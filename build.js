@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
+const VERSION = '0.1.0';
+
 const files = [
   'js/engine.js',
   'js/compiler.js',
@@ -35,6 +37,9 @@ function build() {
       code += fs.readFileSync(filePath, 'utf8') + '\n';
     }
 
+    // Inject version into the code
+    code = `/** Kilopixel Framework v${VERSION} */\n` + code.replace('window.pxl = {};', `window.pxl = { version: '${VERSION}' };`);
+
     // 2. Ensure dist/ directory exists
     const distDir = path.join(__dirname, 'dist');
     if (!fs.existsSync(distDir)) {
@@ -46,8 +51,8 @@ function build() {
     fs.writeFileSync(tempPath, code, 'utf8');
 
     // 4. Minify using npx terser
-    const outputPath = path.join(distDir, 'pxl.min.js');
-    console.log('Running global Terser (this may take a second)...');
+    const outputPath = path.join(distDir, `kilopixel-v${VERSION}.min.js`);
+    console.log(`Running global Terser for v${VERSION} (this may take a second)...`);
     
     // This executes terser on the command line
     execSync(`npx terser "${tempPath}" --compress passes=2 --mangle -o "${outputPath}"`, { stdio: 'inherit' });
