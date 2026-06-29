@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test 23 - Ultimate Text Stress Test</title>
+  <style>
+    /* Fullscreen dark mode presentation */
+    body { background-color: #050505; margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    pxl-stage { width: 100vw; height: 100vh; background-color: #0a0a0a; }
+  </style>
+  <script src="dist/pxl.min.js"></script>
+</head>
+<body>
+  <pxl-stage id="main">
+    <pxl-layer>
+      <!-- FPS Counter -->
+      <pxl-text x="980" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#0f0" align="right" stroke="none"></pxl-text>
+
+      <!-- TITLE -->
+      <pxl-text x="500" y="60" text="'THE ULTIMATE TEXT ENGINE'" size="36" font="system-ui" weight="900" fill="linear(t * 60, ['#00f2fe', '#4facfe'])" align="center"></pxl-text>
+
+      <!-- ROW 1 -->
+      <pxl-text x="50" y="120" text="'[System] Framework initialized.\n[System] All systems nominal.\n[System] Waiting for input...'" size="14" lineheight="1.5" reveal="loop(3)" font="monospace" fill="#0f0" align="left" baseline="top"></pxl-text>
+      <pxl-text x="500 + Math.sin(t * 3) * 150" y="140" text="'ANIMATED POSITION'" size="24" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+      <pxl-text x="950" y="120" text="'THIS IS A MASSIVE MULTILINE BLOCK OF TEXT THAT WILL AUTOMATICALLY WRAP ITSELF INTO A BEAUTIFUL PARAGRAPH WITHOUT DROPPING FRAMES!'" size="16" width="250" lineheight="1.5" font="system-ui" weight="bold" fill="linear(90, ['#10b981', '#3b82f6'])" align="right" baseline="top"></pxl-text>
+
+      <!-- ROW 2 -->
+      <pxl-text x="50" y="220" text="'CINEMATIC GRADIENT REVEAL'" size="24" reveal="loop(2.5)" font="system-ui" weight="900" fill="linear(0, ['#eab308', '#ef4444'])" align="left" baseline="top"></pxl-text>
+      <pxl-text x="500" y="220" text="'DYNAMIC FONT SCALING'" size="20 + wave(1.5) * 20" font="system-ui" weight="900" fill="linear(0, ['#f59e0b', '#dc2626'])" align="center" baseline="middle"></pxl-text>
+      <!-- Notice how lineheight animates seamlessly. With our 3-Tier cache, this skips the auto-wrap layout completely! -->
+      <pxl-text x="700" y="240" text="'Line 1\nLine 2\nLine 3 (Manual)'" size="20" lineheight="0.8 + wave(1)" font="system-ui" weight="bold" fill="linear(0, ['#eab308', '#ec4899'])" align="left" baseline="middle"></pxl-text>
+
+      <!-- ROW 3 -->
+      <pxl-text x="50" y="300" text="'WAVE REVEAL PING-PONG'" size="18" reveal="wave(1)" font="monospace" fill="#aaa" align="left" baseline="top"></pxl-text>
+      <pxl-text x="500" y="320" text="'BREATHING RADIAL GLOW'" size="35" font="system-ui" weight="900" fill="radial(0.5 + wave(2), ['#10b981', 'transparent'])" align="center" baseline="middle"></pxl-text>
+      <pxl-text x="950" y="320" text="'Stage Dimensions:\n' + Math.floor(ref.main.width) + 'x' + Math.floor(ref.main.height)" size="20" font="system-ui" weight="bold" fill="#0ff" align="right" baseline="middle"></pxl-text>
+
+      <!-- ROW 4 -->
+      <!-- ORBITS -->
+      <pxl-text x="150 + Math.cos(t * 2) * 80" y="450 + Math.sin(t * 2) * 80" text="'ORBIT 1'" size="16" font="monospace" fill="#aaa" align="center"></pxl-text>
+      <pxl-text x="150 + Math.cos(t * 2 + 2) * 80" y="450 + Math.sin(t * 2 + 2) * 80" text="'ORBIT 2'" size="16" font="monospace" fill="#aaa" align="center"></pxl-text>
+      <pxl-text x="150 + Math.cos(t * 2 + 4) * 80" y="450 + Math.sin(t * 2 + 4) * 80" text="'ORBIT 3'" size="16" font="monospace" fill="#aaa" align="center"></pxl-text>
+
+      <pxl-text x="500" y="410" text="'RAINBOW COLOR SHIFT (HSL)'" size="30" font="system-ui" weight="900" fill="hsl(t * 150, 100%, 60%)" align="center" baseline="middle"></pxl-text>
+      <pxl-text x="950" y="410" text="`Active Render:\n${Math.floor(t)}s`" size="20" font="system-ui" weight="bold" fill="#a855f7" align="right" baseline="middle"></pxl-text>
+
+      <!-- ROW 5 -->
+      <pxl-text x="500" y="480" text="'SPINNING STROKE & OPACITY'" size="28" font="system-ui" weight="900" fill="none" stroke="linear(t * 200, ['#00ffcc', '#ff00ff'])" strokewidth="2" alpha="0.3 + wave(2) * 0.7" align="center" baseline="middle"></pxl-text>
+      
+      <!-- ROW 6 (Bottom center) -->
+      <pxl-text x="300" y="550" text="'CINEMATIC WIDE TRACKING'" size="16" letterspacing="4 + wave(2) * 8" font="system-ui" weight="bold" fill="#fff" align="center"></pxl-text>
+      <pxl-text x="700" y="580 + Math.abs(Math.sin(t * 4)) * -80" text="'BOUNCING GRAVITY'" size="24" font="system-ui" weight="bold" fill="linear(90, ['#eab308', '#f97316'])" align="center"></pxl-text>
+    </pxl-layer>
+  </pxl-stage>
+</body>
+</html>

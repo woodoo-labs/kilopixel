@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test 15 - The Alignment & Baseline Grid</title>
+  <style>
+    /* Fullscreen dark mode presentation */
+    body { background-color: #050505; margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    pxl-stage { width: 100vw; height: 100vh; background-color: #0a0a0a; }
+  </style>
+  <script src="dist/pxl.min.js"></script>
+  <script>
+    // Initialize a global reactive variable in the framework
+    
+  </script>
+</head>
+<body>
+
+  <!-- NATIVE HTML OVERLAY -->
+  <div style="position: absolute; top: 20px; left: 20px; z-index: 10; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; border: 1px solid #333;">
+    <label for="rotSlider" style="color: #00ffcc; font-family: sans-serif; font-size: 14px; font-weight: bold; margin-right: 10px;">Global Rotation:</label>
+    <input type="range" id="rotSlider" min="0" max="360" value="0" style="vertical-align: middle; cursor: pointer;" oninput="document.getElementById('rotation').setAttribute('value', Number(this.value))">
+  </div>
+
+  <pxl-stage id="main">
+    
+    <!-- GRID GUIDES LAYER -->
+    <pxl-layer>
+          <pxl-var id="rotation" value="0"></pxl-var>
+      <!-- Vertical Guides for X alignments -->
+      <pxl-polyline stroke="#ff0044" strokewidth="2" alpha="0.5" fill="none" points="150,80 ; 150,550"></pxl-polyline>
+      <pxl-polyline stroke="#ff0044" strokewidth="2" alpha="0.5" fill="none" points="400,80 ; 400,550"></pxl-polyline>
+      
+      <!-- Horizontal Guides for Y baselines -->
+      <pxl-polyline stroke="#00ffcc" strokewidth="2" alpha="0.5" fill="none" points="550,150 ; 950,150"></pxl-polyline>
+      <pxl-polyline stroke="#00ffcc" strokewidth="2" alpha="0.5" fill="none" points="550,300 ; 950,300"></pxl-polyline>
+      <pxl-polyline stroke="#00ffcc" strokewidth="2" alpha="0.5" fill="none" points="550,450 ; 950,450"></pxl-polyline>
+    </pxl-layer>
+
+    <!-- TEXT RENDER LAYER -->
+    <pxl-layer>
+      <pxl-text x="500" y="50" text="'THE ULTIMATE ALIGNMENT GRID'" size="30" font="system-ui" weight="900" fill="linear(t*30, ['#00f2fe', '#4facfe'])" align="center"></pxl-text>
+
+      <!-- COLUMN 1: Single Line Align -->
+      <pxl-text x="150" y="100" text="'SINGLE ALIGN'" size="14" fill="#aaa" align="center" font="system-ui"></pxl-text>
+      <pxl-text x="150" y="180" rotate="ref.rotation.value" text="'align=left'" size="20" fill="#fff" align="left" font="system-ui"></pxl-text>
+      <pxl-text x="150" y="320" rotate="ref.rotation.value" text="'align=center'" size="20" fill="#fff" align="center" font="system-ui"></pxl-text>
+      <pxl-text x="150" y="460" rotate="ref.rotation.value" text="'align=right'" size="20" fill="#fff" align="right" font="system-ui"></pxl-text>
+
+      <!-- COLUMN 2: Multi Line Align -->
+      <pxl-text x="400" y="100" text="'MULTI ALIGN'" size="14" fill="#aaa" align="center" font="system-ui"></pxl-text>
+      <pxl-text x="400" y="180" rotate="ref.rotation.value" width="180" text="'align=left wrapped paragraph test'" size="18" lineheight="1.2" fill="#fff" align="left" font="system-ui"></pxl-text>
+      <pxl-text x="400" y="320" rotate="ref.rotation.value" width="180" text="'align=center wrapped paragraph test'" size="18" lineheight="1.2" fill="#fff" align="center" font="system-ui"></pxl-text>
+      <pxl-text x="400" y="460" rotate="ref.rotation.value" width="180" text="'align=right wrapped paragraph test'" size="18" lineheight="1.2" fill="#fff" align="right" font="system-ui"></pxl-text>
+
+      <!-- COLUMN 3: Single Line Baseline -->
+      <pxl-text x="650" y="100" text="'SINGLE BASELINE'" size="14" fill="#aaa" align="center" font="system-ui"></pxl-text>
+      <pxl-text x="650" y="150" rotate="ref.rotation.value" text="'baseline=top'" size="18" fill="#fff" align="center" baseline="top" font="system-ui"></pxl-text>
+      <pxl-text x="650" y="300" rotate="ref.rotation.value" text="'baseline=middle'" size="18" fill="#fff" align="center" baseline="middle" font="system-ui"></pxl-text>
+      <pxl-text x="650" y="450" rotate="ref.rotation.value" text="'baseline=bottom'" size="18" fill="#fff" align="center" baseline="bottom" font="system-ui"></pxl-text>
+
+      <!-- COLUMN 4: Multi Line Baseline -->
+      <pxl-text x="850" y="100" text="'MULTI BASELINE'" size="14" fill="#aaa" align="center" font="system-ui"></pxl-text>
+      <pxl-text x="850" y="150" rotate="ref.rotation.value" width="130" text="'baseline=top paragraph block'" size="16" lineheight="1.2" fill="#fff" align="center" baseline="top" font="system-ui"></pxl-text>
+      <pxl-text x="850" y="300" rotate="ref.rotation.value" width="130" text="'baseline=middle paragraph block'" size="16" lineheight="1.2" fill="#fff" align="center" baseline="middle" font="system-ui"></pxl-text>
+      <pxl-text x="850" y="450" rotate="ref.rotation.value" width="130" text="'baseline=bottom paragraph block'" size="16" lineheight="1.2" fill="#fff" align="center" baseline="bottom" font="system-ui"></pxl-text>
+
+    </pxl-layer>
+  </pxl-stage>
+</body>
+</html>

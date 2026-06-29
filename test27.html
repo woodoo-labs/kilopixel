@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test 27 - Comprehensive Ellipse Arrow Showcase</title>
+  <style>
+    body { background-color: #050505; margin: 0; padding: 50px; overflow: auto; display: block; }
+    pxl-stage { display: block; width: 1000px; margin: 0 auto; background-color: #0a0a0a; border: 1px solid #333; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+  </style>
+  <script src="dist/pxl.min.js"></script>
+</head>
+<body>
+  <pxl-stage id="main" ratio="1000 / 3000">
+    <pxl-layer>
+      <pxl-text x="980" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#0f0" align="right" stroke="none"></pxl-text>
+
+      <pxl-text x="500" y="60" text="'THE ELLIPSE ARROW ENCYCLOPEDIA'" size="40" font="system-ui" weight="900" fill="linear(t * 60, ['#00f2fe', '#4facfe'])" align="center"></pxl-text>
+
+      <pxl-layer>
+        <pxl-rect x="500" y="1500" width="1000" height="3000" fill="#0f172a"></pxl-rect>
+        <pxl-group alpha="0.05">
+          <pxl-line x1="0" y1="0" x2="0" y2="3000" strokewidth="1" stroke="#38bdf8" mode="relative" repeat="20" dx="50"></pxl-line>
+          <pxl-line x1="0" y1="0" x2="1000" y2="0" strokewidth="1" stroke="#38bdf8" mode="relative" repeat="60" dy="50"></pxl-line>
+        </pxl-group>
+      </pxl-layer>
+
+      <!-- SECTION 1: FILLED SCALING MATRIX -->
+      <pxl-text x="500" y="150" text="'SECTION 1: arrowstyle=&quot;filled&quot;'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+      <pxl-text x="150" y="200" text="'Stroke 2px'" size="14" font="monospace" fill="#aaa" align="center"></pxl-text>
+      <pxl-text x="380" y="200" text="'Stroke 8px'" size="14" font="monospace" fill="#aaa" align="center"></pxl-text>
+      <pxl-text x="620" y="200" text="'Stroke 20px'" size="14" font="monospace" fill="#aaa" align="center"></pxl-text>
+      <pxl-text x="850" y="200" text="'Stroke 40px'" size="14" font="monospace" fill="#aaa" align="center"></pxl-text>
+
+      <pxl-ellipse x="150" y="320" rx="100" ry="60" strokewidth="2" stroke="linear(0, ['#059669', '#10b981'])" start="-90" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-ellipse>
+      <pxl-ellipse x="380" y="320" rx="100" ry="60" strokewidth="8" stroke="linear(0, ['#0d9488', '#14b8a6'])" start="-90" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-ellipse>
+      <pxl-ellipse x="620" y="320" rx="100" ry="60" strokewidth="20" stroke="linear(0, ['#0891b2', '#06b6d4'])" start="-90" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-ellipse>
+      <pxl-ellipse x="850" y="320" rx="100" ry="60" strokewidth="40" stroke="linear(0, ['#2563eb', '#3b82f6'])" start="-90" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-ellipse>
+
+      <!-- SECTION 2: LINE SCALING MATRIX -->
+      <pxl-text x="500" y="550" text="'SECTION 2: arrowstyle=&quot;line&quot;'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+      
+      <pxl-ellipse x="150" y="720" rx="60" ry="100" strokewidth="2" stroke="linear(0, ['#9333ea', '#a855f7'])" start="90" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="line"></pxl-ellipse>
+      <pxl-ellipse x="380" y="720" rx="60" ry="100" strokewidth="8" stroke="linear(0, ['#c026d3', '#d946ef'])" start="90" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="line"></pxl-ellipse>
+      <pxl-ellipse x="620" y="720" rx="60" ry="100" strokewidth="20" stroke="linear(0, ['#db2777', '#ec4899'])" start="90" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="line"></pxl-ellipse>
+      <pxl-ellipse x="850" y="720" rx="60" ry="100" strokewidth="40" stroke="linear(0, ['#e11d48', '#f43f5e'])" start="90" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="line"></pxl-ellipse>
+
+      <!-- SECTION 3: DYNAMIC MATH & SWEEPS -->
+      <pxl-text x="500" y="950" text="'SECTION 3: DYNAMIC MATH & SWEEPS'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+      
+      <pxl-text x="250" y="1000" text="'Pulsing Sweep Angle'" size="14" fill="#aaa" align="center"></pxl-text>
+      <pxl-ellipse x="250" y="1150" rx="120" ry="70" strokewidth="15" stroke="#f59e0b" start="0" sweep="90 + sin(t*2)*80" arrowend="auto" arrowstyle="filled"></pxl-ellipse>
+
+      <pxl-text x="750" y="1000" text="'Revolving Start Angle'" size="14" fill="#aaa" align="center"></pxl-text>
+      <pxl-ellipse x="750" y="1150" rx="70" ry="120" strokewidth="8" stroke="#3b82f6" start="t*100" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="line"></pxl-ellipse>
+
+      <!-- SECTION 4: EXTREME PROPORTIONS -->
+      <pxl-text x="500" y="1350" text="'SECTION 4: EXTREME PROPORTIONS'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+
+      <pxl-text x="250" y="1400" text="'Thin Stroke, Massive Arrow'" size="14" fill="#aaa" align="center"></pxl-text>
+      <pxl-ellipse x="250" y="1550" rx="140" ry="60" strokewidth="2" stroke="linear(90, ['#ca8a04', '#facc15'])" start="180" sweep="180" arrowstart="100" arrowend="100" arrowstyle="filled"></pxl-ellipse>
+
+      <pxl-text x="750" y="1400" text="'Thick Stroke, Tiny Arrow'" size="14" fill="#aaa" align="center"></pxl-text>
+      <pxl-ellipse x="750" y="1550" rx="60" ry="140" strokewidth="40" stroke="linear(90, ['#eab308', '#fef08a'])" start="0" sweep="180" arrowstart="15" arrowend="15" arrowstyle="line"></pxl-ellipse>
+
+      <!-- SECTION 5: PIES AND DONUTS -->
+      <pxl-text x="500" y="1750" text="'SECTION 5: PIES AND DONUTS'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+      
+      <pxl-text x="250" y="1800" text="'Filled Pie with Arrows'" size="14" fill="#aaa" align="center"></pxl-text>
+      <pxl-ellipse x="250" y="1950" rx="140" ry="90" pie="true" fill="rgba(236, 72, 153, 0.2)" stroke="#ec4899" strokewidth="4" start="-45 + sin(t)*20" sweep="270" arrowstart="30" arrowend="30" arrowstyle="filled"></pxl-ellipse>
+
+      <pxl-text x="750" y="1800" text="'Inner Radius Donut'" size="14" fill="#aaa" align="center"></pxl-text>
+      <pxl-ellipse x="750" y="1950" rx="90" ry="140" irx="40" iry="60" fill="rgba(168, 85, 247, 0.2)" stroke="#a855f7" strokewidth="4" start="135 + cos(t)*20" sweep="180" arrowstart="30" arrowend="30" arrowstyle="line"></pxl-ellipse>
+
+      <!-- SECTION 6: 60FPS STRESS TEST -->
+      <pxl-text x="500" y="2200" text="'SECTION 6: 60FPS STRESS TEST'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+
+      <pxl-group x="500" y="2450">
+        <!-- Inner spinning arrows -->
+        <pxl-ellipse x="0" y="0" rx="60" ry="40" strokewidth="5" stroke="hsl(t*50, 100%, 50%)" start="t*200" sweep="90" arrowend="auto" arrowstyle="filled"></pxl-ellipse>
+        <pxl-ellipse x="0" y="0" rx="60" ry="40" strokewidth="5" stroke="hsl(t*50 + 180, 100%, 50%)" start="t*200 + 180" sweep="90" arrowend="auto" arrowstyle="filled"></pxl-ellipse>
+
+        <!-- Mid pulsating arrows -->
+        <pxl-ellipse x="0" y="0" rx="140" ry="90" strokewidth="8" stroke="linear(0, ['#10b981', '#3b82f6'])" start="-t*100" sweep="180 + wave(2)*90" arrowstart="auto" arrowend="auto" arrowstyle="line" anticlockwise="true"></pxl-ellipse>
+        
+        <!-- Outer dual sweep -->
+        <pxl-ellipse x="0" y="0" rx="220" ry="160" strokewidth="15" stroke="linear(90, ['#f43f5e', '#f59e0b'])" start="t*50" sweep="270 + wave(1)*50" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-ellipse>
+        
+        <!-- Extremely outer dotted line to show boundaries -->
+        <pxl-ellipse x="0" y="0" rx="340" ry="240" strokewidth="2" stroke="#333" start="0" sweep="360" stroke-dasharray="5 5"></pxl-ellipse>
+        <pxl-ellipse x="0" y="0" rx="340" ry="240" strokewidth="10" stroke="linear(0, ['#0ea5e9', 'rgba(14, 165, 233, 0)'])" start="t*150" sweep="45" arrowend="30" arrowstyle="filled"></pxl-ellipse>
+        <pxl-ellipse x="0" y="0" rx="340" ry="240" strokewidth="10" stroke="linear(0, ['#8b5cf6', 'rgba(139, 92, 246, 0)'])" start="t*150 + 180" sweep="45" arrowend="30" arrowstyle="filled"></pxl-ellipse>
+      </pxl-group>
+
+      <pxl-text x="500" y="2800" text="'(END OF TEST)'" size="14" font="system-ui" fill="#333" align="center"></pxl-text>
+
+    </pxl-layer>
+  </pxl-stage>
+</body>
+</html>

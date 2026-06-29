@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel App</title>
+  <style>
+    /* Base Theme */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0b0b12;
+      color: #e0e0e0;
+    }
+
+    /* Header Styling */
+    header {
+      display: flex;
+      align-items: center;
+      padding: 15px 40px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid rgba(0, 242, 255, 0.1);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    /* The Tiny Stage Container */
+    .logo-container {
+      width: 50px;  /* Forces the canvas to be a neat 50x50 icon */
+      height: 50px;
+      margin-right: 20px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 300;
+      letter-spacing: 6px;
+      margin: 0;
+      background: linear-gradient(90deg, #00f2ff, #ff00ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Page Content */
+    main {
+      padding: 60px 40px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      font-weight: 400;
+      color: #fff;
+      letter-spacing: 2px;
+    }
+
+    p {
+      line-height: 1.7;
+      color: #a0a0b0;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-container">
+      <pxl-stage id="main" ratio="1 / 1">
+        <pxl-layer fps="60">
+          <pxl-var id="speed" value="0.1"></pxl-var>
+          
+          <pxl-group x="500" y="500" rotate="loop(10) * 360">
+            
+            <pxl-rect x="0" y="0" w="700" h="700" fill="none" stroke="#00f2ff" strokewidth="40" rotate="ref.speed.value * loop(4) * 360"></pxl-rect>
+            
+            <pxl-rect x="0" y="0" w="500" h="500" fill="none" stroke="#ff00ff" strokewidth="40" rotate="loop(6) * -360"></pxl-rect>
+
+            <pxl-circle x="0" y="0" r="120 + wave(2) * 50" fill="#00f2ff" stroke="none"></pxl-circle>
+
+            <pxl-circle x="350" y="0" r="60" fill="#ffffff"></pxl-circle>
+
+          </pxl-group>
+
+        </pxl-layer>
+      </pxl-stage>
+    </div>
+    
+    <h1>PIXEL</h1>
+  </header>
+
+  <main>
+    <h2>Welcome to the Next Generation</h2>
+    <p>
+      Notice the logo in the top left? That isn't a GIF, a video, or a heavy SVG animation. 
+      It is a live, 60fps canvas node powered entirely by zero-GC mathematical expressions dynamically compiled by your custom engine.
+    </p>
+    <p>
+      Because your <code>pxl-stage</code> calculates the <code>unit</code> dynamically using the ResizeObserver, you can drop your animations into a 50px header icon or a 4K fullscreen background without changing a single line of framework code.
+    </p>
+  </main>
+
+  <script src="dist/pxl.min.js"></script>
+
+  <script>
+    // Variables are now managed directly by the DOM!
+  </script>
+
+</body>
+</html>

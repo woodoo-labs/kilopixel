@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Declarative Canvas Framework</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <h1>Declarative Canvas Framework</h1>
+
+  <!-- Controls -->
+  <button id="button01">Move Circle2 left</button>
+  <button id="button02">Move Circle2 right</button>
+  <button id="button03">Hide Layer 2</button>
+  <button id="button04">Show Layer 2</button>
+  <button id="button05">Increase Radius</button>
+  <button id="button06">Decrease Radius</button>
+  <button id="button07">Rotate Layer 2 right</button>
+  <button id="button08">Rotate Layer 2 left</button>
+
+  <br><br>
+
+  <!-- Interactive Stage -->
+  <pxl-stage id="main" ratio="10 / 3">
+    
+    <!-- Full Attributes Set -->
+    <pxl-layer x="0" y="0" dx="0" dy="0" rotate="0" hidden="false" fps="4">
+      <pxl-circle id="circle1" x="glide(10) * 400" y="50" dx="0" dy="0" rotate="0" hidden="false" fill="orange" stroke="t > 6000 ? 'blue' : 'yellow'" strokewidth="5" r="30"></pxl-circle>
+      <pxl-rect x="200" y="100" dx="50" dy="20" rotate="10" hidden="false" fill="tomato" stroke="rgb(50, 250/3, 50)" strokewidth="3" w="50" h="30"></pxl-rect>
+      <pxl-circle x="600" y="50" dx="0" dy="0" rotate="0" hidden="false" fill="red" stroke="blue" strokewidth="0" r="1"></pxl-circle>
+      <pxl-line x="600" y="50" dx="18" x1="0" y1="-4" x2="0" y2="4" stroke="blue"></pxl-line>
+      <pxl-text x="600" y="50" dx="20" dy="0" rotate="loop(10)*360" hidden="false" fill="black" stroke="none" strokewidth="2" text="if (0 > 10) return 'jep'; else if (50 > 60) return 'yes'; else return 50 + 50 * sin(PI / 3)" size="8" weight="normal" align="start" font="sans-serif" baseline="middle" fontstyle="normal"></pxl-text>
+      <pxl-text x="600" y="100" dx="20" dy="0" rotate="0" hidden="false" fill="black" stroke="none" strokewidth="2" text="'Hello loop(2) ! * / World return!'"></pxl-text>
+
+      <pxl-group x="500" y="100" dx="0" dy="0" rotate="0" hidden="false">
+        <pxl-circle x="0" y="0" dx="0" dy="0" rotate="0" hidden="false" fill="red" stroke="grey" strokewidth="2" r="2"></pxl-circle>
+        <pxl-circle x="0" y="30" dx="0" dy="0" rotate="0" hidden="false" fill="green" stroke="grey" strokewidth="2" r="10"></pxl-circle>
+        <pxl-group x="-100" y="0" dx="0" dy="0" rotate="wave(10) * 90" hidden="false">
+          <pxl-circle x="0" y="0" dx="0" dy="0" rotate="0" hidden="false" fill="red" stroke="grey" strokewidth="2" r="2"></pxl-circle>
+          <pxl-circle x="0" y="30" dx="0" dy="0" rotate="0" hidden="false" fill="green" stroke="grey" strokewidth="2" r="10"></pxl-circle>
+          <pxl-circle x="0" y="-30" dx="0" dy="0" rotate="0" hidden="false" fill="green" stroke="grey" strokewidth="2" r="10"></pxl-circle>
+        </pxl-group>
+        <pxl-circle x="0" y="-30" dx="0" dy="0" rotate="0" hidden="false" fill="green" stroke="grey" strokewidth="2" r="10"></pxl-circle>
+      </pxl-group>
+
+      <pxl-line x="0" y="0" dx="100" dy="0" rotate="10" hidden="false" fill="green" stroke="royalblue" strokewidth="3" x1="5" x2="700" y1="10" y2="50"></pxl-line>
+      <pxl-polyline x="100" y="50" dx="20" dy="20" rotate="0" hidden="false" fill="yellow" stroke="purple" strokewidth="7" points="20,20 + yoyo(5) * 200; 70,10; 70,30; 100,200"></pxl-polyline>
+    </pxl-layer>
+
+    <!-- Realistic Attributes Set -->
+    <pxl-layer id="layer2">
+      <!-- Static colors (fast path) -->
+      <pxl-circle id="circle2" x="700" y="100" r="25" stroke="rgb(200, 100, 50)" fill="rgba(124, 211, 15, 0.8)"></pxl-circle>
+      
+      <!-- Static math in colors (evaluated once on load) -->
+      <pxl-rect x="200" y="150" w="50" h="30" stroke="rgb(0, 0, 255)" fill="rgba(100, 50 + 50, 150, 0.7)" rotate="10"></pxl-rect>
+      
+      <!-- Animated math in colors (updates smoothly on the rendering loop) -->
+      <pxl-circle x="500" y="150" r="30" stroke="rgb(100, 100, 100)" fill="rgba(255, 100, 50, wave(3))"></pxl-circle>
+      
+      <pxl-line x1="0" y1="0" x2="200" y2="100" stroke="violet" strokewidth="7" rotate="10"></pxl-line>
+    </pxl-layer>
+
+  </pxl-stage>
+
+  <br><br>
+
+  <!-- Secondary Stage -->
+  <div style="width: 500px; background-color: silver">
+    <pxl-stage id="main2" ratio="1 / 1">
+      <pxl-layer fps="4" x="500" y="500" rotate="0" hidden="false">
+        <pxl-circle x="0" y="0" dx="0" dy="0" fill="red" stroke="black" strokewidth="1" rotate="0" hidden="false" r="10"></pxl-circle>
+
+        <pxl-rect x="0" y="0" dx="-100" dy="-100" fill="red" stroke="black" strokewidth="1" rotate="0" hidden="false" w="50" h="30"></pxl-rect>
+        <pxl-rect x="0" y="0" dx="100" dy="-100" fill="red" stroke="black" strokewidth="1" rotate="0" hidden="false" w="50" h="30"></pxl-rect>
+        <pxl-rect x="0" y="0" dx="100" dy="100" fill="red" stroke="black" strokewidth="1" rotate="0" hidden="false" w="50" h="30"></pxl-rect>
+        <pxl-rect x="0" y="0" dx="-100" dy="100" fill="red" stroke="black" strokewidth="1" rotate="0" hidden="false" w="50" h="30"></pxl-rect>
+
+        <pxl-line x="0" y="0" dx="0" dy="0" fill="green" stroke="#446688" strokewidth="2" rotate="0" hidden="false" x1="0" y1="0" x2="100 * cos(2 * PI / 8)" y2="100 * sin(2 * PI / 8)"></pxl-line>
+      </pxl-layer>
+    </pxl-stage>
+  </div>
+
+  <!-- Framework Scripts -->
+  <script src="dist/pxl.min.js"></script>
+
+</body>
+</html>

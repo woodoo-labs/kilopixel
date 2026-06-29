@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pixel - Cross-Element Referencing Showcase</title>
+  <style>
+    :root {
+      --bg: #050505;
+      --card-bg: rgba(20, 20, 22, 0.6);
+      --border: rgba(255, 255, 255, 0.08);
+    }
+    body {
+      background: var(--bg);
+      color: #fff;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 60px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 60px;
+      align-items: center;
+      background-image: radial-gradient(circle at 50% 0%, #1a1a2e 0%, var(--bg) 100%);
+    }
+    .header {
+      text-align: center;
+      max-width: 800px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin: 0 0 20px 0;
+      background: linear-gradient(135deg, #fff 0%, #888 100%);
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing: -1px;
+    }
+    .header p {
+      font-size: 1.25rem;
+      color: #8892b0;
+    }
+    h2 {
+      margin: 0 0 15px 0;
+      font-weight: 600;
+      font-size: 1.75rem;
+      letter-spacing: -0.5px;
+      color: #e2e8f0;
+    }
+    p {
+      color: #94a3b8;
+      margin: 0 0 25px 0;
+      font-size: 1.05rem;
+      max-width: 1200px;
+      line-height: 1.7;
+    }
+    .demo-container {
+      width: 100%;
+      max-width: 1200px;
+      background: var(--card-bg);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 30px 60px -15px rgba(0,0,0,0.8);
+      transition: transform 0.3s ease;
+    }
+    .demo-container:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    pxl-stage {
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      display: block;
+      width: 100%;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
+  </style>
+  <script src="dist/pxl.min.js"></script>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Reference Superpowers</h1>
+    <p>Combining <code>&lt;pxl-group&gt;</code>, <code>&lt;pxl-layer&gt;</code>, and cross-element referencing to build tracking cameras, parallax depth, and dynamic visual filters.</p>
+  </div>
+
+  <!-- Demo 1 -->
+  <div class="demo-container">
+    <h2>1. The Tracking Camera</h2>
+    <p>The player circle explores a giant cyberpunk grid. The camera <code>&lt;pxl-group&gt;</code> moves inversely to the player to keep them perfectly centered, zero JavaScript required.</p>
+    <pxl-stage id="main" ratio="16/9">
+      
+      <!-- Logic Player (Evaluates first, invisible visually) -->
+      <pxl-layer>
+        <pxl-var id="player_x" value="ref.main.mouseX"></pxl-var>
+        <pxl-var id="player_y" value="ref.main.mouseY"></pxl-var>
+      </pxl-layer>
+
+      <pxl-layer>
+        <!-- The Tracking Camera (shifts the world inversely to the mouse) -->
+        <pxl-group x="(500 - ref.player_x.value) * 0.5" y="(281 - ref.player_y.value) * 0.5">
+          
+          <!-- Cyberpunk Grid (800x400 perfectly fits inside the 1000x562 stage) -->
+          <pxl-rect x="500" y="281" w="800" h="400" fill="#050510" stroke="#ff0055" strokewidth="4" ></pxl-rect>
+          <script>
+            // Procedurally generate inner grid lines for the 800x400 rect
+            for (let i = 150; i <= 850; i += 100) {
+              document.write(`<pxl-line x1="${i}" y1="81" x2="${i}" y2="481" stroke="rgba(255,0,85,0.15)" strokewidth="2" ></pxl-line>`);
+            }
+            for (let i = 131; i <= 431; i += 100) {
+              document.write(`<pxl-line x1="100" y1="${i}" x2="900" y2="${i}" stroke="rgba(255,0,85,0.15)" strokewidth="2" ></pxl-line>`);
+            }
+          </script>
+          
+          <!-- Floating Geometries -->
+          <pxl-rect x="200" y="150" w="80" h="80" fill="rgba(0, 255, 255, 0.1)" stroke="#00ffff" strokewidth="2" rotate="t*20" ></pxl-rect>
+          <pxl-circle x="750" y="380" r="40" fill="rgba(157, 0, 255, 0.1)" stroke="#9d00ff" strokewidth="2" ></pxl-circle>
+        </pxl-group>
+      </pxl-layer>
+
+      <!-- The Visual Player is drawn OVER the camera group, acting as your cursor -->
+      <pxl-layer>
+        <pxl-circle x="ref.player_x.value" y="ref.player_y.value" r="15" fill="#fff" filter="drop-shadow(0 0 20px #fff)" ></pxl-circle>
+        <pxl-circle x="ref.player_x.value" y="ref.player_y.value" r="25 + wave(2)*10" fill="none" stroke="#fff" strokewidth="2" ></pxl-circle>
+      </pxl-layer>
+    </pxl-stage>
+  </div>
+
+  <!-- Demo 2 -->
+  <div class="demo-container">
+    <h2>2. Deep Parallax</h2>
+    <p>Move your mouse. Multiple layers track the mouse distance with varying depth multipliers (0.05, 0.15, 0.3) to create true optical parallax over a deep space background.</p>
+    <pxl-stage id="main2" ratio="16/9">
+      <!-- Invisible target tracking the mouse -->
+      <pxl-layer>
+        <pxl-var id="mouse_x" value="ref.main2.mouseX"></pxl-var>
+        <pxl-var id="mouse_y" value="ref.main2.mouseY"></pxl-var>
+      </pxl-layer>
+
+      <pxl-layer><pxl-rect x="500" y="281" w="1000" h="562" fill="#04020a" ></pxl-rect></pxl-layer>
+
+      <!-- Background Layer (Moves Slowest) -->
+      <pxl-layer x="(500 - ref.mouse_x.value) * 0.05" y="(281 - ref.mouse_y.value) * 0.05">
+        <pxl-circle x="200" y="100" r="2" fill="#fff" ></pxl-circle>
+        <pxl-circle x="800" y="200" r="3" fill="#fff" ></pxl-circle>
+        <pxl-circle x="400" y="450" r="2" fill="#fff" ></pxl-circle>
+        <pxl-circle x="700" y="500" r="1.5" fill="#fff" ></pxl-circle>
+        <pxl-circle x="900" y="100" r="2.5" fill="#fff" ></pxl-circle>
+      </pxl-layer>
+
+      <!-- Midground Layer -->
+      <pxl-layer x="(500 - ref.mouse_x.value) * 0.15" y="(281 - ref.mouse_y.value) * 0.15">
+        <pxl-ellipse x="300" y="400" rx="60" ry="15" rotate="30" stroke="rgba(255,0,255,0.4)" strokewidth="2" ></pxl-ellipse>
+        <pxl-circle x="300" y="400" r="10" fill="#f0f" filter="drop-shadow(0 0 15px #f0f)"></pxl-circle>
+        
+        <pxl-rect x="750" y="150" w="80" h="80" rotate="t*10" fill="none" stroke="#0ff" strokewidth="2" ></pxl-rect>
+      </pxl-layer>
+
+      <!-- Foreground Layer -->
+      <pxl-layer x="(500 - ref.mouse_x.value) * 0.3" y="(281 - ref.mouse_y.value) * 0.3">
+        <pxl-rect x="500" y="281" w="500" h="160" r="24" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.2)" strokewidth="1" ></pxl-rect>
+        <pxl-text x="500" y="281" text="'PARALLAX'" size="56" font="system-ui" weight="800" fill="linear([0,0,1,1], ['#0ff', '#f0f'])" align="center" baseline="middle" letterspacing="15" ></pxl-text>
+      </pxl-layer>
+    </pxl-stage>
+  </div>
+
+  <!-- Demo 3 -->
+  <div class="demo-container">
+    <h2>3. Dynamic Scene Coloring</h2>
+    <p>The "sun" shape moves across the sky. Its X coordinate natively drives the <code>hsl()</code> and <code>hsla()</code> color calculations for the sky gradient, the sun's glow, and the stroke highlights of every building in the city! Zero CSS filters, 100% mathematical reactivity at 60fps.</p>
+    <pxl-stage id="main3" ratio="16/9">
+      
+      <!-- Logic Sun Position -->
+      <pxl-layer>
+        <pxl-var id="sun_x" value="ref.main3.mouseX"></pxl-var>
+        <pxl-var id="sun_y" value="ref.main3.mouseY"></pxl-var>
+      </pxl-layer>
+
+      <!-- Sky Background (Reacts to Sun) -->
+      <pxl-layer>
+        <pxl-rect x="500" y="281" w="1000" h="562" fill="linear([0,0,0,1], ['#000', hsl(ref.sun_x.value * 0.36, 60, 15)])" ></pxl-rect>
+      </pxl-layer>
+
+      <!-- The Sun & Glow (Screen Blend Mode for fast lighting) -->
+      <pxl-layer>
+        
+        <!-- Massive volumetric glow without drop-shadow -->
+        <pxl-circle x="ref.sun_x.value" y="ref.sun_y.value" r="250" fill="radial(1, [hsla(ref.sun_x.value * 0.36, 100, 60, 0.5), 'transparent'])" blend="screen" ></pxl-circle>
+        <!-- Solid Sun core -->
+        <pxl-circle x="ref.sun_x.value" y="ref.sun_y.value" r="60" fill="radial(1, ['#fff', hsl(ref.sun_x.value * 0.36, 100, 50)])" ></pxl-circle>
+      </pxl-layer>
+
+      <!-- The Synthwave City -->
+      <pxl-layer>
+        
+        <!-- Background Buildings -->
+        <pxl-rect anchor="bottom" x="300" y="562" w="160" h="250" fill="linear([0,0,0,1], ['#1a0a2a', '#000'])" stroke="hsl(ref.sun_x.value * 0.36, 60, 30)" strokewidth="2" ></pxl-rect>
+        <pxl-rect anchor="bottom" x="720" y="562" w="180" h="320" fill="linear([0,0,0,1], ['#1a0a2a', '#000'])" stroke="hsl(ref.sun_x.value * 0.36, 60, 30)" strokewidth="2" ></pxl-rect>
+        
+        <!-- Foreground Buildings -->
+        <pxl-rect anchor="bottom" x="500" y="562" w="220" h="400" fill="linear([0,0,0,1], ['#0a0512', '#000'])" stroke="hsl(ref.sun_x.value * 0.36, 100, 60)" strokewidth="2" ></pxl-rect>
+        
+        <!-- Windows (Also react to the sun!) -->
+        <pxl-rect anchor="bottom" x="450" y="450" w="40" h="60" fill="hsl(ref.sun_x.value * 0.36, 100, 80)" ></pxl-rect>
+        <pxl-rect anchor="bottom" x="550" y="350" w="40" h="60" fill="hsl(ref.sun_x.value * 0.36, 100, 80)" ></pxl-rect>
+        
+        <pxl-rect anchor="bottom" x="150" y="562" w="120" h="180" fill="linear([0,0,0,1], ['#0a0512', '#000'])" stroke="hsl(ref.sun_x.value * 0.36, 100, 60)" strokewidth="2" ></pxl-rect>
+        <pxl-rect anchor="bottom" x="880" y="562" w="140" h="220" fill="linear([0,0,0,1], ['#0a0512', '#000'])" stroke="hsl(ref.sun_x.value * 0.36, 100, 60)" strokewidth="2" ></pxl-rect>
+      </pxl-layer>
+      
+    </pxl-stage>
+  </div>
+
+</body>
+</html>

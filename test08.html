@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test 08 - Gradient Cookbook</title>
+
+  <style>
+    body {
+      background: #050505;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    pxl-stage {
+      width: 100%;
+      max-width: 1200px;
+      border: 1px solid #222;
+      background: #0a0a0a;
+      border-radius: 12px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    }
+    h1 {
+      margin-bottom: 5px;
+      font-weight: 300;
+      letter-spacing: 2px;
+      color: #00f2ff;
+    }
+    p {
+      color: #888;
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>The Gradient Cookbook</h1>
+  <p>From simple angles to explicit coordinates and reactive bounds.</p>
+
+  <!-- 16:9 Aspect Ratio (approx 1000 x 562 logic coordinates) -->
+  <pxl-stage id="main" ratio="16 / 9">
+    
+    <pxl-layer>
+      <!-- FPS Monitor -->
+      <pxl-text x="20" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms | MAX: ' + ref.main.renderMax + 'ms'" font="monospace" size="14" fill="#0f0"></pxl-text>
+
+      <!-- ========================================== -->
+      <!-- ROW 1: BASIC ANGLES (Angle + Array)        -->
+      <!-- ========================================== -->
+      <pxl-text x="50" y="80" text="'1. BASIC ANGLES'" size="14" fill="#888" weight="bold"></pxl-text>
+      
+      <!-- Left to Right (0 deg) -->
+      <pxl-rect x="180" y="140" w="180" h="60" 
+        fill="linear(0, ['#00f2ff', '#a200ff'])"></pxl-rect>
+      <pxl-text x="180" y="190" text="'0 Degrees'" size="12" fill="#555" align="center"></pxl-text>
+
+      <!-- Top to Bottom (90 deg) -->
+      <pxl-rect x="500" y="140" w="180" h="60" 
+        fill="linear(90, ['#00f2ff', '#a200ff'])"></pxl-rect>
+      <pxl-text x="500" y="190" text="'90 Degrees'" size="12" fill="#555" align="center"></pxl-text>
+
+      <!-- Diagonal (45 deg) with 3 auto-spaced colors -->
+      <pxl-rect x="820" y="140" w="180" h="60" 
+        fill="linear(45, ['#ff0055', '#a200ff', '#00f2ff'])"></pxl-rect>
+      <pxl-text x="820" y="190" text="'45 Deg (3 Colors)'" size="12" fill="#555" align="center"></pxl-text>
+
+
+      <!-- ========================================== -->
+      <!-- ROW 2: EXPLICIT COORDINATES [x1,y1,x2,y2]  -->
+      <!-- ========================================== -->
+      <pxl-text x="50" y="240" text="'2. EXPLICIT BOUNDING COORDINATES'" size="14" fill="#888" weight="bold"></pxl-text>
+
+      <!-- Top-Left to Bottom-Right bounds -->
+      <pxl-rect x="180" y="300" w="180" h="60" 
+        fill="linear([0, 0, 1, 1], ['#ff0055', '#00f2ff'])"></pxl-rect>
+      <pxl-text x="180" y="350" text="'[0, 0, 1, 1] Diagonal'" size="12" fill="#555" align="center"></pxl-text>
+
+      <!-- Half-Bounds (Starts middle, ends bottom right) -->
+      <pxl-rect x="500" y="300" w="180" h="60" 
+        fill="linear([0.5, 0.5, 1, 1], ['#fff', '#a200ff'])"></pxl-rect>
+      <pxl-text x="500" y="350" text="'[0.5, 0.5, 1, 1] Half Spread'" size="12" fill="#555" align="center"></pxl-text>
+
+      <!-- Hard Split with specific color stops -->
+      <pxl-rect x="820" y="300" w="180" h="60" 
+        fill="linear([0, 0, 0, 1], [0, '#ff0055', 0.5, '#ff0055', 0.5, '#00f2ff', 1, '#00f2ff'])"></pxl-rect>
+      <pxl-text x="820" y="350" text="'Hard Split (Color Stops)'" size="12" fill="#555" align="center"></pxl-text>
+
+
+      <!-- ========================================== -->
+      <!-- ROW 3: RADIAL & MATH ANIMATION             -->
+      <!-- ========================================== -->
+      <pxl-text x="50" y="400" text="'3. RADIAL & ANIMATED MATH'" size="14" fill="#888" weight="bold"></pxl-text>
+
+      <!-- Glowing Orb (Multi-stop Radial) -->
+      <pxl-circle x="120" y="470" r="45" 
+        fill="radial(1, [0, '#fff', 0.3, '#ff0055', 1, 'transparent'])"></pxl-circle>
+      <pxl-text x="120" y="530" text="'Glowing Orb'" size="12" fill="#555" align="center"></pxl-text>
+
+      <!-- Breathing Radial (Radius modulates using wave(2) over 2 seconds) -->
+      <pxl-circle x="300" y="470" r="45" 
+        fill="radial(0.3 + wave(2)*0.7, ['#00f2ff', 'transparent'])"></pxl-circle>
+      <pxl-text x="300" y="530" text="'Breathing Radius'" size="12" fill="#555" align="center"></pxl-text>
+
+      <!-- Infinitely Spinning Gradient (t * 100 degrees per second) -->
+      <pxl-rect x="550" y="470" w="150" h="90" 
+        fill="linear(t * 100, ['#00f2ff', '#ff0055'])"></pxl-rect>
+      <pxl-text x="550" y="530" text="'t * 100 Spinning'" size="12" fill="#555" align="center"></pxl-text>
+
+      <!-- Modulo Sliding Box (Moves infinitely left) -->
+      <!-- Note: We use explicit bounds [-1, 0, 3, 0] and repeat colors twice -->
+      <pxl-rect x="820" y="470" w="180" h="60" 
+        fill="linear([-1 - (t)%2, 0, 3 - (t)%2, 0], ['#00f2ff', '#ff0055', '#a200ff', '#00f2ff', '#ff0055', '#a200ff', '#00f2ff'])"></pxl-rect>
+      <pxl-text x="820" y="530" text="'Infinite Left Slide'" size="12" fill="#555" align="center"></pxl-text>
+
+    </pxl-layer>
+  </pxl-stage>
+
+  <script src="dist/pxl.min.js"></script>
+</body>
+</html>

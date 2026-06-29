@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test 17: Rect Anchors Grid</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #111;
+      color: #fff;
+      font-family: sans-serif;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #container {
+      width: 90%;
+      max-width: 1600px;
+      aspect-ratio: 16 / 9;
+      position: relative;
+      background: #050508;
+      box-shadow: 0 10px 60px rgba(0,0,0,0.5);
+      border: 1px solid #222;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <pxl-stage id="main" ratio="16 / 9">
+      
+      <!-- Guide Lines Layer -->
+      <pxl-layer>
+        <!-- Horizontal Guides -->
+        <pxl-line x1="100" y1="150" x2="900" y2="150" stroke="#333" strokewidth="2" linedash="5, 5"></pxl-line>
+        <pxl-line x1="100" y1="280" x2="900" y2="280" stroke="#333" strokewidth="2" linedash="5, 5"></pxl-line>
+        <pxl-line x1="100" y1="410" x2="900" y2="410" stroke="#333" strokewidth="2" linedash="5, 5"></pxl-line>
+
+        <!-- Vertical Guides -->
+        <pxl-line x1="250" y1="50" x2="250" y2="500" stroke="#333" strokewidth="2" linedash="5, 5"></pxl-line>
+        <pxl-line x1="500" y1="50" x2="500" y2="500" stroke="#333" strokewidth="2" linedash="5, 5"></pxl-line>
+        <pxl-line x1="750" y1="50" x2="750" y2="500" stroke="#333" strokewidth="2" linedash="5, 5"></pxl-line>
+      </pxl-layer>
+
+      <!-- Anchored Rectangles Layer -->
+      <pxl-layer>
+        <!-- TOP ROW -->
+        <pxl-rect x="250" y="150" w="40 + wave(2)*60" h="40 + wave(2.5)*60" r="wave(4)*30" fill="hsla(0, 80%, 60%, 0.3)" stroke="hsl(0, 80%, 60%)" strokewidth="2" anchor="top-left"></pxl-rect>
+        <pxl-text x="250" y="120" align="center" size="14" fill="#aaa" text="'top-left'"></pxl-text>
+
+        <pxl-rect x="500" y="150" w="40 + wave(2)*60" h="40 + wave(2.5)*60" r="wave(4)*30" fill="hsla(30, 80%, 60%, 0.3)" stroke="hsl(30, 80%, 60%)" strokewidth="2" anchor="top"></pxl-rect>
+        <pxl-text x="500" y="120" align="center" size="14" fill="#aaa" text="'top'"></pxl-text>
+
+        <pxl-rect x="750" y="150" w="40 + wave(2)*60" h="40 + wave(2.5)*60" r="wave(4)*30" fill="hsla(60, 80%, 60%, 0.3)" stroke="hsl(60, 80%, 60%)" strokewidth="2" anchor="top-right"></pxl-rect>
+        <pxl-text x="750" y="120" align="center" size="14" fill="#aaa" text="'top-right'"></pxl-text>
+
+
+        <!-- MIDDLE ROW -->
+        <pxl-rect x="250" y="280" w="40 + wave(2)*60" h="40 + wave(2.5)*60" r="wave(4)*30" fill="hsla(180, 80%, 60%, 0.3)" stroke="hsl(180, 80%, 60%)" strokewidth="2" anchor="left"></pxl-rect>
+        <pxl-text x="250" y="250" align="center" size="14" fill="#aaa" text="'left'"></pxl-text>
+
+        <pxl-rect x="500" y="280" w="40 + wave(2)*60" h="40 + wave(2.5)*60" r="wave(4)*30" fill="hsla(210, 80%, 60%, 0.3)" stroke="hsl(210, 80%, 60%)" strokewidth="2" anchor="center"></pxl-rect>
+        <pxl-text x="500" y="250" align="center" size="14" fill="#aaa" text="'center'"></pxl-text>
+
+        <pxl-rect x="750" y="280" w="40 + wave(2)*60" h="40 + wave(2.5)*60" r="wave(4)*30" fill="hsla(240, 80%, 60%, 0.3)" stroke="hsl(240, 80%, 60%)" strokewidth="2" anchor="right"></pxl-rect>
+        <pxl-text x="750" y="250" align="center" size="14" fill="#aaa" text="'right'"></pxl-text>
+
+
+        <!-- BOTTOM ROW -->
+        <pxl-rect x="250" y="410" w="40 + wave(2)*60" h="40 + wave(2.5)*60" r="wave(4)*30" fill="hsla(280, 80%, 60%, 0.3)" stroke="hsl(280, 80%, 60%)" strokewidth="2" anchor="bottom-left"></pxl-rect>
+        <pxl-text x="250" y="380" align="center" size="14" fill="#aaa" text="'bottom-left'"></pxl-text>
+
+        <pxl-rect x="500" y="410" w="40 + wave(2)*60" h="40 + wave(2.5)*60" r="wave(4)*30" fill="hsla(320, 80%, 60%, 0.3)" stroke="hsl(320, 80%, 60%)" strokewidth="2" anchor="bottom"></pxl-rect>
+        <pxl-text x="500" y="380" align="center" size="14" fill="#aaa" text="'bottom'"></pxl-text>
+
+        <pxl-rect x="750" y="410" w="40 + wave(2)*60" h="40 + wave(2.5)*60" r="wave(4)*30" fill="hsla(340, 80%, 60%, 0.3)" stroke="hsl(340, 80%, 60%)" strokewidth="2" anchor="bottom-right"></pxl-rect>
+        <pxl-text x="750" y="380" align="center" size="14" fill="#aaa" text="'bottom-right'"></pxl-text>
+      </pxl-layer>
+
+      <!-- Pivot Points Layer (Drawn last so they are always on top) -->
+      <pxl-layer>
+        <!-- Top Row Pivots -->
+        <pxl-circle x="250" y="150" r="4" fill="#fff"></pxl-circle>
+        <pxl-circle x="500" y="150" r="4" fill="#fff"></pxl-circle>
+        <pxl-circle x="750" y="150" r="4" fill="#fff"></pxl-circle>
+
+        <!-- Middle Row Pivots -->
+        <pxl-circle x="250" y="280" r="4" fill="#fff"></pxl-circle>
+        <pxl-circle x="500" y="280" r="4" fill="#fff"></pxl-circle>
+        <pxl-circle x="750" y="280" r="4" fill="#fff"></pxl-circle>
+
+        <!-- Bottom Row Pivots -->
+        <pxl-circle x="250" y="410" r="4" fill="#fff"></pxl-circle>
+        <pxl-circle x="500" y="410" r="4" fill="#fff"></pxl-circle>
+        <pxl-circle x="750" y="410" r="4" fill="#fff"></pxl-circle>
+
+        <!-- FPS Monitor -->
+        <pxl-text x="20" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms | MAX: ' + ref.main.renderMax + 'ms'" font="monospace" size="14" fill="#0f0" align="left" stroke="none"></pxl-text>
+      </pxl-layer>
+
+    </pxl-stage>
+  </div>
+
+  <script src="dist/pxl.min.js"></script>
+</body>
+</html>

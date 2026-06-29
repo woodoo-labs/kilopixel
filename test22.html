@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Ellipses</title>
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; background: #0f172a; overflow: hidden; }
+    pxl-stage { display: block; width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+
+<pxl-stage id="main">
+  <pxl-layer>
+    
+    <pxl-text text="'Advanced pxl-ellipse'" x="500" y="80" size="40" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+    
+    <!-- FPS Monitor -->
+    <pxl-text x="980" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#0f0" align="right" stroke="none"></pxl-text>
+
+    <!-- Background Galaxy -->
+    <pxl-group x="500" y="350">
+      <pxl-ellipse rx="800" ry="250" rotate="20" stroke="rgba(255,255,255,0.03)" strokewidth="40" linedash="[10, 20]" filter="blur(5px)"></pxl-ellipse>
+      <pxl-ellipse rx="700" ry="200" rotate="-10" stroke="rgba(56, 189, 248, 0.05)" strokewidth="20" linedash="[5, 15]" filter="blur(3px)"></pxl-ellipse>
+    </pxl-group>
+
+    <!-- A 3D-looking Solar System utilizing squashed ellipses -->
+    <pxl-group x="500" y="350" scale="0.85">
+      
+      <!-- The Sun -->
+      <pxl-circle r="40" fill="radial(1, ['#fde047', '#ea580c'])" filter="drop-shadow(0 0 30px #ea580c)"></pxl-circle>
+      
+      <!-- Orbit 1: Fast -->
+      <pxl-group rotate="15">
+        <!-- The Orbital Path -->
+        <pxl-ellipse rx="200" ry="60" stroke="rgba(255,255,255,0.1)" strokewidth="2"></pxl-ellipse>
+        <!-- The Planet -->
+        <pxl-circle 
+          x="cos(t * 2) * 200" 
+          y="sin(t * 2) * 60" 
+          r="8" 
+          fill="#38bdf8"
+        ></pxl-circle>
+      </pxl-group>
+
+      <!-- Orbit 2: Medium -->
+      <pxl-group rotate="-10">
+        <pxl-ellipse rx="300" ry="100" stroke="rgba(255,255,255,0.1)" strokewidth="2"></pxl-ellipse>
+        
+        <!-- Planet with its own squashed moon ring -->
+        <pxl-group x="cos(t * 1.2) * 300" y="sin(t * 1.2) * 100">
+          <pxl-circle r="15" fill="#a78bfa"></pxl-circle>
+          <!-- Moon Orbit Ring -->
+          <pxl-ellipse rx="35" ry="10" rotate="t * 50" stroke="rgba(255,255,255,0.5)" strokewidth="1"></pxl-ellipse>
+        </pxl-group>
+      </pxl-group>
+
+      <!-- Comet with tail using dx offset -->
+      <pxl-group x="cos(t*1.5) * 400" y="sin(t*1.5) * 120" rotate="10">
+        <pxl-ellipse rx="40" ry="4" fill="linear([0,0, 1,0], ['#fff', 'rgba(0,242,254,0)'])" dx="-20"></pxl-ellipse>
+        <pxl-circle r="4" fill="#fff" filter="drop-shadow(0 0 10px rgba(255,255,255,0.8))"></pxl-circle>
+      </pxl-group>
+
+      <!-- Elliptical Radar Scanner -->
+      <pxl-group rotate="30">
+        <pxl-ellipse rx="450" ry="150" stroke="rgba(0, 242, 254, 0.2)" strokewidth="1" linedash="[5, 5]"></pxl-ellipse>
+        <!-- The Scanner Sweep using an Elliptical Wedge -->
+        <pxl-ellipse 
+          rx="450" ry="150" 
+          fill="rgba(0, 242, 254, 0.15)"
+          pie="true"
+          start="t * 40" 
+          sweep="45"
+        ></pxl-ellipse>
+      </pxl-group>
+
+    </pxl-group>
+
+  </pxl-layer>
+</pxl-stage>
+
+<script src="dist/pxl.min.js"></script>
+</body>
+</html>

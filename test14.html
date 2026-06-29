@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Demo 4: Color Shifting</title>
+  <style>
+    body { background: #111; margin: 0; padding: 20px; font-family: sans-serif; color: white; display: flex; flex-direction: column; align-items: center; }
+    pxl-stage { max-width: 1000px; width: 100%; border: 1px solid #333; border-radius: 8px; overflow: hidden; background: #000; cursor: crosshair; }
+    h1 { font-size: 24px; font-weight: 300; margin-bottom: 5px; }
+    p { color: #aaa; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Interactive Color Shifting</h1>
+  <p>The entire scene's color palette is mathematically tied to the mouse X and Y coordinates.</p>
+
+  <pxl-stage id="main" ratio="16 / 9">
+    <pxl-layer>
+      <!-- Background that shifts hue based on mouse X and lightness based on mouse Y -->
+      <!-- We use the native `hsl()` utility from the math sandbox! -->
+      <pxl-rect x="500" y="500" w="1000" h="1000" 
+        fill="hsl((ref.main.mouseX / 1000) * 360, 30%, clamp((ref.main.mouseY / (ref.main.height||1000)) * 50, 5, 20))">
+      </pxl-rect>
+      
+      <!-- A geometric pattern where each ring is offset by 120 degrees on the color wheel -->
+      <pxl-group x="500" y="280" rotate="t * 20">
+        <!-- Base color -->
+        <pxl-rect x="0" y="0" w="200" h="200" fill="none" strokewidth="10" 
+          stroke="hsl((ref.main.mouseX / 1000) * 360, 100%, 50%)" rotate="-t * 40">
+        </pxl-rect>
+        
+        <!-- +120 Degrees Hue Shift -->
+        <pxl-rect x="0" y="0" w="300" h="300" fill="none" strokewidth="5" 
+          stroke="hsl(((ref.main.mouseX / 1000) * 360 + 120) % 360, 100%, 50%)" rotate="t * 10">
+        </pxl-rect>
+        
+        <!-- +240 Degrees Hue Shift -->
+        <pxl-rect x="0" y="0" w="400" h="400" fill="none" strokewidth="2" 
+          stroke="hsl(((ref.main.mouseX / 1000) * 360 + 240) % 360, 100%, 50%)" rotate="-t * 5">
+        </pxl-rect>
+      </pxl-group>
+
+      <pxl-text x="500" y="100" text="'SWIPE MOUSE TO SHIFT COLORS'" size="30" fill="#fff" align="center"></pxl-text>
+      
+      <!-- Performance Monitor -->
+      <pxl-text x="20" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms | MAX: ' + ref.main.renderMax + 'ms'" font="monospace" size="14" fill="#0f0"></pxl-text>
+    </pxl-layer>
+  </pxl-stage>
+
+  <script src="dist/pxl.min.js"></script>
+</body>
+</html>

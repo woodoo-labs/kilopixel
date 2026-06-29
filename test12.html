@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Demo 2: Dynamic Flashlight</title>
+  <style>
+    body { background: #111; margin: 0; padding: 20px; font-family: sans-serif; color: white; display: flex; flex-direction: column; align-items: center; }
+    pxl-stage { max-width: 1000px; width: 100%; border: 1px solid #333; border-radius: 8px; overflow: hidden; background: #222; cursor: none; }
+    h1 { font-size: 24px; font-weight: 300; margin-bottom: 5px; }
+    p { color: #aaa; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Dynamic Flashlight Effect</h1>
+  <p>The mouse controls a radial gradient that cuts a transparent hole through a darkness layer.</p>
+
+  <pxl-stage id="main" ratio="16 / 9">
+    <pxl-layer>
+      <!-- The colorful scene hidden in the dark -->
+      <pxl-group>
+        <pxl-circle x="200" y="200" r="50" fill="#ff0055"></pxl-circle>
+        <pxl-circle x="800" y="200" r="50" fill="#00f2ff"></pxl-circle>
+        <pxl-circle x="200" y="800" r="50" fill="#a200ff"></pxl-circle>
+        <pxl-circle x="800" y="800" r="50" fill="#ffcc00"></pxl-circle>
+        <pxl-rect x="500" y="400" w="100" h="100" fill="#00ffaa" rotate="t*45"></pxl-rect>
+        <pxl-text x="500" y="100" text="'MOVE MOUSE TO EXPLORE'" size="40" fill="#fff" align="center"></pxl-text>
+      </pxl-group>
+
+      <!-- The Darkness Overlay -->
+      <!-- We map the radial gradient center directly to the mouse coordinates! -->
+      <!-- We use rgba to fade from transparent (the hole) to pitch black -->
+      <pxl-rect x="500" y="500" w="1000" h="2000" 
+        fill="radial([ref.main.mouseX/1000, ref.main.mouseY/(ref.main.height||1000), 0.25], [0, 'rgba(0,0,0,0)', 0.6, 'rgba(0,0,0,0.95)', 1, 'rgba(0,0,0,1)'])">
+      </pxl-rect>
+      
+      <!-- Performance Monitor -->
+      <pxl-text x="20" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms | MAX: ' + ref.main.renderMax + 'ms'" font="monospace" size="14" fill="#0f0"></pxl-text>
+    </pxl-layer>
+  </pxl-stage>
+
+  <script src="dist/pxl.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Demo: Zero-Cost Referencing</title>
+  <style>
+    body { 
+      background: #050505; 
+      margin: 0; 
+      padding: 0; 
+      font-family: system-ui, -apple-system, sans-serif; 
+      color: white; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    pxl-stage { 
+      width: 100vw; 
+      height: 100vh; 
+      background: #09090b; 
+      cursor: crosshair; 
+    }
+    .overlay {
+      position: absolute;
+      top: 50px;
+      left: 60px;
+      pointer-events: none;
+      z-index: 10;
+    }
+    h1 { 
+      font-size: 42px; 
+      font-weight: 900; 
+      margin: 0 0 10px 0; 
+      background: linear-gradient(to right, #38bdf8, #818cf8); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+      letter-spacing: -1px;
+    }
+    p { 
+      color: #a1a1aa; 
+      margin: 0; 
+      font-size: 18px; 
+      font-weight: 400; 
+      max-width: 400px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="overlay">
+    <h1>The Reference Engine</h1>
+    <p>Watch as the yellow follower and blue orbital rings dynamically track the red leader across different layers—all rendering at 60fps with absolute zero Garbage Collection.</p>
+  </div>
+
+  <pxl-stage id="main" ratio="none">
+    
+    <!-- BACKGROUND & UI LAYER -->
+    <pxl-layer>
+      <!-- FPS Monitor (Logical width is ALWAYS 1000, so x=980 is top right) -->
+      <pxl-text x="980" y="30" text="ref.main.fps + ' FPS | ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#10b981" align="right"></pxl-text>
+      
+      <!-- Ambient Cyberpunk Grid -->
+      <pxl-group alpha="0.03">
+        <pxl-line x1="0" y1="0" x2="0" y2="1000" strokewidth="1" stroke="#38bdf8" mode="relative" repeat="30" dx="33.33"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="1000" y2="0" strokewidth="1" stroke="#38bdf8" mode="relative" repeat="30" dy="33.33"></pxl-line>
+      </pxl-group>
+    </pxl-layer>
+
+    <!-- LAYER 1: THE LEADER -->
+    <pxl-layer>
+      <pxl-circle 
+        id="alpha" 
+        x="lerp(ref.main.mouseX - 250, ref.main.mouseX + 250, wave(4))" 
+        y="lerp(ref.main.mouseY - 100, ref.main.mouseY + 100, wave(3))" 
+        r="40" 
+        fill="radial(1, ['#f43f5e', '#be123c'])">
+      </pxl-circle>
+    </pxl-layer>
+
+    <!-- LAYER 2: THE FOLLOWERS -->
+    <pxl-layer>
+      
+      <pxl-circle 
+        x="ref.alpha.x + cos(t*3)*80" 
+        y="ref.alpha.y + sin(t*3)*80" 
+        r="15" 
+        fill="linear(0, ['#fbbf24', '#d97706'])">
+      </pxl-circle>
+
+      <pxl-group x="ref.alpha.x" y="ref.alpha.y" rotate="t * 150">
+        <pxl-circle x="0" y="0" r="70" stroke="linear(0, ['#38bdf8', 'rgba(56, 189, 248, 0)'])" strokewidth="4" start="0" sweep="180" arrowend="15" arrowstyle="filled"></pxl-circle>
+        <pxl-circle x="0" y="0" r="90" stroke="linear(0, ['#818cf8', 'rgba(129, 140, 248, 0)'])" strokewidth="2" start="180 - t*300" sweep="180"></pxl-circle>
+      </pxl-group>
+
+      <pxl-line 
+        x1="ref.alpha.x" 
+        y1="ref.alpha.y" 
+        x2="ref.main.mouseX" 
+        y2="ref.main.mouseY" 
+        strokewidth="2" 
+        stroke="linear(0, ['rgba(244,63,94,0.8)', 'rgba(56,189,248,0.2)'])"
+        stroke-dasharray="10 10">
+      </pxl-line>
+      
+      <pxl-circle x="ref.main.mouseX" y="ref.main.mouseY" r="10" stroke="#38bdf8" strokewidth="2"></pxl-circle>
+      <pxl-circle x="ref.main.mouseX" y="ref.main.mouseY" r="2" fill="#38bdf8"></pxl-circle>
+
+    </pxl-layer>
+  </pxl-stage>
+
+  <script src="dist/pxl.min.js"></script>
+</body>
+</html>

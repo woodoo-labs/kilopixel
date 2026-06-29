@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Polyline Relative Mode Showcase</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body { background-color: #0f172a; color: white; margin: 0; padding: 20px; font-family: sans-serif; }
+    .container { margin: 0 auto; max-width: 1200px; }
+    h1 { color: #38bdf8; text-align: center; }
+    p { text-align: center; color: #94a3b8; margin-bottom: 40px; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Relative Polyline Unleashed</h1>
+    <p>Showcasing Forward Kinematics, Snake Tails, and Anchor Bouncing using the new <code>mode="relative"</code>!</p>
+
+    <pxl-stage id="main" ratio="16 / 9">
+      
+      <!-- LAYER 1: The Swimming Snake (Smooth Relative Wave) -->
+      <pxl-layer>
+        <!-- The shape itself moves using x/y as the pivot anchor! -->
+        <!-- The first point is 0,0, starting exactly at the pivot. -->
+        <pxl-polyline 
+          x="100 + wave(6) * 800" 
+          y="150"
+          mode="relative" 
+          smooth="true" 
+          stroke="rgba(56, 189, 248, 0.8)" 
+          strokewidth="8" 
+          linecap="round" 
+          fill="none"
+          points="
+            0, 0;
+            40, sin(t * 5) * 30;
+            40, sin(t * 5 - 0.5) * 30;
+            40, sin(t * 5 - 1.0) * 30;
+            40, sin(t * 5 - 1.5) * 30;
+            40, sin(t * 5 - 2.0) * 30;
+            40, sin(t * 5 - 2.5) * 30;
+            40, sin(t * 5 - 3.0) * 30;
+            40, sin(t * 5 - 3.5) * 30;
+          "
+        ></pxl-polyline>
+        
+        <pxl-circle x="100 + wave(6) * 800" y="150" r="6" fill="white"></pxl-circle>
+      </pxl-layer>
+
+      <!-- LAYER 2: The Robotic Arm (Forward Kinematics) -->
+      <pxl-layer>
+        <!-- The pivot is set to x=500, y=450 (near the bottom center) -->
+        <pxl-polyline 
+          x="500" 
+          y="450"
+          mode="relative" 
+          stroke="silver" 
+          strokewidth="12" 
+          linejoin="round" 
+          linecap="round" 
+          fill="none"
+          points="
+            0, 0;
+            cos(wave(5) * PI + PI) * 150, sin(wave(5) * PI + PI) * 150;
+            cos(wave(3) * PI*2) * 100, sin(wave(3) * PI*2) * 100;
+            cos(t * 5) * 50, sin(t * 5) * 50
+          "
+        ></pxl-polyline>
+        
+        <pxl-circle x="500" y="450" r="15" fill="tomato"></pxl-circle>
+      </pxl-layer>
+
+      <!-- LAYER 3: The Bouncing Chain (Anchor Effect) -->
+      <pxl-layer>
+        <!-- The shape bounces using its y pivot! -->
+        <pxl-polyline 
+          x="850" 
+          y="100 + bounce(2) * 300"
+          mode="relative" 
+          stroke="hotpink" 
+          strokewidth="4" 
+          fill="none"
+          points="
+            0, 0;
+            20, 20; 
+            -40, 20; 
+            40, 20; 
+            -40, 20; 
+            40, 20; 
+            -40, 20; 
+            20, 20
+          "
+        ></pxl-polyline>
+        
+        <pxl-circle x="850" y="100 + bounce(2) * 300 + 140" r="25" fill="hotpink"></pxl-circle>
+      </pxl-layer>
+
+      <!-- LAYER 4: The Morphing Amoeba -->
+      <pxl-layer>
+        <!-- This effect CANNOT be done with scale! -->
+        <!-- Each point oscillates on its own independent time loop to create an organic, morphing shape -->
+        <pxl-polyline 
+          x="200" 
+          y="350"
+          mode="relative" 
+          closed="true"
+          smooth="0.3"
+          stroke="rgba(167, 139, 250, 0.9)" 
+          strokewidth="4" 
+          fill="rgba(167, 139, 250, 0.2)"
+          points="
+            0, 0;
+            60 + wave(2)*20, 30 + wave(3)*20;
+            wave(4)*20, 60 + wave(2.5)*20;
+            -60 + wave(3)*20, 30 + wave(3.5)*20;
+            -40 + wave(2.2)*20, -40 + wave(4.1)*20;
+            10 + wave(3.2)*20, -50 + wave(2.8)*20;
+          "
+        ></pxl-polyline>
+      </pxl-layer>
+
+    </pxl-stage>
+  </div>
+
+  <script src="dist/pxl.min.js"></script>
+
+</body>
+</html>

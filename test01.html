@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pixel Geometrical Demo</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+      body {
+        margin: 0;
+        background-color: #0b0b12;
+        color: white;
+        font-family: sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+      .container {
+        width: 90%;
+        max-width: 1400px;
+        box-shadow: 0 10px 60px rgba(0, 0, 0, 0.9);
+        border: 1px solid #222;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      h1 { 
+        margin-bottom: 30px; 
+        font-weight: 300; 
+        letter-spacing: 12px; 
+        color: #ddd; 
+        text-align: center; 
+      }
+    </style>
+  </head>
+  <body>
+    <h1>SACRED GEOMETRY</h1>
+    <div class="container">
+      <pxl-stage id="main" ratio="16 / 9">
+        <pxl-layer fps="60">
+          
+          <!-- Deep Space Background -->
+          <pxl-rect x="500" y="281" w="1000" h="562" fill="#0b0b12"></pxl-rect>
+
+          <!-- Core Ambient Pulses -->
+          <pxl-circle x="500" y="281" r="300 + wave(8) * 150" stroke="rgba(255,255,255,0.03)" strokewidth="1" fill="none"></pxl-circle>
+          <pxl-circle x="500" y="281" r="150 + wave(6) * 80" stroke="rgba(255,255,255,0.05)" strokewidth="2" fill="none"></pxl-circle>
+          <pxl-circle x="500" y="281" r="50 + bounce(2) * 20" stroke="none" fill="rgba(255,255,255,0.05)"></pxl-circle>
+
+          <!-- Inner Rotating Star (8 Arms) -->
+          <pxl-group x="500" y="281" rotate="loop(18) * 360" scale="1 + wave(4) * 0.2" blend="screen">
+            <pxl-group rotate="0"><pxl-line x1="0" y1="0" x2="100 + wave(3)*40" y2="0" stroke="hsl((t/20 + 0) % 360, 80%, 60%)" strokewidth="3"></pxl-line><pxl-circle x="100 + wave(3)*40" y="0" r="10 + yoyo(1.5)*5" fill="hsl((t/20 + 0) % 360, 80%, 60%)"></pxl-circle><pxl-rect x="160 + wave(4)*30" y="0" w="15" h="15" rotate="t * 150" fill="none" stroke="hsl((t/20 + 0) % 360, 100%, 70%)" strokewidth="2"></pxl-rect></pxl-group>
+            <pxl-group rotate="45"><pxl-line x1="0" y1="0" x2="100 + wave(3)*40" y2="0" stroke="hsl((t/20 + 45) % 360, 80%, 60%)" strokewidth="3"></pxl-line><pxl-circle x="100 + wave(3)*40" y="0" r="10 + yoyo(1.5)*5" fill="hsl((t/20 + 45) % 360, 80%, 60%)"></pxl-circle><pxl-rect x="160 + wave(4)*30" y="0" w="15" h="15" rotate="t * 150" fill="none" stroke="hsl((t/20 + 45) % 360, 100%, 70%)" strokewidth="2"></pxl-rect></pxl-group>
+            <pxl-group rotate="90"><pxl-line x1="0" y1="0" x2="100 + wave(3)*40" y2="0" stroke="hsl((t/20 + 90) % 360, 80%, 60%)" strokewidth="3"></pxl-line><pxl-circle x="100 + wave(3)*40" y="0" r="10 + yoyo(1.5)*5" fill="hsl((t/20 + 90) % 360, 80%, 60%)"></pxl-circle><pxl-rect x="160 + wave(4)*30" y="0" w="15" h="15" rotate="t * 150" fill="none" stroke="hsl((t/20 + 90) % 360, 100%, 70%)" strokewidth="2"></pxl-rect></pxl-group>
+            <pxl-group rotate="135"><pxl-line x1="0" y1="0" x2="100 + wave(3)*40" y2="0" stroke="hsl((t/20 + 135) % 360, 80%, 60%)" strokewidth="3"></pxl-line><pxl-circle x="100 + wave(3)*40" y="0" r="10 + yoyo(1.5)*5" fill="hsl((t/20 + 135) % 360, 80%, 60%)"></pxl-circle><pxl-rect x="160 + wave(4)*30" y="0" w="15" h="15" rotate="t * 150" fill="none" stroke="hsl((t/20 + 135) % 360, 100%, 70%)" strokewidth="2"></pxl-rect></pxl-group>
+            <pxl-group rotate="180"><pxl-line x1="0" y1="0" x2="100 + wave(3)*40" y2="0" stroke="hsl((t/20 + 180) % 360, 80%, 60%)" strokewidth="3"></pxl-line><pxl-circle x="100 + wave(3)*40" y="0" r="10 + yoyo(1.5)*5" fill="hsl((t/20 + 180) % 360, 80%, 60%)"></pxl-circle><pxl-rect x="160 + wave(4)*30" y="0" w="15" h="15" rotate="t * 150" fill="none" stroke="hsl((t/20 + 180) % 360, 100%, 70%)" strokewidth="2"></pxl-rect></pxl-group>
+            <pxl-group rotate="225"><pxl-line x1="0" y1="0" x2="100 + wave(3)*40" y2="0" stroke="hsl((t/20 + 225) % 360, 80%, 60%)" strokewidth="3"></pxl-line><pxl-circle x="100 + wave(3)*40" y="0" r="10 + yoyo(1.5)*5" fill="hsl((t/20 + 225) % 360, 80%, 60%)"></pxl-circle><pxl-rect x="160 + wave(4)*30" y="0" w="15" h="15" rotate="t * 150" fill="none" stroke="hsl((t/20 + 225) % 360, 100%, 70%)" strokewidth="2"></pxl-rect></pxl-group>
+            <pxl-group rotate="270"><pxl-line x1="0" y1="0" x2="100 + wave(3)*40" y2="0" stroke="hsl((t/20 + 270) % 360, 80%, 60%)" strokewidth="3"></pxl-line><pxl-circle x="100 + wave(3)*40" y="0" r="10 + yoyo(1.5)*5" fill="hsl((t/20 + 270) % 360, 80%, 60%)"></pxl-circle><pxl-rect x="160 + wave(4)*30" y="0" w="15" h="15" rotate="t * 150" fill="none" stroke="hsl((t/20 + 270) % 360, 100%, 70%)" strokewidth="2"></pxl-rect></pxl-group>
+            <pxl-group rotate="315"><pxl-line x1="0" y1="0" x2="100 + wave(3)*40" y2="0" stroke="hsl((t/20 + 315) % 360, 80%, 60%)" strokewidth="3"></pxl-line><pxl-circle x="100 + wave(3)*40" y="0" r="10 + yoyo(1.5)*5" fill="hsl((t/20 + 315) % 360, 80%, 60%)"></pxl-circle><pxl-rect x="160 + wave(4)*30" y="0" w="15" h="15" rotate="t * 150" fill="none" stroke="hsl((t/20 + 315) % 360, 100%, 70%)" strokewidth="2"></pxl-rect></pxl-group>
+          </pxl-group>
+
+          <!-- Counter-rotating outer ring (12 shapes) -->
+          <pxl-group x="500" y="281" rotate="loop(36) * -360" filter="`blur(${wave(2)*4}px)`">
+            <pxl-group rotate="0"><pxl-group x="280 + wave(5)*20" y="0" rotate="t * 100"><pxl-polyline points="-12,-12; 12,0; -12,12" fill="none" stroke="hsl((t/15 + 0) % 360, 90%, 60%)" strokewidth="2"></pxl-polyline></pxl-group><pxl-circle x="340 + glide(2)*40" y="0" r="3" fill="hsl((t * 100 + 0) % 360, 100%, 80%)"></pxl-circle></pxl-group>
+            <pxl-group rotate="30"><pxl-group x="280 + wave(5)*20" y="0" rotate="t * 100"><pxl-polyline points="-12,-12; 12,0; -12,12" fill="none" stroke="hsl((t/15 + 30) % 360, 90%, 60%)" strokewidth="2"></pxl-polyline></pxl-group><pxl-circle x="340 + glide(2)*40" y="0" r="3" fill="hsl((t * 100 + 30) % 360, 100%, 80%)"></pxl-circle></pxl-group>
+            <pxl-group rotate="60"><pxl-group x="280 + wave(5)*20" y="0" rotate="t * 100"><pxl-polyline points="-12,-12; 12,0; -12,12" fill="none" stroke="hsl((t/15 + 60) % 360, 90%, 60%)" strokewidth="2"></pxl-polyline></pxl-group><pxl-circle x="340 + glide(2)*40" r="3" y="0" fill="hsl((t * 100 + 60) % 360, 100%, 80%)"></pxl-circle></pxl-group>
+            <pxl-group rotate="90"><pxl-group x="280 + wave(5)*20" y="0" rotate="t * 100"><pxl-polyline points="-12,-12; 12,0; -12,12" fill="none" stroke="hsl((t/15 + 90) % 360, 90%, 60%)" strokewidth="2"></pxl-polyline></pxl-group><pxl-circle x="340 + glide(2)*40" y="0" r="3" fill="hsl((t * 100 + 90) % 360, 100%, 80%)"></pxl-circle></pxl-group>
+            <pxl-group rotate="120"><pxl-group x="280 + wave(5)*20" y="0" rotate="t * 100"><pxl-polyline points="-12,-12; 12,0; -12,12" fill="none" stroke="hsl((t/15 + 120) % 360, 90%, 60%)" strokewidth="2"></pxl-polyline></pxl-group><pxl-circle x="340 + glide(2)*40" y="0" r="3" fill="hsl((t * 100 + 120) % 360, 100%, 80%)"></pxl-circle></pxl-group>
+            <pxl-group rotate="150"><pxl-group x="280 + wave(5)*20" y="0" rotate="t * 100"><pxl-polyline points="-12,-12; 12,0; -12,12" fill="none" stroke="hsl((t/15 + 150) % 360, 90%, 60%)" strokewidth="2"></pxl-polyline></pxl-group><pxl-circle x="340 + glide(2)*40" y="0" r="3" fill="hsl((t * 100 + 150) % 360, 100%, 80%)"></pxl-circle></pxl-group>
+            <pxl-group rotate="180"><pxl-group x="280 + wave(5)*20" y="0" rotate="t * 100"><pxl-polyline points="-12,-12; 12,0; -12,12" fill="none" stroke="hsl((t/15 + 180) % 360, 90%, 60%)" strokewidth="2"></pxl-polyline></pxl-group><pxl-circle x="340 + glide(2)*40" y="0" r="3" fill="hsl((t * 100 + 180) % 360, 100%, 80%)"></pxl-circle></pxl-group>
+            <pxl-group rotate="210"><pxl-group x="280 + wave(5)*20" y="0" rotate="t * 100"><pxl-polyline points="-12,-12; 12,0; -12,12" fill="none" stroke="hsl((t/15 + 210) % 360, 90%, 60%)" strokewidth="2"></pxl-polyline></pxl-group><pxl-circle x="340 + glide(2)*40" y="0" r="3" fill="hsl((t * 100 + 210) % 360, 100%, 80%)"></pxl-circle></pxl-group>
+            <pxl-group rotate="240"><pxl-group x="280 + wave(5)*20" y="0" rotate="t * 100"><pxl-polyline points="-12,-12; 12,0; -12,12" fill="none" stroke="hsl((t/15 + 240) % 360, 90%, 60%)" strokewidth="2"></pxl-polyline></pxl-group><pxl-circle x="340 + glide(2)*40" y="0" r="3" fill="hsl((t * 100 + 240) % 360, 100%, 80%)"></pxl-circle></pxl-group>
+            <pxl-group rotate="270"><pxl-group x="280 + wave(5)*20" y="0" rotate="t * 100"><pxl-polyline points="-12,-12; 12,0; -12,12" fill="none" stroke="hsl((t/15 + 270) % 360, 90%, 60%)" strokewidth="2"></pxl-polyline></pxl-group><pxl-circle x="340 + glide(2)*40" y="0" r="3" fill="hsl((t * 100 + 270) % 360, 100%, 80%)"></pxl-circle></pxl-group>
+            <pxl-group rotate="300"><pxl-group x="280 + wave(5)*20" y="0" rotate="t * 100"><pxl-polyline points="-12,-12; 12,0; -12,12" fill="none" stroke="hsl((t/15 + 300) % 360, 90%, 60%)" strokewidth="2"></pxl-polyline></pxl-group><pxl-circle x="340 + glide(2)*40" y="0" r="3" fill="hsl((t * 100 + 300) % 360, 100%, 80%)"></pxl-circle></pxl-group>
+            <pxl-group rotate="330"><pxl-group x="280 + wave(5)*20" y="0" rotate="t * 100"><pxl-polyline points="-12,-12; 12,0; -12,12" fill="none" stroke="hsl((t/15 + 330) % 360, 90%, 60%)" strokewidth="2"></pxl-polyline></pxl-group><pxl-circle x="340 + glide(2)*40" y="0" r="3" fill="hsl((t * 100 + 330) % 360, 100%, 80%)"></pxl-circle></pxl-group>
+          </pxl-group>
+
+          <!-- Center Text -->
+          <pxl-text x="500" y="281" text="PIXEL" font="sans-serif" size="18" align="center" baseline="middle" weight="bold" fill="rgba(255,255,255,0.9)" rotate="wave(20) * 360" stroke="none"></pxl-text>
+          <pxl-text x="500" y="281" dx="0" dy="25" text="FRAMEWORK" font="sans-serif" size="7" align="center" baseline="middle" weight="normal" fill="rgba(255,255,255,0.4)" rotate="wave(20) * 360" stroke="none"></pxl-text>
+
+          <!-- FPS Monitor -->
+          <pxl-text x="20" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms | MAX: ' + ref.main.renderMax + 'ms'" font="monospace" size="14" fill="#0f0" align="left" stroke="none"></pxl-text>
+
+        </pxl-layer>
+      </pxl-stage>
+    </div>
+
+    <script src="dist/pxl.min.js"></script>
+  </body>
+</html>

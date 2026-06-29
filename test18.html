@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test 18: Visual Superpowers (Interactive)</title>
+  <style>
+    body {
+      margin: 0; padding: 0;
+      background-color: #0b0b12;
+      color: #fff;
+      font-family: sans-serif;
+      overflow: hidden;
+      display: flex;
+      height: 100vh;
+    }
+    
+    #sidebar {
+      width: 300px;
+      background: #111;
+      border-right: 1px solid #333;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 5px 0 20px rgba(0,0,0,0.5);
+      z-index: 10;
+    }
+    
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    label {
+      font-size: 14px;
+      color: #aaa;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+    }
+    
+    select {
+      background: #222;
+      color: white;
+      border: 1px solid #444;
+      padding: 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #stage-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    #container {
+      width: 90%;
+      max-width: 1200px;
+      aspect-ratio: 16 / 9;
+      position: relative;
+      background: #050508;
+      box-shadow: 0 10px 60px rgba(0,0,0,0.5);
+      border: 1px solid #222;
+      border-radius: 8px;
+      overflow: hidden;
+      background-image: 
+        linear-gradient(#222 1px, transparent 1px),
+        linear-gradient(90deg, #222 1px, transparent 1px);
+      background-size: 40px 40px;
+      background-position: center center;
+    }
+  </style>
+</head>
+<body>
+  
+  <div id="sidebar">
+    <h2 style="margin:0; font-weight: 300; letter-spacing: 2px;">SUPERPOWERS</h2>
+    <p style="color: #666; font-size: 13px; margin: 0 0 10px 0;">Interactive test of Canvas Context States</p>
+
+    <div class="control-group">
+      <label>Scale <span id="val-scale">1.0</span></label>
+      <input type="range" id="in_scale" min="0.1" max="3" step="0.1" value="1">
+    </div>
+
+    <div class="control-group">
+      <label>Global Alpha <span id="val-alpha">1.0</span></label>
+      <input type="range" id="in_alpha" min="0" max="1" step="0.05" value="1">
+    </div>
+
+    <div class="control-group">
+      <label>Skew X <span id="val-skew">0.0</span></label>
+      <input type="range" id="in_skew" min="-1.5" max="1.5" step="0.1" value="0">
+    </div>
+
+    <div class="control-group">
+      <label>Blur Filter (px) <span id="val-blur">0</span></label>
+      <input type="range" id="in_blur" min="0" max="40" step="1" value="0">
+    </div>
+
+    <div class="control-group">
+      <label>Drop Shadow Alpha <span id="val-shadow">0.8</span></label>
+      <input type="range" id="in_shadow" min="0" max="1" step="0.1" value="0.8">
+    </div>
+
+    <div class="control-group">
+      <label>Blend Mode</label>
+      <select id="in_blend">
+        <option value="source-over">Normal (source-over)</option>
+        <option value="screen">Screen</option>
+        <option value="multiply">Multiply</option>
+        <option value="overlay">Overlay</option>
+        <option value="lighter">Lighter</option>
+        <option value="xor">XOR</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="stage-container">
+    <div id="container">
+      <pxl-stage id="main" ratio="16 / 9">
+        
+        <pxl-layer>
+          <pxl-var id="scale" value="1"></pxl-var>
+          <pxl-var id="alpha" value="1"></pxl-var>
+          <pxl-var id="skew" value="0"></pxl-var>
+          <pxl-var id="blur" value="0"></pxl-var>
+          <pxl-var id="shadow" value="0.8"></pxl-var>
+          <pxl-var id="blend" value="'source-over'"></pxl-var>
+
+          <!-- Background decorative elements to show blending -->
+          <pxl-rect x="300" y="281" w="200" h="200" r="100" fill="hsla(300, 100%, 50%, 0.5)"></pxl-rect>
+          <pxl-rect x="700" y="281" w="200" h="200" r="100" fill="hsla(180, 100%, 50%, 0.5)"></pxl-rect>
+
+          <!-- THE INTERACTIVE TARGET GROUP -->
+          <pxl-group 
+            x="500" 
+            y="281" 
+            scale="ref.scale.value" 
+            alpha="ref.alpha.value" 
+            skewx="ref.skew.value" 
+            blend="ref.blend.value" 
+            filter="`drop-shadow(0 20px 30px rgba(0,0,0,${ref.shadow.value})) blur(${ref.blur.value}px)`"
+            rotate="t * 20">
+            
+            <!-- We apply all superpowers to the group, so the children inherit them flawlessly! -->
+            <pxl-rect x="0" y="0" w="250" h="250" r="40" fill="hsl(45, 100%, 60%)" stroke="#fff" strokewidth="4"></pxl-rect>
+            <pxl-circle x="-80" y="-80" r="40" fill="hsl(0, 100%, 60%)"></pxl-circle>
+            <pxl-circle x="80" y="80" r="40" fill="hsl(200, 100%, 60%)"></pxl-circle>
+            
+            <pxl-text x="0" y="0" text="'TARGET'" align="center" baseline="middle" size="40" font="sans-serif" weight="bold" fill="#fff" stroke="none"></pxl-text>
+            
+          </pxl-group>
+
+          <!-- FPS Monitor -->
+          <pxl-text x="20" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms | MAX: ' + ref.main.renderMax + 'ms'" font="monospace" size="14" fill="#0f0" align="left" stroke="none"></pxl-text>
+
+        </pxl-layer>
+
+      </pxl-stage>
+    </div>
+  </div>
+
+  <script src="dist/pxl.min.js"></script>
+  <script>
+    // Helper to bind a slider to a cvs variable and update the label
+    function bindControl(id, cvsVarName, isString = false) {
+      const el = document.getElementById(id);
+      const valLabel = document.getElementById(`val-${cvsVarName}`);
+      
+      el.addEventListener('input', (e) => {
+        const val = isString ? e.target.value : parseFloat(e.target.value);
+        document.getElementById(cvsVarName).setAttribute('value', isString ? `'${val}'` : val);
+        if (valLabel) valLabel.textContent = isString ? val : val.toFixed(id==='blur'?0:1);
+      });
+    }
+
+    bindControl('in_scale', 'scale');
+    bindControl('in_alpha', 'alpha');
+    bindControl('in_skew', 'skew');
+    bindControl('in_blur', 'blur');
+    bindControl('in_shadow', 'shadow');
+    bindControl('in_blend', 'blend', true);
+  </script>
+</body>
+</html>

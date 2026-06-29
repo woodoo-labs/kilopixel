@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Demo 1: Interactive Parallax</title>
+  <style>
+    body { background: #111; margin: 0; padding: 20px; font-family: sans-serif; color: white; display: flex; flex-direction: column; align-items: center; }
+    pxl-stage { max-width: 1000px; width: 100%; border: 1px solid #333; border-radius: 8px; overflow: hidden; background: #000; cursor: crosshair; }
+    h1 { font-size: 24px; font-weight: 300; margin-bottom: 5px; }
+    p { color: #aaa; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Interactive 3D Parallax</h1>
+  <p>Move your mouse to shift the layers in 3D space with zero Javascript.</p>
+
+  <pxl-stage id="main">
+    <!-- Background Layer: Moves opposite and slowly -->
+    <pxl-layer x="-(ref.main.mouseX - 500) * 0.05" y="-(ref.main.mouseY - 500) * 0.05">
+      <pxl-rect x="200" y="100" w="80" h="80" fill="#222" rotate="45"></pxl-rect>
+      <pxl-rect x="800" y="200" w="100" h="100" fill="#222" rotate="15"></pxl-rect>
+      <pxl-rect x="150" y="600" w="120" h="120" fill="#222" rotate="70"></pxl-rect>
+      <pxl-rect x="750" y="600" w="60" h="60" fill="#222" rotate="30"></pxl-rect>
+    </pxl-layer>
+
+    <!-- Middle Layer: Moves with the mouse moderately -->
+    <pxl-layer x="(ref.main.mouseX - 500) * 0.1" y="(ref.main.mouseY - 500) * 0.1">
+      <pxl-circle x="300" y="250" r="50" fill="none" stroke="#555" strokewidth="4"></pxl-circle>
+      <pxl-circle x="700" y="450" r="80" fill="none" stroke="#555" strokewidth="4"></pxl-circle>
+      <pxl-circle x="400" y="600" r="40" fill="none" stroke="#555" strokewidth="4"></pxl-circle>
+    </pxl-layer>
+
+    <!-- Foreground Layer: Moves with the mouse quickly -->
+    <pxl-layer x="(ref.main.mouseX - 500) * 0.3" y="(ref.main.mouseY - 500) * 0.3">
+      <!-- A beautifully animated focus point -->
+      <pxl-rect x="500" y="350" w="150" h="150" fill="none" stroke="linear([0,0, 1,1], ['#00f2ff', '#ff0055'])" strokewidth="6" rotate="t * 20" r="20"></pxl-rect>
+      <pxl-circle x="500" y="350" r="30" fill="#ff0055"></pxl-circle>
+    </pxl-layer>
+
+    <!-- Performance Monitor -->
+    <pxl-layer>
+      <pxl-text x="20" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms | MAX: ' + ref.main.renderMax + 'ms'" font="monospace" size="14" fill="#0f0"></pxl-text>
+    </pxl-layer>
+  </pxl-stage>
+
+  <script src="dist/pxl.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Pixel | Oscilloscope Nebula</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #050508;
+      color: #00f2ff;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 95%;
+      max-width: 1200px;
+      border: 1px solid rgba(0, 242, 255, 0.1);
+      background: #000;
+      position: relative;
+      box-shadow: 0 0 100px rgba(0, 0, 0, 1);
+    }
+
+    .ui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border: 1px solid #00f2ff;
+      backdrop-filter: blur(10px);
+    }
+
+    .ui label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 2px;
+      margin-bottom: 5px;
+      color: #00f2ff;
+    }
+
+    .ui input {
+      width: 180px;
+      margin-bottom: 15px;
+      cursor: pointer;
+      display: block;
+    }
+
+    h1 {
+      position: absolute;
+      bottom: 20px;
+      right: 30px;
+      font-weight: 100;
+      letter-spacing: 15px;
+      opacity: 0.2;
+      margin: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="ui">
+    <label>NEBULA_TWIST</label>
+    <input type="range" id="in_speed" min="0.01" max="0.5" step="0.01" value="0.1">
+    <label>AMPLITUDE</label>
+    <input type="range" id="in_scale" min="0.1" max="4" step="0.1" value="1">
+    <label>WAVE_DENSITY</label>
+    <input type="range" id="in_twist" min="1" max="20" step="0.5" value="5">
+    <div style="font-size: 9px; opacity: 0.5;">POINTS: 500 | UPDATES: SURGICAL_INDEX</div>
+  </div>
+
+  <h1>NEBULA_OSC_v1</h1>
+
+  <div class="container">
+    <pxl-stage id="main" ratio="16 / 9">
+
+      <!-- Background Layer: Deep Void -->
+      <pxl-layer>
+        <pxl-var id="speed" value="0.1"></pxl-var>
+        <pxl-var id="scale" value="1.0"></pxl-var>
+        <pxl-var id="twist" value="5.0"></pxl-var>
+        <pxl-rect x="500" y="281" w="1000" h="562" fill="#050508"></pxl-rect>
+      </pxl-layer>
+
+      <!-- Plasma Layer: The 500-Point Nebula -->
+      <pxl-layer>
+        <pxl-group x="0" y="281">
+          <!-- We leave points empty; the script below will generate them -->
+          <pxl-polyline id="nebula" 
+            stroke="linear([-1 - (t/100 * ref.speed.value)%2, 0, 3 - (t/100 * ref.speed.value)%2, 0], ['#00f2ff', '#ff0055', '#a200ff', '#00f2ff', '#ff0055', '#a200ff', '#00f2ff'])" 
+            strokewidth="2" fill="none">
+          </pxl-polyline>
+          
+          <!-- Outer Glow: Exact same points but thicker and transparent -->
+          <pxl-polyline id="glow" 
+            stroke="linear([-1 - (t/100 * ref.speed.value)%2, 0, 3 - (t/100 * ref.speed.value)%2, 0], ['rgba(0,242,255,0.15)', 'rgba(255,0,85,0.15)', 'rgba(162,0,255,0.15)', 'rgba(0,242,255,0.15)', 'rgba(255,0,85,0.15)', 'rgba(162,0,255,0.15)', 'rgba(0,242,255,0.15)'])" 
+            strokewidth="20" fill="none">
+          </pxl-polyline>
+        </pxl-group>
+      </pxl-layer>
+
+      <!-- Information HUD -->
+      <pxl-layer>
+        <pxl-text x="500" y="40" align="center" size="10" fill="rgba(0,242,255,0.4)"
+          text="'ENGINE_STATUS: STABLE // SCANNING_ARRAY_01'"></pxl-text>
+        <pxl-text x="980" y="540" align="end" size="14" fill="#fff"
+          text="`MAGNITUDE: ${floor(ref.scale.value * 100)}%`"></pxl-text>
+        <!-- FPS Monitor -->
+        <pxl-text x="20" y="40" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms | MAX: ' + ref.main.renderMax + 'ms'" font="monospace" size="14" fill="#0f0" align="left"
+          stroke="none"></pxl-text>
+      </pxl-layer>
+
+    </pxl-stage>
+  </div>
+
+  <script src="dist/pxl.min.js"></script>
+
+  <script>
+    // --- 1. GENERATE THE 500 POINTS ---
+    // We create a single massive math string.
+    // Each point: X , Y ;
+    const poly = document.getElementById('nebula');
+    const glow = document.getElementById('glow');
+    let pointsString = "";
+
+    for (let i = 0; i < 500; i++) {
+      const x = i * 2; // Spread 500 points across 1000 units
+
+      // The math formula:
+      // We use 'i' as a constant in the string, but v.vars and 't' stay reactive.
+      // We create a "double-wave" interference pattern.
+      const yFormula = `(sin(t * 2 + ${i} * ref.speed.value) + cos(t * 1.25 + ${i} * 0.02 * ref.twist.value)) * 50 * ref.scale.value`;
+
+      pointsString += `${x}, ${yFormula} ; `;
+    }
+
+    // Inject the string. This triggers attributeChangedCallback ONCE.
+    // Your engine will then spend a moment parsing and caching 500 indices.
+    poly.setAttribute('points', pointsString);
+    glow.setAttribute('points', pointsString);
+
+
+    // --- 2. INITIALIZE VARIABLES ---
+    
+    
+    
+
+    // --- 3. CONNECT UI ---
+    document.getElementById('in_speed').oninput = (e) => document.getElementById('speed').setAttribute('value', e.target.value);
+    document.getElementById('in_scale').oninput = (e) => document.getElementById('scale').setAttribute('value', e.target.value);
+    document.getElementById('in_twist').oninput = (e) => document.getElementById('twist').setAttribute('value', e.target.value);
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polyline Arrow Test Bench</title>
+  <!-- Load the Declarative Canvas Framework -->
+  <script src="dist/pxl.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0f172a; /* Slate 900 */
+      color: #cbd5e1;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0 0 10px 0;
+      color: #38bdf8;
+    }
+    .stage-container {
+      width: 1000px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 40px;
+      border: 1px solid #334155;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>&lt;pxl-polyline&gt; Arrowhead Engine</h1>
+    <p>Testing offsets, smoothing, relative coordinates, and auto-scaling.</p>
+  </header>
+
+  <div class="stage-container">
+    <!-- Using a 1000x2100 stage for plenty of vertical room -->
+    <pxl-stage id="main" ratio="1000 / 2100" fps="60">
+      
+      <!-- BACKGROUND -->
+      <pxl-layer>
+        <!-- Dark Blue/Slate background -->
+        <pxl-rect x="500" y="1050" width="1000" height="2100" fill="#0f172a"></pxl-rect>
+        
+        <!-- Cyberpunk Grid -->
+        <pxl-group alpha="0.05">
+          <pxl-line x1="0" y1="0" x2="0" y2="2100" strokewidth="1" stroke="#38bdf8" mode="relative" repeat="20" dx="50"></pxl-line>
+          <pxl-line x1="0" y1="0" x2="1000" y2="0" strokewidth="1" stroke="#38bdf8" mode="relative" repeat="42" dy="50"></pxl-line>
+        </pxl-group>
+      </pxl-layer>
+
+      <pxl-layer>
+        <!-- ========================================== -->
+        <!-- SECTION 1: POINT CACHING & INTERSECTIONS   -->
+        <!-- ========================================== -->
+        <pxl-text x="500" y="80" text="'SECTION 1: GEOMETRIC INTERSECTIONS'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+        
+        <!-- Ghost lines -->
+        <pxl-polyline points="100,200; 300,150; 500,200; 700,150; 900,200" strokewidth="20" linecap="butt" linejoin="miter" stroke="rgba(217, 70, 239, 0.2)"></pxl-polyline>
+        <pxl-polyline points="100,300; 300,250; 500,300; 700,250; 900,300" strokewidth="20" linecap="square" linejoin="miter" stroke="rgba(14, 165, 233, 0.2)"></pxl-polyline>
+        <pxl-polyline points="100,400; 300,350; 500,400; 700,350; 900,400" strokewidth="20" linecap="round" linejoin="round" stroke="rgba(16, 185, 129, 0.2)"></pxl-polyline>
+        
+        <!-- Arrow lines -->
+        <!-- Neon Fuchsia -->
+        <pxl-polyline points="100,200; 300,150; 500,200; 700,150; 900,200" strokewidth="20" linecap="butt" linejoin="miter" stroke="linear(0, ['#c026d3', '#d946ef'])" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-polyline>
+        <pxl-text x="100" y="160" text="'linecap=butt'" size="14" fill="#a1a1aa"></pxl-text>
+
+        <!-- Neon Cyan -->
+        <pxl-polyline points="100,300; 300,250; 500,300; 700,250; 900,300" strokewidth="20" linecap="square" linejoin="miter" stroke="linear(0, ['#0284c7', '#0ea5e9'])" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-polyline>
+        <pxl-text x="100" y="260" text="'linecap=square'" size="14" fill="#a1a1aa"></pxl-text>
+
+        <!-- Neon Emerald -->
+        <pxl-polyline points="100,400; 300,350; 500,400; 700,350; 900,400" strokewidth="20" linecap="round" linejoin="round" stroke="linear(0, ['#059669', '#10b981'])" arrowstart="auto" arrowend="auto" arrowstyle="line"></pxl-polyline>
+        <pxl-text x="100" y="360" text="'linecap=round'" size="14" fill="#a1a1aa"></pxl-text>
+
+
+        <!-- ========================================== -->
+        <!-- SECTION 2: SMOOTHING AND TENSION           -->
+        <!-- ========================================== -->
+        <pxl-text x="500" y="550" text="'SECTION 2: BEZIER SMOOTHING AND TENSION'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+        
+        <!-- Sharp Reference -->
+        <pxl-polyline points="100,650; 300,800; 500,600; 700,800; 900,650" strokewidth="2" stroke="rgba(255,255,255,0.2)"></pxl-polyline>
+        
+        <pxl-text x="100" y="600" text="'smooth=true (Tension=1)'" size="14" fill="#a1a1aa"></pxl-text>
+        <pxl-polyline points="100,650; 300,800; 500,600; 700,800; 900,650" smooth="true" strokewidth="12" linecap="round" stroke="#8b5cf6" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-polyline>
+
+        <pxl-text x="100" y="720" text="'smooth=0.5 (Tension=0.5)'" size="14" fill="#a1a1aa"></pxl-text>
+        <pxl-polyline points="100,770; 300,920; 500,720; 700,920; 900,770" smooth="0.5" strokewidth="12" linecap="round" stroke="#f43f5e" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-polyline>
+
+        <!-- ========================================== -->
+        <!-- SECTION 3: CLOSED POLYLINES                -->
+        <!-- ========================================== -->
+        <pxl-text x="500" y="1050" text="'SECTION 3: CLOSED GEOMETRY'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+
+        <!-- A closed triangle -->
+        <pxl-polyline points="250,1150; 400,1350; 100,1350" closed="true" strokewidth="10" linecap="round" linejoin="round" stroke="#14b8a6" fill="rgba(20, 184, 166, 0.2)" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-polyline>
+        
+        <!-- A closed, smoothed shape -->
+        <pxl-polyline points="750,1150; 900,1250; 800,1400; 600,1300" closed="true" smooth="true" strokewidth="10" linecap="round" stroke="#eab308" fill="rgba(234, 179, 8, 0.2)" arrowstart="auto" arrowend="auto" arrowstyle="line"></pxl-polyline>
+
+        <!-- ========================================== -->
+        <!-- SECTION 4: RELATIVE MODE & ANIMATION       -->
+        <!-- ========================================== -->
+        <pxl-text x="500" y="1500" text="'SECTION 4: RELATIVE MODE (SNAKE)'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+        
+        <!-- We use mode="relative" and make the snake wiggle via sine waves -->
+        <pxl-group x="500" y="1650">
+          <!-- Each segment is -80x relative to the last point, and Y wiggles -->
+          <pxl-polyline 
+            mode="relative" 
+            points="0,0; -80,sin(t*2)*50; -80,sin(t*2 - 0.5)*50; -80,sin(t*2 - 1.0)*50; -80,sin(t*2 - 1.5)*50" 
+            smooth="true" 
+            strokewidth="20" 
+            linecap="round" 
+            stroke="linear(0, ['#10b981', '#3b82f6'])" 
+            arrowstart="auto" 
+            arrowstyle="filled">
+          </pxl-polyline>
+          
+          <pxl-polyline 
+            mode="relative" 
+            points="0,0; 80,sin(t*2)*50; 80,sin(t*2 - 0.5)*50; 80,sin(t*2 - 1.0)*50; 80,sin(t*2 - 1.5)*50" 
+            smooth="true" 
+            strokewidth="20" 
+            linecap="round" 
+            stroke="linear(0, ['#f43f5e', '#f59e0b'])" 
+            arrowstart="auto" 
+            arrowstyle="filled">
+          </pxl-polyline>
+        </pxl-group>
+
+        <!-- ========================================== -->
+        <!-- SECTION 5: MUTATING POLYGON SHAPES         -->
+        <!-- ========================================== -->
+        <pxl-text x="500" y="1850" text="'SECTION 5: MUTATING & CLOSED'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+        <pxl-group x="500" y="2000" rotate="t * -20">
+          <!-- Create a continuous pulsing polygon -->
+          <pxl-polyline 
+            points="0,-100; 100 + wave(1)*50,0; 0,100; -100 - wave(1)*50,0" 
+            closed="true"
+            smooth="0.5"
+            strokewidth="8" 
+            linejoin="round" 
+            stroke="#ec4899" 
+            arrowstart="auto" 
+            arrowend="auto" 
+            arrowstyle="line">
+          </pxl-polyline>
+        </pxl-group>
+
+      </pxl-layer>
+    </pxl-stage>
+  </div>
+
+</body>
+</html>

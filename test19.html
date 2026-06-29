@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test 19: Interactive Bar Chart</title>
+  <style>
+    body {
+      margin: 0; padding: 0;
+      background-color: #0b0b12;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      display: flex;
+      height: 100vh;
+    }
+    
+    #sidebar {
+      width: 320px;
+      background: #111;
+      border-right: 1px solid #333;
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      box-shadow: 5px 0 20px rgba(0,0,0,0.5);
+      z-index: 10;
+      overflow-y: auto;
+    }
+    
+    h2 { margin: 0 0 5px 0; font-weight: 300; letter-spacing: 2px; color: #fff; }
+    p { color: #666; font-size: 13px; margin: 0 0 15px 0; line-height: 1.4; }
+    hr { border: none; border-top: 1px solid #333; margin: 10px 0; }
+    
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    label {
+      font-size: 13px;
+      color: #ccc;
+      display: flex;
+      justify-content: space-between;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+      accent-color: #00ffcc;
+    }
+
+    #stage-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    #container {
+      width: 95%;
+      max-width: 1400px;
+      aspect-ratio: 16 / 9;
+      position: relative;
+      background: #050508;
+      box-shadow: 0 10px 60px rgba(0,0,0,0.8);
+      border: 1px solid #222;
+      border-radius: 12px;
+      overflow: hidden;
+      /* Subtle grid background */
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      background-position: center center;
+    }
+  </style>
+</head>
+<body>
+  
+  <div id="sidebar">
+    <h2>DATA DASHBOARD</h2>
+    <p>Zero-GC interactive data visualization using Pixel rect anchors.</p>
+
+    <!-- Data Controls -->
+    <div class="control-group">
+      <label>Q1 Revenue <span id="val-val1">40</span></label>
+      <input type="range" id="in_val1" min="10" max="120" step="1" value="40">
+    </div>
+    <div class="control-group">
+      <label>Q2 Revenue <span id="val-val2">75</span></label>
+      <input type="range" id="in_val2" min="10" max="120" step="1" value="75">
+    </div>
+    <div class="control-group">
+      <label>Q3 Revenue <span id="val-val3">50</span></label>
+      <input type="range" id="in_val3" min="10" max="120" step="1" value="50">
+    </div>
+    <div class="control-group">
+      <label>Q4 Revenue <span id="val-val4">90</span></label>
+      <input type="range" id="in_val4" min="10" max="120" step="1" value="90">
+    </div>
+    <div class="control-group">
+      <label>Q1 Projection <span id="val-val5">110</span></label>
+      <input type="range" id="in_val5" min="10" max="120" step="1" value="110">
+    </div>
+
+    <hr>
+
+    <!-- Styling Controls -->
+    <div class="control-group">
+      <label>Bar Width <span id="val-width">80</span></label>
+      <input type="range" id="in_width" min="20" max="150" step="1" value="80">
+    </div>
+    <div class="control-group">
+      <label>Bar Spacing <span id="val-spacing">140</span></label>
+      <input type="range" id="in_spacing" min="80" max="250" step="1" value="140">
+    </div>
+    <div class="control-group">
+      <label>Top Radius <span id="val-radius">12</span></label>
+      <input type="range" id="in_radius" min="0" max="75" step="1" value="12">
+    </div>
+
+    <hr>
+
+    <!-- Animation Controls -->
+    <div class="control-group">
+      <label>Live Pulse Speed <span id="val-speed">2.0</span></label>
+      <input type="range" id="in_speed" min="0" max="10" step="0.1" value="2.0">
+    </div>
+    <div class="control-group">
+      <label>Live Pulse Amplitude <span id="val-wave">15</span></label>
+      <input type="range" id="in_wave" min="0" max="50" step="1" value="15">
+    </div>
+  </div>
+
+  <div id="stage-container">
+    <div id="container">
+      <pxl-stage id="main">
+        
+        <pxl-layer>
+          <pxl-var id="val1" value="40"></pxl-var>
+          <pxl-var id="val2" value="75"></pxl-var>
+          <pxl-var id="val3" value="50"></pxl-var>
+          <pxl-var id="val4" value="90"></pxl-var>
+          <pxl-var id="val5" value="110"></pxl-var>
+          
+          <pxl-var id="width" value="80"></pxl-var>
+          <pxl-var id="spacing" value="140"></pxl-var>
+          <pxl-var id="radius" value="12"></pxl-var>
+          
+          <pxl-var id="speed" value="2.0"></pxl-var>
+          <pxl-var id="wave" value="15"></pxl-var>
+
+          <!-- Background Chart Grid Lines -->
+          <pxl-line x1="100" y1="ref.main.height * 0.2" x2="900" y2="ref.main.height * 0.2" stroke="rgba(255,255,255,0.05)" strokewidth="2" linedash="5,5"></pxl-line>
+          <pxl-text x="80" y="ref.main.height * 0.2" text="'150k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
+          
+          <pxl-line x1="100" y1="ref.main.height * 0.4" x2="900" y2="ref.main.height * 0.4" stroke="rgba(255,255,255,0.05)" strokewidth="2" linedash="5,5"></pxl-line>
+          <pxl-text x="80" y="ref.main.height * 0.4" text="'100k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
+          
+          <pxl-line x1="100" y1="ref.main.height * 0.6" x2="900" y2="ref.main.height * 0.6" stroke="rgba(255,255,255,0.05)" strokewidth="2" linedash="5,5"></pxl-line>
+          <pxl-text x="80" y="ref.main.height * 0.6" text="'50k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
+
+          <!-- The Solid Baseline -->
+          <pxl-line x1="100" y1="ref.main.height * 0.8" x2="900" y2="ref.main.height * 0.8" stroke="rgba(255,255,255,0.2)" strokewidth="4"></pxl-line>
+          <pxl-text x="80" y="ref.main.height * 0.8" text="'0k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
+
+          <!-- BAR 1 -->
+          <pxl-group x="500 - ref.spacing.value * 2" y="ref.main.height * 0.8">
+             <!-- The dynamic bar with bottom anchor -->
+             <pxl-rect 
+               x="0" y="0" 
+               w="ref.width.value" 
+               h="(ref.val1.value + Math.sin(t * ref.speed.value + 0) * ref.wave.value) * 3" 
+               r="ref.radius.value" r3="0" r4="0" 
+               anchor="bottom"
+               fill="linear([0,1, 0,0], [hsla(340, 100%, 60%, 0.9), hsla(20, 100%, 60%, 0.3)])"
+               stroke="hsl(350, 100%, 60%)" strokewidth="2">
+             </pxl-rect>
+             <!-- The floating label perfectly tracks the top of the bar -->
+             <pxl-text 
+               x="0" 
+               y="-(ref.val1.value + Math.sin(t * ref.speed.value + 0) * ref.wave.value) * 3 - 20" 
+               text="Math.round(ref.val1.value + Math.sin(t * ref.speed.value + 0) * ref.wave.value) + 'k'" 
+               align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
+             </pxl-text>
+             <!-- X-Axis Label -->
+             <pxl-text x="0" y="30" text="'Q1'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
+          </pxl-group>
+
+          <!-- BAR 2 -->
+          <pxl-group x="500 - ref.spacing.value" y="ref.main.height * 0.8">
+             <pxl-rect 
+               x="0" y="0" 
+               w="ref.width.value" 
+               h="(ref.val2.value + Math.sin(t * ref.speed.value + 1) * ref.wave.value) * 3" 
+               r="ref.radius.value" r3="0" r4="0" 
+               anchor="bottom"
+               fill="linear([0,1, 0,0], [hsla(20, 100%, 60%, 0.9), hsla(60, 100%, 60%, 0.3)])"
+               stroke="hsl(30, 100%, 60%)" strokewidth="2">
+             </pxl-rect>
+             <pxl-text 
+               x="0" 
+               y="-(ref.val2.value + Math.sin(t * ref.speed.value + 1) * ref.wave.value) * 3 - 20" 
+               text="Math.round(ref.val2.value + Math.sin(t * ref.speed.value + 1) * ref.wave.value) + 'k'" 
+               align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
+             </pxl-text>
+             <pxl-text x="0" y="30" text="'Q2'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
+          </pxl-group>
+
+          <!-- BAR 3 -->
+          <pxl-group x="500" y="ref.main.height * 0.8">
+             <pxl-rect 
+               x="0" y="0" 
+               w="ref.width.value" 
+               h="(ref.val3.value + Math.sin(t * ref.speed.value + 2) * ref.wave.value) * 3" 
+               r="ref.radius.value" r3="0" r4="0" 
+               anchor="bottom"
+               fill="linear([0,1, 0,0], [hsla(160, 100%, 50%, 0.9), hsla(200, 100%, 60%, 0.3)])"
+               stroke="hsl(180, 100%, 60%)" strokewidth="2">
+             </pxl-rect>
+             <pxl-text 
+               x="0" 
+               y="-(ref.val3.value + Math.sin(t * ref.speed.value + 2) * ref.wave.value) * 3 - 20" 
+               text="Math.round(ref.val3.value + Math.sin(t * ref.speed.value + 2) * ref.wave.value) + 'k'" 
+               align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
+             </pxl-text>
+             <pxl-text x="0" y="30" text="'Q3'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
+          </pxl-group>
+
+          <!-- BAR 4 -->
+          <pxl-group x="500 + ref.spacing.value" y="ref.main.height * 0.8">
+             <pxl-rect 
+               x="0" y="0" 
+               w="ref.width.value" 
+               h="(ref.val4.value + Math.sin(t * ref.speed.value + 3) * ref.wave.value) * 3" 
+               r="ref.radius.value" r3="0" r4="0" 
+               anchor="bottom"
+               fill="linear([0,1, 0,0], [hsla(220, 100%, 60%, 0.9), hsla(280, 100%, 60%, 0.3)])"
+               stroke="hsl(250, 100%, 70%)" strokewidth="2">
+             </pxl-rect>
+             <pxl-text 
+               x="0" 
+               y="-(ref.val4.value + Math.sin(t * ref.speed.value + 3) * ref.wave.value) * 3 - 20" 
+               text="Math.round(ref.val4.value + Math.sin(t * ref.speed.value + 3) * ref.wave.value) + 'k'" 
+               align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
+             </pxl-text>
+             <pxl-text x="0" y="30" text="'Q4'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
+          </pxl-group>
+
+          <!-- BAR 5 -->
+          <pxl-group x="500 + ref.spacing.value * 2" y="ref.main.height * 0.8">
+             <pxl-rect 
+               x="0" y="0" 
+               w="ref.width.value" 
+               h="(ref.val5.value + Math.sin(t * ref.speed.value + 4) * ref.wave.value) * 3" 
+               r="ref.radius.value" r3="0" r4="0" 
+               anchor="bottom"
+               fill="linear([0,1, 0,0], [hsla(280, 100%, 60%, 0.9), hsla(340, 100%, 60%, 0.3)])"
+               stroke="hsl(310, 100%, 70%)" strokewidth="2">
+             </pxl-rect>
+             <pxl-text 
+               x="0" 
+               y="-(ref.val5.value + Math.sin(t * ref.speed.value + 4) * ref.wave.value) * 3 - 20" 
+               text="Math.round(ref.val5.value + Math.sin(t * ref.speed.value + 4) * ref.wave.value) + 'k'" 
+               align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
+             </pxl-text>
+             <pxl-text x="0" y="30" text="'2027'" align="center" size="16" fill="#00ffcc" weight="bold"></pxl-text>
+          </pxl-group>
+
+          <!-- FPS Monitor -->
+          <pxl-text x="980" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#0f0" align="right" stroke="none"></pxl-text>
+
+        </pxl-layer>
+
+      </pxl-stage>
+    </div>
+  </div>
+
+  <script src="dist/pxl.min.js"></script>
+  <script>
+    // Helper to bind a slider to a cvs variable and update the label
+    function bindControl(cvsVarName) {
+      const el = document.getElementById('in_' + cvsVarName);
+      const valLabel = document.getElementById(`val-${cvsVarName}`);
+      
+      el.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        document.getElementById(cvsVarName).setAttribute('value', val);
+        if (valLabel) valLabel.textContent = val;
+      });
+    }
+
+    // Bind all controls
+    ['val1', 'val2', 'val3', 'val4', 'val5', 'width', 'spacing', 'radius', 'speed', 'wave'].forEach(bindControl);
+  </script>
+</body>
+</html>

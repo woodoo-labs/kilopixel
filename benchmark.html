@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel | Performance & Memory Benchmark</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #07070d;
+      --panel-bg: rgba(13, 13, 25, 0.7);
+      --accent-neon: #00f2ff;
+      --accent-pink: #ff0055;
+      --accent-green: #00ff66;
+      --border-color: rgba(0, 242, 255, 0.15);
+      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 50% -20%, #151530 0%, var(--bg-dark) 70%);
+      color: #f0f0f5;
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    header {
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(7, 7, 13, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #fff 0%, var(--accent-neon) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 1px;
+    }
+
+    .main-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      height: calc(100vh - 71px);
+    }
+
+    /* Sidebar controls */
+    .sidebar {
+      background: rgba(10, 10, 20, 0.4);
+      border-right: 1px solid var(--border-color);
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      overflow-y: auto;
+    }
+
+    .card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--glass-shadow);
+      backdrop-filter: blur(16px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-neon), transparent);
+    }
+
+    .card h3 {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent-neon);
+      margin-bottom: 15px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    button {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #fff;
+      padding: 12px 15px;
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    button span.badge {
+      font-size: 9px;
+      background: rgba(0, 242, 255, 0.15);
+      color: var(--accent-neon);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    button:hover {
+      background: rgba(0, 242, 255, 0.08);
+      border-color: rgba(0, 242, 255, 0.4);
+      transform: translateX(3px);
+    }
+
+    button.active {
+      background: rgba(0, 242, 255, 0.15);
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+    }
+
+    .btn-action {
+      background: linear-gradient(90deg, var(--accent-pink) 0%, #ff0077 100%);
+      border: none;
+      color: #fff;
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-align: center;
+      justify-content: center;
+      border-radius: 8px;
+      padding: 14px;
+      box-shadow: 0 4px 15px rgba(255, 0, 85, 0.3);
+    }
+
+    .btn-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 0, 85, 0.5);
+      background: linear-gradient(90deg, #ff1a6c 0%, #ff3388 100%);
+    }
+
+    /* Dashboard main area */
+    .dashboard {
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      overflow-y: auto;
+    }
+
+    /* Embedded Stage Wrapper */
+    .stage-wrapper {
+      background: #000;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--glass-shadow);
+      position: relative;
+    }
+
+    .stage-hud {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 5;
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid var(--accent-neon);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent-neon);
+    }
+
+    #stage-container {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background-color: #030307;
+    }
+
+    /* Telemetry grid */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .telemetry-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 15px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100px;
+    }
+
+    .telemetry-card h4 {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+    }
+
+    .telemetry-val {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 5px;
+    }
+
+    .telemetry-val span.unit {
+      font-size: 12px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.4);
+      margin-left: 4px;
+    }
+
+    .telemetry-green { color: var(--accent-green) !important; text-shadow: 0 0 10px rgba(0, 255, 102, 0.2); }
+    .telemetry-pink { color: var(--accent-pink) !important; text-shadow: 0 0 10px rgba(255, 0, 85, 0.2); }
+    .telemetry-neon { color: var(--accent-neon) !important; text-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
+
+    /* Graph Container */
+    .graph-card {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+
+    .graph-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .graph-legend {
+      display: flex;
+      gap: 15px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .legend-color {
+      width: 10px;
+      height: 4px;
+      border-radius: 2px;
+    }
+
+    #chart-canvas {
+      width: 100%;
+      height: 120px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: block;
+    }
+
+    /* Modal dialog for benchmark results */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: #0f0f1d;
+      border: 1px solid var(--accent-pink);
+      box-shadow: 0 0 50px rgba(255, 0, 85, 0.25);
+      width: 90%;
+      max-width: 500px;
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-overlay.show .modal {
+      transform: scale(1);
+    }
+
+    .modal h2 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--accent-pink);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
+    .modal h4 {
+      font-family: 'JetBrains Mono', monospace;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 11px;
+      margin-bottom: 25px;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .modal-stat-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 15px;
+      text-align: left;
+    }
+
+    .modal-stat-box h5 {
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      color: rgba(255, 255, 255, 0.4);
+      text-transform: uppercase;
+    }
+
+    .modal-stat-box .val {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 5px;
+    }
+
+    .score-box {
+      grid-column: span 2;
+      background: rgba(0, 242, 255, 0.05);
+      border-color: rgba(0, 242, 255, 0.2);
+      text-align: center;
+    }
+
+    .score-box h5 {
+      color: var(--accent-neon);
+    }
+
+    .score-box .val {
+      font-size: 42px;
+      color: var(--accent-neon);
+      text-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+    }
+
+    .close-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-block;
+      transition: all 0.2s;
+    }
+
+    .close-btn:hover {
+      background: var(--accent-pink);
+      border-color: var(--accent-pink);
+      box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+    }
+
+    /* Loading / Running Overlay */
+    .running-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(3, 3, 7, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .running-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255, 0, 85, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--accent-pink);
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .progress-bar-container {
+      width: 200px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 15px;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: var(--accent-pink);
+      transition: width 0.1s linear;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>Pixel Dashboard</h1>
+      <div class="subtitle">ENGINE PROFILE & STRESS BENCHMARK</div>
+    </div>
+    <div style="display: flex; gap: 20px;">
+      <div style="text-align: right">
+        <div style="font-size: 11px; color: rgba(255,255,255,0.4)">BROWSER ENGINE</div>
+        <div style="font-size: 13px; font-weight: 600; color: var(--accent-neon)" id="browser-info">Detecting...</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <div class="sidebar">
+      
+      <!-- Preset Selectors -->
+      <div class="card">
+        <h3>Workload Presets</h3>
+        <div class="btn-group">
+          <button class="active" onclick="loadPreset('polyline-500')">
+            <span>Wave Polyline</span>
+            <span class="badge">500 pts</span>
+          </button>
+          <button onclick="loadPreset('polyline-2000')">
+            <span>Extreme Wave</span>
+            <span class="badge">2,000 pts</span>
+          </button>
+          <button onclick="loadPreset('swarm-1000')">
+            <span>Particle Swarm</span>
+            <span class="badge">1,000 circles</span>
+          </button>
+          <button onclick="loadPreset('gradients-100')">
+            <span>Animated Gradients</span>
+            <span class="badge">100 shapes</span>
+          </button>
+          <button onclick="loadPreset('math-300')">
+            <span>Complex Math Text</span>
+            <span class="badge">300 elements</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Benchmark Trigger -->
+      <div class="card" style="display: flex; flex-direction: column; gap: 15px;">
+        <h3>Benchmarking</h3>
+        <p style="font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.5">
+          Runs a timed 10-second stress-test, captures frame statistics, heap growth, and calculates a performance index.
+        </p>
+        <button class="btn-action" onclick="runBenchmark()">Run 10s Benchmark</button>
+      </div>
+
+      <!-- Memory telemetry warning -->
+      <div style="font-size: 10px; font-family: 'JetBrains Mono', monospace; color: rgba(255,255,255,0.3); line-height: 1.4;">
+        * JS Heap memory telemetry is supported in Chromium-based browsers (Chrome, Edge, Opera) with standard settings.
+      </div>
+
+    </div>
+
+    <div class="dashboard">
+      
+      <!-- Interactive Stage Frame -->
+      <div class="stage-wrapper">
+        <div class="stage-hud" id="active-workload-name">WORKLOAD: WAVE POLYLINE (500 PTS)</div>
+        
+        <!-- Stress-test rendering area -->
+        <div id="stage-container">
+          <!-- Declarative elements will be dynamically injected here -->
+        </div>
+
+        <!-- Timed Benchmark Progress Overlay -->
+        <div class="running-overlay" id="running-overlay">
+          <div class="spinner"></div>
+          <div style="font-size: 16px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;">Benchmarking Workload</div>
+          <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--accent-pink); margin-top: 5px;" id="benchmark-status-text">Collecting metrics...</div>
+          <div class="progress-bar-container">
+            <div class="progress-bar" id="benchmark-progress"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-time metrics grid -->
+      <div class="telemetry-grid">
+        <div class="telemetry-card">
+          <h4>Frames Per Second</h4>
+          <div class="telemetry-val telemetry-green" id="telemetry-fps">0<span class="unit">FPS</span></div>
+        </div>
+        <div class="telemetry-card">
+          <h4>Avg Render Time</h4>
+          <div class="telemetry-val telemetry-neon" id="telemetry-avg">0.00<span class="unit">ms</span></div>
+        </div>
+        <div class="telemetry-card">
+          <h4>Max Render Time</h4>
+          <div class="telemetry-val telemetry-pink" id="telemetry-max">0.00<span class="unit">ms</span></div>
+        </div>
+        <div class="telemetry-card">
+          <h4>JS Heap Memory</h4>
+          <div class="telemetry-val" id="telemetry-mem">0.00<span class="unit">MB</span></div>
+        </div>
+      </div>
+
+      <!-- Telemetry Chart -->
+      <div class="card graph-card">
+        <div class="graph-header">
+          <h3>Frame Time Telemetry History</h3>
+          <div class="graph-legend">
+            <div class="legend-item">
+              <div class="legend-color" style="background: var(--accent-neon)"></div>
+              <span>Render Time (ms)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: rgba(255, 0, 85, 0.4); border-top: 1px dashed var(--accent-pink)"></div>
+              <span>60 FPS Target (16.67ms)</span>
+            </div>
+          </div>
+        </div>
+        <canvas id="chart-canvas"></canvas>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Benchmark Results Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <h2>Benchmark Report</h2>
+      <h4 id="modal-workload">WORKLOAD: WAVE POLYLINE (500 PTS)</h4>
+      
+      <div class="modal-grid">
+        <div class="score-box modal-stat-box">
+          <h5>Performance Index Score</h5>
+          <div class="val" id="score-val">9,850</div>
+        </div>
+        <div class="modal-stat-box">
+          <h5>Average Framerate</h5>
+          <div class="val" id="stat-fps">59.8<span class="unit">FPS</span></div>
+        </div>
+        <div class="modal-stat-box">
+          <h5>Average Render Time</h5>
+          <div class="val" id="stat-avg">1.25<span class="unit">ms</span></div>
+        </div>
+        <div class="modal-stat-box">
+          <h5>99th Percentile Frame</h5>
+          <div class="val" id="stat-p99">2.10<span class="unit">ms</span></div>
+        </div>
+        <div class="modal-stat-box">
+          <h5>Peak Frame Time</h5>
+          <div class="val" id="stat-max">5.40<span class="unit">ms</span></div>
+        </div>
+        <div class="modal-stat-box" style="grid-column: span 2">
+          <h5>Heap Allocation Rate</h5>
+          <div class="val" id="stat-gc">0.02<span class="unit">MB/sec</span></div>
+        </div>
+      </div>
+
+      <button class="close-btn" onclick="toggleModal(false)">Close Dashboard</button>
+    </div>
+  </div>
+
+  <!-- Framework Scripts -->
+  <script src="dist/pxl.min.js"></script>
+
+  <script>
+    // System & Browser Detection
+    const userAgent = navigator.userAgent.toLowerCase();
+    const browserInfo = document.getElementById('browser-info');
+    if (userAgent.includes('chrome') || userAgent.includes('crios')) {
+      browserInfo.textContent = 'Chrome (Chromium)';
+    } else if (userAgent.includes('edge')) {
+      browserInfo.textContent = 'Edge (Chromium)';
+    } else if (userAgent.includes('firefox')) {
+      browserInfo.textContent = 'Firefox (Gecko)';
+    } else if (userAgent.includes('safari') && !userAgent.includes('chrome')) {
+      browserInfo.textContent = 'Safari (WebKit)';
+    } else {
+      browserInfo.textContent = 'Unknown Engine';
+    }
+
+    // Telemetry Buffers
+    const historyLength = 200;
+    const renderTimeHistory = new Array(historyLength).fill(0);
+    let historyIndex = 0;
+
+    // Chart Canvas Setup
+    const chartCanvas = document.getElementById('chart-canvas');
+    const chartCtx = chartCanvas.getContext('2d');
+    
+    function resizeChartCanvas() {
+      const rect = chartCanvas.getBoundingClientRect();
+      chartCanvas.width = rect.width;
+      chartCanvas.height = rect.height;
+    }
+    window.addEventListener('resize', resizeChartCanvas);
+    resizeChartCanvas();
+
+    // Render history chart loop (native canvas drawing)
+    function drawChart() {
+      const w = chartCanvas.width;
+      const h = chartCanvas.height;
+      const ctx = chartCtx;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Draw horizontal target lines (60 FPS and 144 FPS)
+      const target60Y = h - (16.67 / 30) * h;
+      const target144Y = h - (6.94 / 30) * h;
+
+      // 60fps limit
+      ctx.strokeStyle = 'rgba(255, 0, 85, 0.25)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(0, target60Y);
+      ctx.lineTo(w, target60Y);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255, 0, 85, 0.4)';
+      ctx.font = '8px JetBrains Mono';
+      ctx.fillText('60 FPS LIMIT (16.67ms)', 10, target60Y - 4);
+
+      // 144fps limit
+      ctx.strokeStyle = 'rgba(0, 242, 255, 0.15)';
+      ctx.beginPath();
+      ctx.moveTo(0, target144Y);
+      ctx.lineTo(w, target144Y);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(0, 242, 255, 0.3)';
+      ctx.fillText('144 FPS LIMIT (6.94ms)', 10, target144Y - 4);
+
+      ctx.setLineDash([]);
+
+      // Plot render times
+      ctx.strokeStyle = '#00f2ff';
+      ctx.lineWidth = 2;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = 'rgba(0, 242, 255, 0.3)';
+      ctx.beginPath();
+
+      const step = w / (historyLength - 1);
+      for (let i = 0; i < historyLength; i++) {
+        const val = renderTimeHistory[(historyIndex + i) % historyLength];
+        // Scale 0-30ms to height
+        const valY = h - Math.min(val / 30, 1) * h;
+        const valX = i * step;
+
+        if (i === 0) ctx.moveTo(valX, valY);
+        else ctx.lineTo(valX, valY);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0; // Reset
+    }
+
+    // Telemetry Reader Loop
+    function updateTelemetry() {
+      // FPS & Render times directly from cvs framework
+      if (pxl.sys) {
+        document.getElementById('telemetry-fps').innerHTML = `${pxl.sys.fps || 0}<span class="unit">FPS</span>`;
+        document.getElementById('telemetry-avg').innerHTML = `${pxl.sys.renderAvg || '0.00'}<span class="unit">ms</span>`;
+        document.getElementById('telemetry-max').innerHTML = `${pxl.sys.renderMax || '0.00'}<span class="unit">ms</span>`;
+        
+        // Push current average render time to history buffer
+        const currentMs = parseFloat(pxl.sys.renderAvg) || 0;
+        renderTimeHistory[historyIndex] = currentMs;
+        historyIndex = (historyIndex + 1) % historyLength;
+      }
+
+      // Read browser heap memory
+      if (performance.memory) {
+        const memoryMb = performance.memory.usedJSHeapSize / 1048576;
+        document.getElementById('telemetry-mem').innerHTML = `${memoryMb.toFixed(2)}<span class="unit">MB</span>`;
+      } else {
+        document.getElementById('telemetry-mem').innerHTML = `N/A<span class="unit">Not Supported</span>`;
+      }
+
+      drawChart();
+      requestAnimationFrame(updateTelemetry);
+    }
+    requestAnimationFrame(updateTelemetry);
+
+    // Dynamic point generator helper for Polyline tests
+    function generatePointsString(count) {
+      let str = '';
+      for (let i = 0; i < count; i++) {
+        const x = (i / (count - 1)) * 1000;
+        // Animated coordinate formula that leverages framework JIT math compilation
+        const yFormula = `(sin(t * 2 + ${i} * ref.speed.value) + cos(t * 1.25 + ${i} * 0.02 * ref.twist.value)) * 50 * ref.scale.value`;
+        str += `${x}, ${yFormula} ; `;
+      }
+      return str;
+    }
+
+    // Workload HTML Creators
+    const PRESETS = {
+      'polyline-500': () => {
+        const pts = generatePointsString(500);
+        return `
+          <pxl-stage id="main" ratio="16 / 9">
+            <pxl-layer>
+              <pxl-var id="speed" value="0.08"></pxl-var>
+              <pxl-var id="scale" value="1.0"></pxl-var>
+              <pxl-var id="twist" value="5.0"></pxl-var>
+              <pxl-rect x="500" y="281" w="1000" h="562" fill="#030307"></pxl-rect>
+              <pxl-line x1="0" y1="281" x2="1000" y2="281" stroke="rgba(0,242,255,0.05)" strokewidth="1"></pxl-line>
+            </pxl-layer>
+            <pxl-layer>
+              <pxl-var id="speed" value="0.08"></pxl-var>
+              <pxl-var id="scale" value="1.0"></pxl-var>
+              <pxl-var id="twist" value="5.0"></pxl-var>
+              <pxl-group x="0" y="281">
+                <pxl-polyline id="nebula" stroke="#00f2ff" strokewidth="2.5" fill="none" points="${pts}"></pxl-polyline>
+                <pxl-polyline id="glow" stroke="rgba(0, 242, 255, 0.12)" strokewidth="25" fill="none" points="${pts}"></pxl-polyline>
+              </pxl-group>
+            </pxl-layer>
+            <pxl-layer>
+              <pxl-var id="speed" value="0.08"></pxl-var>
+              <pxl-var id="scale" value="1.0"></pxl-var>
+              <pxl-var id="twist" value="5.0"></pxl-var>
+              <pxl-text x="20" y="40" text="'WAVE POLYLINE // 500 PTS // ACTIVE'" font="monospace" size="12" fill="var(--accent-neon)"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        `;
+      },
+      'polyline-2000': () => {
+        const pts = generatePointsString(2000);
+        return `
+          <pxl-stage id="main2" ratio="16 / 9">
+            <pxl-layer>
+              <pxl-var id="speed" value="0.08"></pxl-var>
+              <pxl-var id="scale" value="1.0"></pxl-var>
+              <pxl-var id="twist" value="5.0"></pxl-var>
+              <pxl-rect x="500" y="281" w="1000" h="562" fill="#030307"></pxl-rect>
+              <pxl-line x1="0" y1="281" x2="1000" y2="281" stroke="rgba(255,0,85,0.05)" strokewidth="1"></pxl-line>
+            </pxl-layer>
+            <pxl-layer>
+              <pxl-var id="speed" value="0.08"></pxl-var>
+              <pxl-var id="scale" value="1.0"></pxl-var>
+              <pxl-var id="twist" value="5.0"></pxl-var>
+              <pxl-group x="0" y="281">
+                <pxl-polyline id="nebula" stroke="var(--accent-pink)" strokewidth="1.5" fill="none" points="${pts}"></pxl-polyline>
+                <pxl-polyline id="glow" stroke="rgba(255, 0, 85, 0.15)" strokewidth="20" fill="none" points="${pts}"></pxl-polyline>
+              </pxl-group>
+            </pxl-layer>
+            <pxl-layer>
+              <pxl-var id="speed" value="0.08"></pxl-var>
+              <pxl-var id="scale" value="1.0"></pxl-var>
+              <pxl-var id="twist" value="5.0"></pxl-var>
+              <pxl-text x="20" y="40" text="'EXTREME WAVE POLYLINE // 2,000 PTS // STRESS'" font="monospace" size="12" fill="var(--accent-pink)"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        `;
+      },
+      'swarm-1000': () => {
+        let shapes = '';
+        for (let i = 0; i < 1000; i++) {
+          const r = 2 + (i % 4);
+          const dist = 50 + (i % 12) * 28;
+          const speedFactor = 0.5 + (i % 3) * 0.5;
+          const xForm = `sin(t * ${speedFactor} + ${i}) * ${dist}`;
+          const yForm = `cos(t * ${speedFactor} + ${i}) * ${dist}`;
+          const color = `hsla(${(i * 360 / 1000) % 360}, %, %, 0.6)`;
+          shapes += `<pxl-circle x="${xForm}" y="${yForm}" r="${r}" fill="${color}"></pxl-circle>`;
+        }
+        return `
+          <pxl-stage id="main3" ratio="16 / 9">
+            <pxl-layer>
+              <pxl-var id="speed" value="0.08"></pxl-var>
+              <pxl-var id="scale" value="1.0"></pxl-var>
+              <pxl-var id="twist" value="5.0"></pxl-var>
+              <pxl-rect x="500" y="281" w="1000" h="562" fill="#030307"></pxl-rect>
+            </pxl-layer>
+            <pxl-layer>
+              <pxl-var id="speed" value="0.08"></pxl-var>
+              <pxl-var id="scale" value="1.0"></pxl-var>
+              <pxl-var id="twist" value="5.0"></pxl-var>
+              <pxl-group x="500" y="281" rotate="loop(30) * 360">
+                ${shapes}
+              </pxl-group>
+            </pxl-layer>
+            <pxl-layer>
+              <pxl-var id="speed" value="0.08"></pxl-var>
+              <pxl-var id="scale" value="1.0"></pxl-var>
+              <pxl-var id="twist" value="5.0"></pxl-var>
+              <pxl-text x="20" y="40" text="'PARTICLE SWARM SWARM // 1,000 ELEMENTS // ACTIVE'" font="monospace" size="12" fill="var(--accent-green)"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        `;
+      },
+      'gradients-100': () => {
+        let rects = '';
+        for (let i = 0; i < 100; i++) {
+          const w = 35 + (i % 3) * 15;
+          const h = 35 + (i % 3) * 15;
+          const x = 70 + (i % 10) * 95;
+          const y = 65 + Math.floor(i / 10) * 95;
+          // Animated linear gradient angle, stressing compiler & cache
+          const grad = `linear(t * 70 + ${i * 15}, ['#00ff66', '#00f2ff', '#ff0055'])`;
+          rects += `<pxl-rect x="${x}" y="${y}" w="${w}" h="${h}" fill="${grad}" rotate="t * 20 + ${i * 4}"></pxl-rect>`;
+        }
+        return `
+          <pxl-stage id="main4" ratio="16 / 9">
+            <pxl-layer>
+              <pxl-var id="speed" value="0.08"></pxl-var>
+              <pxl-var id="scale" value="1.0"></pxl-var>
+              <pxl-var id="twist" value="5.0"></pxl-var>
+              <pxl-rect x="500" y="281" w="1000" h="562" fill="#030307"></pxl-rect>
+            </pxl-layer>
+            <pxl-layer>
+              <pxl-var id="speed" value="0.08"></pxl-var>
+              <pxl-var id="scale" value="1.0"></pxl-var>
+              <pxl-var id="twist" value="5.0"></pxl-var>
+              ${rects}
+            </pxl-layer>
+            <pxl-layer>
+              <pxl-var id="speed" value="0.08"></pxl-var>
+              <pxl-var id="scale" value="1.0"></pxl-var>
+              <pxl-var id="twist" value="5.0"></pxl-var>
+              <pxl-text x="20" y="40" text="'ANIMATED GRADIENTS // 100 RECTS // EVAL'" font="monospace" size="12" fill="var(--accent-neon)"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        `;
+      },
+      'math-300': () => {
+        let texts = '';
+        for (let i = 0; i < 300; i++) {
+          const x = 50 + (i % 10) * 98;
+          const y = 45 + Math.floor(i / 10) * 18;
+          // Complex dynamic math text output, stressing expression resolver
+          const textExpr = `'P#' + ${i} + ' : ' + floor(sin(t + ${i}) * 100) + ' | ' + ref.main.fps`;
+          texts += `<pxl-text x="${x}" y="${y}" size="8.5" fill="hsla(${i % 360}, %, %, 0.85)" text="${textExpr}"></pxl-text>`;
+        }
+        return `
+          <pxl-stage id="main5" ratio="16 / 9">
+            <pxl-layer>
+              <pxl-var id="speed" value="0.08"></pxl-var>
+              <pxl-var id="scale" value="1.0"></pxl-var>
+              <pxl-var id="twist" value="5.0"></pxl-var>
+              <pxl-rect x="500" y="281" w="1000" h="562" fill="#030307"></pxl-rect>
+            </pxl-layer>
+            <pxl-layer>
+              <pxl-var id="speed" value="0.08"></pxl-var>
+              <pxl-var id="scale" value="1.0"></pxl-var>
+              <pxl-var id="twist" value="5.0"></pxl-var>
+              ${texts}
+            </pxl-layer>
+            <pxl-layer>
+              <pxl-var id="speed" value="0.08"></pxl-var>
+              <pxl-var id="scale" value="1.0"></pxl-var>
+              <pxl-var id="twist" value="5.0"></pxl-var>
+              <pxl-text x="20" y="40" text="'COMPLEX JIT MATH TEXT // 300 STRINGS // HEAVY'" font="monospace" size="12" fill="var(--accent-green)"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        `;
+      }
+    };
+
+    let activePreset = '';
+
+    function loadPreset(name) {
+      if (activePreset === name) return;
+      activePreset = name;
+
+      const container = document.getElementById('stage-container');
+      const hudName = document.getElementById('active-workload-name');
+      
+      // Update HUD text
+      const nameMapping = {
+        'polyline-500': 'WORKLOAD: WAVE POLYLINE (500 PTS)',
+        'polyline-2000': 'WORKLOAD: EXTREME WAVE POLYLINE (2,000 PTS)',
+        'swarm-1000': 'WORKLOAD: PARTICLE SWARM (1,000 CIRCLES)',
+        'gradients-100': 'WORKLOAD: ANIMATED GRADIENTS (100 SHAPES)',
+        'math-300': 'WORKLOAD: COMPLEX JIT MATH TEXT (300 STRINGS)'
+      };
+      hudName.textContent = nameMapping[name];
+
+      // Reset Telemetry counters
+      if (pxl.perf) {
+        pxl.perf._frames = 0;
+        pxl.perf._accumulatedTime = 0;
+        pxl.perf._maxTime = 0;
+      }
+
+      // Update button visual state
+      const buttons = document.querySelectorAll('.sidebar button');
+      buttons.forEach(btn => {
+        if (btn.getAttribute('onclick').includes(name)) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+
+      // Clear DOM and inject elements (triggers Web Component connected/disconnected hooks)
+      container.innerHTML = '';
+      
+      // Short timeout to guarantee GC sweeps old elements before creating new ones
+      setTimeout(() => {
+        container.innerHTML = PRESETS[name]();
+        
+        // Initialize dynamic variables for polylines & swarms
+        
+      }, 50);
+    }
+
+    // Modal Controller
+    function toggleModal(show) {
+      const modal = document.getElementById('modal-overlay');
+      if (show) modal.classList.add('show');
+      else modal.classList.remove('show');
+    }
+
+    // Timed Benchmark Runner
+    function runBenchmark() {
+      const overlay = document.getElementById('running-overlay');
+      const progressBar = document.getElementById('benchmark-progress');
+      const statusText = document.getElementById('benchmark-status-text');
+      
+      overlay.classList.add('show');
+      progressBar.style.width = '0%';
+      
+      const benchmarkDuration = 10000; // 10 seconds
+      const sampleInterval = 100; // sample telemetry every 100ms
+      const samples = [];
+      const startTime = performance.now();
+
+      // Read initial memory
+      const startMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+
+      const timer = setInterval(() => {
+        const elapsed = performance.now() - startTime;
+        const pct = Math.min((elapsed / benchmarkDuration) * 100, 100);
+        progressBar.style.width = `${pct}%`;
+        statusText.textContent = `Gathering data... ${(elapsed / 1000).toFixed(1)}s`;
+
+        // Gather instantaneous statistics
+        if (pxl.sys) {
+          samples.push({
+            fps: pxl.sys.fps,
+            avg: parseFloat(pxl.sys.renderAvg) || 0,
+            max: parseFloat(pxl.sys.renderMax) || 0,
+            memory: performance.memory ? performance.memory.usedJSHeapSize : 0
+          });
+        }
+
+        if (elapsed >= benchmarkDuration) {
+          clearInterval(timer);
+          overlay.classList.remove('show');
+          
+          // Compute benchmark stats
+          const endMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+          
+          let sumFps = 0, sumAvg = 0, peakMax = 0;
+          const avgs = [];
+          
+          samples.forEach(s => {
+            sumFps += ref.main.fps;
+            sumAvg += s.avg;
+            avgs.push(s.avg);
+            if (s.max > peakMax) peakMax = s.max;
+          });
+
+          const count = samples.length;
+          const finalAvgFps = sumFps / count;
+          const finalAvgMs = sumAvg / count;
+
+          // Compute 99th Percentile of render times
+          avgs.sort((a, b) => a - b);
+          const p99Index = Math.floor(avgs.length * 0.99);
+          const p99Ms = avgs[p99Index] || 0;
+
+          // Compute memory growth rate (allocations / second)
+          const memoryDelta = Math.max(0, endMemory - startMemory);
+          const allocationRateMbSec = (memoryDelta / 1048576) / (benchmarkDuration / 1000);
+
+          // Performance Index Score Calculation:
+          // Higher is better. Based on average frame times and standard deviation (stability)
+          // Score = (1000 / avgMs) * (1 / (1 + p99Ms - avgMs)) * 100
+          // If frame times are near 1ms and highly stable (p99 is close to avg), score will be high.
+          const stabilityFactor = Math.max(0.1, p99Ms - finalAvgMs);
+          const rawScore = (1000 / Math.max(0.1, finalAvgMs)) * (1 / (1 + stabilityFactor)) * 100;
+          const finalScore = Math.round(rawScore);
+
+          // Populate modal statistics
+          document.getElementById('modal-workload').textContent = document.getElementById('active-workload-name').textContent;
+          document.getElementById('score-val').textContent = finalScore.toLocaleString();
+          document.getElementById('stat-fps').innerHTML = `${finalAvgFps.toFixed(1)}<span class="unit">FPS</span>`;
+          document.getElementById('stat-avg').innerHTML = `${finalAvgMs.toFixed(2)}<span class="unit">ms</span>`;
+          document.getElementById('stat-p99').innerHTML = `${p99Ms.toFixed(2)}<span class="unit">ms</span>`;
+          document.getElementById('stat-max').innerHTML = `${peakMax.toFixed(2)}<span class="unit">ms</span>`;
+          
+          if (performance.memory) {
+            document.getElementById('stat-gc').innerHTML = `${allocationRateMbSec.toFixed(3)}<span class="unit">MB/sec</span>`;
+          } else {
+            document.getElementById('stat-gc').innerHTML = `N/A<span class="unit">Not Supported</span>`;
+          }
+
+          // Show modal
+          toggleModal(true);
+        }
+      }, sampleInterval);
+    }
+
+    // Load initial preset
+    window.addEventListener('DOMContentLoaded', () => {
+      loadPreset('polyline-500');
+    });
+  </script>
+</body>
+</html>

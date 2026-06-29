@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test 16: Ultra-Expanded Relocation & Z-Order Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background-color: #0b0b12;
+      color: #fff;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      margin: 10px 0;
+      font-weight: 300;
+      letter-spacing: 4px;
+      color: #00ffcc;
+      text-shadow: 0 0 10px rgba(0,255,204,0.3);
+    }
+    .description {
+      font-size: 13px;
+      color: #888;
+      max-width: 1000px;
+      text-align: center;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .main-layout {
+      display: flex;
+      gap: 25px;
+      width: 100%;
+      max-width: 1750px;
+      align-items: flex-start;
+    }
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 30px;
+      flex-grow: 1;
+    }
+    .stage-wrapper {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+    .stage-label {
+      position: absolute;
+      top: 30px;
+      left: 35px;
+      z-index: 10;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #aaa;
+      background: rgba(0, 0, 0, 0.85);
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.12);
+      pointer-events: none;
+    }
+    pxl-stage {
+      width: 100%;
+      background: #050508;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.05);
+      overflow: hidden;
+    }
+    #stageAlpha { background-color: #0c0d17; }
+    #stageBeta { background-color: #140b17; }
+    #stageGamma { background-color: #0b1710; }
+    #stageDelta { background-color: #17140b; }
+    .control-panel {
+      width: 420px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .section-title {
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: #00ffcc;
+      border-bottom: 1px solid rgba(0,255,204,0.2);
+      padding-bottom: 8px;
+      margin: 0;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    label {
+      font-size: 11px;
+      color: #aaa;
+      letter-spacing: 1px;
+    }
+    input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+    }
+    .btn {
+      background: linear-gradient(135deg, #00ffcc, #0099ff);
+      border: none;
+      color: #050508;
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: left;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,255,204,0.4);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 15px rgba(255,255,255,0.1);
+    }
+    .alert-info {
+      font-size: 11px;
+      color: #888;
+      background: rgba(255,255,255,0.02);
+      padding: 10px;
+      border-radius: 6px;
+      border-left: 3px solid #0099ff;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>ULTRA-EXPANDED DOM RELOCATION TEST</h1>
+  <div class="description">
+    Stages are now at maximum size. There are 8 color-coded groups (Group A = Tomato, Group A2 = Orange, Group B = Gold, Group B2 = Turquoise, Group C = Violet, Group C2 = Magenta, Group D = Limegreen, Group D2 = Silver). There are 8 toggle buttons below so you can move elements back and forth dynamically.
+  </div>
+
+  <div class="main-layout">
+    
+    <!-- Left: 4 Stages Grid -->
+    <div class="grid-container">
+      
+      <!-- STAGE ALPHA -->
+      <div class="stage-wrapper">
+        <div class="stage-label">STAGE ALPHA</div>
+        <pxl-stage id="stageAlpha" ratio="16 / 9">
+          <pxl-layer id="layer1" fps="60">
+            <pxl-var id="size" value="25"></pxl-var>
+            <pxl-var id="speed" value="4"></pxl-var>
+
+            
+            <!-- Group A (Tomato Theme) -->
+            <pxl-group id="groupA" x="500" y="281" rotate="loop(12) * 360">
+              <pxl-rect id="rect1" x="0" y="0" w="80" h="80" fill="tomato" stroke="white" strokewidth="2"></pxl-rect>
+              <pxl-circle id="circle1" x="wave(ref.speed.value) * (ref.size.value * 10) - (ref.size.value * 5)" y="0" r="25 + wave(ref.speed.value) * ref.size.value" fill="tomato" stroke="white" strokewidth="2"></pxl-circle>
+              <pxl-line id="line_a" x1="-150" y1="0" x2="-220" y2="0" stroke="tomato" strokewidth="3"></pxl-line>
+              <pxl-rect id="rect_a_dynamic" x="wave(ref.speed.value) * (ref.size.value * 15)" y="-80" w="ref.size.value * 1.5" h="ref.size.value * 1.5" fill="tomato" stroke="white" strokewidth="2"></pxl-rect>
+
+              <!-- Group A2 (Orange Theme, nested inside Group A) -->
+              <pxl-group id="groupA2" x="0" y="-100" rotate="loop(4) * -360">
+                <pxl-rect id="rect_a2" x="0" y="0" w="40" h="40" fill="orange" stroke="white" strokewidth="1.5"></pxl-rect>
+                <pxl-circle id="circle_a2" x="40" y="0" r="12" fill="orange" stroke="white" strokewidth="1.5"></pxl-circle>
+                <pxl-circle id="circle_a2_dynamic" x="0" y="wave(ref.speed.value) * (ref.size.value * 8)" r="ref.size.value * 0.5" fill="orange" stroke="white" strokewidth="1.5"></pxl-circle>
+              </pxl-group>
+            </pxl-group>
+
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+
+      <!-- STAGE BETA -->
+      <div class="stage-wrapper">
+        <div class="stage-label">STAGE BETA</div>
+        <pxl-stage id="stageBeta" ratio="16 / 9">
+          <pxl-layer id="layer2" fps="60">
+
+            
+            <!-- Group B (Gold Theme) -->
+            <pxl-group id="groupB" x="500" y="281" rotate="loop(20) * -360">
+              <pxl-line id="line1" x1="-180" y1="60" x2="180" y2="60" stroke="gold" strokewidth="4"></pxl-line>
+              <pxl-polyline id="polyline1" stroke="gold" strokewidth="3" fill="none" points="-180,-60 ; 0,-110 ; 180,-60"></pxl-polyline>
+              <pxl-circle id="circle_b" x="0" y="0" r="30" fill="gold" stroke="white" strokewidth="2"></pxl-circle>
+              <pxl-rect id="rect_b_dynamic" x="wave(ref.speed.value) * (ref.size.value * 12)" y="-120" w="ref.size.value" h="ref.size.value" fill="gold" stroke="white" strokewidth="2"></pxl-rect>
+            </pxl-group>
+
+            <!-- Group B2 (Turquoise Theme) -->
+            <pxl-group id="groupB2" x="500" y="281" rotate="loop(10) * 360">
+              <pxl-circle id="circle_b2" x="-200" y="0" r="22" fill="mediumturquoise" stroke="white" strokewidth="1.5"></pxl-circle>
+              <pxl-rect id="rect_b2" x="200" y="0" w="35" h="35" fill="mediumturquoise" stroke="white" strokewidth="1.5"></pxl-rect>
+              <pxl-circle id="circle_b2_dynamic" x="wave(ref.speed.value) * (ref.size.value * 10)" y="-80" r="ref.size.value * 0.6" fill="mediumturquoise" stroke="white" strokewidth="1.5"></pxl-circle>
+            </pxl-group>
+            
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+
+      <!-- STAGE GAMMA -->
+      <div class="stage-wrapper">
+        <div class="stage-label">STAGE GAMMA</div>
+        <pxl-stage id="stageGamma" ratio="16 / 9">
+          <pxl-layer id="layer3" fps="60">
+
+            
+            <!-- Group C (Violet Theme) -->
+            <pxl-group id="groupC" x="500" y="281" rotate="loop(15) * 360">
+              <pxl-text id="text1" x="0" y="0" text="'STAGE GAMMA'" font="sans-serif" size="24" align="center" baseline="middle" fill="violet" stroke="none"></pxl-text>
+              <pxl-circle id="circle_c" x="0" y="-80" r="20" fill="violet" stroke="white" strokewidth="1.5"></pxl-circle>
+              <pxl-rect id="rect_c_dynamic" x="-120" y="wave(ref.speed.value) * (ref.size.value * 10)" w="ref.size.value" h="ref.size.value" fill="violet" stroke="white" strokewidth="2"></pxl-rect>
+            </pxl-group>
+
+            <!-- Group C2 (Magenta Theme) -->
+            <pxl-group id="groupC2" x="500" y="281" rotate="loop(6) * -360">
+              <pxl-rect id="rect_c2" x="-230" y="0" w="30" h="30" fill="magenta" stroke="white" strokewidth="1.5"></pxl-rect>
+              <pxl-line id="line_c2" x1="150" y1="-30" x2="230" y2="30" stroke="magenta" strokewidth="3"></pxl-line>
+              <pxl-circle id="circle_c2_dynamic" x="0" y="0" r="ref.size.value * 0.7" fill="none" stroke="magenta" strokewidth="ref.size.value / 5"></pxl-circle>
+            </pxl-group>
+            
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+
+      <!-- STAGE DELTA -->
+      <div class="stage-wrapper">
+        <div class="stage-label">STAGE DELTA</div>
+        <pxl-stage id="stageDelta" ratio="16 / 9">
+          <pxl-layer id="layer4" fps="60">
+
+            
+            <!-- Group D (Limegreen Theme) -->
+            <pxl-group id="groupD" x="500" y="281" rotate="loop(8) * -360">
+              <pxl-rect id="rect_d" x="0" y="0" w="50" h="50" fill="limegreen" stroke="white" strokewidth="2"></pxl-rect>
+              <pxl-polyline id="polyline_d" stroke="limegreen" strokewidth="3" fill="none" points="-100,50 ; 0,100 ; 100,50"></pxl-polyline>
+              <pxl-circle id="circle_d_dynamic" x="0" y="wave(ref.speed.value) * (ref.size.value * 15)" r="ref.size.value * 0.8" fill="limegreen" stroke="white" strokewidth="2"></pxl-circle>
+            </pxl-group>
+
+            <!-- Group D2 (Silver Theme) -->
+            <pxl-group id="groupD2" x="500" y="281" rotate="loop(14) * 360">
+              <pxl-circle id="circle_d2" x="-150" y="0" r="15" fill="silver" stroke="white" strokewidth="1.5"></pxl-circle>
+              <pxl-text id="text_d2" x="150" y="0" text="'DELTA_SUB'" font="sans-serif" size="14" align="center" baseline="middle" fill="silver" stroke="none"></pxl-text>
+              <pxl-rect id="rect_d2_dynamic" x="0" y="80" w="ref.size.value * 2" h="ref.size.value * 0.5" fill="silver" stroke="white" strokewidth="1.5"></pxl-rect>
+            </pxl-group>
+            
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+
+    </div>
+
+    <!-- Right: Relocation Controls Pane -->
+    <div class="control-panel">
+      
+      <h3 class="section-title">VARIABLES</h3>
+      <div class="control-group">
+        <label id="lblSize">ref.size.value: 25</label>
+        <input type="range" id="sizeRange" min="5" max="85" value="25">
+      </div>
+      <div class="control-group">
+        <label id="lblSpeed">ref.speed.value (Wave duration): 4s</label>
+        <input type="range" id="speedRange" min="1" max="15" value="4">
+      </div>
+
+      <h3 class="section-title">Z-ORDERING</h3>
+      <div class="control-group">
+        <button class="btn btn-secondary" onclick="bringCircleToFront()">Bring Circle to Front</button>
+        <button class="btn btn-secondary" onclick="sendCircleToBack()">Send Circle to Back</button>
+      </div>
+
+      <h3 class="section-title">TOGGLE RELOCATION</h3>
+      <div class="control-group">
+        <button class="btn" id="btnToggleRect" onclick="toggleRect()">Move Rect1 to Group B</button>
+        <button class="btn" id="btnToggleCircle" onclick="toggleCircle()">Move Circle1 to Group D</button>
+        <button class="btn" id="btnToggleLine" onclick="toggleLine()">Move Line1 to Group A</button>
+        <button class="btn" id="btnTogglePolyline" onclick="togglePolyline()">Move Polyline1 to Group C2</button>
+        <button class="btn" id="btnToggleGroupA" onclick="toggleGroupA()">Move Group A to Stage Delta</button>
+        <button class="btn" id="btnToggleGroupB2" onclick="toggleGroupB2()">Move Group B2 to Layer 3</button>
+        <button class="btn" id="btnToggleNestedGroup" onclick="toggleNestedGroup()">Move Group A2 to Group C</button>
+        <button class="btn" id="btnToggleLayer2" onclick="toggleLayer2()">Move Layer 2 to Stage Gamma</button>
+      </div>
+
+      <div class="alert-info">
+        <strong>Verification Tips:</strong><br>
+        1. All 8 buttons are toggles. Click once to relocate, click again to undo.<br>
+        2. Moving Group A2 (nested) to Group C reparents it between Stage Alpha and Stage Gamma.<br>
+        3. Slide variables to prove moved shapes keep reactive rendering.
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Framework Scripts -->
+  <script src="dist/pxl.min.js"></script>
+
+  <script>
+    // Sliders
+    const sizeRange = document.getElementById('sizeRange');
+    const speedRange = document.getElementById('speedRange');
+    const lblSize = document.getElementById('lblSize');
+    const lblSpeed = document.getElementById('lblSpeed');
+
+    sizeRange.addEventListener('input', (e) => {
+      const val = Number(e.target.value);
+      document.getElementById('size').setAttribute('value', val);
+      lblSize.textContent = `ref.size: ${val}`;
+    });
+
+    speedRange.addEventListener('input', (e) => {
+      const val = Number(e.target.value);
+      document.getElementById('speed').setAttribute('value', val);
+      lblSpeed.textContent = `ref.speed (Wave duration): ${val}s`;
+    });
+
+    // Store Original DOM Parents for Toggling / Undo
+    const originalParents = {
+      rect1: document.getElementById('groupA'),
+      circle1: document.getElementById('groupA'),
+      line1: document.getElementById('groupB'),
+      polyline1: document.getElementById('groupB'),
+      groupA: document.getElementById('layer1'),
+      groupB2: document.getElementById('layer2'),
+      groupA2: document.getElementById('groupA'),
+      layer2: document.getElementById('stageBeta')
+    };
+
+    // --- Z-Ordering Actions ---
+    function bringCircleToFront() {
+      const circle = document.getElementById('circle1');
+      const parent = circle.parentElement;
+      if (circle && parent) {
+        console.log('[test] Re-appending Circle 1 to front of Group A');
+        parent.appendChild(circle);
+      }
+    }
+
+    function sendCircleToBack() {
+      const circle = document.getElementById('circle1');
+      const parent = circle.parentElement;
+      if (circle && parent) {
+        console.log('[test] Prepended Circle 1 to back of Group A');
+        parent.insertBefore(circle, parent.firstChild);
+      }
+    }
+
+    // --- Toggle Relocation Actions ---
+    function toggleRect() {
+      const rect = document.getElementById('rect1');
+      const groupB = document.getElementById('groupB');
+      const btn = document.getElementById('btnToggleRect');
+      if (!rect || !groupB || !originalParents.rect1) return;
+
+      if (rect.parentElement === originalParents.rect1) {
+        console.log('[test] Relocating Rect1 to Group B');
+        groupB.appendChild(rect);
+        btn.textContent = "Restore Rect1 to Group A";
+      } else {
+        console.log('[test] Restoring Rect1 to Group A');
+        originalParents.rect1.appendChild(rect);
+        btn.textContent = "Move Rect1 to Group B";
+      }
+    }
+
+    function toggleCircle() {
+      const circle = document.getElementById('circle1');
+      const groupD = document.getElementById('groupD');
+      const btn = document.getElementById('btnToggleCircle');
+      if (!circle || !groupD || !originalParents.circle1) return;
+
+      if (circle.parentElement === originalParents.circle1) {
+        console.log('[test] Relocating Circle1 to Group D');
+        groupD.appendChild(circle);
+        btn.textContent = "Restore Circle1 to Group A";
+      } else {
+        console.log('[test] Restoring Circle1 to Group A');
+        originalParents.circle1.appendChild(circle);
+        btn.textContent = "Move Circle1 to Group D";
+      }
+    }
+
+    function toggleLine() {
+      const line = document.getElementById('line1');
+      const groupA = document.getElementById('groupA');
+      const btn = document.getElementById('btnToggleLine');
+      if (!line || !groupA || !originalParents.line1) return;
+
+      if (line.parentElement === originalParents.line1) {
+        console.log('[test] Relocating Line1 to Group A');
+        // Translate offset so it aligns inside Group A
+        line.setAttribute('x1', '-100');
+        line.setAttribute('y1', '-50');
+        line.setAttribute('x2', '100');
+        line.setAttribute('y2', '-50');
+        groupA.appendChild(line);
+        btn.textContent = "Restore Line1 to Group B";
+      } else {
+        console.log('[test] Restoring Line1 to Group B');
+        line.setAttribute('x1', '-180');
+        line.setAttribute('y1', '60');
+        line.setAttribute('x2', '180');
+        line.setAttribute('y2', '60');
+        originalParents.line1.appendChild(line);
+        btn.textContent = "Move Line1 to Group A";
+      }
+    }
+
+    function togglePolyline() {
+      const polyline = document.getElementById('polyline1');
+      const groupC2 = document.getElementById('groupC2');
+      const btn = document.getElementById('btnTogglePolyline');
+      if (!polyline || !groupC2 || !originalParents.polyline1) return;
+
+      if (polyline.parentElement === originalParents.polyline1) {
+        console.log('[test] Relocating Polyline1 to Group C2');
+        groupC2.appendChild(polyline);
+        btn.textContent = "Restore Polyline1 to Group B";
+      } else {
+        console.log('[test] Restoring Polyline1 to Group B');
+        originalParents.polyline1.appendChild(polyline);
+        btn.textContent = "Move Polyline1 to Group C2";
+      }
+    }
+
+    function toggleGroupA() {
+      const groupA = document.getElementById('groupA');
+      const layer4 = document.getElementById('layer4');
+      const btn = document.getElementById('btnToggleGroupA');
+      if (!groupA || !layer4 || !originalParents.groupA) return;
+
+      if (groupA.parentElement === originalParents.groupA) {
+        console.log('[test] Relocating Group A to Stage Delta (Layer 4)');
+        layer4.appendChild(groupA);
+        btn.textContent = "Restore Group A to Stage Alpha";
+      } else {
+        console.log('[test] Restoring Group A to Stage Alpha (Layer 1)');
+        originalParents.groupA.appendChild(groupA);
+        btn.textContent = "Move Group A to Stage Delta";
+      }
+    }
+
+    function toggleGroupB2() {
+      const groupB2 = document.getElementById('groupB2');
+      const layer3 = document.getElementById('layer3');
+      const btn = document.getElementById('btnToggleGroupB2');
+      if (!groupB2 || !layer3 || !originalParents.groupB2) return;
+
+      if (groupB2.parentElement === originalParents.groupB2) {
+        console.log('[test] Relocating Group B2 to Layer 3');
+        layer3.appendChild(groupB2);
+        btn.textContent = "Restore Group B2 to Layer 2";
+      } else {
+        console.log('[test] Restoring Group B2 to Layer 2');
+        originalParents.groupB2.appendChild(groupB2);
+        btn.textContent = "Move Group B2 to Layer 3";
+      }
+    }
+
+    function toggleNestedGroup() {
+      const groupA2 = document.getElementById('groupA2');
+      const groupC = document.getElementById('groupC');
+      const btn = document.getElementById('btnToggleNestedGroup');
+      if (!groupA2 || !groupC || !originalParents.groupA2) return;
+
+      if (groupA2.parentElement === originalParents.groupA2) {
+        console.log('[test] Relocating Nested Group A2 to Group C');
+        groupC.appendChild(groupA2);
+        groupA2.setAttribute('x', '0');
+        groupA2.setAttribute('y', '80');
+        btn.textContent = "Restore Group A2 to Group A";
+      } else {
+        console.log('[test] Restoring Nested Group A2 to Group A');
+        originalParents.groupA2.appendChild(groupA2);
+        groupA2.setAttribute('x', '0');
+        groupA2.setAttribute('y', '-100');
+        btn.textContent = "Move Group A2 to Group C";
+      }
+    }
+
+    function toggleLayer2() {
+      const layer2 = document.getElementById('layer2');
+      const stageGamma = document.getElementById('stageGamma');
+      const btn = document.getElementById('btnToggleLayer2');
+      if (!layer2 || !stageGamma || !originalParents.layer2) return;
+
+      if (layer2.parentElement === originalParents.layer2) {
+        console.log('[test] Relocating Layer 2 to Stage Gamma');
+        stageGamma.appendChild(layer2);
+        btn.textContent = "Restore Layer 2 to Stage Beta";
+      } else {
+        console.log('[test] Restoring Layer 2 to Stage Beta');
+        originalParents.layer2.appendChild(layer2);
+        btn.textContent = "Move Layer 2 to Stage Gamma";
+      }
+    }
+  </script>
+
+</body>
+</html>

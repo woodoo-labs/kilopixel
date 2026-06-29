@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Circles</title>
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; background: #0f172a; overflow: hidden; }
+    pxl-stage { display: block; width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+
+<pxl-stage id="main">
+  <pxl-layer>
+    
+    <!-- Title -->
+    <pxl-text text="'Advanced pxl-circle'" x="500" y="100" size="40" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+    
+    <!-- FPS Monitor & Background Glow -->
+    <pxl-text x="980" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#0f0" align="right" stroke="none"></pxl-text>
+    <pxl-circle x="500" y="400" r="400 + wave(5) * 50" fill="radial(1, ['rgba(0,242,254,0.05)', 'rgba(0,242,254,0)'])"></pxl-circle>
+
+    <!-- 1. The Glowing Loading Ring -->
+    <pxl-group x="250" y="400" scale="1.5">
+      <!-- Faint background ring -->
+      <pxl-circle r="50" stroke="rgba(255,255,255,0.1)" strokewidth="10"></pxl-circle>
+      <!-- Animated loading arc -->
+      <pxl-circle 
+        r="50" 
+        stroke="linear(45, ['#00f2fe', '#4facfe'])" 
+        strokewidth="10" 
+        linecap="round"
+        start="t * 180" 
+        sweep="wave(3) * 270"
+        filter="drop-shadow(0px 0px 15px rgba(0,242,254,0.8))"
+      ></pxl-circle>
+      <!-- Satellite orbiting the ring -->
+      <pxl-circle x="cos(t*3) * 70" y="sin(t*3) * 70" r="5" fill="#00f2fe" filter="drop-shadow(0px 0px 5px rgba(0,242,254,0.8))"></pxl-circle>
+      <pxl-text text="'Arc Mode'" y="90" size="14" fill="#94a3b8" align="center"></pxl-text>
+    </pxl-group>
+
+    <!-- 2. The Pac-Man (Pie Mode) -->
+    <pxl-group x="500" y="400" scale="1.5">
+      <pxl-circle 
+        r="50" 
+        fill="#fde047" 
+        pie="true"
+        start="bounce(0.4) * 45"
+        sweep="360 - (bounce(0.4) * 90)"
+        filter="drop-shadow(0px 0px 20px rgba(253,224,71,0.5))"
+      ></pxl-circle>
+      <!-- Pac-Man Eye -->
+      <pxl-circle x="0" y="-20" r="5" fill="#0f172a"></pxl-circle>
+      
+      <!-- Pac-Man Food -->
+      <pxl-group x="40" y="0">
+        <pxl-circle x="20 - (t * 50) % 50" y="0" r="4" fill="#fff" alpha="0.5 + wave(2)*0.5"></pxl-circle>
+        <pxl-circle x="45 - (t * 50) % 50" y="0" r="4" fill="#fff" alpha="0.5 + wave(2)*0.5"></pxl-circle>
+        <pxl-circle x="70 - (t * 50) % 50" y="0" r="4" fill="#fff" alpha="0.5 + wave(2)*0.5"></pxl-circle>
+      </pxl-group>
+
+      <pxl-text text="'Pie Mode'" y="90" size="14" fill="#94a3b8" align="center"></pxl-text>
+    </pxl-group>
+
+    <!-- 3. The Animated Donut Chart -->
+    <pxl-group x="750" y="400" scale="1.5">
+      <!-- Pulsating Core -->
+      <pxl-circle r="25" fill="radial(1, ['rgba(255,255,255,0.2)', 'rgba(255,255,255,0)'])" scale="1 + wave(3)*0.4"></pxl-circle>
+      
+      <pxl-circle 
+        r="55" ir="35" 
+        fill="#fb7185" 
+        start="-90" 
+        sweep="wave(4) * 120"
+      ></pxl-circle>
+      
+      <pxl-circle 
+        r="55" ir="35" 
+        fill="#c084fc" 
+        start="30" 
+        sweep="wave(4.2) * 100"
+      ></pxl-circle>
+
+      <pxl-circle 
+        r="55" ir="35" 
+        fill="#38bdf8" 
+        start="130" 
+        sweep="wave(4.4) * 140"
+      ></pxl-circle>
+      <pxl-text text="'Donut Mode'" y="90" size="14" fill="#94a3b8" align="center"></pxl-text>
+      <!-- Center Text -->
+      <pxl-text text="'75%'" y="5" size="20" weight="bold" fill="white" align="center" baseline="middle"></pxl-text>
+    </pxl-group>
+
+  </pxl-layer>
+</pxl-stage>
+
+<script src="dist/pxl.min.js"></script>
+</body>
+</html>

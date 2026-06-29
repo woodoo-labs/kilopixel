@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pixel - Mathematical Hit Testing</title>
+  <style>
+    body {
+      background: #09090b;
+      color: #fafafa;
+      font-family: 'Inter', system-ui, sans-serif;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+    .hero {
+      text-align: center;
+      max-width: 800px;
+    }
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(to right, #38bdf8, #818cf8, #c084fc);
+      -webkit-background-clip: text;
+      color: transparent;
+      margin: 0 0 15px 0;
+    }
+    p { color: #a1a1aa; font-size: 1.1rem; line-height: 1.6; margin: 0; }
+    
+    .demo-container {
+      width: 100%;
+      max-width: 1000px;
+      background: rgba(24, 24, 27, 0.5);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    pxl-stage {
+      border-radius: 16px;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #18181b 0%, #09090b 100%);
+      display: block;
+      width: 100%;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
+  </style>
+  <script src="dist/pxl.min.js"></script>
+</head>
+<body>
+  <div class="hero">
+    <h1>Mathematical Hit Testing</h1>
+    <p>Demonstrating how to completely fake interactive mouse hover and proximity effects using pure math, zero JavaScript, and zero external hit-testing engines.</p>
+  </div>
+
+  <div class="demo-container">
+    <pxl-stage id="main" ratio="16/9">
+
+      <pxl-layer>
+        <!-- 
+          We use a pxl-var to calculate the exact distance between the mouse and the moving orb ONCE per frame.
+          This prevents us from having to write out the hypot() math 3 separate times in the orb's attributes!
+        -->
+        <pxl-var id="orbDist" value="hypot(ref.main.mouseX - ref.orb.x, ref.main.mouseY - ref.orb.y)"></pxl-var>
+
+        <!-- 
+          1. HARD HOVER (Rectangle)
+          Uses absolute bounds checking: if Mouse X is within 75px of the center AND Mouse Y is within 75px of the center, change color!
+        -->
+        <pxl-rect 
+          id="box"
+          x="300" 
+          y="281" 
+          w="150" h="150" r="16"
+          fill="(abs(ref.main.mouseX - ref.box.x) < 75 && abs(ref.main.mouseY - ref.box.y) < 75) ? '#f43f5e' : '#1e293b'"
+          stroke="(abs(ref.main.mouseX - ref.box.x) < 75 && abs(ref.main.mouseY - ref.box.y) < 75) ? '#fb7185' : '#334155'"
+          strokewidth="4"
+        ></pxl-rect>
+        <pxl-text x="300" y="281" text="Hover Me" size="16" weight="bold" fill="#fff" align="center" baseline="middle" stroke="none"></pxl-text>
+
+        <!-- 
+          2. SOFT PROXIMITY (Moving Circle)
+          Uses map() and clamp() reading from our orbDist variable.
+          As the mouse gets within 200 pixels, it smoothly maps the values to increase radius, brighten color, and cast a glow!
+          Notice how the math perfectly follows the orb even while it moves on a wave path!
+        -->
+        <pxl-circle
+          id="orb"
+          x="700 + cos(t * 2) * 150" 
+          y="281 + sin(t * 3) * 80" 
+          r="40 + map(clamp(ref.orbDist.value, 0, 200), 0, 200, 30, 0)"
+          fill="hsl(190, 100, map(clamp(ref.orbDist.value, 0, 200), 0, 200, 60, 20))"
+          stroke="hsl(190, 100, map(clamp(ref.orbDist.value, 0, 200), 0, 200, 80, 40))"
+          strokewidth="4"
+          filter="`drop-shadow(0 0 ${map(clamp(ref.orbDist.value, 0, 200), 0, 200, 40, 0)}px #22d3ee)`"
+        ></pxl-circle>
+        
+        <pxl-text x="ref.orb.x" y="ref.orb.y + 100" text="Chase Me" size="16" weight="bold" fill="#94a3b8" align="center" stroke="none"></pxl-text>
+
+      </pxl-layer>
+
+    </pxl-stage>
+  </div>
+</body>
+</html>

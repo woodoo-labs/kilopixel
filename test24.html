@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test 24 - Comprehensive Arrow Showcase</title>
+  <style>
+    /* Fullscreen dark mode presentation */
+    body { background-color: #050505; margin: 0; padding: 50px; overflow: auto; display: block; }
+    pxl-stage { display: block; width: 1000px; margin: 0 auto; background-color: #0a0a0a; border: 1px solid #333; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+  </style>
+  <!-- Load the Declarative Canvas Framework -->
+  <script src="dist/pxl.min.js"></script>
+</head>
+<body>
+  <pxl-stage id="main" ratio="1 / 2.5">
+    <pxl-layer>
+      <!-- FPS Counter -->
+      <pxl-text x="980" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#0f0" align="right" stroke="none"></pxl-text>
+
+      <!-- TITLE -->
+      <pxl-text x="500" y="60" text="'THE ARROW ENCYCLOPEDIA'" size="40" font="system-ui" weight="900" fill="linear(t * 60, ['#00f2fe', '#4facfe'])" align="center"></pxl-text>
+
+      <!-- ========================================== -->
+      <!-- SECTION 1: LINECAP ALIGNMENT PROOF         -->
+      <!-- ========================================== -->
+      <pxl-text x="500" y="130" text="'SECTION 1: LINECAP GRID ALIGNMENT PROOF'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+      <!-- Alignment Guides -->
+      <pxl-line x1="300" y1="120" x2="300" y2="380" strokewidth="1" linedash="[5, 5]" stroke="#fff" alpha="0.3"></pxl-line>
+      <pxl-line x1="700" y1="120" x2="700" y2="380" strokewidth="1" linedash="[5, 5]" stroke="#fff" alpha="0.3"></pxl-line>
+      
+      <!-- BUTT -->
+      <pxl-text x="280" y="180" text="'BUTT'" size="14" font="monospace" fill="#aaa" align="right" baseline="middle"></pxl-text>
+      <pxl-line x1="300" y1="180" x2="700" y2="180" strokewidth="20" linecap="butt" stroke="linear(0, ['#eab308', '#facc15'])" arrowend="40" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="300" y1="205" x2="700" y2="205" strokewidth="20" linecap="butt" stroke="rgba(234,179,8,0.3)"></pxl-line>
+
+      <!-- SQUARE -->
+      <pxl-text x="280" y="250" text="'SQUARE'" size="14" font="monospace" fill="#aaa" align="right" baseline="middle"></pxl-text>
+      <pxl-line x1="300" y1="250" x2="700" y2="250" strokewidth="20" linecap="square" stroke="linear(0, ['#ef4444', '#f87171'])" arrowend="40" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="300" y1="275" x2="700" y2="275" strokewidth="20" linecap="square" stroke="rgba(239,68,68,0.3)"></pxl-line>
+
+      <!-- ROUND -->
+      <pxl-text x="280" y="320" text="'ROUND'" size="14" font="monospace" fill="#aaa" align="right" baseline="middle"></pxl-text>
+      <pxl-line x1="300" y1="320" x2="700" y2="320" strokewidth="20" linecap="round" linejoin="round" stroke="linear(0, ['#3b82f6', '#60a5fa'])" arrowend="40" arrowstyle="line"></pxl-line>
+      <pxl-line x1="300" y1="345" x2="700" y2="345" strokewidth="20" linecap="round" stroke="rgba(59,130,246,0.3)"></pxl-line>
+
+      <!-- ========================================== -->
+      <!-- SECTION 2: FILLED SCALING MATRIX           -->
+      <!-- ========================================== -->
+      <pxl-text x="500" y="420" text="'SECTION 2: arrowstyle=&quot;filled&quot;'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+      <pxl-text x="100" y="450" text="'Stroke 2px'" size="12" font="monospace" fill="#aaa" align="center"></pxl-text>
+      <pxl-text x="300" y="450" text="'Stroke 8px'" size="12" font="monospace" fill="#aaa" align="center"></pxl-text>
+      <pxl-text x="600" y="450" text="'Stroke 20px'" size="12" font="monospace" fill="#aaa" align="center"></pxl-text>
+      <pxl-text x="850" y="450" text="'Stroke 40px'" size="12" font="monospace" fill="#aaa" align="center"></pxl-text>
+
+      <pxl-line x1="100" y1="470" x2="100" y2="700" strokewidth="2" linecap="square" stroke="linear(90, ['#059669', '#10b981'])" arrowend="auto" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="300" y1="470" x2="300" y2="700" strokewidth="8" linecap="square" stroke="linear(90, ['#0d9488', '#14b8a6'])" arrowend="auto" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="600" y1="470" x2="600" y2="700" strokewidth="20" linecap="square" stroke="linear(90, ['#0891b2', '#06b6d4'])" arrowend="auto" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="850" y1="470" x2="850" y2="700" strokewidth="40" linecap="square" stroke="linear(90, ['#2563eb', '#3b82f6'])" arrowend="auto" arrowstyle="filled"></pxl-line>
+
+      <!-- ========================================== -->
+      <!-- SECTION 3: LINE SCALING MATRIX             -->
+      <!-- ========================================== -->
+      <pxl-text x="500" y="780" text="'SECTION 3: arrowstyle=&quot;line&quot;'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+      
+      <pxl-line x1="100" y1="830" x2="100" y2="1060" strokewidth="2" linecap="round" linejoin="round" stroke="linear(90, ['#9333ea', '#a855f7'])" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="300" y1="830" x2="300" y2="1060" strokewidth="8" linecap="round" linejoin="round" stroke="linear(90, ['#c026d3', '#d946ef'])" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="600" y1="830" x2="600" y2="1060" strokewidth="20" linecap="round" linejoin="round" stroke="linear(90, ['#db2777', '#ec4899'])" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="850" y1="830" x2="850" y2="1060" strokewidth="40" linecap="round" linejoin="round" stroke="linear(90, ['#e11d48', '#f43f5e'])" arrowend="auto" arrowstyle="line"></pxl-line>
+
+      <!-- ========================================== -->
+      <!-- SECTION 4: ASYMMETRICAL & EXTREME SIZES    -->
+      <!-- ========================================== -->
+      <pxl-text x="500" y="1140" text="'SECTION 4: ASYMMETRIC / EXTREMES'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+
+      <pxl-text x="100" y="1190" text="'Massive Arrow, Thin Stroke'" size="14" fill="#aaa" align="left"></pxl-text>
+      <pxl-line x1="400" y1="1185" x2="900" y2="1185" strokewidth="2" linecap="square" stroke="linear(0, ['#ca8a04', '#facc15'])" arrowend="80" arrowstyle="filled"></pxl-line>
+
+      <pxl-text x="100" y="1250" text="'Tiny Arrow, Massive Stroke'" size="14" fill="#aaa" align="left"></pxl-text>
+      <pxl-line x1="400" y1="1245" x2="900" y2="1245" strokewidth="30" linecap="round" linejoin="round" stroke="linear(0, ['#eab308', '#fef08a'])" arrowend="15" arrowstyle="line"></pxl-line>
+
+      <pxl-text x="100" y="1310" text="'Dual-Ended, Different Sizes'" size="14" fill="#aaa" align="left"></pxl-text>
+      <pxl-line x1="400" y1="1305" x2="900" y2="1305" strokewidth="10" linecap="square" stroke="linear(0, ['#f59e0b', '#fbbf24'])" arrowstart="15" arrowend="60" arrowstyle="filled"></pxl-line>
+
+      <!-- ========================================== -->
+      <!-- SECTION 5: ANIMATION STRESS TEST           -->
+      <!-- ========================================== -->
+      <pxl-text x="500" y="1400" text="'SECTION 5: 60FPS ANIMATION STRESS TEST'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+
+      <pxl-text x="250" y="1450" text="'Growing/Shrinking Arrows'" size="14" font="system-ui" fill="#aaa" align="center"></pxl-text>
+      <pxl-group x="250" y="1580" rotate="-90">
+        <pxl-line x1="-100" y1="-50" x2="100" y2="-50" strokewidth="6" linecap="round" stroke="#10b981" arrowend="5 + wave(1)*40" arrowstyle="filled"></pxl-line>
+        <pxl-line x1="-100" y1="0" x2="100" y2="0" strokewidth="6" linecap="round" stroke="#14b8a6" arrowend="5 + wave(1.2)*40" arrowstyle="filled"></pxl-line>
+        <pxl-line x1="-100" y1="50" x2="100" y2="50" strokewidth="6" linecap="round" stroke="#06b6d4" arrowend="5 + wave(1.4)*40" arrowstyle="filled"></pxl-line>
+      </pxl-group>
+
+      <pxl-text x="750" y="1450" text="'Orbiting & Tangents'" size="14" font="system-ui" fill="#aaa" align="center"></pxl-text>
+      <pxl-line x1="750" y1="1600" x2="750 + cos(t * 3) * 80" y2="1600 + sin(t * 3) * 80" strokewidth="8" linecap="round" linejoin="round" stroke="#f59e0b" arrowend="20" arrowstyle="line"></pxl-line>
+      <pxl-line x1="750" y1="1600" x2="750 + cos(-t * 2.5) * 120" y2="1600 + sin(-t * 2.5) * 120" strokewidth="8" linecap="square" stroke="#ec4899" arrowstart="30" arrowend="30" arrowstyle="filled"></pxl-line>
+
+      <!-- ========================================== -->
+      <!-- SECTION 6: THE STARBURST                   -->
+      <!-- ========================================== -->
+      <pxl-text x="500" y="1750" text="'SECTION 6: GRADIENT STARBURST'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+      <pxl-group x="500" y="1950" rotate="t * 15">
+        <pxl-line x1="0" y1="0" x2="180" y2="0" strokewidth="2" linecap="square" stroke="hsl(t * 50, 100%, 50%)" arrowend="20 + wave(1)*10" arrowstyle="filled"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="180" y2="0" rotate="45" strokewidth="4" linecap="round" stroke="hsl(t * 50 + 45, 100%, 50%)" arrowend="auto" arrowstyle="line" linejoin="round"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="180" y2="0" rotate="90" strokewidth="6" linecap="square" stroke="hsl(t * 50 + 90, 100%, 50%)" arrowend="auto" arrowstyle="filled"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="180" y2="0" rotate="135" strokewidth="8" linecap="round" stroke="hsl(t * 50 + 135, 100%, 50%)" arrowend="auto" arrowstyle="line" linejoin="round"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="180" y2="0" rotate="180" strokewidth="10" linecap="butt" stroke="hsl(t * 50 + 180, 100%, 50%)" arrowend="40 + wave(2)*15" arrowstyle="filled"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="180" y2="0" rotate="225" strokewidth="8" linecap="round" stroke="hsl(t * 50 + 225, 100%, 50%)" arrowend="auto" arrowstyle="line" linejoin="round"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="180" y2="0" rotate="270" strokewidth="6" linecap="square" stroke="hsl(t * 50 + 270, 100%, 50%)" arrowend="auto" arrowstyle="filled"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="180" y2="0" rotate="315" strokewidth="4" linecap="round" stroke="hsl(t * 50 + 315, 100%, 50%)" arrowend="auto" arrowstyle="line" linejoin="round"></pxl-line>
+      </pxl-group>
+
+      <!-- ========================================== -->
+      <!-- SECTION 7: IDEAL PROPORTIONS               -->
+      <!-- ========================================== -->
+      <pxl-text x="500" y="2150" text="'SECTION 7: IDEAL AESTHETIC PROPORTIONS'" size="20" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+      <pxl-text x="500" y="2180" text="'Stroke: 5px  |  Arrow: auto  (3.6x Ratio)'" size="14" font="monospace" fill="#aaa" align="center"></pxl-text>
+      
+      <pxl-line x1="300" y1="2220" x2="700" y2="2220" strokewidth="5" linecap="round" linejoin="round" stroke="linear(0, ['#10b981', '#3b82f6'])" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="300" y1="2270" x2="700" y2="2270" strokewidth="5" linecap="round" linejoin="round" stroke="linear(0, ['#f59e0b', '#ef4444'])" arrowstart="auto" arrowend="auto" arrowstyle="line"></pxl-line>
+
+      <pxl-text x="500" y="2400" text="'(END OF TEST)'" size="14" font="system-ui" fill="#333" align="center"></pxl-text>
+
+    </pxl-layer>
+  </pxl-stage>
+</body>
+</html>

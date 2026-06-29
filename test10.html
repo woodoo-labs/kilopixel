@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test 10 - Dashes and Gradients</title>
+  <style>
+    body {
+      background: #030305;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    pxl-stage {
+      width: 100%;
+      max-width: 1200px;
+      border: 1px solid #222;
+      background: #050508;
+      border-radius: 12px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Test 10: Dashes & Gradient Strokes</h2>
+
+  <pxl-stage id="main" ratio="16 / 9">
+    <pxl-layer>
+      <pxl-text x="20" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms | MAX: ' + ref.main.renderMax + 'ms'" font="monospace" size="14" fill="#0f0"></pxl-text>
+
+      <!-- Row 1: Static Dashes -->
+      <pxl-text x="500" y="80" text="'STATIC DASHES'" size="16" fill="#aaa" align="center"></pxl-text>
+      
+      <pxl-circle x="300" y="150" r="40" fill="none" stroke="#00f2ff" strokewidth="4" linedash="[10, 10]"></pxl-circle>
+      <pxl-rect x="700" y="150" w="80" h="80" fill="none" stroke="#ff0055" strokewidth="4" linedash="[20, 5, 5, 5]" r="10" r3="40"></pxl-rect>
+
+      <!-- Row 2: Animated Dashes -->
+      <pxl-text x="500" y="250" text="'ANIMATED DASHES (Marching Ants)'" size="16" fill="#aaa" align="center"></pxl-text>
+      
+      <pxl-circle x="300" y="320" r="40" fill="rgba(0, 242, 255, 0.1)" stroke="#00f2ff" strokewidth="4" linedash="[15, 15]" dashoffset="t * 100"></pxl-circle>
+      <pxl-rect x="700" y="320" w="80" h="80" fill="rgba(255, 0, 85, 0.1)" stroke="#ff0055" strokewidth="4" linedash="[15, 15]" dashoffset="t * -100" r1="40" r3="40"></pxl-rect>
+
+      <!-- Row 3: Gradients for Lines -->
+      <pxl-text x="500" y="420" text="'GRADIENT STROKES WITH DASHES'" size="16" fill="#aaa" align="center"></pxl-text>
+      
+      <pxl-circle x="300" y="490" r="40" fill="none" 
+        stroke="linear([0,0, 1,1], ['#00f2ff', '#ff0055'])" 
+        strokewidth="8" linedash="[20, 10]" dashoffset="t * 80">
+      </pxl-circle>
+      
+      <pxl-rect x="700" y="490" w="80" h="80" fill="none" 
+        stroke="radial([0.5,0.5, 1.2], ['#a200ff', '#ff0055'])" 
+        strokewidth="8" linedash="[5, 15]" dashoffset="t * -80"
+        linejoin="round" r="10">
+      </pxl-rect>
+
+      <!-- Centerpiece: Rotating Group with dashed gradients -->
+      <pxl-group x="500" y="330" rotate="t * 45">
+        <pxl-circle r="80" fill="none" stroke="linear([0,0.5, 1,0.5], ['#ff0055', '#a200ff', '#00f2ff'])" strokewidth="6" linedash="[30, 20, 5, 20]" dashoffset="t * 150"></pxl-circle>
+        <pxl-rect w="110" h="110" fill="none" stroke="linear([0.5,0, 0.5,1], [0, '#00f2ff', 0.8, '#a200ff', 1, '#ff0055'])" strokewidth="4" linedash="[10, 10]" dashoffset="t * -100"></pxl-rect>
+      </pxl-group>
+
+    </pxl-layer>
+  </pxl-stage>
+
+  <script src="dist/pxl.min.js"></script>
+</body>
+</html>

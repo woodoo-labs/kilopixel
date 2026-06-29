@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neural Synapse - Fixed</title>
+    <style>
+      body { margin: 0; background-color: #050508; color: #00f2ff; font-family: monospace; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
+      .container { width: 95%; max-width: 1200px; border: 1px solid rgba(0, 242, 255, 0.2); background: #000; position: relative; }
+      .ui-overlay { position: absolute; top: 20px; left: 20px; pointer-events: none; z-index: 10; }
+      h1 { position: absolute; bottom: 20px; right: 30px; margin: 0; font-weight: 100; letter-spacing: 20px; font-size: 24px; opacity: 0.4; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div class="ui-overlay">
+      <div style="font-size: 10px; letter-spacing: 4px; opacity: 0.6;">SYSTEM_SYNC</div>
+      <div style="font-size: 18px; font-weight: bold; text-shadow: 0 0 10px #00f2ff;">STABLE_NODE_V3</div>
+    </div>
+    
+    <h1>SYNAPSE</h1>
+
+    <div class="container">
+      <pxl-stage id="main" ratio="16 / 9">
+        
+        <!-- LAYER 1: GRID DEPTH -->
+        <pxl-layer>
+          <pxl-rect x="500" y="281" w="1000" h="562" fill="#050508"></pxl-rect>
+          
+          <pxl-group x="500" y="281">
+            <!-- Grid lines using precise spacing to prevent "pop" flickering -->
+            <pxl-line x1="-500" y1="-300+loop(4)*100" x2="500" y2="-300+loop(4)*100" stroke="rgba(0,242,255,0.1)" strokewidth="1"></pxl-line>
+            <pxl-line x1="-500" y1="-200+loop(4)*100" x2="500" y2="-200+loop(4)*100" stroke="rgba(0,242,255,0.1)" strokewidth="1"></pxl-line>
+            <pxl-line x1="-500" y1="-100+loop(4)*100" x2="500" y2="-100+loop(4)*100" stroke="rgba(0,242,255,0.1)" strokewidth="1"></pxl-line>
+            <pxl-line x1="-500" y1="0+loop(4)*100" x2="500" y2="0+loop(4)*100" stroke="rgba(0,242,255,0.1)" strokewidth="1"></pxl-line>
+            <pxl-line x1="-500" y1="100+loop(4)*100" x2="500" y2="100+loop(4)*100" stroke="rgba(0,242,255,0.1)" strokewidth="1"></pxl-line>
+            <pxl-line x1="-500" y1="200+loop(4)*100" x2="500" y2="200+loop(4)*100" stroke="rgba(0,242,255,0.1)" strokewidth="1"></pxl-line>
+          </pxl-group>
+        </pxl-layer>
+
+        <!-- LAYER 2: INTERFACE CORE -->
+        <pxl-layer>
+          <pxl-group x="500" y="281">
+            <pxl-circle r="80+0*wave(2)*10" stroke="rgba(0,242,255,0.3)" strokewidth="1" fill="none"></pxl-circle>
+            
+            <!-- Mechanical logic: rotate="t*1" ensures the math engine is triggered -->
+            <pxl-group rotate="t*0.05">
+               <pxl-rect x="115" y="0" w="6" h="6" rotate="t" fill="#00f2ff"></pxl-rect>
+               <pxl-rect x="-115" y="0" w="6" h="6" rotate="t" fill="#00f2ff"></pxl-rect>
+               <pxl-line x1="-115" y1="0" x2="115" y2="0" stroke="rgba(0,242,255,0.2)" strokewidth="1"></pxl-line>
+            </pxl-group>
+
+            <!-- Cleaned up Polylines (No trailing semicolons) -->
+            <pxl-polyline points="-400,wave(3)*60;-200,wave(2)*-40;0,wave(4)*80;200,wave(2)*-40;400,wave(3)*60" 
+                          stroke="rgba(0,242,255,0.5)" fill="none" strokewidth="2"></pxl-polyline>
+            
+            <pxl-polyline points="-400,wave(3.5)*-60;-200,wave(2.5)*40;0,wave(4.5)*-80;200,wave(2.5)*40;400,wave(3.5)*-60" 
+                          stroke="rgba(255,0,255,0.2)" fill="none" strokewidth="1"></pxl-polyline>
+          </pxl-group>
+
+          <!-- Floating Scanner -->
+          <pxl-group id="scanner" x="500+yoyo(5)*200-100" y="281+wave(7)*80-40">
+            <pxl-circle r="3" fill="#fff" stroke="#00f2ff" strokewidth="1"></pxl-circle>
+            <pxl-text text="'POS_SCAN: X' + floor(ref.scanner.x) + ' Y' + floor(ref.scanner.y)" x="10" y="-10" size="10" fill="#00f2ff"></pxl-text>
+          </pxl-group>
+        </pxl-layer>
+
+        <!-- LAYER 3: HUD ELEMENTS -->
+        <pxl-layer>
+           <pxl-group x="100" y="281">
+             <pxl-polyline points="15,-100;0,-100;0,100;15,100" stroke="#00f2ff" strokewidth="2" fill="none"></pxl-polyline>
+             <pxl-rect x="0" y="yoyo(3)*160-80" w="10" h="2" fill="#fff"></pxl-rect>
+           </pxl-group>
+
+           <pxl-group x="900" y="281">
+             <pxl-polyline points="-15,-100;0,-100;0,100;-15,100" stroke="#00f2ff" strokewidth="2" fill="none"></pxl-polyline>
+             <pxl-rect x="0" y="yoyo(3)*-160+80" w="10" h="2" fill="#fff"></pxl-rect>
+           </pxl-group>
+
+           <!-- Fixed glitch text -->
+           <pxl-text x="500" y="60" 
+                     text="'LATENCY_MONITOR: ' + ref.main.renderAvg + 'ms'" 
+                     size="11" align="center" fill="#00f2ff"
+                     dx="glitch(0.1)*4-2">
+           </pxl-text>
+        </pxl-layer>
+
+      </pxl-stage>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="dist/pxl.min.js"></script>
+  </body>
+</html>

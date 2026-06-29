@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Demo 3: Magnetic Grid</title>
+  <style>
+    body { background: #111; margin: 0; padding: 20px; font-family: sans-serif; color: white; display: flex; flex-direction: column; align-items: center; }
+    pxl-stage { max-width: 1000px; width: 100%; border: 1px solid #333; border-radius: 8px; overflow: hidden; background: #000; cursor: crosshair; }
+    h1 { font-size: 24px; font-weight: 300; margin-bottom: 5px; }
+    p { color: #aaa; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Magnetic Grid</h1>
+  <p>Every single circle calculates its own distance to the mouse to dynamically swell up natively.</p>
+
+  <pxl-stage id="main" ratio="16 / 9">
+    <pxl-layer id="gridLayer">
+      <!-- Circles will be injected here -->
+    </pxl-layer>
+
+    <!-- Performance Monitor -->
+    <pxl-layer>
+      <pxl-text x="20" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms | MAX: ' + ref.main.renderMax + 'ms'" font="monospace" size="14" fill="#0f0"></pxl-text>
+    </pxl-layer>
+  </pxl-stage>
+
+  <!-- We use a tiny script to generate the HTML tags, but the engine handles the live math! -->
+  <script>
+    const gridLayer = document.getElementById('gridLayer');
+    let html = '';
+    
+    // Create a dense grid of circles
+    for (let x = 40; x <= 960; x += 40) {
+      for (let y = 40; y <= 560; y += 40) {
+        // The magic math: 
+        // 1. Calculate Manhattan distance: abs(ref.main.mouseX - x) + abs(ref.main.mouseY - y)
+        // 2. Divide by 8 to scale the effect
+        // 3. Clamp it so the circles don't become negative radius
+        // 4. Subtract from 25 so they get BIGGER when distance is SMALLER.
+        const mathExpr = `25 - clamp((abs(ref.main.mouseX - ${x}) + abs(ref.main.mouseY - ${y})) / 8, 0, 23)`;
+        
+        html += `<pxl-circle x="${x}" y="${y}" r="${mathExpr}" fill="#ff0055"></pxl-circle>`;
+      }
+    }
+    gridLayer.innerHTML = html;
+  </script>
+
+  <script src="dist/pxl.min.js"></script>
+</body>
+</html>
