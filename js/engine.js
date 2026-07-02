@@ -13,6 +13,10 @@ pxl.removeFromArray = function(arr, item) {
   }
 };
 
+pxl.sortByDOMPosition = function(a, b) {
+  return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_PRECEDING) ? 1 : -1;
+};
+
 // =========================================================================
 // Reactivity Engine
 // =========================================================================
@@ -136,3 +140,18 @@ pxl.restoreVariableSubscriptions = function(element) {
     }
   }
 };
+
+// =========================================================================
+// Declarative Event System (Dummy Context)
+// =========================================================================
+const dummyCanvas = document.createElement('canvas');
+dummyCanvas.width = 1;
+dummyCanvas.height = 1;
+pxl.dummyCtx = dummyCanvas.getContext('2d');
+pxl._hitX = 0;
+pxl._hitY = 0;
+pxl._hitResult = false;
+
+// Global interceptors - these never trigger GC!
+pxl.dummyCtx.fill = function() { if (this.isPointInPath(pxl._hitX, pxl._hitY)) pxl._hitResult = true; };
+pxl.dummyCtx.stroke = function() { if (this.isPointInStroke(pxl._hitX, pxl._hitY)) pxl._hitResult = true; };

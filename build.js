@@ -60,6 +60,10 @@ function build() {
     // 5. Clean up temp file
     fs.unlinkSync(tempPath);
 
+    // 6. Create generic pxl.min.js alias for tests
+    const aliasPath = path.join(distDir, 'pxl.min.js');
+    fs.copyFileSync(outputPath, aliasPath);
+
     // Calculate sizes
     const minifiedCode = fs.readFileSync(outputPath, 'utf8');
     const originalSize = (Buffer.byteLength(code, 'utf8') / 1024).toFixed(2);

@@ -56,9 +56,9 @@ Object.defineProperty(this.attributeValues, 'set', {
 Shapes must recognize the new attributes, compile them immediately, and register themselves with the stage's interactive registry.
 
 **Code Changes:**
-1. Update `observedAttributes` in `Shape` base class to include `'onclick'`, `'onhover'`, `'onleave'`.
-2. In `constructor`: Initialize `this._compiledOnClick`, `this._compiledOnHover`, `this._compiledOnLeave` to `null`.
-3. In `connectedCallback`: Define `this.stage = this.parentLayer?.stage;` to gain access to the root stage.
+1. Update `observedAttributes` in `Shape` base class to include `'onclick'`, `'onhover'`, `'onleave'`, `'ondown'`, `'onup'`, `'onmove'`.
+2. In `constructor`: Initialize `this._compiledOnClick`, `this._compiledOnHover`, etc. to `null`.
+3. In `connectedCallback`: Define `this.stage = this.closest('pxl-stage');` to gain access to the root stage. Check if any `_compiledOn*` exists, and if so, register to `this.stage._interactiveElements`.
 4. In `disconnectedCallback`: Safely unregister from `this.stage._interactiveElements`.
 5. Intercept event attributes in `attributeChangedCallback` before they hit `pxl.compileAttribute`:
 
@@ -67,18 +67,21 @@ Shapes must recognize the new attributes, compile them immediately, and register
     if (oldValue === newValue) return;
 
     // --- NEW EVENT INTERCEPTION ---
-    if (name === 'onclick' || name === 'onhover' || name === 'onleave') {
+    if (name === 'onclick' || name === 'onhover' || name === 'onleave' || name === 'ondown' || name === 'onup' || name === 'onmove') {
       let sanitizedStr = newValue.replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.');
-      const compiled = new Function('scope', 'ref', \`
-        const { \${pxl.scopeKeys} } = scope;
+      const compiled = new Function('scope', 'ref', `
+        const { ${pxl.scopeKeys} } = scope;
         return function() { 
-          \${sanitizedStr} 
+          ${sanitizedStr} 
         };
-      \`)(pxl.scope, pxl.nodes).bind(this);
+      `)(pxl.scope, pxl.nodes).bind(this);
 
       if (name === 'onclick') this._compiledOnClick = compiled;
       if (name === 'onhover') this._compiledOnHover = compiled;
       if (name === 'onleave') this._compiledOnLeave = compiled;
+      if (name === 'ondown')  this._compiledOnDown = compiled;
+      if (name === 'onup')    this._compiledOnUp = compiled;
+      if (name === 'onmove')  this._compiledOnMove = compiled;
       
       if (this.stage && !this.stage._interactiveElements.includes(this)) {
         this.stage._interactiveElements.push(this);
@@ -105,8 +108,12 @@ The stage manages the pre-allocated stacks and runs the actual geometry intersec
    - `this._hoveredElements = [];` (Zero-GC replacement for Set)
    - `this._hitStack = new Array(50);` (Pre-allocated DOM-walk array)
    - `this._lastClick = false;`
-2. Add `click` listener in `connectedCallback`, and route it through `handleEvent(e)` by simply setting `this._lastClick = true; this.requestRender();`.
-3. Call `this.processHitTesting()` at the very end of `render(t)` (just before performance telemetry), and reset `this._lastClick = false`.
+   - `this._lastDown = false;`
+   - `this._lastUp = false;`
+   - `this._lastMove = false;`
+2. Add `click` and `pointer*` listeners in `connectedCallback`, and route them through `handleEvent(e)`. 
+   - On `click`/`down`/`up`/`move`: set respective boolean flags to true and call `this.requestRender()` if `this._interactiveElements.length > 0` to ensure interaction works even when reactive layers are asleep.
+3. Call `this.processHitTesting()` at the very end of `render(t)` (just before performance telemetry).
 
 **New Method (`processHitTesting`):**
 ```javascript
@@ -116,58 +123,58 @@ The stage manages the pre-allocated stacks and runs the actual geometry intersec
     if (len === 0) return;
 
     if (this.isInteractiveOrderDirty) {
-      elements.sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_PRECEDING) ? 1 : -1);
+      elements.sort(pxl.sortByDOMPosition || ((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_PRECEDING) ? 1 : -1));
       this.isInteractiveOrderDirty = false;
     }
 
     const ctx = pxl.dummyCtx;
-    pxl._hitX = this.attributeValues.mouseX; // Logical coordinates
+    pxl._hitX = this.attributeValues.mouseX;
     pxl._hitY = this.attributeValues.mouseY;
 
     let hitEl = null;
 
-    // 1. Find topmost hit
-    for (let i = len - 1; i >= 0; i--) {
-      const el = elements[i];
-      if (!el.draw) continue;
-      
-      let curr = el;
-      let isHidden = false;
-      let stackLen = 0;
+    if (this.attributeValues.isHovered) {
+      for (let i = len - 1; i >= 0; i--) {
+        const el = elements[i];
+        if (!el.draw) continue;
+        
+        let curr = el;
+        let isHidden = false;
+        let stackLen = 0;
 
-      while (curr && curr !== this) {
-        if (curr.attributeValues) {
-          if (curr.attributeValues.hidden) {
-            isHidden = true;
-            break; // Parent is hidden, skip entirely
+        while (curr && curr !== this) {
+          if (curr.attributeValues) {
+            if (curr.attributeValues.hidden) {
+              isHidden = true;
+              break;
+            }
+            this._hitStack[stackLen++] = curr;
           }
-          this._hitStack[stackLen++] = curr;
+          curr = curr.parentElement;
         }
-        curr = curr.parentElement;
-      }
 
-      if (isHidden) continue;
+        if (isHidden) continue;
 
-      ctx.save();
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-      // Apply transformations top-down
-      for (let j = stackLen - 1; j >= 0; j--) {
-        pxl.applyContextState(ctx, this.unit, this._hitStack[j].attributeValues);
-      }
+        for (let j = stackLen - 1; j >= 0; j--) {
+          pxl.applyContextState(ctx, this.unit, this._hitStack[j].attributeValues);
+        }
 
-      pxl._hitResult = false;
-      ctx.beginPath();
-      el.draw(ctx, this.unit, 0);
-      ctx.restore();
+        pxl._hitResult = false;
+        ctx.beginPath();
+        el.draw(ctx, this.unit, 0);
+        ctx.restore();
 
-      if (pxl._hitResult) {
-        hitEl = el;
-        break; // Topmost element found!
+        if (pxl._hitResult) {
+          hitEl = el;
+          break;
+        }
       }
     }
 
-    // 2. Process Leaves (Zero-GC diffing)
+    // Process Leaves
     for (let i = this._hoveredElements.length - 1; i >= 0; i--) {
       const prevHovered = this._hoveredElements[i];
       if (prevHovered !== hitEl) {
@@ -176,18 +183,27 @@ The stage manages the pre-allocated stacks and runs the actual geometry intersec
       }
     }
 
-    // 3. Process Hovers
+    // Process Hovers
     if (hitEl && !this._hoveredElements.includes(hitEl)) {
       this._hoveredElements.push(hitEl);
       if (hitEl._compiledOnHover) hitEl._compiledOnHover();
     }
 
-    // 4. Update Cursor
+    // Update Cursor
     this.style.cursor = hitEl ? 'pointer' : 'default';
 
-    // 5. Process Clicks
-    if (this._lastClick && hitEl && hitEl._compiledOnClick) {
-      hitEl._compiledOnClick();
+    // Process interactions
+    if (hitEl) {
+      if (this._lastMove && hitEl._compiledOnMove) hitEl._compiledOnMove();
+      if (this._lastClick && hitEl._compiledOnClick) hitEl._compiledOnClick();
+      if (this._lastDown && hitEl._compiledOnDown) hitEl._compiledOnDown();
+      if (this._lastUp && hitEl._compiledOnUp) hitEl._compiledOnUp();
     }
+
+    // Reset event flags
+    this._lastMove = false;
+    this._lastClick = false;
+    this._lastDown = false;
+    this._lastUp = false;
   }
 ```

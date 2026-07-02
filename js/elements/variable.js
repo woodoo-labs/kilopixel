@@ -5,6 +5,7 @@ class Variable extends HTMLElement {
     super();
     this.attributeExpressions = { value: 0 };
     this.attributeValues = { value: 0 };
+    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
     this.animatedAttributeKeys = [];
     this.reactiveAttributeKeys = [];
   }

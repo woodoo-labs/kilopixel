@@ -1,7 +1,7 @@
 // TODO
 // Cache Paths?
 class Shape extends HTMLElement {
-  static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'filter', 'hidden']; }
+  static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'filter', 'hidden', 'onclick', 'onhover', 'onleave', 'ondown', 'onup', 'onmove']; }
 
   constructor() {
     super();
@@ -10,6 +10,7 @@ class Shape extends HTMLElement {
     this.isAnimated = false;
     this.attributeExpressions = { x: 0, y: 0, dx: 0, dy: 0, fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false };
     this.attributeValues = { ...this.attributeExpressions };
+    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
     
     // Pre-allocated bounding box object (zero-GC)
     this.boundingBox = { left: 0, right: 0, top: 0, bottom: 0 };
@@ -25,10 +26,41 @@ class Shape extends HTMLElement {
     this.reactiveAttributeKeys = []; // On-demand variable bucket
     
     this._emptyDash = []; // Zero-GC empty linedash
+    
+    this._compiledOnClick = null;
+    this._compiledOnHover = null;
+    this._compiledOnLeave = null;
+    this._compiledOnDown = null;
+    this._compiledOnUp = null;
+    this._compiledOnMove = null;
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
+    
+    if (name === 'onclick' || name === 'onhover' || name === 'onleave' || name === 'ondown' || name === 'onup' || name === 'onmove') {
+      let sanitizedStr = newValue.replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.');
+      const compiled = new Function('scope', 'ref', `
+        const { ${pxl.scopeKeys} } = scope;
+        return function() { 
+          ${sanitizedStr} 
+        };
+      `)(pxl.scope, pxl.nodes).bind(this);
+
+      if (name === 'onclick') this._compiledOnClick = compiled;
+      if (name === 'onhover') this._compiledOnHover = compiled;
+      if (name === 'onleave') this._compiledOnLeave = compiled;
+      if (name === 'ondown')  this._compiledOnDown = compiled;
+      if (name === 'onup')    this._compiledOnUp = compiled;
+      if (name === 'onmove')  this._compiledOnMove = compiled;
+      
+      if (this.stage && !this.stage._interactiveElements.includes(this)) {
+        this.stage._interactiveElements.push(this);
+        this.stage.isInteractiveOrderDirty = true;
+      }
+      return;
+    }
+
     pxl.compileAttribute(this, name, newValue);
     this.isAnimated = this.animatedAttributeKeys.length > 0;
     if (this._refKey) pxl.broadcast(this._refKey);
@@ -36,11 +68,19 @@ class Shape extends HTMLElement {
   }
 
   connectedCallback() {
+    this.stage = this.closest('pxl-stage');
     this.parentLayer = this.closest('pxl-layer');
     this.parentContainer = this.parentElement.closest('pxl-group, pxl-layer');
     this.parentContainer?.registerChild(this);
     pxl.restoreVariableSubscriptions(this);
     
+    if (this._compiledOnClick || this._compiledOnHover || this._compiledOnLeave || this._compiledOnDown || this._compiledOnUp || this._compiledOnMove) {
+      if (this.stage && !this.stage._interactiveElements.includes(this)) {
+        this.stage._interactiveElements.push(this);
+        this.stage.isInteractiveOrderDirty = true;
+      }
+    }
+
     if (this.id) {
       pxl.nodes[this.id] = this.attributeValues;
       this._refKey = `ref.${this.id}`;
@@ -55,6 +95,9 @@ class Shape extends HTMLElement {
     }
     pxl.clearAllVariableSubscriptions(this);
     this.parentContainer?.unregisterChild(this);
+    if (this.stage) {
+      pxl.removeFromArray(this.stage._interactiveElements, this);
+    }
   }
 
   variableChangedCallback(varName) {
