@@ -243,6 +243,19 @@ Fixed logical width of 1000 → dynamic `u` scaling gives you:
 
 test04 proves this works at 50×50 pixels. The benchmark proves it works at full-screen 4K.
 
+### 5. Dual-Architecture Interaction Engine
+
+The framework manages all pointer events natively through a unified hit-testing loop (`processHitTesting`), mapping interactions seamlessly across both mouse and touch devices. It exposes this via a strict dual-architecture:
+
+1. **Declarative States (`isHovered`, `isPressed`)**
+   - Automatically updated boolean states injected directly into shape attributes.
+   - Triggers targeted re-renders only for elements that mathematically depend on them.
+   - Ideal for styling and CSS-like transitions: `scale="ref.btn.isPressed ? 0.95 : (ref.btn.isHovered ? 1.05 : 1)"`
+2. **Imperative Events (`onenter`, `onleave`, `ondown`, `onup`, `onclick`, `onmove`)**
+   - Instantaneous blocks of javascript compiled and attached to the element.
+   - Used for complex logic, mutating variables, or triggering external state.
+   - Example: `onclick="ref.val1.set('value', 100)"`
+
 ---
 
 ## Elements: The Scene Graph

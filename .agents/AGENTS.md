@@ -58,4 +58,19 @@
   - Stage Properties: `<pxl-stage id="main">` ➔ `ref.main.mouseX`
     - Built-in properties: `mouseX`, `mouseY`, `isHovered`, `width` (always 1000), `height` (dynamic based on ratio), `fps`, `renderAvg`, `renderMax`.
   - Shape Properties: `<pxl-circle id="player">` ➔ `ref.player.x`
+    - Built-in states: `isHovered`, `isPressed`. Example: `scale="ref.btn.isPressed ? 0.9 : (ref.btn.isHovered ? 1.1 : 1)"`
   - Layer Properties: `<pxl-layer id="bg">` ➔ *Note: Layer property referencing is planned but not fully implemented yet.*
+
+## Dual-Architecture for Interactions
+The framework uses a strict dual-architecture for handling mouse/touch input. The engine handles all inputs seamlessly for both Mouse and Touch screens natively via standard pointer events.
+
+1. **Declarative States (Used for Styling)**
+   - Continuous boolean properties automatically updated by the framework.
+   - Used directly in mathematical expressions (e.g., `fill="ref.btn.isHovered ? 'red' : 'blue'"`).
+   - **`isHovered`**: True while the pointer is over the element.
+   - **`isPressed`**: True while the pointer is held down on the element.
+2. **Imperative Events (Used for Logic/Scripting)**
+   - Instantaneous actions evaluated natively as JavaScript blocks.
+   - Used to execute logic, mutate variables, or drive algorithms (e.g., `onclick="ref.val1.set('value', 100)"`).
+   - Available events: `onenter`, `onleave`, `ondown`, `onup`, `onclick`, `onmove`.
+   - *Note:* Do not use `onhover`, it was renamed to `onenter`.

@@ -197,8 +197,8 @@ pxl.compileExpression = function (str) {
     }
 
     // 3. OPTIONAL CHAINING INJECTOR: Safely convert ref.player.x to ref.player?.x
-    // This prevents fatal TypeErrors during initial evaluation or typos, returning undefined/NaN gracefully.
-    // (Optional chaining injector removed because pxl.nodes is now a Proxy returning fallback {})
+    // This prevents fatal TypeErrors during initial eager evaluation before elements are connected to the DOM.
+    sanitizedStr = sanitizedStr.replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.');
 
     // Detect 60fps timeline drivers
     const isAnimated = this.timeDriverRegex.test(sanitizedStr);

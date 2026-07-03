@@ -10,6 +10,7 @@ class Stage extends HTMLElement {
     this._interactiveElements = [];
     this.isInteractiveOrderDirty = false;
     this._hoveredElements = [];
+    this._pressedElement = null;
     this._hitStack = new Array(50);
     this._lastClick = false;
     this._lastDown = false;
@@ -249,15 +250,19 @@ class Stage extends HTMLElement {
     for (let i = this._hoveredElements.length - 1; i >= 0; i--) {
       const prevHovered = this._hoveredElements[i];
       if (prevHovered !== hitEl) {
+        prevHovered.attributeValues.isHovered = false;
+        if (prevHovered._refKey) pxl.broadcast(prevHovered._refKey);
         if (prevHovered._compiledOnLeave) prevHovered._compiledOnLeave();
         pxl.removeFromArray(this._hoveredElements, prevHovered);
       }
     }
 
-    // Process Hovers
+    // Process Enters
     if (hitEl && !this._hoveredElements.includes(hitEl)) {
       this._hoveredElements.push(hitEl);
-      if (hitEl._compiledOnHover) hitEl._compiledOnHover();
+      hitEl.attributeValues.isHovered = true;
+      if (hitEl._refKey) pxl.broadcast(hitEl._refKey);
+      if (hitEl._compiledOnEnter) hitEl._compiledOnEnter();
     }
 
     // Update Cursor
@@ -266,8 +271,22 @@ class Stage extends HTMLElement {
     if (hitEl) {
       if (this._lastMove && hitEl._compiledOnMove) hitEl._compiledOnMove();
       if (this._lastClick && hitEl._compiledOnClick) hitEl._compiledOnClick();
-      if (this._lastDown && hitEl._compiledOnDown) hitEl._compiledOnDown();
-      if (this._lastUp && hitEl._compiledOnUp) hitEl._compiledOnUp();
+      
+      if (this._lastDown) {
+        hitEl.attributeValues.isPressed = true;
+        this._pressedElement = hitEl;
+        if (hitEl._refKey) pxl.broadcast(hitEl._refKey);
+        if (hitEl._compiledOnDown) hitEl._compiledOnDown();
+      }
+    }
+
+    if (this._lastUp) {
+      if (this._pressedElement) {
+        this._pressedElement.attributeValues.isPressed = false;
+        if (this._pressedElement._refKey) pxl.broadcast(this._pressedElement._refKey);
+        this._pressedElement = null;
+      }
+      if (hitEl && hitEl._compiledOnUp) hitEl._compiledOnUp();
     }
 
     // Reset event flags
