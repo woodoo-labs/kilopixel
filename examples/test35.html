@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kilopixel - Minimal Static Grid</title>
+    <script src="../dist/pxl.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #111;
+            color: white;
+            font-family: sans-serif;
+            overflow: hidden;
+        }
+
+        h1 {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            margin: 0;
+            pointer-events: none;
+        }
+
+        p {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            z-index: 10;
+            margin: 0;
+            pointer-events: none;
+            max-width: 400px;
+            line-height: 1.5;
+            color: #ccc;
+        }
+
+        #container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        pxl-stage {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Minimal Static Grid</h1>
+    <p>A simple, static grid using all default values. Notice how it perfectly fills the screen!</p>
+
+    <div id="container">
+        <pxl-stage id="stage" ratio="auto">
+            <pxl-layer id="layer" x="400" y="0" rotate="45">
+
+                <!-- Minimal Setup Grid -->
+                <!-- Uses ALL default values (spacing=50, dynamic bounds, faint white stroke) -->
+                <pxl-grid id="grid"></pxl-grid>
+
+                <!-- FPS Monitor -->
+                <pxl-text x="20" y="110" text="ref.stage.fps + ' FPS | AVG: ' + ref.stage.renderAvg + 'ms'"
+                    font="monospace" size="14" fill="#0f0" align="left" stroke="none"></pxl-text>
+
+            </pxl-layer>
+        </pxl-stage>
+    </div>
+
+</body>
+
+</html>

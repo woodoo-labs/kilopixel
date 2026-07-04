@@ -5,7 +5,7 @@ class Layer extends HTMLElement {
     super();
     this.childList = []; // Groups or shapes
     this.isOrderDirty = false; // Tracks if children need sorting
-    this.attributeExpressions = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false };
+    this.attributeExpressions = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false, fps: 0 };
     this.attributeValues = { ...this.attributeExpressions };
     Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
 

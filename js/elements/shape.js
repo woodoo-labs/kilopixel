@@ -11,6 +11,7 @@ class Shape extends HTMLElement {
     this.attributeExpressions = { x: 0, y: 0, dx: 0, dy: 0, fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false, isHovered: false, isPressed: false };
     this.attributeValues = { ...this.attributeExpressions };
     Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
+    Object.defineProperty(this.attributeValues, '_el', { value: this, enumerable: false, writable: false });
     
     // Pre-allocated bounding box object (zero-GC)
     this.boundingBox = { left: 0, right: 0, top: 0, bottom: 0 };
@@ -35,6 +36,13 @@ class Shape extends HTMLElement {
     this._compiledOnMove = null;
   }
 
+  makeInteractive() {
+    if (this.stage && !this.stage._interactiveElements.includes(this)) {
+      this.stage._interactiveElements.push(this);
+      this.stage.isInteractiveOrderDirty = true;
+    }
+  }
+
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
     
@@ -54,10 +62,7 @@ class Shape extends HTMLElement {
       if (name === 'onup')    this._compiledOnUp = compiled;
       if (name === 'onmove')  this._compiledOnMove = compiled;
       
-      if (this.stage && !this.stage._interactiveElements.includes(this)) {
-        this.stage._interactiveElements.push(this);
-        this.stage.isInteractiveOrderDirty = true;
-      }
+      this.makeInteractive();
       return;
     }
 
@@ -74,13 +79,10 @@ class Shape extends HTMLElement {
     this.parentContainer?.registerChild(this);
     pxl.restoreVariableSubscriptions(this);
     
-    if (this._compiledOnClick || this._compiledOnEnter || this._compiledOnLeave || this._compiledOnDown || this._compiledOnUp || this._compiledOnMove) {
-      if (this.stage && !this.stage._interactiveElements.includes(this)) {
-        this.stage._interactiveElements.push(this);
-        this.stage.isInteractiveOrderDirty = true;
-      }
+    if (this._compiledOnClick || this._compiledOnEnter || this._compiledOnLeave || this._compiledOnDown || this._compiledOnUp || this._compiledOnMove || (this.id && pxl.hitTestRequestedIds.has(this.id))) {
+      this.makeInteractive();
     }
-
+    
     if (this.id) {
       pxl.nodes[this.id] = this.attributeValues;
       this._refKey = `ref.${this.id}`;
@@ -165,14 +167,20 @@ class Shape extends HTMLElement {
       return styleValue;
     }
 
-    // Zero-Allocation Gradient Cache
-    if (this._lastGradientConfig === styleValue && this._lastGradientU === u) {
-      return this._cachedGradient;
-    }
-
     const box = this.getBoundingBox();
     const width = box.right - box.left;
     const height = box.bottom - box.top;
+
+    // Zero-Allocation Gradient Cache
+    if (this._lastGradientConfig === styleValue && 
+        this._lastGradientU === u &&
+        this._lastBoxWidth === width &&
+        this._lastBoxHeight === height &&
+        this._lastBoxLeft === box.left &&
+        this._lastBoxTop === box.top) {
+      return this._cachedGradient;
+    }
+
     const cx = (box.left + box.right) / 2;
     const cy = (box.top + box.bottom) / 2;
 
@@ -208,7 +216,7 @@ class Shape extends HTMLElement {
     } else if (styleValue.type === 'radial') {
       const rx = (box.left + width * styleValue.cx) * u;
       const ry = (box.top + height * styleValue.cy) * u;
-      const radius = (Math.max(width, height) / 2) * styleValue.r * u;
+      const radius = (Math.max(Math.abs(width), Math.abs(height)) / 2) * styleValue.r * u;
       
       grad = ctx.createRadialGradient(rx, ry, 0, rx, ry, radius);
       
@@ -222,6 +230,10 @@ class Shape extends HTMLElement {
     if (grad) {
       this._lastGradientConfig = styleValue;
       this._lastGradientU = u;
+      this._lastBoxWidth = width;
+      this._lastBoxHeight = height;
+      this._lastBoxLeft = box.left;
+      this._lastBoxTop = box.top;
       this._cachedGradient = grad;
       return grad;
     }

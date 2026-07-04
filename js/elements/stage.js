@@ -152,6 +152,7 @@ class Stage extends HTMLElement {
   requestRender() {
     if (this.isSizePending || this.isUpdatePending) return;
     this.isUpdatePending = true;
+    pxl.perf?.wakeUp();
     requestAnimationFrame(this.frameCallback);
   }
 
@@ -173,7 +174,10 @@ class Stage extends HTMLElement {
     const len = this.layers.length;
     for (let i = 0; i < len; i++) {
       const layer = this.layers[i];
-      if (layer.isDirty) layer.render(this.unit, t);
+      if (layer.isDirty) {
+        layer.render(this.unit, t);
+        layer.perfFrames = (layer.perfFrames || 0) + 1;
+      }
     }
 
     const ms = performance.now() - start;
@@ -182,11 +186,6 @@ class Stage extends HTMLElement {
     this.perfFrames++;
 
     this.processHitTesting();
-
-    if (pxl.perf && start - pxl.perf.lastUpdate >= 1000) {
-      pxl.perf.lastUpdate = start;
-      pxl.perf.publish();
-    }
   }
 
   processHitTesting() {

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting Started - Kilopixel</title>
+  <meta name="description" content="Learn how to install and start using the Kilopixel framework.">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <a href="index.html" class="logo">Kilo<span>pixel</span></a>
+    <button class="menu-toggle">☰</button>
+    <a href="https://github.com" class="github-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </header>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">Introduction</a></li>
+          <li><a href="getting-started.html">Getting Started</a></li>
+          <li><a href="architecture.html">Architecture</a></li>
+          <li><a href="coordinate-system.html">Coordinate System</a></li>
+          <li><a href="elements-shapes.html">Elements & Shapes</a></li>
+          <li><a href="reactivity-events.html">Reactivity & Events</a></li>
+          <li><a href="expressions-math.html">Expressions & Math</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <h1>Getting Started</h1>
+      
+      <p>Kilopixel is designed to be completely frictionless. There are no build tools, bundlers, or complicated initializations required. It works instantly in any modern browser.</p>
+
+      <h2>Installation</h2>
+      <p>Simply include the minified script in the <code>&lt;head&gt;</code> of your HTML file:</p>
+
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;My Scene&lt;/title&gt;
+  &lt;script src="pxl.min.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;!-- Your Scene goes here --&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <h2>Your First Scene</h2>
+      <p>Every Kilopixel graphic starts with a Stage, which manages the underlying Canvas element. Inside the stage, you add Layers, and inside Layers, you add Shapes.</p>
+
+      <pre><code>&lt;!-- 1. Define the Stage --&gt;
+&lt;pxl-stage id="main"&gt;
+  
+  &lt;!-- 2. Define a rendering context --&gt;
+  &lt;pxl-layer&gt;
+    
+    &lt;!-- 3. Add a shape --&gt;
+    &lt;pxl-circle 
+      x="500" 
+      y="500" 
+      radius="100" 
+      fill="red" 
+    /&gt;
+    
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+      <h2>Adding Animation</h2>
+      <p>Attributes aren't just static strings—they evaluate mathematical expressions at 60 frames per second. The engine exposes a time variable <code>t</code> (in seconds) and built-in drivers like <code>wave()</code>.</p>
+
+      <p>Let's make our circle breathe and change color dynamically:</p>
+
+      <pre><code>&lt;pxl-circle 
+  x="500" 
+  y="500" 
+  radius="100 + wave(2) * 50" 
+  fill="t % 2 &lt; 1 ? 'red' : 'blue'" 
+/&gt;</code></pre>
+
+      <ul>
+        <li><code>wave(2)</code> returns a sine wave oscillating between -1 and 1 over a 2-second period.</li>
+        <li><code>t</code> represents the time in seconds since the stage started rendering.</li>
+      </ul>
+
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Architecture - Kilopixel</title>
+  <meta name="description" content="Learn about the scene graph, reactivity, and performance optimizations.">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <a href="index.html" class="logo">Kilo<span>pixel</span></a>
+    <button class="menu-toggle">☰</button>
+    <a href="https://github.com" class="github-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </header>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">Introduction</a></li>
+          <li><a href="getting-started.html">Getting Started</a></li>
+          <li><a href="architecture.html">Architecture</a></li>
+          <li><a href="coordinate-system.html">Coordinate System</a></li>
+          <li><a href="elements-shapes.html">Elements & Shapes</a></li>
+          <li><a href="reactivity-events.html">Reactivity & Events</a></li>
+          <li><a href="expressions-math.html">Expressions & Math</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <h1>Architecture & Performance</h1>
+      
+      <p>Kilopixel isn't just a wrapper around the Canvas API; it's a <strong>multi-tier compiled reactivity engine</strong>. It is built with zero-GC (Garbage Collection) patterns to ensure a consistent 60fps framerate without stuttering.</p>
+
+      <h2>The Scene Graph</h2>
+      <p>A Kilopixel scene consists of a specific hierarchy:</p>
+      <ul>
+        <li><strong><code>&lt;pxl-stage&gt;</code> (The Root Container)</strong>: Owns the <code>requestAnimationFrame</code> loop, creates a base <code>&lt;canvas&gt;</code> in the Shadow DOM, and monitors pointer events and screen resizing.</li>
+        <li><strong><code>&lt;pxl-layer&gt;</code> (Compositing Units)</strong>: Each layer owns its own isolated <code>&lt;canvas&gt;</code> and is placed absolutely over the stage. This enables independent clearing, <code>hidden</code> optimizations, and blending.</li>
+        <li><strong><code>&lt;pxl-group&gt;</code> (Transform Containers)</strong>: Does <em>not</em> own a canvas. It draws into its parent's context. Groups can nest infinitely, adding their transforms to the stack.</li>
+        <li><strong>Shapes (The Primitives)</strong>: <code>&lt;pxl-circle&gt;</code>, <code>&lt;pxl-rect&gt;</code>, <code>&lt;pxl-polyline&gt;</code>, etc. These actually execute the drawing commands.</li>
+      </ul>
+
+      <h2>Performance: The Three-Tier Compiler</h2>
+      <p>In a typical animated scene, 60-70% of the attributes on elements are entirely static (e.g., <code>fill="red"</code>, <code>radius="30"</code>).</p>
+      <p>Kilopixel features a <strong>Fast Path Compiler</strong> that classifies expressions progressively. It checks: Hex Colors → CSS Functions → Booleans → Numbers → Words → Expressions → Code Blocks.</p>
+      <p>If an attribute is static (like a number or hex color), the framework pays <strong>zero runtime evaluation cost</strong> for it. Dynamic mathematical expressions are wrapped into highly optimized inner closures evaluated each frame.</p>
+
+      <h2>Performance: Dirty-Flag Rendering</h2>
+      <p>The engine only renders what needs to be rendered:</p>
+      <ul>
+        <li>If a layer has no animated attributes and no internal state changes, it pays <strong>zero per-frame render cost</strong>.</li>
+        <li>Only layers flagged as <code>isDirty = true</code> are cleared and re-drawn.</li>
+        <li>If a layer is <code>hidden</code> and already cleared, it completely skips the render pipeline.</li>
+      </ul>
+
+      <h2>Performance: Zero-GC Patterns</h2>
+      <p>To prevent the browser's Garbage Collector from pausing your animations, the core rendering loop reuses objects rather than allocating new ones:</p>
+      <ul>
+        <li><strong>Array Management:</strong> Subscriber lists and coordinate caches use flat arrays and <code>Float32Arrays</code>, manipulated in-place.</li>
+        <li><strong>Bounding Boxes:</strong> Shape bounding boxes are pre-allocated objects that are mutated directly instead of being recreated.</li>
+        <li><strong>Gradients:</strong> Gradient descriptors are lightweight objects, and actual <code>CanvasGradient</code> instances are heavily cached across frames.</li>
+      </ul>
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Gradient Cache Bug Fix</title>
+  <style>
+    body { background-color: #111; color: #fff; padding: 50px; font-family: sans-serif; }
+    #container { width: 800px; height: 600px; background: #000; border: 1px solid #333; }
+  </style>
+</head>
+<body>
+  <h2>Gradient Cache Bounding Box Test</h2>
+  <p>The rectangle's width animates, changing its bounding box. The static gradient correctly stretches with it!</p>
+  <div id="container">
+    <pxl-stage id="main">
+      <pxl-layer id="bg">
+        <!-- 
+          The width is animated using a time driver (wave). 
+          The gradient configuration is static (doesn't use t).
+          If the cache bug was active, the gradient would stay stuck at the original width!
+        -->
+        <pxl-rect 
+          x="400" 
+          y="300" 
+          w="200 + wave(2) * 400" 
+          h="100" 
+          fill="linear([0, 0, 1, 0], ['red', 'blue'])">
+        </pxl-rect>
+        
+        <pxl-text x="400" y="230" text="'Watch the red and blue stretch perfectly with the edges!'" size="16" fill="#fff" align="center"></pxl-text>
+      </pxl-layer>
+    </pxl-stage>
+  </div>
+  
+  <script src="../dist/pxl.min.js"></script>
+</body>
+</html>

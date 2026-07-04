@@ -19,6 +19,7 @@ const files = [
   'js/elements/shapes/line.js',
   'js/elements/shapes/polyline.js',
   'js/elements/shapes/text.js',
+  'js/elements/shapes/grid.js',
   'js/elements/variable.js'
 ];
 

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reactivity & Events - Kilopixel</title>
+  <meta name="description" content="Learn how Kilopixel's zero-GC reactivity and dual-architecture interaction engine works.">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <a href="index.html" class="logo">Kilo<span>pixel</span></a>
+    <button class="menu-toggle">☰</button>
+    <a href="https://github.com" class="github-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </header>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">Introduction</a></li>
+          <li><a href="getting-started.html">Getting Started</a></li>
+          <li><a href="architecture.html">Architecture</a></li>
+          <li><a href="coordinate-system.html">Coordinate System</a></li>
+          <li><a href="elements-shapes.html">Elements & Shapes</a></li>
+          <li><a href="reactivity-events.html">Reactivity & Events</a></li>
+          <li><a href="expressions-math.html">Expressions & Math</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <h1>Reactivity and Events</h1>
+      
+      <p>Kilopixel is fully reactive. Changes to elements, mouse movements, or custom variables instantly update the scene.</p>
+
+      <h2>The <code>ref.</code> Registry</h2>
+      <p>The framework completely avoids expensive DOM traversal. All elements with an <code>id</code> attribute are automatically registered in an O(1) zero-GC registry.</p>
+      <p>You can reference the properties of any element by prefixing it with <code>ref.</code>.</p>
+      <p><strong>The Golden Rule:</strong> If you want to reference something in math, give it an HTML <code>id</code>.</p>
+
+      <pre><code>&lt;pxl-stage id="main"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- The 'leader' circle tracks the mouse --&gt;
+    &lt;pxl-circle id="leader" x="ref.main.mouseX" y="ref.main.mouseY" radius="50" /&gt;
+    
+    &lt;!-- The 'follower' tracks the leader! --&gt;
+    &lt;pxl-circle x="ref.leader.x" y="ref.leader.y" radius="20" fill="red" /&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+      <p><em>The engine tracks these dependencies automatically. Re-evaluations only happen when the referenced element actually updates.</em></p>
+
+      <h3>Default Stage Properties</h3>
+      <p>If your stage is <code>&lt;pxl-stage id="main"&gt;</code>, you automatically have access to:</p>
+      <ul>
+        <li><code>ref.main.mouseX</code> / <code>ref.main.mouseY</code></li>
+        <li><code>ref.main.isHovered</code></li>
+        <li><code>ref.main.width</code> (always 1000)</li>
+        <li><code>ref.main.height</code> (dynamic based on aspect ratio)</li>
+        <li><code>ref.main.fps</code> (current frames per second)</li>
+      </ul>
+
+      <h3><code>&lt;pxl-var&gt;</code> User Variables</h3>
+      <p>You can declare custom reactive variables in HTML:</p>
+      <pre><code>&lt;pxl-var id="speed" value="50"&gt;&lt;/pxl-var&gt;
+
+&lt;pxl-circle rotate="t * ref.speed.value" /&gt;</code></pre>
+
+      <h2>Dual-Architecture Interaction Engine</h2>
+      <p>Kilopixel uses a seamless dual-architecture for handling pointer inputs across Mouse and Touch devices natively.</p>
+
+      <h3>1. Declarative States (For Styling)</h3>
+      <p>These are continuous boolean properties automatically updated by the framework. They are ideal for hover effects and visual feedback inside math expressions.</p>
+      <ul>
+        <li><code>isHovered</code>: True while the pointer is over the shape.</li>
+        <li><code>isPressed</code>: True while the pointer is held down on the shape.</li>
+      </ul>
+
+      <pre><code>&lt;pxl-rect 
+  id="btn" 
+  fill="ref.btn.isPressed ? 'red' : (ref.btn.isHovered ? 'blue' : 'gray')" 
+  scale="ref.btn.isPressed ? 0.9 : 1"
+/&gt;</code></pre>
+
+      <h3>2. Imperative Events (For Logic)</h3>
+      <p>Instantaneous actions that evaluate natively as JavaScript blocks. These are used to mutate variables, execute logic, or trigger state changes.</p>
+      <ul>
+        <li>Available events: <code>onenter</code>, <code>onleave</code>, <code>ondown</code>, <code>onup</code>, <code>onclick</code>, <code>onmove</code>.</li>
+        <li><em>(Note: Do not use <code>onhover</code>, use <code>onenter</code> instead).</em></li>
+      </ul>
+
+      <pre><code>&lt;!-- Clicking the button updates the variable --&gt;
+&lt;pxl-rect 
+  onclick="ref.speed.set('value', ref.speed.value + 10)" 
+/&gt;</code></pre>
+
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

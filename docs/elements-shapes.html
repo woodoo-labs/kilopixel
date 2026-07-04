@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elements & Shapes - Kilopixel</title>
+  <meta name="description" content="Reference for all built-in HTML custom tags in the Kilopixel framework.">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <a href="index.html" class="logo">Kilo<span>pixel</span></a>
+    <button class="menu-toggle">☰</button>
+    <a href="https://github.com" class="github-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </header>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">Introduction</a></li>
+          <li><a href="getting-started.html">Getting Started</a></li>
+          <li><a href="architecture.html">Architecture</a></li>
+          <li><a href="coordinate-system.html">Coordinate System</a></li>
+          <li><a href="elements-shapes.html">Elements & Shapes</a></li>
+          <li><a href="reactivity-events.html">Reactivity & Events</a></li>
+          <li><a href="expressions-math.html">Expressions & Math</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <h1>Elements and Shapes</h1>
+      
+      <p>Kilopixel provides a comprehensive set of declarative HTML elements representing a scene graph and drawing primitives.</p>
+
+      <h2>The Scene Graph</h2>
+
+      <h3><code>&lt;pxl-stage&gt;</code></h3>
+      <p>The root container. You can have multiple independent stages on a single webpage.</p>
+      <ul>
+        <li><code>ratio</code> (default <code>16/9</code>): Sets the CSS aspect ratio of the stage.</li>
+        <li><code>id</code>: Required if you want to reference the stage properties (e.g., <code>id="main"</code>).</li>
+      </ul>
+
+      <h3><code>&lt;pxl-layer&gt;</code></h3>
+      <p>A compositing layer that owns its own <code>&lt;canvas&gt;</code>.</p>
+      <ul>
+        <li>Extremely efficient. If a layer is static, it doesn't re-render.</li>
+        <li>Support blend modes, filters, and global opacity.</li>
+        <li>Layers are stacked in their DOM order.</li>
+      </ul>
+
+      <h3><code>&lt;pxl-group&gt;</code></h3>
+      <p>A nestable container for transforms.</p>
+      <ul>
+        <li>Groups do <em>not</em> own a canvas; they draw directly into their parent layer's canvas.</li>
+        <li>Transforms (<code>rotate</code>, <code>scale</code>, <code>dx</code>, <code>dy</code>) and opacity (<code>alpha</code>) compound down the hierarchy.</li>
+      </ul>
+
+      <hr style="border: 1px solid rgba(255,255,255,0.1); margin: 3rem 0;">
+
+      <h2>Shape Primitives</h2>
+      
+      <p>All shapes share common properties: <code>x</code>, <code>y</code>, <code>dx</code>, <code>dy</code>, <code>rotate</code>, <code>scale</code>, <code>alpha</code>, <code>fill</code>, <code>stroke</code>, <code>linewidth</code>, <code>linedash</code>, <code>filter</code>, <code>blend</code>.</p>
+
+      <h3><code>&lt;pxl-circle&gt;</code></h3>
+      <p>Draws circles, arcs, pies, and donuts.</p>
+      <ul>
+        <li><strong>Attributes:</strong> <code>r</code> (radius), <code>ir</code> (inner radius for donuts), <code>start</code> & <code>end</code> (angles in degrees for arcs), <code>sweep</code>, <code>pie</code>, <code>arrowstart/end/style</code>.</li>
+      </ul>
+
+      <h3><code>&lt;pxl-ellipse&gt;</code></h3>
+      <p>Like a circle, but with independent x/y radii.</p>
+      <ul>
+        <li><strong>Attributes:</strong> <code>rx</code>, <code>ry</code>, <code>irx</code>, <code>iry</code>, plus all arc and pie attributes from circle.</li>
+      </ul>
+
+      <h3><code>&lt;pxl-rect&gt;</code></h3>
+      <p>Draws rectangles with advanced corner radiuses and anchoring.</p>
+      <ul>
+        <li><strong>Attributes:</strong> <code>w</code> (width), <code>h</code> (height), <code>anchor</code> (9-position system: center, topleft, bottom, etc.).</li>
+        <li><strong>Corner Radii:</strong> <code>r</code> (all corners) or <code>r1</code>, <code>r2</code>, <code>r3</code>, <code>r4</code> for individual corners.</li>
+      </ul>
+
+      <h3><code>&lt;pxl-line&gt;</code></h3>
+      <p>Draws a straight line between two points.</p>
+      <ul>
+        <li><strong>Attributes:</strong> <code>x1</code>, <code>y1</code>, <code>x2</code>, <code>y2</code>, <code>repeat</code> (for line tiling), <code>arrowstart/end/style</code>.</li>
+      </ul>
+
+      <h3><code>&lt;pxl-polyline&gt;</code></h3>
+      <p>Draws a series of connected points, with optional Catmull-Rom smoothing.</p>
+      <ul>
+        <li><strong>Attributes:</strong> <code>points</code> (comma-separated list), <code>closed</code>, <code>smooth</code>, <code>mode</code> (relative/absolute).</li>
+        <li><strong>Per-Coordinate Animation:</strong> When you bind an expression to <code>points</code>, each individual coordinate value (<code>p0</code>, <code>p1</code>, <code>p2</code>...) is compiled independently, allowing for highly complex morphing and kinematics.</li>
+      </ul>
+
+      <h3><code>&lt;pxl-text&gt;</code></h3>
+      <p>A highly capable text rendering engine.</p>
+      <ul>
+        <li><strong>Attributes:</strong> <code>text</code>, <code>size</code>, <code>font</code>, <code>align</code>, <code>baseline</code>, <code>weight</code>, <code>fontstyle</code>.</li>
+        <li><strong>Advanced Features:</strong> <code>width</code> triggers auto word-wrapping, <code>letterspacing</code> and <code>lineheight</code> can be animated, and <code>reveal</code> takes a value from 0 to 1 for a typewriter effect.</li>
+      </ul>
+
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

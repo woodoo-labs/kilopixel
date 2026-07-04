@@ -141,6 +141,7 @@ pxl.restoreVariableSubscriptions = function(element) {
   }
 };
 
+
 // =========================================================================
 // Declarative Event System (Dummy Context)
 // =========================================================================
@@ -151,6 +152,7 @@ pxl.dummyCtx = dummyCanvas.getContext('2d');
 pxl._hitX = 0;
 pxl._hitY = 0;
 pxl._hitResult = false;
+pxl.hitTestRequestedIds = new Set();
 
 // Global interceptors - these never trigger GC!
 pxl.dummyCtx.fill = function() { if (this.isPointInPath(pxl._hitX, pxl._hitY)) pxl._hitResult = true; };

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kilopixel - Grid Helper</title>
+    <script src="../dist/pxl.min.js"></script>
+    <style>
+        body { margin: 0; padding: 0; background: #111; color: white; font-family: sans-serif; overflow: hidden; }
+        h1 { position: absolute; top: 20px; left: 20px; z-index: 10; margin: 0; pointer-events: none; }
+        p { position: absolute; top: 60px; left: 20px; z-index: 10; margin: 0; pointer-events: none; max-width: 400px; line-height: 1.5; color: #ccc;}
+        #container { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        pxl-stage { width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+    <h1>Grid Helper</h1>
+    <p>Demonstrating a global background grid, and a nested rotating grid that inherits local coordinate space.</p>
+
+    <div id="container">
+        <pxl-stage id="stage" ratio="auto">
+            
+            <!-- Global Background Grid -->
+            <!-- Uses dynamic height bounds automatically to fill the screen -->
+            <pxl-layer>
+                <pxl-grid 
+                    spacing="100" 
+                    numbers="false"
+                    stroke="rgba(255, 255, 255, 0.1)"
+                    strokewidth="1"
+                />
+            </pxl-layer>
+
+            <!-- Nested Group (Rotated) -->
+            <!-- Grid inherits the exact 500x500 pivot and rotation from the group -->
+            <pxl-layer>
+                <pxl-group x="500" y="ref.stage.height / 2" rotate="t * 20">
+                    
+                    <!-- Local Grid -->
+                    <pxl-grid 
+                        spacing="50"
+                        bounds="500"
+                        numbers="false"
+                        stroke="rgba(0, 255, 204, 0.3)"
+                        strokewidth="2"
+                    />
+
+                    <!-- Shapes placed using the local grid -->
+                    <pxl-circle x="100" y="0" radius="20" fill="#00ffcc" />
+                    <pxl-circle x="-100" y="0" radius="20" fill="#00ffcc" />
+                    <pxl-rect x="0" y="100" w="40" h="40" rotate="t * -40" fill="#ff00cc" />
+                    <pxl-rect x="0" y="-100" w="40" h="40" rotate="t * -40" fill="#ff00cc" />
+                    
+                    <!-- Center indicator -->
+                    <pxl-circle x="0" y="0" radius="5" fill="white" />
+                </pxl-group>
+
+                <!-- FPS Monitor -->
+                <pxl-text x="20" y="30" text="ref.stage.fps + ' FPS | AVG: ' + ref.stage.renderAvg + 'ms | MAX: ' + ref.stage.renderMax + 'ms'" font="monospace" size="14" fill="#0f0" align="left" stroke="none"></pxl-text>
+            </pxl-layer>
+
+        </pxl-stage>
+    </div>
+
+</body>
+</html>

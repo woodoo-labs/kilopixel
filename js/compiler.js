@@ -205,11 +205,17 @@ pxl.compileExpression = function (str) {
 
     // Extract reactive variable dependencies
     const deps = [];
-    const varRegex = /\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
+    const varRegex = /\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)(?:\?\.)?(isHovered|isPressed)?/g;
     let match;
     while ((match = varRegex.exec(sanitizedStr)) !== null) {
       const fullKey = `ref.${match[1]}`;
       if (!deps.includes(fullKey)) deps.push(fullKey);
+      
+      if (match[2]) {
+        pxl.hitTestRequestedIds.add(match[1]);
+        const nodeAttr = pxl.nodes[match[1]];
+        if (nodeAttr && nodeAttr._el) nodeAttr._el.makeInteractive();
+      }
     }
     const hasVars = deps.length > 0;
 

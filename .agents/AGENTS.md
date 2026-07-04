@@ -6,10 +6,6 @@
 - **EXPLORATION PHASE**: Assume you only have READ access during the exploration/planning phase. Do not attempt to write code until the user explicitly approves your preview.
 - **Code Previews Over Strict Plans**: An exhaustive implementation plan is not always necessary. For many tasks, presenting a preview of the code changes (e.g., using code blocks or a diff) is preferred so the user can see exactly what will be modified. Use full implementation plans only for complex, multi-file architectural changes.
 
-## Ignored Files and Directories
-- **Ignore `00 Backup`**: Completely ignore the `00 Backup` folder. Do not read, write, search, or index files inside this directory.
-- **Ignore files starting with underscore**: Completely ignore all files starting with an underscore (e.g., `_*`). Do not read, write, search, or index these files.
-
 ## Dependency Management
 - **No Local node_modules**: Do NOT install packages or create a `node_modules` directory in the project folder. If a node package is required for debugging or development (e.g. `jsdom`, `terser`), it MUST be installed globally (`npm install -g <package>`) or run dynamically via `npx`.
 
@@ -17,7 +13,7 @@
 - **Run Build Script**: Always run `node build.js` ONLY after modifying JavaScript files (e.g., inside the `js/` directory). Do not run the build script if only `.html`, `.md`, or non-source files were changed.
 
 ## Project Context
-- **Framework Overview**: This project is a custom "Declarative Canvas Framework" (`pixel`) that allows building HTML5 Canvas graphics using custom HTML elements like `<pxl-stage>`, `<pxl-layer>`, `<pxl-group>`, and shape elements (`<pxl-circle>`, `<pxl-rect>`, etc.).
+- **Framework Overview**: This project is a custom "Declarative Canvas Framework" (`Kilopixel`) that allows building HTML5 Canvas graphics using custom HTML elements like `<pxl-stage>`, `<pxl-layer>`, `<pxl-group>`, and shape elements (`<pxl-circle>`, `<pxl-rect>`, `<pxl-grid>`, etc.).
 - **Dynamic Attributes**: Element attributes support inline JavaScript expressions and built-in animation functions (e.g., `wave()`, `glide()`, `t` for time). These are evaluated at runtime to animate properties.
 - **Coordinate System (CRITICAL)**: 
   - `x` and `y` define the absolute position and act as the **Pivot Point / Center** of the element. Transformations like `rotate` and `scale` occur around this `x/y` origin.
@@ -59,7 +55,7 @@
     - Built-in properties: `mouseX`, `mouseY`, `isHovered`, `width` (always 1000), `height` (dynamic based on ratio), `fps`, `renderAvg`, `renderMax`.
   - Shape Properties: `<pxl-circle id="player">` ➔ `ref.player.x`
     - Built-in states: `isHovered`, `isPressed`. Example: `scale="ref.btn.isPressed ? 0.9 : (ref.btn.isHovered ? 1.1 : 1)"`
-  - Layer Properties: `<pxl-layer id="bg">` ➔ *Note: Layer property referencing is planned but not fully implemented yet.*
+  - Layer Properties: `<pxl-layer id="bg">` ➔ `ref.bg.x`
 
 ## Dual-Architecture for Interactions
 The framework uses a strict dual-architecture for handling mouse/touch input. The engine handles all inputs seamlessly for both Mouse and Touch screens natively via standard pointer events.
@@ -74,3 +70,16 @@ The framework uses a strict dual-architecture for handling mouse/touch input. Th
    - Used to execute logic, mutate variables, or drive algorithms (e.g., `onclick="ref.val1.set('value', 100)"`).
    - Available events: `onenter`, `onleave`, `ondown`, `onup`, `onclick`, `onmove`.
    - *Note:* Do not use `onhover`, it was renamed to `onenter`.
+
+3. **Automatic Interaction Registration (CRITICAL)**
+   - You do **NOT** need to manually add `interactive="true"` or any other flag to shapes. 
+   - The compiler uses an eager regex to scan for `isHovered`, `isPressed`, or any `on*` events in expressions. If found, it automatically upgrades the shape to be interactive behind the scenes.
+
+## Zero-GC Performance Rules
+1. **Layer FPS vs. Stage Render Times**:
+   - `fps` is tracked independently on layers (e.g. `ref.layer1.fps`).
+   - `renderAvg` and `renderMax` are tracked strictly on the stage (e.g. `ref.main.renderAvg`).
+   - **Never** add `performance.now()` calls inside the 60fps layer render loop. V8 returns doubles from C++ bindings by allocating `HeapNumber` objects. Calling it in a loop across multiple layers causes massive GC allocation leaks.
+2. **Zero-CPU Heartbeats**:
+   - If a background loop is ever needed (like the performance monitor), it MUST self-terminate when the engine goes to sleep.
+   - Use a recursive `setTimeout` pattern that checks if the engine is idle and stops scheduling itself, guaranteeing absolute 0% CPU usage when the app is asleep. Avoid infinite `setInterval` loops.

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expressions & Math - Kilopixel</title>
+  <meta name="description" content="Guide to Kilopixel's 60fps mathematical evaluation engine, smart returns, and colors.">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <a href="index.html" class="logo">Kilo<span>pixel</span></a>
+    <button class="menu-toggle">☰</button>
+    <a href="https://github.com" class="github-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </header>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">Introduction</a></li>
+          <li><a href="getting-started.html">Getting Started</a></li>
+          <li><a href="architecture.html">Architecture</a></li>
+          <li><a href="coordinate-system.html">Coordinate System</a></li>
+          <li><a href="elements-shapes.html">Elements & Shapes</a></li>
+          <li><a href="reactivity-events.html">Reactivity & Events</a></li>
+          <li><a href="expressions-math.html">Expressions & Math</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <h1>Expressions and Math</h1>
+      
+      <p>Kilopixel properties aren't just strings; they are highly optimized mathematical expressions evaluated directly by a custom compiler at 60 frames per second.</p>
+
+      <h2>Smart Returns</h2>
+      <p>Any string passed to an attribute that evaluates math will automatically be wrapped in a <code>return</code> statement by the engine.</p>
+      
+      <h3>Simple Expressions</h3>
+      <pre><code>&lt;pxl-rect fill="t % 2 &lt; 1 ? 'red' : 'blue'" /&gt;</code></pre>
+      
+      <h3>Full Blocks</h3>
+      <p>If your string explicitly contains the word <code>return</code>, the compiler allows you to write full JavaScript block logic:</p>
+      <pre><code>&lt;pxl-rect fill="if (t % 2 &lt; 1) { return 'red'; } else { return 'blue'; }" /&gt;</code></pre>
+      <p><em>(Note: Strings inside JS expressions must be quoted, e.g., <code>text="'Hello'"</code>).</em></p>
+
+      <h2>Animation Time (<code>t</code>)</h2>
+      <p>The framework provides a global <code>t</code> variable.</p>
+      <ul>
+        <li><strong><code>t</code> is ALWAYS evaluated in Seconds</strong>, not milliseconds.</li>
+        <li>For example, <code>t * 60</code> means a rate of 60 per second (e.g., 60 degrees of rotation per second).</li>
+      </ul>
+
+      <h2>Built-In Time Drivers</h2>
+      <p>Kilopixel includes built-in oscillators and time drivers to make animations effortless. Because these drivers internally handle time in seconds, you can just pass them the frequency you want:</p>
+      <ul>
+        <li><code>wave(freq)</code>: Sine wave oscillating between -1 and 1. <code>wave(2)</code> completes a cycle every 2 seconds.</li>
+        <li><code>glide(freq)</code>: Smooth ease-in-out ping-pong animation between 0 and 1.</li>
+        <li><code>bounce(freq)</code>: Bouncing motion between 0 and 1.</li>
+        <li><code>loop(freq)</code>: Linear loop from 0 to 1.</li>
+        <li><code>yoyo(freq)</code>: Linear ping-pong between 0 and 1.</li>
+        <li><code>pulse(freq)</code>: Spiky ping-pong animation.</li>
+        <li><code>strobe(freq)</code>: Blinking boolean logic.</li>
+        <li><code>glitch(freq)</code>: Random noise / jumping values.</li>
+      </ul>
+
+      <h2>Colors & Gradients</h2>
+      <p>The engine injects global JavaScript functions for handling colors safely without needing template literals: <code>hsl</code>, <code>hsla</code>, <code>rgb</code>, <code>rgba</code>, <code>linear</code>, and <code>radial</code>.</p>
+      <p>Because they use parentheses, they bypass the Fast Path string checker and are safely evaluated dynamically at 60fps. They NEVER need backticks.</p>
+
+      <h3>1. <code>hsl(h, s, l)</code> and <code>hsla(h, s, l, a)</code></h3>
+      <p>Perfect for color cycling:</p>
+      <pre><code>&lt;pxl-circle fill="hsl(t * 50, 100, 50)" /&gt;</code></pre>
+
+      <h3>2. Linear Gradients</h3>
+      <ul>
+        <li><code>linear(angle, ['color1', 'color2'])</code>: Linear angles use true CSS geometry. An angle (like <code>45</code>) will push gradient endpoints outside the bounding box if necessary to maintain the physical line angle.</li>
+        <li><code>linear([x1, y1, x2, y2], ['color1', 'color2'])</code>: Explicit coordinates are proportional to the shape's bounding box. <code>0</code> is the top/left edge and <code>1</code> is the bottom/right edge.</li>
+      </ul>
+
+      <h3>3. Radial Gradients</h3>
+      <ul>
+        <li><code>radial(radius, ['color1', 'color2'])</code>: Radius is relative to bounds. Use <code>1</code> to stretch to the edge (not <code>0.5</code>).</li>
+        <li><code>radial([cx, cy, r], ['color1', 'color2'])</code>: Explicit center coordinates and radius overrides.</li>
+      </ul>
+
+      <h3>4. Color Stops</h3>
+      <p>Color arrays can be simple <code>['red', 'blue']</code> or explicitly offset-mapped: <code>[0, 'red', 1, 'blue']</code></p>
+      <p>Because evaluation happens at 60fps, returning a new array literal on every frame is perfectly fine!</p>
+
+      <h2>Filters & Template Literals</h2>
+      <p>The Fast Path intercepts static filters (like <code>filter="drop-shadow(0 0 10px red)"</code>) and returns them as strings instantly. This is extremely fast and bug-free.</p>
+      <p>However, because of the Fast Path, <strong>you cannot put raw math directly inside a static filter string</strong>. To animate a filter, you MUST wrap the entire attribute in JavaScript backticks to force evaluation:</p>
+
+      <pre><code>&lt;!-- Correct way to animate a filter: --&gt;
+&lt;pxl-circle filter="`drop-shadow(0 0 ${wave(2)*15}px red)`" /&gt;</code></pre>
+
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

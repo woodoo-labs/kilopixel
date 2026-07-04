@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coordinate System - Kilopixel</title>
+  <meta name="description" content="Understanding Kilopixel's pivot, offset, and responsive scaling coordinate system.">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <a href="index.html" class="logo">Kilo<span>pixel</span></a>
+    <button class="menu-toggle">☰</button>
+    <a href="https://github.com" class="github-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </header>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">Introduction</a></li>
+          <li><a href="getting-started.html">Getting Started</a></li>
+          <li><a href="architecture.html">Architecture</a></li>
+          <li><a href="coordinate-system.html">Coordinate System</a></li>
+          <li><a href="elements-shapes.html">Elements & Shapes</a></li>
+          <li><a href="reactivity-events.html">Reactivity & Events</a></li>
+          <li><a href="expressions-math.html">Expressions & Math</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <h1>The Coordinate System</h1>
+      
+      <p>Understanding Kilopixel's coordinate system is essential for creating complex animations without fighting the math. The engine handles transformations natively through a unique dual-coordinate approach and a responsive unit scaling system.</p>
+
+      <h2>Pivot + Offset Architecture</h2>
+      <p>Unlike traditional canvas contexts where you have to explicitly <code>ctx.translate()</code>, <code>ctx.rotate()</code>, and <code>ctx.translate()</code> back, Kilopixel natively splits position into <strong>Pivot</strong> and <strong>Offset</strong>.</p>
+
+      <h3>1. The Pivot Point (<code>x</code> and <code>y</code>)</h3>
+      <ul>
+        <li><strong><code>x</code> and <code>y</code></strong> define the absolute position of the element on the stage.</li>
+        <li>They act as the <strong>Center of Rotation</strong> (the pivot point).</li>
+        <li>When you apply <code>rotate</code>, <code>scale</code>, or <code>skew</code>, the transformation occurs perfectly around this point.</li>
+      </ul>
+
+      <h3>2. The Offset (<code>dx</code> and <code>dy</code>)</h3>
+      <ul>
+        <li><strong><code>dx</code> and <code>dy</code></strong> define a local offset that is applied <em>after</em> rotation and scaling.</li>
+        <li>This allows an element to be pushed away from its pivot point.</li>
+      </ul>
+
+      <h3>Example: A Perfect Orbit</h3>
+      <p>Creating an object orbiting a center point takes just one line of HTML, completely eliminating the need for trigonometry or nested groups!</p>
+
+      <pre><code>&lt;!-- A red circle orbiting at 60 degrees per second around the center --&gt;
+&lt;pxl-circle 
+  x="500" 
+  y="500" 
+  dx="200" 
+  rotate="t * 60" 
+  radius="20" 
+  fill="red"
+/&gt;</code></pre>
+      <p><em>Because <code>rotate</code> happens before the <code>dx</code> offset, the element revolves perfectly around the <code>x/y</code> pivot at a radius of 200.</em></p>
+
+      <h2>Responsive Scaling Unit (<code>u</code>)</h2>
+      <p>Kilopixel graphics are intrinsically responsive and scale to fit their container automatically. You don't have to write different math for mobile and desktop screens.</p>
+
+      <h3>Logical Stage Width: Always 1000</h3>
+      <p>Regardless of the actual pixel width of the <code>&lt;canvas&gt;</code> on the screen, the logical coordinate space of the stage is always based on a <strong>fixed width of 1000</strong>.</p>
+      <ul>
+        <li>The horizontal center is <strong>always <code>x="500"</code></strong>.</li>
+        <li>The left edge is <strong>always <code>x="0"</code></strong>.</li>
+        <li>The right edge is <strong>always <code>x="1000"</code></strong>.</li>
+      </ul>
+
+      <h3>How <code>u</code> Works</h3>
+      <p>Before spatial coordinates (x, y, dx, radius, stroke width, etc.) are passed to the canvas drawing API, the engine multiplies them by a dynamic scaling unit called <code>u</code>. <code>u</code> is simply <code>clientWidth / 1000</code>.</p>
+      <p>This unit makes your entire scene perfectly responsive while preserving crisp, DPI-aware rendering via <code>ResizeObserver</code> and <code>device-pixel-content-box</code>.</p>
+
+      <h3>The Golden Rule: Use Raw Numbers</h3>
+      <p>Because the width is strictly 1000, <strong>ALWAYS use raw numbers for horizontal coordinates</strong>.</p>
+
+      <p><strong>Do NOT do this (Slow):</strong></p>
+      <pre><code>&lt;pxl-circle x="ref.main.width / 2" y="500" /&gt;</code></pre>
+
+      <p><strong>Do THIS (Fast):</strong></p>
+      <pre><code>&lt;pxl-circle x="500" y="500" /&gt;</code></pre>
+      
+      <p>By using raw numbers, you instantly hit the framework's "Fast Path" compiler, bypassing expensive proxy subscriptions and mathematical evaluation.</p>
+
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kilopixel - Declarative Canvas Framework</title>
+  <meta name="description" content="A declarative, reactive animation engine for HTML5 Canvas using Web Components.">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <a href="index.html" class="logo">Kilo<span>pixel</span></a>
+    <button class="menu-toggle">☰</button>
+    <a href="https://github.com" class="github-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </header>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">Introduction</a></li>
+          <li><a href="getting-started.html">Getting Started</a></li>
+          <li><a href="architecture.html">Architecture</a></li>
+          <li><a href="coordinate-system.html">Coordinate System</a></li>
+          <li><a href="elements-shapes.html">Elements & Shapes</a></li>
+          <li><a href="reactivity-events.html">Reactivity & Events</a></li>
+          <li><a href="expressions-math.html">Expressions & Math</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <h1>Kilopixel Framework</h1>
+      
+      <p>Welcome to the official documentation for **Kilopixel**.</p>
+      
+      <p>Kilopixel is a <strong>declarative, reactive animation engine</strong> built specifically for HTML5 Canvas using Web Components. Instead of writing imperative <code>ctx.beginPath()</code> boilerplate and managing your own <code>requestAnimationFrame</code> loops, you describe your graphics natively in HTML.</p>
+
+      <h2>Why Kilopixel?</h2>
+      <ul>
+        <li><strong>Declarative HTML API:</strong> Draw circles, paths, and complex polygons just by writing HTML tags.</li>
+        <li><strong>Built-in Math Engine:</strong> Animate properties at 60fps using integrated time drivers like <code>wave()</code> and <code>glide()</code>.</li>
+        <li><strong>Zero Build Tools:</strong> No bundlers, no npm, no React. Just drop in the script tag and go.</li>
+        <li><strong>Insane Performance:</strong> A multi-tier Fast Path compiler ensures static elements cost absolutely zero CPU cycles to process per frame.</li>
+      </ul>
+
+      <h2>Live Example</h2>
+      <p>This entire scene is generated without a single line of JavaScript. It is purely HTML.</p>
+
+      <pre><code>&lt;pxl-stage id="main"&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-circle 
+      x="500" 
+      y="500" 
+      radius="150 + wave(2) * 20" 
+      fill="linear(t*50, ['#00ffcc', '#0044ff'])" 
+    /&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+      <p>Ready to jump in? Proceed to <a href="getting-started.html">Getting Started</a>.</p>
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

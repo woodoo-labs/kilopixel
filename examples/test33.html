@@ -5,332 +5,334 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Test 33: Reactive Event Dashboard (No Time Drivers)</title>
   <style>
-    body {
-      margin: 0; padding: 0;
-      background-color: #0b0b12;
-      color: #fff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      overflow: hidden;
-      display: flex;
-      height: 100vh;
-    }
-    
-    #sidebar {
-      width: 320px;
-      background: #111;
-      border-right: 1px solid #333;
-      padding: 25px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      box-shadow: 5px 0 20px rgba(0,0,0,0.5);
-      z-index: 10;
-      overflow-y: auto;
-    }
-    
-    h2 { margin: 0 0 5px 0; font-weight: 300; letter-spacing: 2px; color: #fff; }
-    p { color: #666; font-size: 13px; margin: 0 0 15px 0; line-height: 1.4; }
-    hr { border: none; border-top: 1px solid #333; margin: 10px 0; }
-    
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    
-    label {
-      font-size: 13px;
-      color: #ccc;
-      display: flex;
-      justify-content: space-between;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    
-    input[type="range"] {
-      width: 100%;
-      cursor: pointer;
-      accent-color: #00ffcc;
-    }
+  body {
+    margin: 0; padding: 0;
+    background-color: #0b0b12;
+    color: #fff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+    display: flex;
+    height: 100vh;
+  }
+  
+  #sidebar {
+    width: 320px;
+    background: #111;
+    border-right: 1px solid #333;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 5px 0 20px rgba(0,0,0,0.5);
+    z-index: 10;
+    overflow-y: auto;
+  }
+  
+  h2 { margin: 0 0 5px 0; font-weight: 300; letter-spacing: 2px; color: #fff; }
+  p { color: #666; font-size: 13px; margin: 0 0 15px 0; line-height: 1.4; }
+  hr { border: none; border-top: 1px solid #333; margin: 10px 0; }
+  
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  label {
+    font-size: 13px;
+    color: #ccc;
+    display: flex;
+    justify-content: space-between;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+    accent-color: #00ffcc;
+  }
 
-    #stage-container {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-    }
+  #stage-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
 
-    #container {
-      width: 95%;
-      max-width: 1400px;
-      aspect-ratio: 16 / 9;
-      position: relative;
-      background: #050508;
-      box-shadow: 0 10px 60px rgba(0,0,0,0.8);
-      border: 1px solid #222;
-      border-radius: 12px;
-      overflow: hidden;
-      /* Subtle grid background */
-      background-image: 
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 50px 50px;
-      background-position: center center;
-    }
+  #container {
+    width: 95%;
+    max-width: 1400px;
+    aspect-ratio: 16 / 9;
+    position: relative;
+    background: #050508;
+    box-shadow: 0 10px 60px rgba(0,0,0,0.8);
+    border: 1px solid #222;
+    border-radius: 12px;
+    overflow: hidden;
+    /* Subtle grid background */
+    background-image: 
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    background-position: center center;
+  }
 
-    .hint {
-      color: #00ffcc;
-      font-weight: bold;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0% { opacity: 0.5; }
-      50% { opacity: 1; }
-      100% { opacity: 0.5; }
-    }
+  .hint {
+    color: #00ffcc;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+  }
   </style>
 </head>
 <body>
   
   <div id="sidebar">
-    <h2>INTERACTIVE DASHBOARD</h2>
-    <p>Testing the new <b>Zero-GC Event System!</b> <br>
-    (Static Reactivity - No Time Drivers)<br><br>
-    <span class="hint">→ Hover over the bars<br>→ Click to randomise data</span></p>
+  <h2>INTERACTIVE DASHBOARD</h2>
+  <p>Testing the new <b>Zero-GC Event System!</b> <br>
+  (Static Reactivity - No Time Drivers)<br><br>
+  <span class="hint">→ Hover over the bars<br>→ Click to randomise data</span></p>
 
-    <!-- Data Controls -->
-    <div class="control-group">
-      <label>Q1 Revenue <span id="val-val1">40</span></label>
-      <input type="range" id="in_val1" min="10" max="120" step="1" value="40">
-    </div>
-    <div class="control-group">
-      <label>Q2 Revenue <span id="val-val2">75</span></label>
-      <input type="range" id="in_val2" min="10" max="120" step="1" value="75">
-    </div>
-    <div class="control-group">
-      <label>Q3 Revenue <span id="val-val3">50</span></label>
-      <input type="range" id="in_val3" min="10" max="120" step="1" value="50">
-    </div>
-    <div class="control-group">
-      <label>Q4 Revenue <span id="val-val4">90</span></label>
-      <input type="range" id="in_val4" min="10" max="120" step="1" value="90">
-    </div>
-    <div class="control-group">
-      <label>2027 Projection <span id="val-val5">110</span></label>
-      <input type="range" id="in_val5" min="10" max="120" step="1" value="110">
-    </div>
+  <!-- Data Controls -->
+  <div class="control-group">
+    <label>Q1 Revenue <span id="val-val1">40</span></label>
+    <input type="range" id="in_val1" min="10" max="120" step="1" value="40">
+  </div>
+  <div class="control-group">
+    <label>Q2 Revenue <span id="val-val2">75</span></label>
+    <input type="range" id="in_val2" min="10" max="120" step="1" value="75">
+  </div>
+  <div class="control-group">
+    <label>Q3 Revenue <span id="val-val3">50</span></label>
+    <input type="range" id="in_val3" min="10" max="120" step="1" value="50">
+  </div>
+  <div class="control-group">
+    <label>Q4 Revenue <span id="val-val4">90</span></label>
+    <input type="range" id="in_val4" min="10" max="120" step="1" value="90">
+  </div>
+  <div class="control-group">
+    <label>2027 Projection <span id="val-val5">110</span></label>
+    <input type="range" id="in_val5" min="10" max="120" step="1" value="110">
+  </div>
 
-    <hr>
+  <hr>
 
-    <!-- Styling Controls -->
-    <div class="control-group">
-      <label>Bar Width <span id="val-width">80</span></label>
-      <input type="range" id="in_width" min="20" max="150" step="1" value="80">
-    </div>
-    <div class="control-group">
-      <label>Bar Spacing <span id="val-spacing">140</span></label>
-      <input type="range" id="in_spacing" min="80" max="250" step="1" value="140">
-    </div>
-    <div class="control-group">
-      <label>Top Radius <span id="val-radius">12</span></label>
-      <input type="range" id="in_radius" min="0" max="75" step="1" value="12">
-    </div>
+  <!-- Styling Controls -->
+  <div class="control-group">
+    <label>Bar Width <span id="val-width">80</span></label>
+    <input type="range" id="in_width" min="20" max="150" step="1" value="80">
+  </div>
+  <div class="control-group">
+    <label>Bar Spacing <span id="val-spacing">140</span></label>
+    <input type="range" id="in_spacing" min="80" max="250" step="1" value="140">
+  </div>
+  <div class="control-group">
+    <label>Top Radius <span id="val-radius">12</span></label>
+    <input type="range" id="in_radius" min="0" max="75" step="1" value="12">
+  </div>
   </div>
 
   <div id="stage-container">
-    <div id="container">
-      <pxl-stage id="main">
-        
-        <pxl-layer>
-          <!-- Dynamic Variables -->
-          <pxl-var id="val1" value="40"></pxl-var>
-          <pxl-var id="val2" value="75"></pxl-var>
-          <pxl-var id="val3" value="50"></pxl-var>
-          <pxl-var id="val4" value="90"></pxl-var>
-          <pxl-var id="val5" value="110"></pxl-var>
-          
-          <pxl-var id="width" value="80"></pxl-var>
-          <pxl-var id="spacing" value="140"></pxl-var>
-          <pxl-var id="radius" value="12"></pxl-var>
+  <div id="container">
+    <pxl-stage id="main">
+    
+    <pxl-layer id="layer1">
+      <!-- Dynamic Variables -->
+      <pxl-var id="val1" value="40"></pxl-var>
+      <pxl-var id="val2" value="75"></pxl-var>
+      <pxl-var id="val3" value="50"></pxl-var>
+      <pxl-var id="val4" value="90"></pxl-var>
+      <pxl-var id="val5" value="110"></pxl-var>
+      
+      <pxl-var id="width" value="80"></pxl-var>
+      <pxl-var id="spacing" value="140"></pxl-var>
+      <pxl-var id="radius" value="12"></pxl-var>
 
-          <!-- Interactive Global Cursor Glow -->
-          <pxl-circle 
-            x="ref.main.mouseX" 
-            y="ref.main.mouseY" 
-            r="150" 
-            fill="radial(1, [0, rgba(255,255,255,0.08), 1, rgba(255,255,255,0)])"
-            alpha="ref.main.isHovered ? 1 : 0">
-          </pxl-circle>
+      <pxl-circle 
+      x="ref.main.mouseX" 
+      y="ref.main.mouseY" 
+      r="150" 
+      fill="radial(1, [0, rgba(255,255,255,0.08), 1, rgba(255,255,255,0)])"
+      alpha="ref.main.isHovered ? 1 : 0">
+      </pxl-circle>
 
-          <!-- Grand Total Text (Reactively computes from variables) -->
-          <pxl-text 
-            x="500" 
-            y="ref.main.height * 0.15" 
-            text="'TOTAL REVENUE: ' + Math.round(ref.val1.value + ref.val2.value + ref.val3.value + ref.val4.value + ref.val5.value) + 'k'" 
-            size="36" 
-            fill="#fff" 
-            weight="bold" 
-            align="center">
-          </pxl-text>
-          <pxl-text 
-            x="500" 
-            y="ref.main.height * 0.15 + 30" 
-            text="'Click any bar to randomize its data!'" 
-            size="16" 
-            fill="#888" 
-            align="center">
-          </pxl-text>
+      <!-- Layer FPS Monitor -->
+      <pxl-text x="10" y="30" text="'Layer FPS: ' + ref.layer1.fps" size="14" fill="#0f0" weight="bold"></pxl-text>
 
-          <!-- Background Chart Grid Lines -->
-          <pxl-line x1="100" y1="ref.main.height * 0.8 - 300" x2="900" y2="ref.main.height * 0.8 - 300" stroke="rgba(255,255,255,0.05)" strokewidth="2" linedash="5,5"></pxl-line>
-          <pxl-text x="80" y="ref.main.height * 0.8 - 300" text="'150k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
-          
-          <pxl-line x1="100" y1="ref.main.height * 0.8 - 200" x2="900" y2="ref.main.height * 0.8 - 200" stroke="rgba(255,255,255,0.05)" strokewidth="2" linedash="5,5"></pxl-line>
-          <pxl-text x="80" y="ref.main.height * 0.8 - 200" text="'100k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
-          
-          <pxl-line x1="100" y1="ref.main.height * 0.8 - 100" x2="900" y2="ref.main.height * 0.8 - 100" stroke="rgba(255,255,255,0.05)" strokewidth="2" linedash="5,5"></pxl-line>
-          <pxl-text x="80" y="ref.main.height * 0.8 - 100" text="'50k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
+      <!-- Grand Total Text (Reactively computes from variables) -->
+      <pxl-text 
+      x="500" 
+      y="ref.main.height * 0.15" 
+      text="'TOTAL REVENUE: ' + Math.round(ref.val1.value + ref.val2.value + ref.val3.value + ref.val4.value + ref.val5.value) + 'k'" 
+      size="36" 
+      fill="#fff" 
+      weight="bold" 
+      align="center">
+      </pxl-text>
+      <pxl-text 
+      x="500" 
+      y="ref.main.height * 0.15 + 30" 
+      text="'Click any bar to randomize its data!'" 
+      size="16" 
+      fill="#888" 
+      align="center">
+      </pxl-text>
 
-          <!-- The Solid Baseline -->
-          <pxl-line x1="100" y1="ref.main.height * 0.8" x2="900" y2="ref.main.height * 0.8" stroke="rgba(255,255,255,0.2)" strokewidth="4"></pxl-line>
-          <pxl-text x="80" y="ref.main.height * 0.8" text="'0k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
+      <!-- Background Chart Grid Lines -->
+      <pxl-line x1="100" y1="ref.main.height * 0.8 - 300" x2="900" y2="ref.main.height * 0.8 - 300" stroke="rgba(255,255,255,0.05)" strokewidth="2" linedash="5,5"></pxl-line>
+      <pxl-text x="80" y="ref.main.height * 0.8 - 300" text="'150k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
+      
+      <pxl-line x1="100" y1="ref.main.height * 0.8 - 200" x2="900" y2="ref.main.height * 0.8 - 200" stroke="rgba(255,255,255,0.05)" strokewidth="2" linedash="5,5"></pxl-line>
+      <pxl-text x="80" y="ref.main.height * 0.8 - 200" text="'100k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
+      
+      <pxl-line x1="100" y1="ref.main.height * 0.8 - 100" x2="900" y2="ref.main.height * 0.8 - 100" stroke="rgba(255,255,255,0.05)" strokewidth="2" linedash="5,5"></pxl-line>
+      <pxl-text x="80" y="ref.main.height * 0.8 - 100" text="'50k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
 
-          <!-- BAR 1 -->
-          <pxl-group id="g1" x="500 - ref.spacing.value * 2" y="ref.main.height * 0.8" scale="ref.r1.isPressed ? 0.95 : (ref.r1.isHovered ? 1.05 : 1)">
-             <pxl-rect id="r1"
-               x="0" y="0" 
-               w="ref.width.value" 
-               h="ref.val1.value * 2" 
-               r="ref.radius.value" r3="0" r4="0" 
-               anchor="bottom"
-               fill="linear([0,1, 0,0], [hsla(340, 100%, 60%, 0.9), hsla(20, 100%, 60%, 0.3)])"
-               stroke="ref.r1.isHovered ? '#fff' : hsl(350, 100%, 60%)" strokewidth="ref.r1.isHovered ? 4 : 2"
-               filter="ref.r1.isHovered ? 'brightness(1.5)' : 'none'"
-               onclick="let v = Math.random() * 100 + 20; ref.val1.set('value', v); document.getElementById('in_val1').value = v; document.getElementById('val-val1').innerText = Math.round(v);">
-             </pxl-rect>
-             <pxl-text 
-               x="0" 
-               y="-ref.val1.value * 2 - 20" 
-               text="Math.round(ref.val1.value) + 'k'" 
-               align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
-             </pxl-text>
-             <pxl-text x="0" y="30" text="'Q1'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
-          </pxl-group>
+      <!-- The Solid Baseline -->
+      <pxl-line x1="100" y1="ref.main.height * 0.8" x2="900" y2="ref.main.height * 0.8" stroke="rgba(255,255,255,0.2)" strokewidth="4"></pxl-line>
+      <pxl-text x="80" y="ref.main.height * 0.8" text="'0k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
 
-          <!-- BAR 2 -->
-          <pxl-group id="g2" x="500 - ref.spacing.value" y="ref.main.height * 0.8" scale="ref.r2.isPressed ? 0.95 : (ref.r2.isHovered ? 1.05 : 1)">
-             <pxl-rect id="r2"
-               x="0" y="0" 
-               w="ref.width.value" 
-               h="ref.val2.value * 2" 
-               r="ref.radius.value" r3="0" r4="0" 
-               anchor="bottom"
-               fill="linear([0,1, 0,0], [hsla(20, 100%, 60%, 0.9), hsla(60, 100%, 60%, 0.3)])"
-               stroke="ref.r2.isHovered ? '#fff' : hsl(30, 100%, 60%)" strokewidth="ref.r2.isHovered ? 4 : 2"
-               filter="ref.r2.isHovered ? 'brightness(1.5)' : 'none'"
-               onclick="let v = Math.random() * 100 + 20; ref.val2.set('value', v); document.getElementById('in_val2').value = v; document.getElementById('val-val2').innerText = Math.round(v);">
-             </pxl-rect>
-             <pxl-text 
-               x="0" 
-               y="-ref.val2.value * 2 - 20" 
-               text="Math.round(ref.val2.value) + 'k'" 
-               align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
-             </pxl-text>
-             <pxl-text x="0" y="30" text="'Q2'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
-          </pxl-group>
+      <!-- BAR 1 -->
+      <pxl-group id="g1" x="500 - ref.spacing.value * 2" y="ref.main.height * 0.8" scale="ref.r1.isPressed ? 0.95 : (ref.r1.isHovered ? 1.05 : 1)">
+       <pxl-rect id="r1"
+         x="0" y="0" 
+         w="ref.width.value" 
+         h="ref.val1.value * 2" 
+         r="ref.radius.value" r3="0" r4="0" 
+         anchor="bottom"
+         fill="linear([0,1, 0,0], [hsla(340, 100%, 60%, 0.9), hsla(20, 100%, 60%, 0.3)])"
+         stroke="ref.r1.isHovered ? '#fff' : hsl(350, 100%, 60%)" strokewidth="ref.r1.isHovered ? 4 : 2"
+         filter="ref.r1.isHovered ? 'brightness(1.5)' : 'none'"
+         onclick="let v = Math.random() * 100 + 20; ref.val1.set('value', v); document.getElementById('in_val1').value = v; document.getElementById('val-val1').innerText = Math.round(v);">
+       </pxl-rect>
+       <pxl-text 
+         x="0" 
+         y="-ref.val1.value * 2 - 20" 
+         text="Math.round(ref.val1.value) + 'k'" 
+         align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
+       </pxl-text>
+       <pxl-text x="0" y="30" text="'Q1'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
+      </pxl-group>
 
-          <!-- BAR 3 -->
-          <pxl-group id="g3" x="500" y="ref.main.height * 0.8" scale="ref.r3.isPressed ? 0.95 : (ref.r3.isHovered ? 1.05 : 1)">
-             <pxl-rect id="r3"
-               x="0" y="0" 
-               w="ref.width.value" 
-               h="ref.val3.value * 2" 
-               r="ref.radius.value" r3="0" r4="0" 
-               anchor="bottom"
-               fill="linear([0,1, 0,0], [hsla(160, 100%, 50%, 0.9), hsla(200, 100%, 60%, 0.3)])"
-               stroke="ref.r3.isHovered ? '#fff' : hsl(180, 100%, 60%)" strokewidth="ref.r3.isHovered ? 4 : 2"
-               filter="ref.r3.isHovered ? 'brightness(1.5)' : 'none'"
-               onclick="let v = Math.random() * 100 + 20; ref.val3.set('value', v); document.getElementById('in_val3').value = v; document.getElementById('val-val3').innerText = Math.round(v);">
-             </pxl-rect>
-             <pxl-text 
-               x="0" 
-               y="-ref.val3.value * 2 - 20" 
-               text="Math.round(ref.val3.value) + 'k'" 
-               align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
-             </pxl-text>
-             <pxl-text x="0" y="30" text="'Q3'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
-          </pxl-group>
+      <!-- BAR 2 -->
+      <pxl-group id="g2" x="500 - ref.spacing.value" y="ref.main.height * 0.8" scale="ref.r2.isPressed ? 0.95 : (ref.r2.isHovered ? 1.05 : 1)">
+       <pxl-rect id="r2"
+         x="0" y="0" 
+         w="ref.width.value" 
+         h="ref.val2.value * 2" 
+         r="ref.radius.value" r3="0" r4="0" 
+         anchor="bottom"
+         fill="linear([0,1, 0,0], [hsla(20, 100%, 60%, 0.9), hsla(60, 100%, 60%, 0.3)])"
+         stroke="ref.r2.isHovered ? '#fff' : hsl(30, 100%, 60%)" strokewidth="ref.r2.isHovered ? 4 : 2"
+         filter="ref.r2.isHovered ? 'brightness(1.5)' : 'none'"
+         onclick="let v = Math.random() * 100 + 20; ref.val2.set('value', v); document.getElementById('in_val2').value = v; document.getElementById('val-val2').innerText = Math.round(v);">
+       </pxl-rect>
+       <pxl-text 
+         x="0" 
+         y="-ref.val2.value * 2 - 20" 
+         text="Math.round(ref.val2.value) + 'k'" 
+         align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
+       </pxl-text>
+       <pxl-text x="0" y="30" text="'Q2'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
+      </pxl-group>
 
-          <!-- BAR 4 -->
-          <pxl-group id="g4" x="500 + ref.spacing.value" y="ref.main.height * 0.8" scale="ref.r4.isPressed ? 0.95 : (ref.r4.isHovered ? 1.05 : 1)">
-             <pxl-rect id="r4"
-               x="0" y="0" 
-               w="ref.width.value" 
-               h="ref.val4.value * 2" 
-               r="ref.radius.value" r3="0" r4="0" 
-               anchor="bottom"
-               fill="linear([0,1, 0,0], [hsla(220, 100%, 60%, 0.9), hsla(280, 100%, 60%, 0.3)])"
-               stroke="ref.r4.isHovered ? '#fff' : hsl(250, 100%, 70%)" strokewidth="ref.r4.isHovered ? 4 : 2"
-               filter="ref.r4.isHovered ? 'brightness(1.5)' : 'none'"
-               onclick="let v = Math.random() * 100 + 20; ref.val4.set('value', v); document.getElementById('in_val4').value = v; document.getElementById('val-val4').innerText = Math.round(v);">
-             </pxl-rect>
-             <pxl-text 
-               x="0" 
-               y="-ref.val4.value * 2 - 20" 
-               text="Math.round(ref.val4.value) + 'k'" 
-               align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
-             </pxl-text>
-             <pxl-text x="0" y="30" text="'Q4'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
-          </pxl-group>
+      <!-- BAR 3 -->
+      <pxl-group id="g3" x="500" y="ref.main.height * 0.8" scale="ref.r3.isPressed ? 0.95 : (ref.r3.isHovered ? 1.05 : 1)">
+       <pxl-rect id="r3"
+         x="0" y="0" 
+         w="ref.width.value" 
+         h="ref.val3.value * 2" 
+         r="ref.radius.value" r3="0" r4="0" 
+         anchor="bottom"
+         fill="linear([0,1, 0,0], [hsla(160, 100%, 50%, 0.9), hsla(200, 100%, 60%, 0.3)])"
+         stroke="ref.r3.isHovered ? '#fff' : hsl(180, 100%, 60%)" strokewidth="ref.r3.isHovered ? 4 : 2"
+         filter="ref.r3.isHovered ? 'brightness(1.5)' : 'none'"
+         onclick="let v = Math.random() * 100 + 20; ref.val3.set('value', v); document.getElementById('in_val3').value = v; document.getElementById('val-val3').innerText = Math.round(v);">
+       </pxl-rect>
+       <pxl-text 
+         x="0" 
+         y="-ref.val3.value * 2 - 20" 
+         text="Math.round(ref.val3.value) + 'k'" 
+         align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
+       </pxl-text>
+       <pxl-text x="0" y="30" text="'Q3'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
+      </pxl-group>
 
-          <!-- BAR 5 -->
-          <pxl-group id="g5" x="500 + ref.spacing.value * 2" y="ref.main.height * 0.8" scale="ref.r5.isPressed ? 0.95 : (ref.r5.isHovered ? 1.05 : 1)">
-             <pxl-rect id="r5"
-               x="0" y="0" 
-               w="ref.width.value" 
-               h="ref.val5.value * 2" 
-               r="ref.radius.value" r3="0" r4="0" 
-               anchor="bottom"
-               fill="linear([0,1, 0,0], [hsla(280, 100%, 60%, 0.9), hsla(340, 100%, 60%, 0.3)])"
-               stroke="ref.r5.isHovered ? '#fff' : hsl(310, 100%, 70%)" strokewidth="ref.r5.isHovered ? 4 : 2"
-               filter="ref.r5.isHovered ? 'brightness(1.5)' : 'none'"
-               onclick="let v = Math.random() * 100 + 20; ref.val5.set('value', v); document.getElementById('in_val5').value = v; document.getElementById('val-val5').innerText = Math.round(v);">
-             </pxl-rect>
-             <pxl-text 
-               x="0" 
-               y="-ref.val5.value * 2 - 20" 
-               text="Math.round(ref.val5.value) + 'k'" 
-               align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
-             </pxl-text>
-             <pxl-text x="0" y="30" text="'2027'" align="center" size="16" fill="#00ffcc" weight="bold"></pxl-text>
-          </pxl-group>
+      <!-- BAR 4 -->
+      <pxl-group id="g4" x="500 + ref.spacing.value" y="ref.main.height * 0.8" scale="ref.r4.isPressed ? 0.95 : (ref.r4.isHovered ? 1.05 : 1)">
+       <pxl-rect id="r4"
+         x="0" y="0" 
+         w="ref.width.value" 
+         h="ref.val4.value * 2" 
+         r="ref.radius.value" r3="0" r4="0" 
+         anchor="bottom"
+         fill="linear([0,1, 0,0], [hsla(220, 100%, 60%, 0.9), hsla(280, 100%, 60%, 0.3)])"
+         stroke="ref.r4.isHovered ? '#fff' : hsl(250, 100%, 70%)" strokewidth="ref.r4.isHovered ? 4 : 2"
+         filter="ref.r4.isHovered ? 'brightness(1.5)' : 'none'"
+         onclick="let v = Math.random() * 100 + 20; ref.val4.set('value', v); document.getElementById('in_val4').value = v; document.getElementById('val-val4').innerText = Math.round(v);">
+       </pxl-rect>
+       <pxl-text 
+         x="0" 
+         y="-ref.val4.value * 2 - 20" 
+         text="Math.round(ref.val4.value) + 'k'" 
+         align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
+       </pxl-text>
+       <pxl-text x="0" y="30" text="'Q4'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
+      </pxl-group>
 
-          <!-- FPS Monitor -->
-          <pxl-text x="980" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#0f0" align="right" stroke="none"></pxl-text>
+      <!-- BAR 5 -->
+      <pxl-group id="g5" x="500 + ref.spacing.value * 2" y="ref.main.height * 0.8" scale="ref.r5.isPressed ? 0.95 : (ref.r5.isHovered ? 1.05 : 1)">
+       <pxl-rect id="r5"
+         x="0" y="0" 
+         w="ref.width.value" 
+         h="ref.val5.value * 2" 
+         r="ref.radius.value" r3="0" r4="0" 
+         anchor="bottom"
+         fill="linear([0,1, 0,0], [hsla(280, 100%, 60%, 0.9), hsla(340, 100%, 60%, 0.3)])"
+         stroke="ref.r5.isHovered ? '#fff' : hsl(310, 100%, 70%)" strokewidth="ref.r5.isHovered ? 4 : 2"
+         filter="ref.r5.isHovered ? 'brightness(1.5)' : 'none'"
+         onclick="let v = Math.random() * 100 + 20; ref.val5.set('value', v); document.getElementById('in_val5').value = v; document.getElementById('val-val5').innerText = Math.round(v);">
+       </pxl-rect>
+       <pxl-text 
+         x="0" 
+         y="-ref.val5.value * 2 - 20" 
+         text="Math.round(ref.val5.value) + 'k'" 
+         align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
+       </pxl-text>
+       <pxl-text x="0" y="30" text="'2027'" align="center" size="16" fill="#00ffcc" weight="bold"></pxl-text>
+      </pxl-group>
 
-        </pxl-layer>
+      <!-- FPS Monitor -->
+      <pxl-text x="980" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#0f0" align="right" stroke="none"></pxl-text>
 
-      </pxl-stage>
-    </div>
+    </pxl-layer>
+
+    </pxl-stage>
+  </div>
   </div>
 
   <script src="../dist/pxl.min.js"></script>
   <script>
-    // Helper to bind a slider to a cvs variable and update the label
-    function bindControl(cvsVarName) {
-      const el = document.getElementById('in_' + cvsVarName);
-      const valLabel = document.getElementById(`val-${cvsVarName}`);
-      
-      el.addEventListener('input', (e) => {
-        const val = parseFloat(e.target.value);
-        document.getElementById(cvsVarName).setAttribute('value', val);
-        if (valLabel) valLabel.textContent = val;
-      });
-    }
+  // Helper to bind a slider to a cvs variable and update the label
+  function bindControl(cvsVarName) {
+    const el = document.getElementById('in_' + cvsVarName);
+    const valLabel = document.getElementById(`val-${cvsVarName}`);
+    
+    el.addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value);
+    document.getElementById(cvsVarName).setAttribute('value', val);
+    if (valLabel) valLabel.textContent = val;
+    });
+  }
 
-    // Bind all controls
-    ['val1', 'val2', 'val3', 'val4', 'val5', 'width', 'spacing', 'radius'].forEach(bindControl);
+  // Bind all controls
+  ['val1', 'val2', 'val3', 'val4', 'val5', 'width', 'spacing', 'radius'].forEach(bindControl);
   </script>
 </body>
 </html>
