@@ -46,11 +46,18 @@ class Layer extends HTMLElement {
       // Broadcast arrival so any elements initialized earlier can successfully re-evaluate
       pxl.broadcast(this._refKey);
     }
+
+    if (this.stage && this.stage.id) {
+      pxl.subscribeToVariable(`ref.${this.stage.id}`, this);
+    }
   }
 
   disconnectedCallback() {
     if (this.id && pxl.nodes[this.id] === this.attributeValues) {
       delete pxl.nodes[this.id];
+    }
+    if (this.stage && this.stage.id) {
+      pxl.unsubscribeFromVariable(`ref.${this.stage.id}`, this);
     }
     pxl.clearAllVariableSubscriptions(this);
     this.stage?.unregisterLayer(this);
@@ -71,9 +78,17 @@ class Layer extends HTMLElement {
   }
 
   variableChangedCallback(varName) {
+    const isStageMouse = this.stage && varName === `ref.${this.stage.id}`;
+    
+    if (isStageMouse && pxl.needsMatrixTracking) {
+      if (this._refKey && pxl._subscriptions[this._refKey] && pxl._subscriptions[this._refKey].length > 0) {
+        this.invalidate();
+      }
+    }
+
     const result = pxl.evaluateAttributesForVariable(this, varName);
 
-    if ((result & 1) === 0) pxl.unsubscribeFromVariable(varName, this);
+    if ((result & 1) === 0 && !isStageMouse) pxl.unsubscribeFromVariable(varName, this);
     if ((result & 2) !== 0) {
       if (this._refKey) pxl.broadcast(this._refKey);
       this.invalidate();
@@ -138,6 +153,8 @@ class Layer extends HTMLElement {
 
     this.isCanvasEmpty = false;
     
+    if (pxl.needsMatrixTracking) pxl.pushMatrix();
+
     const { x, y, dx, dy, rotate, scale, scaleX, scaleY, skewX, skewY, alpha, blend, filter } = this.attributeValues;
     const hasStateChanges = x || y || dx || dy || rotate || 
                             scale !== 1 || scaleX !== 1 || scaleY !== 1 || 
@@ -146,13 +163,34 @@ class Layer extends HTMLElement {
 
     if (hasStateChanges) {
       ctx.save();
-      pxl.applyContextState(ctx, u, this.attributeValues);
+      pxl.applyContextState(ctx, u, this.attributeValues, true);
     }
+
+    if (pxl.needsMatrixTracking) {
+      const m = pxl.currentMatrix;
+      const a = m[0], b = m[1], c = m[2], d = m[3], tx = m[4], ty = m[5];
+      const det = a * d - b * c;
+      if (det !== 0) {
+        const absX = this.stage && this.stage.attributeValues ? (this.stage.attributeValues.mouseX || 0) : 0;
+        const absY = this.stage && this.stage.attributeValues ? (this.stage.attributeValues.mouseY || 0) : 0;
+        const relX = absX - tx;
+        const relY = absY - ty;
+        const localX = (relX * d - relY * c) / det;
+        const localY = (relY * a - relX * b) / det;
+
+        let mouseChanged = false;
+        if (this.attributeValues.mouseX !== localX) { this.attributeValues.mouseX = localX; mouseChanged = true; }
+        if (this.attributeValues.mouseY !== localY) { this.attributeValues.mouseY = localY; mouseChanged = true; }
+        if (mouseChanged && this._refKey) pxl.broadcast(this._refKey);
+      }
+    }
+
     const len = this.childList.length;
     for (let i = 0; i < len; i++) {
       this.childList[i].render(ctx, u, t);
     }
     if (hasStateChanges) ctx.restore();
+    if (pxl.needsMatrixTracking) pxl.popMatrix();
   }
 }
 customElements.define('pxl-layer', Layer);

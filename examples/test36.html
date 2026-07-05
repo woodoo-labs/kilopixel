@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kilopixel - Nested Coordinate Systems</title>
+    <script src="../dist/pxl.min.js"></script>
+    <style>
+        body { margin: 0; background: #111; color: white; font-family: sans-serif; overflow: hidden; }
+        h1 { position: absolute; top: 20px; left: 20px; z-index: 10; margin: 0; pointer-events: none; }
+        p { position: absolute; top: 60px; left: 20px; z-index: 10; margin: 0; pointer-events: none; max-width: 400px; color: #ccc; line-height: 1.4; }
+        #container { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        pxl-stage { width: 100%; height: 100%; }
+    </style>
+</head>
+
+<body>
+    <h1>Nested Coordinate Systems</h1>
+    <p>Visualizing 1 Layer and 2 Groups, each with a different center.<br><br>
+    <span style="color: #ff5555; font-weight: bold;">Red:</span> Layer 1 Space (x: 500, y: 200)<br>
+    <span style="color: #55ff55; font-weight: bold;">Green:</span> Group 1 Space (Rotated)<br>
+    <span style="color: #5555ff; font-weight: bold;">Blue:</span> Group 2 Space (Scaled)
+    </p>
+
+    <div id="container">
+        <pxl-stage id="main" ratio="auto">
+            
+            <!-- LAYER 1 (Red Coordinate Space) -->
+            <pxl-layer id="layer1" x="500" y="150">
+                
+                <pxl-grid spacing="100" fill="#ff5555" stroke="rgba(255, 50, 50, 0.25)"></pxl-grid>
+                <pxl-circle x="0" y="0" r="10" fill="#ff5555"></pxl-circle>
+                <pxl-text x="15" y="15" text="'Layer 1 Origin'" fill="#ff5555" size="16" weight="bold"></pxl-text>
+                
+                <!-- Mouse tracking for Layer 1 -->
+                <pxl-text x="ref.layer1.mouseX + 15" y="ref.layer1.mouseY - 20" 
+                          text="'L1: ' + Math.round(ref.layer1.mouseX) + ', ' + Math.round(ref.layer1.mouseY)" 
+                          fill="#ff5555" size="14" weight="bold"></pxl-text>
+
+                <!-- GROUP 1 (Green Coordinate Space) -->
+                <!-- x=-250 relative to the Layer, and rotated 30 degrees -->
+                <pxl-group id="group1" x="-250" y="250" rotate="30">
+                    <pxl-grid spacing="50" fill="#55ff55" stroke="rgba(50, 255, 50, 0.2)"></pxl-grid>
+                    <pxl-circle x="0" y="0" r="10" fill="#55ff55"></pxl-circle>
+                    <pxl-text x="15" y="15" text="'Group 1 Origin'" fill="#55ff55" size="16" weight="bold"></pxl-text>
+                    
+                    <!-- Mouse tracking for Group 1 -->
+                    <pxl-text x="ref.group1.mouseX + 15" y="ref.group1.mouseY" 
+                              text="'G1: ' + Math.round(ref.group1.mouseX) + ', ' + Math.round(ref.group1.mouseY)" 
+                              fill="#55ff55" size="14" weight="bold"></pxl-text>
+                </pxl-group>
+
+                <!-- GROUP 2 (Blue Coordinate Space) -->
+                <!-- x=250 relative to the Layer, and scaled by 1.5 -->
+                <pxl-group id="group2" x="250" y="250" scale="1.5">
+                    <pxl-grid spacing="50" fill="#5555ff" stroke="rgba(50, 50, 255, 0.2)"></pxl-grid>
+                    <pxl-circle x="0" y="0" r="10" fill="#5555ff"></pxl-circle>
+                    <pxl-text x="15" y="15" text="'Group 2 Origin'" fill="#5555ff" size="16" weight="bold"></pxl-text>
+                    
+                    <!-- Mouse tracking for Group 2 -->
+                    <pxl-text x="ref.group2.mouseX + 15" y="ref.group2.mouseY + 20" 
+                              text="'G2: ' + Math.round(ref.group2.mouseX) + ', ' + Math.round(ref.group2.mouseY)" 
+                              fill="#5555ff" size="14" weight="bold"></pxl-text>
+                </pxl-group>
+
+            </pxl-layer>
+
+        </pxl-stage>
+    </div>
+
+</body>
+</html>

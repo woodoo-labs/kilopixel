@@ -4,74 +4,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kilopixel - Minimal Static Grid</title>
+    <title>Kilopixel - Infinite Mathematical Grid</title>
     <script src="../dist/pxl.min.js"></script>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #111;
-            color: white;
-            font-family: sans-serif;
-            overflow: hidden;
-        }
-
-        h1 {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 10;
-            margin: 0;
-            pointer-events: none;
-        }
-
-        p {
-            position: absolute;
-            top: 60px;
-            left: 20px;
-            z-index: 10;
-            margin: 0;
-            pointer-events: none;
-            max-width: 400px;
-            line-height: 1.5;
-            color: #ccc;
-        }
-
-        #container {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        pxl-stage {
-            width: 100%;
-            height: 100%;
-        }
+        body { margin: 0; background: #050505; color: white; font-family: sans-serif; overflow: hidden; }
+        h1 { position: absolute; top: 20px; left: 20px; z-index: 10; margin: 0; pointer-events: none; }
+        p { position: absolute; top: 60px; left: 20px; z-index: 10; margin: 0; pointer-events: none; max-width: 400px; color: #ccc; }
+        #container { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        pxl-stage { width: 100%; height: 100%; }
     </style>
 </head>
 
 <body>
-    <h1>Minimal Static Grid</h1>
-    <p>A simple, static grid using all default values. Notice how it perfectly fills the screen!</p>
+    <h1>Infinite Mathematical Grid</h1>
+    <p>Zero-GC Parametric Ray Intersection for sticky numbers.<br>
+    The grid completely fills the screen regardless of extreme pan, zoom, or rotation.</p>
 
     <div id="container">
-        <pxl-stage id="stage" ratio="auto">
-            <pxl-layer id="layer" x="400" y="0" rotate="45">
+        <pxl-stage id="main" ratio="auto">
+            <!-- Extremely distorted layer -->
+            <pxl-layer id="gridLayer" 
+                       x="500 + wave(15) * 800" 
+                       y="ref.main.height / 2 + glide(11) * 400" 
+                       rotate="t * 15" 
+                       scale="1.5 + wave(8) * 0.8"
+                       >
+                
+                <!-- Infinite Mathematical Grid -->
+                <pxl-grid id="myGrid" spacing="100" numbers="true" fill="rgba(0, 255, 255, 0.9)" stroke="rgba(255,255,255,0.15)"></pxl-grid>
 
-                <!-- Minimal Setup Grid -->
-                <!-- Uses ALL default values (spacing=50, dynamic bounds, faint white stroke) -->
-                <pxl-grid id="grid"></pxl-grid>
+                <!-- A circle sitting firmly at 0,0 to prove coordinate alignment -->
+                <pxl-circle x="0" y="0" r="10" fill="#ff0055"></pxl-circle>
+                <pxl-text x="25" y="0" text="'Origin (0,0)'" fill="#ff0055" size="20" weight="bold" align="left"></pxl-text>
 
-                <!-- FPS Monitor -->
-                <pxl-text x="20" y="110" text="ref.stage.fps + ' FPS | AVG: ' + ref.stage.renderAvg + 'ms'"
-                    font="monospace" size="14" fill="#0f0" align="left" stroke="none"></pxl-text>
+            </pxl-layer>
 
+            <!-- Overlay Layer for UI so it's not affected by the grid's crazy math -->
+            <pxl-layer id="uiLayer">
+                <pxl-text x="20" y="140" text="'FPS: ' + ref.main.fps" font="monospace" size="16" fill="#0f0" align="left"></pxl-text>
+                <pxl-text x="20" y="165" text="'Render: ' + ref.main.renderAvg + 'ms'" font="monospace" size="16" fill="#0f0" align="left"></pxl-text>
             </pxl-layer>
         </pxl-stage>
     </div>
 
 </body>
-
 </html>

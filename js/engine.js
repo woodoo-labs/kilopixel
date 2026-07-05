@@ -1,6 +1,14 @@
 window.pxl = {};
 
 // =========================================================================
+// Zero-GC Matrix Tracker State
+// =========================================================================
+pxl.matrixStack = new Float32Array(600); // Supports up to 100 nested depths (6 floats per depth)
+pxl.matrixDepth = 0;
+pxl.currentMatrix = new Float32Array([1, 0, 0, 1, 0, 0]); // Identity [a, b, c, d, tx, ty]
+pxl.needsMatrixTracking = false; // Compiler turns this on only if mathematically required
+
+// =========================================================================
 // Generic Utilities
 // =========================================================================
 

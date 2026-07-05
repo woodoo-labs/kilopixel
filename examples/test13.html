@@ -45,7 +45,8 @@
   <p>Every single circle calculates its own distance to the mouse to dynamically swell up natively.</p>
 
   <pxl-stage id="main" ratio="16 / 9">
-    <pxl-layer id="gridLayer">
+    <!-- Notice the layer is moving, rotating, and scaling! -->
+    <pxl-layer id="gridLayer" x="500 + 200 * sin(t)" y="300 + 100 * cos(t)" rotate="t * 20" scale="0.5 + wave(4) * 1.5">
       <!-- Circles will be injected here -->
     </pxl-layer>
 
@@ -54,7 +55,7 @@
       <pxl-text x="20" y="30"
         text="'Stage: ' + ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms | MAX: ' + ref.main.renderMax + 'ms'"
         font="monospace" size="14" fill="#0f0"></pxl-text>
-      <pxl-text x="20" y="60" text="'Layer 1: ' + ref.layer1.fps + ' FPS'" font="monospace" size="14"
+      <pxl-text x="20" y="60" text="'Layer: ' + ref.gridLayer.fps + ' FPS'" font="monospace" size="14"
         fill="#0f0"></pxl-text>
     </pxl-layer>
   </pxl-stage>
@@ -65,14 +66,13 @@
     let html = '';
 
     // Create a dense grid of circles
-    for (let x = 40; x <= 960; x += 40) {
-      for (let y = 40; y <= 560; y += 40) {
+    // We center the grid around 0,0 since the layer's origin is now moving around!
+    for (let x = -400; x <= 400; x += 40) {
+      for (let y = -200; y <= 200; y += 40) {
         // The magic math: 
-        // 1. Calculate Manhattan distance: abs(ref.main.mouseX - x) + abs(ref.main.mouseY - y)
-        // 2. Divide by 8 to scale the effect
-        // 3. Clamp it so the circles don't become negative radius
-        // 4. Subtract from 25 so they get BIGGER when distance is SMALLER.
-        const mathExpr = `25 - clamp((abs(ref.main.mouseX - ${x}) + abs(ref.main.mouseY - ${y})) / 8, 0, 23)`;
+        // We use ref.gridLayer.mouseX instead of ref.main.mouseX!
+        // This gives us perfectly accurate local coordinates even while the layer spins and scales!
+        const mathExpr = `25 - clamp((abs(ref.gridLayer.mouseX - ${x}) + abs(ref.gridLayer.mouseY - ${y})) / 8, 0, 23)`;
 
         html += `<pxl-circle x="${x}" y="${y}" r="${mathExpr}" fill="#ff0055"></pxl-circle>`;
       }

@@ -205,16 +205,22 @@ pxl.compileExpression = function (str) {
 
     // Extract reactive variable dependencies
     const deps = [];
-    const varRegex = /\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)(?:\?\.)?(isHovered|isPressed)?/g;
+    const varRegex = /\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)(?:\?\.)?(isHovered|isPressed|mouseX|mouseY|absoluteX|absoluteY)?/g;
     let match;
     while ((match = varRegex.exec(sanitizedStr)) !== null) {
       const fullKey = `ref.${match[1]}`;
       if (!deps.includes(fullKey)) deps.push(fullKey);
       
       if (match[2]) {
-        pxl.hitTestRequestedIds.add(match[1]);
-        const nodeAttr = pxl.nodes[match[1]];
-        if (nodeAttr && nodeAttr._el) nodeAttr._el.makeInteractive();
+        if (match[2] === 'isHovered' || match[2] === 'isPressed') {
+          pxl.hitTestRequestedIds.add(match[1]);
+          const nodeAttr = pxl.nodes[match[1]];
+          if (nodeAttr && nodeAttr._el) nodeAttr._el.makeInteractive();
+        } else if (match[2] === 'mouseX' || match[2] === 'mouseY' || match[2] === 'absoluteX' || match[2] === 'absoluteY') {
+          pxl.needsMatrixTracking = true;
+          if (!pxl.matrixRequestedIds) pxl.matrixRequestedIds = new Set();
+          pxl.matrixRequestedIds.add(match[1]);
+        }
       }
     }
     const hasVars = deps.length > 0;
