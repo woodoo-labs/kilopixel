@@ -4,10 +4,18 @@ class PxlNode extends HTMLElement {
     this.attributeExpressions = {};
     this.attributeValues = {};
     Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
+    Object.defineProperty(this.attributeValues, '$node', { value: this, enumerable: false, writable: false });
 
     this.animatedAttributeKeys = [];
     this.reactiveAttributeKeys = [];
     this.isAnimated = false;
+    
+    // Zero-GC Lazy Matrix Tracking
+    this.localMatrix = null;
+    this.globalMatrix = null;
+    this._isLocalMatrixDirty = false;
+    this._globalMatrixVersion = 0;
+    this._parentMatrixVersion = -1;
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -56,10 +64,14 @@ class PxlNode extends HTMLElement {
     if (animLen > 0) {
       for (let i = 0; i < animLen; i++) {
         const key = this.animatedAttributeKeys[i];
-        const newVal = this.attributeExpressions[key](t);
+        const newVal = this.attributeExpressions[key].call(this, t);
         if (this.attributeValues[key] !== newVal) {
           this.attributeValues[key] = newVal;
           animatedValuesChanged = true;
+          
+          if (key === 'x' || key === 'y' || key === 'dx' || key === 'dy' || key === 'rotate' || key === 'scale' || key === 'scalex' || key === 'scaley' || key === 'skewx' || key === 'skewy') {
+            this._isLocalMatrixDirty = true;
+          }
         }
       }
     }
@@ -71,6 +83,61 @@ class PxlNode extends HTMLElement {
     if (this.isAnimated) this.parentLayer?.invalidate();
     
     return animatedValuesChanged;
+  }
+
+  // --- Lazy Matrix Tracking Getters ---
+
+  getLocalMatrix() {
+    if (!this.localMatrix) this.localMatrix = pxl.Matrix.create();
+    
+    if (this._isLocalMatrixDirty || !this._localMatrixVersion) {
+      const v = this.attributeValues;
+      const scale = v.scale !== undefined ? v.scale : 1;
+      const sX = (v.scalex !== 1 && v.scalex !== undefined) ? v.scalex : scale;
+      const sY = (v.scaley !== 1 && v.scaley !== undefined) ? v.scaley : scale;
+      
+      pxl.Matrix.updateLocal(this.localMatrix, v.x, v.y, v.dx, v.dy, v.rotate, sX, sY, v.skewx, v.skewy);
+      this._isLocalMatrixDirty = false;
+      this._localMatrixVersion = (this._localMatrixVersion || 0) + 1; 
+    }
+    return this.localMatrix;
+  }
+
+  getGlobalMatrix() {
+    if (!this.globalMatrix) this.globalMatrix = pxl.Matrix.create();
+
+    this.getLocalMatrix(); // ensure local is clean
+
+    let isDirty = false;
+
+    if (this._lastLocalMatrixVersion !== this._localMatrixVersion) {
+      this._lastLocalMatrixVersion = this._localMatrixVersion;
+      isDirty = true;
+    }
+
+    if (this.parentContainer) {
+      const parentGlobal = this.parentContainer.getGlobalMatrix(); // recursively updates parent!
+      const parentVersion = this.parentContainer._globalMatrixVersion;
+
+      if (this._lastParentMatrixVersion !== parentVersion) {
+        this._lastParentMatrixVersion = parentVersion;
+        isDirty = true;
+      }
+
+      if (isDirty) {
+        pxl.Matrix.multiply(this.globalMatrix, parentGlobal, this.localMatrix);
+        this._globalMatrixVersion = (this._globalMatrixVersion || 0) + 1;
+      }
+    } else {
+      if (isDirty) {
+        this.globalMatrix.set(this.localMatrix); 
+        this._globalMatrixVersion = (this._globalMatrixVersion || 0) + 1;
+      }
+    }
+
+    if (!this._globalMatrixVersion) this._globalMatrixVersion = 1;
+
+    return this.globalMatrix;
   }
 }
 

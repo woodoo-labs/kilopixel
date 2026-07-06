@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test 34 - Global Matrix Coordinate Mapping</title>
+  <style>
+    body { background-color: #050505; margin: 0; padding: 50px; overflow: auto; display: block; }
+    pxl-stage { display: block; width: 1000px; margin: 0 auto; background-color: #0a0a0a; border: 1px solid #333; }
+  </style>
+  <script src="../dist/pxl.min.js"></script>
+</head>
+<body>
+  <pxl-stage id="main" ratio="1000 / 1000">
+    <!-- Top-level Background Layer -->
+    <pxl-layer>
+      <pxl-text x="980" y="30" text="ref.main.fps + ' FPS'" font="monospace" size="14" fill="#0f0" align="right"></pxl-text>
+      <pxl-text x="500" y="50" text="'GLOBAL MATRIX TRACKING'" size="30" fill="white" align="center"></pxl-text>
+      
+      <!-- Source world (Scaled to 0.5, shifted, and rotated) -->
+      <pxl-group scale="0.5" rotate="t*10" x="500" y="500">
+        <pxl-group rotate="-t*20" x="200" y="200">
+          <!-- The Target Shape moving in its deeply nested world -->
+          <pxl-circle id="target" x="sin(t*2)*300" y="cos(t*2)*300" r="60" fill="#f00"></pxl-circle>
+        </pxl-group>
+      </pxl-group>
+    </pxl-layer>
+
+    <!-- NEW LAYER: Entirely detached canvas context with an arbitrary coordinate space! -->
+    <pxl-layer x="-200" y="150" scale="1.2" rotate="15">
+      <pxl-group>
+        <!-- Tracker mathematically translates local coordinates to global ones -->
+        <pxl-rect id="tracker" 
+                  x="toLocal(ref.target, 'x')" 
+                  y="toLocal(ref.target, 'y')" 
+                  w="100" h="100" 
+                  fill="none" stroke="#0f0" strokewidth="4"></pxl-rect>
+        
+        <!-- Text also locked onto it -->
+        <pxl-text x="toLocal(ref.target, 'x')" 
+                  y="toLocal(ref.target, 'y') - 70" 
+                  text="'TRACKER LOCKED'" size="16" fill="#0f0" align="center" font="monospace"></pxl-text>
+      </pxl-group>
+    </pxl-layer>
+  </pxl-stage>
+</body>
+</html>

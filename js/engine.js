@@ -95,7 +95,7 @@ pxl.compileAttribute = function(element, name, newValue) {
         }
       }
       // Force initial evaluation for the first frame
-      element.attributeValues[name] = parsed(0);
+      element.attributeValues[name] = parsed.call(element, 0);
     }
   } else {
     // --- Static Primitive ---
@@ -115,7 +115,7 @@ pxl.evaluateAttributesForVariable = function(element, varName) {
 
     if (fn.variableDependencies?.includes(varName)) {
       result |= 1; // Flag bit 1
-      const newVal = fn(0);
+      const newVal = fn.call(element, 0);
       if (element.attributeValues[key] !== newVal) {
         element.attributeValues[key] = newVal;
         result |= 2; // Flag bit 2

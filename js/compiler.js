@@ -177,7 +177,7 @@ pxl.parseAttributeValue = function (value) {
   if (!Number.isNaN(num)) return num;
 
   // 5. SLOW PATH: Math & Animation Guard (e.g., "100 * 2", "loop(2)")
-  if (/(^|[^.])\bt\b|\bref\.|\(|\[|(?:\d\s*[-+*/%<>=!&|]|[-+*/%<>=!&|]\s*\d)|['"`]\s*\+|\+\s*['"`]/.test(value)) {
+  if (/(^|[^.])\bt\b|\bref\.|\btoLocal\(|\(|\[|(?:\d\s*[-+*/%<>=!&|]|[-+*/%<>=!&|]\s*\d)|['"`]\s*\+|\+\s*['"`]/.test(value)) {
     return this.compileExpression(value);
   }
 
@@ -192,16 +192,19 @@ pxl.compileExpression = function (str) {
   try {
     // 2. CSS PERCENTAGE SANITIZER: Safely convert illegal JS percentages to strings
     let sanitizedStr = str;
-    if (sanitizedStr.includes('%')) {
+    if (sanitizedStr.includes('%') && sanitizedStr[0] !== '`') {
       sanitizedStr = sanitizedStr.replace(/(\d+(?:\.\d+)?)%(\s*[,)])/g, "'$1%'$2");
     }
 
     // 3. OPTIONAL CHAINING INJECTOR: Safely convert ref.player.x to ref.player?.x
     // This prevents fatal TypeErrors during initial eager evaluation before elements are connected to the DOM.
     sanitizedStr = sanitizedStr.replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.');
+    
+    // 4. MATRIX TRACKER INJECTOR
+    sanitizedStr = sanitizedStr.replace(/\btoLocal\(/g, 'pxl.mapCoordinate(this, ');
 
-    // Detect 60fps timeline drivers
-    const isAnimated = this.timeDriverRegex.test(sanitizedStr);
+    // Detect 60fps timeline drivers OR self-referencing keyword
+    const isAnimated = this.timeDriverRegex.test(sanitizedStr) || /\bthis\b/.test(sanitizedStr);
 
     // Extract reactive variable dependencies
     const deps = [];

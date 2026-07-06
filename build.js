@@ -6,6 +6,7 @@ const VERSION = '0.1.0';
 
 const files = [
   'js/engine.js',
+  'js/matrix.js',
   'js/compiler.js',
   'js/interaction.js',
   'js/graphics.js',
