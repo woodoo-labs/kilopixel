@@ -1,16 +1,12 @@
 // TODO
 // Cache Paths?
-class Shape extends HTMLElement {
+class Shape extends PxlNode {
   static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'filter', 'hidden', 'onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove']; }
 
   constructor() {
     super();
-    this.parentContainer = null; // Layer or group
-    this.parentLayer = null;
-    this.isAnimated = false;
-    this.attributeExpressions = { x: 0, y: 0, dx: 0, dy: 0, fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false, isHovered: false, isPressed: false };
-    this.attributeValues = { ...this.attributeExpressions };
-    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
+    Object.assign(this.attributeExpressions, { x: 0, y: 0, dx: 0, dy: 0, fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false, isHovered: false, isPressed: false });
+    Object.assign(this.attributeValues, this.attributeExpressions);
     
     // Pre-allocated bounding box object (zero-GC)
     this.boundingBox = { left: 0, right: 0, top: 0, bottom: 0 };
@@ -21,10 +17,7 @@ class Shape extends HTMLElement {
     this._lastGradientConfig = null;
     this._lastGradientU = 0;
 
-    // Symmetric tracking arrays
-    this.animatedAttributeKeys = []; // 60fps loop bucket
-    this.reactiveAttributeKeys = []; // On-demand variable bucket
-    
+
     this._emptyDash = []; // Zero-GC empty linedash
     
     this._compiledOnClick = null;
@@ -54,84 +47,31 @@ class Shape extends HTMLElement {
       if (name === 'onup')    this._compiledOnUp = compiled;
       if (name === 'onmove')  this._compiledOnMove = compiled;
       
-      if (this.stage && !this.stage._interactiveElements.includes(this)) {
-        this.stage._interactiveElements.push(this);
-        this.stage.isInteractiveOrderDirty = true;
-      }
+      this.stage?.interaction.registerElement(this);
       return;
     }
 
-    pxl.compileAttribute(this, name, newValue);
-    this.isAnimated = this.animatedAttributeKeys.length > 0;
-    if (this._refKey) pxl.broadcast(this._refKey);
-    this.parentLayer?.invalidate();
+    super.attributeChangedCallback(name, oldValue, newValue);
   }
 
   connectedCallback() {
     this.stage = this.closest('pxl-stage');
-    this.parentLayer = this.closest('pxl-layer');
-    this.parentContainer = this.parentElement.closest('pxl-group, pxl-layer');
-    this.parentContainer?.registerChild(this);
-    pxl.restoreVariableSubscriptions(this);
+    super.connectedCallback();
     
     if (this._compiledOnClick || this._compiledOnEnter || this._compiledOnLeave || this._compiledOnDown || this._compiledOnUp || this._compiledOnMove) {
-      if (this.stage && !this.stage._interactiveElements.includes(this)) {
-        this.stage._interactiveElements.push(this);
-        this.stage.isInteractiveOrderDirty = true;
-      }
-    }
-
-    if (this.id) {
-      pxl.nodes[this.id] = this.attributeValues;
-      this._refKey = `ref.${this.id}`;
-      // Broadcast arrival so any elements initialized earlier can successfully re-evaluate
-      pxl.broadcast(this._refKey);
+      this.stage?.interaction.registerElement(this);
     }
   }
 
   disconnectedCallback() {
-    if (this.id && pxl.nodes[this.id] === this.attributeValues) {
-      delete pxl.nodes[this.id];
-    }
-    pxl.clearAllVariableSubscriptions(this);
-    this.parentContainer?.unregisterChild(this);
-    if (this.stage) {
-      pxl.removeFromArray(this.stage._interactiveElements, this);
-    }
-  }
-
-  variableChangedCallback(varName) {
-    const result = pxl.evaluateAttributesForVariable(this, varName);
-
-    if ((result & 1) === 0) pxl.unsubscribeFromVariable(varName, this);
-    if ((result & 2) !== 0) {
-      if (this._refKey) pxl.broadcast(this._refKey);
-      this.parentLayer?.invalidate();
-    }
+    super.disconnectedCallback();
+    this.stage?.interaction.unregisterElement(this);
   }
 
   render(ctx, u, t) {
-    let animatedValuesChanged = false;
-    const animLen = this.animatedAttributeKeys.length;
-    if (animLen > 0) {
-      for (let i = 0; i < animLen; i++) {
-        const key = this.animatedAttributeKeys[i];
-        const newVal = this.attributeExpressions[key](t);
-        if (this.attributeValues[key] !== newVal) {
-          this.attributeValues[key] = newVal;
-          animatedValuesChanged = true;
-        }
-      }
-    }
-    
-    if (this._refKey && animatedValuesChanged && pxl._subscriptions[this._refKey]) {
-      pxl.broadcast(this._refKey);
-    }
+    this.evaluateAnimations(t);
 
     if (this.attributeValues.hidden) return;
-
-    // Heartbeat logic
-    if (this.isAnimated) this.parentLayer?.invalidate();
 
     const { x, y, dx, dy, rotate, scale, scaleX, scaleY, skewX, skewY, alpha, blend, filter } = this.attributeValues;
     const hasStateChanges = x || y || dx || dy || rotate || 

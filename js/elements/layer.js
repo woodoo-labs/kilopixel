@@ -1,16 +1,12 @@
-class Layer extends HTMLElement {
+class Layer extends PxlNode {
   static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'filter', 'hidden']; }
 
   constructor() {
     super();
     this.childList = []; // Groups or shapes
     this.isOrderDirty = false; // Tracks if children need sorting
-    this.attributeExpressions = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false };
-    this.attributeValues = { ...this.attributeExpressions };
-    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
-
-    this.animatedAttributeKeys = [];
-    this.reactiveAttributeKeys = [];
+    Object.assign(this.attributeExpressions, { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false });
+    Object.assign(this.attributeValues, this.attributeExpressions);
 
     this.isDirty = true;
     this.isCanvasEmpty = false;
@@ -22,14 +18,6 @@ class Layer extends HTMLElement {
     this.ctx = this.canvas.getContext('2d');
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (oldValue === newValue) return;
-    pxl.compileAttribute(this, name, newValue);
-    this.isAnimated = this.animatedAttributeKeys.length > 0;
-    if (this._refKey) pxl.broadcast(this._refKey);
-    this.invalidate();
-  }
-
   connectedCallback() {
     this.style.display = 'block';
     this.style.position = 'absolute';
@@ -38,21 +26,12 @@ class Layer extends HTMLElement {
     if (!this.contains(this.canvas)) this.appendChild(this.canvas);
     this.stage = this.closest('pxl-stage');
     this.stage?.registerLayer(this);
-    pxl.restoreVariableSubscriptions(this);
     
-    if (this.id) {
-      pxl.nodes[this.id] = this.attributeValues;
-      this._refKey = `ref.${this.id}`;
-      // Broadcast arrival so any elements initialized earlier can successfully re-evaluate
-      pxl.broadcast(this._refKey);
-    }
+    super.connectedCallback();
   }
 
   disconnectedCallback() {
-    if (this.id && pxl.nodes[this.id] === this.attributeValues) {
-      delete pxl.nodes[this.id];
-    }
-    pxl.clearAllVariableSubscriptions(this);
+    super.disconnectedCallback();
     this.stage?.unregisterLayer(this);
     this.stage = null;
     this.isDirty = false;
@@ -70,15 +49,7 @@ class Layer extends HTMLElement {
     this.invalidate();
   }
 
-  variableChangedCallback(varName) {
-    const result = pxl.evaluateAttributesForVariable(this, varName);
 
-    if ((result & 1) === 0) pxl.unsubscribeFromVariable(varName, this);
-    if ((result & 2) !== 0) {
-      if (this._refKey) pxl.broadcast(this._refKey);
-      this.invalidate();
-    }
-  }
 
   // called by layer and shapes
   invalidate() {
@@ -106,30 +77,14 @@ class Layer extends HTMLElement {
       this.isOrderDirty = false;
     }
     
-    // Evaluates layer-level animations
-    let animatedValuesChanged = false;
-    const animLen = this.animatedAttributeKeys.length;
-    if (animLen > 0) {
-      for (let i = 0; i < animLen; i++) {
-        const key = this.animatedAttributeKeys[i];
-        const newVal = this.attributeExpressions[key](t);
-        if (this.attributeValues[key] !== newVal) {
-          this.attributeValues[key] = newVal;
-          animatedValuesChanged = true;
-        }
-      }
-    }
-    
-    if (this._refKey && animatedValuesChanged && pxl._subscriptions[this._refKey]) {
-      pxl.broadcast(this._refKey);
-    }
+    this.evaluateAnimations(t);
 
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.canvas.width / this.dpr, this.canvas.height / this.dpr);
     this.isDirty = false;
 
     // Heartbeat: If this layer has OWN animated properties, keep the stage loop alive
-    if (animLen > 0) this.invalidate();
+    if (this.isAnimated) this.invalidate();
 
     if (this.attributeValues.hidden) {
       this.isCanvasEmpty = true;

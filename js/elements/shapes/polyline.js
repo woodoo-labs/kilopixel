@@ -16,9 +16,8 @@ class Polyline extends Shape {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (oldValue === newValue) return;
-
     if (name === 'points') {
+      if (oldValue === newValue) return;
       this.clearPoints();
 
       pxl.parsePointsIntoArray(newValue, this.rawParts);
@@ -32,12 +31,12 @@ class Polyline extends Shape {
         this.pointKeys[i] = key;
         pxl.compileAttribute(this, key, this.rawParts[i]);
       }
+      
+      this.isAnimated = this.animatedAttributeKeys.length > 0;
+      this.parentLayer?.invalidate();
     } else {
-      pxl.compileAttribute(this, name, newValue);
+      super.attributeChangedCallback(name, oldValue, newValue);
     }
-
-    this.isAnimated = this.animatedAttributeKeys.length > 0;
-    this.parentLayer?.invalidate();
   }
 
   clearPoints() {

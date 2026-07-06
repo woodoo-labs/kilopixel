@@ -7,9 +7,11 @@ const VERSION = '0.1.0';
 const files = [
   'js/engine.js',
   'js/compiler.js',
+  'js/interaction.js',
   'js/graphics.js',
   'js/monitor.js',
   'js/elements/stage.js',
+  'js/elements/node.js',
   'js/elements/layer.js',
   'js/elements/group.js',
   'js/elements/shape.js',
