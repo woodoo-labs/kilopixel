@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test 36 - Synthwave Infinite Grid</title>
+  <style>
+    body { background-color: #050505; margin: 0; padding: 50px; overflow: auto; display: block; }
+    pxl-stage { display: block; width: 1000px; margin: 0 auto; background-color: #0a0a0a; border: 1px solid #333; }
+  </style>
+  <script src="../dist/pxl.min.js"></script>
+</head>
+<body>
+  <pxl-stage id="main" ratio="1000 / 1000">
+    <pxl-layer>
+      <!-- Background Static Grid (Graph Paper style) -->
+      <pxl-grid step="20" major="5" stroke="#333" fill="#888" strokewidth="1" labels="true" labelsize="10"></pxl-grid>
+
+      <!-- Synthwave Animated Grid inside heavily rotated/scaled group -->
+      <pxl-group x="500" y="500" rotate="-t*15" scale="1 + wave(3)*0.5">
+        <!-- 
+          Because the grid is infinite, it will dynamically clip to the screen edges,
+          but the gradient bounding box will instantly stretch to fill those visible bounds!
+        -->
+        <pxl-grid step="50" major="0" stroke="linear(t*20, ['#f0f', '#0ff'])" strokewidth="2" alpha="0.8"></pxl-grid>
+        
+        <!-- A circle acting as the anchor point of the synthwave group -->
+        <pxl-circle r="20" fill="#fff"></pxl-circle>
+      </pxl-group>
+
+      <pxl-text x="500" y="50" text="'INFINITE VIEWPORT GRID'" size="30" fill="white" align="center"></pxl-text>
+      <pxl-text x="500" y="90" text="'(With Gradient Bounding Box & Labels)'" size="16" fill="gray" align="center"></pxl-text>
+      <pxl-text x="980" y="30" text="ref.main.fps + ' FPS'" font="monospace" size="14" fill="#0f0" align="right"></pxl-text>
+    </pxl-layer>
+  </pxl-stage>
+</body>
+</html>
