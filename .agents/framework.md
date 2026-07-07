@@ -15,7 +15,7 @@ graph TD
     B --> D["Shape"]
     C -->|"nestable transforms"| C
     C --> D
-    D --> E["pxl-circle · pxl-rect · pxl-ellipse · pxl-line · pxl-polyline · pxl-text"]
+    D --> E["pxl-circle · pxl-rect · pxl-ellipse · pxl-line · pxl-polyline · pxl-text · pxl-grid"]
     
     F["Compiler System<br/>(compiler.js)"] -->|"expression → function"| G["animationCache / staticCache"]
     I["Built-ins & Scope<br/>(wave, hsl, linear)"] --> F
@@ -94,10 +94,10 @@ Shared transform and canvas abstraction utilities:
 
 ### 4. `monitor.js` — Performance Metrics (~1.2KB)
 
-Auto-starts at module load. Uses a 1-second `setInterval` to publish:
-- `pxl.sys.fps` — frames per second
-- `pxl.sys.renderAvg` — average ms per frame
-- `pxl.sys.renderMax` — worst frame in the last second
+Auto-starts at module load. Uses a 1-second `setInterval` to publish telemetry directly to the stage's properties:
+- `fps` — frames per second
+- `renderAvg` — average ms per frame
+- `renderMax` — worst frame in the last second
 
 These are published directly to the `stage.attributeValues` and broadcast via `stage._refKey`. Any element can reactively display them: `<pxl-text text="ref.main.fps" />`.
 
@@ -300,12 +300,14 @@ The base `Shape` class handles 22 common attributes, the transform pipeline, fil
 | **`pxl-line`** | `x1`, `y1`, `x2`, `y2`, `arrowstart/end/style`, `repeat`, `dx`, `dy` | Arrowheads, line tiling/repeat |
 | **`pxl-polyline`** | `points`, `closed`, `smooth`, `mode`, `arrowstart/end/style` | Catmull-Rom smoothing with configurable tension, relative mode, per-coordinate animation |
 | **`pxl-text`** | `text`, `size`, `font`, `align`, `baseline`, `weight`, `fontstyle`, `maxwidth`, `width`, `lineheight`, `letterspacing`, `reveal`, `direction` | Auto word-wrap, reveal/typewriter effect, animated letter-spacing, 3-tier font/layout/bbox caching |
+| **`pxl-grid`** | `step`, `major`, `labels`, `labelsize` | Infinite hardware-accelerated grid, optional intersection labels, dynamic viewport clipping |
 
 **Zero-GC Patterns in Shape:**
 - Pre-allocated `boundingBox` object — mutated in place, never re-created
 - `_scaledDash: []` — reused for `setLineDash()`
 - `_cachedGradient` + `_lastGradientConfig` — gradient object reuse
 - `Float32Array` flat cache for polyline coordinates
+- In-place global matrix inversion using `pxl._scratchMatrixA` to calculate infinite viewport clipping without object allocations
 
 **Polyline Per-Coordinate Animation:**
 When the `points` attribute changes, each coordinate value is compiled as a separate expression with synthetic keys (`p0`, `p1`, `p2`, ...). This means individual coordinates within a polyline can have independent animations — a remarkably powerful feature.
@@ -350,9 +352,15 @@ Your 28 test files form a comprehensive feature showcase and stress test suite:
 | [test25](file:///c:/Users/micha/OneDrive/Dokumente/Software/01%20Test%20Cases/pixel/test25.html) | Arrow test (polylines) — arrows on smooth/closed/relative polylines, line repeat/tiling |
 | [test26](file:///c:/Users/micha/OneDrive/Dokumente/Software/01%20Test%20Cases/pixel/test26.html) | Arrow encyclopedia (circles) — arrows on circular arcs, pie/donut shapes, spinning stress test |
 | [test27](file:///c:/Users/micha/OneDrive/Dokumente/Software/01%20Test%20Cases/pixel/test27.html) | Arrow encyclopedia (ellipses) — arrows on elliptical arcs, `irx`/`iry` elliptical donuts |
-| [test28](file:///c:/Users/micha/OneDrive/Dokumente/Software/01%20Test%20Cases/pixel/test28.html) | Variables Sandbox — slider controls bound to `pxl.vars`, driving element properties reactively |
+| [test28](file:///c:/Users/micha/OneDrive/Dokumente/Software/01%20Test%20Cases/pixel/test28.html) | Variables Sandbox — slider controls bound to `<pxl-var>`, driving element properties reactively |
 | [test29_refs](file:///c:/Users/micha/OneDrive/Dokumente/Software/01%20Test%20Cases/pixel/test29_refs.html) | Direct Element Referencing — elements tracking `ref.id.attr`, demonstrating O(1) zero-GC reactivity |
 | [test30](file:///c:/Users/micha/OneDrive/Dokumente/Software/01%20Test%20Cases/pixel/test30.html) | Camera & Parallax — a tracking camera and multi-layer parallax scenes driven purely by `ref` and `s.mouseX/Y` |
+| [test31](file:///c:/Users/micha/woodoo-labs/kilopixel/examples/test31.html) | Mathematical Hit Testing — proving point-in-path logic without math inversion |
+| [test32](file:///c:/Users/micha/woodoo-labs/kilopixel/examples/test32.html) | Interactive Event Dashboard — robust usage of declarative `isHovered` and imperative `onclick` |
+| [test33](file:///c:/Users/micha/woodoo-labs/kilopixel/examples/test33.html) | Reactive Event Dashboard — static scene with reactive variable bounds |
+| [test34](file:///c:/Users/micha/woodoo-labs/kilopixel/examples/test34.html) | Global Matrix Coordinate Mapping — the `toLocal` function in action |
+| [test35](file:///c:/Users/micha/woodoo-labs/kilopixel/examples/test35.html) | Self-Referencing — using `this` to bind properties to oneself |
+| [test36](file:///c:/Users/micha/woodoo-labs/kilopixel/examples/test36.html) | Infinite Grid — Synthwave animated grid, gradient bounds mapping, text label optimization |
 | [benchmark](file:///c:/Users/micha/OneDrive/Dokumente/Software/01%20Test%20Cases/pixel/benchmark.html) | Performance dashboard — 5 workload presets (500-2000pt polyline, 1000 particles, gradients, text), telemetry chart, heap tracking |
 
 ---
@@ -427,8 +435,7 @@ The 3-tier caching (font → layout → bbox), auto word-wrap via `width`, and t
 
 ## Honest Assessment: Potential Growth Areas
 
-### 🟡 Declarative Event System
-Hit testing exists for cursors, but there's no `onclick`, `onhover`, `ondrag` attribute system. test11-14 achieve interactivity through `ref.stage.mouseX/Y` math, which is clever but limited. Declarative event handlers would unlock dashboards, interactive data viz, and simple games.
+## Honest Assessment: Potential Growth Areas
 
 ### 🟡 Easing / Keyframe Transitions
 The 8 time drivers (`wave`, `glide`, `bounce`, etc.) are oscillators — they loop forever. There's no `ease(from, to, duration, curve)` for one-shot point-to-point transitions. For UI-style animations (fade in, slide to position, enter/exit), easing curves with start triggers would be valuable.
@@ -440,7 +447,7 @@ The AGENTS.md is an excellent AI-facing spec, and the test files are great livin
 Canvas is inherently inaccessible to screen readers. A `<fallback>` child element or ARIA description system would help for production use cases.
 
 ### 🟡 Missing Shape Primitives
-No `pxl-path` (SVG-like `d` attribute), `pxl-image`, `pxl-star`, `pxl-polygon`, `pxl-ring`, `pxl-arrow`, `pxl-grid`, `pxl-triangle` — though these may have been in an earlier version based on the AGENTS.md description listing them. The current shape.js implements 6 classes (Circle, Ellipse, Rect, Line, Polyline, Text).
+No `pxl-path` (SVG-like `d` attribute), `pxl-image`, `pxl-star`, `pxl-polygon`, `pxl-ring`, `pxl-arrow`, `pxl-triangle` — though these may have been in an earlier version based on the AGENTS.md description listing them. The current shape.js implements 7 classes (Circle, Ellipse, Rect, Line, Polyline, Text, Grid).
 
 ---
 
@@ -469,6 +476,8 @@ This is a **well-architected, performance-conscious, and genuinely original** fr
 2. **The pivot/offset coordinate system** — this is a novel API design that makes complex transforms (orbits, compound rotations, kinematic chains) trivial to express in HTML.
 
 3. **The "just write HTML" developer experience** — no imports, no build step, no initialization ceremony. `<script src="pxl.min.js">` and start typing `<pxl-circle>`. The distance from idea to working animation is remarkably short.
+
+4. **Infinite Viewport Matrix Clipping** — By taking the absolute corners of the screen and pushing them through the inverse of a shape's `globalMatrix` using a pre-allocated Float32 scratchpad, the engine intelligently clips infinite elements (like `pxl-grid`) to only draw what is physically visible. This scales flawlessly regardless of zoom, rotation, or deep group nesting.
 
 You've built a **reactive animation DSL embedded in HTML attributes**, compiled to JavaScript at runtime, with a performance model that degrades gracefully from zero-cost static values to per-frame expression evaluation. That's a sophisticated piece of engineering.
 

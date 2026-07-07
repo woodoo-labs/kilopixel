@@ -17,7 +17,7 @@
 - **Run Build Script**: Always run `node build.js` ONLY after modifying JavaScript files (e.g., inside the `js/` directory). Do not run the build script if only `.html`, `.md`, or non-source files were changed.
 
 ## Project Context
-- **Framework Overview**: This project is a custom "Declarative Canvas Framework" (`pixel`) that allows building HTML5 Canvas graphics using custom HTML elements like `<pxl-stage>`, `<pxl-layer>`, `<pxl-group>`, and shape elements (`<pxl-circle>`, `<pxl-rect>`, etc.).
+- **Framework Overview**: This project is a custom "Declarative Canvas Framework" (`pixel`) that allows building HTML5 Canvas graphics using custom HTML elements like `<pxl-stage>`, `<pxl-layer>`, `<pxl-group>`, and shape elements (`<pxl-circle>`, `<pxl-rect>`, `<pxl-grid>`, etc.).
 - **Dynamic Attributes**: Element attributes support inline JavaScript expressions and built-in animation functions (e.g., `wave()`, `glide()`, `t` for time). These are evaluated at runtime to animate properties.
 - **Coordinate System (CRITICAL)**: 
   - `x` and `y` define the absolute position and act as the **Pivot Point / Center** of the element. Transformations like `rotate` and `scale` occur around this `x/y` origin.
@@ -51,15 +51,22 @@
   - Other elements can declaratively bind to their properties at 60fps using the `ref.` prefix.
   - Example: `<pxl-circle id="leader" x="s.mouseX" y="s.mouseY" />` can be tracked by another shape using `x="ref.leader.x"` and `y="ref.leader.y"`.
   - The reactivity engine tracks these dependencies automatically and only re-evaluates when the referenced element actually updates its state.
+- **Coordinate Mapping (`toLocal`)**:
+  - Natively map the global position/rotation of any element into the local coordinate space of the current evaluating element using `toLocal(target, property)`.
+  - Supported properties: `'x'`, `'y'`, `'rotate'` (or `'r'`), `'scaleX'` (or `'sx'`), `'scaleY'` (or `'sy'`).
+  - Example: `<pxl-circle x="toLocal(ref.player, 'x')" y="toLocal(ref.player, 'y')" />` instantly tracks a player's coordinates even if the circle is inside a rotated/scaled parent group.
 - **Unified Reactive Variables (`ref.*`)**:
   - The framework uses a 100% explicit, zero-DOM-traversal, flat ID namespace. All "magic" context (`v.*`, `s.*`, `sys.*`) has been eliminated.
   - **The Golden Rule:** If you want to reference something in math, give it an HTML `id`.
-  - User Variables: `<pxl-var id="speed">` ➔ `ref.speed.value`
+  - User Variables: `<pxl-var id="speed" value="100">` ➔ `ref.speed.value`
   - Stage Properties: `<pxl-stage id="main">` ➔ `ref.main.mouseX`
     - Built-in properties: `mouseX`, `mouseY`, `isHovered`, `width` (always 1000), `height` (dynamic based on ratio), `fps`, `renderAvg`, `renderMax`.
   - Shape Properties: `<pxl-circle id="player">` ➔ `ref.player.x`
     - Built-in states: `isHovered`, `isPressed`. Example: `scale="ref.btn.isPressed ? 0.9 : (ref.btn.isHovered ? 1.1 : 1)"`
   - Layer Properties: `<pxl-layer id="bg">` ➔ *Note: Layer property referencing is planned but not fully implemented yet.*
+- **Polyline Points Syntax**:
+  - The `points` attribute for `<pxl-polyline>` uses a strict delimiter syntax: Points are separated by semicolons (`;`), and X/Y coordinates are separated by commas (`,`).
+  - Each coordinate can be an independent math expression! Example: `points="0,0; 100,wave(2)*50; 200,0"`
 
 ## Dual-Architecture for Interactions
 The framework uses a strict dual-architecture for handling mouse/touch input. The engine handles all inputs seamlessly for both Mouse and Touch screens natively via standard pointer events.
