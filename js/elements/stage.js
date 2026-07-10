@@ -44,7 +44,11 @@ class Stage extends HTMLElement {
     this.style.aspectRatio ||= '16 / 9';
 
     this.resizeObserver = new ResizeObserver(() => this.resize());
-    this.resizeObserver.observe(this, { box: 'device-pixel-content-box' });
+    try {
+      this.resizeObserver.observe(this, { box: 'device-pixel-content-box' });
+    } catch (e) {
+      this.resizeObserver.observe(this, { box: 'content-box' });
+    }
 
     this.addEventListener('pointermove', this.interaction);
     this.addEventListener('pointerdown', this.interaction);
