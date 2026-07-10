@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kilopixel - Introduction</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Kilopixel Engine -->
+  <script src="../dist/pxl.min.js"></script>
+  
+  <!-- Import our custom layout Web Components -->
+  <script src="js/docs-layout.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+      <h1>Kilopixel</h1>
+      <h2>The Declarative Canvas Framework <span class="subtitle-inline">— HTML5 Canvas, Reinvented.</span></h2>
+      <p class="lead">Kilopixel bridges the gap between the raw performance of the HTML5 Canvas and the ease of declarative HTML. Without needing to write a single line of JavaScript, you can build complex, responsive graphics using nothing but custom HTML tags like <code>&lt;pxl-stage&gt;</code> and <code>&lt;pxl-circle&gt;</code>.</p>
+      
+      <p class="lead">Powered by a lightning-fast evaluation engine, Kilopixel processes math expressions, element reactivity, and continuous animations natively at 60 frames per second — all with absolutely zero build tools required.</p>
+      
+      <h2>See it in Action</h2>
+      <p>The simple HTML snippet below generates the live, continuous canvas animation underneath it. Notice how the circle's movement and color are driven purely by mathematical expressions written directly inside the element's attributes!</p>
+      <pre><code class="language-html">&lt;!-- An autonomous, color-shifting circle gliding across the canvas --&gt;
+&lt;pxl-stage ratio="16 / 9"&gt;
+  &lt;pxl-layer x="500" y="280"&gt;
+    &lt;pxl-grid stroke="#f1f5f9" fill="#94a3b8" major="4" labels="true" labelsize="18"&gt;&lt;/pxl-grid&gt;
+    &lt;pxl-circle 
+      x="wave(4) * 300" 
+      y="0" 
+      r="40 + wave(2) * 20" 
+      fill="hsl(t * 100, 100%, 60%)" 
+    &gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+      <pxl-stage ratio="16 / 9" class="demo-stage">
+        <pxl-layer x="500" y="280">
+          <pxl-grid stroke="#f1f5f9" fill="#94a3b8" major="4" labels="true" labelsize="18"></pxl-grid>
+          <pxl-circle 
+            x="wave(4) * 300" 
+            y="0" 
+            r="40 + wave(2) * 20" 
+            fill="hsl(t * 100, 100%, 60%)" 
+          ></pxl-circle>
+        </pxl-layer>
+      </pxl-stage>
+      
+      <pxl-stage ratio="16 / 9" class="demo-stage">
+        <pxl-layer>
+          <pxl-circle x="500" y="200" r="40 + wave(2) * 20" stroke="grey" fill="yellow"></pxl-circle>
+        </pxl-layer>
+      </pxl-stage>
+
+      <h2>Why Kilopixel?</h2>
+      <ul>
+        <li><strong>Zero Build Steps:</strong> No NPM, Webpack, or bundling required. Just drop in a single script tag and start writing.</li>
+        <li><strong>Declarative Syntax:</strong> Describe your graphics visually using nested HTML Web Components.</li>
+        <li><strong>Native Reactivity:</strong> Bind properties to mouse coordinates, time, or other elements using the zero-GC <code>ref.*</code> registry.</li>
+        <li><strong>Blazing Fast:</strong> The internal engine bypasses the slow DOM entirely during the 60fps render loop.</li>
+      </ul>
+
+      <h2>Scrolling Test</h2>
+      <p>The container below is artificially tall to prove that the main content area scrolls independently while the sidebar and header remain locked in place.</p>
+      
+      <div style="height: 1200px; margin-top: 20px; border-radius: 8px; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.02) 10px, rgba(255,255,255,0.02) 20px); display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+        [ Dummy content extending the page height ]
+      </div>
+
+      <h2 style="margin-top: 40px;">Bottom of the Page</h2>
+      <p>You have successfully scrolled to the bottom while the sidebar remained sticky.</p>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Prism Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+</body>
+</html>

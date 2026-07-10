@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kilopixel - Shapes API</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Import our custom layout Web Components -->
+  <script src="js/docs-layout.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+      <h1>Shapes API</h1>
+      <p>The Shapes API allows you to draw and manipulate various geometric primitives natively within your declarative layers.</p>
+      
+      <h2>HTML Syntax</h2>
+      <p>You can create elements purely through HTML. Every shape has built-in coordinate logic (x, y, dx, dy) and natively evaluates mathematical expressions.</p>
+      
+      <pre><code class="language-html">&lt;pxl-stage ratio="16 / 9"&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-grid stroke="#f1f5f9" major="2" labels="true"&gt;&lt;/pxl-grid&gt;
+    &lt;pxl-circle x="500" y="200" r="50" fill="red"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-rect x="200" y="200" w="100" h="100" fill="blue"&gt;&lt;/pxl-rect&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+      <pxl-stage ratio="16 / 9" class="demo-stage">
+        <pxl-layer>
+          <pxl-grid stroke="#f1f5f9" major="2" labels="true"></pxl-grid>
+          <pxl-circle x="500" y="200" r="50" fill="red"></pxl-circle>
+          <pxl-rect x="200" y="200" w="100" h="100" fill="blue"></pxl-rect>
+        </pxl-layer>
+      </pxl-stage>
+      
+      <h2>Javascript Interactivity</h2>
+      <p>Because Kilopixel uses a zero-GC flat registry for all elements with an ID, you can instantly modify them via Javascript without needing to query the DOM.</p>
+      
+      <pre><code class="language-javascript">// Update coordinates instantly outside the DOM using .set()
+pxl.nodes.myCircle.set('x', 600);
+pxl.nodes.myCircle.set('fill', 'green');
+
+// Or use standard DOM APIs if you prefer
+const rect = document.querySelector('pxl-rect');
+rect.setAttribute('rotate', '45');</code></pre>
+
+      <h2>Advanced Highlighting Examples</h2>
+
+      <h3>Highlighting Specific Words</h3>
+      <p>Using the KeepMarkup plugin, you can wrap any word in a <code>&lt;mark&gt;</code> tag right in your HTML, and Prism will preserve it.</p>
+      
+      <pre><code class="language-html">&lt;pxl-stage id="main" <mark>ratio="16 / 9"</mark>&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-circle x="500" y="200" r="50"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Prism Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+</body>
+</html>

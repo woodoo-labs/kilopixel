@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kilopixel - Coordinates</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Kilopixel Engine -->
+  <script src="../dist/pxl.min.js"></script>
+  
+  <!-- Import our custom layout Web Components -->
+  <script src="js/docs-layout.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+      <h1>Coordinate System</h1>
+      <p class="lead">Understanding the coordinate system is the key to mastering Kilopixel. Unlike standard Canvas APIs which use physical pixels, Kilopixel uses a responsive, logic-based coordinate space designed for declarative markup.</p>
+      
+      <h2>The 1000px Logical Canvas <span class="subtitle-inline">— Yes, this is literally why it's named Kilopixel.</span></h2>
+      <p>To make graphics fully responsive without any media queries, every Kilopixel <code>&lt;pxl-stage&gt;</code> has a fixed <strong>logical width of 1000 units</strong>, regardless of the physical screen size.</p>
+      <p>This means an x-coordinate of <code>500</code> is <strong>always perfectly in the horizontal center</strong> of the canvas. The engine handles all the complex scaling math behind the scenes.</p>
+      
+      <pre><code class="language-html">&lt;pxl-stage ratio="16 / 9"&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-grid stroke="#f1f5f9" major="2" labels="true"&gt;&lt;/pxl-grid&gt;
+    
+    &lt;!-- Perfectly centered horizontally at x=500 --&gt;
+    &lt;pxl-circle x="500" y="280" r="50" fill="#3b82f6"&gt;&lt;/pxl-circle&gt;
+    
+    &lt;!-- A red arrow pointing to the 500x mark --&gt;
+    &lt;pxl-line 
+      x1="50" y1="280" 
+      x2="430" y2="280" 
+      stroke="#f43f5e" 
+      strokewidth="4" 
+      arrowend="auto"&gt;
+    &lt;/pxl-line&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+      <pxl-stage ratio="5 / 3" class="demo-stage">
+        <pxl-layer>
+          <pxl-grid stroke="#f1f5f9"></pxl-grid>
+          <pxl-circle x="500" y="280" r="50" fill="#3b82f6"></pxl-circle>
+          <pxl-line x1="50" y1="280" x2="430" y2="280" stroke="#f43f5e" strokewidth="4" arrowend="auto"></pxl-line>
+        </pxl-layer>
+      </pxl-stage>
+      
+      <h2>Pivot Points (x & y)</h2>
+      <p>In standard HTML/CSS, x and y usually refer to the top-left corner of an element. In Kilopixel, <code>x</code> and <code>y</code> always define the <strong>absolute center and pivot point</strong> of the shape.</p>
+      <p>When you apply a rotation (e.g., <code>rotate="t * 45"</code>), the shape rotates cleanly around this exact pivot point.</p>
+      
+      <pre><code class="language-html">&lt;pxl-stage ratio="16 / 9"&gt;
+  &lt;!-- We center the entire layer to simplify the math --&gt;
+  &lt;pxl-layer x="500" y="280"&gt;
+    &lt;pxl-grid stroke="#f1f5f9" major="2" labels="true"&gt;&lt;/pxl-grid&gt;
+    
+    &lt;!-- Rotating Square --&gt;
+    &lt;pxl-rect x="0" y="0" w="100" h="100" fill="#3b82f6" rotate="t * 45"&gt;&lt;/pxl-rect&gt;
+    
+    &lt;!-- Red dot marking the pivot point at 0,0 --&gt;
+    &lt;pxl-circle x="0" y="0" r="6" fill="#f43f5e"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+      <pxl-stage ratio="16 / 9" class="demo-stage">
+        <pxl-layer x="500" y="280">
+          <pxl-grid stroke="#f1f5f9" major="2" labels="true"></pxl-grid>
+          <pxl-rect x="0" y="0" w="100" h="100" fill="#3b82f6" rotate="t * 45"></pxl-rect>
+          <pxl-circle x="0" y="0" r="6" fill="#f43f5e"></pxl-circle>
+        </pxl-layer>
+      </pxl-stage>
+
+      <h2>Local Offsets (dx & dy)</h2>
+      <p>This is where Kilopixel's coordinate system shines. The <code>dx</code> and <code>dy</code> attributes apply a local offset <strong>after</strong> rotation and scaling.</p>
+      <p>By keeping the pivot point (<code>x/y</code>) fixed at the center, but offsetting the shape by <code>dx="150"</code>, you can create perfect orbital mechanics mathematically effortlessly!</p>
+      
+      <pre><code class="language-html">&lt;pxl-stage ratio="16 / 9"&gt;
+  &lt;pxl-layer x="500" y="280"&gt;
+    &lt;pxl-grid stroke="#f1f5f9" major="2" labels="true"&gt;&lt;/pxl-grid&gt;
+    
+    &lt;!-- The Sun (Pivot Point) --&gt;
+    &lt;pxl-circle x="0" y="0" r="30" fill="#f59e0b"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Orbiting Planet --&gt;
+    &lt;!-- It rotates around 0,0 but is pushed away by dx=150 --&gt;
+    &lt;pxl-circle 
+      x="0" y="0" 
+      dx="150" 
+      r="20" 
+      fill="#3b82f6" 
+      rotate="t * 90"&gt;
+    &lt;/pxl-circle&gt;
+    
+    &lt;!-- Red Arrow illustrating the dx offset vector --&gt;
+    &lt;pxl-line 
+      x="0" y="0" 
+      x1="45" y1="0" x2="115" y2="0" 
+      stroke="#f43f5e" strokewidth="4" arrowend="auto" 
+      rotate="t * 90"&gt;
+    &lt;/pxl-line&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+      <pxl-stage ratio="16 / 9" class="demo-stage">
+        <pxl-layer x="500" y="280">
+          <pxl-grid stroke="#f1f5f9" major="2" labels="true"></pxl-grid>
+          <pxl-circle x="0" y="0" r="30" fill="#f59e0b"></pxl-circle>
+          <pxl-circle x="0" y="0" dx="150" r="20" fill="#3b82f6" rotate="t * 90"></pxl-circle>
+          <pxl-line x="0" y="0" x1="45" y1="0" x2="115" y2="0" stroke="#f43f5e" strokewidth="4" arrowend="auto" rotate="t * 90"></pxl-line>
+        </pxl-layer>
+      </pxl-stage>
+
+      <pxl-stage id="stage" ratio="16 / 9" class="demo-stage">
+        <pxl-layer x="500" y="280">
+          <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+          
+
+          <pxl-circle r="20" fill="#f59e0b"></pxl-circle>
+          <pxl-line x1="0" y1="0" x2="toLocal(ref.circle, 'x')" y2="0" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
+          <pxl-line x1="0" y1="0" x2="0" y2="toLocal(ref.circle, 'y')" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
+
+          <pxl-line x1="45" y1="0" x2="115" y2="0" stroke="#f43f5e" strokewidth="4" arrowend="auto" rotate="t * 90"></pxl-line>
+
+          <pxl-circle id="circle" dx="150" r="20" fill="#3b82f6" rotate="t * 90"></pxl-circle>
+          <pxl-line x1="45" y1="0" x2="115" y2="0" stroke="#f43f5e" strokewidth="4" arrowend="auto" rotate="t * 90"></pxl-line>
+        </pxl-layer>
+      </pxl-stage>
+      
+      </div>
+    </main>
+  </div>
+  
+  <!-- Prism Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+</body>
+</html>
