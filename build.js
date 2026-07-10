@@ -68,6 +68,13 @@ function build() {
     const aliasPath = path.join(distDir, 'pxl.min.js');
     fs.copyFileSync(outputPath, aliasPath);
 
+    // 7. Copy alias to docs folder so GitHub Pages has it locally
+    const docsJsDir = path.join(__dirname, 'docs', 'js');
+    if (fs.existsSync(docsJsDir)) {
+      const docsAliasPath = path.join(docsJsDir, 'pxl.min.js');
+      fs.copyFileSync(outputPath, docsAliasPath);
+    }
+
     // Calculate sizes
     const minifiedCode = fs.readFileSync(outputPath, 'utf8');
     const originalSize = (Buffer.byteLength(code, 'utf8') / 1024).toFixed(2);
