@@ -266,3 +266,56 @@ body {
   padding: 24px;
   margin-bottom: 32px;
 }
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+  /* Reduce content padding on mobile */
+  .docs-inner {
+    padding: 24px 20px;
+  }
+  
+  /* Convert static sidebar into an off-canvas mobile menu */
+  .sidebar {
+    position: fixed;
+    top: 64px; /* Height of the header */
+    left: 0;
+    bottom: 0;
+    z-index: 50;
+    transform: translateX(-100%);
+    box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+  }
+  
+  /* The JS script toggles this class to slide the menu in */
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* Show the hamburger button */
+  #mobile-menu-btn {
+    display: block;
+  }
+
+  /* Hide the top-right text links to save space */
+  .header nav {
+    display: none;
+  }
+  
+  /* Reduce header padding */
+  .header {
+    padding: 0 20px;
+  }
+  
+  /* Make typography slightly tighter on mobile */
+  .docs-content h1 {
+    font-size: 2rem;
+  }
+  
+  .docs-content h2 {
+    font-size: 1.5rem;
+  }
+  
+  /* Shrink demo padding on mobile */
+  .demo-stage {
+    padding: 16px;
+  }
+}
