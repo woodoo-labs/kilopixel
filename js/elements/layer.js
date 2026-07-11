@@ -14,7 +14,7 @@ class Layer extends PxlNode {
     this.dpr = 1; // Overwritten by stage
 
     this.canvas = document.createElement('canvas');
-    this.canvas.style.cssText = 'display: block; position: absolute; left: 0; top: 0; width: 100%; height: 100%;';
+    this.canvas.style.cssText = 'display: block; position: absolute; inset: 0;';
     this.ctx = this.canvas.getContext('2d');
   }
 
