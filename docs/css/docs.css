@@ -41,6 +41,7 @@ body {
 .docs-content {
   flex: 1;
   overflow-y: auto;
+  min-width: 0;
 }
 
 .docs-inner {
@@ -256,6 +257,7 @@ body {
   margin-bottom: 16px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
+  overflow-x: auto;
 }
 
 .demo-stage {

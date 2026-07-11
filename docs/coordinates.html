@@ -136,10 +136,13 @@
           <pxl-line x1="0" y1="0" x2="toLocal(ref.circle, 'x')" y2="0" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
           <pxl-line x1="0" y1="0" x2="0" y2="toLocal(ref.circle, 'y')" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
 
-          <pxl-line x1="45" y1="0" x2="115" y2="0" stroke="#f43f5e" strokewidth="4" arrowend="auto" rotate="t * 90"></pxl-line>
+          <pxl-line x1="toLocal(ref.circle, 'x')" y1="-280" x2="toLocal(ref.circle, 'x')" y2="280" stroke="#94a3b8" strokewidth="1"></pxl-line>
+          <pxl-line x1="-500" y1="toLocal(ref.circle, 'y')" x2="500" y2="toLocal(ref.circle, 'y')" stroke="#94a3b8" strokewidth="1"></pxl-line>
 
           <pxl-circle id="circle" dx="150" r="20" fill="#3b82f6" rotate="t * 90"></pxl-circle>
-          <pxl-line x1="45" y1="0" x2="115" y2="0" stroke="#f43f5e" strokewidth="4" arrowend="auto" rotate="t * 90"></pxl-line>
+          <pxl-line x1="0" y1="0" x2="150" y2="0" stroke="#f43f5e" strokewidth="4" arrowend="auto" rotate="t * 90"></pxl-line>
+
+          <pxl-circle r="150" stroke="#f43f5e" strokewidth="2" end="loop(360 / 90) * 360" linedash="[5, 5]"></pxl-circle>
         </pxl-layer>
       </pxl-stage>
       
