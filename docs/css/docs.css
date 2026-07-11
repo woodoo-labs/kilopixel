@@ -42,11 +42,13 @@ body {
   flex: 1;
   overflow-y: auto;
   min-width: 0;
+  width: 100%;
 }
 
 .docs-inner {
   padding: 40px 60px;
   max-width: 900px;
+  width: 100%;
   margin: 0 auto;
 }
 
