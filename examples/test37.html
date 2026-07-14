@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test 37 — Aurora Mechanica</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      background: #020208;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    pxl-stage { width: 100vw; max-width: 1920px; }
+  </style>
+  <script src="../dist/pxl.min.js"></script>
+</head>
+<body>
+
+<!-- Variables for interactivity -->
+<pxl-stage id="s" ratio="16 / 9">
+  <pxl-var id="clicks" value="0"></pxl-var>
+  <pxl-var id="energy" value="50 + wave(6) * 50"></pxl-var>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- LAYER 1: COSMOS — Deep space background, grid, stars, nebula  -->
+  <!-- Total shapes: 24                                              -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <pxl-layer>
+
+    <!-- [1] Deep space background with radial gradient -->
+    <pxl-rect x="500" y="281" w="1000" h="563"
+      fill="radial(1.4, [0, '#0d0d35', 0.4, '#080820', 1, '#020208'])"/>
+
+    <!-- [2] Subtle animated synthwave grid -->
+    <pxl-grid x="500" y="281" step="40" major="5"
+      stroke="hsla(240, 60%, 20%, 0.06)" strokewidth="0.3"
+      rotate="t * 0.3" scale="1 + wave(40) * 0.03"/>
+
+    <!-- [3-18] Star field — 16 twinkling stars using pulse() driver -->
+    <pxl-circle x="78"  y="42"  r="1.5 + pulse(2.8) * 2"   fill="white"   alpha="0.4 + pulse(2.8) * 0.6"/>
+    <pxl-circle x="230" y="95"  r="1 + pulse(3.5) * 1.5"    fill="#aaddff" alpha="0.3 + pulse(3.5) * 0.7"/>
+    <pxl-circle x="415" y="32"  r="1 + pulse(4.2) * 2"      fill="white"   alpha="0.5 + pulse(4.2) * 0.5"/>
+    <pxl-circle x="620" y="58"  r="1.5 + pulse(2.1) * 1"    fill="#ffeedd" alpha="0.6 + pulse(2.1) * 0.4"/>
+    <pxl-circle x="780" y="105" r="1 + pulse(5.0) * 2.5"    fill="#ccddff" alpha="0.3 + pulse(5.0) * 0.7"/>
+    <pxl-circle x="920" y="40"  r="1 + pulse(3.0) * 1.5"    fill="white"   alpha="0.4 + pulse(3.0) * 0.6"/>
+    <pxl-circle x="55"  y="200" r="1 + pulse(4.7) * 2"      fill="#ffd4e8" alpha="0.35 + pulse(4.7) * 0.65"/>
+    <pxl-circle x="950" y="220" r="1.5 + pulse(2.5) * 1"    fill="white"   alpha="0.5 + pulse(2.5) * 0.5"/>
+    <pxl-circle x="160" y="480" r="1 + pulse(3.8) * 2"      fill="#aaddff" alpha="0.4 + pulse(3.8) * 0.6"/>
+    <pxl-circle x="340" y="520" r="1.5 + pulse(5.5) * 1.5"  fill="white"   alpha="0.3 + pulse(5.5) * 0.7"/>
+    <pxl-circle x="680" y="500" r="1 + pulse(2.3) * 2"      fill="#ffeedd" alpha="0.5 + pulse(2.3) * 0.5"/>
+    <pxl-circle x="850" y="470" r="1 + pulse(4.0) * 1.5"    fill="#ccddff" alpha="0.4 + pulse(4.0) * 0.6"/>
+    <pxl-circle x="45"  y="350" r="1 + pulse(3.3) * 2.5"    fill="white"   alpha="0.35 + pulse(3.3) * 0.65"/>
+    <pxl-circle x="970" y="380" r="1.5 + pulse(4.5) * 1"    fill="#ffd4e8" alpha="0.5 + pulse(4.5) * 0.5"/>
+    <pxl-circle x="500" y="15"  r="1 + pulse(6.0) * 2"      fill="white"   alpha="0.3 + pulse(6.0) * 0.7"/>
+    <pxl-circle x="500" y="545" r="1 + pulse(3.7) * 1.5"    fill="#aaddff" alpha="0.4 + pulse(3.7) * 0.6"/>
+
+    <!-- [19-24] Nebula clouds — large semi-transparent radial gradients -->
+    <pxl-circle x="280" y="160" r="180"
+      fill="radial(0.8, [hsla(280, 80, 30, 0.06), 'transparent'])"
+      dx="20" rotate="t * 0.5"/>
+    <pxl-circle x="720" y="380" r="200"
+      fill="radial(0.9, [hsla(200, 90, 30, 0.05), 'transparent'])"
+      dx="-15" rotate="t * -0.3"/>
+    <pxl-circle x="500" y="281" r="260"
+      fill="radial(0.7, [hsla(320, 70, 25, 0.04), 'transparent'])"
+      scale="1 + wave(20) * 0.05"/>
+    <pxl-circle x="130" y="440" r="150"
+      fill="radial(0.8, [hsla(180, 80, 25, 0.05), 'transparent'])"
+      dx="10" rotate="t * 0.2"/>
+    <pxl-circle x="870" y="100" r="160"
+      fill="radial(0.8, [hsla(260, 80, 30, 0.05), 'transparent'])"
+      dx="-10" rotate="t * -0.4"/>
+    <pxl-circle x="500" y="281" r="300"
+      fill="radial(0.6, [hsla(190, 90, 20, 0.03), 'transparent'])"
+      rotate="t * 0.15"/>
+
+  </pxl-layer>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- LAYER 2: MANDALA ENGINE — The geometric centerpiece            -->
+  <!-- Total shapes: ~52                                              -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <pxl-layer>
+
+    <!-- ─── CENTRAL CORE ─── -->
+
+    <!-- [25] Core outer glow — pulsating blur filter -->
+    <pxl-circle x="500" y="281" r="65 + wave(4) * 20"
+      fill="radial(1, [0, hsla(185, 100, 60, 0.25), 1, 'transparent'])"
+      filter="`blur(${2 + wave(4) * 4}px)`"/>
+
+    <!-- [26] Core body — radial gradient, breathing -->
+    <pxl-circle x="500" y="281" r="22 + wave(4) * 6"
+      fill="radial(0.5, [0, '#ffffff', 0.3, '#00e5ff', 0.8, '#0066cc', 1, '#002255'])"
+      stroke="#00e5ff" strokewidth="1"/>
+
+    <!-- [27] Core inner ring — spinning donut showcase -->
+    <pxl-circle x="500" y="281" r="38 + wave(4) * 8" ir="33 + wave(4) * 7"
+      stroke="hsla(185, 100%, 70%, 0.5)" strokewidth="0.8" fill="none"
+      rotate="t * -60"/>
+
+    <!-- [28] Energy ring — arc with animated sweep (pie/arc showcase) -->
+    <pxl-circle x="500" y="281" r="48 + wave(4) * 5" 
+      start="t * 90" sweep="ref.energy.value * 3.6"
+      stroke="#00e5ff" strokewidth="2" fill="none"
+      linedash="[1, 3]"/>
+
+    <!-- ─── RING 1: OUTER ZODIAC (radius 220, rotating clockwise at 8°/s) ─── -->
+    <pxl-group x="500" y="281" rotate="t * 8">
+
+      <!-- [29] Ring track -->
+      <pxl-circle r="220" stroke="hsla(200, 80%, 50%, 0.12)" strokewidth="0.5" fill="none"/>
+
+      <!-- [30-41] 12 orbiting markers — rainbow HSL cycling via loop() -->
+      <pxl-circle rotate="0"   dx="220" r="6 + wave(3.0) * 3" fill="hsl(loop(15) * 360, 80, 60)" stroke="hsl(loop(15) * 360, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="30"  dx="220" r="6 + wave(3.2) * 3" fill="hsl(loop(15) * 360 + 30, 80, 60)" stroke="hsl(loop(15) * 360 + 30, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="60"  dx="220" r="6 + wave(3.4) * 3" fill="hsl(loop(15) * 360 + 60, 80, 60)" stroke="hsl(loop(15) * 360 + 60, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="90"  dx="220" r="6 + wave(3.6) * 3" fill="hsl(loop(15) * 360 + 90, 80, 60)" stroke="hsl(loop(15) * 360 + 90, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="120" dx="220" r="6 + wave(3.8) * 3" fill="hsl(loop(15) * 360 + 120, 80, 60)" stroke="hsl(loop(15) * 360 + 120, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="150" dx="220" r="6 + wave(4.0) * 3" fill="hsl(loop(15) * 360 + 150, 80, 60)" stroke="hsl(loop(15) * 360 + 150, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="180" dx="220" r="6 + wave(4.2) * 3" fill="hsl(loop(15) * 360 + 180, 80, 60)" stroke="hsl(loop(15) * 360 + 180, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="210" dx="220" r="6 + wave(4.4) * 3" fill="hsl(loop(15) * 360 + 210, 80, 60)" stroke="hsl(loop(15) * 360 + 210, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="240" dx="220" r="6 + wave(4.6) * 3" fill="hsl(loop(15) * 360 + 240, 80, 60)" stroke="hsl(loop(15) * 360 + 240, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="270" dx="220" r="6 + wave(4.8) * 3" fill="hsl(loop(15) * 360 + 270, 80, 60)" stroke="hsl(loop(15) * 360 + 270, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="300" dx="220" r="6 + wave(5.0) * 3" fill="hsl(loop(15) * 360 + 300, 80, 60)" stroke="hsl(loop(15) * 360 + 300, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="330" dx="220" r="6 + wave(5.2) * 3" fill="hsl(loop(15) * 360 + 330, 80, 60)" stroke="hsl(loop(15) * 360 + 330, 90, 80)" strokewidth="0.5"/>
+
+    </pxl-group>
+
+    <!-- ─── RING 2: MIDDLE RING (radius 150, counter-rotating, rects) ─── -->
+    <pxl-group x="500" y="281" rotate="t * -15">
+
+      <!-- [42] Ring track — animated dashed circle -->
+      <pxl-circle r="150" stroke="hsla(320, 80%, 50%, 0.15)" strokewidth="0.5" fill="none"
+        linedash="[6, 8]" dashoffset="t * 30"/>
+
+      <!-- [43-50] 8 orbiting diamond-rects with per-corner radii -->
+      <pxl-group rotate="0"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(320, 80%, 55%, 0.7)" stroke="#ff00aa" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+      <pxl-group rotate="45"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(340, 80%, 55%, 0.7)" stroke="#ff0066" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+      <pxl-group rotate="90"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(300, 80%, 55%, 0.7)" stroke="#cc00ff" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+      <pxl-group rotate="135"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(280, 80%, 55%, 0.7)" stroke="#8800ff" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+      <pxl-group rotate="180"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(320, 80%, 55%, 0.7)" stroke="#ff00aa" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+      <pxl-group rotate="225"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(340, 80%, 55%, 0.7)" stroke="#ff0066" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+      <pxl-group rotate="270"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(300, 80%, 55%, 0.7)" stroke="#cc00ff" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+      <pxl-group rotate="315"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(280, 80%, 55%, 0.7)" stroke="#8800ff" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+
+    </pxl-group>
+
+    <!-- ─── RING 3: INNER RING (radius 85, fast rotation, ellipses) ─── -->
+    <pxl-group x="500" y="281" rotate="t * 25">
+
+      <!-- [51] Ring track -->
+      <pxl-circle r="85" stroke="hsla(45, 90%, 50%, 0.15)" strokewidth="0.5" fill="none"/>
+
+      <!-- [52-57] 6 orbiting ellipses — showcasing pxl-ellipse -->
+      <pxl-group rotate="0"><pxl-ellipse dx="85" rx="8" ry="5" fill="hsla(45, 90%, 60%, 0.8)" stroke="#ffbb00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
+      <pxl-group rotate="60"><pxl-ellipse dx="85" rx="8" ry="5" fill="hsla(35, 90%, 60%, 0.8)" stroke="#ffaa00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
+      <pxl-group rotate="120"><pxl-ellipse dx="85" rx="8" ry="5" fill="hsla(55, 90%, 60%, 0.8)" stroke="#ffcc00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
+      <pxl-group rotate="180"><pxl-ellipse dx="85" rx="8" ry="5" fill="hsla(45, 90%, 60%, 0.8)" stroke="#ffbb00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
+      <pxl-group rotate="240"><pxl-ellipse dx="85" rx="8" ry="5" fill="hsla(35, 90%, 60%, 0.8)" stroke="#ffaa00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
+      <pxl-group rotate="300"><pxl-ellipse dx="85" rx="8" ry="5" fill="hsla(55, 90%, 60%, 0.8)" stroke="#ffcc00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
+
+    </pxl-group>
+
+    <!-- ─── DECORATIVE ARCS — scanning beams with arrows ─── -->
+
+    <!-- [58] Scanning arc A — clockwise, with arrow -->
+    <pxl-circle x="500" y="281" r="185" start="t * 25" sweep="50"
+      stroke="#00e5ff" strokewidth="1.5" fill="none"
+      linedash="[2, 6]" arrowend="auto" arrowstyle="filled"/>
+
+    <!-- [59] Scanning arc B — counter, magenta -->
+    <pxl-circle x="500" y="281" r="185" start="t * -18 + 180" sweep="40"
+      stroke="#ff00aa" strokewidth="1.5" fill="none"
+      linedash="[2, 6]" arrowend="auto" arrowstyle="line"/>
+
+    <!-- [60] Outer boundary circle — very faint -->
+    <pxl-circle x="500" y="281" r="260"
+      stroke="hsla(200, 60%, 40%, 0.08)" strokewidth="0.3" fill="none"/>
+
+    <!-- [61] Anticlockwise energy arc with glide() smoothness -->
+    <pxl-circle x="500" y="281" r="260" 
+      start="glide(8) * 360" sweep="120" anticlockwise="true"
+      stroke="hsla(180, 100%, 50%, 0.12)" strokewidth="2" fill="none"/>
+
+    <!-- [62-63] Pie slice indicators (energy gauge) -->
+    <pxl-circle x="500" y="281" r="55" start="-90" sweep="ref.energy.value * 3.6"
+      fill="hsla(120, 80%, 40%, 0.15)" stroke="none" pie="true"/>
+    <pxl-circle x="500" y="281" r="55" start="-90" sweep="-ref.energy.value * 1.8"
+      fill="hsla(0, 80%, 40%, 0.1)" stroke="none" pie="true"/>
+
+    <!-- [64-67] Cross-hair lines from center — with arrows -->
+    <pxl-line x="500" y="281" x1="0" y1="-65" x2="0" y2="-180" stroke="hsla(200, 80%, 60%, 0.15)" strokewidth="0.5" arrowend="6" arrowstyle="line"/>
+    <pxl-line x="500" y="281" x1="0" y1="65" x2="0" y2="180" stroke="hsla(200, 80%, 60%, 0.15)" strokewidth="0.5" arrowend="6" arrowstyle="line"/>
+    <pxl-line x="500" y="281" x1="-65" y1="0" x2="-180" y2="0" stroke="hsla(200, 80%, 60%, 0.15)" strokewidth="0.5" arrowend="6" arrowstyle="line"/>
+    <pxl-line x="500" y="281" x1="65" y1="0" x2="180" y2="0" stroke="hsla(200, 80%, 60%, 0.15)" strokewidth="0.5" arrowend="6" arrowstyle="line"/>
+
+    <!-- [68] Smooth animated polyline — web pattern around mandala -->
+    <pxl-polyline x="500" y="281" smooth="0.8"
+      points="0,wave(3)*-240; wave(4)*200,wave(5)*-120; wave(2.5)*240,0; wave(4.5)*200,wave(3.5)*120; 0,wave(2.8)*240; wave(5.5)*-200,wave(4.2)*120; wave(3.2)*-240,0; wave(4.8)*-200,wave(5.8)*-120"
+      stroke="hsla(200, 100%, 60%, 0.08)" strokewidth="0.5" fill="none" closed="true"/>
+
+    <!-- [69] Elliptical orbit track — tilted -->
+    <pxl-ellipse x="500" y="281" rx="240" ry="100" rotate="25"
+      stroke="hsla(270, 60%, 50%, 0.08)" strokewidth="0.3" fill="none"
+      linedash="[3, 6]"/>
+
+    <!-- [70] Second elliptical orbit — opposite tilt -->
+    <pxl-ellipse x="500" y="281" rx="240" ry="100" rotate="-25"
+      stroke="hsla(180, 60%, 50%, 0.08)" strokewidth="0.3" fill="none"
+      linedash="[3, 6]"/>
+
+    <!-- ─── ORBITING PLANET SYSTEMS ─── -->
+
+    <!-- [71-73] Planet A — orbiting on tilted ellipse path -->
+    <pxl-group x="500" y="281" rotate="25">
+      <pxl-circle id="planetA" rotate="t * 12" dx="240" dy="0" scaley="0.417" r="10"
+        fill="radial(0.7, ['#66ffcc', '#00aa66'])" stroke="#00ffaa" strokewidth="0.5"
+        filter="`drop-shadow(0 0 ${4 + wave(2) * 4}px #00ffaa)`"/>
+      <!-- Moon of Planet A — nested orbit! -->
+      <pxl-group rotate="t * 12" dx="240" scaley="0.417">
+        <pxl-circle rotate="t * 60" dx="18" r="3" fill="#aaffdd" stroke="none"/>
+      </pxl-group>
+    </pxl-group>
+
+    <!-- [74-75] Planet B — opposite orbit -->
+    <pxl-group x="500" y="281" rotate="-25">
+      <pxl-circle rotate="t * -9" dx="240" dy="0" scaley="0.417" r="8"
+        fill="radial(0.7, ['#ff99cc', '#cc0066'])" stroke="#ff66aa" strokewidth="0.5"
+        filter="`drop-shadow(0 0 ${3 + wave(3) * 3}px #ff66aa)`"/>
+    </pxl-group>
+
+    <!-- [76] Counter-rotating dashed circle with strobe() -->
+    <pxl-circle x="500" y="281" r="195"
+      stroke="hsla(200, 60%, 50%, 0.06)" strokewidth="0.5" fill="none"
+      linedash="[1, 15]" dashoffset="t * -40"
+      alpha="0.5 + strobe(4) * 0.3"/>
+
+  </pxl-layer>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- LAYER 3: INTERACTIVE — Mouse tracking, hover nodes, toLocal   -->
+  <!-- Total shapes: ~20                                              -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <pxl-layer>
+
+    <!-- [77] Mouse glow — large soft follower -->
+    <pxl-circle x="ref.s.mouseX" y="ref.s.mouseY" r="60"
+      fill="radial(0.8, [hsla(185, 100, 60, 0.06), 'transparent'])"
+      filter="blur(3px)"
+      blend="screen"/>
+
+    <!-- [78] Mouse crosshair — precise follower -->
+    <pxl-circle x="ref.s.mouseX" y="ref.s.mouseY" r="8"
+      stroke="#00e5ff" strokewidth="0.5" fill="none"
+      alpha="ref.s.isHovered ? 0.6 : 0"/>
+
+    <!-- [79] Mouse ring — expanding/contracting -->
+    <pxl-circle x="ref.s.mouseX" y="ref.s.mouseY" r="15 + wave(1.5) * 5"
+      stroke="hsla(185, 100%, 70%, 0.3)" strokewidth="0.3" fill="none"
+      alpha="ref.s.isHovered ? 0.5 : 0"/>
+
+    <!-- ─── INTERACTIVE POWER NODES (4 corners) ─── -->
+
+    <!-- [80-81] Top-left node: CYAN — uses bounce() driver -->
+    <pxl-rect id="nodeA" x="80" y="60" w="40" h="40" r="8"
+      fill="ref.nodeA.isPressed ? '#00ccdd' : (ref.nodeA.isHovered ? '#005566' : '#002233')"
+      stroke="ref.nodeA.isHovered ? '#00e5ff' : '#004455'" strokewidth="1"
+      scale="ref.nodeA.isPressed ? 0.9 : (ref.nodeA.isHovered ? 1.15 : 1)"
+      filter="ref.nodeA.isHovered ? `drop-shadow(0 0 8px #00e5ff)` : 'none'"
+      onclick="ref.clicks.set('value', ref.clicks.value + 1)"/>
+    <pxl-text x="80" y="60" text="'⬡'" size="16" fill="#00e5ff" align="center" baseline="middle"
+      alpha="0.5 + bounce(2) * 0.5"/>
+
+    <!-- [82-83] Top-right node: MAGENTA — uses yoyo() driver -->
+    <pxl-rect id="nodeB" x="920" y="60" w="40" h="40" r="8"
+      fill="ref.nodeB.isPressed ? '#cc0088' : (ref.nodeB.isHovered ? '#550033' : '#220022')"
+      stroke="ref.nodeB.isHovered ? '#ff00aa' : '#440044'" strokewidth="1"
+      scale="ref.nodeB.isPressed ? 0.9 : (ref.nodeB.isHovered ? 1.15 : 1)"
+      filter="ref.nodeB.isHovered ? `drop-shadow(0 0 8px #ff00aa)` : 'none'"
+      onclick="ref.clicks.set('value', ref.clicks.value + 1)"/>
+    <pxl-text x="920" y="60" text="'◈'" size="16" fill="#ff00aa" align="center" baseline="middle"
+      alpha="0.5 + yoyo(2) * 0.5"/>
+
+    <!-- [84-85] Bottom-left node: GOLD — uses glide() driver -->
+    <pxl-rect id="nodeC" x="80" y="502" w="40" h="40" r="8"
+      fill="ref.nodeC.isPressed ? '#cc8800' : (ref.nodeC.isHovered ? '#553300' : '#221a00')"
+      stroke="ref.nodeC.isHovered ? '#ffbb00' : '#443300'" strokewidth="1"
+      scale="ref.nodeC.isPressed ? 0.9 : (ref.nodeC.isHovered ? 1.15 : 1)"
+      filter="ref.nodeC.isHovered ? `drop-shadow(0 0 8px #ffbb00)` : 'none'"
+      onclick="ref.clicks.set('value', ref.clicks.value + 1)"/>
+    <pxl-text x="80" y="502" text="'◇'" size="16" fill="#ffbb00" align="center" baseline="middle"
+      alpha="0.5 + glide(2) * 0.5"/>
+
+    <!-- [86-87] Bottom-right node: VIOLET — uses glitch() driver -->
+    <pxl-rect id="nodeD" x="920" y="502" w="40" h="40" r="8"
+      fill="ref.nodeD.isPressed ? '#7700cc' : (ref.nodeD.isHovered ? '#330055' : '#1a0033')"
+      stroke="ref.nodeD.isHovered ? '#aa44ff' : '#330055'" strokewidth="1"
+      scale="ref.nodeD.isPressed ? 0.9 : (ref.nodeD.isHovered ? 1.15 : 1)"
+      filter="ref.nodeD.isHovered ? `drop-shadow(0 0 8px #aa44ff)` : 'none'"
+      onclick="ref.clicks.set('value', ref.clicks.value + 1)"/>
+    <pxl-text x="920" y="502" text="'✦'" size="16" fill="#aa44ff" align="center" baseline="middle"
+      alpha="0.3 + glitch(0.5) * 0.7"/>
+
+    <!-- [88-89] Connecting polylines with arrows — linking nodes to center -->
+    <pxl-polyline smooth="1"
+      points="80,60; 200,150; 380,220; 500,281"
+      stroke="hsla(185, 100%, 60%, 0.06)" strokewidth="0.5" fill="none"
+      arrowend="auto" arrowstyle="line"/>
+    <pxl-polyline smooth="1"
+      points="920,502; 800,420; 620,340; 500,281"
+      stroke="hsla(270, 80%, 60%, 0.06)" strokewidth="0.5" fill="none"
+      arrowend="auto" arrowstyle="line"/>
+
+    <!-- [90-91] toLocal() showcase — tracker follows planetA across coordinate spaces -->
+    <pxl-circle
+      x="toLocal(ref.planetA, 'x')" y="toLocal(ref.planetA, 'y')" r="18"
+      stroke="#00ffaa" strokewidth="0.5" fill="none"
+      linedash="[3, 3]" alpha="0.5"/>
+    <pxl-circle
+      x="toLocal(ref.planetA, 'x')" y="toLocal(ref.planetA, 'y')" r="22"
+      stroke="#00ffaa" strokewidth="0.3" fill="none"
+      alpha="0.3" rotate="t * -30"/>
+
+    <!-- [92-93] Self-referencing showcase — circle whose color depends on its own position -->
+    <pxl-circle x="500 + sin(t * 0.7) * 280" y="281 + cos(t * 1.1) * 120" r="6"
+      fill="`hsl(${this.attributeValues.x / 3}, 80%, 60%)`"
+      stroke="`hsl(${this.attributeValues.x / 3}, 90%, 80%)`"
+      strokewidth="0.5"
+      alpha="0.7"/>
+    <pxl-circle x="500 + sin(t * 0.7 + PI) * 280" y="281 + cos(t * 1.1 + PI) * 120" r="6"
+      fill="`hsl(${this.attributeValues.x / 3 + 180}, 80%, 60%)`"
+      stroke="`hsl(${this.attributeValues.x / 3 + 180}, 90%, 80%)`"
+      strokewidth="0.5"
+      alpha="0.7"/>
+
+    <!-- [94-95] Arrow showcase — animated line with dual arrows -->
+    <pxl-line x="500" y="281"
+      x1="cos(t * 2) * 250" y1="sin(t * 2) * 250"
+      x2="cos(t * 2 + PI) * 250" y2="sin(t * 2 + PI) * 250"
+      stroke="hsla(200, 80%, 60%, 0.08)" strokewidth="1"
+      arrowstart="auto" arrowend="auto" arrowstyle="filled"/>
+
+  </pxl-layer>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- LAYER 4: HUD — Title, stats, decorative overlays              -->
+  <!-- Total shapes: ~18                                              -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <pxl-layer>
+
+    <!-- [96] Title — with letter-spacing animation -->
+    <pxl-text x="500" y="30" text="'AURORA MECHANICA'" 
+      size="28" font="monospace" weight="bold" align="center" baseline="top"
+      fill="linear(0, ['#00e5ff', '#ff00aa', '#ffbb00'])"
+      letterspacing="2 + wave(10) * 4" alpha="0.8"/>
+
+    <!-- [97] Subtitle — with reveal typewriter effect -->
+    <pxl-text x="500" y="540" 
+      text="'A declarative canvas engine. Every shape you see is pure HTML.'"
+      size="11" font="monospace" align="center" baseline="bottom"
+      fill="hsla(200, 60%, 60%, 0.5)"
+      reveal="clamp(t / 8, 0, 1)" width="600"/>
+
+    <!-- [98] FPS counter — reactive to stage telemetry -->
+    <pxl-text x="20" y="555"
+      text="ref.s.fps + ' FPS  |  ' + ref.s.renderAvg + 'ms'"
+      size="10" font="monospace" fill="#00e5ff" alpha="0.5"
+      baseline="bottom"/>
+
+    <!-- [99] Click counter text -->
+    <pxl-text x="500" y="510"
+      text="`INTERACTIONS: ${ref.clicks.value}`"
+      size="10" font="monospace" fill="#ffbb00" alpha="0.6"
+      align="center" baseline="bottom"/>
+
+    <!-- [100] Energy gauge text -->
+    <pxl-text x="980" y="555"
+      text="`ENERGY: ${Math.round(ref.energy.value)}%`"
+      size="10" font="monospace" fill="hsl(120, 80, 50)" alpha="0.5"
+      align="end" baseline="bottom"/>
+
+    <!-- [101-104] Corner brackets — top-left -->
+    <pxl-line x1="15" y1="10" x2="15" y2="30" stroke="#00e5ff" strokewidth="0.5" alpha="0.3"/>
+    <pxl-line x1="15" y1="10" x2="45" y2="10" stroke="#00e5ff" strokewidth="0.5" alpha="0.3"/>
+    <!-- bottom-right -->
+    <pxl-line x1="985" y1="552" x2="985" y2="532" stroke="#00e5ff" strokewidth="0.5" alpha="0.3"/>
+    <pxl-line x1="985" y1="552" x2="955" y2="552" stroke="#00e5ff" strokewidth="0.5" alpha="0.3"/>
+
+    <!-- [105-108] Decorative HUD scan lines -->
+    <pxl-line x1="120" y1="30" x2="400" y2="30" stroke="#00e5ff" strokewidth="0.3" alpha="0.15"/>
+    <pxl-line x1="600" y1="30" x2="880" y2="30" stroke="#ff00aa" strokewidth="0.3" alpha="0.15"/>
+    <pxl-line x1="120" y1="540" x2="440" y2="540" stroke="#ffbb00" strokewidth="0.3" alpha="0.15"/>
+    <pxl-line x1="560" y1="540" x2="880" y2="540" stroke="#aa44ff" strokewidth="0.3" alpha="0.15"/>
+
+    <!-- [109-112] Pulsing indicator dots on HUD lines -->
+    <pxl-circle x="120" y="30" r="2" fill="#00e5ff" alpha="0.3 + strobe(1.5) * 0.4"/>
+    <pxl-circle x="880" y="30" r="2" fill="#ff00aa" alpha="0.3 + strobe(1.8) * 0.4"/>
+    <pxl-circle x="120" y="540" r="2" fill="#ffbb00" alpha="0.3 + strobe(2.1) * 0.4"/>
+    <pxl-circle x="880" y="540" r="2" fill="#aa44ff" alpha="0.3 + strobe(2.4) * 0.4"/>
+
+    <!-- [113] Glitchy timestamp text — uses glitch() driver -->
+    <pxl-text x="500" y="15"
+      text="`SYS.T: ${(t).toFixed(2)}s  //  REF.NODES: ${Object.keys(ref).length}`"
+      size="8" font="monospace" fill="hsla(120, 60%, 50%, 0.3)"
+      align="center" baseline="top"
+      alpha="0.4 + glitch(0.3) * 0.3"/>
+
+  </pxl-layer>
+
+</pxl-stage>
+
+</body>
+</html>
