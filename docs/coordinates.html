@@ -67,7 +67,7 @@
       <pre><code class="language-html">&lt;!-- Placing a shape exactly in the center of the canvas --&gt;
 &lt;pxl-stage ratio="16 / 9"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-circle x="500" y="281" r="50" fill="#3b82f6"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="<span id="codeEx1X" style="color: #f43f5e; font-weight: bold;">500</span>" y="<span id="codeEx1Y" style="color: #f43f5e; font-weight: bold;">281</span>" r="50" fill="#3b82f6"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -102,12 +102,12 @@
         <div class="control-group">
           <label>X-Coordinate <span id="lblEx1X">500</span></label>
           <input type="range" min="0" max="1000" value="500" 
-            oninput="pxl.nodes.ex1X.set('value', Number(this.value)); document.getElementById('lblEx1X').innerText = this.value;">
+            oninput="pxl.nodes.ex1X.set('value', Number(this.value)); document.getElementById('lblEx1X').innerText = this.value; document.getElementById('codeEx1X').innerText = this.value;">
         </div>
         <div class="control-group">
           <label>Y-Coordinate <span id="lblEx1Y">281</span></label>
           <input type="range" min="0" max="562" value="281" 
-            oninput="pxl.nodes.ex1Y.set('value', Number(this.value)); document.getElementById('lblEx1Y').innerText = this.value;">
+            oninput="pxl.nodes.ex1Y.set('value', Number(this.value)); document.getElementById('lblEx1Y').innerText = this.value; document.getElementById('codeEx1Y').innerText = this.value;">
         </div>
       </div>
       
