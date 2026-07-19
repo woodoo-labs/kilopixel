@@ -71,22 +71,45 @@
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
+      <!-- Reactive Variables for Playground -->
+      <pxl-var id="ex1X" value="500"></pxl-var>
+      <pxl-var id="ex1Y" value="281"></pxl-var>
+
       <pxl-stage ratio="16 / 9" class="demo-stage">
         <pxl-layer>
           <!-- Helper Grid & Crosshairs (Not shown in snippet) -->
           <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
           <pxl-line x1="500" y1="0" x2="500" y2="562.5" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
           <pxl-line x1="0" y1="281" x2="1000" y2="281" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
-          <!-- The actual shape -->
-          <pxl-circle x="500" y="281" r="50" fill="#bfdbfe" stroke="#3b82f6" strokewidth="2"></pxl-circle>
-          
-          <!-- Center Dot -->
-          <pxl-circle x="500" y="281" r="5" fill="#f43f5e"></pxl-circle>
 
-          <!-- Coordinate Label -->
-          <pxl-text x="515" y="260" text="'(500, 281)'" size="18" fill="#f43f5e" font="monospace"></pxl-text>
+          <!-- Layer Origin Marker -->
+          <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
+          <pxl-text x="15" y="25" text="'Layer (0, 0)'" size="22" fill="#8b5cf6" font="monospace"></pxl-text>
+
+          <!-- The actual shape -->
+          <pxl-circle x="ref.ex1X.value" y="ref.ex1Y.value" r="50" fill="#bfdbfe" stroke="#3b82f6" strokewidth="2"></pxl-circle>
+          
+          <!-- Shape Pivot Dot -->
+          <pxl-circle x="ref.ex1X.value" y="ref.ex1Y.value" r="5" fill="#f43f5e"></pxl-circle>
+
+          <!-- Dynamic Coordinate Label -->
+          <pxl-text x="ref.ex1X.value + 15" y="ref.ex1Y.value + 25" text="`(${Math.round(ref.ex1X.value)}, ${Math.round(ref.ex1Y.value)})`" size="22" fill="#f43f5e" font="monospace"></pxl-text>
         </pxl-layer>
       </pxl-stage>
+
+      <!-- Playground Controls -->
+      <div class="playground-controls">
+        <div class="control-group">
+          <label>X-Coordinate <span id="lblEx1X">500</span></label>
+          <input type="range" min="0" max="1000" value="500" 
+            oninput="pxl.nodes.ex1X.set('value', Number(this.value)); document.getElementById('lblEx1X').innerText = this.value;">
+        </div>
+        <div class="control-group">
+          <label>Y-Coordinate <span id="lblEx1Y">281</span></label>
+          <input type="range" min="0" max="562" value="281" 
+            oninput="pxl.nodes.ex1Y.set('value', Number(this.value)); document.getElementById('lblEx1Y').innerText = this.value;">
+        </div>
+      </div>
       
       <h2>2. Relative Coordinates (Layer Translation)</h2>
       <p>Working in absolute coordinates can get messy. Instead, you can move the entire <code>&lt;pxl-layer&gt;</code>. If we center the layer at <code>500, 281</code>, we can now place our shapes at <code>0, 0</code>. This is fundamental for building complex scenes.</p>
@@ -112,7 +135,7 @@
           <pxl-circle x="0" y="0" r="5" fill="#f43f5e"></pxl-circle>
           
           <!-- Coordinate Label -->
-          <pxl-text x="15" y="-20" text="'(0, 0)'" size="18" fill="#f43f5e" font="monospace"></pxl-text>
+          <pxl-text x="15" y="25" text="'(0, 0)'" size="22" fill="#f43f5e" font="monospace"></pxl-text>
         </pxl-layer>
       </pxl-stage>
 
@@ -139,6 +162,9 @@
           
           <!-- Pivot Dot -->
           <pxl-circle x="0" y="0" r="6" fill="#f43f5e"></pxl-circle>
+          
+          <!-- Coordinate Label -->
+          <pxl-text x="15" y="25" text="'(0, 0)'" size="22" fill="#f43f5e" font="monospace"></pxl-text>
         </pxl-layer>
       </pxl-stage>
 
