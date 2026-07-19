@@ -248,9 +248,12 @@ body {
   background-color: rgba(34, 197, 94, 0.1); /* Very subtle green marker wash */
   color: inherit; /* Preserve exact syntax highlighting colors */
   border-radius: 3px;
-  padding: 2px 4px;
-  margin: 0 -4px;
-  border-bottom: 2px dashed #22c55e; /* Bright green marker underline */
+  padding: 2px 0;
+  margin: 0;
+  text-decoration: underline;
+  text-decoration-color: #22c55e;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 /* Flat Hierarchy Example Blocks */
