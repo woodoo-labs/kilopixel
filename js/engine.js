@@ -119,6 +119,10 @@ pxl.evaluateAttributesForVariable = function(element, varName) {
       if (element.attributeValues[key] !== newVal) {
         element.attributeValues[key] = newVal;
         result |= 2; // Flag bit 2
+
+        if (key === 'x' || key === 'y' || key === 'dx' || key === 'dy' || key === 'rotate' || key === 'scale' || key === 'scalex' || key === 'scaley' || key === 'skewx' || key === 'skewy') {
+          element._isLocalMatrixDirty = true;
+        }
       }
     }
   }

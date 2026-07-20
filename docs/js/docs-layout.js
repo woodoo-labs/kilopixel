@@ -83,3 +83,18 @@ class DocsSidebar extends HTMLElement {
   }
 }
 customElements.define('docs-sidebar', DocsSidebar);
+
+// Global tab switcher for interactive playgrounds
+window.switchTab = function(btn, targetId) {
+  const container = btn.closest('.demo-controls');
+  if (!container) return;
+  
+  // Deactivate all tabs and contents in this container
+  container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  container.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  
+  // Activate selected
+  btn.classList.add('active');
+  const target = container.querySelector('#' + targetId);
+  if (target) target.classList.add('active');
+};

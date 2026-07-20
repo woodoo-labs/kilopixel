@@ -245,15 +245,12 @@ body {
   border: 1px solid var(--border-color);
 }
 .docs-content pre mark {
-  background-color: rgba(34, 197, 94, 0.1); /* Very subtle green marker wash */
-  color: inherit; /* Preserve exact syntax highlighting colors */
-  border-radius: 3px;
-  padding: 2px 0;
-  margin: 0;
-  text-decoration: underline;
-  text-decoration-color: #22c55e;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  background-color: rgba(34, 197, 94, 0.15); /* Soft green background */
+  color: #15803d; /* Dark green text for contrast */
+  border-radius: 4px; /* Fully rounded corners */
+  padding: 2px 4px; /* Slightly more horizontal breathing room */
+  margin: 0 1px;
+  text-decoration: none; /* Clean, no underline */
 }
 
 /* Flat Hierarchy Example Blocks */
@@ -324,4 +321,108 @@ body {
   .demo-stage {
     padding: 16px;
   }
+}
+
+/* --- Interactive Playground Components --- */
+.demo-container {
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.demo-container .demo-stage {
+  margin-bottom: 0;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.demo-controls {
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-controls-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-left: 8px;
+}
+
+.demo-controls-title {
+  margin: 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.demo-tabs {
+  display: flex;
+}
+
+.tab-btn {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.tab-btn:hover {
+  color: var(--text-heading);
+}
+
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.tab-content {
+  display: none;
+  padding: 20px 8px;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.playground-sliders {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  padding: 20px 8px;
+}
+
+/* Remove padding if inside a tab-content since it already has padding */
+.tab-content .playground-sliders {
+  padding: 0;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.control-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.control-group input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
 }
