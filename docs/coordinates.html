@@ -31,26 +31,26 @@
       
       <h2>1. The 1000-Unit Logical Canvas</h2>
       <p>To make graphics fully responsive without any media queries, every Kilopixel <code>&lt;pxl-stage&gt;</code> has a fixed <strong>logical width of 1000 units</strong>. The height is dynamically calculated based on the <code>ratio</code> attribute.</p>
-      <p>For a <code>16 / 9</code> stage, the height is 562.5. This means a shape at <code>x="500" y="281"</code> is <strong>always perfectly centered</strong>, regardless of the physical screen size.</p>
+      <p>For a <code>5 / 3</code> stage, the height is 600. This means a shape at <code>x="500" y="300"</code> is <strong>always perfectly centered</strong>, regardless of the physical screen size.</p>
       
       <pre><code class="language-html">&lt;!-- Placing a shape exactly in the center of the canvas --&gt;
-&lt;pxl-stage ratio="16 / 9"&gt;
+&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-circle x="<mark id="codeEx1X">500</mark>" y="<mark id="codeEx1Y">281</mark>" r="50" fill="#3b82f6"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="<mark id="codeEx1X">500</mark>" y="<mark id="codeEx1Y">300</mark>" r="50" fill="#3b82f6"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
       <!-- Reactive Variables for Playground -->
       <pxl-var id="ex1X" value="500"></pxl-var>
-      <pxl-var id="ex1Y" value="281"></pxl-var>
+      <pxl-var id="ex1Y" value="300"></pxl-var>
 
       <div class="demo-container">
-        <pxl-stage ratio="16 / 9" class="demo-stage">
+        <pxl-stage ratio="5 / 3" class="demo-stage">
           <pxl-layer>
             <!-- Helper Grid & Crosshairs (Not shown in snippet) -->
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-            <pxl-line x1="500" y1="0" x2="500" y2="562.5" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="0" y1="281" x2="1000" y2="281" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="500" y1="0" x2="500" y2="600" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="300" x2="1000" y2="300" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
 
             <!-- Layer Origin Marker -->
             <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
@@ -60,10 +60,10 @@
             <pxl-circle x="ref.ex1X.value" y="ref.ex1Y.value" r="50" fill="#bfdbfe" stroke="#3b82f6" strokewidth="2"></pxl-circle>
             
             <!-- Shape Pivot Dot -->
-            <pxl-circle x="ref.ex1X.value" y="ref.ex1Y.value" r="5" fill="#f43f5e"></pxl-circle>
+            <pxl-circle x="ref.ex1X.value" y="ref.ex1Y.value" r="5" fill="#1e3a8a"></pxl-circle>
 
             <!-- Dynamic Coordinate Label -->
-            <pxl-text x="ref.ex1X.value + 15" y="ref.ex1Y.value + 25" text="`(${Math.round(ref.ex1X.value)}, ${Math.round(ref.ex1Y.value)})`" size="22" fill="#f43f5e" font="monospace"></pxl-text>
+            <pxl-text x="ref.ex1X.value + 15" y="ref.ex1Y.value + 15" baseline="top" text="`(${Math.round(ref.ex1X.value)}, ${Math.round(ref.ex1Y.value)})`" size="22" fill="#2563eb" font="monospace"></pxl-text>
           </pxl-layer>
         </pxl-stage>
 
@@ -72,12 +72,12 @@
           <div class="playground-sliders">
             <div class="control-group">
               <label>X-Coordinate <span id="lblEx1X">500</span></label>
-              <input type="range" min="0" max="1000" value="500" autocomplete="off"
+              <input type="range" min="0" max="1000" step="5" value="500" autocomplete="off"
                 oninput="pxl.nodes.ex1X.set('value', Number(this.value)); document.getElementById('lblEx1X').innerText = this.value; document.getElementById('codeEx1X').innerText = this.value;">
             </div>
             <div class="control-group">
-              <label>Y-Coordinate <span id="lblEx1Y">281</span></label>
-              <input type="range" min="0" max="562" value="281" autocomplete="off"
+              <label>Y-Coordinate <span id="lblEx1Y">300</span></label>
+              <input type="range" min="0" max="600" step="5" value="300" autocomplete="off"
                 oninput="pxl.nodes.ex1Y.set('value', Number(this.value)); document.getElementById('lblEx1Y').innerText = this.value; document.getElementById('codeEx1Y').innerText = this.value;">
             </div>
           </div>
@@ -88,42 +88,53 @@
       <p>Working in absolute coordinates can get messy. Instead, you can move the entire <code>&lt;pxl-layer&gt;</code>. If we center the layer at <code>500, 281</code>, we can now place our shapes at <code>0, 0</code>. This is fundamental for building complex scenes.</p>
       
       <pre><code class="language-html">&lt;!-- Centering the layer instead of the shape --&gt;
-&lt;pxl-stage ratio="16 / 9"&gt;
-  &lt;pxl-layer x="<mark id="codeEx2LayerX">500</mark>" y="<mark id="codeEx2LayerY">281</mark>"&gt;
-    &lt;pxl-circle x="<mark id="codeEx2ShapeX">0</mark>" y="<mark id="codeEx2ShapeY">0</mark>" r="<mark id="codeEx2ShapeR">50</mark>" fill="#10b981"&gt;&lt;/pxl-circle&gt;
+&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer x="<mark id="codeEx2LayerX">500</mark>" y="<mark id="codeEx2LayerY">300</mark>"&gt;
+    &lt;pxl-circle x="<mark id="codeex2CircleX">0</mark>" y="<mark id="codeex2CircleY">0</mark>" r="<mark id="codeex2CircleR">50</mark>" fill="#10b981"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
       <!-- Reactive Variables for Example 2 -->
       <pxl-var id="ex2LayerX" value="500"></pxl-var>
-      <pxl-var id="ex2LayerY" value="281"></pxl-var>
-      <pxl-var id="ex2ShapeX" value="0"></pxl-var>
-      <pxl-var id="ex2ShapeY" value="0"></pxl-var>
-      <pxl-var id="ex2ShapeR" value="50"></pxl-var>
+      <pxl-var id="ex2LayerY" value="300"></pxl-var>
+      <pxl-var id="ex2CircleX" value="0"></pxl-var>
+      <pxl-var id="ex2CircleY" value="0"></pxl-var>
+      <pxl-var id="ex2CircleR" value="50"></pxl-var>
 
       <div class="demo-container">
-        <pxl-stage ratio="16 / 9" class="demo-stage">
+        <pxl-stage ratio="5 / 3" class="demo-stage">
           <!-- Layer bound to layer variables -->
           <pxl-layer x="ref.ex2LayerX.value" y="ref.ex2LayerY.value">
             <!-- Helpers -->
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-            <pxl-line x1="0" y1="-500" x2="0" y2="500" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="-1000" y1="0" x2="1000" y2="0" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-500" x2="0" y2="500" stroke="#c4b5fd" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-1000" y1="0" x2="1000" y2="0" stroke="#c4b5fd" linedash="[5, 5]"></pxl-line>
             
             <!-- The actual shape, bound to shape variables -->
             <pxl-circle 
-              x="ref.ex2ShapeX.value" 
-              y="ref.ex2ShapeY.value" 
-              r="ref.ex2ShapeR.value"
-              fill="#a7f3d0" stroke="#10b981" strokewidth="2">
+              x="ref.ex2CircleX.value" 
+              y="ref.ex2CircleY.value" 
+              r="ref.ex2CircleR.value"
+              fill="#ffedd5" stroke="#f97316" strokewidth="2">
             </pxl-circle>
-            
-            <!-- Pivot Dot -->
-            <pxl-circle x="ref.ex2ShapeX.value" y="ref.ex2ShapeY.value" r="5" fill="#f43f5e"></pxl-circle>
             
             <!-- Layer Origin Dot -->
             <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
-            <pxl-text x="15" y="25" text="'Layer (0, 0)'" size="22" fill="#8b5cf6" font="monospace"></pxl-text>
+            <pxl-text x="15" y="15" baseline="top" text="`Layer (${Math.round(ref.ex2LayerX.value)}, ${Math.round(ref.ex2LayerY.value)})`" size="22" fill="#8b5cf6" font="monospace"></pxl-text>
+
+            <!-- Pivot Dot -->
+            <pxl-circle x="ref.ex2CircleX.value" y="ref.ex2CircleY.value" r="5" fill="#ea580c"></pxl-circle>
+            
+            <!-- Shape Coordinate Label -->
+            <pxl-text 
+              x="ref.ex2CircleX.value + 15" 
+              y="ref.ex2CircleY.value - 15" 
+              baseline="bottom"
+              text="`Circle (${Math.round(ref.ex2CircleX.value)}, ${Math.round(ref.ex2CircleY.value)})`" 
+              size="22" 
+              fill="#ea580c" 
+              font="monospace">
+            </pxl-text>
           </pxl-layer>
         </pxl-stage>
 
@@ -133,7 +144,7 @@
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
               <button class="tab-btn active" onclick="switchTab(this, 'ex2-layer')">Layer</button>
-              <button class="tab-btn" onclick="switchTab(this, 'ex2-shape')">Shape</button>
+              <button class="tab-btn" onclick="switchTab(this, 'ex2-circle')">Circle</button>
             </div>
           </div>
           
@@ -142,34 +153,34 @@
             <div class="playground-sliders">
               <div class="control-group">
                 <label>Layer X <span id="lblEx2LayerX">500</span></label>
-                <input type="range" min="0" max="1000" value="500" autocomplete="off"
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
                   oninput="pxl.nodes.ex2LayerX.set('value', Number(this.value)); document.getElementById('lblEx2LayerX').innerText = this.value; document.getElementById('codeEx2LayerX').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Layer Y <span id="lblEx2LayerY">281</span></label>
-                <input type="range" min="0" max="562" value="281" autocomplete="off"
+                <label>Layer Y <span id="lblEx2LayerY">300</span></label>
+                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
                   oninput="pxl.nodes.ex2LayerY.set('value', Number(this.value)); document.getElementById('lblEx2LayerY').innerText = this.value; document.getElementById('codeEx2LayerY').innerText = this.value;">
               </div>
             </div>
           </div>
           
-          <!-- Shape Tab -->
-          <div class="tab-content" id="ex2-shape">
+          <!-- Circle Tab -->
+          <div class="tab-content" id="ex2-circle">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Shape X <span id="lblEx2ShapeX">0</span></label>
-                <input type="range" min="-300" max="300" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex2ShapeX.set('value', Number(this.value)); document.getElementById('lblEx2ShapeX').innerText = this.value; document.getElementById('codeEx2ShapeX').innerText = this.value;">
+                <label>Circle X <span id="lblex2CircleX">0</span></label>
+                <input type="range" min="-500" max="500" step="10" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex2CircleX.set('value', Number(this.value)); document.getElementById('lblex2CircleX').innerText = this.value; document.getElementById('codeex2CircleX').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Shape Y <span id="lblEx2ShapeY">0</span></label>
-                <input type="range" min="-300" max="300" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex2ShapeY.set('value', Number(this.value)); document.getElementById('lblEx2ShapeY').innerText = this.value; document.getElementById('codeEx2ShapeY').innerText = this.value;">
+                <label>Circle Y <span id="lblex2CircleY">0</span></label>
+                <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex2CircleY.set('value', Number(this.value)); document.getElementById('lblex2CircleY').innerText = this.value; document.getElementById('codeex2CircleY').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius <span id="lblEx2ShapeR">50</span></label>
-                <input type="range" min="10" max="150" value="50" autocomplete="off"
-                  oninput="pxl.nodes.ex2ShapeR.set('value', Number(this.value)); document.getElementById('lblEx2ShapeR').innerText = this.value; document.getElementById('codeEx2ShapeR').innerText = this.value;">
+                <label>Radius <span id="lblex2CircleR">50</span></label>
+                <input type="range" min="10" max="150" step="10" value="50" autocomplete="off"
+                  oninput="pxl.nodes.ex2CircleR.set('value', Number(this.value)); document.getElementById('lblex2CircleR').innerText = this.value; document.getElementById('codeex2CircleR').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -181,17 +192,17 @@
       <p>By default, shapes are centered exactly on this pivot. If you change a shape's anchor (e.g., <code>anchor="top-left"</code>), the shape shifts relative to the pivot, but any rotation (like <code>rotate="t * 45"</code>) will still cleanly swing around that exact <code>x,y</code> point.</p>
       
       <pre><code class="language-html">&lt;!-- A square swinging around its top-left corner --&gt;
-&lt;pxl-stage ratio="16 / 9"&gt;
-  &lt;pxl-layer x="500" y="281"&gt;
+&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer x="500" y="300"&gt;
     &lt;pxl-rect x="0" y="0" w="100" h="100" anchor="top-left" fill="#8b5cf6" rotate="t * 45"&gt;&lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
-      <pxl-stage ratio="16 / 9" class="demo-stage">
-        <pxl-layer x="500" y="281">
+      <pxl-stage ratio="5 / 3" class="demo-stage">
+        <pxl-layer x="500" y="300">
           <!-- Helpers -->
           <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-          <pxl-line x1="0" y1="-281" x2="0" y2="281" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
+          <pxl-line x1="0" y1="-300" x2="0" y2="300" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
           <pxl-line x1="-500" y1="0" x2="500" y2="0" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
           
           <!-- The actual shape -->
@@ -218,8 +229,8 @@
 &lt;pxl-var id="demoOrbitOffset" value="150"&gt;&lt;/pxl-var&gt;
 &lt;pxl-var id="demoOrbitSpeed" value="90"&gt;&lt;/pxl-var&gt;
 
-&lt;pxl-stage ratio="16 / 9"&gt;
-  &lt;pxl-layer x="500" y="281"&gt;
+&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer x="500" y="300"&gt;
     &lt;!-- The Sun (Pivot Point) --&gt;
     &lt;pxl-circle r="30" fill="#f59e0b"&gt;&lt;/pxl-circle&gt;
 
@@ -237,16 +248,16 @@
       <pxl-var id="demoOrbitSpeed" value="90"></pxl-var>
 
       <div class="demo-container">
-        <pxl-stage ratio="16 / 9" class="demo-stage">
-          <pxl-layer x="500" y="281">
+        <pxl-stage ratio="5 / 3" class="demo-stage">
+          <pxl-layer x="500" y="300">
             <!-- Helpers (Grid & Crosshairs) -->
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
             <pxl-line x1="-500" y1="0" x2="500" y2="0" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="0" y1="-281" x2="0" y2="281" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-300" x2="0" y2="300" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
             
             <!-- Crosshair lines tracking the object using toLocal -->
             <pxl-line x1="-500" y1="toLocal(ref.planet, 'y')" x2="500" y2="toLocal(ref.planet, 'y')" stroke="#94a3b8" strokewidth="1"></pxl-line>
-            <pxl-line x1="toLocal(ref.planet, 'x')" y1="-281" x2="toLocal(ref.planet, 'x')" y2="281" stroke="#94a3b8" strokewidth="1"></pxl-line>
+            <pxl-line x1="toLocal(ref.planet, 'x')" y1="-300" x2="toLocal(ref.planet, 'x')" y2="300" stroke="#94a3b8" strokewidth="1"></pxl-line>
 
             <!-- Grey arrows pointing to current X and Y -->
             <pxl-line x1="0" y1="0" x2="toLocal(ref.planet, 'x')" y2="0" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
