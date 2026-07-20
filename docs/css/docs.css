@@ -17,9 +17,7 @@
   --code-bg: #f1f5f9;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -31,7 +29,7 @@ body {
   height: 100vh;
 }
 
-/* Layout structural classes */
+/* --- Layout Structure --- */
 .layout-container {
   display: flex;
   flex: 1;
@@ -52,7 +50,7 @@ body {
   margin: 0 auto;
 }
 
-/* Base typography styling for the content */
+/* --- Typography & Markdown --- */
 .docs-content h1 {
   font-size: 2.5rem;
   font-weight: 600;
@@ -84,19 +82,18 @@ body {
   line-height: 1.6;
 }
 
-.docs-content p {
+.docs-content p, 
+.docs-content ul, 
+.docs-content ol {
   font-size: 1.05rem;
   line-height: 1.6;
   color: var(--text-main);
   margin-bottom: 24px;
 }
 
-.docs-content ul, .docs-content ol {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  color: var(--text-main);
-  margin-bottom: 24px;
-  padding-left: 24px;
+.docs-content ul, 
+.docs-content ol {
+  padding-left: 1.2em;
 }
 
 .docs-content li {
@@ -112,9 +109,7 @@ body {
   color: var(--accent);
 }
 
-/* --- Web Component Styles (Extracted from layout js) --- */
-
-/* Header */
+/* --- Header & Navigation --- */
 .header {
   height: 64px;
   background-color: var(--bg-header);
@@ -127,12 +122,14 @@ body {
   top: 0;
   z-index: 100;
 }
+
 .header-logo {
   display: flex;
   align-items: center;
   gap: 12px;
   text-decoration: none;
 }
+
 .header-logo h1 { 
   margin: 0; 
   font-size: 1.25rem; 
@@ -140,6 +137,7 @@ body {
   color: var(--text-heading); 
   letter-spacing: 2px; 
 }
+
 .header-logo .badge {
   background-color: var(--accent-bg);
   color: var(--accent);
@@ -148,6 +146,7 @@ body {
   border-radius: 4px;
   font-weight: bold;
 }
+
 .header nav a { 
   color: var(--text-muted); 
   text-decoration: none; 
@@ -156,7 +155,9 @@ body {
   transition: color 0.2s; 
   font-weight: 500;
 }
+
 .header nav a:hover { color: var(--accent); }
+
 #mobile-menu-btn {
   display: none;
   background: none;
@@ -166,7 +167,7 @@ body {
   padding: 4px;
 }
 
-/* Sidebar */
+/* --- Sidebar --- */
 .sidebar {
   width: 280px;
   background-color: var(--bg-sidebar);
@@ -177,7 +178,9 @@ body {
   flex-shrink: 0;
   transition: transform 0.3s ease;
 }
+
 .sidebar-section { margin-bottom: 32px; }
+
 .sidebar-title { 
   font-size: 0.75rem; 
   text-transform: uppercase; 
@@ -187,6 +190,7 @@ body {
   margin-bottom: 12px;
   font-weight: 600;
 }
+
 .sidebar ul { 
   list-style: none; 
   padding: 0; 
@@ -195,7 +199,9 @@ body {
   flex-direction: column;
   gap: 8px;
 }
+
 .sidebar li { margin: 0; padding: 0; }
+
 .sidebar li a {
   display: block;
   padding: 4px 32px 4px 48px;
@@ -205,9 +211,11 @@ body {
   transition: all 0.2s;
   border-left: 3px solid transparent;
 }
+
 .sidebar li a:hover {
   color: var(--text-heading);
 }
+
 .sidebar li a.active {
   border-left-color: var(--accent);
   color: var(--accent);
@@ -215,52 +223,33 @@ body {
   font-weight: 500;
 }
 
-/* Mobile Adjustments */
-@media (max-width: 768px) {
-  .docs-content {
-    padding: 24px 20px;
-  }
-  #mobile-menu-btn { display: block; }
-  .header nav { display: none; }
-  
-  .sidebar {
-    position: fixed;
-    top: 64px; /* Exactly below the header */
-    left: 0;
-    bottom: 0;
-    z-index: 90;
-    transform: translateX(-100%);
-    background-color: var(--bg-main);
-    box-shadow: 4px 0 15px rgba(0,0,0,0.05);
-  }
-  .sidebar.mobile-open {
-    transform: translateX(0);
-  }
-}
-
-/* Code Blocks (Prism.js adjustments) */
-.docs-content pre[class*="language-"] {
-  border-radius: 8px;
+/* --- Code Blocks (Prism.js adjustments) --- */
+.docs-content pre[class*="language-"],
+.docs-content pre {
   margin: 24px 0;
   border: 1px solid var(--border-color);
-}
-.docs-content pre mark {
-  background-color: rgba(255, 229, 100, 0.4); /* Brighter, classic HTML highlight */
-  color: inherit; /* Inherit Prism's exact syntax color (e.g. red for attributes) */
-  border-radius: 4px; /* Fully rounded corners */
-  padding: 2px 4px; /* Slightly more horizontal breathing room */
-  margin: 0 1px;
-  text-decoration: none; /* Clean, no underline */
-}
-
-/* Flat Hierarchy Example Blocks */
-.docs-content pre {
-  margin-top: 32px;
-  margin-bottom: 16px;
-  border: 1px solid var(--border-color);
   border-radius: 8px;
+  font-size: 1em !important;
 }
 
+.docs-content pre mark {
+  background-color: rgba(255, 229, 100, 0.4); /* Brighter HTML highlight */
+  color: inherit;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: 0 1px;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s, transform 0.1s;
+}
+
+.docs-content pre mark.highlight-active {
+  background-color: #f59e0b; /* Vibrant Orange flash */
+  color: #fff;
+  transform: scale(1.1);
+  display: inline-block;
+}
+
+/* --- Interactive Playgrounds --- */
 .demo-stage {
   display: block;
   background-color: var(--bg-main);
@@ -270,60 +259,6 @@ body {
   margin-bottom: 32px;
 }
 
-/* --- Mobile Responsiveness --- */
-@media (max-width: 768px) {
-  /* Reduce content padding on mobile */
-  .docs-inner {
-    padding: 24px 20px;
-  }
-  
-  /* Convert static sidebar into an off-canvas mobile menu */
-  .sidebar {
-    position: fixed;
-    top: 64px; /* Height of the header */
-    left: 0;
-    bottom: 0;
-    z-index: 50;
-    transform: translateX(-100%);
-    box-shadow: 4px 0 15px rgba(0,0,0,0.05);
-  }
-  
-  /* The JS script toggles this class to slide the menu in */
-  .sidebar.mobile-open {
-    transform: translateX(0);
-  }
-
-  /* Show the hamburger button */
-  #mobile-menu-btn {
-    display: block;
-  }
-
-  /* Hide the top-right text links to save space */
-  .header nav {
-    display: none;
-  }
-  
-  /* Reduce header padding */
-  .header {
-    padding: 0 20px;
-  }
-  
-  /* Make typography slightly tighter on mobile */
-  .docs-content h1 {
-    font-size: 2rem;
-  }
-  
-  .docs-content h2 {
-    font-size: 1.5rem;
-  }
-  
-  /* Shrink demo padding on mobile */
-  .demo-stage {
-    padding: 16px;
-  }
-}
-
-/* --- Interactive Playground Components --- */
 .demo-container {
   margin-bottom: 32px;
   display: flex;
@@ -331,11 +266,9 @@ body {
   gap: 16px;
 }
 
+/* Inherits colors/borders from .demo-stage, just remove margin inside a container */
 .demo-container .demo-stage {
   margin-bottom: 0;
-  background: var(--bg-main);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
 }
 
 .demo-controls {
@@ -349,7 +282,15 @@ body {
   gap: 24px;
   align-items: center;
   border-bottom: 1px solid var(--border-color);
-  padding-left: 8px;
+  padding: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.demo-controls-header::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
 
 .demo-controls-title {
@@ -359,18 +300,11 @@ body {
   letter-spacing: 1px;
   color: var(--text-muted);
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .demo-tabs {
   display: flex;
-  overflow-x: auto;
-  white-space: nowrap;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-  max-width: 100%;
-}
-.demo-tabs::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
 }
 
 .tab-btn {
@@ -397,7 +331,7 @@ body {
 
 .tab-content {
   display: none;
-  padding: 20px 8px;
+  padding: 20px 0;
 }
 
 .tab-content.active {
@@ -408,20 +342,7 @@ body {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
-  padding: 20px 8px;
-}
-
-@media (max-width: 600px) {
-  .demo-controls-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-    padding-top: 12px;
-    overflow: hidden;
-  }
-  .playground-sliders {
-    gap: 16px;
-  }
+  padding: 20px 0;
 }
 
 /* Remove padding if inside a tab-content since it already has padding */
@@ -445,6 +366,63 @@ body {
 
 .control-group input[type="range"] {
   width: 100%;
+  margin: 0;
   accent-color: var(--accent);
   cursor: pointer;
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+  /* Layout adjustments */
+  .docs-inner {
+    padding: 24px 20px;
+  }
+  
+  .header {
+    padding: 0 20px;
+  }
+  
+  /* Typography tweaks */
+  .docs-content h1 {
+    font-size: 2rem;
+  }
+  
+  .docs-content h2 {
+    font-size: 1.5rem;
+  }
+  
+  /* Off-canvas mobile menu */
+  .header nav {
+    display: none;
+  }
+  
+  #mobile-menu-btn {
+    display: block;
+  }
+  
+  .sidebar {
+    position: fixed;
+    top: 64px; /* Height of the header */
+    left: 0;
+    bottom: 0;
+    z-index: 90;
+    transform: translateX(-100%);
+    background-color: var(--bg-main);
+    box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+  }
+  
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* Shrink demo padding on mobile */
+  .demo-stage {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .playground-sliders {
+    gap: 16px;
+  }
 }

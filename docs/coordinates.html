@@ -31,66 +31,95 @@
       
       <h2>1. The 1000-Unit Logical Canvas</h2>
       <p>To make graphics fully responsive without any media queries, every Kilopixel <code>&lt;pxl-stage&gt;</code> has a fixed <strong>logical width of 1000 units</strong>. The height is dynamically calculated based on the <code>ratio</code> attribute.</p>
-      <p>For a <code>5 / 3</code> stage, the height is 600. This means a shape at <code>x="500" y="300"</code> is <strong>always perfectly centered</strong>, regardless of the physical screen size.</p>
+      <p>For a <code>ratio="5 / 3"</code> stage, the height is 600. This means a shape at <code>x="500" y="300"</code> is <strong>always perfectly centered</strong>, regardless of the physical screen size.</p>
       
       <pre><code class="language-html">&lt;!-- Placing a shape exactly in the center of the canvas --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-circle x="<mark id="codeEx1X">500</mark>" y="<mark id="codeEx1Y">300</mark>" r="50" fill="#3b82f6"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="<mark id="codeEx1CircleX">500</mark>" y="<mark id="codeEx1CircleY">300</mark>" r="<mark id="codeEx1CircleR">50</mark>" fill="#ffedd5"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
       <!-- Reactive Variables for Playground -->
-      <pxl-var id="ex1X" value="500"></pxl-var>
-      <pxl-var id="ex1Y" value="300"></pxl-var>
+      <pxl-var id="ex1CircleX" value="500"></pxl-var>
+      <pxl-var id="ex1CircleY" value="300"></pxl-var>
+      <pxl-var id="ex1CircleR" value="50"></pxl-var>
 
       <div class="demo-container">
         <pxl-stage ratio="5 / 3" class="demo-stage">
           <pxl-layer>
-            <!-- Helper Grid & Crosshairs (Not shown in snippet) -->
+            <!-- Helpers -->
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-            <pxl-line x1="500" y1="0" x2="500" y2="600" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="0" y1="300" x2="1000" y2="300" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
 
-            <!-- Layer Origin Marker -->
+            <!-- The actual shape, bound to shape variables -->
+            <pxl-circle 
+              x="ref.ex1CircleX.value" 
+              y="ref.ex1CircleY.value" 
+              r="ref.ex1CircleR.value" 
+              fill="#ffedd5" stroke="#f97316" strokewidth="2">
+            </pxl-circle>
+
+            <!-- Layer Origin Dot -->
             <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
-            <pxl-text x="15" y="25" text="'Layer (0, 0)'" size="22" fill="#8b5cf6" font="monospace"></pxl-text>
+            <pxl-text x="15" y="15" baseline="top" text="'Layer (0, 0)'" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
 
-            <!-- The actual shape -->
-            <pxl-circle x="ref.ex1X.value" y="ref.ex1Y.value" r="50" fill="#bfdbfe" stroke="#3b82f6" strokewidth="2"></pxl-circle>
-            
-            <!-- Shape Pivot Dot -->
-            <pxl-circle x="ref.ex1X.value" y="ref.ex1Y.value" r="5" fill="#1e3a8a"></pxl-circle>
+            <!-- Pivot Dot -->
+            <pxl-circle x="ref.ex1CircleX.value" y="ref.ex1CircleY.value" r="5" fill="#ea580c"></pxl-circle>
 
-            <!-- Dynamic Coordinate Label -->
-            <pxl-text x="ref.ex1X.value + 15" y="ref.ex1Y.value + 15" baseline="top" text="`(${Math.round(ref.ex1X.value)}, ${Math.round(ref.ex1Y.value)})`" size="22" fill="#2563eb" font="monospace"></pxl-text>
+            <!-- Shape Coordinate Label -->
+            <pxl-text 
+              x="ref.ex1CircleX.value + 15" 
+              y="ref.ex1CircleY.value - 15" 
+              baseline="bottom"
+              text="`Circle (${Math.round(ref.ex1CircleX.value)}, ${Math.round(ref.ex1CircleY.value)})`" 
+              size="27" 
+              fill="#ea580c" 
+              font="monospace">
+            </pxl-text>
           </pxl-layer>
         </pxl-stage>
 
-        <!-- Playground Controls -->
+        <!-- Tabbed Controls -->
         <div class="demo-controls">
-          <div class="playground-sliders">
-            <div class="control-group">
-              <label>X-Coordinate <span id="lblEx1X">500</span></label>
-              <input type="range" min="0" max="1000" step="5" value="500" autocomplete="off"
-                oninput="pxl.nodes.ex1X.set('value', Number(this.value)); document.getElementById('lblEx1X').innerText = this.value; document.getElementById('codeEx1X').innerText = this.value;">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn active" onclick="switchTab(this, 'ex1-circle')">Circle</button>
             </div>
-            <div class="control-group">
-              <label>Y-Coordinate <span id="lblEx1Y">300</span></label>
-              <input type="range" min="0" max="600" step="5" value="300" autocomplete="off"
-                oninput="pxl.nodes.ex1Y.set('value', Number(this.value)); document.getElementById('lblEx1Y').innerText = this.value; document.getElementById('codeEx1Y').innerText = this.value;">
+          </div>
+          
+          <!-- Circle Tab -->
+          <div class="tab-content active" id="ex1-circle">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Circle X <span id="lblEx1CircleX">500</span></label>
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                  oninput="pxl.nodes.ex1CircleX.set('value', Number(this.value)); document.getElementById('lblEx1CircleX').innerText = this.value; document.getElementById('codeEx1CircleX').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Circle Y <span id="lblEx1CircleY">300</span></label>
+                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                  oninput="pxl.nodes.ex1CircleY.set('value', Number(this.value)); document.getElementById('lblEx1CircleY').innerText = this.value; document.getElementById('codeEx1CircleY').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Radius <span id="lblEx1CircleR">50</span></label>
+                <input type="range" min="10" max="150" step="10" value="50" autocomplete="off"
+                  oninput="pxl.nodes.ex1CircleR.set('value', Number(this.value)); document.getElementById('lblEx1CircleR').innerText = this.value; document.getElementById('codeEx1CircleR').innerText = this.value;">
+              </div>
             </div>
           </div>
         </div>
       </div>
       
       <h2>2. Relative Coordinates (Layer Translation)</h2>
-      <p>Working in absolute coordinates can get messy. Instead, you can move the entire <code>&lt;pxl-layer&gt;</code>. If we center the layer at <code>500, 281</code>, we can now place our shapes at <code>0, 0</code>. This is fundamental for building complex scenes.</p>
+      <p>Working in absolute coordinates can get messy. Instead, you can move the entire <code>&lt;pxl-layer&gt;</code>. If we center the layer at <code>x="500" y="300"</code>, we can now place our shapes at <code>x="0" y="0"</code>. This is fundamental for building complex scenes.</p>
       
       <pre><code class="language-html">&lt;!-- Centering the layer instead of the shape --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="codeEx2LayerX">500</mark>" y="<mark id="codeEx2LayerY">300</mark>"&gt;
-    &lt;pxl-circle x="<mark id="codeex2CircleX">0</mark>" y="<mark id="codeex2CircleY">0</mark>" r="<mark id="codeex2CircleR">50</mark>" fill="#10b981"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="<mark id="codeex2CircleX">0</mark>" y="<mark id="codeex2CircleY">0</mark>" r="<mark id="codeex2CircleR">50</mark>" fill="#ffedd5"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -107,8 +136,8 @@
           <pxl-layer x="ref.ex2LayerX.value" y="ref.ex2LayerY.value">
             <!-- Helpers -->
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-            <pxl-line x1="0" y1="-500" x2="0" y2="500" stroke="#c4b5fd" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="-1000" y1="0" x2="1000" y2="0" stroke="#c4b5fd" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
             
             <!-- The actual shape, bound to shape variables -->
             <pxl-circle 
@@ -120,7 +149,7 @@
             
             <!-- Layer Origin Dot -->
             <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
-            <pxl-text x="15" y="15" baseline="top" text="`Layer (${Math.round(ref.ex2LayerX.value)}, ${Math.round(ref.ex2LayerY.value)})`" size="22" fill="#8b5cf6" font="monospace"></pxl-text>
+            <pxl-text x="15" y="15" baseline="top" text="`Layer (${Math.round(ref.ex2LayerX.value)}, ${Math.round(ref.ex2LayerY.value)})`" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
 
             <!-- Pivot Dot -->
             <pxl-circle x="ref.ex2CircleX.value" y="ref.ex2CircleY.value" r="5" fill="#ea580c"></pxl-circle>
@@ -131,7 +160,7 @@
               y="ref.ex2CircleY.value - 15" 
               baseline="bottom"
               text="`Circle (${Math.round(ref.ex2CircleX.value)}, ${Math.round(ref.ex2CircleY.value)})`" 
-              size="22" 
+              size="27" 
               fill="#ea580c" 
               font="monospace">
             </pxl-text>
@@ -144,10 +173,6 @@
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
               <button class="tab-btn active" onclick="switchTab(this, 'ex2-layer')">Layer</button>
-              <button class="tab-btn" onclick="switchTab(this, '')">Rect</button>
-              <button class="tab-btn" onclick="switchTab(this, '')">Polygon</button>
-              <button class="tab-btn" onclick="switchTab(this, '')">Grid</button>
-              <button class="tab-btn" onclick="switchTab(this, '')">Line</button>
               <button class="tab-btn" onclick="switchTab(this, 'ex2-circle')">Circle</button>
             </div>
           </div>
@@ -191,47 +216,283 @@
         </div>
       </div>
 
-      <h2>3. Pivot Points & Rotation</h2>
-      <p>In standard HTML/CSS, coordinates usually refer to the top-left corner. In Kilopixel, <code>x</code> and <code>y</code> always define the <strong>absolute pivot point</strong> of the shape.</p>
-      <p>By default, shapes are centered exactly on this pivot. If you change a shape's anchor (e.g., <code>anchor="top-left"</code>), the shape shifts relative to the pivot, but any rotation (like <code>rotate="t * 45"</code>) will still cleanly swing around that exact <code>x,y</code> point.</p>
+      <h2>3. Pivot Points (x, y) & Rotation</h2>
+      <p>In Kilopixel, <code>x</code> and <code>y</code> always act as the <strong>absolute pivot point</strong>.</p>
+      <p>Because of this, applying rotation is incredibly simple. However, it's important to understand the difference between <strong>Layer</strong> and <strong>Shape</strong> rotation in the example below:</p>
+      <ul>
+        <li><strong>Layer Rotation:</strong> Rotating a <code>&lt;pxl-layer&gt;</code> tilts the entire coordinate grid beneath it. The shape's coordinates don't change, but the physical space it lives in spins around the Layer's origin.</li>
+        <li><strong>Shape Rotation:</strong> Rotating a shape (like a <code>&lt;pxl-ellipse&gt;</code>) only spins that specific shape around its own local <code>x, y</code> pivot point, leaving the rest of the canvas untouched.</li>
+      </ul>
       
-      <pre><code class="language-html">&lt;!-- A square swinging around its top-left corner --&gt;
+      <pre><code class="language-html">&lt;!-- An ellipse spinning perfectly around its center point --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;pxl-layer x="500" y="300"&gt;
-    &lt;pxl-rect x="0" y="0" w="100" h="100" anchor="top-left" fill="#8b5cf6" rotate="t * 45"&gt;&lt;/pxl-rect&gt;
+  &lt;pxl-layer x="<mark id="codeEx3LayerX">500</mark>" y="<mark id="codeEx3LayerY">300</mark>" rotate="<mark id="codeEx3LayerRot">0</mark>"&gt;
+    &lt;pxl-ellipse 
+      x="<mark id="codeEx3EllipseX">0</mark>" y="<mark id="codeEx3EllipseY">0</mark>" 
+      rx="<mark id="codeEx3EllipseRx">100</mark>" ry="<mark id="codeEx3EllipseRy">40</mark>" 
+      rotate="<mark id="codeEx3EllipseRot">0</mark>" fill="#ffedd5"&gt;
+    &lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
-      <pxl-stage ratio="5 / 3" class="demo-stage">
-        <pxl-layer x="500" y="300">
-          <!-- Helpers -->
-          <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-          <pxl-line x1="0" y1="-300" x2="0" y2="300" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
-          <pxl-line x1="-500" y1="0" x2="500" y2="0" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
-          
-          <!-- The actual shape -->
-          <pxl-rect x="0" y="0" w="100" h="100" anchor="top-left" fill="#8b5cf6" rotate="t * 45"></pxl-rect>
-          
-          <!-- Pivot Dot -->
-          <pxl-circle x="0" y="0" r="6" fill="#f43f5e"></pxl-circle>
-          
-          <!-- Coordinate Label -->
-          <pxl-text x="15" y="25" text="'(0, 0)'" size="22" fill="#f43f5e" font="monospace"></pxl-text>
-        </pxl-layer>
-      </pxl-stage>
+      <!-- Reactive Variables for Example 3 -->
+      <pxl-var id="ex3LayerX" value="500"></pxl-var>
+      <pxl-var id="ex3LayerY" value="300"></pxl-var>
+      <pxl-var id="ex3LayerRot" value="0"></pxl-var>
+      <pxl-var id="ex3EllipseX" value="0"></pxl-var>
+      <pxl-var id="ex3EllipseY" value="0"></pxl-var>
+      <pxl-var id="ex3EllipseRot" value="0"></pxl-var>
+      <pxl-var id="ex3EllipseRx" value="100"></pxl-var>
+      <pxl-var id="ex3EllipseRy" value="40"></pxl-var>
 
-      <h2>4. Local Offsets (dx & dy)</h2>
+      <div class="demo-container">
+        <pxl-stage ratio="5 / 3" class="demo-stage">
+          <pxl-layer x="ref.ex3LayerX.value" y="ref.ex3LayerY.value" rotate="ref.ex3LayerRot.value">
+            <!-- Helpers -->
+            <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            
+            <!-- The actual shape -->
+            <pxl-ellipse 
+              x="ref.ex3EllipseX.value" 
+              y="ref.ex3EllipseY.value" 
+              rx="ref.ex3EllipseRx.value" ry="ref.ex3EllipseRy.value" 
+              rotate="ref.ex3EllipseRot.value" 
+              fill="#ffedd5" stroke="#f97316" strokewidth="2">
+            </pxl-ellipse>
+
+            <!-- Layer Origin Dot -->
+            <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
+            <pxl-text x="15" y="15" baseline="top" text="`Layer (${Math.round(ref.ex3LayerX.value)}, ${Math.round(ref.ex3LayerY.value)})`" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
+            
+            <!-- Pivot Dot -->
+            <pxl-circle x="ref.ex3EllipseX.value" y="ref.ex3EllipseY.value" r="5" fill="#ea580c"></pxl-circle>
+            
+            <!-- Coordinate Label -->
+            <pxl-text 
+              x="ref.ex3EllipseX.value + 15" 
+              y="ref.ex3EllipseY.value - 15" 
+              baseline="bottom"
+              text="`Ellipse (${Math.round(ref.ex3EllipseX.value)}, ${Math.round(ref.ex3EllipseY.value)})`" 
+              size="27" fill="#ea580c" font="monospace">
+            </pxl-text>
+          </pxl-layer>
+        </pxl-stage>
+
+        <!-- Tabbed Controls -->
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn active" onclick="switchTab(this, 'ex3-layer')">Layer</button>
+              <button class="tab-btn" onclick="switchTab(this, 'ex3-ellipse')">Ellipse</button>
+            </div>
+          </div>
+          
+          <!-- Layer Tab -->
+          <div class="tab-content active" id="ex3-layer">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Layer X <span id="lblEx3LayerX">500</span></label>
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                  oninput="pxl.nodes.ex3LayerX.set('value', Number(this.value)); document.getElementById('lblEx3LayerX').innerText = this.value; document.getElementById('codeEx3LayerX').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Layer Y <span id="lblEx3LayerY">300</span></label>
+                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                  oninput="pxl.nodes.ex3LayerY.set('value', Number(this.value)); document.getElementById('lblEx3LayerY').innerText = this.value; document.getElementById('codeEx3LayerY').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="lblEx3LayerRot">0°</span></label>
+                <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex3LayerRot.set('value', Number(this.value)); document.getElementById('lblEx3LayerRot').innerText = this.value + '°'; document.getElementById('codeEx3LayerRot').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Ellipse Tab -->
+          <div class="tab-content" id="ex3-ellipse">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Ellipse X <span id="lblEx3EllipseX">0</span></label>
+                <input type="range" min="-500" max="500" step="10" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex3EllipseX.set('value', Number(this.value)); document.getElementById('lblEx3EllipseX').innerText = this.value; document.getElementById('codeEx3EllipseX').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Ellipse Y <span id="lblEx3EllipseY">0</span></label>
+                <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex3EllipseY.set('value', Number(this.value)); document.getElementById('lblEx3EllipseY').innerText = this.value; document.getElementById('codeEx3EllipseY').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Radius X <span id="lblEx3EllipseRx">100</span></label>
+                <input type="range" min="10" max="300" step="10" value="100" autocomplete="off"
+                  oninput="pxl.nodes.ex3EllipseRx.set('value', Number(this.value)); document.getElementById('lblEx3EllipseRx').innerText = this.value; document.getElementById('codeEx3EllipseRx').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Radius Y <span id="lblEx3EllipseRy">40</span></label>
+                <input type="range" min="10" max="300" step="10" value="40" autocomplete="off"
+                  oninput="pxl.nodes.ex3EllipseRy.set('value', Number(this.value)); document.getElementById('lblEx3EllipseRy').innerText = this.value; document.getElementById('codeEx3EllipseRy').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="lblEx3EllipseRot">0°</span></label>
+                <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex3EllipseRot.set('value', Number(this.value)); document.getElementById('lblEx3EllipseRot').innerText = this.value + '°'; document.getElementById('codeEx3EllipseRot').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2>4. Local Offsets (dx, dy)</h2>
+      <p>This is where Kilopixel's coordinate system becomes incredibly powerful. The <code>dx</code> and <code>dy</code> attributes apply a local offset <strong>after</strong> rotation and scaling.</p>
+      <p>By keeping the pivot point fixed, but offsetting the shape by <code>dx</code>, any rotation applied will cause the shape to <strong>orbit</strong> the pivot point instead of just spinning in place.</p>
+      
+      <pre><code class="language-html">&lt;!-- A rectangle orbiting its pivot point --&gt;
+&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer x="<mark id="codeEx4LayerX">500</mark>" y="<mark id="codeEx4LayerY">300</mark>" rotate="<mark id="codeEx4LayerRot">0</mark>"&gt;
+    &lt;pxl-rect 
+      x="<mark id="codeEx4RectX">0</mark>" y="<mark id="codeEx4RectY">0</mark>" 
+      dx="<mark id="codeEx4RectDx">-200</mark>" dy="<mark id="codeEx4RectDy">-200</mark>" 
+      rotate="<mark id="codeEx4RectRot">0</mark>" 
+      w="100" h="100" fill="#ffedd5"&gt;
+    &lt;/pxl-rect&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+      <!-- Reactive Variables -->
+      <pxl-var id="ex4LayerX" value="500"></pxl-var>
+      <pxl-var id="ex4LayerY" value="300"></pxl-var>
+      <pxl-var id="ex4LayerRot" value="0"></pxl-var>
+      <pxl-var id="ex4RectX" value="0"></pxl-var>
+      <pxl-var id="ex4RectY" value="0"></pxl-var>
+      <pxl-var id="ex4RectDx" value="-200"></pxl-var>
+      <pxl-var id="ex4RectDy" value="-200"></pxl-var>
+      <pxl-var id="ex4RectRot" value="0"></pxl-var>
+
+      <div class="demo-container">
+        <pxl-stage ratio="5 / 3" class="demo-stage">
+          <pxl-layer x="ref.ex4LayerX.value" y="ref.ex4LayerY.value" rotate="ref.ex4LayerRot.value">
+            <!-- Helpers (Grid & Crosshairs) -->
+            <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+
+            <!-- The Shape -->
+            <pxl-rect id="ex4RectShape"
+              x="ref.ex4RectX.value" 
+              y="ref.ex4RectY.value" 
+              dx="ref.ex4RectDx.value" 
+              dy="ref.ex4RectDy.value" 
+              rotate="ref.ex4RectRot.value" 
+              w="100" h="100" 
+              fill="#ffedd5" stroke="#f97316" strokewidth="2">
+            </pxl-rect>
+
+            <!-- Layer Origin Dot -->
+            <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
+            <pxl-text x="15" y="15" baseline="top" text="`Layer (${Math.round(ref.ex4LayerX.value)}, ${Math.round(ref.ex4LayerY.value)})`" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
+            
+            <!-- Pivot Dot -->
+            <pxl-circle x="ref.ex4RectX.value" y="ref.ex4RectY.value" r="5" fill="#ea580c"></pxl-circle>
+            <pxl-text 
+              x="ref.ex4RectX.value + 15" 
+              y="ref.ex4RectY.value - 15" 
+              baseline="bottom" 
+              text="`Rect (${Math.round(ref.ex4RectX.value)}, ${Math.round(ref.ex4RectY.value)})`" 
+              size="27" fill="#ea580c" font="monospace">
+            </pxl-text>
+
+            <!-- Rect Offset Dot -->
+            <pxl-circle 
+              x="toLocal(ref.ex4RectShape, 'x')" 
+              y="toLocal(ref.ex4RectShape, 'y')" 
+              r="5" fill="#ef4444">
+            </pxl-circle>
+            <pxl-text 
+              x="toLocal(ref.ex4RectShape, 'x') + 15" 
+              y="toLocal(ref.ex4RectShape, 'y') - 15" 
+              baseline="bottom" 
+              text="`Rect Offset (${Math.round(ref.ex4RectDx.value)}, ${Math.round(ref.ex4RectDy.value)})`" 
+              size="27" fill="#ef4444" font="monospace">
+            </pxl-text>
+          </pxl-layer>
+        </pxl-stage>
+
+        <!-- Tabbed Controls -->
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn active" onclick="switchTab(this, 'ex4-layer')">Layer</button>
+              <button class="tab-btn" onclick="switchTab(this, 'ex4-rect')">Rectangle</button>
+            </div>
+          </div>
+
+          <div class="tab-content active" id="ex4-layer">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Layer X <span id="lblEx4LayerX">500</span></label>
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                  oninput="pxl.nodes.ex4LayerX.set('value', Number(this.value)); document.getElementById('lblEx4LayerX').innerText = this.value; document.getElementById('codeEx4LayerX').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Layer Y <span id="lblEx4LayerY">300</span></label>
+                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                  oninput="pxl.nodes.ex4LayerY.set('value', Number(this.value)); document.getElementById('lblEx4LayerY').innerText = this.value; document.getElementById('codeEx4LayerY').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="lblEx4LayerRot">0°</span></label>
+                <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex4LayerRot.set('value', Number(this.value)); document.getElementById('lblEx4LayerRot').innerText = this.value + '°'; document.getElementById('codeEx4LayerRot').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="ex4-rect">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Rectangle X <span id="lblEx4RectX">0</span></label>
+                <input type="range" min="-500" max="500" step="10" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex4RectX.set('value', Number(this.value)); document.getElementById('lblEx4RectX').innerText = this.value; document.getElementById('codeEx4RectX').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rectangle Y <span id="lblEx4RectY">0</span></label>
+                <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex4RectY.set('value', Number(this.value)); document.getElementById('lblEx4RectY').innerText = this.value; document.getElementById('codeEx4RectY').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Offset X <span id="lblEx4RectDx">-200</span></label>
+                <input type="range" min="-300" max="300" step="10" value="-200" autocomplete="off"
+                  oninput="pxl.nodes.ex4RectDx.set('value', Number(this.value)); document.getElementById('lblEx4RectDx').innerText = this.value; document.getElementById('codeEx4RectDx').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Offset Y <span id="lblEx4RectDy">-200</span></label>
+                <input type="range" min="-300" max="300" step="10" value="-200" autocomplete="off"
+                  oninput="pxl.nodes.ex4RectDy.set('value', Number(this.value)); document.getElementById('lblEx4RectDy').innerText = this.value; document.getElementById('codeEx4RectDy').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="lblEx4RectRot">0°</span></label>
+                <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex4RectRot.set('value', Number(this.value)); document.getElementById('lblEx4RectRot').innerText = this.value + '°'; document.getElementById('codeEx4RectRot').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+<h2>5. Animated Orbits</h2>
       <p>This is where Kilopixel's coordinate system shines. The <code>dx</code> and <code>dy</code> attributes apply a local offset <strong>after</strong> rotation and scaling.</p>
       <p>By keeping the pivot point (<code>x/y</code>) fixed at the center, but offsetting the shape by <code>dx="150"</code>, you can create perfect orbital mechanics mathematically effortlessly!</p>
       <p>Use the sliders below to see how standard HTML inputs can instantly drive the Kilopixel canvas via the <code>ref.*</code> registry.</p>
       
       <pre><code class="language-html">&lt;!-- Standard HTML Inputs driving Kilopixel variables --&gt;
-&lt;input type="range" oninput="pxl.nodes.demoOrbitOffset.set('value', this.value)"&gt;
-&lt;input type="range" oninput="pxl.nodes.demoOrbitSpeed.set('value', this.value)"&gt;
+&lt;input type="range" oninput="pxl.nodes.ex5OrbitOffset.set('value', this.value)"&gt;
+&lt;input type="range" oninput="pxl.nodes.ex5OrbitSpeed.set('value', this.value)"&gt;
 
 &lt;!-- Kilopixel Variables --&gt;
-&lt;pxl-var id="demoOrbitOffset" value="150"&gt;&lt;/pxl-var&gt;
-&lt;pxl-var id="demoOrbitSpeed" value="90"&gt;&lt;/pxl-var&gt;
+&lt;pxl-var id="ex5OrbitOffset" value="150"&gt;&lt;/pxl-var&gt;
+&lt;pxl-var id="ex5OrbitSpeed" value="90"&gt;&lt;/pxl-var&gt;
 
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="500" y="300"&gt;
@@ -240,16 +501,16 @@
 
     &lt;!-- Orbiting Planet --&gt;
     &lt;pxl-circle 
-      dx="ref.demoOrbitOffset.value" 
-      rotate="t * ref.demoOrbitSpeed.value" 
+      dx="ref.ex5OrbitOffset.value" 
+      rotate="t * ref.ex5OrbitSpeed.value" 
       r="20" fill="#3b82f6"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
       <!-- Reactive Variables -->
-      <pxl-var id="demoOrbitOffset" value="150"></pxl-var>
-      <pxl-var id="demoOrbitSpeed" value="90"></pxl-var>
+      <pxl-var id="ex5OrbitOffset" value="150"></pxl-var>
+      <pxl-var id="ex5OrbitSpeed" value="90"></pxl-var>
 
       <div class="demo-container">
         <pxl-stage ratio="5 / 3" class="demo-stage">
@@ -272,27 +533,27 @@
 
             <!-- The Orbiting Planet -->
             <pxl-circle id="planet" 
-              dx="ref.demoOrbitOffset.value" 
-              rotate="t * ref.demoOrbitSpeed.value" 
+              dx="ref.ex5OrbitOffset.value" 
+              rotate="t * ref.ex5OrbitSpeed.value" 
               r="20" fill="#3b82f6">
             </pxl-circle>
 
             <!-- Red Arrow illustrating the dx offset vector -->
             <pxl-line 
               x="0" y="0" 
-              x2="ref.demoOrbitOffset.value" y2="0" 
+              x2="ref.ex5OrbitOffset.value" y2="0" 
               stroke="#f43f5e" strokewidth="4" arrowend="auto" 
-              rotate="t * ref.demoOrbitSpeed.value">
+              rotate="t * ref.ex5OrbitSpeed.value">
             </pxl-line>
 
             <!-- Circle tracing the orbital path. 
                  The 'end' calculation ensures the drawn arc dynamically matches the current rotation speed. -->
             <pxl-circle 
-              r="ref.demoOrbitOffset.value" 
+              r="ref.ex5OrbitOffset.value" 
               stroke="#f43f5e" 
               strokewidth="2" 
               linedash="[5, 5]" 
-              end="(t * ref.demoOrbitSpeed.value) % 360" 
+              end="(t * ref.ex5OrbitSpeed.value) % 360" 
               fill="none">
             </pxl-circle>
           </pxl-layer>
@@ -302,19 +563,20 @@
         <div class="demo-controls">
           <div class="playground-sliders">
             <div class="control-group">
-              <label>Offset (dx) <span id="lblOffset">150</span></label>
+              <label>Offset (dx) <span id="lblEx5Offset">150</span></label>
               <input type="range" min="0" max="300" value="150" autocomplete="off"
-                oninput="pxl.nodes.demoOrbitOffset.set('value', Number(this.value)); document.getElementById('lblOffset').innerText = this.value;">
+                oninput="pxl.nodes.ex5OrbitOffset.set('value', Number(this.value)); document.getElementById('lblEx5Offset').innerText = this.value;">
             </div>
             <div class="control-group">
-              <label>Speed (degrees/s) <span id="lblSpeed">90</span></label>
-              <input type="range" min="-360" max="360" value="90" autocomplete="off"
-                oninput="pxl.nodes.demoOrbitSpeed.set('value', Number(this.value)); document.getElementById('lblSpeed').innerText = this.value;">
+              <label>Speed (degrees/s) <span id="lblEx5Speed">90</span></label>
+              <input type="range" min="-180" max="180" value="90" autocomplete="off"
+                oninput="pxl.nodes.ex5OrbitSpeed.set('value', Number(this.value)); document.getElementById('lblEx5Speed').innerText = this.value;">
             </div>
           </div>
         </div>
       </div>
       
+
       </div>
     </main>
   </div>
@@ -322,5 +584,30 @@
   <!-- Prism Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+
+  <!-- Highlight HTML marks when values change -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          let target = mutation.target;
+          if (target.nodeType === Node.TEXT_NODE) {
+            target = target.parentElement;
+          }
+          if (target && target.tagName === 'MARK') {
+            target.classList.add('highlight-active');
+            clearTimeout(target.highlightTimeout);
+            target.highlightTimeout = setTimeout(() => {
+              target.classList.remove('highlight-active');
+            }, 300);
+          }
+        });
+      });
+
+      document.querySelectorAll('mark').forEach(mark => {
+        observer.observe(mark, { characterData: true, childList: true, subtree: true });
+      });
+    });
+  </script>
 </body>
 </html>
