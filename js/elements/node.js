@@ -22,6 +22,9 @@ class PxlNode extends HTMLElement {
     if (oldValue === newValue) return;
     pxl.compileAttribute(this, name, newValue);
     this.isAnimated = this.animatedAttributeKeys.length > 0;
+    if (name === 'x' || name === 'y' || name === 'dx' || name === 'dy' || name === 'rotate' || name === 'scale' || name === 'scalex' || name === 'scaley' || name === 'skewx' || name === 'skewy') {
+      this._isLocalMatrixDirty = true;
+    }
     if (this._refKey) pxl.broadcast(this._refKey);
     this.parentLayer?.invalidate();
   }

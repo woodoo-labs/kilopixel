@@ -40,11 +40,6 @@
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
-      <!-- Reactive Variables for Playground -->
-      <pxl-var id="ex1CircleX" value="500"></pxl-var>
-      <pxl-var id="ex1CircleY" value="300"></pxl-var>
-      <pxl-var id="ex1CircleR" value="50"></pxl-var>
-
       <div class="demo-container">
         <pxl-stage ratio="5 / 3" class="demo-stage">
           <pxl-layer>
@@ -53,11 +48,11 @@
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
 
-            <!-- The actual shape, bound to shape variables -->
-            <pxl-circle 
-              x="ref.ex1CircleX.value" 
-              y="ref.ex1CircleY.value" 
-              r="ref.ex1CircleR.value" 
+            <!-- The actual shape -->
+            <pxl-circle id="ex1Circle"
+              x="500" 
+              y="300" 
+              r="50" 
               fill="#ffedd5" stroke="#f97316" strokewidth="2">
             </pxl-circle>
 
@@ -66,14 +61,14 @@
             <pxl-text x="15" y="15" baseline="top" text="'Layer (0, 0)'" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
 
             <!-- Pivot Dot -->
-            <pxl-circle x="ref.ex1CircleX.value" y="ref.ex1CircleY.value" r="5" fill="#ea580c"></pxl-circle>
+            <pxl-circle x="ref.ex1Circle.x" y="ref.ex1Circle.y" r="5" fill="#ea580c"></pxl-circle>
 
             <!-- Shape Coordinate Label -->
             <pxl-text 
-              x="ref.ex1CircleX.value + 15" 
-              y="ref.ex1CircleY.value - 15" 
+              x="ref.ex1Circle.x + 15" 
+              y="ref.ex1Circle.y - 15" 
               baseline="bottom"
-              text="`Circle (${Math.round(ref.ex1CircleX.value)}, ${Math.round(ref.ex1CircleY.value)})`" 
+              text="`Circle (${ref.ex1Circle.x}, ${ref.ex1Circle.y})`" 
               size="27" 
               fill="#ea580c" 
               font="monospace">
@@ -96,17 +91,17 @@
               <div class="control-group">
                 <label>Circle X <span id="lblEx1CircleX">500</span></label>
                 <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
-                  oninput="pxl.nodes.ex1CircleX.set('value', Number(this.value)); document.getElementById('lblEx1CircleX').innerText = this.value; document.getElementById('codeEx1CircleX').innerText = this.value;">
+                  oninput="pxl.nodes.ex1Circle.set('x', this.value); document.getElementById('lblEx1CircleX').innerText = this.value; document.getElementById('codeEx1CircleX').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Circle Y <span id="lblEx1CircleY">300</span></label>
                 <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
-                  oninput="pxl.nodes.ex1CircleY.set('value', Number(this.value)); document.getElementById('lblEx1CircleY').innerText = this.value; document.getElementById('codeEx1CircleY').innerText = this.value;">
+                  oninput="pxl.nodes.ex1Circle.set('y', this.value); document.getElementById('lblEx1CircleY').innerText = this.value; document.getElementById('codeEx1CircleY').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Radius <span id="lblEx1CircleR">50</span></label>
                 <input type="range" min="10" max="150" step="10" value="50" autocomplete="off"
-                  oninput="pxl.nodes.ex1CircleR.set('value', Number(this.value)); document.getElementById('lblEx1CircleR').innerText = this.value; document.getElementById('codeEx1CircleR').innerText = this.value;">
+                  oninput="pxl.nodes.ex1Circle.set('r', this.value); document.getElementById('lblEx1CircleR').innerText = this.value; document.getElementById('codeEx1CircleR').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -119,47 +114,40 @@
       <pre><code class="language-html">&lt;!-- Centering the layer instead of the shape --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="codeEx2LayerX">500</mark>" y="<mark id="codeEx2LayerY">300</mark>"&gt;
-    &lt;pxl-circle x="<mark id="codeex2CircleX">0</mark>" y="<mark id="codeex2CircleY">0</mark>" r="<mark id="codeex2CircleR">50</mark>" fill="#ffedd5"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="<mark id="codeEx2CircleX">0</mark>" y="<mark id="codeEx2CircleY">0</mark>" r="<mark id="codeEx2CircleR">50</mark>" fill="#ffedd5"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
-      <!-- Reactive Variables for Example 2 -->
-      <pxl-var id="ex2LayerX" value="500"></pxl-var>
-      <pxl-var id="ex2LayerY" value="300"></pxl-var>
-      <pxl-var id="ex2CircleX" value="0"></pxl-var>
-      <pxl-var id="ex2CircleY" value="0"></pxl-var>
-      <pxl-var id="ex2CircleR" value="50"></pxl-var>
-
       <div class="demo-container">
         <pxl-stage ratio="5 / 3" class="demo-stage">
-          <!-- Layer bound to layer variables -->
-          <pxl-layer x="ref.ex2LayerX.value" y="ref.ex2LayerY.value">
+          <!-- The layer container -->
+          <pxl-layer id="ex2Layer" x="500" y="300">
             <!-- Helpers -->
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
             
-            <!-- The actual shape, bound to shape variables -->
-            <pxl-circle 
-              x="ref.ex2CircleX.value" 
-              y="ref.ex2CircleY.value" 
-              r="ref.ex2CircleR.value"
+            <!-- The actual shape -->
+            <pxl-circle id="ex2Circle"
+              x="0" 
+              y="0" 
+              r="50"
               fill="#ffedd5" stroke="#f97316" strokewidth="2">
             </pxl-circle>
             
             <!-- Layer Origin Dot -->
             <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
-            <pxl-text x="15" y="15" baseline="top" text="`Layer (${Math.round(ref.ex2LayerX.value)}, ${Math.round(ref.ex2LayerY.value)})`" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
+            <pxl-text x="15" y="15" baseline="top" text="`Layer (${ref.ex2Layer.x}, ${ref.ex2Layer.y})`" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
 
             <!-- Pivot Dot -->
-            <pxl-circle x="ref.ex2CircleX.value" y="ref.ex2CircleY.value" r="5" fill="#ea580c"></pxl-circle>
+            <pxl-circle x="ref.ex2Circle.x" y="ref.ex2Circle.y" r="5" fill="#ea580c"></pxl-circle>
             
             <!-- Shape Coordinate Label -->
             <pxl-text 
-              x="ref.ex2CircleX.value + 15" 
-              y="ref.ex2CircleY.value - 15" 
+              x="ref.ex2Circle.x + 15" 
+              y="ref.ex2Circle.y - 15" 
               baseline="bottom"
-              text="`Circle (${Math.round(ref.ex2CircleX.value)}, ${Math.round(ref.ex2CircleY.value)})`" 
+              text="`Circle (${ref.ex2Circle.x}, ${ref.ex2Circle.y})`" 
               size="27" 
               fill="#ea580c" 
               font="monospace">
@@ -183,12 +171,12 @@
               <div class="control-group">
                 <label>Layer X <span id="lblEx2LayerX">500</span></label>
                 <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
-                  oninput="pxl.nodes.ex2LayerX.set('value', Number(this.value)); document.getElementById('lblEx2LayerX').innerText = this.value; document.getElementById('codeEx2LayerX').innerText = this.value;">
+                  oninput="pxl.nodes.ex2Layer.set('x', this.value); document.getElementById('lblEx2LayerX').innerText = this.value; document.getElementById('codeEx2LayerX').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Layer Y <span id="lblEx2LayerY">300</span></label>
                 <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
-                  oninput="pxl.nodes.ex2LayerY.set('value', Number(this.value)); document.getElementById('lblEx2LayerY').innerText = this.value; document.getElementById('codeEx2LayerY').innerText = this.value;">
+                  oninput="pxl.nodes.ex2Layer.set('y', this.value); document.getElementById('lblEx2LayerY').innerText = this.value; document.getElementById('codeEx2LayerY').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -197,19 +185,19 @@
           <div class="tab-content" id="ex2-circle">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Circle X <span id="lblex2CircleX">0</span></label>
+                <label>Circle X <span id="lblEx2CircleX">0</span></label>
                 <input type="range" min="-500" max="500" step="10" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex2CircleX.set('value', Number(this.value)); document.getElementById('lblex2CircleX').innerText = this.value; document.getElementById('codeex2CircleX').innerText = this.value;">
+                  oninput="pxl.nodes.ex2Circle.set('x', this.value); document.getElementById('lblEx2CircleX').innerText = this.value; document.getElementById('codeEx2CircleX').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Circle Y <span id="lblex2CircleY">0</span></label>
+                <label>Circle Y <span id="lblEx2CircleY">0</span></label>
                 <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex2CircleY.set('value', Number(this.value)); document.getElementById('lblex2CircleY').innerText = this.value; document.getElementById('codeex2CircleY').innerText = this.value;">
+                  oninput="pxl.nodes.ex2Circle.set('y', this.value); document.getElementById('lblEx2CircleY').innerText = this.value; document.getElementById('codeEx2CircleY').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius <span id="lblex2CircleR">50</span></label>
+                <label>Radius <span id="lblEx2CircleR">50</span></label>
                 <input type="range" min="10" max="150" step="10" value="50" autocomplete="off"
-                  oninput="pxl.nodes.ex2CircleR.set('value', Number(this.value)); document.getElementById('lblex2CircleR').innerText = this.value; document.getElementById('codeex2CircleR').innerText = this.value;">
+                  oninput="pxl.nodes.ex2Circle.set('r', this.value); document.getElementById('lblEx2CircleR').innerText = this.value; document.getElementById('codeEx2CircleR').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -235,46 +223,36 @@
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
-      <!-- Reactive Variables for Example 3 -->
-      <pxl-var id="ex3LayerX" value="500"></pxl-var>
-      <pxl-var id="ex3LayerY" value="300"></pxl-var>
-      <pxl-var id="ex3LayerRot" value="0"></pxl-var>
-      <pxl-var id="ex3EllipseX" value="0"></pxl-var>
-      <pxl-var id="ex3EllipseY" value="0"></pxl-var>
-      <pxl-var id="ex3EllipseRot" value="0"></pxl-var>
-      <pxl-var id="ex3EllipseRx" value="100"></pxl-var>
-      <pxl-var id="ex3EllipseRy" value="40"></pxl-var>
-
       <div class="demo-container">
         <pxl-stage ratio="5 / 3" class="demo-stage">
-          <pxl-layer x="ref.ex3LayerX.value" y="ref.ex3LayerY.value" rotate="ref.ex3LayerRot.value">
+          <pxl-layer id="ex3Layer" x="500" y="300" rotate="0">
             <!-- Helpers -->
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
             
             <!-- The actual shape -->
-            <pxl-ellipse 
-              x="ref.ex3EllipseX.value" 
-              y="ref.ex3EllipseY.value" 
-              rx="ref.ex3EllipseRx.value" ry="ref.ex3EllipseRy.value" 
-              rotate="ref.ex3EllipseRot.value" 
+            <pxl-ellipse id="ex3Ellipse"
+              x="0" 
+              y="0" 
+              rx="100" ry="40" 
+              rotate="0" 
               fill="#ffedd5" stroke="#f97316" strokewidth="2">
             </pxl-ellipse>
 
             <!-- Layer Origin Dot -->
             <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
-            <pxl-text x="15" y="15" baseline="top" text="`Layer (${Math.round(ref.ex3LayerX.value)}, ${Math.round(ref.ex3LayerY.value)})`" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
+            <pxl-text x="15" y="15" baseline="top" text="`Layer (${ref.ex3Layer.x}, ${ref.ex3Layer.y})`" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
             
             <!-- Pivot Dot -->
-            <pxl-circle x="ref.ex3EllipseX.value" y="ref.ex3EllipseY.value" r="5" fill="#ea580c"></pxl-circle>
+            <pxl-circle x="ref.ex3Ellipse.x" y="ref.ex3Ellipse.y" r="5" fill="#ea580c"></pxl-circle>
             
             <!-- Coordinate Label -->
             <pxl-text 
-              x="ref.ex3EllipseX.value + 15" 
-              y="ref.ex3EllipseY.value - 15" 
+              x="ref.ex3Ellipse.x + 15" 
+              y="ref.ex3Ellipse.y - 15" 
               baseline="bottom"
-              text="`Ellipse (${Math.round(ref.ex3EllipseX.value)}, ${Math.round(ref.ex3EllipseY.value)})`" 
+              text="`Ellipse (${ref.ex3Ellipse.x}, ${ref.ex3Ellipse.y})`" 
               size="27" fill="#ea580c" font="monospace">
             </pxl-text>
           </pxl-layer>
@@ -296,17 +274,17 @@
               <div class="control-group">
                 <label>Layer X <span id="lblEx3LayerX">500</span></label>
                 <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
-                  oninput="pxl.nodes.ex3LayerX.set('value', Number(this.value)); document.getElementById('lblEx3LayerX').innerText = this.value; document.getElementById('codeEx3LayerX').innerText = this.value;">
+                  oninput="pxl.nodes.ex3Layer.set('x', this.value); document.getElementById('lblEx3LayerX').innerText = this.value; document.getElementById('codeEx3LayerX').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Layer Y <span id="lblEx3LayerY">300</span></label>
                 <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
-                  oninput="pxl.nodes.ex3LayerY.set('value', Number(this.value)); document.getElementById('lblEx3LayerY').innerText = this.value; document.getElementById('codeEx3LayerY').innerText = this.value;">
+                  oninput="pxl.nodes.ex3Layer.set('y', this.value); document.getElementById('lblEx3LayerY').innerText = this.value; document.getElementById('codeEx3LayerY').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Rotation <span id="lblEx3LayerRot">0°</span></label>
                 <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex3LayerRot.set('value', Number(this.value)); document.getElementById('lblEx3LayerRot').innerText = this.value + '°'; document.getElementById('codeEx3LayerRot').innerText = this.value;">
+                  oninput="pxl.nodes.ex3Layer.set('rotate', this.value); document.getElementById('lblEx3LayerRot').innerText = this.value + '°'; document.getElementById('codeEx3LayerRot').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -317,27 +295,27 @@
               <div class="control-group">
                 <label>Ellipse X <span id="lblEx3EllipseX">0</span></label>
                 <input type="range" min="-500" max="500" step="10" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex3EllipseX.set('value', Number(this.value)); document.getElementById('lblEx3EllipseX').innerText = this.value; document.getElementById('codeEx3EllipseX').innerText = this.value;">
+                  oninput="pxl.nodes.ex3Ellipse.set('x', this.value); document.getElementById('lblEx3EllipseX').innerText = this.value; document.getElementById('codeEx3EllipseX').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Ellipse Y <span id="lblEx3EllipseY">0</span></label>
                 <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex3EllipseY.set('value', Number(this.value)); document.getElementById('lblEx3EllipseY').innerText = this.value; document.getElementById('codeEx3EllipseY').innerText = this.value;">
+                  oninput="pxl.nodes.ex3Ellipse.set('y', this.value); document.getElementById('lblEx3EllipseY').innerText = this.value; document.getElementById('codeEx3EllipseY').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Radius X <span id="lblEx3EllipseRx">100</span></label>
                 <input type="range" min="10" max="300" step="10" value="100" autocomplete="off"
-                  oninput="pxl.nodes.ex3EllipseRx.set('value', Number(this.value)); document.getElementById('lblEx3EllipseRx').innerText = this.value; document.getElementById('codeEx3EllipseRx').innerText = this.value;">
+                  oninput="pxl.nodes.ex3Ellipse.set('rx', this.value); document.getElementById('lblEx3EllipseRx').innerText = this.value; document.getElementById('codeEx3EllipseRx').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Radius Y <span id="lblEx3EllipseRy">40</span></label>
                 <input type="range" min="10" max="300" step="10" value="40" autocomplete="off"
-                  oninput="pxl.nodes.ex3EllipseRy.set('value', Number(this.value)); document.getElementById('lblEx3EllipseRy').innerText = this.value; document.getElementById('codeEx3EllipseRy').innerText = this.value;">
+                  oninput="pxl.nodes.ex3Ellipse.set('ry', this.value); document.getElementById('lblEx3EllipseRy').innerText = this.value; document.getElementById('codeEx3EllipseRy').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Rotation <span id="lblEx3EllipseRot">0°</span></label>
                 <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex3EllipseRot.set('value', Number(this.value)); document.getElementById('lblEx3EllipseRot').innerText = this.value + '°'; document.getElementById('codeEx3EllipseRot').innerText = this.value;">
+                  oninput="pxl.nodes.ex3Ellipse.set('rotate', this.value); document.getElementById('lblEx3EllipseRot').innerText = this.value + '°'; document.getElementById('codeEx3EllipseRot').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -360,60 +338,50 @@
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
-      <!-- Reactive Variables -->
-      <pxl-var id="ex4LayerX" value="500"></pxl-var>
-      <pxl-var id="ex4LayerY" value="300"></pxl-var>
-      <pxl-var id="ex4LayerRot" value="0"></pxl-var>
-      <pxl-var id="ex4RectX" value="0"></pxl-var>
-      <pxl-var id="ex4RectY" value="0"></pxl-var>
-      <pxl-var id="ex4RectDx" value="-200"></pxl-var>
-      <pxl-var id="ex4RectDy" value="-200"></pxl-var>
-      <pxl-var id="ex4RectRot" value="0"></pxl-var>
-
       <div class="demo-container">
         <pxl-stage ratio="5 / 3" class="demo-stage">
-          <pxl-layer x="ref.ex4LayerX.value" y="ref.ex4LayerY.value" rotate="ref.ex4LayerRot.value">
+          <pxl-layer id="ex4Layer" x="500" y="300" rotate="0">
             <!-- Helpers (Grid & Crosshairs) -->
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
 
             <!-- The Shape -->
-            <pxl-rect id="ex4RectShape"
-              x="ref.ex4RectX.value" 
-              y="ref.ex4RectY.value" 
-              dx="ref.ex4RectDx.value" 
-              dy="ref.ex4RectDy.value" 
-              rotate="ref.ex4RectRot.value" 
+            <pxl-rect id="ex4Rect"
+              x="0" 
+              y="0" 
+              dx="-200" 
+              dy="-200" 
+              rotate="0" 
               w="100" h="100" 
               fill="#ffedd5" stroke="#f97316" strokewidth="2">
             </pxl-rect>
 
             <!-- Layer Origin Dot -->
             <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
-            <pxl-text x="15" y="15" baseline="top" text="`Layer (${Math.round(ref.ex4LayerX.value)}, ${Math.round(ref.ex4LayerY.value)})`" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
+            <pxl-text x="15" y="15" baseline="top" text="`Layer (${ref.ex4Layer.x}, ${ref.ex4Layer.y})`" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
             
             <!-- Pivot Dot -->
-            <pxl-circle x="ref.ex4RectX.value" y="ref.ex4RectY.value" r="5" fill="#ea580c"></pxl-circle>
+            <pxl-circle x="ref.ex4Rect.x" y="ref.ex4Rect.y" r="5" fill="#ea580c"></pxl-circle>
             <pxl-text 
-              x="ref.ex4RectX.value + 15" 
-              y="ref.ex4RectY.value - 15" 
+              x="ref.ex4Rect.x + 15" 
+              y="ref.ex4Rect.y - 15" 
               baseline="bottom" 
-              text="`Rect (${Math.round(ref.ex4RectX.value)}, ${Math.round(ref.ex4RectY.value)})`" 
+              text="`Rect (${ref.ex4Rect.x}, ${ref.ex4Rect.y})`" 
               size="27" fill="#ea580c" font="monospace">
             </pxl-text>
 
             <!-- Rect Offset Dot -->
             <pxl-circle 
-              x="toLocal(ref.ex4RectShape, 'x')" 
-              y="toLocal(ref.ex4RectShape, 'y')" 
+              x="toLocal(ref.ex4Rect, 'x')" 
+              y="toLocal(ref.ex4Rect, 'y')" 
               r="5" fill="#ef4444">
             </pxl-circle>
             <pxl-text 
-              x="toLocal(ref.ex4RectShape, 'x') + 15" 
-              y="toLocal(ref.ex4RectShape, 'y') - 15" 
+              x="toLocal(ref.ex4Rect, 'x') + 15" 
+              y="toLocal(ref.ex4Rect, 'y') - 15" 
               baseline="bottom" 
-              text="`Rect Offset (${Math.round(ref.ex4RectDx.value)}, ${Math.round(ref.ex4RectDy.value)})`" 
+              text="`Rect Offset (${ref.ex4Rect.dx}, ${ref.ex4Rect.dy})`" 
               size="27" fill="#ef4444" font="monospace">
             </pxl-text>
           </pxl-layer>
@@ -434,17 +402,17 @@
               <div class="control-group">
                 <label>Layer X <span id="lblEx4LayerX">500</span></label>
                 <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
-                  oninput="pxl.nodes.ex4LayerX.set('value', Number(this.value)); document.getElementById('lblEx4LayerX').innerText = this.value; document.getElementById('codeEx4LayerX').innerText = this.value;">
+                  oninput="pxl.nodes.ex4Layer.set('x', this.value); document.getElementById('lblEx4LayerX').innerText = this.value; document.getElementById('codeEx4LayerX').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Layer Y <span id="lblEx4LayerY">300</span></label>
                 <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
-                  oninput="pxl.nodes.ex4LayerY.set('value', Number(this.value)); document.getElementById('lblEx4LayerY').innerText = this.value; document.getElementById('codeEx4LayerY').innerText = this.value;">
+                  oninput="pxl.nodes.ex4Layer.set('y', this.value); document.getElementById('lblEx4LayerY').innerText = this.value; document.getElementById('codeEx4LayerY').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Rotation <span id="lblEx4LayerRot">0°</span></label>
                 <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex4LayerRot.set('value', Number(this.value)); document.getElementById('lblEx4LayerRot').innerText = this.value + '°'; document.getElementById('codeEx4LayerRot').innerText = this.value;">
+                  oninput="pxl.nodes.ex4Layer.set('rotate', this.value); document.getElementById('lblEx4LayerRot').innerText = this.value + '°'; document.getElementById('codeEx4LayerRot').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -454,27 +422,27 @@
               <div class="control-group">
                 <label>Rectangle X <span id="lblEx4RectX">0</span></label>
                 <input type="range" min="-500" max="500" step="10" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex4RectX.set('value', Number(this.value)); document.getElementById('lblEx4RectX').innerText = this.value; document.getElementById('codeEx4RectX').innerText = this.value;">
+                  oninput="pxl.nodes.ex4Rect.set('x', this.value); document.getElementById('lblEx4RectX').innerText = this.value; document.getElementById('codeEx4RectX').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Rectangle Y <span id="lblEx4RectY">0</span></label>
                 <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex4RectY.set('value', Number(this.value)); document.getElementById('lblEx4RectY').innerText = this.value; document.getElementById('codeEx4RectY').innerText = this.value;">
+                  oninput="pxl.nodes.ex4Rect.set('y', this.value); document.getElementById('lblEx4RectY').innerText = this.value; document.getElementById('codeEx4RectY').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Offset X <span id="lblEx4RectDx">-200</span></label>
                 <input type="range" min="-300" max="300" step="10" value="-200" autocomplete="off"
-                  oninput="pxl.nodes.ex4RectDx.set('value', Number(this.value)); document.getElementById('lblEx4RectDx').innerText = this.value; document.getElementById('codeEx4RectDx').innerText = this.value;">
+                  oninput="pxl.nodes.ex4Rect.set('dx', this.value); document.getElementById('lblEx4RectDx').innerText = this.value; document.getElementById('codeEx4RectDx').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Offset Y <span id="lblEx4RectDy">-200</span></label>
                 <input type="range" min="-300" max="300" step="10" value="-200" autocomplete="off"
-                  oninput="pxl.nodes.ex4RectDy.set('value', Number(this.value)); document.getElementById('lblEx4RectDy').innerText = this.value; document.getElementById('codeEx4RectDy').innerText = this.value;">
+                  oninput="pxl.nodes.ex4Rect.set('dy', this.value); document.getElementById('lblEx4RectDy').innerText = this.value; document.getElementById('codeEx4RectDy').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Rotation <span id="lblEx4RectRot">0°</span></label>
                 <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex4RectRot.set('value', Number(this.value)); document.getElementById('lblEx4RectRot').innerText = this.value + '°'; document.getElementById('codeEx4RectRot').innerText = this.value;">
+                  oninput="pxl.nodes.ex4Rect.set('rotate', this.value); document.getElementById('lblEx4RectRot').innerText = this.value + '°'; document.getElementById('codeEx4RectRot').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -521,18 +489,18 @@
             <pxl-line x1="0" y1="-300" x2="0" y2="300" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
             
             <!-- Crosshair lines tracking the object using toLocal -->
-            <pxl-line x1="-500" y1="toLocal(ref.planet, 'y')" x2="500" y2="toLocal(ref.planet, 'y')" stroke="#94a3b8" strokewidth="1"></pxl-line>
-            <pxl-line x1="toLocal(ref.planet, 'x')" y1="-300" x2="toLocal(ref.planet, 'x')" y2="300" stroke="#94a3b8" strokewidth="1"></pxl-line>
+            <pxl-line x1="-500" y1="toLocal(ref.ex5Planet, 'y')" x2="500" y2="toLocal(ref.ex5Planet, 'y')" stroke="#94a3b8" strokewidth="1"></pxl-line>
+            <pxl-line x1="toLocal(ref.ex5Planet, 'x')" y1="-300" x2="toLocal(ref.ex5Planet, 'x')" y2="300" stroke="#94a3b8" strokewidth="1"></pxl-line>
 
             <!-- Grey arrows pointing to current X and Y -->
-            <pxl-line x1="0" y1="0" x2="toLocal(ref.planet, 'x')" y2="0" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
-            <pxl-line x1="0" y1="0" x2="0" y2="toLocal(ref.planet, 'y')" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
+            <pxl-line x1="0" y1="0" x2="toLocal(ref.ex5Planet, 'x')" y2="0" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
+            <pxl-line x1="0" y1="0" x2="0" y2="toLocal(ref.ex5Planet, 'y')" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
 
             <!-- The Sun -->
             <pxl-circle r="30" fill="#f59e0b"></pxl-circle>
 
             <!-- The Orbiting Planet -->
-            <pxl-circle id="planet" 
+            <pxl-circle id="ex5Planet" 
               dx="ref.ex5OrbitOffset.value" 
               rotate="t * ref.ex5OrbitSpeed.value" 
               r="20" fill="#3b82f6">
@@ -565,12 +533,12 @@
             <div class="control-group">
               <label>Offset (dx) <span id="lblEx5Offset">150</span></label>
               <input type="range" min="0" max="300" value="150" autocomplete="off"
-                oninput="pxl.nodes.ex5OrbitOffset.set('value', Number(this.value)); document.getElementById('lblEx5Offset').innerText = this.value;">
+                oninput="pxl.nodes.ex5OrbitOffset.set('value', this.value); document.getElementById('lblEx5Offset').innerText = this.value;">
             </div>
             <div class="control-group">
               <label>Speed (degrees/s) <span id="lblEx5Speed">90</span></label>
               <input type="range" min="-180" max="180" value="90" autocomplete="off"
-                oninput="pxl.nodes.ex5OrbitSpeed.set('value', Number(this.value)); document.getElementById('lblEx5Speed').innerText = this.value;">
+                oninput="pxl.nodes.ex5OrbitSpeed.set('value', this.value); document.getElementById('lblEx5Speed').innerText = this.value;">
             </div>
           </div>
         </div>

@@ -63,7 +63,7 @@
     - Built-in properties: `mouseX`, `mouseY`, `isHovered`, `width` (always 1000), `height` (dynamic based on ratio), `fps`, `renderAvg`, `renderMax`.
   - Shape Properties: `<pxl-circle id="player">` ➔ `ref.player.x`
     - Built-in states: `isHovered`, `isPressed`. Example: `scale="ref.btn.isPressed ? 0.9 : (ref.btn.isHovered ? 1.1 : 1)"`
-  - Layer Properties: `<pxl-layer id="bg">` ➔ *Note: Layer property referencing is planned but not fully implemented yet.*
+  - Layer Properties: `<pxl-layer id="bg">` ➔ `ref.bg.x` (Note: Layers expose spatial properties but do not currently expose interaction states like `isHovered`).
 - **Polyline Points Syntax**:
   - The `points` attribute for `<pxl-polyline>` uses a strict delimiter syntax: Points are separated by semicolons (`;`), and X/Y coordinates are separated by commas (`,`).
   - Each coordinate can be an independent math expression! Example: `points="0,0; 100,wave(2)*50; 200,0"`
