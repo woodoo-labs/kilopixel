@@ -7,7 +7,7 @@ We use a strict color-coding system to separate context (the stage/layer) from c
 
 * **Violet / Purple (`#8b5cf6`, `#a78bfa`)**: Used for the **Environment**. This includes Layers, Layer Origin coordinates, and coordinate crosshairs.
 * **Neutral Slate (`#f1f5f9`, `#cbd5e1`)**: Used for **Background Grids** to ensure they remain subtle and do not visually compete with the environment coordinates.
-* **Orange (`#ea580c`, `#f97316`, `#ffedd5`)**: Used for the **Shapes**. This includes Shape borders/fills, Pivot points, and Shape coordinate texts. *Exception: When a demo requires distinguishing multiple independent interacting shapes (e.g., constellation points), you may use a diverse vibrant palette (Blue, Amber, Red) to separate them.*
+* **Orange (`#ea580c`, `rgba(234, 88, 12, 0.5)`, `#ffedd5`)**: Used for the **Shapes**. This includes Shape borders/fills, Pivot points, and Shape coordinate texts. *Exception: When a demo requires distinguishing multiple independent interacting shapes (e.g., constellation points), you may use a diverse vibrant palette (Blue, Amber, Red) to separate them.*
 * **Red / Pink (`#ef4444`, `#f43f5e`)**: Used for **Action & Results**. This includes Offset vectors, orbital paths, and dynamically tracked result points (like `Rect Offset`).
 
 ## 2. Visual Stacking Order (Z-Index)
