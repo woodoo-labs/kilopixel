@@ -37,7 +37,7 @@
       <pre><code class="language-html">&lt;!-- Placing a shape exactly in the center of the canvas --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-circle x="<mark id="codeEx1CircleX">500</mark>" y="<mark id="codeEx1CircleY">300</mark>" r="<mark id="codeEx1CircleR">200</mark>" fill="rgba(255, 237, 213, 0.4)"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="<mark id="codeEx1CircleX">500</mark>" y="<mark id="codeEx1CircleY">300</mark>" r="<mark id="codeEx1CircleR">200</mark>" stroke="#FF8A65"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -46,23 +46,23 @@
           <pxl-layer>
             <!-- Helpers -->
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="1" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="1" linedash="[5, 5]"></pxl-line>
 
             <!-- The actual shape -->
             <pxl-circle id="ex1Circle"
               x="500" 
               y="300" 
               r="200" 
-              fill="rgba(255, 237, 213, 0.4)" stroke="rgba(234, 88, 12, 0.5)" strokewidth="2">
+              fill="#FF8A6526" stroke="#FF8A65" strokewidth="2">
             </pxl-circle>
 
-            <!-- Layer Origin Dot -->
-            <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
-            <pxl-text x="15" y="15" baseline="top" text="'Layer (0, 0)'" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
+            <!-- Layer Center Dot -->
+            <pxl-circle x="0" y="0" r="5" fill="#7E57C2"></pxl-circle>
+            <pxl-text x="15" y="15" baseline="top" text="'Layer (0, 0)'" size="27" fill="#7E57C2" font="monospace"></pxl-text>
 
-            <!-- Pivot Dot -->
-            <pxl-circle x="ref.ex1Circle.x" y="ref.ex1Circle.y" r="5" fill="#ea580c"></pxl-circle>
+            <!-- Circle Center Dot -->
+            <pxl-circle x="ref.ex1Circle.x" y="ref.ex1Circle.y" r="5" fill="#FF7043"></pxl-circle>
 
             <!-- Shape Coordinate Label -->
             <pxl-text 
@@ -71,15 +71,15 @@
               baseline="bottom"
               text="`Circle (${ref.ex1Circle.x}, ${ref.ex1Circle.y})`" 
               size="27" 
-              fill="#ea580c" 
+              fill="#FF7043" 
               font="monospace">
             </pxl-text>
 
             <!-- Coordinate Vectors -->
-            <pxl-line x1="0" y1="ref.ex1Circle.y" x2="ref.ex1Circle.x" y2="ref.ex1Circle.y" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.ex1Circle.x / 2" y="ref.ex1Circle.y + 15" baseline="top" align="center" text="`x = ${ref.ex1Circle.x}`" size="27" fill="#94a3b8" font="monospace"></pxl-text>
-            <pxl-line x1="ref.ex1Circle.x" y1="0" x2="ref.ex1Circle.x" y2="ref.ex1Circle.y" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.ex1Circle.x + 15" y="ref.ex1Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.ex1Circle.y}`" size="27" fill="#94a3b8" font="monospace"></pxl-text>
+            <pxl-line x1="0" y1="ref.ex1Circle.y" x2="ref.ex1Circle.x" y2="ref.ex1Circle.y" stroke="#FFAB91" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex1Circle.x / 2" y="ref.ex1Circle.y + 15" baseline="top" align="center" text="`x = ${ref.ex1Circle.x}`" size="27" fill="#FFAB91" font="monospace"></pxl-text>
+            <pxl-line x1="ref.ex1Circle.x" y1="0" x2="ref.ex1Circle.x" y2="ref.ex1Circle.y" stroke="#FFAB91" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex1Circle.x + 15" y="ref.ex1Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.ex1Circle.y}`" size="27" fill="#FFAB91" font="monospace"></pxl-text>
           </pxl-layer>
         </pxl-stage>
 
@@ -107,7 +107,7 @@
               </div>
               <div class="control-group">
                 <label>Radius <span id="lblEx1CircleR">200</span></label>
-                <input type="range" min="10" max="300" step="10" value="200" autocomplete="off"
+                <input type="range" min="10" max="500" step="10" value="200" autocomplete="off"
                   oninput="pxl.nodes.ex1Circle.set('r', this.value); document.getElementById('lblEx1CircleR').innerText = this.value; document.getElementById('codeEx1CircleR').innerText = this.value;">
               </div>
             </div>
@@ -126,33 +126,41 @@
       <pre><code class="language-html">&lt;!-- Centering the layer instead of the shape --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="codeEx2LayerX">500</mark>" y="<mark id="codeEx2LayerY">300</mark>"&gt;
-    &lt;pxl-circle x="<mark id="codeEx2CircleX">200</mark>" y="<mark id="codeEx2CircleY">-150</mark>" r="<mark id="codeEx2CircleR">100</mark>" fill="rgba(255, 237, 213, 0.4)"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="<mark id="codeEx2CircleX">200</mark>" y="<mark id="codeEx2CircleY">150</mark>" r="<mark id="codeEx2CircleR">300</mark>" stroke="#FF8A65"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
       <div class="demo-container">
         <pxl-stage ratio="5 / 3" class="demo-stage">
-          <!-- The layer container -->
-          <pxl-layer id="ex2Layer" x="500" y="300">
-            <!-- Helpers -->
+          <!-- 1. Layer Background (Grid, crosshairs, and origin dot) -->
+          <pxl-layer x="ref.ex2Layer.x" y="ref.ex2Layer.y">
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
-            
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="1" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="1" linedash="[5, 5]"></pxl-line>
+            <pxl-circle x="0" y="0" r="5" fill="#7E57C2"></pxl-circle>
+            <pxl-text x="15" y="-15" baseline="bottom" text="'Layer (0, 0)'" size="27" fill="#7E57C2" font="monospace"></pxl-text>
+          </pxl-layer>
+
+          <!-- 2. Stage-Level Layer Coordinate Vectors (Relative to Stage, unrotated, above grid) -->
+          <pxl-layer x="0" y="0">
+            <pxl-line x1="0" y1="ref.ex2Layer.y" x2="ref.ex2Layer.x" y2="ref.ex2Layer.y" stroke="#B39DDB" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex2Layer.x / 2" y="ref.ex2Layer.y + 15" baseline="top" align="center" text="`x = ${ref.ex2Layer.x}`" size="27" fill="#B39DDB" font="monospace"></pxl-text>
+            <pxl-line x1="ref.ex2Layer.x" y1="0" x2="ref.ex2Layer.x" y2="ref.ex2Layer.y" stroke="#B39DDB" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex2Layer.x + 15" y="ref.ex2Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.ex2Layer.y}`" size="27" fill="#B39DDB" font="monospace"></pxl-text>
+          </pxl-layer>
+
+          <!-- 3. Main Interactive Shape Layer (Top stack) -->
+          <pxl-layer id="ex2Layer" x="500" y="300">
             <!-- The actual shape -->
             <pxl-circle id="ex2Circle"
               x="200" 
-              y="-150" 
-              r="100"
-              fill="rgba(255, 237, 213, 0.4)" stroke="rgba(234, 88, 12, 0.5)" strokewidth="2">
+              y="150" 
+              r="300"
+              fill="#FF8A6526" stroke="#FF8A65" strokewidth="2">
             </pxl-circle>
-            
-            <!-- Layer Origin Dot -->
-            <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
-            <pxl-text x="15" y="15" baseline="top" text="`Layer (${ref.ex2Layer.x}, ${ref.ex2Layer.y})`" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
 
-            <!-- Pivot Dot -->
-            <pxl-circle x="ref.ex2Circle.x" y="ref.ex2Circle.y" r="5" fill="#ea580c"></pxl-circle>
+            <!-- Circle Center Dot -->
+            <pxl-circle x="ref.ex2Circle.x" y="ref.ex2Circle.y" r="5" fill="#FF7043"></pxl-circle>
             
             <!-- Shape Coordinate Label -->
             <pxl-text 
@@ -161,15 +169,16 @@
               baseline="bottom"
               text="`Circle (${ref.ex2Circle.x}, ${ref.ex2Circle.y})`" 
               size="27" 
-              fill="#ea580c" 
+              fill="#FF7043" 
               font="monospace">
             </pxl-text>
 
             <!-- Coordinate Vectors -->
-            <pxl-line x1="0" y1="ref.ex2Circle.y" x2="ref.ex2Circle.x" y2="ref.ex2Circle.y" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.ex2Circle.x / 2" y="ref.ex2Circle.y + 15" baseline="top" align="center" text="`x = ${ref.ex2Circle.x}`" size="27" fill="#94a3b8" font="monospace"></pxl-text>
-            <pxl-line x1="ref.ex2Circle.x" y1="0" x2="ref.ex2Circle.x" y2="ref.ex2Circle.y" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.ex2Circle.x + 15" y="ref.ex2Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.ex2Circle.y}`" size="27" fill="#94a3b8" font="monospace"></pxl-text>
+            <pxl-line x1="0" y1="ref.ex2Circle.y" x2="ref.ex2Circle.x" y2="ref.ex2Circle.y" stroke="#FFAB91" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex2Circle.x / 2" y="ref.ex2Circle.y + 15" baseline="top" align="center" text="`x = ${ref.ex2Circle.x}`" size="27" fill="#FFAB91" font="monospace"></pxl-text>
+            <pxl-line x1="ref.ex2Circle.x" y1="0" x2="ref.ex2Circle.x" y2="ref.ex2Circle.y" stroke="#FFAB91" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex2Circle.x + 15" y="ref.ex2Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.ex2Circle.y}`" size="27" fill="#FFAB91" font="monospace"></pxl-text>
+
           </pxl-layer>
         </pxl-stage>
 
@@ -208,13 +217,13 @@
                   oninput="pxl.nodes.ex2Circle.set('x', this.value); document.getElementById('lblEx2CircleX').innerText = this.value; document.getElementById('codeEx2CircleX').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="lblEx2CircleY">-150</span></label>
-                <input type="range" min="-300" max="300" step="10" value="-150" autocomplete="off"
+                <label>Center Y <span id="lblEx2CircleY">150</span></label>
+                <input type="range" min="-300" max="300" step="10" value="150" autocomplete="off"
                   oninput="pxl.nodes.ex2Circle.set('y', this.value); document.getElementById('lblEx2CircleY').innerText = this.value; document.getElementById('codeEx2CircleY').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius <span id="lblEx2CircleR">100</span></label>
-                <input type="range" min="10" max="300" step="10" value="100" autocomplete="off"
+                <label>Radius <span id="lblEx2CircleR">300</span></label>
+                <input type="range" min="10" max="500" step="10" value="300" autocomplete="off"
                   oninput="pxl.nodes.ex2Circle.set('r', this.value); document.getElementById('lblEx2CircleR').innerText = this.value; document.getElementById('codeEx2CircleR').innerText = this.value;">
               </div>
             </div>
@@ -222,63 +231,81 @@
         </div>
       </div>
 
-      <h2>3. Pivot Points & Rotation</h2>
-      <p>In Kilopixel, <code>x</code> and <code>y</code> always act as the <strong>pivot point</strong>.</p>
-      <p>Because of this, applying rotation is incredibly simple. However, it's important to understand the difference between <strong>Layer</strong> and <strong>Shape</strong> rotation in the example below:</p>
+      <h2>3. Basic Rotation around Layout Center</h2>
+      <p>In Kilopixel, <code>x</code> and <code>y</code> define an element's <strong>layout center</strong>. By default (when no offset and no pivot is specified), any rotation or scaling is applied directly around this center coordinate <code>(x, y)</code>.</p>
+      <p>Applying rotation is incredibly simple, but it's important to understand the difference between <strong>Layer</strong> and <strong>Shape</strong> rotation in the example below:</p>
       <ul>
-        <li><strong>Layer Rotation:</strong> Rotating a <code>&lt;pxl-layer&gt;</code> tilts the entire coordinate grid beneath it. The shape's coordinates don't change, but the physical space it lives in spins around the layer's origin.</li>
-        <li><strong>Shape Rotation:</strong> Rotating a shape (like a <code>&lt;pxl-ellipse&gt;</code>) only spins that specific shape around its own local <code>x</code> and <code>y</code> pivot point, leaving the rest of the canvas untouched.</li>
+        <li><strong>Layer Rotation:</strong> Rotating a <code>&lt;pxl-layer&gt;</code> tilts the entire coordinate grid beneath it. The shape's coordinates don't change, but the physical space it lives in spins around the layer's origin <code>(0, 0)</code>.</li>
+        <li><strong>Shape Rotation:</strong> Rotating a shape (like a <code>&lt;pxl-ellipse&gt;</code>) spins that specific shape around its own layout center <code>(x, y)</code>, leaving the rest of the canvas untouched.</li>
       </ul>
       
-      <pre><code class="language-html">&lt;!-- An ellipse spinning perfectly around its center point --&gt;
+      <pre><code class="language-html">&lt;!-- An ellipse spinning perfectly around its layout center --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="codeEx3LayerX">500</mark>" y="<mark id="codeEx3LayerY">300</mark>" rotate="<mark id="codeEx3LayerRot">0</mark>"&gt;
     &lt;pxl-ellipse 
-      x="<mark id="codeEx3EllipseX">200</mark>" y="<mark id="codeEx3EllipseY">-150</mark>" 
-      rx="<mark id="codeEx3EllipseRx">200</mark>" ry="<mark id="codeEx3EllipseRy">100</mark>" 
-      rotate="<mark id="codeEx3EllipseRot">0</mark>" fill="rgba(255, 237, 213, 0.4)"&gt;
+      x="<mark id="codeEx3EllipseX">200</mark>" y="<mark id="codeEx3EllipseY">150</mark>" 
+      rx="<mark id="codeEx3EllipseRx">250</mark>" ry="<mark id="codeEx3EllipseRy">100</mark>" 
+      rotate="<mark id="codeEx3EllipseRot">0</mark>" stroke="#FF8A65"&gt;
     &lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
       <div class="demo-container">
         <pxl-stage ratio="5 / 3" class="demo-stage">
-          <pxl-layer id="ex3Layer" x="500" y="300" rotate="0">
-            <!-- Helpers -->
+          <!-- 1. Layer Background (Grid, crosshairs, and origin dot - rotating with layer) -->
+          <pxl-layer x="ref.ex3Layer.x" y="ref.ex3Layer.y" rotate="ref.ex3Layer.rotate">
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
-            
+            <pxl-group hidden="ref.ex3Layer.rotate == 0">
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#D1C4E9" strokewidth="1" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#D1C4E9" strokewidth="1" linedash="[5, 5]"></pxl-line>
+            </pxl-group>
+            <pxl-circle x="0" y="0" r="5" fill="#7E57C2"></pxl-circle>
+            <pxl-text x="15" y="-15" baseline="bottom" text="'Layer (0, 0)'" size="27" fill="#7E57C2" font="monospace"></pxl-text>
+          </pxl-layer>
+
+          <!-- 2. Stage-Level Layer Coordinate Vectors (Relative to Stage, unrotated, above grid) -->
+          <pxl-layer x="0" y="0">
+            <pxl-line x1="0" y1="ref.ex3Layer.y" x2="ref.ex3Layer.x" y2="ref.ex3Layer.y" stroke="#B39DDB" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex3Layer.x / 2" y="ref.ex3Layer.y + 15" baseline="top" align="center" text="`x = ${ref.ex3Layer.x}`" size="27" fill="#B39DDB" font="monospace"></pxl-text>
+            <pxl-line x1="ref.ex3Layer.x" y1="0" x2="ref.ex3Layer.x" y2="ref.ex3Layer.y" stroke="#B39DDB" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex3Layer.x + 15" y="ref.ex3Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.ex3Layer.y}`" size="27" fill="#B39DDB" font="monospace"></pxl-text>
+          </pxl-layer>
+
+          <!-- 3. Main Interactive Shape Layer (Top stack) -->
+          <pxl-layer id="ex3Layer" x="500" y="300" rotate="0">
+            <!-- Shape Local Axes Crosshair (Visible only when rotated) -->
+            <pxl-group x="ref.ex3Ellipse.x" y="ref.ex3Ellipse.y" rotate="ref.ex3Ellipse.rotate" hidden="ref.ex3Ellipse.rotate == 0">
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#FFCCBC" strokewidth="1" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#FFCCBC" strokewidth="1" linedash="[5, 5]"></pxl-line>
+            </pxl-group>
+
             <!-- The actual shape -->
             <pxl-ellipse id="ex3Ellipse"
               x="200" 
-              y="-150" 
-              rx="200" ry="100" 
+              y="150" 
+              rx="250" ry="100" 
               rotate="0" 
-              fill="rgba(255, 237, 213, 0.4)" stroke="rgba(234, 88, 12, 0.5)" strokewidth="2">
+              fill="#FF8A6526" stroke="#FF8A65" strokewidth="2">
             </pxl-ellipse>
-
-            <!-- Layer Origin Dot -->
-            <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
-            <pxl-text x="15" y="15" baseline="top" text="`Layer (${ref.ex3Layer.x}, ${ref.ex3Layer.y})`" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
             
-            <!-- Pivot Dot -->
-            <pxl-circle x="ref.ex3Ellipse.x" y="ref.ex3Ellipse.y" r="5" fill="#ea580c"></pxl-circle>
-            
-            <!-- Coordinate Label -->
-            <pxl-text 
-              x="ref.ex3Ellipse.x + 15" 
-              y="ref.ex3Ellipse.y - 15" 
-              baseline="bottom"
-              text="`Ellipse (${ref.ex3Ellipse.x}, ${ref.ex3Ellipse.y})`" 
-              size="27" fill="#ea580c" font="monospace">
-            </pxl-text>
+            <!-- Ellipse Center Dot & Coordinate Label (Rotating with Ellipse) -->
+            <pxl-group x="ref.ex3Ellipse.x" y="ref.ex3Ellipse.y" rotate="ref.ex3Ellipse.rotate">
+              <pxl-circle x="0" y="0" r="5" fill="#FF7043"></pxl-circle>
+              <pxl-text 
+                x="15" 
+                y="-15" 
+                baseline="bottom"
+                text="`Ellipse (${ref.ex3Ellipse.x}, ${ref.ex3Ellipse.y})`" 
+                size="27" fill="#FF7043" font="monospace">
+              </pxl-text>
+            </pxl-group>
 
             <!-- Coordinate Vectors -->
-            <pxl-line x1="0" y1="ref.ex3Ellipse.y" x2="ref.ex3Ellipse.x" y2="ref.ex3Ellipse.y" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.ex3Ellipse.x / 2" y="ref.ex3Ellipse.y + 15" baseline="top" align="center" text="`x = ${ref.ex3Ellipse.x}`" size="27" fill="#94a3b8" font="monospace"></pxl-text>
-            <pxl-line x1="ref.ex3Ellipse.x" y1="0" x2="ref.ex3Ellipse.x" y2="ref.ex3Ellipse.y" stroke="#94a3b8" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.ex3Ellipse.x + 15" y="ref.ex3Ellipse.y / 2" baseline="middle" align="left" text="`y = ${ref.ex3Ellipse.y}`" size="27" fill="#94a3b8" font="monospace"></pxl-text>
+            <pxl-line x1="0" y1="ref.ex3Ellipse.y" x2="ref.ex3Ellipse.x" y2="ref.ex3Ellipse.y" stroke="#FFAB91" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex3Ellipse.x / 2" y="ref.ex3Ellipse.y + 15" baseline="top" align="center" text="`x = ${ref.ex3Ellipse.x}`" size="27" fill="#FFAB91" font="monospace"></pxl-text>
+            <pxl-line x1="ref.ex3Ellipse.x" y1="0" x2="ref.ex3Ellipse.x" y2="ref.ex3Ellipse.y" stroke="#FFAB91" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex3Ellipse.x + 15" y="ref.ex3Ellipse.y / 2" baseline="middle" align="left" text="`y = ${ref.ex3Ellipse.y}`" size="27" fill="#FFAB91" font="monospace"></pxl-text>
+
           </pxl-layer>
         </pxl-stage>
 
@@ -322,18 +349,18 @@
                   oninput="pxl.nodes.ex3Ellipse.set('x', this.value); document.getElementById('lblEx3EllipseX').innerText = this.value; document.getElementById('codeEx3EllipseX').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="lblEx3EllipseY">-150</span></label>
-                <input type="range" min="-300" max="300" step="10" value="-150" autocomplete="off"
+                <label>Center Y <span id="lblEx3EllipseY">150</span></label>
+                <input type="range" min="-300" max="300" step="10" value="150" autocomplete="off"
                   oninput="pxl.nodes.ex3Ellipse.set('y', this.value); document.getElementById('lblEx3EllipseY').innerText = this.value; document.getElementById('codeEx3EllipseY').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius X <span id="lblEx3EllipseRx">200</span></label>
-                <input type="range" min="10" max="400" step="10" value="200" autocomplete="off"
+                <label>Radius X <span id="lblEx3EllipseRx">250</span></label>
+                <input type="range" min="10" max="500" step="10" value="250" autocomplete="off"
                   oninput="pxl.nodes.ex3Ellipse.set('rx', this.value); document.getElementById('lblEx3EllipseRx').innerText = this.value; document.getElementById('codeEx3EllipseRx').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Radius Y <span id="lblEx3EllipseRy">100</span></label>
-                <input type="range" min="10" max="400" step="10" value="100" autocomplete="off"
+                <input type="range" min="10" max="500" step="10" value="100" autocomplete="off"
                   oninput="pxl.nodes.ex3Ellipse.set('ry', this.value); document.getElementById('lblEx3EllipseRy').innerText = this.value; document.getElementById('codeEx3EllipseRy').innerText = this.value;">
               </div>
               <div class="control-group">
@@ -347,85 +374,101 @@
       </div>
 
       <h2>4. Local Offsets (offsetX, offsetY)</h2>
-      <p>This is where Kilopixel's coordinate system becomes incredibly powerful. The <code>offsetX</code> and <code>offsetY</code> attributes offset the shape from its center <code>x</code> and <code>y</code> pivot point.</p>
-      <p>Because this offset happens <em>inside</em> the shape's local coordinate system, any rotation applied will cause the shape to <strong>orbit</strong> the pivot point instead of just spinning in place.</p>
+      <p>This is where Kilopixel's coordinate system becomes incredibly powerful. The <code>offsetX</code> and <code>offsetY</code> attributes define a relative offset for the element's <strong>pivot point (invisible hinge)</strong> of rotation and scaling, moving it from the layout center <code>(x, y)</code> to <code>(x + offsetX, y + offsetY)</code>.</p>
+      <p>Because this offset shifts the hinge point of the shape, any rotation applied will cause the shape to <strong>orbit</strong> around this new pivot coordinate instead of spinning in place.</p>
       
-      <pre><code class="language-html">&lt;!-- A rectangle orbiting its pivot point --&gt;
+      <pre><code class="language-html">&lt;!-- A rectangle orbiting its offset pivot point --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;pxl-layer x="<mark id="codeEx4LayerX">500</mark>" y="<mark id="codeEx4LayerY">300</mark>" rotate="<mark id="codeEx4LayerRot">0</mark>"&gt;
+  &lt;pxl-layer x="<mark id="codeEx4LayerX">150</mark>" y="<mark id="codeEx4LayerY">200</mark>" rotate="<mark id="codeEx4LayerRot">0</mark>"&gt;
     &lt;pxl-rect 
-      x="<mark id="codeEx4RectX">-200</mark>" y="<mark id="codeEx4RectY">-200</mark>" 
-      offsetX="<mark id="codeEx4RectDx">200</mark>" offsetY="<mark id="codeEx4RectDy">200</mark>" 
+      x="<mark id="codeEx4RectX">300</mark>" y="<mark id="codeEx4RectY">150</mark>" 
+      offsetX="<mark id="codeEx4RectDx">150</mark>" offsetY="<mark id="codeEx4RectDy">150</mark>" 
       rotate="<mark id="codeEx4RectRot">0</mark>" 
-      w="100" h="100" fill="#ffedd5"&gt;
+      w="100" h="100" stroke="#FF8A65"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
       <div class="demo-container">
         <pxl-stage ratio="5 / 3" class="demo-stage">
-          <pxl-layer id="ex4Layer" x="500" y="300" rotate="0">
-            <!-- Helpers (Grid & Crosshairs) -->
+          <!-- 1. Layer Background (Grid, crosshairs, and origin dot - rotating with layer) -->
+          <pxl-layer x="ref.ex4Layer.x" y="ref.ex4Layer.y" rotate="ref.ex4Layer.rotate">
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-group hidden="ref.ex4Layer.rotate == 0">
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#D1C4E9" strokewidth="1" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#D1C4E9" strokewidth="1" linedash="[5, 5]"></pxl-line>
+            </pxl-group>
+            <pxl-circle x="0" y="0" r="5" fill="#7E57C2"></pxl-circle>
+            <pxl-text x="15" y="-15" baseline="bottom" text="'Layer (0, 0)'" size="27" fill="#7E57C2" font="monospace"></pxl-text>
+          </pxl-layer>
+
+          <!-- 2. Stage-Level Layer Coordinate Vectors (Relative to Stage, unrotated, above grid) -->
+          <pxl-layer x="0" y="0">
+            <pxl-line x1="0" y1="ref.ex4Layer.y" x2="ref.ex4Layer.x" y2="ref.ex4Layer.y" stroke="#B39DDB" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex4Layer.x / 2" y="ref.ex4Layer.y + 15" baseline="top" align="center" text="`x = ${ref.ex4Layer.x}`" size="27" fill="#B39DDB" font="monospace"></pxl-text>
+            <pxl-line x1="ref.ex4Layer.x" y1="0" x2="ref.ex4Layer.x" y2="ref.ex4Layer.y" stroke="#B39DDB" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex4Layer.x + 15" y="ref.ex4Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.ex4Layer.y}`" size="27" fill="#B39DDB" font="monospace"></pxl-text>
+          </pxl-layer>
+
+          <!-- 3. Main Interactive Shape Layer (Top stack) -->
+          <pxl-layer id="ex4Layer" x="150" y="200" rotate="0">
+            <!-- Rotated Axes Crosshair (Orange 100 dashed lines through offset pivot point, visible when rotated) -->
+            <pxl-group x="ref.ex4Rect.x + ref.ex4Rect.offsetX" y="ref.ex4Rect.y + ref.ex4Rect.offsetY" rotate="ref.ex4Rect.rotate" hidden="ref.ex4Rect.rotate == 0">
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#FFCCBC" strokewidth="1" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#FFCCBC" strokewidth="1" linedash="[5, 5]"></pxl-line>
+            </pxl-group>
+
+            <!-- Orbit Path Guide (Grey dashed circle from offset to original center) -->
+            <pxl-circle x="ref.ex4Rect.x + ref.ex4Rect.offsetX" y="ref.ex4Rect.y + ref.ex4Rect.offsetY" r="sqrt(ref.ex4Rect.offsetX**2 + ref.ex4Rect.offsetY**2)" stroke="#cbd5e1" strokewidth="1" linedash="[5, 5]" fill="none"></pxl-circle>
 
             <!-- The Shape -->
             <pxl-rect id="ex4Rect"
-              x="-200" 
-              y="-200" 
-              offsetX="200" 
-              offsetY="200" 
+              x="300" 
+              y="150" 
+              offsetX="150" 
+              offsetY="150" 
               rotate="0" 
               w="100" h="100" 
-              fill="#ffedd5" stroke="rgba(234, 88, 12, 0.5)" strokewidth="2">
+              fill="#FF8A6526" stroke="#FF8A65" strokewidth="2">
             </pxl-rect>
 
-            <!-- Layer Origin Dot -->
-            <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
-            <pxl-text x="15" y="15" baseline="top" text="`Layer (${ref.ex4Layer.x}, ${ref.ex4Layer.y})`" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
-            
-            <!-- Center X/Y (Layout Center where shape sits unrotated) -->
+            <!-- Shape Coordinate Vectors -->
+            <pxl-line x1="0" y1="ref.ex4Rect.y" x2="ref.ex4Rect.x" y2="ref.ex4Rect.y" stroke="#FFAB91" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex4Rect.x / 2" y="ref.ex4Rect.y + 15" baseline="top" align="center" text="`x = ${ref.ex4Rect.x}`" size="27" fill="#FFAB91" font="monospace"></pxl-text>
+            <pxl-line x1="ref.ex4Rect.x" y1="0" x2="ref.ex4Rect.x" y2="ref.ex4Rect.y" stroke="#FFAB91" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex4Rect.x + 15" y="ref.ex4Rect.y / 2" baseline="middle" align="left" text="`y = ${ref.ex4Rect.y}`" size="27" fill="#FFAB91" font="monospace"></pxl-text>
+
+            <!-- Offset Vector Helper Lines -->
+            <pxl-line x1="ref.ex4Rect.x" y1="ref.ex4Rect.y + ref.ex4Rect.offsetY" x2="ref.ex4Rect.x + ref.ex4Rect.offsetX" y2="ref.ex4Rect.y + ref.ex4Rect.offsetY" stroke="#90CAF9" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex4Rect.x + ref.ex4Rect.offsetX / 2" y="ref.ex4Rect.y + ref.ex4Rect.offsetY + 15" baseline="top" align="center" text="`x = ${ref.ex4Rect.offsetX}`" size="27" fill="#64B5F6" font="monospace"></pxl-text>
+            <pxl-line x1="ref.ex4Rect.x + ref.ex4Rect.offsetX" y1="ref.ex4Rect.y" x2="ref.ex4Rect.x + ref.ex4Rect.offsetX" y2="ref.ex4Rect.y + ref.ex4Rect.offsetY" stroke="#90CAF9" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.ex4Rect.x + ref.ex4Rect.offsetX + 15" y="ref.ex4Rect.y + ref.ex4Rect.offsetY / 2" baseline="middle" align="left" text="`y = ${ref.ex4Rect.offsetY}`" size="27" fill="#64B5F6" font="monospace"></pxl-text>
+
+            <!-- Rect Dot (Layout Center where shape sits unrotated) -->
             <pxl-circle 
               x="ref.ex4Rect.x" 
               y="ref.ex4Rect.y" 
-              r="5" fill="#ea580c">
+              r="5" fill="#D84315">
             </pxl-circle>
             <pxl-text 
               x="ref.ex4Rect.x + 15" 
               y="ref.ex4Rect.y - 15" 
               baseline="bottom" 
-              text="`Center (${ref.ex4Rect.x}, ${ref.ex4Rect.y})`" 
-              size="27" fill="#ea580c" font="monospace">
+              text="`Rect (${ref.ex4Rect.x}, ${ref.ex4Rect.y})`" 
+              size="27" fill="#D84315" font="monospace">
             </pxl-text>
 
-            <!-- Relative Pivot Point (Hinge around which shape rotates) -->
-            <pxl-circle 
-              x="ref.ex4Rect.x + ref.ex4Rect.offsetX" 
-              y="ref.ex4Rect.y + ref.ex4Rect.offsetY" 
-              r="5" fill="#3b82f6">
-            </pxl-circle>
-            <pxl-text 
-              x="ref.ex4Rect.x + ref.ex4Rect.offsetX + 15" 
-              y="ref.ex4Rect.y + ref.ex4Rect.offsetY - 15" 
-              baseline="bottom" 
-              text="`Pivot (${ref.ex4Rect.x + ref.ex4Rect.offsetX}, ${ref.ex4Rect.y + ref.ex4Rect.offsetY})`" 
-              size="27" fill="#3b82f6" font="monospace">
-            </pxl-text>
-
-            <!-- Orbiting Rect Position (toLocal tracks rect's coordinates on layer) -->
-            <pxl-circle 
-              x="toLocal(ref.ex4Rect, 'x')" 
-              y="toLocal(ref.ex4Rect, 'y')" 
-              r="5" fill="#ef4444">
-            </pxl-circle>
-            <pxl-text 
-              x="toLocal(ref.ex4Rect, 'x') + 15" 
-              y="toLocal(ref.ex4Rect, 'y') - 15" 
-              baseline="bottom" 
-              text="`Rect (${toLocal(ref.ex4Rect, 'x')}, ${toLocal(ref.ex4Rect, 'y')})`" 
-              size="27" fill="#ef4444" font="monospace">
-            </pxl-text>
+            <!-- Offset Dot (Hinge around which shape rotates) -->
+            <pxl-group x="ref.ex4Rect.x + ref.ex4Rect.offsetX" y="ref.ex4Rect.y + ref.ex4Rect.offsetY">
+              <pxl-circle x="0" y="0" r="5" fill="#42A5F5"></pxl-circle>
+              <pxl-text 
+                x="15" 
+                y="-15" 
+                baseline="bottom" 
+                text="`Offset (${ref.ex4Rect.offsetX}, ${ref.ex4Rect.offsetY})`" 
+                size="27" fill="#42A5F5" font="monospace">
+              </pxl-text>
+            </pxl-group>
           </pxl-layer>
         </pxl-stage>
 
@@ -442,13 +485,13 @@
           <div class="tab-content active" id="ex4-layer">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="lblEx4LayerX">500</span></label>
-                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                <label>Center X <span id="lblEx4LayerX">150</span></label>
+                <input type="range" min="0" max="1000" step="10" value="150" autocomplete="off"
                   oninput="pxl.nodes.ex4Layer.set('x', this.value); document.getElementById('lblEx4LayerX').innerText = this.value; document.getElementById('codeEx4LayerX').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="lblEx4LayerY">300</span></label>
-                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                <label>Center Y <span id="lblEx4LayerY">200</span></label>
+                <input type="range" min="0" max="600" step="10" value="200" autocomplete="off"
                   oninput="pxl.nodes.ex4Layer.set('y', this.value); document.getElementById('lblEx4LayerY').innerText = this.value; document.getElementById('codeEx4LayerY').innerText = this.value;">
               </div>
               <div class="control-group">
@@ -462,23 +505,23 @@
           <div class="tab-content" id="ex4-rect">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="lblEx4RectX">-200</span></label>
-                <input type="range" min="-500" max="500" step="10" value="-200" autocomplete="off"
+                <label>Center X <span id="lblEx4RectX">300</span></label>
+                <input type="range" min="-500" max="500" step="10" value="300" autocomplete="off"
                   oninput="pxl.nodes.ex4Rect.set('x', this.value); document.getElementById('lblEx4RectX').innerText = this.value; document.getElementById('codeEx4RectX').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="lblEx4RectY">-200</span></label>
-                <input type="range" min="-300" max="300" step="10" value="-200" autocomplete="off"
+                <label>Center Y <span id="lblEx4RectY">150</span></label>
+                <input type="range" min="-300" max="300" step="10" value="150" autocomplete="off"
                   oninput="pxl.nodes.ex4Rect.set('y', this.value); document.getElementById('lblEx4RectY').innerText = this.value; document.getElementById('codeEx4RectY').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Offset X <span id="lblEx4RectDx">200</span></label>
-                <input type="range" min="-300" max="300" step="10" value="200" autocomplete="off"
+                <label>Offset X <span id="lblEx4RectDx">150</span></label>
+                <input type="range" min="-300" max="300" step="10" value="150" autocomplete="off"
                   oninput="pxl.nodes.ex4Rect.set('offsetX', this.value); document.getElementById('lblEx4RectDx').innerText = this.value; document.getElementById('codeEx4RectDx').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Offset Y <span id="lblEx4RectDy">200</span></label>
-                <input type="range" min="-300" max="300" step="10" value="200" autocomplete="off"
+                <label>Offset Y <span id="lblEx4RectDy">150</span></label>
+                <input type="range" min="-300" max="300" step="10" value="150" autocomplete="off"
                   oninput="pxl.nodes.ex4Rect.set('offsetY', this.value); document.getElementById('lblEx4RectDy').innerText = this.value; document.getElementById('codeEx4RectDy').innerText = this.value;">
               </div>
               <div class="control-group">
@@ -491,23 +534,19 @@
         </div>
       </div>
       
-      <h2>5. Coordinate Mapping (toLocal)</h2>
-      <p>The <code>toLocal(target, property)</code> function allows you to map any element's coordinates seamlessly into the local coordinate space of another element.</p>
-      <p>In this "constellation" example, two shapes orbit the center independently. The connecting line doesn't need to know any trigonometry—it simply uses <code>toLocal</code> to track the exact global position of the orbiting points and draw a perfectly connected line!</p>
+      <h2>5. Absolute Pivot Points (pivotX, pivotY)</h2>
+      <p>While <code>offsetX</code> and <code>offsetY</code> define a pivot hinge <em>relative</em> to a shape's center, the <code>pivotX</code> and <code>pivotY</code> attributes allow you to define an <strong>absolute</strong> pivot coordinate within the parent layer.</p>
+      <p>When unrotated (<code>rotate="0"</code>), the shape rests at <code>(x, y)</code>. When rotated, the shape orbits around the absolute coordinate <code>(pivotX, pivotY)</code>!</p>
       
-      <pre><code class="language-html">&lt;!-- A line dynamically connecting independent points --&gt;
+      <pre><code class="language-html">&lt;!-- A shape rotating around an absolute pivot coordinate --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="codeEx5LayerX">500</mark>" y="<mark id="codeEx5LayerY">300</mark>" rotate="<mark id="codeEx5LayerRot">0</mark>"&gt;
-    &lt;!-- Orbiting Points --&gt;
-    &lt;pxl-circle id="pointA" x="<mark id="codeEx5PointAX">-150</mark>" y="<mark id="codeEx5PointAY">0</mark>" offsetX="<mark id="codeEx5PointADx">0</mark>" offsetY="<mark id="codeEx5PointADy">-200</mark>" rotate="<mark id="codeEx5RotA">0</mark>" r="15" fill="#3b82f6"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle id="pointB" x="<mark id="codeEx5PointBX">150</mark>" y="<mark id="codeEx5PointBY">0</mark>" offsetX="<mark id="codeEx5PointBDx">0</mark>" offsetY="<mark id="codeEx5PointBDy">200</mark>" rotate="<mark id="codeEx5RotB">0</mark>" r="15" fill="#f59e0b"&gt;&lt;/pxl-circle&gt;
-
-    &lt;!-- Connecting Line --&gt;
-    &lt;pxl-line 
-      x1="toLocal(ref.pointA, 'x')" y1="toLocal(ref.pointA, 'y')" 
-      x2="toLocal(ref.pointB, 'x')" y2="toLocal(ref.pointB, 'y')" 
-      stroke="#94a3b8" strokewidth="2"&gt;
-    &lt;/pxl-line&gt;
+    &lt;pxl-rect 
+      x="<mark id="codeEx5RectX">-200</mark>" y="<mark id="codeEx5RectY">-200</mark>" 
+      pivotX="<mark id="codeEx5RectPx">0</mark>" pivotY="<mark id="codeEx5RectPy">0</mark>" 
+      rotate="<mark id="codeEx5RectRot">0</mark>" 
+      w="100" h="100" fill="#ffedd5"&gt;
+    &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -516,33 +555,71 @@
           <pxl-layer id="ex5Layer" x="500" y="300" rotate="0">
             <!-- Helpers (Grid & Crosshairs) -->
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="1" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="1" linedash="[5, 5]"></pxl-line>
+            <!-- Pivot Crosshair (Blue dashed lines through absolute pivot point, rotating with rect) -->
+            <pxl-group x="ref.ex5Rect.pivotX" y="ref.ex5Rect.pivotY" rotate="ref.ex5Rect.rotate">
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#60a5fa" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#60a5fa" linedash="[5, 5]"></pxl-line>
+            </pxl-group>
 
-            <!-- Layer Origin Dot -->
-            <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
-            <pxl-text x="15" y="15" baseline="top" text="`Layer (${ref.ex5Layer.x}, ${ref.ex5Layer.y})`" size="27" fill="#8b5cf6" font="monospace"></pxl-text>
+            <!-- Orbit Path Guide (Grey dashed circle from absolute pivot to original center) -->
+            <pxl-circle x="ref.ex5Rect.pivotX" y="ref.ex5Rect.pivotY" r="sqrt((ref.ex5Rect.x - ref.ex5Rect.pivotX)**2 + (ref.ex5Rect.y - ref.ex5Rect.pivotY)**2)" stroke="#cbd5e1" strokewidth="1" linedash="[5, 5]" fill="none"></pxl-circle>
+
+            <!-- The Shape -->
+            <pxl-rect id="ex5Rect"
+              x="-200" 
+              y="-200" 
+              pivotX="0" 
+              pivotY="0" 
+              rotate="0" 
+              w="100" h="100" 
+              fill="#ffedd5" stroke="rgba(234, 88, 12, 0.5)" strokewidth="2">
+            </pxl-rect>
+
+            <!-- Layer Center Dot -->
+            <pxl-circle x="0" y="0" r="5" fill="#7E57C2"></pxl-circle>
+            <pxl-text x="15" y="-15" baseline="bottom" text="'Layer (0, 0)'" size="27" fill="#7E57C2" font="monospace"></pxl-text>
             
-            <!-- Orbit Ring Guides -->
-            <pxl-circle x="ref.ex5PointA.x" y="ref.ex5PointA.y" r="sqrt(ref.ex5PointA.offsetX**2 + ref.ex5PointA.offsetY**2)" stroke="rgba(59, 130, 246, 0.2)" strokewidth="3" linedash="[5, 5]" fill="none"></pxl-circle>
-            <pxl-circle x="ref.ex5PointB.x" y="ref.ex5PointB.y" r="sqrt(ref.ex5PointB.offsetX**2 + ref.ex5PointB.offsetY**2)" stroke="rgba(245, 158, 11, 0.2)" strokewidth="3" linedash="[5, 5]" fill="none"></pxl-circle>
+            <!-- Center Dot (Layout Center where shape sits unrotated) -->
+            <pxl-circle 
+              x="ref.ex5Rect.x" 
+              y="ref.ex5Rect.y" 
+              r="5" fill="#ea580c">
+            </pxl-circle>
+            <pxl-text 
+              x="ref.ex5Rect.x + 15" 
+              y="ref.ex5Rect.y - 15" 
+              baseline="bottom" 
+              text="`Center (${ref.ex5Rect.x}, ${ref.ex5Rect.y})`" 
+              size="27" fill="#ea580c" font="monospace">
+            </pxl-text>
 
-            <!-- Connecting Line (Drawn behind the points) -->
-            <pxl-line 
-              x1="toLocal(ref.ex5PointA, 'x')" y1="toLocal(ref.ex5PointA, 'y')" 
-              x2="toLocal(ref.ex5PointB, 'x')" y2="toLocal(ref.ex5PointB, 'y')" 
-              stroke="#cbd5e1" strokewidth="2">
-            </pxl-line>
+            <!-- Pivot Dot (World/Layer coordinate around which shape rotates) -->
+            <pxl-group x="ref.ex5Rect.pivotX" y="ref.ex5Rect.pivotY" rotate="ref.ex5Rect.rotate">
+              <pxl-circle x="0" y="0" r="5" fill="#3b82f6"></pxl-circle>
+              <pxl-text 
+                x="15" 
+                y="-15" 
+                baseline="bottom" 
+                text="`Pivot (${ref.ex5Rect.pivotX}, ${ref.ex5Rect.pivotY})`" 
+                size="27" fill="#3b82f6" font="monospace">
+              </pxl-text>
+            </pxl-group>
 
-            <!-- Orbiting Points -->
-            <pxl-circle id="ex5PointA" x="-150" y="0" offsetX="0" offsetY="-200" rotate="0" r="15" fill="#3b82f6"></pxl-circle>
-            <pxl-circle id="ex5PointB" x="150" y="0" offsetX="0" offsetY="200" rotate="0" r="15" fill="#f59e0b"></pxl-circle>
-
-            <!-- Pivot Dots -->
-            <pxl-circle x="ref.ex5PointA.x" y="ref.ex5PointA.y" r="5" fill="#3b82f6"></pxl-circle>
-            <pxl-text x="ref.ex5PointA.x + 15" y="ref.ex5PointA.y - 15" baseline="bottom" text="`Point A (${ref.ex5PointA.x}, ${ref.ex5PointA.y})`" size="27" fill="#3b82f6" font="monospace"></pxl-text>
-            <pxl-circle x="ref.ex5PointB.x" y="ref.ex5PointB.y" r="5" fill="#f59e0b"></pxl-circle>
-            <pxl-text x="ref.ex5PointB.x + 15" y="ref.ex5PointB.y - 15" baseline="bottom" text="`Point B (${ref.ex5PointB.x}, ${ref.ex5PointB.y})`" size="27" fill="#f59e0b" font="monospace"></pxl-text>
+            <!-- Orbiting Rect Position (toLocal tracks rect's coordinates on layer) -->
+            <pxl-circle 
+              x="toLocal(ref.ex5Rect, 'x')" 
+              y="toLocal(ref.ex5Rect, 'y')" 
+              r="5" fill="#ef4444">
+            </pxl-circle>
+            <pxl-text 
+              x="toLocal(ref.ex5Rect, 'x') + 15" 
+              y="toLocal(ref.ex5Rect, 'y') - 15" 
+              baseline="bottom" 
+              text="`Rect (${toLocal(ref.ex5Rect, 'x')}, ${toLocal(ref.ex5Rect, 'y')})`" 
+              size="27" fill="#ef4444" font="monospace">
+            </pxl-text>
           </pxl-layer>
         </pxl-stage>
 
@@ -552,8 +629,7 @@
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
               <button class="tab-btn active" onclick="switchTab(this, 'ex5-layer')">Layer</button>
-              <button class="tab-btn" onclick="switchTab(this, 'ex5-point-a')">Point A</button>
-              <button class="tab-btn" onclick="switchTab(this, 'ex5-point-b')">Point B</button>
+              <button class="tab-btn" onclick="switchTab(this, 'ex5-rect')">Rectangle</button>
             </div>
           </div>
 
@@ -577,89 +653,207 @@
             </div>
           </div>
 
-          <div class="tab-content" id="ex5-point-a">
+          <div class="tab-content" id="ex5-rect">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="lblEx5PointAX">-150</span></label>
-                <input type="range" min="-500" max="500" step="10" value="-150" autocomplete="off"
-                  oninput="pxl.nodes.ex5PointA.set('x', this.value); document.getElementById('lblEx5PointAX').innerText = this.value; document.getElementById('codeEx5PointAX').innerText = this.value;">
+                <label>Center X <span id="lblEx5RectX">-200</span></label>
+                <input type="range" min="-500" max="500" step="10" value="-200" autocomplete="off"
+                  oninput="pxl.nodes.ex5Rect.set('x', this.value); document.getElementById('lblEx5RectX').innerText = this.value; document.getElementById('codeEx5RectX').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="lblEx5PointAY">0</span></label>
-                <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex5PointA.set('y', this.value); document.getElementById('lblEx5PointAY').innerText = this.value; document.getElementById('codeEx5PointAY').innerText = this.value;">
-              </div>
-              <div class="control-group">
-                <label>Offset X <span id="lblEx5PointADx">0</span></label>
-                <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex5PointA.set('offsetX', this.value); document.getElementById('lblEx5PointADx').innerText = this.value; document.getElementById('codeEx5PointADx').innerText = this.value;">
-              </div>
-              <div class="control-group">
-                <label>Offset Y <span id="lblEx5PointADy">-200</span></label>
+                <label>Center Y <span id="lblEx5RectY">-200</span></label>
                 <input type="range" min="-300" max="300" step="10" value="-200" autocomplete="off"
-                  oninput="pxl.nodes.ex5PointA.set('offsetY', this.value); document.getElementById('lblEx5PointADy').innerText = this.value; document.getElementById('codeEx5PointADy').innerText = this.value;">
+                  oninput="pxl.nodes.ex5Rect.set('y', this.value); document.getElementById('lblEx5RectY').innerText = this.value; document.getElementById('codeEx5RectY').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Rotation <span id="lblEx5RotA">0°</span></label>
-                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex5PointA.set('rotate', this.value); document.getElementById('lblEx5RotA').innerText = this.value + '°'; document.getElementById('codeEx5RotA').innerText = this.value;">
-              </div>
-            </div>
-          </div>
-
-          <div class="tab-content" id="ex5-point-b">
-            <div class="playground-sliders">
-              <div class="control-group">
-                <label>Center X <span id="lblEx5PointBX">150</span></label>
-                <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off"
-                  oninput="pxl.nodes.ex5PointB.set('x', this.value); document.getElementById('lblEx5PointBX').innerText = this.value; document.getElementById('codeEx5PointBX').innerText = this.value;">
+                <label>Pivot X <span id="lblEx5RectPx">0</span></label>
+                <input type="range" min="-500" max="500" step="10" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex5Rect.set('pivotX', this.value); document.getElementById('lblEx5RectPx').innerText = this.value; document.getElementById('codeEx5RectPx').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="lblEx5PointBY">0</span></label>
+                <label>Pivot Y <span id="lblEx5RectPy">0</span></label>
                 <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex5PointB.set('y', this.value); document.getElementById('lblEx5PointBY').innerText = this.value; document.getElementById('codeEx5PointBY').innerText = this.value;">
+                  oninput="pxl.nodes.ex5Rect.set('pivotY', this.value); document.getElementById('lblEx5RectPy').innerText = this.value; document.getElementById('codeEx5RectPy').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Offset X <span id="lblEx5PointBDx">0</span></label>
-                <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex5PointB.set('offsetX', this.value); document.getElementById('lblEx5PointBDx').innerText = this.value; document.getElementById('codeEx5PointBDx').innerText = this.value;">
-              </div>
-              <div class="control-group">
-                <label>Offset Y <span id="lblEx5PointBDy">200</span></label>
-                <input type="range" min="-300" max="300" step="10" value="200" autocomplete="off"
-                  oninput="pxl.nodes.ex5PointB.set('offsetY', this.value); document.getElementById('lblEx5PointBDy').innerText = this.value; document.getElementById('codeEx5PointBDy').innerText = this.value;">
-              </div>
-              <div class="control-group">
-                <label>Rotation <span id="lblEx5RotB">0°</span></label>
+                <label>Rotation <span id="lblEx5RectRot">0°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
-                  oninput="pxl.nodes.ex5PointB.set('rotate', this.value); document.getElementById('lblEx5RotB').innerText = this.value + '°'; document.getElementById('codeEx5RotB').innerText = this.value;">
+                  oninput="pxl.nodes.ex5Rect.set('rotate', this.value); document.getElementById('lblEx5RectRot').innerText = this.value + '°'; document.getElementById('codeEx5RectRot').innerText = this.value;">
               </div>
             </div>
           </div>
         </div>
       </div>
-<h2>6. Animated Orbits</h2>
+      
+      <h2>6. Coordinate Mapping (toLocal)</h2>
+      <p>The <code>toLocal(target, property)</code> function allows you to map any element's coordinates seamlessly into the local coordinate space of another element.</p>
+      <p>In this "constellation" example, two shapes orbit the center independently. The connecting line doesn't need to know any trigonometry—it simply uses <code>toLocal</code> to track the exact global position of the orbiting points and draw a perfectly connected line!</p>
+      
+      <pre><code class="language-html">&lt;!-- A line dynamically connecting independent points --&gt;
+&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer x="<mark id="codeEx6LayerX">500</mark>" y="<mark id="codeEx6LayerY">300</mark>" rotate="<mark id="codeEx6LayerRot">0</mark>"&gt;
+    &lt;!-- Orbiting Points --&gt;
+    &lt;pxl-circle id="pointA" x="<mark id="codeEx6PointAX">-150</mark>" y="<mark id="codeEx6PointAY">-200</mark>" offsetX="<mark id="codeEx6PointADx">0</mark>" offsetY="<mark id="codeEx6PointADy">200</mark>" rotate="<mark id="codeEx6RotA">0</mark>" r="15" fill="#3b82f6"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle id="pointB" x="<mark id="codeEx6PointBX">150</mark>" y="<mark id="codeEx6PointBY">200</mark>" offsetX="<mark id="codeEx6PointBDx">0</mark>" offsetY="<mark id="codeEx6PointBDy">-200</mark>" rotate="<mark id="codeEx6RotB">0</mark>" r="15" fill="#f59e0b"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Connecting Line --&gt;
+    &lt;pxl-line 
+      x1="toLocal(ref.pointA, 'x')" y1="toLocal(ref.pointA, 'y')" 
+      x2="toLocal(ref.pointB, 'x')" y2="toLocal(ref.pointB, 'y')" 
+      stroke="#94a3b8" strokewidth="2"&gt;
+    &lt;/pxl-line&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+      <div class="demo-container">
+        <pxl-stage ratio="5 / 3" class="demo-stage">
+          <pxl-layer id="ex6Layer" x="500" y="300" rotate="0">
+            <!-- Helpers (Grid & Crosshairs) -->
+            <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="1" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="1" linedash="[5, 5]"></pxl-line>
+
+            <!-- Layer Center Dot -->
+            <pxl-circle x="0" y="0" r="5" fill="#7E57C2"></pxl-circle>
+            <pxl-text x="15" y="-15" baseline="bottom" text="'Layer (0, 0)'" size="27" fill="#7E57C2" font="monospace"></pxl-text>
+            
+            <!-- Orbit Ring Guides -->
+            <pxl-circle x="ref.ex6PointA.x + ref.ex6PointA.offsetX" y="ref.ex6PointA.y + ref.ex6PointA.offsetY" r="sqrt(ref.ex6PointA.offsetX**2 + ref.ex6PointA.offsetY**2)" stroke="rgba(59, 130, 246, 0.2)" strokewidth="3" linedash="[5, 5]" fill="none"></pxl-circle>
+            <pxl-circle x="ref.ex6PointB.x + ref.ex6PointB.offsetX" y="ref.ex6PointB.y + ref.ex6PointB.offsetY" r="sqrt(ref.ex6PointB.offsetX**2 + ref.ex6PointB.offsetY**2)" stroke="rgba(245, 158, 11, 0.2)" strokewidth="3" linedash="[5, 5]" fill="none"></pxl-circle>
+
+            <!-- Connecting Line (Drawn behind the points) -->
+            <pxl-line 
+              x1="toLocal(ref.ex6PointA, 'x')" y1="toLocal(ref.ex6PointA, 'y')" 
+              x2="toLocal(ref.ex6PointB, 'x')" y2="toLocal(ref.ex6PointB, 'y')" 
+              stroke="#cbd5e1" strokewidth="2">
+            </pxl-line>
+
+            <!-- Orbiting Points -->
+            <pxl-circle id="ex6PointA" x="-150" y="-200" offsetX="0" offsetY="200" rotate="0" r="15" fill="#3b82f6"></pxl-circle>
+            <pxl-circle id="ex6PointB" x="150" y="200" offsetX="0" offsetY="-200" rotate="0" r="15" fill="#f59e0b"></pxl-circle>
+
+            <!-- Offset Dots -->
+            <pxl-circle x="ref.ex6PointA.x + ref.ex6PointA.offsetX" y="ref.ex6PointA.y + ref.ex6PointA.offsetY" r="5" fill="#3b82f6"></pxl-circle>
+            <pxl-text x="ref.ex6PointA.x + ref.ex6PointA.offsetX + 15" y="ref.ex6PointA.y + ref.ex6PointA.offsetY - 15" baseline="bottom" text="`Offset A (${ref.ex6PointA.x + ref.ex6PointA.offsetX}, ${ref.ex6PointA.y + ref.ex6PointA.offsetY})`" size="27" fill="#3b82f6" font="monospace"></pxl-text>
+            <pxl-circle x="ref.ex6PointB.x + ref.ex6PointB.offsetX" y="ref.ex6PointB.y + ref.ex6PointB.offsetY" r="5" fill="#f59e0b"></pxl-circle>
+            <pxl-text x="ref.ex6PointB.x + ref.ex6PointB.offsetX + 15" y="ref.ex6PointB.y + ref.ex6PointB.offsetY - 15" baseline="bottom" text="`Offset B (${ref.ex6PointB.x + ref.ex6PointB.offsetX}, ${ref.ex6PointB.y + ref.ex6PointB.offsetY})`" size="27" fill="#f59e0b" font="monospace"></pxl-text>
+          </pxl-layer>
+        </pxl-stage>
+
+        <!-- Tabbed Controls -->
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn active" onclick="switchTab(this, 'ex6-layer')">Layer</button>
+              <button class="tab-btn" onclick="switchTab(this, 'ex6-point-a')">Point A</button>
+              <button class="tab-btn" onclick="switchTab(this, 'ex6-point-b')">Point B</button>
+            </div>
+          </div>
+
+          <div class="tab-content active" id="ex6-layer">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="lblEx6LayerX">500</span></label>
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                  oninput="pxl.nodes.ex6Layer.set('x', this.value); document.getElementById('lblEx6LayerX').innerText = this.value; document.getElementById('codeEx6LayerX').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="lblEx6LayerY">300</span></label>
+                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                  oninput="pxl.nodes.ex6Layer.set('y', this.value); document.getElementById('lblEx6LayerY').innerText = this.value; document.getElementById('codeEx6LayerY').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="lblEx6LayerRot">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex6Layer.set('rotate', this.value); document.getElementById('lblEx6LayerRot').innerText = this.value + '°'; document.getElementById('codeEx6LayerRot').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="ex6-point-a">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="lblEx6PointAX">-150</span></label>
+                <input type="range" min="-500" max="500" step="10" value="-150" autocomplete="off"
+                  oninput="pxl.nodes.ex6PointA.set('x', this.value); document.getElementById('lblEx6PointAX').innerText = this.value; document.getElementById('codeEx6PointAX').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="lblEx6PointAY">-200</span></label>
+                <input type="range" min="-300" max="300" step="10" value="-200" autocomplete="off"
+                  oninput="pxl.nodes.ex6PointA.set('y', this.value); document.getElementById('lblEx6PointAY').innerText = this.value; document.getElementById('codeEx6PointAY').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Offset X <span id="lblEx6PointADx">0</span></label>
+                <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex6PointA.set('offsetX', this.value); document.getElementById('lblEx6PointADx').innerText = this.value; document.getElementById('codeEx6PointADx').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Offset Y <span id="lblEx6PointADy">200</span></label>
+                <input type="range" min="-300" max="300" step="10" value="200" autocomplete="off"
+                  oninput="pxl.nodes.ex6PointA.set('offsetY', this.value); document.getElementById('lblEx6PointADy').innerText = this.value; document.getElementById('codeEx6PointADy').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="lblEx6RotA">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex6PointA.set('rotate', this.value); document.getElementById('lblEx6RotA').innerText = this.value + '°'; document.getElementById('codeEx6RotA').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="ex6-point-b">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="lblEx6PointBX">150</span></label>
+                <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off"
+                  oninput="pxl.nodes.ex6PointB.set('x', this.value); document.getElementById('lblEx6PointBX').innerText = this.value; document.getElementById('codeEx6PointBX').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="lblEx6PointBY">200</span></label>
+                <input type="range" min="-300" max="300" step="10" value="200" autocomplete="off"
+                  oninput="pxl.nodes.ex6PointB.set('y', this.value); document.getElementById('lblEx6PointBY').innerText = this.value; document.getElementById('codeEx6PointBY').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Offset X <span id="lblEx6PointBDx">0</span></label>
+                <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex6PointB.set('offsetX', this.value); document.getElementById('lblEx6PointBDx').innerText = this.value; document.getElementById('codeEx6PointBDx').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Offset Y <span id="lblEx6PointBDy">-200</span></label>
+                <input type="range" min="-300" max="300" step="10" value="-200" autocomplete="off"
+                  oninput="pxl.nodes.ex6PointB.set('offsetY', this.value); document.getElementById('lblEx6PointBDy').innerText = this.value; document.getElementById('codeEx6PointBDy').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="lblEx6RotB">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="pxl.nodes.ex6PointB.set('rotate', this.value); document.getElementById('lblEx6RotB').innerText = this.value + '°'; document.getElementById('codeEx6RotB').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2>7. Animated Orbits</h2>
       <p>This is where Kilopixel's coordinate system shines. By combining local offsets with dynamic rotation, we can create perfect orbital mechanics mathematically effortlessly!</p>
-      <p>The <code>offsetX</code> attribute pushes the planet away from the Sun (the <code>x</code> and <code>y</code> pivot point), and the <code>rotate</code> attribute spins that entire offset vector around the center.</p>
+      <p>The <code>offsetX</code> attribute pushes the planet away from the Sun (the layout center at <code>x</code> and <code>y</code>), and the <code>rotate</code> attribute spins that entire offset vector around the center.</p>
       <p>Use the sliders below to see how standard HTML inputs can instantly drive the Kilopixel canvas via the <code>ref.*</code> registry.</p>
       
       <pre><code class="language-html">&lt;!-- Standard HTML Inputs driving Kilopixel variables --&gt;
-&lt;input type="range" oninput="pxl.nodes.ex6OrbitOffset.set('value', this.value)"&gt;
-&lt;input type="range" oninput="pxl.nodes.ex6OrbitSpeed.set('value', this.value)"&gt;
+&lt;input type="range" oninput="pxl.nodes.ex7OrbitOffset.set('value', this.value)"&gt;
+&lt;input type="range" oninput="pxl.nodes.ex7OrbitSpeed.set('value', this.value)"&gt;
 
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="500" y="300"&gt;
     &lt;!-- Kilopixel Variables --&gt;
-    &lt;pxl-var id="ex6OrbitOffset" value="150"&gt;&lt;/pxl-var&gt;
-    &lt;pxl-var id="ex6OrbitSpeed" value="90"&gt;&lt;/pxl-var&gt;
+    &lt;pxl-var id="ex7OrbitOffset" value="150"&gt;&lt;/pxl-var&gt;
+    &lt;pxl-var id="ex7OrbitSpeed" value="90"&gt;&lt;/pxl-var&gt;
 
-    &lt;!-- The Sun (Pivot Point) --&gt;
+    &lt;!-- The Sun (Center Point) --&gt;
     &lt;pxl-circle r="30" fill="#f59e0b"&gt;&lt;/pxl-circle&gt;
 
     &lt;!-- Orbiting Planet --&gt;
     &lt;pxl-circle 
-      offsetX="ref.ex6OrbitOffset.value" 
-      rotate="t * ref.ex6OrbitSpeed.value" 
+      offsetX="ref.ex7OrbitOffset.value" 
+      rotate="t * ref.ex7OrbitSpeed.value" 
       r="20" fill="#3b82f6"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
@@ -669,8 +863,8 @@
         <pxl-stage ratio="5 / 3" class="demo-stage">
           <pxl-layer x="500" y="300">
             <!-- Reactive Variables -->
-            <pxl-var id="ex6OrbitOffset" value="150"></pxl-var>
-            <pxl-var id="ex6OrbitSpeed" value="90"></pxl-var>
+            <pxl-var id="ex7OrbitOffset" value="150"></pxl-var>
+            <pxl-var id="ex7OrbitSpeed" value="90"></pxl-var>
 
             <!-- Helpers (Grid & Crosshairs) -->
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
@@ -678,39 +872,39 @@
             <pxl-line x1="0" y1="-300" x2="0" y2="300" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
             
             <!-- Crosshair lines tracking the object using toLocal -->
-            <pxl-line x1="-500" y1="toLocal(ref.ex6Planet, 'y')" x2="500" y2="toLocal(ref.ex6Planet, 'y')" stroke="#94a3b8" strokewidth="1"></pxl-line>
-            <pxl-line x1="toLocal(ref.ex6Planet, 'x')" y1="-300" x2="toLocal(ref.ex6Planet, 'x')" y2="300" stroke="#94a3b8" strokewidth="1"></pxl-line>
+            <pxl-line x1="-500" y1="toLocal(ref.ex7Planet, 'y')" x2="500" y2="toLocal(ref.ex7Planet, 'y')" stroke="#94a3b8" strokewidth="1"></pxl-line>
+            <pxl-line x1="toLocal(ref.ex7Planet, 'x')" y1="-300" x2="toLocal(ref.ex7Planet, 'x')" y2="300" stroke="#94a3b8" strokewidth="1"></pxl-line>
 
             <!-- Grey arrows pointing to current X and Y -->
-            <pxl-line x1="0" y1="0" x2="toLocal(ref.ex6Planet, 'x')" y2="0" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
-            <pxl-line x1="0" y1="0" x2="0" y2="toLocal(ref.ex6Planet, 'y')" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
+            <pxl-line x1="0" y1="0" x2="toLocal(ref.ex7Planet, 'x')" y2="0" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
+            <pxl-line x1="0" y1="0" x2="0" y2="toLocal(ref.ex7Planet, 'y')" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
 
             <!-- The Sun -->
             <pxl-circle r="30" fill="#f59e0b"></pxl-circle>
 
             <!-- The Orbiting Planet -->
-            <pxl-circle id="ex6Planet" 
-              offsetX="ref.ex6OrbitOffset.value" 
-              rotate="t * ref.ex6OrbitSpeed.value" 
+            <pxl-circle id="ex7Planet" 
+              offsetX="ref.ex7OrbitOffset.value" 
+              rotate="t * ref.ex7OrbitSpeed.value" 
               r="20" fill="#3b82f6">
             </pxl-circle>
 
             <!-- Red Arrow illustrating the offsetX offset vector -->
             <pxl-line 
               x="0" y="0" 
-              x2="ref.ex6OrbitOffset.value" y2="0" 
+              x2="ref.ex7OrbitOffset.value" y2="0" 
               stroke="#f43f5e" strokewidth="4" arrowend="auto" 
-              rotate="t * ref.ex6OrbitSpeed.value">
+              rotate="t * ref.ex7OrbitSpeed.value">
             </pxl-line>
 
             <!-- Circle tracing the orbital path. 
                  The 'end' calculation ensures the drawn arc dynamically matches the current rotation speed. -->
             <pxl-circle 
-              r="ref.ex6OrbitOffset.value" 
+              r="ref.ex7OrbitOffset.value" 
               stroke="#f43f5e" 
               strokewidth="2" 
               linedash="[5, 5]" 
-              end="(t * ref.ex6OrbitSpeed.value) % 360" 
+              end="(t * ref.ex7OrbitSpeed.value) % 360" 
               fill="none">
             </pxl-circle>
           </pxl-layer>
@@ -720,14 +914,14 @@
         <div class="demo-controls">
           <div class="playground-sliders">
             <div class="control-group">
-              <label>Offset X <span id="lblEx6Offset">150</span></label>
+              <label>Offset X <span id="lblEx7Offset">150</span></label>
               <input type="range" min="0" max="300" value="150" autocomplete="off"
-                oninput="pxl.nodes.ex6OrbitOffset.set('value', this.value); document.getElementById('lblEx6Offset').innerText = this.value;">
+                oninput="pxl.nodes.ex7OrbitOffset.set('value', this.value); document.getElementById('lblEx7Offset').innerText = this.value;">
             </div>
             <div class="control-group">
-              <label>Speed (degrees/s) <span id="lblEx6Speed">90</span></label>
+              <label>Speed (degrees/s) <span id="lblEx7Speed">90</span></label>
               <input type="range" min="-180" max="180" value="90" autocomplete="off"
-                oninput="pxl.nodes.ex6OrbitSpeed.set('value', this.value); document.getElementById('lblEx6Speed').innerText = this.value;">
+                oninput="pxl.nodes.ex7OrbitSpeed.set('value', this.value); document.getElementById('lblEx7Speed').innerText = this.value;">
             </div>
           </div>
         </div>

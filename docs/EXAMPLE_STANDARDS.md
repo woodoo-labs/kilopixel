@@ -2,26 +2,52 @@
 
 This guide establishes the visual and architectural standards for creating interactive documentation examples in the Kilopixel project. Following these rules ensures a unified, beautiful, and highly intuitive learning experience for developers.
 
-## 1. Color Semantics
-We use a strict color-coding system to separate context (the stage/layer) from content (the shapes).
+## 1. Color Semantics (2014 Material Design Color System)
+We use a strict color-coding system based on the 2014 Material Design palettes to separate context (the stage/layer) from content (the shapes).
 
-* **Violet / Purple (`#8b5cf6`, `#a78bfa`)**: Used for the **Environment**. This includes Layers, Layer Origin coordinates, and coordinate crosshairs.
-* **Neutral Slate (`#f1f5f9`, `#cbd5e1`)**: Used for **Background Grids** to ensure they remain subtle and do not visually compete with the environment coordinates.
-* **Orange (`#ea580c`, `rgba(234, 88, 12, 0.5)`, `#ffedd5`)**: Used for the **Shapes**. This includes Shape borders/fills, Pivot points, and Shape coordinate texts. *Exception: When a demo requires distinguishing multiple independent interacting shapes (e.g., constellation points), you may use a diverse vibrant palette (Blue, Amber, Red) to separate them.*
-* **Red / Pink (`#ef4444`, `#f43f5e`)**: Used for **Action & Results**. This includes Offset vectors, orbital paths, and dynamically tracked result points (like `Rect Offset`).
+* **Transparency Rule:** Always use 100% solid colors for strokes, dots, text labels, and dashed helper lines. Only use semitransparent hex colors (e.g., `#FF8A6526`) for shape fills.
+* **Environment (Material Deep Purple):**
+  * **Layer Center Dot & `'Layer (0, 0)'` Text:** Deep Purple 400 (`#7E57C2`)
+  * **Layer Coordinate Vectors & Guides:** Deep Purple 200 (`#B39DDB`)
+  * **Layer Rotated Axes Crosshair:** Deep Purple 100 (`#D1C4E9`) with thin stroke (`strokewidth="1"`)
+* **Neutral Slate (`#f1f5f9`, `#cbd5e1`):**
+  * **Background Grids:** Subtle Slate (`#f1f5f9`)
+  * **Origin Crosshairs:** Slate 300 (`#cbd5e1`) with thin stroke (`strokewidth="1"`) for layer `(0, 0)` axes and orbit path guides so they resemble delicate coordinate grid lines.
+* **Shapes (Material Deep Orange):**
+  * **Center Dot & Title Text:** Deep Orange 400 (`#FF7043`)
+  * **Shape Stroke & Fill:** Deep Orange 300 solid (`#FF8A65`) for stroke and semitransparent (`#FF8A6526`) for fill.
+  * **Shape Coordinate Vectors & Labels:** Deep Orange 200 (`#FFAB91`)
+  * **Shape Rotated Axes Crosshair:** Deep Orange 100 (`#FFCCBC`) with thin stroke (`strokewidth="1"`)
+* **Action & Results (Red / Pink):** Used for Offset vectors, orbital paths, and dynamically tracked result points (`#ef4444`, `#f43f5e`).
 
 ## 2. Visual Stacking Order (Z-Index)
-Elements within a `<pxl-layer>` are drawn in strict DOM order (back-to-front). All examples must adhere to this semantic layering:
+Elements within a `<pxl-stage>` and `<pxl-layer>` are drawn in strict DOM order (back-to-front). When demonstrating Stage and Layer coordinates together, use this 3-layer architecture:
 
-1. **Helpers (Bottom):** The background grid and center crosshairs (`<pxl-grid>`, `<pxl-line>`).
-2. **The Shape:** The actual element being demonstrated (`<pxl-rect>`, `<pxl-circle>`, etc.).
-3. **Environment Overlays:** Layer Origin dots and their associated text labels.
-4. **Shape Overlays (Top):** Pivot point dots, dynamic tracking dots, and their associated text labels. This ensures the pivot is *always* visible, even when inside the shape.
+1. **Background Layer (Bottom):** A layer (`<pxl-layer x="ref.main.x" y="ref.main.y" rotate="ref.main.rotate">`) containing the `<pxl-grid>`, grey origin crosshairs, and the `'Layer (0, 0)'` dot and text label.
+2. **Stage-Level Helper Layer (Middle):** A static, unrotated layer (`<pxl-layer x="0" y="0">`) containing the violet dashed helper lines (`#B39DDB`) and `x = ...` / `y = ...` labels connecting the stage borders to the layer origin. Placing this above the background layer ensures the grid never covers the helper lines or labels.
+3. **Main Shape Layer (Top):** The main interactive layer (`id="main"`) containing the demonstrated shape (`<pxl-rect>`, `<pxl-circle>`, etc.), shape center/pivot markers, and orange shape coordinate vectors (`#FFAB91`).
 
-## 3. Coordinate Labels
-When labeling points on the canvas, always use standard mathematical tuple syntax without explicit axis assignments inside the string:
-* **Correct:** `Layer (0, 0)` or `Rect (100, 200)`
-* **Incorrect:** `Layer (x=0, y=0)` or `Rect x/y: 100, 200`
+## 3. Coordinate Labels, Alignments & Vectors
+* **Mathematical Tuples:** When labeling origin points or centers, always use standard tuple syntax without axis assignments inside the string:
+  * **Correct:** `Layer (0, 0)` or `Circle (200, 150)`
+  * **Incorrect:** `Layer (x=0, y=0)` or `Circle x/y: 200, 150`
+* **Label Alignments:**
+  * **Origin / Center Points:** Position labels at the **top-right** of the dot (`x="... + 15" y="... - 15" baseline="bottom"`).
+  * **Horizontal Vector Labels (`x = ...`):** Position **below** the horizontal dashed line (`y="... + 15" baseline="top" align="center"`).
+  * **Vertical Vector Labels (`y = ...`):** Position **to the right** of the vertical dashed line (`x="... + 15" baseline="middle" align="left"`).
+* **Layer vs. Shape Vectors:**
+  * When demonstrating Layer X/Y coordinates, draw violet dashed helper lines (`#B39DDB`) inside an unrotated stage-level layer (`<pxl-layer x="0" y="0">`) connecting the stage borders (`x1="0"` and `y1="0"`) to the layer center (`ref.layer.x` and `ref.layer.y`). Because these coordinates are relative to the stage, this ensures they remain horizontal/vertical and do not rotate when the target layer tilts.
+  * For Shape X/Y coordinates, draw orange dashed helper lines (`#FFAB91`) connecting the layer origin `(0, 0)` to the shape center `(x, y)`.
+* **Conditional Local Coordinate Axes (Rotated Crosshairs):**
+  * When demonstrating rotation, show local X and Y crosshair axes centered at the element's origin that rotate with the element.
+  * To prevent visual clutter when unrotated, hide these crosshairs when rotation is `0°` using the reactive attribute `hidden="ref.target.rotate == 0"` on a `<pxl-group>`.
+  * **Layer Rotated Crosshair:** Use Deep Purple 100 (`#D1C4E9`) inside `<pxl-group hidden="ref.layer.rotate == 0">`.
+  * **Shape Rotated Crosshair:** Use Deep Orange 100 (`#FFCCBC`) inside `<pxl-group x="ref.shape.x" y="ref.shape.y" rotate="ref.shape.rotate" hidden="ref.shape.rotate == 0">` placed in the DOM right before the shape so the shape draws on top of its crosshair.
+* **Stroke Width Hierarchy:**
+  * **`strokewidth="1"` (or default 1):** Background grids, origin crosshairs, rotated axes crosshairs, and coordinate vector helper lines.
+  * **`strokewidth="2"`:** Primary interactive shapes being demonstrated (`<pxl-rect>`, `<pxl-circle>`, `<pxl-ellipse>`, etc.).
+  * **`strokewidth="3"` / `"4"`:** Special highlight strokes (e.g., interactive orbit rings or primary coordinate axes in dedicated examples).
+* **HTML Code Snippets:** Keep introductory `<pre><code>` HTML snippets clean and focused on coordinates by showing `stroke` and omitting redundant `fill` or `strokewidth` attributes.
 
 ## 4. UI Controls & Architecture
 Interactive playgrounds must follow a standardized DOM architecture to maintain visual parity across the site.
