@@ -1,5 +1,10 @@
 # AI Assistant Coding Rules
 
+## Environment & OS (Windows / PowerShell)
+- **PowerShell Shell**: The terminal operating system is **Windows** running **PowerShell**.
+- **Command Chaining**: NEVER use Bash-style command chaining with `&&`. Always chain commands using a semicolon (`;`) in PowerShell (e.g., `git add .; git commit -m "msg"`).
+- **Windows Commands**: Do not assume a Unix/Bash environment when executing terminal commands.
+
 ## Approvals
 - **CRITICAL: STRICT APPROVAL REQUIRED**: NEVER use file modification tools (e.g., `multi_replace_file_content`, `replace_file_content`, or `write_to_file`) on source code files without FIRST describing the proposed changes and receiving explicit user approval.
 - **OPERATIONAL SEQUENCE**: Before executing ANY code edit on a source file, you MUST stop and ask the user for confirmation. A full code preview is not required, but you must clearly explain what you are going to change.
