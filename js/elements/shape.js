@@ -1,11 +1,11 @@
 // TODO
 // Cache Paths?
 class Shape extends PxlNode {
-  static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'filter', 'hidden', 'onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove']; }
+  static get observedAttributes() { return ['x', 'y', 'offsetx', 'offsety', 'pivotx', 'pivoty', 'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'filter', 'hidden', 'onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove']; }
 
   constructor() {
     super();
-    Object.assign(this.attributeExpressions, { x: 0, y: 0, dx: 0, dy: 0, fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false, isHovered: false, isPressed: false });
+    Object.assign(this.attributeExpressions, { x: 0, y: 0, offsetX: 0, offsetY: 0, pivotX: null, pivotY: null, fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0, rotate: 0, scale: 1, scaleX: null, scaleY: null, skewX: 0, skewY: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false, isHovered: false, isPressed: false });
     Object.assign(this.attributeValues, this.attributeExpressions);
     
     // Pre-allocated bounding box object (zero-GC)
@@ -73,21 +73,10 @@ class Shape extends PxlNode {
 
     if (this.attributeValues.hidden) return;
 
-    const { x, y, dx, dy, rotate, scale, scaleX, scaleY, skewX, skewY, alpha, blend, filter } = this.attributeValues;
-    const hasStateChanges = x || y || dx || dy || rotate || 
-                            scale !== 1 || scaleX !== 1 || scaleY !== 1 || 
-                            skewX || skewY || 
-                            alpha !== 1 || blend !== 'source-over' || filter !== 'none';
-
-    // Global Pipeline Sandbox
-    if (hasStateChanges) {
-      ctx.save();
-      pxl.applyContextState(ctx, u, this.attributeValues);
-      this.draw(ctx, u, t);
-      ctx.restore();
-    } else {
-      this.draw(ctx, u, t);
-    }
+    ctx.save();
+    pxl.applyContextState(ctx, u, this.attributeValues);
+    this.draw(ctx, u, t);
+    ctx.restore();
   }
 
   getBoundingBox() {

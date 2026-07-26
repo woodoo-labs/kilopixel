@@ -20,10 +20,11 @@
 - **Deep Documentation**: For complete, in-depth technical documentation about the engine's architecture, scope, syntax, and capabilities, you MUST consult `.agents/framework.md`.
 - **Dynamic Attributes**: Element attributes support inline JavaScript expressions and built-in animation functions (e.g., `wave()`, `glide()`, `t` for time). These are evaluated at runtime to animate properties.
 - **Coordinate System (CRITICAL)**: 
-  - `x` and `y` define the absolute position and act as the **Pivot Point / Center** of the element. Transformations like `rotate` and `scale` occur around this `x/y` origin.
-  - `dx` and `dy` define a local **Offset** applied *after* rotation and scaling. This allows an element to be offset from its pivot point (e.g., to create an orbit effect) without changing the center of rotation.
+  - `x` and `y` define the **Layout Center** of the element (where the element is drawn when unrotated).
+  - `offsetX` and `offsetY` define a relative offset for the **Pivot Point (invisible hinge)** of rotation and scaling (`x + offsetX, y + offsetY`).
+  - `pivotX` and `pivotY` allow explicitly defining an **Absolute Pivot Point** in stage coordinates, overriding `offsetX`/`offsetY`.
   - This coordinate pipeline applies universally to layers, groups, and shapes. Shapes are intrinsically drawn relative to `(0, 0)` within this transformed context.
-  - **Responsive Unit `u`**: All spatial and sizing values (like x, y, dx, radius, width, stroke width, etc.) are multiplied by a dynamic scaling unit `u` right before being passed to the canvas context. This unit allows the graphics to be fully responsive to the stage dimensions, based on a fixed **logical Stage width of 1000** (i.e., x=500 is always the horizontal center, and `u` scales this 0-1000 coordinate space to fit the actual pixel dimensions of the canvas).
+  - **Responsive Unit `u`**: All spatial and sizing values (like x, y, offsetX, radius, width, stroke width, etc.) are multiplied by a dynamic scaling unit `u` right before being passed to the canvas context. This unit allows the graphics to be fully responsive to the stage dimensions, based on a fixed **logical Stage width of 1000** (i.e., x=500 is always the horizontal center, and `u` scales this 0-1000 coordinate space to fit the actual pixel dimensions of the canvas).
   - **Use Raw Numbers over `s.width`**: Because the logical width is strictly fixed at 1000, ALWAYS use raw numbers for horizontal coordinates (e.g., `x="500"` for center, `x="100"` for left margins) instead of expressions like `s.width / 2`. Using raw numbers instantly hits the framework's "Fast Path" compiler, bypassing expensive math evaluations and proxy subscriptions.
 
 ## Advanced Syntax & Engine Rules
@@ -31,7 +32,7 @@
   - Simple expressions: `t > 1000 ? 'red' : 'blue'` (auto-wrapped in `return`).
   - Full Blocks: If the string contains `return`, you can write full JS blocks: `if (t < 1000) { return 'red'; } else { return 'blue'; }`
   - *Note*: Strings inside JS expressions must be quoted: `text="'Hello'"`.
-- **Math Globals**: All standard `Math` constants and methods (e.g., `sqrt`, `sin`, `cos`, `PI`, `abs`) are natively injected into the evaluation scope. You can use them directly without the `Math.` prefix (e.g., `r="sqrt(dx**2 + dy**2)"`).
+- **Math Globals**: All standard `Math` constants and methods (e.g., `sqrt`, `sin`, `cos`, `PI`, `abs`) are natively injected into the evaluation scope. You can use them directly without the `Math.` prefix (e.g., `r="sqrt(offsetX**2 + offsetY**2)"`).
 - **Animation Time (`t`)**:
   - The variable `t` is ALWAYS evaluated in **Seconds**, not milliseconds. For example, `t * 100` means a rate of 100 per second.
   - Built-in time drivers (`wave(freq)`, `glide(freq)`, etc.) already handle this internally, so `wave(2)` correctly means a 2-second cycle.

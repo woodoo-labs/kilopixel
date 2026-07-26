@@ -120,7 +120,7 @@ pxl.evaluateAttributesForVariable = function(element, varName) {
         element.attributeValues[key] = newVal;
         result |= 2; // Flag bit 2
 
-        if (key === 'x' || key === 'y' || key === 'dx' || key === 'dy' || key === 'rotate' || key === 'scale' || key === 'scalex' || key === 'scaley' || key === 'skewx' || key === 'skewy') {
+        if (key === 'x' || key === 'y' || key === 'offsetX' || key === 'offsetY' || key === 'pivotX' || key === 'pivotY' || key === 'rotate' || key === 'scale' || key === 'scaleX' || key === 'scaleY' || key === 'skewX' || key === 'skewY') {
           element._isLocalMatrixDirty = true;
         }
       }

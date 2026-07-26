@@ -6,6 +6,28 @@ class PxlNode extends HTMLElement {
     Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
     Object.defineProperty(this.attributeValues, '$node', { value: this, enumerable: false, writable: false });
 
+    // Zero-GC runtime aliases so lowercase and camelCase access the exact same underlying value
+    const aliases = {
+      offsetx: 'offsetX', offsety: 'offsetY', pivotx: 'pivotX', pivoty: 'pivotY',
+      scalex: 'scaleX', scaley: 'scaleY', skewx: 'skewX', skewy: 'skewY',
+      strokewidth: 'strokeWidth', linecap: 'lineCap', linejoin: 'lineJoin',
+      miterlimit: 'miterLimit', linedash: 'lineDash', dashoffset: 'dashOffset'
+    };
+    for (const [lower, camel] of Object.entries(aliases)) {
+      Object.defineProperty(this.attributeValues, lower, {
+        get: () => this.attributeValues[camel],
+        set: (v) => { this.attributeValues[camel] = v; },
+        enumerable: true,
+        configurable: true
+      });
+      Object.defineProperty(this.attributeExpressions, lower, {
+        get: () => this.attributeExpressions[camel],
+        set: (v) => { this.attributeExpressions[camel] = v; },
+        enumerable: true,
+        configurable: true
+      });
+    }
+
     this.animatedAttributeKeys = [];
     this.reactiveAttributeKeys = [];
     this.isAnimated = false;
@@ -20,9 +42,17 @@ class PxlNode extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
+    const attrMap = { 
+      offsetx: 'offsetX', offsety: 'offsetY', pivotx: 'pivotX', pivoty: 'pivotY', 
+      scalex: 'scaleX', scaley: 'scaleY', skewx: 'skewX', skewy: 'skewY',
+      strokewidth: 'strokeWidth', linecap: 'lineCap', linejoin: 'lineJoin', 
+      miterlimit: 'miterLimit', linedash: 'lineDash', dashoffset: 'dashOffset',
+      onclick: 'onClick', onenter: 'onEnter', onleave: 'onLeave', ondown: 'onDown', onup: 'onUp', onmove: 'onMove'
+    };
+    name = attrMap[name] || name;
     pxl.compileAttribute(this, name, newValue);
     this.isAnimated = this.animatedAttributeKeys.length > 0;
-    if (name === 'x' || name === 'y' || name === 'dx' || name === 'dy' || name === 'rotate' || name === 'scale' || name === 'scalex' || name === 'scaley' || name === 'skewx' || name === 'skewy') {
+    if (name === 'x' || name === 'y' || name === 'offsetX' || name === 'offsetY' || name === 'pivotX' || name === 'pivotY' || name === 'rotate' || name === 'scale' || name === 'scaleX' || name === 'scaleY' || name === 'skewX' || name === 'skewY') {
       this._isLocalMatrixDirty = true;
     }
     if (this._refKey) pxl.broadcast(this._refKey);
@@ -72,7 +102,7 @@ class PxlNode extends HTMLElement {
           this.attributeValues[key] = newVal;
           animatedValuesChanged = true;
           
-          if (key === 'x' || key === 'y' || key === 'dx' || key === 'dy' || key === 'rotate' || key === 'scale' || key === 'scalex' || key === 'scaley' || key === 'skewx' || key === 'skewy') {
+          if (key === 'x' || key === 'y' || key === 'offsetX' || key === 'offsetY' || key === 'pivotX' || key === 'pivotY' || key === 'rotate' || key === 'scale' || key === 'scaleX' || key === 'scaleY' || key === 'skewX' || key === 'skewY') {
             this._isLocalMatrixDirty = true;
           }
         }
@@ -96,10 +126,10 @@ class PxlNode extends HTMLElement {
     if (this._isLocalMatrixDirty || !this._localMatrixVersion) {
       const v = this.attributeValues;
       const scale = v.scale !== undefined ? v.scale : 1;
-      const sX = (v.scalex !== 1 && v.scalex !== undefined) ? v.scalex : scale;
-      const sY = (v.scaley !== 1 && v.scaley !== undefined) ? v.scaley : scale;
+      const sX = v.scaleX !== null && v.scaleX !== undefined ? v.scaleX : scale;
+      const sY = v.scaleY !== null && v.scaleY !== undefined ? v.scaleY : scale;
       
-      pxl.Matrix.updateLocal(this.localMatrix, v.x, v.y, v.dx, v.dy, v.rotate, sX, sY, v.skewx, v.skewy);
+      pxl.Matrix.updateLocal(this.localMatrix, v.x, v.y, v.pivotX, v.pivotY, v.offsetX, v.offsetY, v.rotate, sX, sY, v.skewX, v.skewY);
       this._isLocalMatrixDirty = false;
       this._localMatrixVersion = (this._localMatrixVersion || 0) + 1; 
     }

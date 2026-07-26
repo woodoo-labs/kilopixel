@@ -7,15 +7,28 @@ pxl.Matrix = {
     return new Float32Array([1, 0, 0, 1, 0, 0]);
   },
 
-  // Order: Translate(x,y) -> Rotate -> Scale -> Skew -> Translate(dx,dy)
-  updateLocal: function(out, x, y, dx, dy, rotate, scaleX, scaleY, skewX, skewY) {
+  // Order: Translate(pivX, pivY) -> Rotate -> Scale -> Skew -> Translate(offX, offY)
+  updateLocal: function(out, x, y, pivotX, pivotY, offsetX, offsetY, rotate, scaleX, scaleY, skewX, skewY) {
     out[0] = 1; out[1] = 0;
     out[2] = 0; out[3] = 1;
     out[4] = 0; out[5] = 0;
 
-    if (x || y) {
-      out[4] = x || 0;
-      out[5] = y || 0;
+    let pivX, pivY, offX, offY;
+    if (pivotX !== null || pivotY !== null) {
+      pivX = pivotX !== null ? pivotX : (x || 0);
+      pivY = pivotY !== null ? pivotY : (y || 0);
+      offX = (x || 0) - pivX;
+      offY = (y || 0) - pivY;
+    } else {
+      pivX = (x || 0) + (offsetX || 0);
+      pivY = (y || 0) + (offsetY || 0);
+      offX = -(offsetX || 0);
+      offY = -(offsetY || 0);
+    }
+
+    if (pivX || pivY) {
+      out[4] = pivX;
+      out[5] = pivY;
     }
 
     if (rotate) {
@@ -35,8 +48,8 @@ pxl.Matrix = {
     }
 
     if (skewX || skewY) {
-      const sx = Math.tan((skewX || 0) * Math.PI / 180);
-      const sy = Math.tan((skewY || 0) * Math.PI / 180);
+      const sx = Math.tan(skewX * Math.PI / 180);
+      const sy = Math.tan(skewY * Math.PI / 180);
       const o0 = out[0], o1 = out[1], o2 = out[2], o3 = out[3];
       out[0] = o0 + o2 * sy;
       out[1] = o1 + o3 * sy;
@@ -44,11 +57,9 @@ pxl.Matrix = {
       out[3] = o1 * sx + o3;
     }
 
-    if (dx || dy) {
-      const ddx = dx || 0;
-      const ddy = dy || 0;
-      out[4] += out[0] * ddx + out[2] * ddy;
-      out[5] += out[1] * ddx + out[3] * ddy;
+    if (offX || offY) {
+      out[4] += out[0] * offX + out[2] * offY;
+      out[5] += out[1] * offX + out[3] * offY;
     }
     
     return out;

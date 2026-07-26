@@ -61,19 +61,19 @@
     <!-- [19-24] Nebula clouds — large semi-transparent radial gradients -->
     <pxl-circle x="280" y="160" r="180"
       fill="radial(0.8, [hsla(280, 80, 30, 0.06), 'transparent'])"
-      dx="20" rotate="t * 0.5"/>
+      offsetX="20" rotate="t * 0.5"/>
     <pxl-circle x="720" y="380" r="200"
       fill="radial(0.9, [hsla(200, 90, 30, 0.05), 'transparent'])"
-      dx="-15" rotate="t * -0.3"/>
+      offsetX="-15" rotate="t * -0.3"/>
     <pxl-circle x="500" y="281" r="260"
       fill="radial(0.7, [hsla(320, 70, 25, 0.04), 'transparent'])"
       scale="1 + wave(20) * 0.05"/>
     <pxl-circle x="130" y="440" r="150"
       fill="radial(0.8, [hsla(180, 80, 25, 0.05), 'transparent'])"
-      dx="10" rotate="t * 0.2"/>
+      offsetX="10" rotate="t * 0.2"/>
     <pxl-circle x="870" y="100" r="160"
       fill="radial(0.8, [hsla(260, 80, 30, 0.05), 'transparent'])"
-      dx="-10" rotate="t * -0.4"/>
+      offsetX="-10" rotate="t * -0.4"/>
     <pxl-circle x="500" y="281" r="300"
       fill="radial(0.6, [hsla(190, 90, 20, 0.03), 'transparent'])"
       rotate="t * 0.15"/>
@@ -116,18 +116,18 @@
       <pxl-circle r="220" stroke="hsla(200, 80%, 50%, 0.12)" strokewidth="0.5" fill="none"/>
 
       <!-- [30-41] 12 orbiting markers — rainbow HSL cycling via loop() -->
-      <pxl-circle rotate="0"   dx="220" r="6 + wave(3.0) * 3" fill="hsl(loop(15) * 360, 80, 60)" stroke="hsl(loop(15) * 360, 90, 80)" strokewidth="0.5"/>
-      <pxl-circle rotate="30"  dx="220" r="6 + wave(3.2) * 3" fill="hsl(loop(15) * 360 + 30, 80, 60)" stroke="hsl(loop(15) * 360 + 30, 90, 80)" strokewidth="0.5"/>
-      <pxl-circle rotate="60"  dx="220" r="6 + wave(3.4) * 3" fill="hsl(loop(15) * 360 + 60, 80, 60)" stroke="hsl(loop(15) * 360 + 60, 90, 80)" strokewidth="0.5"/>
-      <pxl-circle rotate="90"  dx="220" r="6 + wave(3.6) * 3" fill="hsl(loop(15) * 360 + 90, 80, 60)" stroke="hsl(loop(15) * 360 + 90, 90, 80)" strokewidth="0.5"/>
-      <pxl-circle rotate="120" dx="220" r="6 + wave(3.8) * 3" fill="hsl(loop(15) * 360 + 120, 80, 60)" stroke="hsl(loop(15) * 360 + 120, 90, 80)" strokewidth="0.5"/>
-      <pxl-circle rotate="150" dx="220" r="6 + wave(4.0) * 3" fill="hsl(loop(15) * 360 + 150, 80, 60)" stroke="hsl(loop(15) * 360 + 150, 90, 80)" strokewidth="0.5"/>
-      <pxl-circle rotate="180" dx="220" r="6 + wave(4.2) * 3" fill="hsl(loop(15) * 360 + 180, 80, 60)" stroke="hsl(loop(15) * 360 + 180, 90, 80)" strokewidth="0.5"/>
-      <pxl-circle rotate="210" dx="220" r="6 + wave(4.4) * 3" fill="hsl(loop(15) * 360 + 210, 80, 60)" stroke="hsl(loop(15) * 360 + 210, 90, 80)" strokewidth="0.5"/>
-      <pxl-circle rotate="240" dx="220" r="6 + wave(4.6) * 3" fill="hsl(loop(15) * 360 + 240, 80, 60)" stroke="hsl(loop(15) * 360 + 240, 90, 80)" strokewidth="0.5"/>
-      <pxl-circle rotate="270" dx="220" r="6 + wave(4.8) * 3" fill="hsl(loop(15) * 360 + 270, 80, 60)" stroke="hsl(loop(15) * 360 + 270, 90, 80)" strokewidth="0.5"/>
-      <pxl-circle rotate="300" dx="220" r="6 + wave(5.0) * 3" fill="hsl(loop(15) * 360 + 300, 80, 60)" stroke="hsl(loop(15) * 360 + 300, 90, 80)" strokewidth="0.5"/>
-      <pxl-circle rotate="330" dx="220" r="6 + wave(5.2) * 3" fill="hsl(loop(15) * 360 + 330, 80, 60)" stroke="hsl(loop(15) * 360 + 330, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="0"   offsetX="220" r="6 + wave(3.0) * 3" fill="hsl(loop(15) * 360, 80, 60)" stroke="hsl(loop(15) * 360, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="30"  offsetX="220" r="6 + wave(3.2) * 3" fill="hsl(loop(15) * 360 + 30, 80, 60)" stroke="hsl(loop(15) * 360 + 30, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="60"  offsetX="220" r="6 + wave(3.4) * 3" fill="hsl(loop(15) * 360 + 60, 80, 60)" stroke="hsl(loop(15) * 360 + 60, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="90"  offsetX="220" r="6 + wave(3.6) * 3" fill="hsl(loop(15) * 360 + 90, 80, 60)" stroke="hsl(loop(15) * 360 + 90, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="120" offsetX="220" r="6 + wave(3.8) * 3" fill="hsl(loop(15) * 360 + 120, 80, 60)" stroke="hsl(loop(15) * 360 + 120, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="150" offsetX="220" r="6 + wave(4.0) * 3" fill="hsl(loop(15) * 360 + 150, 80, 60)" stroke="hsl(loop(15) * 360 + 150, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="180" offsetX="220" r="6 + wave(4.2) * 3" fill="hsl(loop(15) * 360 + 180, 80, 60)" stroke="hsl(loop(15) * 360 + 180, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="210" offsetX="220" r="6 + wave(4.4) * 3" fill="hsl(loop(15) * 360 + 210, 80, 60)" stroke="hsl(loop(15) * 360 + 210, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="240" offsetX="220" r="6 + wave(4.6) * 3" fill="hsl(loop(15) * 360 + 240, 80, 60)" stroke="hsl(loop(15) * 360 + 240, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="270" offsetX="220" r="6 + wave(4.8) * 3" fill="hsl(loop(15) * 360 + 270, 80, 60)" stroke="hsl(loop(15) * 360 + 270, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="300" offsetX="220" r="6 + wave(5.0) * 3" fill="hsl(loop(15) * 360 + 300, 80, 60)" stroke="hsl(loop(15) * 360 + 300, 90, 80)" strokewidth="0.5"/>
+      <pxl-circle rotate="330" offsetX="220" r="6 + wave(5.2) * 3" fill="hsl(loop(15) * 360 + 330, 80, 60)" stroke="hsl(loop(15) * 360 + 330, 90, 80)" strokewidth="0.5"/>
 
     </pxl-group>
 
@@ -139,14 +139,14 @@
         linedash="[6, 8]" dashoffset="t * 30"/>
 
       <!-- [43-50] 8 orbiting diamond-rects with per-corner radii -->
-      <pxl-group rotate="0"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(320, 80%, 55%, 0.7)" stroke="#ff00aa" strokewidth="0.5" rotate="t * 45"/></pxl-group>
-      <pxl-group rotate="45"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(340, 80%, 55%, 0.7)" stroke="#ff0066" strokewidth="0.5" rotate="t * 45"/></pxl-group>
-      <pxl-group rotate="90"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(300, 80%, 55%, 0.7)" stroke="#cc00ff" strokewidth="0.5" rotate="t * 45"/></pxl-group>
-      <pxl-group rotate="135"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(280, 80%, 55%, 0.7)" stroke="#8800ff" strokewidth="0.5" rotate="t * 45"/></pxl-group>
-      <pxl-group rotate="180"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(320, 80%, 55%, 0.7)" stroke="#ff00aa" strokewidth="0.5" rotate="t * 45"/></pxl-group>
-      <pxl-group rotate="225"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(340, 80%, 55%, 0.7)" stroke="#ff0066" strokewidth="0.5" rotate="t * 45"/></pxl-group>
-      <pxl-group rotate="270"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(300, 80%, 55%, 0.7)" stroke="#cc00ff" strokewidth="0.5" rotate="t * 45"/></pxl-group>
-      <pxl-group rotate="315"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(280, 80%, 55%, 0.7)" stroke="#8800ff" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+      <pxl-group rotate="0"><pxl-rect offsetX="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(320, 80%, 55%, 0.7)" stroke="#ff00aa" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+      <pxl-group rotate="45"><pxl-rect offsetX="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(340, 80%, 55%, 0.7)" stroke="#ff0066" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+      <pxl-group rotate="90"><pxl-rect offsetX="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(300, 80%, 55%, 0.7)" stroke="#cc00ff" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+      <pxl-group rotate="135"><pxl-rect offsetX="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(280, 80%, 55%, 0.7)" stroke="#8800ff" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+      <pxl-group rotate="180"><pxl-rect offsetX="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(320, 80%, 55%, 0.7)" stroke="#ff00aa" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+      <pxl-group rotate="225"><pxl-rect offsetX="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(340, 80%, 55%, 0.7)" stroke="#ff0066" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+      <pxl-group rotate="270"><pxl-rect offsetX="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(300, 80%, 55%, 0.7)" stroke="#cc00ff" strokewidth="0.5" rotate="t * 45"/></pxl-group>
+      <pxl-group rotate="315"><pxl-rect offsetX="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(280, 80%, 55%, 0.7)" stroke="#8800ff" strokewidth="0.5" rotate="t * 45"/></pxl-group>
 
     </pxl-group>
 
@@ -157,12 +157,12 @@
       <pxl-circle r="85" stroke="hsla(45, 90%, 50%, 0.15)" strokewidth="0.5" fill="none"/>
 
       <!-- [52-57] 6 orbiting ellipses — showcasing pxl-ellipse -->
-      <pxl-group rotate="0"><pxl-ellipse dx="85" rx="8" ry="5" fill="hsla(45, 90%, 60%, 0.8)" stroke="#ffbb00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
-      <pxl-group rotate="60"><pxl-ellipse dx="85" rx="8" ry="5" fill="hsla(35, 90%, 60%, 0.8)" stroke="#ffaa00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
-      <pxl-group rotate="120"><pxl-ellipse dx="85" rx="8" ry="5" fill="hsla(55, 90%, 60%, 0.8)" stroke="#ffcc00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
-      <pxl-group rotate="180"><pxl-ellipse dx="85" rx="8" ry="5" fill="hsla(45, 90%, 60%, 0.8)" stroke="#ffbb00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
-      <pxl-group rotate="240"><pxl-ellipse dx="85" rx="8" ry="5" fill="hsla(35, 90%, 60%, 0.8)" stroke="#ffaa00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
-      <pxl-group rotate="300"><pxl-ellipse dx="85" rx="8" ry="5" fill="hsla(55, 90%, 60%, 0.8)" stroke="#ffcc00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
+      <pxl-group rotate="0"><pxl-ellipse offsetX="85" rx="8" ry="5" fill="hsla(45, 90%, 60%, 0.8)" stroke="#ffbb00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
+      <pxl-group rotate="60"><pxl-ellipse offsetX="85" rx="8" ry="5" fill="hsla(35, 90%, 60%, 0.8)" stroke="#ffaa00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
+      <pxl-group rotate="120"><pxl-ellipse offsetX="85" rx="8" ry="5" fill="hsla(55, 90%, 60%, 0.8)" stroke="#ffcc00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
+      <pxl-group rotate="180"><pxl-ellipse offsetX="85" rx="8" ry="5" fill="hsla(45, 90%, 60%, 0.8)" stroke="#ffbb00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
+      <pxl-group rotate="240"><pxl-ellipse offsetX="85" rx="8" ry="5" fill="hsla(35, 90%, 60%, 0.8)" stroke="#ffaa00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
+      <pxl-group rotate="300"><pxl-ellipse offsetX="85" rx="8" ry="5" fill="hsla(55, 90%, 60%, 0.8)" stroke="#ffcc00" strokewidth="0.5" rotate="t * -50"/></pxl-group>
 
     </pxl-group>
 
@@ -218,18 +218,18 @@
 
     <!-- [71-73] Planet A — orbiting on tilted ellipse path -->
     <pxl-group x="500" y="281" rotate="25">
-      <pxl-circle id="planetA" rotate="t * 12" dx="240" dy="0" scaley="0.417" r="10"
+      <pxl-circle id="planetA" rotate="t * 12" offsetX="240" offsetY="0" scaley="0.417" r="10"
         fill="radial(0.7, ['#66ffcc', '#00aa66'])" stroke="#00ffaa" strokewidth="0.5"
         filter="`drop-shadow(0 0 ${4 + wave(2) * 4}px #00ffaa)`"/>
       <!-- Moon of Planet A — nested orbit! -->
-      <pxl-group rotate="t * 12" dx="240" scaley="0.417">
-        <pxl-circle rotate="t * 60" dx="18" r="3" fill="#aaffdd" stroke="none"/>
+      <pxl-group rotate="t * 12" offsetX="240" scaley="0.417">
+        <pxl-circle rotate="t * 60" offsetX="18" r="3" fill="#aaffdd" stroke="none"/>
       </pxl-group>
     </pxl-group>
 
     <!-- [74-75] Planet B — opposite orbit -->
     <pxl-group x="500" y="281" rotate="-25">
-      <pxl-circle rotate="t * -9" dx="240" dy="0" scaley="0.417" r="8"
+      <pxl-circle rotate="t * -9" offsetX="240" offsetY="0" scaley="0.417" r="8"
         fill="radial(0.7, ['#ff99cc', '#cc0066'])" stroke="#ff66aa" strokewidth="0.5"
         filter="`drop-shadow(0 0 ${3 + wave(3) * 3}px #ff66aa)`"/>
     </pxl-group>

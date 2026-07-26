@@ -298,22 +298,23 @@ The optional chaining injector ensures `ref.player?.x` so unresolved refs return
 
 Every element (layer, group, shape) has this coordinate model:
 
-- **`x`, `y`** — The **Pivot Point** (absolute position). This is also the center of rotation and scaling.
-- **`dx`, `dy`** — A **Local Offset** applied *after* rotation and scaling. This allows orbiting without changing the rotation center.
+- **`x`, `y`** — The **Layout Center** of the element (where the element is drawn when unrotated).
+- **`offsetX`, `offsetY`** — A relative offset for the **Pivot Point (invisible hinge)** of rotation and scaling (`x + offsetX, y + offsetY`).
+- **`pivotX`, `pivotY`** — Explicit absolute override for the center of rotation and scaling in stage coordinates.
 
 ### Transform Pipeline Order
 
 Applied by `pxl.applyContextState()` in this exact order:
 
 ```
-1. ctx.translate(x * u, y * u)      ← Move to pivot point
-2. ctx.rotate(rotate * π/180)        ← Rotate around pivot
-3. ctx.scale(scaleX, scaleY)         ← Scale around pivot
-4. ctx.transform(1, skewY, skewX, 1) ← Skew
-5. ctx.translate(dx * u, dy * u)     ← Offset AFTER rotation/scale
-6. ctx.globalAlpha *= alpha           ← Compound opacity
-7. ctx.globalCompositeOperation       ← Blend mode
-8. ctx.filter                         ← CSS filter
+1. ctx.translate(pivX * u, pivY * u)     ← Move to pivot point (pivotX/Y if set, else x/y)
+2. ctx.rotate(rotate * π/180)            ← Rotate around pivot
+3. ctx.scale(scaleX, scaleY)             ← Scale around pivot
+4. ctx.transform(1, skewY, skewX, 1)     ← Skew
+5. ctx.translate(offX * u, offY * u)     ← Offset AFTER rotation/scale
+6. ctx.globalAlpha *= alpha              ← Compound opacity
+7. ctx.globalCompositeOperation          ← Blend mode
+8. ctx.filter                            ← CSS filter
 ```
 
 ### Why This Matters
@@ -322,7 +323,7 @@ The pivot/offset split makes orbital motion trivial:
 
 ```html
 <!-- Planet orbiting center at 60°/sec, 200-unit orbital radius -->
-<pxl-circle x="500" y="300" dx="200" rotate="t * 60" r="20" fill="red"/>
+<pxl-circle x="500" y="300" offsetX="200" rotate="t * 60" r="20" fill="red"/>
 ```
 
 Without this split, you'd need nested groups or trigonometry.
@@ -338,7 +339,7 @@ Shapes are drawn relative to `(0, 0)` within the transformed context. The transf
 - **Logical width**: Always **1000** (hardcoded)
 - **Unit `u`**: `clientWidth / 1000` — the scaling factor
 - **Logical height**: Dynamic, calculated as `clientHeight / u`
-- All spatial values (x, y, dx, dy, r, w, h, strokewidth, etc.) are multiplied by `u` at draw time
+- All spatial values (x, y, offsetX, offsetY, r, w, h, strokewidth, etc.) are multiplied by `u` at draw time
 - **DPI awareness**: Canvas is scaled by `devicePixelRatio` via ResizeObserver
 
 This means:
@@ -505,7 +506,7 @@ This reuses the shape's own `draw()` method for pixel-perfect mathematical hit t
 `pxl.Matrix` is a namespace of static functions that operate on `Float32Array(6)` matrices `[a, b, c, d, tx, ty]`:
 
 - `create()` → identity Float32Array
-- `updateLocal(out, x, y, dx, dy, rotate, scaleX, scaleY, skewX, skewY)` → builds local transform
+- `updateLocal(out, x, y, offsetX, offsetY, pivotX, pivotY, rotate, scaleX, scaleY, skewX, skewY)` → builds local transform
 - `multiply(out, a, b)` → `out = a * b`
 - `invert(out, a)` → `out = a⁻¹` (with degenerate fallback to identity)
 
@@ -593,14 +594,14 @@ Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile 
 **Class**: `Layer extends PxlNode`  
 **Source**: `js/elements/layer.js`
 
-### Observed Attributes (14)
+### Observed Attributes (16)
 
-`x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`, `alpha`, `blend`, `filter`, `hidden`
+`x`, `y`, `offsetX`, `offsetY`, `pivotX`, `pivotY`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`, `alpha`, `blend`, `filter`, `hidden`
 
 ### Default Values
 
 ```javascript
-{ x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scaleX: 1, scaleY: 1,
+{ x: 0, y: 0, offsetX: 0, offsetY: 0, pivotX: null, pivotY: null, rotate: 0, scale: 1, scaleX: 1, scaleY: 1,
   skewX: 0, skewY: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false }
 ```
 
@@ -623,9 +624,9 @@ Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile 
 **Class**: `Group extends PxlNode`  
 **Source**: `js/elements/group.js`
 
-### Observed Attributes (14)
+### Observed Attributes (16)
 
-Same as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`, `alpha`, `blend`, `filter`, `hidden`
+Same as Layer: `x`, `y`, `offsetX`, `offsetY`, `pivotX`, `pivotY`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`, `alpha`, `blend`, `filter`, `hidden`
 
 ### Key Behavior
 
@@ -633,7 +634,7 @@ Same as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `ske
 - Groups can nest infinitely, each adding transforms to the stack
 - `globalAlpha *= alpha` means opacity compounds through the hierarchy
 - `render(ctx, u, t)` evaluates animations, applies transforms, iterates children
-- Only saves/restores context if there are actual transform changes (optimization)
+- Always saves/restores context around children during rendering
 
 ---
 
@@ -643,9 +644,9 @@ Same as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `ske
 **Class**: `Shape extends PxlNode`  
 **Source**: `js/elements/shape.js`
 
-### Observed Attributes (28)
+### Observed Attributes (30)
 
-**Transform**: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`  
+**Transform**: `x`, `y`, `offsetX`, `offsetY`, `pivotX`, `pivotY`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`  
 **Style**: `fill`, `stroke`, `strokewidth`, `linecap`, `linejoin`, `miterlimit`, `linedash`, `dashoffset`  
 **Render**: `alpha`, `blend`, `filter`, `hidden`  
 **Events**: `onclick`, `onenter`, `onleave`, `ondown`, `onup`, `onmove`
@@ -653,7 +654,7 @@ Same as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `ske
 ### Default Values
 
 ```javascript
-{ x: 0, y: 0, dx: 0, dy: 0, fill: null, stroke: null, strokewidth: 1,
+{ x: 0, y: 0, offsetX: 0, offsetY: 0, pivotX: null, pivotY: null, fill: null, stroke: null, strokewidth: 1,
   linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null,
   dashoffset: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1,
   skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none',
@@ -1257,8 +1258,8 @@ The logical width is always 1000. Use raw numbers.
 #### 9. Orbital Motion
 
 ```html
-<!-- dx creates orbit radius, rotate spins around the pivot (x,y) -->
-<pxl-circle x="500" y="300" dx="150" rotate="t * 45" r="15" fill="orange"/>
+<!-- offsetX creates orbit radius, rotate spins around the pivot (x,y) -->
+<pxl-circle x="500" y="300" offsetX="150" rotate="t * 45" r="15" fill="orange"/>
 ```
 
 #### 10. Interactive Elements
