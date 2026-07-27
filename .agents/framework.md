@@ -102,14 +102,14 @@ The framework compiles from these files (in build order):
 
 | # | File | Lines | Purpose |
 |---|------|-------|---------|
-| 1 | `js/engine.js` | 145 | Global `pxl` namespace, reactivity pub-sub, attribute compilation bridge |
+| 1 | `js/engine.js` | 149 | Global `pxl` namespace, reactivity pub-sub, attribute compilation bridge |
 | 2 | `js/matrix.js` | 116 | Zero-GC 2D affine matrix engine (Float32Array) |
 | 3 | `js/compiler.js` | 258 | Multi-tier expression parser, built-in scope, time drivers |
 | 4 | `js/interaction.js` | 200 | InteractionEngine class, dummy context hit testing, pointer events |
 | 5 | `js/graphics.js` | 63 | Transform pipeline helper, anchor tables, points parser |
 | 6 | `js/monitor.js` | 36 | Performance telemetry (fps, renderAvg, renderMax) |
 | 7 | `js/elements/stage.js` | 148 | Root container, canvas host, rAF loop, resize, pointer routing |
-| 8 | `js/elements/node.js` | 145 | `PxlNode` base class (extends HTMLElement), matrix tracking |
+| 8 | `js/elements/node.js` | 148 | `PxlNode` base class (extends HTMLElement), matrix tracking |
 | 9 | `js/elements/layer.js` | 113 | Compositing layer, own canvas, dirty-flag rendering |
 | 10 | `js/elements/group.js` | 54 | Nestable transform container, draws into parent canvas |
 | 11 | `js/elements/shape.js` | 234 | Base Shape class, style application, gradient creation, arrows |
@@ -294,21 +294,21 @@ The optional chaining injector ensures `ref.player?.x` so unresolved refs return
 
 ## Coordinate System & Transform Pipeline
 
-### Pivot + Offset Architecture
+### Center + Offset Architecture
 
 Every element (layer, group, shape) has this coordinate model:
 
-- **`x`, `y`** — The **Pivot Point** (absolute position). This is also the center of rotation and scaling.
-- **`dx`, `dy`** — A **Local Offset** applied *after* rotation and scaling. This allows orbiting without changing the rotation center.
+- **`x`, `y`** — The **Center** of the element. All transforms (rotation, scaling, skewing) occur around this point. When `dx`/`dy` offsets are applied, the shape is visually displaced but `x`/`y` remains the transform origin.
+- **`dx`, `dy`** — A **Local Offset** applied *after* rotation and scaling. Shifts where the shape is drawn without moving its center of transformation. This allows orbiting without changing the rotation center.
 
 ### Transform Pipeline Order
 
 Applied by `pxl.applyContextState()` in this exact order:
 
 ```
-1. ctx.translate(x * u, y * u)      ← Move to pivot point
+1. ctx.translate(x * u, y * u)      ← Move to center (transform origin)
 2. ctx.rotate(rotate * π/180)        ← Rotate around pivot
-3. ctx.scale(scaleX, scaleY)         ← Scale around pivot
+3. ctx.scale(scaleX, scaleY)         ← Scale around center
 4. ctx.transform(1, skewY, skewX, 1) ← Skew
 5. ctx.translate(dx * u, dy * u)     ← Offset AFTER rotation/scale
 6. ctx.globalAlpha *= alpha           ← Compound opacity
@@ -316,9 +316,11 @@ Applied by `pxl.applyContextState()` in this exact order:
 8. ctx.filter                         ← CSS filter
 ```
 
+**Scale Resolution**: `scalex` falls back to `scale` when `scalex === 1` or `undefined`. Same for `scaley`. This means `scale="2"` uniformly scales both axes, while `scalex`/`scaley` provide independent overrides.
+
 ### Why This Matters
 
-The pivot/offset split makes orbital motion trivial:
+The center/offset split makes orbital motion trivial:
 
 ```html
 <!-- Planet orbiting center at 60°/sec, 200-unit orbital radius -->
@@ -329,7 +331,7 @@ Without this split, you'd need nested groups or trigonometry.
 
 ### Shape Drawing Origin
 
-Shapes are drawn relative to `(0, 0)` within the transformed context. The transform pipeline has already positioned the canvas context at the shape's pivot point. For example, a circle draws `ctx.arc(0, 0, r * u, ...)`.
+Shapes are drawn relative to `(0, 0)` within the transformed context. The transform pipeline has already positioned the canvas context at the shape's center. For example, a circle draws `ctx.arc(0, 0, r * u, ...)`.
 
 ---
 
@@ -375,7 +377,7 @@ Because they contain parentheses, the compiler automatically routes them through
 ```html
 fill="linear(45, ['red', 'blue'])"
 ```
-The angle uses CSS-like geometry. The compiler calculates endpoints that stretch to the bounding box edges.
+The angle uses CSS-like geometry. Endpoints are calculated using `stretch = 1 / max(|cos|, |sin|)` normalization, ensuring they always reach the bounding box edges regardless of angle.
 
 **Coordinate mode** (array):
 ```html
@@ -493,6 +495,7 @@ This reuses the shape's own `draw()` method for pixel-perfect mathematical hit t
 - Pointer events (`pointermove`, `pointerdown`, `pointerup`, `click`, `pointerenter`, `pointerleave`) are handled by the InteractionEngine via `handleEvent()`
 - Hit testing runs in `process()`, called at the end of each `stage.render()`
 - Mouse coordinates are converted to logical units: `offsetX / stage.unit`
+- Interactive elements automatically set `stage.style.cursor = 'pointer'` on hover, resetting to `''` when no interactive element is hovered
 
 ---
 
@@ -516,10 +519,10 @@ Three pre-allocated scratch matrices prevent GC pressure:
 
 ### Lazy Versioned Matrix Tracking
 
-Each PxlNode tracks matrix versions to avoid recomputation:
-- `_localMatrixVersion` — increments when transform attributes change
+Each PxlNode tracks matrix state to avoid recomputation:
+- `_isLocalMatrixDirty` — boolean flag, set true when transform attributes change
 - `_globalMatrixVersion` — increments when local or parent matrix changes
-- `_lastParentMatrixVersion` — tracks parent's version for dirty detection
+- `_parentMatrixVersion` — tracks parent's version for dirty detection
 
 `getGlobalMatrix()` recursively walks the parent chain, only recomputing when version mismatches are detected.
 
@@ -600,8 +603,8 @@ Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile 
 ### Default Values
 
 ```javascript
-{ x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scaleX: 1, scaleY: 1,
-  skewX: 0, skewY: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false }
+{ x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1,
+  skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false }
 ```
 
 ### Key Behavior
@@ -1032,7 +1035,7 @@ This works correctly regardless of zoom, rotation, or deep group nesting.
 
 ### Bounding Box
 
-Returns zeroed bounding box (grid is infinite, bounding box has no meaning).
+Returns zeroed bounding box by default (grid is infinite). However, during draw, Grid dynamically updates its own `boundingBox` to match the visible viewport bounds, enabling gradients to render correctly across the visible area.
 
 ---
 
@@ -1155,7 +1158,10 @@ The `set(key, value)` method on `attributeValues` calls `setAttribute()` on the 
 5. Outputs to `dist/kilopixel-v0.1.0.min.js`
 6. Copies to `dist/pxl.min.js` (generic alias)
 7. Copies to `docs/js/pxl.min.js` (for GitHub Pages)
-8. Reports original and minified sizes
+8. Copies to `docs/download/pxl.min.js` (for downloads page)
+9. Generates `docs/download/kilopixel-boilerplate.zip` (starter package with `js/pxl.min.js` and modified `index.html`)
+10. Cleans up legacy zip locations (`dist/` and `docs/`)
+11. Reports original and minified sizes
 
 ### Build Command
 
@@ -1196,17 +1202,17 @@ Every shape MUST be inside a `<pxl-layer>`. Layers MUST be inside a `<pxl-stage>
 
 The logical width is always 1000. Use raw numbers.
 
-#### 3. String Values in Expressions Need Quotes
+#### 3. String Quoting Rules
+
+Plain text attributes work without quotes — the compiler's Fast Path handles them:
 
 ```html
-<!-- Text content must be quoted in expressions -->
-<pxl-text text="'Hello World'" .../>
+<!-- Plain text: no quotes needed -->
+<pxl-text text="Hello World" .../>
 
-<!-- Dynamic text with template literals -->
-<pxl-text text="`Score: ${ref.score.value}`" .../>
-
-<!-- Ternary returning strings -->
+<!-- Inside JS expressions: quotes ARE needed -->
 <pxl-circle fill="t > 5 ? 'red' : 'blue'" .../>
+<pxl-text text="`Score: ${ref.score.value}`" .../>
 ```
 
 #### 4. Time is in Seconds
@@ -1295,17 +1301,17 @@ The logical width is always 1000. Use raw numbers.
 #### 13. Common Pitfalls
 
 - **Don't use `onhover`** → use `onenter` instead
-- **Don't put `s.width`** → use `1000` directly (width is always 1000)
+- **Use raw numbers for coordinates** → `x="500"` not `ref.main.width / 2` (width is always 1000)
 - **Don't forget `fill` or `stroke`** → shapes with neither are invisible
 - **Don't animate inside static CSS filter strings** → wrap in backticks
-- **Don't use `v.xxx` or `s.xxx`** → these old prefixes were removed, use `ref.xxx` exclusively
 - **Don't nest `<pxl-stage>` inside `<pxl-stage>`** → stages are independent roots
-- **`text` attribute plain strings** → must be wrapped in quotes: `text="'Hello'"` not `text="Hello"`
 - **Gradient radius** → use `1` to stretch to edge, not `0.5`
 
 #### 14. Scope Available in Expressions
 
-**All Math methods**: `sin`, `cos`, `tan`, `abs`, `floor`, `ceil`, `round`, `sqrt`, `pow`, `min`, `max`, `random`, `atan2`, `hypot`, `log`, `exp`, `sign`, `trunc`, `cbrt`, `PI`, `E`, etc.
+**All Math constants**: `PI`, `E`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `SQRT1_2`, `SQRT2`
+
+**All Math methods**: `abs`, `acos`, `acosh`, `asin`, `asinh`, `atan`, `atan2`, `atanh`, `cbrt`, `ceil`, `clz32`, `cos`, `cosh`, `exp`, `expm1`, `floor`, `fround`, `hypot`, `imul`, `log`, `log10`, `log1p`, `log2`, `max`, `min`, `pow`, `random`, `round`, `sign`, `sin`, `sinh`, `sqrt`, `tan`, `tanh`, `trunc`
 
 **Color constructors**: `rgb()`, `rgba()`, `hsl()`, `hsla()`
 

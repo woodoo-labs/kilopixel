@@ -236,6 +236,7 @@
         <li><strong>Layer Rotation:</strong> Rotating a <code>&lt;pxl-layer&gt;</code> spins the entire coordinate space inside that layer around the layer's center point (<code>x</code>, <code>y</code>). The shape's relative coordinates do not change, but the local space it lives in spins together with the layer.</li>
         <li><strong>Shape Rotation:</strong> Rotating a shape (such as a <code>&lt;pxl-ellipse&gt;</code>) only spins that specific shape around its own <code>x</code> and <code>y</code> center point, leaving the rest of the layer untouched.</li>
       </ul>
+      <p>Look for the pulsing orange indicator dot (<span class="indicator-dot"></span>) on the controls below—try spinning the Layer and Ellipse sliders to see this difference in real time!</p>
       
       <pre><code class="language-html">&lt;!-- An ellipse spinning perfectly around its center point --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
@@ -307,7 +308,7 @@
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
               <button class="tab-btn active" onclick="switchTab(this, 'ex3-layer')">Layer</button>
-              <button class="tab-btn" onclick="switchTab(this, 'ex3-ellipse')">Ellipse</button>
+              <button class="tab-btn" onclick="switchTab(this, 'ex3-ellipse')">Ellipse <span class="indicator-dot"></span></button>
             </div>
           </div>
           
@@ -356,7 +357,7 @@
                   oninput="pxl.nodes.ex3Ellipse.set('ry', this.value); document.getElementById('lblEx3EllipseRy').innerText = this.value; document.getElementById('codeEx3EllipseRy').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Rotation <span id="lblEx3EllipseRot">20°</span></label>
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="lblEx3EllipseRot">20°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="20" autocomplete="off"
                   oninput="pxl.nodes.ex3Ellipse.set('rotate', this.value); document.getElementById('lblEx3EllipseRot').innerText = this.value + '°'; document.getElementById('codeEx3EllipseRot').innerText = this.value;">
               </div>

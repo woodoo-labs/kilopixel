@@ -412,6 +412,26 @@ body {
   border-bottom-color: var(--accent);
 }
 
+.indicator-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background-color: #f97316;
+  border-radius: 50%;
+  margin-left: 6px;
+  vertical-align: middle;
+  animation: dot-glow 3s infinite ease-in-out;
+}
+
+@keyframes dot-glow {
+  0%, 100% {
+    box-shadow: 0 0 3px 0px rgba(249, 115, 22, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 10px 3px rgba(249, 115, 22, 0.85);
+  }
+}
+
 .tab-content {
   display: none;
   padding: 20px 0;
