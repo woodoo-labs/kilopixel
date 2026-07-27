@@ -13,7 +13,7 @@
   <!-- Kilopixel Engine -->
   <script src="js/pxl.min.js"></script>
   
-  <!-- Import our custom layout Web Components -->
+  <!-- Import our custom layout elements -->
   <script src="js/docs-layout.js"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <div class="docs-inner">
       <h1>Kilopixel</h1>
       <h2>The Declarative Canvas Framework <span class="subtitle-inline">— HTML5 Canvas, Reinvented.</span></h2>
-      <p class="lead">Kilopixel bridges the gap between the raw performance of the HTML5 Canvas and the ease of declarative HTML. Without needing to write a single line of JavaScript, you can build complex, responsive graphics using nothing but custom HTML tags like <code>&lt;pxl-stage&gt;</code> and <code>&lt;pxl-circle&gt;</code>.</p>
+      <p class="lead">Kilopixel bridges the gap between the raw performance of the HTML5 Canvas and the ease of declarative HTML. Without needing to write a single line of JavaScript, you can build complex, responsive graphics using nothing but custom HTML elements like <code>&lt;pxl-stage&gt;</code> and <code>&lt;pxl-circle&gt;</code>.</p>
       
       <p class="lead">Powered by a lightning-fast evaluation engine, Kilopixel processes math expressions, element reactivity, and continuous animations natively at 60 frames per second — all with absolutely zero build tools required.</p>
       
@@ -61,30 +61,14 @@
           ></pxl-circle>
         </pxl-layer>
       </pxl-stage>
-      
-      <pxl-stage ratio="16 / 9" class="demo-stage">
-        <pxl-layer>
-          <pxl-circle x="500" y="200" r="40 + wave(2) * 20" stroke="grey" fill="yellow"></pxl-circle>
-        </pxl-layer>
-      </pxl-stage>
 
       <h2>Why Kilopixel?</h2>
       <ul>
         <li><strong>Zero Build Steps:</strong> No NPM, Webpack, or bundling required. Just drop in a single script tag and start writing.</li>
-        <li><strong>Declarative Syntax:</strong> Describe your graphics visually using nested HTML Web Components.</li>
+        <li><strong>Declarative Syntax:</strong> Describe your graphics visually using nested custom HTML elements.</li>
         <li><strong>Native Reactivity:</strong> Bind properties to mouse coordinates, time, or other elements using the zero-GC <code>ref.*</code> registry.</li>
         <li><strong>Blazing Fast:</strong> The internal engine bypasses the slow DOM entirely during the 60fps render loop.</li>
       </ul>
-
-      <h2>Scrolling Test</h2>
-      <p>The container below is artificially tall to prove that the main content area scrolls independently while the sidebar and header remain locked in place.</p>
-      
-      <div style="height: 1200px; margin-top: 20px; border-radius: 8px; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.02) 10px, rgba(255,255,255,0.02) 20px); display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
-        [ Dummy content extending the page height ]
-      </div>
-
-      <h2 style="margin-top: 40px;">Bottom of the Page</h2>
-      <p>You have successfully scrolled to the bottom while the sidebar remained sticky.</p>
       </div>
     </main>
 

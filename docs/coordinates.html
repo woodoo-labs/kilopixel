@@ -14,7 +14,7 @@
   <!-- Kilopixel Engine -->
   <script src="js/pxl.min.js"></script>
   
-  <!-- Import our custom layout Web Components -->
+  <!-- Import our custom layout elements -->
   <script src="js/docs-layout.js"></script>
 </head>
 <body>
@@ -598,13 +598,13 @@
             <pxl-circle id="ex5FollowerB" 
               x="ref.ex5LeaderA.x" y="ref.ex5LeaderA.y" 
               dx="-400" dy="-300" 
-              r="8" fill="#60a5fa">
+              r="10" fill="#60a5fa">
             </pxl-circle>
             <!-- Follower C Shape (Green Palette) -->
             <pxl-circle id="ex5FollowerC" 
               x="ref.ex5LeaderA.x" y="ref.ex5LeaderA.y" 
               dx="150" dy="-350" 
-              r="8" fill="#4ade80">
+              r="10" fill="#4ade80">
             </pxl-circle>
 
             <!-- 6. Markers & Labels (Top) -->
@@ -921,7 +921,7 @@
           </div>
         </div>
       </div>
-<h2>7. Animated Orbits</h2>
+      <h2>7. Animated Orbits</h2>
       <p>This is where Kilopixel's coordinate system shines. By combining local offsets with dynamic rotation, we can create perfect orbital mechanics mathematically effortlessly!</p>
       <p>The <code>dx</code> attribute pushes the planet away from the Sun (the <code>x</code> and <code>y</code> pivot point), and the <code>rotate</code> attribute spins that entire offset vector around the center.</p>
       <p>Use the sliders below to see how standard HTML inputs can instantly drive the Kilopixel canvas via the <code>ref.*</code> registry.</p>

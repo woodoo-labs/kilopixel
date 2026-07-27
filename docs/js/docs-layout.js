@@ -41,6 +41,15 @@ class DocsSidebar extends HTMLElement {
     
     this.innerHTML = `
       <aside class="sidebar">
+        <pxl-stage ratio="1 / 4" class="sidebar-bg-stage" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; pointer-events: none !important; z-index: 0 !important;">
+          <pxl-layer>
+            <pxl-circle x="250 + wave(16) * 80" y="300 + wave(22) * 150" r="90" fill="#3b82f633"></pxl-circle>
+            <pxl-circle x="750 + wave(19) * 120" y="900 + wave(26) * 200" r="70" fill="#f9731633"></pxl-circle>
+            <pxl-circle x="400 + wave(14) * 100" y="1600 + wave(24) * 250" r="110" fill="#60a5fa33"></pxl-circle>
+            <pxl-circle x="650 + wave(18) * 90" y="2400 + wave(28) * 300" r="80" fill="#a78bfa33"></pxl-circle>
+            <pxl-circle x="300 + wave(21) * 110" y="3200 + wave(30) * 200" r="100" fill="#34d39933"></pxl-circle>
+          </pxl-layer>
+        </pxl-stage>
         <div class="sidebar-section">
           <div class="sidebar-title">Getting Started</div>
           <ul>
