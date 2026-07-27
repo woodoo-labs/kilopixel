@@ -74,6 +74,46 @@ function build() {
       const docsAliasPath = path.join(docsJsDir, 'pxl.min.js');
       fs.copyFileSync(outputPath, docsAliasPath);
     }
+    const docsDownloadDir = path.join(__dirname, 'docs', 'download');
+    if (!fs.existsSync(docsDownloadDir)) {
+      fs.mkdirSync(docsDownloadDir, { recursive: true });
+    }
+    fs.copyFileSync(outputPath, path.join(docsDownloadDir, 'pxl.min.js'));
+
+    // 8. Generate docs/download/kilopixel-boilerplate.zip from docs/download/index.html
+    console.log('Generating boilerplate ZIP archive...');
+    const boilerplateTmpDir = path.join(distDir, 'boilerplate_tmp');
+    if (fs.existsSync(boilerplateTmpDir)) {
+      fs.rmSync(boilerplateTmpDir, { recursive: true, force: true });
+    }
+    fs.mkdirSync(boilerplateTmpDir);
+    const boilerplateJsDir = path.join(boilerplateTmpDir, 'js');
+    fs.mkdirSync(boilerplateJsDir);
+
+    // Copy pxl.min.js into boilerplate_tmp/js/
+    fs.copyFileSync(outputPath, path.join(boilerplateJsDir, 'pxl.min.js'));
+
+    // Read index.html from docs/download/index.html and adjust script path for zip package
+    const boilerplateSourcePath = path.join(docsDownloadDir, 'index.html');
+    let boilerplateHtml = fs.readFileSync(boilerplateSourcePath, 'utf8');
+    boilerplateHtml = boilerplateHtml.replace('src="pxl.min.js"', 'src="js/pxl.min.js"');
+    fs.writeFileSync(path.join(boilerplateTmpDir, 'index.html'), boilerplateHtml, 'utf8');
+
+    const zipOutputPath = path.join(docsDownloadDir, 'kilopixel-boilerplate.zip');
+    if (fs.existsSync(zipOutputPath)) {
+      fs.unlinkSync(zipOutputPath);
+    }
+
+    // Clean up old unused zip locations if present
+    const oldDistZip = path.join(distDir, 'kilopixel-boilerplate.zip');
+    if (fs.existsSync(oldDistZip)) fs.unlinkSync(oldDistZip);
+    const oldDocsZip = path.join(__dirname, 'docs', 'kilopixel-boilerplate.zip');
+    if (fs.existsSync(oldDocsZip)) fs.unlinkSync(oldDocsZip);
+
+    execSync(`npx -y bestzip "${zipOutputPath}" *`, { cwd: boilerplateTmpDir, stdio: 'inherit' });
+    fs.rmSync(boilerplateTmpDir, { recursive: true, force: true });
+
+    console.log(`Saved boilerplate ZIP to: ${zipOutputPath}`);
 
     // Calculate sizes
     const minifiedCode = fs.readFileSync(outputPath, 'utf8');

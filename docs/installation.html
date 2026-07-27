@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Get started with Kilopixel in seconds. Zero dependencies, zero build step, zero local web server required. Include pxl.min.js and start building declarative canvas graphics.">
+  <title>Kilopixel - Installation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+  
+  <!-- Import our custom layout Web Components -->
+  <script src="js/docs-layout.js"></script>
+</head>
+<body>
+  
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <docs-sidebar></docs-sidebar>
+    
+    <main class="docs-content">
+      <div class="docs-inner">
+      <h1>Installation & Setup</h1>
+      <p class="lead">Getting started with Kilopixel takes less than a minute. With <strong>zero dependencies</strong>, <strong>zero build tools</strong>, and <strong>zero local web server requirements</strong>, you can build declarative, high-performance HTML5 Canvas graphics in any standard HTML file.</p>
+      
+      <h2>1. Download & Include</h2>
+      <p>Download the minified engine file (<code>pxl.min.js</code>, ~44KB) or the development version (<code>pxl.js</code>) from GitHub and place it inside your project folder.</p>
+      <p>Include the script inside your HTML document's <code>&lt;head&gt;</code> tag. As soon as the script loads, it automatically registers Kilopixel's custom HTML Web Components (<code>&lt;pxl-stage&gt;</code>, <code>&lt;pxl-layer&gt;</code>, <code>&lt;pxl-circle&gt;</code>, etc.) with the browser.</p>
+      
+      <pre><code class="language-html">&lt;!-- Include Kilopixel in your document head --&gt;
+&lt;script src="pxl.min.js"&gt;&lt;/script&gt;</code></pre>
+
+      <div style="display: flex; gap: 16px; margin: 28px 0; flex-wrap: wrap;">
+        <a href="download/pxl.min.js" download="pxl.min.js" style="display: inline-flex; align-items: center; gap: 8px; background: #3b82f6; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 500; transition: background 0.2s; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Download pxl.min.js (~44KB)
+        </a>
+        <a href="download/kilopixel-boilerplate.zip" download="kilopixel-boilerplate.zip" style="display: inline-flex; align-items: center; gap: 8px; background: #0f172a; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 500; transition: background 0.2s; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Download Boilerplate (.zip)
+        </a>
+      </div>
+
+      <h2>2. Fullscreen Starter Boilerplate</h2>
+      <p>Here is a complete, copy-pasteable starter template. It uses a tiny 4-line CSS reset in the <code>&lt;head&gt;</code> to remove browser margins and enable a sleek, fullscreen responsive canvas—without requiring external stylesheets or inline style attributes.</p>
+      
+      <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Kilopixel Starter&lt;/title&gt;
+  &lt;script src="js/pxl.min.js"&gt;&lt;/script&gt;
+  &lt;style&gt;
+    body {
+      margin: 0;
+      background: #0f172a;
+      overflow: hidden;
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+  &lt;!-- Responsive stage that fills the entire viewport --&gt;
+  &lt;pxl-stage ratio="16 / 9"&gt;
+    &lt;pxl-layer&gt;
+      &lt;pxl-grid stroke="#1e293b" major="4"&gt;&lt;/pxl-grid&gt;
+      &lt;pxl-circle 
+        x="500" 
+        y="300" 
+        r="80 + wave(2) * 20" 
+        fill="#f97316"&gt;
+      &lt;/pxl-circle&gt;
+    &lt;/pxl-layer&gt;
+  &lt;/pxl-stage&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <h2>3. Zero Web Server Required (Works 100% Offline)</h2>
+      <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 1.25rem 1.5rem; border-radius: 0.5rem; margin: 1.5rem 0; color: #1e3a8a;">
+        <p style="margin-top: 0; font-weight: 600; font-size: 1.1rem; color: #1e3a8a;">Double-Click and Run Anywhere</p>
+        <p style="margin-bottom: 0; color: #1e3a8a;">Unlike most modern JavaScript frameworks or 3D libraries that require Node.js, bundlers, or a local web server just to display a page, Kilopixel has <strong>zero CORS or file-system restrictions</strong>. You can save <code>index.html</code> anywhere on your computer and double-click it to open directly in any browser via the <code>file://</code> protocol at a full 60fps.</p>
+      </div>
+
+      <h2>4. Live Verification Playground</h2>
+      <p>Use the interactive controls below to verify that the Kilopixel engine is loaded and responsive:</p>
+
+      <div class="demo-container">
+        <pxl-stage ratio="16 / 9" class="demo-stage">
+          <pxl-layer>
+            <!-- 1. Background Grid -->
+            <pxl-grid stroke="#f1f5f9" major="4"></pxl-grid>
+
+            <!-- 2. Shape Helpers -->
+            <pxl-line x1="0" y1="ref.installCircle.y" x2="ref.installCircle.x" y2="ref.installCircle.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.installCircle.x / 2" y="ref.installCircle.y + 15" baseline="top" align="center" text="`x = ${ref.installCircle.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+            <pxl-line x1="ref.installCircle.x" y1="0" x2="ref.installCircle.x" y2="ref.installCircle.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.installCircle.x + 15" y="ref.installCircle.y / 2" baseline="middle" align="left" text="`y = ${ref.installCircle.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+
+            <!-- 3. The Shape -->
+            <pxl-circle id="installCircle"
+              x="500" 
+              y="300" 
+              r="80 + wave(2) * 20" 
+              fill="#ffedd566" stroke="#f97316" strokewidth="2">
+            </pxl-circle>
+
+            <!-- 4. Shape Center (Top) -->
+            <pxl-circle x="ref.installCircle.x" y="ref.installCircle.y" r="5" fill="#fb923c"></pxl-circle>
+            <pxl-text 
+              x="ref.installCircle.x + 15" 
+              y="ref.installCircle.y - 15" 
+              baseline="bottom"
+              text="`Circle (${ref.installCircle.x}, ${ref.installCircle.y})`" 
+              size="27" 
+              fill="#fb923c" 
+              font="monospace">
+            </pxl-text>
+          </pxl-layer>
+        </pxl-stage>
+
+        <!-- Tabbed Controls -->
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn active" onclick="switchTab(this, 'install-circle')">Circle</button>
+            </div>
+          </div>
+
+          <div class="tab-content active" id="install-circle">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="lblInstallX">500</span></label>
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                  oninput="pxl.nodes.installCircle.set('x', this.value); document.getElementById('lblInstallX').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="lblInstallY">300</span></label>
+                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                  oninput="pxl.nodes.installCircle.set('y', this.value); document.getElementById('lblInstallY').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Prism Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+</body>
+</html>

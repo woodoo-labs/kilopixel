@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kilopixel Boilerplate</title>
+  <script src="pxl.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background: #0f172a;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Responsive stage that fills the entire viewport -->
+  <pxl-stage ratio="16 / 9">
+    <pxl-layer>
+      <pxl-grid stroke="#1e293b" major="4"></pxl-grid>
+      <pxl-circle 
+        x="500" 
+        y="300" 
+        r="80 + wave(2) * 20" 
+        fill="#f97316">
+      </pxl-circle>
+    </pxl-layer>
+  </pxl-stage>
+
+</body>
+</html>
