@@ -5,18 +5,40 @@ This guide establishes the visual and architectural standards for creating inter
 ## 1. Color Semantics
 We use a strict color-coding system to separate context (the stage/layer) from content (the shapes).
 
-* **Violet / Purple (`#8b5cf6`, `#a78bfa`)**: Used for the **Environment**. This includes Layers, Layer Origin coordinates, and coordinate crosshairs.
-* **Neutral Slate (`#f1f5f9`, `#cbd5e1`)**: Used for **Background Grids** to ensure they remain subtle and do not visually compete with the environment coordinates.
-* **Orange (`#ea580c`, `rgba(234, 88, 12, 0.5)`, `#ffedd5`)**: Used for the **Shapes**. This includes Shape borders/fills, Pivot points, and Shape coordinate texts. *Exception: When a demo requires distinguishing multiple independent interacting shapes (e.g., constellation points), you may use a diverse vibrant palette (Blue, Amber, Red) to separate them.*
-* **Red / Pink (`#ef4444`, `#f43f5e`)**: Used for **Action & Results**. This includes Offset vectors, orbital paths, and dynamically tracked result points (like `Rect Offset`).
+* **Violet / Purple (`#6d28d9`, `#a78bfa`)**: Used for the **Environment**. This includes solid `#6d28d9` (`violet-700`) for Layer Center coordinates/dots and `#a78bfa` (`violet-400`) for subtle Layer coordinate helper lines and labels (`x =`, `y =`).
+* **Neutral Slate (`#f1f5f9`, `#cbd5e1`)**: Used for **Background Grids** (`#f1f5f9`) and internal coordinate crosshair lines (`#cbd5e1`) to ensure they remain subtle and do not visually compete with the environment or shape coordinates.
+* **Shape Palettes (Orange, Blue, Green)**: When demonstrating single or multiple independent interacting shapes, use these standardized single-palette lighter/darker color schemes (`400` Center, `600` Offset Vectors, `700` Offsets, `300` Background Guides):
+  * **1. Orange Shape Scheme (Primary / Default):**
+    * **Center Dot & Title Label:** `#fb923c` (`orange-400`, Lighter anchor tone)
+    * **Offset Dot, Active Point & Offset Label:** `#c2410c` (`orange-700`, Deeper accent tone)
+    * **Shape Border (`stroke`):** `#f97316` (`orange-500`)
+    * **Shape Fill:** `#ffedd566` (`orange-100` at 40% opacity)
+    * **Center Helper Lines & Orbit Guides:** `#fdba74` (`orange-300`)
+    * **Offset Radius/Vector Lines:** `#ea580c` (`orange-600`)
+  * **2. Blue Shape Scheme (Secondary / Point A):**
+    * **Center Dot & Title Label:** `#60a5fa` (`blue-400`, Lighter anchor tone)
+    * **Offset Dot, Active Point & Offset Label:** `#1d4ed8` (`blue-700`, Deeper accent tone)
+    * **Shape Border (`stroke`):** `#3b82f6` (`blue-500`)
+    * **Shape Fill:** `#dbeafe66` (`blue-100` at 40% opacity)
+    * **Center Helper Lines & Orbit Guides:** `#93c5fd` (`blue-300`)
+    * **Offset Radius/Vector Lines:** `#2563eb` (`blue-600`)
+  * **3. Green Shape Scheme (Tertiary / Shape 3):**
+    * **Center Dot & Title Label:** `#4ade80` (`green-400`, Lighter anchor tone)
+    * **Offset Dot, Active Point & Offset Label:** `#15803d` (`green-700`, Deeper accent tone)
+    * **Shape Border (`stroke`):** `#22c55e` (`green-500`)
+    * **Shape Fill:** `#dcfce766` (`green-100` at 40% opacity)
+    * **Center Helper Lines & Orbit Guides:** `#86efac` (`green-300`)
+    * **Offset Radius/Vector Lines:** `#16a34a` (`green-600`)
 
 ## 2. Visual Stacking Order (Z-Index)
 Elements within a `<pxl-layer>` are drawn in strict DOM order (back-to-front). All examples must adhere to this semantic layering:
 
-1. **Helpers (Bottom):** The background grid and center crosshairs (`<pxl-grid>`, `<pxl-line>`).
-2. **The Shape:** The actual element being demonstrated (`<pxl-rect>`, `<pxl-circle>`, etc.).
-3. **Environment Overlays:** Layer Origin dots and their associated text labels.
-4. **Shape Overlays (Top):** Pivot point dots, dynamic tracking dots, and their associated text labels. This ensures the pivot is *always* visible, even when inside the shape.
+1. **Background Grid (Bottom):** `<pxl-grid>` in stage space.
+2. **Layer Helpers:** Dashed lines and coordinate labels (`x =`, `y =`) pointing to the layer center.
+3. **Layer Axes & Center:** Internal grey crosshairs (`<pxl-line>`) and the Layer Center dot and text (`'Layer (0, 0)'`).
+4. **Shape Helpers:** Dashed coordinate helper lines and labels (`x =`, `y =`) pointing to the shape center.
+5. **The Shape:** The actual element being demonstrated (`<pxl-rect>`, `<pxl-circle>`, etc.).
+6. **Shape Center (Top):** Center dots, dynamic tracking dots, and their primary title labels (e.g., `'Circle (150, 200)'`). This ensures identity markers are *always* visible above all helpers and shapes.
 
 ## 3. Coordinate Labels
 When labeling points on the canvas, always use standard mathematical tuple syntax without explicit axis assignments inside the string:
