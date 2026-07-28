@@ -15,7 +15,11 @@ pxl.applyContextState = function(ctx, u, attributeValues) {
   const finalScaleY = (scaley !== 1 && scaley !== undefined) ? scaley : (scale !== undefined ? scale : 1);
   if (finalScaleX !== 1 || finalScaleY !== 1) ctx.scale(finalScaleX, finalScaleY);
 
-  if (skewx || skewy) ctx.transform(1, skewy || 0, skewx || 0, 1, 0, 0);
+  if (skewx || skewy) {
+    const sx = Math.tan((skewx || 0) * Math.PI / 180);
+    const sy = Math.tan((skewy || 0) * Math.PI / 180);
+    ctx.transform(1, sy, sx, 1, 0, 0);
+  }
   if (dx || dy) ctx.translate(dx * u, dy * u);
 
   // 2. Rendering States
