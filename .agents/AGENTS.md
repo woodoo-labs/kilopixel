@@ -25,7 +25,7 @@
 - **Time `t` is in Seconds**: `t * 90` = 90 degrees per second. `wave(2)` = a 2-second cycle. Never treat `t` as milliseconds.
 - **Strings in Expressions**: Plain text attributes work without quotes (`text="Hello World"`). Quotes are only needed **inside JavaScript expressions**: `fill="t > 5 ? 'red' : 'blue'"`.
 - **Cross-Referencing (`ref.*`)**: Use `ref.*` to reference any element by its `id`. Example: `ref.main.mouseX`, `ref.speed.value`, `ref.btn.isHovered`.
-- **Filters Need Backticks for Animation**: Static filters work as-is (`filter="blur(5px)"`). Animated filters MUST use backticks: `filter="\`blur(${wave(2)*10}px)\`"`.
+- **Static vs. Animated Filters**: Static filters work as-is without quotes or backticks (`filter="blur(5px)"`). Animated filters MUST use JS template literal backticks: `filter="\`blur(${wave(2)*10}px)\`"`. Do NOT use backticks for static filters.
 - **Use `onenter` not `onhover`**: The hover-entry event is `onenter`.
 
 # Kilopixel Documentation Style Guide

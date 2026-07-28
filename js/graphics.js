@@ -11,21 +11,21 @@ pxl.applyContextState = function(ctx, u, attributeValues) {
   if (x || y) ctx.translate(x * u, y * u);
   if (rotate) ctx.rotate(rotate * Math.PI / 180);
   
-  const finalScaleX = (scalex !== 1 && scalex !== undefined) ? scalex : (scale !== undefined ? scale : 1);
-  const finalScaleY = (scaley !== 1 && scaley !== undefined) ? scaley : (scale !== undefined ? scale : 1);
+  const finalScaleX = scale !== 1 ? scale : scalex;
+  const finalScaleY = scale !== 1 ? scale : scaley;
   if (finalScaleX !== 1 || finalScaleY !== 1) ctx.scale(finalScaleX, finalScaleY);
 
   if (skewx || skewy) {
-    const sx = Math.tan((skewx || 0) * Math.PI / 180);
-    const sy = Math.tan((skewy || 0) * Math.PI / 180);
+    const sx = Math.tan(skewx * Math.PI / 180);
+    const sy = Math.tan(skewy * Math.PI / 180);
     ctx.transform(1, sy, sx, 1, 0, 0);
   }
   if (dx || dy) ctx.translate(dx * u, dy * u);
 
   // 2. Rendering States
-  if (alpha !== 1 && alpha !== undefined) ctx.globalAlpha *= alpha;
-  if (blend !== 'source-over' && blend !== undefined) ctx.globalCompositeOperation = blend;
-  if (filter !== 'none' && filter !== undefined) ctx.filter = filter;
+  if (alpha !== 1) ctx.globalAlpha *= alpha;
+  if (blend !== 'source-over') ctx.globalCompositeOperation = blend;
+  if (filter !== 'none') ctx.filter = filter;
 };
 
 // =========================================================================

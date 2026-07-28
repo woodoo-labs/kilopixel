@@ -8,49 +8,37 @@ pxl.Matrix = {
   },
 
   // Order: Translate(x,y) -> Rotate -> Scale -> Skew -> Translate(dx,dy)
-  updateLocal: function(out, x, y, dx, dy, rotate, scaleX, scaleY, skewX, skewY) {
-    out[0] = 1; out[1] = 0;
-    out[2] = 0; out[3] = 1;
-    out[4] = 0; out[5] = 0;
-
-    if (x || y) {
-      out[4] = x || 0;
-      out[5] = y || 0;
-    }
-
+  updateLocal: function(out, x, y, dx, dy, rotate, scalex, scaley, skewx, skewy) {
     if (rotate) {
       const rad = rotate * Math.PI / 180;
       const c = Math.cos(rad);
       const s = Math.sin(rad);
-      const o0 = out[0], o1 = out[1], o2 = out[2], o3 = out[3];
-      out[0] = o0 * c + o2 * s;
-      out[1] = o1 * c + o3 * s;
-      out[2] = o0 * -s + o2 * c;
-      out[3] = o1 * -s + o3 * c;
+      out[0] = c;  out[1] = s;
+      out[2] = -s; out[3] = c;
+    } else {
+      out[0] = 1; out[1] = 0;
+      out[2] = 0; out[3] = 1;
     }
+    out[4] = x;
+    out[5] = y;
 
-    if (scaleX !== 1 || scaleY !== 1) {
-      out[0] *= scaleX; out[1] *= scaleX;
-      out[2] *= scaleY; out[3] *= scaleY;
+    if (scalex !== 1 || scaley !== 1) {
+      out[0] *= scalex; out[1] *= scalex;
+      out[2] *= scaley; out[3] *= scaley;
     }
-
-    if (skewX || skewY) {
-      const sx = Math.tan((skewX || 0) * Math.PI / 180);
-      const sy = Math.tan((skewY || 0) * Math.PI / 180);
-      const o0 = out[0], o1 = out[1], o2 = out[2], o3 = out[3];
-      out[0] = o0 + o2 * sy;
-      out[1] = o1 + o3 * sy;
-      out[2] = o0 * sx + o2;
-      out[3] = o1 * sx + o3;
+    if (skewx || skewy) {
+      const sx = Math.tan(skewx * Math.PI / 180);
+      const sy = Math.tan(skewy * Math.PI / 180);
+      const a0 = out[0], a1 = out[1], a2 = out[2], a3 = out[3];
+      out[0] = a0 + a2 * sy;
+      out[1] = a1 + a3 * sy;
+      out[2] = a0 * sx + a2;
+      out[3] = a1 * sx + a3;
     }
-
     if (dx || dy) {
-      const ddx = dx || 0;
-      const ddy = dy || 0;
-      out[4] += out[0] * ddx + out[2] * ddy;
-      out[5] += out[1] * ddx + out[3] * ddy;
+      out[4] += out[0] * dx + out[2] * dy;
+      out[5] += out[1] * dx + out[3] * dy;
     }
-    
     return out;
   },
 
@@ -105,11 +93,20 @@ pxl.mapCoordinate = function(caller, targetObj, prop) {
   pxl.Matrix.invert(pxl._scratchMatrixA, callerParentGlobal);
   pxl.Matrix.multiply(pxl._scratchMatrixB, pxl._scratchMatrixA, targetGlobal);
 
-  if (prop === 'x') return pxl._scratchMatrixB[4];
-  if (prop === 'y') return pxl._scratchMatrixB[5];
-  if (prop === 'rotate' || prop === 'r') return Math.atan2(pxl._scratchMatrixB[1], pxl._scratchMatrixB[0]) * 180 / Math.PI;
-  if (prop === 'scaleX' || prop === 'sx') return Math.sqrt(pxl._scratchMatrixB[0]*pxl._scratchMatrixB[0] + pxl._scratchMatrixB[1]*pxl._scratchMatrixB[1]);
-  if (prop === 'scaleY' || prop === 'sy') return Math.sqrt(pxl._scratchMatrixB[2]*pxl._scratchMatrixB[2] + pxl._scratchMatrixB[3]*pxl._scratchMatrixB[3]);
+  const dx = targetNode.attributeValues.dx;
+  const dy = targetNode.attributeValues.dy;
+  const tdx = pxl._scratchMatrixB[0] * dx + pxl._scratchMatrixB[2] * dy;
+  const tdy = pxl._scratchMatrixB[1] * dx + pxl._scratchMatrixB[3] * dy;
+
+  if (prop === 'x')      return pxl._scratchMatrixB[4] - tdx;
+  if (prop === 'y')      return pxl._scratchMatrixB[5] - tdy;
+  if (prop === 'dx')     return tdx;
+  if (prop === 'dy')     return tdy;
+  if (prop === 'tx')     return pxl._scratchMatrixB[4];
+  if (prop === 'ty')     return pxl._scratchMatrixB[5];
+  if (prop === 'rotate') return Math.atan2(pxl._scratchMatrixB[1], pxl._scratchMatrixB[0]) * 180 / Math.PI;
+  if (prop === 'scale' || prop === 'scalex') return Math.sqrt(pxl._scratchMatrixB[0]*pxl._scratchMatrixB[0] + pxl._scratchMatrixB[1]*pxl._scratchMatrixB[1]);
+  if (prop === 'scaley') return Math.sqrt(pxl._scratchMatrixB[2]*pxl._scratchMatrixB[2] + pxl._scratchMatrixB[3]*pxl._scratchMatrixB[3]);
   
   return 0;
 };

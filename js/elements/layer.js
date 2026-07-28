@@ -93,10 +93,10 @@ class Layer extends PxlNode {
 
     this.isCanvasEmpty = false;
     
-    const { x, y, dx, dy, rotate, scale, scaleX, scaleY, skewX, skewY, alpha, blend, filter } = this.attributeValues;
+    const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy, alpha, blend, filter } = this.attributeValues;
     const hasStateChanges = x || y || dx || dy || rotate || 
-                            scale !== 1 || scaleX !== 1 || scaleY !== 1 || 
-                            skewX || skewY || 
+                            scale !== 1 || scalex !== 1 || scaley !== 1 || 
+                            skewx || skewy || 
                             alpha !== 1 || blend !== 'source-over' || filter !== 'none';
 
     if (hasStateChanges) {

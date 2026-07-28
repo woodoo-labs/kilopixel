@@ -308,15 +308,15 @@ Applied by `pxl.applyContextState()` in this exact order:
 ```
 1. ctx.translate(x * u, y * u)      ← Move to center (transform origin)
 2. ctx.rotate(rotate * π/180)        ← Rotate around pivot
-3. ctx.scale(scaleX, scaleY)         ← Scale around center
-4. ctx.transform(1, skewY, skewX, 1) ← Skew
+3. ctx.scale(scalex, scaley)         ← Scale around center
+4. ctx.transform(1, skewy, skewx, 1) ← Skew
 5. ctx.translate(dx * u, dy * u)     ← Offset AFTER rotation/scale
 6. ctx.globalAlpha *= alpha           ← Compound opacity
 7. ctx.globalCompositeOperation       ← Blend mode
 8. ctx.filter                         ← CSS filter
 ```
 
-**Scale Resolution**: `scalex` falls back to `scale` when `scalex === 1` or `undefined`. Same for `scaley`. This means `scale="2"` uniformly scales both axes, while `scalex`/`scaley` provide independent overrides.
+**Scale Resolution & Symmetry Guarantee**: Uniform scaling uses `scale="..."` (applying identically to both axes), while non-uniform scaling uses `scalex="..."` and/or `scaley="..."`. **Do not combine both on the same element.** If this rule is broken and `scale` is applied alongside `scalex` or `scaley`, `scale` strictly overrides the individual axis multipliers (`scale !== 1 ? scale : scalex`). This guarantees that whenever a uniform `scale` attribute is set, the element transforms with 100% geometric symmetry and safe aspect-ratio preservation.
 
 ### Why This Matters
 
@@ -508,7 +508,7 @@ This reuses the shape's own `draw()` method for pixel-perfect mathematical hit t
 `pxl.Matrix` is a namespace of static functions that operate on `Float32Array(6)` matrices `[a, b, c, d, tx, ty]`:
 
 - `create()` → identity Float32Array
-- `updateLocal(out, x, y, dx, dy, rotate, scaleX, scaleY, skewX, skewY)` → builds local transform
+- `updateLocal(out, x, y, dx, dy, rotate, scalex, scaley, skewx, skewy)` → builds local transform
 - `multiply(out, a, b)` → `out = a * b`
 - `invert(out, a)` → `out = a⁻¹` (with degenerate fallback to identity)
 
@@ -539,11 +539,13 @@ The `toLocal(target, property)` function maps a target element's global position
 2. Get the target's global matrix
 3. Compute: `Delta = Invert(CallerParentGlobal) × TargetGlobal`
 4. Extract the requested property from the delta matrix:
-   - `'x'` → `delta[4]` (translation X)
-   - `'y'` → `delta[5]` (translation Y)
-   - `'rotate'` or `'r'` → `atan2(delta[1], delta[0])` in degrees
-   - `'scaleX'` or `'sx'` → `sqrt(delta[0]² + delta[1]²)`
-   - `'scaleY'` or `'sy'` → `sqrt(delta[2]² + delta[3]²)`
+   - `'x'` → `delta[4]` (translation X of Hinge Origin)
+   - `'y'` → `delta[5]` (translation Y of Hinge Origin)
+   - `'dx'` / `'dy'` → offset vector components `(tdx, tdy)` rotated and scaled in caller space
+   - `'tx'` / `'ty'` → total physical screen coordinate (`x + dx`, `y + dy`) in caller space
+   - `'rotate'` → `atan2(delta[1], delta[0])` in degrees
+   - `'scale'` / `'scalex'` → `sqrt(delta[0]² + delta[1]²)`
+   - `'scaley'` → `sqrt(delta[2]² + delta[3]²)`
 
 Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile time.
 
@@ -1234,13 +1236,16 @@ Plain text attributes work without quotes — the compiler's Fast Path handles t
 <pxl-circle fill="radial(1, ['white', 'black'])" .../>
 ```
 
-#### 6. Filters DO Need Backticks for Animation
+#### 6. Static vs. Animated Filters (When to Use Backticks)
+
+Static filters work as-is without quotes or backticks (Fast Path). Backticks should ONLY be used when animating filters with `${...}` syntax:
 
 ```html
-<!-- Static filter: no backticks needed -->
+<!-- Static filter: NO backticks (Fast Path, zero-GC) -->
 <pxl-circle filter="blur(5px)" .../>
+<pxl-circle filter="drop-shadow(0 0 10px #38bdf8)" .../>
 
-<!-- Animated filter: MUST use backticks -->
+<!-- Animated filter: MUST use backticks for ${...} evaluation -->
 <pxl-circle filter="`blur(${wave(2) * 10}px)`" .../>
 <pxl-circle filter="`drop-shadow(0 0 ${wave(2)*15}px red)`" .../>
 ```
@@ -1323,8 +1328,20 @@ Plain text attributes work without quotes — the compiler's Fast Path handles t
 
 **Reactive references**: `ref.xxx.property`
 
-**Coordinate mapping**: `toLocal(ref.target, 'x'|'y'|'rotate'|'scaleX'|'scaleY')`
+**Coordinate mapping**: `toLocal(ref.target, 'x'|'y'|'dx'|'dy'|'tx'|'ty'|'rotate'|'scale'|'scalex'|'scaley')`
 
 **Self-reference**: `this.attributeValues.xxx`, `this.id`
-
 **Variables**: `t` (time in seconds)
+
+---
+
+## 28. Roadmap & Future Enhancements (TODO)
+
+### 1. Native Canvas 2D Shadows (High-Performance GPU Shadows)
+- **Problem**: CSS-style filters (`filter="drop-shadow(0 0 10px #38bdf8)"`) invoke the browser compositor's CSS Filter Graph, creating offscreen textures and executing multi-pass Gaussian blur kernels that can push integrated GPUs to 80% load on 60 FPS animations.
+- **Proposed Feature**: Add first-class support for native HTML5 Canvas 2D shadow attributes on shapes and groups (`ctx.shadowColor`, `ctx.shadowBlur`, `ctx.shadowOffsetX`, `ctx.shadowOffsetY`).
+- **Proposed Syntax** (using canonical lowercase attribute naming):
+  - `shadowcolor` — valid color string (e.g. `#38bdf8` or `rgba(56, 189, 248, 0.8)`)
+  - `shadowblur` — blur radius in logical units (e.g. `10`)
+  - `shadowx` / `shadowy` — X and Y shadow offsets (defaults to `0`)
+- **Performance Benefit**: Direct2D and Skia render native canvas shadows via hardware radial alpha masks without spinning up the CSS Filter Graph pipeline, reducing GPU shader load by ~80-90%.

@@ -5,7 +5,7 @@ class Group extends PxlNode {
     super();
     this.childList = []; // Groups or shapes
     this.isOrderDirty = false; // Tracks if children need sorting
-    Object.assign(this.attributeExpressions, { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scaleX: 1, scaleY: 1, skewX: 0, skewY: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false });
+    Object.assign(this.attributeExpressions, { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false });
     Object.assign(this.attributeValues, this.attributeExpressions);
   }
 
@@ -34,10 +34,10 @@ class Group extends PxlNode {
 
     if (this.attributeValues.hidden) return;
 
-    const { x, y, dx, dy, rotate, scale, scaleX, scaleY, skewX, skewY, alpha, blend, filter } = this.attributeValues;
+    const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy, alpha, blend, filter } = this.attributeValues;
     const hasStateChanges = x || y || dx || dy || rotate || 
-                            scale !== 1 || scaleX !== 1 || scaleY !== 1 || 
-                            skewX || skewY || 
+                            scale !== 1 || scalex !== 1 || scaley !== 1 || 
+                            skewx || skewy || 
                             alpha !== 1 || blend !== 'source-over' || filter !== 'none';
 
     if (hasStateChanges) {

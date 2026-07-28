@@ -109,16 +109,24 @@
 
       <!-- Visual Nodes Layer (Drawn OVER lines) -->
       <pxl-layer>
-        <!-- Main Chain Nodes -->
-        <pxl-circle x="ref.n0x.value" y="ref.n0y.value" r="15" fill="#0f172a" stroke="#38bdf8" strokewidth="4" filter="`drop-shadow(0 0 10px #38bdf8)`" ></pxl-circle>
-        <pxl-circle x="ref.n1x.value" y="ref.n1y.value" r="12" fill="#0f172a" stroke="#38bdf8" strokewidth="3" filter="`drop-shadow(0 0 10px #38bdf8)`" ></pxl-circle>
-        <pxl-circle x="ref.n2x.value" y="ref.n2y.value" r="10" fill="#0f172a" stroke="#818cf8" strokewidth="3" filter="`drop-shadow(0 0 10px #818cf8)`" ></pxl-circle>
-        <pxl-circle x="ref.n3x.value" y="ref.n3y.value" r="8" fill="#0f172a" stroke="#c084fc" strokewidth="3" filter="`drop-shadow(0 0 10px #c084fc)`" ></pxl-circle>
-        <pxl-circle x="ref.n4x.value" y="ref.n4y.value" r="6" fill="#0f172a" stroke="#e879f9" strokewidth="3" filter="`drop-shadow(0 0 10px #e879f9)`" ></pxl-circle>
-        <pxl-circle x="ref.n5x.value" y="ref.n5y.value" r="5" fill="#0f172a" stroke="#f43f5e" strokewidth="3" filter="`drop-shadow(0 0 10px #f43f5e)`" ></pxl-circle>
-        
-        <!-- End Effector Trace (Visual Only) -->
-        <pxl-circle x="ref.n5x.value" y="ref.n5y.value" r="8 + wave(8)*6" fill="#f43f5e" filter="`drop-shadow(0 0 20px #f43f5e)`" stroke="none" ></pxl-circle>
+        <!-- Glowing Auras (Solid RGBA Hardware Fill, Zero Shader Math) -->
+        <pxl-circle x="ref.n0x.value" y="ref.n0y.value" r="28" fill="rgba(56, 189, 248, 0.15)" stroke="none" ></pxl-circle>
+        <pxl-circle x="ref.n1x.value" y="ref.n1y.value" r="24" fill="rgba(56, 189, 248, 0.15)" stroke="none" ></pxl-circle>
+        <pxl-circle x="ref.n2x.value" y="ref.n2y.value" r="22" fill="rgba(129, 140, 248, 0.15)" stroke="none" ></pxl-circle>
+        <pxl-circle x="ref.n3x.value" y="ref.n3y.value" r="20" fill="rgba(192, 132, 252, 0.15)" stroke="none" ></pxl-circle>
+        <pxl-circle x="ref.n4x.value" y="ref.n4y.value" r="18" fill="rgba(232, 121, 249, 0.15)" stroke="none" ></pxl-circle>
+        <pxl-circle x="ref.n5x.value" y="ref.n5y.value" r="16" fill="rgba(244, 63, 94, 0.15)" stroke="none" ></pxl-circle>
+
+        <!-- End Effector Pulsating Glow (Solid RGBA Hardware Fill) -->
+        <pxl-circle x="ref.n5x.value" y="ref.n5y.value" r="18 + wave(8)*12" fill="rgba(244, 63, 94, 0.2)" stroke="none" ></pxl-circle>
+
+        <!-- Main Chain Solid Nodes -->
+        <pxl-circle x="ref.n0x.value" y="ref.n0y.value" r="15" fill="#0f172a" stroke="#38bdf8" strokewidth="4" ></pxl-circle>
+        <pxl-circle x="ref.n1x.value" y="ref.n1y.value" r="12" fill="#0f172a" stroke="#38bdf8" strokewidth="3" ></pxl-circle>
+        <pxl-circle x="ref.n2x.value" y="ref.n2y.value" r="10" fill="#0f172a" stroke="#818cf8" strokewidth="3" ></pxl-circle>
+        <pxl-circle x="ref.n3x.value" y="ref.n3y.value" r="8" fill="#0f172a" stroke="#c084fc" strokewidth="3" ></pxl-circle>
+        <pxl-circle x="ref.n4x.value" y="ref.n4y.value" r="6" fill="#0f172a" stroke="#e879f9" strokewidth="3" ></pxl-circle>
+        <pxl-circle x="ref.n5x.value" y="ref.n5y.value" r="5" fill="#0f172a" stroke="#f43f5e" strokewidth="3" ></pxl-circle>
 
         <!-- Mouse Chain Nodes -->
         <pxl-circle x="ref.main.mouseX" y="ref.main.mouseY" r="0" fill="none" ></pxl-circle>
@@ -127,7 +135,7 @@
       </pxl-layer>
 
       <pxl-layer>
-        <pxl-text x="20" y="30" text="ref.main.fps + ' FPS'" font="monospace" size="14" fill="#52525b" align="left" stroke="none" ></pxl-text>
+        <pxl-text x="20" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#a1a1aa" align="left" stroke="none" ></pxl-text>
       </pxl-layer>
     </pxl-stage>
   </div>

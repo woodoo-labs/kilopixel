@@ -5,6 +5,8 @@ class PxlNode extends HTMLElement {
     this.attributeValues = {};
     Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
     Object.defineProperty(this.attributeValues, '$node', { value: this, enumerable: false, writable: false });
+    Object.defineProperty(this.attributeValues, 'tx', { get: () => this.attributeValues.x + this.attributeValues.dx, enumerable: false });
+    Object.defineProperty(this.attributeValues, 'ty', { get: () => this.attributeValues.y + this.attributeValues.dy, enumerable: false });
 
     this.animatedAttributeKeys = [];
     this.reactiveAttributeKeys = [];
@@ -95,9 +97,8 @@ class PxlNode extends HTMLElement {
     
     if (this._isLocalMatrixDirty || !this._localMatrixVersion) {
       const v = this.attributeValues;
-      const scale = v.scale !== undefined ? v.scale : 1;
-      const sX = (v.scalex !== 1 && v.scalex !== undefined) ? v.scalex : scale;
-      const sY = (v.scaley !== 1 && v.scaley !== undefined) ? v.scaley : scale;
+      const sX = v.scale !== 1 ? v.scale : v.scalex;
+      const sY = v.scale !== 1 ? v.scale : v.scaley;
       
       pxl.Matrix.updateLocal(this.localMatrix, v.x, v.y, v.dx, v.dy, v.rotate, sX, sY, v.skewx, v.skewy);
       this._isLocalMatrixDirty = false;

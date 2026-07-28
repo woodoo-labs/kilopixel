@@ -453,13 +453,13 @@
 
             <!-- Rect Offset Dot & Text (Rotating with shape) -->
             <pxl-circle 
-              x="toLocal(ref.ex4Rect, 'x')" 
-              y="toLocal(ref.ex4Rect, 'y')" 
+              x="toLocal(ref.ex4Rect, 'tx')" 
+              y="toLocal(ref.ex4Rect, 'ty')" 
               r="5" fill="#c2410c">
             </pxl-circle>
             <pxl-text 
-              x="toLocal(ref.ex4Rect, 'x')" 
-              y="toLocal(ref.ex4Rect, 'y')" 
+              x="toLocal(ref.ex4Rect, 'tx')" 
+              y="toLocal(ref.ex4Rect, 'ty')" 
               dx="15"
               dy="-15"
               rotate="ref.ex4Rect.rotate"
@@ -724,7 +724,7 @@
       <p>When shapes orbit or rotate inside nested coordinate spaces, drawing connecting lines or tracking positions requires translating between coordinate systems:</p>
       <ul>
         <li><strong>Why raw attributes stay constant:</strong> If you reference <code>ref.pointA.x</code> or <code>ref.pointA.dx</code> directly, you will always get their static declared values even while the point is rotating. Because the local coordinate system rotates <em>with</em> the shape, its internal <code>x</code> and <code>dx</code> numbers never change.</li>
-        <li><strong>How <code>toLocal</code> solves this:</strong> By wrapping the reference in <code>toLocal(ref.pointA, 'x')</code> or <code>toLocal(ref.pointA, 'y')</code>, Kilopixel automatically calculates the shape's true orbiting position and maps it into your current coordinate space—no manual trigonometry required!</li>
+        <li><strong>How <code>toLocal</code> solves this:</strong> By wrapping the reference in <code>toLocal(ref.pointA, 'tx')</code> or <code>toLocal(ref.pointA, 'ty')</code> (or <code>'x'</code>/<code>'y'</code> for center positions), Kilopixel automatically calculates the shape's true orbiting position and maps it into your current coordinate space—no manual trigonometry required!</li>
       </ul>
       <p>In this "constellation" example, two shapes orbit their centers independently. The connecting line uses <code>toLocal</code> to track their live positions and stay perfectly connected at 60fps.</p>
       
@@ -737,8 +737,8 @@
 
     &lt;!-- Connecting Line --&gt;
     &lt;pxl-line 
-      x1="toLocal(ref.pointA, 'x')" y1="toLocal(ref.pointA, 'y')" 
-      x2="toLocal(ref.pointB, 'x')" y2="toLocal(ref.pointB, 'y')" 
+      x1="toLocal(ref.pointA, 'tx')" y1="toLocal(ref.pointA, 'ty')" 
+      x2="toLocal(ref.pointB, 'tx')" y2="toLocal(ref.pointB, 'ty')" 
       stroke="#94a3b8" strokewidth="2"&gt;
     &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
@@ -781,13 +781,13 @@
             <pxl-circle x="ref.ex6PointB.x" y="ref.ex6PointB.y" r="sqrt(ref.ex6PointB.dx**2 + ref.ex6PointB.dy**2)" stroke="#fdba74" strokewidth="1" linedash="[5, 5]" fill="none"></pxl-circle>
 
             <!-- Radius vectors connecting Centers to Orbiting positions -->
-            <pxl-line x1="ref.ex6PointA.x" y1="ref.ex6PointA.y" x2="toLocal(ref.ex6PointA, 'x')" y2="toLocal(ref.ex6PointA, 'y')" stroke="#2563eb" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="ref.ex6PointB.x" y1="ref.ex6PointB.y" x2="toLocal(ref.ex6PointB, 'x')" y2="toLocal(ref.ex6PointB, 'y')" stroke="#ea580c" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.ex6PointA.x" y1="ref.ex6PointA.y" x2="toLocal(ref.ex6PointA, 'tx')" y2="toLocal(ref.ex6PointA, 'ty')" stroke="#2563eb" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.ex6PointB.x" y1="ref.ex6PointB.y" x2="toLocal(ref.ex6PointB, 'tx')" y2="toLocal(ref.ex6PointB, 'ty')" stroke="#ea580c" linedash="[5, 5]"></pxl-line>
 
             <!-- Connecting Line (Drawn behind the points) -->
             <pxl-line 
-              x1="toLocal(ref.ex6PointA, 'x')" y1="toLocal(ref.ex6PointA, 'y')" 
-              x2="toLocal(ref.ex6PointB, 'x')" y2="toLocal(ref.ex6PointB, 'y')" 
+              x1="toLocal(ref.ex6PointA, 'tx')" y1="toLocal(ref.ex6PointA, 'ty')" 
+              x2="toLocal(ref.ex6PointB, 'tx')" y2="toLocal(ref.ex6PointB, 'ty')" 
               stroke="#cbd5e1" strokewidth="2">
             </pxl-line>
 
@@ -822,11 +822,11 @@
             </pxl-text>
 
             <!-- Point A Orbiting Offset Dot & Label -->
-            <pxl-circle x="toLocal(ref.ex6PointA, 'x')" y="toLocal(ref.ex6PointA, 'y')" r="5" fill="#1d4ed8"></pxl-circle>
-            <pxl-text x="toLocal(ref.ex6PointA, 'x')" y="toLocal(ref.ex6PointA, 'y')" dx="15" dy="-15" rotate="ref.ex6PointA.rotate" baseline="bottom" text="`Offset A (${ref.ex6PointA.dx}, ${ref.ex6PointA.dy})`" size="27" fill="#1d4ed8" font="monospace"></pxl-text>
+            <pxl-circle x="toLocal(ref.ex6PointA, 'tx')" y="toLocal(ref.ex6PointA, 'ty')" r="5" fill="#1d4ed8"></pxl-circle>
+            <pxl-text x="toLocal(ref.ex6PointA, 'tx')" y="toLocal(ref.ex6PointA, 'ty')" dx="15" dy="-15" rotate="ref.ex6PointA.rotate" baseline="bottom" text="`Offset A (${ref.ex6PointA.dx}, ${ref.ex6PointA.dy})`" size="27" fill="#1d4ed8" font="monospace"></pxl-text>
             <!-- Point B Orbiting Offset Dot & Label -->
-            <pxl-circle x="toLocal(ref.ex6PointB, 'x')" y="toLocal(ref.ex6PointB, 'y')" r="5" fill="#c2410c"></pxl-circle>
-            <pxl-text x="toLocal(ref.ex6PointB, 'x')" y="toLocal(ref.ex6PointB, 'y')" dx="15" dy="-15" rotate="ref.ex6PointB.rotate" baseline="bottom" text="`Offset B (${ref.ex6PointB.dx}, ${ref.ex6PointB.dy})`" size="27" fill="#c2410c" font="monospace"></pxl-text>
+            <pxl-circle x="toLocal(ref.ex6PointB, 'tx')" y="toLocal(ref.ex6PointB, 'ty')" r="5" fill="#c2410c"></pxl-circle>
+            <pxl-text x="toLocal(ref.ex6PointB, 'tx')" y="toLocal(ref.ex6PointB, 'ty')" dx="15" dy="-15" rotate="ref.ex6PointB.rotate" baseline="bottom" text="`Offset B (${ref.ex6PointB.dx}, ${ref.ex6PointB.dy})`" size="27" fill="#c2410c" font="monospace"></pxl-text>
           </pxl-layer>
         </pxl-stage>
 
@@ -962,12 +962,12 @@
             <pxl-line x1="0" y1="-300" x2="0" y2="300" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
             
             <!-- Crosshair lines tracking the object using toLocal -->
-            <pxl-line x1="-500" y1="toLocal(ref.ex7Planet, 'y')" x2="500" y2="toLocal(ref.ex7Planet, 'y')" stroke="#94a3b8" strokewidth="1"></pxl-line>
-            <pxl-line x1="toLocal(ref.ex7Planet, 'x')" y1="-300" x2="toLocal(ref.ex7Planet, 'x')" y2="300" stroke="#94a3b8" strokewidth="1"></pxl-line>
+            <pxl-line x1="-500" y1="toLocal(ref.ex7Planet, 'ty')" x2="500" y2="toLocal(ref.ex7Planet, 'ty')" stroke="#94a3b8" strokewidth="1"></pxl-line>
+            <pxl-line x1="toLocal(ref.ex7Planet, 'tx')" y1="-300" x2="toLocal(ref.ex7Planet, 'tx')" y2="300" stroke="#94a3b8" strokewidth="1"></pxl-line>
 
             <!-- Grey arrows pointing to current X and Y -->
-            <pxl-line x1="0" y1="0" x2="toLocal(ref.ex7Planet, 'x')" y2="0" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
-            <pxl-line x1="0" y1="0" x2="0" y2="toLocal(ref.ex7Planet, 'y')" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
+            <pxl-line x1="0" y1="0" x2="toLocal(ref.ex7Planet, 'tx')" y2="0" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
+            <pxl-line x1="0" y1="0" x2="0" y2="toLocal(ref.ex7Planet, 'ty')" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
 
             <!-- The Sun -->
             <pxl-circle r="30" fill="#f59e0b"></pxl-circle>
