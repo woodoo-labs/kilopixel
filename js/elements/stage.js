@@ -26,7 +26,14 @@ class Stage extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
-    if (name === 'ratio') this.style.aspectRatio = pxl.parseAttributeValue(newValue);
+    if (name === 'ratio') {
+      this._parsedRatio = pxl.parseAttributeValue(newValue);
+      this.style.aspectRatio = this._parsedRatio;
+      if (this.attributeValues) {
+        this.attributeValues.height = 1000 / this._parsedRatio;
+        if (this._refKey) pxl.broadcast(this._refKey);
+      }
+    }
   }
 
   connectedCallback() {
@@ -41,7 +48,8 @@ class Stage extends HTMLElement {
     this.style.display = 'block';
     this.style.position = 'relative';
     this.style.width = '100%';
-    this.style.aspectRatio ||= '16 / 9';
+    this._parsedRatio ||= 16 / 9;
+    this.style.aspectRatio = this._parsedRatio;
 
     this.resizeObserver = new ResizeObserver(() => this.resize());
     try {
@@ -96,7 +104,7 @@ class Stage extends HTMLElement {
     if (w === 0) return;
 
     this.unit = w / 1000;
-    this.attributeValues.height = h / this.unit;
+    this.attributeValues.height = 1000 / this._parsedRatio;
     if (this._refKey) pxl.broadcast(this._refKey);
 
     this.dpr = window.devicePixelRatio || 1;
