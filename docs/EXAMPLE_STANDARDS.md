@@ -5,7 +5,8 @@ This guide establishes the visual and architectural standards for creating inter
 ## 1. Color Semantics
 We use a strict color-coding system to separate context (the stage/layer) from content (the shapes).
 
-* **Violet / Purple (`#6d28d9`, `#a78bfa`)**: Used for the **Environment**. This includes solid `#6d28d9` (`violet-700`) for Layer Center coordinates/dots and `#a78bfa` (`violet-400`) for subtle Layer coordinate helper lines and labels (`x =`, `y =`).
+* **Teal / Cyan (`#0f766e`, `#14b8a6`)**: Used for the **Stage Environment** (Stage space). This includes solid `#0f766e` (`teal-700`) for Stage corners, origin dots (`Stage (0, 0)`), and corner coordinate labels (`(1000, 0)`), and `#14b8a6` (`teal-500`) for Stage dimension arrows (`width = 1000 (fixed)`) and helper lines.
+* **Violet / Purple (`#6d28d9`, `#a78bfa`)**: Used for the **Layer Environment** (Layer space). This includes solid `#6d28d9` (`violet-700`) for Layer Center coordinates/dots and `#a78bfa` (`violet-400`) for subtle Layer coordinate helper lines and labels (`x =`, `y =`).
 * **Neutral Slate (`#f1f5f9`, `#cbd5e1`)**: Used for **Background Grids** (`#f1f5f9`) and internal coordinate crosshair lines (`#cbd5e1`) to ensure they remain subtle and do not visually compete with the environment or shape coordinates.
 * **Shape Palettes (Orange, Blue, Green)**: When demonstrating single or multiple independent interacting shapes, use these standardized single-palette lighter/darker color schemes (`400` Center, `600` Offset Vectors, `700` Offsets, `300` Background Guides):
   * **1. Orange Shape Scheme (Primary / Default):**
