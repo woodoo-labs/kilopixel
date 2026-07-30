@@ -98,6 +98,10 @@ Interactive playgrounds must follow a standardized DOM architecture to maintain 
   1. Update the element property: `document.getElementById('ex4Rect').setAttribute('x', this.value)`
   2. Update the UI label: `document.getElementById('lblEx4RectX').innerText = this.value`
   3. Update the HTML Code snippet: `document.getElementById('codeEx4RectX').innerText = this.value`
+* Toggle button `onclick` handlers must follow **Option 1 (Explicit Native DOM + UI Helper)**: put the native `document.getElementById('id').setAttribute('attr', 'value')` call explicitly first so developers see transparently how Kilopixel works, then call `pxlDocs.updateToggle(this, 'lblId', 'codeId', 'value')` to handle UI button state and label/mark updates:
+  ```html
+  <button class="toggle-btn active" onclick="document.getElementById('heroCircle').setAttribute('pie', 'false'); pxlDocs.updateToggle(this, 'lblHeroPie', 'codeHeroPie', 'false');">false (Open Arc)</button>
+  ```
 * *Note: The highlighting system uses a Regex-based Pointer Event Delegation System (`pointerdown`/`touchstart`). It automatically parses the `oninput` strings of sliders to find the `getElementById('code...')` references, dynamically mapping active sliders to their `<mark>` targets.*
 
 ### 5. ID Naming Conventions

@@ -16,6 +16,23 @@ pxlDocs.switchTab = function(btn, targetId) {
   if (target) target.classList.add('active');
 };
 
+// 2. Toggle Button UI Helper (Option 1: Transparent DOM + UI helper)
+pxlDocs.updateToggle = function(btn, lblId, codeId, displayValue) {
+  if (lblId) {
+    const lblEl = document.getElementById(lblId);
+    if (lblEl) lblEl.innerText = displayValue;
+  }
+  if (codeId) {
+    const codeEl = document.getElementById(codeId);
+    if (codeEl) codeEl.innerText = displayValue;
+  }
+  const group = btn?.closest('.toggle-group');
+  if (group) {
+    group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+};
+
 // 2. Automatic Code Mark Highlighting (Pointer Event Delegation System)
 pxlDocs.initHighlighting = function() {
   function updateHighlight(input) {

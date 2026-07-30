@@ -52,30 +52,30 @@
             <div class="tab-content active" id="hero-controls">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Outer Radius (<code>r</code>)</span> <span id="valHeroR">180</span></label>
+                  <label><span>Outer Radius (<code>r</code>)</span> <span id="lblHeroR">180</span></label>
                   <input type="range" min="40" max="250" step="10" value="180" autocomplete="off"
-                    oninput="document.getElementById('heroCircle').setAttribute('r', this.value); document.getElementById('valHeroR').innerText = this.value; document.getElementById('codeHeroR').innerText = this.value;">
+                    oninput="document.getElementById('heroCircle').setAttribute('r', this.value); document.getElementById('lblHeroR').innerText = this.value; document.getElementById('codeHeroR').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Inner Radius (<code>ir</code>)</span> <span id="valHeroIR">0</span></label>
+                  <label><span>Inner Radius (<code>ir</code>)</span> <span id="lblHeroIR">0</span></label>
                   <input type="range" min="0" max="150" step="10" value="0" autocomplete="off"
-                    oninput="document.getElementById('heroCircle').setAttribute('ir', this.value); document.getElementById('valHeroIR').innerText = this.value; document.getElementById('codeHeroIR').innerText = this.value;">
+                    oninput="document.getElementById('heroCircle').setAttribute('ir', this.value); document.getElementById('lblHeroIR').innerText = this.value; document.getElementById('codeHeroIR').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Start Angle (<code>start</code>)</span> <span><span id="valHeroStart">0</span>°</span></label>
+                  <label><span>Start Angle (<code>start</code>)</span> <span><span id="lblHeroStart">0</span>°</span></label>
                   <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
-                    oninput="document.getElementById('heroCircle').setAttribute('start', this.value); document.getElementById('valHeroStart').innerText = this.value; document.getElementById('codeHeroStart').innerText = this.value;">
+                    oninput="document.getElementById('heroCircle').setAttribute('start', this.value); document.getElementById('lblHeroStart').innerText = this.value; document.getElementById('codeHeroStart').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Angular Sweep (<code>sweep</code>)</span> <span><span id="valHeroSweep">270</span>°</span></label>
+                  <label><span>Angular Sweep (<code>sweep</code>)</span> <span><span id="lblHeroSweep">270</span>°</span></label>
                   <input type="range" min="45" max="360" step="15" value="270" autocomplete="off"
-                    oninput="document.getElementById('heroCircle').setAttribute('sweep', this.value); document.getElementById('valHeroSweep').innerText = this.value; document.getElementById('codeHeroSweep').innerText = this.value;">
+                    oninput="document.getElementById('heroCircle').setAttribute('sweep', this.value); document.getElementById('lblHeroSweep').innerText = this.value; document.getElementById('codeHeroSweep').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Pie Mode (<code>pie</code>)</span> <span id="valHeroPie">false</span></label>
+                  <label><span>Pie Mode (<code>pie</code>)</span> <span id="lblHeroPie">false</span></label>
                   <div class="toggle-group">
-                    <button class="toggle-btn active" id="btnHeroPieFalse" onclick="setHeroPie(false)">false (Open Arc)</button>
-                    <button class="toggle-btn" id="btnHeroPieTrue" onclick="setHeroPie(true)">true (Pie Wedge)</button>
+                    <button class="toggle-btn active" id="btnHeroPieFalse" onclick="document.getElementById('heroCircle').setAttribute('pie', 'false'); pxlDocs.updateToggle(this, 'lblHeroPie', 'codeHeroPie', 'false');">false (Open Arc)</button>
+                    <button class="toggle-btn" id="btnHeroPieTrue" onclick="document.getElementById('heroCircle').setAttribute('pie', 'true'); pxlDocs.updateToggle(this, 'lblHeroPie', 'codeHeroPie', 'true');">true (Pie Wedge)</button>
                   </div>
                 </div>
               </div>
@@ -688,14 +688,14 @@
 
     &lt;!-- Glowing Animated Arc --&gt;
     &lt;pxl-circle x="500" y="300" r="140" 
-      stroke="#14b8a6" 
+      stroke="#f97316" 
       strokewidth="16" 
       start="t * 180" 
       sweep="160 + wave(3) * 120"
-      filter="drop-shadow(0px 0px 15px rgba(20,184,166,0.8))"&gt;&lt;/pxl-circle&gt;
+      filter="drop-shadow(0px 0px 15px rgba(249,115,22,0.8))"&gt;&lt;/pxl-circle&gt;
 
     &lt;!-- Orbiting Satellite Dot --&gt;
-    &lt;pxl-circle x="500 + cos(t*3)*180" y="300 + sin(t*3)*180" r="10" fill="#0f766e"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="500 + cos(t*3)*180" y="300 + sin(t*3)*180" r="10" fill="#c2410c"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
               </div>
@@ -711,17 +711,17 @@
                 
                 <!-- Glowing animated arc -->
                 <pxl-circle x="500" y="300" r="140" 
-                  stroke="#14b8a6" 
+                  stroke="#f97316" 
                   strokewidth="16" 
                   start="t * 180" 
                   sweep="160 + wave(3) * 120"
-                  filter="drop-shadow(0px 0px 15px rgba(20,184,166,0.8))"></pxl-circle>
+                  filter="drop-shadow(0px 0px 15px rgba(249,115,22,0.8))"></pxl-circle>
 
                 <!-- Orbiting satellite dot -->
-                <pxl-circle x="500 + cos(t*3)*180" y="300 + sin(t*3)*180" r="10" fill="#0f766e"></pxl-circle>
+                <pxl-circle x="500 + cos(t*3)*180" y="300 + sin(t*3)*180" r="10" fill="#c2410c"></pxl-circle>
                 
                 <!-- Center Text -->
-                <pxl-text x="500" y="300" text="'Arc Mode (Loading Spinner)'" size="18" fill="#0f766e" font="monospace" align="center" baseline="middle"></pxl-text>
+                <pxl-text x="500" y="300" text="'Arc Mode (Loading Spinner)'" size="18" fill="#ea580c" font="monospace" align="center" baseline="middle"></pxl-text>
               </pxl-layer>
             </pxl-stage>
           </div>
@@ -819,7 +819,7 @@
                 <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Filled Triangle Arrowhead (arrowstyle="filled") --&gt;
-    &lt;pxl-circle x="280" y="300" r="100" strokewidth="12" stroke="#0d9488" 
+    &lt;pxl-circle x="280" y="300" r="100" strokewidth="12" stroke="#f97316" 
       start="-135" sweep="180" 
       arrowstart="auto" arrowend="auto" arrowstyle="filled"&gt;&lt;/pxl-circle&gt;
 
@@ -838,9 +838,9 @@
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                 
                 <!-- Left: arrowstyle="filled" -->
-                <pxl-circle x="280" y="300" r="100" strokewidth="12" stroke="#0d9488" 
+                <pxl-circle x="280" y="300" r="100" strokewidth="12" stroke="#f97316" 
                   start="-135" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-circle>
-                <pxl-text x="280" y="300" text="'arrowstyle=&quot;filled&quot;'" size="16" fill="#0d9488" font="monospace" align="center" baseline="middle"></pxl-text>
+                <pxl-text x="280" y="300" text="'arrowstyle=&quot;filled&quot;'" size="16" fill="#ea580c" font="monospace" align="center" baseline="middle"></pxl-text>
 
                 <!-- Right: arrowstyle="line" -->
                 <pxl-circle x="720" y="300" r="100" strokewidth="12" stroke="#2563eb" 
@@ -953,30 +953,6 @@
     </main>
 
   </div>
-
-  <!-- Hero Sandbox Mode Logic & Highlight script -->
-  <script>
-    function setHeroPie(val) {
-      const circle = document.getElementById('heroCircle');
-      const btnFalse = document.getElementById('btnHeroPieFalse');
-      const btnTrue = document.getElementById('btnHeroPieTrue');
-      const valLabel = document.getElementById('valHeroPie');
-      const codeLabel = document.getElementById('codeHeroPie');
-
-      if (circle) circle.setAttribute('pie', val);
-      if (valLabel) valLabel.innerText = val ? 'true' : 'false';
-      if (codeLabel) codeLabel.innerText = val ? 'true' : 'false';
-
-      if (val) {
-        btnTrue.classList.add('active');
-        btnFalse.classList.remove('active');
-      } else {
-        btnFalse.classList.add('active');
-        btnTrue.classList.remove('active');
-      }
-    }
-
-  </script>
 
   <!-- Prism Syntax Highlighting -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
