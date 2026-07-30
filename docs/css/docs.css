@@ -529,3 +529,107 @@ body {
     gap: 16px;
   }
 }
+
+/* ==========================================================================
+   Modern Responsive API Reference Cards (.api-list / .api-item)
+   ========================================================================== */
+.api-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.api-item {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+  padding: 16px 20px;
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  align-items: start;
+}
+
+.api-item:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+.api-item-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.api-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  background-color: var(--code-bg);
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  width: fit-content;
+  font-family: monospace;
+}
+
+.api-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.api-pill {
+  font-size: 0.8rem;
+  font-family: monospace;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.api-pill.default-pill {
+  background-color: rgba(100, 116, 139, 0.12);
+  color: var(--text-muted);
+}
+
+.api-pill.default-pill strong {
+  color: var(--text-heading);
+}
+
+.api-pill.values-pill {
+  background-color: rgba(14, 165, 233, 0.12);
+  color: #0284c7;
+}
+
+.api-pill.values-pill code {
+  background: none !important;
+  padding: 0 !important;
+  color: inherit !important;
+}
+
+.api-item-desc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-body);
+}
+
+@media (max-width: 640px) {
+  .api-item {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+  
+  .api-item-header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+  }
+}

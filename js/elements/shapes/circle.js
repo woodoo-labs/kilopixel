@@ -76,6 +76,9 @@ class Circle extends Shape {
     ctx.arc(0, 0, r * u, drawStartRadians, drawEndRadians, isAnti);
 
     if (ir > 0) {
+      if (isFull) {
+        ctx.moveTo((ir * u) * Math.cos(drawEndRadians), (ir * u) * Math.sin(drawEndRadians));
+      }
       ctx.arc(0, 0, ir * u, drawEndRadians, drawStartRadians, !isAnti);
       ctx.closePath();
     } else if (isPie && !isFull) {

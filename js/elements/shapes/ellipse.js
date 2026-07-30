@@ -84,6 +84,9 @@ class Ellipse extends Shape {
     ctx.ellipse(0, 0, rx * u, ry * u, 0, drawStartRadians, drawEndRadians, isAnti);
 
     if (irx > 0 || iry > 0) {
+      if (isFull) {
+        ctx.moveTo((irx * u) * Math.cos(drawEndRadians), (iry * u) * Math.sin(drawEndRadians));
+      }
       ctx.ellipse(0, 0, irx * u, iry * u, 0, drawEndRadians, drawStartRadians, !isAnti);
       ctx.closePath();
     } else if (isPie && !isFull) {

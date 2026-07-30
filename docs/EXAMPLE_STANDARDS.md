@@ -57,29 +57,40 @@ Interactive playgrounds must follow a standardized DOM architecture to maintain 
   
   <!-- 2. The controls block -->
   <div class="demo-controls">
-    <div class="demo-controls-header">Controls</div>
-    
-    <!-- Optional: Tabs for grouping -->
-    <div class="playground-tabs">...</div>
-    
-    <!-- The sliders -->
-    <div class="playground-sliders">
-      <div class="control-group">
-        <label>Rotation <span id="lblRot">0°</span></label>
-        <input type="range" oninput="...">
+    <div class="demo-controls-header">
+      <h3 class="demo-controls-title">Controls</h3>
+      <div class="demo-tabs">
+        <button class="tab-btn active" onclick="switchTab(this, 'ex1-controls')">Attributes</button>
+        <button class="tab-btn" onclick="switchTab(this, 'ex1-code')">HTML Markup</button>
       </div>
+    </div>
+    
+    <!-- Tab 1: Sliders -->
+    <div class="tab-content active" id="ex1-controls">
+      <div class="playground-sliders">
+        <div class="control-group">
+          <label>Rotation <span id="lblRot">0°</span></label>
+          <input type="range" oninput="document.getElementById('ex1Shape').setAttribute('rotate', this.value); document.getElementById('lblRot').innerText = this.value + '°';">
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: HTML Markup Preview -->
+    <div class="tab-content" id="ex1-code">
+      <pre><code class="language-html">...</code></pre>
     </div>
   </div>
 </div>
 ```
+* **Tab Bars & Mobile Scrolling:** Always use `.demo-tabs` inside `.demo-controls-header` for tab navigation. The header container (`.demo-controls-header`) automatically scrolls horizontally on mobile devices to prevent wrapping or layout overflow.
 
 ### Reactivity & Live Code
 * **Variable Placement:** `<pxl-var>` nodes act as invisible shapes in the engine. If they use any mathematical animations (like `t` or `wave()`), they **must** be placed inside a `<pxl-layer>` so their `render` cycle is evaluated by the engine loop.
-* **Direct Manipulation over Variables:** `<pxl-var>` nodes should only be used for shared global state. For direct property control, sliders must directly manipulate the target element via the engine: `pxl.nodes.[elementId].set('property', this.value)`.
+* **Direct Manipulation over Variables:** `<pxl-var>` nodes should only be used for shared global state. For direct property control, sliders must directly manipulate the target element using standard HTML5 Web Component DOM methods: `document.getElementById('elementId').setAttribute('property', this.value)`.
 * HTML code blocks must use `<pre><code class="language-html">`.
 * Values in the code block that change dynamically must be wrapped in a `<mark id="code[VarName]">` tag.
 * Slider `oninput` handlers must execute inline JS to do exactly three things:
-  1. Update the element property: `pxl.nodes.ex4Rect.set('x', this.value)`
+  1. Update the element property: `document.getElementById('ex4Rect').setAttribute('x', this.value)`
   2. Update the UI label: `document.getElementById('lblEx4RectX').innerText = this.value`
   3. Update the HTML Code snippet: `document.getElementById('codeEx4RectX').innerText = this.value`
 * *Note: The highlighting system uses a Regex-based Pointer Event Delegation System (`pointerdown`/`touchstart`). It automatically parses the `oninput` strings of sliders to find the `getElementById('code...')` references, dynamically mapping active sliders to their `<mark>` targets.*

@@ -28,20 +28,8 @@
     <!-- Main Content Area -->
     <main class="docs-content">
       <div class="docs-inner">
-        <div class="breadcrumb">
-          <a href="index.html">Docs</a> / <a href="#">Shapes</a> / <span>&lt;pxl-circle&gt;</span>
-        </div>
-
-        <h1>&lt;pxl-circle&gt;</h1>
+        <h1>Circle <code>&lt;pxl-circle&gt;</code></h1>
         <p class="lead">A multi-mode radial primitive that renders circles, hollow rings, open arcs, curved diagram arrows, solid pie chart wedges, donut chart segments, and animated loading spinners—all from a single declarative tag.</p>
-
-        <!-- Inheritance Badge -->
-        <div class="inheritance-bar">
-          <span class="inheritance-label">Inheritance:</span>
-          <span class="inheritance-path">
-            <code>Shape</code> <span class="inheritance-arrow">→</span> <code>&lt;pxl-circle&gt;</code>
-          </span>
-        </div>
 
         <!-- ================================================================= -->
         <!-- SECTION 1: HERO ANATOMY SANDBOX -->
@@ -63,27 +51,27 @@
             <div class="tab-content active" id="hero-controls">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label>Outer Radius (<code>r</code>): <span id="valHeroR">180</span></label>
+                  <label><span>Outer Radius (<code>r</code>)</span> <span id="valHeroR">180</span></label>
                   <input type="range" min="40" max="250" step="10" value="180" autocomplete="off"
                     oninput="document.getElementById('heroCircle').setAttribute('r', this.value); document.getElementById('valHeroR').innerText = this.value; document.getElementById('codeHeroR').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label>Inner Radius (<code>ir</code>): <span id="valHeroIR">0</span></label>
+                  <label><span>Inner Radius (<code>ir</code>)</span> <span id="valHeroIR">0</span></label>
                   <input type="range" min="0" max="150" step="10" value="0" autocomplete="off"
                     oninput="document.getElementById('heroCircle').setAttribute('ir', this.value); document.getElementById('valHeroIR').innerText = this.value; document.getElementById('codeHeroIR').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label>Start Angle (<code>start</code>): <span id="valHeroStart">0</span>°</label>
+                  <label><span>Start Angle (<code>start</code>)</span> <span><span id="valHeroStart">0</span>°</span></label>
                   <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
                     oninput="document.getElementById('heroCircle').setAttribute('start', this.value); document.getElementById('valHeroStart').innerText = this.value; document.getElementById('codeHeroStart').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label>Angular Sweep (<code>sweep</code>): <span id="valHeroSweep">270</span>°</label>
+                  <label><span>Angular Sweep (<code>sweep</code>)</span> <span><span id="valHeroSweep">270</span>°</span></label>
                   <input type="range" min="45" max="360" step="15" value="270" autocomplete="off"
                     oninput="document.getElementById('heroCircle').setAttribute('sweep', this.value); document.getElementById('valHeroSweep').innerText = this.value; document.getElementById('codeHeroSweep').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label>Pie Mode (<code>pie</code>): <span id="valHeroPie">false</span></label>
+                  <label><span>Pie Mode (<code>pie</code>)</span> <span id="valHeroPie">false</span></label>
                   <div class="toggle-group">
                     <button class="toggle-btn active" id="btnHeroPieFalse" onclick="setHeroPie(false)">false (Open Arc)</button>
                     <button class="toggle-btn" id="btnHeroPieTrue" onclick="setHeroPie(true)">true (Pie Wedge)</button>
@@ -135,268 +123,481 @@
         <h2>2. Declarative Attribute Reference</h2>
         <p>The table below covers all attributes supported by <code>&lt;pxl-circle&gt;</code>. Use the tabs to switch between shape-specific attributes and those inherited from <code>Shape</code>.</p>
 
-        <div class="api-reference-container">
-          <div class="api-tabs">
-            <button class="tab-btn active" onclick="switchTab(this, 'tab-circle-attr')">Circle Attributes (10)</button>
-            <button class="tab-btn" onclick="switchTab(this, 'tab-common-attr')">Common Styling (10)</button>
-            <button class="tab-btn" onclick="switchTab(this, 'tab-spatial-attr')">Transforms &amp; Spatial (11)</button>
-            <button class="tab-btn" onclick="switchTab(this, 'tab-event-attr')">Interactive Events (5)</button>
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <div class="demo-tabs">
+              <button class="tab-btn active" onclick="switchTab(this, 'tab-circle-attr')">Circle Attributes (10)</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-common-attr')">Common Styling (12)</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-spatial-attr')">Transforms &amp; Spatial (12)</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-event-attr')">Interactive Events (6)</button>
+            </div>
           </div>
 
           <!-- TAB 1: CIRCLE SPECIFIC ATTRIBUTES -->
           <div class="tab-content active" id="tab-circle-attr">
-            <table class="api-table">
-              <thead>
-                <tr>
-                  <th>Attribute</th>
-                  <th>Type</th>
-                  <th>Default</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><code>r</code></td>
-                  <td>number / expr</td>
-                  <td><code>0</code></td>
-                  <td>Outer radius of the circle or arc in logical units. Supports dynamic time expressions like <code>r="100 + wave(2)*20"</code>.</td>
-                </tr>
-                <tr>
-                  <td><code>ir</code></td>
-                  <td>number / expr</td>
-                  <td><code>0</code></td>
-                  <td>Inner radius. When <code>ir &gt; 0</code>, the interior is hollowed out to render concentric rings, donuts, or hollow arc bands.</td>
-                </tr>
-                <tr>
-                  <td><code>start</code></td>
-                  <td>number / expr</td>
-                  <td><code>0</code></td>
-                  <td>Start angle in <strong>degrees</strong> (<code>0°</code> is at 3 o'clock / positive X-axis).</td>
-                </tr>
-                <tr>
-                  <td><code>end</code></td>
-                  <td>number / expr</td>
-                  <td><code>null</code></td>
-                  <td>Absolute end angle in degrees. If neither <code>end</code> nor <code>sweep</code> is provided, renders a full 360° circle.</td>
-                </tr>
-                <tr>
-                  <td><code>sweep</code></td>
-                  <td>number / expr</td>
-                  <td><code>null</code></td>
-                  <td>Relative angular span in degrees from the <code>start</code> angle (e.g. <code>start="45" sweep="90"</code> draws from 45° to 135°).</td>
-                </tr>
-                <tr>
-                  <td><code>pie</code></td>
-                  <td>boolean</td>
-                  <td><code>false</code></td>
-                  <td>When <code>true</code>, connects the endpoints of an open arc to the center origin <code>(0, 0)</code> to form a solid pie wedge.</td>
-                </tr>
-                <tr>
-                  <td><code>anticlockwise</code></td>
-                  <td>boolean</td>
-                  <td><code>false</code></td>
-                  <td>When <code>true</code>, draws the circular arc counter-clockwise around the origin.</td>
-                </tr>
-                <tr>
-                  <td><code>arrowstart</code></td>
-                  <td>number / <code>'auto'</code></td>
-                  <td><code>0</code></td>
-                  <td>Draws a vector arrowhead at the starting point of an open arc curve. Use <code>'auto'</code> to scale proportionally to stroke width.</td>
-                </tr>
-                <tr>
-                  <td><code>arrowend</code></td>
-                  <td>number / <code>'auto'</code></td>
-                  <td><code>0</code></td>
-                  <td>Draws a vector arrowhead at the ending point of an open arc curve. Use <code>'auto'</code> to scale proportionally to stroke width.</td>
-                </tr>
-                <tr>
-                  <td><code>arrowstyle</code></td>
-                  <td>string</td>
-                  <td><code>'filled'</code></td>
-                  <td>Visual appearance of open arc arrowheads (<code>'filled'</code> solid triangle vs. <code>'line'</code> open vector v-shape).</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="api-list">
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">r</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>0</strong></span>
+                    <span class="api-pill values-pill"><code>0–1000</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Outer radius of the circle or arc in logical units. Supports dynamic time expressions like <code>r="100 + wave(2)*20"</code>.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">ir</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>0</strong></span>
+                    <span class="api-pill values-pill"><code>0–1000</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Inner radius. When <code>ir &gt; 0</code>, the interior is hollowed out to render concentric rings, donuts, or hollow arc bands.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">start</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>0</strong></span>
+                    <span class="api-pill values-pill"><code>number</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Start angle in <strong>degrees</strong> (<code>0°</code> is at 3 o'clock / positive X-axis).
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">end</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>360</strong></span>
+                    <span class="api-pill values-pill"><code>number</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Absolute end angle in degrees. If neither <code>end</code> nor <code>sweep</code> is provided, renders a full 360° circle.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">sweep</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>360</strong></span>
+                    <span class="api-pill values-pill"><code>number</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Relative angular span in degrees from the <code>start</code> angle (e.g. <code>start="45" sweep="90"</code> draws from 45° to 135°).
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">pie</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>false</strong></span>
+                    <span class="api-pill values-pill"><code>false</code> | <code>true</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  When <code>true</code>, connects the endpoints of an open arc to the center origin <code>(0, 0)</code> to form a solid pie wedge.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">anticlockwise</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>false</strong></span>
+                    <span class="api-pill values-pill"><code>false</code> | <code>true</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  When <code>true</code>, draws the circular arc counter-clockwise around the origin.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">arrowstart</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>0</strong></span>
+                    <span class="api-pill values-pill"><code>'auto'</code> | <code>number</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Draws a vector arrowhead at the starting point of an open arc curve. Use <code>'auto'</code> to scale proportionally to stroke width.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">arrowend</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>0</strong></span>
+                    <span class="api-pill values-pill"><code>'auto'</code> | <code>number</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Draws a vector arrowhead at the ending point of an open arc curve. Use <code>'auto'</code> to scale proportionally to stroke width.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">arrowstyle</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>'filled'</strong></span>
+                    <span class="api-pill values-pill"><code>'filled'</code> | <code>'line'</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Visual appearance of open arc arrowheads (<code>'filled'</code> solid triangle vs. <code>'line'</code> open vector v-shape).
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- TAB 2: COMMON STYLING -->
           <div class="tab-content" id="tab-common-attr">
-            <table class="api-table">
-              <thead>
-                <tr>
-                  <th>Attribute</th>
-                  <th>Type</th>
-                  <th>Default</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><code>fill</code></td>
-                  <td>string / expr</td>
-                  <td><code>'transparent'</code></td>
-                  <td>Fill color, CSS color string, or declarative gradient expression (e.g. <code>fill="radial(1, ['#f97316', 'transparent'])"</code>).</td>
-                </tr>
-                <tr>
-                  <td><code>stroke</code></td>
-                  <td>string / expr</td>
-                  <td><code>'transparent'</code></td>
-                  <td>Border stroke color or linear/radial gradient expression.</td>
-                </tr>
-                <tr>
-                  <td><code>strokewidth</code></td>
-                  <td>number</td>
-                  <td><code>1</code></td>
-                  <td>Border thickness in logical units.</td>
-                </tr>
-                <tr>
-                  <td><code>linedash</code></td>
-                  <td>array string</td>
-                  <td><code>[]</code></td>
-                  <td>Dashed border pattern in logical units (e.g. <code>linedash="[10, 5]"</code>).</td>
-                </tr>
-                <tr>
-                  <td><code>opacity</code> / <code>alpha</code></td>
-                  <td>number (0–1)</td>
-                  <td><code>1</code></td>
-                  <td>Global element transparency multiplier.</td>
-                </tr>
-                <tr>
-                  <td><code>filter</code></td>
-                  <td>string / expr</td>
-                  <td><code>''</code></td>
-                  <td>CSS visual filter string (e.g. <code>filter="drop-shadow(0px 0px 15px rgba(249,115,22,0.8))"</code>).</td>
-                </tr>
-                <tr>
-                  <td><code>shadowcolor</code></td>
-                  <td>string</td>
-                  <td><code>'transparent'</code></td>
-                  <td>Native Canvas 2D shadow color.</td>
-                </tr>
-                <tr>
-                  <td><code>shadowblur</code></td>
-                  <td>number</td>
-                  <td><code>0</code></td>
-                  <td>Native Canvas 2D shadow Gaussian blur radius in logical units.</td>
-                </tr>
-                <tr>
-                  <td><code>shadowx</code> / <code>shadowy</code></td>
-                  <td>number</td>
-                  <td><code>0</code></td>
-                  <td>Horizontal and vertical shadow offsets in logical units.</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="api-list">
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">fill</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>null</strong></span>
+                    <span class="api-pill values-pill"><code>color</code> | <code>gradient</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Fill color, CSS color string, or declarative gradient expression (e.g. <code>fill="radial(1, ['#f97316', 'transparent'])"</code>).
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">stroke</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>null</strong></span>
+                    <span class="api-pill values-pill"><code>color</code> | <code>gradient</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Border stroke color or linear/radial gradient expression.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">strokewidth</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>1</strong></span>
+                    <span class="api-pill values-pill"><code>0–100</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Border thickness in logical units.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">linecap</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>'butt'</strong></span>
+                    <span class="api-pill values-pill"><code>'butt'</code> | <code>'round'</code> | <code>'square'</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Shape of the line endpoints for stroked open arcs and curves.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">linejoin</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>'miter'</strong></span>
+                    <span class="api-pill values-pill"><code>'miter'</code> | <code>'round'</code> | <code>'bevel'</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Corner join appearance when lines meet at sharp angles.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">miterlimit</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>10</strong></span>
+                    <span class="api-pill values-pill"><code>number >= 1</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Maximum ratio of miter length to stroke width before beveling sharp corners.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">linedash</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>[]</strong></span>
+                    <span class="api-pill values-pill"><code>[dash, gap]</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Dash pattern array in logical units (e.g. <code>linedash="[10, 5]"</code> for 10px dash, 5px gap).
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">dashoffset</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>0</strong></span>
+                    <span class="api-pill values-pill"><code>number</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Phase shift offset of the line dash pattern. Animate with time <code>t</code> to create marching ants effects.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">alpha</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>1</strong></span>
+                    <span class="api-pill values-pill"><code>0–1</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Overall alpha transparency of the rendered shape (<code>0</code> = invisible, <code>1</code> = fully opaque).
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">blend</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>'source-over'</strong></span>
+                    <span class="api-pill values-pill"><code>'multiply'</code> | <code>'screen'</code> | <code>'overlay'</code>...</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Supports all 26 Canvas 2D blend modes and clipping operations (e.g. <code>'multiply'</code>, <code>'screen'</code>, <code>'overlay'</code>, <code>'source-in'</code>). See the <a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation" target="_blank" rel="noopener noreferrer">MDN globalCompositeOperation Reference</a> for interactive visual examples.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">hidden</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>false</strong></span>
+                    <span class="api-pill values-pill"><code>false</code> | <code>true</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  When set to <code>true</code>, hides the shape from rendering.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">filter</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>''</strong></span>
+                    <span class="api-pill values-pill"><code>CSS filter string</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  CSS visual filter string (e.g. <code>filter="drop-shadow(0px 0px 15px rgba(249,115,22,0.8))"</code>). Supports all CSS filter functions like <code>blur()</code>, <code>brightness()</code>, <code>contrast()</code>, and <code>drop-shadow()</code>. See the <a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter" target="_blank" rel="noopener noreferrer">MDN Canvas filter Reference</a> for all available functions.
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- TAB 3: TRANSFORMS & SPATIAL -->
           <div class="tab-content" id="tab-spatial-attr">
-            <table class="api-table">
-              <thead>
-                <tr>
-                  <th>Attribute</th>
-                  <th>Type</th>
-                  <th>Default</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><code>x</code> / <code>y</code></td>
-                  <td>number / expr</td>
-                  <td><code>0</code></td>
-                  <td><strong>Transform Origin &amp; Center:</strong> The anchor point of the shape in logical stage coordinates.</td>
-                </tr>
-                <tr>
-                  <td><code>dx</code> / <code>dy</code></td>
-                  <td>number / expr</td>
-                  <td><code>0</code></td>
-                  <td><strong>Visual Displacement:</strong> Shifts the rendered geometry away from <code>(x, y)</code> without changing the rotation pivot.</td>
-                </tr>
-                <tr>
-                  <td><code>tx</code> / <code>ty</code></td>
-                  <td>number / expr</td>
-                  <td><code>0</code></td>
-                  <td><strong>Texture Origin:</strong> Offsets pattern and gradient coordinates relative to the shape center.</td>
-                </tr>
-                <tr>
-                  <td><code>rotate</code></td>
-                  <td>number / expr</td>
-                  <td><code>0</code></td>
-                  <td>Rotation around <code>(x, y)</code> in degrees (e.g. <code>rotate="t * 90"</code> for 90°/second continuous spin).</td>
-                </tr>
-                <tr>
-                  <td><code>scale</code> / <code>scalex</code> / <code>scaley</code></td>
-                  <td>number / expr</td>
-                  <td><code>1</code></td>
-                  <td>Uniform or independent axis scaling factors.</td>
-                </tr>
-                <tr>
-                  <td><code>skewx</code> / <code>skewy</code></td>
-                  <td>number / expr</td>
-                  <td><code>0</code></td>
-                  <td>Horizontal and vertical shear skew angles in degrees.</td>
-                </tr>
-                <tr>
-                  <td><code>cursor</code></td>
-                  <td>string</td>
-                  <td><code>'default'</code></td>
-                  <td>Mouse cursor displayed when hovering over the shape bounding box (e.g. <code>'pointer'</code>, <code>'move'</code>).</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="api-list">
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">x / y</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>0</strong></span>
+                    <span class="api-pill values-pill"><code>0–1000</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  <strong>Transform Origin &amp; Center:</strong> The anchor point of the shape in logical stage coordinates.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">dx / dy</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>0</strong></span>
+                    <span class="api-pill values-pill"><code>number</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  <strong>Visual Displacement:</strong> Shifts the rendered geometry away from <code>(x, y)</code> without changing the rotation pivot.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">ref.id.tx / ty</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>x + dx</strong></span>
+                    <span class="api-pill values-pill"><code>read-only JS getter</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  <strong>Total Coordinates:</strong> Read-only JS properties returning the combined total position (<code>x + dx</code> and <code>y + dy</code>).
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">rotate</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>0</strong></span>
+                    <span class="api-pill values-pill"><code>number</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Rotation around <code>(x, y)</code> in degrees (e.g. <code>rotate="t * 90"</code> for 90°/second continuous spin).
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">scale / scalex / scaley</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>1</strong></span>
+                    <span class="api-pill values-pill"><code>number</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Uniform or independent axis scaling factors.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">skewx / skewy</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>0</strong></span>
+                    <span class="api-pill values-pill"><code>number</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Horizontal and vertical shear skew angles in degrees (typically <code>-89</code> to <code>89</code> before infinite shearing at <code>±90</code>).
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- TAB 4: INTERACTIVE EVENTS -->
           <div class="tab-content" id="tab-event-attr">
-            <table class="api-table">
-              <thead>
-                <tr>
-                  <th>Attribute</th>
-                  <th>Type</th>
-                  <th>Default</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><code>onenter</code></td>
-                  <td>string (script)</td>
-                  <td><code>null</code></td>
-                  <td>Fires once when the pointer enters the shape. Recommended over legacy hover handlers.</td>
-                </tr>
-                <tr>
-                  <td><code>onleave</code></td>
-                  <td>string (script)</td>
-                  <td><code>null</code></td>
-                  <td>Fires once when the pointer exits the shape bounding area.</td>
-                </tr>
-                <tr>
-                  <td><code>onmove</code></td>
-                  <td>string (script)</td>
-                  <td><code>null</code></td>
-                  <td>Fires continuously as the pointer moves across the shape.</td>
-                </tr>
-                <tr>
-                  <td><code>ondown</code></td>
-                  <td>string (script)</td>
-                  <td><code>null</code></td>
-                  <td>Fires when the primary pointer button is pressed down while over the shape.</td>
-                </tr>
-                <tr>
-                  <td><code>onup</code></td>
-                  <td>string (script)</td>
-                  <td><code>null</code></td>
-                  <td>Fires when the primary pointer button is released while over the shape.</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="api-list">
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">onclick</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>null</strong></span>
+                    <span class="api-pill values-pill"><code>JS script</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Fires when a complete click or tap sequence (down and release over the same shape) occurs. Works on mouse, touch, and stylus.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">onenter</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>null</strong></span>
+                    <span class="api-pill values-pill"><code>JS script</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Fires once when the pointer enters the shape. Recommended over legacy hover handlers.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">onleave</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>null</strong></span>
+                    <span class="api-pill values-pill"><code>JS script</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Fires once when the pointer exits the shape bounding area.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">onmove</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>null</strong></span>
+                    <span class="api-pill values-pill"><code>JS script</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Fires continuously as the pointer moves across the shape.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">ondown</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>null</strong></span>
+                    <span class="api-pill values-pill"><code>JS script</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Fires when the primary pointer button is pressed down while over the shape.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">onup</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>null</strong></span>
+                    <span class="api-pill values-pill"><code>JS script</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Fires when the primary pointer button is released while over the shape.
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- ================================================================= -->
         <!-- SECTION 3: THE 5 VISUAL MODES (INTERACTIVE COOKBOOK) -->
-        <!-- ================================================================= -->
         <h2>3. The 5 Visual Modes (Interactive Cookbook)</h2>
         <p>Because <code>&lt;pxl-circle&gt;</code> can render everything from solid discs to animated donut charts and curved vector arrows, we organize its real-world usage into <strong>5 Visual Modes</strong>.</p>
 
@@ -421,7 +622,7 @@
               <div class="tab-content active" id="ex1-controls">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label>Right Shape Inner Radius (<code>ir</code>): <span id="valEx1IR">60</span></label>
+                    <label><span>Right Shape Inner Radius (<code>ir</code>)</span> <span id="valEx1IR">60</span></label>
                     <input type="range" min="0" max="95" step="5" value="60" autocomplete="off"
                       oninput="document.getElementById('ex1Ring').setAttribute('ir', this.value); document.getElementById('valEx1IR').innerText = this.value; document.getElementById('codeEx1IR').innerText = this.value;">
                   </div>
