@@ -7,7 +7,7 @@ class DocsHeader extends HTMLElement {
           <h1>KILOPIXEL</h1>
           <span class="badge">DOCS</span>
         </a>
-        <button id="mobile-menu-btn">
+        <button id="mobile-menu-btn" aria-label="Toggle Menu">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -25,8 +25,12 @@ class DocsHeader extends HTMLElement {
     const btn = this.querySelector('#mobile-menu-btn');
     if (btn) {
       btn.addEventListener('click', () => {
-        const sidebar = document.querySelector('docs-sidebar').querySelector('.sidebar');
-        if (sidebar) sidebar.classList.toggle('mobile-open');
+        const sidebar = document.querySelector('docs-sidebar')?.querySelector('.sidebar');
+        const backdrop = document.querySelector('docs-sidebar')?.querySelector('.sidebar-backdrop');
+        if (sidebar) {
+          const isOpen = sidebar.classList.toggle('mobile-open');
+          if (backdrop) backdrop.classList.toggle('active', isOpen);
+        }
       });
     }
   }
@@ -40,6 +44,7 @@ class DocsSidebar extends HTMLElement {
     const currentPath = window.location.pathname.split('/').pop() || 'index.html';
     
     this.innerHTML = `
+      <div class="sidebar-backdrop"></div>
       <aside class="sidebar">
         <pxl-stage ratio="1 / 4" class="sidebar-bg-stage" style="position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; pointer-events: none !important; z-index: 0 !important;">
           <pxl-layer>
@@ -56,6 +61,7 @@ class DocsSidebar extends HTMLElement {
             <li><a href="index.html" class="${currentPath === 'index.html' ? 'active' : ''}">Introduction</a></li>
             <li><a href="installation.html" class="${currentPath === 'installation.html' ? 'active' : ''}">Installation</a></li>
             <li><a href="coordinates.html" class="${currentPath === 'coordinates.html' ? 'active' : ''}">Coordinate System</a></li>
+            <li><a href="styling.html" class="${currentPath === 'styling.html' ? 'active' : ''}">Styling &amp; Rules</a></li>
           </ul>
         </div>
         <div class="sidebar-section">
@@ -79,7 +85,7 @@ class DocsSidebar extends HTMLElement {
           </ul>
         </div>
         <div class="sidebar-section">
-          <div class="sidebar-title">Engine & Logic</div>
+          <div class="sidebar-title">Engine &amp; Logic</div>
           <ul>
             <li><a href="expressions.html" class="${currentPath === 'expressions.html' ? 'active' : ''}">Expressions</a></li>
             <li><a href="referencing.html" class="${currentPath === 'referencing.html' ? 'active' : ''}">Referencing</a></li>
@@ -89,21 +95,29 @@ class DocsSidebar extends HTMLElement {
         </div>
       </aside>
     `;
+
+    // Wire up backdrop and dismissal behaviors
+    const backdrop = this.querySelector('.sidebar-backdrop');
+    const sidebar = this.querySelector('.sidebar');
+
+    const closeSidebar = () => {
+      if (sidebar) sidebar.classList.remove('mobile-open');
+      if (backdrop) backdrop.classList.remove('active');
+    };
+
+    if (backdrop) {
+      backdrop.addEventListener('click', closeSidebar);
+    }
+
+    // Close drawer when clicking any sidebar navigation link
+    this.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeSidebar);
+    });
+
+    // Close drawer when pressing Escape
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeSidebar();
+    });
   }
 }
 customElements.define('docs-sidebar', DocsSidebar);
-
-// Global tab switcher for interactive playgrounds
-window.switchTab = function(btn, targetId) {
-  const container = btn.closest('.demo-controls');
-  if (!container) return;
-  
-  // Deactivate all tabs and contents in this container
-  container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  container.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  
-  // Activate selected
-  btn.classList.add('active');
-  const target = container.querySelector('#' + targetId);
-  if (target) target.classList.add('active');
-};

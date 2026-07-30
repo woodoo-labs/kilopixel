@@ -474,65 +474,7 @@ body {
   cursor: pointer;
 }
 
-/* --- Mobile Responsiveness --- */
-@media (max-width: 768px) {
-  /* Layout adjustments */
-  .docs-inner {
-    padding: 24px 20px;
-  }
-  
-  .header {
-    padding: 0 20px;
-  }
-  
-  /* Typography tweaks */
-  .docs-content h1 {
-    font-size: 2rem;
-  }
-  
-  .docs-content h2 {
-    font-size: 1.5rem;
-  }
-  
-  /* Off-canvas mobile menu */
-  .header nav {
-    display: none;
-  }
-  
-  #mobile-menu-btn {
-    display: block;
-  }
-  
-  .sidebar {
-    position: fixed;
-    top: 64px; /* Height of the header */
-    left: 0;
-    bottom: 0;
-    z-index: 90;
-    transform: translateX(-100%);
-    background-color: var(--bg-main);
-    box-shadow: 4px 0 15px rgba(0,0,0,0.05);
-  }
-  
-  .sidebar.mobile-open {
-    transform: translateX(0);
-  }
-
-  /* Shrink demo padding on mobile */
-  .demo-stage {
-    padding: 16px;
-  }
-}
-
-@media (max-width: 600px) {
-  .playground-sliders {
-    gap: 16px;
-  }
-}
-
-/* ==========================================================================
-   Modern Responsive API Reference Cards (.api-list / .api-item)
-   ========================================================================== */
+/* --- API Reference Cards (.api-list / .api-item) --- */
 .api-list {
   display: flex;
   flex-direction: column;
@@ -542,10 +484,10 @@ body {
 
 .api-item {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 240px 1fr;
   gap: 24px;
   padding: 16px 20px;
-  background-color: var(--surface);
+  background-color: var(--bg-main);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   transition: all 0.2s ease;
@@ -619,7 +561,74 @@ body {
   color: var(--text-body);
 }
 
-@media (max-width: 640px) {
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+  /* Layout adjustments */
+  .docs-inner {
+    padding: 24px 20px;
+  }
+  
+  .header {
+    padding: 0 20px;
+  }
+  
+  /* Typography tweaks */
+  .docs-content h1 {
+    font-size: 2rem;
+  }
+  
+  .docs-content h2 {
+    font-size: 1.5rem;
+  }
+  
+  /* Off-canvas mobile menu */
+  .header nav {
+    display: none;
+  }
+  
+  #mobile-menu-btn {
+    display: block;
+  }
+  
+  .sidebar {
+    position: fixed;
+    top: 64px; /* Height of the header */
+    left: 0;
+    bottom: 0;
+    z-index: 90;
+    transform: translateX(-100%);
+    background-color: var(--bg-main);
+    box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+  }
+  
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    top: 64px; /* Height of the header */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.4);
+    z-index: 85; /* Just below sidebar (z-index: 90) */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .sidebar-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Shrink demo padding on mobile */
+  .demo-stage {
+    padding: 16px;
+  }
+
+  /* Stack API cards vertically on mobile/tablet */
   .api-item {
     grid-template-columns: 1fr;
     gap: 12px;
@@ -631,5 +640,9 @@ body {
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+  }
+
+  .playground-sliders {
+    gap: 16px;
   }
 }

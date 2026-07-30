@@ -30,3 +30,6 @@
 
 # Kilopixel Documentation Style Guide
 When creating or modifying interactive documentation examples, you MUST first read the full style guide located at `docs/EXAMPLE_STANDARDS.md`. You must strictly follow all color semantics, stacking orders, and UI architecture rules defined in that file.
+
+# Token Optimization & Artifacts
+- **Walkthrough Artifacts (On Explicit Request Only)**: By default, do NOT create or update `walkthrough.md` artifacts after completing work, and do NOT ask the user if they want one. Simply summarize your work concisely in your chat response. Only create a `walkthrough.md` file if the user explicitly requests one in their prompt.

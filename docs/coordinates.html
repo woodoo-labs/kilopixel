@@ -14,8 +14,9 @@
   <!-- Kilopixel Engine -->
   <script src="js/pxl.min.js"></script>
   
-  <!-- Import our custom layout elements -->
-  <script src="js/docs-layout.js"></script>
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
 </head>
 <body>
   
@@ -41,7 +42,7 @@
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="switchTab(this, 'ex1-stage')">Stage</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex1-stage')">Stage</button>
             </div>
           </div>
           
@@ -149,7 +150,7 @@
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="switchTab(this, 'ex2-circle')">Circle</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex2-circle')">Circle</button>
             </div>
           </div>
           
@@ -245,8 +246,8 @@
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="switchTab(this, 'ex3-layer')">Layer</button>
-              <button class="tab-btn" onclick="switchTab(this, 'ex3-circle')">Circle</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex3-layer')">Layer</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex3-circle')">Circle</button>
             </div>
           </div>
           
@@ -367,8 +368,8 @@
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="switchTab(this, 'ex4-layer')">Layer</button>
-              <button class="tab-btn" onclick="switchTab(this, 'ex4-ellipse')">Ellipse <span class="indicator-dot"></span></button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex4-layer')">Layer</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex4-ellipse')">Ellipse <span class="indicator-dot"></span></button>
             </div>
           </div>
           
@@ -535,8 +536,8 @@
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="switchTab(this, 'ex5-layer')">Layer</button>
-              <button class="tab-btn" onclick="switchTab(this, 'ex5-rect')">Rectangle</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex5-layer')">Layer</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex5-rect')">Rectangle</button>
             </div>
           </div>
 
@@ -706,10 +707,10 @@
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="switchTab(this, 'ex6-layer')">Layer</button>
-              <button class="tab-btn" onclick="switchTab(this, 'ex6-leader-a')">Leader A</button>
-              <button class="tab-btn" onclick="switchTab(this, 'ex6-follower-b')">Follower B</button>
-              <button class="tab-btn" onclick="switchTab(this, 'ex6-follower-c')">Follower C</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex6-layer')">Layer</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex6-leader-a')">Leader A</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex6-follower-b')">Follower B</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex6-follower-c')">Follower C</button>
             </div>
           </div>
 
@@ -895,9 +896,9 @@
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="switchTab(this, 'ex7-layer')">Layer</button>
-              <button class="tab-btn" onclick="switchTab(this, 'ex7-point-a')">Point A</button>
-              <button class="tab-btn" onclick="switchTab(this, 'ex7-point-b')">Point B</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex7-layer')">Layer</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex7-point-a')">Point A</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex7-point-b')">Point B</button>
             </div>
           </div>
 
@@ -1114,53 +1115,6 @@
       if (lbl) lbl.innerText = val;
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      
-      function updateHighlight(input) {
-        const oninputStr = input.getAttribute('oninput');
-        if (!oninputStr) return;
-        const match = oninputStr.match(/getElementById\(['"](code[^'"]+)['"]\)/);
-        if (match) {
-          const markId = match[1];
-          const markElement = document.getElementById(markId);
-          if (markElement) {
-            if (input._isPressed) {
-              markElement.classList.add('highlight-active');
-              input._activeMark = markElement;
-            } else {
-              markElement.classList.remove('highlight-active');
-              input._activeMark = null;
-            }
-          }
-        }
-      }
-
-      function handlePressStart(e) {
-        const target = e.target.closest('input[type="range"]');
-        if (target) {
-          target._isPressed = true;
-          updateHighlight(target);
-        }
-      }
-      
-      function handlePressEnd() {
-        document.querySelectorAll('input[type="range"]').forEach(input => {
-          if (input._isPressed) {
-            input._isPressed = false;
-            updateHighlight(input);
-          }
-        });
-      }
-
-      // Universal Interaction Handlers
-      document.body.addEventListener('pointerdown', handlePressStart);
-      document.body.addEventListener('touchstart', handlePressStart, {passive: true});
-
-      document.addEventListener('pointerup', handlePressEnd);
-      document.addEventListener('pointercancel', handlePressEnd);
-      document.addEventListener('touchend', handlePressEnd, {passive: true});
-      document.addEventListener('touchcancel', handlePressEnd, {passive: true});
-    });
   </script>
 </body>
 </html>

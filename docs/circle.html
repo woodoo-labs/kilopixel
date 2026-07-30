@@ -10,8 +10,9 @@
   <!-- Prism Syntax Highlighting -->
   <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
   
-  <!-- Import our custom layout elements -->
-  <script src="js/docs-layout.js"></script>
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
   <!-- Kilopixel Engine -->
   <script src="js/pxl.min.js"></script>
 </head>
@@ -42,8 +43,8 @@
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Sandbox Controls</h3>
               <div class="demo-tabs">
-                <button class="tab-btn active" onclick="switchTab(this, 'hero-controls')">Attributes</button>
-                <button class="tab-btn" onclick="switchTab(this, 'hero-code')">HTML Markup</button>
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'hero-controls')">Attributes</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'hero-code')">HTML Markup</button>
               </div>
             </div>
 
@@ -126,10 +127,10 @@
         <div class="demo-controls">
           <div class="demo-controls-header">
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="switchTab(this, 'tab-circle-attr')">Circle Attributes (10)</button>
-              <button class="tab-btn" onclick="switchTab(this, 'tab-common-attr')">Common Styling (12)</button>
-              <button class="tab-btn" onclick="switchTab(this, 'tab-spatial-attr')">Transforms &amp; Spatial (12)</button>
-              <button class="tab-btn" onclick="switchTab(this, 'tab-event-attr')">Interactive Events (6)</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'tab-circle-attr')">Circle Attributes (10)</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'tab-common-attr')">Common Styling (12)</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'tab-spatial-attr')">Transforms &amp; Spatial (12)</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'tab-event-attr')">Interactive Events (6)</button>
             </div>
           </div>
 
@@ -613,8 +614,8 @@
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Mode 1 Controls</h3>
                 <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="switchTab(this, 'ex1-controls')">Attributes</button>
-                  <button class="tab-btn" onclick="switchTab(this, 'ex1-code')">HTML Markup</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex1-controls')">Attributes</button>
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex1-code')">HTML Markup</button>
                 </div>
               </div>
 
@@ -674,7 +675,7 @@
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Mode 2 Controls</h3>
                 <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="switchTab(this, 'ex2-code')">HTML Markup</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex2-code')">HTML Markup</button>
                 </div>
               </div>
 
@@ -738,7 +739,7 @@
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Mode 3 Controls</h3>
                 <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="switchTab(this, 'ex3-code')">HTML Markup</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex3-code')">HTML Markup</button>
                 </div>
               </div>
 
@@ -809,7 +810,7 @@
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Mode 4 Controls</h3>
                 <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="switchTab(this, 'ex4-code')">HTML Markup</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex4-code')">HTML Markup</button>
                 </div>
               </div>
 
@@ -862,7 +863,7 @@
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Mode 5 Controls</h3>
                 <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="switchTab(this, 'ex5-code')">HTML Markup</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex5-code')">HTML Markup</button>
                 </div>
               </div>
 
@@ -975,54 +976,6 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      function updateHighlight(input) {
-        const oninputStr = input.getAttribute('oninput');
-        if (!oninputStr) return;
-        const match = oninputStr.match(/getElementById\(['"](code[^'"]+)['"]\)/);
-        if (match) {
-          const markId = match[1];
-          const markElement = document.getElementById(markId);
-          if (markElement) {
-            if (input._isPressed) {
-              markElement.classList.add('highlight-active');
-              input._activeMark = markElement;
-            } else {
-              markElement.classList.remove('highlight-active');
-              input._activeMark = null;
-            }
-          }
-        }
-      }
-
-      function handlePressStart(e) {
-        const target = e.target.closest('input[type="range"]');
-        if (target) {
-          target._isPressed = true;
-          updateHighlight(target);
-        }
-      }
-
-      function handlePressEnd(e) {
-        const targets = document.querySelectorAll('input[type="range"]');
-        targets.forEach(target => {
-          if (target._isPressed) {
-            target._isPressed = false;
-            updateHighlight(target);
-          }
-        });
-      }
-
-      document.addEventListener('mousedown', handlePressStart);
-      document.addEventListener('touchstart', handlePressStart, { passive: true });
-      document.addEventListener('mouseup', handlePressEnd);
-      document.addEventListener('touchend', handlePressEnd);
-      document.addEventListener('input', (e) => {
-        if (e.target.tagName === 'INPUT' && e.target.type === 'range') {
-          updateHighlight(e.target);
-        }
-      });
-    });
   </script>
 
   <!-- Prism Syntax Highlighting -->

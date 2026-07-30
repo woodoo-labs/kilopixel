@@ -60,8 +60,8 @@ Interactive playgrounds must follow a standardized DOM architecture to maintain 
     <div class="demo-controls-header">
       <h3 class="demo-controls-title">Controls</h3>
       <div class="demo-tabs">
-        <button class="tab-btn active" onclick="switchTab(this, 'ex1-controls')">Attributes</button>
-        <button class="tab-btn" onclick="switchTab(this, 'ex1-code')">HTML Markup</button>
+        <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex1-controls')">Attributes</button>
+        <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex1-code')">HTML Markup</button>
       </div>
     </div>
     
@@ -82,7 +82,12 @@ Interactive playgrounds must follow a standardized DOM architecture to maintain 
   </div>
 </div>
 ```
-* **Tab Bars & Mobile Scrolling:** Always use `.demo-tabs` inside `.demo-controls-header` for tab navigation. The header container (`.demo-controls-header`) automatically scrolls horizontally on mobile devices to prevent wrapping or layout overflow.
+* **Required Script Imports:** Every documentation page must include `<script src="js/layout.js"></script>` and `<script src="js/docs.js"></script>` in `<head>`.
+* **Tab Bars & Mobile Scrolling:** Always use `.demo-tabs` inside `.demo-controls-header` for tab navigation with `onclick="pxlDocs.switchTab(this, '...')"` handlers. The header container (`.demo-controls-header`) automatically scrolls horizontally on mobile devices to prevent wrapping or layout overflow.
+
+### JavaScript Namespace & Native DOM Methods
+* **Strict Namespacing (`pxlDocs`):** All documentation playground helper functions, utilities, and interactive methods MUST be defined under the `window.pxlDocs` namespace in `docs/js/docs.js` (e.g., `pxlDocs.switchTab`, `pxlDocs.initHighlighting`). Never define global functions on `window` or in ad-hoc `<script>` blocks on individual pages.
+* **Native DOM API (Zero-Magic Interaction):** When interacting with Kilopixel HTML elements from JavaScript (e.g., in slider `oninput` handlers or custom scripts), ALWAYS use standard native DOM methods like `document.getElementById('id').setAttribute('attr', value)`. This makes it transparent to developers inspecting the source code that Kilopixel has no proprietary or secret JavaScript API—it works 100% via standard declarative HTML attributes and native DOM manipulation.
 
 ### Reactivity & Live Code
 * **Variable Placement:** `<pxl-var>` nodes act as invisible shapes in the engine. If they use any mathematical animations (like `t` or `wave()`), they **must** be placed inside a `<pxl-layer>` so their `render` cycle is evaluated by the engine loop.

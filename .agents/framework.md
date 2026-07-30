@@ -1345,3 +1345,12 @@ Static filters work as-is without quotes or backticks (Fast Path). Backticks sho
   - `shadowblur` — blur radius in logical units (e.g. `10`)
   - `shadowx` / `shadowy` — X and Y shadow offsets (defaults to `0`)
 - **Performance Benefit**: Direct2D and Skia render native canvas shadows via hardware radial alpha masks without spinning up the CSS Filter Graph pipeline, reducing GPU shader load by ~80-90%.
+
+### 2. Documentation Roadmap: "Styling & Styling Rules" (`styling.html`)
+- **Proposed Feature**: Create a dedicated `docs/styling.html` guide under "Getting Started" in the documentation sidebar.
+- **Content Scope**:
+  - **The 12 Universal Styling Attributes**: `fill`, `stroke`, `strokewidth`, `alpha`, `linecap` (`butt` | `round` | `square`), `linejoin` (`miter` | `round` | `bevel`), `miterlimit`, `linedash`, `dashoffset` (animated marching ants), `blend` (26 Canvas 2D blend modes), `filter` (CSS visual filters), and `hidden`.
+  - **Style Cascade & Inheritance**: Explaining how styling attributes set on `<pxl-layer>` and `<pxl-group>` cascade down to child shapes that do not override them, and how `alpha` transparency multiplies down the container tree.
+  - **Static vs. Dynamic Syntax**: Guidance on plain strings (`filter="blur(5px)"`) vs. JavaScript template literal backticks (`filter="\`blur(${wave(2)*10}px)\`"`).
+  - **Zero-Magic Canvas Styling**: Explaining why Canvas 2D shapes are styled via declarative HTML attributes rather than external CSS stylesheet selectors.
+```
