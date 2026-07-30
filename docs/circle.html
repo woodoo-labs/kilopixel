@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kilopixel - Shapes API</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <title>Kilopixel - &lt;pxl-circle&gt; Documentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/docs.css">
   
   <!-- Prism Syntax Highlighting -->
@@ -28,56 +28,803 @@
     <!-- Main Content Area -->
     <main class="docs-content">
       <div class="docs-inner">
-      <h1>Shapes API</h1>
-      <p>The Shapes API allows you to draw and manipulate various geometric primitives natively within your declarative layers.</p>
-      
-      <h2>HTML Syntax</h2>
-      <p>You can create elements purely through HTML. Every shape has built-in coordinate logic (x, y, dx, dy) and natively evaluates mathematical expressions.</p>
-      
-      <pre><code class="language-html">&lt;pxl-stage ratio="16 / 9"&gt;
+        <div class="breadcrumb">
+          <a href="index.html">Docs</a> / <a href="#">Shapes</a> / <span>&lt;pxl-circle&gt;</span>
+        </div>
+
+        <h1>&lt;pxl-circle&gt;</h1>
+        <p class="lead">A multi-mode radial primitive that renders circles, hollow rings, open arcs, curved diagram arrows, solid pie chart wedges, donut chart segments, and animated loading spinners—all from a single declarative tag.</p>
+
+        <!-- Inheritance Badge -->
+        <div class="inheritance-bar">
+          <span class="inheritance-label">Inheritance:</span>
+          <span class="inheritance-path">
+            <code>Shape</code> <span class="inheritance-arrow">→</span> <code>&lt;pxl-circle&gt;</code>
+          </span>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: HERO ANATOMY SANDBOX -->
+        <!-- ================================================================= -->
+        <h2>1. Interactive Anatomy Sandbox</h2>
+        <p>Experiment with the sliders below to see how a single <code>&lt;pxl-circle&gt;</code> element morphs across its different visual archetypes on a standard <strong>1000 × 600</strong> logical canvas.</p>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Sandbox Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="switchTab(this, 'hero-controls')">Attributes</button>
+                <button class="tab-btn" onclick="switchTab(this, 'hero-code')">HTML Markup</button>
+              </div>
+            </div>
+
+            <!-- Controls Tab -->
+            <div class="tab-content active" id="hero-controls">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label>Outer Radius (<code>r</code>): <span id="valHeroR">180</span></label>
+                  <input type="range" min="40" max="250" step="10" value="180" autocomplete="off"
+                    oninput="document.getElementById('heroCircle').setAttribute('r', this.value); document.getElementById('valHeroR').innerText = this.value; document.getElementById('codeHeroR').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label>Inner Radius (<code>ir</code>): <span id="valHeroIR">0</span></label>
+                  <input type="range" min="0" max="150" step="10" value="0" autocomplete="off"
+                    oninput="document.getElementById('heroCircle').setAttribute('ir', this.value); document.getElementById('valHeroIR').innerText = this.value; document.getElementById('codeHeroIR').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label>Start Angle (<code>start</code>): <span id="valHeroStart">0</span>°</label>
+                  <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
+                    oninput="document.getElementById('heroCircle').setAttribute('start', this.value); document.getElementById('valHeroStart').innerText = this.value; document.getElementById('codeHeroStart').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label>Angular Sweep (<code>sweep</code>): <span id="valHeroSweep">270</span>°</label>
+                  <input type="range" min="45" max="360" step="15" value="270" autocomplete="off"
+                    oninput="document.getElementById('heroCircle').setAttribute('sweep', this.value); document.getElementById('valHeroSweep').innerText = this.value; document.getElementById('codeHeroSweep').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label>Pie Mode (<code>pie</code>): <span id="valHeroPie">false</span></label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn active" id="btnHeroPieFalse" onclick="setHeroPie(false)">false (Open Arc)</button>
+                    <button class="toggle-btn" id="btnHeroPieTrue" onclick="setHeroPie(true)">true (Pie Wedge)</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- HTML Markup Preview Tab -->
+            <div class="tab-content" id="hero-code">
+              <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-grid stroke="#f1f5f9" major="2" labels="true"&gt;&lt;/pxl-grid&gt;
-    &lt;pxl-circle x="500" y="200" r="50" fill="red"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-rect x="200" y="200" w="100" h="100" fill="blue"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-grid stroke="#f1f5f9" major="2"&gt;&lt;/pxl-grid&gt;
+    &lt;pxl-circle x="500" y="300" 
+      r="<mark id="codeHeroR">180</mark>" 
+      ir="<mark id="codeHeroIR">0</mark>" 
+      start="<mark id="codeHeroStart">0</mark>" 
+      sweep="<mark id="codeHeroSweep">270</mark>" 
+      pie="<mark id="codeHeroPie">false</mark>"
+      fill="#ffedd566" 
+      stroke="#f97316" 
+      strokewidth="8"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
+            </div>
+          </div>
 
-      <pxl-stage ratio="16 / 9" class="demo-stage">
-        <pxl-layer>
-          <pxl-grid stroke="#f1f5f9" major="2" labels="true"></pxl-grid>
-          <pxl-circle x="500" y="200" r="50" fill="red"></pxl-circle>
-          <pxl-rect x="200" y="200" w="100" h="100" fill="blue"></pxl-rect>
-        </pxl-layer>
-      </pxl-stage>
-      
-      <h2>Javascript Interactivity</h2>
-      <p>Because Kilopixel uses a zero-GC flat registry for all elements with an ID, you can instantly modify them via Javascript without needing to query the DOM.</p>
-      
-      <pre><code class="language-javascript">// Update coordinates instantly outside the DOM using .set()
-pxl.nodes.myCircle.set('x', 600);
-pxl.nodes.myCircle.set('fill', 'green');
+          <!-- Hero Sandbox Stage -->
+          <pxl-stage id="heroStage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              <pxl-line x1="500" y1="0" x2="500" y2="600" stroke="#cbd5e1" strokewidth="1" linedash="[4, 4]"></pxl-line>
+              <pxl-line x1="0" y1="300" x2="1000" y2="300" stroke="#cbd5e1" strokewidth="1" linedash="[4, 4]"></pxl-line>
 
-// Or use standard DOM APIs if you prefer
-const rect = document.querySelector('pxl-rect');
-rect.setAttribute('rotate', '45');</code></pre>
+              <!-- Hero Circle Shape -->
+              <pxl-circle id="heroCircle" x="500" y="300" r="180" ir="0" start="0" sweep="270" pie="false"
+                fill="#ffedd566" stroke="#f97316" strokewidth="8" arrowend="0" arrowstyle="filled"></pxl-circle>
 
-      <h2>Advanced Highlighting Examples</h2>
+              <!-- Center Anchor Dot -->
+              <pxl-circle x="500" y="300" r="6" fill="#fb923c"></pxl-circle>
+              <pxl-text x="515" y="285" text="'Circle (500, 300)'" size="15" fill="#fb923c" font="monospace"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
 
-      <h3>Highlighting Specific Words</h3>
-      <p>Using the KeepMarkup plugin, you can wrap any word in a <code>&lt;mark&gt;</code> tag right in your HTML, and Prism will preserve it.</p>
-      
-      <pre><code class="language-html">&lt;pxl-stage id="main" <mark>ratio="16 / 9"</mark>&gt;
+        <!-- ================================================================= -->
+        <!-- SECTION 2: 4-TAB ATTRIBUTE REFERENCE -->
+        <!-- ================================================================= -->
+        <h2>2. Declarative Attribute Reference</h2>
+        <p>The table below covers all attributes supported by <code>&lt;pxl-circle&gt;</code>. Use the tabs to switch between shape-specific attributes and those inherited from <code>Shape</code>.</p>
+
+        <div class="api-reference-container">
+          <div class="api-tabs">
+            <button class="tab-btn active" onclick="switchTab(this, 'tab-circle-attr')">Circle Attributes (10)</button>
+            <button class="tab-btn" onclick="switchTab(this, 'tab-common-attr')">Common Styling (10)</button>
+            <button class="tab-btn" onclick="switchTab(this, 'tab-spatial-attr')">Transforms &amp; Spatial (11)</button>
+            <button class="tab-btn" onclick="switchTab(this, 'tab-event-attr')">Interactive Events (5)</button>
+          </div>
+
+          <!-- TAB 1: CIRCLE SPECIFIC ATTRIBUTES -->
+          <div class="tab-content active" id="tab-circle-attr">
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>Attribute</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>r</code></td>
+                  <td>number / expr</td>
+                  <td><code>0</code></td>
+                  <td>Outer radius of the circle or arc in logical units. Supports dynamic time expressions like <code>r="100 + wave(2)*20"</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>ir</code></td>
+                  <td>number / expr</td>
+                  <td><code>0</code></td>
+                  <td>Inner radius. When <code>ir &gt; 0</code>, the interior is hollowed out to render concentric rings, donuts, or hollow arc bands.</td>
+                </tr>
+                <tr>
+                  <td><code>start</code></td>
+                  <td>number / expr</td>
+                  <td><code>0</code></td>
+                  <td>Start angle in <strong>degrees</strong> (<code>0°</code> is at 3 o'clock / positive X-axis).</td>
+                </tr>
+                <tr>
+                  <td><code>end</code></td>
+                  <td>number / expr</td>
+                  <td><code>null</code></td>
+                  <td>Absolute end angle in degrees. If neither <code>end</code> nor <code>sweep</code> is provided, renders a full 360° circle.</td>
+                </tr>
+                <tr>
+                  <td><code>sweep</code></td>
+                  <td>number / expr</td>
+                  <td><code>null</code></td>
+                  <td>Relative angular span in degrees from the <code>start</code> angle (e.g. <code>start="45" sweep="90"</code> draws from 45° to 135°).</td>
+                </tr>
+                <tr>
+                  <td><code>pie</code></td>
+                  <td>boolean</td>
+                  <td><code>false</code></td>
+                  <td>When <code>true</code>, connects the endpoints of an open arc to the center origin <code>(0, 0)</code> to form a solid pie wedge.</td>
+                </tr>
+                <tr>
+                  <td><code>anticlockwise</code></td>
+                  <td>boolean</td>
+                  <td><code>false</code></td>
+                  <td>When <code>true</code>, draws the circular arc counter-clockwise around the origin.</td>
+                </tr>
+                <tr>
+                  <td><code>arrowstart</code></td>
+                  <td>number / <code>'auto'</code></td>
+                  <td><code>0</code></td>
+                  <td>Draws a vector arrowhead at the starting point of an open arc curve. Use <code>'auto'</code> to scale proportionally to stroke width.</td>
+                </tr>
+                <tr>
+                  <td><code>arrowend</code></td>
+                  <td>number / <code>'auto'</code></td>
+                  <td><code>0</code></td>
+                  <td>Draws a vector arrowhead at the ending point of an open arc curve. Use <code>'auto'</code> to scale proportionally to stroke width.</td>
+                </tr>
+                <tr>
+                  <td><code>arrowstyle</code></td>
+                  <td>string</td>
+                  <td><code>'filled'</code></td>
+                  <td>Visual appearance of open arc arrowheads (<code>'filled'</code> solid triangle vs. <code>'line'</code> open vector v-shape).</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- TAB 2: COMMON STYLING -->
+          <div class="tab-content" id="tab-common-attr">
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>Attribute</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>fill</code></td>
+                  <td>string / expr</td>
+                  <td><code>'transparent'</code></td>
+                  <td>Fill color, CSS color string, or declarative gradient expression (e.g. <code>fill="radial(1, ['#f97316', 'transparent'])"</code>).</td>
+                </tr>
+                <tr>
+                  <td><code>stroke</code></td>
+                  <td>string / expr</td>
+                  <td><code>'transparent'</code></td>
+                  <td>Border stroke color or linear/radial gradient expression.</td>
+                </tr>
+                <tr>
+                  <td><code>strokewidth</code></td>
+                  <td>number</td>
+                  <td><code>1</code></td>
+                  <td>Border thickness in logical units.</td>
+                </tr>
+                <tr>
+                  <td><code>linedash</code></td>
+                  <td>array string</td>
+                  <td><code>[]</code></td>
+                  <td>Dashed border pattern in logical units (e.g. <code>linedash="[10, 5]"</code>).</td>
+                </tr>
+                <tr>
+                  <td><code>opacity</code> / <code>alpha</code></td>
+                  <td>number (0–1)</td>
+                  <td><code>1</code></td>
+                  <td>Global element transparency multiplier.</td>
+                </tr>
+                <tr>
+                  <td><code>filter</code></td>
+                  <td>string / expr</td>
+                  <td><code>''</code></td>
+                  <td>CSS visual filter string (e.g. <code>filter="drop-shadow(0px 0px 15px rgba(249,115,22,0.8))"</code>).</td>
+                </tr>
+                <tr>
+                  <td><code>shadowcolor</code></td>
+                  <td>string</td>
+                  <td><code>'transparent'</code></td>
+                  <td>Native Canvas 2D shadow color.</td>
+                </tr>
+                <tr>
+                  <td><code>shadowblur</code></td>
+                  <td>number</td>
+                  <td><code>0</code></td>
+                  <td>Native Canvas 2D shadow Gaussian blur radius in logical units.</td>
+                </tr>
+                <tr>
+                  <td><code>shadowx</code> / <code>shadowy</code></td>
+                  <td>number</td>
+                  <td><code>0</code></td>
+                  <td>Horizontal and vertical shadow offsets in logical units.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- TAB 3: TRANSFORMS & SPATIAL -->
+          <div class="tab-content" id="tab-spatial-attr">
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>Attribute</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>x</code> / <code>y</code></td>
+                  <td>number / expr</td>
+                  <td><code>0</code></td>
+                  <td><strong>Transform Origin &amp; Center:</strong> The anchor point of the shape in logical stage coordinates.</td>
+                </tr>
+                <tr>
+                  <td><code>dx</code> / <code>dy</code></td>
+                  <td>number / expr</td>
+                  <td><code>0</code></td>
+                  <td><strong>Visual Displacement:</strong> Shifts the rendered geometry away from <code>(x, y)</code> without changing the rotation pivot.</td>
+                </tr>
+                <tr>
+                  <td><code>tx</code> / <code>ty</code></td>
+                  <td>number / expr</td>
+                  <td><code>0</code></td>
+                  <td><strong>Texture Origin:</strong> Offsets pattern and gradient coordinates relative to the shape center.</td>
+                </tr>
+                <tr>
+                  <td><code>rotate</code></td>
+                  <td>number / expr</td>
+                  <td><code>0</code></td>
+                  <td>Rotation around <code>(x, y)</code> in degrees (e.g. <code>rotate="t * 90"</code> for 90°/second continuous spin).</td>
+                </tr>
+                <tr>
+                  <td><code>scale</code> / <code>scalex</code> / <code>scaley</code></td>
+                  <td>number / expr</td>
+                  <td><code>1</code></td>
+                  <td>Uniform or independent axis scaling factors.</td>
+                </tr>
+                <tr>
+                  <td><code>skewx</code> / <code>skewy</code></td>
+                  <td>number / expr</td>
+                  <td><code>0</code></td>
+                  <td>Horizontal and vertical shear skew angles in degrees.</td>
+                </tr>
+                <tr>
+                  <td><code>cursor</code></td>
+                  <td>string</td>
+                  <td><code>'default'</code></td>
+                  <td>Mouse cursor displayed when hovering over the shape bounding box (e.g. <code>'pointer'</code>, <code>'move'</code>).</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- TAB 4: INTERACTIVE EVENTS -->
+          <div class="tab-content" id="tab-event-attr">
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>Attribute</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>onenter</code></td>
+                  <td>string (script)</td>
+                  <td><code>null</code></td>
+                  <td>Fires once when the pointer enters the shape. Recommended over legacy hover handlers.</td>
+                </tr>
+                <tr>
+                  <td><code>onleave</code></td>
+                  <td>string (script)</td>
+                  <td><code>null</code></td>
+                  <td>Fires once when the pointer exits the shape bounding area.</td>
+                </tr>
+                <tr>
+                  <td><code>onmove</code></td>
+                  <td>string (script)</td>
+                  <td><code>null</code></td>
+                  <td>Fires continuously as the pointer moves across the shape.</td>
+                </tr>
+                <tr>
+                  <td><code>ondown</code></td>
+                  <td>string (script)</td>
+                  <td><code>null</code></td>
+                  <td>Fires when the primary pointer button is pressed down while over the shape.</td>
+                </tr>
+                <tr>
+                  <td><code>onup</code></td>
+                  <td>string (script)</td>
+                  <td><code>null</code></td>
+                  <td>Fires when the primary pointer button is released while over the shape.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 3: THE 5 VISUAL MODES (INTERACTIVE COOKBOOK) -->
+        <!-- ================================================================= -->
+        <h2>3. The 5 Visual Modes (Interactive Cookbook)</h2>
+        <p>Because <code>&lt;pxl-circle&gt;</code> can render everything from solid discs to animated donut charts and curved vector arrows, we organize its real-world usage into <strong>5 Visual Modes</strong>.</p>
+
+        <!-- MODE 1: THE DISC & THE RING -->
+        <div class="example-card">
+          <div class="example-header">
+            <h3>Mode 1: The Disc &amp; The Ring (<code>r</code> vs. <code>ir</code>)</h3>
+            <p>A simple outer radius (<code>r</code>) draws a solid disc. Providing an inner radius (<code>ir &gt; 0</code>) hollows out the center to produce a concentric ring.</p>
+          </div>
+
+          <div class="demo-container">
+            <div class="demo-controls">
+              <div class="demo-controls-header">
+                <h3 class="demo-controls-title">Mode 1 Controls</h3>
+                <div class="demo-tabs">
+                  <button class="tab-btn active" onclick="switchTab(this, 'ex1-controls')">Attributes</button>
+                  <button class="tab-btn" onclick="switchTab(this, 'ex1-code')">HTML Markup</button>
+                </div>
+              </div>
+
+              <!-- Controls -->
+              <div class="tab-content active" id="ex1-controls">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label>Right Shape Inner Radius (<code>ir</code>): <span id="valEx1IR">60</span></label>
+                    <input type="range" min="0" max="95" step="5" value="60" autocomplete="off"
+                      oninput="document.getElementById('ex1Ring').setAttribute('ir', this.value); document.getElementById('valEx1IR').innerText = this.value; document.getElementById('codeEx1IR').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- HTML Code Preview -->
+              <div class="tab-content" id="ex1-code">
+                <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-circle x="500" y="200" r="50"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Left: Solid Disc (ir = 0) --&gt;
+    &lt;pxl-circle x="280" y="300" r="110" ir="0" fill="#ffedd566" stroke="#f97316" strokewidth="6"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Right: Hollow Ring (ir &gt; 0) --&gt;
+    &lt;pxl-circle x="720" y="300" r="110" ir="<mark id="codeEx1IR">60</mark>" fill="#dbeafe66" stroke="#3b82f6" strokewidth="6"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
+              </div>
+            </div>
+
+            <!-- Mode 1 Stage -->
+            <pxl-stage id="ex1Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                
+                <!-- Left: Solid Disc (Orange Scheme) -->
+                <pxl-circle x="280" y="300" r="110" ir="0" fill="#ffedd566" stroke="#f97316" strokewidth="6"></pxl-circle>
+                <pxl-circle x="280" y="300" r="6" fill="#fb923c"></pxl-circle>
+                <pxl-text x="280" y="440" text="'Solid Disc (ir = 0)'" size="18" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+                <!-- Right: Hollow Ring (Blue Scheme) -->
+                <pxl-circle id="ex1Ring" x="720" y="300" r="110" ir="60" fill="#dbeafe66" stroke="#3b82f6" strokewidth="6"></pxl-circle>
+                <pxl-circle x="720" y="300" r="6" fill="#60a5fa"></pxl-circle>
+                <pxl-text x="720" y="440" text="'Hollow Ring (ir > 0)'" size="18" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              </pxl-layer>
+            </pxl-stage>
+          </div>
+        </div>
+
+        <!-- MODE 2: OPEN ARCS & ANIMATED SPINNERS -->
+        <div class="example-card">
+          <div class="example-header">
+            <h3>Mode 2: Open Arcs &amp; Animated Spinners (<code>start</code>, <code>sweep</code>)</h3>
+            <p>By defining <code>start</code> and <code>sweep</code> angles in standard degrees (0°–360°) along with time-based expressions, a circle becomes an animated loading ring or progress gauge.</p>
+          </div>
+
+          <div class="demo-container">
+            <div class="demo-controls">
+              <div class="demo-controls-header">
+                <h3 class="demo-controls-title">Mode 2 Controls</h3>
+                <div class="demo-tabs">
+                  <button class="tab-btn active" onclick="switchTab(this, 'ex2-code')">HTML Markup</button>
+                </div>
+              </div>
+
+              <!-- HTML Markup -->
+              <div class="tab-content active" id="ex2-code">
+                <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Background Track Ring --&gt;
+    &lt;pxl-circle x="500" y="300" r="140" stroke="#cbd5e1" strokewidth="16"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Glowing Animated Arc --&gt;
+    &lt;pxl-circle x="500" y="300" r="140" 
+      stroke="#14b8a6" 
+      strokewidth="16" 
+      start="t * 180" 
+      sweep="160 + wave(3) * 120"
+      filter="drop-shadow(0px 0px 15px rgba(20,184,166,0.8))"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Orbiting Satellite Dot --&gt;
+    &lt;pxl-circle x="500 + cos(t*3)*180" y="300 + sin(t*3)*180" r="10" fill="#0f766e"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+              </div>
+            </div>
+
+            <!-- Mode 2 Stage (Loading Ring from test21.html) -->
+            <pxl-stage id="ex2Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                
+                <!-- Background track ring -->
+                <pxl-circle x="500" y="300" r="140" stroke="#cbd5e1" strokewidth="16"></pxl-circle>
+                
+                <!-- Glowing animated arc -->
+                <pxl-circle x="500" y="300" r="140" 
+                  stroke="#14b8a6" 
+                  strokewidth="16" 
+                  start="t * 180" 
+                  sweep="160 + wave(3) * 120"
+                  filter="drop-shadow(0px 0px 15px rgba(20,184,166,0.8))"></pxl-circle>
+
+                <!-- Orbiting satellite dot -->
+                <pxl-circle x="500 + cos(t*3)*180" y="300 + sin(t*3)*180" r="10" fill="#0f766e"></pxl-circle>
+                
+                <!-- Center Text -->
+                <pxl-text x="500" y="300" text="'Arc Mode (Loading Spinner)'" size="18" fill="#0f766e" font="monospace" align="center" baseline="middle"></pxl-text>
+              </pxl-layer>
+            </pxl-stage>
+          </div>
+        </div>
+
+        <!-- MODE 3: PIE CHARTS & DONUT CHARTS -->
+        <div class="example-card">
+          <div class="example-header">
+            <h3>Mode 3: Pie Wedges &amp; Donut Charts (<code>pie="true"</code> vs. <code>ir &gt; 0</code>)</h3>
+            <p>Setting <code>pie="true"</code> connects the ends of an open arc to the center origin <code>(0, 0)</code> to create solid wedges (like Pac-Man). Combining <code>ir &gt; 0</code> with <code>sweep</code> creates concentric donut chart segments.</p>
+          </div>
+
+          <div class="demo-container">
+            <div class="demo-controls">
+              <div class="demo-controls-header">
+                <h3 class="demo-controls-title">Mode 3 Controls</h3>
+                <div class="demo-tabs">
+                  <button class="tab-btn active" onclick="switchTab(this, 'ex3-code')">HTML Markup</button>
+                </div>
+              </div>
+
+              <!-- HTML Markup -->
+              <div class="tab-content active" id="ex3-code">
+                <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Animated Pac-Man (Pie Wedge Mode) --&gt;
+    &lt;pxl-circle x="280" y="300" r="110" 
+      fill="#fde047" stroke="#ca8a04" strokewidth="4"
+      pie="true" 
+      start="bounce(0.4) * 45" 
+      sweep="360 - (bounce(0.4) * 90)"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Right: Concentric Donut Chart Segments (ir &gt; 0) --&gt;
+    &lt;pxl-circle x="720" y="300" r="120" ir="70" fill="#fb7185" start="-90" sweep="135"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="720" y="300" r="120" ir="70" fill="#c084fc" start="45" sweep="115"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="720" y="300" r="120" ir="70" fill="#38bdf8" start="160" sweep="110"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+              </div>
+            </div>
+
+            <!-- Mode 3 Stage (Pac-Man and Donut Chart from test21.html) -->
+            <pxl-stage id="ex3Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                
+                <!-- Left: Animated Pac-Man -->
+                <pxl-group x="280" y="300">
+                  <pxl-circle r="110" 
+                    fill="#fde047" stroke="#ca8a04" strokewidth="4"
+                    pie="true"
+                    start="bounce(0.4) * 45"
+                    sweep="360 - (bounce(0.4) * 90)"
+                    filter="drop-shadow(0px 0px 15px rgba(253,224,71,0.5))"></pxl-circle>
+                  <!-- Pac-Man Eye -->
+                  <pxl-circle x="0" y="-55" r="10" fill="#0f172a"></pxl-circle>
+                  <!-- Pac-Man Food pellets -->
+                  <pxl-circle x="80 - (t * 80) % 80" y="0" r="7" fill="#ca8a04" alpha="0.5 + wave(2)*0.5"></pxl-circle>
+                  <pxl-circle x="160 - (t * 80) % 80" y="0" r="7" fill="#ca8a04" alpha="0.5 + wave(2)*0.5"></pxl-circle>
+                </pxl-group>
+                <pxl-text x="280" y="460" text="'Pie Wedge (pie = true)'" size="18" fill="#ca8a04" font="monospace" align="center"></pxl-text>
+
+                <!-- Right: Donut Chart -->
+                <pxl-group x="720" y="300">
+                  <pxl-circle r="50" fill="radial(1, ['rgba(249,115,22,0.15)', 'transparent'])" scale="1 + wave(3)*0.2"></pxl-circle>
+                  <pxl-circle r="120" ir="70" fill="#fb7185" start="-90" sweep="135"></pxl-circle>
+                  <pxl-circle r="120" ir="70" fill="#c084fc" start="45" sweep="115"></pxl-circle>
+                  <pxl-circle r="120" ir="70" fill="#38bdf8" start="160" sweep="110"></pxl-circle>
+                  <pxl-text text="'75%'" y="5" size="26" weight="bold" fill="#6d28d9" align="center" baseline="middle"></pxl-text>
+                </pxl-group>
+                <pxl-text x="720" y="460" text="'Donut Chart (ir > 0)'" size="18" fill="#6d28d9" font="monospace" align="center"></pxl-text>
+              </pxl-layer>
+            </pxl-stage>
+          </div>
+        </div>
+
+        <!-- MODE 4: CURVED VECTOR ARROWS -->
+        <div class="example-card">
+          <div class="example-header">
+            <h3>Mode 4: Curved Vector Arrows (<code>arrowstart</code>, <code>arrowend</code>, <code>arrowstyle</code>)</h3>
+            <p>Adding arrowhead sizes to an open circular arc transforms it into a curved vector diagram arrow, circular dial, or speedometer indicator.</p>
+          </div>
+
+          <div class="demo-container">
+            <div class="demo-controls">
+              <div class="demo-controls-header">
+                <h3 class="demo-controls-title">Mode 4 Controls</h3>
+                <div class="demo-tabs">
+                  <button class="tab-btn active" onclick="switchTab(this, 'ex4-code')">HTML Markup</button>
+                </div>
+              </div>
+
+              <!-- HTML Markup -->
+              <div class="tab-content active" id="ex4-code">
+                <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Filled Triangle Arrowhead (arrowstyle="filled") --&gt;
+    &lt;pxl-circle x="280" y="300" r="100" strokewidth="12" stroke="#0d9488" 
+      start="-135" sweep="180" 
+      arrowstart="auto" arrowend="auto" arrowstyle="filled"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Open Line V-Arrowhead (arrowstyle="line") --&gt;
+    &lt;pxl-circle x="720" y="300" r="100" strokewidth="12" stroke="#2563eb" 
+      start="-45" sweep="180" 
+      arrowstart="auto" arrowend="auto" arrowstyle="line"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+              </div>
+            </div>
+
+            <!-- Mode 4 Stage (Adapted from test26.html Circle Arrow Encyclopedia) -->
+            <pxl-stage id="ex4Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                
+                <!-- Left: arrowstyle="filled" -->
+                <pxl-circle x="280" y="300" r="100" strokewidth="12" stroke="#0d9488" 
+                  start="-135" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-circle>
+                <pxl-text x="280" y="300" text="'arrowstyle=&quot;filled&quot;'" size="16" fill="#0d9488" font="monospace" align="center" baseline="middle"></pxl-text>
+
+                <!-- Right: arrowstyle="line" -->
+                <pxl-circle x="720" y="300" r="100" strokewidth="12" stroke="#2563eb" 
+                  start="-45" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="line"></pxl-circle>
+                <pxl-text x="720" y="300" text="'arrowstyle=&quot;line&quot;'" size="16" fill="#2563eb" font="monospace" align="center" baseline="middle"></pxl-text>
+              </pxl-layer>
+            </pxl-stage>
+          </div>
+        </div>
+
+        <!-- MODE 5: CENTER ORIGIN VS. ORBITING -->
+        <div class="example-card">
+          <div class="example-header">
+            <h3>Mode 5: Transform Origin &amp; Orbiting (<code>(x, y)</code> vs. <code>(dx, dy)</code>)</h3>
+            <p>Coordinates <code>(x, y)</code> always define the rotation anchor point. Applying visual displacement offsets (<code>dx</code>, <code>dy</code>) shifts the shape away from its pivot, creating orbiting satellites when <code>rotate</code> is animated.</p>
+          </div>
+
+          <div class="demo-container">
+            <div class="demo-controls">
+              <div class="demo-controls-header">
+                <h3 class="demo-controls-title">Mode 5 Controls</h3>
+                <div class="demo-tabs">
+                  <button class="tab-btn active" onclick="switchTab(this, 'ex5-code')">HTML Markup</button>
+                </div>
+              </div>
+
+              <!-- HTML Markup -->
+              <div class="tab-content active" id="ex5-code">
+                <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Central Origin Dot at (500, 300) --&gt;
+    &lt;pxl-circle x="500" y="300" r="20" fill="#6d28d9"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Satellite Orbiting around (500, 300) via dx/dy + rotate --&gt;
+    &lt;pxl-circle x="500" y="300" 
+      dx="160" dy="0" 
+      r="30" 
+      fill="#ffedd566" stroke="#f97316" strokewidth="6"
+      rotate="t * 90"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+              </div>
+            </div>
+
+            <!-- Mode 5 Stage -->
+            <pxl-stage id="ex5Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                
+                <!-- Orbit Track Helper -->
+                <pxl-circle x="500" y="300" r="160" stroke="#cbd5e1" strokewidth="1" linedash="[6, 6]"></pxl-circle>
+
+                <!-- Central Pivot Anchor (Violet Scheme) -->
+                <pxl-circle x="500" y="300" r="20" fill="#6d28d9"></pxl-circle>
+                <pxl-text x="500" y="340" text="'Origin (500, 300)'" size="16" fill="#6d28d9" font="monospace" align="center"></pxl-text>
+
+                <!-- Orbiting Satellite (Orange Scheme) -->
+                <pxl-circle x="500" y="300" dx="160" dy="0" r="30" fill="#ffedd566" stroke="#f97316" strokewidth="6" rotate="t * 90"></pxl-circle>
+              </pxl-layer>
+            </pxl-stage>
+          </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 4: PRO TIPS, GOTCHAS & PERFORMANCE -->
+        <!-- ================================================================= -->
+        <h2>4. Pro Tips, Gotchas &amp; Performance Best Practices</h2>
+        <div class="pro-tips-grid">
+          <div class="pro-tip-card">
+            <h4>1. Angles are Always in Degrees (0°–360°)</h4>
+            <p>Unlike standard Canvas 2D methods which require radians, Kilopixel evaluates all <code>start</code>, <code>end</code>, <code>sweep</code>, and <code>rotate</code> angles in standard degrees. Never multiply by <code>Math.PI / 180</code> in your markup!</p>
+          </div>
+
+          <div class="pro-tip-card">
+            <h4>2. Compiler Fast-Path vs. Expression Evaluation</h4>
+            <p>When you pass a raw number like <code>r="100"</code>, Kilopixel hits a zero-cost compilation Fast-Path. Dynamic time expressions like <code>r="100 + wave(2)*20"</code> are compiled once and evaluated per animation frame.</p>
+          </div>
+
+          <div class="pro-tip-card">
+            <h4>3. Rotating Arcs vs. Changing Start/End</h4>
+            <p>To rotate a circular gauge or spinner, use <code>arc</code> with a continuous rotation like <code>rotate="t * 90"</code> rather than manually recalculating moving start and end angles every frame.</p>
+          </div>
+
+          <div class="pro-tip-card">
+            <h4>4. Ellipses use &lt;pxl-ellipse&gt;</h4>
+            <p>If you need independent horizontal and vertical radii (<code>rx</code> and <code>ry</code>), use the dedicated <code>&lt;pxl-ellipse&gt;</code> element rather than applying non-uniform scaling to a circle.</p>
+          </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 5: RELATED ELEMENTS & NEXT STEPS -->
+        <!-- ================================================================= -->
+        <h2>5. Related Elements</h2>
+        <div class="related-cards">
+          <a href="coordinates.html" class="related-card">
+            <h4>Coordinate System</h4>
+            <p>Master the 1000-unit logical canvas and responsive aspect ratios.</p>
+          </a>
+          <a href="rect.html" class="related-card">
+            <h4>&lt;pxl-rect&gt;</h4>
+            <p>Draw rectangles, rounded cards, and responsive bounding boxes.</p>
+          </a>
+          <a href="line.html" class="related-card">
+            <h4>&lt;pxl-line&gt;</h4>
+            <p>Draw line segments, vectors, and connector paths.</p>
+          </a>
+        </div>
+
       </div>
     </main>
 
   </div>
 
-  <!-- Prism Scripts -->
+  <!-- Hero Sandbox Mode Logic & Highlight script -->
+  <script>
+    function setHeroPie(val) {
+      const circle = document.getElementById('heroCircle');
+      const btnFalse = document.getElementById('btnHeroPieFalse');
+      const btnTrue = document.getElementById('btnHeroPieTrue');
+      const valLabel = document.getElementById('valHeroPie');
+      const codeLabel = document.getElementById('codeHeroPie');
+
+      if (circle) circle.setAttribute('pie', val);
+      if (valLabel) valLabel.innerText = val ? 'true' : 'false';
+      if (codeLabel) codeLabel.innerText = val ? 'true' : 'false';
+
+      if (val) {
+        btnTrue.classList.add('active');
+        btnFalse.classList.remove('active');
+      } else {
+        btnFalse.classList.add('active');
+        btnTrue.classList.remove('active');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      function updateHighlight(input) {
+        const oninputStr = input.getAttribute('oninput');
+        if (!oninputStr) return;
+        const match = oninputStr.match(/getElementById\(['"](code[^'"]+)['"]\)/);
+        if (match) {
+          const markId = match[1];
+          const markElement = document.getElementById(markId);
+          if (markElement) {
+            if (input._isPressed) {
+              markElement.classList.add('highlight-active');
+              input._activeMark = markElement;
+            } else {
+              markElement.classList.remove('highlight-active');
+              input._activeMark = null;
+            }
+          }
+        }
+      }
+
+      function handlePressStart(e) {
+        const target = e.target.closest('input[type="range"]');
+        if (target) {
+          target._isPressed = true;
+          updateHighlight(target);
+        }
+      }
+
+      function handlePressEnd(e) {
+        const targets = document.querySelectorAll('input[type="range"]');
+        targets.forEach(target => {
+          if (target._isPressed) {
+            target._isPressed = false;
+            updateHighlight(target);
+          }
+        });
+      }
+
+      document.addEventListener('mousedown', handlePressStart);
+      document.addEventListener('touchstart', handlePressStart, { passive: true });
+      document.addEventListener('mouseup', handlePressEnd);
+      document.addEventListener('touchend', handlePressEnd);
+      document.addEventListener('input', (e) => {
+        if (e.target.tagName === 'INPUT' && e.target.type === 'range') {
+          updateHighlight(e.target);
+        }
+      });
+    });
+  </script>
+
+  <!-- Prism Syntax Highlighting -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
 </body>
 </html>
