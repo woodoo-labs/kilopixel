@@ -17,7 +17,7 @@
 
 ## Project Context
 - **Framework Overview**: This project is a custom "Declarative Canvas Framework" (`pixel`) that allows building HTML5 Canvas graphics using custom HTML elements like `<pxl-stage>`, `<pxl-layer>`, `<pxl-group>`, and shape elements (`<pxl-circle>`, `<pxl-rect>`, `<pxl-grid>`, etc.).
-- **Deep Documentation**: For complete, in-depth technical documentation about the engine's architecture, scope, syntax, and capabilities, you MUST consult `.agents/framework.md`.
+- **Deep Documentation**: For complete, in-depth technical documentation about the engine's architecture, scope, syntax, and capabilities, you MUST consult `.agents/KILOPIXEL.md`.
 
 ## Critical Rules & Common Pitfalls
 - **Coordinate System**: `x` and `y` define the **Center** of the element. All transforms (rotation, scaling, skewing) occur around this point. When `dx`/`dy` offsets are applied, the shape is visually displaced but `x`/`y` remains the transform origin. All spatial values are multiplied by the responsive unit `u` at draw time. Shapes are drawn relative to `(0, 0)` within the transformed context.
@@ -29,7 +29,7 @@
 - **Use `onenter` not `onhover`**: The hover-entry event is `onenter`.
 
 # Kilopixel Documentation Style Guide
-When creating or modifying interactive documentation examples, you MUST first read the full style guide located at `docs/EXAMPLE_STANDARDS.md`. You must strictly follow all color semantics, stacking orders, and UI architecture rules defined in that file.
+When creating or modifying interactive documentation examples, you MUST first read the full style guide located at `docs/DOCS_STANDARDS.md`. You must strictly follow all color semantics, stacking orders, and UI architecture rules defined in that file.
 
 # Token Optimization & Artifacts
 - **Walkthrough Artifacts (On Explicit Request Only)**: By default, do NOT create or update `walkthrough.md` artifacts after completing work, and do NOT ask the user if they want one. Simply summarize your work concisely in your chat response. Only create a `walkthrough.md` file if the user explicitly requests one in their prompt.

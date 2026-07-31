@@ -290,6 +290,10 @@ All reactive references use a flat `ref.` prefix:
 
 The optional chaining injector ensures `ref.player?.x` so unresolved refs return `undefined` instead of throwing.
 
+> [!WARNING]
+> **Why Canvas Target IDs Must Not Use Kebab-Case (`-`)**
+> Never use hyphens (`kebab-case`) in IDs for `<pxl-layer>`, `<pxl-var>`, or any shape element that will be referenced by `ref.*` in declarative expressions. Because hyphens are subtraction operators in JavaScript, writing `ref.ex4-layer.x` throws a JavaScript syntax error (`(ref.ex4) - (layer.x)`). Always use **`camelCase`** (`id="ex4Layer"`, `id="orbitSpeed"`) for elements referenced by `ref.*`.
+
 ---
 
 ## Coordinate System & Transform Pipeline
@@ -1178,6 +1182,10 @@ node build.js
 ## AI Code Generation Guide
 
 ### Essential Rules for Generating Kilopixel HTML
+
+#### 0. Documentation Pages & Interactive Playgrounds
+
+When creating or modifying documentation pages under `docs/`, you MUST first consult `docs/DOCS_STANDARDS.md` to strictly follow all 3-part layout requirements (`Markup` -> `Stage` -> `Tabbed Controls`), `pxlDocs` namespacing, and Prism syntax highlighting rules.
 
 #### 1. Always Include These Elements
 

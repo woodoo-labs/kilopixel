@@ -50,34 +50,41 @@ When labeling points on the canvas, always use standard mathematical tuple synta
 Interactive playgrounds must follow a standardized DOM architecture to maintain visual parity across the site.
 
 ### Layout Structure
+Every documentation example must follow a standardized 3-part layout:
+1. **Visible Declarative Code Block (`<pre><code class="language-html">`)**: Placed **above** the demo container so developers see the declarative syntax immediately. Use `<mark id="code...">` around dynamic values.
+2. **Reactive Stage (`<pxl-stage class="demo-stage">`)**: Placed at the top inside `<div class="demo-container">`.
+3. **Interactive Controls (`<div class="demo-controls">`)**: Placed **below** `<pxl-stage>` inside `<div class="demo-container">`. Every example must feature interactive controls (sliders or toggle buttons). The header title must be simply `Controls` without redundant prefixes.
+
 ```html
+<!-- 1. Declarative Code Block Above Stage -->
+<pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-circle x="500" y="300" r="&lt;mark id="codeEx1R"&gt;200&lt;/mark&gt;" stroke="#f97316"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
 <div class="demo-container">
-  <!-- 1. The reactive stage -->
+  <!-- 2. The reactive stage -->
   <pxl-stage class="demo-stage">...</pxl-stage>
   
-  <!-- 2. The controls block -->
+  <!-- 3. The controls block below stage -->
   <div class="demo-controls">
     <div class="demo-controls-header">
       <h3 class="demo-controls-title">Controls</h3>
       <div class="demo-tabs">
-        <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex1-controls')">Attributes</button>
-        <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex1-code')">HTML Markup</button>
+        <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex1-circle')">Circle</button>
       </div>
     </div>
     
-    <!-- Tab 1: Sliders -->
-    <div class="tab-content active" id="ex1-controls">
+    <!-- Circle Tab -->
+    <div class="tab-content active" id="ex1-circle">
       <div class="playground-sliders">
         <div class="control-group">
-          <label>Rotation <span id="lblRot">0°</span></label>
-          <input type="range" oninput="document.getElementById('ex1Shape').setAttribute('rotate', this.value); document.getElementById('lblRot').innerText = this.value + '°';">
+          <label>Radius <span id="lblEx1R">200</span></label>
+          <input type="range" min="10" max="400" step="10" value="200" autocomplete="off"
+            oninput="document.getElementById('ex1Circle').setAttribute('r', this.value); document.getElementById('lblEx1R').innerText = this.value; document.getElementById('codeEx1R').innerText = this.value;">
         </div>
       </div>
-    </div>
-
-    <!-- Tab 2: HTML Markup Preview -->
-    <div class="tab-content" id="ex1-code">
-      <pre><code class="language-html">...</code></pre>
     </div>
   </div>
 </div>
@@ -94,6 +101,11 @@ Interactive playgrounds must follow a standardized DOM architecture to maintain 
 * **Direct Manipulation over Variables:** `<pxl-var>` nodes should only be used for shared global state. For direct property control, sliders must directly manipulate the target element using standard HTML5 Web Component DOM methods: `document.getElementById('elementId').setAttribute('property', this.value)`.
 * HTML code blocks must use `<pre><code class="language-html">`.
 * Values in the code block that change dynamically must be wrapped in a `<mark id="code[VarName]">` tag.
+* **Prism Syntax Highlighting & Keep-Markup:** Every documentation page that uses Prism syntax highlighting MUST load both `prism.min.js` and `<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>`. Without the `keep-markup` plugin, Prism strips out `<mark id="...">` tags during syntax highlighting, breaking live code updates.
+* **Simplified Pedagogical Code Snippets:** HTML code blocks (`<pre><code class="language-html">`) MUST show only the minimal, clean markup needed to teach the section's core concept:
+  * **Exclude Stage Helpers:** Never include background grids (`<pxl-grid>`), coordinate axes, dimension lines, or leader markers in the HTML snippet.
+  * **Exclude Auxiliary Shapes:** Do not show secondary decorative shapes in the code block.
+  * **Minimal Styling:** Use simple `stroke` or basic `fill` attributes. Do not include verbose `strokewidth`, `alpha`, or long CSS `filter` strings unless that specific styling attribute is what is being demonstrated or controlled.
 * Slider `oninput` handlers must execute inline JS to do exactly three things:
   1. Update the element property: `document.getElementById('ex4Rect').setAttribute('x', this.value)`
   2. Update the UI label: `document.getElementById('lblEx4RectX').innerText = this.value`
@@ -107,7 +119,22 @@ Interactive playgrounds must follow a standardized DOM architecture to maintain 
 ### 5. ID Naming Conventions
 To ensure perfect consistency across documentation playgrounds, all HTML IDs must follow a strict naming scheme:
 * Format: **`ex[Number][Entity][Property]`** (camelCase)
+* **Canvas Target Shapes (`camelCase`):** Any `<pxl-layer>`, `<pxl-var>`, or canvas shape element that will be referenced by `ref.*` in declarative expressions must use strict **camelCase** (e.g., `ex1Stage`, `ex4Layer`, `ex4Ellipse`, `ex3m1Ring`).
+  * *(Why? Using hyphens (`-`) in kebab-case breaks JavaScript dot notation in `ref.*` expressions because `-` is evaluated as subtraction—see `.agents/KILOPIXEL.md`).*
 * Target Elements: `ex4Layer`, `ex4Rect`, `ex2Circle`
 * UI Labels: `lblEx4LayerX`, `lblEx4RectRot`
 * Code Snippet Marks: `codeEx4LayerX`, `codeEx4RectRot`
 * Do not append redundant suffixes like `Shape`.
+* **Tab Content & Button IDs:** All interactive tab container IDs (`<div class="tab-content id="...">`) and their button `onclick` targets (`pxlDocs.switchTab(this, 'id')`) must use strict **kebab-case**:
+  * Format: **`ex[SectionNumber]-[name]`** matching the button's distinguishing label (e.g., `ex2-circle`, `ex2-styling`, `ex2-transforms`, `ex2-events` in Section 2, or `ex4-layer`, `ex4-ellipse` in Section 4).
+  * Do not use redundant suffixes like `-attr` or `-tab`.
+
+### 6. Typography & Punctuation Standards
+To maintain a cohesive, highly professional editorial presentation across all documentation and guides, follow this strict typography standard:
+
+| Name | Character | Canonical Rule | Example |
+| :--- | :---: | :--- | :--- |
+| **Hyphen** | `-` | **No spaces.** Strictly for compound adjectives and prefixes. | `zero-cost fast path`, `multi-mode primitive` |
+| **En Dash** | `–` (`&ndash;`) | **No spaces.** Strictly for numerical, date, and coordinate ranges (*"to / through"*). | `Angles are evaluated in degrees (0°–360°)` |
+| **Em Dash** | `—` (`&mdash;`) | **Always use a space before and after (` — `).** Strictly for sentence breaks, dramatic pauses, or parenthetical explanations. Never use unspaced em dashes or en dashes for sentence breaks. | `animated loading spinners — all from a single tag` |
+| **Minus Sign** | `−` (`&minus;`) | **Always use spaces around arithmetic operators.** Strictly for mathematical equations and negative numbers. | `−10 + 5 = −5` |
