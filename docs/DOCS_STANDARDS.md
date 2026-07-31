@@ -117,17 +117,22 @@ Every documentation example must follow a standardized 3-part layout:
 * *Note: The highlighting system uses a Regex-based Pointer Event Delegation System (`pointerdown`/`touchstart`). It automatically parses the `oninput` strings of sliders to find the `getElementById('code...')` references, dynamically mapping active sliders to their `<mark>` targets.*
 
 ### 5. ID Naming Conventions
-To ensure perfect consistency across documentation playgrounds, all HTML IDs must follow a strict naming scheme:
-* Format: **`ex[Number][Entity][Property]`** (camelCase)
-* **Canvas Target Shapes (`camelCase`):** Any `<pxl-layer>`, `<pxl-var>`, or canvas shape element that will be referenced by `ref.*` in declarative expressions must use strict **camelCase** (e.g., `ex1Stage`, `ex4Layer`, `ex4Ellipse`, `ex3m1Ring`).
+To ensure perfect consistency across all documentation playgrounds and guides, 100% of HTML IDs must follow our **Universal 100% `camelCase` Hierarchical ID Standard**:
+* Formula: **`sec[N][exM][Entity][Target][Role]`** (strict **camelCase**, zero hyphens anywhere)
+  * **`sec[N]`** *(Required)*: Major Section number on the page (`sec1`, `sec2`, `sec3`, `sec4`).
+  * **`[exM]`** *(Optional)*: Example number within that section (`ex1`, `ex2`, `ex3`...). Used when a section has multiple examples or sub-sections. Omitted when a section has only a single interactive example.
+  * **`[Entity]`** *(Required)*: Target shape, layer, group, or table category (`Stage`, `Layer`, `Circle`, `Ellipse`, `Styling`, `Transforms`).
+  * **`[Target]`** *(Optional)*: Container component (`Tab`) or attribute name (`X`, `Y`, `R`, `Rx`, `Rot`, `Width`).
+  * **`[Role]`** *(Optional)*: UI modifier for attribute controls (`Val`, `Code`, `Input`).
+* **Canvas Target Shapes (`camelCase`):** Any `<pxl-layer>`, `<pxl-var>`, or canvas shape element that will be referenced by `ref.*` in declarative expressions must use strict **camelCase** (`sec4Layer`, `sec4Ellipse`, `sec3ex1Ring`).
   * *(Why? Using hyphens (`-`) in kebab-case breaks JavaScript dot notation in `ref.*` expressions because `-` is evaluated as subtraction—see `.agents/KILOPIXEL.md`).*
-* Target Elements: `ex4Layer`, `ex4Rect`, `ex2Circle`
-* UI Labels: `lblEx4LayerX`, `lblEx4RectRot`
-* Code Snippet Marks: `codeEx4LayerX`, `codeEx4RectRot`
-* Do not append redundant suffixes like `Shape`.
-* **Tab Content & Button IDs:** All interactive tab container IDs (`<div class="tab-content id="...">`) and their button `onclick` targets (`pxlDocs.switchTab(this, 'id')`) must use strict **kebab-case**:
-  * Format: **`ex[SectionNumber]-[name]`** matching the button's distinguishing label (e.g., `ex2-circle`, `ex2-styling`, `ex2-transforms`, `ex2-events` in Section 2, or `ex4-layer`, `ex4-ellipse` in Section 4).
-  * Do not use redundant suffixes like `-attr` or `-tab`.
+* **Examples by Component Type:**
+  * Base Canvas Shapes & Layers: `sec1Stage`, `sec2Circle`, `sec4Layer`, `sec4Ellipse`, `sec3ex1Ring`
+  * Tab Content Boxes (`[Target]` = `Tab`): `sec2CircleTab`, `sec4LayerTab`, `sec4EllipseTab`, `sec3ex1RingTab`
+  * UI Numeric Label Spans (`[Role]` = `Val`): `sec2CircleXVal`, `sec4LayerRotVal`, `sec4EllipseRxVal`, `sec3ex1RingIRVal`
+  * Code Snippet Marks (`[Role]` = `Code`): `sec2CircleXCode`, `sec4LayerRotCode`, `sec4EllipseRxCode`, `sec3ex1RingIRCode`
+  * Slider Inputs (`[Role]` = `Input`): `sec2CircleXInput`, `sec4LayerRotInput`
+* **Do not append redundant suffixes** like `Shape` or `Attr`.
 
 ### 6. Typography & Punctuation Standards
 To maintain a cohesive, highly professional editorial presentation across all documentation and guides, follow this strict typography standard:
