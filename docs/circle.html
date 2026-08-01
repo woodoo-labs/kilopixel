@@ -122,10 +122,10 @@
         <div class="demo-controls">
           <div class="demo-controls-header">
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2CircleTab')">Circle (10)</button>
-              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2StylingTab')">Styling (12)</button>
-              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2TransformsTab')">Transforms (12)</button>
-              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2EventsTab')">Events (6)</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2CircleTab')">Circle</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2StylingTab')">Styling</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2TransformsTab')">Transforms</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2EventsTab')">Events</button>
             </div>
           </div>
 
@@ -137,7 +137,7 @@
                   <code class="api-name">r</code>
                   <div class="api-meta">
                     <span class="api-pill default-pill">default: <strong>0</strong></span>
-                    <span class="api-pill values-pill"><code>0–1000</code> | <code>expr</code></span>
+                    <span class="api-pill values-pill"><code>number &gt;= 0</code> | <code>expr</code></span>
                   </div>
                 </div>
                 <div class="api-item-desc">
@@ -150,7 +150,7 @@
                   <code class="api-name">ir</code>
                   <div class="api-meta">
                     <span class="api-pill default-pill">default: <strong>0</strong></span>
-                    <span class="api-pill values-pill"><code>0–1000</code> | <code>expr</code></span>
+                    <span class="api-pill values-pill"><code>number &gt;= 0</code> | <code>expr</code></span>
                   </div>
                 </div>
                 <div class="api-item-desc">
@@ -298,7 +298,7 @@
                   <code class="api-name">strokewidth</code>
                   <div class="api-meta">
                     <span class="api-pill default-pill">default: <strong>1</strong></span>
-                    <span class="api-pill values-pill"><code>0–100</code> | <code>expr</code></span>
+                    <span class="api-pill values-pill"><code>number &gt;= 0</code> | <code>expr</code></span>
                   </div>
                 </div>
                 <div class="api-item-desc">
@@ -422,6 +422,45 @@
                   CSS visual filter string (e.g. <code>filter="drop-shadow(0px 0px 15px rgba(249,115,22,0.8))"</code>). Supports all CSS filter functions like <code>blur()</code>, <code>brightness()</code>, <code>contrast()</code>, and <code>drop-shadow()</code>. See the <a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter" target="_blank" rel="noopener noreferrer">MDN Canvas filter Reference</a> for all available functions.
                 </div>
               </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">shadowcolor</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>'none'</strong></span>
+                    <span class="api-pill values-pill"><code>color</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Native Canvas 2D shadow color (e.g. <code>#38bdf8</code> or <code>rgba(56, 189, 248, 0.8)</code>). Rendered by the GPU via radial alpha masks for high-performance glows and drop shadows.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">shadowblur</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>0</strong></span>
+                    <span class="api-pill values-pill"><code>number &gt;= 0</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Native shadow blur radius in logical units (<code>u</code>). Scales responsively with the stage.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">shadowx / shadowy</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>0</strong></span>
+                    <span class="api-pill values-pill"><code>number</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Horizontal and vertical offset distance of the native shadow in logical units (<code>u</code>).
+                </div>
+              </div>
             </div>
           </div>
 
@@ -433,7 +472,7 @@
                   <code class="api-name">x / y</code>
                   <div class="api-meta">
                     <span class="api-pill default-pill">default: <strong>0</strong></span>
-                    <span class="api-pill values-pill"><code>0–1000</code> | <code>expr</code></span>
+                    <span class="api-pill values-pill"><code>number</code> | <code>expr</code></span>
                   </div>
                 </div>
                 <div class="api-item-desc">

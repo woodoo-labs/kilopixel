@@ -5,7 +5,7 @@ pxl.anchorX = { 'left': 0, 'right': 1, 'center': 0.5, 'top-left': 0, 'top-right'
 pxl.anchorY = { 'top': 0, 'bottom': 1, 'center': 0.5, 'top-left': 0, 'top-right': 0, 'bottom-left': 1, 'bottom-right': 1, 'left': 0.5, 'right': 0.5 };
 
 pxl.applyContextState = function(ctx, u, attributeValues) {
-  const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy, alpha, blend, filter } = attributeValues;
+  const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy, alpha, blend, filter, shadowcolor, shadowblur, shadowx, shadowy } = attributeValues;
   
   // 1. Geometric Transforms
   if (x || y) ctx.translate(x * u, y * u);
@@ -26,6 +26,20 @@ pxl.applyContextState = function(ctx, u, attributeValues) {
   if (alpha !== 1) ctx.globalAlpha *= alpha;
   if (blend !== 'source-over') ctx.globalCompositeOperation = blend;
   if (filter !== 'none') ctx.filter = filter;
+
+  if (shadowcolor) {
+    if (shadowcolor === 'none' || shadowcolor === 'transparent') {
+      ctx.shadowColor = 'rgba(0, 0, 0, 0)';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+    } else {
+      ctx.shadowColor = shadowcolor;
+      ctx.shadowBlur = shadowblur * u;
+      ctx.shadowOffsetX = shadowx * u;
+      ctx.shadowOffsetY = shadowy * u;
+    }
+  }
 };
 
 // =========================================================================

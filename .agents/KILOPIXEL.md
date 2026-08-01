@@ -9,7 +9,7 @@ Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built
 <script src="pxl.min.js"></script>
 <pxl-stage id="main" ratio="16 / 9">
   <pxl-layer>
-    <pxl-circle x="500" y="300" r="50" fill="red" rotate="t * 90"/>
+    <pxl-circle x="500" y="300" r="50" fill="red" rotate="t * 90"></pxl-circle>
   </pxl-layer>
 </pxl-stage>
 ```
@@ -60,7 +60,7 @@ graph TD
     D --> E["pxl-circle · pxl-ellipse · pxl-rect · pxl-line · pxl-polyline · pxl-text · pxl-grid"]
 
     F["compiler.js<br/>(Expression Compiler)"] -->|"string → function"| G["animationCache / staticCache"]
-    I["Built-in Scope<br/>(wave, hsl, linear, Math.*)"] --> F
+    I["Built-in Scope<br/>(wave, hsl, linear, cos, sin, PI...)"] --> F
 
     H["engine.js<br/>(Reactivity Engine)"] -->|"ref.* pub/sub, attribute compilation"| D
     H --> B
@@ -231,6 +231,13 @@ The outer function (factory) executes ONCE, destructuring the entire scope. The 
 **Static Path** (no time, no variables):
 Evaluated once via `new Function`, result cached in `staticCache`.
 
+### No `Math.` Prefix Required (Top-Level Scope Injection)
+
+All standard JavaScript `Math` constants and methods (`PI`, `cos`, `sin`, `abs`, `min`, `max`, `pow`, `round`, etc.) are injected directly into every compiled expression's top-level scope.
+
+> [!IMPORTANT]
+> **Never use the `Math.` prefix** inside declarative expressions. Write `cos(t)` and `sin(t)` directly instead of `Math.cos(t)` or `Math.sin(t)`.
+
 ### Smart Return
 
 The compiler auto-wraps expressions in `return` unless the string already contains the `return` keyword. This enables two syntax modes:
@@ -242,7 +249,7 @@ The compiler auto-wraps expressions in `return` unless the string already contai
 Expressions containing `this` are flagged as `isTimeDependent = true` (animated), because the function is called with `fn.call(element, t)`. This gives the expression access to `this.attributeValues`, `this.id`, etc.
 
 ```html
-<pxl-circle r="30 + wave(2)*70" fill="`hsl(${this.attributeValues.r * 3}, 100%, 50%)`"/>
+<pxl-circle r="30 + wave(2)*70" fill="`hsl(${this.attributeValues.r * 3}, 100%, 50%)`"></pxl-circle>
 ```
 
 ---
@@ -328,7 +335,7 @@ The center/offset split makes orbital motion trivial:
 
 ```html
 <!-- Planet orbiting center at 60°/sec, 200-unit orbital radius -->
-<pxl-circle x="500" y="300" dx="200" rotate="t * 60" r="20" fill="red"/>
+<pxl-circle x="500" y="300" dx="200" rotate="t * 60" r="20" fill="red"></pxl-circle>
 ```
 
 Without this split, you'd need nested groups or trigonometry.
@@ -336,6 +343,17 @@ Without this split, you'd need nested groups or trigonometry.
 ### Shape Drawing Origin
 
 Shapes are drawn relative to `(0, 0)` within the transformed context. The transform pipeline has already positioned the canvas context at the shape's center. For example, a circle draws `ctx.arc(0, 0, r * u, ...)`.
+
+---
+
+### Style Cascade & Inheritance (`alpha`, `blend`, `filter`, and native shadows)
+
+All container styling attributes (`alpha`, `blend`, `filter`, and native canvas shadows `shadowcolor`, `shadowblur`, `shadowx`, `shadowy`) cascade through the element hierarchy from `<pxl-layer>` and `<pxl-group>` down to child `<pxl-shape>` elements:
+
+- **Compounding Opacity (`alpha`)**: Opacity multiplies mathematically down the container tree (`ctx.globalAlpha *= alpha`). For example, a group with `alpha="0.5"` containing a shape with `alpha="0.5"` renders the shape at `0.25` opacity (`0.5 * 0.5`).
+- **Inherited Blend Modes, Filters, and Native Shadows**: Containers set the rendering state on the canvas context (`ctx.globalCompositeOperation`, `ctx.filter`, `ctx.shadowColor`, `ctx.shadowBlur`, `ctx.shadowOffsetX`, `ctx.shadowOffsetY`) before drawing their children. All child shapes automatically inherit these styles.
+- **Overriding and Disabling Styles**: Any child shape can override an inherited style by setting its own value (e.g. `shadowcolor="#ef4444"`), or explicitly disable an inherited filter or shadow by setting `filter="none"` or `shadowcolor="none"` / `shadowcolor="transparent"`.
+- **CPU Performance Advantage**: Applying `shadowcolor`, `shadowblur`, `shadowx`, `shadowy` once on a container (`<pxl-layer>` or `<pxl-group>`) is up to 10x more performant on the CPU for multiple shapes than applying shadows individually on each shape, because it requires only 1 `ctx.save()` / `ctx.restore()` state switch instead of one per shape.
 
 ---
 
@@ -457,7 +475,7 @@ Automatically updated boolean properties on shape elements:
 ```html
 <pxl-rect id="btn" w="100" h="40"
   fill="ref.btn.isPressed ? '#333' : (ref.btn.isHovered ? '#666' : '#999')"
-  scale="ref.btn.isPressed ? 0.95 : (ref.btn.isHovered ? 1.05 : 1)"/>
+  scale="ref.btn.isPressed ? 0.95 : (ref.btn.isHovered ? 1.05 : 1)"></pxl-rect>
 ```
 
 #### 2. Imperative Events (for logic/scripting)
@@ -471,7 +489,7 @@ Instantaneous JavaScript blocks compiled and attached to elements:
 - `onmove` — pointer moves while over element
 
 ```html
-<pxl-circle onclick="ref.counter.set('value', ref.counter.value + 1)" .../>
+<pxl-circle onclick="ref.counter.set('value', ref.counter.value + 1)" ...></pxl-circle>
 ```
 
 **Event compilation**: Event strings are compiled via `new Function` with the full scope (including `ref`, all math functions, all drivers). They are bound to the element via `.bind(this)`.
@@ -535,7 +553,7 @@ Each PxlNode tracks matrix state to avoid recomputation:
 The `toLocal(target, property)` function maps a target element's global position into the caller's local coordinate space:
 
 ```html
-<pxl-circle x="toLocal(ref.player, 'x')" y="toLocal(ref.player, 'y')"/>
+<pxl-circle x="toLocal(ref.player, 'x')" y="toLocal(ref.player, 'y')"></pxl-circle>
 ```
 
 **Algorithm** (`pxl.mapCoordinate`):
@@ -602,15 +620,16 @@ Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile 
 **Class**: `Layer extends PxlNode`  
 **Source**: `js/elements/layer.js`
 
-### Observed Attributes (14)
+### Observed Attributes (18)
 
-`x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`, `alpha`, `blend`, `filter`, `hidden`
+`x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`, `alpha`, `blend`, `filter`, `shadowcolor`, `shadowblur`, `shadowx`, `shadowy`, `hidden`
 
 ### Default Values
 
 ```javascript
 { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1,
-  skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false }
+  skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none',
+  shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false }
 ```
 
 ### Key Behavior
@@ -632,9 +651,9 @@ Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile 
 **Class**: `Group extends PxlNode`  
 **Source**: `js/elements/group.js`
 
-### Observed Attributes (14)
+### Observed Attributes (18)
 
-Same as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`, `alpha`, `blend`, `filter`, `hidden`
+Same as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`, `alpha`, `blend`, `filter`, `shadowcolor`, `shadowblur`, `shadowx`, `shadowy`, `hidden`
 
 ### Key Behavior
 
@@ -652,11 +671,11 @@ Same as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `ske
 **Class**: `Shape extends PxlNode`  
 **Source**: `js/elements/shape.js`
 
-### Observed Attributes (28)
+### Observed Attributes (32)
 
 **Transform**: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`  
 **Style**: `fill`, `stroke`, `strokewidth`, `linecap`, `linejoin`, `miterlimit`, `linedash`, `dashoffset`  
-**Render**: `alpha`, `blend`, `filter`, `hidden`  
+**Render**: `alpha`, `blend`, `filter`, `shadowcolor`, `shadowblur`, `shadowx`, `shadowy`, `hidden`  
 **Events**: `onclick`, `onenter`, `onleave`, `ondown`, `onup`, `onmove`
 
 ### Default Values
@@ -666,6 +685,7 @@ Same as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `ske
   linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null,
   dashoffset: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1,
   skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none',
+  shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0,
   hidden: false, isHovered: false, isPressed: false }
 ```
 
@@ -1072,13 +1092,13 @@ Returns zeroed bounding box by default (grid is infinite). However, during draw,
 ### Usage
 
 ```html
-<pxl-var id="speed" value="100"/>
-<pxl-circle r="ref.speed.value" .../>
+<pxl-var id="speed" value="100"></pxl-var>
+<pxl-circle r="ref.speed.value" ...></pxl-circle>
 ```
 
 Mutating from event handlers:
 ```html
-<pxl-circle onclick="ref.speed.set('value', ref.speed.value + 10)" .../>
+<pxl-circle onclick="ref.speed.set('value', ref.speed.value + 10)" ...></pxl-circle>
 ```
 
 The `set(key, value)` method on `attributeValues` calls `setAttribute()` on the element, triggering recompilation and broadcast.
@@ -1146,7 +1166,7 @@ The `set(key, value)` method on `attributeValues` calls `setAttribute()` on the 
 
 ```html
 <pxl-text text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'"
-  font="monospace" size="14" fill="#0f0"/>
+  font="monospace" size="14" fill="#0f0"></pxl-text>
 ```
 
 ---
@@ -1200,123 +1220,144 @@ When creating or modifying documentation pages under `docs/`, you MUST first con
 
 Every shape MUST be inside a `<pxl-layer>`. Layers MUST be inside a `<pxl-stage>`.
 
-#### 2. Use Raw Numbers for Coordinates
+#### 2. Never Use Self-Closing Tags (`/>`) for Kilopixel Elements
+
+In HTML5, custom Web Components are **not void elements** (unlike `<img>` or `<input>`). Writing `<pxl-circle />` will be parsed by the browser as an unclosed opening tag, causing subsequent sibling elements to be accidentally nested as children.
+
+```html
+<!-- GOOD: Explicit closing tags -->
+<pxl-circle x="500" y="300" r="50"></pxl-circle>
+<pxl-rect w="100" h="50"></pxl-rect>
+
+<!-- BAD: Self-closing syntax causes DOM nesting bugs in HTML5 -->
+<pxl-circle x="500" y="300" r="50" />
+```
+
+#### 3. Use Raw Numbers for Coordinates
 
 ```html
 <!-- GOOD: Fast Path, zero evaluation cost -->
-<pxl-circle x="500" y="300" r="50"/>
+<pxl-circle x="500" y="300" r="50"></pxl-circle>
 
 <!-- BAD: Unnecessary expression evaluation -->
-<pxl-circle x="ref.main.width / 2" y="ref.main.height / 2" r="50"/>
+<pxl-circle x="ref.main.width / 2" y="ref.main.height / 2" r="50"></pxl-circle>
 ```
 
 The logical width is always 1000. Use raw numbers.
 
-#### 3. String Quoting Rules
+#### 4. String Quoting Rules
 
 Plain text attributes work without quotes — the compiler's Fast Path handles them:
 
 ```html
 <!-- Plain text: no quotes needed -->
-<pxl-text text="Hello World" .../>
+<pxl-text text="Hello World" ...></pxl-text>
 
 <!-- Inside JS expressions: quotes ARE needed -->
-<pxl-circle fill="t > 5 ? 'red' : 'blue'" .../>
-<pxl-text text="`Score: ${ref.score.value}`" .../>
+<pxl-circle fill="t > 5 ? 'red' : 'blue'" ...></pxl-circle>
+<pxl-text text="`Score: ${ref.score.value}`" ...></pxl-text>
 ```
 
-#### 4. Time is in Seconds
+#### 5. Time is in Seconds
 
 ```html
 <!-- wave(2) = 2-second cycle -->
-<pxl-circle r="30 + wave(2) * 70" .../>
+<pxl-circle r="30 + wave(2) * 70" ...></pxl-circle>
 
 <!-- t * 90 = 90 degrees per second -->
-<pxl-circle rotate="t * 90" .../>
+<pxl-circle rotate="t * 90" ...></pxl-circle>
 ```
 
-#### 5. Colors and Gradients Don't Need Backticks
+#### 6. Colors and Gradients Don't Need Backticks
 
 ```html
 <!-- These work because parentheses trigger dynamic evaluation -->
-<pxl-circle fill="hsl(t * 36, 80, 50)" .../>
-<pxl-rect fill="linear(45, ['red', 'blue'])" .../>
-<pxl-circle fill="radial(1, ['white', 'black'])" .../>
+<pxl-circle fill="hsl(t * 36, 80, 50)" ...></pxl-circle>
+<pxl-rect fill="linear(45, ['red', 'blue'])" ...></pxl-rect>
+<pxl-circle fill="radial(1, ['white', 'black'])" ...></pxl-circle>
 ```
 
-#### 6. Static vs. Animated Filters (When to Use Backticks)
+#### 7. Static vs. Animated Filters (When to Use Backticks)
 
 Static filters work as-is without quotes or backticks (Fast Path). Backticks should ONLY be used when animating filters with `${...}` syntax:
 
 ```html
 <!-- Static filter: NO backticks (Fast Path, zero-GC) -->
-<pxl-circle filter="blur(5px)" .../>
-<pxl-circle filter="drop-shadow(0 0 10px #38bdf8)" .../>
+<pxl-circle filter="blur(5px)" ...></pxl-circle>
+<pxl-circle filter="drop-shadow(0 0 10px #38bdf8)" ...></pxl-circle>
 
 <!-- Animated filter: MUST use backticks for ${...} evaluation -->
-<pxl-circle filter="`blur(${wave(2) * 10}px)`" .../>
-<pxl-circle filter="`drop-shadow(0 0 ${wave(2)*15}px red)`" .../>
+<pxl-circle filter="`blur(${wave(2) * 10}px)`" ...></pxl-circle>
+<pxl-circle filter="`drop-shadow(0 0 ${wave(2)*15}px red)`" ...></pxl-circle>
 ```
 
-#### 7. Reactive Variables Pattern
+> [!NOTE]
+> **CSS Filters (`px`) vs. Native Canvas Shadows (`u`)**:
+> - **CSS Filters (`filter="..."`)** take literal CSS strings (e.g. `blur(5px)` or `drop-shadow(0 0 10px red)`), meaning they operate in **fixed physical screen pixels (`px`)** and do *not* scale responsively when the stage resizes.
+> - **Native Canvas Shadows (`shadowblur="10"`)** operate in **logical units (`u`)**, meaning they scale responsively with the stage. Always prefer native shadow attributes over CSS `drop-shadow` for resolution-independent rendering.
+
+
+#### 8. Reactive Variables Pattern
 
 ```html
-<pxl-var id="score" value="0"/>
-<pxl-text text="`Score: ${ref.score.value}`" .../>
-<pxl-circle onclick="ref.score.set('value', ref.score.value + 1)" .../>
+<pxl-var id="score" value="0"></pxl-var>
+<pxl-text text="`Score: ${ref.score.value}`" ...></pxl-text>
+<pxl-circle onclick="ref.score.set('value', ref.score.value + 1)" ...></pxl-circle>
 ```
 
-#### 8. Element Cross-Referencing
+#### 9. Element Cross-Referencing
 
 ```html
-<pxl-circle id="leader" x="ref.main.mouseX" y="ref.main.mouseY" r="20" fill="red"/>
-<pxl-circle x="ref.leader.x" y="ref.leader.y" r="30" stroke="blue" fill="none"/>
+<pxl-circle id="leader" x="ref.main.mouseX" y="ref.main.mouseY" r="20" fill="red"></pxl-circle>
+<pxl-circle x="ref.leader.x" y="ref.leader.y" r="30" stroke="blue" fill="none"></pxl-circle>
 ```
 
-#### 9. Orbital Motion
+#### 10. Orbital Motion
 
 ```html
 <!-- dx creates orbit radius, rotate spins around the pivot (x,y) -->
-<pxl-circle x="500" y="300" dx="150" rotate="t * 45" r="15" fill="orange"/>
+<pxl-circle x="500" y="300" dx="150" rotate="t * 45" r="15" fill="orange"></pxl-circle>
 ```
 
-#### 10. Interactive Elements
+#### 11. Interactive Elements
 
 ```html
 <!-- Declarative hover/press styling -->
 <pxl-rect id="btn" x="500" y="300" w="120" h="50" r="10"
   fill="ref.btn.isPressed ? '#222' : (ref.btn.isHovered ? '#555' : '#888')"
   scale="ref.btn.isPressed ? 0.95 : (ref.btn.isHovered ? 1.05 : 1)"
-  onclick="ref.counter.set('value', ref.counter.value + 1)"/>
+  onclick="ref.counter.set('value', ref.counter.value + 1)"></pxl-rect>
 ```
 
-#### 11. Performance Monitor Display
+#### 12. Performance Monitor Display
 
 ```html
 <pxl-text x="20" y="30"
   text="ref.main.fps + ' FPS | ' + ref.main.renderAvg + 'ms'"
-  font="monospace" size="14" fill="#0f0"/>
+  font="monospace" size="14" fill="#0f0"></pxl-text>
 ```
 
-#### 12. Polyline Points Syntax
+#### 13. Polyline Points Syntax
 
 ```html
 <!-- Semicolons separate points, commas separate X,Y -->
-<pxl-polyline points="100,100; 200,50; 300,100; 400,50" stroke="white"/>
+<pxl-polyline points="100,100; 200,50; 300,100; 400,50" stroke="white"></pxl-polyline>
 
 <!-- Per-coordinate animation -->
-<pxl-polyline points="100,wave(2)*200; 200,wave(3)*200; 300,wave(4)*200" stroke="cyan"/>
+<pxl-polyline points="100,wave(2)*200; 200,wave(3)*200; 300,wave(4)*200" stroke="cyan"></pxl-polyline>
 
 <!-- Relative mode -->
-<pxl-polyline mode="relative" points="0,0; 50,50; 50,-50; 50,50" stroke="lime"/>
+<pxl-polyline mode="relative" points="0,0; 50,50; 50,-50; 50,50" stroke="lime"></pxl-polyline>
 ```
 
-#### 13. Common Pitfalls
+#### 14. Common Pitfalls
 
+- **Never use self-closing tags (`/>`)** → custom Web Components are not void elements in HTML5; always use explicit closing tags (`<pxl-circle></pxl-circle>`)
 - **Don't use `onhover`** → use `onenter` instead
 - **Use raw numbers for coordinates** → `x="500"` not `ref.main.width / 2` (width is always 1000)
 - **Don't forget `fill` or `stroke`** → shapes with neither are invisible
 - **Don't animate inside static CSS filter strings** → wrap in backticks
+- **CSS filter pixels vs logical units** → filter strings use fixed screen pixels (`5px`); native shadows (`shadowblur="5"`) use responsive logical units (`5 * u`)
 - **Don't nest `<pxl-stage>` inside `<pxl-stage>`** → stages are independent roots
 - **Gradient radius** → use `1` to stretch to edge, not `0.5`
 
@@ -1345,14 +1386,14 @@ Static filters work as-is without quotes or backticks (Fast Path). Backticks sho
 
 ## 28. Roadmap & Future Enhancements (TODO)
 
-### 1. Native Canvas 2D Shadows (High-Performance GPU Shadows)
+### 1. [COMPLETED] Native Canvas 2D Shadows (High-Performance GPU Shadows)
+- **Status**: Implemented first-class support for native HTML5 Canvas 2D shadow attributes (`shadowcolor`, `shadowblur`, `shadowx`, `shadowy`) across `<pxl-layer>`, `<pxl-group>`, and all `<pxl-shape>` elements.
 - **Problem**: CSS-style filters (`filter="drop-shadow(0 0 10px #38bdf8)"`) invoke the browser compositor's CSS Filter Graph, creating offscreen textures and executing multi-pass Gaussian blur kernels that can push integrated GPUs to 80% load on 60 FPS animations.
-- **Proposed Feature**: Add first-class support for native HTML5 Canvas 2D shadow attributes on shapes and groups (`ctx.shadowColor`, `ctx.shadowBlur`, `ctx.shadowOffsetX`, `ctx.shadowOffsetY`).
-- **Proposed Syntax** (using canonical lowercase attribute naming):
+- **Implemented Syntax** (canonical lowercase attribute naming):
   - `shadowcolor` — valid color string (e.g. `#38bdf8` or `rgba(56, 189, 248, 0.8)`)
   - `shadowblur` — blur radius in logical units (e.g. `10`)
   - `shadowx` / `shadowy` — X and Y shadow offsets (defaults to `0`)
-- **Performance Benefit**: Direct2D and Skia render native canvas shadows via hardware radial alpha masks without spinning up the CSS Filter Graph pipeline, reducing GPU shader load by ~80-90%.
+- **Performance Benefit**: Direct2D and Skia render native canvas shadows via hardware radial alpha masks without spinning up the CSS Filter Graph pipeline, reducing GPU shader load by ~80-90%. Container inheritance (`<pxl-layer>`, `<pxl-group>`) reduces CPU `ctx.save()`/`restore()` overhead by 10x when styling multiple shapes.
 
 ### 2. Documentation Roadmap: "Styling & Styling Rules" (`styling.html`)
 - **Proposed Feature**: Create a dedicated `docs/styling.html` guide under "Getting Started" in the documentation sidebar.
@@ -1361,4 +1402,13 @@ Static filters work as-is without quotes or backticks (Fast Path). Backticks sho
   - **Style Cascade & Inheritance**: Explaining how styling attributes set on `<pxl-layer>` and `<pxl-group>` cascade down to child shapes that do not override them, and how `alpha` transparency multiplies down the container tree.
   - **Static vs. Dynamic Syntax**: Guidance on plain strings (`filter="blur(5px)"`) vs. JavaScript template literal backticks (`filter="\`blur(${wave(2)*10}px)\`"`).
   - **Zero-Magic Canvas Styling**: Explaining why Canvas 2D shapes are styled via declarative HTML attributes rather than external CSS stylesheet selectors.
-```
+
+### 3. Evaluate Degrees vs. Radians Consistency Across Attributes & Expressions
+- **Current Status**: There is currently a mixed angular unit boundary in the framework:
+  - **All Kilopixel attributes use Degrees (`0° – 360°`)**: Angular properties such as `rotate`, `start`, `end`, `sweep`, `arrowstart`, `arrowend`, `skewx`, and `skewy` expect degrees for human UX and declarative readability.
+  - **All Expression Math Functions use Radians (`0 – 2π`)**: Injected trig functions (`sin`, `cos`, `tan`, `atan2`, `asin`, `acos`) copy native JavaScript `Math` behavior directly, expecting and returning radians.
+- **Problem**: Passing degree angles into `cos(45)` evaluates 45 radians (~2578°), and passing `atan2(...)` into `rotate="..."` rotates by radians (e.g. `1.57°`) instead of degrees (`90°`), requiring manual `* PI / 180` and `* 180 / PI` conversions.
+- **Next Steps / Proposed Options**:
+  - **Option A (All-Degrees Mode)**: Wrap trig functions in `pxl.scope` (`sin`, `cos`, `tan`, `atan2`, etc.) to take and return degrees, achieving 100% conceptual consistency across the entire framework (`rotate="90"`, `cos(90) === 0`, `atan2` returns degrees).
+  - **Option B (All-Radians Mode)**: Standardize all attributes (`rotate`, `start`, `sweep`, etc.) to use radians to match native Canvas 2D/WebGL and JS `Math`, at the expense of human UX and template readability.
+  - **Option C (Document Hybrid Boundary)**: Keep JS-standard radians in `pxl.scope` and degrees in attributes, but add explicit documentation and helper conversion functions (`deg(rad)` / `rad(deg)`) to the scope.

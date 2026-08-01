@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test 38 - Native Canvas 2D Shadows & Reactive Shadow References</title>
+  <style>
+    body { background-color: #050505; margin: 0; padding: 40px; font-family: sans-serif; }
+    pxl-stage { display: block; width: 1000px; margin: 0 auto; background-color: #0a0a0a; border: 1px solid #222; }
+  </style>
+  <script src="../dist/pxl.min.js"></script>
+</head>
+<body>
+  <pxl-stage id="main" ratio="1000 / 900">
+    <pxl-layer>
+      <!-- Background subtle grid -->
+      <pxl-grid x="500" y="450" w="900" h="800" step="50" stroke="#111" strokewidth="1" />
+
+      <!-- TITLE -->
+      <pxl-text x="500" y="60" text="NATIVE CANVAS 2D SHADOWS & REACTIVE CROSS-REFERENCING" size="22" fill="white" align="center" />
+      <pxl-text x="500" y="90" text="Hardware radial masks via shadowcolor, shadowblur, shadowx, shadowy" size="14" fill="#64748b" align="center" />
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 1: MASTER CORE (Animated Native Shadow) -->
+      <!-- ========================================================================= -->
+      <pxl-text x="500" y="160" text="1. MASTER CORE - ANIMATED RADIUS & ORBITING SHADOW OFFSET" size="14" fill="#38bdf8" align="center" />
+      
+      <pxl-circle 
+        id="masterCore"
+        x="500" y="280" 
+        r="50 + wave(3) * 15"
+        fill="#38bdf8"
+        shadowcolor="#38bdf8"
+        shadowblur="20 + wave(3) * 35"
+        shadowx="cos(t * 2) * 20"
+        shadowy="sin(t * 2) * 20" />
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 2: SATELLITES CROSS-REFERENCING MASTER SHADOW VIA ref.masterCore.* -->
+      <!-- ========================================================================= -->
+      <pxl-text x="500" y="400" text="'2. SATELLITE REFERENCING MASTER SHADOW (ref.masterCore.shadowblur)'" size="13" fill="#f43f5e" align="center" />
+      
+      <!-- Satellite orb that orbits masterCore and reactively scales its own shadow blur & inverted offset -->
+      <pxl-circle 
+        id="satellite"
+        x="500" y="280"
+        dx="170"
+        rotate="t * 60"
+        r="22"
+        fill="#f43f5e"
+        shadowcolor="#f43f5e"
+        shadowblur="ref.masterCore.shadowblur * 0.5"
+        shadowx="-ref.masterCore.shadowx"
+        shadowy="-ref.masterCore.shadowy" />
+
+      <!-- Live telemetry reading ref.masterCore.shadowblur natively -->
+      <pxl-text 
+        x="500" y="435"
+        text="`MASTER BLUR: ${Math.round(ref.masterCore?.shadowblur || 0)}px | MASTER OFFSET X: ${Math.round(ref.masterCore?.shadowx || 0)}px`" 
+        size="13" fill="#94a3b8" align="center" />
+
+      <!-- ========================================================================= -->
+      <!-- SECTION 3: CONTAINER INHERITANCE, OVERRIDING & DISABLING (Option A) -->
+      <!-- ========================================================================= -->
+      <pxl-text x="500" y="520" text="3. CONTAINER INHERITANCE - GROUP SHADOW WITH CHILD OVERRIDE & DISABLE" size="14" fill="#a855f7" align="center" />
+
+      <!-- Group sets default purple shadow (#a855f7, blur=25, shadowy=12) -->
+      <pxl-group x="0" y="0" shadowcolor="#a855f7" shadowblur="25" shadowy="12">
+        
+        <!-- Shape A: Inherits group purple shadow -->
+        <pxl-rect x="250" y="650" w="140" h="80" fill="#22c55e" />
+        <pxl-text x="250" y="770" text="INHERITED SHADOW" size="13" fill="#22c55e" align="center" />
+        <pxl-text x="250" y="795" text="Uses Group #a855f7" size="11" fill="#64748b" align="center" />
+
+        <!-- Shape B: Overrides group shadow with red (#ef4444) -->
+        <pxl-rect x="500" y="650" w="140" h="80" fill="#eab308" shadowcolor="#ef4444" shadowblur="15" shadowy="0" />
+        <pxl-text x="500" y="770" text="OVERRIDDEN SHADOW" size="13" fill="#eab308" align="center" />
+        <pxl-text x="500" y="795" text="shadowcolor='#ef4444'" size="11" fill="#64748b" align="center" />
+
+        <!-- Shape C: Explicitly disables group shadow (shadowcolor="none") -->
+        <pxl-rect x="750" y="650" w="140" h="80" fill="#3b82f6" shadowcolor="none" />
+        <pxl-text x="750" y="770" text="DISABLED SHADOW" size="13" fill="#3b82f6" align="center" />
+        <pxl-text x="750" y="795" text="shadowcolor='none'" size="11" fill="#64748b" align="center" />
+
+      </pxl-group>
+
+    </pxl-layer>
+  </pxl-stage>
+</body>
+</html>

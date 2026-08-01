@@ -27,6 +27,7 @@
 - **Cross-Referencing (`ref.*`)**: Use `ref.*` to reference any element by its `id`. Example: `ref.main.mouseX`, `ref.speed.value`, `ref.btn.isHovered`.
 - **Static vs. Animated Filters**: Static filters work as-is without quotes or backticks (`filter="blur(5px)"`). Animated filters MUST use JS template literal backticks: `filter="\`blur(${wave(2)*10}px)\`"`. Do NOT use backticks for static filters.
 - **Use `onenter` not `onhover`**: The hover-entry event is `onenter`.
+- **No Self-Closing Tags (`/>`)**: Custom Web Components are not void elements in HTML5. Always use explicit closing tags (`<pxl-circle></pxl-circle>`), never `<pxl-circle />` (which causes silent DOM nesting bugs).
 
 # Kilopixel Documentation Style Guide
 When creating or modifying interactive documentation examples, you MUST first read the full style guide located at `docs/DOCS_STANDARDS.md`. You must strictly follow all color semantics, stacking orders, and UI architecture rules defined in that file.
