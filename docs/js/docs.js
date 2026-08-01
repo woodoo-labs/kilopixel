@@ -39,8 +39,8 @@ pxlDocs.initHighlighting = function() {
     const oninputStr = input.getAttribute('oninput');
     if (!oninputStr) return;
     
-    // Parse the inline oninput string for document.getElementById('code...') references
-    const match = oninputStr.match(/getElementById\(['"](code[^'"]+)['"]\)/);
+    // Parse inline oninput string for code highlight mark IDs (e.g. 'sec2CircleXCode')
+    const match = oninputStr.match(/getElementById\(['"]([^'"]+Code)['"]\)/);
     if (match) {
       const markId = match[1];
       const markElement = document.getElementById(markId);

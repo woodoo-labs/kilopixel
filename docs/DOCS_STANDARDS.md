@@ -31,6 +31,13 @@ We use a strict color-coding system to separate context (the stage/layer) from c
     * **Center Helper Lines & Orbit Guides:** `#86efac` (`green-300`)
     * **Offset Radius/Vector Lines:** `#16a34a` (`green-600`)
 
+### Stroke Width Hierarchy (`strokewidth`)
+To ensure crisp rendering on high-PPI mobile screens (avoiding subpixel alpha-fading) while maintaining a clear visual hierarchy between foreground shapes and background guides, all documentation stage examples MUST use the following tiered stroke widths:
+
+* **Helper Lines & Guides (`strokewidth="2"`):** All dashed coordinate axes, layer origin lines, center-tracking lines, local offset lines (`dx`, `dy`), guidelines, and orbit ring guides MUST be set to `strokewidth="2"`.
+* **Primary Shapes & Emphasis Vectors (`strokewidth="4"`):** The primary interactive shapes being demonstrated (`<pxl-circle>`, `<pxl-rect>`, `<pxl-ellipse>`, etc.) and critical connecting/leader vectors MUST use `strokewidth="4"` (or `strokewidth="2"` minimum for secondary/nested shapes). This ensures the primary subject stands out boldly above `strokewidth="2"` background helper lines.
+* **Minimal Code Snippets:** In pedagogical `<pre><code class="language-html">` snippets, omit explicit `strokewidth` attributes unless `strokewidth` is the specific property being taught.
+
 ## 2. Visual Stacking Order (Z-Index)
 Elements within a `<pxl-layer>` are drawn in strict DOM order (back-to-front). All examples must adhere to this semantic layering:
 
@@ -41,10 +48,11 @@ Elements within a `<pxl-layer>` are drawn in strict DOM order (back-to-front). A
 5. **The Shape:** The actual element being demonstrated (`<pxl-rect>`, `<pxl-circle>`, etc.).
 6. **Shape Center (Top):** Center dots, dynamic tracking dots, and their primary title labels (e.g., `'Circle (150, 200)'`). This ensures identity markers are *always* visible above all helpers and shapes.
 
-## 3. Coordinate Labels
-When labeling points on the canvas, always use standard mathematical tuple syntax without explicit axis assignments inside the string:
-* **Correct:** `Layer (0, 0)` or `Rect (100, 200)`
-* **Incorrect:** `Layer (x=0, y=0)` or `Rect x/y: 100, 200`
+## 3. Typography & Coordinate Labels
+* **Standard Font Size (`size="27"`):** Within the 1000-unit logical canvas, all `<pxl-text>` annotations, coordinate labels, shape titles, and axis guides MUST use `size="27"` by default. This ensures consistent readability across desktop and high-PPI mobile screens without cluttering the canvas.
+* **Tuple Syntax:** When labeling points on the canvas, always use standard mathematical tuple syntax without explicit axis assignments inside the string:
+  * **Correct:** `Layer (0, 0)` or `Rect (100, 200)`
+  * **Incorrect:** `Layer (x=0, y=0)` or `Rect x/y: 100, 200`
 
 ## 4. UI Controls & Architecture
 Interactive playgrounds must follow a standardized DOM architecture to maintain visual parity across the site.

@@ -70,9 +70,9 @@
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
               
               <!-- 2. Stage Dimension Arrows & Labels -->
-              <pxl-line x1="100" y1="0" x2="100" y2="ref.sec1Stage.height" stroke="#14b8a6" strokewidth="1" linedash="[5, 5]" arrowend="15"></pxl-line>
+              <pxl-line x1="100" y1="0" x2="100" y2="ref.sec1Stage.height" stroke="#14b8a6" strokewidth="2" linedash="[5, 5]" arrowend="15"></pxl-line>
               <pxl-text x="115" y="ref.sec1Stage.height / 2" baseline="middle" align="left" text="`height = ${round(ref.sec1Stage.height)}\n(computed)`" size="27" fill="#14b8a6" font="monospace"></pxl-text>
-              <pxl-line x1="0" y1="100" x2="1000" y2="100" stroke="#14b8a6" strokewidth="1" linedash="[5, 5]" arrowend="15"></pxl-line>
+              <pxl-line x1="0" y1="100" x2="1000" y2="100" stroke="#14b8a6" strokewidth="2" linedash="[5, 5]" arrowend="15"></pxl-line>
               <pxl-text x="500" y="115" baseline="top" align="center" text="'width = 1000 (fixed)'" size="27" fill="#14b8a6" font="monospace"></pxl-text>
 
               <!-- 3. Stage Corner & Center Markers -->
@@ -91,7 +91,7 @@
         </div>
       </div>
       
-      <h2>2. Center Point (x,y)</h2>
+      <h2>2. Center Point <code>x, y</code></h2>
       <p>In Kilopixel, the <code>x</code> and <code>y</code> attributes of any shape always define its <strong>exact center point</strong>, rather than its top-left corner (which is common in traditional HTML5 Canvas 2D or SVG APIs).</p>
       <p>This makes scaling, rotating, and aligning graphics intuitive. For example, placing a circle at <code>x="500" y="300"</code> positions its exact center right in the middle of a 1000&times;600 canvas!</p>
       
@@ -110,17 +110,17 @@
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
             
             <!-- 2. Layer Axes -->
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
             <!-- 3. Layer Center -->
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
             <pxl-text x="15" y="15" baseline="top" text="'Layer (0, 0)'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
 
             <!-- 4. Shape Helpers -->
-            <pxl-line x1="0" y1="ref.sec2Circle.y" x2="ref.sec2Circle.x" y2="ref.sec2Circle.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec2Circle.y" x2="ref.sec2Circle.x" y2="ref.sec2Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec2Circle.x / 2" y="ref.sec2Circle.y + 15" baseline="top" align="center" text="`x = ${ref.sec2Circle.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec2Circle.x" y1="0" x2="ref.sec2Circle.x" y2="ref.sec2Circle.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.sec2Circle.x" y1="0" x2="ref.sec2Circle.x" y2="ref.sec2Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec2Circle.x + 15" y="ref.sec2Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.sec2Circle.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
 
             <!-- 5. The Shape -->
@@ -128,7 +128,7 @@
               x="500" 
               y="300" 
               r="200" 
-              fill="#ffedd566" stroke="#f97316" strokewidth="2">
+              fill="#ffedd566" stroke="#f97316" strokewidth="4">
             </pxl-circle>
 
             <!-- 6. Shape Center (Top) -->
@@ -177,7 +177,7 @@
         </div>
       </div>
       
-      <h2>3. Relative Coordinates (Layer Translation)</h2>
+      <h2>3. Relative Coordinates</h2>
       <p>Working in global coordinates can quickly become difficult to manage. Instead, you can translate the entire <code>&lt;pxl-layer&gt;</code> to create a local coordinate space. This is a fundamental concept for building complex, movable scenes:</p>
       <ul>
         <li><strong>Global Positioning:</strong> The layer itself is positioned at <code>x="500" y="300"</code>, placing its origin at the exact center of the global 1000-unit stage.</li>
@@ -197,26 +197,26 @@
           <!-- Stage-level Layer coordinate vectors -->
           <pxl-layer>
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-            <pxl-line x1="0" y1="ref.sec3Layer.y" x2="ref.sec3Layer.x" y2="ref.sec3Layer.y" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec3Layer.y" x2="ref.sec3Layer.x" y2="ref.sec3Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec3Layer.x / 2" y="ref.sec3Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec3Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec3Layer.x" y1="0" x2="ref.sec3Layer.x" y2="ref.sec3Layer.y" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.sec3Layer.x" y1="0" x2="ref.sec3Layer.x" y2="ref.sec3Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec3Layer.x + 15" y="ref.sec3Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec3Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
           </pxl-layer>
 
           <!-- The layer container -->
           <pxl-layer id="sec3Layer" x="500" y="300">
             <!-- 3. Layer Axes -->
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             
             <!-- 4. Layer Center -->
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
             <pxl-text x="15" y="-15" baseline="bottom" text="'Layer (0, 0)'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
 
             <!-- 5. Shape Helpers -->
-            <pxl-line x1="0" y1="ref.sec3Circle.y" x2="ref.sec3Circle.x" y2="ref.sec3Circle.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec3Circle.y" x2="ref.sec3Circle.x" y2="ref.sec3Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec3Circle.x / 2" y="ref.sec3Circle.y + 15" baseline="top" align="center" text="`x = ${ref.sec3Circle.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec3Circle.x" y1="0" x2="ref.sec3Circle.x" y2="ref.sec3Circle.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.sec3Circle.x" y1="0" x2="ref.sec3Circle.x" y2="ref.sec3Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec3Circle.x + 15" y="ref.sec3Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.sec3Circle.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
 
             <!-- 6. The Shape -->
@@ -224,7 +224,7 @@
               x="150" 
               y="200" 
               r="300"
-              fill="#ffedd566" stroke="#f97316" strokewidth="2">
+              fill="#ffedd566" stroke="#f97316" strokewidth="4">
             </pxl-circle>
 
             <!-- 7. Shape Center (Top) -->
@@ -290,7 +290,7 @@
         </div>
       </div>
 
-      <h2>4. Rotation</h2>
+      <h2>4. Rotation <code>rotate</code></h2>
       <p>In Kilopixel, applying rotation is incredibly simple. When you rotate a shape, it spins around its <code>x</code> and <code>y</code> <strong>center point</strong> by default.</p>
       <p>However, it is important to understand the difference between <strong>Layer</strong> and <strong>Shape</strong> rotation:</p>
       <ul>
@@ -319,24 +319,24 @@
 
           <!-- 2. Fixed Stage-Level Layer Helpers -->
           <pxl-layer>
-            <pxl-line x1="0" y1="ref.sec4Layer.y" x2="ref.sec4Layer.x" y2="ref.sec4Layer.y" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec4Layer.y" x2="ref.sec4Layer.x" y2="ref.sec4Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec4Layer.x / 2" y="ref.sec4Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec4Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec4Layer.x" y1="0" x2="ref.sec4Layer.x" y2="ref.sec4Layer.y" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.sec4Layer.x" y1="0" x2="ref.sec4Layer.x" y2="ref.sec4Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec4Layer.x + 15" y="ref.sec4Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec4Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
           </pxl-layer>
 
           <!-- The layer container -->
           <pxl-layer id="sec4Layer" x="500" y="300" rotate="0">
             <!-- 3. Layer Axes & Center -->
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
             <pxl-text x="15" y="-15" baseline="bottom" text="'Layer (0, 0)'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
             
             <!-- 4. Shape Helpers -->
-            <pxl-line x1="0" y1="ref.sec4Ellipse.y" x2="ref.sec4Ellipse.x" y2="ref.sec4Ellipse.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec4Ellipse.y" x2="ref.sec4Ellipse.x" y2="ref.sec4Ellipse.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec4Ellipse.x / 2" y="ref.sec4Ellipse.y + 15" baseline="top" align="center" text="`x = ${ref.sec4Ellipse.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec4Ellipse.x" y1="0" x2="ref.sec4Ellipse.x" y2="ref.sec4Ellipse.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.sec4Ellipse.x" y1="0" x2="ref.sec4Ellipse.x" y2="ref.sec4Ellipse.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec4Ellipse.x + 15" y="ref.sec4Ellipse.y / 2" baseline="middle" align="left" text="`y = ${ref.sec4Ellipse.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
 
             <!-- 5. The Shape -->
@@ -345,7 +345,7 @@
               y="150" 
               rx="250" ry="100" 
               rotate="20" 
-              fill="#ffedd566" stroke="#f97316" strokewidth="2">
+              fill="#ffedd566" stroke="#f97316" strokewidth="4">
             </pxl-ellipse>
             
             <!-- 6. Shape Center (Top) -->
@@ -427,7 +427,7 @@
         </div>
       </div>
 
-      <h2>5. Local Offsets (dx, dy)</h2>
+      <h2>5. Local Offsets <code>dx, dy</code></h2>
       <p>This is where Kilopixel's coordinate system becomes incredibly powerful. The <code>dx</code> and <code>dy</code> attributes offset the shape from its center <code>x</code> and <code>y</code> pivot point.</p>
       <p>Because this offset happens <em>inside</em> the shape's local coordinate system, any rotation applied will cause the shape to <strong>orbit</strong> the pivot point instead of just spinning in place.</p>
       
@@ -452,17 +452,17 @@
 
           <!-- 2. Fixed Stage-Level Layer Helpers -->
           <pxl-layer>
-            <pxl-line x1="0" y1="ref.sec5Layer.y" x2="ref.sec5Layer.x" y2="ref.sec5Layer.y" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec5Layer.y" x2="ref.sec5Layer.x" y2="ref.sec5Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec5Layer.x / 2" y="ref.sec5Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec5Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec5Layer.x" y1="0" x2="ref.sec5Layer.x" y2="ref.sec5Layer.y" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.sec5Layer.x" y1="0" x2="ref.sec5Layer.x" y2="ref.sec5Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec5Layer.x + 15" y="ref.sec5Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec5Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
           </pxl-layer>
 
           <!-- The layer container -->
           <pxl-layer id="sec5Layer" x="200" y="150" rotate="0">
             <!-- 3. Layer Axes & Center -->
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
             <pxl-text x="15" y="-15" baseline="bottom" text="'Layer (0, 0)'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
             
@@ -471,20 +471,20 @@
             <!-- Rotating Rect Center Crosshair & Local Offset Helpers (dx, dy) -->
             <pxl-group x="ref.sec5Rect.x" y="ref.sec5Rect.y" rotate="ref.sec5Rect.rotate">
               <!-- Grey Crosshair for Rect Center -->
-              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
-              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
               
               <!-- Red Rotating Helper lines pointing to Rect Offset (dx, dy) -->
-              <pxl-line x1="0" y1="ref.sec5Rect.dy" x2="ref.sec5Rect.dx" y2="ref.sec5Rect.dy" stroke="#ea580c" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="0" y1="ref.sec5Rect.dy" x2="ref.sec5Rect.dx" y2="ref.sec5Rect.dy" stroke="#ea580c" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-text x="ref.sec5Rect.dx / 2" y="ref.sec5Rect.dy + 15" baseline="top" align="center" text="`dx = ${ref.sec5Rect.dx}`" size="27" fill="#ea580c" font="monospace"></pxl-text>
-              <pxl-line x1="ref.sec5Rect.dx" y1="0" x2="ref.sec5Rect.dx" y2="ref.sec5Rect.dy" stroke="#ea580c" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="ref.sec5Rect.dx" y1="0" x2="ref.sec5Rect.dx" y2="ref.sec5Rect.dy" stroke="#ea580c" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-text x="ref.sec5Rect.dx + 15" y="ref.sec5Rect.dy / 2" baseline="middle" align="left" text="`dy = ${ref.sec5Rect.dy}`" size="27" fill="#ea580c" font="monospace"></pxl-text>
             </pxl-group>
 
             <!-- Coordinate vectors pointing to Rect Center (x, y) (Drawn AFTER crosshair to stay on top) -->
-            <pxl-line x1="0" y1="ref.sec5Rect.y" x2="ref.sec5Rect.x" y2="ref.sec5Rect.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec5Rect.y" x2="ref.sec5Rect.x" y2="ref.sec5Rect.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec5Rect.x / 2" y="ref.sec5Rect.y + 15" baseline="top" align="center" text="`x = ${ref.sec5Rect.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec5Rect.x" y1="0" x2="ref.sec5Rect.x" y2="ref.sec5Rect.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.sec5Rect.x" y1="0" x2="ref.sec5Rect.x" y2="ref.sec5Rect.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec5Rect.x + 15" y="ref.sec5Rect.y / 2" baseline="middle" align="left" text="`y = ${ref.sec5Rect.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
             
             <!-- 5. The Shape -->
@@ -495,7 +495,7 @@
               dy="150" 
               rotate="0" 
               w="100" h="100" 
-              fill="#ffedd566" stroke="#f97316" strokewidth="2">
+              fill="#ffedd566" stroke="#f97316" strokewidth="4">
             </pxl-rect>
 
             <!-- 6. Shape Center & Offset Markers (Top) -->
@@ -593,7 +593,7 @@
         </div>
       </div>
 
-      <h2>6. Element Referencing (ref.*)</h2>
+      <h2>6. Element Referencing <code>ref.*</code></h2>
       <p>Any element with an <code>id</code> is automatically registered in Kilopixel's zero-GC <code>pxl.nodes</code> registry. Other elements can declaratively bind to its properties at 60fps using the <code>ref.*</code> prefix.</p>
       <p>In this example, three shapes exist inside the same coordinate system. Both <strong>Follower B</strong> and <strong>Follower C</strong> lock their origin coordinates (<code>x</code> and <code>y</code>) directly to <code>ref.leaderA.x</code> and <code>ref.leaderA.y</code>, while using independent <code>dx</code> and <code>dy</code> attributes to define their relative offset from <strong>Leader A</strong>!</p>
       
@@ -628,16 +628,16 @@
 
           <!-- 2. Fixed Stage-Level Layer Helpers -->
           <pxl-layer>
-            <pxl-line x1="0" y1="ref.sec6Layer.y" x2="ref.sec6Layer.x" y2="ref.sec6Layer.y" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec6Layer.y" x2="ref.sec6Layer.x" y2="ref.sec6Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec6Layer.x / 2" y="ref.sec6Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec6Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec6Layer.x" y1="0" x2="ref.sec6Layer.x" y2="ref.sec6Layer.y" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.sec6Layer.x" y1="0" x2="ref.sec6Layer.x" y2="ref.sec6Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec6Layer.x + 15" y="ref.sec6Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec6Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
           </pxl-layer>
 
           <pxl-layer id="sec6Layer" x="500" y="300" rotate="0">
             <!-- 3. Layer Axes & Center -->
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
             <pxl-text x="15" y="15" baseline="top" text="'Layer (0, 0)'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
 
@@ -645,12 +645,12 @@
             <pxl-line 
               x1="ref.sec6LeaderA.x" y1="ref.sec6LeaderA.y" 
               x2="ref.sec6LeaderA.x + ref.sec6FollowerB.dx" y2="ref.sec6LeaderA.y + ref.sec6FollowerB.dy" 
-              stroke="#2563eb" strokewidth="2" linedash="[5, 5]">
+              stroke="#2563eb" strokewidth="4" linedash="[5, 5]">
             </pxl-line>
             <pxl-line 
               x1="ref.sec6LeaderA.x" y1="ref.sec6LeaderA.y" 
               x2="ref.sec6LeaderA.x + ref.sec6FollowerC.dx" y2="ref.sec6LeaderA.y + ref.sec6FollowerC.dy" 
-              stroke="#16a34a" strokewidth="2" linedash="[5, 5]">
+              stroke="#16a34a" strokewidth="4" linedash="[5, 5]">
             </pxl-line>
 
             <!-- 5. Shapes -->
@@ -781,7 +781,7 @@
         </div>
       </div>
       
-      <h2>7. Coordinate Mapping (toLocal)</h2>
+      <h2>7. Coordinate Mapping <code>toLocal()</code></h2>
       <p>When shapes orbit or rotate inside nested coordinate spaces, drawing connecting lines or tracking positions requires translating between coordinate systems:</p>
       <ul>
         <li><strong>Why raw attributes stay constant:</strong> If you reference <code>ref.pointA.x</code> or <code>ref.pointA.dx</code> directly, you will always get their static declared values even while the point is rotating. Because the local coordinate system rotates <em>with</em> the shape, its internal <code>x</code> and <code>dx</code> numbers never change.</li>
@@ -814,42 +814,42 @@
 
           <!-- 2. Fixed Stage-Level Layer Helpers -->
           <pxl-layer>
-            <pxl-line x1="0" y1="ref.sec7Layer.y" x2="ref.sec7Layer.x" y2="ref.sec7Layer.y" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec7Layer.y" x2="ref.sec7Layer.x" y2="ref.sec7Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec7Layer.x / 2" y="ref.sec7Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec7Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec7Layer.x" y1="0" x2="ref.sec7Layer.x" y2="ref.sec7Layer.y" stroke="#a78bfa" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.sec7Layer.x" y1="0" x2="ref.sec7Layer.x" y2="ref.sec7Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec7Layer.x + 15" y="ref.sec7Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec7Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
           </pxl-layer>
 
           <pxl-layer id="sec7Layer" x="500" y="300" rotate="0">
             <!-- 3. Layer Axes & Center -->
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
             <pxl-text x="15" y="15" baseline="top" text="'Layer (0, 0)'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
             <!-- 4. Shape Helpers -->
             <!-- Rotating Crosshairs for Center A and Center B (Visible only when rotated) -->
             <pxl-group x="ref.sec7PointA.x" y="ref.sec7PointA.y" rotate="ref.sec7PointA.rotate" hidden="ref.sec7PointA.rotate == 0">
-              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#93c5fd" linedash="[5, 5]"></pxl-line>
-              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#93c5fd" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]"></pxl-line>
             </pxl-group>
             <pxl-group x="ref.sec7PointB.x" y="ref.sec7PointB.y" rotate="ref.sec7PointB.rotate" hidden="ref.sec7PointB.rotate == 0">
-              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
-              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             </pxl-group>
 
             <!-- Orbit Ring Guides -->
-            <pxl-circle x="ref.sec7PointA.x" y="ref.sec7PointA.y" r="sqrt(ref.sec7PointA.dx**2 + ref.sec7PointA.dy**2)" stroke="#93c5fd" strokewidth="1" linedash="[5, 5]" fill="none"></pxl-circle>
-            <pxl-circle x="ref.sec7PointB.x" y="ref.sec7PointB.y" r="sqrt(ref.sec7PointB.dx**2 + ref.sec7PointB.dy**2)" stroke="#fdba74" strokewidth="1" linedash="[5, 5]" fill="none"></pxl-circle>
+            <pxl-circle x="ref.sec7PointA.x" y="ref.sec7PointA.y" r="sqrt(ref.sec7PointA.dx**2 + ref.sec7PointA.dy**2)" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]" fill="none"></pxl-circle>
+            <pxl-circle x="ref.sec7PointB.x" y="ref.sec7PointB.y" r="sqrt(ref.sec7PointB.dx**2 + ref.sec7PointB.dy**2)" stroke="#fdba74" strokewidth="2" linedash="[5, 5]" fill="none"></pxl-circle>
 
             <!-- Radius vectors connecting Centers to Orbiting positions -->
-            <pxl-line x1="ref.sec7PointA.x" y1="ref.sec7PointA.y" x2="toLocal(ref.sec7PointA, 'tx')" y2="toLocal(ref.sec7PointA, 'ty')" stroke="#2563eb" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="ref.sec7PointB.x" y1="ref.sec7PointB.y" x2="toLocal(ref.sec7PointB, 'tx')" y2="toLocal(ref.sec7PointB, 'ty')" stroke="#ea580c" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.sec7PointA.x" y1="ref.sec7PointA.y" x2="toLocal(ref.sec7PointA, 'tx')" y2="toLocal(ref.sec7PointA, 'ty')" stroke="#2563eb" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.sec7PointB.x" y1="ref.sec7PointB.y" x2="toLocal(ref.sec7PointB, 'tx')" y2="toLocal(ref.sec7PointB, 'ty')" stroke="#ea580c" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
             <!-- Connecting Line (Drawn behind the points) -->
             <pxl-line 
               x1="toLocal(ref.sec7PointA, 'tx')" y1="toLocal(ref.sec7PointA, 'ty')" 
               x2="toLocal(ref.sec7PointB, 'tx')" y2="toLocal(ref.sec7PointB, 'ty')" 
-              stroke="#cbd5e1" strokewidth="2">
+              stroke="#cbd5e1" strokewidth="4">
             </pxl-line>
 
             <!-- 5. Orbiting Shapes -->

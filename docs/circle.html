@@ -35,37 +35,37 @@
         <!-- ================================================================= -->
         <!-- SECTION 1: HERO ANATOMY SANDBOX -->
         <!-- ================================================================= -->
-        <h2>1. Interactive Anatomy Sandbox</h2>
+        <h2>1. Interactive Circle Sandbox</h2>
         <p>Experiment with the sliders below to see how a single <code>&lt;pxl-circle&gt;</code> element morphs across its different visual archetypes on a standard <strong>1000 × 600</strong> logical canvas.</p>
 
         <!-- Declarative HTML Markup Above Stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;pxl-circle x="500" y="300" 
-      r="<mark id="codeHeroR">180</mark>" 
-      ir="<mark id="codeHeroIR">0</mark>" 
-      start="<mark id="codeHeroStart">0</mark>" 
-      sweep="<mark id="codeHeroSweep">270</mark>" 
-      pie="<mark id="codeHeroPie">false</mark>"
+      r="<mark id="sec1CircleRCode">180</mark>" 
+      ir="<mark id="sec1CircleIRCode">0</mark>" 
+      start="<mark id="sec1CircleStartCode">0</mark>" 
+      sweep="<mark id="sec1CircleSweepCode">270</mark>" 
+      pie="<mark id="sec1CirclePieCode">false</mark>"
       stroke="#f97316"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
         <div class="demo-container">
           <!-- Hero Sandbox Stage -->
-          <pxl-stage id="heroStage" ratio="5 / 3" class="demo-stage">
+          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
             <pxl-layer>
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-              <pxl-line x1="500" y1="0" x2="500" y2="600" stroke="#cbd5e1" strokewidth="1" linedash="[4, 4]"></pxl-line>
-              <pxl-line x1="0" y1="300" x2="1000" y2="300" stroke="#cbd5e1" strokewidth="1" linedash="[4, 4]"></pxl-line>
+              <pxl-line x1="500" y1="0" x2="500" y2="600" stroke="#cbd5e1" strokewidth="2" linedash="[4, 4]"></pxl-line>
+              <pxl-line x1="0" y1="300" x2="1000" y2="300" stroke="#cbd5e1" strokewidth="2" linedash="[4, 4]"></pxl-line>
 
               <!-- Hero Circle Shape -->
-              <pxl-circle id="heroCircle" x="500" y="300" r="180" ir="0" start="0" sweep="270" pie="false"
-                fill="#ffedd566" stroke="#f97316" strokewidth="8" arrowend="0" arrowstyle="filled"></pxl-circle>
+              <pxl-circle id="sec1Circle" x="500" y="300" r="180" ir="0" start="0" sweep="270" pie="false"
+                fill="#ffedd566" stroke="#f97316" strokewidth="4" arrowend="0" arrowstyle="filled"></pxl-circle>
 
               <!-- Center Anchor Dot -->
               <pxl-circle x="500" y="300" r="6" fill="#fb923c"></pxl-circle>
-              <pxl-text x="515" y="285" text="'Circle (500, 300)'" size="15" fill="#fb923c" font="monospace"></pxl-text>
+              <pxl-text x="515" y="275" baseline="bottom" text="'Circle (500, 300)'" size="27" fill="#fb923c" font="monospace"></pxl-text>
             </pxl-layer>
           </pxl-stage>
 
@@ -74,38 +74,38 @@
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Controls</h3>
               <div class="demo-tabs">
-                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'hero-circle')">Circle</button>
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1CircleTab')">Circle</button>
               </div>
             </div>
 
             <!-- Circle Tab -->
-            <div class="tab-content active" id="hero-circle">
+            <div class="tab-content active" id="sec1CircleTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Outer Radius (<code>r</code>)</span> <span id="lblHeroR">180</span></label>
+                  <label><span>Outer Radius (<code>r</code>)</span> <span id="sec1CircleRVal">180</span></label>
                   <input type="range" min="40" max="250" step="10" value="180" autocomplete="off"
-                    oninput="document.getElementById('heroCircle').setAttribute('r', this.value); document.getElementById('lblHeroR').innerText = this.value; document.getElementById('codeHeroR').innerText = this.value;">
+                    oninput="document.getElementById('sec1Circle').setAttribute('r', this.value); document.getElementById('sec1CircleRVal').innerText = this.value; document.getElementById('sec1CircleRCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Inner Radius (<code>ir</code>)</span> <span id="lblHeroIR">0</span></label>
+                  <label><span>Inner Radius (<code>ir</code>)</span> <span id="sec1CircleIRVal">0</span></label>
                   <input type="range" min="0" max="150" step="10" value="0" autocomplete="off"
-                    oninput="document.getElementById('heroCircle').setAttribute('ir', this.value); document.getElementById('lblHeroIR').innerText = this.value; document.getElementById('codeHeroIR').innerText = this.value;">
+                    oninput="document.getElementById('sec1Circle').setAttribute('ir', this.value); document.getElementById('sec1CircleIRVal').innerText = this.value; document.getElementById('sec1CircleIRCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Start Angle (<code>start</code>)</span> <span><span id="lblHeroStart">0</span>°</span></label>
+                  <label><span>Start Angle (<code>start</code>)</span> <span><span id="sec1CircleStartVal">0</span>°</span></label>
                   <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
-                    oninput="document.getElementById('heroCircle').setAttribute('start', this.value); document.getElementById('lblHeroStart').innerText = this.value; document.getElementById('codeHeroStart').innerText = this.value;">
+                    oninput="document.getElementById('sec1Circle').setAttribute('start', this.value); document.getElementById('sec1CircleStartVal').innerText = this.value; document.getElementById('sec1CircleStartCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Angular Sweep (<code>sweep</code>)</span> <span><span id="lblHeroSweep">270</span>°</span></label>
+                  <label><span>Angular Sweep (<code>sweep</code>)</span> <span><span id="sec1CircleSweepVal">270</span>°</span></label>
                   <input type="range" min="45" max="360" step="15" value="270" autocomplete="off"
-                    oninput="document.getElementById('heroCircle').setAttribute('sweep', this.value); document.getElementById('lblHeroSweep').innerText = this.value; document.getElementById('codeHeroSweep').innerText = this.value;">
+                    oninput="document.getElementById('sec1Circle').setAttribute('sweep', this.value); document.getElementById('sec1CircleSweepVal').innerText = this.value; document.getElementById('sec1CircleSweepCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Pie Mode (<code>pie</code>)</span> <span id="lblHeroPie">false</span></label>
+                  <label><span>Pie Mode (<code>pie</code>)</span> <span id="sec1CirclePieVal">false</span></label>
                   <div class="toggle-group">
-                    <button class="toggle-btn active" id="btnHeroPieFalse" onclick="document.getElementById('heroCircle').setAttribute('pie', 'false'); pxlDocs.updateToggle(this, 'lblHeroPie', 'codeHeroPie', 'false');">false (Open Arc)</button>
-                    <button class="toggle-btn" id="btnHeroPieTrue" onclick="document.getElementById('heroCircle').setAttribute('pie', 'true'); pxlDocs.updateToggle(this, 'lblHeroPie', 'codeHeroPie', 'true');">true (Pie Wedge)</button>
+                    <button class="toggle-btn active" id="sec1PieFalseBtn" onclick="document.getElementById('sec1Circle').setAttribute('pie', 'false'); pxlDocs.updateToggle(this, 'sec1CirclePieVal', 'sec1CirclePieCode', 'false');">false (Open Arc)</button>
+                    <button class="toggle-btn" id="sec1PieTrueBtn" onclick="document.getElementById('sec1Circle').setAttribute('pie', 'true'); pxlDocs.updateToggle(this, 'sec1CirclePieVal', 'sec1CirclePieCode', 'true');">true (Pie Wedge)</button>
                   </div>
                 </div>
               </div>
@@ -122,15 +122,15 @@
         <div class="demo-controls">
           <div class="demo-controls-header">
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex2-circle')">Circle (10)</button>
-              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex2-styling')">Styling (12)</button>
-              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex2-transforms')">Transforms (12)</button>
-              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex2-events')">Events (6)</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2CircleTab')">Circle (10)</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2StylingTab')">Styling (12)</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2TransformsTab')">Transforms (12)</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2EventsTab')">Events (6)</button>
             </div>
           </div>
 
           <!-- TAB 1: CIRCLE SPECIFIC ATTRIBUTES -->
-          <div class="tab-content active" id="ex2-circle">
+          <div class="tab-content active" id="sec2CircleTab">
             <div class="api-list">
               <div class="api-item">
                 <div class="api-item-header">
@@ -180,7 +180,7 @@
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Absolute end angle in degrees. If neither <code>end</code> nor <code>sweep</code> is provided, renders a full 360° circle.
+                  Absolute end angle in degrees. <strong>Note:</strong> If <code>sweep</code> is also specified, <code>sweep</code> takes priority and <code>end</code> is ignored.
                 </div>
               </div>
 
@@ -193,7 +193,7 @@
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Relative angular span in degrees from the <code>start</code> angle (e.g. <code>start="45" sweep="90"</code> draws from 45° to 135°).
+                  Relative angular span in degrees from the <code>start</code> angle (e.g. <code>start="45" sweep="90"</code> draws from 45° to 135°). <strong>Takes priority over <code>end</code>.</strong>
                 </div>
               </div>
 
@@ -265,7 +265,7 @@
           </div>
 
           <!-- TAB 2: COMMON STYLING -->
-          <div class="tab-content" id="ex2-styling">
+          <div class="tab-content" id="sec2StylingTab">
             <div class="api-list">
               <div class="api-item">
                 <div class="api-item-header">
@@ -426,7 +426,7 @@
           </div>
 
           <!-- TAB 3: TRANSFORMS & SPATIAL -->
-          <div class="tab-content" id="ex2-transforms">
+          <div class="tab-content" id="sec2TransformsTab">
             <div class="api-list">
               <div class="api-item">
                 <div class="api-item-header">
@@ -509,7 +509,7 @@
           </div>
 
           <!-- TAB 4: INTERACTIVE EVENTS -->
-          <div class="tab-content" id="ex2-events">
+          <div class="tab-content" id="sec2EventsTab">
             <div class="api-list">
               <div class="api-item">
                 <div class="api-item-header">
@@ -593,16 +593,12 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECTION 3: THE 5 VISUAL MODES (INTERACTIVE COOKBOOK) -->
-        <h2>3. The 5 Visual Modes (Interactive Cookbook)</h2>
-        <p>Because <code>&lt;pxl-circle&gt;</code> can render everything from solid discs to animated donut charts and curved vector arrows, we organize its real-world usage into <strong>5 Visual Modes</strong>.</p>
+        <!-- SECTION 3: THE DISC & THE RING -->
+        <!-- ================================================================= -->
+        <h2>3. The Disc &amp; The Ring <code>r, ir</code></h2>
+        <p>A simple outer radius (<code>r</code>) draws a solid disc. Providing an inner radius (<code>ir &gt; 0</code>) hollows out the center to produce a concentric ring.</p>
 
-        <!-- MODE 1: THE DISC & THE RING -->
         <div class="example-card">
-          <div class="example-header">
-            <h3>Mode 1: The Disc &amp; The Ring (<code>r</code> vs. <code>ir</code>)</h3>
-            <p>A simple outer radius (<code>r</code>) draws a solid disc. Providing an inner radius (<code>ir &gt; 0</code>) hollows out the center to produce a concentric ring.</p>
-          </div>
 
           <!-- Declarative HTML Markup Above Stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
@@ -611,25 +607,25 @@
     &lt;pxl-circle x="280" y="300" r="110" ir="0" fill="#f97316"&gt;&lt;/pxl-circle&gt;
 
     &lt;!-- Right: Hollow Ring (ir &gt; 0) --&gt;
-    &lt;pxl-circle x="720" y="300" r="110" ir="<mark id="codeEx1IR">60</mark>" stroke="#3b82f6"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="720" y="300" r="110" ir="<mark id="sec3RingIRCode">60</mark>" stroke="#3b82f6"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
           <div class="demo-container">
             <!-- Mode 1 Stage -->
-            <pxl-stage id="ex1Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-stage id="sec3Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                 
                 <!-- Left: Solid Disc (Orange Scheme) -->
-                <pxl-circle x="280" y="300" r="110" ir="0" fill="#ffedd566" stroke="#f97316" strokewidth="6"></pxl-circle>
+                <pxl-circle x="280" y="300" r="110" ir="0" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
                 <pxl-circle x="280" y="300" r="6" fill="#fb923c"></pxl-circle>
-                <pxl-text x="280" y="440" text="'Solid Disc (ir = 0)'" size="18" fill="#fb923c" font="monospace" align="center"></pxl-text>
+                <pxl-text x="280" y="450" text="'Solid Disc (ir = 0)'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
                 <!-- Right: Hollow Ring (Blue Scheme) -->
-                <pxl-circle id="ex1Ring" x="720" y="300" r="110" ir="60" fill="#dbeafe66" stroke="#3b82f6" strokewidth="6"></pxl-circle>
+                <pxl-circle id="sec3Ring" x="720" y="300" r="110" ir="60" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-circle>
                 <pxl-circle x="720" y="300" r="6" fill="#60a5fa"></pxl-circle>
-                <pxl-text x="720" y="440" text="'Hollow Ring (ir > 0)'" size="18" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+                <pxl-text x="720" y="450" text="'Hollow Ring (ir > 0)'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
               </pxl-layer>
             </pxl-stage>
 
@@ -637,17 +633,17 @@
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Controls</h3>
                 <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex1-ring')">Ring</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3RingTab')">Ring</button>
                 </div>
               </div>
 
               <!-- Ring Tab -->
-              <div class="tab-content active" id="ex1-ring">
+              <div class="tab-content active" id="sec3RingTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Right Shape Inner Radius (<code>ir</code>)</span> <span id="lblEx1IR">60</span></label>
+                    <label><span>Right Shape Inner Radius (<code>ir</code>)</span> <span id="sec3RingIRVal">60</span></label>
                     <input type="range" min="0" max="95" step="5" value="60" autocomplete="off"
-                      oninput="document.getElementById('ex1Ring').setAttribute('ir', this.value); document.getElementById('lblEx1IR').innerText = this.value; document.getElementById('codeEx1IR').innerText = this.value;">
+                      oninput="document.getElementById('sec3Ring').setAttribute('ir', this.value); document.getElementById('sec3RingIRVal').innerText = this.value; document.getElementById('sec3RingIRCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -655,37 +651,38 @@
           </div>
         </div>
 
-        <!-- MODE 2: OPEN ARCS & ANIMATED SPINNERS -->
+        <!-- ================================================================= -->
+        <!-- SECTION 4: OPEN ARCS & ANIMATED SPINNERS -->
+        <!-- ================================================================= -->
+        <h2>4. Open Arcs &amp; Animated Spinners <code>start, sweep</code></h2>
+        <p>By defining <code>start</code> and <code>sweep</code> angles in standard degrees (0°–360°) along with time-based expressions, a circle becomes an animated loading ring or progress gauge.</p>
+
         <div class="example-card">
-          <div class="example-header">
-            <h3>Mode 2: Open Arcs &amp; Animated Spinners (<code>start</code>, <code>sweep</code>)</h3>
-            <p>By defining <code>start</code> and <code>sweep</code> angles in standard degrees (0°–360°) along with time-based expressions, a circle becomes an animated loading ring or progress gauge.</p>
-          </div>
 
           <!-- Declarative HTML Markup Above Stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Animated Arc (Loading Spinner Mode) --&gt;
-    &lt;pxl-circle x="500" y="300" r="<mark id="codeEx2R">140</mark>" 
+    &lt;pxl-circle x="500" y="300" r="<mark id="sec4CircleRCode">140</mark>" 
       stroke="#f97316" 
-      strokewidth="<mark id="codeEx2Width">16</mark>" 
+      strokewidth="<mark id="sec4CircleWidthCode">16</mark>" 
       start="t * 180" 
       sweep="160 + wave(3) * 120"
-      filter="drop-shadow(0px 0px <mark id="codeEx2Glow">15</mark>px rgba(249,115,22,0.8))"&gt;&lt;/pxl-circle&gt;
+      filter="drop-shadow(0px 0px <mark id="sec4CircleGlowCode">15</mark>px rgba(249,115,22,0.8))"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
           <div class="demo-container">
             <!-- Mode 2 Stage -->
-            <pxl-stage id="ex2Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-stage id="sec4Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                 
                 <!-- Background track ring -->
-                <pxl-circle id="ex2Track" x="500" y="300" r="140" stroke="#cbd5e1" strokewidth="16"></pxl-circle>
+                <pxl-circle id="sec4Track" x="500" y="300" r="140" stroke="#cbd5e1" strokewidth="16"></pxl-circle>
                 
                 <!-- Glowing animated arc -->
-                <pxl-circle id="ex2Circle" x="500" y="300" r="140" 
+                <pxl-circle id="sec4Circle" x="500" y="300" r="140" 
                   stroke="#f97316" 
                   strokewidth="16" 
                   start="t * 180" 
@@ -696,7 +693,7 @@
                 <pxl-circle x="500 + cos(t*3)*180" y="300 + sin(t*3)*180" r="10" fill="#c2410c"></pxl-circle>
                 
                 <!-- Center Text -->
-                <pxl-text x="500" y="300" text="'Arc Mode (Loading Spinner)'" size="18" fill="#ea580c" font="monospace" align="center" baseline="middle"></pxl-text>
+                <pxl-text x="500" y="450" text="'Arc Mode (Loading Spinner)'" size="27" fill="#ea580c" font="monospace" align="center"></pxl-text>
               </pxl-layer>
             </pxl-stage>
 
@@ -704,27 +701,27 @@
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Controls</h3>
                 <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex2-arc')">Arc</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4ArcTab')">Arc</button>
                 </div>
               </div>
 
               <!-- Arc Tab -->
-              <div class="tab-content active" id="ex2-arc">
+              <div class="tab-content active" id="sec4ArcTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Radius (<code>r</code>)</span> <span id="lblEx2R">140</span></label>
+                    <label><span>Radius (<code>r</code>)</span> <span id="sec4CircleRVal">140</span></label>
                     <input type="range" min="50" max="220" step="10" value="140" autocomplete="off"
-                      oninput="document.getElementById('ex2Circle').setAttribute('r', this.value); document.getElementById('ex2Track').setAttribute('r', this.value); document.getElementById('lblEx2R').innerText = this.value; document.getElementById('codeEx2R').innerText = this.value;">
+                      oninput="document.getElementById('sec4Circle').setAttribute('r', this.value); document.getElementById('sec4Track').setAttribute('r', this.value); document.getElementById('sec4CircleRVal').innerText = this.value; document.getElementById('sec4CircleRCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="lblEx2Width">16</span></label>
+                    <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="sec4CircleWidthVal">16</span></label>
                     <input type="range" min="4" max="40" step="2" value="16" autocomplete="off"
-                      oninput="document.getElementById('ex2Circle').setAttribute('strokewidth', this.value); document.getElementById('ex2Track').setAttribute('strokewidth', this.value); document.getElementById('lblEx2Width').innerText = this.value; document.getElementById('codeEx2Width').innerText = this.value;">
+                      oninput="document.getElementById('sec4Circle').setAttribute('strokewidth', this.value); document.getElementById('sec4Track').setAttribute('strokewidth', this.value); document.getElementById('sec4CircleWidthVal').innerText = this.value; document.getElementById('sec4CircleWidthCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Glow Shadow (<code>filter</code>)</span> <span id="lblEx2Glow">15</span></label>
+                    <label><span>Glow Shadow (<code>filter</code>)</span> <span id="sec4CircleGlowVal">15</span></label>
                     <input type="range" min="0" max="40" step="5" value="15" autocomplete="off"
-                      oninput="document.getElementById('ex2Circle').setAttribute('filter', 'drop-shadow(0px 0px ' + this.value + 'px rgba(249,115,22,0.8))'); document.getElementById('lblEx2Glow').innerText = this.value; document.getElementById('codeEx2Glow').innerText = this.value;">
+                      oninput="document.getElementById('sec4Circle').setAttribute('filter', 'drop-shadow(0px 0px ' + this.value + 'px rgba(249,115,22,0.8))'); document.getElementById('sec4CircleGlowVal').innerText = this.value; document.getElementById('sec4CircleGlowCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -732,25 +729,26 @@
           </div>
         </div>
 
-        <!-- MODE 3: PIE CHARTS & DONUT CHARTS -->
+        <!-- ================================================================= -->
+        <!-- SECTION 5: PIE WEDGES & DONUT CHARTS -->
+        <!-- ================================================================= -->
+        <h2>5. Pie Wedges &amp; Donut Charts <code>pie, ir</code></h2>
+        <p>Setting <code>pie="true"</code> connects the ends of an open arc to the center origin <code>(0, 0)</code> to create solid wedges (like Pac-Man). Combining <code>ir &gt; 0</code> with <code>sweep</code> creates concentric donut chart segments.</p>
+
         <div class="example-card">
-          <div class="example-header">
-            <h3>Mode 3: Pie Wedges &amp; Donut Charts (<code>pie="true"</code> vs. <code>ir &gt; 0</code>)</h3>
-            <p>Setting <code>pie="true"</code> connects the ends of an open arc to the center origin <code>(0, 0)</code> to create solid wedges (like Pac-Man). Combining <code>ir &gt; 0</code> with <code>sweep</code> creates concentric donut chart segments.</p>
-          </div>
 
           <!-- Declarative HTML Markup Above Stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Animated Pac-Man (Pie Wedge Mode) --&gt;
-    &lt;pxl-circle x="280" y="300" r="<mark id="codeEx3R">110</mark>" 
-      fill="#fde047" strokewidth="<mark id="codeEx3Width">4</mark>"
+    &lt;pxl-circle x="280" y="300" r="<mark id="sec5PacmanRCode">110</mark>" 
+      fill="#fde047" strokewidth="<mark id="sec5PacmanWidthCode">4</mark>"
       pie="true" 
       start="bounce(0.4) * 45" 
       sweep="360 - (bounce(0.4) * 90)"&gt;&lt;/pxl-circle&gt;
 
     &lt;!-- Right: Concentric Donut Chart Segments (ir &gt; 0) --&gt;
-    &lt;pxl-circle x="720" y="300" r="120" ir="<mark id="codeEx3DonutIR">70</mark>" fill="#fb7185" start="-90" sweep="135"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="720" y="300" r="120" ir="<mark id="sec5DonutIRCode">70</mark>" fill="#fb7185" start="-90" sweep="135"&gt;&lt;/pxl-circle&gt;
     &lt;pxl-circle x="720" y="300" r="120" ir="70" fill="#c084fc" start="45" sweep="115"&gt;&lt;/pxl-circle&gt;
     &lt;pxl-circle x="720" y="300" r="120" ir="70" fill="#38bdf8" start="160" sweep="110"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
@@ -758,13 +756,13 @@
 
           <div class="demo-container">
             <!-- Mode 3 Stage -->
-            <pxl-stage id="ex3Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-stage id="sec5Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                 
                 <!-- Left: Animated Pac-Man -->
                 <pxl-group x="280" y="300">
-                  <pxl-circle id="ex3Pacman" r="110" 
+                  <pxl-circle id="sec5Pacman" r="110" 
                     fill="#fde047" stroke="#ca8a04" strokewidth="4"
                     pie="true"
                     start="bounce(0.4) * 45"
@@ -776,17 +774,17 @@
                   <pxl-circle x="80 - (t * 80) % 80" y="0" r="7" fill="#ca8a04" alpha="0.5 + wave(2)*0.5"></pxl-circle>
                   <pxl-circle x="160 - (t * 80) % 80" y="0" r="7" fill="#ca8a04" alpha="0.5 + wave(2)*0.5"></pxl-circle>
                 </pxl-group>
-                <pxl-text x="280" y="460" text="'Pie Wedge (pie = true)'" size="18" fill="#ca8a04" font="monospace" align="center"></pxl-text>
+                <pxl-text x="280" y="450" text="'Pie Wedge (pie = true)'" size="27" fill="#ca8a04" font="monospace" align="center"></pxl-text>
 
                 <!-- Right: Donut Chart -->
                 <pxl-group x="720" y="300">
                   <pxl-circle r="50" fill="radial(1, ['rgba(249,115,22,0.15)', 'transparent'])" scale="1 + wave(3)*0.2"></pxl-circle>
-                  <pxl-circle id="ex3Donut1" r="120" ir="70" fill="#fb7185" start="-90" sweep="135"></pxl-circle>
-                  <pxl-circle id="ex3Donut2" r="120" ir="70" fill="#c084fc" start="45" sweep="115"></pxl-circle>
-                  <pxl-circle id="ex3Donut3" r="120" ir="70" fill="#38bdf8" start="160" sweep="110"></pxl-circle>
-                  <pxl-text text="'75%'" y="5" size="26" weight="bold" fill="#6d28d9" align="center" baseline="middle"></pxl-text>
+                  <pxl-circle id="sec5Donut1" r="120" ir="70" fill="#fb7185" start="-90" sweep="135"></pxl-circle>
+                  <pxl-circle id="sec5Donut2" r="120" ir="70" fill="#c084fc" start="45" sweep="115"></pxl-circle>
+                  <pxl-circle id="sec5Donut3" r="120" ir="70" fill="#38bdf8" start="160" sweep="110"></pxl-circle>
+                  <pxl-text text="'75%'" y="5" size="27" weight="bold" fill="#6d28d9" align="center" baseline="middle"></pxl-text>
                 </pxl-group>
-                <pxl-text x="720" y="460" text="'Donut Chart (ir > 0)'" size="18" fill="#6d28d9" font="monospace" align="center"></pxl-text>
+                <pxl-text x="720" y="450" text="'Donut Chart (ir > 0)'" size="27" fill="#6d28d9" font="monospace" align="center"></pxl-text>
               </pxl-layer>
             </pxl-stage>
 
@@ -794,34 +792,34 @@
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Controls</h3>
                 <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex3-pacman')">Pac-Man</button>
-                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex3-donut')">Donut Chart</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec5PacmanTab')">Pac-Man</button>
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec5DonutTab')">Donut Chart</button>
                 </div>
               </div>
 
               <!-- Pac-Man Tab -->
-              <div class="tab-content active" id="ex3-pacman">
+              <div class="tab-content active" id="sec5PacmanTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Radius (<code>r</code>)</span> <span id="lblEx3R">110</span></label>
+                    <label><span>Radius (<code>r</code>)</span> <span id="sec5PacmanRVal">110</span></label>
                     <input type="range" min="50" max="180" step="10" value="110" autocomplete="off"
-                      oninput="document.getElementById('ex3Pacman').setAttribute('r', this.value); document.getElementById('lblEx3R').innerText = this.value; document.getElementById('codeEx3R').innerText = this.value;">
+                      oninput="document.getElementById('sec5Pacman').setAttribute('r', this.value); document.getElementById('sec5PacmanRVal').innerText = this.value; document.getElementById('sec5PacmanRCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="lblEx3Width">4</span></label>
+                    <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="sec5PacmanWidthVal">4</span></label>
                     <input type="range" min="0" max="16" step="1" value="4" autocomplete="off"
-                      oninput="document.getElementById('ex3Pacman').setAttribute('strokewidth', this.value); document.getElementById('lblEx3Width').innerText = this.value; document.getElementById('codeEx3Width').innerText = this.value;">
+                      oninput="document.getElementById('sec5Pacman').setAttribute('strokewidth', this.value); document.getElementById('sec5PacmanWidthVal').innerText = this.value; document.getElementById('sec5PacmanWidthCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
 
               <!-- Donut Chart Tab -->
-              <div class="tab-content" id="ex3-donut">
+              <div class="tab-content" id="sec5DonutTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Inner Radius (<code>ir</code>)</span> <span id="lblEx3DonutIR">70</span></label>
+                    <label><span>Inner Radius (<code>ir</code>)</span> <span id="sec5DonutIRVal">70</span></label>
                     <input type="range" min="20" max="105" step="5" value="70" autocomplete="off"
-                      oninput="document.getElementById('ex3Donut1').setAttribute('ir', this.value); document.getElementById('ex3Donut2').setAttribute('ir', this.value); document.getElementById('ex3Donut3').setAttribute('ir', this.value); document.getElementById('lblEx3DonutIR').innerText = this.value; document.getElementById('codeEx3DonutIR').innerText = this.value;">
+                      oninput="document.getElementById('sec5Donut1').setAttribute('ir', this.value); document.getElementById('sec5Donut2').setAttribute('ir', this.value); document.getElementById('sec5Donut3').setAttribute('ir', this.value); document.getElementById('sec5DonutIRVal').innerText = this.value; document.getElementById('sec5DonutIRCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -829,23 +827,24 @@
           </div>
         </div>
 
-        <!-- MODE 4: CURVED VECTOR ARROWS -->
+        <!-- ================================================================= -->
+        <!-- SECTION 6: CURVED VECTOR ARROWS -->
+        <!-- ================================================================= -->
+        <h2>6. Curved Vector Arrows <code>arrowstart, arrowend, arrowstyle</code></h2>
+        <p>Adding arrowhead sizes to an open circular arc transforms it into a curved vector diagram arrow, circular dial, or speedometer indicator.</p>
+
         <div class="example-card">
-          <div class="example-header">
-            <h3>Mode 4: Curved Vector Arrows (<code>arrowstart</code>, <code>arrowend</code>, <code>arrowstyle</code>)</h3>
-            <p>Adding arrowhead sizes to an open circular arc transforms it into a curved vector diagram arrow, circular dial, or speedometer indicator.</p>
-          </div>
 
           <!-- Declarative HTML Markup Above Stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Filled Triangle Arrowhead (arrowstyle="filled") --&gt;
-    &lt;pxl-circle x="280" y="300" r="<mark id="codeEx4LeftR">100</mark>" strokewidth="<mark id="codeEx4LeftWidth">12</mark>" stroke="#f97316" 
+    &lt;pxl-circle x="280" y="300" r="<mark id="sec6FilledRCode">100</mark>" strokewidth="<mark id="sec6FilledWidthCode">12</mark>" stroke="#f97316" 
       start="-135" sweep="180" 
       arrowstart="auto" arrowend="auto" arrowstyle="filled"&gt;&lt;/pxl-circle&gt;
 
     &lt;!-- Open Line V-Arrowhead (arrowstyle="line") --&gt;
-    &lt;pxl-circle x="720" y="300" r="<mark id="codeEx4RightR">100</mark>" strokewidth="<mark id="codeEx4RightWidth">12</mark>" stroke="#2563eb" 
+    &lt;pxl-circle x="720" y="300" r="<mark id="sec6LineRCode">100</mark>" strokewidth="<mark id="sec6LineWidthCode">12</mark>" stroke="#2563eb" 
       start="-45" sweep="180" 
       arrowstart="auto" arrowend="auto" arrowstyle="line"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
@@ -853,19 +852,19 @@
 
           <div class="demo-container">
             <!-- Mode 4 Stage -->
-            <pxl-stage id="ex4Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-stage id="sec6Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                 
                 <!-- Left: arrowstyle="filled" -->
-                <pxl-circle id="ex4LeftArrow" x="280" y="300" r="100" strokewidth="12" stroke="#f97316" 
+                <pxl-circle id="sec6FilledArrow" x="280" y="300" r="100" strokewidth="12" stroke="#f97316" 
                   start="-135" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-circle>
-                <pxl-text x="280" y="300" text="'arrowstyle=&quot;filled&quot;'" size="16" fill="#ea580c" font="monospace" align="center" baseline="middle"></pxl-text>
+                <pxl-text x="280" y="450" text="'arrowstyle=&quot;filled&quot;'" size="27" fill="#ea580c" font="monospace" align="center"></pxl-text>
 
                 <!-- Right: arrowstyle="line" -->
-                <pxl-circle id="ex4RightArrow" x="720" y="300" r="100" strokewidth="12" stroke="#2563eb" 
+                <pxl-circle id="sec6LineArrow" x="720" y="300" r="100" strokewidth="12" stroke="#2563eb" 
                   start="-45" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="line"></pxl-circle>
-                <pxl-text x="720" y="300" text="'arrowstyle=&quot;line&quot;'" size="16" fill="#2563eb" font="monospace" align="center" baseline="middle"></pxl-text>
+                <pxl-text x="720" y="450" text="'arrowstyle=&quot;line&quot;'" size="27" fill="#2563eb" font="monospace" align="center"></pxl-text>
               </pxl-layer>
             </pxl-stage>
 
@@ -873,111 +872,39 @@
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Controls</h3>
                 <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex4-filled')">Filled Arrow</button>
-                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'ex4-line')">Line Arrow</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec6FilledTab')">Filled Arrow</button>
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec6LineTab')">Line Arrow</button>
                 </div>
               </div>
 
               <!-- Filled Arrow Tab -->
-              <div class="tab-content active" id="ex4-filled">
+              <div class="tab-content active" id="sec6FilledTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Radius (<code>r</code>)</span> <span id="lblEx4LeftR">100</span></label>
+                    <label><span>Radius (<code>r</code>)</span> <span id="sec6FilledRVal">100</span></label>
                     <input type="range" min="50" max="170" step="10" value="100" autocomplete="off"
-                      oninput="document.getElementById('ex4LeftArrow').setAttribute('r', this.value); document.getElementById('lblEx4LeftR').innerText = this.value; document.getElementById('codeEx4LeftR').innerText = this.value;">
+                      oninput="document.getElementById('sec6FilledArrow').setAttribute('r', this.value); document.getElementById('sec6FilledRVal').innerText = this.value; document.getElementById('sec6FilledRCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="lblEx4LeftWidth">12</span></label>
+                    <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="sec6FilledWidthVal">12</span></label>
                     <input type="range" min="2" max="24" step="2" value="12" autocomplete="off"
-                      oninput="document.getElementById('ex4LeftArrow').setAttribute('strokewidth', this.value); document.getElementById('lblEx4LeftWidth').innerText = this.value; document.getElementById('codeEx4LeftWidth').innerText = this.value;">
+                      oninput="document.getElementById('sec6FilledArrow').setAttribute('strokewidth', this.value); document.getElementById('sec6FilledWidthVal').innerText = this.value; document.getElementById('sec6FilledWidthCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
 
               <!-- Line Arrow Tab -->
-              <div class="tab-content" id="ex4-line">
+              <div class="tab-content" id="sec6LineTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Radius (<code>r</code>)</span> <span id="lblEx4RightR">100</span></label>
+                    <label><span>Radius (<code>r</code>)</span> <span id="sec6LineRVal">100</span></label>
                     <input type="range" min="50" max="170" step="10" value="100" autocomplete="off"
-                      oninput="document.getElementById('ex4RightArrow').setAttribute('r', this.value); document.getElementById('lblEx4RightR').innerText = this.value; document.getElementById('codeEx4RightR').innerText = this.value;">
+                      oninput="document.getElementById('sec6LineArrow').setAttribute('r', this.value); document.getElementById('sec6LineRVal').innerText = this.value; document.getElementById('sec6LineRCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="lblEx4RightWidth">12</span></label>
+                    <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="sec6LineWidthVal">12</span></label>
                     <input type="range" min="2" max="24" step="2" value="12" autocomplete="off"
-                      oninput="document.getElementById('ex4RightArrow').setAttribute('strokewidth', this.value); document.getElementById('lblEx4RightWidth').innerText = this.value; document.getElementById('codeEx4RightWidth').innerText = this.value;">
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- MODE 5: CENTER ORIGIN VS. ORBITING -->
-        <div class="example-card">
-          <div class="example-header">
-            <h3>Mode 5: Transform Origin &amp; Orbiting (<code>(x, y)</code> vs. <code>(dx, dy)</code>)</h3>
-            <p>Coordinates <code>(x, y)</code> always define the rotation anchor point. Applying visual displacement offsets (<code>dx</code>, <code>dy</code>) shifts the shape away from its pivot, creating orbiting satellites when <code>rotate</code> is animated.</p>
-          </div>
-
-          <!-- Declarative HTML Markup Above Stage -->
-          <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;pxl-layer&gt;
-    &lt;!-- Central Origin Dot at (500, 300) --&gt;
-    &lt;pxl-circle x="500" y="300" r="20" fill="#6d28d9"&gt;&lt;/pxl-circle&gt;
-
-    &lt;!-- Satellite Orbiting around (500, 300) via dx/dy + rotate --&gt;
-    &lt;pxl-circle x="500" y="300" 
-      dx="<mark id="codeEx5DX">160</mark>" dy="0" 
-      r="<mark id="codeEx5R">30</mark>" 
-      stroke="#f97316" strokewidth="<mark id="codeEx5Width">6</mark>"
-      rotate="t * 90"&gt;&lt;/pxl-circle&gt;
-  &lt;/pxl-layer&gt;
-&lt;/pxl-stage&gt;</code></pre>
-
-          <div class="demo-container">
-            <!-- Mode 5 Stage -->
-            <pxl-stage id="ex5Stage" ratio="5 / 3" class="demo-stage">
-              <pxl-layer>
-                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-                
-                <!-- Orbit Track Helper -->
-                <pxl-circle id="ex5OrbitTrack" x="500" y="300" r="160" stroke="#cbd5e1" strokewidth="1" linedash="[6, 6]"></pxl-circle>
-
-                <!-- Central Pivot Anchor (Violet Scheme) -->
-                <pxl-circle x="500" y="300" r="20" fill="#6d28d9"></pxl-circle>
-                <pxl-text x="500" y="340" text="'Origin (500, 300)'" size="16" fill="#6d28d9" font="monospace" align="center"></pxl-text>
-
-                <!-- Orbiting Satellite (Orange Scheme) -->
-                <pxl-circle id="ex5OrbitCircle" x="500" y="300" dx="160" dy="0" r="30" fill="#ffedd566" stroke="#f97316" strokewidth="6" rotate="t * 90"></pxl-circle>
-              </pxl-layer>
-            </pxl-stage>
-
-            <div class="demo-controls">
-              <div class="demo-controls-header">
-                <h3 class="demo-controls-title">Controls</h3>
-                <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex5-orbit')">Orbit</button>
-                </div>
-              </div>
-
-              <!-- Orbit Tab -->
-              <div class="tab-content active" id="ex5-orbit">
-                <div class="playground-sliders">
-                  <div class="control-group">
-                    <label><span>Orbit Distance (<code>dx</code>)</span> <span id="lblEx5DX">160</span></label>
-                    <input type="range" min="60" max="220" step="10" value="160" autocomplete="off"
-                      oninput="document.getElementById('ex5OrbitCircle').setAttribute('dx', this.value); document.getElementById('ex5OrbitTrack').setAttribute('r', this.value); document.getElementById('lblEx5DX').innerText = this.value; document.getElementById('codeEx5DX').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Satellite Radius (<code>r</code>)</span> <span id="lblEx5R">30</span></label>
-                    <input type="range" min="10" max="60" step="5" value="30" autocomplete="off"
-                      oninput="document.getElementById('ex5OrbitCircle').setAttribute('r', this.value); document.getElementById('lblEx5R').innerText = this.value; document.getElementById('codeEx5R').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="lblEx5Width">6</span></label>
-                    <input type="range" min="1" max="16" step="1" value="6" autocomplete="off"
-                      oninput="document.getElementById('ex5OrbitCircle').setAttribute('strokewidth', this.value); document.getElementById('lblEx5Width').innerText = this.value; document.getElementById('codeEx5Width').innerText = this.value;">
+                      oninput="document.getElementById('sec6LineArrow').setAttribute('strokewidth', this.value); document.getElementById('sec6LineWidthVal').innerText = this.value; document.getElementById('sec6LineWidthCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -986,9 +913,9 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECTION 4: PRO TIPS, GOTCHAS & PERFORMANCE -->
+        <!-- SECTION 7: PRO TIPS, GOTCHAS & PERFORMANCE -->
         <!-- ================================================================= -->
-        <h2>4. Pro Tips, Gotchas &amp; Performance Best Practices</h2>
+        <h2>7. Pro Tips, Gotchas &amp; Performance Best Practices</h2>
         <div class="pro-tips-grid">
           <div class="pro-tip-card">
             <h4>1. Angles are Always in Degrees (0°–360°)</h4>
@@ -1009,27 +936,6 @@
             <h4>4. Ellipses use &lt;pxl-ellipse&gt;</h4>
             <p>If you need independent horizontal and vertical radii (<code>rx</code> and <code>ry</code>), use the dedicated <code>&lt;pxl-ellipse&gt;</code> element rather than applying non-uniform scaling to a circle.</p>
           </div>
-        </div>
-
-        <!-- ================================================================= -->
-        <!-- SECTION 5: RELATED ELEMENTS & NEXT STEPS -->
-        <!-- ================================================================= -->
-        <h2>5. Related Elements</h2>
-        <div class="related-cards">
-          <a href="coordinates.html" class="related-card">
-            <h4>Coordinate System</h4>
-            <p>Master the 1000-unit logical canvas and responsive aspect ratios.</p>
-          </a>
-          <a href="rect.html" class="related-card">
-            <h4>&lt;pxl-rect&gt;</h4>
-            <p>Draw rectangles, rounded cards, and responsive bounding boxes.</p>
-          </a>
-          <a href="line.html" class="related-card">
-            <h4>&lt;pxl-line&gt;</h4>
-            <p>Draw line segments, vectors, and connector paths.</p>
-          </a>
-        </div>
-
       </div>
     </main>
 
