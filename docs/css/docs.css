@@ -487,6 +487,20 @@ body {
   margin: 20px 0;
 }
 
+.api-subheading {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 16px 0 4px 4px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 6px;
+}
+.api-list .api-subheading:first-child {
+  margin-top: 4px;
+}
+
 .api-item {
   display: grid;
   grid-template-columns: 240px 1fr;

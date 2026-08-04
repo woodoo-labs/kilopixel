@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kilopixel — Interactive Pursuit Curve Vortex</title>
+  <script src="../dist/pxl.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #0d0e15;
+      color: #fff;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+      min-height: 100vh;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #00e5ff;
+      text-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+      margin-bottom: 8px;
+    }
+    .header p {
+      font-size: 14px;
+      color: #8c92b3;
+      max-width: 650px;
+      line-height: 1.5;
+    }
+    .stage-container {
+      width: 100%;
+      max-width: min(90vw, 82vh);
+      aspect-ratio: 1 / 1;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 229, 255, 0.1);
+      overflow: hidden;
+      background: #000;
+      margin-bottom: 30px;
+    }
+    pxl-stage {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .controls-panel {
+      width: 100%;
+      max-width: min(90vw, 82vh);
+      padding: 24px 28px;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px 28px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 500;
+      color: #b4b8cc;
+      letter-spacing: 0.5px;
+    }
+    .control-label span {
+      color: #00e5ff;
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: 600;
+      background: rgba(0, 229, 255, 0.1);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #00e5ff;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.2s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>KILOPIXEL PURSUIT CURVE VORTEX</h1>
+    <p>160 Inscribed Declarative Triangles — Live Math Geometry, Reactive Variables &amp; Real-time Circular Clipping Masks</p>
+  </div>
+
+  <div class="stage-container">
+    <pxl-stage id="main" ratio="1 / 1">
+
+      <!-- ========================================================================= -->
+      <!-- REACTIVE GEOMETRY & STATE VARIABLES -->
+      <!-- ========================================================================= -->
+      <pxl-var id="R" value="460"></pxl-var>
+      <pxl-var id="y0" value="-ref.R.value"></pxl-var>
+      <pxl-var id="x1" value="ref.R.value * cos(PI/6)"></pxl-var>
+      <pxl-var id="y1" value="ref.R.value * sin(PI/6)"></pxl-var>
+      <pxl-var id="lineW" value="1.6"></pxl-var>
+      <pxl-var id="rotSpeed" value="24"></pxl-var>
+      <pxl-var id="stepAng" value="2.0"></pxl-var>
+      <pxl-var id="decay" value="0.9436"></pxl-var>
+      <pxl-var id="clipR" value="230"></pxl-var>
+      <pxl-var id="colorA" value="#00e5ff"></pxl-var>
+      <pxl-var id="colorTest" value="radial([0.5, 0.66666, 1.0], ['blue', '#00e5ff'])"></pxl-var>
+
+      <!-- ========================================================================= -->
+      <!-- LAYER 1: STATIC BACKGROUND SPIRAL (Cyan) - Cached Bitmap for 50% CPU win -->
+      <!-- ========================================================================= -->
+      <pxl-layer id="bgLayer" x="500" y="500">
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 0)" rotate="0 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 1)" rotate="1 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 2)" rotate="2 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 3)" rotate="3 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 4)" rotate="4 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 5)" rotate="5 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 6)" rotate="6 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 7)" rotate="7 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 8)" rotate="8 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 9)" rotate="9 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 10)" rotate="10 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 11)" rotate="11 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 12)" rotate="12 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 13)" rotate="13 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 14)" rotate="14 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 15)" rotate="15 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 16)" rotate="16 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 17)" rotate="17 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 18)" rotate="18 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 19)" rotate="19 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 20)" rotate="20 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 21)" rotate="21 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 22)" rotate="22 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 23)" rotate="23 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 24)" rotate="24 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 25)" rotate="25 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 26)" rotate="26 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 27)" rotate="27 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 28)" rotate="28 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 29)" rotate="29 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 30)" rotate="30 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 31)" rotate="31 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 32)" rotate="32 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 33)" rotate="33 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 34)" rotate="34 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 35)" rotate="35 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 36)" rotate="36 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 37)" rotate="37 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 38)" rotate="38 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 39)" rotate="39 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 40)" rotate="40 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 41)" rotate="41 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 42)" rotate="42 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 43)" rotate="43 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 44)" rotate="44 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 45)" rotate="45 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 46)" rotate="46 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 47)" rotate="47 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 48)" rotate="48 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 49)" rotate="49 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 50)" rotate="50 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 51)" rotate="51 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 52)" rotate="52 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 53)" rotate="53 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 54)" rotate="54 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 55)" rotate="55 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 56)" rotate="56 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 57)" rotate="57 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 58)" rotate="58 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 59)" rotate="59 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 60)" rotate="60 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 61)" rotate="61 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 62)" rotate="62 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 63)" rotate="63 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 64)" rotate="64 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 65)" rotate="65 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 66)" rotate="66 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 67)" rotate="67 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 68)" rotate="68 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 69)" rotate="69 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 70)" rotate="70 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 71)" rotate="71 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 72)" rotate="72 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 73)" rotate="73 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 74)" rotate="74 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 75)" rotate="75 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 76)" rotate="76 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 77)" rotate="77 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 78)" rotate="78 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="ref.colorA.value" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 79)" rotate="79 * ref.stepAng.value"></pxl-polyline>
+        <!-- Circular Clipping Mask -->
+        <pxl-circle x="0" y="0" r="ref.clipR.value" fill="#fff" blend="destination-in"></pxl-circle>
+      </pxl-layer>
+
+      <!-- ========================================================================= -->
+      <!-- LAYER 2: ANIMATED FOREGROUND SPIRAL (Magenta) -->
+      <!-- ========================================================================= -->
+      <pxl-layer id="spinner" x="500" y="500" rotate="t * ref.rotSpeed.value">
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 0)" rotate="0 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 1)" rotate="1 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 2)" rotate="2 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 3)" rotate="3 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 4)" rotate="4 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 5)" rotate="5 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 6)" rotate="6 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 7)" rotate="7 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 8)" rotate="8 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 9)" rotate="9 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 10)" rotate="10 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 11)" rotate="11 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 12)" rotate="12 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 13)" rotate="13 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 14)" rotate="14 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 15)" rotate="15 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 16)" rotate="16 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 17)" rotate="17 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 18)" rotate="18 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 19)" rotate="19 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 20)" rotate="20 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 21)" rotate="21 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 22)" rotate="22 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 23)" rotate="23 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 24)" rotate="24 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 25)" rotate="25 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 26)" rotate="26 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 27)" rotate="27 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 28)" rotate="28 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 29)" rotate="29 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 30)" rotate="30 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 31)" rotate="31 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 32)" rotate="32 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 33)" rotate="33 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 34)" rotate="34 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 35)" rotate="35 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 36)" rotate="36 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 37)" rotate="37 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 38)" rotate="38 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 39)" rotate="39 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 40)" rotate="40 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 41)" rotate="41 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 42)" rotate="42 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 43)" rotate="43 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 44)" rotate="44 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 45)" rotate="45 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 46)" rotate="46 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 47)" rotate="47 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 48)" rotate="48 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 49)" rotate="49 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 50)" rotate="50 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 51)" rotate="51 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 52)" rotate="52 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 53)" rotate="53 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 54)" rotate="54 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 55)" rotate="55 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 56)" rotate="56 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 57)" rotate="57 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 58)" rotate="58 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 59)" rotate="59 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 60)" rotate="60 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 61)" rotate="61 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 62)" rotate="62 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 63)" rotate="63 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 64)" rotate="64 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 65)" rotate="65 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 66)" rotate="66 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 67)" rotate="67 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 68)" rotate="68 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 69)" rotate="69 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 70)" rotate="70 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 71)" rotate="71 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 72)" rotate="72 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 73)" rotate="73 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 74)" rotate="74 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 75)" rotate="75 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 76)" rotate="76 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 77)" rotate="77 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 78)" rotate="78 * ref.stepAng.value"></pxl-polyline>
+        <pxl-polyline points="0, ref.y0.value; ref.x1.value, ref.y1.value; -ref.x1.value, ref.y1.value" closed="true" fill="none" stroke="#ff00aa" strokewidth="ref.lineW.value" scale="pow(ref.decay.value, 79)" rotate="79 * ref.stepAng.value"></pxl-polyline>
+        <!-- Circular Clipping Mask -->
+        <pxl-circle x="0" y="0" r="ref.clipR.value" fill="#fff" blend="destination-in"></pxl-circle>
+      </pxl-layer>
+
+      <!-- ========================================================================= -->
+      <!-- LAYER 3: HUD TELEMETRY -->
+      <!-- ========================================================================= -->
+      <pxl-layer id="hudLayer">
+        <pxl-text 
+          x="20" y="30" 
+          text="'ANGLE: ' + Math.round((ref.spinner?.rotate || 0) % 360) + '°'" 
+          font="monospace"
+          size="14" 
+          fill="#0f0" 
+          align="left"
+          stroke="none"></pxl-text>
+
+        <pxl-text 
+          x="980" y="30" 
+          text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'" 
+          font="monospace" 
+          size="14" 
+          fill="#0f0" 
+          align="right" 
+          stroke="none"></pxl-text>
+      </pxl-layer>
+
+    </pxl-stage>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- INTERACTIVE CONTROL PANEL (OUTSIDE STAGE) -->
+  <!-- ========================================================================= -->
+  <div class="controls-panel">
+    <div class="control-group">
+      <div class="control-label">
+        <span>RADIUS (R)</span>
+        <span id="valR">460</span>
+      </div>
+      <input type="range" min="200" max="500" step="10" value="460" autocomplete="off" 
+             oninput="document.getElementById('R').setAttribute('value', this.value); document.getElementById('valR').textContent = this.value;">
+    </div>
+
+    <div class="control-group">
+      <div class="control-label">
+        <span>LINE WIDTH</span>
+        <span id="valLineW">1.6px</span>
+      </div>
+      <input type="range" min="0.5" max="5.0" step="0.1" value="1.6" autocomplete="off" 
+             oninput="document.getElementById('lineW').setAttribute('value', this.value); document.getElementById('valLineW').textContent = this.value + 'px';">
+    </div>
+
+    <div class="control-group">
+      <div class="control-label">
+        <span>ROTATION SPEED</span>
+        <span id="valSpeed">24°/s</span>
+      </div>
+      <input type="range" min="-60" max="60" step="1" value="24" autocomplete="off" 
+             oninput="document.getElementById('rotSpeed').setAttribute('value', this.value); document.getElementById('valSpeed').textContent = this.value + '°/s';">
+    </div>
+
+    <div class="control-group">
+      <div class="control-label">
+        <span>STEP ANGLE</span>
+        <span id="valStep">2.0°</span>
+      </div>
+      <input type="range" min="0.5" max="5.0" step="0.1" value="2.0" autocomplete="off" 
+             oninput="document.getElementById('stepAng').setAttribute('value', this.value); document.getElementById('valStep').textContent = this.value + '°';">
+    </div>
+
+    <div class="control-group">
+      <div class="control-label">
+        <span>SPIRAL DECAY</span>
+        <span id="valDecay">0.9436</span>
+      </div>
+      <input type="range" min="0.8800" max="0.9800" step="0.0020" value="0.9436" autocomplete="off" 
+             oninput="document.getElementById('decay').setAttribute('value', this.value); document.getElementById('valDecay').textContent = Number(this.value).toFixed(4);">
+    </div>
+
+    <div class="control-group">
+      <div class="control-label">
+        <span>CLIP RADIUS</span>
+        <span id="valClip">230</span>
+      </div>
+      <input type="range" min="50" max="460" step="5" value="230" autocomplete="off" 
+             oninput="document.getElementById('clipR').setAttribute('value', this.value); document.getElementById('valClip').textContent = this.value;">
+    </div>
+  </div>
+
+</body>
+</html>

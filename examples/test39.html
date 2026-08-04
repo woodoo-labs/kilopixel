@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test 39 - Moiré Effect Concentric Squares & 2-Layer Performance Architecture</title>
+  <style>
+    body {
+      background-color: #050505;
+      margin: 0;
+      padding: 30px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      color: #f8fafc;
+      margin: 0 0 8px 0;
+      font-size: 24px;
+      letter-spacing: 1px;
+    }
+    .header p {
+      margin: 0;
+      font-size: 14px;
+      color: #64748b;
+    }
+    .stage-container {
+      width: min(90vw, 90vh);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+  <script src="../dist/pxl.min.js"></script>
+</head>
+<body>
+
+  <div class="header">
+    <h1>KILOPIXEL MOIRÉ EFFECT — CONCENTRIC SQUARES</h1>
+    <p>Hardware GPU-Composited 2-Layer Architecture (Static Background Canvas + Animated Rotating Foreground Canvas)</p>
+  </div>
+
+  <!-- Parent container sized to min(90vw, 90vh); ZERO CSS applied to pxl-stage -->
+  <div class="stage-container">
+    <pxl-stage id="main" ratio="1 / 1">
+
+      <!-- ========================================================================= -->
+      <!-- LAYER 1: STATIC BACKGROUND CANVAS (50 Concentric Squares) -->
+      <!-- Transforms (x="500" y="500") applied directly on Layer 1 (no groups used) -->
+      <!-- ========================================================================= -->
+      <pxl-layer id="bgLayer" x="500" y="500">
+        <pxl-rect w="20" h="20" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="40" h="40" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="60" h="60" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="80" h="80" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="100" h="100" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="120" h="120" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="140" h="140" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="160" h="160" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="180" h="180" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="200" h="200" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="220" h="220" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="240" h="240" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="260" h="260" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="280" h="280" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="300" h="300" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="320" h="320" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="340" h="340" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="360" h="360" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="380" h="380" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="400" h="400" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="420" h="420" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="440" h="440" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="460" h="460" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="480" h="480" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="500" h="500" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="520" h="520" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="540" h="540" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="560" h="560" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="580" h="580" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="600" h="600" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="620" h="620" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="640" h="640" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="660" h="660" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="680" h="680" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="700" h="700" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="720" h="720" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="740" h="740" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="760" h="760" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="780" h="780" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="800" h="800" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="820" h="820" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="840" h="840" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="860" h="860" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="880" h="880" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="900" h="900" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="920" h="920" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="940" h="940" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="960" h="960" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="980" h="980" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="1000" h="1000" fill="none" stroke="#00e5ff" strokewidth="4.5"></pxl-rect>
+      </pxl-layer>
+
+      <!-- ========================================================================= -->
+      <!-- LAYER 2: ANIMATED FOREGROUND CANVAS (50 Rotating Concentric Squares) -->
+      <!-- Transforms (x="500" y="500" rotate="t * 8") applied directly on Layer 2 -->
+      <!-- ========================================================================= -->
+      <pxl-layer id="spinner" x="500" y="500" rotate="t * 16">
+        <pxl-rect w="20" h="20" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="40" h="40" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="60" h="60" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="80" h="80" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="100" h="100" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="120" h="120" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="140" h="140" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="160" h="160" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="180" h="180" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="200" h="200" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="220" h="220" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="240" h="240" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="260" h="260" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="280" h="280" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="300" h="300" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="320" h="320" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="340" h="340" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="360" h="360" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="380" h="380" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="400" h="400" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="420" h="420" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="440" h="440" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="460" h="460" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="480" h="480" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="500" h="500" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="520" h="520" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="540" h="540" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="560" h="560" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="580" h="580" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="600" h="600" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="620" h="620" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="640" h="640" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="660" h="660" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="680" h="680" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="700" h="700" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="720" h="720" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="740" h="740" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="760" h="760" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="780" h="780" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="800" h="800" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="820" h="820" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="840" h="840" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="860" h="860" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="880" h="880" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="900" h="900" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="920" h="920" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="940" h="940" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="960" h="960" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="980" h="980" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+        <pxl-rect w="1000" h="1000" fill="none" stroke="#ff00aa" strokewidth="4.5"></pxl-rect>
+      </pxl-layer>
+
+      <!-- ========================================================================= -->
+      <!-- LAYER 3: HUD TELEMETRY -->
+      <!-- Angle readout on top-left and FPS/Render performance monitor on top-right -->
+      <!-- ========================================================================= -->
+      <pxl-layer id="hudLayer">
+        <pxl-text 
+          x="20" y="30" 
+          text="'ANGLE: ' + Math.round((ref.spinner?.rotate || 0) % 360) + '°'" 
+          font="monospace"
+          size="14" 
+          fill="#0f0" 
+          align="left"
+          stroke="none"></pxl-text>
+
+        <pxl-text 
+          x="980" y="30" 
+          text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'" 
+          font="monospace" 
+          size="14" 
+          fill="#0f0" 
+          align="right" 
+          stroke="none"></pxl-text>
+      </pxl-layer>
+
+    </pxl-stage>
+  </div>
+
+</body>
+</html>

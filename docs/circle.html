@@ -114,10 +114,10 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECTION 2: ATTRIBUTE SPECIFICATION -->
+        <!-- SECTION 2: ELEMENT REFERENCE -->
         <!-- ================================================================= -->
-        <h2>2. Attribute Specification</h2>
-        <p>The table below covers all attributes supported by <code>&lt;pxl-circle&gt;</code>. Use the tabs to switch between circle-specific attributes and common attributes shared across all shapes.</p>
+        <h2>2. Element Reference</h2>
+        <p>The table below covers all attributes, runtime properties, and event handlers supported by <code>&lt;pxl-circle&gt;</code>. Use the tabs to switch between circle-specific features and common APIs shared across all shapes.</p>
 
         <div class="demo-controls">
           <div class="demo-controls-header">
@@ -132,6 +132,7 @@
           <!-- TAB 1: CIRCLE SPECIFIC ATTRIBUTES -->
           <div class="tab-content active" id="sec2CircleTab">
             <div class="api-list">
+              <div class="api-subheading">Circle Geometry Attributes</div>
               <div class="api-item">
                 <div class="api-item-header">
                   <code class="api-name">r</code>
@@ -175,12 +176,12 @@
                 <div class="api-item-header">
                   <code class="api-name">end</code>
                   <div class="api-meta">
-                    <span class="api-pill default-pill">default: <strong>360</strong></span>
+                    <span class="api-pill default-pill">default: <strong>null</strong></span>
                     <span class="api-pill values-pill"><code>number</code> | <code>expr</code></span>
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Absolute end angle in degrees. <strong>Note:</strong> If <code>sweep</code> is also specified, <code>sweep</code> takes priority and <code>end</code> is ignored.
+                  Absolute end angle in degrees. <strong>Note:</strong> Defaults to <code>null</code> (if neither <code>end</code> nor <code>sweep</code> is specified, a full 360° circle is drawn). If <code>sweep</code> is also specified, <code>sweep</code> takes priority and <code>end</code> is ignored.
                 </div>
               </div>
 
@@ -188,12 +189,12 @@
                 <div class="api-item-header">
                   <code class="api-name">sweep</code>
                   <div class="api-meta">
-                    <span class="api-pill default-pill">default: <strong>360</strong></span>
+                    <span class="api-pill default-pill">default: <strong>null</strong></span>
                     <span class="api-pill values-pill"><code>number</code> | <code>expr</code></span>
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Relative angular span in degrees from the <code>start</code> angle (e.g. <code>start="45" sweep="90"</code> draws from 45° to 135°). <strong>Takes priority over <code>end</code>.</strong>
+                  Relative angular span in degrees from the <code>start</code> angle (e.g. <code>start="45" sweep="90"</code> draws from 45° to 135°). Defaults to <code>null</code> (full 360° circle). <strong>Takes priority over <code>end</code>.</strong>
                 </div>
               </div>
 
@@ -223,6 +224,7 @@
                 </div>
               </div>
 
+              <div class="api-subheading">Arrowhead Decorations</div>
               <div class="api-item">
                 <div class="api-item-header">
                   <code class="api-name">arrowstart</code>
@@ -267,6 +269,7 @@
           <!-- TAB 2: COMMON STYLING -->
           <div class="tab-content" id="sec2StylingTab">
             <div class="api-list">
+              <div class="api-subheading">Color & Transparency</div>
               <div class="api-item">
                 <div class="api-item-header">
                   <code class="api-name">fill</code>
@@ -293,6 +296,33 @@
                 </div>
               </div>
 
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">alpha</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>1</strong></span>
+                    <span class="api-pill values-pill"><code>0–1</code> | <code>expr</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Overall alpha transparency of the rendered shape (<code>0</code> = invisible, <code>1</code> = fully opaque).
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">hidden</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>false</strong></span>
+                    <span class="api-pill values-pill"><code>false</code> | <code>true</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  When set to <code>true</code>, hides the shape from rendering.
+                </div>
+              </div>
+
+              <div class="api-subheading">Stroke Details</div>
               <div class="api-item">
                 <div class="api-item-header">
                   <code class="api-name">strokewidth</code>
@@ -349,12 +379,12 @@
                 <div class="api-item-header">
                   <code class="api-name">linedash</code>
                   <div class="api-meta">
-                    <span class="api-pill default-pill">default: <strong>[]</strong></span>
+                    <span class="api-pill default-pill">default: <strong>null</strong></span>
                     <span class="api-pill values-pill"><code>[dash, gap]</code> | <code>expr</code></span>
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Dash pattern array in logical units (e.g. <code>linedash="[10, 5]"</code> for 10px dash, 5px gap).
+                  Dash pattern array in logical coordinate units (<code>u</code>). Values scale responsively with the stage (e.g. <code>linedash="[10, 5]"</code> draws a 10u dash followed by a 5u gap). Defaults to <code>null</code> (solid line).
                 </div>
               </div>
 
@@ -367,23 +397,11 @@
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Phase shift offset of the line dash pattern. Animate with time <code>t</code> to create marching ants effects.
+                  Phase shift offset of the line dash pattern in logical coordinate units (<code>u</code>). Animate with time <code>t</code> to create marching ants effects (e.g. <code>dashoffset="t * 20"</code>).
                 </div>
               </div>
 
-              <div class="api-item">
-                <div class="api-item-header">
-                  <code class="api-name">alpha</code>
-                  <div class="api-meta">
-                    <span class="api-pill default-pill">default: <strong>1</strong></span>
-                    <span class="api-pill values-pill"><code>0–1</code> | <code>expr</code></span>
-                  </div>
-                </div>
-                <div class="api-item-desc">
-                  Overall alpha transparency of the rendered shape (<code>0</code> = invisible, <code>1</code> = fully opaque).
-                </div>
-              </div>
-
+              <div class="api-subheading">Compositing & Effects</div>
               <div class="api-item">
                 <div class="api-item-header">
                   <code class="api-name">blend</code>
@@ -399,22 +417,9 @@
 
               <div class="api-item">
                 <div class="api-item-header">
-                  <code class="api-name">hidden</code>
-                  <div class="api-meta">
-                    <span class="api-pill default-pill">default: <strong>false</strong></span>
-                    <span class="api-pill values-pill"><code>false</code> | <code>true</code></span>
-                  </div>
-                </div>
-                <div class="api-item-desc">
-                  When set to <code>true</code>, hides the shape from rendering.
-                </div>
-              </div>
-
-              <div class="api-item">
-                <div class="api-item-header">
                   <code class="api-name">filter</code>
                   <div class="api-meta">
-                    <span class="api-pill default-pill">default: <strong>''</strong></span>
+                    <span class="api-pill default-pill">default: <strong>'none'</strong></span>
                     <span class="api-pill values-pill"><code>CSS filter string</code> | <code>expr</code></span>
                   </div>
                 </div>
@@ -427,12 +432,12 @@
                 <div class="api-item-header">
                   <code class="api-name">shadowcolor</code>
                   <div class="api-meta">
-                    <span class="api-pill default-pill">default: <strong>'none'</strong></span>
+                    <span class="api-pill default-pill">default: <strong>null</strong></span>
                     <span class="api-pill values-pill"><code>color</code> | <code>expr</code></span>
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Native Canvas 2D shadow color (e.g. <code>#38bdf8</code> or <code>rgba(56, 189, 248, 0.8)</code>). Rendered by the GPU via radial alpha masks for high-performance glows and drop shadows.
+                  Native Canvas 2D shadow color (e.g. <code>#38bdf8</code> or <code>rgba(56, 189, 248, 0.8)</code>). Rendered by the GPU via radial alpha masks for high-performance glows and drop shadows. Defaults to <code>null</code> (no shadow).
                 </div>
               </div>
 
@@ -467,6 +472,7 @@
           <!-- TAB 3: TRANSFORMS & SPATIAL -->
           <div class="tab-content" id="sec2TransformsTab">
             <div class="api-list">
+              <div class="api-subheading">Transform Attributes (HTML Markup)</div>
               <div class="api-item">
                 <div class="api-item-header">
                   <code class="api-name">x / y</code>
@@ -490,19 +496,6 @@
                 </div>
                 <div class="api-item-desc">
                   <strong>Visual Displacement:</strong> Shifts the rendered geometry away from <code>(x, y)</code> without changing the rotation pivot.
-                </div>
-              </div>
-
-              <div class="api-item">
-                <div class="api-item-header">
-                  <code class="api-name">ref.id.tx / ty</code>
-                  <div class="api-meta">
-                    <span class="api-pill default-pill">default: <strong>x + dx</strong></span>
-                    <span class="api-pill values-pill"><code>read-only JS getter</code></span>
-                  </div>
-                </div>
-                <div class="api-item-desc">
-                  <strong>Total Coordinates:</strong> Read-only JS properties returning the combined total position (<code>x + dx</code> and <code>y + dy</code>).
                 </div>
               </div>
 
@@ -544,18 +537,33 @@
                   Horizontal and vertical shear skew angles in degrees (typically <code>-89</code> to <code>89</code> before infinite shearing at <code>±90</code>).
                 </div>
               </div>
+
+              <div class="api-subheading">Read-Only JS Properties (Runtime Getters)</div>
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">tx / ty</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>x + dx</strong></span>
+                    <span class="api-pill values-pill"><code>read-only JS getter</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  <strong>Total Coordinates:</strong> Read-only JS properties returning the combined total position (<code>x + dx</code> and <code>y + dy</code>).
+                </div>
+              </div>
             </div>
           </div>
 
           <!-- TAB 4: INTERACTIVE EVENTS -->
           <div class="tab-content" id="sec2EventsTab">
             <div class="api-list">
+              <div class="api-subheading">Interactive Event Handlers (HTML Attributes)</div>
               <div class="api-item">
                 <div class="api-item-header">
                   <code class="api-name">onclick</code>
                   <div class="api-meta">
                     <span class="api-pill default-pill">default: <strong>null</strong></span>
-                    <span class="api-pill values-pill"><code>JS script</code></span>
+                    <span class="api-pill values-pill"><code>script</code></span>
                   </div>
                 </div>
                 <div class="api-item-desc">
@@ -568,7 +576,7 @@
                   <code class="api-name">onenter</code>
                   <div class="api-meta">
                     <span class="api-pill default-pill">default: <strong>null</strong></span>
-                    <span class="api-pill values-pill"><code>JS script</code></span>
+                    <span class="api-pill values-pill"><code>script</code></span>
                   </div>
                 </div>
                 <div class="api-item-desc">
@@ -581,7 +589,7 @@
                   <code class="api-name">onleave</code>
                   <div class="api-meta">
                     <span class="api-pill default-pill">default: <strong>null</strong></span>
-                    <span class="api-pill values-pill"><code>JS script</code></span>
+                    <span class="api-pill values-pill"><code>script</code></span>
                   </div>
                 </div>
                 <div class="api-item-desc">
@@ -594,7 +602,7 @@
                   <code class="api-name">onmove</code>
                   <div class="api-meta">
                     <span class="api-pill default-pill">default: <strong>null</strong></span>
-                    <span class="api-pill values-pill"><code>JS script</code></span>
+                    <span class="api-pill values-pill"><code>script</code></span>
                   </div>
                 </div>
                 <div class="api-item-desc">
@@ -607,7 +615,7 @@
                   <code class="api-name">ondown</code>
                   <div class="api-meta">
                     <span class="api-pill default-pill">default: <strong>null</strong></span>
-                    <span class="api-pill values-pill"><code>JS script</code></span>
+                    <span class="api-pill values-pill"><code>script</code></span>
                   </div>
                 </div>
                 <div class="api-item-desc">
@@ -620,11 +628,50 @@
                   <code class="api-name">onup</code>
                   <div class="api-meta">
                     <span class="api-pill default-pill">default: <strong>null</strong></span>
-                    <span class="api-pill values-pill"><code>JS script</code></span>
+                    <span class="api-pill values-pill"><code>script</code></span>
                   </div>
                 </div>
                 <div class="api-item-desc">
                   Fires when the primary pointer button is released while over the shape.
+                </div>
+              </div>
+
+              <div class="api-subheading">Reactive Interaction Properties (Runtime Getters)</div>
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">isHovered</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>false</strong></span>
+                    <span class="api-pill values-pill"><code>read-only boolean</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  <strong>Hover State:</strong> Reactive boolean property that is <code>true</code> when the pointer is over the shape. Can be referenced in dynamic expressions (e.g. <code>fill="ref.id.isHovered ? '#38bdf8' : '#1e293b'"</code>).
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">isPressed</code>
+                  <div class="api-meta">
+                    <span class="api-pill default-pill">default: <strong>false</strong></span>
+                    <span class="api-pill values-pill"><code>read-only boolean</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  <strong>Active Press State:</strong> Reactive boolean property that is <code>true</code> while the primary pointer button is held down over the shape.
+                </div>
+              </div>
+
+              <div class="api-item" style="border-left: 3px solid var(--accent); background: var(--code-bg);">
+                <div class="api-item-header">
+                  <code class="api-name">Stage Properties (Tip)</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill"><code>global stage reference</code></span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Inside any shape expression, you can also access global reactive properties from the parent stage, including <code>ref.main.mouseX</code>, <code>ref.main.mouseY</code>, <code>ref.main.width</code>, <code>ref.main.height</code>, and <code>ref.main.fps</code>.
                 </div>
               </div>
             </div>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kilopixel — Test 41: Gradient Cache Bug</title>
+  <script src="../dist/pxl.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0d0e15;
+      color: #fff;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      padding: 30px 20px;
+      min-height: 100vh;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #f59e0b;
+      text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+      margin-bottom: 8px;
+    }
+    .header p {
+      font-size: 13px;
+      color: #8c92b3;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .test-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .test-card.bug-card {
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+    .test-card.ok-card {
+      border-color: rgba(34, 197, 94, 0.35);
+    }
+
+    .card-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .card-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+    }
+    .tag-ok  { background: rgba(34,197,94,0.15);  color: #4ade80; }
+    .tag-bug { background: rgba(239,68,68,0.15);  color: #f87171; }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 4px;
+    }
+    .card-desc {
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .stage-wrap {
+      aspect-ratio: 2 / 1;
+      width: 100%;
+    }
+    pxl-stage {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 10px;
+      color: #475569;
+    }
+    .legend-bar {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(to right, #ff3366, #3366ff);
+    }
+    .legend span { white-space: nowrap; }
+
+    .note {
+      max-width: 1200px;
+      margin: 20px auto 0;
+      padding: 14px 18px;
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 8px;
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.7;
+    }
+    .note strong { color: #f59e0b; }
+    code {
+      background: rgba(255,255,255,0.08);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>TEST 41 — GRADIENT CACHE BUG INVESTIGATION</h1>
+    <p>
+      The gradient cache only invalidates when the <em>gradient config object reference</em> or <code>u</code> changes.
+      If a shape's local geometry changes (animated <code>w</code>/<code>h</code> or polyline points),
+      the cached <code>CanvasGradient</code> uses stale bounding box coordinates and misaligns.
+    </p>
+  </div>
+
+  <div class="grid">
+
+    <!-- ===================================================== -->
+    <!-- TEST A: Moving rect (x attribute → CTM, not geometry) -->
+    <!-- ===================================================== -->
+    <div class="test-card ok-card">
+      <div class="card-header">
+        <div class="card-tag tag-ok">EXPECTED: NO BUG</div>
+        <div class="card-title">A — Moving rect via <code>x</code> attribute</div>
+        <div class="card-desc">
+          The <code>x</code> attribute translates via CTM.
+          <code>getBoundingBox()</code> ignores <code>x</code>/<code>y</code> — it's always
+          in local space. Gradient cache stays valid. Gradient should follow the rect.
+          <br><strong style="color:#4ade80">✓ Gradient should stay red→blue on the rect</strong>
+        </div>
+      </div>
+
+      <div class="stage-wrap">
+        <pxl-stage id="stageA" ratio="2 / 1">
+          <pxl-layer>
+            <!-- Dark background -->
+            <pxl-rect x="500" y="250" w="1000" h="500" fill="#111827"></pxl-rect>
+            <!-- Grid lines to show stage coordinates -->
+            <pxl-rect x="500" y="250" w="1000" h="1" fill="rgba(255,255,255,0.06)"></pxl-rect>
+            <pxl-rect x="500" y="250" w="1" h="500" fill="rgba(255,255,255,0.06)"></pxl-rect>
+          </pxl-layer>
+          <pxl-layer>
+            <!-- Moving rect — x is a transform (CTM), does NOT change local bounding box -->
+            <pxl-rect id="rectA" x="loop(5)*800 + 100" y="250" w="200" h="160"
+                      fill="linear(0, ['#ff3366', '#3366ff'])" r="8"></pxl-rect>
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+
+      <div class="legend">
+        <span>red</span>
+        <div class="legend-bar"></div>
+        <span>blue</span>
+      </div>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- TEST B: Animated width (local geometry change)        -->
+    <!-- ===================================================== -->
+    <div class="test-card bug-card">
+      <div class="card-header">
+        <div class="card-tag tag-bug">EXPECTED: BUG</div>
+        <div class="card-title">B — Animated width via <code>w</code> attribute</div>
+        <div class="card-desc">
+          <code>w</code> changes the local bounding box every frame.
+          Cache hit → old gradient (small bbox) reused on large rect.
+          As rect grows, it extends beyond the gradient's coverage area.
+          <br><strong style="color:#f87171">✗ Rect should show solid blue at edges when wide</strong>
+        </div>
+      </div>
+
+      <div class="stage-wrap">
+        <pxl-stage id="stageB" ratio="2 / 1">
+          <pxl-layer>
+            <pxl-rect x="500" y="250" w="1000" h="500" fill="#111827"></pxl-rect>
+            <!-- Tick marks showing expected gradient width -->
+            <pxl-rect x="500" y="440" w="2" h="30" fill="rgba(255,255,255,0.3)"></pxl-rect>
+          </pxl-layer>
+          <pxl-layer>
+            <!-- Rect with animated width — local geometry changes each frame -->
+            <!-- BUG: gradient cached at t=0 (w≈20), stays tiny as rect grows to w=960 -->
+            <pxl-rect id="rectB" x="500" y="250" w="20 + wave(3)*940" h="160"
+                      fill="linear(0, ['#ff3366', '#3366ff'])" r="8"></pxl-rect>
+            <!-- Width indicator text -->
+            <pxl-text x="500" y="440" text="'w = ' + round(20 + wave(3)*940)"
+                      fill="rgba(255,255,255,0.5)" fontsize="18" anchor="center"></pxl-text>
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+
+      <div class="legend">
+        <span>red</span>
+        <div class="legend-bar"></div>
+        <span>blue</span>
+      </div>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- TEST C: Animated polyline points                      -->
+    <!-- ===================================================== -->
+    <div class="test-card bug-card">
+      <div class="card-header">
+        <div class="card-tag tag-bug">EXPECTED: BUG</div>
+        <div class="card-title">C — Animated polyline points</div>
+        <div class="card-desc">
+          Polyline <code>points</code> animate → bounding box changes each frame.
+          Gradient cache hits (static config) → gradient stays at t=0 bounding box.
+          The gradient radial center drifts away from the shape's actual centroid.
+          <br><strong style="color:#f87171">✗ Gradient center should track the triangle's centroid</strong>
+        </div>
+      </div>
+
+      <div class="stage-wrap">
+        <pxl-stage id="stageC" ratio="2 / 1">
+          <pxl-layer>
+            <pxl-rect x="500" y="250" w="1000" h="500" fill="#111827"></pxl-rect>
+          </pxl-layer>
+          <pxl-layer>
+            <!-- Triangle with animated apex — gradient bounding box is cached at t=0 position -->
+            <!-- Points syntax: x, y ; x, y ; x, y (comma between x and y!) -->
+            <pxl-polyline id="poly"
+              points="100, 420; 900, 420; loop(6)*800 + 100, 60"
+              closed="true"
+              fill="radial([0.5, 0.5, 1.0], ['#ffdd00', '#ff3366', '#8800ff'])"
+              stroke="#ffffff"
+              strokewidth="2">
+            </pxl-polyline>
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+
+      <div class="legend">
+        <span>yellow center</span>
+        <div class="legend-bar" style="background: linear-gradient(to right, #ffdd00, #ff3366, transparent)"></div>
+        <span>transparent edge</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="note">
+    <strong>How to read these tests:</strong>
+    Test A (moving): gradient should <em>always</em> appear red→blue on the rect — the CTM handles positioning, local geometry is unchanged.
+    Test B (width): when the rect is at its widest, you should see <strong style="color:#f87171">solid blue at both edges</strong> — the gradient covers only the initial narrow width.
+    Test C (polyline): the radial gradient <strong style="color:#f87171">should stay roughly fixed</strong> while the triangle's apex moves — the centroid shifts but the gradient doesn't.
+    <br><br>
+    <strong>Root cause:</strong> <code>createGradient()</code> in <code>shape.js</code> caches on <code>(_lastGradientConfig === styleValue && _lastGradientU === u)</code>.
+    For static gradients on animated shapes, <code>styleValue</code> is always the same object reference (compiler <code>staticCache</code>) → cache always hits →
+    bounding box recalculation never occurs.
+    <br><br>
+    <strong>Fix:</strong> Add bounding box dimensions to the cache key:
+    <code>_lastGradientW</code>, <code>_lastGradientH</code>, <code>_lastGradientL</code>, <code>_lastGradientT</code>.
+  </div>
+
+</body>
+</html>
