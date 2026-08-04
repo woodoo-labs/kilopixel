@@ -7,9 +7,10 @@
 
 ## 1. Goal Description
 Create a unified, responsive Filter API in Kilopixel that mirrors our Gradient (`linear`, `radial`) architecture.
-1. Replace messy CSS string concatenation and backticks with clean JavaScript function calls in `pxl.scope` (e.g., `blur(5)`, `dropShadow(10, 10, 5, 'rgba(0,0,0,0.5)')`).
+1. Replace CSS string concatenation and backticks with clean JavaScript function calls in `pxl.scope` (`blur(5)`, `dropShadow(10, 10, 5, 'rgba(0,0,0,0.5)')`).
 2. Automatically scale spatial filter values (`blur`, `drop-shadow`) by the responsive unit `u` at draw time with zero Garbage Collection (GC) overhead at 60 FPS.
 3. Support both single filters (`filter="blur(5)"`) and chained filters via JS arrays (`filter="[blur(5), contrast(150)]"`).
+4. Update `.agents/KILOPIXEL.md` documentation to reflect the unified filter syntax and color quote rules.
 
 ---
 
@@ -21,6 +22,7 @@ Create a unified, responsive Filter API in Kilopixel that mirrors our Gradient (
 > 2. **Chaining via Arrays**: To combine multiple filters, pass an Array of filter expressions: `filter="[blur(5), contrast(150)]"`.
 > 3. **Color Quotes Rule**: Inside JavaScript expressions, hex colors require single quotes (`'#ff007f'`), while standard color keyword names (`black`, `white`, `red`, `transparent`, etc.) are available as unquoted constants in `pxl.scope`.
 > 4. **Responsive Bare Numbers**: Spatial lengths inside `blur(...)` and `dropShadow(...)` use bare logical numbers (`1000` = full stage width), which Kilopixel automatically multiplies by `u` at draw time.
+> 5. **Simple Zero-GC Caching**: Use a clean 2-variable check (`_lastFilterRaw !== filterVal || _lastFilterU !== u`) to eliminate 100% of regex scaling overhead on unchanged frames without overcomplicating the engine code.
 
 ---
 
@@ -65,7 +67,7 @@ Add color keyword constants and Filter helper functions to `pxl.scope`:
 ---
 
 ### 2. [MODIFY] `js/graphics.js`
-Implement zero-GC responsive filter scaling inside context state application:
+Implement simple, clean zero-GC responsive filter scaling inside context state application:
 * **Add `pxl.scaleResponsiveFilter(filterStr, u)` Helper**:
   ```javascript
   pxl.scaleResponsiveFilter = function(filterStr, u) {
@@ -80,25 +82,36 @@ Implement zero-GC responsive filter scaling inside context state application:
     });
   };
   ```
-* **Update `pxl.applyContextState(ctx, u, attributeValues)`**:
+* **Update `pxl.applyContextState(ctx, u, attributeValues, node)`**:
   ```javascript
   const filterVal = Array.isArray(attributeValues.filter)
     ? attributeValues.filter.join(' ')
     : attributeValues.filter;
 
   if (filterVal && filterVal !== 'none') {
-    // Zero-GC caching per target node / u pair
-    ctx.filter = pxl.scaleResponsiveFilter(filterVal, u);
+    // Simple, clean cache: skip regex scaling whenever filter string & u are unchanged
+    if (node._lastFilterRaw !== filterVal || node._lastFilterU !== u) {
+      node._lastFilterRaw = filterVal;
+      node._lastFilterU = u;
+      node._cachedFilterScaled = pxl.scaleResponsiveFilter(filterVal, u);
+    }
+    ctx.filter = node._cachedFilterScaled;
   }
   ```
 
 ---
 
-### 3. [MODIFY] `.agents/KILOPIXEL.md`
-Update official documentation to describe the Unified Responsive Filter API:
-* Under **Section 5: Attribute Expression Syntax**, add documentation for `pxl.scope` filter helpers (`blur`, `dropShadow`, `brightness`, `contrast`, `hueRotate`, `invert`, `saturate`) and color keyword constants (`black`, `white`, `red`, etc.).
-* Explain that `blur(...)` and `dropShadow(...)` use logical Kilopixel units (`1000` = stage width) and are automatically scaled by `u` at draw time.
-* Add examples of chaining multiple filters using Array syntax: `filter="[blur(5), contrast(150)]"`.
+### 3. [MODIFY] `.agents/KILOPIXEL.md` (Documentation Updates)
+Update official documentation to specify the Unified Responsive Filter API:
+* **Section 5 (Attribute Expression Syntax - Filters & Colors)**:
+  * Replace existing static/animated filter documentation with the **Unified `pxl.scope` Filter API**:
+    * Explicitly state that CSS filter strings (`"blur(5px)"`) are replaced by JavaScript function calls (`"blur(5)"`).
+    * Table of available `pxl.scope` filter functions: `blur(radius)`, `dropShadow(x, y, blur, color)`, `brightness(val)`, `contrast(val)`, `hueRotate(deg)`, `invert(val)`, `saturate(val)`.
+  * **Responsive Units Explanation**: Note that spatial numbers in `blur(...)` and `dropShadow(...)` use logical Kilopixel units (`1000` = stage width) and scale automatically with `u`.
+  * **Array Chaining**: Show examples of chaining multiple filters using Array syntax: `filter="[dropShadow(10, 10, 5, black), blur(5), contrast(150)]"`.
+  * **Color Quotes Rule**: Document that inside JS expressions, hex colors require single quotes (`'#ff007f'`), while standard color keyword names (`black`, `white`, `red`, etc.) are available as unquoted constants in `pxl.scope`.
+* **Section 2 (`<pxl-layer>` & Shape Attributes Table)**:
+  * Update `filter` column description and examples to showcase `blur(5)` and array chaining `[blur(5), contrast(150)]`.
 
 ---
 
