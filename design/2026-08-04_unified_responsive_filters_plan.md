@@ -52,6 +52,9 @@ Add Filter helper functions to `pxl.scope`:
   pxl.scope.hueRotate  = (deg) => `hue-rotate(${deg}deg)`;
   pxl.scope.invert     = (val) => `invert(${val}%)`;
   pxl.scope.saturate   = (val) => `saturate(${val}%)`;
+  pxl.scope.grayscale  = (val) => `grayscale(${val}%)`;
+  pxl.scope.sepia      = (val) => `sepia(${val}%)`;
+  pxl.scope.opacity    = (val) => `opacity(${val}%)`;
   ```
 
 ---
@@ -96,7 +99,7 @@ Update official documentation to specify the Unified Responsive Filter API:
 * **Section 5 (Attribute Expression Syntax - Filters & Colors)**:
   * Replace existing static/animated filter documentation with the **Unified `pxl.scope` Filter API**:
     * Explicitly state that CSS filter strings (`"blur(5px)"`) are replaced by JavaScript function calls (`"blur(5)"`).
-    * Table of available `pxl.scope` filter functions: `blur(radius)`, `dropShadow(x, y, blur, color)`, `brightness(val)`, `contrast(val)`, `hueRotate(deg)`, `invert(val)`, `saturate(val)`.
+    * Table of available `pxl.scope` filter functions: `blur(radius)`, `dropShadow(x, y, blur, color)`, `brightness(val)`, `contrast(val)`, `hueRotate(deg)`, `invert(val)`, `saturate(val)`, `grayscale(val)`, `sepia(val)`, `opacity(val)`.
   * **Responsive Units Explanation**: Note that spatial numbers in `blur(...)` and `dropShadow(...)` use logical Kilopixel units (`1000` = stage width) and scale automatically with `u`.
   * **Array Chaining**: Show examples of chaining multiple filters using Array syntax: `filter="[dropShadow(10, 10, 5, 'black'), blur(5), contrast(150)]"`.
   * **Color Quotes Rule**: Document that inside JS expressions, ALL color strings require single quotes (`'#ff007f'`, `'red'`, `'rgba(...)')`.
