@@ -348,12 +348,12 @@ Shapes are drawn relative to `(0, 0)` within the transformed context. The transf
 
 ### Style Cascade & Inheritance (`alpha`, `blend`, `filter`, and native shadows)
 
-All container styling attributes (`alpha`, `blend`, `filter`, and native canvas shadows `shadowcolor`, `shadowblur`, `shadowx`, `shadowy`) cascade through the element hierarchy from `<pxl-layer>` and `<pxl-group>` down to child `<pxl-shape>` elements:
+All container styling attributes (`alpha`, `blend`, `filter`, and native canvas shadows `shadowcolor`, `shadowblur`, `shadowx`, `shadowy`) cascade through the element hierarchy from `<pxl-layer>` down to child `<pxl-shape>` elements:
 
-- **Compounding Opacity (`alpha`)**: Opacity multiplies mathematically down the container tree (`ctx.globalAlpha *= alpha`). For example, a group with `alpha="0.5"` containing a shape with `alpha="0.5"` renders the shape at `0.25` opacity (`0.5 * 0.5`).
-- **Inherited Blend Modes, Filters, and Native Shadows**: Containers set the rendering state on the canvas context (`ctx.globalCompositeOperation`, `ctx.filter`, `ctx.shadowColor`, `ctx.shadowBlur`, `ctx.shadowOffsetX`, `ctx.shadowOffsetY`) before drawing their children. All child shapes automatically inherit these styles.
+- **Compounding Opacity (`alpha`)**: Opacity multiplies mathematically down the container tree (`ctx.globalAlpha *= alpha`). 
+- **Inherited Blend Modes, Filters, and Native Shadows**: The `<pxl-layer>` sets the rendering state on the canvas context (`ctx.globalCompositeOperation`, `ctx.filter`, `ctx.shadowColor`, `ctx.shadowBlur`, `ctx.shadowOffsetX`, `ctx.shadowOffsetY`) before drawing its children. All child shapes automatically inherit these styles.
 - **Overriding and Disabling Styles**: Any child shape can override an inherited style by setting its own value (e.g. `shadowcolor="#ef4444"`), or explicitly disable an inherited filter or shadow by setting `filter="none"` or `shadowcolor="none"` / `shadowcolor="transparent"`.
-- **CPU Performance Advantage**: Applying `shadowcolor`, `shadowblur`, `shadowx`, `shadowy` once on a container (`<pxl-layer>` or `<pxl-group>`) is up to 10x more performant on the CPU for multiple shapes than applying shadows individually on each shape, because it requires only 1 `ctx.save()` / `ctx.restore()` state switch instead of one per shape.
+- **Zero-Inheritance Groups**: Note that `<pxl-group>` is a **Pure Spatial Transform & Structural Container** and does *not* support or cascade styling attributes. This enforces a clean 3-tier architecture (`Layer` -> `Group` -> `Shape`) with zero DOM style inheritance overhead for groups.
 
 ---
 
@@ -651,15 +651,18 @@ Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile 
 **Class**: `Group extends PxlNode`  
 **Source**: `js/elements/group.js`
 
-### Observed Attributes (18)
+> [!NOTE]
+> **Pure Spatial Transform Container**  
+> `<pxl-group>` is a lightweight container dedicated exclusively to structural grouping and geometric transforms. It does NOT support bitmap compositing (`alpha`, `blend`, `filter`, `shadow*`). For compositing, use `<pxl-layer>` or apply the attributes directly to leaf shapes.
 
-Same as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`, `alpha`, `blend`, `filter`, `shadowcolor`, `shadowblur`, `shadowx`, `shadowy`, `hidden`
+### Observed Attributes (11)
+
+Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`, `hidden`
 
 ### Key Behavior
 
 - Does NOT own a canvas — draws into parent layer's context
 - Groups can nest infinitely, each adding transforms to the stack
-- `globalAlpha *= alpha` means opacity compounds through the hierarchy
 - `render(ctx, u, t)` evaluates animations, applies transforms, iterates children
 - Only saves/restores context if there are actual transform changes (optimization)
 

@@ -4,10 +4,9 @@
 pxl.anchorX = { 'left': 0, 'right': 1, 'center': 0.5, 'top-left': 0, 'top-right': 1, 'bottom-left': 0, 'bottom-right': 1, 'top': 0.5, 'bottom': 0.5 };
 pxl.anchorY = { 'top': 0, 'bottom': 1, 'center': 0.5, 'top-left': 0, 'top-right': 0, 'bottom-left': 1, 'bottom-right': 1, 'left': 0.5, 'right': 0.5 };
 
-pxl.applyContextState = function(ctx, u, attributeValues) {
-  const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy, alpha, blend, filter, shadowcolor, shadowblur, shadowx, shadowy } = attributeValues;
+pxl.applyTransformState = function(ctx, u, attributeValues) {
+  const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy } = attributeValues;
   
-  // 1. Geometric Transforms
   if (x || y) ctx.translate(x * u, y * u);
   if (rotate) ctx.rotate(rotate * Math.PI / 180);
   
@@ -21,7 +20,13 @@ pxl.applyContextState = function(ctx, u, attributeValues) {
     ctx.transform(1, sy, sx, 1, 0, 0);
   }
   if (dx || dy) ctx.translate(dx * u, dy * u);
+};
 
+pxl.applyContextState = function(ctx, u, attributeValues) {
+  pxl.applyTransformState(ctx, u, attributeValues);
+  
+  const { alpha, blend, filter, shadowcolor, shadowblur, shadowx, shadowy } = attributeValues;
+  
   // 2. Rendering States
   if (alpha !== 1) ctx.globalAlpha *= alpha;
   if (blend !== 'source-over') ctx.globalCompositeOperation = blend;

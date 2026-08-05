@@ -1,11 +1,11 @@
 class Group extends PxlNode {
-  static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'filter', 'shadowcolor', 'shadowblur', 'shadowx', 'shadowy', 'hidden']; }
+  static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden']; }
 
   constructor() {
     super();
     this.childList = []; // Groups or shapes
     this.isOrderDirty = false; // Tracks if children need sorting
-    Object.assign(this.attributeExpressions, { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false });
+    Object.assign(this.attributeExpressions, { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false });
     Object.assign(this.attributeValues, this.attributeExpressions);
   }
 
@@ -34,16 +34,14 @@ class Group extends PxlNode {
 
     if (this.attributeValues.hidden) return;
 
-    const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy, alpha, blend, filter, shadowcolor } = this.attributeValues;
+    const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy } = this.attributeValues;
     const hasStateChanges = x || y || dx || dy || rotate || 
                             scale !== 1 || scalex !== 1 || scaley !== 1 || 
-                            skewx || skewy || 
-                            alpha !== 1 || blend !== 'source-over' || filter !== 'none' ||
-                            shadowcolor;
+                            skewx || skewy;
 
     if (hasStateChanges) {
       ctx.save();
-      pxl.applyContextState(ctx, u, this.attributeValues);
+      pxl.applyTransformState(ctx, u, this.attributeValues);
     }
     const len = this.childList.length;
     for (let i = 0; i < len; i++) {
