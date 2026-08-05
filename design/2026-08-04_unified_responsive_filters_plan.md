@@ -20,7 +20,7 @@ Create a unified, responsive Filter API in Kilopixel that mirrors our Gradient (
 > **Unified Syntax & UX Rules**
 > 1. **One Unified Syntax**: Whether static or animated, filters use `pxl.scope` function calls (`blur(5)`, `dropShadow(...)`, `contrast(150)`).
 > 2. **Chaining via Arrays**: To combine multiple filters, pass an Array of filter expressions: `filter="[blur(5), contrast(150)]"`.
-> 3. **Color Quotes Rule**: Inside JavaScript expressions, hex colors require single quotes (`'#ff007f'`), while standard color keyword names (`black`, `white`, `red`, `transparent`, etc.) are available as unquoted constants in `pxl.scope`.
+> 3. **Color Quotes Rule**: Inside JavaScript expressions, ALL color strings require single quotes (`'#ff007f'`, `'red'`, `'rgba(0,0,0,0.5)'`), avoiding exceptions and keeping `pxl.scope` clean.
 > 4. **Responsive Bare Numbers**: Spatial lengths inside `blur(...)` and `dropShadow(...)` use bare logical numbers (`1000` = full stage width), which Kilopixel automatically multiplies by `u` at draw time.
 > 5. **Simple Zero-GC Caching**: Use a clean 2-variable check (`_lastFilterRaw !== filterVal || _lastFilterU !== u`) to eliminate 100% of regex scaling overhead on unchanged frames without overcomplicating the engine code.
 
@@ -42,17 +42,7 @@ Create a unified, responsive Filter API in Kilopixel that mirrors our Gradient (
 ## 4. Proposed Changes (File-by-File Detailed Specification)
 
 ### 1. [MODIFY] `js/compiler.js`
-Add color keyword constants and Filter helper functions to `pxl.scope`:
-* **Add CSS Color Keyword Constants**:
-  ```javascript
-  const colorKeywords = [
-    'black', 'white', 'red', 'green', 'blue', 'yellow', 'cyan', 'magenta',
-    'orange', 'purple', 'pink', 'gray', 'grey', 'transparent'
-  ];
-  for (const color of colorKeywords) {
-    pxl.scope[color] = color;
-  }
-  ```
+Add Filter helper functions to `pxl.scope`:
 * **Add Filter Helpers to `pxl.scope`**:
   ```javascript
   pxl.scope.blur       = (radius) => `blur(${radius})`;
@@ -108,8 +98,8 @@ Update official documentation to specify the Unified Responsive Filter API:
     * Explicitly state that CSS filter strings (`"blur(5px)"`) are replaced by JavaScript function calls (`"blur(5)"`).
     * Table of available `pxl.scope` filter functions: `blur(radius)`, `dropShadow(x, y, blur, color)`, `brightness(val)`, `contrast(val)`, `hueRotate(deg)`, `invert(val)`, `saturate(val)`.
   * **Responsive Units Explanation**: Note that spatial numbers in `blur(...)` and `dropShadow(...)` use logical Kilopixel units (`1000` = stage width) and scale automatically with `u`.
-  * **Array Chaining**: Show examples of chaining multiple filters using Array syntax: `filter="[dropShadow(10, 10, 5, black), blur(5), contrast(150)]"`.
-  * **Color Quotes Rule**: Document that inside JS expressions, hex colors require single quotes (`'#ff007f'`), while standard color keyword names (`black`, `white`, `red`, etc.) are available as unquoted constants in `pxl.scope`.
+  * **Array Chaining**: Show examples of chaining multiple filters using Array syntax: `filter="[dropShadow(10, 10, 5, 'black'), blur(5), contrast(150)]"`.
+  * **Color Quotes Rule**: Document that inside JS expressions, ALL color strings require single quotes (`'#ff007f'`, `'red'`, `'rgba(...)')`.
 * **Section 2 (`<pxl-layer>` & Shape Attributes Table)**:
   * Update `filter` column description and examples to showcase `blur(5)` and array chaining `[blur(5), contrast(150)]`.
 
