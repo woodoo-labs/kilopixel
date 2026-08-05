@@ -96,7 +96,7 @@
           fill="hsl(190, 100, map(clamp(ref.orbDist.value, 0, 200), 0, 200, 60, 20))"
           stroke="hsl(190, 100, map(clamp(ref.orbDist.value, 0, 200), 0, 200, 80, 40))"
           strokewidth="4"
-          filter="`drop-shadow(0 0 ${map(clamp(ref.orbDist.value, 0, 200), 0, 200, 40, 0)}px #22d3ee)`"
+          filter="dropShadow(0, 0, map(clamp(ref.orbDist.value, 0, 200), 0, 200, 40, 0), '#22d3ee')"
         ></pxl-circle>
         
         <pxl-text x="ref.orb.x" y="ref.orb.y + 100" text="Chase Me" size="16" weight="bold" fill="#94a3b8" align="center" stroke="none"></pxl-text>

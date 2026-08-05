@@ -91,7 +91,7 @@
     <!-- [25] Core outer glow — pulsating blur filter -->
     <pxl-circle x="500" y="281" r="65 + wave(4) * 20"
       fill="radial(1, [0, hsla(185, 100, 60, 0.25), 1, 'transparent'])"
-      filter="`blur(${2 + wave(4) * 4}px)`"></pxl-circle>
+      filter="blur(2 + wave(4) * 4)"></pxl-circle>
 
     <!-- [26] Core body — radial gradient, breathing -->
     <pxl-circle x="500" y="281" r="22 + wave(4) * 6"
@@ -220,7 +220,7 @@
     <pxl-group x="500" y="281" rotate="25">
       <pxl-circle id="planetA" rotate="t * 12" dx="240" dy="0" scaley="0.417" r="10"
         fill="radial(0.7, ['#66ffcc', '#00aa66'])" stroke="#00ffaa" strokewidth="0.5"
-        filter="`drop-shadow(0 0 ${4 + wave(2) * 4}px #00ffaa)`"></pxl-circle>
+        filter="dropShadow(0, 0, 4 + wave(2) * 4, '#00ffaa')"></pxl-circle>
       <!-- Moon of Planet A — nested orbit! -->
       <pxl-group rotate="t * 12" dx="240" scaley="0.417">
         <pxl-circle rotate="t * 60" dx="18" r="3" fill="#aaffdd" stroke="none"></pxl-circle>
@@ -231,7 +231,7 @@
     <pxl-group x="500" y="281" rotate="-25">
       <pxl-circle rotate="t * -9" dx="240" dy="0" scaley="0.417" r="8"
         fill="radial(0.7, ['#ff99cc', '#cc0066'])" stroke="#ff66aa" strokewidth="0.5"
-        filter="`drop-shadow(0 0 ${3 + wave(3) * 3}px #ff66aa)`"></pxl-circle>
+        filter="dropShadow(0, 0, 3 + wave(3) * 3, '#ff66aa')"></pxl-circle>
     </pxl-group>
 
     <!-- [76] Counter-rotating dashed circle with strobe() -->
@@ -251,7 +251,7 @@
     <!-- [77] Mouse glow — large soft follower -->
     <pxl-circle x="ref.s.mouseX" y="ref.s.mouseY" r="60"
       fill="radial(0.8, [hsla(185, 100, 60, 0.06), 'transparent'])"
-      filter="blur(3px)"
+      filter="blur(3)"
       blend="screen"></pxl-circle>
 
     <!-- [78] Mouse crosshair — precise follower -->
@@ -271,7 +271,7 @@
       fill="ref.nodeA.isPressed ? '#00ccdd' : (ref.nodeA.isHovered ? '#005566' : '#002233')"
       stroke="ref.nodeA.isHovered ? '#00e5ff' : '#004455'" strokewidth="1"
       scale="ref.nodeA.isPressed ? 0.9 : (ref.nodeA.isHovered ? 1.15 : 1)"
-      filter="ref.nodeA.isHovered ? `drop-shadow(0 0 8px #00e5ff)` : 'none'"
+      filter="ref.nodeA.isHovered ? dropShadow(0, 0, 8, '#00e5ff') : 'none'"
       onclick="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
     <pxl-text x="80" y="60" text="'⬡'" size="16" fill="#00e5ff" align="center" baseline="middle"
       alpha="0.5 + bounce(2) * 0.5"></pxl-text>
@@ -281,7 +281,7 @@
       fill="ref.nodeB.isPressed ? '#cc0088' : (ref.nodeB.isHovered ? '#550033' : '#220022')"
       stroke="ref.nodeB.isHovered ? '#ff00aa' : '#440044'" strokewidth="1"
       scale="ref.nodeB.isPressed ? 0.9 : (ref.nodeB.isHovered ? 1.15 : 1)"
-      filter="ref.nodeB.isHovered ? `drop-shadow(0 0 8px #ff00aa)` : 'none'"
+      filter="ref.nodeB.isHovered ? dropShadow(0, 0, 8, '#ff00aa') : 'none'"
       onclick="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
     <pxl-text x="920" y="60" text="'◈'" size="16" fill="#ff00aa" align="center" baseline="middle"
       alpha="0.5 + yoyo(2) * 0.5"></pxl-text>
@@ -291,7 +291,7 @@
       fill="ref.nodeC.isPressed ? '#cc8800' : (ref.nodeC.isHovered ? '#553300' : '#221a00')"
       stroke="ref.nodeC.isHovered ? '#ffbb00' : '#443300'" strokewidth="1"
       scale="ref.nodeC.isPressed ? 0.9 : (ref.nodeC.isHovered ? 1.15 : 1)"
-      filter="ref.nodeC.isHovered ? `drop-shadow(0 0 8px #ffbb00)` : 'none'"
+      filter="ref.nodeC.isHovered ? dropShadow(0, 0, 8, '#ffbb00') : 'none'"
       onclick="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
     <pxl-text x="80" y="502" text="'◇'" size="16" fill="#ffbb00" align="center" baseline="middle"
       alpha="0.5 + glide(2) * 0.5"></pxl-text>
@@ -301,7 +301,7 @@
       fill="ref.nodeD.isPressed ? '#7700cc' : (ref.nodeD.isHovered ? '#330055' : '#1a0033')"
       stroke="ref.nodeD.isHovered ? '#aa44ff' : '#330055'" strokewidth="1"
       scale="ref.nodeD.isPressed ? 0.9 : (ref.nodeD.isHovered ? 1.15 : 1)"
-      filter="ref.nodeD.isHovered ? `drop-shadow(0 0 8px #aa44ff)` : 'none'"
+      filter="ref.nodeD.isHovered ? dropShadow(0, 0, 8, '#aa44ff') : 'none'"
       onclick="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
     <pxl-text x="920" y="502" text="'✦'" size="16" fill="#aa44ff" align="center" baseline="middle"
       alpha="0.3 + glitch(0.5) * 0.7"></pxl-text>

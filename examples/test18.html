@@ -98,7 +98,7 @@
 
     <div class="control-group">
       <label>Skew X <span id="val-skew">0.0</span></label>
-      <input type="range" id="in_skew" min="-1.5" max="1.5" step="0.1" value="0">
+      <input type="range" id="in_skew" min="-45" max="45" step="1" value="0">
     </div>
 
     <div class="control-group">
@@ -139,19 +139,23 @@
           <!-- Background decorative elements to show blending -->
           <pxl-rect x="300" y="281" w="200" h="200" r="100" fill="hsla(300, 100%, 50%, 0.5)"></pxl-rect>
           <pxl-rect x="700" y="281" w="200" h="200" r="100" fill="hsla(180, 100%, 50%, 0.5)"></pxl-rect>
+        </pxl-layer>
 
-          <!-- THE INTERACTIVE TARGET GROUP -->
+        <!-- THE INTERACTIVE TARGET LAYER (Context States) -->
+        <pxl-layer 
+          alpha="ref.alpha.value" 
+          blend="ref.blend.value" 
+          filter="[dropShadow(0, 20, 30, `rgba(0,0,0,${ref.shadow.value})`), blur(ref.blur.value)]">
+
+          <!-- THE INTERACTIVE TARGET GROUP (Transform States) -->
           <pxl-group 
             x="500" 
             y="281" 
             scale="ref.scale.value" 
-            alpha="ref.alpha.value" 
             skewx="ref.skew.value" 
-            blend="ref.blend.value" 
-            filter="`drop-shadow(0 20px 30px rgba(0,0,0,${ref.shadow.value})) blur(${ref.blur.value}px)`"
             rotate="t * 20">
             
-            <!-- We apply all superpowers to the group, so the children inherit them flawlessly! -->
+            <!-- We apply all superpowers to the group/layer, so the children inherit them flawlessly! -->
             <pxl-rect x="0" y="0" w="250" h="250" r="40" fill="hsl(45, 100%, 60%)" stroke="#fff" strokewidth="4"></pxl-rect>
             <pxl-circle x="-80" y="-80" r="40" fill="hsl(0, 100%, 60%)"></pxl-circle>
             <pxl-circle x="80" y="80" r="40" fill="hsl(200, 100%, 60%)"></pxl-circle>
@@ -159,10 +163,11 @@
             <pxl-text x="0" y="0" text="'TARGET'" align="center" baseline="middle" size="40" font="sans-serif" weight="bold" fill="#fff" stroke="none"></pxl-text>
             
           </pxl-group>
+        </pxl-layer>
 
+        <pxl-layer>
           <!-- FPS Monitor -->
           <pxl-text x="20" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms | MAX: ' + ref.main.renderMax + 'ms'" font="monospace" size="14" fill="#0f0" align="left" stroke="none"></pxl-text>
-
         </pxl-layer>
 
       </pxl-stage>

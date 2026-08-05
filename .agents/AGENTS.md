@@ -20,6 +20,7 @@
 - **Deep Documentation**: For complete, in-depth technical documentation about the engine's architecture, scope, syntax, and capabilities, you MUST consult `.agents/KILOPIXEL.md`.
 
 ## Critical Rules & Common Pitfalls
+- **No Redundant Defensive Fallbacks**: All `PxlNode` attributes are strictly initialized with default values (numbers, strings, or `null`) via `attributeExpressions`. When reading `attributeValues`, do NOT use defensive checks like `alpha !== undefined` or fallbacks like `(shadowblur || 0)`. Trust the engine's deterministic initialization to avoid code bloat.
 - **Coordinate System**: `x` and `y` define the **Center** of the element. All transforms (rotation, scaling, skewing) occur around this point. When `dx`/`dy` offsets are applied, the shape is visually displaced but `x`/`y` remains the transform origin. All spatial values are multiplied by the responsive unit `u` at draw time. Shapes are drawn relative to `(0, 0)` within the transformed context.
 - **Logical Width = 1000**: The stage's logical width is always 1000. Use raw numbers for coordinates (`x="500"` for center) to hit the compiler's Fast Path. Never use `ref.main.width / 2` when `500` does the same with zero cost.
 - **Time `t` is in Seconds**: `t * 90` = 90 degrees per second. `wave(2)` = a 2-second cycle. Never treat `t` as milliseconds.

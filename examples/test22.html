@@ -21,15 +21,15 @@
 
     <!-- Background Galaxy -->
     <pxl-group x="500" y="350">
-      <pxl-ellipse rx="800" ry="250" rotate="20" stroke="rgba(255,255,255,0.03)" strokewidth="40" linedash="[10, 20]" filter="blur(5px)"></pxl-ellipse>
-      <pxl-ellipse rx="700" ry="200" rotate="-10" stroke="rgba(56, 189, 248, 0.05)" strokewidth="20" linedash="[5, 15]" filter="blur(3px)"></pxl-ellipse>
+      <pxl-ellipse rx="800" ry="250" rotate="20" stroke="rgba(255,255,255,0.03)" strokewidth="40" linedash="[10, 20]" filter="blur(5)"></pxl-ellipse>
+      <pxl-ellipse rx="700" ry="200" rotate="-10" stroke="rgba(56, 189, 248, 0.05)" strokewidth="20" linedash="[5, 15]" filter="blur(3)"></pxl-ellipse>
     </pxl-group>
 
     <!-- A 3D-looking Solar System utilizing squashed ellipses -->
     <pxl-group x="500" y="350" scale="0.85">
       
       <!-- The Sun -->
-      <pxl-circle r="40" fill="radial(1, ['#fde047', '#ea580c'])" filter="drop-shadow(0 0 30px #ea580c)"></pxl-circle>
+      <pxl-circle r="40" fill="radial(1, ['#fde047', '#ea580c'])" filter="dropShadow(0, 0, 30, '#ea580c')"></pxl-circle>
       
       <!-- Orbit 1: Fast -->
       <pxl-group rotate="15">
@@ -59,7 +59,7 @@
       <!-- Comet with tail using dx offset -->
       <pxl-group x="cos(t*1.5) * 400" y="sin(t*1.5) * 120" rotate="10">
         <pxl-ellipse rx="40" ry="4" fill="linear([0,0, 1,0], ['#fff', 'rgba(0,242,254,0)'])" dx="-20"></pxl-ellipse>
-        <pxl-circle r="4" fill="#fff" filter="drop-shadow(0 0 10px rgba(255,255,255,0.8))"></pxl-circle>
+        <pxl-circle r="4" fill="#fff" filter="dropShadow(0, 0, 10, 'rgba(255,255,255,0.8)')"></pxl-circle>
       </pxl-group>
 
       <!-- Elliptical Radar Scanner -->

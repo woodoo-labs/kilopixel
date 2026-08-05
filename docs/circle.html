@@ -754,7 +754,7 @@
       strokewidth="<mark id="sec4CircleWidthCode">16</mark>" 
       start="t * 180" 
       sweep="160 + wave(3) * 120"
-      filter="drop-shadow(0px 0px <mark id="sec4CircleGlowCode">15</mark>px rgba(249,115,22,0.8))"&gt;&lt;/pxl-circle&gt;
+      filter="dropShadow(0, 0, <mark id="sec4CircleGlowCode">15</mark>, 'rgba(249,115,22,0.8)')"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -773,7 +773,7 @@
                   strokewidth="16" 
                   start="t * 180" 
                   sweep="160 + wave(3) * 120"
-                  filter="drop-shadow(0px 0px 15px rgba(249,115,22,0.8))"></pxl-circle>
+                  filter="dropShadow(0, 0, 15, 'rgba(249,115,22,0.8)')"></pxl-circle>
 
                 <!-- Orbiting satellite dot -->
                 <pxl-circle x="500 + cos(t*3)*180" y="300 + sin(t*3)*180" r="10" fill="#c2410c"></pxl-circle>
@@ -807,7 +807,7 @@
                   <div class="control-group">
                     <label><span>Glow Shadow (<code>filter</code>)</span> <span id="sec4CircleGlowVal">15</span></label>
                     <input type="range" min="0" max="40" step="5" value="15" autocomplete="off"
-                      oninput="document.getElementById('sec4Circle').setAttribute('filter', 'drop-shadow(0px 0px ' + this.value + 'px rgba(249,115,22,0.8))'); document.getElementById('sec4CircleGlowVal').innerText = this.value; document.getElementById('sec4CircleGlowCode').innerText = this.value;">
+                      oninput="document.getElementById('sec4Circle').setAttribute('filter', `dropShadow(0, 0, ${this.value}, 'rgba(249,115,22,0.8)')`); document.getElementById('sec4CircleGlowVal').innerText = this.value; document.getElementById('sec4CircleGlowCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -853,7 +853,7 @@
                     pie="true"
                     start="bounce(0.4) * 45"
                     sweep="360 - (bounce(0.4) * 90)"
-                    filter="drop-shadow(0px 0px 15px rgba(253,224,71,0.5))"></pxl-circle>
+                    filter="dropShadow(0, 0, 15, 'rgba(253,224,71,0.5)')"></pxl-circle>
                   <!-- Pac-Man Eye -->
                   <pxl-circle x="0" y="-55" r="10" fill="#0f172a"></pxl-circle>
                   <!-- Pac-Man Food pellets -->

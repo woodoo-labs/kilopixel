@@ -121,7 +121,7 @@
 
       <!-- The Visual Player is drawn OVER the camera group, acting as your cursor -->
       <pxl-layer>
-        <pxl-circle x="ref.player_x.value" y="ref.player_y.value" r="15" fill="#fff" filter="drop-shadow(0 0 20px #fff)" ></pxl-circle>
+        <pxl-circle x="ref.player_x.value" y="ref.player_y.value" r="15" fill="#fff" filter="dropShadow(0, 0, 20, '#fff')" ></pxl-circle>
         <pxl-circle x="ref.player_x.value" y="ref.player_y.value" r="25 + wave(2)*10" fill="none" stroke="#fff" strokewidth="2" ></pxl-circle>
       </pxl-layer>
     </pxl-stage>
@@ -152,7 +152,7 @@
       <!-- Midground Layer -->
       <pxl-layer x="(500 - ref.mouse_x.value) * 0.15" y="(281 - ref.mouse_y.value) * 0.15">
         <pxl-ellipse x="300" y="400" rx="60" ry="15" rotate="30" stroke="rgba(255,0,255,0.4)" strokewidth="2" ></pxl-ellipse>
-        <pxl-circle x="300" y="400" r="10" fill="#f0f" filter="drop-shadow(0 0 15px #f0f)"></pxl-circle>
+        <pxl-circle x="300" y="400" r="10" fill="#f0f" filter="dropShadow(0, 0, 15, '#f0f')"></pxl-circle>
         
         <pxl-rect x="750" y="150" w="80" h="80" rotate="t*10" fill="none" stroke="#0ff" strokewidth="2" ></pxl-rect>
       </pxl-layer>

@@ -435,6 +435,44 @@ The Shape base class caches gradients via `_lastGradientConfig` and `_lastGradie
 
 ---
 
+## Unified Responsive Filters
+
+Kilopixel provides a unified API for CSS and Canvas filters that mirrors the Gradient architecture, accessible natively via `pxl.scope`.
+
+### Usage
+
+Filters are invoked as standard function calls rather than raw string concatenation. They can be applied individually or chained using an array.
+
+**Single Filter**:
+```html
+<pxl-layer filter="blur(5)"></pxl-layer>
+```
+
+**Chained Filters (Array)**:
+```html
+<pxl-shape filter="[blur(10), contrast(150), saturate(200)]"></pxl-shape>
+```
+
+### Available Filter Helpers
+
+| Function | Output | Description |
+| :--- | :--- | :--- |
+| `blur(radius)` | `blur(...)` | `radius` is automatically scaled by `u`. |
+| `dropShadow(x, y, blur, color)` | `drop-shadow(...)` | `x`, `y`, `blur` are scaled by `u`. Defaults to `#000` if no color provided. |
+| `brightness(val)` | `brightness(...)` | Uses percentage (`val`%). |
+| `contrast(val)` | `contrast(...)` | Uses percentage (`val`%). |
+| `hueRotate(deg)` | `hue-rotate(...)` | Uses degrees (`deg`deg). |
+| `invert(val)` | `invert(...)` | Uses percentage (`val`%). |
+| `saturate(val)` | `saturate(...)` | Uses percentage (`val`%). |
+| `grayscale(val)` | `grayscale(...)` | Uses percentage (`val`%). |
+| `sepia(val)` | `sepia(...)` | Uses percentage (`val`%). |
+| `opacity(val)` | `opacity(...)` | Uses percentage (`val`%). |
+
+> [!IMPORTANT]
+> **No Units Required**: Do not provide `px`, `%`, or `deg` manually! The scope helpers automatically append the correct units (`blur(5)` → `blur(5px)`). Kilopixel's graphics pipeline automatically detects pixel values and multiplies them by the physical scaling factor (`u`) before drawing.
+
+---
+
 ## Time Drivers
 
 All 8 time drivers are defined in `pxl.drivers` and injected into every compiled expression's scope. The variable `t` is in **seconds** (not milliseconds). Each driver takes a `d` parameter (duration/period in seconds) and returns a value in the `[0, 1]` range.

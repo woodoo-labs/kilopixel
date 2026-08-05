@@ -83,7 +83,7 @@ class Shape extends PxlNode {
     // Global Pipeline Sandbox
     if (hasStateChanges) {
       ctx.save();
-      pxl.applyContextState(ctx, u, this.attributeValues);
+      pxl.applyContextState(ctx, u, this.attributeValues, this);
       this.draw(ctx, u, t);
       ctx.restore();
     } else {

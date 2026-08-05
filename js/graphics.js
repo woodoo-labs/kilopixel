@@ -22,7 +22,14 @@ pxl.applyTransformState = function(ctx, u, attributeValues) {
   if (dx || dy) ctx.translate(dx * u, dy * u);
 };
 
-pxl.applyContextState = function(ctx, u, attributeValues) {
+pxl.scaleResponsiveFilter = function(filterStr, u) {
+  // Only match and scale values explicitly suffixed with 'px' from pxl.scope helpers
+  return filterStr.replace(/(-?\d+\.?\d*)px/g, (match, val) => {
+    return (parseFloat(val) * u) + 'px';
+  });
+};
+
+pxl.applyContextState = function(ctx, u, attributeValues, node) {
   pxl.applyTransformState(ctx, u, attributeValues);
   
   const { alpha, blend, filter, shadowcolor, shadowblur, shadowx, shadowy } = attributeValues;
@@ -30,7 +37,18 @@ pxl.applyContextState = function(ctx, u, attributeValues) {
   // 2. Rendering States
   if (alpha !== 1) ctx.globalAlpha *= alpha;
   if (blend !== 'source-over') ctx.globalCompositeOperation = blend;
-  if (filter !== 'none') ctx.filter = filter;
+  
+  if (filter && filter !== 'none') {
+    const filterStr = Array.isArray(filter) ? filter.join(' ') : filter;
+    
+    // Zero-GC Cache: skip regex scaling if string and u are unchanged
+    if (node._lastFilterRaw !== filterStr || node._lastFilterU !== u) {
+      node._lastFilterRaw = filterStr;
+      node._lastFilterU = u;
+      node._cachedFilterScaled = pxl.scaleResponsiveFilter(filterStr, u);
+    }
+    ctx.filter = node._cachedFilterScaled;
+  }
 
   if (shadowcolor) {
     if (shadowcolor === 'none' || shadowcolor === 'transparent') {

@@ -36,6 +36,18 @@ pxl.scope.hsla = (h, s, l, a) => {
   return `hsla(${h},${sf},${lf},${a})`;
 };
 
+// CSS Filter Helpers
+pxl.scope.blur       = (radius) => `blur(${radius}px)`;
+pxl.scope.dropShadow = (x, y, blur, color) => `drop-shadow(${x}px ${y}px ${blur}px ${color || '#000'})`;
+pxl.scope.brightness = (val) => `brightness(${val}%)`;
+pxl.scope.contrast   = (val) => `contrast(${val}%)`;
+pxl.scope.hueRotate  = (deg) => `hue-rotate(${deg}deg)`;
+pxl.scope.invert     = (val) => `invert(${val}%)`;
+pxl.scope.saturate   = (val) => `saturate(${val}%)`;
+pxl.scope.grayscale  = (val) => `grayscale(${val}%)`;
+pxl.scope.sepia      = (val) => `sepia(${val}%)`;
+pxl.scope.opacity    = (val) => `opacity(${val}%)`;
+
 pxl.scope.clamp = (v, low, high) => Math.max(low, Math.min(high, v));
 pxl.scope.lerp  = (a, b, alpha) => a + (b - a) * alpha;
 pxl.scope.map   = (v, inMin, inMax, outMin, outMax) => (v - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
@@ -153,14 +165,6 @@ pxl.parseAttributeValue = function (value) {
 
     // Fast Path for static CSS color functions (e.g., "rgba(124, 211, 15, 0.8)")
     if (/^(rgb|rgba|hsl|hsla)\([\d\s.,%]+\)$/i.test(value)) {
-      return value;
-    }
-
-    // Fast Path for static CSS filters
-    if (/^(blur|brightness|contrast|drop-shadow|grayscale|hue-rotate|invert|opacity|saturate|sepia)\(/i.test(value)) {
-      if (value.includes('${') || /\b(wave|loop|yoyo|bounce|strobe|glide|pulse|glitch)\b/.test(value)) {
-        console.warn(`[pxl] Warning: Animated filters must be wrapped in backticks (\` \`). Ignoring invalid static string: ${value}`);
-      }
       return value;
     }
   }

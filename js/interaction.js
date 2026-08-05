@@ -132,7 +132,7 @@ pxl.InteractionEngine = class {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
 
         for (let j = stackLen - 1; j >= 0; j--) {
-          pxl.applyContextState(ctx, this.stage.unit, this._hitStack[j].attributeValues);
+          pxl.applyContextState(ctx, this.stage.unit, this._hitStack[j].attributeValues, this._hitStack[j]);
         }
 
         pxl._hitResult = false;

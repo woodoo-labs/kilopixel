@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Responsive Filters Demo - Kilopixel</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+      body {
+        margin: 0;
+        background-color: #0f172a;
+        color: white;
+        font-family: sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+      .container {
+        width: 90%;
+        max-width: 1200px;
+        box-shadow: 0 10px 60px rgba(0, 0, 0, 0.9);
+        border: 1px solid #334155;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      h1 { 
+        margin-bottom: 20px; 
+        font-weight: 300; 
+        color: #e2e8f0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Unified Responsive Filters API</h1>
+    <div class="container">
+      <pxl-stage id="main" ratio="1 / 1">
+        
+        <!-- Background -->
+        <pxl-layer>
+          <pxl-rect x="500" y="500" width="1000" height="1000" fill="#0f172a"></pxl-rect>
+          <!-- Grid -->
+          <pxl-line x1="0" y1="0" x2="0" y2="1000" strokewidth="1" stroke="#1e293b" mode="relative" repeat="20" dx="50"></pxl-line>
+          <pxl-line x1="0" y1="0" x2="1000" y2="0" strokewidth="1" stroke="#1e293b" mode="relative" repeat="20" dy="50"></pxl-line>
+        </pxl-layer>
+
+        <!-- Filters Demo Layer -->
+        <pxl-layer>
+          
+          <!-- 1. Single Static Filter -->
+          <pxl-rect x="200" y="300" w="150" h="150" fill="#3b82f6" filter="blur(10)"></pxl-rect>
+          <pxl-text x="200" y="420" text="'blur(10)'" size="16" fill="#94a3b8" align="center"></pxl-text>
+          
+          <!-- 2. Animated Single Filter (Responsive Drop Shadow) -->
+          <pxl-circle x="500" y="300" r="75" fill="#ef4444" filter="dropShadow(0, 20 + wave(2)*40, 10, 'rgba(255, 255, 255, 0.6)')" dy="wave(2)*-20"></pxl-circle>
+          <pxl-text x="500" y="420" text="'dropShadow(...) animated'" size="16" fill="#94a3b8" align="center"></pxl-text>
+          
+          <!-- 3. Static Array Chain -->
+          <pxl-rect x="800" y="300" w="150" h="150" fill="#10b981" filter="[blur(5), brightness(150), hueRotate(180)]"></pxl-rect>
+          <pxl-text x="800" y="420" text="'[blur, brightness, hueRotate]'" size="16" fill="#94a3b8" align="center"></pxl-text>
+
+          <!-- 4. Animated Array Chain -->
+          <pxl-circle x="350" y="700" r="75" fill="#f59e0b" filter="[blur(wave(3)*20), hueRotate(t*100), saturate(200)]"></pxl-circle>
+          <pxl-text x="350" y="820" text="'Animated Chained Array'" size="16" fill="#94a3b8" align="center"></pxl-text>
+
+          <!-- 5. Multiple Color Quotes inside dropShadow -->
+          <pxl-circle x="650" y="700" r="75" fill="#a855f7" filter="[dropShadow(wave(1)*-30, 10, 15, '#3b82f6'), dropShadow(wave(1)*30, -10, 15, '#ef4444')]"></pxl-circle>
+          <pxl-text x="650" y="820" text="'Double dropShadow()'" size="16" fill="#94a3b8" align="center"></pxl-text>
+
+          <pxl-text x="500" y="950" text="'Resize the window! Filters automatically scale with the responsive unit u.'" size="20" fill="#e2e8f0" align="center"></pxl-text>
+          
+        </pxl-layer>
+
+      </pxl-stage>
+    </div>
+
+    <!-- Core Engine Script -->
+    <script src="../dist/pxl.min.js"></script>
+
+  </body>
+</html>

@@ -102,7 +102,7 @@ class Layer extends PxlNode {
 
     if (hasStateChanges) {
       ctx.save();
-      pxl.applyContextState(ctx, u, this.attributeValues);
+      pxl.applyContextState(ctx, u, this.attributeValues, this);
     }
     const len = this.childList.length;
     for (let i = 0; i < len; i++) {
