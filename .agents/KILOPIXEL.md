@@ -346,14 +346,14 @@ Shapes are drawn relative to `(0, 0)` within the transformed context. The transf
 
 ---
 
-### Style Cascade & Inheritance (`alpha`, `blend`, `filter`, and native shadows)
+### Style Cascade & Inheritance (Dual Architecture)
 
-All container styling attributes (`alpha`, `blend`, `filter`, and native canvas shadows `shadowcolor`, `shadowblur`, `shadowx`, `shadowy`) cascade through the element hierarchy from `<pxl-layer>` down to child `<pxl-shape>` elements:
+Kilopixel uses a strict **Dual Architecture** for context states, separating flattened DOM compositing from Canvas pixel operations.
 
-- **Compounding Opacity (`alpha`)**: Opacity multiplies mathematically down the container tree (`ctx.globalAlpha *= alpha`). 
-- **Inherited Blend Modes, Filters, and Native Shadows**: The `<pxl-layer>` sets the rendering state on the canvas context (`ctx.globalCompositeOperation`, `ctx.filter`, `ctx.shadowColor`, `ctx.shadowBlur`, `ctx.shadowOffsetX`, `ctx.shadowOffsetY`) before drawing its children. All child shapes automatically inherit these styles.
-- **Overriding and Disabling Styles**: Any child shape can override an inherited style by setting its own value (e.g. `shadowcolor="#ef4444"`), or explicitly disable an inherited filter or shadow by setting `filter="none"` or `shadowcolor="none"` / `shadowcolor="transparent"`.
-- **Zero-Inheritance Groups**: Note that `<pxl-group>` is a **Pure Spatial Transform & Structural Container** and does *not* support or cascade styling attributes. This enforces a clean 3-tier architecture (`Layer` -> `Group` -> `Shape`) with zero DOM style inheritance overhead for groups.
+- **Layer-Level (`<pxl-layer>`)**: Uses the **CSS DOM API**. Applying `alpha`, `blend`, or `filter` to a layer modifies the `<canvas>` DOM element itself (`opacity`, `mix-blend-mode`, `filter`). The entire flattened canvas blends with the stage background. Shapes inside the layer do *not* inherit these properties; they are drawn sharp and opaque into the canvas buffer, and the browser's GPU composites the final flattened image into the page.
+- **Shape-Level (`<pxl-circle>`, etc.)**: Uses the **HTML5 Canvas API**. Applying `alpha`, `blend`, `filter`, or `mask` to a shape changes how its pixels are drawn onto the layer's canvas (`ctx.globalAlpha`, `ctx.globalCompositeOperation`, `ctx.filter`). Overlapping shapes will cast shadows on each other, bleed through each other, or mask each other mathematically.
+- **Zero-Inheritance Groups (`<pxl-group>`)**: Groups are **Pure Spatial Transform Containers** and do *not* support compositing attributes (`alpha`, `blend`, etc.). This enforces a clean 3-tier architecture with maximum performance.
+- **Native Shadows (Shapes Only)**: Raw canvas shadows (`shadowcolor`, `shadowblur`, `shadowx`, `shadowy`) are only supported on Shapes. For layers, use the `filter="dropShadow(...)"` helper instead to cast a unified silhouette shadow.
 
 ---
 
@@ -658,16 +658,16 @@ Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile 
 **Class**: `Layer extends PxlNode`  
 **Source**: `js/elements/layer.js`
 
-### Observed Attributes (18)
+### Observed Attributes (14)
 
-`x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`, `alpha`, `blend`, `filter`, `shadowcolor`, `shadowblur`, `shadowx`, `shadowy`, `hidden`
+`x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`, `alpha`, `blend`, `filter`, `hidden`
 
 ### Default Values
 
 ```javascript
 { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1,
   skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none',
-  shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false }
+  hidden: false }
 ```
 
 ### Key Behavior
@@ -712,11 +712,11 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `sc
 **Class**: `Shape extends PxlNode`  
 **Source**: `js/elements/shape.js`
 
-### Observed Attributes (32)
+### Observed Attributes (33)
 
 **Transform**: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`  
 **Style**: `fill`, `stroke`, `strokewidth`, `linecap`, `linejoin`, `miterlimit`, `linedash`, `dashoffset`  
-**Render**: `alpha`, `blend`, `filter`, `shadowcolor`, `shadowblur`, `shadowx`, `shadowy`, `hidden`  
+**Render**: `alpha`, `blend`, `mask`, `filter`, `shadowcolor`, `shadowblur`, `shadowx`, `shadowy`, `hidden`  
 **Events**: `onclick`, `onenter`, `onleave`, `ondown`, `onup`, `onmove`
 
 ### Default Values
@@ -725,7 +725,7 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `sc
 { x: 0, y: 0, dx: 0, dy: 0, fill: null, stroke: null, strokewidth: 1,
   linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null,
   dashoffset: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1,
-  skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none',
+  skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', mask: 'none', filter: 'none',
   shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0,
   hidden: false, isHovered: false, isPressed: false }
 ```
@@ -1297,6 +1297,12 @@ Plain text attributes work without quotes — the compiler's Fast Path handles t
 <!-- Inside JS expressions: quotes ARE needed -->
 <pxl-circle fill="t > 5 ? 'red' : 'blue'" ...></pxl-circle>
 <pxl-text text="`Score: ${ref.score.value}`" ...></pxl-text>
+
+<!-- Function arguments (like colors) inside expressions MUST also be quoted -->
+<!-- Incorrect (SyntaxError: '#' not followed by identifier) -->
+<!-- <pxl-layer filter="dropShadow(0, 20, 20, #0ff)"> -->
+<!-- Correct -->
+<pxl-layer filter="dropShadow(0, 20, 20, '#0ff')">
 ```
 
 #### 5. Time is in Seconds
@@ -1318,24 +1324,24 @@ Plain text attributes work without quotes — the compiler's Fast Path handles t
 <pxl-circle fill="radial(1, ['white', 'black'])" ...></pxl-circle>
 ```
 
-#### 7. Static vs. Animated Filters (When to Use Backticks)
+#### 7. Unified Responsive Filters (Arrays vs Strings)
 
-Static filters work as-is without quotes or backticks (Fast Path). Backticks should ONLY be used when animating filters with `${...}` syntax:
+Kilopixel provides a unified API for CSS and Canvas filters using `pxl.scope` helpers. Do NOT use backticks for filters!
 
 ```html
-<!-- Static filter: NO backticks (Fast Path, zero-GC) -->
-<pxl-circle filter="blur(5px)" ...></pxl-circle>
-<pxl-circle filter="drop-shadow(0 0 10px #38bdf8)" ...></pxl-circle>
+<!-- Static filter (Single function call) -->
+<pxl-circle filter="blur(5)" ...></pxl-circle>
+<pxl-circle filter="dropShadow(0, 0, 10, '#38bdf8')" ...></pxl-circle>
 
-<!-- Animated filter: MUST use backticks for ${...} evaluation -->
-<pxl-circle filter="`blur(${wave(2) * 10}px)`" ...></pxl-circle>
-<pxl-circle filter="`drop-shadow(0 0 ${wave(2)*15}px red)`" ...></pxl-circle>
+<!-- Complex / Animated filter (Array syntax) -->
+<pxl-circle filter="[blur(wave(2) * 10)]" ...></pxl-circle>
+<pxl-circle filter="[dropShadow(0, 0, wave(2)*15, 'red')]" ...></pxl-circle>
 ```
 
 > [!NOTE]
-> **CSS Filters (`px`) vs. Native Canvas Shadows (`u`)**:
-> - **CSS Filters (`filter="..."`)** take literal CSS strings (e.g. `blur(5px)` or `drop-shadow(0 0 10px red)`), meaning they operate in **fixed physical screen pixels (`px`)** and do *not* scale responsively when the stage resizes.
-> - **Native Canvas Shadows (`shadowblur="10"`)** operate in **logical units (`u`)**, meaning they scale responsively with the stage. Always prefer native shadow attributes over CSS `drop-shadow` for resolution-independent rendering.
+> **CSS Filters vs. Native Canvas Shadows**:
+> - **CSS Filters (`filter="..."`)**: The scope helpers (`blur`, `dropShadow`, etc.) take values in logical units and automatically scale them to physical pixels internally.
+> - **Native Canvas Shadows (`shadowblur="10"`)**: Native shadow attributes also operate in logical units (`u`). Native shadows are often faster for individual shapes, while `dropShadow` is required for tracing a layer's silhouette.
 
 
 #### 8. Reactive Variables Pattern
@@ -1397,8 +1403,8 @@ Static filters work as-is without quotes or backticks (Fast Path). Backticks sho
 - **Don't use `onhover`** → use `onenter` instead
 - **Use raw numbers for coordinates** → `x="500"` not `ref.main.width / 2` (width is always 1000)
 - **Don't forget `fill` or `stroke`** → shapes with neither are invisible
-- **Don't animate inside static CSS filter strings** → wrap in backticks
-- **CSS filter pixels vs logical units** → filter strings use fixed screen pixels (`5px`); native shadows (`shadowblur="5"`) use responsive logical units (`5 * u`)
+- **Don't animate inside static CSS filter strings** → use Array syntax `filter="[blur(wave(2)*10)]"` instead
+- **CSS filter pixels vs logical units** → filter helpers (`blur(5)`) auto-scale the values to physical pixels; native shadows (`shadowblur="5"`) also use responsive logical units (`5 * u`)
 - **Don't nest `<pxl-stage>` inside `<pxl-stage>`** → stages are independent roots
 - **Gradient radius** → use `1` to stretch to edge, not `0.5`
 
@@ -1427,24 +1433,16 @@ Static filters work as-is without quotes or backticks (Fast Path). Backticks sho
 
 ## 28. Roadmap & Future Enhancements (TODO)
 
-### 1. [COMPLETED] Native Canvas 2D Shadows (High-Performance GPU Shadows)
-- **Status**: Implemented first-class support for native HTML5 Canvas 2D shadow attributes (`shadowcolor`, `shadowblur`, `shadowx`, `shadowy`) across `<pxl-layer>`, `<pxl-group>`, and all `<pxl-shape>` elements.
-- **Problem**: CSS-style filters (`filter="drop-shadow(0 0 10px #38bdf8)"`) invoke the browser compositor's CSS Filter Graph, creating offscreen textures and executing multi-pass Gaussian blur kernels that can push integrated GPUs to 80% load on 60 FPS animations.
-- **Implemented Syntax** (canonical lowercase attribute naming):
-  - `shadowcolor` — valid color string (e.g. `#38bdf8` or `rgba(56, 189, 248, 0.8)`)
-  - `shadowblur` — blur radius in logical units (e.g. `10`)
-  - `shadowx` / `shadowy` — X and Y shadow offsets (defaults to `0`)
-- **Performance Benefit**: Direct2D and Skia render native canvas shadows via hardware radial alpha masks without spinning up the CSS Filter Graph pipeline, reducing GPU shader load by ~80-90%. Container inheritance (`<pxl-layer>`, `<pxl-group>`) reduces CPU `ctx.save()`/`restore()` overhead by 10x when styling multiple shapes.
-
-### 2. Documentation Roadmap: "Styling & Styling Rules" (`styling.html`)
+### 1. Documentation Roadmap: "Styling & Compositing Rules" (`styling.html`)
 - **Proposed Feature**: Create a dedicated `docs/styling.html` guide under "Getting Started" in the documentation sidebar.
 - **Content Scope**:
-  - **The 12 Universal Styling Attributes**: `fill`, `stroke`, `strokewidth`, `alpha`, `linecap` (`butt` | `round` | `square`), `linejoin` (`miter` | `round` | `bevel`), `miterlimit`, `linedash`, `dashoffset` (animated marching ants), `blend` (26 Canvas 2D blend modes), `filter` (CSS visual filters), and `hidden`.
-  - **Style Cascade & Inheritance**: Explaining how styling attributes set on `<pxl-layer>` and `<pxl-group>` cascade down to child shapes that do not override them, and how `alpha` transparency multiplies down the container tree.
-  - **Static vs. Dynamic Syntax**: Guidance on plain strings (`filter="blur(5px)"`) vs. JavaScript template literal backticks (`filter="\`blur(${wave(2)*10}px)\`"`).
+  - **The Universal Styling Attributes**: `fill`, `stroke`, `strokewidth`, `linecap`, `linejoin`, `miterlimit`, `linedash`, `dashoffset`.
+  - **Dual Architecture Compositing**: Explain the CSS DOM vs HTML5 Canvas split. Show how `alpha`, `blend`, and `filter` on a `<pxl-layer>` modifies the `<canvas>` DOM element, while the same attributes on a `<pxl-shape>` modify the `ctx` operations inside the canvas buffer.
+  - **Zero-Inheritance Groups**: Explain why `<pxl-group>` is a pure spatial transform container and does not support compositing attributes.
+  - **Static vs. Dynamic Syntax**: Guidance on plain strings (`filter="blur(5)"`) vs. JavaScript Arrays for multiple or animated filters (`filter="[blur(wave(2)*10)]"`).
   - **Zero-Magic Canvas Styling**: Explaining why Canvas 2D shapes are styled via declarative HTML attributes rather than external CSS stylesheet selectors.
 
-### 3. Evaluate Degrees vs. Radians Consistency Across Attributes & Expressions
+### 2. Evaluate Degrees vs. Radians Consistency Across Attributes & Expressions
 - **Current Status**: There is currently a mixed angular unit boundary in the framework:
   - **All Kilopixel attributes use Degrees (`0° – 360°`)**: Angular properties such as `rotate`, `start`, `end`, `sweep`, `arrowstart`, `arrowend`, `skewx`, and `skewy` expect degrees for human UX and declarative readability.
   - **All Expression Math Functions use Radians (`0 – 2π`)**: Injected trig functions (`sin`, `cos`, `tan`, `atan2`, `asin`, `acos`) copy native JavaScript `Math` behavior directly, expecting and returning radians.

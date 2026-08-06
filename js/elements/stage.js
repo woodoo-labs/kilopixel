@@ -136,7 +136,7 @@ class Stage extends HTMLElement {
     const len = this.layers.length;
     for (let i = 0; i < len; i++) {
       const layer = this.layers[i];
-      if (layer.isDirty) layer.render(this.unit, t);
+      if (layer.isDirty || layer.isAnimated) layer.render(this.unit, t);
     }
 
     const ms = performance.now() - start;

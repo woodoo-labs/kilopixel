@@ -1,11 +1,11 @@
 class Layer extends PxlNode {
-  static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'filter', 'shadowcolor', 'shadowblur', 'shadowx', 'shadowy', 'hidden']; }
+  static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'filter', 'hidden']; }
 
   constructor() {
     super();
     this.childList = []; // Groups or shapes
     this.isOrderDirty = false; // Tracks if children need sorting
-    Object.assign(this.attributeExpressions, { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false });
+    Object.assign(this.attributeExpressions, { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false });
     Object.assign(this.attributeValues, this.attributeExpressions);
 
     this.isDirty = true;
@@ -28,6 +28,7 @@ class Layer extends PxlNode {
     this.stage?.registerLayer(this);
     
     super.connectedCallback();
+    this.invalidate();
   }
 
   disconnectedCallback() {
@@ -79,36 +80,76 @@ class Layer extends PxlNode {
     
     this.evaluateAnimations(t);
 
+    const { alpha, blend, filter, hidden } = this.attributeValues;
+
+    if (this._lastAlpha !== alpha) {
+      this.canvas.style.opacity = alpha;
+      this._lastAlpha = alpha;
+    }
+    
+    const cssBlend = blend === 'source-over' ? 'normal' : blend;
+    if (this._lastBlend !== cssBlend) {
+      this.canvas.style.mixBlendMode = cssBlend;
+      this._lastBlend = cssBlend;
+    }
+
+    if (filter !== 'none' && filter !== null && filter !== undefined) {
+      const filterStr = pxl.resolveFilter(this, filter, u);
+      if (this._lastAppliedFilter !== filterStr) {
+        this.canvas.style.filter = filterStr;
+        this._lastAppliedFilter = filterStr;
+      }
+    } else if (this._lastAppliedFilter && this._lastAppliedFilter !== 'none') {
+      this.canvas.style.filter = 'none';
+      this._lastAppliedFilter = 'none';
+    }
+
+    // cssOnly Fast Path Check
+    let _transformsAnimated = false;
+    let _anyCompositingAnimated = false;
+    for (let i = 0; i < this.animatedAttributeKeys.length; i++) {
+      const k = this.animatedAttributeKeys[i];
+      if (k === 'x' || k === 'y' || k === 'dx' || k === 'dy' || k === 'rotate' || k === 'scale' || k === 'scalex' || k === 'scaley' || k === 'skewx' || k === 'skewy') {
+        _transformsAnimated = true;
+      }
+      if (k === 'alpha' || k === 'blend' || k === 'filter') {
+        _anyCompositingAnimated = true;
+      }
+    }
+
+    if (_anyCompositingAnimated && !_transformsAnimated && !this.isDirty) {
+      if (this.isAnimated) this.stage?.requestRender();
+      return; // Skip canvas clear and child rendering!
+    }
+
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.canvas.width / this.dpr, this.canvas.height / this.dpr);
     this.isDirty = false;
 
-    // Heartbeat: If this layer has OWN animated properties, keep the stage loop alive
-    if (this.isAnimated) this.invalidate();
-
-    if (this.attributeValues.hidden) {
+    if (hidden) {
       this.isCanvasEmpty = true;
+      if (this.isAnimated) this.stage?.requestRender();
       return;
     }
 
     this.isCanvasEmpty = false;
     
-    const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy, alpha, blend, filter, shadowcolor } = this.attributeValues;
-    const hasStateChanges = x || y || dx || dy || rotate || 
-                            scale !== 1 || scalex !== 1 || scaley !== 1 || 
-                            skewx || skewy || 
-                            alpha !== 1 || blend !== 'source-over' || filter !== 'none' ||
-                            shadowcolor;
+    const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy } = this.attributeValues;
+    const hasTransformChanges = x || y || dx || dy || rotate || 
+                                scale !== 1 || scalex !== 1 || scaley !== 1 || 
+                                skewx || skewy;
 
-    if (hasStateChanges) {
+    if (hasTransformChanges) {
       ctx.save();
-      pxl.applyContextState(ctx, u, this.attributeValues, this);
+      pxl.applyTransformState(ctx, u, this.attributeValues);
     }
     const len = this.childList.length;
     for (let i = 0; i < len; i++) {
       this.childList[i].render(ctx, u, t);
     }
-    if (hasStateChanges) ctx.restore();
+    if (hasTransformChanges) ctx.restore();
+
+    if (this.isAnimated) this.stage?.requestRender();
   }
 }
 customElements.define('pxl-layer', Layer);

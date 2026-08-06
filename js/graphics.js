@@ -29,25 +29,57 @@ pxl.scaleResponsiveFilter = function(filterStr, u) {
   });
 };
 
+pxl.resolveFilter = function(node, filter, u) {
+  if (!filter || filter === 'none') return 'none';
+  
+  if (Array.isArray(filter)) {
+    let changed = !node._lastFilterArr || node._lastFilterArr.length !== filter.length;
+    if (!changed) {
+      for (let i = 0; i < filter.length; i++) {
+        if (node._lastFilterArr[i] !== filter[i]) {
+          changed = true;
+          break;
+        }
+      }
+    }
+    
+    if (changed || node._lastFilterU !== u) {
+      if (changed) {
+        if (!node._lastFilterArr) node._lastFilterArr = [];
+        node._lastFilterArr.length = filter.length;
+        for (let i = 0; i < filter.length; i++) node._lastFilterArr[i] = filter[i];
+        node._lastFilterRaw = filter.join(' ');
+      }
+      node._lastFilterU = u;
+      node._cachedFilterScaled = pxl.scaleResponsiveFilter(node._lastFilterRaw, u);
+    }
+  } else {
+    if (node._lastFilterRaw !== filter || node._lastFilterU !== u) {
+      node._lastFilterRaw = filter;
+      node._lastFilterU = u;
+      node._cachedFilterScaled = pxl.scaleResponsiveFilter(filter, u);
+    }
+  }
+  
+  return node._cachedFilterScaled;
+};
+
 pxl.applyContextState = function(ctx, u, attributeValues, node) {
   pxl.applyTransformState(ctx, u, attributeValues);
   
-  const { alpha, blend, filter, shadowcolor, shadowblur, shadowx, shadowy } = attributeValues;
+  const { alpha, blend, mask, filter, shadowcolor, shadowblur, shadowx, shadowy } = attributeValues;
   
   // 2. Rendering States
   if (alpha !== 1) ctx.globalAlpha *= alpha;
-  if (blend !== 'source-over') ctx.globalCompositeOperation = blend;
+  
+  if (mask && mask !== 'none') {
+    ctx.globalCompositeOperation = mask;
+  } else if (blend !== 'source-over') {
+    ctx.globalCompositeOperation = blend;
+  }
   
   if (filter && filter !== 'none') {
-    const filterStr = Array.isArray(filter) ? filter.join(' ') : filter;
-    
-    // Zero-GC Cache: skip regex scaling if string and u are unchanged
-    if (node._lastFilterRaw !== filterStr || node._lastFilterU !== u) {
-      node._lastFilterRaw = filterStr;
-      node._lastFilterU = u;
-      node._cachedFilterScaled = pxl.scaleResponsiveFilter(filterStr, u);
-    }
-    ctx.filter = node._cachedFilterScaled;
+    ctx.filter = pxl.resolveFilter(node, filter, u);
   }
 
   if (shadowcolor) {
