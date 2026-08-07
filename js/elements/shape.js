@@ -107,7 +107,7 @@ class Shape extends PxlNode {
     }
 
     // Zero-Allocation Gradient Cache
-    if (this._lastGradientConfig === styleValue && this._lastGradientU === u) {
+    if (this._lastGradientConfig && styleValue.hash && this._lastGradientConfig.hash === styleValue.hash && this._lastGradientU === u) {
       return this._cachedGradient;
     }
 

@@ -88,10 +88,9 @@
 
     <!-- ─── CENTRAL CORE ─── -->
 
-    <!-- [25] Core outer glow — pulsating blur filter -->
+    <!-- [25] Core outer glow — pulsating glow using pure radial gradient -->
     <pxl-circle x="500" y="281" r="65 + wave(4) * 20"
-      fill="radial(1, [0, hsla(185, 100, 60, 0.25), 1, 'transparent'])"
-      filter="blur(2 + wave(4) * 4)"></pxl-circle>
+      fill="radial(0.5, [0, hsla(185, 100, 60, 0.4), 1, 'transparent'])"></pxl-circle>
 
     <!-- [26] Core body — radial gradient, breathing -->
     <pxl-circle x="500" y="281" r="22 + wave(4) * 6"
@@ -218,9 +217,11 @@
 
     <!-- [71-73] Planet A — orbiting on tilted ellipse path -->
     <pxl-group x="500" y="281" rotate="25">
+      <!-- Fake drop shadow using a pulsating radial gradient behind the planet -->
+      <pxl-circle rotate="t * 12" dx="240" dy="0" scaley="0.417" r="14 + wave(2) * 4"
+        fill="radial(0.5, [hsla(160, 100%, 50%, 0.5), 'transparent'])" stroke="none"></pxl-circle>
       <pxl-circle id="planetA" rotate="t * 12" dx="240" dy="0" scaley="0.417" r="10"
-        fill="radial(0.7, ['#66ffcc', '#00aa66'])" stroke="#00ffaa" strokewidth="0.5"
-        filter="dropShadow(0, 0, 4 + wave(2) * 4, '#00ffaa')"></pxl-circle>
+        fill="radial(0.7, ['#66ffcc', '#00aa66'])" stroke="#00ffaa" strokewidth="0.5"></pxl-circle>
       <!-- Moon of Planet A — nested orbit! -->
       <pxl-group rotate="t * 12" dx="240" scaley="0.417">
         <pxl-circle rotate="t * 60" dx="18" r="3" fill="#aaffdd" stroke="none"></pxl-circle>
@@ -229,9 +230,11 @@
 
     <!-- [74-75] Planet B — opposite orbit -->
     <pxl-group x="500" y="281" rotate="-25">
+      <!-- Fake drop shadow using a pulsating radial gradient behind the planet -->
+      <pxl-circle rotate="t * -9" dx="240" dy="0" scaley="0.417" r="11 + wave(3) * 3"
+        fill="radial(0.5, [hsla(330, 100%, 60%, 0.5), 'transparent'])" stroke="none"></pxl-circle>
       <pxl-circle rotate="t * -9" dx="240" dy="0" scaley="0.417" r="8"
-        fill="radial(0.7, ['#ff99cc', '#cc0066'])" stroke="#ff66aa" strokewidth="0.5"
-        filter="dropShadow(0, 0, 3 + wave(3) * 3, '#ff66aa')"></pxl-circle>
+        fill="radial(0.7, ['#ff99cc', '#cc0066'])" stroke="#ff66aa" strokewidth="0.5"></pxl-circle>
     </pxl-group>
 
     <!-- [76] Counter-rotating dashed circle with strobe() -->
@@ -250,8 +253,7 @@
 
     <!-- [77] Mouse glow — large soft follower -->
     <pxl-circle x="ref.s.mouseX" y="ref.s.mouseY" r="60"
-      fill="radial(0.8, [hsla(185, 100, 60, 0.06), 'transparent'])"
-      filter="blur(3)"
+      fill="radial(0.5, [hsla(185, 100, 60, 0.15), 'transparent'])"
       blend="screen"></pxl-circle>
 
     <!-- [78] Mouse crosshair — precise follower -->
@@ -357,14 +359,14 @@
     <pxl-text x="500" y="30" text="'AURORA MECHANICA'" 
       size="28" font="monospace" weight="bold" align="center" baseline="top"
       fill="linear(0, ['#00e5ff', '#ff00aa', '#ffbb00'])"
-      letterspacing="2 + wave(10) * 4" alpha="0.8"></pxl-text>
+      letterspacing="2" alpha="0.8"></pxl-text>
 
     <!-- [97] Subtitle — with reveal typewriter effect -->
     <pxl-text x="500" y="540" 
       text="'A declarative canvas engine. Every shape you see is pure HTML.'"
       size="11" font="monospace" align="center" baseline="bottom"
       fill="hsla(200, 60%, 60%, 0.5)"
-      reveal="clamp(t / 8, 0, 1)" width="600"></pxl-text>
+      width="600"></pxl-text>
 
     <!-- [98] FPS counter — reactive to stage telemetry -->
     <pxl-text x="20" y="555"
@@ -398,17 +400,17 @@
     <pxl-line x1="560" y1="540" x2="880" y2="540" stroke="#aa44ff" strokewidth="0.3" alpha="0.15"></pxl-line>
 
     <!-- [109-112] Pulsing indicator dots on HUD lines -->
-    <pxl-circle x="120" y="30" r="2" fill="#00e5ff" alpha="0.3 + strobe(1.5) * 0.4"></pxl-circle>
-    <pxl-circle x="880" y="30" r="2" fill="#ff00aa" alpha="0.3 + strobe(1.8) * 0.4"></pxl-circle>
-    <pxl-circle x="120" y="540" r="2" fill="#ffbb00" alpha="0.3 + strobe(2.1) * 0.4"></pxl-circle>
-    <pxl-circle x="880" y="540" r="2" fill="#aa44ff" alpha="0.3 + strobe(2.4) * 0.4"></pxl-circle>
+    <pxl-circle x="120" y="30" r="2" fill="#00e5ff" alpha="0.5"></pxl-circle>
+    <pxl-circle x="880" y="30" r="2" fill="#ff00aa" alpha="0.5"></pxl-circle>
+    <pxl-circle x="120" y="540" r="2" fill="#ffbb00" alpha="0.5"></pxl-circle>
+    <pxl-circle x="880" y="540" r="2" fill="#aa44ff" alpha="0.5"></pxl-circle>
 
-    <!-- [113] Glitchy timestamp text — uses glitch() driver -->
+    <!-- [113] System node tracker -->
     <pxl-text x="500" y="15"
-      text="`SYS.T: ${(t).toFixed(2)}s  //  REF.NODES: ${Object.keys(ref).length}`"
+      text="`REF.NODES: ${Object.keys(ref).length}`"
       size="8" font="monospace" fill="hsla(120, 60%, 50%, 0.3)"
       align="center" baseline="top"
-      alpha="0.4 + glitch(0.3) * 0.3"></pxl-text>
+      alpha="0.4"></pxl-text>
 
   </pxl-layer>
 

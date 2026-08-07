@@ -308,6 +308,7 @@ body {
 }
 
 .callout-info .callout-body {
+  margin-top: 0;
   margin-bottom: 0;
   color: #1e3a8a;
 }

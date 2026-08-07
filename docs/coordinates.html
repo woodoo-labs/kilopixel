@@ -31,12 +31,52 @@
       <h1>Coordinate System</h1>
       <p class="lead">Understanding the coordinate system is the key to mastering Kilopixel. Unlike standard Canvas APIs which use physical pixels, Kilopixel uses a responsive, logic-based coordinate space designed for declarative markup.</p>
       
-      <h2>1. The 1000-Unit Logical Canvas</h2>
-      <p>To make graphics fully responsive without any media queries, every Kilopixel <code>&lt;pxl-stage&gt;</code> has a fixed <strong>logical width of 1000 units</strong>. The height is dynamically calculated based on the <code>ratio</code> attribute.</p>
-      <p>Throughout this guide, we use <code>ratio="5 / 3"</code> as our standard example format because it produces clean, round numbers that make mental math effortless: a logical width of <strong>1000</strong> and a logical height of <strong>600</strong> (placing the canvas center at exactly <strong>500, 300</strong>).</p>
-      <p>In the example below, try moving the ratio slider to see how the coordinate system adapts: the logical width remains <strong>fixed at 1000</strong> across all formats, while the logical height is dynamically <strong>computed</strong> from the aspect ratio. No matter how large or small your physical screen is, coordinate <code>(0, 0)</code> is always the top-left origin!</p>
+      <h2>1. Stage <code>&lt;pxl-stage&gt;</code></h2>
+      <p>To ensure graphics are fully responsive across all screen sizes, every Kilopixel <code>&lt;pxl-stage&gt;</code> has a fixed <strong>logical width of 1000</strong>. The height is dynamically computed based on the <code>ratio</code> attribute.</p>
+      
+      <div class="callout-info">
+        <p class="callout-body"><strong>Values as percentages:</strong> Because the logical width is always 1000, you can mentally read coordinates and sizes as percentages of the stage's width with one decimal place. For example, a circle with <code>r="200"</code> will have a radius spanning exactly <strong>20.0%</strong> of the stage's width, and a line with <code>strokewidth="10"</code> will be exactly <strong>1.0%</strong> thick.</p>
+      </div>
+
+      <p>A <code>&lt;pxl-stage&gt;</code> has a CSS <code>width</code> of <code>100%</code>, meaning it will always automatically adapt to horizontally fill its parent element. To control the physical stage width, you simply adjust the width of its parent container.</p>
+
+      <p>In the example below, try moving the ratio slider to see how the coordinate system adapts: the logical width remains <strong>fixed at 1000</strong> across all formats, while the logical height is dynamically <strong>computed</strong> from the aspect ratio. No matter how large or small your physical screen is, the Stage Origin is always <code>(0, 0)</code>!</p>
+
+      <pre><code class="language-html">&lt;!-- Try resizing the container or dragging the ratio slider --&gt;
+&lt;div style="width: <mark id="sec1WidthCode">100%</mark>;"&gt;
+  &lt;pxl-stage ratio="<mark id="sec1RatioCode">5 / 3</mark>"&gt;
+    &lt;!-- Insert layers (containing shapes and groups) here --&gt;
+  &lt;/pxl-stage&gt;
+&lt;/div&gt;</code></pre>
 
       <div class="demo-container">
+        <div id="sec1Container" style="width: 100%; margin: 0 auto; transition: width 0.1s ease-out;">
+          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <!-- 1. Background Grid -->
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              
+              <!-- 2. Stage Dimension Arrows & Labels -->
+              <pxl-line x1="100" y1="0" x2="100" y2="ref.sec1Stage.height" stroke="#14b8a6" strokewidth="2" linedash="[5, 5]" arrowend="17"></pxl-line>
+              <pxl-text x="115" y="ref.sec1Stage.height / 2" baseline="middle" align="left" text="`height = ${round(ref.sec1Stage.height)}\n(computed)`" size="27" fill="#14b8a6" font="monospace"></pxl-text>
+              <pxl-line x1="0" y1="100" x2="1000" y2="100" stroke="#14b8a6" strokewidth="2" linedash="[5, 5]" arrowend="17"></pxl-line>
+              <pxl-text x="500" y="115" baseline="top" align="center" text="'width = 1000 (fixed)'" size="27" fill="#14b8a6" font="monospace"></pxl-text>
+
+              <!-- 3. Stage Corner & Center Markers -->
+              <pxl-circle x="0" y="0" r="6" fill="#0f766e"></pxl-circle>
+              <pxl-text x="15" y="15" baseline="top" text="'Stage Origin (0, 0)'" size="27" fill="#0f766e" font="monospace"></pxl-text>
+              <pxl-circle x="1000" y="0" r="6" fill="#86efac"></pxl-circle>
+              <pxl-text x="985" y="15" baseline="top" align="right" text="'(1000, 0)'" size="27" fill="#86efac" font="monospace"></pxl-text>
+              <pxl-circle x="1000" y="ref.sec1Stage.height" r="6" fill="#86efac"></pxl-circle>
+              <pxl-text x="985" y="ref.sec1Stage.height - 15" baseline="bottom" align="right" text="`(1000, ${round(ref.sec1Stage.height)})`" size="27" fill="#86efac" font="monospace"></pxl-text>
+              <pxl-circle x="0" y="ref.sec1Stage.height" r="6" fill="#86efac"></pxl-circle>
+              <pxl-text x="15" y="ref.sec1Stage.height - 15" baseline="bottom" align="left" text="`(0, ${round(ref.sec1Stage.height)})`" size="27" fill="#86efac" font="monospace"></pxl-text>
+              <pxl-circle x="500" y="ref.sec1Stage.height / 2" r="5" fill="#86efac"></pxl-circle>
+              <pxl-text x="515" y="ref.sec1Stage.height / 2 - 15" baseline="bottom" text="`(500, ${round(ref.sec1Stage.height / 2)})`" size="27" fill="#86efac" font="monospace"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
         <!-- Tabbed Controls -->
         <div class="demo-controls">
           <div class="demo-controls-header">
@@ -55,140 +95,113 @@
                   oninput="updateSec1Ratio(this.value)">
               </div>
               <div class="control-group">
-                <label>Container Width <span id="sec1WidthVal">100%</span></label>
+                <label>Parent Width <span id="sec1WidthVal">100%</span></label>
                 <input type="range" min="30" max="100" step="5" value="100" autocomplete="off"
-                  oninput="document.getElementById('sec1Container').style.width = this.value + '%'; document.getElementById('sec1WidthVal').innerText = this.value + '%';">
+                  oninput="updateSec1Width(this.value)">
               </div>
             </div>
           </div>
         </div>
-
-        <div id="sec1Container" style="width: 100%; margin: 0 auto; transition: width 0.1s ease-out;">
-          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
-            <pxl-layer>
-              <!-- 1. Background Grid -->
-              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-              
-              <!-- 2. Stage Dimension Arrows & Labels -->
-              <pxl-line x1="100" y1="0" x2="100" y2="ref.sec1Stage.height" stroke="#14b8a6" strokewidth="2" linedash="[5, 5]" arrowend="15"></pxl-line>
-              <pxl-text x="115" y="ref.sec1Stage.height / 2" baseline="middle" align="left" text="`height = ${round(ref.sec1Stage.height)}\n(computed)`" size="27" fill="#14b8a6" font="monospace"></pxl-text>
-              <pxl-line x1="0" y1="100" x2="1000" y2="100" stroke="#14b8a6" strokewidth="2" linedash="[5, 5]" arrowend="15"></pxl-line>
-              <pxl-text x="500" y="115" baseline="top" align="center" text="'width = 1000 (fixed)'" size="27" fill="#14b8a6" font="monospace"></pxl-text>
-
-              <!-- 3. Stage Corner & Center Markers -->
-              <pxl-circle x="0" y="0" r="6" fill="#0f766e"></pxl-circle>
-              <pxl-text x="15" y="15" baseline="top" text="'Stage (0, 0)'" size="27" fill="#0f766e" font="monospace"></pxl-text>
-              <pxl-circle x="1000" y="0" r="6" fill="#0f766e"></pxl-circle>
-              <pxl-text x="985" y="15" baseline="top" align="right" text="'(1000, 0)'" size="27" fill="#0f766e" font="monospace"></pxl-text>
-              <pxl-circle x="1000" y="ref.sec1Stage.height" r="6" fill="#0f766e"></pxl-circle>
-              <pxl-text x="985" y="ref.sec1Stage.height - 15" baseline="bottom" align="right" text="'(1000, ' + round(ref.sec1Stage.height) + ')'" size="27" fill="#0f766e" font="monospace"></pxl-text>
-              <pxl-circle x="0" y="ref.sec1Stage.height" r="6" fill="#0f766e"></pxl-circle>
-              <pxl-text x="15" y="ref.sec1Stage.height - 15" baseline="bottom" align="left" text="'(0, ' + round(ref.sec1Stage.height) + ')'" size="27" fill="#0f766e" font="monospace"></pxl-text>
-              <pxl-circle x="500" y="ref.sec1Stage.height / 2" r="5" fill="#0f766e"></pxl-circle>
-              <pxl-text x="515" y="ref.sec1Stage.height / 2 - 15" baseline="bottom" text="'Center (500, ' + round(ref.sec1Stage.height / 2) + ')'" size="27" fill="#0f766e" font="monospace"></pxl-text>
-            </pxl-layer>
-          </pxl-stage>
-        </div>
       </div>
       
-      <h2>2. Center Point <code>x, y</code></h2>
-      <p>In Kilopixel, the <code>x</code> and <code>y</code> attributes of any shape always define its <strong>exact center point</strong>, rather than its top-left corner (which is common in traditional HTML5 Canvas 2D or SVG APIs).</p>
-      <p>This makes scaling, rotating, and aligning graphics intuitive. For example, placing a circle at <code>x="500" y="300"</code> positions its exact center right in the middle of a 1000&times;600 canvas!</p>
+      <h2>2. Layer <code>&lt;pxl-layer&gt;</code></h2>
+      <p>Working directly in global stage coordinates can become rigid. Instead, a <code>&lt;pxl-layer&gt;</code> allows you to create an independent, movable local coordinate space:</p>
+      <ul>
+        <li><strong>Global Positioning:</strong> The layer itself is positioned relative to the stage's top-left origin.</li>
+        <li><strong>Local Origin:</strong> The layer's <code>x</code> and <code>y</code> attributes define its own internal <code>(0, 0)</code> Layer Center.</li>
+        <li><strong>Nesting Spaces:</strong> Drag the Layer sliders below. Notice how the entire local grid moves. Any shape you place inside this layer will be drawn relative to this moving local origin, rather than the static stage origin.</li>
+      </ul>
       
-      <pre><code class="language-html">&lt;!-- Placing a shape whose center is at (500, 300) --&gt;
-&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;pxl-layer&gt;
-    &lt;pxl-circle x="<mark id="sec2CircleXCode">500</mark>" y="<mark id="sec2CircleYCode">300</mark>" r="<mark id="sec2CircleRCode">200</mark>" stroke="#f97316"&gt;&lt;/pxl-circle&gt;
+      <pre><code class="language-html">&lt;!-- Moving the layer's origin to the center of the stage --&gt;
+&lt;pxl-stage ratio="<mark id="sec2RatioCode">5 / 3</mark>"&gt;
+  &lt;pxl-layer x="<mark id="sec2LayerXCode">500</mark>" y="<mark id="sec2LayerYCode">300</mark>"&gt;
+    &lt;!-- Insert shapes and groups here --&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
       <div class="demo-container">
-        <pxl-stage ratio="5 / 3" class="demo-stage">
-          <pxl-layer>
-            <!-- Helpers -->
-            <!-- 1. Background Grid -->
-            <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-            
-            <!-- 2. Layer Axes -->
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
-
-            <!-- 3. Layer Center -->
-            <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
-            <pxl-text x="15" y="15" baseline="top" text="'Layer (0, 0)'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
-
-            <!-- 4. Shape Helpers -->
-            <pxl-line x1="0" y1="ref.sec2Circle.y" x2="ref.sec2Circle.x" y2="ref.sec2Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.sec2Circle.x / 2" y="ref.sec2Circle.y + 15" baseline="top" align="center" text="`x = ${ref.sec2Circle.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec2Circle.x" y1="0" x2="ref.sec2Circle.x" y2="ref.sec2Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.sec2Circle.x + 15" y="ref.sec2Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.sec2Circle.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
-
-            <!-- 5. The Shape -->
-            <pxl-circle id="sec2Circle"
-              x="500" 
-              y="300" 
-              r="200" 
-              fill="#ffedd566" stroke="#f97316" strokewidth="4">
-            </pxl-circle>
-
-            <!-- 6. Shape Center (Top) -->
-            <pxl-circle x="ref.sec2Circle.x" y="ref.sec2Circle.y" r="5" fill="#fb923c"></pxl-circle>
-            <pxl-text 
-              x="ref.sec2Circle.x + 15" 
-              y="ref.sec2Circle.y - 15" 
-              baseline="bottom"
-              text="`Circle (${ref.sec2Circle.x}, ${ref.sec2Circle.y})`" 
-              size="27" 
-              fill="#fb923c" 
-              font="monospace">
-            </pxl-text>
-          </pxl-layer>
-        </pxl-stage>
+        <div id="sec2Container" style="width: 100%; margin: 0 auto; transition: width 0.1s ease-out;">
+          <pxl-stage id="sec2Stage" ratio="5 / 3" class="demo-stage">
+            <!-- Stage-level Layer coordinate vectors -->
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              
+              <!-- Stage Corner Markers -->
+              <pxl-circle x="0" y="0" r="6" fill="#0f766e"></pxl-circle>
+              <pxl-text x="15" y="15" baseline="top" text="'Stage Origin (0, 0)'" size="27" fill="#0f766e" font="monospace"></pxl-text>
+              <pxl-circle x="1000" y="0" r="6" fill="#86efac"></pxl-circle>
+              <pxl-text x="985" y="15" baseline="top" align="right" text="'(1000, 0)'" size="27" fill="#86efac" font="monospace"></pxl-text>
+              <pxl-circle x="1000" y="ref.sec2Stage.height" r="6" fill="#86efac"></pxl-circle>
+              <pxl-text x="985" y="ref.sec2Stage.height - 15" baseline="bottom" align="right" text="`(1000, ${round(ref.sec2Stage.height)})`" size="27" fill="#86efac" font="monospace"></pxl-text>
+              <pxl-circle x="0" y="ref.sec2Stage.height" r="6" fill="#86efac"></pxl-circle>
+              <pxl-text x="15" y="ref.sec2Stage.height - 15" baseline="bottom" align="left" text="`(0, ${round(ref.sec2Stage.height)})`" size="27" fill="#86efac" font="monospace"></pxl-text>
+              
+              <pxl-line x1="0" y1="ref.sec2Layer.y" x2="ref.sec2Layer.x" y2="ref.sec2Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-text x="ref.sec2Layer.x / 2" y="ref.sec2Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec2Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
+              <pxl-line x1="ref.sec2Layer.x" y1="0" x2="ref.sec2Layer.x" y2="ref.sec2Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-text x="ref.sec2Layer.x + 15" y="ref.sec2Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec2Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
+            </pxl-layer>
+  
+            <!-- The layer container -->
+            <pxl-layer id="sec2Layer" x="500" y="300">
+              <!-- 3. Layer Axes -->
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              
+              <!-- 4. Layer Center -->
+              <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
+              <pxl-text x="15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
 
         <!-- Tabbed Controls -->
         <div class="demo-controls">
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2CircleTab')">Circle</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2StageTab')">Stage</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2LayerTab')">Layer</button>
             </div>
           </div>
           
-          <!-- Circle Tab -->
-          <div class="tab-content active" id="sec2CircleTab">
+          <!-- Stage Tab -->
+          <div class="tab-content" id="sec2StageTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec2CircleXVal">500</span></label>
+                <label>Ratio <span id="sec2RatioVal">5 / 3</span></label>
+                <input type="range" min="0" max="14" step="1" value="10" autocomplete="off"
+                  oninput="updateSec2Ratio(this.value)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Layer Tab -->
+          <div class="tab-content active" id="sec2LayerTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="sec2LayerXVal">500</span></label>
                 <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
-                  oninput="document.getElementById('sec2Circle').setAttribute('x', this.value); document.getElementById('sec2CircleXVal').innerText = this.value; document.getElementById('sec2CircleXCode').innerText = this.value;">
+                  oninput="document.getElementById('sec2Layer').setAttribute('x', this.value); document.getElementById('sec2LayerXVal').innerText = this.value; document.getElementById('sec2LayerXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec2CircleYVal">300</span></label>
+                <label>Center Y <span id="sec2LayerYVal">300</span></label>
                 <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
-                  oninput="document.getElementById('sec2Circle').setAttribute('y', this.value); document.getElementById('sec2CircleYVal').innerText = this.value; document.getElementById('sec2CircleYCode').innerText = this.value;">
-              </div>
-              <div class="control-group">
-                <label>Radius <span id="sec2CircleRVal">200</span></label>
-                <input type="range" min="10" max="500" step="10" value="200" autocomplete="off"
-                  oninput="document.getElementById('sec2Circle').setAttribute('r', this.value); document.getElementById('sec2CircleRVal').innerText = this.value; document.getElementById('sec2CircleRCode').innerText = this.value;">
+                  oninput="document.getElementById('sec2Layer').setAttribute('y', this.value); document.getElementById('sec2LayerYVal').innerText = this.value; document.getElementById('sec2LayerYCode').innerText = this.value;">
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <h2>3. Shape, e.g. <code>&lt;pxl-circle&gt;</code></h2>
+      <p>In Kilopixel, the <code>x</code> and <code>y</code> attributes of any shape define its <strong>center point</strong> relative to its parent layer or group.</p>
+      <p>Because shapes are nested inside layers, their final screen position is compounded. In the example below, the circle is placed at local <code>(350, 150)</code>. But because its parent layer is also shifted to <code>(400, 200)</code>, you can see how the shape's final visual position on the stage is perfectly offset from both origins!</p>
       
-      <h2>3. Relative Coordinates</h2>
-      <p>Working in global coordinates can quickly become difficult to manage. Instead, you can translate the entire <code>&lt;pxl-layer&gt;</code> to create a local coordinate space. This is a fundamental concept for building complex, movable scenes:</p>
-      <ul>
-        <li><strong>Global Positioning:</strong> The layer itself is positioned at <code>x="500" y="300"</code>, placing its origin at the exact center of the global 1000-unit stage.</li>
-        <li><strong>Local Origin:</strong> Because the shape lives inside the layer, the layer's center point acts as the local <code>(0, 0)</code> origin for the shape.</li>
-        <li><strong>Independent Movement:</strong> If you drag the Layer sliders to move it, notice that the shape's <code>x</code> and <code>y</code> coordinates do not change. The shape physically moves across the screen because its parent layer is moving, but its local mathematical position remains strictly relative to the layer's origin.</li>
-      </ul>
-      
-      <pre><code class="language-html">&lt;!-- Centering the layer instead of the shape --&gt;
+      <pre><code class="language-html">&lt;!-- Placing a shape whose center is at (350, 150) --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;pxl-layer x="<mark id="sec3LayerXCode">500</mark>" y="<mark id="sec3LayerYCode">300</mark>"&gt;
-    &lt;pxl-circle x="<mark id="sec3CircleXCode">150</mark>" y="<mark id="sec3CircleYCode">200</mark>" r="<mark id="sec3CircleRCode">300</mark>" stroke="#f97316"&gt;&lt;/pxl-circle&gt;
+  &lt;pxl-layer x="<mark id="sec3LayerXCode">400</mark>" y="<mark id="sec3LayerYCode">200</mark>"&gt;
+    &lt;pxl-circle x="<mark id="sec3CircleXCode">350</mark>" y="<mark id="sec3CircleYCode">150</mark>" r="<mark id="sec3CircleRCode">250</mark>" stroke="#f97316"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -197,43 +210,47 @@
           <!-- Stage-level Layer coordinate vectors -->
           <pxl-layer>
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            
+            <!-- Stage Origin -->
+            <pxl-circle x="0" y="0" r="6" fill="#0f766e"></pxl-circle>
+            <pxl-text x="15" y="15" baseline="top" text="'Stage Origin (0, 0)'" size="27" fill="#0f766e" font="monospace"></pxl-text>
             <pxl-line x1="0" y1="ref.sec3Layer.y" x2="ref.sec3Layer.x" y2="ref.sec3Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec3Layer.x / 2" y="ref.sec3Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec3Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
             <pxl-line x1="ref.sec3Layer.x" y1="0" x2="ref.sec3Layer.x" y2="ref.sec3Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec3Layer.x + 15" y="ref.sec3Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec3Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
           </pxl-layer>
-
-          <!-- The layer container -->
-          <pxl-layer id="sec3Layer" x="500" y="300">
-            <!-- 3. Layer Axes -->
+          
+          <pxl-layer id="sec3Layer" x="400" y="200">
+            <!-- Helpers -->
+            <!-- 2. Layer Axes -->
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
-            
-            <!-- 4. Layer Center -->
-            <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
-            <pxl-text x="15" y="-15" baseline="bottom" text="'Layer (0, 0)'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
 
-            <!-- 5. Shape Helpers -->
+            <!-- 3. Layer Center -->
+            <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
+            <pxl-text x="15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
+
+            <!-- 4. Shape Helpers -->
             <pxl-line x1="0" y1="ref.sec3Circle.y" x2="ref.sec3Circle.x" y2="ref.sec3Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec3Circle.x / 2" y="ref.sec3Circle.y + 15" baseline="top" align="center" text="`x = ${ref.sec3Circle.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
             <pxl-line x1="ref.sec3Circle.x" y1="0" x2="ref.sec3Circle.x" y2="ref.sec3Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec3Circle.x + 15" y="ref.sec3Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.sec3Circle.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
 
-            <!-- 6. The Shape -->
+            <!-- 5. The Shape -->
             <pxl-circle id="sec3Circle"
-              x="150" 
-              y="200" 
-              r="300"
+              x="350" 
+              y="150" 
+              r="250" 
               fill="#ffedd566" stroke="#f97316" strokewidth="4">
             </pxl-circle>
 
-            <!-- 7. Shape Center (Top) -->
+            <!-- 6. Shape Center (Top) -->
             <pxl-circle x="ref.sec3Circle.x" y="ref.sec3Circle.y" r="5" fill="#fb923c"></pxl-circle>
             <pxl-text 
               x="ref.sec3Circle.x + 15" 
               y="ref.sec3Circle.y - 15" 
               baseline="bottom"
-              text="`Circle (${ref.sec3Circle.x}, ${ref.sec3Circle.y})`" 
+              text="'Circle Center'" 
               size="27" 
               fill="#fb923c" 
               font="monospace">
@@ -246,43 +263,43 @@
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3LayerTab')">Layer</button>
-              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3CircleTab')">Circle</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3LayerTab')">Layer</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3CircleTab')">Circle</button>
             </div>
           </div>
           
           <!-- Layer Tab -->
-          <div class="tab-content active" id="sec3LayerTab">
+          <div class="tab-content" id="sec3LayerTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec3LayerXVal">500</span></label>
-                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                <label>Center X <span id="sec3LayerXVal">400</span></label>
+                <input type="range" min="-500" max="1000" step="10" value="400" autocomplete="off"
                   oninput="document.getElementById('sec3Layer').setAttribute('x', this.value); document.getElementById('sec3LayerXVal').innerText = this.value; document.getElementById('sec3LayerXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec3LayerYVal">300</span></label>
-                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                <label>Center Y <span id="sec3LayerYVal">200</span></label>
+                <input type="range" min="-300" max="600" step="10" value="200" autocomplete="off"
                   oninput="document.getElementById('sec3Layer').setAttribute('y', this.value); document.getElementById('sec3LayerYVal').innerText = this.value; document.getElementById('sec3LayerYCode').innerText = this.value;">
               </div>
             </div>
           </div>
           
           <!-- Circle Tab -->
-          <div class="tab-content" id="sec3CircleTab">
+          <div class="tab-content active" id="sec3CircleTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec3CircleXVal">150</span></label>
-                <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off"
+                <label>Center X <span id="sec3CircleXVal">350</span></label>
+                <input type="range" min="-500" max="500" step="10" value="350" autocomplete="off"
                   oninput="document.getElementById('sec3Circle').setAttribute('x', this.value); document.getElementById('sec3CircleXVal').innerText = this.value; document.getElementById('sec3CircleXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec3CircleYVal">200</span></label>
-                <input type="range" min="-300" max="300" step="10" value="200" autocomplete="off"
+                <label>Center Y <span id="sec3CircleYVal">150</span></label>
+                <input type="range" min="-300" max="300" step="10" value="150" autocomplete="off"
                   oninput="document.getElementById('sec3Circle').setAttribute('y', this.value); document.getElementById('sec3CircleYVal').innerText = this.value; document.getElementById('sec3CircleYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius <span id="sec3CircleRVal">300</span></label>
-                <input type="range" min="10" max="500" step="10" value="300" autocomplete="off"
+                <label>Radius <span id="sec3CircleRVal">250</span></label>
+                <input type="range" min="10" max="500" step="10" value="250" autocomplete="off"
                   oninput="document.getElementById('sec3Circle').setAttribute('r', this.value); document.getElementById('sec3CircleRVal').innerText = this.value; document.getElementById('sec3CircleRCode').innerText = this.value;">
               </div>
             </div>
@@ -291,11 +308,11 @@
       </div>
 
       <h2>4. Rotation <code>rotate</code></h2>
-      <p>In Kilopixel, applying rotation is incredibly simple. When you rotate a shape, it spins around its <code>x</code> and <code>y</code> <strong>center point</strong> by default.</p>
+      <p>In Kilopixel, applying rotation is incredibly simple. When you rotate a shape, it spins around its <code>x</code> and <code>y</code> <strong>Center</strong> by default.</p>
       <p>However, it is important to understand the difference between <strong>Layer</strong> and <strong>Shape</strong> rotation:</p>
       <ul>
-        <li><strong>Layer Rotation:</strong> Rotating a <code>&lt;pxl-layer&gt;</code> spins the entire coordinate space inside that layer around the layer's center point (<code>x</code>, <code>y</code>). The shape's relative coordinates do not change, but the local space it lives in spins together with the layer.</li>
-        <li><strong>Shape Rotation:</strong> Rotating a shape (such as a <code>&lt;pxl-ellipse&gt;</code>) only spins that specific shape around its own <code>x</code> and <code>y</code> center point, leaving the rest of the layer untouched.</li>
+        <li><strong>Layer Rotation:</strong> Rotating a <code>&lt;pxl-layer&gt;</code> spins the entire coordinate space inside that layer around the Layer Center. The shape's relative coordinates do not change, but the local space it lives in spins together with the layer.</li>
+        <li><strong>Shape Rotation:</strong> Rotating a shape (such as a <code>&lt;pxl-ellipse&gt;</code>) only spins that specific shape around its own Shape Center, leaving the rest of the layer untouched.</li>
       </ul>
       <p>Look for the pulsing orange indicator dot (<span class="indicator-dot"></span>) on the controls below — try spinning the Layer and Ellipse sliders to see this difference in real time!</p>
       
@@ -331,7 +348,7 @@
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
-            <pxl-text x="15" y="-15" baseline="bottom" text="'Layer (0, 0)'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
+            <pxl-text x="15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
             
             <!-- 4. Shape Helpers -->
             <pxl-line x1="0" y1="ref.sec4Ellipse.y" x2="ref.sec4Ellipse.x" y2="ref.sec4Ellipse.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
@@ -357,7 +374,7 @@
               dy="-15"
               rotate="ref.sec4Ellipse.rotate"
               baseline="bottom"
-              text="`Ellipse (${ref.sec4Ellipse.x}, ${ref.sec4Ellipse.y})`" 
+              text="'Ellipse Center'" 
               size="27" fill="#fb923c" font="monospace">
             </pxl-text>
           </pxl-layer>
@@ -368,13 +385,13 @@
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4LayerTab')">Layer</button>
-              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4EllipseTab')">Ellipse <span class="indicator-dot"></span></button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4LayerTab')">Layer</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4EllipseTab')">Ellipse <span class="indicator-dot"></span></button>
             </div>
           </div>
           
           <!-- Layer Tab -->
-          <div class="tab-content active" id="sec4LayerTab">
+          <div class="tab-content" id="sec4LayerTab">
             <div class="playground-sliders">
               <div class="control-group">
                 <label>Center X <span id="sec4LayerXVal">500</span></label>
@@ -395,7 +412,7 @@
           </div>
           
           <!-- Ellipse Tab -->
-          <div class="tab-content" id="sec4EllipseTab">
+          <div class="tab-content active" id="sec4EllipseTab">
             <div class="playground-sliders">
               <div class="control-group">
                 <label>Center X <span id="sec4EllipseXVal">200</span></label>
@@ -427,9 +444,9 @@
         </div>
       </div>
 
-      <h2>5. Local Offsets <code>dx, dy</code></h2>
-      <p>This is where Kilopixel's coordinate system becomes incredibly powerful. The <code>dx</code> and <code>dy</code> attributes offset the shape from its center <code>x</code> and <code>y</code> pivot point.</p>
-      <p>Because this offset happens <em>inside</em> the shape's local coordinate system, any rotation applied will cause the shape to <strong>orbit</strong> the pivot point instead of just spinning in place.</p>
+      <h2>5. Offset <code>dx</code> and <code>dy</code></h2>
+      <p>This is where Kilopixel's coordinate system becomes incredibly powerful. The <code>dx</code> and <code>dy</code> attributes (where "d" stands for delta) offset the shape from its <code>x</code> and <code>y</code> Center.</p>
+      <p>Because this offset happens <em>inside</em> the shape's local coordinate system, any rotation applied will cause the shape to <strong>orbit</strong> the Center instead of just spinning in place.</p>
       
       <pre><code class="language-html">&lt;!-- A rectangle orbiting its center point --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
@@ -438,7 +455,7 @@
       x="<mark id="sec5RectXCode">300</mark>" y="<mark id="sec5RectYCode">150</mark>" 
       dx="<mark id="sec5RectDxCode">150</mark>" dy="<mark id="sec5RectDyCode">150</mark>" 
       rotate="<mark id="sec5RectRotCode">0</mark>" 
-      w="100" h="100" stroke="#f97316"&gt;
+      w="<mark id="sec5RectWCode">100</mark>" h="<mark id="sec5RectHCode">100</mark>" stroke="#f97316"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -464,7 +481,7 @@
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
-            <pxl-text x="15" y="-15" baseline="bottom" text="'Layer (0, 0)'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
+            <pxl-text x="15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
             
             <!-- 4. Shape Helpers -->
             <!-- 4. Shape Helpers -->
@@ -508,7 +525,7 @@
               dy="-15"
               rotate="ref.sec5Rect.rotate"
               baseline="bottom" 
-              text="`Rect Center (${ref.sec5Rect.x}, ${ref.sec5Rect.y})`" 
+              text="'Rect Center'" 
               size="27" fill="#fb923c" font="monospace">
             </pxl-text>
 
@@ -525,7 +542,7 @@
               dy="-15"
               rotate="ref.sec5Rect.rotate"
               baseline="bottom" 
-              text="`Rect Offset (${ref.sec5Rect.dx}, ${ref.sec5Rect.dy})`" 
+              text="'Rect Offset'" 
               size="27" fill="#c2410c" font="monospace">
             </pxl-text>
           </pxl-layer>
@@ -536,12 +553,12 @@
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec5LayerTab')">Layer</button>
-              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec5RectTab')">Rectangle</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec5LayerTab')">Layer</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec5RectTab')">Rect</button>
             </div>
           </div>
 
-          <div class="tab-content active" id="sec5LayerTab">
+          <div class="tab-content" id="sec5LayerTab">
             <div class="playground-sliders">
               <div class="control-group">
                 <label>Center X <span id="sec5LayerXVal">200</span></label>
@@ -561,7 +578,7 @@
             </div>
           </div>
 
-          <div class="tab-content" id="sec5RectTab">
+          <div class="tab-content active" id="sec5RectTab">
             <div class="playground-sliders">
                <div class="control-group">
                 <label>Center X <span id="sec5RectXVal">300</span></label>
@@ -584,6 +601,16 @@
                   oninput="document.getElementById('sec5Rect').setAttribute('dy', this.value); document.getElementById('sec5RectDyVal').innerText = this.value; document.getElementById('sec5RectDyCode').innerText = this.value;">
               </div>
               <div class="control-group">
+                <label>Width <span id="sec5RectWVal">100</span></label>
+                <input type="range" min="10" max="500" step="10" value="100" autocomplete="off"
+                  oninput="document.getElementById('sec5Rect').setAttribute('w', this.value); document.getElementById('sec5RectWVal').innerText = this.value; document.getElementById('sec5RectWCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Height <span id="sec5RectHVal">100</span></label>
+                <input type="range" min="10" max="500" step="10" value="100" autocomplete="off"
+                  oninput="document.getElementById('sec5Rect').setAttribute('h', this.value); document.getElementById('sec5RectHVal').innerText = this.value; document.getElementById('sec5RectHCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
                 <label>Rotation <span id="sec5RectRotVal">0°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
                   oninput="document.getElementById('sec5Rect').setAttribute('rotate', this.value); document.getElementById('sec5RectRotVal').innerText = this.value + '°'; document.getElementById('sec5RectRotCode').innerText = this.value;">
@@ -595,7 +622,7 @@
 
       <h2>6. Element Referencing <code>ref.*</code></h2>
       <p>Any element with an <code>id</code> is automatically registered in Kilopixel's zero-GC <code>pxl.nodes</code> registry. Other elements can declaratively bind to its properties at 60fps using the <code>ref.*</code> prefix.</p>
-      <p>In this example, three shapes exist inside the same coordinate system. Both <strong>Follower B</strong> and <strong>Follower C</strong> lock their origin coordinates (<code>x</code> and <code>y</code>) directly to <code>ref.leaderA.x</code> and <code>ref.leaderA.y</code>, while using independent <code>dx</code> and <code>dy</code> attributes to define their relative offset from <strong>Leader A</strong>!</p>
+      <p>In this example, three shapes exist inside the same coordinate system. Both <strong>Follower B</strong> and <strong>Follower C</strong> lock their Center (<code>x</code> and <code>y</code>) directly to <code>ref.leaderA.x</code> and <code>ref.leaderA.y</code>, while using independent <code>dx</code> and <code>dy</code> attributes to define their relative Offset from <strong>Leader A</strong>!</p>
       
       <pre><code class="language-html">&lt;!-- Followers binding their origin to a Leader shape --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
@@ -639,7 +666,7 @@
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
-            <pxl-text x="15" y="15" baseline="top" text="'Layer (0, 0)'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
+            <pxl-text x="15" y="15" baseline="top" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
 
             <!-- 4. Connecting Vector Lines (600 shade) -->
             <pxl-line 
@@ -676,7 +703,7 @@
               x="ref.sec6LeaderA.x" y="ref.sec6LeaderA.y" 
               dx="15" dy="-15" 
               baseline="bottom" 
-              text="`Center A (${ref.sec6LeaderA.x}, ${ref.sec6LeaderA.y})`" 
+              text="'Center A'" 
               size="27" fill="#c2410c" font="monospace">
             </pxl-text>
 
@@ -686,7 +713,7 @@
               x="ref.sec6LeaderA.x + ref.sec6FollowerB.dx" y="ref.sec6LeaderA.y + ref.sec6FollowerB.dy" 
               dx="15" dy="-15" 
               baseline="bottom" 
-              text="`Offset B (${ref.sec6FollowerB.dx}, ${ref.sec6FollowerB.dy})`" 
+              text="'Offset B'" 
               size="27" fill="#1d4ed8" font="monospace">
             </pxl-text>
 
@@ -696,7 +723,7 @@
               x="ref.sec6LeaderA.x + ref.sec6FollowerC.dx" y="ref.sec6LeaderA.y + ref.sec6FollowerC.dy" 
               dx="15" dy="-15" 
               baseline="bottom" 
-              text="`Offset C (${ref.sec6FollowerC.dx}, ${ref.sec6FollowerC.dy})`" 
+              text="'Offset C'" 
               size="27" fill="#15803d" font="monospace">
             </pxl-text>
           </pxl-layer>
@@ -825,7 +852,7 @@
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
-            <pxl-text x="15" y="15" baseline="top" text="'Layer (0, 0)'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
+            <pxl-text x="15" y="15" baseline="top" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
             <!-- 4. Shape Helpers -->
             <!-- Rotating Crosshairs for Center A and Center B (Visible only when rotated) -->
             <pxl-group x="ref.sec7PointA.x" y="ref.sec7PointA.y" rotate="ref.sec7PointA.rotate" hidden="ref.sec7PointA.rotate == 0">
@@ -866,7 +893,7 @@
               dy="-15" 
               rotate="ref.sec7PointA.rotate" 
               baseline="bottom" 
-              text="`Center A (${ref.sec7PointA.x}, ${ref.sec7PointA.y})`" 
+              text="'Center A'" 
               size="27" fill="#60a5fa" font="monospace">
             </pxl-text>
             <!-- Point B Center Dot & Label -->
@@ -878,16 +905,16 @@
               dy="-15" 
               rotate="ref.sec7PointB.rotate" 
               baseline="bottom" 
-              text="`Center B (${ref.sec7PointB.x}, ${ref.sec7PointB.y})`" 
+              text="'Center B'" 
               size="27" fill="#fb923c" font="monospace">
             </pxl-text>
 
             <!-- Point A Orbiting Offset Dot & Label -->
             <pxl-circle x="toLocal(ref.sec7PointA, 'tx')" y="toLocal(ref.sec7PointA, 'ty')" r="5" fill="#1d4ed8"></pxl-circle>
-            <pxl-text x="toLocal(ref.sec7PointA, 'tx')" y="toLocal(ref.sec7PointA, 'ty')" dx="15" dy="-15" rotate="ref.sec7PointA.rotate" baseline="bottom" text="`Offset A (${ref.sec7PointA.dx}, ${ref.sec7PointA.dy})`" size="27" fill="#1d4ed8" font="monospace"></pxl-text>
+            <pxl-text x="toLocal(ref.sec7PointA, 'tx')" y="toLocal(ref.sec7PointA, 'ty')" dx="15" dy="-15" rotate="ref.sec7PointA.rotate" baseline="bottom" text="'Offset A'" size="27" fill="#1d4ed8" font="monospace"></pxl-text>
             <!-- Point B Orbiting Offset Dot & Label -->
             <pxl-circle x="toLocal(ref.sec7PointB, 'tx')" y="toLocal(ref.sec7PointB, 'ty')" r="5" fill="#c2410c"></pxl-circle>
-            <pxl-text x="toLocal(ref.sec7PointB, 'tx')" y="toLocal(ref.sec7PointB, 'ty')" dx="15" dy="-15" rotate="ref.sec7PointB.rotate" baseline="bottom" text="`Offset B (${ref.sec7PointB.dx}, ${ref.sec7PointB.dy})`" size="27" fill="#c2410c" font="monospace"></pxl-text>
+            <pxl-text x="toLocal(ref.sec7PointB, 'tx')" y="toLocal(ref.sec7PointB, 'ty')" dx="15" dy="-15" rotate="ref.sec7PointB.rotate" baseline="bottom" text="'Offset B'" size="27" fill="#c2410c" font="monospace"></pxl-text>
           </pxl-layer>
         </pxl-stage>
 
@@ -1111,8 +1138,32 @@
       const val = SEC1_RATIOS[idx] || '5 / 3';
       const stg = document.getElementById('sec1Stage');
       if (stg) stg.setAttribute('ratio', val);
+      
       const lbl = document.getElementById('sec1RatioVal');
       if (lbl) lbl.innerText = val;
+      const code = document.getElementById('sec1RatioCode');
+      if (code) code.innerText = val;
+    }
+
+    function updateSec1Width(val) {
+      const container = document.getElementById('sec1Container');
+      if (container) container.style.width = val + '%';
+      
+      const lbl = document.getElementById('sec1WidthVal');
+      if (lbl) lbl.innerText = val + '%';
+      const code = document.getElementById('sec1WidthCode');
+      if (code) code.innerText = val + '%';
+    }
+
+    function updateSec2Ratio(idx) {
+      const val = SEC1_RATIOS[idx] || '5 / 3';
+      const stg = document.getElementById('sec2Stage');
+      if (stg) stg.setAttribute('ratio', val);
+      
+      const lbl = document.getElementById('sec2RatioVal');
+      if (lbl) lbl.innerText = val;
+      const code = document.getElementById('sec2RatioCode');
+      if (code) code.innerText = val;
     }
 
   </script>

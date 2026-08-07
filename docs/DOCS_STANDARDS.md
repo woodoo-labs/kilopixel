@@ -50,9 +50,15 @@ Elements within a `<pxl-layer>` are drawn in strict DOM order (back-to-front). A
 
 ## 3. Typography & Coordinate Labels
 * **Standard Font Size (`size="27"`):** Within the 1000-unit logical canvas, all `<pxl-text>` annotations, coordinate labels, shape titles, and axis guides MUST use `size="27"` by default. This ensures consistent readability across desktop and high-PPI mobile screens without cluttering the canvas.
-* **Tuple Syntax:** When labeling points on the canvas, always use standard mathematical tuple syntax without explicit axis assignments inside the string:
-  * **Correct:** `Layer (0, 0)` or `Rect (100, 200)`
-  * **Incorrect:** `Layer (x=0, y=0)` or `Rect x/y: 100, 200`
+* **Center Point Labels (Canvas):** Center point labels (e.g., the colored dots at the center of layers or shapes) must strictly use descriptive text like `'Layer Center'` or `'Circle Center'`. Do NOT include coordinate tuples `(x, y)` in these labels, as the coordinates are already visualized by the surrounding dashed helper lines.
+  * **Exception for Absolute Stage Bounds:** The Stage origin and corners are the only points that use absolute tuple syntax in labels: `'Stage Origin (0, 0)'` or `'(1000, 0)'`.
+* **Coordinate Syntax in Text (Prose):**
+  * **Spatial Locations (Points):** When describing a mathematical location on the stage in paragraphs, use pure tuple syntax without any prefixes (e.g., *"The shape moves to `(350, 150)`"*). Do not use redundant phrasing like *"coordinate (0, 0)"*.
+  * **HTML Attributes:** When referring to specific properties in declarative code in paragraphs, use inline code with quotes, joined by *and* (e.g., *"Set `x="350"` and `y="150"`"*). Do not use mashups like *"placed at x="350", y="150""*.
+* **Terminology:**
+  * **Origin**: Use strictly for `(0, 0)` global spaces (e.g., Stage Origin).
+  * **Center**: Use for the central `x` and `y` attributes of a shape or layer (e.g., Shape Center, Layer Center). Do not use the term "pivot point".
+  * **Offset**: Use for the `dx` and `dy` attributes of a shape (e.g., Shape Offset).
 
 ## 4. UI Controls & Architecture
 Interactive playgrounds must follow a standardized DOM architecture to maintain visual parity across the site.

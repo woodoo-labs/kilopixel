@@ -81,7 +81,8 @@ pxl.scope.linear = (direction, colorsArray) => {
       }
     }
   }
-  return { isGradient: true, type: 'linear', x1, y1, x2, y2, angle, stops: parsedStops };
+  const hash = 'linear-' + x1 + '-' + y1 + '-' + x2 + '-' + y2 + '-' + angle + '-' + (Array.isArray(colorsArray) ? colorsArray.join(',') : colorsArray);
+  return { isGradient: true, type: 'linear', x1, y1, x2, y2, angle, stops: parsedStops, hash };
 };
 
 pxl.scope.radial = (radiusObj, colorsArray) => {
@@ -103,7 +104,8 @@ pxl.scope.radial = (radiusObj, colorsArray) => {
       }
     }
   }
-  return { isGradient: true, type: 'radial', cx, cy, r, stops: parsedStops };
+  const hash = 'radial-' + cx + '-' + cy + '-' + r + '-' + (Array.isArray(colorsArray) ? colorsArray.join(',') : colorsArray);
+  return { isGradient: true, type: 'radial', cx, cy, r, stops: parsedStops, hash };
 };
 
 pxl.scopeKeys = Object.keys(pxl.scope).join(', ');
