@@ -190,16 +190,7 @@ body {
   position: relative;
 }
 
-.sidebar-bg-stage {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  pointer-events: none !important;
-  z-index: 0 !important;
-  opacity: 0.85;
-}
+
 
 .sidebar-section { 
   margin-bottom: 32px;
@@ -431,10 +422,12 @@ body {
 
 @keyframes dot-glow {
   0%, 100% {
-    box-shadow: 0 0 3px 0px rgba(249, 115, 22, 0.4);
+    opacity: 0.6;
+    transform: scale(0.9);
   }
   50% {
-    box-shadow: 0 0 10px 3px rgba(249, 115, 22, 0.85);
+    opacity: 1;
+    transform: scale(1.1);
   }
 }
 

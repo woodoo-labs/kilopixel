@@ -620,29 +620,32 @@
         </div>
       </div>
 
-      <h2>6. Element Referencing <code>ref.*</code></h2>
+      <h2>6. Data Binding <code>ref.*</code></h2>
       <p>Any element with an <code>id</code> is automatically registered in Kilopixel's zero-GC <code>pxl.nodes</code> registry. Other elements can declaratively bind to its properties at 60fps using the <code>ref.*</code> prefix.</p>
-      <p>In this example, three shapes exist inside the same coordinate system. Both <strong>Follower B</strong> and <strong>Follower C</strong> lock their Center (<code>x</code> and <code>y</code>) directly to <code>ref.leaderA.x</code> and <code>ref.leaderA.y</code>, while using independent <code>dx</code> and <code>dy</code> attributes to define their relative Offset from <strong>Leader A</strong>!</p>
+      <p>This allows for true <strong>cross-property mathematical binding</strong>. In this example, you only control the <strong>Master</strong> shape. The <strong>Mirror</strong> perfectly mirrors its X position (<code>1000 - ref.sec6Master.x</code>), while the <strong>Reactor</strong> binds its size and rotation to the Master's position!</p>
       
-      <pre><code class="language-html">&lt;!-- Followers binding their origin to a Leader shape --&gt;
+      <pre><code class="language-html">&lt;!-- Math-driven data binding across different properties --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;pxl-layer x="<mark id="sec6LayerXCode">500</mark>" y="<mark id="sec6LayerYCode">300</mark>" rotate="<mark id="sec6LayerRotCode">0</mark>"&gt;
-    &lt;!-- Leader A Shape (Anchor Origin) --&gt;
-    &lt;pxl-circle id="leaderA" x="<mark id="sec6LeaderAXCode">0</mark>" y="<mark id="sec6LeaderAYCode">150</mark>" r="12" fill="#fb923c"&gt;&lt;/pxl-circle&gt;
+  &lt;pxl-layer x="<mark id="sec6LayerXCode">0</mark>" y="<mark id="sec6LayerYCode">0</mark>" rotate="<mark id="sec6LayerRotCode">0</mark>"&gt;
+    &lt;!-- 1. Master Shape (You control this) --&gt;
+    &lt;pxl-rect id="master" x="<mark id="sec6MasterXCode">250</mark>" y="<mark id="sec6MasterYCode">200</mark>" w="100" h="100" rotate="<mark id="sec6MasterRotCode">0</mark>" stroke="#f97316"&gt;&lt;/pxl-rect&gt;
 
-    &lt;!-- Follower B (Blue Palette) --&gt;
-    &lt;pxl-circle id="followerB"
-      x="ref.leaderA.x" y="ref.leaderA.y"
-      dx="<mark id="sec6FollowerBDxCode">-400</mark>" dy="<mark id="sec6FollowerBDyCode">-300</mark>"
-      r="10" fill="#60a5fa"&gt;
-    &lt;/pxl-circle&gt;
+    &lt;!-- 2. Mirror Shape (Moves in reverse) --&gt;
+    &lt;pxl-rect id="mirror" 
+      x="1000 - ref.master.x" 
+      y="ref.master.y" 
+      w="<mark id="sec6MirrorWCode">100</mark>" h="<mark id="sec6MirrorHCode">100</mark>" 
+      rotate="<mark id="sec6MirrorRotCode">0</mark>" stroke="#3b82f6"&gt;
+    &lt;/pxl-rect&gt;
 
-    &lt;!-- Follower C (Green Palette) --&gt;
-    &lt;pxl-circle id="followerC"
-      x="ref.leaderA.x" y="ref.leaderA.y"
-      dx="<mark id="sec6FollowerCDxCode">150</mark>" dy="<mark id="sec6FollowerCDyCode">-350</mark>"
-      r="10" fill="#4ade80"&gt;
-    &lt;/pxl-circle&gt;
+    &lt;!-- 3. Reactor Shape (Spins and scales) --&gt;
+    &lt;pxl-rect id="reactor" 
+      x="<mark id="sec6ReactorXCode">500</mark>" y="<mark id="sec6ReactorYCode">450</mark>" 
+      w="ref.master.x / 5" 
+      h="ref.master.x / 5" 
+      rotate="ref.master.x" 
+      stroke="#22c55e"&gt;
+    &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -653,79 +656,41 @@
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
           </pxl-layer>
 
+
+
           <!-- 2. Fixed Stage-Level Layer Helpers -->
           <pxl-layer>
             <pxl-line x1="0" y1="ref.sec6Layer.y" x2="ref.sec6Layer.x" y2="ref.sec6Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.sec6Layer.x / 2" y="ref.sec6Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec6Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
             <pxl-line x1="ref.sec6Layer.x" y1="0" x2="ref.sec6Layer.x" y2="ref.sec6Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.sec6Layer.x + 15" y="ref.sec6Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec6Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
           </pxl-layer>
 
-          <pxl-layer id="sec6Layer" x="500" y="300" rotate="0">
+          <pxl-layer id="sec6Layer" x="0" y="0" rotate="0">
             <!-- 3. Layer Axes & Center -->
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
             <pxl-text x="15" y="15" baseline="top" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
 
-            <!-- 4. Connecting Vector Lines (600 shade) -->
-            <pxl-line 
-              x1="ref.sec6LeaderA.x" y1="ref.sec6LeaderA.y" 
-              x2="ref.sec6LeaderA.x + ref.sec6FollowerB.dx" y2="ref.sec6LeaderA.y + ref.sec6FollowerB.dy" 
-              stroke="#2563eb" strokewidth="4" linedash="[5, 5]">
-            </pxl-line>
-            <pxl-line 
-              x1="ref.sec6LeaderA.x" y1="ref.sec6LeaderA.y" 
-              x2="ref.sec6LeaderA.x + ref.sec6FollowerC.dx" y2="ref.sec6LeaderA.y + ref.sec6FollowerC.dy" 
-              stroke="#16a34a" strokewidth="4" linedash="[5, 5]">
-            </pxl-line>
+            <!-- Helper Lines (Drawn behind shapes) -->
+            <!-- Line from Master to Mirror -->
+            <pxl-line x1="ref.sec6Master.x" y1="ref.sec6Master.y" x2="ref.sec6Mirror.x" y2="ref.sec6Mirror.y" stroke="#2563eb" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <!-- Line from Master to Reactor -->
+            <pxl-line x1="ref.sec6Master.x" y1="ref.sec6Master.y" x2="ref.sec6Reactor.x" y2="ref.sec6Reactor.y" stroke="#16a34a" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
-            <!-- 5. Shapes -->
-            <!-- Leader A Shape -->
-            <pxl-circle id="sec6LeaderA" x="0" y="150" r="10" fill="#fb923c"></pxl-circle>
-            <!-- Follower B Shape (Blue Palette) -->
-            <pxl-circle id="sec6FollowerB" 
-              x="ref.sec6LeaderA.x" y="ref.sec6LeaderA.y" 
-              dx="-400" dy="-300" 
-              r="10" fill="#60a5fa">
-            </pxl-circle>
-            <!-- Follower C Shape (Green Palette) -->
-            <pxl-circle id="sec6FollowerC" 
-              x="ref.sec6LeaderA.x" y="ref.sec6LeaderA.y" 
-              dx="150" dy="-350" 
-              r="10" fill="#4ade80">
-            </pxl-circle>
+            <!-- 1. Master Shape (Orange Palette) -->
+            <pxl-rect id="sec6Master" x="250" y="200" w="100" h="100" rotate="0" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-rect>
+            <pxl-circle x="ref.sec6Master.x" y="ref.sec6Master.y" r="5" fill="#fb923c"></pxl-circle>
+            <pxl-text x="ref.sec6Master.x" y="ref.sec6Master.y" dx="15" dy="-15" baseline="bottom" text="'Master Center'" size="27" fill="#c2410c" font="monospace"></pxl-text>
 
-            <!-- 6. Markers & Labels (Top) -->
-            <!-- Leader A Center Dot (Orange-700) -->
-            <pxl-circle x="ref.sec6LeaderA.x" y="ref.sec6LeaderA.y" r="5" fill="#c2410c"></pxl-circle>
-            <pxl-text 
-              x="ref.sec6LeaderA.x" y="ref.sec6LeaderA.y" 
-              dx="15" dy="-15" 
-              baseline="bottom" 
-              text="'Center A'" 
-              size="27" fill="#c2410c" font="monospace">
-            </pxl-text>
+            <!-- 2. Mirror Shape (Blue Palette) -->
+            <pxl-rect id="sec6Mirror" x="1000 - ref.sec6Master.x" y="ref.sec6Master.y" w="100" h="100" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-rect>
+            <pxl-circle x="ref.sec6Mirror.x" y="ref.sec6Mirror.y" r="5" fill="#60a5fa"></pxl-circle>
+            <pxl-text x="ref.sec6Mirror.x" y="ref.sec6Mirror.y" dx="15" dy="-15" baseline="bottom" text="'Mirror Center'" size="27" fill="#1d4ed8" font="monospace"></pxl-text>
 
-            <!-- Follower B Offset Dot (Blue-700) -->
-            <pxl-circle x="ref.sec6LeaderA.x + ref.sec6FollowerB.dx" y="ref.sec6LeaderA.y + ref.sec6FollowerB.dy" r="5" fill="#1d4ed8"></pxl-circle>
-            <pxl-text 
-              x="ref.sec6LeaderA.x + ref.sec6FollowerB.dx" y="ref.sec6LeaderA.y + ref.sec6FollowerB.dy" 
-              dx="15" dy="-15" 
-              baseline="bottom" 
-              text="'Offset B'" 
-              size="27" fill="#1d4ed8" font="monospace">
-            </pxl-text>
-
-            <!-- Follower C Offset Dot (Green-700) -->
-            <pxl-circle x="ref.sec6LeaderA.x + ref.sec6FollowerC.dx" y="ref.sec6LeaderA.y + ref.sec6FollowerC.dy" r="5" fill="#15803d"></pxl-circle>
-            <pxl-text 
-              x="ref.sec6LeaderA.x + ref.sec6FollowerC.dx" y="ref.sec6LeaderA.y + ref.sec6FollowerC.dy" 
-              dx="15" dy="-15" 
-              baseline="bottom" 
-              text="'Offset C'" 
-              size="27" fill="#15803d" font="monospace">
-            </pxl-text>
+            <!-- 3. Reactor Shape (Green Palette) -->
+            <pxl-rect id="sec6Reactor" x="500" y="450" w="ref.sec6Master.x / 5" h="ref.sec6Master.x / 5" rotate="ref.sec6Master.x" fill="#dcfce766" stroke="#22c55e" strokewidth="4"></pxl-rect>
+            <pxl-circle x="ref.sec6Reactor.x" y="ref.sec6Reactor.y" r="5" fill="#4ade80"></pxl-circle>
+            <pxl-text x="ref.sec6Reactor.x" y="ref.sec6Reactor.y" dx="15" dy="-15" baseline="bottom" text="'Reactor Center'" size="27" fill="#15803d" font="monospace"></pxl-text>
           </pxl-layer>
         </pxl-stage>
 
@@ -734,23 +699,23 @@
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec6LayerTab')">Layer</button>
-              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec6LeaderATab')">Leader A</button>
-              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec6FollowerBTab')">Follower B</button>
-              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec6FollowerCTab')">Follower C</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec6LayerTab')">Layer</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec6MasterTab')">Master</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec6MirrorTab')">Mirror</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec6ReactorTab')">Reactor</button>
             </div>
           </div>
 
-          <div class="tab-content active" id="sec6LayerTab">
+          <div class="tab-content" id="sec6LayerTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec6LayerXVal">500</span></label>
-                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                <label>Center X <span id="sec6LayerXVal">0</span></label>
+                <input type="range" min="0" max="1000" step="10" value="0" autocomplete="off"
                   oninput="document.getElementById('sec6Layer').setAttribute('x', this.value); document.getElementById('sec6LayerXVal').innerText = this.value; document.getElementById('sec6LayerXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec6LayerYVal">300</span></label>
-                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                <label>Center Y <span id="sec6LayerYVal">0</span></label>
+                <input type="range" min="0" max="600" step="10" value="0" autocomplete="off"
                   oninput="document.getElementById('sec6Layer').setAttribute('y', this.value); document.getElementById('sec6LayerYVal').innerText = this.value; document.getElementById('sec6LayerYCode').innerText = this.value;">
               </div>
               <div class="control-group">
@@ -761,47 +726,59 @@
             </div>
           </div>
 
-          <div class="tab-content" id="sec6LeaderATab">
+          <div class="tab-content active" id="sec6MasterTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec6LeaderAXVal">0</span></label>
-                <input type="range" min="-400" max="400" step="10" value="0" autocomplete="off"
-                  oninput="document.getElementById('sec6LeaderA').setAttribute('x', this.value); document.getElementById('sec6LeaderAXVal').innerText = this.value; document.getElementById('sec6LeaderAXCode').innerText = this.value;">
+                <label>Center X <span id="sec6MasterXVal">250</span></label>
+                <input type="range" min="0" max="1000" step="10" value="250" autocomplete="off"
+                  oninput="document.getElementById('sec6Master').setAttribute('x', this.value); document.getElementById('sec6MasterXVal').innerText = this.value; document.getElementById('sec6MasterXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec6LeaderAYVal">150</span></label>
-                <input type="range" min="-250" max="250" step="10" value="150" autocomplete="off"
-                  oninput="document.getElementById('sec6LeaderA').setAttribute('y', this.value); document.getElementById('sec6LeaderAYVal').innerText = this.value; document.getElementById('sec6LeaderAYCode').innerText = this.value;">
+                <label>Center Y <span id="sec6MasterYVal">200</span></label>
+                <input type="range" min="0" max="600" step="10" value="200" autocomplete="off"
+                  oninput="document.getElementById('sec6Master').setAttribute('y', this.value); document.getElementById('sec6MasterYVal').innerText = this.value; document.getElementById('sec6MasterYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="sec6MasterRotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec6Master').setAttribute('rotate', this.value); document.getElementById('sec6MasterRotVal').innerText = this.value + '°'; document.getElementById('sec6MasterRotCode').innerText = this.value;">
               </div>
             </div>
           </div>
 
-          <div class="tab-content" id="sec6FollowerBTab">
+          <div class="tab-content" id="sec6MirrorTab">
             <div class="playground-sliders">
+              <p class="tab-note" style="grid-column: 1 / -1; margin: 0; font-size: 14px; color: #64748b; font-style: italic;">Note: Center X and Y are mathematically bound to the Master Shape.</p>
               <div class="control-group">
-                <label>Offset X <span id="sec6FollowerBDxVal">-400</span></label>
-                <input type="range" min="-500" max="500" step="10" value="-400" autocomplete="off"
-                  oninput="document.getElementById('sec6FollowerB').setAttribute('dx', this.value); document.getElementById('sec6FollowerBDxVal').innerText = this.value; document.getElementById('sec6FollowerBDxCode').innerText = this.value;">
+                <label>Width <span id="sec6MirrorWVal">100</span></label>
+                <input type="range" min="10" max="500" step="10" value="100" autocomplete="off"
+                  oninput="document.getElementById('sec6Mirror').setAttribute('w', this.value); document.getElementById('sec6MirrorWVal').innerText = this.value; document.getElementById('sec6MirrorWCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Offset Y <span id="sec6FollowerBDyVal">-300</span></label>
-                <input type="range" min="-500" max="500" step="10" value="-300" autocomplete="off"
-                  oninput="document.getElementById('sec6FollowerB').setAttribute('dy', this.value); document.getElementById('sec6FollowerBDyVal').innerText = this.value; document.getElementById('sec6FollowerBDyCode').innerText = this.value;">
+                <label>Height <span id="sec6MirrorHVal">100</span></label>
+                <input type="range" min="10" max="500" step="10" value="100" autocomplete="off"
+                  oninput="document.getElementById('sec6Mirror').setAttribute('h', this.value); document.getElementById('sec6MirrorHVal').innerText = this.value; document.getElementById('sec6MirrorHCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="sec6MirrorRotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec6Mirror').setAttribute('rotate', this.value); document.getElementById('sec6MirrorRotVal').innerText = this.value + '°'; document.getElementById('sec6MirrorRotCode').innerText = this.value;">
               </div>
             </div>
           </div>
 
-          <div class="tab-content" id="sec6FollowerCTab">
+          <div class="tab-content" id="sec6ReactorTab">
             <div class="playground-sliders">
+              <p class="tab-note" style="grid-column: 1 / -1; margin: 0; font-size: 14px; color: #64748b; font-style: italic;">Note: Size and Rotation are mathematically bound to the Master Shape.</p>
               <div class="control-group">
-                <label>Offset X <span id="sec6FollowerCDxVal">150</span></label>
-                <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off"
-                  oninput="document.getElementById('sec6FollowerC').setAttribute('dx', this.value); document.getElementById('sec6FollowerCDxVal').innerText = this.value; document.getElementById('sec6FollowerCDxCode').innerText = this.value;">
+                <label>Center X <span id="sec6ReactorXVal">500</span></label>
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                  oninput="document.getElementById('sec6Reactor').setAttribute('x', this.value); document.getElementById('sec6ReactorXVal').innerText = this.value; document.getElementById('sec6ReactorXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Offset Y <span id="sec6FollowerCDyVal">-350</span></label>
-                <input type="range" min="-500" max="500" step="10" value="-350" autocomplete="off"
-                  oninput="document.getElementById('sec6FollowerC').setAttribute('dy', this.value); document.getElementById('sec6FollowerCDyVal').innerText = this.value; document.getElementById('sec6FollowerCDyCode').innerText = this.value;">
+                <label>Center Y <span id="sec6ReactorYVal">450</span></label>
+                <input type="range" min="0" max="600" step="10" value="450" autocomplete="off"
+                  oninput="document.getElementById('sec6Reactor').setAttribute('y', this.value); document.getElementById('sec6ReactorYVal').innerText = this.value; document.getElementById('sec6ReactorYCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -1010,6 +987,7 @@
           </div>
         </div>
       </div>
+      <!--
       <h2>8. Animated Orbits</h2>
       <p>This is where Kilopixel's coordinate system shines. By combining local offsets with dynamic rotation, we can create perfect orbital mechanics mathematically effortlessly!</p>
       <p>The <code>dx</code> attribute pushes the planet away from the Sun (the <code>x</code> and <code>y</code> pivot point), and the <code>rotate</code> attribute spins that entire offset vector around the center.</p>
@@ -1040,34 +1018,34 @@
       <div class="demo-container">
         <pxl-stage ratio="5 / 3" class="demo-stage">
           <pxl-layer x="500" y="300">
-            <!-- Reactive Variables -->
+            &lt;!-- Reactive Variables --&gt;
             <pxl-var id="sec8OrbitOffset" value="150"></pxl-var>
             <pxl-var id="sec8OrbitSpeed" value="90"></pxl-var>
 
-            <!-- Helpers (Grid & Crosshairs) -->
+            &lt;!-- Helpers (Grid & Crosshairs) --&gt;
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
             <pxl-line x1="-500" y1="0" x2="500" y2="0" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="0" y1="-300" x2="0" y2="300" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
             
-            <!-- Crosshair lines tracking the object using toLocal -->
+            &lt;!-- Crosshair lines tracking the object using toLocal --&gt;
             <pxl-line x1="-500" y1="toLocal(ref.sec8Planet, 'ty')" x2="500" y2="toLocal(ref.sec8Planet, 'ty')" stroke="#94a3b8" strokewidth="1"></pxl-line>
             <pxl-line x1="toLocal(ref.sec8Planet, 'tx')" y1="-300" x2="toLocal(ref.sec8Planet, 'tx')" y2="300" stroke="#94a3b8" strokewidth="1"></pxl-line>
 
-            <!-- Grey arrows pointing to current X and Y -->
+            &lt;!-- Grey arrows pointing to current X and Y --&gt;
             <pxl-line x1="0" y1="0" x2="toLocal(ref.sec8Planet, 'tx')" y2="0" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
             <pxl-line x1="0" y1="0" x2="0" y2="toLocal(ref.sec8Planet, 'ty')" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
 
-            <!-- The Sun -->
+            &lt;!-- The Sun --&gt;
             <pxl-circle r="30" fill="#f59e0b"></pxl-circle>
 
-            <!-- The Orbiting Planet -->
+            &lt;!-- The Orbiting Planet --&gt;
             <pxl-circle id="sec8Planet" 
               dx="ref.sec8OrbitOffset.value" 
               rotate="t * ref.sec8OrbitSpeed.value" 
               r="20" fill="#3b82f6">
             </pxl-circle>
 
-            <!-- Red Arrow illustrating the dx offset vector -->
+            &lt;!-- Red Arrow illustrating the dx offset vector --&gt;
             <pxl-line 
               x="0" y="0" 
               x2="ref.sec8OrbitOffset.value" y2="0" 
@@ -1075,8 +1053,8 @@
               rotate="t * ref.sec8OrbitSpeed.value">
             </pxl-line>
 
-            <!-- Circle tracing the orbital path. 
-                 The 'end' calculation ensures the drawn arc dynamically matches the current rotation speed. -->
+            &lt;!-- Circle tracing the orbital path. 
+                 The 'end' calculation ensures the drawn arc dynamically matches the current rotation speed. --&gt;
             <pxl-circle 
               r="ref.sec8OrbitOffset.value" 
               stroke="#f43f5e" 
@@ -1088,7 +1066,7 @@
           </pxl-layer>
         </pxl-stage>
 
-        <!-- Controls -->
+        &lt;!-- Controls --&gt;
         <div class="demo-controls">
           <div class="playground-sliders">
             <div class="control-group">
@@ -1104,6 +1082,7 @@
           </div>
         </div>
       </div>
+      -->
       
 
       </div>

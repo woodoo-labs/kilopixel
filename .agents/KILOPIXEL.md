@@ -1451,3 +1451,9 @@ Kilopixel provides a unified API for CSS and Canvas filters using `pxl.scope` he
   - **Option A (All-Degrees Mode)**: Wrap trig functions in `pxl.scope` (`sin`, `cos`, `tan`, `atan2`, etc.) to take and return degrees, achieving 100% conceptual consistency across the entire framework (`rotate="90"`, `cos(90) === 0`, `atan2` returns degrees).
   - **Option B (All-Radians Mode)**: Standardize all attributes (`rotate`, `start`, `sweep`, etc.) to use radians to match native Canvas 2D/WebGL and JS `Math`, at the expense of human UX and template readability.
   - **Option C (Document Hybrid Boundary)**: Keep JS-standard radians in `pxl.scope` and degrees in attributes, but add explicit documentation and helper conversion functions (`deg(rad)` / `rad(deg)`) to the scope.
+
+### 3. IntersectionObserver for Offscreen Stages
+- **Current Status**: Animated `<pxl-stage>` elements currently execute their `requestAnimationFrame` loop at full 60fps unconditionally, even when scrolled entirely offscreen.
+- **Problem**: Documentation pages with multiple animated examples waste massive amounts of CPU/GPU resources computing layout and rendering to invisible canvases.
+- **Proposed Feature**: Implement an `IntersectionObserver` inside `PxlStage` (alongside the existing `ResizeObserver`). Set a boolean flag `this.isVisible` and skip the inner rendering routines when `false`.
+- **Expected Benefit**: Massive reduction in battery drain and rendering overhead on documentation pages.

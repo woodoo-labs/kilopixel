@@ -81,8 +81,7 @@ pxl.scope.linear = (direction, colorsArray) => {
       }
     }
   }
-  const hash = 'linear-' + x1 + '-' + y1 + '-' + x2 + '-' + y2 + '-' + angle + '-' + (Array.isArray(colorsArray) ? colorsArray.join(',') : colorsArray);
-  return { isGradient: true, type: 'linear', x1, y1, x2, y2, angle, stops: parsedStops, hash };
+  return { isGradient: true, type: 'linear', x1, y1, x2, y2, angle, stops: parsedStops };
 };
 
 pxl.scope.radial = (radiusObj, colorsArray) => {
@@ -104,8 +103,7 @@ pxl.scope.radial = (radiusObj, colorsArray) => {
       }
     }
   }
-  const hash = 'radial-' + cx + '-' + cy + '-' + r + '-' + (Array.isArray(colorsArray) ? colorsArray.join(',') : colorsArray);
-  return { isGradient: true, type: 'radial', cx, cy, r, stops: parsedStops, hash };
+  return { isGradient: true, type: 'radial', cx, cy, r, stops: parsedStops };
 };
 
 pxl.scopeKeys = Object.keys(pxl.scope).join(', ');
@@ -206,11 +204,12 @@ pxl.compileExpression = function (str) {
     // This prevents fatal TypeErrors during initial eager evaluation before elements are connected to the DOM.
     sanitizedStr = sanitizedStr.replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.');
     
+    // Detect 60fps timeline drivers OR self-referencing keyword
+    // IMPORTANT: We must check this BEFORE replacing toLocal, because toLocal injects 'this'.
+    const isAnimated = this.timeDriverRegex.test(sanitizedStr) || /\bthis\b/.test(sanitizedStr);
+
     // 4. MATRIX TRACKER INJECTOR
     sanitizedStr = sanitizedStr.replace(/\btoLocal\(/g, 'pxl.mapCoordinate(this, ');
-
-    // Detect 60fps timeline drivers OR self-referencing keyword
-    const isAnimated = this.timeDriverRegex.test(sanitizedStr) || /\bthis\b/.test(sanitizedStr);
 
     // Extract reactive variable dependencies
     const deps = [];
