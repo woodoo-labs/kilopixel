@@ -837,17 +837,17 @@
             <div class="playground-sliders">
               <div class="control-group">
                 <label>Hue <span id="sec7HueVal">250</span></label>
-                <input type="range" min="0" max="360" value="250" autocomplete="off" data-mark="sec7HueCode"
+                <input type="range" min="0" max="360" step="5" value="250" autocomplete="off" data-mark="sec7HueCode"
                   oninput="document.getElementById('sec7Hue').setAttribute('value', this.value); document.getElementById('sec7HueVal').innerText = this.value; document.getElementById('sec7HueCode').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Spread <span id="sec7SpreadVal">80</span></label>
-                <input type="range" min="0" max="250" value="80" autocomplete="off" data-mark="sec7SpreadCode"
+                <input type="range" min="0" max="250" step="10" value="80" autocomplete="off" data-mark="sec7SpreadCode"
                   oninput="document.getElementById('sec7Spread').setAttribute('value', this.value); document.getElementById('sec7SpreadVal').innerText = this.value; document.getElementById('sec7SpreadCode').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Size <span id="sec7SizeVal">100</span></label>
-                <input type="range" min="10" max="250" value="100" autocomplete="off" data-mark="sec7SizeCode"
+                <input type="range" min="10" max="250" step="10" value="100" autocomplete="off" data-mark="sec7SizeCode"
                   oninput="document.getElementById('sec7Size').setAttribute('value', this.value); document.getElementById('sec7SizeVal').innerText = this.value; document.getElementById('sec7SizeCode').innerText = this.value;">
               </div>
             </div>
