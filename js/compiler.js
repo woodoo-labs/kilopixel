@@ -206,7 +206,7 @@ pxl.compileExpression = function (str) {
     
     // Detect 60fps timeline drivers OR self-referencing keyword
     // IMPORTANT: We must check this BEFORE replacing toLocal, because toLocal injects 'this'.
-    const isAnimated = this.timeDriverRegex.test(sanitizedStr) || /\bthis\b/.test(sanitizedStr);
+    const isAnimated = this.timeDriverRegex.test(sanitizedStr);
 
     // 4. MATRIX TRACKER INJECTOR
     sanitizedStr = sanitizedStr.replace(/\btoLocal\(/g, 'pxl.mapCoordinate(this, ');

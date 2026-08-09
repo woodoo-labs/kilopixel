@@ -36,13 +36,19 @@ pxlDocs.updateToggle = function(btn, lblId, codeId, displayValue) {
 // 2. Automatic Code Mark Highlighting (Pointer Event Delegation System)
 pxlDocs.initHighlighting = function() {
   function updateHighlight(input) {
-    const oninputStr = input.getAttribute('oninput');
-    if (!oninputStr) return;
+    // 1. Check if the developer explicitly provided a data-mark attribute
+    let markId = input.getAttribute('data-mark');
     
-    // Parse inline oninput string for code highlight mark IDs (e.g. 'sec2CircleXCode')
-    const match = oninputStr.match(/getElementById\(['"]([^'"]+Code)['"]\)/);
-    if (match) {
-      const markId = match[1];
+    // 2. If not, fall back to parsing the inline oninput string
+    if (!markId) {
+      const oninputStr = input.getAttribute('oninput');
+      if (oninputStr) {
+        const match = oninputStr.match(/getElementById\(['"]([^'"]+Code)['"]\)/);
+        if (match) markId = match[1];
+      }
+    }
+    
+    if (markId) {
       const markElement = document.getElementById(markId);
       if (markElement) {
         if (input._isPressed) {

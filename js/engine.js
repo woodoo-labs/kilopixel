@@ -94,8 +94,11 @@ pxl.compileAttribute = function(element, name, newValue) {
           this.subscribeToVariable(deps[i], element);
         }
       }
-      // Force initial evaluation for the first frame
-      element.attributeValues[name] = parsed.call(element, 0);
+      
+      // ONLY evaluate if we are connected to the DOM. If we aren't, connectedCallback will handle it.
+      if (element.isConnected) {
+        element.attributeValues[name] = parsed.call(element, 0);
+      }
     }
   } else {
     // --- Static Primitive ---

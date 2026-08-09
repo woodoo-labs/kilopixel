@@ -37,6 +37,32 @@ class PxlNode extends HTMLElement {
     this.parentContainer?.registerChild(this);
     pxl.restoreVariableSubscriptions(this);
 
+    // ZERO-GC FIX: Initial evaluation of reactive attributes now that we have a spatial context
+    const keys = this.reactiveAttributeKeys;
+    if (keys) {
+      const numKeys = keys.length;
+      if (numKeys > 0) {
+        for (let i = 0; i < numKeys; i++) {
+          const key = keys[i];
+          const newVal = this.attributeExpressions[key].call(this, 0);
+          
+          if (this.attributeValues[key] !== newVal) {
+            this.attributeValues[key] = newVal;
+            
+            switch (key) {
+              case 'x': case 'y': case 'dx': case 'dy': case 'rotate':
+              case 'scale': case 'scalex': case 'scaley': case 'skewx': case 'skewy':
+                this._isLocalMatrixDirty = true;
+                break;
+            }
+          }
+        }
+        if (this._isLocalMatrixDirty) {
+          this.parentLayer?.invalidate();
+        }
+      }
+    }
+
     if (this.id) {
       pxl.nodes[this.id] = this.attributeValues;
       this._refKey = `ref.${this.id}`;

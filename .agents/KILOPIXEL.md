@@ -244,14 +244,6 @@ The compiler auto-wraps expressions in `return` unless the string already contai
 - **Simple expressions**: `t > 1000 ? 'red' : 'blue'` (auto-wrapped)
 - **Full code blocks**: `if (t < 1000) { return 'red'; } else { return 'blue'; }`
 
-### Self-Referencing with `this`
-
-Expressions containing `this` are flagged as `isTimeDependent = true` (animated), because the function is called with `fn.call(element, t)`. This gives the expression access to `this.attributeValues`, `this.id`, etc.
-
-```html
-<pxl-circle r="30 + wave(2)*70" fill="`hsl(${this.attributeValues.r * 3}, 100%, 50%)`"></pxl-circle>
-```
-
 ---
 
 ## The Reactivity Engine
