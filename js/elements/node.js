@@ -24,8 +24,8 @@ class PxlNode extends HTMLElement {
     if (oldValue === newValue) return;
     pxl.compileAttribute(this, name, newValue);
     this.isAnimated = this.animatedAttributeKeys.length > 0;
-    if (name === 'x' || name === 'y' || name === 'dx' || name === 'dy' || name === 'rotate' || name === 'scale' || name === 'scalex' || name === 'scaley' || name === 'skewx' || name === 'skewy') {
-      this._isLocalMatrixDirty = true;
+    if (pxl.isSpatialKey(name)) {
+      this.setLocalMatrixDirty();
     }
     if (this._refKey) pxl.broadcast(this._refKey);
     this.parentLayer?.invalidate();
@@ -48,12 +48,8 @@ class PxlNode extends HTMLElement {
           
           if (this.attributeValues[key] !== newVal) {
             this.attributeValues[key] = newVal;
-            
-            switch (key) {
-              case 'x': case 'y': case 'dx': case 'dy': case 'rotate':
-              case 'scale': case 'scalex': case 'scaley': case 'skewx': case 'skewy':
-                this._isLocalMatrixDirty = true;
-                break;
+            if (pxl.isSpatialKey(key)) {
+              this.setLocalMatrixDirty();
             }
           }
         }
@@ -91,6 +87,7 @@ class PxlNode extends HTMLElement {
 
   evaluateAnimations(t) {
     let animatedValuesChanged = false;
+    let matrixDirtied = false;
     const animLen = this.animatedAttributeKeys.length;
     if (animLen > 0) {
       for (let i = 0; i < animLen; i++) {
@@ -100,11 +97,15 @@ class PxlNode extends HTMLElement {
           this.attributeValues[key] = newVal;
           animatedValuesChanged = true;
           
-          if (key === 'x' || key === 'y' || key === 'dx' || key === 'dy' || key === 'rotate' || key === 'scale' || key === 'scalex' || key === 'scaley' || key === 'skewx' || key === 'skewy') {
-            this._isLocalMatrixDirty = true;
+          if (pxl.isSpatialKey(key)) {
+            matrixDirtied = true;
           }
         }
       }
+    }
+    
+    if (matrixDirtied) {
+      this.setLocalMatrixDirty();
     }
     
     if (this._refKey && animatedValuesChanged && pxl._subscriptions[this._refKey]) {
@@ -114,6 +115,33 @@ class PxlNode extends HTMLElement {
     if (this.isAnimated) this.parentLayer?.invalidate();
     
     return animatedValuesChanged;
+  }
+
+  // --- Spatial Reactivity Cascade ---
+  
+  setLocalMatrixDirty() {
+    this._isLocalMatrixDirty = true;
+    this.broadcastGlobalMatrixChange();
+  }
+
+  broadcastGlobalMatrixChange() {
+    if (this.childList) {
+      const len = this.childList.length;
+      const subs = pxl._subscriptions;
+      for (let i = 0; i < len; i++) {
+        const child = this.childList[i];
+        
+        // Broadcast the child if someone is explicitly tracking its global matrix
+        if (child._refKey && subs[child._refKey] && subs[child._refKey].length > 0) {
+          pxl.broadcast(child._refKey);
+        }
+        
+        // Recursively push the matrix dirty flag down the DOM tree (zero-cost if no tracked children)
+        if (typeof child.broadcastGlobalMatrixChange === 'function') {
+          child.broadcastGlobalMatrixChange();
+        }
+      }
+    }
   }
 
   // --- Lazy Matrix Tracking Getters ---

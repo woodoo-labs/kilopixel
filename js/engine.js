@@ -17,6 +17,12 @@ pxl.sortByDOMPosition = function(a, b) {
   return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_PRECEDING) ? 1 : -1;
 };
 
+pxl.isSpatialKey = function(key) {
+  return key === 'x' || key === 'y' || key === 'dx' || key === 'dy' || 
+         key === 'rotate' || key === 'scale' || key === 'scalex' || 
+         key === 'scaley' || key === 'skewx' || key === 'skewy';
+};
+
 // =========================================================================
 // Reactivity Engine
 // =========================================================================
@@ -110,6 +116,7 @@ pxl.compileAttribute = function(element, name, newValue) {
 
 pxl.evaluateAttributesForVariable = function(element, varName) {
   let result = 0; // Bitmask: 1 = isVarStillNeeded, 2 = hasChanges
+  let matrixDirtied = false;
   const len = element.reactiveAttributeKeys.length;
 
   for (let i = 0; i < len; i++) {
@@ -123,12 +130,17 @@ pxl.evaluateAttributesForVariable = function(element, varName) {
         element.attributeValues[key] = newVal;
         result |= 2; // Flag bit 2
 
-        if (key === 'x' || key === 'y' || key === 'dx' || key === 'dy' || key === 'rotate' || key === 'scale' || key === 'scalex' || key === 'scaley' || key === 'skewx' || key === 'skewy') {
-          element._isLocalMatrixDirty = true;
+        if (pxl.isSpatialKey(key)) {
+          matrixDirtied = true;
         }
       }
     }
   }
+  
+  if (matrixDirtied) {
+    element.setLocalMatrixDirty();
+  }
+  
   return result;
 };
 

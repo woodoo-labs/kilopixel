@@ -109,7 +109,7 @@ class Layer extends PxlNode {
     let _anyCompositingAnimated = false;
     for (let i = 0; i < this.animatedAttributeKeys.length; i++) {
       const k = this.animatedAttributeKeys[i];
-      if (k === 'x' || k === 'y' || k === 'dx' || k === 'dy' || k === 'rotate' || k === 'scale' || k === 'scalex' || k === 'scaley' || k === 'skewx' || k === 'skewy') {
+      if (pxl.isSpatialKey(k)) {
         _transformsAnimated = true;
       }
       if (k === 'alpha' || k === 'blend' || k === 'filter') {

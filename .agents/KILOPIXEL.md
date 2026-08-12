@@ -1,6 +1,6 @@
 # Kilopixel Framework — Complete Technical Reference
 
-> **Version**: 0.1.0 | **Total Source**: ~44KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Total Source**: ~48KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes using custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, etc.) and the framework compiles, evaluates, and renders everything at 60fps automatically.
 
@@ -100,27 +100,27 @@ Stage.requestRender() → requestAnimationFrame → Stage.render(t)
 
 The framework compiles from these files (in build order):
 
-| # | File | Lines | Purpose |
-|---|------|-------|---------|
-| 1 | `js/engine.js` | 149 | Global `pxl` namespace, reactivity pub-sub, attribute compilation bridge |
-| 2 | `js/matrix.js` | 116 | Zero-GC 2D affine matrix engine (Float32Array) |
-| 3 | `js/compiler.js` | 258 | Multi-tier expression parser, built-in scope, time drivers |
-| 4 | `js/interaction.js` | 200 | InteractionEngine class, dummy context hit testing, pointer events |
-| 5 | `js/graphics.js` | 63 | Transform pipeline helper, anchor tables, points parser |
-| 6 | `js/monitor.js` | 36 | Performance telemetry (fps, renderAvg, renderMax) |
-| 7 | `js/elements/stage.js` | 148 | Root container, canvas host, rAF loop, resize, pointer routing |
-| 8 | `js/elements/node.js` | 148 | `PxlNode` base class (extends HTMLElement), matrix tracking |
-| 9 | `js/elements/layer.js` | 113 | Compositing layer, own canvas, dirty-flag rendering |
-| 10 | `js/elements/group.js` | 54 | Nestable transform container, draws into parent canvas |
-| 11 | `js/elements/shape.js` | 234 | Base Shape class, style application, gradient creation, arrows |
-| 12 | `js/elements/shapes/circle.js` | 109 | `<pxl-circle>` — arcs, pies, donuts, arrowheads |
-| 13 | `js/elements/shapes/ellipse.js` | 117 | `<pxl-ellipse>` — elliptical arcs with independent radii |
-| 14 | `js/elements/shapes/rect.js` | 63 | `<pxl-rect>` — per-corner radii, 9-position anchor |
-| 15 | `js/elements/shapes/line.js` | 75 | `<pxl-line>` — simple line with arrowheads |
-| 16 | `js/elements/shapes/polyline.js` | 203 | `<pxl-polyline>` — per-coordinate animation, Catmull-Rom smoothing |
-| 17 | `js/elements/shapes/text.js` | 205 | `<pxl-text>` — 3-tier caching, word-wrap, reveal effect |
-| 18 | `js/elements/shapes/grid.js` | 127 | `<pxl-grid>` — infinite viewport-clipped grid |
-| 19 | `js/elements/variable.js` | 20 | `<pxl-var>` — reactive variable element |
+| # | File | Purpose |
+|---|------|---------|
+| 1 | `js/engine.js` | Global `pxl` namespace, reactivity pub-sub, attribute compilation bridge |
+| 2 | `js/matrix.js` | Zero-GC 2D affine matrix engine (Float32Array) |
+| 3 | `js/compiler.js` | Multi-tier expression parser, built-in scope, time drivers |
+| 4 | `js/interaction.js` | InteractionEngine class, dummy context hit testing, pointer events |
+| 5 | `js/graphics.js` | Transform pipeline helper, anchor tables, points parser |
+| 6 | `js/monitor.js` | Performance telemetry (fps, renderAvg, renderMax) |
+| 7 | `js/elements/stage.js` | Root container, canvas host, rAF loop, resize, pointer routing |
+| 8 | `js/elements/node.js` | `PxlNode` base class (extends HTMLElement), matrix tracking |
+| 9 | `js/elements/layer.js` | Compositing layer, own canvas, dirty-flag rendering |
+| 10 | `js/elements/group.js` | Nestable transform container, draws into parent canvas |
+| 11 | `js/elements/shape.js` | Base Shape class, style application, gradient creation, arrows |
+| 12 | `js/elements/shapes/circle.js` | `<pxl-circle>` — arcs, pies, donuts, arrowheads |
+| 13 | `js/elements/shapes/ellipse.js` | `<pxl-ellipse>` — elliptical arcs with independent radii |
+| 14 | `js/elements/shapes/rect.js` | `<pxl-rect>` — per-corner radii, 9-position anchor |
+| 15 | `js/elements/shapes/line.js` | `<pxl-line>` — simple line with arrowheads |
+| 16 | `js/elements/shapes/polyline.js` | `<pxl-polyline>` — per-coordinate animation, Catmull-Rom smoothing |
+| 17 | `js/elements/shapes/text.js` | `<pxl-text>` — 3-tier caching, word-wrap, reveal effect |
+| 18 | `js/elements/shapes/grid.js` | `<pxl-grid>` — infinite viewport-clipped grid |
+| 19 | `js/elements/variable.js` | `<pxl-var>` — reactive variable element |
 
 ---
 
@@ -580,24 +580,35 @@ Each PxlNode tracks matrix state to avoid recomputation:
 
 ### Coordinate Mapping (`toLocal`)
 
-The `toLocal(target, property)` function maps a target element's global position into the caller's local coordinate space:
+The `toLocal(target, property)` function projects a target element's position into the caller's parent coordinate space — exactly the space where the caller's own attributes (`x`, `y`, etc.) are interpreted. This makes the result directly usable as an attribute value.
 
 ```html
-<pxl-circle x="toLocal(ref.player, 'x')" y="toLocal(ref.player, 'y')"></pxl-circle>
+<!-- Track a shape's actual drawn position from a different coordinate space -->
+<pxl-line x1="toLocal(ref.planet, 'tx')" y1="toLocal(ref.planet, 'ty')" x2="0" y2="0"></pxl-line>
 ```
 
 **Algorithm** (`pxl.mapCoordinate`):
 1. Get the caller's parent's global matrix
 2. Get the target's global matrix
 3. Compute: `Delta = Invert(CallerParentGlobal) × TargetGlobal`
-4. Extract the requested property from the delta matrix:
-   - `'x'` → `delta[4]` (translation X of Hinge Origin)
-   - `'y'` → `delta[5]` (translation Y of Hinge Origin)
-   - `'dx'` / `'dy'` → offset vector components `(tdx, tdy)` rotated and scaled in caller space
-   - `'tx'` / `'ty'` → total physical screen coordinate (`x + dx`, `y + dy`) in caller space
-   - `'rotate'` → `atan2(delta[1], delta[0])` in degrees
-   - `'scale'` / `'scalex'` → `sqrt(delta[0]² + delta[1]²)`
-   - `'scaley'` → `sqrt(delta[2]² + delta[3]²)`
+4. Compute the target's offset vector in the delta space: `tdx = delta[0]·dx + delta[2]·dy`, `tdy = delta[1]·dx + delta[3]·dy`
+5. Extract the requested property:
+
+| Property | Formula | Description |
+|----------|---------|-------------|
+| `'x'` | `delta[4] - tdx` | Target's **pivot/center** (without offset) |
+| `'y'` | `delta[5] - tdy` | Same for Y axis |
+| `'dx'` | `tdx` | Target's **offset vector** rotated into caller's space |
+| `'dy'` | `tdy` | Same for Y axis |
+| `'tx'` | `delta[4]` | Target's **total position** (center + offset) |
+| `'ty'` | `delta[5]` | Same for Y axis |
+| `'rotate'` | `atan2(delta[1], delta[0]) × 180/π` | Accumulated rotation in degrees |
+| `'scale'` / `'scalex'` | `√(delta[0]² + delta[1]²)` | Accumulated X scale |
+| `'scaley'` | `√(delta[2]² + delta[3]²)` | Accumulated Y scale |
+
+**Algebraic Identity**: `toLocal(target, 'x') + toLocal(target, 'dx')` equals `toLocal(target, 'tx')`. The `'tx'`/`'ty'` properties are shortcuts for the sum of center + offset. Use `'tx'`/`'ty'` when tracking where a shape actually appears (e.g., connecting lines). Use `'x'`/`'y'` when tracking the pivot point (e.g., drawing orbit rings around a center).
+
+**Reactivity**: `toLocal` expressions update automatically via `ref.*` dependency tracking. When a parent's transform changes, `broadcastGlobalMatrixChange()` recursively notifies all tracked children, triggering re-evaluation of any `toLocal` expression referencing them.
 
 Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile time.
 
@@ -625,7 +636,7 @@ Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile 
 | `mouseY` | number | Pointer Y in logical coordinates. Default: 500 |
 | `isHovered` | boolean | True when pointer is over the stage |
 | `width` | number | Always 1000 (fixed logical width) |
-| `height` | number | Dynamic, based on aspect ratio (`clientHeight / unit`) |
+| `height` | number | Dynamic, based on aspect ratio (`1000 / parsedRatio`) |
 | `fps` | number | Frames rendered in last second |
 | `renderAvg` | string | Average ms per frame (2 decimal places) |
 | `renderMax` | string | Worst frame ms in last second (2 decimal places) |
@@ -668,8 +679,11 @@ Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile 
 - `isDirty` flag controls whether the layer re-renders
 - `isCanvasEmpty` tracks whether the canvas was just cleared (optimization for hidden layers)
 - `invalidate()` sets `isDirty = true` and calls `stage.requestRender()`
-- Hidden optimization: if `hidden` AND `isCanvasEmpty`, skip even the `requestRender()` call
-- On render: evaluates animations, clears canvas, applies transforms, iterates `childList`
+- Hidden optimization: if `hidden` (checked against `attributeExpressions`) AND `isCanvasEmpty`, `invalidate()` returns early without scheduling rAF
+- Layer compositing uses **CSS DOM properties** (`canvas.style.opacity`, `canvas.style.mixBlendMode`, `canvas.style.filter`) — not Canvas context state. The `'source-over'` blend mode maps to CSS `'normal'`.
+- Layer transforms use `pxl.applyTransformState()` (spatial only), NOT `pxl.applyContextState()` (which adds compositing). This enforces the dual architecture.
+- **CSS-Only Fast Path**: When a layer's only animated attributes are compositing properties (`alpha`, `blend`, `filter`) and NOT transforms, the layer skips canvas clearing and child re-rendering entirely — it only updates CSS DOM properties and requests the next frame.
+- **Heartbeat**: animated layers call `this.stage?.requestRender()` at the end of `render()` (deliberately without setting `isDirty`, enabling the CSS-Only Fast Path)
 - Children (groups and shapes) sorted by DOM position when `isOrderDirty`
 - `resize(w, h, dpr)` — called by stage, resizes canvas to physical pixels, scales context by DPR
 
@@ -1035,6 +1049,10 @@ When `reveal` is set (0 to 1):
 - Lines are truncated progressively via `substring()`
 - Fast-path bailout if `charsRemaining <= 0`
 
+### Bounding Box
+
+Computed dynamically in Tier 3 cache using `ctx.measureText()` metrics (ascent/descent). Accounts for multi-line layout, alignment, and baseline.
+
 ### Text Rendering
 
 - Skips empty text
@@ -1253,32 +1271,7 @@ When creating or modifying documentation pages under `docs/`, you MUST first con
 
 Every shape MUST be inside a `<pxl-layer>`. Layers MUST be inside a `<pxl-stage>`.
 
-#### 2. Never Use Self-Closing Tags (`/>`) for Kilopixel Elements
-
-In HTML5, custom Web Components are **not void elements** (unlike `<img>` or `<input>`). Writing `<pxl-circle />` will be parsed by the browser as an unclosed opening tag, causing subsequent sibling elements to be accidentally nested as children.
-
-```html
-<!-- GOOD: Explicit closing tags -->
-<pxl-circle x="500" y="300" r="50"></pxl-circle>
-<pxl-rect w="100" h="50"></pxl-rect>
-
-<!-- BAD: Self-closing syntax causes DOM nesting bugs in HTML5 -->
-<pxl-circle x="500" y="300" r="50" />
-```
-
-#### 3. Use Raw Numbers for Coordinates
-
-```html
-<!-- GOOD: Fast Path, zero evaluation cost -->
-<pxl-circle x="500" y="300" r="50"></pxl-circle>
-
-<!-- BAD: Unnecessary expression evaluation -->
-<pxl-circle x="ref.main.width / 2" y="ref.main.height / 2" r="50"></pxl-circle>
-```
-
-The logical width is always 1000. Use raw numbers.
-
-#### 4. String Quoting Rules
+#### 2. String Quoting Rules
 
 Plain text attributes work without quotes — the compiler's Fast Path handles them:
 
@@ -1297,17 +1290,7 @@ Plain text attributes work without quotes — the compiler's Fast Path handles t
 <pxl-layer filter="dropShadow(0, 20, 20, '#0ff')">
 ```
 
-#### 5. Time is in Seconds
-
-```html
-<!-- wave(2) = 2-second cycle -->
-<pxl-circle r="30 + wave(2) * 70" ...></pxl-circle>
-
-<!-- t * 90 = 90 degrees per second -->
-<pxl-circle rotate="t * 90" ...></pxl-circle>
-```
-
-#### 6. Colors and Gradients Don't Need Backticks
+#### 3. Colors and Gradients Don't Need Backticks
 
 ```html
 <!-- These work because parentheses trigger dynamic evaluation -->
@@ -1316,7 +1299,7 @@ Plain text attributes work without quotes — the compiler's Fast Path handles t
 <pxl-circle fill="radial(1, ['white', 'black'])" ...></pxl-circle>
 ```
 
-#### 7. Unified Responsive Filters (Arrays vs Strings)
+#### 4. Unified Responsive Filters (Arrays vs Strings)
 
 Kilopixel provides a unified API for CSS and Canvas filters using `pxl.scope` helpers. Do NOT use backticks for filters!
 
@@ -1336,7 +1319,7 @@ Kilopixel provides a unified API for CSS and Canvas filters using `pxl.scope` he
 > - **Native Canvas Shadows (`shadowblur="10"`)**: Native shadow attributes also operate in logical units (`u`). Native shadows are often faster for individual shapes, while `dropShadow` is required for tracing a layer's silhouette.
 
 
-#### 8. Reactive Variables Pattern
+#### 5. Reactive Variables Pattern
 
 ```html
 <pxl-var id="score" value="0"></pxl-var>
@@ -1344,21 +1327,14 @@ Kilopixel provides a unified API for CSS and Canvas filters using `pxl.scope` he
 <pxl-circle onclick="ref.score.set('value', ref.score.value + 1)" ...></pxl-circle>
 ```
 
-#### 9. Element Cross-Referencing
-
-```html
-<pxl-circle id="leader" x="ref.main.mouseX" y="ref.main.mouseY" r="20" fill="red"></pxl-circle>
-<pxl-circle x="ref.leader.x" y="ref.leader.y" r="30" stroke="blue" fill="none"></pxl-circle>
-```
-
-#### 10. Orbital Motion
+#### 6. Orbital Motion
 
 ```html
 <!-- dx creates orbit radius, rotate spins around the pivot (x,y) -->
 <pxl-circle x="500" y="300" dx="150" rotate="t * 45" r="15" fill="orange"></pxl-circle>
 ```
 
-#### 11. Interactive Elements
+#### 7. Interactive Elements
 
 ```html
 <!-- Declarative hover/press styling -->
@@ -1368,7 +1344,7 @@ Kilopixel provides a unified API for CSS and Canvas filters using `pxl.scope` he
   onclick="ref.counter.set('value', ref.counter.value + 1)"></pxl-rect>
 ```
 
-#### 12. Performance Monitor Display
+#### 8. Performance Monitor Display
 
 ```html
 <pxl-text x="20" y="30"
@@ -1376,7 +1352,7 @@ Kilopixel provides a unified API for CSS and Canvas filters using `pxl.scope` he
   font="monospace" size="14" fill="#0f0"></pxl-text>
 ```
 
-#### 13. Polyline Points Syntax
+#### 9. Polyline Points Syntax
 
 ```html
 <!-- Semicolons separate points, commas separate X,Y -->
@@ -1389,18 +1365,38 @@ Kilopixel provides a unified API for CSS and Canvas filters using `pxl.scope` he
 <pxl-polyline mode="relative" points="0,0; 50,50; 50,-50; 50,50" stroke="lime"></pxl-polyline>
 ```
 
-#### 14. Common Pitfalls
+#### 10. Cross-Space Coordinate Mapping (`toLocal`)
 
-- **Never use self-closing tags (`/>`)** → custom Web Components are not void elements in HTML5; always use explicit closing tags (`<pxl-circle></pxl-circle>`)
-- **Don't use `onhover`** → use `onenter` instead
-- **Use raw numbers for coordinates** → `x="500"` not `ref.main.width / 2` (width is always 1000)
+```html
+<!-- Track a shape's total position across coordinate spaces -->
+<pxl-line 
+  x1="toLocal(ref.planet, 'tx')" y1="toLocal(ref.planet, 'ty')"
+  x2="0" y2="0" stroke="white"></pxl-line>
+
+<!-- Track only the pivot center (without offset) -->
+<pxl-circle 
+  x="toLocal(ref.planet, 'x')" y="toLocal(ref.planet, 'y')" 
+  r="150" stroke="gray" fill="none"></pxl-circle>
+```
+
+`'tx'`/`'ty'` = total drawn position (center + offset). `'x'`/`'y'` = pivot center only. `'tx' = 'x' + 'dx'` algebraically.
+
+Note: `ref.myShape.tx` gives `x + dx` in the shape's OWN local space. `toLocal(ref.myShape, 'tx')` projects that into the CALLER's parent coordinate space. Use `toLocal` when shapes are in different layers or groups.
+
+#### 11. Common Pitfalls
+
+- **No Self-Closing Tags (`/>`)** → Custom Web Components are not void elements in HTML5. Always use explicit closing tags (`<pxl-circle></pxl-circle>`), never `<pxl-circle />` (causes silent DOM nesting bugs)
+- **No Redundant Defensive Fallbacks** → All `PxlNode` attributes are strictly initialized with default values via `attributeExpressions`. Never use `alpha !== undefined` or `(shadowblur || 0)`. Trust the engine's deterministic initialization.
+- **Use `onenter` not `onhover`** → The hover-entry event attribute is `onenter`, not `onhover`
+- **Use raw numbers for coordinates** → `x="500"` not `ref.main.width / 2` (logical width is always 1000)
+- **Time `t` is in seconds** → `t * 90` = 90°/sec, `wave(2)` = 2-second cycle. Never treat `t` as milliseconds.
 - **Don't forget `fill` or `stroke`** → shapes with neither are invisible
 - **Don't animate inside static CSS filter strings** → use Array syntax `filter="[blur(wave(2)*10)]"` instead
 - **CSS filter pixels vs logical units** → filter helpers (`blur(5)`) auto-scale the values to physical pixels; native shadows (`shadowblur="5"`) also use responsive logical units (`5 * u`)
 - **Don't nest `<pxl-stage>` inside `<pxl-stage>`** → stages are independent roots
 - **Gradient radius** → use `1` to stretch to edge, not `0.5`
 
-#### 14. Scope Available in Expressions
+#### 12. Scope Available in Expressions
 
 **All Math constants**: `PI`, `E`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `SQRT1_2`, `SQRT2`
 
@@ -1420,32 +1416,3 @@ Kilopixel provides a unified API for CSS and Canvas filters using `pxl.scope` he
 
 **Self-reference**: `this.attributeValues.xxx`, `this.id`
 **Variables**: `t` (time in seconds)
-
----
-
-## 28. Roadmap & Future Enhancements (TODO)
-
-### 1. Documentation Roadmap: "Styling & Compositing Rules" (`styling.html`)
-- **Proposed Feature**: Create a dedicated `docs/styling.html` guide under "Getting Started" in the documentation sidebar.
-- **Content Scope**:
-  - **The Universal Styling Attributes**: `fill`, `stroke`, `strokewidth`, `linecap`, `linejoin`, `miterlimit`, `linedash`, `dashoffset`.
-  - **Dual Architecture Compositing**: Explain the CSS DOM vs HTML5 Canvas split. Show how `alpha`, `blend`, and `filter` on a `<pxl-layer>` modifies the `<canvas>` DOM element, while the same attributes on a `<pxl-shape>` modify the `ctx` operations inside the canvas buffer.
-  - **Zero-Inheritance Groups**: Explain why `<pxl-group>` is a pure spatial transform container and does not support compositing attributes.
-  - **Static vs. Dynamic Syntax**: Guidance on plain strings (`filter="blur(5)"`) vs. JavaScript Arrays for multiple or animated filters (`filter="[blur(wave(2)*10)]"`).
-  - **Zero-Magic Canvas Styling**: Explaining why Canvas 2D shapes are styled via declarative HTML attributes rather than external CSS stylesheet selectors.
-
-### 2. Evaluate Degrees vs. Radians Consistency Across Attributes & Expressions
-- **Current Status**: There is currently a mixed angular unit boundary in the framework:
-  - **All Kilopixel attributes use Degrees (`0° – 360°`)**: Angular properties such as `rotate`, `start`, `end`, `sweep`, `arrowstart`, `arrowend`, `skewx`, and `skewy` expect degrees for human UX and declarative readability.
-  - **All Expression Math Functions use Radians (`0 – 2π`)**: Injected trig functions (`sin`, `cos`, `tan`, `atan2`, `asin`, `acos`) copy native JavaScript `Math` behavior directly, expecting and returning radians.
-- **Problem**: Passing degree angles into `cos(45)` evaluates 45 radians (~2578°), and passing `atan2(...)` into `rotate="..."` rotates by radians (e.g. `1.57°`) instead of degrees (`90°`), requiring manual `* PI / 180` and `* 180 / PI` conversions.
-- **Next Steps / Proposed Options**:
-  - **Option A (All-Degrees Mode)**: Wrap trig functions in `pxl.scope` (`sin`, `cos`, `tan`, `atan2`, etc.) to take and return degrees, achieving 100% conceptual consistency across the entire framework (`rotate="90"`, `cos(90) === 0`, `atan2` returns degrees).
-  - **Option B (All-Radians Mode)**: Standardize all attributes (`rotate`, `start`, `sweep`, etc.) to use radians to match native Canvas 2D/WebGL and JS `Math`, at the expense of human UX and template readability.
-  - **Option C (Document Hybrid Boundary)**: Keep JS-standard radians in `pxl.scope` and degrees in attributes, but add explicit documentation and helper conversion functions (`deg(rad)` / `rad(deg)`) to the scope.
-
-### 3. IntersectionObserver for Offscreen Stages
-- **Current Status**: Animated `<pxl-stage>` elements currently execute their `requestAnimationFrame` loop at full 60fps unconditionally, even when scrolled entirely offscreen.
-- **Problem**: Documentation pages with multiple animated examples waste massive amounts of CPU/GPU resources computing layout and rendering to invisible canvases.
-- **Proposed Feature**: Implement an `IntersectionObserver` inside `PxlStage` (alongside the existing `ResizeObserver`). Set a boolean flag `this.isVisible` and skip the inner rendering routines when `false`.
-- **Expected Benefit**: Massive reduction in battery drain and rendering overhead on documentation pages.

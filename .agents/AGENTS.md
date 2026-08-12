@@ -19,15 +19,10 @@
 - **Framework Overview**: This project is a custom "Declarative Canvas Framework" (`pixel`) that allows building HTML5 Canvas graphics using custom HTML elements like `<pxl-stage>`, `<pxl-layer>`, `<pxl-group>`, and shape elements (`<pxl-circle>`, `<pxl-rect>`, `<pxl-grid>`, etc.).
 - **Deep Documentation**: For complete, in-depth technical documentation about the engine's architecture, scope, syntax, and capabilities, you MUST consult `.agents/KILOPIXEL.md`.
 
-## Critical Rules & Common Pitfalls
-- **No Redundant Defensive Fallbacks**: All `PxlNode` attributes are strictly initialized with default values (numbers, strings, or `null`) via `attributeExpressions`. When reading `attributeValues`, do NOT use defensive checks like `alpha !== undefined` or fallbacks like `(shadowblur || 0)`. Trust the engine's deterministic initialization to avoid code bloat.
-- **Coordinate System**: `x` and `y` define the **Center** of the element. All transforms (rotation, scaling, skewing) occur around this point. When `dx`/`dy` offsets are applied, the shape is visually displaced but `x`/`y` remains the transform origin. All spatial values are multiplied by the responsive unit `u` at draw time. Shapes are drawn relative to `(0, 0)` within the transformed context.
-- **Logical Width = 1000**: The stage's logical width is always 1000. Use raw numbers for coordinates (`x="500"` for center) to hit the compiler's Fast Path. Never use `ref.main.width / 2` when `500` does the same with zero cost.
-- **Time `t` is in Seconds**: `t * 90` = 90 degrees per second. `wave(2)` = a 2-second cycle. Never treat `t` as milliseconds.
-- **Strings in Expressions**: Plain text attributes work without quotes (`text="Hello World"`). Quotes are only needed **inside JavaScript expressions**: `fill="t > 5 ? 'red' : 'blue'"`.
-- **Cross-Referencing (`ref.*`)**: Use `ref.*` to reference any element by its `id`. Example: `ref.main.mouseX`, `ref.speed.value`, `ref.btn.isHovered`.
-- **Use `onenter` not `onhover`**: The hover-entry event is `onenter`.
-- **No Self-Closing Tags (`/>`)**: Custom Web Components are not void elements in HTML5. Always use explicit closing tags (`<pxl-circle></pxl-circle>`), never `<pxl-circle />` (which causes silent DOM nesting bugs).
+## Documentation Structure
+- **`.agents/AGENTS.md`** — Operational rules: approvals, build process, ignored files, terminal syntax.
+- **`.agents/KILOPIXEL.md`** — Complete framework reference: architecture, API, element attributes, expression compiler, and code generation guide.
+- **`.agents/TODO.md`** — Roadmap and open design questions.
 
 # Kilopixel Documentation Style Guide
 When creating or modifying interactive documentation examples, you MUST first read the full style guide located at `docs/DOCS_STANDARDS.md`. You must strictly follow all color semantics, stacking orders, and UI architecture rules defined in that file.
