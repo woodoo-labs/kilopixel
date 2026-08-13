@@ -877,11 +877,11 @@
       </div>
       
       <h2>8. Cross-Space Projection <code>toLocal()</code></h2>
-      <p>The true power of <code>toLocal()</code> is cross-space affine projection. It allows you to perfectly track the true screen position of an element nested deep inside rotating or scaled layers, without writing any trigonometry.</p>
+      <p>The true power of <code>toLocal()</code> is cross-space affine projection. It allows you to perfectly track an element nested deep inside rotating or scaled layers, without writing any trigonometry.</p>
       <ul>
         <li><strong>Layer Independence:</strong> You can place shapes inside completely different, independently transforming layers.</li>
-        <li><strong>The Link:</strong> By using <code>toLocal(ref.target, 'tx')</code>, Kilopixel automatically projects the target's true global position into the root coordinate space.</li>
-        <li><strong>The Magic:</strong> Kilopixel's spatial reactivity engine automatically cascades matrix changes down the tree. If a layer rotates, it automatically alerts any element tracking its children to update!</li>
+        <li><strong>The Link:</strong> By using <code>toLocal(ref.target, 'x')</code>, Kilopixel calculates the target's global position and automatically translates it into your <em>current</em> coordinate space. It returns exactly the <code>x</code> and <code>y</code> values your shape needs to align perfectly.</li>
+        <li><strong>The Magic:</strong> Kilopixel's spatial reactivity engine automatically tracks matrix changes. If a layer rotates or moves, it instantly alerts any element tracking its children to update!</li>
       </ul>
       
       <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
@@ -1057,6 +1057,235 @@
           </div>
         </div>
       </div>
+      <h2>9. Native Animations (<code>t</code>, Math &amp; Time Drivers)</h2>
+      <p>Kilopixel has a native animation loop that evaluates all variable expressions at 60 FPS. By using the built-in <code>t</code> variable (time in seconds), injected math functions (like <code>sin</code> and <code>cos</code>), and normalized <strong>time drivers</strong> (like <code>loop(d)</code>), you can create incredibly complex, smooth animations declaratively.</p>
+      
+      <p>In this example, we use <code>sin(t)</code> and <code>cos(t)</code> with independent X and Y frequencies to draw a Lissajous curve. We also use the native <code>hsl()</code> scope function combined with the <code>loop(d)</code> time driver to elegantly cycle the orb's color across the color wheel exactly once every 10 seconds!</p>
+      
+      <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer x="<mark id="sec9LayerXCode">500</mark>" y="<mark id="sec9LayerYCode">300</mark>" rotate="<mark id="sec9LayerRotCode">0</mark>"&gt;
+    &lt;!-- Pure Math: Lissajous curve using sine waves --&gt;
+    &lt;pxl-var id="hue" value="loop(10) * 360"&gt;&lt;/pxl-var&gt;
+    &lt;!-- Note: shadowcolor safely self-references its own stroke --&gt;
+    &lt;pxl-circle id="oscillator"
+      x="sin(t * <mark id="sec9FreqXCode">2</mark>) * 300" 
+      y="cos(t * <mark id="sec9FreqYCode">3</mark>) * 150" 
+      r="<mark id="sec9RadiusCode">40</mark>" 
+      fill="hsla(ref.hue.value, 100, 60, 0.4)" 
+      stroke="hsl(ref.hue.value, 100, 60)" 
+      strokewidth="4"
+      shadowcolor="ref.oscillator.stroke" 
+      shadowblur="20"&gt;
+    &lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+      <div class="demo-container">
+        <pxl-stage class="demo-stage" ratio="5 / 3">
+          <!-- Background Grid -->
+          <pxl-layer>
+            <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+          </pxl-layer>
+
+          <!-- Visualization Layer -->
+          <pxl-layer id="sec9Layer" x="500" y="300" rotate="0">
+            <!-- Variables -->
+            <pxl-var id="sec9FreqX" value="2"></pxl-var>
+            <pxl-var id="sec9FreqY" value="3"></pxl-var>
+            <pxl-var id="sec9Radius" value="40"></pxl-var>
+            
+            <pxl-var id="sec9OrbHue" value="loop(10) * 360"></pxl-var>
+            <pxl-var id="sec9OrbX" value="sin(t * ref.sec9FreqX.value) * 300"></pxl-var>
+            <pxl-var id="sec9OrbY" value="cos(t * ref.sec9FreqY.value) * 150"></pxl-var>
+            <!-- Axes Helpers -->
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+
+            <!-- Line connecting anchor to orb -->
+            <pxl-line x1="0" y1="0" x2="ref.sec9OrbX.value" y2="ref.sec9OrbY.value" stroke="ref.sec9FlyingOrb.stroke" strokewidth="4"></pxl-line>
+
+            <!-- Central Anchor Shape (Orange Scheme) -->
+            <pxl-circle r="5" fill="#f97316"></pxl-circle>
+            <pxl-text x="25" y="-20" text="'Anchor'" size="27" fill="#fb923c"></pxl-text>
+
+            <!-- Flying Orb -->
+            <pxl-circle id="sec9FlyingOrb" x="ref.sec9OrbX.value" y="ref.sec9OrbY.value" r="ref.sec9Radius.value" fill="hsla(ref.sec9OrbHue.value, 100, 60, 0.4)" stroke="hsl(ref.sec9OrbHue.value, 100, 60)" strokewidth="4" shadowcolor="ref.sec9FlyingOrb.stroke" shadowblur="20"></pxl-circle>
+            <pxl-text x="ref.sec9OrbX.value + 50" y="ref.sec9OrbY.value - 20" text="'Oscillator'" size="27" fill="ref.sec9FlyingOrb.stroke"></pxl-text>
+          </pxl-layer>
+        </pxl-stage>
+
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec9LayerTab')">Layer</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec9ControlsTab')">Oscillator</button>
+            </div>
+          </div>
+          
+          <div class="tab-content" id="sec9LayerTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="sec9LayerXVal">500</span></label>
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                  oninput="document.getElementById('sec9Layer').setAttribute('x', this.value); document.getElementById('sec9LayerXVal').innerText = this.value; document.getElementById('sec9LayerXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec9LayerYVal">300</span></label>
+                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                  oninput="document.getElementById('sec9Layer').setAttribute('y', this.value); document.getElementById('sec9LayerYVal').innerText = this.value; document.getElementById('sec9LayerYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="sec9LayerRotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec9Layer').setAttribute('rotate', this.value); document.getElementById('sec9LayerRotVal').innerText = this.value + '°'; document.getElementById('sec9LayerRotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content active" id="sec9ControlsTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Frequency X <span id="sec9FreqXVal">2</span></label>
+                <input type="range" min="1" max="10" step="1" value="2" autocomplete="off"
+                  oninput="document.getElementById('sec9FreqX').setAttribute('value', this.value); document.getElementById('sec9FreqXVal').innerText = this.value; document.getElementById('sec9FreqXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Frequency Y <span id="sec9FreqYVal">3</span></label>
+                <input type="range" min="1" max="10" step="1" value="3" autocomplete="off"
+                  oninput="document.getElementById('sec9FreqY').setAttribute('value', this.value); document.getElementById('sec9FreqYVal').innerText = this.value; document.getElementById('sec9FreqYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Radius <span id="sec9RadiusVal">40</span></label>
+                <input type="range" min="10" max="150" step="5" value="40" autocomplete="off"
+                  oninput="document.getElementById('sec9Radius').setAttribute('value', this.value); document.getElementById('sec9RadiusVal').innerText = this.value; document.getElementById('sec9RadiusCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <h2>10. Hierarchical Animations (Groups &amp; Orbits)</h2>
+      <p>Kilopixel's geometric transform engine separates the <strong>Center</strong> (<code>x</code>, <code>y</code>) from the <strong>Offset</strong> (<code>dx</code>, <code>dy</code>). By applying both a <code>rotate</code> and a <code>dx</code> offset to a <code>&lt;pxl-group&gt;</code>, the group's entire internal coordinate space is shifted into orbit.</p>
+      
+      <p>In this solar system example, the Planet System group orbits the Sun. Inside that group, the local origin <code>(0,0)</code> physically sits exactly on the Planet! The Moon System simply uses another <code>rotate</code> and <code>dx</code> combination to effortlessly orbit its parent.</p>
+      
+      <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer x="<mark id='sec10LayerXCode'>500</mark>" y="<mark id='sec10LayerYCode'>300</mark>" rotate="<mark id='sec10LayerRotCode'>0</mark>"&gt;
+    &lt;!-- Sun --&gt;
+    &lt;pxl-circle r="50" fill="radial(1, ['#fde047', '#f59e0b'])"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Planet Orbit Path --&gt;
+    &lt;pxl-circle r="<mark id='sec10PlanetRadiusCode'>200</mark>" fill="none" stroke="#334155" linedash="[4,4]"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Planet System (Local space orbiting the Sun) --&gt;
+    &lt;pxl-group rotate="t * <mark id='sec10PlanetSpeedCode'>45</mark>" dx="<mark id='sec10PlanetRadiusCode2'>200</mark>"&gt;
+      &lt;!-- Planet (Drawn exactly at 0,0 of its local space) --&gt;
+      &lt;pxl-circle r="25" fill="#3b82f6"&gt;&lt;/pxl-circle&gt;
+
+      &lt;!-- Moon Orbit Path --&gt;
+      &lt;pxl-circle r="<mark id='sec10MoonRadiusCode'>60</mark>" fill="none" stroke="#475569" linedash="[2,2]"&gt;&lt;/pxl-circle&gt;
+
+      &lt;!-- Moon System (Local space orbiting the Planet) --&gt;
+      &lt;pxl-group rotate="t * <mark id='sec10MoonSpeedCode'>180</mark>" dx="<mark id='sec10MoonRadiusCode2'>60</mark>"&gt;
+        &lt;pxl-circle r="10" fill="#cbd5e1"&gt;&lt;/pxl-circle&gt;
+      &lt;/pxl-group&gt;
+    &lt;/pxl-group&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+      <div class="demo-container">
+        <pxl-stage ratio="5 / 3" class="demo-stage">
+          <pxl-layer id="sec10Layer" x="500" y="300" rotate="0">
+            <!-- Variables -->
+            <pxl-var id="sec10PlanetSpeed" value="45"></pxl-var>
+            <pxl-var id="sec10PlanetRadius" value="200"></pxl-var>
+            <pxl-var id="sec10MoonSpeed" value="180"></pxl-var>
+            <pxl-var id="sec10MoonRadius" value="60"></pxl-var>
+
+            <!-- Axes Helpers -->
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+
+            <!-- Sun -->
+            <pxl-circle r="50" fill="radial(1, ['#fde047', '#f59e0b'])" shadowcolor="#fde047" shadowblur="40"></pxl-circle>
+
+            <!-- Planet Orbit Path -->
+            <pxl-circle r="ref.sec10PlanetRadius.value" fill="none" stroke="#334155" linedash="[4,4]" strokewidth="2"></pxl-circle>
+
+            <!-- Planet System -->
+            <pxl-group rotate="t * ref.sec10PlanetSpeed.value" dx="ref.sec10PlanetRadius.value">
+              <!-- Planet -->
+              <pxl-circle r="25" fill="#3b82f6" shadowcolor="#3b82f6" shadowblur="20"></pxl-circle>
+
+              <!-- Moon Orbit Path -->
+              <pxl-circle r="ref.sec10MoonRadius.value" fill="none" stroke="#475569" linedash="[2,2]" strokewidth="2"></pxl-circle>
+
+              <!-- Moon System -->
+              <pxl-group rotate="t * ref.sec10MoonSpeed.value" dx="ref.sec10MoonRadius.value">
+                <pxl-circle r="10" fill="#cbd5e1" shadowcolor="#f8fafc" shadowblur="10"></pxl-circle>
+              </pxl-group>
+            </pxl-group>
+          </pxl-layer>
+        </pxl-stage>
+
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec10LayerTab')">Layer</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec10ControlsTab')">Orbital Mechanics</button>
+            </div>
+          </div>
+
+          <div class="tab-content" id="sec10LayerTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="sec10LayerXVal">500</span></label>
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                  oninput="document.getElementById('sec10Layer').setAttribute('x', this.value); document.getElementById('sec10LayerXVal').innerText = this.value; document.getElementById('sec10LayerXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec10LayerYVal">300</span></label>
+                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                  oninput="document.getElementById('sec10Layer').setAttribute('y', this.value); document.getElementById('sec10LayerYVal').innerText = this.value; document.getElementById('sec10LayerYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="sec10LayerRotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec10Layer').setAttribute('rotate', this.value); document.getElementById('sec10LayerRotVal').innerText = this.value + '°'; document.getElementById('sec10LayerRotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+          
+          <div class="tab-content active" id="sec10ControlsTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Planet Speed <span id="sec10PlanetSpeedVal">45</span></label>
+                <input type="range" min="-180" max="180" step="1" value="45" autocomplete="off"
+                  oninput="document.getElementById('sec10PlanetSpeed').setAttribute('value', this.value); document.getElementById('sec10PlanetSpeedVal').innerText = this.value; document.getElementById('sec10PlanetSpeedCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Planet Radius <span id="sec10PlanetRadiusVal">200</span></label>
+                <input type="range" min="100" max="400" step="10" value="200" autocomplete="off"
+                  oninput="document.getElementById('sec10PlanetRadius').setAttribute('value', this.value); document.getElementById('sec10PlanetRadiusVal').innerText = this.value; document.getElementById('sec10PlanetRadiusCode').innerText = this.value; document.getElementById('sec10PlanetRadiusCode2').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Moon Speed <span id="sec10MoonSpeedVal">180</span></label>
+                <input type="range" min="-720" max="720" step="1" value="180" autocomplete="off"
+                  oninput="document.getElementById('sec10MoonSpeed').setAttribute('value', this.value); document.getElementById('sec10MoonSpeedVal').innerText = this.value; document.getElementById('sec10MoonSpeedCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Moon Radius <span id="sec10MoonRadiusVal">60</span></label>
+                <input type="range" min="20" max="150" step="5" value="60" autocomplete="off"
+                  oninput="document.getElementById('sec10MoonRadius').setAttribute('value', this.value); document.getElementById('sec10MoonRadiusVal').innerText = this.value; document.getElementById('sec10MoonRadiusCode').innerText = this.value; document.getElementById('sec10MoonRadiusCode2').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!--
       <h2>11. Coordinate Mapping <code>toLocal()</code></h2>
       <p>When shapes orbit or rotate inside nested coordinate spaces, drawing connecting lines or tracking positions requires translating between coordinate systems:</p>
       <ul>
@@ -1083,12 +1312,12 @@
 
       <div class="demo-container">
         <pxl-stage ratio="5 / 3" class="demo-stage">
-          <!-- 1. Rotating Background Grid -->
+          <!~~ 1. Rotating Background Grid ~~>
           <pxl-layer x="ref.sec11Layer.x" y="ref.sec11Layer.y" rotate="ref.sec11Layer.rotate">
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
           </pxl-layer>
 
-          <!-- 2. Fixed Stage-Level Layer Helpers -->
+          <!~~ 2. Fixed Stage-Level Layer Helpers ~~>
           <pxl-layer>
             <pxl-line x1="0" y1="ref.sec11Layer.y" x2="ref.sec11Layer.x" y2="ref.sec11Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec11Layer.x / 2" y="ref.sec11Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec11Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
@@ -1097,13 +1326,13 @@
           </pxl-layer>
 
           <pxl-layer id="sec11Layer" x="500" y="300" rotate="0">
-            <!-- 3. Layer Axes & Center -->
+            <!~~ 3. Layer Axes & Center ~~>
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
             <pxl-text x="15" y="15" baseline="top" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
-            <!-- 4. Shape Helpers -->
-            <!-- Rotating Crosshairs for Center A and Center B (Visible only when rotated) -->
+            <!~~ 4. Shape Helpers ~~>
+            <!~~ Rotating Crosshairs for Center A and Center B (Visible only when rotated) ~~>
             <pxl-group x="ref.sec11PointA.x" y="ref.sec11PointA.y" rotate="ref.sec11PointA.rotate" hidden="ref.sec11PointA.rotate == 0">
               <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]"></pxl-line>
@@ -1113,27 +1342,27 @@
               <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             </pxl-group>
 
-            <!-- Orbit Ring Guides -->
+            <!~~ Orbit Ring Guides ~~>
             <pxl-circle x="ref.sec11PointA.x" y="ref.sec11PointA.y" r="sqrt(ref.sec11PointA.dx**2 + ref.sec11PointA.dy**2)" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]" fill="none"></pxl-circle>
             <pxl-circle x="ref.sec11PointB.x" y="ref.sec11PointB.y" r="sqrt(ref.sec11PointB.dx**2 + ref.sec11PointB.dy**2)" stroke="#fdba74" strokewidth="2" linedash="[5, 5]" fill="none"></pxl-circle>
 
-            <!-- Radius vectors connecting Centers to Orbiting positions -->
+            <!~~ Radius vectors connecting Centers to Orbiting positions ~~>
             <pxl-line x1="ref.sec11PointA.x" y1="ref.sec11PointA.y" x2="toLocal(ref.sec11PointA, 'tx')" y2="toLocal(ref.sec11PointA, 'ty')" stroke="#2563eb" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="ref.sec11PointB.x" y1="ref.sec11PointB.y" x2="toLocal(ref.sec11PointB, 'tx')" y2="toLocal(ref.sec11PointB, 'ty')" stroke="#ea580c" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
-            <!-- Connecting Line (Drawn behind the points) -->
+            <!~~ Connecting Line (Drawn behind the points) ~~>
             <pxl-line 
               x1="toLocal(ref.sec11PointA, 'tx')" y1="toLocal(ref.sec11PointA, 'ty')" 
               x2="toLocal(ref.sec11PointB, 'tx')" y2="toLocal(ref.sec11PointB, 'ty')" 
               stroke="#cbd5e1" strokewidth="4">
             </pxl-line>
 
-            <!-- 5. Orbiting Shapes -->
+            <!~~ 5. Orbiting Shapes ~~>
             <pxl-circle id="sec11PointA" x="-400" y="0" dx="0" dy="-200" rotate="0" r="5" fill="#1d4ed8"></pxl-circle>
             <pxl-circle id="sec11PointB" x="150" y="0" dx="0" dy="200" rotate="0" r="5" fill="#c2410c"></pxl-circle>
 
-            <!-- 6. Shape Center & Orbiting Offset Markers (Top) -->
-            <!-- Point A Center Dot & Label -->
+            <!~~ 6. Shape Center & Orbiting Offset Markers (Top) ~~>
+            <!~~ Point A Center Dot & Label ~~>
             <pxl-circle x="ref.sec11PointA.x" y="ref.sec11PointA.y" r="5" fill="#60a5fa"></pxl-circle>
             <pxl-text 
               x="ref.sec11PointA.x" 
@@ -1145,7 +1374,7 @@
               text="'Center A'" 
               size="27" fill="#60a5fa" font="monospace">
             </pxl-text>
-            <!-- Point B Center Dot & Label -->
+            <!~~ Point B Center Dot & Label ~~>
             <pxl-circle x="ref.sec11PointB.x" y="ref.sec11PointB.y" r="5" fill="#fb923c"></pxl-circle>
             <pxl-text 
               x="ref.sec11PointB.x" 
@@ -1158,16 +1387,16 @@
               size="27" fill="#fb923c" font="monospace">
             </pxl-text>
 
-            <!-- Point A Orbiting Offset Dot & Label -->
+            <!~~ Point A Orbiting Offset Dot & Label ~~>
             <pxl-circle x="toLocal(ref.sec11PointA, 'tx')" y="toLocal(ref.sec11PointA, 'ty')" r="5" fill="#1d4ed8"></pxl-circle>
             <pxl-text x="toLocal(ref.sec11PointA, 'tx')" y="toLocal(ref.sec11PointA, 'ty')" dx="15" dy="-15" rotate="ref.sec11PointA.rotate" baseline="bottom" text="'Offset A'" size="27" fill="#1d4ed8" font="monospace"></pxl-text>
-            <!-- Point B Orbiting Offset Dot & Label -->
+            <!~~ Point B Orbiting Offset Dot & Label ~~>
             <pxl-circle x="toLocal(ref.sec11PointB, 'tx')" y="toLocal(ref.sec11PointB, 'ty')" r="5" fill="#c2410c"></pxl-circle>
             <pxl-text x="toLocal(ref.sec11PointB, 'tx')" y="toLocal(ref.sec11PointB, 'ty')" dx="15" dy="-15" rotate="ref.sec11PointB.rotate" baseline="bottom" text="'Offset B'" size="27" fill="#c2410c" font="monospace"></pxl-text>
           </pxl-layer>
         </pxl-stage>
 
-        <!-- Tabbed Controls -->
+        <!~~ Tabbed Controls ~~>
         <div class="demo-controls">
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
@@ -1259,7 +1488,7 @@
           </div>
         </div>
       </div>
-      <!--
+      <!~~
       <h2>12. Animated Orbits</h2>
       <p>This is where Kilopixel's coordinate system shines. By combining local offsets with dynamic rotation, we can create perfect orbital mechanics mathematically effortlessly!</p>
       <p>The <code>dx</code> attribute pushes the planet away from the Sun (the <code>x</code> and <code>y</code> pivot point), and the <code>rotate</code> attribute spins that entire offset vector around the center.</p>
@@ -1354,13 +1583,13 @@
           </div>
         </div>
       </div>
-      -->
-      
+      ~~>
 
       </div>
     </main>
   </div>
   
+      -->
   <!-- Prism Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
