@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kilopixel - Crescent Math Experiment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../docs/css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Kilopixel Engine -->
+  <script src="../docs/js/pxl.min.js"></script>
+  
+  <!-- Import interactive framework -->
+  <script src="../docs/js/docs.js"></script>
+  
+  <style>
+    body { background: #f8fafc; margin: 0; padding: 40px 20px; }
+    .container { max-width: 1100px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+  </style>
+</head>
+<body>
+  <div class="docs-content container">
+      <h2>Mathematical Crescent Moon</h2>
+      <p>By splitting the visualization into two layers, we can use <strong>HTML5 Canvas Compositing</strong> to perfectly erase the inner circle, while keeping a faint wireframe outline visible in the background layer to prove the geometry.</p>
+      
+      <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;!-- Define primary radius and desired thickness (a) --&gt;
+  &lt;pxl-var id="moonR1" value="<mark id="moonR1Code">200</mark>"&gt;&lt;/pxl-var&gt;
+  &lt;pxl-var id="moonA" value="<mark id="moonACode">100</mark>"&gt;&lt;/pxl-var&gt;
+  &lt;pxl-var id="moonBlend" value="<mark id="moonBlendCode">'destination-out'</mark>"&gt;&lt;/pxl-var&gt;
+
+  &lt;!-- Compute exact center offset (dx) and radius (r2) --&gt;
+  &lt;pxl-var id="moonDx" value="(ref.moonA.value**2 - ref.moonR1.value**2) / (2 * ref.moonA.value)"&gt;&lt;/pxl-var&gt;
+  &lt;pxl-var id="moonR2" value="ref.moonA.value - ref.moonDx.value"&gt;&lt;/pxl-var&gt;
+
+  &lt;!-- Layer 1: Faint wireframe background to see what's happening --&gt;
+  &lt;pxl-layer x="500" y="300"&gt;
+    &lt;pxl-circle r="ref.moonR1.value" stroke="#cbd5e1" fill="none"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="ref.moonDx.value" r="ref.moonR2.value" stroke="#cbd5e1" fill="none"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+
+  &lt;!-- Layer 2: The Boolean composite with a glowing drop shadow! --&gt;
+  &lt;pxl-layer x="500" y="300" filter="dropShadow(0, 0, 15, '#f59e0b')"&gt;
+    &lt;!-- Draw Solid Moon --&gt;
+    &lt;pxl-circle r="ref.moonR1.value" fill="#fcd34d"&gt;&lt;/pxl-circle&gt;
+    
+    &lt;!-- ERASER: Overlapping pixels are erased due to blend mode --&gt;
+    &lt;pxl-circle x="ref.moonDx.value" r="ref.moonR2.value" fill="#000" blend="ref.moonBlend.value"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+      <div class="demo-container">
+        <!-- Light grey background on the stage itself -->
+        <pxl-stage ratio="5 / 3" class="demo-stage" style="background-color: #f8fafc;">
+          <!-- Variables -->
+          <pxl-var id="moonR1" value="200"></pxl-var>
+          <pxl-var id="moonA" value="100"></pxl-var>
+          <pxl-var id="moonBlend" value="'destination-out'"></pxl-var>
+          
+          <pxl-var id="moonDx" value="(ref.moonA.value**2 - ref.moonR1.value**2) / (2 * ref.moonA.value)"></pxl-var>
+          <pxl-var id="moonR2" value="ref.moonA.value - ref.moonDx.value"></pxl-var>
+
+          <!-- Background Stats Layer -->
+          <pxl-layer>
+            <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
+            <pxl-text x="20" y="30" text="'Live Math Computation'" font="monospace" size="14" fill="#94a3b8"></pxl-text>
+            <pxl-text x="20" y="55" text="`R1 = ${ref.moonR1.value}`" font="monospace" size="14" fill="#f59e0b"></pxl-text>
+            <pxl-text x="20" y="80" text="`dx = ${Math.round(ref.moonDx.value * 10) / 10}`" font="monospace" size="14" fill="#0ea5e9"></pxl-text>
+            <pxl-text x="20" y="105" text="`R2 = ${Math.round(ref.moonR2.value * 10) / 10}`" font="monospace" size="14" fill="#0ea5e9"></pxl-text>
+          </pxl-layer>
+
+          <!-- Wireframe Layer (Shows the underlying geometry) -->
+          <pxl-layer x="500" y="300">
+            <!-- Axes -->
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#e2e8f0" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#e2e8f0" strokewidth="2" linedash="[5, 5]"></pxl-line>
+
+            <!-- Outer Circle Wireframe -->
+            <pxl-circle r="ref.moonR1.value" stroke="#94a3b8" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-circle>
+
+            <!-- Inner Circle Wireframe -->
+            <pxl-circle x="ref.moonDx.value" r="ref.moonR2.value" stroke="#94a3b8" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-circle>
+            
+            <!-- Exact intersection points (Visual Proof) -->
+            <pxl-circle y="-ref.moonR1.value" r="6" fill="#ef4444"></pxl-circle>
+            <pxl-circle y="ref.moonR1.value" r="6" fill="#ef4444"></pxl-circle>
+          </pxl-layer>
+
+          <!-- Final Composite Layer (Where the magic happens) -->
+          <!-- We apply a dropShadow to the entire layer to prove the final shape is a single unified crescent -->
+          <pxl-layer x="500" y="300" filter="dropShadow(0, 0, 15, '#f59e0b')">
+            <!-- Solid Moon -->
+            <pxl-circle r="ref.moonR1.value" fill="#fcd34d"></pxl-circle>
+            
+            <!-- ERASER (The cutting circle) -->
+            <pxl-circle x="ref.moonDx.value" r="ref.moonR2.value" fill="#000" blend="ref.moonBlend.value"></pxl-circle>
+          </pxl-layer>
+        </pxl-stage>
+
+        <!-- Controls -->
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Geometry Controls</h3>
+          </div>
+          <div class="tab-content active" style="display:block; padding: 20px 24px;">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Radius 1 (Moon Size) <span id="moonR1Val">200</span></label>
+                <input type="range" min="50" max="250" step="1" value="200" autocomplete="off"
+                  oninput="document.getElementById('moonR1').setAttribute('value', this.value); document.getElementById('moonR1Val').innerText = this.value; document.getElementById('moonR1Code').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Thickness 'a' <span id="moonAVal">100</span></label>
+                <input type="range" min="10" max="390" step="1" value="100" autocomplete="off"
+                  oninput="document.getElementById('moonA').setAttribute('value', this.value); document.getElementById('moonAVal').innerText = this.value; document.getElementById('moonACode').innerText = this.value;">
+              </div>
+              
+              <div class="control-group" style="grid-column: span 2;">
+                <label>Boolean Operation (Composite Blend Mode)</label>
+                <select style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 14px;"
+                  onchange="document.getElementById('moonBlend').setAttribute('value', &quot;'&quot; + this.value + &quot;'&quot;); document.getElementById('moonBlendCode').innerText = &quot;'&quot; + this.value + &quot;'&quot;;">
+                  <option value="destination-out">Subtract (destination-out)</option>
+                  <option value="destination-in">Intersect (destination-in)</option>
+                  <option value="source-over">Overlay (source-over)</option>
+                  <option value="xor">Exclude Overlap (xor)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+</body>
+</html>
