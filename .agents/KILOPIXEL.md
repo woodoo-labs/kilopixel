@@ -479,12 +479,29 @@ All 8 time drivers are defined in `pxl.drivers` and injected into every compiled
 | `glide(d)` | `l*l*(3-2*l)` where `l = (t%d)/d` | Smooth ease-in-out (Hermite) |
 | `pulse(d)` | `pow(sin((t/d) * PI), 6)` | Sharp spike pulse |
 | `glitch(d)` | `abs(sin(floor(t/d) * 437.58)) % 1` | Pseudo-random stepped values |
+| `time(unit)` | e.g. `time('s')` | Real-world time ('ms', 's', 'm', 'h', 'day', 'date', 'month', 'year') with decimal precision |
 
-**Usage**: All return 0-1. Multiply to scale, add to offset:
+**Usage**: All `(d)` drivers return 0-1. Multiply to scale, add to offset:
 ```html
 r="30 + wave(2) * 70"           <!-- radius oscillates between 30 and 100 over 2 seconds -->
 fill="hsl(loop(5) * 360, 80, 50)"  <!-- hue cycles through rainbow every 5 seconds -->
 ```
+
+**Real-world time clocks**:
+The `time(unit)` driver returns exact real-world values based on the user's local clock. To enable smooth 60fps animations (e.g., sweeping analog clock hands), the returned values include decimal precision (e.g., `time('s')` might return `45.242`).
+
+| Unit | Returns | Range | Use case |
+|------|---------|-------|----------|
+| `'ms'` | Milliseconds | `0 - 999` | Strobe effects, micro-animations |
+| `'s'` | Seconds of the minute | `0.0 - 59.999` | Second hand: `rotate="(time('s') / 60) * 360"` |
+| `'m'` | Minutes of the hour | `0.0 - 59.999` | Minute hand: `rotate="(time('m') / 60) * 360"` |
+| `'h'` | Hours of the day | `0.0 - 23.999` | 12h Hour hand: `rotate="((time('h') % 12) / 12) * 360"` |
+| `'day'` | Day of the week | `0 - 6` | Sunday=0, Monday=1 |
+| `'date'` | Day of the month | `1 - 31` | Calendars |
+| `'month'`| Month of the year | `1 - 12` | 1=Jan, 12=Dec |
+| `'year'` | Full year | e.g. `2026` | Copyright text |
+
+*Tip: For a digital ticking clock instead of a smooth sweep, use `floor(time('s'))`.*
 
 ---
 
@@ -1408,7 +1425,7 @@ Note: `ref.myShape.tx` gives `x + dx` in the shape's OWN local space. `toLocal(r
 
 **Utility functions**: `lerp(a, b, t)`, `clamp(v, low, high)`, `map(v, inMin, inMax, outMin, outMax)`
 
-**Time drivers**: `loop()`, `yoyo()`, `wave()`, `bounce()`, `strobe()`, `glide()`, `pulse()`, `glitch()`
+**Time drivers**: `loop()`, `yoyo()`, `wave()`, `bounce()`, `strobe()`, `glide()`, `pulse()`, `glitch()`, `time(unit)`
 
 **Reactive references**: `ref.xxx.property`
 

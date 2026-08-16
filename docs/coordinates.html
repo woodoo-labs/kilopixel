@@ -1095,7 +1095,7 @@
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
             <!-- Trace Path -->
-            <pxl-polyline smooth="true" stroke="#94a3b8" strokewidth="2" fill="none" closed="true" points="
+            <pxl-polyline smooth="true" stroke="linear(t * 50, ['#0ea5e9', '#8b5cf6', '#ec4899'])" strokewidth="4" fill="none" closed="true" points="
               sin(0 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(0 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
               sin(1 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(1 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
               sin(2 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(2 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
@@ -1276,6 +1276,7 @@
         </div>
       </div>
       
+      <!--
       <h2>10. Hierarchical Animations (Groups &amp; Orbits)</h2>
       <p>Kilopixel's geometric transform engine separates the <strong>Center</strong> (<code>x</code>, <code>y</code>) from the <strong>Offset</strong> (<code>dx</code>, <code>dy</code>). By applying both a <code>rotate</code> and a <code>dx</code> offset to a <code>&lt;pxl-group&gt;</code>, the group's entire internal coordinate space is shifted into orbit.</p>
       
@@ -1308,31 +1309,31 @@
       <div class="demo-container">
         <pxl-stage ratio="5 / 3" class="demo-stage">
           <pxl-layer id="sec10Layer" x="500" y="300" rotate="0">
-            <!-- Variables -->
+            <!~~ Variables ~~>
             <pxl-var id="sec10PlanetSpeed" value="45"></pxl-var>
             <pxl-var id="sec10PlanetRadius" value="200"></pxl-var>
             <pxl-var id="sec10MoonSpeed" value="180"></pxl-var>
             <pxl-var id="sec10MoonRadius" value="60"></pxl-var>
 
-            <!-- Axes Helpers -->
+            <!~~ Axes Helpers ~~>
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
-            <!-- Sun -->
+            <!~~ Sun ~~>
             <pxl-circle r="50" fill="radial(1, ['#fde047', '#f59e0b'])" shadowcolor="#fde047" shadowblur="40"></pxl-circle>
 
-            <!-- Planet Orbit Path -->
+            <!~~ Planet Orbit Path ~~>
             <pxl-circle r="ref.sec10PlanetRadius.value" fill="none" stroke="#334155" linedash="[4,4]" strokewidth="2"></pxl-circle>
 
-            <!-- Planet System -->
+            <!~~ Planet System ~~>
             <pxl-group rotate="t * ref.sec10PlanetSpeed.value" dx="ref.sec10PlanetRadius.value">
-              <!-- Planet -->
+              <!~~ Planet ~~>
               <pxl-circle r="25" fill="#3b82f6" shadowcolor="#3b82f6" shadowblur="20"></pxl-circle>
 
-              <!-- Moon Orbit Path -->
+              <!~~ Moon Orbit Path ~~>
               <pxl-circle r="ref.sec10MoonRadius.value" fill="none" stroke="#475569" linedash="[2,2]" strokewidth="2"></pxl-circle>
 
-              <!-- Moon System -->
+              <!~~ Moon System ~~>
               <pxl-group rotate="t * ref.sec10MoonSpeed.value" dx="ref.sec10MoonRadius.value">
                 <pxl-circle r="10" fill="#cbd5e1" shadowcolor="#f8fafc" shadowblur="10"></pxl-circle>
               </pxl-group>
@@ -1395,6 +1396,7 @@
           </div>
         </div>
       </div>
+      -->
       
       <!--
       <h2>11. Coordinate Mapping <code>toLocal()</code></h2>

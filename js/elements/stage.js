@@ -1,5 +1,5 @@
 class Stage extends HTMLElement {
-  static get observedAttributes() { return ['ratio']; }
+  static get observedAttributes() { return ['ratio', 'alwaysrender']; }
 
   constructor() {
     super();
@@ -33,10 +33,29 @@ class Stage extends HTMLElement {
         this.attributeValues.height = 1000 / this._parsedRatio;
         if (this._refKey) pxl.broadcast(this._refKey);
       }
+    } else if (name === 'alwaysrender') {
+      const isAlwaysRender = newValue === 'true';
+      if (isAlwaysRender) {
+        if (this.intersectionObserver) {
+          this.intersectionObserver.disconnect();
+          this.intersectionObserver = null;
+        }
+        this.isVisible = true;
+        this.requestRender();
+      } else {
+        if (!this.intersectionObserver && this.isConnected) {
+          this.intersectionObserver = new IntersectionObserver((entries) => {
+            this.isVisible = entries[0].isIntersecting;
+            if (this.isVisible) this.requestRender();
+          });
+          this.intersectionObserver.observe(this);
+        }
+      }
     }
   }
 
   connectedCallback() {
+    this.isVisible = true;
     this.attributeValues = { mouseX: 500, mouseY: 500, isHovered: false, width: 1000, height: 1000, fps: 0, renderAvg: 0, renderMax: 0 };
     Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
     if (this.id) {
@@ -66,9 +85,22 @@ class Stage extends HTMLElement {
     this.addEventListener('click', this.interaction);
 
     pxl.perf?.registerStage(this);
+
+    // Initial setup if not already handled by attributeChangedCallback
+    if (this.getAttribute('alwaysrender') !== 'true' && !this.intersectionObserver) {
+      this.intersectionObserver = new IntersectionObserver((entries) => {
+        this.isVisible = entries[0].isIntersecting;
+        if (this.isVisible) this.requestRender();
+      });
+      this.intersectionObserver.observe(this);
+    }
   }
 
   disconnectedCallback() {
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+      this.intersectionObserver = null;
+    }
     this.resizeObserver.disconnect();
     this.resizeObserver = null;
     this.isUpdatePending = false;
@@ -118,7 +150,7 @@ class Stage extends HTMLElement {
   }
 
   requestRender() {
-    if (this.isSizePending || this.isUpdatePending) return;
+    if (!this.isVisible || this.isSizePending || this.isUpdatePending) return;
     this.isUpdatePending = true;
     requestAnimationFrame(this.frameCallback);
   }

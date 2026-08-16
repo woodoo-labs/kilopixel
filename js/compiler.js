@@ -118,6 +118,18 @@ pxl.drivers = {
   glide:  '(d) => ((l) => l * l * (3 - 2 * l))((t % d) / d)',
   pulse:  '(d) => pow(sin((t / d) * PI), 6)',
   glitch: '(d) => abs(sin(floor(t / d) * 437.58)) % 1',
+  time: `(u) => {
+    _d.setTime(Date.now());
+    if (u === 'ms') return _d.getMilliseconds();
+    if (u === 's') return _d.getSeconds() + _d.getMilliseconds() / 1000;
+    if (u === 'm') return _d.getMinutes() + _d.getSeconds() / 60;
+    if (u === 'h') return _d.getHours() + _d.getMinutes() / 60;
+    if (u === 'day') return _d.getDay();
+    if (u === 'date') return _d.getDate();
+    if (u === 'month') return _d.getMonth() + 1;
+    if (u === 'year') return _d.getFullYear();
+    return _d.getTime();
+  }`
 };
 
 pxl.timeDrivers = Object.entries(pxl.drivers)
@@ -229,6 +241,7 @@ pxl.compileExpression = function (str) {
       const fn = new Function('scope', 'ref', `
         const { ${this.scopeKeys} } = scope;
         let t;
+        const _d = new Date();
         ${this.timeDrivers}
         return function(_t) {
           t = _t;

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rotoreliefs - Kilopixel</title>
+  <style>
+    body { 
+      margin: 0; 
+      background: #000; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      color: white; 
+      font-family: sans-serif; 
+    }
+    pxl-stage { 
+      width: 100%; 
+      max-width: 1200px; 
+      margin-top: 20px; 
+    }
+    h2 { margin: 10px 0 0 0; font-weight: normal; color: #cbd5e1; }
+  </style>
+  <script src="../dist/pxl.min.js"></script>
+</head>
+<body>
+  <h2>Marcel Duchamp Rotoreliefs</h2>
+  
+  <pxl-stage id="main" ratio="2">
+    
+    <pxl-layer>
+      <!-- ========================================== -->
+      <!-- 1. Rigid Spiral Tunnel                     -->
+      <!-- ========================================== -->
+      <pxl-text x="250" y="40" fill="white" size="24" align="center" text="'Rigid Spiral Tunnel'"></pxl-text>
+      <!-- Using scale="1.4" so we don't have to rewrite the 15 nested radiuses! -->
+      <pxl-group x="250" y="270" rotate="-(t * 100)" scale="1.4">
+        <pxl-circle r="140" fill="#ff0000"></pxl-circle>
+        <pxl-group x="5" rotate="25">
+          <pxl-circle r="131" fill="#000080"></pxl-circle>
+          <pxl-group x="5" rotate="25">
+            <pxl-circle r="122" fill="#ff0000"></pxl-circle>
+            <pxl-group x="5" rotate="25">
+              <pxl-circle r="113" fill="#000080"></pxl-circle>
+              <pxl-group x="5" rotate="25">
+                <pxl-circle r="104" fill="#ff0000"></pxl-circle>
+                <pxl-group x="5" rotate="25">
+                  <pxl-circle r="95" fill="#000080"></pxl-circle>
+                  <pxl-group x="5" rotate="25">
+                    <pxl-circle r="86" fill="#ff0000"></pxl-circle>
+                    <pxl-group x="5" rotate="25">
+                      <pxl-circle r="77" fill="#000080"></pxl-circle>
+                      <pxl-group x="5" rotate="25">
+                        <pxl-circle r="68" fill="#ff0000"></pxl-circle>
+                        <pxl-group x="5" rotate="25">
+                          <pxl-circle r="59" fill="#000080"></pxl-circle>
+                          <pxl-group x="5" rotate="25">
+                            <pxl-circle r="50" fill="#ff0000"></pxl-circle>
+                            <pxl-group x="5" rotate="25">
+                              <pxl-circle r="41" fill="#000080"></pxl-circle>
+                              <pxl-group x="5" rotate="25">
+                                <pxl-circle r="32" fill="#ff0000"></pxl-circle>
+                                <pxl-group x="5" rotate="25">
+                                  <pxl-circle r="23" fill="#000080"></pxl-circle>
+                                  <pxl-group x="5" rotate="25">
+                                    <pxl-circle r="14" fill="#ff0000"></pxl-circle>
+                                  </pxl-group>
+                                </pxl-group>
+                              </pxl-group>
+                            </pxl-group>
+                          </pxl-group>
+                        </pxl-group>
+                      </pxl-group>
+                    </pxl-group>
+                  </pxl-group>
+                </pxl-group>
+              </pxl-group>
+            </pxl-group>
+          </pxl-group>
+        </pxl-group>
+      </pxl-group>
+
+      <!-- ========================================== -->
+      <!-- 2. Rigid Edge Cone                         -->
+      <!-- ========================================== -->
+      <pxl-text x="750" y="40" fill="white" size="24" align="center" text="'Rigid Edge Cone'"></pxl-text>
+      <pxl-group x="750" y="270" rotate="t * 120" scale="1.4">
+        <pxl-circle r="140" dx="0" fill="#ff0000"></pxl-circle>
+        <pxl-circle r="133" dx="-(140 - 133) * 0.8" fill="#000080"></pxl-circle>
+        <pxl-circle r="126" dx="-(140 - 126) * 0.8" fill="#ff0000"></pxl-circle>
+        <pxl-circle r="119" dx="-(140 - 119) * 0.8" fill="#000080"></pxl-circle>
+        <pxl-circle r="112" dx="-(140 - 112) * 0.8" fill="#ff0000"></pxl-circle>
+        <pxl-circle r="105" dx="-(140 - 105) * 0.8" fill="#000080"></pxl-circle>
+        <pxl-circle r="98" dx="-(140 - 98) * 0.8" fill="#ff0000"></pxl-circle>
+        <pxl-circle r="91" dx="-(140 - 91) * 0.8" fill="#000080"></pxl-circle>
+        <pxl-circle r="84" dx="-(140 - 84) * 0.8" fill="#ff0000"></pxl-circle>
+        <pxl-circle r="77" dx="-(140 - 77) * 0.8" fill="#000080"></pxl-circle>
+        <pxl-circle r="70" dx="-(140 - 70) * 0.8" fill="#ff0000"></pxl-circle>
+        <pxl-circle r="63" dx="-(140 - 63) * 0.8" fill="#000080"></pxl-circle>
+        <pxl-circle r="56" dx="-(140 - 56) * 0.8" fill="#ff0000"></pxl-circle>
+        <pxl-circle r="49" dx="-(140 - 49) * 0.8" fill="#000080"></pxl-circle>
+        <pxl-circle r="42" dx="-(140 - 42) * 0.8" fill="#ff0000"></pxl-circle>
+        <pxl-circle r="35" dx="-(140 - 35) * 0.8" fill="#000080"></pxl-circle>
+        <pxl-circle r="28" dx="-(140 - 28) * 0.8" fill="#ff0000"></pxl-circle>
+        <pxl-circle r="21" dx="-(140 - 21) * 0.8" fill="#000080"></pxl-circle>
+        <pxl-circle r="14" dx="-(140 - 14) * 0.8" fill="#ff0000"></pxl-circle>
+        <pxl-circle r="7" dx="-(140 - 7) * 0.8" fill="#000080"></pxl-circle>
+      </pxl-group>
+
+    </pxl-layer>
+
+  </pxl-stage>
+</body>
+</html>
