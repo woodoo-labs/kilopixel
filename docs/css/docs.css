@@ -488,8 +488,6 @@ body {
   letter-spacing: 0.08em;
   color: var(--text-muted);
   margin: 16px 0 4px 4px;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 6px;
 }
 .api-list .api-subheading:first-child {
   margin-top: 4px;
@@ -519,7 +517,7 @@ body {
   gap: 8px;
 }
 
-.api-name {
+.docs-content code.api-name {
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-heading);
@@ -533,7 +531,8 @@ body {
 
 .api-meta {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 6px;
 }
 
@@ -553,9 +552,6 @@ body {
   color: var(--text-muted);
 }
 
-.api-pill.default-pill strong {
-  color: var(--text-heading);
-}
 
 .api-pill.values-pill {
   background-color: rgba(14, 165, 233, 0.12);
@@ -672,5 +668,10 @@ body {
 
   .playground-sliders {
     gap: 16px;
+  }
+
+  .api-meta {
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 }
