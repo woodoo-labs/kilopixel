@@ -176,7 +176,7 @@ pxl.parseAttributeValue = function (value) {
     }
 
     // Fast Path for static CSS color functions (e.g., "rgba(124, 211, 15, 0.8)")
-    if (/^(rgb|rgba|hsl|hsla)\([\d\s.,%]+\)$/i.test(value)) {
+    if (/^(rgb|rgba)\([\d\s.,%]+\)$/i.test(value)) {
       return value;
     }
   }
