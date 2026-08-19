@@ -20,24 +20,24 @@
       <!-- Background that shifts hue based on mouse X and lightness based on mouse Y -->
       <!-- We use the native `hsl()` utility from the math sandbox! -->
       <pxl-rect x="500" y="500" w="1000" h="1000" 
-        fill="hsl((ref.main.mouseX / 1000) * 360, 30%, clamp((ref.main.mouseY / (ref.main.height||1000)) * 50, 5, 20))">
+        fill="hsl((ref.main.mouseX / 1000) * 360, 30, clamp((ref.main.mouseY / (ref.main.height||1000)) * 50, 5, 20))">
       </pxl-rect>
       
       <!-- A geometric pattern where each ring is offset by 120 degrees on the color wheel -->
       <pxl-group x="500" y="280" rotate="t * 20">
         <!-- Base color -->
         <pxl-rect x="0" y="0" w="200" h="200" fill="none" strokewidth="10" 
-          stroke="hsl((ref.main.mouseX / 1000) * 360, 100%, 50%)" rotate="-t * 40">
+          stroke="hsl((ref.main.mouseX / 1000) * 360, 100, 50)" rotate="-t * 40">
         </pxl-rect>
         
         <!-- +120 Degrees Hue Shift -->
         <pxl-rect x="0" y="0" w="300" h="300" fill="none" strokewidth="5" 
-          stroke="hsl(((ref.main.mouseX / 1000) * 360 + 120) % 360, 100%, 50%)" rotate="t * 10">
+          stroke="hsl(((ref.main.mouseX / 1000) * 360 + 120) % 360, 100, 50)" rotate="t * 10">
         </pxl-rect>
         
         <!-- +240 Degrees Hue Shift -->
         <pxl-rect x="0" y="0" w="400" h="400" fill="none" strokewidth="2" 
-          stroke="hsl(((ref.main.mouseX / 1000) * 360 + 240) % 360, 100%, 50%)" rotate="-t * 5">
+          stroke="hsl(((ref.main.mouseX / 1000) * 360 + 240) % 360, 100, 50)" rotate="-t * 5">
         </pxl-rect>
       </pxl-group>
 

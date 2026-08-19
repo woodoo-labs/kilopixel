@@ -830,7 +830,7 @@
           const speedFactor = 0.5 + (i % 3) * 0.5;
           const xForm = `sin(t * ${speedFactor} + ${i}) * ${dist}`;
           const yForm = `cos(t * ${speedFactor} + ${i}) * ${dist}`;
-          const color = `hsla(${(i * 360 / 1000) % 360}, 100%, 50%, 0.6)`;
+          const color = `hsla(${(i * 360 / 1000) % 360}, 100, 50, 0.6)`;
           shapes += `<pxl-circle x="${xForm}" y="${yForm}" r="${r}" fill="${color}"></pxl-circle>`;
         }
         return `
@@ -899,7 +899,7 @@
           const y = 45 + Math.floor(i / 10) * 18;
           // Complex dynamic math text output, stressing expression resolver
           const textExpr = `'P#' + ${i} + ' : ' + floor(sin(t + ${i}) * 100) + ' | ' + ref.main.fps`;
-          texts += `<pxl-text x="${x}" y="${y}" size="8.5" fill="hsla(${i % 360}, 100%, 50%, 0.85)" text="${textExpr}"></pxl-text>`;
+          texts += `<pxl-text x="${x}" y="${y}" size="8.5" fill="hsla(${i % 360}, 100, 50, 0.85)" text="${textExpr}"></pxl-text>`;
         }
         return `
           <pxl-stage id="main5" ratio="16 / 9">
