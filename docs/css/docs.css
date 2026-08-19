@@ -558,38 +558,32 @@ body {
   color: #0284c7;
 }
 
-.api-pill.values-pill code {
-  background: none !important;
-  padding: 0 !important;
-  color: inherit !important;
-}
+
 
 .api-item-desc {
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--text-body);
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
-/* --- Mobile Responsiveness --- */
-@media (max-width: 768px) {
-  /* Unlock root window scrolling on mobile for iOS status-bar tap-to-top */
-  body {
+/* --- Tablet Responsiveness (<= 1024px) --- */
+@media (max-width: 1024px) {
+  /* Unlock root window scrolling for iOS status-bar tap-to-top */
+  body, .layout-container, .docs-content {
     height: auto;
     overflow: visible;
   }
+  
   .layout-container {
-    height: auto;
-    overflow: visible;
     display: block;
-  }
-  .docs-content {
-    overflow-y: visible;
-    height: auto;
   }
 
   /* Layout adjustments */
   .docs-inner {
-    padding: 24px 20px;
+    padding: 32px 32px;
   }
   
   .header {
@@ -614,9 +608,10 @@ body {
     display: block;
   }
   
+  /* Sidebar Off-canvas */
   .sidebar {
     position: fixed;
-    top: 64px; /* Height of the header */
+    top: 64px;
     left: 0;
     bottom: 0;
     z-index: 90;
@@ -628,31 +623,42 @@ body {
   .sidebar.mobile-open {
     transform: translateX(0);
   }
-
+  
   .sidebar-backdrop {
     position: fixed;
-    top: 64px; /* Height of the header */
+    top: 64px;
     left: 0;
     right: 0;
     bottom: 0;
     background-color: rgba(15, 23, 42, 0.4);
-    z-index: 85; /* Just below sidebar (z-index: 90) */
+    z-index: 85;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease;
   }
-
+  
   .sidebar-backdrop.active {
     opacity: 1;
     pointer-events: auto;
   }
+}
 
-  /* Shrink demo padding on mobile */
+/* --- Mobile Responsiveness (<= 768px) --- */
+@media (max-width: 768px) {
+  /* Tighter layout on small phones */
+  .docs-inner {
+    padding: 24px 20px;
+  }
+  
   .demo-stage {
     padding: 16px;
   }
+  
+  .playground-sliders {
+    gap: 16px;
+  }
 
-  /* Stack API cards vertically on mobile/tablet */
+  /* Stack API cards vertically on mobile */
   .api-item {
     grid-template-columns: 1fr;
     gap: 12px;
@@ -665,11 +671,7 @@ body {
     justify-content: space-between;
     align-items: center;
   }
-
-  .playground-sliders {
-    gap: 16px;
-  }
-
+  
   .api-meta {
     flex-direction: row;
     flex-wrap: wrap;

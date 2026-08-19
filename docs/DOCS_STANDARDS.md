@@ -73,7 +73,7 @@ Every documentation example must follow a standardized 3-part layout:
 <!-- 1. Declarative Code Block Above Stage -->
 <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-circle x="500" y="300" r="&lt;mark id="codeEx1R"&gt;200&lt;/mark&gt;" stroke="#f97316"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="500" y="300" r="&lt;mark id="sec1CircleRCode"&gt;200&lt;/mark&gt;" stroke="#f97316"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -86,17 +86,17 @@ Every documentation example must follow a standardized 3-part layout:
     <div class="demo-controls-header">
       <h3 class="demo-controls-title">Controls</h3>
       <div class="demo-tabs">
-        <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'ex1-circle')">Circle</button>
+        <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1CircleTab')">Circle</button>
       </div>
     </div>
     
     <!-- Circle Tab -->
-    <div class="tab-content active" id="ex1-circle">
+    <div class="tab-content active" id="sec1CircleTab">
       <div class="playground-sliders">
         <div class="control-group">
-          <label>Radius <span id="lblEx1R">200</span></label>
+          <label>Radius <span id="sec1CircleRVal">200</span></label>
           <input type="range" min="10" max="400" step="10" value="200" autocomplete="off"
-            oninput="document.getElementById('ex1Circle').setAttribute('r', this.value); document.getElementById('lblEx1R').innerText = this.value; document.getElementById('codeEx1R').innerText = this.value;">
+            oninput="document.getElementById('sec1Circle').setAttribute('r', this.value); document.getElementById('sec1CircleRVal').innerText = this.value; document.getElementById('sec1CircleRCode').innerText = this.value;">
         </div>
       </div>
     </div>
@@ -114,19 +114,19 @@ Every documentation example must follow a standardized 3-part layout:
 * **Variable Placement:** `<pxl-var>` nodes act as invisible shapes in the engine. If they use any mathematical animations (like `t` or `wave()`), they **must** be placed inside a `<pxl-layer>` so their `render` cycle is evaluated by the engine loop.
 * **Direct Manipulation over Variables:** `<pxl-var>` nodes should only be used for shared global state. For direct property control, sliders must directly manipulate the target element using standard HTML5 Web Component DOM methods: `document.getElementById('elementId').setAttribute('property', this.value)`.
 * HTML code blocks must use `<pre><code class="language-html">`.
-* Values in the code block that change dynamically must be wrapped in a `<mark id="code[VarName]">` tag.
+* Values in the code block that change dynamically must be wrapped in a `<mark id="sec[N][Entity][Target]Code">` tag.
 * **Prism Syntax Highlighting & Keep-Markup:** Every documentation page that uses Prism syntax highlighting MUST load both `prism.min.js` and `<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>`. Without the `keep-markup` plugin, Prism strips out `<mark id="...">` tags during syntax highlighting, breaking live code updates.
 * **Simplified Pedagogical Code Snippets:** HTML code blocks (`<pre><code class="language-html">`) MUST show only the minimal, clean markup needed to teach the section's core concept:
   * **Exclude Stage Helpers:** Never include background grids (`<pxl-grid>`), coordinate axes, dimension lines, or leader markers in the HTML snippet.
   * **Exclude Auxiliary Shapes:** Do not show secondary decorative shapes in the code block.
   * **Minimal Styling:** Use simple `stroke` or basic `fill` attributes. Do not include verbose `strokewidth`, `alpha`, or long CSS `filter` strings unless that specific styling attribute is what is being demonstrated or controlled.
 * Slider `oninput` handlers must execute inline JS to do exactly three things:
-  1. Update the element property: `document.getElementById('ex4Rect').setAttribute('x', this.value)`
-  2. Update the UI label: `document.getElementById('lblEx4RectX').innerText = this.value`
-  3. Update the HTML Code snippet: `document.getElementById('codeEx4RectX').innerText = this.value`
-* Toggle button `onclick` handlers must follow **Option 1 (Explicit Native DOM + UI Helper)**: put the native `document.getElementById('id').setAttribute('attr', 'value')` call explicitly first so developers see transparently how Kilopixel works, then call `pxlDocs.updateToggle(this, 'lblId', 'codeId', 'value')` to handle UI button state and label/mark updates:
+  1. Update the element property: `document.getElementById('sec4Rect').setAttribute('x', this.value)`
+  2. Update the UI label: `document.getElementById('sec4RectXVal').innerText = this.value`
+  3. Update the HTML Code snippet: `document.getElementById('sec4RectXCode').innerText = this.value`
+* Toggle button `onclick` handlers must follow **Option 1 (Explicit Native DOM + UI Helper)**: put the native `document.getElementById('id').setAttribute('attr', 'value')` call explicitly first so developers see transparently how Kilopixel works, then call `pxlDocs.updateToggle(this, 'valId', 'codeId', 'value')` to handle UI button state and label/mark updates:
   ```html
-  <button class="toggle-btn active" onclick="document.getElementById('heroCircle').setAttribute('pie', 'false'); pxlDocs.updateToggle(this, 'lblHeroPie', 'codeHeroPie', 'false');">false (Open Arc)</button>
+  <button class="toggle-btn active" onclick="document.getElementById('sec1Circle').setAttribute('pie', 'false'); pxlDocs.updateToggle(this, 'sec1CirclePieVal', 'sec1CirclePieCode', 'false');">false (Open Arc)</button>
   ```
 * *Note: The highlighting system uses a Regex-based Pointer Event Delegation System (`pointerdown`/`touchstart`). It automatically parses the `oninput` strings of sliders to find the `getElementById('code...')` references, dynamically mapping active sliders to their `<mark>` targets.*
 

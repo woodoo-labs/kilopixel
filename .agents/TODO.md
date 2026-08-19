@@ -21,3 +21,9 @@
 - Implement an `IntersectionObserver` inside `PxlStage` alongside the existing `ResizeObserver`.
 - Set a boolean flag `this.isVisible` and skip inner rendering routines when `false`.
 - **Expected Benefit**: Massive reduction in battery drain and rendering overhead on documentation pages with multiple animated examples.
+
+## 4. Implement `<pxl-out>` Declarative HTML Output Component
+- **Reference**: [`design/2026-08-02_declarative_html_output_pxl_out_plan.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/design/2026-08-02_declarative_html_output_pxl_out_plan.md)
+- Build the `<pxl-out>` Custom Web Component as a declarative DOM bridge.
+- Allow placement anywhere in standard HTML to reactively output data (e.g., `ref.main.fps`) from the Kilopixel dependency graph without JavaScript polling.
+- Resolve open design questions regarding the primary attribute syntax (`value="..."` vs `text="..."`) and built-in template literal string formatting.

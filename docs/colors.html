@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kilopixel - Colors &amp; Gradients</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+  <script src="js/api-tabs.js"></script>
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+        <h1>Colors &amp; Gradients</h1>
+        <p class="lead">The foundational color systems for Kilopixel shapes. Learn how to apply standard solid colors, CSS variables, and generative linear and radial gradients to any shape's fill or stroke.</p>
+
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: NAMED COLORS & HEX CODES -->
+        <!-- ================================================================= -->
+        <h2>1. Named Colors &amp; Hex Codes</h2>
+        <p>Because Kilopixel renders directly to HTML5 Canvas, you can use any valid CSS color keyword (like <code>tomato</code> or <code>transparent</code>) or hexadecimal code (like <code>#1e293b</code>) for the <code>fill</code> and <code>stroke</code> attributes.</p>
+        
+        <div class="callout-info">
+          <p class="callout-body"><strong>Stacking Order (Z-Index):</strong> Elements are drawn strictly in the order they appear in the HTML. The last element in the markup is drawn on top of the others.</p>
+        </div>
+
+        <pre><code class="language-html">&lt;pxl-stage ratio="2"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Circle 1 (Drawn First, at the bottom) --&gt;
+    &lt;pxl-circle x="<mark id="c1XCode">500</mark>" y="<mark id="c1YCode">210</mark>" r="<mark id="c1RCode">140</mark>" fill="tomato" stroke="#991b1b" strokewidth="<mark id="c1SwCode">10</mark>"&gt;&lt;/pxl-circle&gt;
+      
+    &lt;!-- Circle 2 (Drawn Second, in the middle) --&gt;
+    &lt;pxl-circle x="<mark id="c2XCode">420</mark>" y="<mark id="c2YCode">340</mark>" r="<mark id="c2RCode">140</mark>" fill="#38bdf8" stroke="royalblue" strokewidth="<mark id="c2SwCode">10</mark>"&gt;&lt;/pxl-circle&gt;
+      
+    &lt;!-- Circle 3 (Drawn Last, on top) --&gt;
+    &lt;pxl-circle x="<mark id="c3XCode">580</mark>" y="<mark id="c3YCode">340</mark>" r="<mark id="c3RCode">140</mark>" fill="#fbbf24" stroke="#b45309" strokewidth="<mark id="c3SwCode">10</mark>"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <pxl-stage id="sec1Stage" ratio="2" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              <pxl-circle id="circle1" x="500" y="210" r="140" fill="tomato" stroke="#991b1b" strokewidth="10"></pxl-circle>
+              <pxl-circle id="circle2" x="420" y="340" r="140" fill="#38bdf8" stroke="royalblue" strokewidth="10"></pxl-circle>
+              <pxl-circle id="circle3" x="580" y="340" r="140" fill="#fbbf24" stroke="#b45309" strokewidth="10"></pxl-circle>
+            </pxl-layer>
+          </pxl-stage>
+
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'tabC1')">Circle 1</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'tabC2')">Circle 2</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'tabC3')">Circle 3</button>
+              </div>
+            </div>
+
+            <!-- Circle 1 Tab -->
+            <div class="tab-content active" id="tabC1">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Center X (<code>x</code>)</span> <span id="c1XVal">500</span></label>
+                  <input type="range" min="150" max="850" step="10" value="500" autocomplete="off"
+                    oninput="document.getElementById('circle1').setAttribute('x', this.value); document.getElementById('c1XVal').innerText = this.value; document.getElementById('c1XCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Center Y (<code>y</code>)</span> <span id="c1YVal">210</span></label>
+                  <input type="range" min="150" max="350" step="10" value="210" autocomplete="off"
+                    oninput="document.getElementById('circle1').setAttribute('y', this.value); document.getElementById('c1YVal').innerText = this.value; document.getElementById('c1YCode').innerText = this.value;">
+                </div>
+                                <div class="control-group">
+                  <label><span>Radius (<code>r</code>)</span> <span id="c1RVal">140</span></label>
+                  <input type="range" min="50" max="250" step="10" value="140" autocomplete="off"
+                    oninput="document.getElementById('circle1').setAttribute('r', this.value); document.getElementById('c1RVal').innerText = this.value; document.getElementById('c1RCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="c1SwVal">10</span></label>
+                  <input type="range" min="0" max="50" step="1" value="10" autocomplete="off"
+                    oninput="document.getElementById('circle1').setAttribute('strokewidth', this.value); document.getElementById('c1SwVal').innerText = this.value; document.getElementById('c1SwCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Circle 2 Tab -->
+            <div class="tab-content" id="tabC2">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Center X (<code>x</code>)</span> <span id="c2XVal">420</span></label>
+                  <input type="range" min="150" max="850" step="10" value="420" autocomplete="off"
+                    oninput="document.getElementById('circle2').setAttribute('x', this.value); document.getElementById('c2XVal').innerText = this.value; document.getElementById('c2XCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Center Y (<code>y</code>)</span> <span id="c2YVal">340</span></label>
+                  <input type="range" min="150" max="350" step="10" value="340" autocomplete="off"
+                    oninput="document.getElementById('circle2').setAttribute('y', this.value); document.getElementById('c2YVal').innerText = this.value; document.getElementById('c2YCode').innerText = this.value;">
+                </div>
+                                <div class="control-group">
+                  <label><span>Radius (<code>r</code>)</span> <span id="c2RVal">140</span></label>
+                  <input type="range" min="50" max="250" step="10" value="140" autocomplete="off"
+                    oninput="document.getElementById('circle2').setAttribute('r', this.value); document.getElementById('c2RVal').innerText = this.value; document.getElementById('c2RCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="c2SwVal">10</span></label>
+                  <input type="range" min="0" max="50" step="1" value="10" autocomplete="off"
+                    oninput="document.getElementById('circle2').setAttribute('strokewidth', this.value); document.getElementById('c2SwVal').innerText = this.value; document.getElementById('c2SwCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Circle 3 Tab -->
+            <div class="tab-content" id="tabC3">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Center X (<code>x</code>)</span> <span id="c3XVal">580</span></label>
+                  <input type="range" min="150" max="850" step="10" value="580" autocomplete="off"
+                    oninput="document.getElementById('circle3').setAttribute('x', this.value); document.getElementById('c3XVal').innerText = this.value; document.getElementById('c3XCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Center Y (<code>y</code>)</span> <span id="c3YVal">340</span></label>
+                  <input type="range" min="200" max="450" step="10" value="340" autocomplete="off"
+                    oninput="document.getElementById('circle3').setAttribute('y', this.value); document.getElementById('c3YVal').innerText = this.value; document.getElementById('c3YCode').innerText = this.value;">
+                </div>
+                                <div class="control-group">
+                  <label><span>Radius (<code>r</code>)</span> <span id="c3RVal">140</span></label>
+                  <input type="range" min="50" max="250" step="10" value="140" autocomplete="off"
+                    oninput="document.getElementById('circle3').setAttribute('r', this.value); document.getElementById('c3RVal').innerText = this.value; document.getElementById('c3RCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="c3SwVal">10</span></label>
+                  <input type="range" min="0" max="50" step="1" value="10" autocomplete="off"
+                    oninput="document.getElementById('circle3').setAttribute('strokewidth', this.value); document.getElementById('c3SwVal').innerText = this.value; document.getElementById('c3SwCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+
+        <!-- ================================================================= -->
+        <!-- SECTION 2: RGB & RGBA -->
+        <!-- ================================================================= -->
+        <h2 style="margin-top: 4rem;">2. RGB &amp; RGBA</h2>
+        <p>The <code>rgb()</code> and <code>rgba()</code> formats break colors down into their core numeric channels: <strong>R</strong>ed, <strong>G</strong>reen, and <strong>B</strong>lue (0-255). The <code>rgba()</code> variant adds a fourth <strong>A</strong>lpha channel (0.0 - 1.0) to control transparency, allowing overlapping shapes to blend together.</p>
+
+        <div class="example-card">
+          <div class="example-code">
+            <pre><code class="language-html">&lt;pxl-stage ratio="2"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Circle 1 (Red) --&gt;
+    &lt;pxl-circle x="500" y="210" r="140" fill="rgba(<mark id="c1RgbRCode">255</mark>, <mark id="c1RgbGCode">0</mark>, <mark id="c1RgbBCode">0</mark>, <mark id="c1RgbACode">0.7</mark>)"&gt;&lt;/pxl-circle&gt;
+      
+    &lt;!-- Circle 2 (Green) --&gt;
+    &lt;pxl-circle x="420" y="340" r="140" fill="rgba(<mark id="c2RgbRCode">0</mark>, <mark id="c2RgbGCode">255</mark>, <mark id="c2RgbBCode">0</mark>, <mark id="c2RgbACode">0.7</mark>)"&gt;&lt;/pxl-circle&gt;
+      
+    &lt;!-- Circle 3 (Blue) --&gt;
+    &lt;pxl-circle x="580" y="340" r="140" fill="rgba(<mark id="c3RgbRCode">0</mark>, <mark id="c3RgbGCode">0</mark>, <mark id="c3RgbBCode">255</mark>, <mark id="c3RgbACode">0.7</mark>)"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+          </div>
+
+          <div class="demo-container">
+            <pxl-stage id="sec2Stage" ratio="2" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                <pxl-circle id="sec2Circle1" x="500" y="210" r="140" fill="rgba(255, 0, 0, 0.7)"></pxl-circle>
+                <pxl-circle id="sec2Circle2" x="420" y="340" r="140" fill="rgba(0, 255, 0, 0.7)"></pxl-circle>
+                <pxl-circle id="sec2Circle3" x="580" y="340" r="140" fill="rgba(0, 0, 255, 0.7)"></pxl-circle>
+              </pxl-layer>
+            </pxl-stage>
+
+            <div class="demo-controls">
+              <div class="demo-controls-header">
+                <h3 class="demo-controls-title">Controls</h3>
+                <div class="demo-tabs">
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'tabRgba1')">Circle 1</button>
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'tabRgba2')">Circle 2</button>
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'tabRgba3')">Circle 3</button>
+                </div>
+              </div>
+
+              <!-- RGBA Circle 1 Tab -->
+              <div class="tab-content active" id="tabRgba1">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Red</span> <span id="c1RgbRVal">255</span></label>
+                    <input type="range" min="0" max="255" step="1" value="255" autocomplete="off"
+                      oninput="document.getElementById('sec2Circle1').setAttribute('fill', `rgba(${this.value}, ${document.getElementById('c1RgbGVal').innerText}, ${document.getElementById('c1RgbBVal').innerText}, ${document.getElementById('c1RgbAVal').innerText})`); document.getElementById('c1RgbRVal').innerText = this.value; document.getElementById('c1RgbRCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Green</span> <span id="c1RgbGVal">0</span></label>
+                    <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec2Circle1').setAttribute('fill', `rgba(${document.getElementById('c1RgbRVal').innerText}, ${this.value}, ${document.getElementById('c1RgbBVal').innerText}, ${document.getElementById('c1RgbAVal').innerText})`); document.getElementById('c1RgbGVal').innerText = this.value; document.getElementById('c1RgbGCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Blue</span> <span id="c1RgbBVal">0</span></label>
+                    <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec2Circle1').setAttribute('fill', `rgba(${document.getElementById('c1RgbRVal').innerText}, ${document.getElementById('c1RgbGVal').innerText}, ${this.value}, ${document.getElementById('c1RgbAVal').innerText})`); document.getElementById('c1RgbBVal').innerText = this.value; document.getElementById('c1RgbBCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Alpha (Transparency)</span> <span id="c1RgbAVal">0.7</span></label>
+                    <input type="range" min="0" max="1" step="0.05" value="0.7" autocomplete="off"
+                      oninput="document.getElementById('sec2Circle1').setAttribute('fill', `rgba(${document.getElementById('c1RgbRVal').innerText}, ${document.getElementById('c1RgbGVal').innerText}, ${document.getElementById('c1RgbBVal').innerText}, ${this.value})`); document.getElementById('c1RgbAVal').innerText = this.value; document.getElementById('c1RgbACode').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- RGBA Circle 2 Tab -->
+              <div class="tab-content" id="tabRgba2">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Red</span> <span id="c2RgbRVal">0</span></label>
+                    <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec2Circle2').setAttribute('fill', `rgba(${this.value}, ${document.getElementById('c2RgbGVal').innerText}, ${document.getElementById('c2RgbBVal').innerText}, ${document.getElementById('c2RgbAVal').innerText})`); document.getElementById('c2RgbRVal').innerText = this.value; document.getElementById('c2RgbRCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Green</span> <span id="c2RgbGVal">255</span></label>
+                    <input type="range" min="0" max="255" step="1" value="255" autocomplete="off"
+                      oninput="document.getElementById('sec2Circle2').setAttribute('fill', `rgba(${document.getElementById('c2RgbRVal').innerText}, ${this.value}, ${document.getElementById('c2RgbBVal').innerText}, ${document.getElementById('c2RgbAVal').innerText})`); document.getElementById('c2RgbGVal').innerText = this.value; document.getElementById('c2RgbGCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Blue</span> <span id="c2RgbBVal">0</span></label>
+                    <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec2Circle2').setAttribute('fill', `rgba(${document.getElementById('c2RgbRVal').innerText}, ${document.getElementById('c2RgbGVal').innerText}, ${this.value}, ${document.getElementById('c2RgbAVal').innerText})`); document.getElementById('c2RgbBVal').innerText = this.value; document.getElementById('c2RgbBCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Alpha (Transparency)</span> <span id="c2RgbAVal">0.7</span></label>
+                    <input type="range" min="0" max="1" step="0.05" value="0.7" autocomplete="off"
+                      oninput="document.getElementById('sec2Circle2').setAttribute('fill', `rgba(${document.getElementById('c2RgbRVal').innerText}, ${document.getElementById('c2RgbGVal').innerText}, ${document.getElementById('c2RgbBVal').innerText}, ${this.value})`); document.getElementById('c2RgbAVal').innerText = this.value; document.getElementById('c2RgbACode').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- RGBA Circle 3 Tab -->
+              <div class="tab-content" id="tabRgba3">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Red</span> <span id="c3RgbRVal">0</span></label>
+                    <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec2Circle3').setAttribute('fill', `rgba(${this.value}, ${document.getElementById('c3RgbGVal').innerText}, ${document.getElementById('c3RgbBVal').innerText}, ${document.getElementById('c3RgbAVal').innerText})`); document.getElementById('c3RgbRVal').innerText = this.value; document.getElementById('c3RgbRCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Green</span> <span id="c3RgbGVal">0</span></label>
+                    <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec2Circle3').setAttribute('fill', `rgba(${document.getElementById('c3RgbRVal').innerText}, ${this.value}, ${document.getElementById('c3RgbBVal').innerText}, ${document.getElementById('c3RgbAVal').innerText})`); document.getElementById('c3RgbGVal').innerText = this.value; document.getElementById('c3RgbGCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Blue</span> <span id="c3RgbBVal">255</span></label>
+                    <input type="range" min="0" max="255" step="1" value="255" autocomplete="off"
+                      oninput="document.getElementById('sec2Circle3').setAttribute('fill', `rgba(${document.getElementById('c3RgbRVal').innerText}, ${document.getElementById('c3RgbGVal').innerText}, ${this.value}, ${document.getElementById('c3RgbAVal').innerText})`); document.getElementById('c3RgbBVal').innerText = this.value; document.getElementById('c3RgbBCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Alpha (Transparency)</span> <span id="c3RgbAVal">0.7</span></label>
+                    <input type="range" min="0" max="1" step="0.05" value="0.7" autocomplete="off"
+                      oninput="document.getElementById('sec2Circle3').setAttribute('fill', `rgba(${document.getElementById('c3RgbRVal').innerText}, ${document.getElementById('c3RgbGVal').innerText}, ${document.getElementById('c3RgbBVal').innerText}, ${this.value})`); document.getElementById('c3RgbAVal').innerText = this.value; document.getElementById('c3RgbACode').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Prism Syntax Highlighting -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+</body>
+</html>

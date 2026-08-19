@@ -37,7 +37,7 @@
         <!-- SECTION 1: HERO ANATOMY SANDBOX -->
         <!-- ================================================================= -->
         <h2>1. Interactive Circle Sandbox</h2>
-        <p>Experiment with the sliders below to see how a single <code>&lt;pxl-circle&gt;</code> element morphs across its different visual archetypes on a standard <strong>1000 × 600</strong> logical canvas.</p>
+        <p>Experiment with the sliders below to see how a single <code>&lt;pxl-circle&gt;</code> element morphs across its different visual archetypes on a standard 1000 × 600 logical canvas.</p>
 
         <!-- Declarative HTML Markup Above Stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
@@ -47,7 +47,7 @@
       ir="<mark id="sec1CircleIRCode">0</mark>" 
       start="<mark id="sec1CircleStartCode">0</mark>" 
       sweep="<mark id="sec1CircleSweepCode">270</mark>" 
-      pie="<mark id="sec1CirclePieCode">false</mark>"
+      pie="<mark id="sec1CirclePieCode">true</mark>"
       stroke="#f97316"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -61,7 +61,7 @@
               <pxl-line x1="0" y1="300" x2="1000" y2="300" stroke="#cbd5e1" strokewidth="2" linedash="[4, 4]"></pxl-line>
 
               <!-- Hero Circle Shape -->
-              <pxl-circle id="sec1Circle" x="500" y="300" r="180" ir="0" start="0" sweep="270" pie="false"
+              <pxl-circle id="sec1Circle" x="500" y="300" r="180" ir="0" start="0" sweep="270" pie="true"
                 fill="#ffedd566" stroke="#f97316" strokewidth="4" arrowend="0" arrowstyle="filled"></pxl-circle>
 
               <!-- Center Anchor Dot -->
@@ -98,15 +98,15 @@
                     oninput="document.getElementById('sec1Circle').setAttribute('start', this.value); document.getElementById('sec1CircleStartVal').innerText = this.value; document.getElementById('sec1CircleStartCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Angular Sweep (<code>sweep</code>)</span> <span><span id="sec1CircleSweepVal">270</span>°</span></label>
+                  <label><span>Sweep (<code>sweep</code>)</span> <span><span id="sec1CircleSweepVal">270</span>°</span></label>
                   <input type="range" min="45" max="360" step="15" value="270" autocomplete="off"
                     oninput="document.getElementById('sec1Circle').setAttribute('sweep', this.value); document.getElementById('sec1CircleSweepVal').innerText = this.value; document.getElementById('sec1CircleSweepCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Pie Mode (<code>pie</code>)</span> <span id="sec1CirclePieVal">false</span></label>
+                  <label><span>Pie Mode (<code>pie</code>)</span> <span id="sec1CirclePieVal">true</span></label>
                   <div class="toggle-group">
-                    <button class="toggle-btn active" id="sec1PieFalseBtn" onclick="document.getElementById('sec1Circle').setAttribute('pie', 'false'); pxlDocs.updateToggle(this, 'sec1CirclePieVal', 'sec1CirclePieCode', 'false');">false (Open Arc)</button>
-                    <button class="toggle-btn" id="sec1PieTrueBtn" onclick="document.getElementById('sec1Circle').setAttribute('pie', 'true'); pxlDocs.updateToggle(this, 'sec1CirclePieVal', 'sec1CirclePieCode', 'true');">true (Pie Wedge)</button>
+                    <button class="toggle-btn" id="sec1CirclePieFalseBtn" onclick="document.getElementById('sec1Circle').setAttribute('pie', 'false'); pxlDocs.updateToggle(this, 'sec1CirclePieVal', 'sec1CirclePieCode', 'false');">false (Open Arc)</button>
+                    <button class="toggle-btn active" id="sec1CirclePieTrueBtn" onclick="document.getElementById('sec1Circle').setAttribute('pie', 'true'); pxlDocs.updateToggle(this, 'sec1CirclePieVal', 'sec1CirclePieCode', 'true');">true (Pie Wedge)</button>
                   </div>
                 </div>
               </div>
@@ -138,12 +138,12 @@
                 <div class="api-item-header">
                   <code class="api-name">r</code>
                   <div class="api-meta">
-                    <span class="api-pill values-pill"><code>number &gt;= 0</code> | <code>expr</code></span>
+                    <span class="api-pill values-pill">number &gt;= 0 | expr</span>
                     <span class="api-pill default-pill">default: 0</span>
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Outer radius of the circle or arc in logical units. Supports dynamic time expressions like <code>r="100 + wave(2)*20"</code>.
+                  Outer radius of the circle or arc.
                 </div>
               </div>
 
@@ -151,7 +151,7 @@
                 <div class="api-item-header">
                   <code class="api-name">ir</code>
                   <div class="api-meta">
-                    <span class="api-pill values-pill"><code>number &gt;= 0</code> | <code>expr</code></span>
+                    <span class="api-pill values-pill">number &gt;= 0 | expr</span>
                     <span class="api-pill default-pill">default: 0</span>
                   </div>
                 </div>
@@ -164,12 +164,12 @@
                 <div class="api-item-header">
                   <code class="api-name">start</code>
                   <div class="api-meta">
-                    <span class="api-pill values-pill"><code>number</code> | <code>expr</code></span>
+                    <span class="api-pill values-pill">number | expr</span>
                     <span class="api-pill default-pill">default: 0</span>
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Start angle in <strong>degrees</strong> (<code>0°</code> is at 3 o'clock / positive X-axis).
+                  Start angle in degrees (<code>0°</code> is at 3 o'clock / positive X-axis).
                 </div>
               </div>
 
@@ -177,12 +177,12 @@
                 <div class="api-item-header">
                   <code class="api-name">end</code>
                   <div class="api-meta">
-                    <span class="api-pill values-pill"><code>number</code> | <code>expr</code></span>
+                    <span class="api-pill values-pill">number | expr</span>
                     <span class="api-pill default-pill">default: null</span>
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Absolute end angle in degrees. <strong>Note:</strong> Defaults to <code>null</code> (if neither <code>end</code> nor <code>sweep</code> is specified, a full 360° circle is drawn). If <code>sweep</code> is also specified, <code>sweep</code> takes priority and <code>end</code> is ignored.
+                  End angle in degrees. Defaults to <code>null</code> (if neither <code>end</code> nor <code>sweep</code> is specified, a full 360° circle is drawn). If <code>sweep</code> is also specified, <code>sweep</code> takes priority and <code>end</code> is ignored.
                 </div>
               </div>
 
@@ -190,12 +190,12 @@
                 <div class="api-item-header">
                   <code class="api-name">sweep</code>
                   <div class="api-meta">
-                    <span class="api-pill values-pill"><code>number</code> | <code>expr</code></span>
+                    <span class="api-pill values-pill">number | expr</span>
                     <span class="api-pill default-pill">default: null</span>
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Relative angular span in degrees from the <code>start</code> angle (e.g. <code>start="45" sweep="90"</code> draws from 45° to 135°). Defaults to <code>null</code> (full 360° circle). <strong>Takes priority over <code>end</code>.</strong>
+                  Relative angular span in degrees from the <code>start</code> angle (e.g. <code>start="45" sweep="90"</code> draws from 45° to 135°). Defaults to <code>null</code> (full 360° circle). Takes priority over <code>end</code>.
                 </div>
               </div>
 
@@ -203,12 +203,12 @@
                 <div class="api-item-header">
                   <code class="api-name">pie</code>
                   <div class="api-meta">
-                    <span class="api-pill values-pill"><code>false</code> | <code>true</code></span>
+                    <span class="api-pill values-pill">false | true</span>
                     <span class="api-pill default-pill">default: false</span>
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  When <code>true</code>, connects the endpoints of an open arc to the center origin <code>(0, 0)</code> to form a solid pie wedge.
+                  When <code>true</code>, connects the endpoints of an open arc to the center point to form a solid pie wedge. This mode is ignored if an inner radius (<code>ir</code>) is applied.
                 </div>
               </div>
 
@@ -216,7 +216,7 @@
                 <div class="api-item-header">
                   <code class="api-name">anticlockwise</code>
                   <div class="api-meta">
-                    <span class="api-pill values-pill"><code>false</code> | <code>true</code></span>
+                    <span class="api-pill values-pill">false | true</span>
                     <span class="api-pill default-pill">default: false</span>
                   </div>
                 </div>
@@ -230,12 +230,12 @@
                 <div class="api-item-header">
                   <code class="api-name">arrowstart</code>
                   <div class="api-meta">
-                    <span class="api-pill values-pill"><code>'auto'</code> | <code>number</code></span>
+                    <span class="api-pill values-pill">'auto' | number</span>
                     <span class="api-pill default-pill">default: 0</span>
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Draws a vector arrowhead at the starting point of an open arc curve. Use <code>'auto'</code> to scale proportionally to stroke width.
+                  Draws an arrowhead at the starting point of an open arc curve. Use <code>'auto'</code> to automatically scale the size to <code>strokewidth * 3.6</code>.
                 </div>
               </div>
 
@@ -243,12 +243,12 @@
                 <div class="api-item-header">
                   <code class="api-name">arrowend</code>
                   <div class="api-meta">
-                    <span class="api-pill values-pill"><code>'auto'</code> | <code>number</code></span>
+                    <span class="api-pill values-pill">'auto' | number</span>
                     <span class="api-pill default-pill">default: 0</span>
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Draws a vector arrowhead at the ending point of an open arc curve. Use <code>'auto'</code> to scale proportionally to stroke width.
+                  Draws an arrowhead at the ending point of an open arc curve. Use <code>'auto'</code> to automatically scale the size to <code>strokewidth * 3.6</code>.
                 </div>
               </div>
 
@@ -256,12 +256,12 @@
                 <div class="api-item-header">
                   <code class="api-name">arrowstyle</code>
                   <div class="api-meta">
-                    <span class="api-pill values-pill"><code>'filled'</code> | <code>'line'</code></span>
+                    <span class="api-pill values-pill">'filled' | 'line'</span>
                     <span class="api-pill default-pill">default: 'filled'</span>
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Visual appearance of open arc arrowheads (<code>'filled'</code> solid triangle vs. <code>'line'</code> open vector v-shape).
+                  Visual appearance of open arc arrowheads (<code>'filled'</code> solid triangle vs. <code>'line'</code> open v-shape).
                 </div>
               </div>
             </div>
@@ -418,7 +418,7 @@
         <!-- SECTION 5: PIE WEDGES & DONUT CHARTS -->
         <!-- ================================================================= -->
         <h2>5. Pie Wedges &amp; Donut Charts <code>pie, ir</code></h2>
-        <p>Setting <code>pie="true"</code> connects the ends of an open arc to the center origin <code>(0, 0)</code> to create solid wedges (like Pac-Man). Combining <code>ir &gt; 0</code> with <code>sweep</code> creates concentric donut chart segments.</p>
+        <p>Setting <code>pie="true"</code> connects the ends of an open arc to the center point to create solid wedges (like Pac-Man). Combining <code>ir &gt; 0</code> with <code>sweep</code> creates concentric donut chart segments.</p>
 
         <div class="example-card">
 

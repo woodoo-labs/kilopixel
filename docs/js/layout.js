@@ -52,7 +52,6 @@ class DocsSidebar extends HTMLElement {
             <li><a href="index.html" class="${currentPath === 'index.html' ? 'active' : ''}">Introduction</a></li>
             <li><a href="installation.html" class="${currentPath === 'installation.html' ? 'active' : ''}">Installation</a></li>
             <li><a href="coordinates.html" class="${currentPath === 'coordinates.html' ? 'active' : ''}">Coordinate System</a></li>
-            <li><a href="styling.html" class="${currentPath === 'styling.html' ? 'active' : ''}">Styling &amp; Rules</a></li>
           </ul>
         </div>
         <div class="sidebar-section">
@@ -73,6 +72,14 @@ class DocsSidebar extends HTMLElement {
             <li><a href="polyline.html" class="${currentPath === 'polyline.html' ? 'active' : ''}">Polyline</a></li>
             <li><a href="polygon.html" class="${currentPath === 'polygon.html' ? 'active' : ''}">Polygon</a></li>
             <li><a href="grid.html" class="${currentPath === 'grid.html' ? 'active' : ''}">Grid</a></li>
+          </ul>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">Styling</div>
+          <ul>
+            <li><a href="colors.html" class="${currentPath === 'colors.html' ? 'active' : ''}">Colors &amp; Gradients</a></li>
+            <li><a href="stroke-styles.html" class="${currentPath === 'stroke-styles.html' ? 'active' : ''}">Stroke Styles</a></li>
+            <li><a href="effects.html" class="${currentPath === 'effects.html' ? 'active' : ''}">Effects</a></li>
           </ul>
         </div>
         <div class="sidebar-section">
