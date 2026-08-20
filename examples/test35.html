@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Test 35 - Self-Referencing with 'this'</title>
+  <title>Test 35 - Self-Referencing with IDs</title>
   <style>
     body { background-color: #050505; margin: 0; padding: 50px; overflow: auto; display: block; }
     pxl-stage { display: block; width: 1000px; margin: 0 auto; background-color: #0a0a0a; border: 1px solid #333; }
@@ -12,29 +12,29 @@
 <body>
   <pxl-stage id="main" ratio="1000 / 1000">
     <pxl-layer>
-      <pxl-text x="500" y="50" text="'SELF REFERENCING WITH `this`'" size="30" fill="white" align="center"></pxl-text>
+      <pxl-text x="500" y="50" text="'SELF REFERENCING WITH IDs'" size="30" fill="white" align="center"></pxl-text>
       
       <!-- Example 1: Circle pulsating, using its own radius to drive its color! -->
       <!-- The larger it gets, the further it shifts the HSL hue -->
-      <pxl-circle 
+      <pxl-circle id="c1"
         x="200" y="400" 
         r="30 + wave(2)*70" 
-        fill="`hsl(${this.attributeValues.r * 3}, 100, 50)`">
+        fill="hsl(ref.c1.r * 3, 100, 50)">
       </pxl-circle>
 
       <!-- Example 2: Rect spinning based entirely on its own X coordinate! -->
-      <pxl-rect
+      <pxl-rect id="r1"
         x="500 + wave(4)*200" y="400" 
         w="100" h="100"
-        rotate="this.attributeValues.x * 2"
+        rotate="ref.r1.x * 2"
         fill="#0f0">
       </pxl-rect>
       
-      <!-- Example 3: Text printing its own ID and reading its Y position natively -->
+      <!-- Example 3: Text reading its Y position natively -->
       <pxl-text 
         id="SelfAwareText"
         x="800" y="400 + wave(1.5)*150" 
-        text="`I am ${this.id} at Y: ${Math.round(this.attributeValues.y)}`" 
+        text="'I am SelfAwareText at Y: ' + Math.round(ref.SelfAwareText.y)" 
         size="16" fill="yellow" align="center">
       </pxl-text>
 

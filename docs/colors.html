@@ -291,6 +291,7 @@
 
         <div class="callout-info">
           <p class="callout-body"><strong>Golden Rule of hsla Colors:</strong> Never use <code>%</code> signs! By sticking to pure numbers (e.g., <code>fill="hsl(120, 100, 50)"</code>), you can seamlessly animate colors using math and time variables without triggering syntax errors. The engine handles all the CSS units behind the scenes.</p>
+          <p class="callout-body" style="margin-top: 10px;"><em>Exception:</em> If you choose to use Javascript <strong>backticks</strong> (template literals) for string interpolation (e.g., <code>fill="`hsl(${t*90}, 100%, 50%)`"</code>), your math and time variables are evaluated natively by JavaScript. Because this bypasses Kilopixel's formatting helpers, you <strong>must</strong> include the <code>%</code> signs manually so the final generated string is valid CSS.</p>
         </div>
 
         <div class="example-card">
@@ -385,6 +386,101 @@
                       oninput="document.getElementById('sec3Circle3').setAttribute('fill', `hsl(t * ${this.value}, 100, 50)`); document.getElementById('sec3Circle3SpeedVal').innerText = this.value; document.getElementById('sec3Circle3SpeedCode').innerText = this.value;">
                   </div>
                   <p class="callout-body" style="margin-top: 1rem; font-size: 0.9rem; color: var(--slate-500);">This circle's Hue is driven by the time variable <code>t</code>. Adjusting the slider changes the multiplier, affecting how fast the colors cycle.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 4: LINEAR GRADIENTS -->
+        <!-- ================================================================= -->
+        <h2 style="margin-top: 4rem;">4. Linear Gradients</h2>
+        <p>The <code>linear()</code> math helper generates high-performance linear gradients. The first argument defines the direction (either an angle in degrees or an <code>[x1, y1, x2, y2]</code> coordinate array where 0.0 to 1.0 represents the element's bounding box). The second argument is an array of colors (which distribute evenly) or explicit <code>[offset, color]</code> pairs.</p>
+
+        <div class="example-card">
+          <div class="example-code">
+            <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Circle 1 (Angle Driven) --&gt;
+    &lt;pxl-circle x="500" y="230" r="140" fill="linear(<mark id="sec4Circle1AngleCode">45</mark>, ['#ff0055', '#00ffcc'])"&gt;&lt;/pxl-circle&gt;
+      
+    &lt;!-- Circle 2 (Coordinate Vector &amp; Multi-Stop) --&gt;
+    &lt;pxl-circle x="420" y="370" r="140" fill="linear([<mark id="sec4Circle2X1Code">0</mark>, <mark id="sec4Circle2Y1Code">0</mark>, <mark id="sec4Circle2X2Code">1</mark>, <mark id="sec4Circle2Y2Code">1</mark>], ['#000', '#f00', '#000'])"&gt;&lt;/pxl-circle&gt;
+      
+    &lt;!-- Circle 3 (Animated Angle) --&gt;
+    &lt;pxl-circle x="580" y="370" r="140" fill="linear(t * <mark id="sec4Circle3SpeedCode">90</mark>, ['#8A2387', '#E94057', '#F27121'])"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+          </div>
+
+          <div class="demo-container">
+            <pxl-stage id="sec4Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                <pxl-circle id="sec4Circle1" x="500" y="230" r="140" fill="linear(45, ['#ff0055', '#00ffcc'])"></pxl-circle>
+                <pxl-circle id="sec4Circle2" x="420" y="370" r="140" fill="linear([0, 0, 1, 1], ['#000', '#f00', '#000'])"></pxl-circle>
+                <pxl-circle id="sec4Circle3" x="580" y="370" r="140" fill="linear(t * 90, ['#8A2387', '#E94057', '#F27121'])"></pxl-circle>
+              </pxl-layer>
+            </pxl-stage>
+
+            <div class="demo-controls">
+              <div class="demo-controls-header">
+                <h3 class="demo-controls-title">Controls</h3>
+                <div class="demo-tabs">
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4Circle1Tab')">Circle 1</button>
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4Circle2Tab')">Circle 2</button>
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4Circle3Tab')">Circle 3</button>
+                </div>
+              </div>
+
+              <!-- Linear Circle 1 Tab -->
+              <div class="tab-content active" id="sec4Circle1Tab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Angle (Degrees)</span> <span id="sec4Circle1AngleVal">45</span></label>
+                    <input type="range" min="0" max="360" step="1" value="45" autocomplete="off"
+                      oninput="document.getElementById('sec4Circle1').setAttribute('fill', `linear(${this.value}, ['#ff0055', '#00ffcc'])`); document.getElementById('sec4Circle1AngleVal').innerText = this.value; document.getElementById('sec4Circle1AngleCode').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Linear Circle 2 Tab -->
+              <div class="tab-content" id="sec4Circle2Tab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>X1 (Start X)</span> <span id="sec4Circle2X1Val">0</span></label>
+                    <input type="range" min="-1" max="2" step="0.1" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec4Circle2').setAttribute('fill', `linear([${this.value}, ${document.getElementById('sec4Circle2Y1Val').innerText}, ${document.getElementById('sec4Circle2X2Val').innerText}, ${document.getElementById('sec4Circle2Y2Val').innerText}], ['#000', '#f00', '#000'])`); document.getElementById('sec4Circle2X1Val').innerText = this.value; document.getElementById('sec4Circle2X1Code').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Y1 (Start Y)</span> <span id="sec4Circle2Y1Val">0</span></label>
+                    <input type="range" min="-1" max="2" step="0.1" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec4Circle2').setAttribute('fill', `linear([${document.getElementById('sec4Circle2X1Val').innerText}, ${this.value}, ${document.getElementById('sec4Circle2X2Val').innerText}, ${document.getElementById('sec4Circle2Y2Val').innerText}], ['#000', '#f00', '#000'])`); document.getElementById('sec4Circle2Y1Val').innerText = this.value; document.getElementById('sec4Circle2Y1Code').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>X2 (End X)</span> <span id="sec4Circle2X2Val">1</span></label>
+                    <input type="range" min="-1" max="2" step="0.1" value="1" autocomplete="off"
+                      oninput="document.getElementById('sec4Circle2').setAttribute('fill', `linear([${document.getElementById('sec4Circle2X1Val').innerText}, ${document.getElementById('sec4Circle2Y1Val').innerText}, ${this.value}, ${document.getElementById('sec4Circle2Y2Val').innerText}], ['#000', '#f00', '#000'])`); document.getElementById('sec4Circle2X2Val').innerText = this.value; document.getElementById('sec4Circle2X2Code').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Y2 (End Y)</span> <span id="sec4Circle2Y2Val">1</span></label>
+                    <input type="range" min="-1" max="2" step="0.1" value="1" autocomplete="off"
+                      oninput="document.getElementById('sec4Circle2').setAttribute('fill', `linear([${document.getElementById('sec4Circle2X1Val').innerText}, ${document.getElementById('sec4Circle2Y1Val').innerText}, ${document.getElementById('sec4Circle2X2Val').innerText}, ${this.value}], ['#000', '#f00', '#000'])`); document.getElementById('sec4Circle2Y2Val').innerText = this.value; document.getElementById('sec4Circle2Y2Code').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Linear Circle 3 Tab -->
+              <div class="tab-content" id="sec4Circle3Tab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Speed (Degrees/sec)</span> <span id="sec4Circle3SpeedVal">90</span></label>
+                    <input type="range" min="-360" max="360" step="10" value="90" autocomplete="off"
+                      oninput="document.getElementById('sec4Circle3').setAttribute('fill', `linear(t * ${this.value}, ['#8A2387', '#E94057', '#F27121'])`); document.getElementById('sec4Circle3SpeedVal').innerText = this.value; document.getElementById('sec4Circle3SpeedCode').innerText = this.value;">
+                  </div>
+                  <p class="callout-body" style="margin-top: 1rem; font-size: 0.9rem; color: var(--slate-500);">This circle's gradient angle is driven by the time variable <code>t</code>. Adjusting the slider changes the multiplier, affecting how fast the gradient spins.</p>
                 </div>
               </div>
 

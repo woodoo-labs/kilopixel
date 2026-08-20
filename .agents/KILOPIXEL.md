@@ -187,8 +187,7 @@ The compiler uses a progressive "Fast Path" classification system. Static string
    - Exception: `"t"` → compiled as time expression
    - Exception: `"true"` / `"false"` → boolean
    - Exception: Math constants like `"PI"` → numeric value from scope
-   - Static CSS color functions (`rgb(...)`, `hsl(...)` with only numbers) → returned as string
-   - Static CSS filters (`blur(...)`, `drop-shadow(...)`) → returned as string
+   - Static CSS color functions (`rgb(...)`, `rgba(...)` with only numbers) → returned as string
 4. **Quoted String Literals** (`'Hello World'`) → inner string extracted
 5. **Pure Numbers** (`"100"`, `"-50"`, `"0.25"`) → parsed to Number
 6. **Math/Animation Guard** — regex detects `t`, `ref.`, `toLocal(`, operators, parentheses → compiled
@@ -225,7 +224,7 @@ const fn = new Function('scope', 'ref', `
 The outer function (factory) executes ONCE, destructuring the entire scope. The inner function (closure) executes every frame, receiving only `_t`.
 
 **Properties added to the function**:
-- `fn.isTimeDependent` — true if uses `t` or time drivers or `this`
+- `fn.isTimeDependent` — true if uses `t` or time drivers
 - `fn.variableDependencies` — array of `ref.xxx` strings (if any)
 
 **Static Path** (no time, no variables):
@@ -1431,5 +1430,4 @@ Note: `ref.myShape.tx` gives `x + dx` in the shape's OWN local space. `toLocal(r
 
 **Coordinate mapping**: `toLocal(ref.target, 'x'|'y'|'dx'|'dy'|'tx'|'ty'|'rotate'|'scale'|'scalex'|'scaley')`
 
-**Self-reference**: `this.attributeValues.xxx`, `this.id`
 **Variables**: `t` (time in seconds)
