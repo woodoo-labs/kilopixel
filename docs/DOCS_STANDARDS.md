@@ -5,7 +5,7 @@ This guide establishes the visual and architectural standards for creating inter
 ## 1. Color Semantics
 We use a strict color-coding system to separate context (the stage/layer) from content (the shapes).
 
-* **Teal / Cyan (`#0f766e`, `#14b8a6`)**: Used for the **Stage Environment** (Stage space). This includes solid `#0f766e` (`teal-700`) for Stage corners, origin dots (`Stage (0, 0)`), and corner coordinate labels (`(1000, 0)`), and `#14b8a6` (`teal-500`) for Stage dimension arrows (`width = 1000 (fixed)`) and helper lines.
+* **Sky Blue (`#0284c7`, `#0ea5e9`, `#7dd3fc`)**: Used for the **Stage Environment** (Stage space). This includes solid `#0284c7` (`sky-600`) for the Stage origin dot (`Stage (0, 0)`), `#0ea5e9` (`sky-500`) for Stage dimension arrows (`width = 1000 (fixed)`) and helper lines, and `#7dd3fc` (`sky-300`) for other Stage corners and their labels (`(1000, 0)`).
 * **Violet / Purple (`#6d28d9`, `#a78bfa`)**: Used for the **Layer Environment** (Layer space). This includes solid `#6d28d9` (`violet-700`) for Layer Center coordinates/dots and `#a78bfa` (`violet-400`) for subtle Layer coordinate helper lines and labels (`x =`, `y =`).
 * **Neutral Slate (`#f1f5f9`, `#cbd5e1`)**: Used for **Background Grids** (`#f1f5f9`) and internal coordinate crosshair lines (`#cbd5e1`) to ensure they remain subtle and do not visually compete with the environment or shape coordinates.
 * **Shape Palettes (Orange, Blue, Green)**: When demonstrating single or multiple independent interacting shapes, use these standardized single-palette lighter/darker color schemes (`400` Center, `600` Offset Vectors, `700` Offsets, `300` Background Guides):
@@ -66,11 +66,11 @@ Interactive playgrounds must follow a standardized DOM architecture to maintain 
 ### Layout Structure
 Every documentation example must follow a standardized 3-part layout:
 1. **Visible Declarative Code Block (`<pre><code class="language-html">`)**: Placed **above** the demo container so developers see the declarative syntax immediately. Use `<mark id="code...">` around dynamic values.
-2. **Reactive Stage (`<pxl-stage class="demo-stage">`)**: Placed at the top inside `<div class="demo-container">`.
-3. **Interactive Controls (`<div class="demo-controls">`)**: Placed **below** `<pxl-stage>` inside `<div class="demo-container">`. Every example must feature interactive controls (sliders or toggle buttons). The header title must be simply `Controls` without redundant prefixes.
+2. **Interactive Controls (`<div class="demo-controls">`)**: Placed **above** `<pxl-stage>` inside `<div class="demo-container">`. Every example must feature interactive controls (sliders or toggle buttons). The header title must be simply `Controls` without redundant prefixes.
+3. **Reactive Stage (`<pxl-stage class="demo-stage">`)**: Placed at the bottom inside `<div class="demo-container">`. The container's CSS flex gap automatically spaces the stage away from the controls.
 
 ```html
-<!-- 1. Declarative Code Block Above Stage -->
+<!-- 1. Declarative Code Block Above Container -->
 <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;pxl-circle x="500" y="300" r="&lt;mark id="sec1CircleRCode"&gt;200&lt;/mark&gt;" stroke="#f97316"&gt;&lt;/pxl-circle&gt;
@@ -78,10 +78,7 @@ Every documentation example must follow a standardized 3-part layout:
 &lt;/pxl-stage&gt;</code></pre>
 
 <div class="demo-container">
-  <!-- 2. The reactive stage -->
-  <pxl-stage class="demo-stage">...</pxl-stage>
-  
-  <!-- 3. The controls block below stage -->
+  <!-- 2. The controls block above stage -->
   <div class="demo-controls">
     <div class="demo-controls-header">
       <h3 class="demo-controls-title">Controls</h3>
@@ -101,6 +98,9 @@ Every documentation example must follow a standardized 3-part layout:
       </div>
     </div>
   </div>
+
+  <!-- 3. The reactive stage -->
+  <pxl-stage class="demo-stage">...</pxl-stage>
 </div>
 ```
 * **Required Script Imports:** Every documentation page must include `<script src="js/layout.js"></script>` and `<script src="js/docs.js"></script>` in `<head>`.

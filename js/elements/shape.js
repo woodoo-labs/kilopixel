@@ -145,11 +145,19 @@ class Shape extends PxlNode {
       grad = ctx.createLinearGradient(gx1, gy1, gx2, gy2);
 
     } else if (styleValue.type === 'radial') {
-      const rx = (box.left + width * styleValue.cx) * u;
-      const ry = (box.top + height * styleValue.cy) * u;
-      const radius = (Math.max(width, height) / 2) * styleValue.r * u;
+      const dx = Math.max(styleValue.x1, 1 - styleValue.x1) * width;
+      const dy = Math.max(styleValue.y1, 1 - styleValue.y1) * height;
+      const maxD = Math.sqrt(dx * dx + dy * dy);
       
-      grad = ctx.createRadialGradient(rx, ry, 0, rx, ry, radius);
+      const gx0 = (box.left + width * styleValue.x0) * u;
+      const gy0 = (box.top + height * styleValue.y0) * u;
+      const gr0 = maxD * styleValue.r0 * u;
+      
+      const gx1 = (box.left + width * styleValue.x1) * u;
+      const gy1 = (box.top + height * styleValue.y1) * u;
+      const gr1 = maxD * styleValue.r1 * u;
+      
+      grad = ctx.createRadialGradient(gx0, gy0, gr0, gx1, gy1, gr1);
 
     } else if (styleValue.type === 'conic') {
       const gcx = (box.left + width * styleValue.cx) * u;
