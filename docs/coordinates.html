@@ -1252,7 +1252,6 @@
             <pxl-var id="sec9FreqY" value="3"></pxl-var>
             <pxl-var id="sec9Radius" value="40"></pxl-var>
             
-            <pxl-var id="sec9OrbHue" value="loop(10) * 360"></pxl-var>
             <pxl-var id="sec9OrbX" value="sin(t * ref.sec9FreqX.value) * 450"></pxl-var>
             <pxl-var id="sec9OrbY" value="cos(t * ref.sec9FreqY.value) * 250"></pxl-var>
             <!-- Axes Helpers -->
@@ -1260,15 +1259,24 @@
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
             <!-- Line connecting anchor to orb -->
-            <pxl-line x1="0" y1="0" x2="ref.sec9OrbX.value" y2="ref.sec9OrbY.value" stroke="ref.sec9FlyingOrb.stroke" strokewidth="4"></pxl-line>
+            <pxl-line x1="0" y1="0" x2="ref.sec9OrbX.value" y2="ref.sec9OrbY.value" stroke="#94a3b8" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
             <!-- Central Anchor Shape (Orange Scheme) -->
             <pxl-circle r="5" fill="#f97316"></pxl-circle>
             <pxl-text x="25" y="-20" text="'Anchor'" size="27" fill="#fb923c"></pxl-text>
+          </pxl-layer>
 
-            <!-- Flying Orb -->
-            <pxl-circle id="sec9FlyingOrb" x="ref.sec9OrbX.value" y="ref.sec9OrbY.value" r="ref.sec9Radius.value" fill="hsla(ref.sec9OrbHue.value, 100, 60, 0.4)" stroke="hsl(ref.sec9OrbHue.value, 100, 60)" strokewidth="4" shadowcolor="ref.sec9FlyingOrb.stroke" shadowblur="20"></pxl-circle>
-            <pxl-text x="ref.sec9OrbX.value + 50" y="ref.sec9OrbY.value - 20" text="'Oscillator'" size="27" fill="ref.sec9FlyingOrb.stroke"></pxl-text>
+          <!-- Top Layer: The Chameleon Orb Masking Trick -->
+          <pxl-layer id="sec9OrbMaskLayer" x="500" y="300" rotate="0">
+            <!-- 1. The Stencil: A solid circle at the orb location -->
+            <pxl-circle id="sec9FlyingOrb" x="ref.sec9OrbX.value" y="ref.sec9OrbY.value" r="ref.sec9Radius.value" fill="#ffffff" shadowcolor="#000000" shadowblur="10"></pxl-circle>
+            
+            <!-- 2. The Gradient Mask: Draws the gradient ONLY over the stencil -->
+            <pxl-rect x="0" y="0" w="980" h="580" fill="linear(t * 50, ['#0ea5e9', '#8b5cf6', '#ec4899'])" blend="source-in"></pxl-rect>
+            
+            <!-- 3. Post-Mask Enhancements: Draw a crisp white ring and the text ON TOP of the masked orb -->
+            <pxl-circle x="ref.sec9OrbX.value" y="ref.sec9OrbY.value" r="ref.sec9Radius.value" fill="none" stroke="#ffffff" strokewidth="3"></pxl-circle>
+            <pxl-text x="ref.sec9OrbX.value + 50" y="ref.sec9OrbY.value - 20" text="'Oscillator'" size="27" fill="#ffffff" shadowcolor="#000000" shadowblur="5"></pxl-text>
           </pxl-layer>
         </pxl-stage>
       </div>
