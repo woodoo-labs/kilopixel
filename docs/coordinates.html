@@ -1272,11 +1272,11 @@
             <pxl-circle id="sec9FlyingOrb" x="ref.sec9OrbX.value" y="ref.sec9OrbY.value" r="ref.sec9Radius.value" fill="#ffffff" shadowcolor="#000000" shadowblur="10"></pxl-circle>
             
             <!-- 2. The Gradient Mask: Draws the gradient ONLY over the stencil -->
-            <pxl-rect x="0" y="0" w="980" h="580" fill="linear(t * 50, ['#0ea5e9', '#8b5cf6', '#ec4899'])" blend="source-in"></pxl-rect>
+            <pxl-rect id="sec9GradientRect" x="0" y="0" w="980" h="580" fill="linear(t * 50, ['#0ea5e9', '#8b5cf6', '#ec4899'])" blend="source-in"></pxl-rect>
             
             <!-- 3. Post-Mask Enhancements: Draw a crisp white ring and the text ON TOP of the masked orb -->
             <pxl-circle x="ref.sec9OrbX.value" y="ref.sec9OrbY.value" r="ref.sec9Radius.value" fill="none" stroke="#ffffff" strokewidth="3"></pxl-circle>
-            <pxl-text x="ref.sec9OrbX.value + 50" y="ref.sec9OrbY.value - 20" text="'Oscillator'" size="27" fill="#ffffff" shadowcolor="#000000" shadowblur="5"></pxl-text>
+            <pxl-text x="ref.sec9OrbX.value + 50" y="ref.sec9OrbY.value - 20" text="'Oscillator'" size="27" fill="ref.sec9GradientRect.fill" shadowcolor="#000000" shadowblur="5"></pxl-text>
           </pxl-layer>
         </pxl-stage>
       </div>
