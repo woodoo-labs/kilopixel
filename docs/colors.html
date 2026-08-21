@@ -397,12 +397,13 @@
         <!-- SECTION 4: LINEAR GRADIENTS -->
         <!-- ================================================================= -->
         <h2 style="margin-top: 4rem;">4. Linear Gradients</h2>
-        <p>The <code>linear()</code> math helper generates high-performance linear gradients. Rectangles are the perfect shape to understand them. The first argument defines the direction (either an angle in degrees or an <code>[x1, y1, x2, y2]</code> coordinate array where 0 to 1 represents the element's bounding box). The second argument is an array of colors (which distribute evenly) or explicit <code>[offset, color]</code> pairs.</p>
+        <p>The <code>linear()</code> math helper generates high-performance linear gradients. The first argument defines the direction (either an angle in degrees or an <code>[x1, y1, x2, y2]</code> coordinate array where 0 to 1 represents the element's bounding box). The second argument is an array of colors (which distribute evenly) or explicit <code>[offset, color]</code> pairs.</p>
 
         <div class="callout-info">
           <p class="callout-body"><strong>The 0-to-1 Bounding Box:</strong> In Kilopixel, gradients are locked to the element's bounding box! The top-left corner of any shape is always exactly <code>(0, 0)</code>, and the bottom-right is <code>(1, 1)</code>. This guarantees that if you move, scale, or stretch your shape, the gradient stretches seamlessly with it—no complex trigonometry required!</p>
+          <p class="callout-body" style="margin-top: 1rem;">In the diagrams below, the <span style="color: #3b82f6; font-weight: 600;">blue coordinates</span> represent the fixed corners of the shape's invisible bounding box. The <span style="color: #8b5cf6; font-weight: 600;">purple vectors</span> represent the actual <code>[x1, y1, x2, y2]</code> array driving the gradient's direction through that box.</p>
 
-          <pxl-stage ratio="5 / 2" style="width: 100%; background: transparent; margin-top: 1rem;">
+          <pxl-stage ratio="2 / 1" style="width: 100%; background: transparent; margin-top: 1rem;">
             <pxl-layer>
               <pxl-grid stroke="#cbd5e1" major="2"></pxl-grid>
               
@@ -414,24 +415,27 @@
               <pxl-circle x="300" y="275" r="8" fill="#3b82f6"></pxl-circle>
               <pxl-text x="300" y="290" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
               <pxl-line x1="50" y1="125" x2="300" y2="275" stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
+              <pxl-text x="175" y="450" text="'[0, 0, 1, 1]'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
         
               <!-- 2. Ellipse (rx=75, ry=150, so w=150, h=300) -->
-              <pxl-ellipse x="500" y="200" rx="75" ry="150" fill="linear([0, 0, 1, 1], [0, '#e2e8f0', 0.4, '#e2e8f0', 0.6, '#94a3b8', 1, '#94a3b8'])"></pxl-ellipse>
+              <pxl-ellipse x="500" y="200" rx="75" ry="150" fill="linear([1, 1, 0, 0], [0, '#e2e8f0', 0.4, '#e2e8f0', 0.6, '#94a3b8', 1, '#94a3b8'])"></pxl-ellipse>
               <pxl-rect x="500" y="200" w="150" h="300" fill="none" stroke="#3b82f6" strokewidth="2" linedash="5, 5"></pxl-rect>
               <pxl-circle x="425" y="50" r="8" fill="#3b82f6"></pxl-circle>
               <pxl-text x="425" y="35" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
               <pxl-circle x="575" y="350" r="8" fill="#3b82f6"></pxl-circle>
               <pxl-text x="575" y="365" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
-              <pxl-line x1="425" y1="50" x2="575" y2="350" stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
+              <pxl-line x1="575" y1="350" x2="425" y2="50" stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
+              <pxl-text x="500" y="450" text="'[1, 1, 0, 0]'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
         
               <!-- 3. Polyline (Worm, w=250, h=200) -->
-              <pxl-polyline points="700,200; 784,100; 866,300; 950,200" smooth="1" closed="false" stroke="linear([0, 0, 1, 1], [0, '#e2e8f0', 0.4, '#e2e8f0', 0.6, '#94a3b8', 1, '#94a3b8'])" strokewidth="20" fill="none" linecap="round"></pxl-polyline>
+              <pxl-polyline points="700,200; 784,100; 866,300; 950,200" smooth="1" closed="false" stroke="linear([0, 0, 1, 0], [0, '#e2e8f0', 0.4, '#e2e8f0', 0.6, '#94a3b8', 1, '#94a3b8'])" strokewidth="20" fill="none" linecap="round"></pxl-polyline>
               <pxl-rect x="825" y="200" w="250" h="200" fill="none" stroke="#3b82f6" strokewidth="2" linedash="5, 5"></pxl-rect>
               <pxl-circle x="700" y="100" r="8" fill="#3b82f6"></pxl-circle>
               <pxl-text x="700" y="85" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
               <pxl-circle x="950" y="300" r="8" fill="#3b82f6"></pxl-circle>
               <pxl-text x="950" y="315" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
-              <pxl-line x1="700" y1="100" x2="950" y2="300" stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
+              <pxl-line x1="700" y1="100" x2="950" y2="100" stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
+              <pxl-text x="825" y="450" text="'[0, 0, 1, 0]'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
         
             </pxl-layer>
           </pxl-stage>
@@ -448,20 +452,20 @@
               <pxl-rect x="150" y="200" w="250" h="150" fill="linear(0, [0, '#e2e8f0', 0.4, '#e2e8f0', 0.6, '#94a3b8', 1, '#94a3b8'])"></pxl-rect>
               <pxl-rect x="150" y="200" w="250" h="150" fill="none" stroke="#3b82f6" strokewidth="2" linedash="5, 5"></pxl-rect>
               <pxl-line x1="25" y1="200" x2="275" y2="200" stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
-              <pxl-text x="150" y="110" text="'0°'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+              <pxl-text x="150" y="110" text="'0°'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
         
               <!-- 2. 45 Degrees -->
               <pxl-rect x="500" y="200" w="250" h="150" fill="linear(45, [0, '#e2e8f0', 0.4, '#e2e8f0', 0.6, '#94a3b8', 1, '#94a3b8'])"></pxl-rect>
               <pxl-rect x="500" y="200" w="250" h="150" fill="none" stroke="#3b82f6" strokewidth="2" linedash="5, 5"></pxl-rect>
               <!-- 45 deg vector through center (500,200). dx/dy = 150 * 0.707 = 106 -->
               <pxl-line x1="400" y1="100" x2="600" y2="300" stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
-              <pxl-text x="500" y="110" text="'45°'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+              <pxl-text x="500" y="110" text="'45°'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
         
               <!-- 3. 90 Degrees -->
               <pxl-rect x="850" y="200" w="250" h="150" fill="linear(90, [0, '#e2e8f0', 0.4, '#e2e8f0', 0.6, '#94a3b8', 1, '#94a3b8'])"></pxl-rect>
               <pxl-rect x="850" y="200" w="250" h="150" fill="none" stroke="#3b82f6" strokewidth="2" linedash="5, 5"></pxl-rect>
               <pxl-line x1="850" y1="125" x2="850" y2="275" stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
-              <pxl-text x="850" y="110" text="'90°'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+              <pxl-text x="850" y="110" text="'90°'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
