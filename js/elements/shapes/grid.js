@@ -98,7 +98,7 @@ class Grid extends Shape {
     if (labels && major > 0) {
       const fillAttr = this.attributeValues.fill;
       ctx.fillStyle = (fillAttr && fillAttr !== 'none' && fillAttr !== 'transparent') 
-                        ? this.createGradient(ctx, u, fillAttr) 
+                        ? this.createGradient(ctx, u, fillAttr, 0) 
                         : ctx.strokeStyle;
       ctx.font = `${labelsize * u}px monospace`;
       ctx.textAlign = 'center';

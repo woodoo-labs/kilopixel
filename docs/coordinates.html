@@ -385,7 +385,7 @@
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4LayerTab')">Layer</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4LayerTab')">Layer <span class="indicator-dot"></span></button>
               <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4EllipseTab')">Ellipse <span class="indicator-dot"></span></button>
             </div>
           </div>
@@ -404,7 +404,7 @@
                   oninput="document.getElementById('sec4Layer').setAttribute('y', this.value); document.getElementById('sec4LayerYVal').innerText = this.value; document.getElementById('sec4LayerYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Rotation <span id="sec4LayerRotVal">0°</span></label>
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec4LayerRotVal">0°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
                   oninput="document.getElementById('sec4Layer').setAttribute('rotate', this.value); document.getElementById('sec4LayerRotVal').innerText = this.value + '°'; document.getElementById('sec4LayerRotCode').innerText = this.value;">
               </div>

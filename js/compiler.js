@@ -52,58 +52,46 @@ pxl.scope.clamp = (v, low, high) => Math.max(low, Math.min(high, v));
 pxl.scope.lerp  = (a, b, alpha) => a + (b - a) * alpha;
 pxl.scope.map   = (v, inMin, inMax, outMin, outMax) => (v - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 
-pxl.scope.linear = (direction, colorsArray) => {
-  let x1, y1, x2, y2, angle;
-  if (typeof direction === 'number') {
-    angle = direction;
-    const rad = direction * Math.PI / 180;
-    const absCos = Math.abs(Math.cos(rad));
-    const absSin = Math.abs(Math.sin(rad));
-    const stretch = 1 / Math.max(absCos, absSin); // Perfectly hits the square bounding box edges
-    x1 = (-Math.cos(rad) * stretch + 1) / 2;
-    y1 = (-Math.sin(rad) * stretch + 1) / 2;
-    x2 = (Math.cos(rad) * stretch + 1) / 2;
-    y2 = (Math.sin(rad) * stretch + 1) / 2;
-  } else if (Array.isArray(direction)) {
-    [x1, y1, x2, y2] = direction;
-  }
-
-  const parsedStops = [];
-  if (Array.isArray(colorsArray)) {
-    if (typeof colorsArray[0] === 'string') {
-      const step = 1 / (colorsArray.length - 1 || 1);
-      for (let i = 0; i < colorsArray.length; i++) {
-        parsedStops.push({ offset: i * step, color: colorsArray[i] });
-      }
-    } else {
-      for (let i = 0; i < colorsArray.length; i += 2) {
-        parsedStops.push({ offset: colorsArray[i], color: colorsArray[i + 1] });
-      }
+// Shared stop-parsing helper for all gradient types (zero duplication)
+function _parseStops(colorsArray) {
+  const stops = [];
+  if (!Array.isArray(colorsArray) || colorsArray.length === 0) return stops;
+  if (typeof colorsArray[0] === 'string') {
+    const step = 1 / (colorsArray.length - 1 || 1);
+    for (let i = 0; i < colorsArray.length; i++) {
+      stops.push({ offset: i * step, color: colorsArray[i] });
+    }
+  } else {
+    for (let i = 0; i < colorsArray.length; i += 2) {
+      stops.push({ offset: colorsArray[i], color: colorsArray[i + 1] });
     }
   }
-  return { isGradient: true, type: 'linear', x1, y1, x2, y2, angle, stops: parsedStops };
+  return stops;
+}
+
+pxl.scope.linear = (direction, colorsArray) => {
+  const stops = _parseStops(colorsArray);
+  if (typeof direction === 'number') {
+    return { isGradient: true, type: 'linear', angle: direction, stops };
+  }
+  const [x1, y1, x2, y2] = direction;
+  return { isGradient: true, type: 'linear', x1, y1, x2, y2, stops };
 };
 
 pxl.scope.radial = (radiusObj, colorsArray) => {
-  let r = 1;
-  let cx = 0.5, cy = 0.5;
+  const stops = _parseStops(colorsArray);
+  let r = 1, cx = 0.5, cy = 0.5;
   if (typeof radiusObj === 'number') r = radiusObj;
   else if (Array.isArray(radiusObj)) [cx, cy, r] = radiusObj;
-  
-  const parsedStops = [];
-  if (Array.isArray(colorsArray)) {
-    if (typeof colorsArray[0] === 'string') {
-      const step = 1 / (colorsArray.length - 1 || 1);
-      for (let i = 0; i < colorsArray.length; i++) {
-        parsedStops.push({ offset: i * step, color: colorsArray[i] });
-      }
-    } else {
-      for (let i = 0; i < colorsArray.length; i += 2) {
-        parsedStops.push({ offset: colorsArray[i], color: colorsArray[i + 1] });
-      }
-    }
-  }
-  return { isGradient: true, type: 'radial', cx, cy, r, stops: parsedStops };
+  return { isGradient: true, type: 'radial', cx, cy, r, stops };
+};
+
+pxl.scope.conic = (angleOrConfig, colorsArray) => {
+  const stops = _parseStops(colorsArray);
+  let startAngle = 0, cx = 0.5, cy = 0.5;
+  if (typeof angleOrConfig === 'number') startAngle = angleOrConfig;
+  else if (Array.isArray(angleOrConfig)) [startAngle, cx, cy] = angleOrConfig;
+  return { isGradient: true, type: 'conic', startAngle, cx, cy, stops };
 };
 
 pxl.scopeKeys = Object.keys(pxl.scope).join(', ');

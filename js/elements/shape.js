@@ -11,14 +11,14 @@ class Shape extends PxlNode {
     // Pre-allocated bounding box object (zero-GC)
     this.boundingBox = { left: 0, right: 0, top: 0, bottom: 0 };
     
-    // Memory Cache to prevent GC allocations at 60 FPS
-    this._scaledDash = [];
-    this._cachedGradient = null;
-    this._lastGradientConfig = null;
-    this._lastGradientU = 0;
+    // Dual-Slot Gradient Cache: [0] = fill, [1] = stroke (pre-allocated, zero-GC)
+    this._gradCache = [
+      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, grad: null },
+      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, grad: null }
+    ];
 
-
-    this._emptyDash = []; // Zero-GC empty linedash
+    this._scaledDash = [];  // Pre-allocated for zero-GC line dash scaling
+    this._emptyDash = [];   // Zero-GC empty linedash
     
     this._compiledOnClick = null;
     this._compiledOnEnter = null;
@@ -101,21 +101,23 @@ class Shape extends PxlNode {
     return this.boundingBox;
   }
 
-  createGradient(ctx, u, styleValue) {
+  createGradient(ctx, u, styleValue, slot) {
     if (typeof styleValue !== 'object' || !styleValue.isGradient) {
       return styleValue;
     }
 
-    // Zero-Allocation Gradient Cache (Object Reference Equality)
-    if (this._lastGradientConfig === styleValue && this._lastGradientU === u) {
-      return this._cachedGradient;
+    const box = this.getBoundingBox();
+    const c = this._gradCache[slot];
+
+    // Dual-Slot Gradient Cache (bbox-aware)
+    if (c.config === styleValue && c.u === u &&
+        c.bl === box.left && c.bt === box.top &&
+        c.br === box.right && c.bb === box.bottom) {
+      return c.grad;
     }
 
-    const box = this.getBoundingBox();
     const width = box.right - box.left;
     const height = box.bottom - box.top;
-    const cx = (box.left + box.right) / 2;
-    const cy = (box.top + box.bottom) / 2;
 
     let grad;
 
@@ -123,14 +125,16 @@ class Shape extends PxlNode {
       let gx1, gy1, gx2, gy2;
       
       if (styleValue.angle !== undefined) {
+        const bx = (box.left + box.right) / 2;
+        const by = (box.top + box.bottom) / 2;
         const rad = styleValue.angle * Math.PI / 180;
         const cosRad = Math.cos(rad);
         const sinRad = Math.sin(rad);
         const distance = Math.abs((width / 2) * cosRad) + Math.abs((height / 2) * sinRad);
-        gx1 = (cx - distance * cosRad) * u;
-        gy1 = (cy - distance * sinRad) * u;
-        gx2 = (cx + distance * cosRad) * u;
-        gy2 = (cy + distance * sinRad) * u;
+        gx1 = (bx - distance * cosRad) * u;
+        gy1 = (by - distance * sinRad) * u;
+        gx2 = (bx + distance * cosRad) * u;
+        gy2 = (by + distance * sinRad) * u;
       } else {
         gx1 = (box.left + width * styleValue.x1) * u;
         gy1 = (box.top + height * styleValue.y1) * u;
@@ -139,12 +143,6 @@ class Shape extends PxlNode {
       }
       
       grad = ctx.createLinearGradient(gx1, gy1, gx2, gy2);
-      
-      const stops = styleValue.stops;
-      const len = stops.length;
-      for (let i = 0; i < len; i++) {
-        grad.addColorStop(stops[i].offset, stops[i].color);
-      }
 
     } else if (styleValue.type === 'radial') {
       const rx = (box.left + width * styleValue.cx) * u;
@@ -152,18 +150,28 @@ class Shape extends PxlNode {
       const radius = (Math.max(width, height) / 2) * styleValue.r * u;
       
       grad = ctx.createRadialGradient(rx, ry, 0, rx, ry, radius);
+
+    } else if (styleValue.type === 'conic') {
+      const gcx = (box.left + width * styleValue.cx) * u;
+      const gcy = (box.top + height * styleValue.cy) * u;
       
+      grad = ctx.createConicGradient(styleValue.startAngle * Math.PI / 180, gcx, gcy);
+    }
+
+    if (grad) {
       const stops = styleValue.stops;
       const len = stops.length;
       for (let i = 0; i < len; i++) {
         grad.addColorStop(stops[i].offset, stops[i].color);
       }
-    }
 
-    if (grad) {
-      this._lastGradientConfig = styleValue;
-      this._lastGradientU = u;
-      this._cachedGradient = grad;
+      c.config = styleValue;
+      c.u = u;
+      c.bl = box.left;
+      c.bt = box.top;
+      c.br = box.right;
+      c.bb = box.bottom;
+      c.grad = grad;
       return grad;
     }
 
@@ -183,12 +191,12 @@ class Shape extends PxlNode {
     const { fill, stroke, strokewidth, linecap, linejoin, miterlimit, linedash, dashoffset } = this.attributeValues;
 
     if (fill && fill !== 'none' && fill !== 'transparent') {
-      ctx.fillStyle = this.createGradient(ctx, u, fill);
+      ctx.fillStyle = this.createGradient(ctx, u, fill, 0);
       ctx.fill();
     }
     
     if (stroke && stroke !== 'none' && stroke !== 'transparent' && strokewidth > 0) {
-      ctx.strokeStyle = this.createGradient(ctx, u, stroke);
+      ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
       
       ctx.lineWidth = strokewidth * u;
       ctx.lineCap = linecap;

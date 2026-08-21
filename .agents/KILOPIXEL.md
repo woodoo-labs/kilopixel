@@ -382,7 +382,7 @@ Because they contain parentheses, the compiler automatically routes them through
 
 ### Gradient Descriptors (Deferred Creation)
 
-`linear()` and `radial()` return lightweight **descriptor objects**, not `CanvasGradient` instances. The actual gradient is created at draw time by `shape.createGradient()` when the bounding box is known.
+`linear()`, `radial()`, and `conic()` return lightweight **descriptor objects**, not `CanvasGradient` instances. The actual gradient is created at draw time by `shape.createGradient()` when the bounding box is known.
 
 #### `linear(direction, colorsArray)`
 
@@ -390,7 +390,7 @@ Because they contain parentheses, the compiler automatically routes them through
 ```html
 fill="linear(45, ['red', 'blue'])"
 ```
-The angle uses CSS-like geometry. Endpoints are calculated using `stretch = 1 / max(|cos|, |sin|)` normalization, ensuring they always reach the bounding box edges regardless of angle.
+The angle uses CSS-like geometry. At draw time, endpoints are calculated using `distance = |w/2·cos| + |h/2·sin|`, ensuring the gradient line always reaches the bounding box edges regardless of angle or aspect ratio.
 
 **Coordinate mode** (array):
 ```html
@@ -412,9 +412,23 @@ fill="radial([0.5, 0.5, 1], ['white', 'black'])"
 ```
 `[cx, cy, r]` — center coordinates (proportional) and radius.
 
+#### `conic(startAngleOrConfig, colorsArray)`
+
+**Simple mode** (number):
+```html
+fill="conic(0, ['red', 'yellow', 'lime', 'cyan', 'blue', 'magenta', 'red'])"
+```
+`startAngle` in degrees, centered on the bounding box center.
+
+**Config mode** (array):
+```html
+fill="conic([90, 0.3, 0.7], ['red', 'blue'])"
+```
+`[startAngle, cx, cy]` — start angle in degrees, center coordinates (proportional).
+
 #### Color Stop Formats
 
-Both gradient functions accept two color stop formats:
+All gradient functions accept two color stop formats:
 ```javascript
 ['red', 'blue']                    // Simple — evenly spaced
 [0, 'red', 0.5, 'green', 1, 'blue'] // Offset-mapped — explicit positions
@@ -422,7 +436,7 @@ Both gradient functions accept two color stop formats:
 
 #### Gradient Caching
 
-The Shape base class caches gradients via `_lastGradientConfig` and `_lastGradientU`. If the descriptor object reference and unit haven't changed, the cached `CanvasGradient` is reused.
+The Shape base class maintains a **dual-slot gradient cache** (`_gradCache[0]` for fill, `_gradCache[1]` for stroke). Each slot tracks the descriptor object reference, responsive unit `u`, and all four bounding box values (`left`, `top`, `right`, `bottom`). If all values match, the cached `CanvasGradient` is reused. This ensures gradients update correctly when a shape's geometry animates (e.g., changing radius or width), while avoiding unnecessary recreation for static shapes.
 
 ---
 
@@ -1313,6 +1327,7 @@ Plain text attributes work without quotes — the compiler's Fast Path handles t
 <pxl-circle fill="hsl(t * 36, 80, 50)" ...></pxl-circle>
 <pxl-rect fill="linear(45, ['red', 'blue'])" ...></pxl-rect>
 <pxl-circle fill="radial(1, ['white', 'black'])" ...></pxl-circle>
+<pxl-circle fill="conic(0, ['red', 'yellow', 'lime', 'cyan', 'blue', 'magenta', 'red'])" ...></pxl-circle>
 ```
 
 #### 4. Unified Responsive Filters (Arrays vs Strings)
@@ -1420,7 +1435,7 @@ Note: `ref.myShape.tx` gives `x + dx` in the shape's OWN local space. `toLocal(r
 
 **Color constructors**: `rgb()`, `rgba()`, `hsl()`, `hsla()`
 
-**Gradient constructors**: `linear()`, `radial()`
+**Gradient constructors**: `linear()`, `radial()`, `conic()`
 
 **Utility functions**: `lerp(a, b, t)`, `clamp(v, low, high)`, `map(v, inMin, inMax, outMin, outMax)`
 

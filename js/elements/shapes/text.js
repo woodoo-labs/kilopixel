@@ -164,9 +164,9 @@ class Text extends Shape {
 
     if (!hasFill && !hasStroke) return;
 
-    if (hasFill) ctx.fillStyle = this.createGradient(ctx, u, fill);
+    if (hasFill) ctx.fillStyle = this.createGradient(ctx, u, fill, 0);
     if (hasStroke) {
-      ctx.strokeStyle = this.createGradient(ctx, u, stroke);
+      ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
       if (strokewidth !== 1) ctx.lineWidth = strokewidth * u;
     }
 
