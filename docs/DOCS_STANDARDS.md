@@ -114,21 +114,30 @@ Every documentation example must follow a standardized 3-part layout:
 * **Variable Placement:** `<pxl-var>` nodes act as invisible shapes in the engine. If they use any mathematical animations (like `t` or `wave()`), they **must** be placed inside a `<pxl-layer>` so their `render` cycle is evaluated by the engine loop.
 * **Direct Manipulation over Variables:** `<pxl-var>` nodes should only be used for shared global state. For direct property control, sliders must directly manipulate the target element using standard HTML5 Web Component DOM methods: `document.getElementById('elementId').setAttribute('property', this.value)`.
 * HTML code blocks must use `<pre><code class="language-html">`.
-* Values in the code block that change dynamically must be wrapped in a `<mark id="sec[N][Entity][Target]Code">` tag.
+* **Code Highlights & Reactive Bindings:** Values in the code block that change dynamically must be wrapped in a `<mark id="sec[N][Entity][Target]Code">` tag.
+  * **Standard Marks:** Use a standard `<mark>` for direct numerical values that are updated by a slider. These will flash a vibrant yellow/orange to indicate direct control.
+  * **Reactive Marks:** When a value in the code block is a math expression or dependent variable (e.g., `x="-ref.master.rotate"`), you MUST use `<mark class="highlight-reactive">`. This ensures the text looks like normal, transparent code until its upstream dependency changes, at which point it flashes a distinct, softer orange to indicate reactive follow-through.
 * **Prism Syntax Highlighting & Keep-Markup:** Every documentation page that uses Prism syntax highlighting MUST load both `prism.min.js` and `<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>`. Without the `keep-markup` plugin, Prism strips out `<mark id="...">` tags during syntax highlighting, breaking live code updates.
 * **Simplified Pedagogical Code Snippets:** HTML code blocks (`<pre><code class="language-html">`) MUST show only the minimal, clean markup needed to teach the section's core concept:
   * **Exclude Stage Helpers:** Never include background grids (`<pxl-grid>`), coordinate axes, dimension lines, or leader markers in the HTML snippet.
   * **Exclude Auxiliary Shapes:** Do not show secondary decorative shapes in the code block.
   * **Minimal Styling:** Use simple `stroke` or basic `fill` attributes. Do not include verbose `strokewidth`, `alpha`, or long CSS `filter` strings unless that specific styling attribute is what is being demonstrated or controlled.
-* Slider `oninput` handlers must execute inline JS to do exactly three things:
-  1. Update the element property: `document.getElementById('sec4Rect').setAttribute('x', this.value)`
-  2. Update the UI label: `document.getElementById('sec4RectXVal').innerText = this.value`
-  3. Update the HTML Code snippet: `document.getElementById('sec4RectXCode').innerText = this.value`
-* Toggle button `onclick` handlers must follow **Option 1 (Explicit Native DOM + UI Helper)**: put the native `document.getElementById('id').setAttribute('attr', 'value')` call explicitly first so developers see transparently how Kilopixel works, then call `pxlDocs.updateToggle(this, 'valId', 'codeId', 'value')` to handle UI button state and label/mark updates:
+* **Slider Implementations:** 
+  * `oninput` handlers must execute inline JS to do exactly three things:
+    1. Update the element property: `document.getElementById('sec4Rect').setAttribute('x', this.value)`
+    2. Update the UI label: `document.getElementById('sec4RectXVal').innerText = this.value`
+    3. Update the HTML Code snippet: `document.getElementById('sec4RectXCode').innerText = this.value`
+  * **Multi-Highlighting (`data-mark`):** By default, the JS framework parses a slider's `oninput` string to find a `<mark>` ID to highlight. To highlight multiple `<mark>` tags simultaneously (e.g., a standard mark and a reactive mark), you MUST explicitly define them as a comma-separated list on the input: `<input type="range" data-mark="sec4RectXCode, sec4MirrorRefXCode">`.
+* **Toggle Button Implementations:** Toggle button `onclick` handlers must follow **Option 1 (Explicit Native DOM + UI Helper)**: put the native `document.getElementById('id').setAttribute('attr', 'value')` call explicitly first so developers see transparently how Kilopixel works, then call `pxlDocs.updateToggle(this, 'valId', 'codeId', 'value')` to handle UI button state and label/mark updates:
   ```html
   <button class="toggle-btn active" onclick="document.getElementById('sec1Circle').setAttribute('pie', 'false'); pxlDocs.updateToggle(this, 'sec1CirclePieVal', 'sec1CirclePieCode', 'false');">false (Open Arc)</button>
   ```
-* *Note: The highlighting system uses a Regex-based Pointer Event Delegation System (`pointerdown`/`touchstart`). It automatically parses the `oninput` strings of sliders to find the `getElementById('code...')` references, dynamically mapping active sliders to their `<mark>` targets.*
+
+### Onboarding Beacons
+To combat "interactive blindness" and guide users to the most important sliders in a complex playground, you should use Onboarding Beacons. 
+* **Sliders**: Simply drop `<span class="indicator-dot"></span>` next to a label inside a `.control-group`. The CSS automatically generates a hardware-accelerated, pulsing "Radar Ping" effect.
+* **Auto-Generated Tab Badges**: You NEVER need to manually add dots or badges to `.tab-btn` elements in your HTML. On page load, the JS framework automatically scans every `.tab-content`, counts the number of `.indicator-dot` sliders inside, and dynamically injects an iOS-style numbered notification badge (e.g., `<span class="indicator-badge">3</span>`) onto the controlling `.tab-btn`. 
+* **Automatic Dismissal**: The framework is DOM-aware. The moment a user interacts with a slider (via the `input` event), the framework automatically deletes its ping dot. It then recalculates the parent tab's badge count, updating the number instantly. When the count hits zero, the tab badge pops out of existence. No IDs or manual JavaScript wiring is required!
 
 ### 5. ID Naming Conventions
 To ensure perfect consistency across all documentation playgrounds and guides, 100% of HTML IDs must follow our **Universal 100% `camelCase` Hierarchical ID Standard**:

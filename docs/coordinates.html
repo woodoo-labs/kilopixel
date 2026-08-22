@@ -63,7 +63,7 @@
           <div class="tab-content active" id="sec1StageTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Ratio <span id="sec1RatioVal">5 / 3</span></label>
+                <label><span>Ratio <span class="indicator-dot"></span></span> <span id="sec1RatioVal">5 / 3</span></label>
                 <input type="range" min="0" max="14" step="1" value="10" autocomplete="off"
                   data-mark="sec1RatioCode" oninput="updateSec1Ratio(this.value)">
               </div>
@@ -143,7 +143,7 @@
           <div class="tab-content active" id="sec2LayerTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec2LayerXVal">500</span></label>
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec2LayerXVal">500</span></label>
                 <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
                   oninput="document.getElementById('sec2Layer').setAttribute('x', this.value); document.getElementById('sec2LayerXVal').innerText = this.value; document.getElementById('sec2LayerXCode').innerText = this.value;">
               </div>
@@ -217,7 +217,7 @@
           <div class="tab-content" id="sec3LayerTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec3LayerXVal">400</span></label>
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec3LayerXVal">400</span></label>
                 <input type="range" min="-500" max="1000" step="10" value="400" autocomplete="off"
                   oninput="document.getElementById('sec3Layer').setAttribute('x', this.value); document.getElementById('sec3LayerXVal').innerText = this.value; document.getElementById('sec3LayerXCode').innerText = this.value;">
               </div>
@@ -233,7 +233,7 @@
           <div class="tab-content active" id="sec3CircleTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec3CircleXVal">350</span></label>
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec3CircleXVal">350</span></label>
                 <input type="range" min="-500" max="500" step="10" value="350" autocomplete="off"
                   oninput="document.getElementById('sec3Circle').setAttribute('x', this.value); document.getElementById('sec3CircleXVal').innerText = this.value; document.getElementById('sec3CircleXCode').innerText = this.value;">
               </div>
@@ -330,8 +330,8 @@
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4LayerTab')">Layer <span class="indicator-dot"></span></button>
-              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4EllipseTab')">Ellipse <span class="indicator-dot"></span></button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4LayerTab')">Layer</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4EllipseTab')">Ellipse</button>
             </div>
           </div>
           
@@ -395,6 +395,9 @@
 
           <!-- 2. Fixed Stage-Level Layer Helpers -->
           <pxl-layer>
+            <pxl-circle x="0" y="0" r="6" fill="#0284c7"></pxl-circle>
+            <pxl-text x="15" y="15" baseline="top" text="'Stage Origin (0, 0)'" size="27" fill="#0284c7" font="monospace"></pxl-text>
+            
             <pxl-line x1="0" y1="ref.sec4Layer.y" x2="ref.sec4Layer.x" y2="ref.sec4Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec4Layer.x / 2" y="ref.sec4Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec4Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
             <pxl-line x1="ref.sec4Layer.x" y1="0" x2="ref.sec4Layer.x" y2="ref.sec4Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
@@ -536,6 +539,9 @@
 
           <!-- 2. Fixed Stage-Level Layer Helpers -->
           <pxl-layer>
+            <pxl-circle x="0" y="0" r="6" fill="#0284c7"></pxl-circle>
+            <pxl-text x="15" y="15" baseline="top" text="'(0, 0)'" size="27" fill="#0284c7" font="monospace"></pxl-text>
+            
             <pxl-line x1="0" y1="ref.sec5Layer.y" x2="ref.sec5Layer.x" y2="ref.sec5Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec5Layer.x / 2" y="ref.sec5Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec5Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
             <pxl-line x1="ref.sec5Layer.x" y1="0" x2="ref.sec5Layer.x" y2="ref.sec5Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
@@ -628,18 +634,19 @@
 
     &lt;!-- 2. Mirror Shape (Moves in reverse) --&gt;
     &lt;pxl-rect id="mirror" 
-      x="1000 - ref.master.x" 
-      y="ref.master.y" 
+      x="1000 - <mark id="sec6MirrorRefXCode" class="highlight-reactive">ref.master.x</mark>" 
+      y="<mark id="sec6MirrorRefYCode" class="highlight-reactive">ref.master.y</mark>" 
       w="<mark id="sec6MirrorWCode">100</mark>" h="<mark id="sec6MirrorHCode">100</mark>" 
-      rotate="<mark id="sec6MirrorRotCode">0</mark>" stroke="#3b82f6"&gt;
+      rotate="<mark id="sec6MirrorRefRotCode" class="highlight-reactive">-ref.master.rotate</mark>" 
+      stroke="#3b82f6"&gt;
     &lt;/pxl-rect&gt;
 
     &lt;!-- 3. Reactor Shape (Spins and scales) --&gt;
     &lt;pxl-rect id="reactor" 
       x="<mark id="sec6ReactorXCode">500</mark>" y="<mark id="sec6ReactorYCode">450</mark>" 
-      w="ref.master.x / 5" 
-      h="ref.master.x / 5" 
-      rotate="ref.master.x" 
+      w="<mark id="sec6ReactorRefWCode" class="highlight-reactive">ref.master.x</mark> / 5" 
+      h="<mark id="sec6ReactorRefHCode" class="highlight-reactive">ref.master.x</mark> / 5" 
+      rotate="<mark id="sec6ReactorRefRotCode" class="highlight-reactive">ref.master.x</mark>" 
       stroke="#22c55e"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
@@ -683,17 +690,17 @@
             <div class="playground-sliders">
               <div class="control-group">
                 <label>Center X <span id="sec6MasterXVal">250</span></label>
-                <input type="range" min="0" max="1000" step="10" value="250" autocomplete="off"
+                <input type="range" min="0" max="1000" step="10" value="250" autocomplete="off" data-mark="sec6MasterXCode, sec6MirrorRefXCode, sec6ReactorRefWCode, sec6ReactorRefHCode, sec6ReactorRefRotCode"
                   oninput="document.getElementById('sec6Master').setAttribute('x', this.value); document.getElementById('sec6MasterXVal').innerText = this.value; document.getElementById('sec6MasterXCode').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Center Y <span id="sec6MasterYVal">200</span></label>
-                <input type="range" min="0" max="600" step="10" value="200" autocomplete="off"
+                <input type="range" min="0" max="600" step="10" value="200" autocomplete="off" data-mark="sec6MasterYCode, sec6MirrorRefYCode"
                   oninput="document.getElementById('sec6Master').setAttribute('y', this.value); document.getElementById('sec6MasterYVal').innerText = this.value; document.getElementById('sec6MasterYCode').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Rotation <span id="sec6MasterRotVal">0°</span></label>
-                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec6MasterRotCode, sec6MirrorRefRotCode"
                   oninput="document.getElementById('sec6Master').setAttribute('rotate', this.value); document.getElementById('sec6MasterRotVal').innerText = this.value + '°'; document.getElementById('sec6MasterRotCode').innerText = this.value;">
               </div>
             </div>
@@ -701,7 +708,7 @@
 
           <div class="tab-content" id="sec6MirrorTab">
             <div class="playground-sliders">
-              <p class="tab-note" style="grid-column: 1 / -1; margin: 0; font-size: 14px; color: #64748b; font-style: italic;">Note: Center X and Y are mathematically bound to the Master Shape.</p>
+              <p class="tab-note" style="grid-column: 1 / -1; margin: 0; font-size: 14px; color: #64748b; font-style: italic;">Note: Center X, Y, and Rotation are mathematically bound to the Master Shape.</p>
               <div class="control-group">
                 <label>Width <span id="sec6MirrorWVal">100</span></label>
                 <input type="range" min="10" max="500" step="10" value="100" autocomplete="off"
@@ -711,11 +718,6 @@
                 <label>Height <span id="sec6MirrorHVal">100</span></label>
                 <input type="range" min="10" max="500" step="10" value="100" autocomplete="off"
                   oninput="document.getElementById('sec6Mirror').setAttribute('h', this.value); document.getElementById('sec6MirrorHVal').innerText = this.value; document.getElementById('sec6MirrorHCode').innerText = this.value;">
-              </div>
-              <div class="control-group">
-                <label>Rotation <span id="sec6MirrorRotVal">0°</span></label>
-                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
-                  oninput="document.getElementById('sec6Mirror').setAttribute('rotate', this.value); document.getElementById('sec6MirrorRotVal').innerText = this.value + '°'; document.getElementById('sec6MirrorRotCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -769,7 +771,7 @@
             <pxl-text x="ref.sec6Master.x" y="ref.sec6Master.y" dx="15" dy="-15" baseline="bottom" text="'Master Center'" size="27" fill="#c2410c" font="monospace"></pxl-text>
 
             <!-- 2. Mirror Shape (Blue Palette) -->
-            <pxl-rect id="sec6Mirror" x="1000 - ref.sec6Master.x" y="ref.sec6Master.y" w="100" h="100" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-rect>
+            <pxl-rect id="sec6Mirror" x="1000 - ref.sec6Master.x" y="ref.sec6Master.y" w="100" h="100" rotate="-ref.sec6Master.rotate" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-rect>
             <pxl-circle x="ref.sec6Mirror.x" y="ref.sec6Mirror.y" r="5" fill="#60a5fa"></pxl-circle>
             <pxl-text x="ref.sec6Mirror.x" y="ref.sec6Mirror.y" dx="15" dy="-15" baseline="bottom" text="'Mirror Center'" size="27" fill="#1d4ed8" font="monospace"></pxl-text>
 

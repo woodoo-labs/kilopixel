@@ -36,29 +36,36 @@ pxlDocs.updateToggle = function(btn, lblId, codeId, displayValue) {
 // 2. Automatic Code Mark Highlighting (Pointer Event Delegation System)
 pxlDocs.initHighlighting = function() {
   function updateHighlight(input) {
-    // 1. Check if the developer explicitly provided a data-mark attribute
-    let markId = input.getAttribute('data-mark');
+    let markIds = [];
+    const dataMark = input.getAttribute('data-mark');
     
-    // 2. If not, fall back to parsing the inline oninput string
-    if (!markId) {
+    if (dataMark) {
+      markIds = dataMark.split(',').map(s => s.trim());
+    } else {
       const oninputStr = input.getAttribute('oninput');
       if (oninputStr) {
         const match = oninputStr.match(/getElementById\(['"]([^'"]+Code)['"]\)/);
-        if (match) markId = match[1];
+        if (match) markIds = [match[1]];
       }
     }
     
-    if (markId) {
-      const markElement = document.getElementById(markId);
-      if (markElement) {
-        if (input._isPressed) {
-          markElement.classList.add('highlight-active');
-          input._activeMark = markElement;
-        } else {
-          markElement.classList.remove('highlight-active');
-          input._activeMark = null;
+    input._activeMarks = input._activeMarks || [];
+    
+    if (input._isPressed) {
+      // Clear any existing active marks just in case
+      input._activeMarks.forEach(el => el.classList.remove('highlight-active'));
+      input._activeMarks = [];
+      
+      markIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.classList.add('highlight-active');
+          input._activeMarks.push(el);
         }
-      }
+      });
+    } else {
+      input._activeMarks.forEach(el => el.classList.remove('highlight-active'));
+      input._activeMarks = [];
     }
   }
 
@@ -67,6 +74,22 @@ pxlDocs.initHighlighting = function() {
     if (target) {
       target._isPressed = true;
       updateHighlight(target);
+    }
+  }
+
+  function handleInput(e) {
+    const target = e.target.closest('input[type="range"]');
+    if (target) {
+      // Automatically dismiss any onboarding beacon dot for this slider
+      const group = target.closest('.control-group');
+      if (group) {
+        const dot = group.querySelector('.indicator-dot');
+        if (dot) {
+          dot.remove();
+          // Update the parent tab's badge count!
+          pxlDocs.updateTabBadge(target.closest('.tab-content'));
+        }
+      }
     }
   }
 
@@ -80,8 +103,43 @@ pxlDocs.initHighlighting = function() {
   }
 
   // Universal Interaction Handlers
+  document.body.addEventListener('input', handleInput);
   document.body.addEventListener('pointerdown', handlePressStart);
   document.body.addEventListener('touchstart', handlePressStart, {passive: true});
+
+  // Automatically count dots and spawn numbered badges on Tab Buttons
+  pxlDocs.updateTabBadge = function(tabContent) {
+    if (!tabContent || !tabContent.id) return;
+    const btn = document.querySelector(`button[onclick*="${tabContent.id}"]`);
+    if (!btn) return;
+    
+    const remaining = tabContent.querySelectorAll('.indicator-dot').length;
+    let badge = btn.querySelector('.indicator-badge');
+    
+    if (remaining > 0) {
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'indicator-badge';
+        btn.appendChild(badge);
+      }
+      badge.innerText = remaining;
+    } else {
+      if (badge) badge.remove();
+    }
+  };
+
+  function initBadges() {
+    document.querySelectorAll('.tab-content').forEach(tabContent => {
+      pxlDocs.updateTabBadge(tabContent);
+    });
+  }
+
+  // Initialize badges on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBadges);
+  } else {
+    initBadges();
+  }
 
   document.addEventListener('pointerup', handlePressEnd);
   document.addEventListener('pointercancel', handlePressEnd);
