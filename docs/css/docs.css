@@ -329,7 +329,7 @@ body {
 }
 
 .docs-content pre mark.highlight-reactive.highlight-active {
-  background-color: #fb923c; /* Softer, lighter orange for dependents */
+  background-color: #fdba74; /* Very soft, light pastel orange */
   color: #fff;
 }
 
