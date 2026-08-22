@@ -324,6 +324,15 @@ body {
   transition: background-color 0.2s, color 0.2s;
 }
 
+.docs-content pre mark.highlight-reactive {
+  background-color: transparent;
+}
+
+.docs-content pre mark.highlight-reactive.highlight-active {
+  background-color: #fb923c; /* Softer, lighter orange for dependents */
+  color: #fff;
+}
+
 .docs-content pre mark.highlight-active {
   background-color: #f59e0b; /* Vibrant Orange flash */
   color: #fff;
