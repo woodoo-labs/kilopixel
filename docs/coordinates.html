@@ -35,10 +35,10 @@
       <p>To ensure graphics are fully responsive across all screen sizes, every Kilopixel <code>&lt;pxl-stage&gt;</code> has a fixed <strong>logical width of 1000</strong>. The height is dynamically computed based on the <code>ratio</code> attribute.</p>
       
       <div class="callout-info">
-        <p class="callout-body"><strong>Values as percentages:</strong> Because the logical width is always 1000, you can mentally read coordinates and sizes as percentages of the stage's width with one decimal place. For example, a circle with <code>r="200"</code> will have a radius spanning exactly <strong>20.0%</strong> of the stage's width, and a line with <code>strokewidth="10"</code> will be exactly <strong>1.0%</strong> thick.</p>
+        <p class="callout-body"><strong>Values as percentages:</strong> Because the logical width is always 1000, you can mentally read coordinates and sizes as percentages of the Stage's width with one decimal place. For example, a circle with <code>r="200"</code> will have a radius spanning exactly <strong>20.0%</strong> of the stage's width, and a line with <code>strokewidth="10"</code> will be exactly <strong>1.0%</strong> thick.</p>
       </div>
 
-      <p>A <code>&lt;pxl-stage&gt;</code> has a CSS <code>width</code> of <code>100%</code>, meaning it will always automatically adapt to horizontally fill its parent element. To control the physical stage width, you simply adjust the width of its parent container.</p>
+      <p>A <code>&lt;pxl-stage&gt;</code> has a CSS <code>width</code> of <code>100%</code>, meaning it will always automatically adapt to horizontally fill its parent element. To control the physical Stage width, you simply adjust the width of its parent container.</p>
 
       <p>In the example below, try moving the ratio slider to see how the coordinate system adapts: the logical width remains <strong>fixed at 1000</strong> across all formats, while the logical height is dynamically <strong>computed</strong> from the aspect ratio. No matter how large or small your physical screen is, the Stage Origin is always <code>(0, 0)</code>!</p>
 
@@ -103,14 +103,14 @@
           </div>
 </div>
 <h2>2. Layer <code>&lt;pxl-layer&gt;</code></h2>
-      <p>Working directly in global stage coordinates can become rigid. Instead, a <code>&lt;pxl-layer&gt;</code> allows you to create an independent, movable local coordinate space:</p>
+      <p>Working directly in global Stage coordinates can become rigid. Instead, a <code>&lt;pxl-layer&gt;</code> allows you to create an independent, movable local coordinate space:</p>
       <ul>
-        <li><strong>Global Positioning:</strong> The layer itself is positioned relative to the stage's top-left origin.</li>
-        <li><strong>Local Origin:</strong> The layer's <code>x</code> and <code>y</code> attributes define its own internal <code>(0, 0)</code> Layer Center.</li>
-        <li><strong>Nesting Spaces:</strong> Drag the Layer sliders below. Notice how the entire local grid moves. Any shape you place inside this layer will be drawn relative to this moving local origin, rather than the static stage origin.</li>
+        <li><strong>Global Positioning:</strong> The Layer itself is positioned relative to the Stage's top-left Origin.</li>
+        <li><strong>Layer Center:</strong> The Layer's <code>x</code> and <code>y</code> attributes define its own internal <code>(0, 0)</code> Layer Center.</li>
+        <li><strong>Nesting Spaces:</strong> Drag the Layer sliders below. Notice how the entire local grid moves. Any Shape you place inside this Layer will be drawn relative to this moving Layer Center, rather than the static Stage Origin.</li>
       </ul>
       
-      <pre><code class="language-html">&lt;!-- Moving the layer's origin to the center of the stage --&gt;
+      <pre><code class="language-html">&lt;!-- Moving the Layer Center to the middle of the Stage --&gt;
 &lt;pxl-stage ratio="<mark id="sec2RatioCode">5 / 3</mark>"&gt;
   &lt;pxl-layer x="<mark id="sec2LayerXCode">500</mark>" y="<mark id="sec2LayerYCode">300</mark>"&gt;
     &lt;!-- Insert shapes and groups here --&gt;
@@ -148,7 +148,7 @@
                   oninput="document.getElementById('sec2Layer').setAttribute('x', this.value); document.getElementById('sec2LayerXVal').innerText = this.value; document.getElementById('sec2LayerXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec2LayerYVal">300</span></label>
+                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec2LayerYVal">300</span></label>
                 <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
                   oninput="document.getElementById('sec2Layer').setAttribute('y', this.value); document.getElementById('sec2LayerYVal').innerText = this.value; document.getElementById('sec2LayerYCode').innerText = this.value;">
               </div>
@@ -177,7 +177,7 @@
               <pxl-text x="ref.sec2Layer.x + 15" y="ref.sec2Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec2Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
             </pxl-layer>
   
-            <!-- The layer container -->
+            <!-- The Layer container -->
             <pxl-layer id="sec2Layer" x="500" y="300">
               <!-- 3. Layer Axes -->
               <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
@@ -191,10 +191,10 @@
           </div>
 </div>
 <h2>3. Shape, e.g. <code>&lt;pxl-circle&gt;</code></h2>
-      <p>In Kilopixel, the <code>x</code> and <code>y</code> attributes of any shape define its <strong>center point</strong> relative to its parent layer or group.</p>
-      <p>Because shapes are nested inside layers, their final screen position is compounded. In the example below, the circle is placed at local <code>(350, 150)</code>. But because its parent layer is also shifted to <code>(400, 200)</code>, you can see how the shape's final visual position on the stage is perfectly offset from both origins!</p>
+      <p>In Kilopixel, the <code>x</code> and <code>y</code> attributes of any Shape define its <strong>center point</strong> relative to its parent Layer or Group.</p>
+      <p>Because Shapes are nested inside Layers, their final screen position is compounded. In the example below, the circle is placed at local <code>(350, 150)</code>. But because its parent Layer is also shifted to <code>(400, 200)</code>, you can see how the Shape's final visual position on the Stage is perfectly Offset from both reference points!</p>
       
-      <pre><code class="language-html">&lt;!-- Placing a shape whose center is at (350, 150) --&gt;
+      <pre><code class="language-html">&lt;!-- Placing a Shape whose Center is at (350, 150) --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec3LayerXCode">400</mark>" y="<mark id="sec3LayerYCode">200</mark>"&gt;
     &lt;pxl-circle x="<mark id="sec3CircleXCode">350</mark>" y="<mark id="sec3CircleYCode">150</mark>" r="<mark id="sec3CircleRCode">250</mark>" stroke="#f97316"&gt;&lt;/pxl-circle&gt;
@@ -238,12 +238,12 @@
                   oninput="document.getElementById('sec3Circle').setAttribute('x', this.value); document.getElementById('sec3CircleXVal').innerText = this.value; document.getElementById('sec3CircleXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec3CircleYVal">150</span></label>
+                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec3CircleYVal">150</span></label>
                 <input type="range" min="-300" max="300" step="10" value="150" autocomplete="off"
                   oninput="document.getElementById('sec3Circle').setAttribute('y', this.value); document.getElementById('sec3CircleYVal').innerText = this.value; document.getElementById('sec3CircleYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius <span id="sec3CircleRVal">250</span></label>
+                <label><span>Radius <span class="indicator-dot"></span></span> <span id="sec3CircleRVal">250</span></label>
                 <input type="range" min="10" max="500" step="10" value="250" autocomplete="off"
                   oninput="document.getElementById('sec3Circle').setAttribute('r', this.value); document.getElementById('sec3CircleRVal').innerText = this.value; document.getElementById('sec3CircleRCode').innerText = this.value;">
               </div>
@@ -304,11 +304,11 @@
       </div>
 
       <h2>4. Rotation <code>rotate</code></h2>
-      <p>In Kilopixel, applying rotation is incredibly simple. When you rotate a shape, it spins around its <code>x</code> and <code>y</code> <strong>Center</strong> by default.</p>
+      <p>In Kilopixel, applying rotation is incredibly simple. When you rotate a Shape, it spins around its <code>x</code> and <code>y</code> <strong>Center</strong> by default.</p>
       <p>However, it is important to understand the difference between <strong>Layer</strong> and <strong>Shape</strong> rotation:</p>
       <ul>
-        <li><strong>Layer Rotation:</strong> Rotating a <code>&lt;pxl-layer&gt;</code> spins the entire coordinate space inside that layer around the Layer Center. The shape's relative coordinates do not change, but the local space it lives in spins together with the layer.</li>
-        <li><strong>Shape Rotation:</strong> Rotating a shape (such as a <code>&lt;pxl-ellipse&gt;</code>) only spins that specific shape around its own Shape Center, leaving the rest of the layer untouched.</li>
+        <li><strong>Layer Rotation:</strong> Rotating a <code>&lt;pxl-layer&gt;</code> spins the entire coordinate space inside that Layer around the Layer Center. The Shape's relative coordinates do not change, but the local space it lives in spins together with the Layer.</li>
+        <li><strong>Shape Rotation:</strong> Rotating a Shape (such as a <code>&lt;pxl-ellipse&gt;</code>) only spins that specific Shape around its own Center, leaving the rest of the Layer untouched.</li>
       </ul>
       <p>Look for the pulsing orange indicator dot (<span class="indicator-dot"></span>) on the controls below — try spinning the Layer and Ellipse sliders to see this difference in real time!</p>
       
@@ -447,7 +447,7 @@
       <p>This is where Kilopixel's coordinate system becomes incredibly powerful. The <code>dx</code> and <code>dy</code> attributes (where "d" stands for delta) offset the shape from its <code>x</code> and <code>y</code> Center.</p>
       <p>Because this offset happens <em>inside</em> the shape's local coordinate system, any rotation applied will cause the shape to <strong>orbit</strong> the Center instead of just spinning in place.</p>
       
-      <pre><code class="language-html">&lt;!-- A rectangle orbiting its center point --&gt;
+      <pre><code class="language-html">&lt;!-- A rectangle orbiting its Pivot Point --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec5LayerXCode">200</mark>" y="<mark id="sec5LayerYCode">150</mark>" rotate="<mark id="sec5LayerRotCode">0</mark>"&gt;
     &lt;pxl-rect 
@@ -613,7 +613,7 @@
       </div>
 
       <h2>6. Reference <code>ref.*</code></h2>
-      <p>Any element with an <code>id</code> can be instantly referenced by other shapes. You can declaratively link to its attributes using the <code>ref.*</code> prefix, and Kilopixel will automatically keep them perfectly in sync.</p>
+      <p>Any element with an <code>id</code> can be instantly referenced by other Shapes. You can declaratively link to its attributes using the <code>ref.*</code> prefix, and Kilopixel will automatically keep them perfectly in sync.</p>
       <p>This allows for true <strong>cross-attribute linking</strong>. In this example, if you change the <strong>Master</strong> shape, the others react instantly. The <strong>Mirror</strong> perfectly mirrors its X position (<code>1000 - ref.master.x</code>), while the <strong>Reactor</strong> links its size and rotation to the Master's position!</p>
       
       <pre><code class="language-html">&lt;!-- Linking attributes across different shapes --&gt;
@@ -1390,12 +1390,12 @@
       
       <!--
       <h2>11. Coordinate Mapping <code>toLocal()</code></h2>
-      <p>When shapes orbit or rotate inside nested coordinate spaces, drawing connecting lines or tracking positions requires translating between coordinate systems:</p>
+      <p>When Shapes orbit or rotate inside nested coordinate spaces, drawing connecting lines or tracking positions requires translating between coordinate systems:</p>
       <ul>
         <li><strong>Why raw attributes stay constant:</strong> If you reference <code>ref.pointA.x</code> or <code>ref.pointA.dx</code> directly, you will always get their static declared values even while the point is rotating. Because the local coordinate system rotates <em>with</em> the shape, its internal <code>x</code> and <code>dx</code> numbers never change.</li>
-        <li><strong>How <code>toLocal</code> solves this:</strong> By wrapping the reference in <code>toLocal(ref.pointA, 'tx')</code> or <code>toLocal(ref.pointA, 'ty')</code> (or <code>x</code> and <code>y</code> for center positions), Kilopixel automatically calculates the shape's true orbiting position and maps it into your current coordinate space — no manual trigonometry required!</li>
+        <li><strong>How <code>toLocal</code> solves this:</strong> By wrapping the reference in <code>toLocal(ref.pointA, 'tx')</code> or <code>toLocal(ref.pointA, 'ty')</code> (or <code>x</code> and <code>y</code> for center positions), Kilopixel automatically calculates the Shape's true orbiting position and maps it into your current coordinate space — no manual trigonometry required!</li>
       </ul>
-      <p>In this "constellation" example, two shapes orbit their centers independently. The connecting line uses <code>toLocal</code> to track their live positions and stay perfectly connected at 60fps.</p>
+      <p>In this "constellation" example, two Shapes orbit their Centers independently. The connecting line uses <code>toLocal</code> to track their live positions and stay perfectly connected at 60fps.</p>
       
       <pre><code class="language-html">&lt;!-- A line dynamically connecting independent points --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
@@ -1594,7 +1594,7 @@
       <!~~
       <h2>12. Animated Orbits</h2>
       <p>This is where Kilopixel's coordinate system shines. By combining local offsets with dynamic rotation, we can create perfect orbital mechanics mathematically effortlessly!</p>
-      <p>The <code>dx</code> attribute pushes the planet away from the Sun (the <code>x</code> and <code>y</code> pivot point), and the <code>rotate</code> attribute spins that entire offset vector around the center.</p>
+      <p>The <code>dx</code> attribute pushes the planet away from the Sun (the <code>x</code> and <code>y</code> Pivot Point), and the <code>rotate</code> attribute spins that entire Offset vector around the Center.</p>
       <p>Use the sliders below to see how standard HTML inputs can instantly drive the Kilopixel canvas via the <code>ref.*</code> registry.</p>
       
       <pre><code class="language-html">&lt;!-- Standard HTML Inputs driving Kilopixel variables --&gt;
@@ -1666,7 +1666,7 @@
               r="20" fill="#3b82f6">
             </pxl-circle>
 
-            &lt;!-- Red Arrow illustrating the dx offset vector --&gt;
+            &lt;!-- Red Arrow illustrating the dx Offset vector --&gt;
             <pxl-line 
               x="0" y="0" 
               x2="ref.sec12OrbitOffset.value" y2="0" 
