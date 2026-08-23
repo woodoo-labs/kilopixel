@@ -454,7 +454,7 @@
       x="<mark id="sec5RectXCode">300</mark>" y="<mark id="sec5RectYCode">150</mark>" 
       dx="<mark id="sec5RectDxCode">150</mark>" dy="<mark id="sec5RectDyCode">150</mark>" 
       rotate="<mark id="sec5RectRotCode">0</mark>" 
-      w="<mark id="sec5RectWCode">100</mark>" h="<mark id="sec5RectHCode">100</mark>" stroke="#f97316"&gt;
+      w="100" h="100" stroke="#f97316"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -504,7 +504,7 @@
                   oninput="document.getElementById('sec5Rect').setAttribute('y', this.value); document.getElementById('sec5RectYVal').innerText = this.value; document.getElementById('sec5RectYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Offset X <span id="sec5RectDxVal">150</span></label>
+                <label><span>Offset X <span class="indicator-dot"></span></span> <span id="sec5RectDxVal">150</span></label>
                 <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off"
                   oninput="document.getElementById('sec5Rect').setAttribute('dx', this.value); document.getElementById('sec5RectDxVal').innerText = this.value; document.getElementById('sec5RectDxCode').innerText = this.value;">
               </div>
@@ -514,17 +514,7 @@
                   oninput="document.getElementById('sec5Rect').setAttribute('dy', this.value); document.getElementById('sec5RectDyVal').innerText = this.value; document.getElementById('sec5RectDyCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Width <span id="sec5RectWVal">100</span></label>
-                <input type="range" min="10" max="500" step="10" value="100" autocomplete="off"
-                  oninput="document.getElementById('sec5Rect').setAttribute('w', this.value); document.getElementById('sec5RectWVal').innerText = this.value; document.getElementById('sec5RectWCode').innerText = this.value;">
-              </div>
-              <div class="control-group">
-                <label>Height <span id="sec5RectHVal">100</span></label>
-                <input type="range" min="10" max="500" step="10" value="100" autocomplete="off"
-                  oninput="document.getElementById('sec5Rect').setAttribute('h', this.value); document.getElementById('sec5RectHVal').innerText = this.value; document.getElementById('sec5RectHCode').innerText = this.value;">
-              </div>
-              <div class="control-group">
-                <label>Rotation <span id="sec5RectRotVal">0°</span></label>
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec5RectRotVal">0°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
                   oninput="document.getElementById('sec5Rect').setAttribute('rotate', this.value); document.getElementById('sec5RectRotVal').innerText = this.value + '°'; document.getElementById('sec5RectRotCode').innerText = this.value;">
               </div>
@@ -689,7 +679,7 @@
           <div class="tab-content active" id="sec6MasterTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec6MasterXVal">250</span></label>
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec6MasterXVal">250</span></label>
                 <input type="range" min="0" max="1000" step="10" value="250" autocomplete="off" data-mark="sec6MasterXCode, sec6MirrorRefXCode, sec6ReactorRefWCode, sec6ReactorRefHCode, sec6ReactorRefRotCode"
                   oninput="document.getElementById('sec6Master').setAttribute('x', this.value); document.getElementById('sec6MasterXVal').innerText = this.value; document.getElementById('sec6MasterXCode').innerText = this.value;">
               </div>
@@ -699,7 +689,7 @@
                   oninput="document.getElementById('sec6Master').setAttribute('y', this.value); document.getElementById('sec6MasterYVal').innerText = this.value; document.getElementById('sec6MasterYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Rotation <span id="sec6MasterRotVal">0°</span></label>
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec6MasterRotVal">0°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec6MasterRotCode, sec6MirrorRefRotCode"
                   oninput="document.getElementById('sec6Master').setAttribute('rotate', this.value); document.getElementById('sec6MasterRotVal').innerText = this.value + '°'; document.getElementById('sec6MasterRotCode').innerText = this.value;">
               </div>
@@ -796,9 +786,9 @@
     &lt;pxl-var id="size" value="<mark id="sec7SizeCode">150</mark>"&gt;&lt;/pxl-var&gt;
 
     &lt;!-- Shapes bound to state --&gt;
-    &lt;pxl-circle rotate="0"   dx="ref.spread.value" r="ref.size.value" fill="hsla(ref.hue.value + 25, 80, 60, 0.6)"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle rotate="120" dx="ref.spread.value" r="ref.size.value" fill="hsla(ref.hue.value + 142, 80, 60, 0.6)"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle rotate="240" dx="ref.spread.value" r="ref.size.value" fill="hsla(ref.hue.value + 217, 80, 60, 0.6)"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle dx="<mark id="sec7Circ1SpreadCode" class="highlight-reactive">ref.spread.value</mark>" r="<mark id="sec7Circ1SizeCode" class="highlight-reactive">ref.size.value</mark>" fill="hsla(<mark id="sec7Circ1HueCode" class="highlight-reactive">ref.hue.value</mark> + 25, 80, 60, 0.6)" rotate="0"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle dx="<mark id="sec7Circ2SpreadCode" class="highlight-reactive">ref.spread.value</mark>" r="<mark id="sec7Circ2SizeCode" class="highlight-reactive">ref.size.value</mark>" fill="hsla(<mark id="sec7Circ2HueCode" class="highlight-reactive">ref.hue.value</mark> + 142, 80, 60, 0.6)" rotate="120"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle dx="<mark id="sec7Circ3SpreadCode" class="highlight-reactive">ref.spread.value</mark>" r="<mark id="sec7Circ3SizeCode" class="highlight-reactive">ref.size.value</mark>" fill="hsla(<mark id="sec7Circ3HueCode" class="highlight-reactive">ref.hue.value</mark> + 217, 80, 60, 0.6)" rotate="240"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -817,18 +807,18 @@
           <div class="tab-content active" id="sec7VarsTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Hue <span id="sec7HueVal">250</span></label>
-                <input type="range" min="0" max="360" step="5" value="250" autocomplete="off" data-mark="sec7HueCode"
+                <label><span>Hue <span class="indicator-dot"></span></span> <span id="sec7HueVal">250</span></label>
+                <input type="range" min="0" max="360" step="5" value="250" autocomplete="off" data-mark="sec7HueCode, sec7Circ1HueCode, sec7Circ2HueCode, sec7Circ3HueCode"
                   oninput="document.getElementById('sec7Hue').setAttribute('value', this.value); document.getElementById('sec7HueVal').innerText = this.value; document.getElementById('sec7HueCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Spread <span id="sec7SpreadVal">120</span></label>
-                <input type="range" min="0" max="250" step="10" value="120" autocomplete="off" data-mark="sec7SpreadCode"
+                <label><span>Spread <span class="indicator-dot"></span></span> <span id="sec7SpreadVal">120</span></label>
+                <input type="range" min="0" max="250" step="10" value="120" autocomplete="off" data-mark="sec7SpreadCode, sec7Circ1SpreadCode, sec7Circ2SpreadCode, sec7Circ3SpreadCode"
                   oninput="document.getElementById('sec7Spread').setAttribute('value', this.value); document.getElementById('sec7SpreadVal').innerText = this.value; document.getElementById('sec7SpreadCode').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Size <span id="sec7SizeVal">150</span></label>
-                <input type="range" min="10" max="250" step="10" value="150" autocomplete="off" data-mark="sec7SizeCode"
+                <input type="range" min="10" max="250" step="10" value="150" autocomplete="off" data-mark="sec7SizeCode, sec7Circ1SizeCode, sec7Circ2SizeCode, sec7Circ3SizeCode"
                   oninput="document.getElementById('sec7Size').setAttribute('value', this.value); document.getElementById('sec7SizeVal').innerText = this.value; document.getElementById('sec7SizeCode').innerText = this.value;">
               </div>
             </div>
@@ -866,9 +856,9 @@
             <pxl-var id="sec7Size" value="150"></pxl-var>
 
             <!-- Shapes bound to state -->
-            <pxl-circle id="sec7Shape1" rotate="0"   dx="ref.sec7Spread.value" r="ref.sec7Size.value" fill="hsla(ref.sec7Hue.value + 25, 80, 60, 0.6)"></pxl-circle>
-            <pxl-circle id="sec7Shape2" rotate="120" dx="ref.sec7Spread.value" r="ref.sec7Size.value" fill="hsla(ref.sec7Hue.value + 142, 80, 60, 0.6)"></pxl-circle>
-            <pxl-circle id="sec7Shape3" rotate="240" dx="ref.sec7Spread.value" r="ref.sec7Size.value" fill="hsla(ref.sec7Hue.value + 217, 80, 60, 0.6)"></pxl-circle>
+            <pxl-circle id="sec7Shape1" dx="ref.sec7Spread.value" r="ref.sec7Size.value" fill="hsla(ref.sec7Hue.value + 25, 80, 60, 0.6)" rotate="0"  ></pxl-circle>
+            <pxl-circle id="sec7Shape2" dx="ref.sec7Spread.value" r="ref.sec7Size.value" fill="hsla(ref.sec7Hue.value + 142, 80, 60, 0.6)" rotate="120"></pxl-circle>
+            <pxl-circle id="sec7Shape3" dx="ref.sec7Spread.value" r="ref.sec7Size.value" fill="hsla(ref.sec7Hue.value + 217, 80, 60, 0.6)" rotate="240"></pxl-circle>
 
           </pxl-layer>
         </pxl-stage>
@@ -883,15 +873,6 @@
       </ul>
       
       <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;!-- A line on the root stage perfectly tracking two shapes inside different rotating layers --&gt;
-  &lt;pxl-layer&gt;
-    &lt;pxl-line 
-      x1="toLocal(ref.circle1, 'x')" y1="toLocal(ref.circle1, 'y')" 
-      x2="toLocal(ref.circle2, 'x')" y2="toLocal(ref.circle2, 'y')" 
-      stroke="#ff00ff"&gt;
-    &lt;/pxl-line&gt;
-  &lt;/pxl-layer&gt;
-
   &lt;!-- Two independent rotating layers with their own shapes --&gt;
   &lt;pxl-layer id="layer1" x="<mark id="sec8Layer1XCode">350</mark>" y="<mark id="sec8Layer1YCode">250</mark>" rotate="<mark id="sec8Layer1RotCode">0</mark>"&gt;
     &lt;pxl-circle id="circle1" x="<mark id="sec8Circle1XCode">-150</mark>" y="<mark id="sec8Circle1YCode">-150</mark>" r="<mark id="sec8Circle1RCode">100</mark>" stroke="#f97316"&gt;&lt;/pxl-circle&gt;
@@ -899,6 +880,15 @@
 
   &lt;pxl-layer id="layer2" x="<mark id="sec8Layer2XCode">650</mark>" y="<mark id="sec8Layer2YCode">350</mark>" rotate="<mark id="sec8Layer2RotCode">0</mark>"&gt;
     &lt;pxl-circle id="circle2" x="<mark id="sec8Circle2XCode">150</mark>" y="<mark id="sec8Circle2YCode">150</mark>" r="<mark id="sec8Circle2RCode">100</mark>" stroke="#3b82f6"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+
+  &lt;!-- A line perfectly tracking two shapes inside different rotating layers --&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-line 
+      x1="toLocal(<mark id="sec8LineRefCirc1X" class="highlight-reactive">ref.circle1</mark>, 'x')" y1="toLocal(<mark id="sec8LineRefCirc1Y" class="highlight-reactive">ref.circle1</mark>, 'y')" 
+      x2="toLocal(<mark id="sec8LineRefCirc2X" class="highlight-reactive">ref.circle2</mark>, 'x')" y2="toLocal(<mark id="sec8LineRefCirc2Y" class="highlight-reactive">ref.circle2</mark>, 'y')" 
+      stroke="#ff00ff"&gt;
+    &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -919,18 +909,18 @@
           <div class="tab-content active" id="sec8Layer1Tab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec8Layer1XVal">350</span></label>
-                <input type="range" min="0" max="1000" step="10" value="350" autocomplete="off"
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec8Layer1XVal">350</span></label>
+                <input type="range" min="0" max="1000" step="10" value="350" autocomplete="off" data-mark="sec8Layer1XCode, sec8LineRefCirc1X, sec8LineRefCirc1Y"
                   oninput="document.getElementById('sec8Layer1X').setAttribute('value', this.value); document.getElementById('sec8Layer1XVal').innerText = this.value; document.getElementById('sec8Layer1XCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec8Layer1YVal">250</span></label>
-                <input type="range" min="0" max="600" step="10" value="250" autocomplete="off"
+                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec8Layer1YVal">250</span></label>
+                <input type="range" min="0" max="600" step="10" value="250" autocomplete="off" data-mark="sec8Layer1YCode, sec8LineRefCirc1X, sec8LineRefCirc1Y"
                   oninput="document.getElementById('sec8Layer1Y').setAttribute('value', this.value); document.getElementById('sec8Layer1YVal').innerText = this.value; document.getElementById('sec8Layer1YCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Rotation <span id="sec8Layer1RotVal">0°</span></label>
-                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec8Layer1RotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec8Layer1RotCode, sec8LineRefCirc1X, sec8LineRefCirc1Y"
                   oninput="document.getElementById('sec8Layer1Rot').setAttribute('value', this.value); document.getElementById('sec8Layer1RotVal').innerText = this.value + '°'; document.getElementById('sec8Layer1RotCode').innerText = this.value;">
               </div>
             </div>
@@ -939,18 +929,18 @@
           <div class="tab-content" id="sec8Circle1Tab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec8Circle1XVal">-150</span></label>
-                <input type="range" min="-500" max="500" step="10" value="-150" autocomplete="off"
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec8Circle1XVal">-150</span></label>
+                <input type="range" min="-500" max="500" step="10" value="-150" autocomplete="off" data-mark="sec8Circle1XCode, sec8LineRefCirc1X, sec8LineRefCirc1Y"
                   oninput="document.getElementById('sec8Circle1X').setAttribute('value', this.value); document.getElementById('sec8Circle1XVal').innerText = this.value; document.getElementById('sec8Circle1XCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec8Circle1YVal">-150</span></label>
-                <input type="range" min="-500" max="500" step="10" value="-150" autocomplete="off"
+                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec8Circle1YVal">-150</span></label>
+                <input type="range" min="-500" max="500" step="10" value="-150" autocomplete="off" data-mark="sec8Circle1YCode, sec8LineRefCirc1X, sec8LineRefCirc1Y"
                   oninput="document.getElementById('sec8Circle1Y').setAttribute('value', this.value); document.getElementById('sec8Circle1YVal').innerText = this.value; document.getElementById('sec8Circle1YCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius <span id="sec8Circle1RVal">100</span></label>
-                <input type="range" min="0" max="200" step="5" value="100" autocomplete="off"
+                <label><span>Radius <span class="indicator-dot"></span></span> <span id="sec8Circle1RVal">100</span></label>
+                <input type="range" min="0" max="200" step="5" value="100" autocomplete="off" data-mark="sec8Circle1RCode"
                   oninput="document.getElementById('sec8Circle1R').setAttribute('value', this.value); document.getElementById('sec8Circle1RVal').innerText = this.value; document.getElementById('sec8Circle1RCode').innerText = this.value;">
               </div>
             </div>
@@ -959,18 +949,18 @@
           <div class="tab-content" id="sec8Layer2Tab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec8Layer2XVal">650</span></label>
-                <input type="range" min="0" max="1000" step="10" value="650" autocomplete="off"
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec8Layer2XVal">650</span></label>
+                <input type="range" min="0" max="1000" step="10" value="650" autocomplete="off" data-mark="sec8Layer2XCode, sec8LineRefCirc2X, sec8LineRefCirc2Y"
                   oninput="document.getElementById('sec8Layer2X').setAttribute('value', this.value); document.getElementById('sec8Layer2XVal').innerText = this.value; document.getElementById('sec8Layer2XCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec8Layer2YVal">350</span></label>
-                <input type="range" min="0" max="600" step="10" value="350" autocomplete="off"
+                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec8Layer2YVal">350</span></label>
+                <input type="range" min="0" max="600" step="10" value="350" autocomplete="off" data-mark="sec8Layer2YCode, sec8LineRefCirc2X, sec8LineRefCirc2Y"
                   oninput="document.getElementById('sec8Layer2Y').setAttribute('value', this.value); document.getElementById('sec8Layer2YVal').innerText = this.value; document.getElementById('sec8Layer2YCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Rotation <span id="sec8Layer2RotVal">0°</span></label>
-                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec8Layer2RotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec8Layer2RotCode, sec8LineRefCirc2X, sec8LineRefCirc2Y"
                   oninput="document.getElementById('sec8Layer2Rot').setAttribute('value', this.value); document.getElementById('sec8Layer2RotVal').innerText = this.value + '°'; document.getElementById('sec8Layer2RotCode').innerText = this.value;">
               </div>
             </div>
@@ -979,18 +969,18 @@
           <div class="tab-content" id="sec8Circle2Tab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec8Circle2XVal">150</span></label>
-                <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off"
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec8Circle2XVal">150</span></label>
+                <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off" data-mark="sec8Circle2XCode, sec8LineRefCirc2X, sec8LineRefCirc2Y"
                   oninput="document.getElementById('sec8Circle2X').setAttribute('value', this.value); document.getElementById('sec8Circle2XVal').innerText = this.value; document.getElementById('sec8Circle2XCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec8Circle2YVal">150</span></label>
-                <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off"
+                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec8Circle2YVal">150</span></label>
+                <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off" data-mark="sec8Circle2YCode, sec8LineRefCirc2X, sec8LineRefCirc2Y"
                   oninput="document.getElementById('sec8Circle2Y').setAttribute('value', this.value); document.getElementById('sec8Circle2YVal').innerText = this.value; document.getElementById('sec8Circle2YCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius <span id="sec8Circle2RVal">100</span></label>
-                <input type="range" min="0" max="200" step="5" value="100" autocomplete="off"
+                <label><span>Radius <span class="indicator-dot"></span></span> <span id="sec8Circle2RVal">100</span></label>
+                <input type="range" min="0" max="200" step="5" value="100" autocomplete="off" data-mark="sec8Circle2RCode"
                   oninput="document.getElementById('sec8Circle2R').setAttribute('value', this.value); document.getElementById('sec8Circle2RVal').innerText = this.value; document.getElementById('sec8Circle2RCode').innerText = this.value;">
               </div>
             </div>
@@ -1019,17 +1009,6 @@
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
           </pxl-layer>
 
-          <!-- Cross-Space Connecting Line -->
-          <pxl-layer>
-            <pxl-line 
-              x1="toLocal(ref.sec8Layer1Shape, 'x')" 
-              y1="toLocal(ref.sec8Layer1Shape, 'y')" 
-              x2="toLocal(ref.sec8Layer2Shape, 'x')" 
-              y2="toLocal(ref.sec8Layer2Shape, 'y')" 
-              stroke="#ff00ff" strokewidth="4" linedash="[10, 10]">
-            </pxl-line>
-          </pxl-layer>
-
           <!-- Layer 1 -->
           <pxl-layer id="sec8Layer1" x="ref.sec8Layer1X.value" y="ref.sec8Layer1Y.value" rotate="ref.sec8Layer1Rot.value">
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#fed7aa" strokewidth="2" linedash="[5, 5]"></pxl-line>
@@ -1053,9 +1032,20 @@
             <pxl-circle x="ref.sec8Circle2X.value" y="ref.sec8Circle2Y.value" r="5" fill="#3b82f6"></pxl-circle>
             <pxl-text x="ref.sec8Circle2X.value + 15" y="ref.sec8Circle2Y.value - 15" text="Circle 2 Center" size="27" fill="#60a5fa"></pxl-text>
           </pxl-layer>
+
+          <!-- Cross-Space Connecting Line -->
+          <pxl-layer>
+            <pxl-line 
+              x1="toLocal(ref.sec8Layer1Shape, 'x')" 
+              y1="toLocal(ref.sec8Layer1Shape, 'y')" 
+              x2="toLocal(ref.sec8Layer2Shape, 'x')" 
+              y2="toLocal(ref.sec8Layer2Shape, 'y')" 
+              stroke="#ff00ff" strokewidth="4" linedash="[10, 10]">
+            </pxl-line>
+          </pxl-layer>
         </pxl-stage>
       </div>
-      <h2>9. Native Animations (<code>t</code>, Math &amp; Time Drivers)</h2>
+      <h2>9. Animations (Time <code>t</code>, Math &amp; Time Drivers)</h2>
       <p>Kilopixel has a native animation loop that evaluates all variable expressions at 60 FPS. By using the built-in <code>t</code> variable (time in seconds), injected math functions (like <code>sin</code> and <code>cos</code>), and normalized <strong>time drivers</strong> (like <code>loop(d)</code>), you can create incredibly complex, smooth animations declaratively.</p>
       
       <p>In this example, we use <code>sin(t)</code> and <code>cos(t)</code> with independent X and Y frequencies to draw a Lissajous curve. We also use the native <code>hsl()</code> scope function combined with the <code>loop(d)</code> time driver to elegantly cycle the orb's color across the color wheel exactly once every 10 seconds!</p>
