@@ -35,12 +35,12 @@
       <p>To ensure graphics are fully responsive across all screen sizes, every Kilopixel <code>&lt;pxl-stage&gt;</code> has a fixed <strong>logical width of 1000</strong>. The height is dynamically computed based on the <code>ratio</code> attribute.</p>
       
       <div class="callout-info">
-        <p class="callout-body"><strong>Values as percentages:</strong> Because the logical width is always 1000, you can mentally read coordinates and sizes as percentages of the Stage's width with one decimal place. For example, a circle with <code>r="200"</code> will have a radius spanning exactly <strong>20.0%</strong> of the stage's width, and a line with <code>strokewidth="10"</code> will be exactly <strong>1.0%</strong> thick.</p>
+        <p class="callout-body"><strong>Values as percentages:</strong> Because the logical width is always 1000, you can mentally read coordinates and sizes as percentages of the stage's width with one decimal place. For example, a circle with <code>r="200"</code> will have a radius spanning exactly <strong>20.0%</strong> of the stage's width, and a line with <code>strokewidth="10"</code> will be exactly <strong>1.0%</strong> thick.</p>
       </div>
 
-      <p>A <code>&lt;pxl-stage&gt;</code> has a CSS <code>width</code> of <code>100%</code>, meaning it will always automatically adapt to horizontally fill its parent element. To control the physical Stage width, you simply adjust the width of its parent container.</p>
+      <p>A <code>&lt;pxl-stage&gt;</code> has a CSS <code>width</code> of <code>100%</code>, meaning it will always automatically adapt to horizontally fill its parent element. To control the physical stage width, you simply adjust the width of its parent container.</p>
 
-      <p>In the example below, try moving the ratio slider to see how the coordinate system adapts: the logical width remains <strong>fixed at 1000</strong> across all formats, while the logical height is dynamically <strong>computed</strong> from the aspect ratio. No matter how large or small your physical screen is, the Stage Origin is always <code>(0, 0)</code>!</p>
+      <p>In the example below, try moving the ratio slider to see how the coordinate system adapts: the logical width remains <strong>fixed at 1000</strong> across all formats, while the logical height is dynamically <strong>computed</strong> from the aspect ratio. No matter how large or small your physical screen is, the stage origin is always <code>(0, 0)</code>!</p>
 
       <pre><code class="language-html">&lt;!-- Try resizing the container or dragging the ratio slider --&gt;
 &lt;div style="width: <mark id="sec1WidthCode">100%</mark>;"&gt;
