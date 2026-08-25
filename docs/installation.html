@@ -100,13 +100,13 @@
             <!-- 1. Background Grid -->
             <pxl-grid stroke="#f1f5f9" major="4"></pxl-grid>
 
-            <!-- 2. Shape Helpers -->
+            <!-- 2. Shape helpers -->
             <pxl-line x1="0" y1="ref.installCircle.y" x2="ref.installCircle.x" y2="ref.installCircle.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.installCircle.x / 2" y="ref.installCircle.y + 15" baseline="top" align="center" text="`x = ${ref.installCircle.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
             <pxl-line x1="ref.installCircle.x" y1="0" x2="ref.installCircle.x" y2="ref.installCircle.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.installCircle.x + 15" y="ref.installCircle.y / 2" baseline="middle" align="left" text="`y = ${ref.installCircle.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
 
-            <!-- 3. The Shape -->
+            <!-- 3. The shape -->
             <pxl-circle id="installCircle"
               x="500" 
               y="300" 
@@ -114,7 +114,7 @@
               fill="#ffedd566" stroke="#f97316" strokewidth="2">
             </pxl-circle>
 
-            <!-- 4. Shape Center (Top) -->
+            <!-- 4. Shape center (Top) -->
             <pxl-circle x="ref.installCircle.x" y="ref.installCircle.y" r="5" fill="#fb923c"></pxl-circle>
             <pxl-text 
               x="ref.installCircle.x + 15" 
