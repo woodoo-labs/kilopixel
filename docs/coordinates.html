@@ -619,10 +619,10 @@
       <pre><code class="language-html">&lt;!-- Linking attributes across different shapes --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec6LayerXCode">0</mark>" y="<mark id="sec6LayerYCode">0</mark>" rotate="<mark id="sec6LayerRotCode">0</mark>"&gt;
-    &lt;!-- 1. Master shape (You control this) --&gt;
+    &lt;!-- 1. Master Shape (You control this) --&gt;
     &lt;pxl-rect id="master" x="<mark id="sec6MasterXCode">250</mark>" y="<mark id="sec6MasterYCode">200</mark>" w="100" h="100" rotate="<mark id="sec6MasterRotCode">0</mark>" stroke="#f97316"&gt;&lt;/pxl-rect&gt;
 
-    &lt;!-- 2. Mirror shape (Moves in reverse) --&gt;
+    &lt;!-- 2. Mirror Shape (Moves in reverse) --&gt;
     &lt;pxl-rect id="mirror" 
       x="1000 - <mark id="sec6MirrorRefXCode" class="highlight-reactive">ref.master.x</mark>" 
       y="<mark id="sec6MirrorRefYCode" class="highlight-reactive">ref.master.y</mark>" 
@@ -631,7 +631,7 @@
       stroke="#3b82f6"&gt;
     &lt;/pxl-rect&gt;
 
-    &lt;!-- 3. Reactor shape (Spins and scales) --&gt;
+    &lt;!-- 3. Reactor Shape (Spins and scales) --&gt;
     &lt;pxl-rect id="reactor" 
       x="<mark id="sec6ReactorXCode">500</mark>" y="<mark id="sec6ReactorYCode">450</mark>" 
       w="<mark id="sec6ReactorRefWCode" class="highlight-reactive">ref.master.x</mark> / 5" 
@@ -1607,7 +1607,7 @@
     &lt;pxl-var id="sec12OrbitOffset" value="150"&gt;&lt;/pxl-var&gt;
     &lt;pxl-var id="sec12OrbitSpeed" value="90"&gt;&lt;/pxl-var&gt;
 
-    &lt;!-- The Sun (pivot point) --&gt;
+    &lt;!-- The Sun (Pivot Point) --&gt;
     &lt;pxl-circle r="30" fill="#f59e0b"&gt;&lt;/pxl-circle&gt;
 
     &lt;!-- Orbiting Planet --&gt;
@@ -1666,7 +1666,7 @@
               r="20" fill="#3b82f6">
             </pxl-circle>
 
-            &lt;!-- Red arrow illustrating the dx offset vector --&gt;
+            &lt;!-- Red Arrow illustrating the dx Offset vector --&gt;
             <pxl-line 
               x="0" y="0" 
               x2="ref.sec12OrbitOffset.value" y2="0" 
