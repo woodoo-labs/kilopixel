@@ -35,7 +35,10 @@
       <p>To ensure graphics are fully responsive across all screen sizes, every Kilopixel <code>&lt;pxl-stage&gt;</code> has a fixed <strong>logical width of 1000</strong>. The height is dynamically computed based on the <code>ratio</code> attribute.</p>
       
       <div class="callout-info">
-        <p class="callout-body"><strong>Values as percentages:</strong> Because the logical width is always 1000, you can mentally read coordinates and sizes as percentages of the stage's width with one decimal place. For example, a circle with <code>r="200"</code> will have a radius spanning exactly <strong>20.0%</strong> of the stage's width, and a line with <code>strokewidth="10"</code> will be exactly <strong>1.0%</strong> thick.</p>
+        <p class="callout-body"><strong>Values as Percentages:</strong> Because the logical width is always 1000, you can mentally read coordinates and sizes as percentages of the stage's width with one decimal place. For example, a circle with <code>r="200"</code> will have a radius spanning exactly <strong>20.0%</strong> of the stage's width, and a line with <code>strokewidth="10"</code> will be exactly <strong>1.0%</strong> thick.</p>
+      </div>
+      <div class="callout-info">
+        <p class="callout-body"><strong>Unitless Values:</strong> Because Kilopixel uses a logical coordinate space, all spatial attributes (<code>x</code>, <code>y</code>, <code>w</code>, <code>r</code>, <code>strokewidth</code>, etc.) accept pure, unitless numbers. You should never append <code>px</code>, <code>em</code>, or <code>%</code> to your values (e.g., write <code>x="500"</code>, not <code>x="500px"</code>).</p>
       </div>
 
       <p>A <code>&lt;pxl-stage&gt;</code> has a CSS <code>width</code> of <code>100%</code>, meaning it will always automatically adapt to horizontally fill its parent element. To control the physical stage width, you simply adjust the width of its parent container.</p>
@@ -1392,8 +1395,8 @@
       <h2>11. Coordinate Mapping <code>toLocal()</code></h2>
       <p>When shapes orbit or rotate inside nested coordinate spaces, drawing connecting lines or tracking positions requires translating between coordinate systems:</p>
       <ul>
-        <li><strong>Why raw attributes stay constant:</strong> If you reference <code>ref.pointA.x</code> or <code>ref.pointA.dx</code> directly, you will always get their static declared values even while the point is rotating. Because the local coordinate system rotates <em>with</em> the shape, its internal <code>x</code> and <code>dx</code> numbers never change.</li>
-        <li><strong>How <code>toLocal</code> solves this:</strong> By wrapping the reference in <code>toLocal(ref.pointA, 'tx')</code> or <code>toLocal(ref.pointA, 'ty')</code> (or <code>x</code> and <code>y</code> for center positions), Kilopixel automatically calculates the shape's true orbiting position and maps it into your current coordinate space — no manual trigonometry required!</li>
+        <li><strong>Why Raw Attributes Stay Constant:</strong> If you reference <code>ref.pointA.x</code> or <code>ref.pointA.dx</code> directly, you will always get their static declared values even while the point is rotating. Because the local coordinate system rotates <em>with</em> the shape, its internal <code>x</code> and <code>dx</code> numbers never change.</li>
+        <li><strong>How <code>toLocal</code> Solves This:</strong> By wrapping the reference in <code>toLocal(ref.pointA, 'tx')</code> or <code>toLocal(ref.pointA, 'ty')</code> (or <code>x</code> and <code>y</code> for center positions), Kilopixel automatically calculates the shape's true orbiting position and maps it into your current coordinate space — no manual trigonometry required!</li>
       </ul>
       <p>In this "constellation" example, two shapes orbit their centers independently. The connecting line uses <code>toLocal</code> to track their live positions and stay perfectly connected at 60fps.</p>
       

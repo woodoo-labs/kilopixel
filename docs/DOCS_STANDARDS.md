@@ -61,6 +61,8 @@ Elements within a `<pxl-layer>` are drawn in strict DOM order (back-to-front). A
   * **Code Formatting:** When referring specifically to a Kilopixel HTML element, component, or declarative attribute, format the text as code. Use `<code>` tags when writing in HTML documents, or backticks when writing in Markdown. (e.g., *"Nest the `<code>&lt;pxl-circle&gt;</code>` inside..."*).
   * **Combined Markers (Canvas Labels):** UI markers and canvas labels (e.g., the text floating on the canvas next to a dot) are the only exception. Always capitalize both words for these UI labels (e.g., `Layer Center`, `Shape Offset`) to make them stand out visually on the canvas.
   * **Structural HTML Comments:** HTML comments inside code blocks that act as structural titles or headers (e.g., `<!-- Hero Sandbox Stage -->`, `<!-- Left: Animated Pac-Man -->`) may use Title Case. They are treated as document headers rather than conversational prose.
+  * **Inline Callout/List Headers:** Bold prefixes at the beginning of paragraphs, lists, or callout bodies (e.g., `<strong>Values as Percentages:</strong>`) MUST use Title Case.
+  * **Unitless Coordinates (No `u` or `px`):** The public documentation must treat the 1000-width canvas as a pure mathematical space. NEVER append units (like `px`, `em`, or `%`) to declarative attribute values in text, NEVER refer to the internal scale factor variable `u`, and NEVER use phrases like "logical units" or "coordinate units". Always use pure bare numbers or refer to a "1000-width logical canvas".
 
 ## 4. UI Controls & Architecture
 Interactive playgrounds must follow a standardized DOM architecture to maintain visual parity across the site.

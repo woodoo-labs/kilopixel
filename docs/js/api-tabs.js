@@ -53,7 +53,7 @@ class DocsApiStyling extends HTMLElement {
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Border thickness in logical units.
+                  Border thickness.
                 </div>
               </div>
 
@@ -105,7 +105,7 @@ class DocsApiStyling extends HTMLElement {
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Dash pattern array in logical coordinate units (<code>u</code>). Values scale responsively with the stage (e.g. <code>linedash="[10, 5]"</code> draws a 10u dash followed by a 5u gap). Defaults to <code>null</code> (solid line).
+                  Dash pattern array. Values scale responsively with the stage (e.g. <code>linedash="[10, 5]"</code> draws a dash of 10 followed by a gap of 5). Defaults to <code>null</code> (solid line).
                 </div>
               </div>
 
@@ -118,7 +118,7 @@ class DocsApiStyling extends HTMLElement {
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Phase shift offset of the line dash pattern in logical coordinate units (<code>u</code>). Animate with time <code>t</code> to create marching ants effects (e.g. <code>dashoffset="t * 20"</code>).
+                  Phase shift offset of the line dash pattern. Animate with time <code>t</code> to create marching ants effects (e.g. <code>dashoffset="t * 20"</code>).
                 </div>
               </div>
 
@@ -171,7 +171,7 @@ class DocsApiStyling extends HTMLElement {
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Array of responsive visual filters (e.g. <code>filter="[blur(5), dropShadow(0, 0, 15, 'red')]"</code>). Values are automatically scaled by logical units, so do not use <code>px</code> suffixes. Supports <code>blur</code>, <code>dropShadow</code>, <code>brightness</code>, <code>contrast</code>, <code>saturate</code>, <code>hueRotate</code>, <code>invert</code>, <code>grayscale</code>, <code>sepia</code>, and <code>opacity</code>.
+                  Array of responsive visual filters (e.g. <code>filter="[blur(5), dropShadow(0, 0, 15, 'red')]"</code>). Values are unitless and scale responsively, so do not use <code>px</code> suffixes. Supports <code>blur</code>, <code>dropShadow</code>, <code>brightness</code>, <code>contrast</code>, <code>saturate</code>, <code>hueRotate</code>, <code>invert</code>, <code>grayscale</code>, <code>sepia</code>, and <code>opacity</code>.
                 </div>
               </div>
 
@@ -197,7 +197,7 @@ class DocsApiStyling extends HTMLElement {
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Native shadow blur radius in logical units (<code>u</code>). Scales responsively with the stage.
+                  Native shadow blur radius. Scales responsively with the stage.
                 </div>
               </div>
 
@@ -210,7 +210,7 @@ class DocsApiStyling extends HTMLElement {
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Horizontal and vertical offset distance of the native shadow in logical units (<code>u</code>).
+                  Horizontal and vertical offset distance of the native shadow.
                 </div>
               </div>
             </div>
