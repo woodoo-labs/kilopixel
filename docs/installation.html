@@ -101,13 +101,13 @@
             <pxl-grid stroke="#f1f5f9" major="4"></pxl-grid>
 
             <!-- 2. Shape helpers -->
-            <pxl-line x1="0" y1="ref.installCircle.y" x2="ref.installCircle.x" y2="ref.installCircle.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.installCircle.x / 2" y="ref.installCircle.y + 15" baseline="top" align="center" text="`x = ${ref.installCircle.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
-            <pxl-line x1="ref.installCircle.x" y1="0" x2="ref.installCircle.x" y2="ref.installCircle.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.installCircle.x + 15" y="ref.installCircle.y / 2" baseline="middle" align="left" text="`y = ${ref.installCircle.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+            <pxl-line x1="0" y1="ref.sec4Circle.y" x2="ref.sec4Circle.x" y2="ref.sec4Circle.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec4Circle.x / 2" y="ref.sec4Circle.y + 15" baseline="top" align="center" text="`x = ${ref.sec4Circle.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+            <pxl-line x1="ref.sec4Circle.x" y1="0" x2="ref.sec4Circle.x" y2="ref.sec4Circle.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec4Circle.x + 15" y="ref.sec4Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.sec4Circle.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
 
             <!-- 3. The shape -->
-            <pxl-circle id="installCircle"
+            <pxl-circle id="sec4Circle"
               x="500" 
               y="300" 
               r="80 + wave(2) * 20" 
@@ -115,12 +115,12 @@
             </pxl-circle>
 
             <!-- 4. Shape center (Top) -->
-            <pxl-circle x="ref.installCircle.x" y="ref.installCircle.y" r="5" fill="#fb923c"></pxl-circle>
+            <pxl-circle x="ref.sec4Circle.x" y="ref.sec4Circle.y" r="5" fill="#fb923c"></pxl-circle>
             <pxl-text 
-              x="ref.installCircle.x + 15" 
-              y="ref.installCircle.y - 15" 
+              x="ref.sec4Circle.x + 15" 
+              y="ref.sec4Circle.y - 15" 
               baseline="bottom"
-              text="`Circle (${ref.installCircle.x}, ${ref.installCircle.y})`" 
+              text="`Circle (${ref.sec4Circle.x}, ${ref.sec4Circle.y})`" 
               size="27" 
               fill="#fb923c" 
               font="monospace">
@@ -133,21 +133,21 @@
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="switchTab(this, 'install-circle')">Circle</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4CircleTab')">Circle</button>
             </div>
           </div>
 
-          <div class="tab-content active" id="install-circle">
+          <div class="tab-content active" id="sec4CircleTab">
             <div class="playground-sliders">
               <div class="control-group">
                 <label>Center X <span id="lblInstallX">500</span></label>
                 <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
-                  oninput="pxl.nodes.installCircle.set('x', this.value); document.getElementById('lblInstallX').innerText = this.value;">
+                  oninput="pxl.nodes.sec4Circle.set('x', this.value); document.getElementById('lblInstallX').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Center Y <span id="lblInstallY">300</span></label>
                 <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
-                  oninput="pxl.nodes.installCircle.set('y', this.value); document.getElementById('lblInstallY').innerText = this.value;">
+                  oninput="pxl.nodes.sec4Circle.set('y', this.value); document.getElementById('lblInstallY').innerText = this.value;">
               </div>
             </div>
           </div>
