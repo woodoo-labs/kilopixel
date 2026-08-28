@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kilopixel - Colors &amp; Gradients</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/docs.css">
   
   <!-- Prism Syntax Highlighting -->
@@ -400,7 +400,7 @@
         <p>The <code>linear()</code> math helper generates high-performance linear gradients. The first argument defines the direction (either an angle in degrees or an <code>[x1, y1, x2, y2]</code> coordinate array where 0 to 1 represents the element's bounding box). The second argument is an array of colors (which distribute evenly) or explicit <code>[offset, color]</code> pairs.</p>
 
         <div class="callout-info">
-          <p class="callout-body"><strong>The 0-to-1 Bounding Box:</strong> In Kilopixel, gradients are locked to the element's bounding box! The top-left corner of any shape is always exactly <code>(0, 0)</code>, and the bottom-right is <code>(1, 1)</code>. This guarantees that if you move, scale, or stretch your shape, the gradient stretches seamlessly with it — no complex trigonometry required!</p>
+          <p class="callout-body"><strong>The 0-to-1 Bounding Box:</strong> In Kilopixel, gradients are locked to the element's bounding box! The top-left corner of any shape is always exactly <code>(0, 0)</code>, and the bottom-right is <code>(1, 1)</code>. This guarantees that if you move, scale, or stretch your shape, the gradient stretches seamlessly with it â€” no complex trigonometry required!</p>
           <p class="callout-body" style="margin-top: 1rem;">In the diagrams below, the <span style="color: #3b82f6; font-weight: 600;">blue coordinates</span> represent the fixed corners of the shape's invisible bounding box. The <span style="color: #8b5cf6; font-weight: 600;">purple vectors</span> represent the actual <code>[x1, y1, x2, y2]</code> array driving the gradient's direction through that box.</p>
 
           <pxl-stage ratio="2 / 1" style="width: 100%; background: transparent; margin-top: 1rem;">
@@ -442,7 +442,7 @@
         </div>
 
         <div class="callout-info" style="margin-top: 2rem;">
-          <p class="callout-body"><strong>True Geometric Angles:</strong> When you provide an angle in degrees instead of an array, Kilopixel bypasses the 0-to-1 corner mapping entirely! It projects a geometrically perfect angle from the center of the shape and calculates the exact distance needed to cover the corners. This means a <code>45°</code> gradient is <em>always</em> drawn at a strict 45-degree angle on the screen, even if the bounding box is a wide rectangle!</p>
+          <p class="callout-body"><strong>True Geometric Angles:</strong> When you provide an angle in degrees instead of an array, Kilopixel bypasses the 0-to-1 corner mapping entirely! It projects a geometrically perfect angle from the center of the shape and calculates the exact distance needed to cover the corners. This means a <code>45Â°</code> gradient is <em>always</em> drawn at a strict 45-degree angle on the screen, even if the bounding box is a wide rectangle!</p>
 
           <pxl-stage ratio="5 / 2" style="width: 100%; background: transparent; margin-top: 1rem;">
             <pxl-layer>
@@ -452,7 +452,7 @@
               <pxl-rect x="150" y="200" w="250" h="150" fill="linear(0, [0, '#e2e8f0', 0.4, '#e2e8f0', 0.6, '#94a3b8', 1, '#94a3b8'])"></pxl-rect>
               <pxl-rect x="150" y="200" w="250" h="150" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
               <pxl-line x1="25" y1="200" x2="275" y2="200" stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
-              <pxl-text x="150" y="110" text="'0°'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+              <pxl-text x="150" y="110" text="'0Â°'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
         
               <!-- 2. 45 Degrees -->
               <pxl-rect x="500" y="200" w="250" h="150" fill="linear(45, [0, '#e2e8f0', 0.4, '#e2e8f0', 0.6, '#94a3b8', 1, '#94a3b8'])"></pxl-rect>
@@ -462,13 +462,13 @@
               <pxl-line x1="575" y1="325" x2="650" y2="250" stroke="#94a3b8" strokewidth="2" linedash="[4, 4]"></pxl-line>
               <!-- 45 deg vector through center (500,200). dx/dy = 150 * 0.707 = 106 -->
               <pxl-line x1="400" y1="100" x2="600" y2="300" stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
-              <pxl-text x="500" y="110" text="'45°'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+              <pxl-text x="500" y="110" text="'45Â°'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
         
               <!-- 3. 90 Degrees -->
               <pxl-rect x="850" y="200" w="250" h="150" fill="linear(90, [0, '#e2e8f0', 0.4, '#e2e8f0', 0.6, '#94a3b8', 1, '#94a3b8'])"></pxl-rect>
               <pxl-rect x="850" y="200" w="250" h="150" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
               <pxl-line x1="850" y1="125" x2="850" y2="275" stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
-              <pxl-text x="850" y="110" text="'90°'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+              <pxl-text x="850" y="110" text="'90Â°'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -746,3 +746,4 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
 </body>
 </html>
+

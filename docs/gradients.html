@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kilopixel - Gradients</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/docs.css">
   
   <!-- Prism Syntax Highlighting -->
@@ -36,7 +36,7 @@
         <p class="lead" style="margin-top: 2rem; margin-bottom: 1.5rem;">To work with gradients in Kilopixel, you first need to understand two core concepts: the <strong>Bounding Box</strong> and the <strong>colorsArray</strong>.</p>
 
         <div class="callout-info">
-          <p class="callout-body"><strong>Bounding Box:</strong> In Kilopixel, all gradients are mapped to an element's invisible bounding box. The top-left corner of any shape is always exactly <code>(0, 0)</code>, and the bottom-right is <code>(1, 1)</code>. This guarantees that if you move, scale, or stretch your shape, the gradient stretches seamlessly with it — no complex trigonometry required!</p>
+          <p class="callout-body"><strong>Bounding Box:</strong> In Kilopixel, all gradients are mapped to an element's invisible bounding box. The top-left corner of any shape is always exactly <code>(0, 0)</code>, and the bottom-right is <code>(1, 1)</code>. This guarantees that if you move, scale, or stretch your shape, the gradient stretches seamlessly with it â€” no complex trigonometry required!</p>
           <p class="callout-body" style="margin-top: 1rem;">In the diagrams below, the <span style="color: #3b82f6; font-weight: 600;">blue coordinates</span> represent the fixed corners of the shape's invisible 0-to-1 bounding box space.</p>
 
           <pxl-stage ratio="5 / 2" style="width: 100%; background: transparent; margin-top: 1rem;">
@@ -151,7 +151,7 @@
                       oninput="document.getElementById('sec1ex1GradEndVal').innerText = this.value; document.getElementById('sec1ex1GradEndCode').innerText = this.value; document.getElementById('sec1ex1Rect').setAttribute('fill', `linear(${document.getElementById('sec1ex1AngleInput').value}, [${document.getElementById('sec1ex1GradStartInput').value}, '#e2e8f0', ${this.value}, '#94a3b8'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>Angle <span class="indicator-dot"></span></span> <span id="sec1ex1GradAngleVal">45</span></label>
+                    <label><span>Gradient Angle <span class="indicator-dot"></span></span> <span id="sec1ex1GradAngleVal">45</span></label>
                     <input type="range" id="sec1ex1AngleInput" min="0" max="360" step="5" value="45" autocomplete="off"
                       oninput="document.getElementById('sec1ex1Angle').setAttribute('value', this.value); document.getElementById('sec1ex1GradAngleVal').innerText = this.value; document.getElementById('sec1ex1GradAngleCode').innerText = this.value; document.getElementById('sec1ex1Rect').setAttribute('fill', `linear(${this.value}, [${document.getElementById('sec1ex1GradStartInput').value}, '#e2e8f0', ${document.getElementById('sec1ex1GradEndInput').value}, '#94a3b8'])`);">
                   </div>
@@ -224,15 +224,15 @@
   &lt;pxl-layer&gt;
     &lt;!-- 1. Ellipse --&gt;
     &lt;pxl-ellipse x="150" y="300" rx="<mark id="sec1ex2EllipseRxCode">100</mark>" ry="<mark id="sec1ex2EllipseRyCode">200</mark>" rotate="<mark id="sec1ex2EllipseRotCode">0</mark>" 
-      fill="linear(<mark id="sec1ex2EllipseAngleCode">45</mark>, ['orange', 'gold', 'tomato'])"&gt;&lt;/pxl-ellipse&gt;
+      fill="linear(<mark id="sec1ex2EllipseAngleCode">45</mark>, ['darkorange', 'gold', 'crimson'])"&gt;&lt;/pxl-ellipse&gt;
       
     &lt;!-- 2. Hard Split Rounded Rect --&gt;
-    &lt;pxl-rect x="500" y="300" w="<mark id="sec1ex2RectSizeCode">200</mark>" h="<mark id="sec1ex2RectSizeCode2">200</mark>" r="20" rotate="<mark id="sec1ex2RectRotCode">0</mark>" 
+    &lt;pxl-rect x="500" y="300" w="<mark id="sec1ex2RectWidthCode">300</mark>" h="<mark id="sec1ex2RectHeightCode">200</mark>" r="20" rotate="<mark id="sec1ex2RectRotCode">0</mark>" 
       fill="linear(<mark id="sec1ex2RectAngleCode">135</mark>, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])"&gt;&lt;/pxl-rect&gt;
 
     &lt;!-- 3. Gradient Text --&gt;
-    &lt;pxl-text x="850" y="300" size="<mark id="sec1ex2TextSizeCode">150</mark>" rotate="<mark id="sec1ex2TextRotCode">90</mark>" text="'Pixel'" weight="800" align="center" baseline="middle"
-      fill="linear(<mark id="sec1ex2TextAngleCode">45</mark>, ['#c026d3', '#db2777', '#f43f5e'])"&gt;&lt;/pxl-text&gt;
+    &lt;pxl-text x="850" y="300" size="<mark id="sec1ex2TextSizeCode">150</mark>" weight="<mark id="sec1ex2TextWeightCode">800</mark>" font="Inter" rotate="<mark id="sec1ex2TextRotCode">0</mark>" text="'pxl'" align="center" baseline="middle"
+      fill="linear(<mark id="sec1ex2TextAngleCode">45</mark>, ['#8b5cf6', '#ec4899', '#f59e0b'])"&gt;&lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
           </div>
@@ -269,7 +269,7 @@
                   <div class="control-group">
                     <label><span>Gradient Angle</span> <span id="sec1ex2EllipseAngleVal">45</span></label>
                     <input type="range" min="0" max="360" step="5" value="45" autocomplete="off"
-                      oninput="document.getElementById('sec1ex2Ellipse').setAttribute('fill', `linear(${this.value}, ['orange', 'gold', 'tomato'])`); document.getElementById('sec1ex2EllipseAngleVal').innerText = this.value; document.getElementById('sec1ex2EllipseAngleCode').innerText = this.value;">
+                      oninput="document.getElementById('sec1ex2Ellipse').setAttribute('fill', `linear(${this.value}, ['darkorange', 'gold', 'crimson'])`); document.getElementById('sec1ex2EllipseAngleVal').innerText = this.value; document.getElementById('sec1ex2EllipseAngleCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -278,19 +278,24 @@
               <div class="tab-content" id="sec1ex2RectTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Gradient Angle</span> <span id="sec1ex2RectAngleVal">135</span></label>
-                    <input type="range" min="0" max="360" step="5" value="135" autocomplete="off"
-                      oninput="document.getElementById('sec1ex2Rect').setAttribute('fill', `linear(${this.value}, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])`); document.getElementById('sec1ex2RectAngleVal').innerText = this.value; document.getElementById('sec1ex2RectAngleCode').innerText = this.value;">
+                    <label><span>Width</span> <span id="sec1ex2RectWidthVal">300</span></label>
+                    <input type="range" min="50" max="500" step="10" value="300" autocomplete="off"
+                      oninput="document.getElementById('sec1ex2Rect').setAttribute('w', this.value); document.getElementById('sec1ex2RectWidthVal').innerText = this.value; document.getElementById('sec1ex2RectWidthCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Size</span> <span id="sec1ex2RectSizeVal">200</span></label>
-                    <input type="range" min="50" max="300" step="10" value="200" autocomplete="off" data-mark="sec1ex2RectSizeCode, sec1ex2RectSizeCode2"
-                      oninput="document.getElementById('sec1ex2Rect').setAttribute('w', this.value); document.getElementById('sec1ex2Rect').setAttribute('h', this.value); document.getElementById('sec1ex2RectSizeVal').innerText = this.value; document.getElementById('sec1ex2RectSizeCode').innerText = this.value; document.getElementById('sec1ex2RectSizeCode2').innerText = this.value;">
+                    <label><span>Height</span> <span id="sec1ex2RectHeightVal">200</span></label>
+                    <input type="range" min="50" max="500" step="10" value="200" autocomplete="off"
+                      oninput="document.getElementById('sec1ex2Rect').setAttribute('h', this.value); document.getElementById('sec1ex2RectHeightVal').innerText = this.value; document.getElementById('sec1ex2RectHeightCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
                     <label><span>Rotation</span> <span id="sec1ex2RectRotVal">0°</span></label>
                     <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
                       oninput="document.getElementById('sec1ex2Rect').setAttribute('rotate', this.value); document.getElementById('sec1ex2RectRotVal').innerText = this.value + '°'; document.getElementById('sec1ex2RectRotCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Gradient Angle</span> <span id="sec1ex2RectAngleVal">135</span></label>
+                    <input type="range" min="0" max="360" step="5" value="135" autocomplete="off"
+                      oninput="document.getElementById('sec1ex2Rect').setAttribute('fill', `linear(${this.value}, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])`); document.getElementById('sec1ex2RectAngleVal').innerText = this.value; document.getElementById('sec1ex2RectAngleCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -299,19 +304,24 @@
               <div class="tab-content" id="sec1ex2TextTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Gradient Angle</span> <span id="sec1ex2TextAngleVal">45</span></label>
-                    <input type="range" min="0" max="360" step="5" value="45" autocomplete="off"
-                      oninput="document.getElementById('sec1ex2Text').setAttribute('fill', `linear(${this.value}, ['#c026d3', '#db2777', '#f43f5e'])`); document.getElementById('sec1ex2TextAngleVal').innerText = this.value; document.getElementById('sec1ex2TextAngleCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
                     <label><span>Font Size</span> <span id="sec1ex2TextSizeVal">150</span></label>
                     <input type="range" min="50" max="350" step="5" value="150" autocomplete="off"
                       oninput="document.getElementById('sec1ex2Text').setAttribute('size', this.value); document.getElementById('sec1ex2TextSizeVal').innerText = this.value; document.getElementById('sec1ex2TextSizeCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Rotation</span> <span id="sec1ex2TextRotVal">90°</span></label>
-                    <input type="range" min="0" max="360" step="5" value="90" autocomplete="off"
+                    <label><span>Font Weight</span> <span id="sec1ex2TextWeightVal">800</span></label>
+                    <input type="range" min="100" max="900" step="100" value="800" autocomplete="off"
+                      oninput="document.getElementById('sec1ex2Text').setAttribute('weight', this.value); document.getElementById('sec1ex2TextWeightVal').innerText = this.value; document.getElementById('sec1ex2TextWeightCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Rotation</span> <span id="sec1ex2TextRotVal">0°</span></label>
+                    <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
                       oninput="document.getElementById('sec1ex2Text').setAttribute('rotate', this.value); document.getElementById('sec1ex2TextRotVal').innerText = this.value + '°'; document.getElementById('sec1ex2TextRotCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Gradient Angle</span> <span id="sec1ex2TextAngleVal">45</span></label>
+                    <input type="range" min="0" max="360" step="5" value="45" autocomplete="off"
+                      oninput="document.getElementById('sec1ex2Text').setAttribute('fill', `linear(${this.value}, ['#8b5cf6', '#ec4899', '#f59e0b'])`); document.getElementById('sec1ex2TextAngleVal').innerText = this.value; document.getElementById('sec1ex2TextAngleCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -320,9 +330,9 @@
             <pxl-stage id="sec1ex2Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-                <pxl-ellipse id="sec1ex2Ellipse" x="150" y="300" rx="100" ry="200" rotate="0" fill="linear(45, ['orange', 'gold', 'tomato'])"></pxl-ellipse>
-                <pxl-rect id="sec1ex2Rect" x="500" y="300" w="200" h="200" r="20" rotate="0" fill="linear(135, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])"></pxl-rect>
-                <pxl-text id="sec1ex2Text" x="850" y="300" size="150" rotate="90" text="'Pixel'" weight="800" align="center" baseline="middle" fill="linear(45, ['#c026d3', '#db2777', '#f43f5e'])"></pxl-text>
+                <pxl-ellipse id="sec1ex2Ellipse" x="150" y="300" rx="100" ry="200" rotate="0" fill="linear(45, ['darkorange', 'gold', 'crimson'])"></pxl-ellipse>
+                <pxl-rect id="sec1ex2Rect" x="500" y="300" w="300" h="200" r="20" rotate="0" fill="linear(135, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])"></pxl-rect>
+                <pxl-text id="sec1ex2Text" x="850" y="300" size="150" weight="800" font="Inter" rotate="0" text="'pxl'" align="center" baseline="middle" fill="linear(45, ['#8b5cf6', '#ec4899', '#f59e0b'])"></pxl-text>
               </pxl-layer>
             </pxl-stage>
           </div>
@@ -335,3 +345,4 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
 </body>
 </html>
+
