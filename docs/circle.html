@@ -93,14 +93,14 @@
                     oninput="document.getElementById('sec1Circle').setAttribute('ir', this.value); document.getElementById('sec1CircleIRVal').innerText = this.value; document.getElementById('sec1CircleIRCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Start Angle (<code>start</code>)</span> <span><span id="sec1CircleStartVal">0</span>°</span></label>
+                  <label><span>Start Angle (<code>start</code>)</span> <span id="sec1CircleStartVal">0°</span></label>
                   <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec1Circle').setAttribute('start', this.value); document.getElementById('sec1CircleStartVal').innerText = this.value; document.getElementById('sec1CircleStartCode').innerText = this.value;">
+                    oninput="document.getElementById('sec1Circle').setAttribute('start', this.value); document.getElementById('sec1CircleStartVal').innerText = this.value + '°'; document.getElementById('sec1CircleStartCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Sweep (<code>sweep</code>)</span> <span><span id="sec1CircleSweepVal">270</span>°</span></label>
+                  <label><span>Sweep (<code>sweep</code>)</span> <span id="sec1CircleSweepVal">270°</span></label>
                   <input type="range" min="45" max="360" step="15" value="270" autocomplete="off"
-                    oninput="document.getElementById('sec1Circle').setAttribute('sweep', this.value); document.getElementById('sec1CircleSweepVal').innerText = this.value; document.getElementById('sec1CircleSweepCode').innerText = this.value;">
+                    oninput="document.getElementById('sec1Circle').setAttribute('sweep', this.value); document.getElementById('sec1CircleSweepVal').innerText = this.value + '°'; document.getElementById('sec1CircleSweepCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
                   <label><span>Pie Mode (<code>pie</code>)</span> <span id="sec1CirclePieVal">true</span></label>

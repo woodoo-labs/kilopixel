@@ -517,9 +517,9 @@
               <div class="tab-content active" id="sec4Rect1Tab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Angle (Degrees)</span> <span id="sec4Rect1AngleVal">45</span></label>
-                    <input type="range" min="0" max="360" step="1" value="45" autocomplete="off"
-                      oninput="document.getElementById('sec4Rect1').setAttribute('fill', `linear(${this.value}, [0, '#ff0055', 0.45, '#ff0055', 0.55, '#00ffcc', 1, '#00ffcc'])`); document.getElementById('sec4Rect1AngleVal').innerText = this.value; document.getElementById('sec4Rect1AngleCode').innerText = this.value;">
+                    <label><span>Angle</span> <span id="sec4Rect1AngleVal">45°</span></label>
+                    <input type="range" min="0" max="360" step="5" value="45" autocomplete="off"
+                      oninput="document.getElementById('sec4Rect1').setAttribute('fill', `linear(${this.value}, [0, '#ff0055', 0.45, '#ff0055', 0.55, '#00ffcc', 1, '#00ffcc'])`); document.getElementById('sec4Rect1AngleVal').innerText = this.value + '°'; document.getElementById('sec4Rect1AngleCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
