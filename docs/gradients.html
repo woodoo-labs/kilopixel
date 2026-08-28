@@ -151,9 +151,9 @@
                       oninput="document.getElementById('sec1ex1GradEndVal').innerText = this.value; document.getElementById('sec1ex1GradEndCode').innerText = this.value; document.getElementById('sec1ex1Rect').setAttribute('fill', `linear(${document.getElementById('sec1ex1AngleInput').value}, [${document.getElementById('sec1ex1GradStartInput').value}, '#e2e8f0', ${this.value}, '#94a3b8'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>Gradient Angle <span class="indicator-dot"></span></span> <span id="sec1ex1GradAngleVal">45</span></label>
+                    <label><span>Gradient Angle <span class="indicator-dot"></span></span> <span id="sec1ex1GradAngleVal">45°</span></label>
                     <input type="range" id="sec1ex1AngleInput" min="0" max="360" step="5" value="45" autocomplete="off"
-                      oninput="document.getElementById('sec1ex1Angle').setAttribute('value', this.value); document.getElementById('sec1ex1GradAngleVal').innerText = this.value; document.getElementById('sec1ex1GradAngleCode').innerText = this.value; document.getElementById('sec1ex1Rect').setAttribute('fill', `linear(${this.value}, [${document.getElementById('sec1ex1GradStartInput').value}, '#e2e8f0', ${document.getElementById('sec1ex1GradEndInput').value}, '#94a3b8'])`);">
+                      oninput="document.getElementById('sec1ex1Angle').setAttribute('value', this.value); document.getElementById('sec1ex1GradAngleVal').innerText = this.value + '°'; document.getElementById('sec1ex1GradAngleCode').innerText = this.value; document.getElementById('sec1ex1Rect').setAttribute('fill', `linear(${this.value}, [${document.getElementById('sec1ex1GradStartInput').value}, '#e2e8f0', ${document.getElementById('sec1ex1GradEndInput').value}, '#94a3b8'])`);">
                   </div>
                 </div>
               </div>
@@ -267,9 +267,9 @@
                       oninput="document.getElementById('sec1ex2Ellipse').setAttribute('rotate', this.value); document.getElementById('sec1ex2EllipseRotVal').innerText = this.value + '°'; document.getElementById('sec1ex2EllipseRotCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Gradient Angle</span> <span id="sec1ex2EllipseAngleVal">45</span></label>
+                    <label><span>Gradient Angle</span> <span id="sec1ex2EllipseAngleVal">45°</span></label>
                     <input type="range" min="0" max="360" step="5" value="45" autocomplete="off"
-                      oninput="document.getElementById('sec1ex2Ellipse').setAttribute('fill', `linear(${this.value}, ['darkorange', 'gold', 'crimson'])`); document.getElementById('sec1ex2EllipseAngleVal').innerText = this.value; document.getElementById('sec1ex2EllipseAngleCode').innerText = this.value;">
+                      oninput="document.getElementById('sec1ex2Ellipse').setAttribute('fill', `linear(${this.value}, ['darkorange', 'gold', 'crimson'])`); document.getElementById('sec1ex2EllipseAngleVal').innerText = this.value + '°'; document.getElementById('sec1ex2EllipseAngleCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -293,9 +293,9 @@
                       oninput="document.getElementById('sec1ex2Rect').setAttribute('rotate', this.value); document.getElementById('sec1ex2RectRotVal').innerText = this.value + '°'; document.getElementById('sec1ex2RectRotCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Gradient Angle</span> <span id="sec1ex2RectAngleVal">135</span></label>
+                    <label><span>Gradient Angle</span> <span id="sec1ex2RectAngleVal">135°</span></label>
                     <input type="range" min="0" max="360" step="5" value="135" autocomplete="off"
-                      oninput="document.getElementById('sec1ex2Rect').setAttribute('fill', `linear(${this.value}, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])`); document.getElementById('sec1ex2RectAngleVal').innerText = this.value; document.getElementById('sec1ex2RectAngleCode').innerText = this.value;">
+                      oninput="document.getElementById('sec1ex2Rect').setAttribute('fill', `linear(${this.value}, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])`); document.getElementById('sec1ex2RectAngleVal').innerText = this.value + '°'; document.getElementById('sec1ex2RectAngleCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -319,9 +319,9 @@
                       oninput="document.getElementById('sec1ex2Text').setAttribute('rotate', this.value); document.getElementById('sec1ex2TextRotVal').innerText = this.value + '°'; document.getElementById('sec1ex2TextRotCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Gradient Angle</span> <span id="sec1ex2TextAngleVal">45</span></label>
+                    <label><span>Gradient Angle</span> <span id="sec1ex2TextAngleVal">45°</span></label>
                     <input type="range" min="0" max="360" step="5" value="45" autocomplete="off"
-                      oninput="document.getElementById('sec1ex2Text').setAttribute('fill', `linear(${this.value}, ['#8b5cf6', '#ec4899', '#f59e0b'])`); document.getElementById('sec1ex2TextAngleVal').innerText = this.value; document.getElementById('sec1ex2TextAngleCode').innerText = this.value;">
+                      oninput="document.getElementById('sec1ex2Text').setAttribute('fill', `linear(${this.value}, ['#8b5cf6', '#ec4899', '#f59e0b'])`); document.getElementById('sec1ex2TextAngleVal').innerText = this.value + '°'; document.getElementById('sec1ex2TextAngleCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
