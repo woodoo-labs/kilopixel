@@ -77,7 +77,8 @@ class DocsSidebar extends HTMLElement {
         <div class="sidebar-section">
           <div class="sidebar-title">Styling</div>
           <ul>
-            <li><a href="colors.html" class="${currentPath === 'colors.html' ? 'active' : ''}">Colors &amp; Gradients</a></li>
+            <li><a href="colors.html" class="${currentPath === 'colors.html' ? 'active' : ''}">Colors</a></li>
+            <li><a href="gradients.html" class="${currentPath === 'gradients.html' ? 'active' : ''}">Gradients</a></li>
             <li><a href="stroke-styles.html" class="${currentPath === 'stroke-styles.html' ? 'active' : ''}">Stroke Styles</a></li>
             <li><a href="effects.html" class="${currentPath === 'effects.html' ? 'active' : ''}">Effects</a></li>
           </ul>

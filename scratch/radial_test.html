@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radial Gradient Fallback Test</title>
+  <!-- Load the locally built engine -->
+  <script src="../dist/kilopixel-v0.1.0.min.js"></script>
+</head>
+<body style="background: #1e293b; color: white;">
+
+  <h2>Radial Gradient Tests</h2>
+  <pxl-stage ratio="3 / 1" style="width: 100%; max-width: 1200px; border: 1px solid #475569;">
+    <pxl-layer>
+      <!-- 1. Number (default center, max corner radius) -->
+      <pxl-rect x="140" y="166" w="200" h="150" fill="radial(1, [0, 'red', 0.80, 'blue', 1, 'white'])"></pxl-rect>
+      
+      <!-- 2. Array length 1 [r1] -->
+      <pxl-rect x="380" y="166" w="200" h="150" fill="radial([1], ['green', 'yellow'])"></pxl-rect>
+      
+      <!-- 3. Array length 2 [x1, y1] (Top-left spotlight) -->
+      <pxl-rect x="620" y="166" w="200" h="150" fill="radial([0, 0], ['purple', 'orange'])"></pxl-rect>
+      
+      <!-- 4. Array length 4 [x0, y0, x1, y1] (Spotlight offset) -->
+      <pxl-rect x="860" y="166" w="200" h="150" fill="radial([0, 0, 0.5, 0.5], ['cyan', 'blue'])"></pxl-rect>
+    </pxl-layer>
+  </pxl-stage>
+
+</body>
+</html>
