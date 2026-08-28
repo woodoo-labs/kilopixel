@@ -33,8 +33,10 @@
         <h1>Gradients</h1>
         <p class="lead">Kilopixel offers a highly flexible generative gradient system. Learn how to map linear, radial, and conic gradients accurately to your shapes, seamlessly animated and updated at 60fps.</p>
 
+        <p class="lead" style="margin-top: 2rem; margin-bottom: 1.5rem;">To work with gradients in Kilopixel, you first need to understand two core concepts: the <strong>Bounding Box</strong> and the <strong>colorsArray</strong>.</p>
+
         <div class="callout-info">
-          <p class="callout-body"><strong>The 0-to-1 Bounding Box:</strong> In Kilopixel, all gradients are mapped to an element's invisible bounding box. The top-left corner of any shape is always exactly <code>(0, 0)</code>, and the bottom-right is <code>(1, 1)</code>. This guarantees that if you move, scale, or stretch your shape, the gradient stretches seamlessly with it—no complex trigonometry required!</p>
+          <p class="callout-body"><strong>Bounding Box:</strong> In Kilopixel, all gradients are mapped to an element's invisible bounding box. The top-left corner of any shape is always exactly <code>(0, 0)</code>, and the bottom-right is <code>(1, 1)</code>. This guarantees that if you move, scale, or stretch your shape, the gradient stretches seamlessly with it — no complex trigonometry required!</p>
           <p class="callout-body" style="margin-top: 1rem;">In the diagrams below, the <span style="color: #3b82f6; font-weight: 600;">blue coordinates</span> represent the fixed corners of the shape's invisible 0-to-1 bounding box space.</p>
 
           <pxl-stage ratio="5 / 2" style="width: 100%; background: transparent; margin-top: 1rem;">
@@ -70,15 +72,161 @@
         </div>
 
         <div class="callout-info">
-          <p class="callout-body"><strong>The colorsArray Parameter:</strong> All gradients in Kilopixel share a common parameter called <code>colorsArray</code> to define their colors. You can provide this array in two ways:</p>
+          <p class="callout-body"><strong>colorsArray:</strong> All gradients in Kilopixel share a common parameter called <code>colorsArray</code> to define their colors. You can provide this array in two ways:</p>
           <ul style="margin-top: 10px; font-size: 0.95rem; color: var(--slate-700); padding-left: 1.5rem;">
             <li><strong>Colors Only:</strong> Pass an array of just colors (e.g., <code>['red', 'yellow', 'blue']</code>). Kilopixel will automatically space them out evenly from 0.0 to 1.0.</li>
-            <li style="margin-top: 0.5rem;"><strong>Color Offset Pairs:</strong> Pass an array alternating between numeric offsets (0 to 1) and colors for precise control (e.g., <code>[0, 'red', 0.8, 'blue']</code>).</li>
+            <li style="margin-top: 0.5rem;"><strong>Color Stops:</strong> Pass an array alternating between numeric offsets (0 to 1) and colors for precise control (e.g., <code>[0, 'red', 0.8, 'blue']</code>).</li>
           </ul>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: LINEAR GRADIENTS (ANGLE MODE) -->
+        <!-- ================================================================= -->
+        <h2 style="margin-top: 4rem;">1. Linear Gradients (Angle Mode)</h2>
+        <p>In Angle Mode, you provide a single number representing the angle in degrees (0 to 360). Kilopixel projects a geometrically perfect angle from the center of the shape and calculates the exact distance needed to cover the farthest corners.</p>
+        <p>This means the gradient is always drawn at a strict, perfect angle on the screen, even if the bounding box of the shape is a very wide rectangle.</p>
+
+        <div class="callout-info">
+          <p class="callout-body" style="margin-bottom: 0.5rem;"><strong>Angle Mode Syntax:</strong> (True geometric degrees)</p>
+          <pre style="margin-top: 0; margin-bottom: 0;"><code class="language-javascript">fill="linear(angle, colorsArray)"</code></pre>
+        </div>
+
+        <div class="example-card">
+          <div class="example-code">
+            <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-rect 
+      x="<mark id="sec1ex1RectXCode">500</mark>" y="<mark id="sec1ex1RectYCode">300</mark>" 
+      w="<mark id="sec1ex1RectWCode">400</mark>" h="<mark id="sec1ex1RectHCode">200</mark>" 
+      rotate="<mark id="sec1ex1RectRotCode">0</mark>" 
+      fill="linear(<mark id="sec1ex1GradAngleCode">45</mark>, [<mark id="sec1ex1GradStartCode">0.4</mark>, '#e2e8f0', <mark id="sec1ex1GradEndCode">0.6</mark>, '#94a3b8'])"&gt;
+    &lt;/pxl-rect&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+          </div>
+
+          <div class="demo-container">
+            <div class="demo-controls">
+              <div class="demo-controls-header">
+                <h3 class="demo-controls-title">Controls</h3>
+                <div class="demo-tabs">
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1ex1RectTab')">Rect</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1ex1GradTab')">Gradient</button>
+                </div>
+              </div>
+
+              <!-- Rect Tab -->
+              <div class="tab-content" id="sec1ex1RectTab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Center X</span> <span id="sec1ex1RectXVal">500</span></label>
+                    <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                      oninput="document.getElementById('sec1ex1Rect').setAttribute('x', this.value); document.getElementById('sec1ex1RectXVal').innerText = this.value; document.getElementById('sec1ex1RectXCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Center Y</span> <span id="sec1ex1RectYVal">300</span></label>
+                    <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                      oninput="document.getElementById('sec1ex1Rect').setAttribute('y', this.value); document.getElementById('sec1ex1RectYVal').innerText = this.value; document.getElementById('sec1ex1RectYCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Width</span> <span id="sec1ex1RectWVal">400</span></label>
+                    <input type="range" min="100" max="800" step="10" value="400" autocomplete="off"
+                      oninput="document.getElementById('sec1ex1Rect').setAttribute('w', this.value); document.getElementById('sec1ex1RectWVal').innerText = this.value; document.getElementById('sec1ex1RectWCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Height</span> <span id="sec1ex1RectHVal">200</span></label>
+                    <input type="range" min="50" max="500" step="10" value="200" autocomplete="off"
+                      oninput="document.getElementById('sec1ex1Rect').setAttribute('h', this.value); document.getElementById('sec1ex1RectHVal').innerText = this.value; document.getElementById('sec1ex1RectHCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec1ex1RectRotVal">0°</span></label>
+                    <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec1ex1Rect').setAttribute('rotate', this.value); document.getElementById('sec1ex1RectRotVal').innerText = this.value + '°'; document.getElementById('sec1ex1RectRotCode').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gradient Tab (Active by Default) -->
+              <div class="tab-content active" id="sec1ex1GradTab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Color 1 Offset</span> <span id="sec1ex1GradStartVal">0.4</span></label>
+                    <input type="range" id="sec1ex1GradStartInput" min="0" max="1" step="0.05" value="0.4" autocomplete="off"
+                      oninput="document.getElementById('sec1ex1GradStartVal').innerText = this.value; document.getElementById('sec1ex1GradStartCode').innerText = this.value; document.getElementById('sec1ex1Rect').setAttribute('fill', `linear(${document.getElementById('sec1ex1AngleInput').value}, [${this.value}, '#e2e8f0', ${document.getElementById('sec1ex1GradEndInput').value}, '#94a3b8'])`);">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Color 2 Offset</span> <span id="sec1ex1GradEndVal">0.6</span></label>
+                    <input type="range" id="sec1ex1GradEndInput" min="0" max="1" step="0.05" value="0.6" autocomplete="off"
+                      oninput="document.getElementById('sec1ex1GradEndVal').innerText = this.value; document.getElementById('sec1ex1GradEndCode').innerText = this.value; document.getElementById('sec1ex1Rect').setAttribute('fill', `linear(${document.getElementById('sec1ex1AngleInput').value}, [${document.getElementById('sec1ex1GradStartInput').value}, '#e2e8f0', ${this.value}, '#94a3b8'])`);">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Angle <span class="indicator-dot"></span></span> <span id="sec1ex1GradAngleVal">45</span></label>
+                    <input type="range" id="sec1ex1AngleInput" min="0" max="360" step="5" value="45" autocomplete="off"
+                      oninput="document.getElementById('sec1ex1Angle').setAttribute('value', this.value); document.getElementById('sec1ex1GradAngleVal').innerText = this.value; document.getElementById('sec1ex1GradAngleCode').innerText = this.value; document.getElementById('sec1ex1Rect').setAttribute('fill', `linear(${this.value}, [${document.getElementById('sec1ex1GradStartInput').value}, '#e2e8f0', ${document.getElementById('sec1ex1GradEndInput').value}, '#94a3b8'])`);">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <pxl-stage id="sec1ex1Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                <pxl-rect id="sec1ex1Rect"
+                  x="500" y="300"
+                  w="400" h="200"
+                  rotate="0"
+                  fill="linear(45, [0.4, '#e2e8f0', 0.6, '#94a3b8'])">
+                </pxl-rect>
+
+                <!-- Math Variables for Geometric Projection -->
+                <pxl-var id="sec1ex1Angle" value="45"></pxl-var>
+                <pxl-var id="sec1ex1Rad" value="ref.sec1ex1Angle.value * PI / 180"></pxl-var>
+                <pxl-var id="sec1ex1Cos" value="cos(ref.sec1ex1Rad.value)"></pxl-var>
+                <pxl-var id="sec1ex1Sin" value="sin(ref.sec1ex1Rad.value)"></pxl-var>
+                
+                <pxl-var id="sec1ex1Dist" value="abs(ref.sec1ex1Rect.w/2 * ref.sec1ex1Cos.value) + abs(ref.sec1ex1Rect.h/2 * ref.sec1ex1Sin.value)"></pxl-var>
+                <pxl-var id="sec1ex1Dx" value="ref.sec1ex1Dist.value * ref.sec1ex1Cos.value"></pxl-var>
+                <pxl-var id="sec1ex1Dy" value="ref.sec1ex1Dist.value * ref.sec1ex1Sin.value"></pxl-var>
+                
+                <pxl-var id="sec1ex1ProjL" value="800"></pxl-var>
+                <pxl-var id="sec1ex1Px" value="ref.sec1ex1ProjL.value * ref.sec1ex1Sin.value"></pxl-var>
+                <pxl-var id="sec1ex1Py" value="ref.sec1ex1ProjL.value * ref.sec1ex1Cos.value"></pxl-var>
+
+                <!-- Dynamic Geometric Helpers -->
+                <pxl-group x="ref.sec1ex1Rect.x" y="ref.sec1ex1Rect.y" rotate="ref.sec1ex1Rect.rotate">
+                  <pxl-rect x="0" y="0" w="ref.sec1ex1Rect.w" h="ref.sec1ex1Rect.h" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
+                  
+                  <!-- Farthest corner projections (Perpendicular Fixed Length) -->
+                  <pxl-line
+                    x1="ref.sec1ex1Dx.value + ref.sec1ex1Px.value" y1="ref.sec1ex1Dy.value - ref.sec1ex1Py.value"
+                    x2="ref.sec1ex1Dx.value - ref.sec1ex1Px.value" y2="ref.sec1ex1Dy.value + ref.sec1ex1Py.value"
+                    stroke="#94a3b8" strokewidth="2" linedash="[4,4]"
+                  ></pxl-line>
+
+                  <pxl-line
+                    x1="-ref.sec1ex1Dx.value + ref.sec1ex1Px.value" y1="-ref.sec1ex1Dy.value - ref.sec1ex1Py.value"
+                    x2="-ref.sec1ex1Dx.value - ref.sec1ex1Px.value" y2="-ref.sec1ex1Dy.value + ref.sec1ex1Py.value"
+                    stroke="#94a3b8" strokewidth="2" linedash="[4,4]"
+                  ></pxl-line>
+
+                  <!-- Gradient Vector -->
+                  <pxl-line 
+                    x1="-ref.sec1ex1Dx.value" y1="-ref.sec1ex1Dy.value"
+                    x2="ref.sec1ex1Dx.value" y2="ref.sec1ex1Dy.value"
+                    stroke="#8b5cf6" strokewidth="3" arrowend="25"
+                  ></pxl-line>
+                  <!-- Center Point -->
+                  <pxl-circle x="0" y="0" r="6" fill="#8b5cf6"></pxl-circle>
+                </pxl-group>
+              </pxl-layer>
+            </pxl-stage>
+          </div>
         </div>
 
       </div>
     </main>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
 </body>
 </html>
