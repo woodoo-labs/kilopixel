@@ -96,7 +96,7 @@
             <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;pxl-rect 
-      x="<mark id="sec1ex1RectXCode">500</mark>" y="<mark id="sec1ex1RectYCode">300</mark>" 
+      x="500" y="300" 
       w="<mark id="sec1ex1RectWCode">400</mark>" h="<mark id="sec1ex1RectHCode">200</mark>" 
       rotate="<mark id="sec1ex1RectRotCode">0</mark>" 
       fill="linear(<mark id="sec1ex1GradAngleCode">45</mark>, [<mark id="sec1ex1GradStartCode">0.4</mark>, '#e2e8f0', <mark id="sec1ex1GradEndCode">0.6</mark>, '#94a3b8'])"&gt;
@@ -118,16 +118,7 @@
               <!-- Rect Tab -->
               <div class="tab-content" id="sec1ex1RectTab">
                 <div class="playground-sliders">
-                  <div class="control-group">
-                    <label><span>Center X</span> <span id="sec1ex1RectXVal">500</span></label>
-                    <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
-                      oninput="document.getElementById('sec1ex1Rect').setAttribute('x', this.value); document.getElementById('sec1ex1RectXVal').innerText = this.value; document.getElementById('sec1ex1RectXCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Center Y</span> <span id="sec1ex1RectYVal">300</span></label>
-                    <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
-                      oninput="document.getElementById('sec1ex1Rect').setAttribute('y', this.value); document.getElementById('sec1ex1RectYVal').innerText = this.value; document.getElementById('sec1ex1RectYCode').innerText = this.value;">
-                  </div>
+
                   <div class="control-group">
                     <label><span>Width</span> <span id="sec1ex1RectWVal">400</span></label>
                     <input type="range" min="100" max="800" step="10" value="400" autocomplete="off"
@@ -218,6 +209,115 @@
                   <!-- Center Point -->
                   <pxl-circle x="0" y="0" r="6" fill="#8b5cf6"></pxl-circle>
                 </pxl-group>
+              </pxl-layer>
+            </pxl-stage>
+          </div>
+        </div>
+
+        <!-- 1.2 The Gallery -->
+        <h3 style="margin-top: 3rem;">Example 2: The Gallery</h3>
+        <p>Because the angle projection is purely geometric, it works perfectly on every shape and doesn't distort when shapes are rotated or resized. Try adjusting the size and rotation of the shapes below to see how the gradients remain locked to their absolute angles.</p>
+
+        <div class="example-card">
+          <div class="example-code">
+            <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- 1. Animated Circle --&gt;
+    &lt;pxl-circle x="166" y="300" r="<mark id="sec1ex2CircleRCode">100</mark>" rotate="<mark id="sec1ex2CircleRotCode">0</mark>" 
+      fill="linear(t * <mark id="sec1ex2CircleSpeedCode">90</mark>, ['#f97316', '#fbbf24', '#f87171'])"&gt;&lt;/pxl-circle&gt;
+      
+    &lt;!-- 2. Hard Split Rounded Rect --&gt;
+    &lt;pxl-rect x="500" y="300" w="<mark id="sec1ex2RectSizeCode">200</mark>" h="<mark id="sec1ex2RectSizeCode2">200</mark>" r="20" rotate="<mark id="sec1ex2RectRotCode">0</mark>" 
+      fill="linear(<mark id="sec1ex2RectAngleCode">135</mark>, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])"&gt;&lt;/pxl-rect&gt;
+
+    &lt;!-- 3. Gradient Text --&gt;
+    &lt;pxl-text x="833" y="300" size="<mark id="sec1ex2TextSizeCode">150</mark>" rotate="<mark id="sec1ex2TextRotCode">0</mark>" text="'PXL'" weight="800" align="center" baseline="middle"
+      fill="linear(<mark id="sec1ex2TextAngleCode">45</mark>, ['#c026d3', '#db2777', '#f43f5e'])"&gt;&lt;/pxl-text&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+          </div>
+
+          <div class="demo-container">
+            <div class="demo-controls">
+              <div class="demo-controls-header">
+                <h3 class="demo-controls-title">Controls</h3>
+                <div class="demo-tabs">
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1ex2CircleTab')">Circle</button>
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1ex2RectTab')">Rect</button>
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1ex2TextTab')">Text</button>
+                </div>
+              </div>
+
+              <!-- Circle Tab -->
+              <div class="tab-content active" id="sec1ex2CircleTab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Animation Speed</span> <span id="sec1ex2CircleSpeedVal">90</span></label>
+                    <input type="range" min="0" max="360" step="5" value="90" autocomplete="off"
+                      oninput="document.getElementById('sec1ex2Circle').setAttribute('fill', `linear(t * ${this.value}, ['#f97316', '#fbbf24', '#f87171'])`); document.getElementById('sec1ex2CircleSpeedVal').innerText = this.value; document.getElementById('sec1ex2CircleSpeedCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Radius</span> <span id="sec1ex2CircleRVal">100</span></label>
+                    <input type="range" min="20" max="150" step="5" value="100" autocomplete="off"
+                      oninput="document.getElementById('sec1ex2Circle').setAttribute('r', this.value); document.getElementById('sec1ex2CircleRVal').innerText = this.value; document.getElementById('sec1ex2CircleRCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Rotation</span> <span id="sec1ex2CircleRotVal">0°</span></label>
+                    <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec1ex2Circle').setAttribute('rotate', this.value); document.getElementById('sec1ex2CircleRotVal').innerText = this.value + '°'; document.getElementById('sec1ex2CircleRotCode').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Rect Tab -->
+              <div class="tab-content" id="sec1ex2RectTab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Gradient Angle</span> <span id="sec1ex2RectAngleVal">135</span></label>
+                    <input type="range" min="0" max="360" step="5" value="135" autocomplete="off"
+                      oninput="document.getElementById('sec1ex2Rect').setAttribute('fill', `linear(${this.value}, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])`); document.getElementById('sec1ex2RectAngleVal').innerText = this.value; document.getElementById('sec1ex2RectAngleCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Size</span> <span id="sec1ex2RectSizeVal">200</span></label>
+                    <input type="range" min="50" max="300" step="10" value="200" autocomplete="off" data-mark="sec1ex2RectSizeCode, sec1ex2RectSizeCode2"
+                      oninput="document.getElementById('sec1ex2Rect').setAttribute('w', this.value); document.getElementById('sec1ex2Rect').setAttribute('h', this.value); document.getElementById('sec1ex2RectSizeVal').innerText = this.value; document.getElementById('sec1ex2RectSizeCode').innerText = this.value; document.getElementById('sec1ex2RectSizeCode2').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Rotation</span> <span id="sec1ex2RectRotVal">0°</span></label>
+                    <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec1ex2Rect').setAttribute('rotate', this.value); document.getElementById('sec1ex2RectRotVal').innerText = this.value + '°'; document.getElementById('sec1ex2RectRotCode').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Text Tab -->
+              <div class="tab-content" id="sec1ex2TextTab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Gradient Angle</span> <span id="sec1ex2TextAngleVal">45</span></label>
+                    <input type="range" min="0" max="360" step="5" value="45" autocomplete="off"
+                      oninput="document.getElementById('sec1ex2Text').setAttribute('fill', `linear(${this.value}, ['#c026d3', '#db2777', '#f43f5e'])`); document.getElementById('sec1ex2TextAngleVal').innerText = this.value; document.getElementById('sec1ex2TextAngleCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Font Size</span> <span id="sec1ex2TextSizeVal">150</span></label>
+                    <input type="range" min="50" max="250" step="5" value="150" autocomplete="off"
+                      oninput="document.getElementById('sec1ex2Text').setAttribute('size', this.value); document.getElementById('sec1ex2TextSizeVal').innerText = this.value; document.getElementById('sec1ex2TextSizeCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Rotation</span> <span id="sec1ex2TextRotVal">0°</span></label>
+                    <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec1ex2Text').setAttribute('rotate', this.value); document.getElementById('sec1ex2TextRotVal').innerText = this.value + '°'; document.getElementById('sec1ex2TextRotCode').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <pxl-stage id="sec1ex2Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                <pxl-circle id="sec1ex2Circle" x="166" y="300" r="100" rotate="0" fill="linear(t * 90, ['#f97316', '#fbbf24', '#f87171'])"></pxl-circle>
+                <pxl-rect id="sec1ex2Rect" x="500" y="300" w="200" h="200" r="20" rotate="0" fill="linear(135, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])"></pxl-rect>
+                <pxl-text id="sec1ex2Text" x="833" y="300" size="150" rotate="0" text="'PXL'" weight="800" align="center" baseline="middle" fill="linear(45, ['#c026d3', '#db2777', '#f43f5e'])"></pxl-text>
               </pxl-layer>
             </pxl-stage>
           </div>
