@@ -170,3 +170,9 @@ To maintain a cohesive, highly professional editorial presentation across all do
 | **En Dash** | `–` (`&ndash;`) | **No spaces.** Strictly for numerical, date, and coordinate ranges (*"to / through"*). | `Angles are evaluated in degrees (0°–360°)` |
 | **Em Dash** | `—` (`&mdash;`) | **Always use a space before and after (` — `).** Strictly for sentence breaks, dramatic pauses, or parenthetical explanations. Never use unspaced em dashes or en dashes for sentence breaks. | `animated loading spinners — all from a single tag` |
 | **Minus Sign** | `−` (`&minus;`) | **Always use spaces around arithmetic operators.** Strictly for mathematical equations and negative numbers. | `−10 + 5 = −5` |
+
+## 7. Page Metadata
+* **Title Tags (`<title>`)**: Every HTML page must use the strict title format: `[Page Name] | Kilopixel`. 
+  * This "Page Name First" structure ensures browser tabs remain legible when users have many tabs open.
+  * Do not append redundant suffixes like "Documentation". 
+  * Do not use raw HTML tags or HTML character entities (`&lt;pxl-circle&gt;`). Use clean, plain English names (e.g. `Circle | Kilopixel`).
