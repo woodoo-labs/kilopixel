@@ -353,9 +353,15 @@
 
         <div class="example-card">
           <div class="example-code">
-            <pre><code class="language-html">&lt;pxl-rect w="600" h="300" r="20"
+            <pre><code class="language-html">&lt;pxl-stage ratio="2"&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-rect 
+      w="<mark id="sec2ex1RectWCode">400</mark>" h="<mark id="sec2ex1RectHCode">200</mark>" 
+      rotate="<mark id="sec2ex1RectRotCode">0</mark>" 
       fill="linear([<mark id="sec2ex1X0Code">0</mark>, <mark id="sec2ex1Y0Code">0</mark>, <mark id="sec2ex1X1Code">1</mark>, <mark id="sec2ex1Y1Code">1</mark>], ['#0ea5e9', '#6366f1'])"&gt;
-&lt;/pxl-rect&gt;</code></pre>
+    &lt;/pxl-rect&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
           </div>
 
           <div class="demo-container">
@@ -363,33 +369,56 @@
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Controls</h3>
                 <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2ex1Tab')">Gradient</button>
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2ex1RectTab')">Rect</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2ex1GradTab')">Gradient</button>
                 </div>
               </div>
               
-              <div class="tab-content active" id="sec2ex1Tab">
+              <!-- Rect Tab -->
+              <div class="tab-content" id="sec2ex1RectTab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Width</span> <span id="sec2ex1RectWVal">400</span></label>
+                    <input type="range" min="100" max="800" step="10" value="400" autocomplete="off"
+                      oninput="document.getElementById('sec2ex1Rect').setAttribute('w', this.value); document.getElementById('sec2ex1RectWVal').innerText = this.value; document.getElementById('sec2ex1RectWCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Height</span> <span id="sec2ex1RectHVal">200</span></label>
+                    <input type="range" min="50" max="500" step="10" value="200" autocomplete="off"
+                      oninput="document.getElementById('sec2ex1Rect').setAttribute('h', this.value); document.getElementById('sec2ex1RectHVal').innerText = this.value; document.getElementById('sec2ex1RectHCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec2ex1RectRotVal">0°</span></label>
+                    <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec2ex1Rect').setAttribute('rotate', this.value); document.getElementById('sec2ex1RectRotVal').innerText = this.value + '°'; document.getElementById('sec2ex1RectRotCode').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gradient Tab -->
+              <div class="tab-content active" id="sec2ex1GradTab">
                 <div class="playground-sliders">
                   <!-- Start Coordinates -->
                   <div class="control-group">
                     <label><span>Start X (<code>x0</code>)</span> <span id="sec2ex1X0Val">0</span></label>
-                    <input type="range" id="sec2ex1X0Input" min="-0.5" max="1.5" step="0.1" value="0" autocomplete="off"
-                      oninput="document.getElementById('sec2ex1X0Val').innerText = this.value; document.getElementById('sec2ex1X0Code').innerText = this.value; document.getElementById('sec2ex1Rect').setAttribute('fill', `linear([${this.value}, ${document.getElementById('sec2ex1Y0Input').value}, ${document.getElementById('sec2ex1X1Input').value}, ${document.getElementById('sec2ex1Y1Input').value}], ['#0ea5e9', '#6366f1'])`); document.getElementById('sec2ex1StartGuide').setAttribute('x', (this.value - 0.5) * 600); document.getElementById('sec2ex1Line').setAttribute('x1', (this.value - 0.5) * 600);">
+                    <input type="range" min="-0.5" max="1.5" step="0.1" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec2ex1X0').setAttribute('value', this.value); document.getElementById('sec2ex1X0Val').innerText = this.value; document.getElementById('sec2ex1X0Code').innerText = this.value;">
                   </div>
                   <div class="control-group">
                     <label><span>Start Y (<code>y0</code>)</span> <span id="sec2ex1Y0Val">0</span></label>
-                    <input type="range" id="sec2ex1Y0Input" min="-0.5" max="1.5" step="0.1" value="0" autocomplete="off"
-                      oninput="document.getElementById('sec2ex1Y0Val').innerText = this.value; document.getElementById('sec2ex1Y0Code').innerText = this.value; document.getElementById('sec2ex1Rect').setAttribute('fill', `linear([${document.getElementById('sec2ex1X0Input').value}, ${this.value}, ${document.getElementById('sec2ex1X1Input').value}, ${document.getElementById('sec2ex1Y1Input').value}], ['#0ea5e9', '#6366f1'])`); document.getElementById('sec2ex1StartGuide').setAttribute('y', (this.value - 0.5) * 300); document.getElementById('sec2ex1Line').setAttribute('y1', (this.value - 0.5) * 300);">
+                    <input type="range" min="-0.5" max="1.5" step="0.1" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec2ex1Y0').setAttribute('value', this.value); document.getElementById('sec2ex1Y0Val').innerText = this.value; document.getElementById('sec2ex1Y0Code').innerText = this.value;">
                   </div>
                   <!-- End Coordinates -->
                   <div class="control-group" style="margin-top: 1rem;">
                     <label><span>End X (<code>x1</code>)</span> <span id="sec2ex1X1Val">1</span></label>
-                    <input type="range" id="sec2ex1X1Input" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
-                      oninput="document.getElementById('sec2ex1X1Val').innerText = this.value; document.getElementById('sec2ex1X1Code').innerText = this.value; document.getElementById('sec2ex1Rect').setAttribute('fill', `linear([${document.getElementById('sec2ex1X0Input').value}, ${document.getElementById('sec2ex1Y0Input').value}, ${this.value}, ${document.getElementById('sec2ex1Y1Input').value}], ['#0ea5e9', '#6366f1'])`); document.getElementById('sec2ex1EndGuide').setAttribute('x', (this.value - 0.5) * 600); document.getElementById('sec2ex1Line').setAttribute('x2', (this.value - 0.5) * 600);">
+                    <input type="range" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
+                      oninput="document.getElementById('sec2ex1X1').setAttribute('value', this.value); document.getElementById('sec2ex1X1Val').innerText = this.value; document.getElementById('sec2ex1X1Code').innerText = this.value;">
                   </div>
                   <div class="control-group">
                     <label><span>End Y (<code>y1</code>)</span> <span id="sec2ex1Y1Val">1</span></label>
-                    <input type="range" id="sec2ex1Y1Input" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
-                      oninput="document.getElementById('sec2ex1Y1Val').innerText = this.value; document.getElementById('sec2ex1Y1Code').innerText = this.value; document.getElementById('sec2ex1Rect').setAttribute('fill', `linear([${document.getElementById('sec2ex1X0Input').value}, ${document.getElementById('sec2ex1Y0Input').value}, ${document.getElementById('sec2ex1X1Input').value}, ${this.value}], ['#0ea5e9', '#6366f1'])`); document.getElementById('sec2ex1EndGuide').setAttribute('y', (this.value - 0.5) * 300); document.getElementById('sec2ex1Line').setAttribute('y2', (this.value - 0.5) * 300);">
+                    <input type="range" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
+                      oninput="document.getElementById('sec2ex1Y1').setAttribute('value', this.value); document.getElementById('sec2ex1Y1Val').innerText = this.value; document.getElementById('sec2ex1Y1Code').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -400,12 +429,33 @@
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                 
                 <pxl-layer x="500" y="250">
-                  <pxl-rect w="600" h="300" fill="none" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-rect>
-                  <pxl-rect id="sec2ex1Rect" w="600" h="300" r="20" fill="linear([0, 0, 1, 1], ['#0ea5e9', '#6366f1'])"></pxl-rect>
+                  <pxl-var id="sec2ex1X0" value="0"></pxl-var>
+                  <pxl-var id="sec2ex1Y0" value="0"></pxl-var>
+                  <pxl-var id="sec2ex1X1" value="1"></pxl-var>
+                  <pxl-var id="sec2ex1Y1" value="1"></pxl-var>
+
+                  <!-- Dashed guide box behind the rect -->
+                  <pxl-rect w="ref.sec2ex1Rect.w" h="ref.sec2ex1Rect.h" rotate="ref.sec2ex1Rect.rotate" fill="none" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-rect>
                   
-                  <pxl-line id="sec2ex1Line" x1="-300" y1="-150" x2="300" y2="150" stroke="#f8fafc" strokewidth="3" linedash="[5, 5]"></pxl-line>
-                  <pxl-circle id="sec2ex1StartGuide" x="-300" y="-150" r="10" fill="#f8fafc" stroke="#0ea5e9" strokewidth="4"></pxl-circle>
-                  <pxl-circle id="sec2ex1EndGuide" x="300" y="150" r="10" fill="#f8fafc" stroke="#6366f1" strokewidth="4"></pxl-circle>
+                  <!-- The main rect -->
+                  <pxl-rect id="sec2ex1Rect" w="400" h="200" r="20" rotate="0" fill="linear([ref.sec2ex1X0.value, ref.sec2ex1Y0.value, ref.sec2ex1X1.value, ref.sec2ex1Y1.value], ['#0ea5e9', '#6366f1'])"></pxl-rect>
+                  
+                  <pxl-group rotate="ref.sec2ex1Rect.rotate">
+                    <pxl-line 
+                      x1="(ref.sec2ex1X0.value - 0.5) * ref.sec2ex1Rect.w" 
+                      y1="(ref.sec2ex1Y0.value - 0.5) * ref.sec2ex1Rect.h" 
+                      x2="(ref.sec2ex1X1.value - 0.5) * ref.sec2ex1Rect.w" 
+                      y2="(ref.sec2ex1Y1.value - 0.5) * ref.sec2ex1Rect.h" 
+                      stroke="#f8fafc" strokewidth="3" linedash="[5, 5]"></pxl-line>
+                    <pxl-circle 
+                      x="(ref.sec2ex1X0.value - 0.5) * ref.sec2ex1Rect.w" 
+                      y="(ref.sec2ex1Y0.value - 0.5) * ref.sec2ex1Rect.h" 
+                      r="10" fill="#f8fafc" stroke="#0ea5e9" strokewidth="4"></pxl-circle>
+                    <pxl-circle 
+                      x="(ref.sec2ex1X1.value - 0.5) * ref.sec2ex1Rect.w" 
+                      y="(ref.sec2ex1Y1.value - 0.5) * ref.sec2ex1Rect.h" 
+                      r="10" fill="#f8fafc" stroke="#6366f1" strokewidth="4"></pxl-circle>
+                  </pxl-group>
                 </pxl-layer>
               </pxl-layer>
             </pxl-stage>
