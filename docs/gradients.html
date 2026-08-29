@@ -408,23 +408,23 @@
                 <div class="playground-sliders">
                   <!-- Start Coordinates -->
                   <div class="control-group">
-                    <label><span>Start X0 <span class="indicator-dot"></span></span> <span id="sec2ex1X0Val">0</span></label>
+                    <label><span>Gradient X1 <span class="indicator-dot"></span></span> <span id="sec2ex1X0Val">0</span></label>
                     <input type="range" id="sec2ex1X0Input" min="-0.5" max="1.5" step="0.1" value="0" autocomplete="off"
                       oninput="document.getElementById('sec2ex1X0').setAttribute('value', this.value); document.getElementById('sec2ex1X0Val').innerText = this.value; document.getElementById('sec2ex1X0Code').innerText = this.value; document.getElementById('sec2ex1Rect').setAttribute('fill', `linear([${this.value}, ${document.getElementById('sec2ex1Y0Input').value}, ${document.getElementById('sec2ex1X1Input').value}, ${document.getElementById('sec2ex1Y1Input').value}], ['#e2e8f0', '#94a3b8'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>Start Y0 <span class="indicator-dot"></span></span> <span id="sec2ex1Y0Val">0</span></label>
+                    <label><span>Gradient Y1 <span class="indicator-dot"></span></span> <span id="sec2ex1Y0Val">0</span></label>
                     <input type="range" id="sec2ex1Y0Input" min="-0.5" max="1.5" step="0.1" value="0" autocomplete="off"
                       oninput="document.getElementById('sec2ex1Y0').setAttribute('value', this.value); document.getElementById('sec2ex1Y0Val').innerText = this.value; document.getElementById('sec2ex1Y0Code').innerText = this.value; document.getElementById('sec2ex1Rect').setAttribute('fill', `linear([${document.getElementById('sec2ex1X0Input').value}, ${this.value}, ${document.getElementById('sec2ex1X1Input').value}, ${document.getElementById('sec2ex1Y1Input').value}], ['#e2e8f0', '#94a3b8'])`);">
                   </div>
                   <!-- End Coordinates -->
                   <div class="control-group">
-                    <label><span>End X1</span> <span id="sec2ex1X1Val">1</span></label>
+                    <label><span>Gradient X2</span> <span id="sec2ex1X1Val">1</span></label>
                     <input type="range" id="sec2ex1X1Input" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
                       oninput="document.getElementById('sec2ex1X1').setAttribute('value', this.value); document.getElementById('sec2ex1X1Val').innerText = this.value; document.getElementById('sec2ex1X1Code').innerText = this.value; document.getElementById('sec2ex1Rect').setAttribute('fill', `linear([${document.getElementById('sec2ex1X0Input').value}, ${document.getElementById('sec2ex1Y0Input').value}, ${this.value}, ${document.getElementById('sec2ex1Y1Input').value}], ['#e2e8f0', '#94a3b8'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>End Y1</span> <span id="sec2ex1Y1Val">1</span></label>
+                    <label><span>Gradient Y2</span> <span id="sec2ex1Y1Val">1</span></label>
                     <input type="range" id="sec2ex1Y1Input" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
                       oninput="document.getElementById('sec2ex1Y1').setAttribute('value', this.value); document.getElementById('sec2ex1Y1Val').innerText = this.value; document.getElementById('sec2ex1Y1Code').innerText = this.value; document.getElementById('sec2ex1Rect').setAttribute('fill', `linear([${document.getElementById('sec2ex1X0Input').value}, ${document.getElementById('sec2ex1Y0Input').value}, ${document.getElementById('sec2ex1X1Input').value}, ${this.value}], ['#e2e8f0', '#94a3b8'])`);">
                   </div>
@@ -543,22 +543,22 @@
                   </div>
                   
                   <div class="control-group">
-                    <label><span>Start X0</span> <span id="sec2ex2EllipseX0Val">0.25</span></label>
+                    <label><span>Gradient X1</span> <span id="sec2ex2EllipseX0Val">0.25</span></label>
                     <input type="range" id="sec2ex2EllipseX0Input" min="-0.5" max="1.5" step="0.05" value="0.25" autocomplete="off"
                       oninput="document.getElementById('sec2ex2EllipseX0Code').innerText = this.value; document.getElementById('sec2ex2EllipseX0Val').innerText = this.value; document.getElementById('sec2ex2Ellipse').setAttribute('fill', `linear([${this.value}, ${document.getElementById('sec2ex2EllipseY0Input').value}, ${document.getElementById('sec2ex2EllipseX1Input').value}, ${document.getElementById('sec2ex2EllipseY1Input').value}], ['darkorange', 'gold', 'crimson'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>Start Y0</span> <span id="sec2ex2EllipseY0Val">0.25</span></label>
+                    <label><span>Gradient Y1</span> <span id="sec2ex2EllipseY0Val">0.25</span></label>
                     <input type="range" id="sec2ex2EllipseY0Input" min="-0.5" max="1.5" step="0.05" value="0.25" autocomplete="off"
                       oninput="document.getElementById('sec2ex2EllipseY0Code').innerText = this.value; document.getElementById('sec2ex2EllipseY0Val').innerText = this.value; document.getElementById('sec2ex2Ellipse').setAttribute('fill', `linear([${document.getElementById('sec2ex2EllipseX0Input').value}, ${this.value}, ${document.getElementById('sec2ex2EllipseX1Input').value}, ${document.getElementById('sec2ex2EllipseY1Input').value}], ['darkorange', 'gold', 'crimson'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>End X1</span> <span id="sec2ex2EllipseX1Val">0.75</span></label>
+                    <label><span>Gradient X2</span> <span id="sec2ex2EllipseX1Val">0.75</span></label>
                     <input type="range" id="sec2ex2EllipseX1Input" min="-0.5" max="1.5" step="0.05" value="0.75" autocomplete="off"
                       oninput="document.getElementById('sec2ex2EllipseX1Code').innerText = this.value; document.getElementById('sec2ex2EllipseX1Val').innerText = this.value; document.getElementById('sec2ex2Ellipse').setAttribute('fill', `linear([${document.getElementById('sec2ex2EllipseX0Input').value}, ${document.getElementById('sec2ex2EllipseY0Input').value}, ${this.value}, ${document.getElementById('sec2ex2EllipseY1Input').value}], ['darkorange', 'gold', 'crimson'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>End Y1</span> <span id="sec2ex2EllipseY1Val">0.75</span></label>
+                    <label><span>Gradient Y2</span> <span id="sec2ex2EllipseY1Val">0.75</span></label>
                     <input type="range" id="sec2ex2EllipseY1Input" min="-0.5" max="1.5" step="0.05" value="0.75" autocomplete="off"
                       oninput="document.getElementById('sec2ex2EllipseY1Code').innerText = this.value; document.getElementById('sec2ex2EllipseY1Val').innerText = this.value; document.getElementById('sec2ex2Ellipse').setAttribute('fill', `linear([${document.getElementById('sec2ex2EllipseX0Input').value}, ${document.getElementById('sec2ex2EllipseY0Input').value}, ${document.getElementById('sec2ex2EllipseX1Input').value}, ${this.value}], ['darkorange', 'gold', 'crimson'])`);">
                   </div>
@@ -585,22 +585,22 @@
                   </div>
                   
                   <div class="control-group">
-                    <label><span>Start X0</span> <span id="sec2ex2RectX0Val">0</span></label>
+                    <label><span>Gradient X1</span> <span id="sec2ex2RectX0Val">0</span></label>
                     <input type="range" id="sec2ex2RectX0Input" min="-0.5" max="1.5" step="0.1" value="0" autocomplete="off"
                       oninput="document.getElementById('sec2ex2RectX0Code').innerText = this.value; document.getElementById('sec2ex2RectX0Val').innerText = this.value; document.getElementById('sec2ex2Rect').setAttribute('fill', `linear([${this.value}, ${document.getElementById('sec2ex2RectY0Input').value}, ${document.getElementById('sec2ex2RectX1Input').value}, ${document.getElementById('sec2ex2RectY1Input').value}], [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>Start Y0</span> <span id="sec2ex2RectY0Val">0.5</span></label>
+                    <label><span>Gradient Y1</span> <span id="sec2ex2RectY0Val">0.5</span></label>
                     <input type="range" id="sec2ex2RectY0Input" min="-0.5" max="1.5" step="0.1" value="0.5" autocomplete="off"
                       oninput="document.getElementById('sec2ex2RectY0Code').innerText = this.value; document.getElementById('sec2ex2RectY0Val').innerText = this.value; document.getElementById('sec2ex2Rect').setAttribute('fill', `linear([${document.getElementById('sec2ex2RectX0Input').value}, ${this.value}, ${document.getElementById('sec2ex2RectX1Input').value}, ${document.getElementById('sec2ex2RectY1Input').value}], [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>End X1</span> <span id="sec2ex2RectX1Val">0.5</span></label>
+                    <label><span>Gradient X2</span> <span id="sec2ex2RectX1Val">0.5</span></label>
                     <input type="range" id="sec2ex2RectX1Input" min="-0.5" max="1.5" step="0.1" value="0.5" autocomplete="off"
                       oninput="document.getElementById('sec2ex2RectX1Code').innerText = this.value; document.getElementById('sec2ex2RectX1Val').innerText = this.value; document.getElementById('sec2ex2Rect').setAttribute('fill', `linear([${document.getElementById('sec2ex2RectX0Input').value}, ${document.getElementById('sec2ex2RectY0Input').value}, ${this.value}, ${document.getElementById('sec2ex2RectY1Input').value}], [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>End Y1</span> <span id="sec2ex2RectY1Val">0.5</span></label>
+                    <label><span>Gradient Y2</span> <span id="sec2ex2RectY1Val">0.5</span></label>
                     <input type="range" id="sec2ex2RectY1Input" min="-0.5" max="1.5" step="0.1" value="0.5" autocomplete="off"
                       oninput="document.getElementById('sec2ex2RectY1Code').innerText = this.value; document.getElementById('sec2ex2RectY1Val').innerText = this.value; document.getElementById('sec2ex2Rect').setAttribute('fill', `linear([${document.getElementById('sec2ex2RectX0Input').value}, ${document.getElementById('sec2ex2RectY0Input').value}, ${document.getElementById('sec2ex2RectX1Input').value}, ${this.value}], [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])`);">
                   </div>
@@ -627,22 +627,22 @@
                   </div>
                   
                   <div class="control-group">
-                    <label><span>Start X0</span> <span id="sec2ex2TextX0Val">0</span></label>
+                    <label><span>Gradient X1</span> <span id="sec2ex2TextX0Val">0</span></label>
                     <input type="range" id="sec2ex2TextX0Input" min="-0.5" max="1.5" step="0.1" value="0" autocomplete="off"
                       oninput="document.getElementById('sec2ex2TextX0Code').innerText = this.value; document.getElementById('sec2ex2TextX0Val').innerText = this.value; document.getElementById('sec2ex2Text').setAttribute('fill', `linear([${this.value}, ${document.getElementById('sec2ex2TextY0Input').value}, ${document.getElementById('sec2ex2TextX1Input').value}, ${document.getElementById('sec2ex2TextY1Input').value}], ['#8b5cf6', '#ec4899', '#f59e0b'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>Start Y0</span> <span id="sec2ex2TextY0Val">0.4</span></label>
+                    <label><span>Gradient Y1</span> <span id="sec2ex2TextY0Val">0.4</span></label>
                     <input type="range" id="sec2ex2TextY0Input" min="-0.5" max="1.5" step="0.1" value="0.4" autocomplete="off"
                       oninput="document.getElementById('sec2ex2TextY0Code').innerText = this.value; document.getElementById('sec2ex2TextY0Val').innerText = this.value; document.getElementById('sec2ex2Text').setAttribute('fill', `linear([${document.getElementById('sec2ex2TextX0Input').value}, ${this.value}, ${document.getElementById('sec2ex2TextX1Input').value}, ${document.getElementById('sec2ex2TextY1Input').value}], ['#8b5cf6', '#ec4899', '#f59e0b'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>End X1</span> <span id="sec2ex2TextX1Val">0</span></label>
+                    <label><span>Gradient X2</span> <span id="sec2ex2TextX1Val">0</span></label>
                     <input type="range" id="sec2ex2TextX1Input" min="-0.5" max="1.5" step="0.1" value="0" autocomplete="off"
                       oninput="document.getElementById('sec2ex2TextX1Code').innerText = this.value; document.getElementById('sec2ex2TextX1Val').innerText = this.value; document.getElementById('sec2ex2Text').setAttribute('fill', `linear([${document.getElementById('sec2ex2TextX0Input').value}, ${document.getElementById('sec2ex2TextY0Input').value}, ${this.value}, ${document.getElementById('sec2ex2TextY1Input').value}], ['#8b5cf6', '#ec4899', '#f59e0b'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>End Y1</span> <span id="sec2ex2TextY1Val">0.6</span></label>
+                    <label><span>Gradient Y2</span> <span id="sec2ex2TextY1Val">0.6</span></label>
                     <input type="range" id="sec2ex2TextY1Input" min="-0.5" max="1.5" step="0.1" value="0.6" autocomplete="off"
                       oninput="document.getElementById('sec2ex2TextY1Code').innerText = this.value; document.getElementById('sec2ex2TextY1Val').innerText = this.value; document.getElementById('sec2ex2Text').setAttribute('fill', `linear([${document.getElementById('sec2ex2TextX0Input').value}, ${document.getElementById('sec2ex2TextY0Input').value}, ${document.getElementById('sec2ex2TextX1Input').value}, ${this.value}], ['#8b5cf6', '#ec4899', '#f59e0b'])`);">
                   </div>
