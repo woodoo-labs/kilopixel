@@ -187,6 +187,15 @@
                 <pxl-group x="ref.sec1ex1Rect.x" y="ref.sec1ex1Rect.y" rotate="ref.sec1ex1Rect.rotate">
                   <pxl-rect x="0" y="0" w="ref.sec1ex1Rect.w" h="ref.sec1ex1Rect.h" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
                   
+                  <!-- Gradient Vector -->
+                  <pxl-line 
+                    x1="-ref.sec1ex1Dx.value" y1="-ref.sec1ex1Dy.value"
+                    x2="ref.sec1ex1Dx.value" y2="ref.sec1ex1Dy.value"
+                    stroke="#8b5cf6" strokewidth="3" arrowend="25"
+                  ></pxl-line>
+                  <!-- Center Point -->
+                  <pxl-circle x="0" y="0" r="6" fill="#8b5cf6"></pxl-circle>
+
                   <!-- Farthest corner projections (Perpendicular Fixed Length) -->
                   <pxl-line
                     x1="ref.sec1ex1Dx.value + ref.sec1ex1Px.value" y1="ref.sec1ex1Dy.value - ref.sec1ex1Py.value"
@@ -199,15 +208,6 @@
                     x2="-ref.sec1ex1Dx.value - ref.sec1ex1Px.value" y2="-ref.sec1ex1Dy.value + ref.sec1ex1Py.value"
                     stroke="#94a3b8" strokewidth="2" linedash="[4,4]"
                   ></pxl-line>
-
-                  <!-- Gradient Vector -->
-                  <pxl-line 
-                    x1="-ref.sec1ex1Dx.value" y1="-ref.sec1ex1Dy.value"
-                    x2="ref.sec1ex1Dx.value" y2="ref.sec1ex1Dy.value"
-                    stroke="#8b5cf6" strokewidth="3" arrowend="25"
-                  ></pxl-line>
-                  <!-- Center Point -->
-                  <pxl-circle x="0" y="0" r="6" fill="#8b5cf6"></pxl-circle>
                 </pxl-group>
               </pxl-layer>
             </pxl-stage>
@@ -436,6 +436,20 @@
                 <pxl-var id="sec2ex1X1" value="1"></pxl-var>
                 <pxl-var id="sec2ex1Y1" value="1"></pxl-var>
 
+                <!-- Math Variables for Geometric Projection -->
+                <pxl-var id="sec2ex1P0x" value="(ref.sec2ex1X0.value - 0.5) * ref.sec2ex1Rect.w"></pxl-var>
+                <pxl-var id="sec2ex1P0y" value="(ref.sec2ex1Y0.value - 0.5) * ref.sec2ex1Rect.h"></pxl-var>
+                <pxl-var id="sec2ex1P1x" value="(ref.sec2ex1X1.value - 0.5) * ref.sec2ex1Rect.w"></pxl-var>
+                <pxl-var id="sec2ex1P1y" value="(ref.sec2ex1Y1.value - 0.5) * ref.sec2ex1Rect.h"></pxl-var>
+                
+                <pxl-var id="sec2ex1Vx" value="ref.sec2ex1P1x.value - ref.sec2ex1P0x.value"></pxl-var>
+                <pxl-var id="sec2ex1Vy" value="ref.sec2ex1P1y.value - ref.sec2ex1P0y.value"></pxl-var>
+                <pxl-var id="sec2ex1VLen" value="sqrt(ref.sec2ex1Vx.value*ref.sec2ex1Vx.value + ref.sec2ex1Vy.value*ref.sec2ex1Vy.value)"></pxl-var>
+                
+                <pxl-var id="sec2ex1ProjL" value="800"></pxl-var>
+                <pxl-var id="sec2ex1Nx" value="-(ref.sec2ex1Vy.value / (ref.sec2ex1VLen.value || 1)) * ref.sec2ex1ProjL.value"></pxl-var>
+                <pxl-var id="sec2ex1Ny" value="(ref.sec2ex1Vx.value / (ref.sec2ex1VLen.value || 1)) * ref.sec2ex1ProjL.value"></pxl-var>
+
                 <pxl-group x="ref.sec2ex1Rect.x" y="ref.sec2ex1Rect.y" rotate="ref.sec2ex1Rect.rotate">
                   <!-- Solid blue bounding box -->
                   <pxl-rect x="0" y="0" w="ref.sec2ex1Rect.w" h="ref.sec2ex1Rect.h" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
@@ -449,11 +463,24 @@
                   
                   <!-- Purple Gradient Vector Arrow -->
                   <pxl-line 
-                    x1="(ref.sec2ex1X0.value - 0.5) * ref.sec2ex1Rect.w" 
-                    y1="(ref.sec2ex1Y0.value - 0.5) * ref.sec2ex1Rect.h" 
-                    x2="(ref.sec2ex1X1.value - 0.5) * ref.sec2ex1Rect.w" 
-                    y2="(ref.sec2ex1Y1.value - 0.5) * ref.sec2ex1Rect.h" 
+                    x1="ref.sec2ex1P0x.value" 
+                    y1="ref.sec2ex1P0y.value" 
+                    x2="ref.sec2ex1P1x.value" 
+                    y2="ref.sec2ex1P1y.value" 
                     stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
+
+                  <!-- Color Band Boundaries (Perpendicular Projections) -->
+                  <pxl-line
+                    x1="ref.sec2ex1P0x.value + ref.sec2ex1Nx.value" y1="ref.sec2ex1P0y.value + ref.sec2ex1Ny.value"
+                    x2="ref.sec2ex1P0x.value - ref.sec2ex1Nx.value" y2="ref.sec2ex1P0y.value - ref.sec2ex1Ny.value"
+                    stroke="#94a3b8" strokewidth="2" linedash="[4,4]"
+                  ></pxl-line>
+
+                  <pxl-line
+                    x1="ref.sec2ex1P1x.value + ref.sec2ex1Nx.value" y1="ref.sec2ex1P1y.value + ref.sec2ex1Ny.value"
+                    x2="ref.sec2ex1P1x.value - ref.sec2ex1Nx.value" y2="ref.sec2ex1P1y.value - ref.sec2ex1Ny.value"
+                    stroke="#94a3b8" strokewidth="2" linedash="[4,4]"
+                  ></pxl-line>
                 </pxl-group>
               </pxl-layer>
             </pxl-stage>
