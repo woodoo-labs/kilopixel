@@ -338,6 +338,80 @@
           </div>
         </div>
 
+        <!-- ================================================================= -->
+        <!-- SECTION 2: LINEAR GRADIENTS (BOUNDING BOX MODE) -->
+        <!-- ================================================================= -->
+        <h2 style="margin-top: 4rem;">2. Linear Gradients (Bounding Box Mode)</h2>
+        <p>In Bounding Box Mode, instead of providing an angle, you provide an array of four normalized coordinates: <code>[x0, y0, x1, y1]</code>. These coordinates are mapped proportionally to the shape's bounding box. <code>[0, 0]</code> represents the top-left corner, and <code>[1, 1]</code> represents the bottom-right corner.</p>
+        
+        <div class="callout-info">
+          <p class="callout-body" style="margin-bottom: 0.5rem;"><strong>Bounding Box Mode Syntax:</strong> (Normalized coordinates)</p>
+          <pre style="margin-top: 0; margin-bottom: 0;"><code class="language-javascript">fill="linear([x0, y0, x1, y1], colorsArray)"</code></pre>
+        </div>
+
+        <p style="margin-top: 2rem;">In this example, drag the coordinate sliders to see how the gradient's start and end points move relative to the rectangle's bounding box. The dashed box represents the coordinate space from <code>0</code> to <code>1</code>.</p>
+
+        <div class="example-card">
+          <div class="example-code">
+            <pre><code class="language-html">&lt;pxl-rect w="600" h="300" r="20"
+      fill="linear([<mark id="sec2ex1X0Code">0</mark>, <mark id="sec2ex1Y0Code">0</mark>, <mark id="sec2ex1X1Code">1</mark>, <mark id="sec2ex1Y1Code">1</mark>], ['#0ea5e9', '#6366f1'])"&gt;
+&lt;/pxl-rect&gt;</code></pre>
+          </div>
+
+          <div class="demo-container">
+            <div class="demo-controls">
+              <div class="demo-controls-header">
+                <h3 class="demo-controls-title">Controls</h3>
+                <div class="demo-tabs">
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2ex1Tab')">Gradient</button>
+                </div>
+              </div>
+              
+              <div class="tab-content active" id="sec2ex1Tab">
+                <div class="playground-sliders">
+                  <!-- Start Coordinates -->
+                  <div class="control-group">
+                    <label><span>Start X (<code>x0</code>)</span> <span id="sec2ex1X0Val">0</span></label>
+                    <input type="range" id="sec2ex1X0Input" min="-0.5" max="1.5" step="0.1" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec2ex1X0Val').innerText = this.value; document.getElementById('sec2ex1X0Code').innerText = this.value; document.getElementById('sec2ex1Rect').setAttribute('fill', `linear([${this.value}, ${document.getElementById('sec2ex1Y0Input').value}, ${document.getElementById('sec2ex1X1Input').value}, ${document.getElementById('sec2ex1Y1Input').value}], ['#0ea5e9', '#6366f1'])`); document.getElementById('sec2ex1StartGuide').setAttribute('x', (this.value - 0.5) * 600); document.getElementById('sec2ex1Line').setAttribute('x1', (this.value - 0.5) * 600);">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Start Y (<code>y0</code>)</span> <span id="sec2ex1Y0Val">0</span></label>
+                    <input type="range" id="sec2ex1Y0Input" min="-0.5" max="1.5" step="0.1" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec2ex1Y0Val').innerText = this.value; document.getElementById('sec2ex1Y0Code').innerText = this.value; document.getElementById('sec2ex1Rect').setAttribute('fill', `linear([${document.getElementById('sec2ex1X0Input').value}, ${this.value}, ${document.getElementById('sec2ex1X1Input').value}, ${document.getElementById('sec2ex1Y1Input').value}], ['#0ea5e9', '#6366f1'])`); document.getElementById('sec2ex1StartGuide').setAttribute('y', (this.value - 0.5) * 300); document.getElementById('sec2ex1Line').setAttribute('y1', (this.value - 0.5) * 300);">
+                  </div>
+                  <!-- End Coordinates -->
+                  <div class="control-group" style="margin-top: 1rem;">
+                    <label><span>End X (<code>x1</code>)</span> <span id="sec2ex1X1Val">1</span></label>
+                    <input type="range" id="sec2ex1X1Input" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
+                      oninput="document.getElementById('sec2ex1X1Val').innerText = this.value; document.getElementById('sec2ex1X1Code').innerText = this.value; document.getElementById('sec2ex1Rect').setAttribute('fill', `linear([${document.getElementById('sec2ex1X0Input').value}, ${document.getElementById('sec2ex1Y0Input').value}, ${this.value}, ${document.getElementById('sec2ex1Y1Input').value}], ['#0ea5e9', '#6366f1'])`); document.getElementById('sec2ex1EndGuide').setAttribute('x', (this.value - 0.5) * 600); document.getElementById('sec2ex1Line').setAttribute('x2', (this.value - 0.5) * 600);">
+                  </div>
+                  <div class="control-group">
+                    <label><span>End Y (<code>y1</code>)</span> <span id="sec2ex1Y1Val">1</span></label>
+                    <input type="range" id="sec2ex1Y1Input" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
+                      oninput="document.getElementById('sec2ex1Y1Val').innerText = this.value; document.getElementById('sec2ex1Y1Code').innerText = this.value; document.getElementById('sec2ex1Rect').setAttribute('fill', `linear([${document.getElementById('sec2ex1X0Input').value}, ${document.getElementById('sec2ex1Y0Input').value}, ${document.getElementById('sec2ex1X1Input').value}, ${this.value}], ['#0ea5e9', '#6366f1'])`); document.getElementById('sec2ex1EndGuide').setAttribute('y', (this.value - 0.5) * 300); document.getElementById('sec2ex1Line').setAttribute('y2', (this.value - 0.5) * 300);">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <pxl-stage ratio="2" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                
+                <pxl-layer x="500" y="250">
+                  <pxl-rect w="600" h="300" fill="none" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-rect>
+                  <pxl-rect id="sec2ex1Rect" w="600" h="300" r="20" fill="linear([0, 0, 1, 1], ['#0ea5e9', '#6366f1'])"></pxl-rect>
+                  
+                  <pxl-line id="sec2ex1Line" x1="-300" y1="-150" x2="300" y2="150" stroke="#f8fafc" strokewidth="3" linedash="[5, 5]"></pxl-line>
+                  <pxl-circle id="sec2ex1StartGuide" x="-300" y="-150" r="10" fill="#f8fafc" stroke="#0ea5e9" strokewidth="4"></pxl-circle>
+                  <pxl-circle id="sec2ex1EndGuide" x="300" y="150" r="10" fill="#f8fafc" stroke="#6366f1" strokewidth="4"></pxl-circle>
+                </pxl-layer>
+              </pxl-layer>
+            </pxl-stage>
+          </div>
+        </div>
+
       </div>
     </main>
   </div>
