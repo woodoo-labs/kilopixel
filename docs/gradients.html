@@ -341,6 +341,18 @@
       </div>
     </main>
   </div>
+  <!-- 
+    FONT PRELOADER FOR CANVAS:
+    The HTML5 Canvas API (ctx.font) does not immediately download web fonts unless they are used in the HTML DOM first.
+    This invisible div renders all 9 weights of 'Inter' to force the browser to download and cache them on page load.
+    This guarantees that when the user drags the Kilopixel Font Weight slider (100-900), the Canvas draws them instantly without any delayed network "pop-in".
+  -->
+  <div aria-hidden="true" style="opacity: 0; pointer-events: none; position: absolute; width: 0; height: 0; overflow: hidden; font-family: 'Inter', sans-serif;">
+    <span style="font-weight: 100;">pxl</span><span style="font-weight: 200;">pxl</span><span style="font-weight: 300;">pxl</span>
+    <span style="font-weight: 400;">pxl</span><span style="font-weight: 500;">pxl</span><span style="font-weight: 600;">pxl</span>
+    <span style="font-weight: 700;">pxl</span><span style="font-weight: 800;">pxl</span><span style="font-weight: 900;">pxl</span>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
 </body>
