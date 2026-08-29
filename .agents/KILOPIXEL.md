@@ -392,7 +392,7 @@ fill="linear(45, ['red', 'blue'])"
 ```
 The angle uses CSS-like geometry. At draw time, endpoints are calculated using `distance = |w/2·cos| + |h/2·sin|`, ensuring the gradient line always reaches the bounding box edges regardless of angle or aspect ratio.
 
-**Coordinate mode** (array):
+**Vector mode** (array):
 ```html
 fill="linear([0, 0, 1, 1], ['red', 'blue'])"
 ```
