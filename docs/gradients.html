@@ -541,11 +541,6 @@
                     <input type="range" min="20" max="250" step="5" value="200" autocomplete="off"
                       oninput="document.getElementById('sec2ex2Ellipse').setAttribute('ry', this.value); document.getElementById('sec2ex2EllipseRyVal').innerText = this.value; document.getElementById('sec2ex2EllipseRyCode').innerText = this.value;">
                   </div>
-                  <div class="control-group">
-                    <label><span>Rotation</span> <span id="sec2ex2EllipseRotVal">0°</span></label>
-                    <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
-                      oninput="document.getElementById('sec2ex2Ellipse').setAttribute('rotate', this.value); document.getElementById('sec2ex2EllipseRotVal').innerText = this.value + '°'; document.getElementById('sec2ex2EllipseRotCode').innerText = this.value;">
-                  </div>
                   
                   <div class="control-group">
                     <label><span>Start X0</span> <span id="sec2ex2EllipseX0Val">0</span></label>
@@ -567,6 +562,11 @@
                     <input type="range" id="sec2ex2EllipseY1Input" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
                       oninput="document.getElementById('sec2ex2EllipseY1Code').innerText = this.value; document.getElementById('sec2ex2EllipseY1Val').innerText = this.value; document.getElementById('sec2ex2Ellipse').setAttribute('fill', `linear([${document.getElementById('sec2ex2EllipseX0Input').value}, ${document.getElementById('sec2ex2EllipseY0Input').value}, ${document.getElementById('sec2ex2EllipseX1Input').value}, ${this.value}], ['darkorange', 'gold', 'crimson'])`);">
                   </div>
+                  <div class="control-group">
+                    <label><span>Rotation</span> <span id="sec2ex2EllipseRotVal">0°</span></label>
+                    <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec2ex2Ellipse').setAttribute('rotate', this.value); document.getElementById('sec2ex2EllipseRotVal').innerText = this.value + '°'; document.getElementById('sec2ex2EllipseRotCode').innerText = this.value;">
+                  </div>
                 </div>
               </div>
 
@@ -582,11 +582,6 @@
                     <label><span>Height</span> <span id="sec2ex2RectHeightVal">200</span></label>
                     <input type="range" min="50" max="500" step="10" value="200" autocomplete="off"
                       oninput="document.getElementById('sec2ex2Rect').setAttribute('h', this.value); document.getElementById('sec2ex2RectHeightVal').innerText = this.value; document.getElementById('sec2ex2RectHeightCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Rotation</span> <span id="sec2ex2RectRotVal">0°</span></label>
-                    <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
-                      oninput="document.getElementById('sec2ex2Rect').setAttribute('rotate', this.value); document.getElementById('sec2ex2RectRotVal').innerText = this.value + '°'; document.getElementById('sec2ex2RectRotCode').innerText = this.value;">
                   </div>
                   
                   <div class="control-group">
@@ -609,6 +604,11 @@
                     <input type="range" id="sec2ex2RectY1Input" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
                       oninput="document.getElementById('sec2ex2RectY1Code').innerText = this.value; document.getElementById('sec2ex2RectY1Val').innerText = this.value; document.getElementById('sec2ex2Rect').setAttribute('fill', `linear([${document.getElementById('sec2ex2RectX0Input').value}, ${document.getElementById('sec2ex2RectY0Input').value}, ${document.getElementById('sec2ex2RectX1Input').value}, ${this.value}], [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])`);">
                   </div>
+                  <div class="control-group">
+                    <label><span>Rotation</span> <span id="sec2ex2RectRotVal">0°</span></label>
+                    <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec2ex2Rect').setAttribute('rotate', this.value); document.getElementById('sec2ex2RectRotVal').innerText = this.value + '°'; document.getElementById('sec2ex2RectRotCode').innerText = this.value;">
+                  </div>
                 </div>
               </div>
 
@@ -624,11 +624,6 @@
                     <label><span>Font Weight</span> <span id="sec2ex2TextWeightVal">800</span></label>
                     <input type="range" min="100" max="900" step="100" value="800" autocomplete="off"
                       oninput="document.getElementById('sec2ex2Text').setAttribute('weight', this.value); document.getElementById('sec2ex2TextWeightVal').innerText = this.value; document.getElementById('sec2ex2TextWeightCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Rotation</span> <span id="sec2ex2TextRotVal">0°</span></label>
-                    <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
-                      oninput="document.getElementById('sec2ex2Text').setAttribute('rotate', this.value); document.getElementById('sec2ex2TextRotVal').innerText = this.value + '°'; document.getElementById('sec2ex2TextRotCode').innerText = this.value;">
                   </div>
                   
                   <div class="control-group">
@@ -650,6 +645,11 @@
                     <label><span>End Y1</span> <span id="sec2ex2TextY1Val">1</span></label>
                     <input type="range" id="sec2ex2TextY1Input" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
                       oninput="document.getElementById('sec2ex2TextY1Code').innerText = this.value; document.getElementById('sec2ex2TextY1Val').innerText = this.value; document.getElementById('sec2ex2Text').setAttribute('fill', `linear([${document.getElementById('sec2ex2TextX0Input').value}, ${document.getElementById('sec2ex2TextY0Input').value}, ${document.getElementById('sec2ex2TextX1Input').value}, ${this.value}], ['#8b5cf6', '#ec4899', '#f59e0b'])`);">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Rotation</span> <span id="sec2ex2TextRotVal">0°</span></label>
+                    <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec2ex2Text').setAttribute('rotate', this.value); document.getElementById('sec2ex2TextRotVal').innerText = this.value + '°'; document.getElementById('sec2ex2TextRotCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
