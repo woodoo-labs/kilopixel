@@ -618,13 +618,13 @@
             <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Rect 1 (Standard Radius) --&gt;
-    &lt;pxl-rect x="140" y="300" w="200" h="280" fill="radial(<mark id="sec5Rect1RadiusCode">1</mark>, ['#ff0055', '#00ffcc'])"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect x="140" y="300" w="200" h="280" fill="radial([<mark id="sec5Rect1RadiusCode">1</mark>, <mark id="sec5Rect1RadiusCode2">1</mark>], ['#ff0055', '#00ffcc'])"&gt;&lt;/pxl-rect&gt;
       
     &lt;!-- Rect 2 (3-Arg Offset Center) --&gt;
-    &lt;pxl-rect x="380" y="300" w="200" h="280" fill="radial([<mark id="sec5Rect2XCode">0.2</mark>, <mark id="sec5Rect2YCode">0.2</mark>, <mark id="sec5Rect2RCode">1</mark>], ['#ffea00', '#ff00a0'])"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect x="380" y="300" w="200" h="280" fill="radial([<mark id="sec5Rect2XCode">0.2</mark>, <mark id="sec5Rect2YCode">0.2</mark>, <mark id="sec5Rect2RCode">1</mark>, <mark id="sec5Rect2RCode2">1</mark>], ['#ffea00', '#ff00a0'])"&gt;&lt;/pxl-rect&gt;
 
     &lt;!-- Rect 3 (6-Arg 3D Spotlight) --&gt;
-    &lt;pxl-rect x="620" y="300" w="200" h="280" fill="radial([<mark id="sec5Rect3X0Code">0.2</mark>, <mark id="sec5Rect3Y0Code">0.2</mark>, <mark id="sec5Rect3R0Code">0.1</mark>, <mark id="sec5Rect3X1Code">0.8</mark>, <mark id="sec5Rect3Y1Code">0.8</mark>, <mark id="sec5Rect3R1Code">1.2</mark>], ['#ffea00', '#ff00a0'])"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect x="620" y="300" w="200" h="280" fill="radial([<mark id="sec5Rect3X0Code">0.2</mark>, <mark id="sec5Rect3Y0Code">0.2</mark>, <mark id="sec5Rect3R0Code">0.1</mark>, <mark id="sec5Rect3R0Code2">0.1</mark>, <mark id="sec5Rect3X1Code">0.8</mark>, <mark id="sec5Rect3Y1Code">0.8</mark>, <mark id="sec5Rect3R1Code">1.2</mark>, <mark id="sec5Rect3R1Code2">1.2</mark>], ['#ffea00', '#ff00a0'])"&gt;&lt;/pxl-rect&gt;
       
     &lt;!-- Rect 4 (Hard Border Trick) --&gt;
     &lt;pxl-rect x="860" y="300" w="200" h="280" fill="radial([1, 1], [0, '#000', <mark id="sec5Rect4OffsetCode">0.95</mark>, '#00f', <mark id="sec5Rect4OffsetCode2">0.95</mark>, '#fff', 1, '#fff'])"&gt;&lt;/pxl-rect&gt;
@@ -660,7 +660,7 @@
                   <div class="control-group">
                     <label><span>Radius</span> <span id="sec5Rect1RadiusVal">1</span></label>
                     <input type="range" min="0.1" max="2" step="0.1" value="1" autocomplete="off"
-                      oninput="document.getElementById('sec5Rect1').setAttribute('fill', `radial([${this.value}, ${this.value}], ['#ff0055', '#00ffcc'])`); document.getElementById('sec5Rect1RadiusVal').innerText = this.value; document.getElementById('sec5Rect1RadiusCode').innerText = this.value;">
+                      oninput="document.getElementById('sec5Rect1').setAttribute('fill', `radial([${this.value}, ${this.value}], ['#ff0055', '#00ffcc'])`); document.getElementById('sec5Rect1RadiusVal').innerText = this.value; document.getElementById('sec5Rect1RadiusCode').innerText = this.value; document.getElementById('sec5Rect1RadiusCode2').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -681,7 +681,7 @@
                   <div class="control-group">
                     <label><span>Radius</span> <span id="sec5Rect2RVal">1</span></label>
                     <input type="range" min="0.1" max="2" step="0.1" value="1" autocomplete="off"
-                      oninput="document.getElementById('sec5Rect2').setAttribute('fill', `radial([${document.getElementById('sec5Rect2XVal').innerText}, ${document.getElementById('sec5Rect2YVal').innerText}, ${this.value}], ['#ffea00', '#ff00a0'])`); document.getElementById('sec5Rect2RVal').innerText = this.value; document.getElementById('sec5Rect2RCode').innerText = this.value;">
+                      oninput="document.getElementById('sec5Rect2').setAttribute('fill', `radial([${document.getElementById('sec5Rect2XVal').innerText}, ${document.getElementById('sec5Rect2YVal').innerText}, ${this.value}], ['#ffea00', '#ff00a0'])`); document.getElementById('sec5Rect2RVal').innerText = this.value; document.getElementById('sec5Rect2RCode').innerText = this.value; document.getElementById('sec5Rect2RCode2').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -702,7 +702,7 @@
                   <div class="control-group">
                     <label><span>Start R (r0)</span> <span id="sec5Rect3R0Val">0.1</span></label>
                     <input type="range" min="0" max="1" step="0.1" value="0.1" autocomplete="off"
-                      oninput="document.getElementById('sec5Rect3').setAttribute('fill', `radial([${document.getElementById('sec5Rect3X0Val').innerText}, ${document.getElementById('sec5Rect3Y0Val').innerText}, ${this.value}, ${this.value}, ${document.getElementById('sec5Rect3X1Val').innerText}, ${document.getElementById('sec5Rect3Y1Val').innerText}, ${document.getElementById('sec5Rect3R1Val').innerText}, ${document.getElementById('sec5Rect3R1Val').innerText}], ['#ffea00', '#ff00a0'])`); document.getElementById('sec5Rect3R0Val').innerText = this.value; document.getElementById('sec5Rect3R0Code').innerText = this.value;">
+                      oninput="document.getElementById('sec5Rect3').setAttribute('fill', `radial([${document.getElementById('sec5Rect3X0Val').innerText}, ${document.getElementById('sec5Rect3Y0Val').innerText}, ${this.value}, ${this.value}, ${document.getElementById('sec5Rect3X1Val').innerText}, ${document.getElementById('sec5Rect3Y1Val').innerText}, ${document.getElementById('sec5Rect3R1Val').innerText}, ${document.getElementById('sec5Rect3R1Val').innerText}], ['#ffea00', '#ff00a0'])`); document.getElementById('sec5Rect3R0Val').innerText = this.value; document.getElementById('sec5Rect3R0Code').innerText = this.value; document.getElementById('sec5Rect3R0Code2').innerText = this.value;">
                   </div>
                   <div class="control-group">
                     <label><span>End X (x1)</span> <span id="sec5Rect3X1Val">0.8</span></label>
@@ -717,7 +717,7 @@
                   <div class="control-group">
                     <label><span>End R (r1)</span> <span id="sec5Rect3R1Val">1.2</span></label>
                     <input type="range" min="0.1" max="2" step="0.1" value="1.2" autocomplete="off"
-                      oninput="document.getElementById('sec5Rect3').setAttribute('fill', `radial([${document.getElementById('sec5Rect3X0Val').innerText}, ${document.getElementById('sec5Rect3Y0Val').innerText}, ${document.getElementById('sec5Rect3R0Val').innerText}, ${document.getElementById('sec5Rect3R0Val').innerText}, ${document.getElementById('sec5Rect3X1Val').innerText}, ${document.getElementById('sec5Rect3Y1Val').innerText}, ${this.value}, ${this.value}], ['#ffea00', '#ff00a0'])`); document.getElementById('sec5Rect3R1Val').innerText = this.value; document.getElementById('sec5Rect3R1Code').innerText = this.value;">
+                      oninput="document.getElementById('sec5Rect3').setAttribute('fill', `radial([${document.getElementById('sec5Rect3X0Val').innerText}, ${document.getElementById('sec5Rect3Y0Val').innerText}, ${document.getElementById('sec5Rect3R0Val').innerText}, ${document.getElementById('sec5Rect3R0Val').innerText}, ${document.getElementById('sec5Rect3X1Val').innerText}, ${document.getElementById('sec5Rect3Y1Val').innerText}, ${this.value}, ${this.value}], ['#ffea00', '#ff00a0'])`); document.getElementById('sec5Rect3R1Val').innerText = this.value; document.getElementById('sec5Rect3R1Code').innerText = this.value; document.getElementById('sec5Rect3R1Code2').innerText = this.value;">
                   </div>
                 </div>
               </div>
