@@ -97,12 +97,12 @@
 
       <!-- Glowing Orb (Multi-stop Radial) -->
       <pxl-circle x="120" y="470" r="45" 
-        fill="radial(1, [0, '#fff', 0.3, '#ff0055', 1, 'transparent'])"></pxl-circle>
+        fill="radial([1, 1], [0, '#fff', 0.3, '#ff0055', 1, 'transparent'])"></pxl-circle>
       <pxl-text x="120" y="530" text="'Glowing Orb'" size="12" fill="#555" align="center"></pxl-text>
 
       <!-- Breathing Radial (Radius modulates using wave(2) over 2 seconds) -->
       <pxl-circle x="300" y="470" r="45" 
-        fill="radial(0.3 + wave(2)*0.7, ['#00f2ff', 'transparent'])"></pxl-circle>
+        fill="radial([0.5 + (0.3 + wave(2)*0.7)/2, 0.5 + (0.3 + wave(2)*0.7)/2], ['#00f2ff', 'transparent'])"></pxl-circle>
       <pxl-text x="300" y="530" text="'Breathing Radius'" size="12" fill="#555" align="center"></pxl-text>
 
       <!-- Infinitely Spinning Gradient (t * 100 degrees per second) -->

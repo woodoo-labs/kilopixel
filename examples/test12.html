@@ -31,7 +31,7 @@
       <!-- We map the radial gradient center directly to the mouse coordinates! -->
       <!-- We use rgba to fade from transparent (the hole) to pitch black -->
       <pxl-rect x="500" y="500" w="1000" h="2000" 
-        fill="radial([ref.main.mouseX/1000, ref.main.mouseY/(ref.main.height||1000), 0.25], [0, 'rgba(0,0,0,0)', 0.6, 'rgba(0,0,0,0.95)', 1, 'rgba(0,0,0,1)'])">
+        fill="radial([ref.main.mouseX/1000, ref.main.mouseY/(ref.main.height||1000), 0.5 + (ref.main.mouseX/1000), 0.5 + (ref.main.mouseY/(ref.main.height||1000))], [0, 'rgba(0,0,0,0)', 0.6, 'rgba(0,0,0,0.95)', 1, 'rgba(0,0,0,1)'])">
       </pxl-rect>
       
       <!-- Performance Monitor -->

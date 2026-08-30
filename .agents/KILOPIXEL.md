@@ -398,34 +398,19 @@ fill="linear([0, 0, 1, 1], ['red', 'blue'])"
 ```
 Coordinates are **proportional** to the shape's bounding box. `[0, 0]` = top-left, `[1, 1]` = bottom-right.
 
-#### `radial(radiusOrConfig, colorsArray)`
+#### `radial(config, colorsArray)`
 
-Officially, 3 modes are promoted in user-facing documentation. However, the engine internally supports a progressive 7-mode fallback architecture mapped to `createRadialGradient(x0, y0, r0, x1, y1, r1)`.
+The radial gradient API uses a **Point-Based** architecture. You define a center point and an "extend" point, and the engine dynamically calculates the absolute pixel distance between them as the radius. This eliminates all aspect-ratio ambiguity on non-square shapes.
 
-*Base Radius Math: `Math.sqrt(dx*dx + dy*dy)` ensures `r=1` perfectly touches the farthest corner of the bounding box.*
+| Args | Syntax | Description |
+|:---:|---|---|
+| **2** | `radial([ex1, ey1], colors)` | Centered gradient. The radius extends to `(ex1, ey1)`. |
+| **4** | `radial([x1, y1, ex1, ey1], colors)` | You explicitly define the center `(x1, y1)` and the extend point `(ex1, ey1)`. |
+| **6** | `radial([x0, y0, x1, y1, ex1, ey1], colors)` | 3D Spotlight. Start origin is at `(x0, y0)`. Outer circle is centered at `(x1, y1)` extending to `(ex1, ey1)`. |
+| **8** | `radial([x0, y0, ex0, ey0, x1, y1, ex1, ey1], colors)` | Full explicit control defining both the inner and outer circles. |
 
-1. **Number Mode (`radius`)**
-   `radial(1, ['red', 'blue'])`
-   - *Defaults:* `x0=0.5, y0=0.5, r0=0`, `x1=0.5, y1=0.5`
-   - *Use:* Dead center, custom radius.
-2. **1-Arg Array (`[r1]`)**
-   - *Defaults:* Same as number mode.
-3. **2-Arg Array (`[x1, y1]`)**
-   - *Defaults:* `x0=x1, y0=y1, r0=0`, `r1=1`
-   - *Use:* Moves the gradient center but keeps default radius of 1.
-4. **3-Arg Array (`[x1, y1, r1]`)**
-   `radial([0.5, 0.5, 1], ['red', 'blue'])`
-   - *Defaults:* `x0=x1, y0=y1, r0=0`
-   - *Use:* Standard custom circle (perfect backward compatibility).
-5. **4-Arg Array (`[x0, y0, x1, y1]`)**
-   - *Defaults:* `r0=0, r1=1`
-   - *Use:* 3D spotlight or cone effect by offsetting start point from end point.
-6. **5-Arg Array (`[x0, y0, r0, x1, y1]`)**
-   - *Defaults:* `r1=1`
-   - *Use:* Cone effect with custom start radius (e.g., hollow cone).
-7. **6-Arg Array (`[x0, y0, r0, x1, y1, r1]`)**
-   `radial([0.5, 0.5, 0, 0.5, 0.5, 1], ['red', 'blue'])`
-   - *Use:* Full, unadulterated access to the native Canvas API.
+> [!TIP]
+> **No Math Required for Circles!** Because the radius is physically anchored to a point, passing `[1, 0.5]` automatically touches the exact center of the right edge, creating a perfectly fitted circle. Passing `[1, 1]` automatically reaches the exact diagonal corner.
 
 #### `conic(startAngleOrConfig, colorsArray)`
 

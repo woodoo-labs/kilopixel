@@ -33,7 +33,7 @@
 
     <!-- [1] Deep space background with radial gradient -->
     <pxl-rect x="500" y="281" w="1000" h="563"
-      fill="radial(1.4, [0, '#0d0d35', 0.4, '#080820', 1, '#020208'])"></pxl-rect>
+      fill="radial([1.2, 1.2], [0, '#0d0d35', 0.4, '#080820', 1, '#020208'])"></pxl-rect>
 
     <!-- [2] Subtle animated synthwave grid -->
     <pxl-grid x="500" y="281" step="40" major="5"
@@ -60,22 +60,22 @@
 
     <!-- [19-24] Nebula clouds — large semi-transparent radial gradients -->
     <pxl-circle x="280" y="160" r="180"
-      fill="radial(0.8, [hsla(280, 80, 30, 0.06), 'transparent'])"
+      fill="radial([0.9, 0.9], [hsla(280, 80, 30, 0.06), 'transparent'])"
       dx="20" rotate="t * 0.5"></pxl-circle>
     <pxl-circle x="720" y="380" r="200"
-      fill="radial(0.9, [hsla(200, 90, 30, 0.05), 'transparent'])"
+      fill="radial([0.95, 0.95], [hsla(200, 90, 30, 0.05), 'transparent'])"
       dx="-15" rotate="t * -0.3"></pxl-circle>
     <pxl-circle x="500" y="281" r="260"
-      fill="radial(0.7, [hsla(320, 70, 25, 0.04), 'transparent'])"
+      fill="radial([0.85, 0.85], [hsla(320, 70, 25, 0.04), 'transparent'])"
       scale="1 + wave(20) * 0.05"></pxl-circle>
     <pxl-circle x="130" y="440" r="150"
-      fill="radial(0.8, [hsla(180, 80, 25, 0.05), 'transparent'])"
+      fill="radial([0.9, 0.9], [hsla(180, 80, 25, 0.05), 'transparent'])"
       dx="10" rotate="t * 0.2"></pxl-circle>
     <pxl-circle x="870" y="100" r="160"
-      fill="radial(0.8, [hsla(260, 80, 30, 0.05), 'transparent'])"
+      fill="radial([0.9, 0.9], [hsla(260, 80, 30, 0.05), 'transparent'])"
       dx="-10" rotate="t * -0.4"></pxl-circle>
     <pxl-circle x="500" y="281" r="300"
-      fill="radial(0.6, [hsla(190, 90, 20, 0.03), 'transparent'])"
+      fill="radial([0.8, 0.8], [hsla(190, 90, 20, 0.03), 'transparent'])"
       rotate="t * 0.15"></pxl-circle>
 
   </pxl-layer>
@@ -90,11 +90,11 @@
 
     <!-- [25] Core outer glow — pulsating glow using pure radial gradient -->
     <pxl-circle x="500" y="281" r="65 + wave(4) * 20"
-      fill="radial(0.5, [0, hsla(185, 100, 60, 0.4), 1, 'transparent'])"></pxl-circle>
+      fill="radial([0.75, 0.75], [0, hsla(185, 100, 60, 0.4), 1, 'transparent'])"></pxl-circle>
 
     <!-- [26] Core body — radial gradient, breathing -->
     <pxl-circle x="500" y="281" r="22 + wave(4) * 6"
-      fill="radial(0.5, [0, '#ffffff', 0.3, '#00e5ff', 0.8, '#0066cc', 1, '#002255'])"
+      fill="radial([0.75, 0.75], [0, '#ffffff', 0.3, '#00e5ff', 0.8, '#0066cc', 1, '#002255'])"
       stroke="#00e5ff" strokewidth="1"></pxl-circle>
 
     <!-- [27] Core inner ring — spinning donut showcase -->
@@ -219,9 +219,9 @@
     <pxl-group x="500" y="281" rotate="25">
       <!-- Fake drop shadow using a pulsating radial gradient behind the planet -->
       <pxl-circle rotate="t * 12" dx="240" dy="0" scaley="0.417" r="14 + wave(2) * 4"
-        fill="radial(0.5, [hsla(160, 100, 50, 0.5), 'transparent'])" stroke="none"></pxl-circle>
+        fill="radial([0.75, 0.75], [hsla(160, 100, 50, 0.5), 'transparent'])" stroke="none"></pxl-circle>
       <pxl-circle id="planetA" rotate="t * 12" dx="240" dy="0" scaley="0.417" r="10"
-        fill="radial(0.7, ['#66ffcc', '#00aa66'])" stroke="#00ffaa" strokewidth="0.5"></pxl-circle>
+        fill="radial([0.85, 0.85], ['#66ffcc', '#00aa66'])" stroke="#00ffaa" strokewidth="0.5"></pxl-circle>
       <!-- Moon of Planet A — nested orbit! -->
       <pxl-group rotate="t * 12" dx="240" scaley="0.417">
         <pxl-circle rotate="t * 60" dx="18" r="3" fill="#aaffdd" stroke="none"></pxl-circle>
@@ -232,9 +232,9 @@
     <pxl-group x="500" y="281" rotate="-25">
       <!-- Fake drop shadow using a pulsating radial gradient behind the planet -->
       <pxl-circle rotate="t * -9" dx="240" dy="0" scaley="0.417" r="11 + wave(3) * 3"
-        fill="radial(0.5, [hsla(330, 100, 60, 0.5), 'transparent'])" stroke="none"></pxl-circle>
+        fill="radial([0.75, 0.75], [hsla(330, 100, 60, 0.5), 'transparent'])" stroke="none"></pxl-circle>
       <pxl-circle rotate="t * -9" dx="240" dy="0" scaley="0.417" r="8"
-        fill="radial(0.7, ['#ff99cc', '#cc0066'])" stroke="#ff66aa" strokewidth="0.5"></pxl-circle>
+        fill="radial([0.85, 0.85], ['#ff99cc', '#cc0066'])" stroke="#ff66aa" strokewidth="0.5"></pxl-circle>
     </pxl-group>
 
     <!-- [76] Counter-rotating dashed circle with strobe() -->
@@ -253,7 +253,7 @@
 
     <!-- [77] Mouse glow — large soft follower -->
     <pxl-circle x="ref.s.mouseX" y="ref.s.mouseY" r="60"
-      fill="radial(0.5, [hsla(185, 100, 60, 0.15), 'transparent'])"
+      fill="radial([0.75, 0.75], [hsla(185, 100, 60, 0.15), 'transparent'])"
       blend="screen"></pxl-circle>
 
     <!-- [78] Mouse crosshair — precise follower -->

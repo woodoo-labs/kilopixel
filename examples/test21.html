@@ -19,7 +19,7 @@
     
     <!-- FPS Monitor & Background Glow -->
     <pxl-text x="980" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#0f0" align="right" stroke="none"></pxl-text>
-    <pxl-circle x="500" y="400" r="400 + wave(5) * 50" fill="radial(1, ['rgba(0,242,254,0.05)', 'rgba(0,242,254,0)'])"></pxl-circle>
+    <pxl-circle x="500" y="400" r="400 + wave(5) * 50" fill="radial([1, 1], ['rgba(0,242,254,0.05)', 'rgba(0,242,254,0)'])"></pxl-circle>
 
     <!-- 1. The Glowing Loading Ring -->
     <pxl-group x="250" y="400" scale="1.5">
@@ -66,7 +66,7 @@
     <!-- 3. The Animated Donut Chart -->
     <pxl-group x="750" y="400" scale="1.5">
       <!-- Pulsating Core -->
-      <pxl-circle r="25" fill="radial(1, ['rgba(255,255,255,0.2)', 'rgba(255,255,255,0)'])" scale="1 + wave(3)*0.4"></pxl-circle>
+      <pxl-circle r="25" fill="radial([1, 1], ['rgba(255,255,255,0.2)', 'rgba(255,255,255,0)'])" scale="1 + wave(3)*0.4"></pxl-circle>
       
       <pxl-circle 
         r="55" ir="35" 

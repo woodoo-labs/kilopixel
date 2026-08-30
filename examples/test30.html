@@ -186,9 +186,9 @@
       <pxl-layer>
         
         <!-- Massive volumetric glow without drop-shadow -->
-        <pxl-circle x="ref.sun_x.value" y="ref.sun_y.value" r="250" fill="radial(1, [hsla(ref.sun_x.value * 0.36, 100, 60, 0.5), 'transparent'])" blend="screen" ></pxl-circle>
+        <pxl-circle x="ref.sun_x.value" y="ref.sun_y.value" r="250" fill="radial([1, 1], [hsla(ref.sun_x.value * 0.36, 100, 60, 0.5), 'transparent'])" blend="screen" ></pxl-circle>
         <!-- Solid Sun core -->
-        <pxl-circle x="ref.sun_x.value" y="ref.sun_y.value" r="60" fill="radial(1, ['#fff', hsl(ref.sun_x.value * 0.36, 100, 50)])" ></pxl-circle>
+        <pxl-circle x="ref.sun_x.value" y="ref.sun_y.value" r="60" fill="radial([1, 1], ['#fff', hsl(ref.sun_x.value * 0.36, 100, 50)])" ></pxl-circle>
       </pxl-layer>
 
       <!-- The Synthwave City -->
