@@ -1,0 +1,367 @@
+Line 34:
+- <h2>1. Stage <code>&lt;pxl-stage&gt;</code></h2>
++ <h2>1. Stage <code>&lt;pxl-Stage&gt;</code></h2>
+
+Line 35:
+- <p>To ensure graphics are fully responsive across all screen sizes, every Kilopixel <code>&lt;pxl-stage&gt;</code> has a fixed <strong>logical width of 1000</strong>. The height is dynamically computed based on the <code>ratio</code> attribute.</p>
++ <p>To ensure graphics are fully responsive across all screen sizes, every Kilopixel <code>&lt;pxl-Stage&gt;</code> has a fixed <strong>logical width of 1000</strong>. The height is dynamically computed based on the <code>ratio</code> attribute.</p>
+
+Line 41:
+- <p>A <code>&lt;pxl-stage&gt;</code> has a CSS <code>width</code> of <code>100%</code>, meaning it will always automatically adapt to horizontally fill its parent element. To control the physical Stage width, you simply adjust the width of its parent container.</p>
++ <p>A <code>&lt;pxl-Stage&gt;</code> has a CSS <code>width</code> of <code>100%</code>, meaning it will always automatically adapt to horizontally fill its parent element. To control the physical Stage width, you simply adjust the width of its parent container.</p>
+
+Line 47:
+- &lt;pxl-stage ratio="<mark id="sec1RatioCode">5 / 3</mark>"&gt;
++ &lt;pxl-Stage ratio="<mark id="sec1RatioCode">5 / 3</mark>"&gt;
+
+Line 48:
+- &lt;!-- Insert layers (containing shapes and groups) here --&gt;
++ &lt;!-- Insert Layers (containing Shapes and Groups) here --&gt;
+
+Line 49:
+- &lt;/pxl-stage&gt;
++ &lt;/pxl-Stage&gt;
+
+Line 105:
+- <h2>2. Layer <code>&lt;pxl-layer&gt;</code></h2>
++ <h2>2. Layer <code>&lt;pxl-Layer&gt;</code></h2>
+
+Line 106:
+- <p>Working directly in global Stage coordinates can become rigid. Instead, a <code>&lt;pxl-layer&gt;</code> allows you to create an independent, movable local coordinate space:</p>
++ <p>Working directly in global Stage coordinates can become rigid. Instead, a <code>&lt;pxl-Layer&gt;</code> allows you to create an independent, movable local coordinate space:</p>
+
+Line 109:
+- <li><strong>Layer Center:</strong> The layer's <code>x</code> and <code>y</code> attributes define its own internal <code>(0, 0)</code> Layer Center.</li>
++ <li><strong>Layer Center:</strong> The Layer's <code>x</code> and <code>y</code> attributes define its own internal <code>(0, 0)</code> Layer Center.</li>
+
+Line 114:
+- &lt;pxl-stage ratio="<mark id="sec2RatioCode">5 / 3</mark>"&gt;
++ &lt;pxl-Stage ratio="<mark id="sec2RatioCode">5 / 3</mark>"&gt;
+
+Line 115:
+- &lt;pxl-layer x="<mark id="sec2LayerXCode">500</mark>" y="<mark id="sec2LayerYCode">300</mark>"&gt;
++ &lt;pxl-Layer x="<mark id="sec2LayerXCode">500</mark>" y="<mark id="sec2LayerYCode">300</mark>"&gt;
+
+Line 116:
+- &lt;!-- Insert shapes and groups here --&gt;
++ &lt;!-- Insert Shapes and Groups here --&gt;
+
+Line 117:
+- &lt;/pxl-layer&gt;
++ &lt;/pxl-Layer&gt;
+
+Line 118:
+- &lt;/pxl-stage&gt;</code></pre>
++ &lt;/pxl-Stage&gt;</code></pre>
+
+Line 194:
+- <p>In Kilopixel, the <code>x</code> and <code>y</code> attributes of any Shape define its <strong>center point</strong> relative to its parent Layer or Group.</p>
++ <p>In Kilopixel, the <code>x</code> and <code>y</code> attributes of any Shape define its <strong>Center point</strong> relative to its parent Layer or Group.</p>
+
+Line 195:
+- <p>Because Shapes are nested inside Layers, their final screen position is compounded. In the example below, the circle is placed at local <code>(350, 150)</code>. But because its parent Layer is also shifted to <code>(400, 200)</code>, you can see how the Shape's final visual position on the Stage is perfectly offset from both reference points!</p>
++ <p>Because Shapes are nested inside Layers, their final screen position is compounded. In the example below, the circle is placed at local <code>(350, 150)</code>. But because its parent Layer is also shifted to <code>(400, 200)</code>, you can see how the Shape's final visual position on the Stage is perfectly Offset from both reference points!</p>
+
+Line 197:
+- <pre><code class="language-html">&lt;!-- Placing a shape whose Center is at (350, 150) --&gt;
++ <pre><code class="language-html">&lt;!-- Placing a Shape whose Center is at (350, 150) --&gt;
+
+Line 198:
+- &lt;pxl-stage ratio="5 / 3"&gt;
++ &lt;pxl-Stage ratio="5 / 3"&gt;
+
+Line 199:
+- &lt;pxl-layer x="<mark id="sec3LayerXCode">400</mark>" y="<mark id="sec3LayerYCode">200</mark>"&gt;
++ &lt;pxl-Layer x="<mark id="sec3LayerXCode">400</mark>" y="<mark id="sec3LayerYCode">200</mark>"&gt;
+
+Line 201:
+- &lt;/pxl-layer&gt;
++ &lt;/pxl-Layer&gt;
+
+Line 202:
+- &lt;/pxl-stage&gt;</code></pre>
++ &lt;/pxl-Stage&gt;</code></pre>
+
+Line 310:
+- <li><strong>Layer Rotation:</strong> Rotating a <code>&lt;pxl-layer&gt;</code> spins the entire coordinate space inside that Layer around the Layer Center. The Shape's relative coordinates do not change, but the local space it lives in spins together with the Layer.</li>
++ <li><strong>Layer Rotation:</strong> Rotating a <code>&lt;pxl-Layer&gt;</code> spins the entire coordinate space inside that Layer around the Layer Center. The Shape's relative coordinates do not change, but the local space it lives in spins together with the Layer.</li>
+
+Line 315:
+- <pre><code class="language-html">&lt;!-- An ellipse spinning perfectly around its center point --&gt;
++ <pre><code class="language-html">&lt;!-- An ellipse spinning perfectly around its Center point --&gt;
+
+Line 316:
+- &lt;pxl-stage ratio="5 / 3"&gt;
++ &lt;pxl-Stage ratio="5 / 3"&gt;
+
+Line 317:
+- &lt;pxl-layer x="<mark id="sec4LayerXCode">500</mark>" y="<mark id="sec4LayerYCode">300</mark>" rotate="<mark id="sec4LayerRotCode">0</mark>"&gt;
++ &lt;pxl-Layer x="<mark id="sec4LayerXCode">500</mark>" y="<mark id="sec4LayerYCode">300</mark>" rotate="<mark id="sec4LayerRotCode">0</mark>"&gt;
+
+Line 323:
+- &lt;/pxl-layer&gt;
++ &lt;/pxl-Layer&gt;
+
+Line 324:
+- &lt;/pxl-stage&gt;</code></pre>
++ &lt;/pxl-Stage&gt;</code></pre>
+
+Line 449:
+- <p class="callout-body">When you use offsets, the original <code>x</code> and <code>y</code> center point acts as a fixed <strong>pivot center</strong>, while the shape's actual visual center becomes the sum of the Center plus the Offset (<code>x + dx</code>, <code>y + dy</code>).</p>
++ <p class="callout-body">When you use Offsets, the original <code>x</code> and <code>y</code> Center point acts as a fixed <strong>pivot Center</strong>, while the Shape's actual visual Center becomes the sum of the Center plus the Offset (<code>x + dx</code>, <code>y + dy</code>).</p>
+
+Line 451:
+- <p>Because this displacement happens <em>after</em> rotation in the render pipeline, applying rotation causes the Shape to perfectly <strong>orbit</strong> its pivot center instead of just spinning in place. This "center + offset" architecture eliminates the need for nested groups or complex trigonometry when animating orbital motion.</p>
++ <p>Because this displacement happens <em>after</em> rotation in the render pipeline, applying rotation causes the Shape to perfectly <strong>orbit</strong> its pivot Center instead of just spinning in place. This "Center + Offset" architecture eliminates the need for nested Groups or complex trigonometry when animating orbital motion.</p>
+
+Line 454:
+- &lt;pxl-stage ratio="5 / 3"&gt;
++ &lt;pxl-Stage ratio="5 / 3"&gt;
+
+Line 455:
+- &lt;pxl-layer x="<mark id="sec5LayerXCode">200</mark>" y="<mark id="sec5LayerYCode">150</mark>" rotate="<mark id="sec5LayerRotCode">0</mark>"&gt;
++ &lt;pxl-Layer x="<mark id="sec5LayerXCode">200</mark>" y="<mark id="sec5LayerYCode">150</mark>" rotate="<mark id="sec5LayerRotCode">0</mark>"&gt;
+
+Line 462:
+- &lt;/pxl-layer&gt;
++ &lt;/pxl-Layer&gt;
+
+Line 463:
+- &lt;/pxl-stage&gt;</code></pre>
++ &lt;/pxl-Stage&gt;</code></pre>
+
+Line 620:
+- <p>This allows for true <strong>cross-attribute linking</strong>. In this example, if you change the <strong>Master</strong> shape, the others react instantly. The <strong>Mirror</strong> perfectly mirrors its X position (<code>1000 - ref.master.x</code>), while the <strong>Reactor</strong> links its size and rotation to the Master's position!</p>
++ <p>This allows for true <strong>cross-attribute linking</strong>. In this example, if you change the <strong>Master</strong> Shape, the others react instantly. The <strong>Mirror</strong> perfectly mirrors its X position (<code>1000 - ref.master.x</code>), while the <strong>Reactor</strong> links its size and rotation to the Master's position!</p>
+
+Line 622:
+- <pre><code class="language-html">&lt;!-- Linking attributes across different shapes --&gt;
++ <pre><code class="language-html">&lt;!-- Linking attributes across different Shapes --&gt;
+
+Line 623:
+- &lt;pxl-stage ratio="5 / 3"&gt;
++ &lt;pxl-Stage ratio="5 / 3"&gt;
+
+Line 624:
+- &lt;pxl-layer x="<mark id="sec6LayerXCode">0</mark>" y="<mark id="sec6LayerYCode">0</mark>" rotate="<mark id="sec6LayerRotCode">0</mark>"&gt;
++ &lt;pxl-Layer x="<mark id="sec6LayerXCode">0</mark>" y="<mark id="sec6LayerYCode">0</mark>" rotate="<mark id="sec6LayerRotCode">0</mark>"&gt;
+
+Line 645:
+- &lt;/pxl-layer&gt;
++ &lt;/pxl-Layer&gt;
+
+Line 646:
+- &lt;/pxl-stage&gt;</code></pre>
++ &lt;/pxl-Stage&gt;</code></pre>
+
+Line 780:
+- <p>Sometimes you don't want to bind to a visual shape. You want a "headless" state variable that controls multiple elements at once, much like state management in React or Vue.</p>
++ <p>Sometimes you don't want to bind to a visual Shape. You want a "headless" state variable that controls multiple elements at once, much like state management in React or Vue.</p>
+
+Line 781:
+- <p>The <code>&lt;pxl-var&gt;</code> element is invisible, but any shape can reactively reference its <code>value</code>. In this example, three variables control the entire geometric composition:</p>
++ <p>The <code>&lt;pxl-var&gt;</code> element is invisible, but any Shape can reactively reference its <code>value</code>. In this example, three variables control the entire geometric composition:</p>
+
+Line 784:
+- &lt;pxl-stage ratio="5 / 3"&gt;
++ &lt;pxl-Stage ratio="5 / 3"&gt;
+
+Line 785:
+- &lt;pxl-layer x="<mark id="sec7LayerXCode">500</mark>" y="<mark id="sec7LayerYCode">300</mark>" rotate="<mark id="sec7LayerRotCode">0</mark>"&gt;
++ &lt;pxl-Layer x="<mark id="sec7LayerXCode">500</mark>" y="<mark id="sec7LayerYCode">300</mark>" rotate="<mark id="sec7LayerRotCode">0</mark>"&gt;
+
+Line 795:
+- &lt;/pxl-layer&gt;
++ &lt;/pxl-Layer&gt;
+
+Line 796:
+- &lt;/pxl-stage&gt;</code></pre>
++ &lt;/pxl-Stage&gt;</code></pre>
+
+Line 871:
+- <p>The true power of <code>toLocal()</code> is cross-space affine projection. It allows you to perfectly track an element nested deep inside rotating or scaled layers, without writing any trigonometry.</p>
++ <p>The true power of <code>toLocal()</code> is cross-space affine projection. It allows you to perfectly track an element nested deep inside rotating or scaled Layers, without writing any trigonometry.</p>
+
+Line 873:
+- <li><strong>Layer Independence:</strong> You can place shapes inside completely different, independently transforming layers.</li>
++ <li><strong>Layer Independence:</strong> You can place Shapes inside completely different, independently transforming Layers.</li>
+
+Line 874:
+- <li><strong>The Link:</strong> By using <code>toLocal(ref.target, 'x')</code>, Kilopixel calculates the target's global position and automatically translates it into your <em>current</em> coordinate space. It returns exactly the <code>x</code> and <code>y</code> values your shape needs to align perfectly.</li>
++ <li><strong>The Link:</strong> By using <code>toLocal(ref.target, 'x')</code>, Kilopixel calculates the target's global position and automatically translates it into your <em>current</em> coordinate space. It returns exactly the <code>x</code> and <code>y</code> values your Shape needs to align perfectly.</li>
+
+Line 875:
+- <li><strong>The Magic:</strong> Kilopixel's spatial reactivity engine automatically tracks matrix changes. If a layer rotates or moves, it instantly alerts any element tracking its children to update!</li>
++ <li><strong>The Magic:</strong> Kilopixel's spatial reactivity engine automatically tracks matrix changes. If a Layer rotates or moves, it instantly alerts any element tracking its children to update!</li>
+
+Line 878:
+- <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
++ <pre><code class="language-html">&lt;pxl-Stage ratio="5 / 3"&gt;
+
+Line 879:
+- &lt;!-- Two independent rotating layers with their own shapes --&gt;
++ &lt;!-- Two independent rotating Layers with their own Shapes --&gt;
+
+Line 880:
+- &lt;pxl-layer id="layer1" x="<mark id="sec8Layer1XCode">350</mark>" y="<mark id="sec8Layer1YCode">250</mark>" rotate="<mark id="sec8Layer1RotCode">0</mark>"&gt;
++ &lt;pxl-Layer id="layer1" x="<mark id="sec8Layer1XCode">350</mark>" y="<mark id="sec8Layer1YCode">250</mark>" rotate="<mark id="sec8Layer1RotCode">0</mark>"&gt;
+
+Line 882:
+- &lt;/pxl-layer&gt;
++ &lt;/pxl-Layer&gt;
+
+Line 884:
+- &lt;pxl-layer id="layer2" x="<mark id="sec8Layer2XCode">650</mark>" y="<mark id="sec8Layer2YCode">350</mark>" rotate="<mark id="sec8Layer2RotCode">0</mark>"&gt;
++ &lt;pxl-Layer id="layer2" x="<mark id="sec8Layer2XCode">650</mark>" y="<mark id="sec8Layer2YCode">350</mark>" rotate="<mark id="sec8Layer2RotCode">0</mark>"&gt;
+
+Line 886:
+- &lt;/pxl-layer&gt;
++ &lt;/pxl-Layer&gt;
+
+Line 888:
+- &lt;!-- A line perfectly tracking two shapes inside different rotating layers --&gt;
++ &lt;!-- A line perfectly tracking two Shapes inside different rotating Layers --&gt;
+
+Line 889:
+- &lt;pxl-layer&gt;
++ &lt;pxl-Layer&gt;
+
+Line 895:
+- &lt;/pxl-layer&gt;
++ &lt;/pxl-Layer&gt;
+
+Line 896:
+- &lt;/pxl-stage&gt;</code></pre>
++ &lt;/pxl-Stage&gt;</code></pre>
+
+Line 1056:
+- <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
++ <pre><code class="language-html">&lt;pxl-Stage ratio="5 / 3"&gt;
+
+Line 1057:
+- &lt;pxl-layer x="<mark id="sec9LayerXCode">500</mark>" y="<mark id="sec9LayerYCode">300</mark>" rotate="<mark id="sec9LayerRotCode">0</mark>"&gt;
++ &lt;pxl-Layer x="<mark id="sec9LayerXCode">500</mark>" y="<mark id="sec9LayerYCode">300</mark>" rotate="<mark id="sec9LayerRotCode">0</mark>"&gt;
+
+Line 1071:
+- &lt;/pxl-layer&gt;
++ &lt;/pxl-Layer&gt;
+
+Line 1072:
+- &lt;/pxl-stage&gt;</code></pre>
++ &lt;/pxl-Stage&gt;</code></pre>
+
+Line 1273:
+- <p>Kilopixel's geometric transform engine separates the <strong>Center</strong> (<code>x</code>, <code>y</code>) from the <strong>Offset</strong> (<code>dx</code>, <code>dy</code>). By applying both a <code>rotate</code> and a <code>dx</code> offset to a <code>&lt;pxl-group&gt;</code>, the group's entire internal coordinate space is shifted into orbit.</p>
++ <p>Kilopixel's geometric transform engine separates the <strong>Center</strong> (<code>x</code>, <code>y</code>) from the <strong>Offset</strong> (<code>dx</code>, <code>dy</code>). By applying both a <code>rotate</code> and a <code>dx</code> Offset to a <code>&lt;pxl-Group&gt;</code>, the Group's entire internal coordinate space is shifted into orbit.</p>
+
+Line 1275:
+- <p>In this solar system example, the Planet System group orbits the Sun. Inside that group, the local origin <code>(0,0)</code> physically sits exactly on the Planet! The Moon System simply uses another <code>rotate</code> and <code>dx</code> combination to effortlessly orbit its parent.</p>
++ <p>In this solar system example, the Planet System Group orbits the Sun. Inside that Group, the local Origin <code>(0,0)</code> physically sits exactly on the Planet! The Moon System simply uses another <code>rotate</code> and <code>dx</code> combination to effortlessly orbit its parent.</p>
+
+Line 1277:
+- <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
++ <pre><code class="language-html">&lt;pxl-Stage ratio="5 / 3"&gt;
+
+Line 1278:
+- &lt;pxl-layer x="<mark id='sec10LayerXCode'>500</mark>" y="<mark id='sec10LayerYCode'>300</mark>" rotate="<mark id='sec10LayerRotCode'>0</mark>"&gt;
++ &lt;pxl-Layer x="<mark id='sec10LayerXCode'>500</mark>" y="<mark id='sec10LayerYCode'>300</mark>" rotate="<mark id='sec10LayerRotCode'>0</mark>"&gt;
+
+Line 1286:
+- &lt;pxl-group rotate="t * <mark id='sec10PlanetSpeedCode'>45</mark>" dx="<mark id='sec10PlanetRadiusCode2'>200</mark>"&gt;
++ &lt;pxl-Group rotate="t * <mark id='sec10PlanetSpeedCode'>45</mark>" dx="<mark id='sec10PlanetRadiusCode2'>200</mark>"&gt;
+
+Line 1294:
+- &lt;pxl-group rotate="t * <mark id='sec10MoonSpeedCode'>180</mark>" dx="<mark id='sec10MoonRadiusCode2'>60</mark>"&gt;
++ &lt;pxl-Group rotate="t * <mark id='sec10MoonSpeedCode'>180</mark>" dx="<mark id='sec10MoonRadiusCode2'>60</mark>"&gt;
+
+Line 1296:
+- &lt;/pxl-group&gt;
++ &lt;/pxl-Group&gt;
+
+Line 1297:
+- &lt;/pxl-group&gt;
++ &lt;/pxl-Group&gt;
+
+Line 1298:
+- &lt;/pxl-layer&gt;
++ &lt;/pxl-Layer&gt;
+
+Line 1299:
+- &lt;/pxl-stage&gt;</code></pre>
++ &lt;/pxl-Stage&gt;</code></pre>
+
+Line 1391:
+- </div>
++ </div>>
+
+Line 1392:
+- -->
++ --
+
+Line 1396:
+- <p>When shapes orbit or rotate inside nested coordinate spaces, drawing connecting lines or tracking positions requires translating between coordinate systems:</p>
++ <p>When Shapes orbit or rotate inside nested coordinate spaces, drawing connecting lines or tracking positions requires translating between coordinate systems:</p>
+
+Line 1398:
+- <li><strong>Why raw attributes stay constant:</strong> If you reference <code>ref.pointA.x</code> or <code>ref.pointA.dx</code> directly, you will always get their static declared values even while the point is rotating. Because the local coordinate system rotates <em>with</em> the shape, its internal <code>x</code> and <code>dx</code> numbers never change.</li>
++ <li><strong>Why raw attributes stay constant:</strong> If you reference <code>ref.pointA.x</code> or <code>ref.pointA.dx</code> directly, you will always get their static declared values even while the point is rotating. Because the local coordinate system rotates <em>with</em> the Shape, its internal <code>x</code> and <code>dx</code> numbers never change.</li>
+
+Line 1399:
+- <li><strong>How <code>toLocal</code> solves this:</strong> By wrapping the reference in <code>toLocal(ref.pointA, 'tx')</code> or <code>toLocal(ref.pointA, 'ty')</code> (or <code>x</code> and <code>y</code> for center positions), Kilopixel automatically calculates the shape's true orbiting position and maps it into your current coordinate space — no manual trigonometry required!</li>
++ <li><strong>How <code>toLocal</code> solves this:</strong> By wrapping the reference in <code>toLocal(ref.pointA, 'tx')</code> or <code>toLocal(ref.pointA, 'ty')</code> (or <code>x</code> and <code>y</code> for Center positions), Kilopixel automatically calculates the Shape's true orbiting position and maps it into your current coordinate space — no manual trigonometry required!</li>
+
+Line 1401:
+- <p>In this "constellation" example, two shapes orbit their centers independently. The connecting line uses <code>toLocal</code> to track their live positions and stay perfectly connected at 60fps.</p>
++ <p>In this "constellation" example, two Shapes orbit their Centers independently. The connecting line uses <code>toLocal</code> to track their live positions and stay perfectly connected at 60fps.</p>
+
+Line 1404:
+- &lt;pxl-stage ratio="5 / 3"&gt;
++ &lt;pxl-Stage ratio="5 / 3"&gt;
+
+Line 1405:
+- &lt;pxl-layer x="<mark id="sec11LayerXCode">500</mark>" y="<mark id="sec11LayerYCode">300</mark>" rotate="<mark id="sec11LayerRotCode">0</mark>"&gt;
++ &lt;pxl-Layer x="<mark id="sec11LayerXCode">500</mark>" y="<mark id="sec11LayerYCode">300</mark>" rotate="<mark id="sec11LayerRotCode">0</mark>"&gt;
+
+Line 1416:
+- &lt;/pxl-layer&gt;
++ &lt;/pxl-Layer&gt;
+
+Line 1417:
+- &lt;/pxl-stage&gt;</code></pre>
++ &lt;/pxl-Stage&gt;</code></pre>
+
+Line 1599:
+- <p>This is where Kilopixel's coordinate system shines. By combining local offsets with dynamic rotation, we can create perfect orbital mechanics mathematically effortlessly!</p>
++ <p>This is where Kilopixel's coordinate system shines. By combining local Offsets with dynamic rotation, we can create perfect orbital mechanics mathematically effortlessly!</p>
+
+Line 1600:
+- <p>The <code>dx</code> attribute pushes the planet away from the Sun (the <code>x</code> and <code>y</code> pivot point), and the <code>rotate</code> attribute spins that entire offset vector around the center.</p>
++ <p>The <code>dx</code> attribute pushes the planet away from the Sun (the <code>x</code> and <code>y</code> Pivot Point), and the <code>rotate</code> attribute spins that entire Offset vector around the Center.</p>
+
+Line 1607:
+- &lt;pxl-stage ratio="5 / 3"&gt;
++ &lt;pxl-Stage ratio="5 / 3"&gt;
+
+Line 1608:
+- &lt;pxl-layer x="500" y="300"&gt;
++ &lt;pxl-Layer x="500" y="300"&gt;
+
+Line 1622:
+- &lt;/pxl-layer&gt;
++ &lt;/pxl-Layer&gt;
+
+Line 1623:
+- &lt;/pxl-stage&gt;</code></pre>
++ &lt;/pxl-Stage&gt;</code></pre>
+
+Line 1672:
+- &lt;!-- Red Arrow illustrating the dx offset vector --&gt;
++ &lt;!-- Red Arrow illustrating the dx Offset vector --&gt;
+
+Line 1692:
+- </div>
++ </div>>
+
+Line 1693:
+- -->
++ --

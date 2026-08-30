@@ -667,14 +667,14 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECTION 3: RADIAL GRADIENT (2-POINT MODE) -->
+        <!-- SECTION 3: RADIAL GRADIENT (2-VALUE MODE) -->
         <!-- ================================================================= -->
-        <h2 style="margin-top: 4rem;">3. Radial Gradient (2-Point Mode)</h2>
-        <p>The simplest form of the radial gradient uses a 2-argument coordinate array: <code>[rx1, ry1]</code>. In this mode, the center of the gradient is automatically anchored to the exact center of the shape's bounding box <code>(0.5, 0.5)</code>.</p>
+        <h2 style="margin-top: 4rem;">3. Radial Gradient (2-Value Mode)</h2>
+        <p>The simplest form of the radial gradient uses a 2-value coordinate array: <code>[rx1, ry1]</code>. In this mode, the center of the gradient is automatically anchored to the exact center of the shape's bounding box <code>(0.5, 0.5)</code>.</p>
         <p>Instead of providing a scalar radius, you provide a <strong>radius point</strong>. The engine converts both points to physical pixels and calculates the Euclidean distance between them to form a perfect circular radius. This guarantees that the gradient never stretches into an ellipse on non-square rectangles, and makes it incredibly easy to snap gradients to edges or corners.</p>
 
         <div class="callout-info">
-          <p class="callout-body" style="margin-bottom: 0.5rem;"><strong>2-Point Mode Syntax:</strong> (Normalized coordinates)</p>
+          <p class="callout-body" style="margin-bottom: 0.5rem;"><strong>2-Value Mode Syntax:</strong> (Normalized coordinates)</p>
           <pre style="margin-top: 0; margin-bottom: 0;"><code class="language-javascript">fill="radial([rx1, ry1], colorsArray)"</code></pre>
         </div>
 
@@ -792,14 +792,14 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECTION 4: RADIAL GRADIENT (4-POINT MODE) -->
+        <!-- SECTION 4: RADIAL GRADIENT (4-VALUE MODE) -->
         <!-- ================================================================= -->
-        <h2 style="margin-top: 4rem;">4. Radial Gradient (4-Point Mode)</h2>
-        <p>The 4-argument mode allows you to move the gradient's center point away from the default <code>(0.5, 0.5)</code>. You explicitly define the center point <code>(cx1, cy1)</code> followed by the radius point <code>(rx1, ry1)</code>.</p>
+        <h2 style="margin-top: 4rem;">4. Radial Gradient (4-Value Mode)</h2>
+        <p>The 4-value mode allows you to move the gradient's center point away from the default <code>(0.5, 0.5)</code>. You explicitly define the center point <code>(cx1, cy1)</code> followed by the radius point <code>(rx1, ry1)</code>.</p>
         <p>The Euclidean distance logic remains exactly the same, but the radius is now calculated between your custom center point and the radius point. This is incredibly useful for off-center highlights, lighting effects, or matching a gradient's origin to a specific focal point in your UI.</p>
 
         <div class="callout-info">
-          <p class="callout-body" style="margin-bottom: 0.5rem;"><strong>4-Point Mode Syntax:</strong> (Normalized coordinates)</p>
+          <p class="callout-body" style="margin-bottom: 0.5rem;"><strong>4-Value Mode Syntax:</strong> (Normalized coordinates)</p>
           <pre style="margin-top: 0; margin-bottom: 0;"><code class="language-javascript">fill="radial([cx1, cy1, rx1, ry1], colorsArray)"</code></pre>
         </div>
 

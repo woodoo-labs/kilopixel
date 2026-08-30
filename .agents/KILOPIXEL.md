@@ -384,6 +384,12 @@ Because they contain parentheses, the compiler automatically routes them through
 
 `linear()`, `radial()`, and `conic()` return lightweight **descriptor objects**, not `CanvasGradient` instances. The actual gradient is created at draw time by `shape.createGradient()` when the bounding box is known.
 
+#### The `colorsArray` Parameter
+
+All three gradient types share a common `colorsArray` parameter to define their color stops. You can provide this array in two formats:
+- **Colors Only**: `['red', 'yellow', 'blue']` (The engine automatically spaces them evenly from 0.0 to 1.0)
+- **Color Stops**: `[0, 'red', 0.8, 'blue', 1, 'yellow']` (Alternating numeric offsets and color strings for explicit control)
+
 #### `linear(direction, colorsArray)`
 
 **Angle mode** (number):
@@ -404,10 +410,10 @@ The radial gradient API uses a **Point-Based** architecture. You define a Center
 
 | Args | Syntax | Description |
 |:---:|---|---|
-| **2** | `radial([rx1, ry1], colors)` | Centered gradient. The radius extends to `(rx1, ry1)`. |
-| **4** | `radial([cx1, cy1, rx1, ry1], colors)` | You explicitly define the center `(cx1, cy1)` and the radius point `(rx1, ry1)`. |
-| **6** | `radial([cx0, cy0, cx1, cy1, rx1, ry1], colors)` | 3D Spotlight. Start origin is at `(cx0, cy0)`. Outer circle is centered at `(cx1, cy1)` extending to `(rx1, ry1)`. |
-| **8** | `radial([cx0, cy0, rx0, ry0, cx1, cy1, rx1, ry1], colors)` | Full explicit control defining both the inner and outer circles. |
+| **2** | `radial([rx1, ry1], colorsArray)` | Centered gradient. The radius extends to `(rx1, ry1)`. |
+| **4** | `radial([cx1, cy1, rx1, ry1], colorsArray)` | You explicitly define the center `(cx1, cy1)` and the radius point `(rx1, ry1)`. |
+| **6** | `radial([cx0, cy0, cx1, cy1, rx1, ry1], colorsArray)` | 3D Spotlight. Start origin is at `(cx0, cy0)`. Outer circle is centered at `(cx1, cy1)` extending to `(rx1, ry1)`. |
+| **8** | `radial([cx0, cy0, rx0, ry0, cx1, cy1, rx1, ry1], colorsArray)` | Full explicit control defining both the inner and outer circles. |
 
 > [!TIP]
 > **No Math Required for Circles!** Because the radius is physically anchored to a point, passing `[1, 0.5]` automatically touches the exact center of the right edge, creating a perfectly fitted circle. Passing `[1, 1]` automatically reaches the exact diagonal corner.

@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Learn how Kilopixel's responsive, logic-based coordinate system works. Discover how to use relative layers, pivot points, offsets, and toLocal coordinate mapping.">
+  <title>Kilopixel - Coordinates</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+  
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+</head>
+<body>
+  
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <docs-sidebar></docs-sidebar>
+    
+    <main class="docs-content">
+      <div class="docs-inner">
+      <h1>Coordinate System</h1>
+      <p class="lead">Understanding the coordinate system is the key to mastering Kilopixel. Unlike standard Canvas APIs which use physical pixels, Kilopixel uses a responsive, logic-based coordinate space designed for declarative markup.</p>
+      
+      <h2>1. Stage <code>&lt;pxl-Stage&gt;</code></h2>
+      <p>To ensure graphics are fully responsive across all screen sizes, every Kilopixel <code>&lt;pxl-Stage&gt;</code> has a fixed <strong>logical width of 1000</strong>. The height is dynamically computed based on the <code>ratio</code> attribute.</p>
+      
+      <div class="callout-info">
+        <p class="callout-body"><strong>Values as percentages:</strong> Because the logical width is always 1000, you can mentally read coordinates and sizes as percentages of the Stage's width with one decimal place. For example, a circle with <code>r="200"</code> will have a radius spanning exactly <strong>20.0%</strong> of the Stage's width, and a line with <code>strokewidth="10"</code> will be exactly <strong>1.0%</strong> thick.</p>
+      </div>
+
+      <p>A <code>&lt;pxl-Stage&gt;</code> has a CSS <code>width</code> of <code>100%</code>, meaning it will always automatically adapt to horizontally fill its parent element. To control the physical Stage width, you simply adjust the width of its parent container.</p>
+
+      <p>In the example below, try moving the ratio slider to see how the coordinate system adapts: the logical width remains <strong>fixed at 1000</strong> across all formats, while the logical height is dynamically <strong>computed</strong> from the aspect ratio. No matter how large or small your physical screen is, the Stage Origin is always <code>(0, 0)</code>!</p>
+
+      <pre><code class="language-html">&lt;!-- Try resizing the container or dragging the ratio slider --&gt;
+&lt;div style="width: <mark id="sec1WidthCode">100%</mark>;"&gt;
+  &lt;pxl-Stage ratio="<mark id="sec1RatioCode">5 / 3</mark>"&gt;
+    &lt;!-- Insert Layers (containing Shapes and Groups) here --&gt;
+  &lt;/pxl-Stage&gt;
+&lt;/div&gt;</code></pre>
+
+      <div class="demo-container">
+        <!-- Tabbed Controls -->
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1StageTab')">Stage</button>
+            </div>
+          </div>
+          
+          <!-- Stage Tab -->
+          <div class="tab-content active" id="sec1StageTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label><span>Ratio <span class="indicator-dot"></span></span> <span id="sec1RatioVal">5 / 3</span></label>
+                <input type="range" min="0" max="14" step="1" value="10" autocomplete="off"
+                  data-mark="sec1RatioCode" oninput="updateSec1Ratio(this.value)">
+              </div>
+              <div class="control-group">
+                <label>Parent Width <span id="sec1WidthVal">100%</span></label>
+                <input type="range" min="30" max="100" step="5" value="100" autocomplete="off"
+                  data-mark="sec1WidthCode" oninput="updateSec1Width(this.value)">
+              </div>
+            </div>
+            </div>
+</div>
+        <div id="sec1Container" style="width: 100%; margin: 0 auto; transition: width 0.1s ease-out;">
+          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <!-- 1. Background Grid -->
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              
+              <!-- 2. Stage Dimension Arrows & Labels -->
+              <pxl-line x1="100" y1="0" x2="100" y2="ref.sec1Stage.height" stroke="#0ea5e9" strokewidth="2" linedash="[5, 5]" arrowend="17"></pxl-line>
+              <pxl-text x="115" y="ref.sec1Stage.height / 2" baseline="middle" align="left" text="`height = ${round(ref.sec1Stage.height)}\n(computed)`" size="27" fill="#0ea5e9" font="monospace"></pxl-text>
+              <pxl-line x1="0" y1="100" x2="1000" y2="100" stroke="#0ea5e9" strokewidth="2" linedash="[5, 5]" arrowend="17"></pxl-line>
+              <pxl-text x="500" y="115" baseline="top" align="center" text="'width = 1000 (fixed)'" size="27" fill="#0ea5e9" font="monospace"></pxl-text>
+
+              <!-- 3. Stage Corner & Center Markers -->
+              <pxl-circle x="0" y="0" r="6" fill="#0284c7"></pxl-circle>
+              <pxl-text x="15" y="15" baseline="top" text="'Stage Origin (0, 0)'" size="27" fill="#0284c7" font="monospace"></pxl-text>
+              <pxl-circle x="1000" y="0" r="6" fill="#7dd3fc"></pxl-circle>
+              <pxl-text x="985" y="15" baseline="top" align="right" text="'(1000, 0)'" size="27" fill="#7dd3fc" font="monospace"></pxl-text>
+              <pxl-circle x="1000" y="ref.sec1Stage.height" r="6" fill="#7dd3fc"></pxl-circle>
+              <pxl-text x="985" y="ref.sec1Stage.height - 15" baseline="bottom" align="right" text="`(1000, ${round(ref.sec1Stage.height)})`" size="27" fill="#7dd3fc" font="monospace"></pxl-text>
+              <pxl-circle x="0" y="ref.sec1Stage.height" r="6" fill="#7dd3fc"></pxl-circle>
+              <pxl-text x="15" y="ref.sec1Stage.height - 15" baseline="bottom" align="left" text="`(0, ${round(ref.sec1Stage.height)})`" size="27" fill="#7dd3fc" font="monospace"></pxl-text>
+              <pxl-circle x="500" y="ref.sec1Stage.height / 2" r="5" fill="#7dd3fc"></pxl-circle>
+              <pxl-text x="515" y="ref.sec1Stage.height / 2 - 15" baseline="bottom" text="`(500, ${round(ref.sec1Stage.height / 2)})`" size="27" fill="#7dd3fc" font="monospace"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+          </div>
+</div>
+<h2>2. Layer <code>&lt;pxl-Layer&gt;</code></h2>
+      <p>Working directly in global Stage coordinates can become rigid. Instead, a <code>&lt;pxl-Layer&gt;</code> allows you to create an independent, movable local coordinate space:</p>
+      <ul>
+        <li><strong>Global Positioning:</strong> The Layer itself is positioned relative to the Stage's top-left Origin.</li>
+        <li><strong>Layer Center:</strong> The Layer's <code>x</code> and <code>y</code> attributes define its own internal <code>(0, 0)</code> Layer Center.</li>
+        <li><strong>Nesting Spaces:</strong> Drag the Layer sliders below. Notice how the entire local grid moves. Any Shape you place inside this Layer will be drawn relative to this moving Layer Center, rather than the static Stage Origin.</li>
+      </ul>
+      
+      <pre><code class="language-html">&lt;!-- Moving the Layer Center to the middle of the Stage --&gt;
+&lt;pxl-Stage ratio="<mark id="sec2RatioCode">5 / 3</mark>"&gt;
+  &lt;pxl-Layer x="<mark id="sec2LayerXCode">500</mark>" y="<mark id="sec2LayerYCode">300</mark>"&gt;
+    &lt;!-- Insert Shapes and Groups here --&gt;
+  &lt;/pxl-Layer&gt;
+&lt;/pxl-Stage&gt;</code></pre>
+
+      <div class="demo-container">
+        <!-- Tabbed Controls -->
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2StageTab')">Stage</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2LayerTab')">Layer</button>
+            </div>
+          </div>
+          
+          <!-- Stage Tab -->
+          <div class="tab-content" id="sec2StageTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Ratio <span id="sec2RatioVal">5 / 3</span></label>
+                <input type="range" min="0" max="14" step="1" value="10" autocomplete="off"
+                  data-mark="sec2RatioCode" oninput="updateSec2Ratio(this.value)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Layer Tab -->
+          <div class="tab-content active" id="sec2LayerTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec2LayerXVal">500</span></label>
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                  oninput="document.getElementById('sec2Layer').setAttribute('x', this.value); document.getElementById('sec2LayerXVal').innerText = this.value; document.getElementById('sec2LayerXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec2LayerYVal">300</span></label>
+                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                  oninput="document.getElementById('sec2Layer').setAttribute('y', this.value); document.getElementById('sec2LayerYVal').innerText = this.value; document.getElementById('sec2LayerYCode').innerText = this.value;">
+              </div>
+            </div>
+            </div>
+</div>
+        <div id="sec2Container" style="width: 100%; margin: 0 auto; transition: width 0.1s ease-out;">
+          <pxl-stage id="sec2Stage" ratio="5 / 3" class="demo-stage">
+            <!-- Stage-level Layer coordinate vectors -->
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              
+              <!-- Stage Corner Markers -->
+              <pxl-circle x="0" y="0" r="6" fill="#0284c7"></pxl-circle>
+              <pxl-text x="15" y="15" baseline="top" text="'Stage Origin (0, 0)'" size="27" fill="#0284c7" font="monospace"></pxl-text>
+              <pxl-circle x="1000" y="0" r="6" fill="#7dd3fc"></pxl-circle>
+              <pxl-text x="985" y="15" baseline="top" align="right" text="'(1000, 0)'" size="27" fill="#7dd3fc" font="monospace"></pxl-text>
+              <pxl-circle x="1000" y="ref.sec2Stage.height" r="6" fill="#7dd3fc"></pxl-circle>
+              <pxl-text x="985" y="ref.sec2Stage.height - 15" baseline="bottom" align="right" text="`(1000, ${round(ref.sec2Stage.height)})`" size="27" fill="#7dd3fc" font="monospace"></pxl-text>
+              <pxl-circle x="0" y="ref.sec2Stage.height" r="6" fill="#7dd3fc"></pxl-circle>
+              <pxl-text x="15" y="ref.sec2Stage.height - 15" baseline="bottom" align="left" text="`(0, ${round(ref.sec2Stage.height)})`" size="27" fill="#7dd3fc" font="monospace"></pxl-text>
+              
+              <pxl-line x1="0" y1="ref.sec2Layer.y" x2="ref.sec2Layer.x" y2="ref.sec2Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-text x="ref.sec2Layer.x / 2" y="ref.sec2Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec2Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
+              <pxl-line x1="ref.sec2Layer.x" y1="0" x2="ref.sec2Layer.x" y2="ref.sec2Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-text x="ref.sec2Layer.x + 15" y="ref.sec2Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec2Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
+            </pxl-layer>
+  
+            <!-- The layer container -->
+            <pxl-layer id="sec2Layer" x="500" y="300">
+              <!-- 3. Layer Axes -->
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              
+              <!-- 4. Layer Center -->
+              <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
+              <pxl-text x="15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+          </div>
+</div>
+<h2>3. Shape, e.g. <code>&lt;pxl-circle&gt;</code></h2>
+      <p>In Kilopixel, the <code>x</code> and <code>y</code> attributes of any Shape define its <strong>Center point</strong> relative to its parent Layer or Group.</p>
+      <p>Because Shapes are nested inside Layers, their final screen position is compounded. In the example below, the circle is placed at local <code>(350, 150)</code>. But because its parent Layer is also shifted to <code>(400, 200)</code>, you can see how the Shape's final visual position on the Stage is perfectly Offset from both reference points!</p>
+      
+      <pre><code class="language-html">&lt;!-- Placing a Shape whose Center is at (350, 150) --&gt;
+&lt;pxl-Stage ratio="5 / 3"&gt;
+  &lt;pxl-Layer x="<mark id="sec3LayerXCode">400</mark>" y="<mark id="sec3LayerYCode">200</mark>"&gt;
+    &lt;pxl-circle x="<mark id="sec3CircleXCode">350</mark>" y="<mark id="sec3CircleYCode">150</mark>" r="<mark id="sec3CircleRCode">250</mark>" stroke="#f97316"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-Layer&gt;
+&lt;/pxl-Stage&gt;</code></pre>
+
+      <div class="demo-container">
+        
+        <!-- Tabbed Controls -->
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3LayerTab')">Layer</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3CircleTab')">Circle</button>
+            </div>
+          </div>
+          
+          <!-- Layer Tab -->
+          <div class="tab-content" id="sec3LayerTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec3LayerXVal">400</span></label>
+                <input type="range" min="-500" max="1000" step="10" value="400" autocomplete="off"
+                  oninput="document.getElementById('sec3Layer').setAttribute('x', this.value); document.getElementById('sec3LayerXVal').innerText = this.value; document.getElementById('sec3LayerXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec3LayerYVal">200</span></label>
+                <input type="range" min="-300" max="600" step="10" value="200" autocomplete="off"
+                  oninput="document.getElementById('sec3Layer').setAttribute('y', this.value); document.getElementById('sec3LayerYVal').innerText = this.value; document.getElementById('sec3LayerYCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Circle Tab -->
+          <div class="tab-content active" id="sec3CircleTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec3CircleXVal">350</span></label>
+                <input type="range" min="-500" max="500" step="10" value="350" autocomplete="off"
+                  oninput="document.getElementById('sec3Circle').setAttribute('x', this.value); document.getElementById('sec3CircleXVal').innerText = this.value; document.getElementById('sec3CircleXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec3CircleYVal">150</span></label>
+                <input type="range" min="-300" max="300" step="10" value="150" autocomplete="off"
+                  oninput="document.getElementById('sec3Circle').setAttribute('y', this.value); document.getElementById('sec3CircleYVal').innerText = this.value; document.getElementById('sec3CircleYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Radius <span class="indicator-dot"></span></span> <span id="sec3CircleRVal">250</span></label>
+                <input type="range" min="10" max="500" step="10" value="250" autocomplete="off"
+                  oninput="document.getElementById('sec3Circle').setAttribute('r', this.value); document.getElementById('sec3CircleRVal').innerText = this.value; document.getElementById('sec3CircleRCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+        </div>
+        <pxl-stage ratio="5 / 3" class="demo-stage">
+          <!-- Stage-level Layer coordinate vectors -->
+          <pxl-layer>
+            <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            
+            <!-- Stage Origin -->
+            <pxl-circle x="0" y="0" r="6" fill="#0284c7"></pxl-circle>
+            <pxl-text x="15" y="15" baseline="top" text="'Stage Origin (0, 0)'" size="27" fill="#0284c7" font="monospace"></pxl-text>
+            <pxl-line x1="0" y1="ref.sec3Layer.y" x2="ref.sec3Layer.x" y2="ref.sec3Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec3Layer.x / 2" y="ref.sec3Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec3Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
+            <pxl-line x1="ref.sec3Layer.x" y1="0" x2="ref.sec3Layer.x" y2="ref.sec3Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec3Layer.x + 15" y="ref.sec3Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec3Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
+          </pxl-layer>
+          
+          <pxl-layer id="sec3Layer" x="400" y="200">
+            <!-- Helpers -->
+            <!-- 2. Layer Axes -->
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+
+            <!-- 3. Layer Center -->
+            <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
+            <pxl-text x="15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
+
+            <!-- 4. Shape Helpers -->
+            <pxl-line x1="0" y1="ref.sec3Circle.y" x2="ref.sec3Circle.x" y2="ref.sec3Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec3Circle.x / 2" y="ref.sec3Circle.y + 15" baseline="top" align="center" text="`x = ${ref.sec3Circle.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+            <pxl-line x1="ref.sec3Circle.x" y1="0" x2="ref.sec3Circle.x" y2="ref.sec3Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec3Circle.x + 15" y="ref.sec3Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.sec3Circle.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+
+            <!-- 5. The Shape -->
+            <pxl-circle id="sec3Circle"
+              x="350" 
+              y="150" 
+              r="250" 
+              fill="#ffedd566" stroke="#f97316" strokewidth="4">
+            </pxl-circle>
+
+            <!-- 6. Shape Center (Top) -->
+            <pxl-circle x="ref.sec3Circle.x" y="ref.sec3Circle.y" r="5" fill="#fb923c"></pxl-circle>
+            <pxl-text 
+              x="ref.sec3Circle.x + 15" 
+              y="ref.sec3Circle.y - 15" 
+              baseline="bottom"
+              text="'Circle Center'" 
+              size="27" 
+              fill="#fb923c" 
+              font="monospace">
+            </pxl-text>
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+
+      <h2>4. Rotation <code>rotate</code></h2>
+      <p>In Kilopixel, applying rotation is incredibly simple. When you rotate a Shape, it spins around its <code>x</code> and <code>y</code> <strong>Center</strong> by default.</p>
+      <p>However, it is important to understand the difference between <strong>Layer</strong> and <strong>Shape</strong> rotation:</p>
+      <ul>
+        <li><strong>Layer Rotation:</strong> Rotating a <code>&lt;pxl-Layer&gt;</code> spins the entire coordinate space inside that Layer around the Layer Center. The Shape's relative coordinates do not change, but the local space it lives in spins together with the Layer.</li>
+        <li><strong>Shape Rotation:</strong> Rotating a Shape (such as a <code>&lt;pxl-ellipse&gt;</code>) only spins that specific Shape around its own Shape Center, leaving the rest of the Layer untouched.</li>
+      </ul>
+      <p>Look for the pulsing orange indicator dot (<span class="indicator-dot"></span>) on the controls below — try spinning the Layer and Ellipse sliders to see this difference in real time!</p>
+      
+      <pre><code class="language-html">&lt;!-- An ellipse spinning perfectly around its Center point --&gt;
+&lt;pxl-Stage ratio="5 / 3"&gt;
+  &lt;pxl-Layer x="<mark id="sec4LayerXCode">500</mark>" y="<mark id="sec4LayerYCode">300</mark>" rotate="<mark id="sec4LayerRotCode">0</mark>"&gt;
+    &lt;pxl-ellipse 
+      x="<mark id="sec4EllipseXCode">200</mark>" y="<mark id="sec4EllipseYCode">150</mark>" 
+      rx="<mark id="sec4EllipseRxCode">250</mark>" ry="<mark id="sec4EllipseRyCode">100</mark>" 
+      rotate="<mark id="sec4EllipseRotCode">20</mark>" stroke="#f97316"&gt;
+    &lt;/pxl-ellipse&gt;
+  &lt;/pxl-Layer&gt;
+&lt;/pxl-Stage&gt;</code></pre>
+
+      <div class="demo-container">
+        
+        <!-- Tabbed Controls -->
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4LayerTab')">Layer</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4EllipseTab')">Ellipse</button>
+            </div>
+          </div>
+          
+          <!-- Layer Tab -->
+          <div class="tab-content" id="sec4LayerTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="sec4LayerXVal">500</span></label>
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                  oninput="document.getElementById('sec4Layer').setAttribute('x', this.value); document.getElementById('sec4LayerXVal').innerText = this.value; document.getElementById('sec4LayerXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec4LayerYVal">300</span></label>
+                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                  oninput="document.getElementById('sec4Layer').setAttribute('y', this.value); document.getElementById('sec4LayerYVal').innerText = this.value; document.getElementById('sec4LayerYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec4LayerRotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec4Layer').setAttribute('rotate', this.value); document.getElementById('sec4LayerRotVal').innerText = this.value + '°'; document.getElementById('sec4LayerRotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Ellipse Tab -->
+          <div class="tab-content active" id="sec4EllipseTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="sec4EllipseXVal">200</span></label>
+                <input type="range" min="-500" max="500" step="10" value="200" autocomplete="off"
+                  oninput="document.getElementById('sec4Ellipse').setAttribute('x', this.value); document.getElementById('sec4EllipseXVal').innerText = this.value; document.getElementById('sec4EllipseXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec4EllipseYVal">150</span></label>
+                <input type="range" min="-300" max="300" step="10" value="150" autocomplete="off"
+                  oninput="document.getElementById('sec4Ellipse').setAttribute('y', this.value); document.getElementById('sec4EllipseYVal').innerText = this.value; document.getElementById('sec4EllipseYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Radius X <span id="sec4EllipseRxVal">250</span></label>
+                <input type="range" min="10" max="500" step="10" value="250" autocomplete="off"
+                  oninput="document.getElementById('sec4Ellipse').setAttribute('rx', this.value); document.getElementById('sec4EllipseRxVal').innerText = this.value; document.getElementById('sec4EllipseRxCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Radius Y <span id="sec4EllipseRyVal">100</span></label>
+                <input type="range" min="10" max="500" step="10" value="100" autocomplete="off"
+                  oninput="document.getElementById('sec4Ellipse').setAttribute('ry', this.value); document.getElementById('sec4EllipseRyVal').innerText = this.value; document.getElementById('sec4EllipseRyCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec4EllipseRotVal">20°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="20" autocomplete="off"
+                  oninput="document.getElementById('sec4Ellipse').setAttribute('rotate', this.value); document.getElementById('sec4EllipseRotVal').innerText = this.value + '°'; document.getElementById('sec4EllipseRotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+        </div>
+        <pxl-stage ratio="5 / 3" class="demo-stage">
+          <!-- 1. Rotating Background Grid -->
+          <pxl-layer x="ref.sec4Layer.x" y="ref.sec4Layer.y" rotate="ref.sec4Layer.rotate">
+            <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+          </pxl-layer>
+
+          <!-- 2. Fixed Stage-Level Layer Helpers -->
+          <pxl-layer>
+            <pxl-circle x="0" y="0" r="6" fill="#0284c7"></pxl-circle>
+            <pxl-text x="15" y="15" baseline="top" text="'Stage Origin (0, 0)'" size="27" fill="#0284c7" font="monospace"></pxl-text>
+            
+            <pxl-line x1="0" y1="ref.sec4Layer.y" x2="ref.sec4Layer.x" y2="ref.sec4Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec4Layer.x / 2" y="ref.sec4Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec4Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
+            <pxl-line x1="ref.sec4Layer.x" y1="0" x2="ref.sec4Layer.x" y2="ref.sec4Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec4Layer.x + 15" y="ref.sec4Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec4Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
+          </pxl-layer>
+
+          <!-- The layer container -->
+          <pxl-layer id="sec4Layer" x="500" y="300" rotate="0">
+            <!-- 3. Layer Axes & Center -->
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
+            <pxl-text x="15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
+            
+            <!-- 4. Shape Helpers -->
+            <pxl-line x1="0" y1="ref.sec4Ellipse.y" x2="ref.sec4Ellipse.x" y2="ref.sec4Ellipse.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec4Ellipse.x / 2" y="ref.sec4Ellipse.y + 15" baseline="top" align="center" text="`x = ${ref.sec4Ellipse.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+            <pxl-line x1="ref.sec4Ellipse.x" y1="0" x2="ref.sec4Ellipse.x" y2="ref.sec4Ellipse.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec4Ellipse.x + 15" y="ref.sec4Ellipse.y / 2" baseline="middle" align="left" text="`y = ${ref.sec4Ellipse.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+
+            <!-- 5. The Shape -->
+            <pxl-ellipse id="sec4Ellipse"
+              x="200" 
+              y="150" 
+              rx="250" ry="100" 
+              rotate="20" 
+              fill="#ffedd566" stroke="#f97316" strokewidth="4">
+            </pxl-ellipse>
+            
+            <!-- 6. Shape Center (Top) -->
+            <pxl-circle x="ref.sec4Ellipse.x" y="ref.sec4Ellipse.y" r="5" fill="#fb923c"></pxl-circle>
+            <pxl-text 
+              x="ref.sec4Ellipse.x" 
+              y="ref.sec4Ellipse.y" 
+              dx="15"
+              dy="-15"
+              rotate="ref.sec4Ellipse.rotate"
+              baseline="bottom"
+              text="'Ellipse Center'" 
+              size="27" fill="#fb923c" font="monospace">
+            </pxl-text>
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+
+      <h2>5. Offset <code>dx</code> and <code>dy</code></h2>
+      <p>This is where Kilopixel's coordinate system becomes incredibly powerful. The <code>dx</code> and <code>dy</code> attributes apply a local Offset to the Shape. You can read <code>dx</code> as <em>delta-x</em>.</p>
+      <div class="callout-info">
+        <p class="callout-body">When you use Offsets, the original <code>x</code> and <code>y</code> Center point acts as a fixed <strong>pivot Center</strong>, while the Shape's actual visual Center becomes the sum of the Center plus the Offset (<code>x + dx</code>, <code>y + dy</code>).</p>
+      </div>
+      <p>Because this displacement happens <em>after</em> rotation in the render pipeline, applying rotation causes the Shape to perfectly <strong>orbit</strong> its pivot Center instead of just spinning in place. This "Center + Offset" architecture eliminates the need for nested Groups or complex trigonometry when animating orbital motion.</p>
+      
+      <pre><code class="language-html">&lt;!-- A rectangle orbiting its Pivot Point --&gt;
+&lt;pxl-Stage ratio="5 / 3"&gt;
+  &lt;pxl-Layer x="<mark id="sec5LayerXCode">200</mark>" y="<mark id="sec5LayerYCode">150</mark>" rotate="<mark id="sec5LayerRotCode">0</mark>"&gt;
+    &lt;pxl-rect 
+      x="<mark id="sec5RectXCode">300</mark>" y="<mark id="sec5RectYCode">150</mark>" 
+      dx="<mark id="sec5RectDxCode">150</mark>" dy="<mark id="sec5RectDyCode">150</mark>" 
+      rotate="<mark id="sec5RectRotCode">0</mark>" 
+      w="100" h="100" stroke="#f97316"&gt;
+    &lt;/pxl-rect&gt;
+  &lt;/pxl-Layer&gt;
+&lt;/pxl-Stage&gt;</code></pre>
+
+      <div class="demo-container">
+        
+        <!-- Tabbed Controls -->
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec5LayerTab')">Layer</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec5RectTab')">Rect</button>
+            </div>
+          </div>
+
+          <div class="tab-content" id="sec5LayerTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="sec5LayerXVal">200</span></label>
+                <input type="range" min="0" max="1000" step="10" value="200" autocomplete="off"
+                  oninput="document.getElementById('sec5Layer').setAttribute('x', this.value); document.getElementById('sec5LayerXVal').innerText = this.value; document.getElementById('sec5LayerXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec5LayerYVal">150</span></label>
+                <input type="range" min="0" max="600" step="10" value="150" autocomplete="off"
+                  oninput="document.getElementById('sec5Layer').setAttribute('y', this.value); document.getElementById('sec5LayerYVal').innerText = this.value; document.getElementById('sec5LayerYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="sec5LayerRotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec5Layer').setAttribute('rotate', this.value); document.getElementById('sec5LayerRotVal').innerText = this.value + '°'; document.getElementById('sec5LayerRotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content active" id="sec5RectTab">
+            <div class="playground-sliders">
+               <div class="control-group">
+                <label>Center X <span id="sec5RectXVal">300</span></label>
+                <input type="range" min="-500" max="500" step="10" value="300" autocomplete="off"
+                  oninput="document.getElementById('sec5Rect').setAttribute('x', this.value); document.getElementById('sec5RectXVal').innerText = this.value; document.getElementById('sec5RectXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec5RectYVal">150</span></label>
+                <input type="range" min="-300" max="300" step="10" value="150" autocomplete="off"
+                  oninput="document.getElementById('sec5Rect').setAttribute('y', this.value); document.getElementById('sec5RectYVal').innerText = this.value; document.getElementById('sec5RectYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Offset X <span class="indicator-dot"></span></span> <span id="sec5RectDxVal">150</span></label>
+                <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off"
+                  oninput="document.getElementById('sec5Rect').setAttribute('dx', this.value); document.getElementById('sec5RectDxVal').innerText = this.value; document.getElementById('sec5RectDxCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Offset Y <span id="sec5RectDyVal">150</span></label>
+                <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off"
+                  oninput="document.getElementById('sec5Rect').setAttribute('dy', this.value); document.getElementById('sec5RectDyVal').innerText = this.value; document.getElementById('sec5RectDyCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec5RectRotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec5Rect').setAttribute('rotate', this.value); document.getElementById('sec5RectRotVal').innerText = this.value + '°'; document.getElementById('sec5RectRotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+        </div>
+        <pxl-stage ratio="5 / 3" class="demo-stage">
+          <!-- 1. Rotating Background Grid -->
+          <pxl-layer x="ref.sec5Layer.x" y="ref.sec5Layer.y" rotate="ref.sec5Layer.rotate">
+            <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+          </pxl-layer>
+
+          <!-- 2. Fixed Stage-Level Layer Helpers -->
+          <pxl-layer>
+            <pxl-circle x="0" y="0" r="6" fill="#0284c7"></pxl-circle>
+            <pxl-text x="15" y="15" baseline="top" text="'(0, 0)'" size="27" fill="#0284c7" font="monospace"></pxl-text>
+            
+            <pxl-line x1="0" y1="ref.sec5Layer.y" x2="ref.sec5Layer.x" y2="ref.sec5Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec5Layer.x / 2" y="ref.sec5Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec5Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
+            <pxl-line x1="ref.sec5Layer.x" y1="0" x2="ref.sec5Layer.x" y2="ref.sec5Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec5Layer.x + 15" y="ref.sec5Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec5Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
+          </pxl-layer>
+
+          <!-- The layer container -->
+          <pxl-layer id="sec5Layer" x="200" y="150" rotate="0">
+            <!-- 3. Layer Axes & Center -->
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
+            <pxl-text x="15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
+            
+            <!-- 4. Shape Helpers -->
+            <!-- 4. Shape Helpers -->
+            <!-- Rotating Rect Center Crosshair & Local Offset Helpers (dx, dy) -->
+            <pxl-group x="ref.sec5Rect.x" y="ref.sec5Rect.y" rotate="ref.sec5Rect.rotate">
+              <!-- Grey Crosshair for Rect Center -->
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              
+              <!-- Red Rotating Helper lines pointing to Rect Offset (dx, dy) -->
+              <pxl-line x1="0" y1="ref.sec5Rect.dy" x2="ref.sec5Rect.dx" y2="ref.sec5Rect.dy" stroke="#ea580c" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-text x="ref.sec5Rect.dx / 2" y="ref.sec5Rect.dy + 15" baseline="top" align="center" text="`dx = ${ref.sec5Rect.dx}`" size="27" fill="#ea580c" font="monospace"></pxl-text>
+              <pxl-line x1="ref.sec5Rect.dx" y1="0" x2="ref.sec5Rect.dx" y2="ref.sec5Rect.dy" stroke="#ea580c" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-text x="ref.sec5Rect.dx + 15" y="ref.sec5Rect.dy / 2" baseline="middle" align="left" text="`dy = ${ref.sec5Rect.dy}`" size="27" fill="#ea580c" font="monospace"></pxl-text>
+            </pxl-group>
+
+            <!-- Coordinate vectors pointing to Rect Center (x, y) (Drawn AFTER crosshair to stay on top) -->
+            <pxl-line x1="0" y1="ref.sec5Rect.y" x2="ref.sec5Rect.x" y2="ref.sec5Rect.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec5Rect.x / 2" y="ref.sec5Rect.y + 15" baseline="top" align="center" text="`x = ${ref.sec5Rect.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+            <pxl-line x1="ref.sec5Rect.x" y1="0" x2="ref.sec5Rect.x" y2="ref.sec5Rect.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec5Rect.x + 15" y="ref.sec5Rect.y / 2" baseline="middle" align="left" text="`y = ${ref.sec5Rect.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+            
+            <!-- 5. The Shape -->
+            <pxl-rect id="sec5Rect"
+              x="300" 
+              y="150" 
+              dx="150" 
+              dy="150" 
+              rotate="0" 
+              w="100" h="100" 
+              fill="#ffedd566" stroke="#f97316" strokewidth="4">
+            </pxl-rect>
+
+            <!-- 6. Shape Center & Offset Markers (Top) -->
+            <!-- Rect Center Dot & Rotating Text -->
+            <pxl-circle x="ref.sec5Rect.x" y="ref.sec5Rect.y" r="5" fill="#fb923c"></pxl-circle>
+            <pxl-text 
+              x="ref.sec5Rect.x" 
+              y="ref.sec5Rect.y" 
+              dx="15"
+              dy="-15"
+              rotate="ref.sec5Rect.rotate"
+              baseline="bottom" 
+              text="'Rect Center'" 
+              size="27" fill="#fb923c" font="monospace">
+            </pxl-text>
+
+            <!-- Rect Offset Dot & Text (Rotating with shape) -->
+            <pxl-circle 
+              x="toLocal(ref.sec5Rect, 'tx')" 
+              y="toLocal(ref.sec5Rect, 'ty')" 
+              r="5" fill="#c2410c">
+            </pxl-circle>
+            <pxl-text 
+              x="toLocal(ref.sec5Rect, 'tx')" 
+              y="toLocal(ref.sec5Rect, 'ty')" 
+              dx="15"
+              dy="-15"
+              rotate="ref.sec5Rect.rotate"
+              baseline="bottom" 
+              text="'Rect Offset'" 
+              size="27" fill="#c2410c" font="monospace">
+            </pxl-text>
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+
+      <h2>6. Reference <code>ref.*</code></h2>
+      <p>Any element with an <code>id</code> can be instantly referenced by other Shapes. You can declaratively link to its attributes using the <code>ref.*</code> prefix, and Kilopixel will automatically keep them perfectly in sync.</p>
+      <p>This allows for true <strong>cross-attribute linking</strong>. In this example, if you change the <strong>Master</strong> Shape, the others react instantly. The <strong>Mirror</strong> perfectly mirrors its X position (<code>1000 - ref.master.x</code>), while the <strong>Reactor</strong> links its size and rotation to the Master's position!</p>
+      
+      <pre><code class="language-html">&lt;!-- Linking attributes across different Shapes --&gt;
+&lt;pxl-Stage ratio="5 / 3"&gt;
+  &lt;pxl-Layer x="<mark id="sec6LayerXCode">0</mark>" y="<mark id="sec6LayerYCode">0</mark>" rotate="<mark id="sec6LayerRotCode">0</mark>"&gt;
+    &lt;!-- 1. Master Shape (You control this) --&gt;
+    &lt;pxl-rect id="master" x="<mark id="sec6MasterXCode">250</mark>" y="<mark id="sec6MasterYCode">200</mark>" w="100" h="100" rotate="<mark id="sec6MasterRotCode">0</mark>" stroke="#f97316"&gt;&lt;/pxl-rect&gt;
+
+    &lt;!-- 2. Mirror Shape (Moves in reverse) --&gt;
+    &lt;pxl-rect id="mirror" 
+      x="1000 - <mark id="sec6MirrorRefXCode" class="highlight-reactive">ref.master.x</mark>" 
+      y="<mark id="sec6MirrorRefYCode" class="highlight-reactive">ref.master.y</mark>" 
+      w="<mark id="sec6MirrorWCode">100</mark>" h="<mark id="sec6MirrorHCode">100</mark>" 
+      rotate="<mark id="sec6MirrorRefRotCode" class="highlight-reactive">-ref.master.rotate</mark>" 
+      stroke="#3b82f6"&gt;
+    &lt;/pxl-rect&gt;
+
+    &lt;!-- 3. Reactor Shape (Spins and scales) --&gt;
+    &lt;pxl-rect id="reactor" 
+      x="<mark id="sec6ReactorXCode">500</mark>" y="<mark id="sec6ReactorYCode">450</mark>" 
+      w="<mark id="sec6ReactorRefWCode" class="highlight-reactive">ref.master.x</mark> / 5" 
+      h="<mark id="sec6ReactorRefHCode" class="highlight-reactive">ref.master.x</mark> / 5" 
+      rotate="<mark id="sec6ReactorRefRotCode" class="highlight-reactive">ref.master.x</mark>" 
+      stroke="#22c55e"&gt;
+    &lt;/pxl-rect&gt;
+  &lt;/pxl-Layer&gt;
+&lt;/pxl-Stage&gt;</code></pre>
+
+      <div class="demo-container">
+        
+        <!-- Tabbed Controls -->
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec6LayerTab')">Layer</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec6MasterTab')">Master</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec6MirrorTab')">Mirror</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec6ReactorTab')">Reactor</button>
+            </div>
+          </div>
+
+          <div class="tab-content" id="sec6LayerTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="sec6LayerXVal">0</span></label>
+                <input type="range" min="0" max="1000" step="10" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec6Layer').setAttribute('x', this.value); document.getElementById('sec6LayerXVal').innerText = this.value; document.getElementById('sec6LayerXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec6LayerYVal">0</span></label>
+                <input type="range" min="0" max="600" step="10" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec6Layer').setAttribute('y', this.value); document.getElementById('sec6LayerYVal').innerText = this.value; document.getElementById('sec6LayerYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="sec6LayerRotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec6Layer').setAttribute('rotate', this.value); document.getElementById('sec6LayerRotVal').innerText = this.value + '°'; document.getElementById('sec6LayerRotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content active" id="sec6MasterTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec6MasterXVal">250</span></label>
+                <input type="range" min="0" max="1000" step="10" value="250" autocomplete="off" data-mark="sec6MasterXCode, sec6MirrorRefXCode, sec6ReactorRefWCode, sec6ReactorRefHCode, sec6ReactorRefRotCode"
+                  oninput="document.getElementById('sec6Master').setAttribute('x', this.value); document.getElementById('sec6MasterXVal').innerText = this.value; document.getElementById('sec6MasterXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec6MasterYVal">200</span></label>
+                <input type="range" min="0" max="600" step="10" value="200" autocomplete="off" data-mark="sec6MasterYCode, sec6MirrorRefYCode"
+                  oninput="document.getElementById('sec6Master').setAttribute('y', this.value); document.getElementById('sec6MasterYVal').innerText = this.value; document.getElementById('sec6MasterYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec6MasterRotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec6MasterRotCode, sec6MirrorRefRotCode"
+                  oninput="document.getElementById('sec6Master').setAttribute('rotate', this.value); document.getElementById('sec6MasterRotVal').innerText = this.value + '°'; document.getElementById('sec6MasterRotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="sec6MirrorTab">
+            <div class="playground-sliders">
+              <p class="tab-note" style="grid-column: 1 / -1; margin: 0; font-size: 14px; color: #64748b; font-style: italic;">Note: Center X, Y, and Rotation are mathematically bound to the Master Shape.</p>
+              <div class="control-group">
+                <label>Width <span id="sec6MirrorWVal">100</span></label>
+                <input type="range" min="10" max="500" step="10" value="100" autocomplete="off"
+                  oninput="document.getElementById('sec6Mirror').setAttribute('w', this.value); document.getElementById('sec6MirrorWVal').innerText = this.value; document.getElementById('sec6MirrorWCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Height <span id="sec6MirrorHVal">100</span></label>
+                <input type="range" min="10" max="500" step="10" value="100" autocomplete="off"
+                  oninput="document.getElementById('sec6Mirror').setAttribute('h', this.value); document.getElementById('sec6MirrorHVal').innerText = this.value; document.getElementById('sec6MirrorHCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="sec6ReactorTab">
+            <div class="playground-sliders">
+              <p class="tab-note" style="grid-column: 1 / -1; margin: 0; font-size: 14px; color: #64748b; font-style: italic;">Note: Size and Rotation are mathematically bound to the Master Shape.</p>
+              <div class="control-group">
+                <label>Center X <span id="sec6ReactorXVal">500</span></label>
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                  oninput="document.getElementById('sec6Reactor').setAttribute('x', this.value); document.getElementById('sec6ReactorXVal').innerText = this.value; document.getElementById('sec6ReactorXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec6ReactorYVal">450</span></label>
+                <input type="range" min="0" max="600" step="10" value="450" autocomplete="off"
+                  oninput="document.getElementById('sec6Reactor').setAttribute('y', this.value); document.getElementById('sec6ReactorYVal').innerText = this.value; document.getElementById('sec6ReactorYCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+        </div>
+        <pxl-stage ratio="5 / 3" class="demo-stage">
+          <!-- 1. Rotating Background Grid -->
+          <pxl-layer x="ref.sec6Layer.x" y="ref.sec6Layer.y" rotate="ref.sec6Layer.rotate">
+            <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+          </pxl-layer>
+
+
+
+          <!-- 2. Fixed Stage-Level Layer Helpers -->
+          <pxl-layer>
+            <pxl-line x1="0" y1="ref.sec6Layer.y" x2="ref.sec6Layer.x" y2="ref.sec6Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.sec6Layer.x" y1="0" x2="ref.sec6Layer.x" y2="ref.sec6Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+          </pxl-layer>
+
+          <pxl-layer id="sec6Layer" x="0" y="0" rotate="0">
+            <!-- 3. Layer Axes & Center -->
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
+            <pxl-text x="15" y="15" baseline="top" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
+
+            <!-- Helper Lines (Drawn behind shapes) -->
+            <!-- Line from Master to Mirror -->
+            <pxl-line x1="ref.sec6Master.x" y1="ref.sec6Master.y" x2="ref.sec6Mirror.x" y2="ref.sec6Mirror.y" stroke="#2563eb" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <!-- Line from Master to Reactor -->
+            <pxl-line x1="ref.sec6Master.x" y1="ref.sec6Master.y" x2="ref.sec6Reactor.x" y2="ref.sec6Reactor.y" stroke="#16a34a" strokewidth="2" linedash="[5, 5]"></pxl-line>
+
+            <!-- 1. Master Shape (Orange Palette) -->
+            <pxl-rect id="sec6Master" x="250" y="200" w="100" h="100" rotate="0" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-rect>
+            <pxl-circle x="ref.sec6Master.x" y="ref.sec6Master.y" r="5" fill="#fb923c"></pxl-circle>
+            <pxl-text x="ref.sec6Master.x" y="ref.sec6Master.y" dx="15" dy="-15" baseline="bottom" text="'Master Center'" size="27" fill="#c2410c" font="monospace"></pxl-text>
+
+            <!-- 2. Mirror Shape (Blue Palette) -->
+            <pxl-rect id="sec6Mirror" x="1000 - ref.sec6Master.x" y="ref.sec6Master.y" w="100" h="100" rotate="-ref.sec6Master.rotate" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-rect>
+            <pxl-circle x="ref.sec6Mirror.x" y="ref.sec6Mirror.y" r="5" fill="#60a5fa"></pxl-circle>
+            <pxl-text x="ref.sec6Mirror.x" y="ref.sec6Mirror.y" dx="15" dy="-15" baseline="bottom" text="'Mirror Center'" size="27" fill="#1d4ed8" font="monospace"></pxl-text>
+
+            <!-- 3. Reactor Shape (Green Palette) -->
+            <pxl-rect id="sec6Reactor" x="500" y="450" w="ref.sec6Master.x / 5" h="ref.sec6Master.x / 5" rotate="ref.sec6Master.x" fill="#dcfce766" stroke="#22c55e" strokewidth="4"></pxl-rect>
+            <pxl-circle x="ref.sec6Reactor.x" y="ref.sec6Reactor.y" r="5" fill="#4ade80"></pxl-circle>
+            <pxl-text x="ref.sec6Reactor.x" y="ref.sec6Reactor.y" dx="15" dy="-15" baseline="bottom" text="'Reactor Center'" size="27" fill="#15803d" font="monospace"></pxl-text>
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+      
+      <h2>7. Variables <code>&lt;pxl-var&gt;</code></h2>
+      <p>Sometimes you don't want to bind to a visual Shape. You want a "headless" state variable that controls multiple elements at once, much like state management in React or Vue.</p>
+      <p>The <code>&lt;pxl-var&gt;</code> element is invisible, but any Shape can reactively reference its <code>value</code>. In this example, three variables control the entire geometric composition:</p>
+      
+      <pre><code class="language-html">&lt;!-- Variables act as global state for the canvas --&gt;
+&lt;pxl-Stage ratio="5 / 3"&gt;
+  &lt;pxl-Layer x="<mark id="sec7LayerXCode">500</mark>" y="<mark id="sec7LayerYCode">300</mark>" rotate="<mark id="sec7LayerRotCode">0</mark>"&gt;
+    &lt;!-- Global State --&gt;
+    &lt;pxl-var id="hue" value="<mark id="sec7HueCode">250</mark>"&gt;&lt;/pxl-var&gt;
+    &lt;pxl-var id="spread" value="<mark id="sec7SpreadCode">120</mark>"&gt;&lt;/pxl-var&gt;
+    &lt;pxl-var id="size" value="<mark id="sec7SizeCode">150</mark>"&gt;&lt;/pxl-var&gt;
+
+    &lt;!-- Shapes bound to state --&gt;
+    &lt;pxl-circle dx="<mark id="sec7Circ1SpreadCode" class="highlight-reactive">ref.spread.value</mark>" r="<mark id="sec7Circ1SizeCode" class="highlight-reactive">ref.size.value</mark>" fill="hsla(<mark id="sec7Circ1HueCode" class="highlight-reactive">ref.hue.value</mark> + 25, 80, 60, 0.6)" rotate="0"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle dx="<mark id="sec7Circ2SpreadCode" class="highlight-reactive">ref.spread.value</mark>" r="<mark id="sec7Circ2SizeCode" class="highlight-reactive">ref.size.value</mark>" fill="hsla(<mark id="sec7Circ2HueCode" class="highlight-reactive">ref.hue.value</mark> + 142, 80, 60, 0.6)" rotate="120"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle dx="<mark id="sec7Circ3SpreadCode" class="highlight-reactive">ref.spread.value</mark>" r="<mark id="sec7Circ3SizeCode" class="highlight-reactive">ref.size.value</mark>" fill="hsla(<mark id="sec7Circ3HueCode" class="highlight-reactive">ref.hue.value</mark> + 217, 80, 60, 0.6)" rotate="240"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-Layer&gt;
+&lt;/pxl-Stage&gt;</code></pre>
+
+      <div class="demo-container">
+        
+        <!-- Tabbed Controls -->
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec7LayerTab')">Layer</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec7VarsTab')">Variables</button>
+            </div>
+          </div>
+          
+          <div class="tab-content active" id="sec7VarsTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label><span>Hue <span class="indicator-dot"></span></span> <span id="sec7HueVal">250</span></label>
+                <input type="range" min="0" max="360" step="5" value="250" autocomplete="off" data-mark="sec7HueCode, sec7Circ1HueCode, sec7Circ2HueCode, sec7Circ3HueCode"
+                  oninput="document.getElementById('sec7Hue').setAttribute('value', this.value); document.getElementById('sec7HueVal').innerText = this.value; document.getElementById('sec7HueCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Spread <span class="indicator-dot"></span></span> <span id="sec7SpreadVal">120</span></label>
+                <input type="range" min="0" max="250" step="10" value="120" autocomplete="off" data-mark="sec7SpreadCode, sec7Circ1SpreadCode, sec7Circ2SpreadCode, sec7Circ3SpreadCode"
+                  oninput="document.getElementById('sec7Spread').setAttribute('value', this.value); document.getElementById('sec7SpreadVal').innerText = this.value; document.getElementById('sec7SpreadCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Size <span id="sec7SizeVal">150</span></label>
+                <input type="range" min="10" max="250" step="10" value="150" autocomplete="off" data-mark="sec7SizeCode, sec7Circ1SizeCode, sec7Circ2SizeCode, sec7Circ3SizeCode"
+                  oninput="document.getElementById('sec7Size').setAttribute('value', this.value); document.getElementById('sec7SizeVal').innerText = this.value; document.getElementById('sec7SizeCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="sec7LayerTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="sec7LayerXVal">500</span></label>
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off" data-mark="sec7LayerXCode"
+                  oninput="document.getElementById('sec7Layer').setAttribute('x', this.value); document.getElementById('sec7LayerXVal').innerText = this.value; document.getElementById('sec7LayerXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec7LayerYVal">300</span></label>
+                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off" data-mark="sec7LayerYCode"
+                  oninput="document.getElementById('sec7Layer').setAttribute('y', this.value); document.getElementById('sec7LayerYVal').innerText = this.value; document.getElementById('sec7LayerYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="sec7LayerRotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec7LayerRotCode"
+                  oninput="document.getElementById('sec7Layer').setAttribute('rotate', this.value); document.getElementById('sec7LayerRotVal').innerText = this.value + '°'; document.getElementById('sec7LayerRotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+        </div>
+        <pxl-stage ratio="5 / 3" class="demo-stage">
+          <pxl-layer id="sec7Layer" x="500" y="300" rotate="0">
+            <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            <pxl-line x1="-500" y1="0" x2="500" y2="0" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-300" x2="0" y2="300" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
+            
+            <!-- Global State -->
+            <pxl-var id="sec7Hue" value="250"></pxl-var>
+            <pxl-var id="sec7Spread" value="120"></pxl-var>
+            <pxl-var id="sec7Size" value="150"></pxl-var>
+
+            <!-- Shapes bound to state -->
+            <pxl-circle id="sec7Shape1" dx="ref.sec7Spread.value" r="ref.sec7Size.value" fill="hsla(ref.sec7Hue.value + 25, 80, 60, 0.6)" rotate="0"  ></pxl-circle>
+            <pxl-circle id="sec7Shape2" dx="ref.sec7Spread.value" r="ref.sec7Size.value" fill="hsla(ref.sec7Hue.value + 142, 80, 60, 0.6)" rotate="120"></pxl-circle>
+            <pxl-circle id="sec7Shape3" dx="ref.sec7Spread.value" r="ref.sec7Size.value" fill="hsla(ref.sec7Hue.value + 217, 80, 60, 0.6)" rotate="240"></pxl-circle>
+
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+      
+      <h2>8. Cross-Space Projection <code>toLocal()</code></h2>
+      <p>The true power of <code>toLocal()</code> is cross-space affine projection. It allows you to perfectly track an element nested deep inside rotating or scaled Layers, without writing any trigonometry.</p>
+      <ul>
+        <li><strong>Layer Independence:</strong> You can place Shapes inside completely different, independently transforming Layers.</li>
+        <li><strong>The Link:</strong> By using <code>toLocal(ref.target, 'x')</code>, Kilopixel calculates the target's global position and automatically translates it into your <em>current</em> coordinate space. It returns exactly the <code>x</code> and <code>y</code> values your Shape needs to align perfectly.</li>
+        <li><strong>The Magic:</strong> Kilopixel's spatial reactivity engine automatically tracks matrix changes. If a Layer rotates or moves, it instantly alerts any element tracking its children to update!</li>
+      </ul>
+      
+      <pre><code class="language-html">&lt;pxl-Stage ratio="5 / 3"&gt;
+  &lt;!-- Two independent rotating Layers with their own Shapes --&gt;
+  &lt;pxl-Layer id="layer1" x="<mark id="sec8Layer1XCode">350</mark>" y="<mark id="sec8Layer1YCode">250</mark>" rotate="<mark id="sec8Layer1RotCode">0</mark>"&gt;
+    &lt;pxl-circle id="circle1" x="<mark id="sec8Circle1XCode">-150</mark>" y="<mark id="sec8Circle1YCode">-150</mark>" r="<mark id="sec8Circle1RCode">100</mark>" stroke="#f97316"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-Layer&gt;
+
+  &lt;pxl-Layer id="layer2" x="<mark id="sec8Layer2XCode">650</mark>" y="<mark id="sec8Layer2YCode">350</mark>" rotate="<mark id="sec8Layer2RotCode">0</mark>"&gt;
+    &lt;pxl-circle id="circle2" x="<mark id="sec8Circle2XCode">150</mark>" y="<mark id="sec8Circle2YCode">150</mark>" r="<mark id="sec8Circle2RCode">100</mark>" stroke="#3b82f6"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-Layer&gt;
+
+  &lt;!-- A line perfectly tracking two Shapes inside different rotating Layers --&gt;
+  &lt;pxl-Layer&gt;
+    &lt;pxl-line 
+      x1="toLocal(<mark id="sec8LineRefCirc1X" class="highlight-reactive">ref.circle1</mark>, 'x')" y1="toLocal(<mark id="sec8LineRefCirc1Y" class="highlight-reactive">ref.circle1</mark>, 'y')" 
+      x2="toLocal(<mark id="sec8LineRefCirc2X" class="highlight-reactive">ref.circle2</mark>, 'x')" y2="toLocal(<mark id="sec8LineRefCirc2Y" class="highlight-reactive">ref.circle2</mark>, 'y')" 
+      stroke="#ff00ff"&gt;
+    &lt;/pxl-line&gt;
+  &lt;/pxl-Layer&gt;
+&lt;/pxl-Stage&gt;</code></pre>
+
+      <div class="demo-container">
+        
+        <!-- Tabbed Controls -->
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec8Layer1Tab')">Layer 1</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec8Circle1Tab')">Circle 1</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec8Layer2Tab')">Layer 2</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec8Circle2Tab')">Circle 2</button>
+            </div>
+          </div>
+
+          <div class="tab-content active" id="sec8Layer1Tab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec8Layer1XVal">350</span></label>
+                <input type="range" min="0" max="1000" step="10" value="350" autocomplete="off" data-mark="sec8Layer1XCode, sec8LineRefCirc1X, sec8LineRefCirc1Y"
+                  oninput="document.getElementById('sec8Layer1X').setAttribute('value', this.value); document.getElementById('sec8Layer1XVal').innerText = this.value; document.getElementById('sec8Layer1XCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec8Layer1YVal">250</span></label>
+                <input type="range" min="0" max="600" step="10" value="250" autocomplete="off" data-mark="sec8Layer1YCode, sec8LineRefCirc1X, sec8LineRefCirc1Y"
+                  oninput="document.getElementById('sec8Layer1Y').setAttribute('value', this.value); document.getElementById('sec8Layer1YVal').innerText = this.value; document.getElementById('sec8Layer1YCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec8Layer1RotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec8Layer1RotCode, sec8LineRefCirc1X, sec8LineRefCirc1Y"
+                  oninput="document.getElementById('sec8Layer1Rot').setAttribute('value', this.value); document.getElementById('sec8Layer1RotVal').innerText = this.value + '°'; document.getElementById('sec8Layer1RotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+          
+          <div class="tab-content" id="sec8Circle1Tab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec8Circle1XVal">-150</span></label>
+                <input type="range" min="-500" max="500" step="10" value="-150" autocomplete="off" data-mark="sec8Circle1XCode, sec8LineRefCirc1X, sec8LineRefCirc1Y"
+                  oninput="document.getElementById('sec8Circle1X').setAttribute('value', this.value); document.getElementById('sec8Circle1XVal').innerText = this.value; document.getElementById('sec8Circle1XCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec8Circle1YVal">-150</span></label>
+                <input type="range" min="-500" max="500" step="10" value="-150" autocomplete="off" data-mark="sec8Circle1YCode, sec8LineRefCirc1X, sec8LineRefCirc1Y"
+                  oninput="document.getElementById('sec8Circle1Y').setAttribute('value', this.value); document.getElementById('sec8Circle1YVal').innerText = this.value; document.getElementById('sec8Circle1YCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Radius <span class="indicator-dot"></span></span> <span id="sec8Circle1RVal">100</span></label>
+                <input type="range" min="0" max="200" step="5" value="100" autocomplete="off" data-mark="sec8Circle1RCode"
+                  oninput="document.getElementById('sec8Circle1R').setAttribute('value', this.value); document.getElementById('sec8Circle1RVal').innerText = this.value; document.getElementById('sec8Circle1RCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="sec8Layer2Tab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec8Layer2XVal">650</span></label>
+                <input type="range" min="0" max="1000" step="10" value="650" autocomplete="off" data-mark="sec8Layer2XCode, sec8LineRefCirc2X, sec8LineRefCirc2Y"
+                  oninput="document.getElementById('sec8Layer2X').setAttribute('value', this.value); document.getElementById('sec8Layer2XVal').innerText = this.value; document.getElementById('sec8Layer2XCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec8Layer2YVal">350</span></label>
+                <input type="range" min="0" max="600" step="10" value="350" autocomplete="off" data-mark="sec8Layer2YCode, sec8LineRefCirc2X, sec8LineRefCirc2Y"
+                  oninput="document.getElementById('sec8Layer2Y').setAttribute('value', this.value); document.getElementById('sec8Layer2YVal').innerText = this.value; document.getElementById('sec8Layer2YCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec8Layer2RotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec8Layer2RotCode, sec8LineRefCirc2X, sec8LineRefCirc2Y"
+                  oninput="document.getElementById('sec8Layer2Rot').setAttribute('value', this.value); document.getElementById('sec8Layer2RotVal').innerText = this.value + '°'; document.getElementById('sec8Layer2RotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+          
+          <div class="tab-content" id="sec8Circle2Tab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec8Circle2XVal">150</span></label>
+                <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off" data-mark="sec8Circle2XCode, sec8LineRefCirc2X, sec8LineRefCirc2Y"
+                  oninput="document.getElementById('sec8Circle2X').setAttribute('value', this.value); document.getElementById('sec8Circle2XVal').innerText = this.value; document.getElementById('sec8Circle2XCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec8Circle2YVal">150</span></label>
+                <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off" data-mark="sec8Circle2YCode, sec8LineRefCirc2X, sec8LineRefCirc2Y"
+                  oninput="document.getElementById('sec8Circle2Y').setAttribute('value', this.value); document.getElementById('sec8Circle2YVal').innerText = this.value; document.getElementById('sec8Circle2YCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Radius <span class="indicator-dot"></span></span> <span id="sec8Circle2RVal">100</span></label>
+                <input type="range" min="0" max="200" step="5" value="100" autocomplete="off" data-mark="sec8Circle2RCode"
+                  oninput="document.getElementById('sec8Circle2R').setAttribute('value', this.value); document.getElementById('sec8Circle2RVal').innerText = this.value; document.getElementById('sec8Circle2RCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+        </div>
+        <pxl-stage ratio="5 / 3" class="demo-stage">
+          <!-- Variables -->
+          <pxl-var id="sec8Layer1X" value="350"></pxl-var>
+          <pxl-var id="sec8Layer1Y" value="250"></pxl-var>
+          <pxl-var id="sec8Layer1Rot" value="0"></pxl-var>
+          
+          <pxl-var id="sec8Layer2X" value="650"></pxl-var>
+          <pxl-var id="sec8Layer2Y" value="350"></pxl-var>
+          <pxl-var id="sec8Layer2Rot" value="0"></pxl-var>
+
+          <pxl-var id="sec8Circle1X" value="-150"></pxl-var>
+          <pxl-var id="sec8Circle1Y" value="-150"></pxl-var>
+          <pxl-var id="sec8Circle1R" value="100"></pxl-var>
+          
+          <pxl-var id="sec8Circle2X" value="150"></pxl-var>
+          <pxl-var id="sec8Circle2Y" value="150"></pxl-var>
+          <pxl-var id="sec8Circle2R" value="100"></pxl-var>
+
+          <!-- Background Grid -->
+          <pxl-layer>
+            <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+          </pxl-layer>
+
+          <!-- Layer 1 -->
+          <pxl-layer id="sec8Layer1" x="ref.sec8Layer1X.value" y="ref.sec8Layer1Y.value" rotate="ref.sec8Layer1Rot.value">
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#fed7aa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#fed7aa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-circle x="0" y="0" r="5" fill="#fdba74"></pxl-circle>
+            <pxl-text x="15" y="-15" text="Layer 1 Center" size="27" fill="#fdba74"></pxl-text>
+            
+            <pxl-circle id="sec8Layer1Shape" x="ref.sec8Circle1X.value" y="ref.sec8Circle1Y.value" r="ref.sec8Circle1R.value" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
+            <pxl-circle x="ref.sec8Circle1X.value" y="ref.sec8Circle1Y.value" r="5" fill="#f97316"></pxl-circle>
+            <pxl-text x="ref.sec8Circle1X.value + 15" y="ref.sec8Circle1Y.value - 15" text="Circle 1 Center" size="27" fill="#fb923c"></pxl-text>
+          </pxl-layer>
+
+          <!-- Layer 2 -->
+          <pxl-layer id="sec8Layer2" x="ref.sec8Layer2X.value" y="ref.sec8Layer2Y.value" rotate="ref.sec8Layer2Rot.value">
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#bfdbfe" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#bfdbfe" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-circle x="0" y="0" r="5" fill="#93c5fd"></pxl-circle>
+            <pxl-text x="15" y="-15" text="Layer 2 Center" size="27" fill="#93c5fd"></pxl-text>
+            
+            <pxl-circle id="sec8Layer2Shape" x="ref.sec8Circle2X.value" y="ref.sec8Circle2Y.value" r="ref.sec8Circle2R.value" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-circle>
+            <pxl-circle x="ref.sec8Circle2X.value" y="ref.sec8Circle2Y.value" r="5" fill="#3b82f6"></pxl-circle>
+            <pxl-text x="ref.sec8Circle2X.value + 15" y="ref.sec8Circle2Y.value - 15" text="Circle 2 Center" size="27" fill="#60a5fa"></pxl-text>
+          </pxl-layer>
+
+          <!-- Cross-Space Connecting Line -->
+          <pxl-layer>
+            <pxl-line 
+              x1="toLocal(ref.sec8Layer1Shape, 'x')" 
+              y1="toLocal(ref.sec8Layer1Shape, 'y')" 
+              x2="toLocal(ref.sec8Layer2Shape, 'x')" 
+              y2="toLocal(ref.sec8Layer2Shape, 'y')" 
+              stroke="#ff00ff" strokewidth="4" linedash="[10, 10]">
+            </pxl-line>
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+      <h2>9. Animations (Time <code>t</code>, Math &amp; Time Drivers)</h2>
+      <p>Kilopixel has a native animation loop that evaluates all variable expressions at 60 FPS. By using the built-in <code>t</code> variable (time in seconds), injected math functions (like <code>sin</code> and <code>cos</code>), and normalized <strong>time drivers</strong> (like <code>loop(d)</code>), you can create incredibly complex, smooth animations declaratively.</p>
+      
+      <p>In this example, we use <code>sin(t)</code> and <code>cos(t)</code> with independent X and Y frequencies to draw a Lissajous curve. We also use the native <code>hsl()</code> scope function combined with the <code>loop(d)</code> time driver to elegantly cycle the orb's color across the color wheel exactly once every 10 seconds!</p>
+      
+      <pre><code class="language-html">&lt;pxl-Stage ratio="5 / 3"&gt;
+  &lt;pxl-Layer x="<mark id="sec9LayerXCode">500</mark>" y="<mark id="sec9LayerYCode">300</mark>" rotate="<mark id="sec9LayerRotCode">0</mark>"&gt;
+    &lt;!-- Pure Math: Lissajous curve using sine waves --&gt;
+    &lt;pxl-var id="hue" value="loop(10) * 360"&gt;&lt;/pxl-var&gt;
+    &lt;!-- Note: shadowcolor safely self-references its own stroke --&gt;
+    &lt;pxl-circle id="oscillator"
+      x="sin(t * <mark id="sec9FreqXCode">2</mark>) * 300" 
+      y="cos(t * <mark id="sec9FreqYCode">3</mark>) * 150" 
+      r="<mark id="sec9RadiusCode">40</mark>" 
+      fill="hsla(ref.hue.value, 100, 60, 0.4)" 
+      stroke="hsl(ref.hue.value, 100, 60)" 
+      strokewidth="4"
+      shadowcolor="ref.oscillator.stroke" 
+      shadowblur="20"&gt;
+    &lt;/pxl-circle&gt;
+  &lt;/pxl-Layer&gt;
+&lt;/pxl-Stage&gt;</code></pre>
+
+      <div class="demo-container">
+        
+        
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec9LayerTab')">Layer</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec9ControlsTab')">Oscillator</button>
+            </div>
+          </div>
+          
+          <div class="tab-content" id="sec9LayerTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="sec9LayerXVal">500</span></label>
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                  oninput="document.getElementById('sec9Layer').setAttribute('x', this.value); document.getElementById('sec9BgLayer').setAttribute('x', this.value); document.getElementById('sec9LayerXVal').innerText = this.value; document.getElementById('sec9LayerXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec9LayerYVal">300</span></label>
+                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                  oninput="document.getElementById('sec9Layer').setAttribute('y', this.value); document.getElementById('sec9BgLayer').setAttribute('y', this.value); document.getElementById('sec9LayerYVal').innerText = this.value; document.getElementById('sec9LayerYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="sec9LayerRotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec9Layer').setAttribute('rotate', this.value); document.getElementById('sec9BgLayer').setAttribute('rotate', this.value); document.getElementById('sec9LayerRotVal').innerText = this.value + '°'; document.getElementById('sec9LayerRotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content active" id="sec9ControlsTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Frequency X <span id="sec9FreqXVal">2</span></label>
+                <input type="range" min="1" max="10" step="1" value="2" autocomplete="off"
+                  oninput="document.getElementById('sec9FreqX').setAttribute('value', this.value); document.getElementById('sec9FreqXVal').innerText = this.value; document.getElementById('sec9FreqXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Frequency Y <span id="sec9FreqYVal">3</span></label>
+                <input type="range" min="1" max="10" step="1" value="3" autocomplete="off"
+                  oninput="document.getElementById('sec9FreqY').setAttribute('value', this.value); document.getElementById('sec9FreqYVal').innerText = this.value; document.getElementById('sec9FreqYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Radius <span id="sec9RadiusVal">40</span></label>
+                <input type="range" min="10" max="150" step="5" value="40" autocomplete="off"
+                  oninput="document.getElementById('sec9Radius').setAttribute('value', this.value); document.getElementById('sec9RadiusVal').innerText = this.value; document.getElementById('sec9RadiusCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+        </div>
+        <pxl-stage class="demo-stage" ratio="5 / 3">
+          <!-- Background Grid -->
+          <pxl-layer>
+            <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+          </pxl-layer>
+
+          <!-- Visualization Layer -->
+          <!-- Background Layer (Trace Path) -->
+          <pxl-layer id="sec9BgLayer" x="500" y="300" rotate="0">
+            <!-- Axes Helpers -->
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+
+            <!-- Trace Path -->
+            <pxl-polyline smooth="true" stroke="linear(t * 50, ['#0ea5e9', '#8b5cf6', '#ec4899'])" strokewidth="4" fill="none" closed="true" points="
+              sin(0 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(0 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(1 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(1 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(2 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(2 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(3 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(3 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(4 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(4 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(5 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(5 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(6 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(6 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(7 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(7 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(8 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(8 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(9 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(9 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(10 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(10 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(11 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(11 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(12 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(12 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(13 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(13 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(14 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(14 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(15 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(15 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(16 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(16 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(17 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(17 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(18 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(18 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(19 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(19 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(20 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(20 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(21 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(21 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(22 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(22 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(23 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(23 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(24 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(24 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(25 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(25 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(26 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(26 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(27 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(27 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(28 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(28 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(29 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(29 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(30 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(30 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(31 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(31 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(32 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(32 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(33 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(33 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(34 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(34 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(35 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(35 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(36 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(36 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(37 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(37 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(38 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(38 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(39 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(39 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(40 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(40 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(41 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(41 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(42 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(42 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(43 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(43 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(44 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(44 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(45 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(45 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(46 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(46 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(47 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(47 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(48 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(48 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(49 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(49 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(50 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(50 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(51 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(51 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(52 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(52 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(53 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(53 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(54 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(54 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(55 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(55 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(56 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(56 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(57 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(57 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(58 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(58 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(59 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(59 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(60 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(60 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(61 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(61 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(62 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(62 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(63 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(63 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(64 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(64 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(65 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(65 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(66 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(66 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(67 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(67 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(68 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(68 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(69 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(69 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(70 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(70 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(71 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(71 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(72 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(72 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(73 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(73 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(74 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(74 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(75 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(75 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(76 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(76 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(77 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(77 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(78 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(78 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(79 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(79 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(80 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(80 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(81 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(81 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(82 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(82 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(83 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(83 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(84 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(84 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(85 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(85 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(86 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(86 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(87 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(87 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(88 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(88 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(89 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(89 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(90 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(90 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(91 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(91 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(92 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(92 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(93 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(93 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(94 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(94 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(95 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(95 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(96 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(96 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(97 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(97 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(98 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(98 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
+              sin(99 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(99 * 2 * PI / 100 * ref.sec9FreqY.value) * 250
+            "></pxl-polyline>
+          </pxl-layer>
+
+          <pxl-layer id="sec9Layer" x="500" y="300" rotate="0">
+            <!-- Variables -->
+            <pxl-var id="sec9FreqX" value="2"></pxl-var>
+            <pxl-var id="sec9FreqY" value="3"></pxl-var>
+            <pxl-var id="sec9Radius" value="40"></pxl-var>
+            
+            <pxl-var id="sec9OrbHue" value="loop(10) * 360"></pxl-var>
+            <pxl-var id="sec9OrbX" value="sin(t * ref.sec9FreqX.value) * 450"></pxl-var>
+            <pxl-var id="sec9OrbY" value="cos(t * ref.sec9FreqY.value) * 250"></pxl-var>
+            <!-- Axes Helpers -->
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+
+            <!-- Line connecting anchor to orb -->
+            <pxl-line x1="0" y1="0" x2="ref.sec9OrbX.value" y2="ref.sec9OrbY.value" stroke="ref.sec9FlyingOrb.stroke" strokewidth="4"></pxl-line>
+
+            <!-- Central Anchor Shape (Orange Scheme) -->
+            <pxl-circle r="5" fill="#f97316"></pxl-circle>
+            <pxl-text x="25" y="-20" text="'Anchor'" size="27" fill="#fb923c"></pxl-text>
+
+            <!-- Flying Orb -->
+            <pxl-circle id="sec9FlyingOrb" x="ref.sec9OrbX.value" y="ref.sec9OrbY.value" r="ref.sec9Radius.value" fill="hsla(ref.sec9OrbHue.value, 100, 60, 0.4)" stroke="hsl(ref.sec9OrbHue.value, 100, 60)" strokewidth="4" shadowcolor="ref.sec9FlyingOrb.stroke" shadowblur="20"></pxl-circle>
+            <pxl-text x="ref.sec9OrbX.value + 50" y="ref.sec9OrbY.value - 20" text="'Oscillator'" size="27" fill="ref.sec9FlyingOrb.stroke"></pxl-text>
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+      
+      <!--
+      <h2>10. Hierarchical Animations (Groups &amp; Orbits)</h2>
+      <p>Kilopixel's geometric transform engine separates the <strong>Center</strong> (<code>x</code>, <code>y</code>) from the <strong>Offset</strong> (<code>dx</code>, <code>dy</code>). By applying both a <code>rotate</code> and a <code>dx</code> Offset to a <code>&lt;pxl-Group&gt;</code>, the Group's entire internal coordinate space is shifted into orbit.</p>
+      
+      <p>In this solar system example, the Planet System Group orbits the Sun. Inside that Group, the local Origin <code>(0,0)</code> physically sits exactly on the Planet! The Moon System simply uses another <code>rotate</code> and <code>dx</code> combination to effortlessly orbit its parent.</p>
+      
+      <pre><code class="language-html">&lt;pxl-Stage ratio="5 / 3"&gt;
+  &lt;pxl-Layer x="<mark id='sec10LayerXCode'>500</mark>" y="<mark id='sec10LayerYCode'>300</mark>" rotate="<mark id='sec10LayerRotCode'>0</mark>"&gt;
+    &lt;!-- Sun --&gt;
+    &lt;pxl-circle r="50" fill="radial(1, ['#fde047', '#f59e0b'])"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Planet Orbit Path --&gt;
+    &lt;pxl-circle r="<mark id='sec10PlanetRadiusCode'>200</mark>" fill="none" stroke="#334155" linedash="[4,4]"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Planet System (Local space orbiting the Sun) --&gt;
+    &lt;pxl-Group rotate="t * <mark id='sec10PlanetSpeedCode'>45</mark>" dx="<mark id='sec10PlanetRadiusCode2'>200</mark>"&gt;
+      &lt;!-- Planet (Drawn exactly at 0,0 of its local space) --&gt;
+      &lt;pxl-circle r="25" fill="#3b82f6"&gt;&lt;/pxl-circle&gt;
+
+      &lt;!-- Moon Orbit Path --&gt;
+      &lt;pxl-circle r="<mark id='sec10MoonRadiusCode'>60</mark>" fill="none" stroke="#475569" linedash="[2,2]"&gt;&lt;/pxl-circle&gt;
+
+      &lt;!-- Moon System (Local space orbiting the Planet) --&gt;
+      &lt;pxl-Group rotate="t * <mark id='sec10MoonSpeedCode'>180</mark>" dx="<mark id='sec10MoonRadiusCode2'>60</mark>"&gt;
+        &lt;pxl-circle r="10" fill="#cbd5e1"&gt;&lt;/pxl-circle&gt;
+      &lt;/pxl-Group&gt;
+    &lt;/pxl-Group&gt;
+  &lt;/pxl-Layer&gt;
+&lt;/pxl-Stage&gt;</code></pre>
+
+      <div class="demo-container">
+        
+        
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec10LayerTab')">Layer</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec10ControlsTab')">Orbital Mechanics</button>
+            </div>
+          </div>
+
+          <div class="tab-content" id="sec10LayerTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="sec10LayerXVal">500</span></label>
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                  oninput="document.getElementById('sec10Layer').setAttribute('x', this.value); document.getElementById('sec10LayerXVal').innerText = this.value; document.getElementById('sec10LayerXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec10LayerYVal">300</span></label>
+                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                  oninput="document.getElementById('sec10Layer').setAttribute('y', this.value); document.getElementById('sec10LayerYVal').innerText = this.value; document.getElementById('sec10LayerYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="sec10LayerRotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec10Layer').setAttribute('rotate', this.value); document.getElementById('sec10LayerRotVal').innerText = this.value + '°'; document.getElementById('sec10LayerRotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+          
+          <div class="tab-content active" id="sec10ControlsTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Planet Speed <span id="sec10PlanetSpeedVal">45</span></label>
+                <input type="range" min="-180" max="180" step="1" value="45" autocomplete="off"
+                  oninput="document.getElementById('sec10PlanetSpeed').setAttribute('value', this.value); document.getElementById('sec10PlanetSpeedVal').innerText = this.value; document.getElementById('sec10PlanetSpeedCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Planet Radius <span id="sec10PlanetRadiusVal">200</span></label>
+                <input type="range" min="100" max="400" step="10" value="200" autocomplete="off"
+                  oninput="document.getElementById('sec10PlanetRadius').setAttribute('value', this.value); document.getElementById('sec10PlanetRadiusVal').innerText = this.value; document.getElementById('sec10PlanetRadiusCode').innerText = this.value; document.getElementById('sec10PlanetRadiusCode2').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Moon Speed <span id="sec10MoonSpeedVal">180</span></label>
+                <input type="range" min="-720" max="720" step="1" value="180" autocomplete="off"
+                  oninput="document.getElementById('sec10MoonSpeed').setAttribute('value', this.value); document.getElementById('sec10MoonSpeedVal').innerText = this.value; document.getElementById('sec10MoonSpeedCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Moon Radius <span id="sec10MoonRadiusVal">60</span></label>
+                <input type="range" min="20" max="150" step="5" value="60" autocomplete="off"
+                  oninput="document.getElementById('sec10MoonRadius').setAttribute('value', this.value); document.getElementById('sec10MoonRadiusVal').innerText = this.value; document.getElementById('sec10MoonRadiusCode').innerText = this.value; document.getElementById('sec10MoonRadiusCode2').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+        </div>
+        <pxl-stage ratio="5 / 3" class="demo-stage">
+          <pxl-layer id="sec10Layer" x="500" y="300" rotate="0">
+            <!~~ Variables ~~>
+            <pxl-var id="sec10PlanetSpeed" value="45"></pxl-var>
+            <pxl-var id="sec10PlanetRadius" value="200"></pxl-var>
+            <pxl-var id="sec10MoonSpeed" value="180"></pxl-var>
+            <pxl-var id="sec10MoonRadius" value="60"></pxl-var>
+
+            <!~~ Axes Helpers ~~>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+
+            <!~~ Sun ~~>
+            <pxl-circle r="50" fill="radial(1, ['#fde047', '#f59e0b'])" shadowcolor="#fde047" shadowblur="40"></pxl-circle>
+
+            <!~~ Planet Orbit Path ~~>
+            <pxl-circle r="ref.sec10PlanetRadius.value" fill="none" stroke="#334155" linedash="[4,4]" strokewidth="2"></pxl-circle>
+
+            <!~~ Planet System ~~>
+            <pxl-group rotate="t * ref.sec10PlanetSpeed.value" dx="ref.sec10PlanetRadius.value">
+              <!~~ Planet ~~>
+              <pxl-circle r="25" fill="#3b82f6" shadowcolor="#3b82f6" shadowblur="20"></pxl-circle>
+
+              <!~~ Moon Orbit Path ~~>
+              <pxl-circle r="ref.sec10MoonRadius.value" fill="none" stroke="#475569" linedash="[2,2]" strokewidth="2"></pxl-circle>
+
+              <!~~ Moon System ~~>
+              <pxl-group rotate="t * ref.sec10MoonSpeed.value" dx="ref.sec10MoonRadius.value">
+                <pxl-circle r="10" fill="#cbd5e1" shadowcolor="#f8fafc" shadowblur="10"></pxl-circle>
+              </pxl-group>
+            </pxl-group>
+          </pxl-layer>
+        </pxl-stage>
+      </div>>
+      --
+      
+      <!--
+      <h2>11. Coordinate Mapping <code>toLocal()</code></h2>
+      <p>When Shapes orbit or rotate inside nested coordinate spaces, drawing connecting lines or tracking positions requires translating between coordinate systems:</p>
+      <ul>
+        <li><strong>Why raw attributes stay constant:</strong> If you reference <code>ref.pointA.x</code> or <code>ref.pointA.dx</code> directly, you will always get their static declared values even while the point is rotating. Because the local coordinate system rotates <em>with</em> the Shape, its internal <code>x</code> and <code>dx</code> numbers never change.</li>
+        <li><strong>How <code>toLocal</code> solves this:</strong> By wrapping the reference in <code>toLocal(ref.pointA, 'tx')</code> or <code>toLocal(ref.pointA, 'ty')</code> (or <code>x</code> and <code>y</code> for Center positions), Kilopixel automatically calculates the Shape's true orbiting position and maps it into your current coordinate space — no manual trigonometry required!</li>
+      </ul>
+      <p>In this "constellation" example, two Shapes orbit their Centers independently. The connecting line uses <code>toLocal</code> to track their live positions and stay perfectly connected at 60fps.</p>
+      
+      <pre><code class="language-html">&lt;!-- A line dynamically connecting independent points --&gt;
+&lt;pxl-Stage ratio="5 / 3"&gt;
+  &lt;pxl-Layer x="<mark id="sec11LayerXCode">500</mark>" y="<mark id="sec11LayerYCode">300</mark>" rotate="<mark id="sec11LayerRotCode">0</mark>"&gt;
+    &lt;!-- Orbiting Points --&gt;
+    &lt;pxl-circle id="pointA" x="<mark id="sec11PointAXCode">-400</mark>" y="<mark id="sec11PointAYCode">0</mark>" dx="<mark id="sec11PointADxCode">0</mark>" dy="<mark id="sec11PointADyCode">-200</mark>" rotate="<mark id="sec11PointARotCode">0</mark>" r="5" fill="#1d4ed8"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle id="pointB" x="<mark id="sec11PointBXCode">150</mark>" y="<mark id="sec11PointBYCode">0</mark>" dx="<mark id="sec11PointBDxCode">0</mark>" dy="<mark id="sec11PointBDyCode">200</mark>" rotate="<mark id="sec11PointBRotCode">0</mark>" r="5" fill="#c2410c"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Connecting Line --&gt;
+    &lt;pxl-line 
+      x1="toLocal(ref.pointA, 'tx')" y1="toLocal(ref.pointA, 'ty')" 
+      x2="toLocal(ref.pointB, 'tx')" y2="toLocal(ref.pointB, 'ty')" 
+      stroke="#94a3b8" strokewidth="2"&gt;
+    &lt;/pxl-line&gt;
+  &lt;/pxl-Layer&gt;
+&lt;/pxl-Stage&gt;</code></pre>
+
+      <div class="demo-container">
+        
+        <!~~ Tabbed Controls ~~>
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec11LayerTab')">Layer</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec11PointATab')">Point A</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec11PointBTab')">Point B</button>
+            </div>
+          </div>
+
+          <div class="tab-content active" id="sec11LayerTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="sec11LayerXVal">500</span></label>
+                <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
+                  oninput="document.getElementById('sec11Layer').setAttribute('x', this.value); document.getElementById('sec11LayerXVal').innerText = this.value; document.getElementById('sec11LayerXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec11LayerYVal">300</span></label>
+                <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
+                  oninput="document.getElementById('sec11Layer').setAttribute('y', this.value); document.getElementById('sec11LayerYVal').innerText = this.value; document.getElementById('sec11LayerYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="sec11LayerRotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec11Layer').setAttribute('rotate', this.value); document.getElementById('sec11LayerRotVal').innerText = this.value + '°'; document.getElementById('sec11LayerRotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="sec11PointATab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="sec11PointAXVal">-400</span></label>
+                <input type="range" min="-500" max="500" step="10" value="-400" autocomplete="off"
+                  oninput="document.getElementById('sec11PointA').setAttribute('x', this.value); document.getElementById('sec11PointAXVal').innerText = this.value; document.getElementById('sec11PointAXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec11PointAYVal">0</span></label>
+                <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec11PointA').setAttribute('y', this.value); document.getElementById('sec11PointAYVal').innerText = this.value; document.getElementById('sec11PointAYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Offset X <span id="sec11PointADxVal">0</span></label>
+                <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec11PointA').setAttribute('dx', this.value); document.getElementById('sec11PointADxVal').innerText = this.value; document.getElementById('sec11PointADxCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Offset Y <span id="sec11PointADyVal">-200</span></label>
+                <input type="range" min="-300" max="300" step="10" value="-200" autocomplete="off"
+                  oninput="document.getElementById('sec11PointA').setAttribute('dy', this.value); document.getElementById('sec11PointADyVal').innerText = this.value; document.getElementById('sec11PointADyCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="sec11PointARotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec11PointA').setAttribute('rotate', this.value); document.getElementById('sec11PointARotVal').innerText = this.value + '°'; document.getElementById('sec11PointARotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="sec11PointBTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Center X <span id="sec11PointBXVal">150</span></label>
+                <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off"
+                  oninput="document.getElementById('sec11PointB').setAttribute('x', this.value); document.getElementById('sec11PointBXVal').innerText = this.value; document.getElementById('sec11PointBXCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Center Y <span id="sec11PointBYVal">0</span></label>
+                <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec11PointB').setAttribute('y', this.value); document.getElementById('sec11PointBYVal').innerText = this.value; document.getElementById('sec11PointBYCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Offset X <span id="sec11PointBDxVal">0</span></label>
+                <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec11PointB').setAttribute('dx', this.value); document.getElementById('sec11PointBDxVal').innerText = this.value; document.getElementById('sec11PointBDxCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Offset Y <span id="sec11PointBDyVal">200</span></label>
+                <input type="range" min="-300" max="300" step="10" value="200" autocomplete="off"
+                  oninput="document.getElementById('sec11PointB').setAttribute('dy', this.value); document.getElementById('sec11PointBDyVal').innerText = this.value; document.getElementById('sec11PointBDyCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Rotation <span id="sec11PointBRotVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                  oninput="document.getElementById('sec11PointB').setAttribute('rotate', this.value); document.getElementById('sec11PointBRotVal').innerText = this.value + '°'; document.getElementById('sec11PointBRotCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+        </div>
+        <pxl-stage ratio="5 / 3" class="demo-stage">
+          <!~~ 1. Rotating Background Grid ~~>
+          <pxl-layer x="ref.sec11Layer.x" y="ref.sec11Layer.y" rotate="ref.sec11Layer.rotate">
+            <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+          </pxl-layer>
+
+          <!~~ 2. Fixed Stage-Level Layer Helpers ~~>
+          <pxl-layer>
+            <pxl-line x1="0" y1="ref.sec11Layer.y" x2="ref.sec11Layer.x" y2="ref.sec11Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec11Layer.x / 2" y="ref.sec11Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec11Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
+            <pxl-line x1="ref.sec11Layer.x" y1="0" x2="ref.sec11Layer.x" y2="ref.sec11Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec11Layer.x + 15" y="ref.sec11Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec11Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
+          </pxl-layer>
+
+          <pxl-layer id="sec11Layer" x="500" y="300" rotate="0">
+            <!~~ 3. Layer Axes & Center ~~>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
+            <pxl-text x="15" y="15" baseline="top" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
+            <!~~ 4. Shape Helpers ~~>
+            <!~~ Rotating Crosshairs for Center A and Center B (Visible only when rotated) ~~>
+            <pxl-group x="ref.sec11PointA.x" y="ref.sec11PointA.y" rotate="ref.sec11PointA.rotate" hidden="ref.sec11PointA.rotate == 0">
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            </pxl-group>
+            <pxl-group x="ref.sec11PointB.x" y="ref.sec11PointB.y" rotate="ref.sec11PointB.rotate" hidden="ref.sec11PointB.rotate == 0">
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            </pxl-group>
+
+            <!~~ Orbit Ring Guides ~~>
+            <pxl-circle x="ref.sec11PointA.x" y="ref.sec11PointA.y" r="sqrt(ref.sec11PointA.dx**2 + ref.sec11PointA.dy**2)" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]" fill="none"></pxl-circle>
+            <pxl-circle x="ref.sec11PointB.x" y="ref.sec11PointB.y" r="sqrt(ref.sec11PointB.dx**2 + ref.sec11PointB.dy**2)" stroke="#fdba74" strokewidth="2" linedash="[5, 5]" fill="none"></pxl-circle>
+
+            <!~~ Radius vectors connecting Centers to Orbiting positions ~~>
+            <pxl-line x1="ref.sec11PointA.x" y1="ref.sec11PointA.y" x2="toLocal(ref.sec11PointA, 'tx')" y2="toLocal(ref.sec11PointA, 'ty')" stroke="#2563eb" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.sec11PointB.x" y1="ref.sec11PointB.y" x2="toLocal(ref.sec11PointB, 'tx')" y2="toLocal(ref.sec11PointB, 'ty')" stroke="#ea580c" strokewidth="2" linedash="[5, 5]"></pxl-line>
+
+            <!~~ Connecting Line (Drawn behind the points) ~~>
+            <pxl-line 
+              x1="toLocal(ref.sec11PointA, 'tx')" y1="toLocal(ref.sec11PointA, 'ty')" 
+              x2="toLocal(ref.sec11PointB, 'tx')" y2="toLocal(ref.sec11PointB, 'ty')" 
+              stroke="#cbd5e1" strokewidth="4">
+            </pxl-line>
+
+            <!~~ 5. Orbiting Shapes ~~>
+            <pxl-circle id="sec11PointA" x="-400" y="0" dx="0" dy="-200" rotate="0" r="5" fill="#1d4ed8"></pxl-circle>
+            <pxl-circle id="sec11PointB" x="150" y="0" dx="0" dy="200" rotate="0" r="5" fill="#c2410c"></pxl-circle>
+
+            <!~~ 6. Shape Center & Orbiting Offset Markers (Top) ~~>
+            <!~~ Point A Center Dot & Label ~~>
+            <pxl-circle x="ref.sec11PointA.x" y="ref.sec11PointA.y" r="5" fill="#60a5fa"></pxl-circle>
+            <pxl-text 
+              x="ref.sec11PointA.x" 
+              y="ref.sec11PointA.y" 
+              dx="15" 
+              dy="-15" 
+              rotate="ref.sec11PointA.rotate" 
+              baseline="bottom" 
+              text="'Center A'" 
+              size="27" fill="#60a5fa" font="monospace">
+            </pxl-text>
+            <!~~ Point B Center Dot & Label ~~>
+            <pxl-circle x="ref.sec11PointB.x" y="ref.sec11PointB.y" r="5" fill="#fb923c"></pxl-circle>
+            <pxl-text 
+              x="ref.sec11PointB.x" 
+              y="ref.sec11PointB.y" 
+              dx="15" 
+              dy="-15" 
+              rotate="ref.sec11PointB.rotate" 
+              baseline="bottom" 
+              text="'Center B'" 
+              size="27" fill="#fb923c" font="monospace">
+            </pxl-text>
+
+            <!~~ Point A Orbiting Offset Dot & Label ~~>
+            <pxl-circle x="toLocal(ref.sec11PointA, 'tx')" y="toLocal(ref.sec11PointA, 'ty')" r="5" fill="#1d4ed8"></pxl-circle>
+            <pxl-text x="toLocal(ref.sec11PointA, 'tx')" y="toLocal(ref.sec11PointA, 'ty')" dx="15" dy="-15" rotate="ref.sec11PointA.rotate" baseline="bottom" text="'Offset A'" size="27" fill="#1d4ed8" font="monospace"></pxl-text>
+            <!~~ Point B Orbiting Offset Dot & Label ~~>
+            <pxl-circle x="toLocal(ref.sec11PointB, 'tx')" y="toLocal(ref.sec11PointB, 'ty')" r="5" fill="#c2410c"></pxl-circle>
+            <pxl-text x="toLocal(ref.sec11PointB, 'tx')" y="toLocal(ref.sec11PointB, 'ty')" dx="15" dy="-15" rotate="ref.sec11PointB.rotate" baseline="bottom" text="'Offset B'" size="27" fill="#c2410c" font="monospace"></pxl-text>
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+      <!~~
+      <h2>12. Animated Orbits</h2>
+      <p>This is where Kilopixel's coordinate system shines. By combining local Offsets with dynamic rotation, we can create perfect orbital mechanics mathematically effortlessly!</p>
+      <p>The <code>dx</code> attribute pushes the planet away from the Sun (the <code>x</code> and <code>y</code> Pivot Point), and the <code>rotate</code> attribute spins that entire Offset vector around the Center.</p>
+      <p>Use the sliders below to see how standard HTML inputs can instantly drive the Kilopixel canvas via the <code>ref.*</code> registry.</p>
+      
+      <pre><code class="language-html">&lt;!-- Standard HTML Inputs driving Kilopixel variables --&gt;
+&lt;input type="range" oninput="document.getElementById('sec12OrbitOffset').setAttribute('value', this.value)"&gt;
+&lt;input type="range" oninput="document.getElementById('sec12OrbitSpeed').setAttribute('value', this.value)"&gt;
+
+&lt;pxl-Stage ratio="5 / 3"&gt;
+  &lt;pxl-Layer x="500" y="300"&gt;
+    &lt;!-- Kilopixel Variables --&gt;
+    &lt;pxl-var id="sec12OrbitOffset" value="150"&gt;&lt;/pxl-var&gt;
+    &lt;pxl-var id="sec12OrbitSpeed" value="90"&gt;&lt;/pxl-var&gt;
+
+    &lt;!-- The Sun (Pivot Point) --&gt;
+    &lt;pxl-circle r="30" fill="#f59e0b"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Orbiting Planet --&gt;
+    &lt;pxl-circle 
+      dx="ref.sec12OrbitOffset.value" 
+      rotate="t * ref.sec12OrbitSpeed.value" 
+      r="20" fill="#3b82f6"&gt;
+    &lt;/pxl-circle&gt;
+  &lt;/pxl-Layer&gt;
+&lt;/pxl-Stage&gt;</code></pre>
+
+      <div class="demo-container">
+        
+        &lt;!-- Controls --&gt;
+        <div class="demo-controls">
+          <div class="playground-sliders">
+            <div class="control-group">
+              <label>Offset X <span id="sec12OrbitOffsetVal">150</span></label>
+              <input type="range" min="0" max="300" value="150" autocomplete="off"
+                oninput="document.getElementById('sec12OrbitOffset').setAttribute('value', this.value); document.getElementById('sec12OrbitOffsetVal').innerText = this.value;">
+            </div>
+            <div class="control-group">
+              <label>Speed (degrees/s) <span id="sec12OrbitSpeedVal">90</span></label>
+              <input type="range" min="-180" max="180" value="90" autocomplete="off"
+                oninput="document.getElementById('sec12OrbitSpeed').setAttribute('value', this.value); document.getElementById('sec12OrbitSpeedVal').innerText = this.value;">
+            </div>
+          </div>
+        </div>
+      </div>
+        <pxl-stage ratio="5 / 3" class="demo-stage">
+          <pxl-layer x="500" y="300">
+            &lt;!-- Reactive Variables --&gt;
+            <pxl-var id="sec12OrbitOffset" value="150"></pxl-var>
+            <pxl-var id="sec12OrbitSpeed" value="90"></pxl-var>
+
+            &lt;!-- Helpers (Grid & Crosshairs) --&gt;
+            <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            <pxl-line x1="-500" y1="0" x2="500" y2="0" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-300" x2="0" y2="300" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
+            
+            &lt;!-- Crosshair lines tracking the object using toLocal --&gt;
+            <pxl-line x1="-500" y1="toLocal(ref.sec12Planet, 'ty')" x2="500" y2="toLocal(ref.sec12Planet, 'ty')" stroke="#94a3b8" strokewidth="1"></pxl-line>
+            <pxl-line x1="toLocal(ref.sec12Planet, 'tx')" y1="-300" x2="toLocal(ref.sec12Planet, 'tx')" y2="300" stroke="#94a3b8" strokewidth="1"></pxl-line>
+
+            &lt;!-- Grey arrows pointing to current X and Y --&gt;
+            <pxl-line x1="0" y1="0" x2="toLocal(ref.sec12Planet, 'tx')" y2="0" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
+            <pxl-line x1="0" y1="0" x2="0" y2="toLocal(ref.sec12Planet, 'ty')" stroke="#94a3b8" strokewidth="4" arrowend="auto"></pxl-line>
+
+            &lt;!-- The Sun --&gt;
+            <pxl-circle r="30" fill="#f59e0b"></pxl-circle>
+
+            &lt;!-- The Orbiting Planet --&gt;
+            <pxl-circle id="sec12Planet" 
+              dx="ref.sec12OrbitOffset.value" 
+              rotate="t * ref.sec12OrbitSpeed.value" 
+              r="20" fill="#3b82f6">
+            </pxl-circle>
+
+            &lt;!-- Red Arrow illustrating the dx Offset vector --&gt;
+            <pxl-line 
+              x="0" y="0" 
+              x2="ref.sec12OrbitOffset.value" y2="0" 
+              stroke="#f43f5e" strokewidth="4" arrowend="auto" 
+              rotate="t * ref.sec12OrbitSpeed.value">
+            </pxl-line>
+
+            &lt;!-- Circle tracing the orbital path. 
+                 The 'end' calculation ensures the drawn arc dynamically matches the current rotation speed. --&gt;
+            <pxl-circle 
+              r="ref.sec12OrbitOffset.value" 
+              stroke="#f43f5e" 
+              strokewidth="2" 
+              linedash="[5, 5]" 
+              end="(t * ref.sec12OrbitSpeed.value) % 360" 
+              fill="none">
+            </pxl-circle>
+          </pxl-layer>
+        </pxl-stage>
+      </div>>
+      --
+    </main>
+  </div>
+  
+  <!-- Prism Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+
+  <!-- Highlight HTML marks when sliders are active -->
+  <script>
+    const SEC1_RATIOS = [
+      '9 / 16',
+      '2 / 3',
+      '3 / 4',
+      '4 / 5',
+      '1 / 1',
+      '5 / 4',
+      '4 / 3',
+      '7 / 5',
+      '3 / 2',
+      '16 / 10',
+      '5 / 3',
+      '16 / 9',
+      '2 / 1',
+      '21 / 9',
+      '3 / 1'
+    ];
+
+    function updateSec1Ratio(idx) {
+      const val = SEC1_RATIOS[idx] || '5 / 3';
+      const stg = document.getElementById('sec1Stage');
+      if (stg) stg.setAttribute('ratio', val);
+      
+      const lbl = document.getElementById('sec1RatioVal');
+      if (lbl) lbl.innerText = val;
+      const code = document.getElementById('sec1RatioCode');
+      if (code) code.innerText = val;
+    }
+
+    function updateSec1Width(val) {
+      const container = document.getElementById('sec1Container');
+      if (container) container.style.width = val + '%';
+      
+      const lbl = document.getElementById('sec1WidthVal');
+      if (lbl) lbl.innerText = val + '%';
+      const code = document.getElementById('sec1WidthCode');
+      if (code) code.innerText = val + '%';
+    }
+
+    function updateSec2Ratio(idx) {
+      const val = SEC1_RATIOS[idx] || '5 / 3';
+      const stg = document.getElementById('sec2Stage');
+      if (stg) stg.setAttribute('ratio', val);
+      
+      const lbl = document.getElementById('sec2RatioVal');
+      if (lbl) lbl.innerText = val;
+      const code = document.getElementById('sec2RatioCode');
+      if (code) code.innerText = val;
+    }
+
+  </script>
+</body>
+</html>
