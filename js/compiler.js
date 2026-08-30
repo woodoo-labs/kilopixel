@@ -91,6 +91,7 @@ pxl.scope.radial = (config, colorsArray) => {
   } else if (len === 4) {
     x1 = a[0]; y1 = a[1]; ex1 = a[2]; ey1 = a[3];
     x0 = x1; y0 = y1;
+    ex0 = x0; ey0 = y0;
   } else if (len === 6) {
     x0 = a[0]; y0 = a[1]; x1 = a[2]; y1 = a[3]; ex1 = a[4]; ey1 = a[5];
     ex0 = x0; ey0 = y0;

@@ -1339,7 +1339,7 @@ Plain text attributes work without quotes — the compiler's Fast Path handles t
 <!-- These work because parentheses trigger dynamic evaluation -->
 <pxl-circle fill="hsl(t * 36, 80, 50)" ...></pxl-circle>
 <pxl-rect fill="linear(45, ['red', 'blue'])" ...></pxl-rect>
-<pxl-circle fill="radial(1, ['white', 'black'])" ...></pxl-circle>
+<pxl-circle fill="radial([1, 1], ['white', 'black'])" ...></pxl-circle>
 <pxl-circle fill="conic(0, ['red', 'yellow', 'lime', 'cyan', 'blue', 'magenta', 'red'])" ...></pxl-circle>
 ```
 
@@ -1438,7 +1438,7 @@ Note: `ref.myShape.tx` gives `x + dx` in the shape's OWN local space. `toLocal(r
 - **Don't animate inside static CSS filter strings** → use Array syntax `filter="[blur(wave(2)*10)]"` instead
 - **CSS filter pixels vs logical units** → filter helpers (`blur(5)`) auto-scale the values to physical pixels; native shadows (`shadowblur="5"`) also use responsive logical units (`5 * u`)
 - **Don't nest `<pxl-stage>` inside `<pxl-stage>`** → stages are independent roots
-- **Gradient radius** → use `1` to stretch to edge, not `0.5`
+- **Radial Gradients** → use point coordinates like `[1, 1]` to stretch to the corner, scalar radii are not supported.
 
 #### 12. Scope Available in Expressions
 
