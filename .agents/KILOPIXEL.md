@@ -400,14 +400,14 @@ Coordinates are **proportional** to the shape's bounding box. `[0, 0]` = top-lef
 
 #### `radial(config, colorsArray)`
 
-The radial gradient API uses a **Point-Based** architecture. You define a center point and an "extend" point, and the engine dynamically calculates the absolute pixel distance between them as the radius. This eliminates all aspect-ratio ambiguity on non-square shapes.
+The radial gradient API uses a **Point-Based** architecture. You define a Center point `(cx, cy)` and a Radius point `(rx, ry)`, and the engine dynamically calculates the absolute pixel distance between them as the true radius. This eliminates all aspect-ratio ambiguity on non-square shapes.
 
 | Args | Syntax | Description |
 |:---:|---|---|
-| **2** | `radial([ex1, ey1], colors)` | Centered gradient. The radius extends to `(ex1, ey1)`. |
-| **4** | `radial([x1, y1, ex1, ey1], colors)` | You explicitly define the center `(x1, y1)` and the extend point `(ex1, ey1)`. |
-| **6** | `radial([x0, y0, x1, y1, ex1, ey1], colors)` | 3D Spotlight. Start origin is at `(x0, y0)`. Outer circle is centered at `(x1, y1)` extending to `(ex1, ey1)`. |
-| **8** | `radial([x0, y0, ex0, ey0, x1, y1, ex1, ey1], colors)` | Full explicit control defining both the inner and outer circles. |
+| **2** | `radial([rx1, ry1], colors)` | Centered gradient. The radius extends to `(rx1, ry1)`. |
+| **4** | `radial([cx1, cy1, rx1, ry1], colors)` | You explicitly define the center `(cx1, cy1)` and the radius point `(rx1, ry1)`. |
+| **6** | `radial([cx0, cy0, cx1, cy1, rx1, ry1], colors)` | 3D Spotlight. Start origin is at `(cx0, cy0)`. Outer circle is centered at `(cx1, cy1)` extending to `(rx1, ry1)`. |
+| **8** | `radial([cx0, cy0, rx0, ry0, cx1, cy1, rx1, ry1], colors)` | Full explicit control defining both the inner and outer circles. |
 
 > [!TIP]
 > **No Math Required for Circles!** Because the radius is physically anchored to a point, passing `[1, 0.5]` automatically touches the exact center of the right edge, creating a perfectly fitted circle. Passing `[1, 1]` automatically reaches the exact diagonal corner.
