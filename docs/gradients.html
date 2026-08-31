@@ -671,7 +671,7 @@
         <!-- ================================================================= -->
         <h2 style="margin-top: 4rem;">3. Radial Gradient (2-Value Mode)</h2>
         <p>The simplest form of the radial gradient uses a 2-value coordinate array: <code>[rx1, ry1]</code>. In this mode, the center of the gradient is automatically anchored to the exact center of the shape's bounding box <code>(0.5, 0.5)</code>.</p>
-        <p>Instead of providing a scalar radius, you provide a <strong>radius point</strong>. The engine converts both points to physical pixels and calculates the Euclidean distance between them to form a perfect circular radius. This guarantees that the gradient never stretches into an ellipse on non-square rectangles, and makes it incredibly easy to snap gradients to edges or corners.</p>
+        <p>Instead of providing a scalar radius, you provide a <strong>Radius Point 1</strong>. The engine converts both points to physical pixels and calculates the Euclidean distance between them to form a perfect circular radius. This guarantees that the gradient never stretches into an ellipse on non-square rectangles, and makes it incredibly easy to snap gradients to edges or corners.</p>
 
         <div class="callout-info">
           <p class="callout-body" style="margin-bottom: 0.5rem;"><strong>2-Value Mode Syntax:</strong> (Normalized coordinates)</p>
@@ -708,7 +708,7 @@
               <div class="tab-content" id="sec3ex1RectTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Width</span> <span id="sec3ex1RectWVal">400</span></label>
+                    <label><span>Width <span class="indicator-dot"></span></span> <span id="sec3ex1RectWVal">400</span></label>
                     <input type="range" min="100" max="800" step="10" value="400" autocomplete="off"
                       oninput="document.getElementById('sec3ex1Rect').setAttribute('w', this.value); document.getElementById('sec3ex1RectWVal').innerText = this.value; document.getElementById('sec3ex1RectWCode').innerText = this.value;">
                   </div>
@@ -718,7 +718,7 @@
                       oninput="document.getElementById('sec3ex1Rect').setAttribute('h', this.value); document.getElementById('sec3ex1RectHVal').innerText = this.value; document.getElementById('sec3ex1RectHCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec3ex1RectRotVal">0°</span></label>
+                    <label><span>Rotation</span> <span id="sec3ex1RectRotVal">0°</span></label>
                     <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
                       oninput="document.getElementById('sec3ex1Rect').setAttribute('rotate', this.value); document.getElementById('sec3ex1RectRotVal').innerText = this.value + '°'; document.getElementById('sec3ex1RectRotCode').innerText = this.value;">
                   </div>
@@ -729,12 +729,12 @@
               <div class="tab-content active" id="sec3ex1GradTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Radius X (rx1) <span class="indicator-dot"></span></span> <span id="sec3ex1RX1Val">1</span></label>
+                    <label><span>Radius X1 <span class="indicator-dot"></span></span> <span id="sec3ex1RX1Val">1</span></label>
                     <input type="range" id="sec3ex1RX1Input" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
                       oninput="document.getElementById('sec3ex1RX1').setAttribute('value', this.value); document.getElementById('sec3ex1RX1Val').innerText = this.value; document.getElementById('sec3ex1RX1Code').innerText = this.value; document.getElementById('sec3ex1Rect').setAttribute('fill', `radial([${this.value}, ${document.getElementById('sec3ex1RY1Input').value}], ['#e2e8f0', '#475569'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>Radius Y (ry1) <span class="indicator-dot"></span></span> <span id="sec3ex1RY1Val">1</span></label>
+                    <label><span>Radius Y1 <span class="indicator-dot"></span></span> <span id="sec3ex1RY1Val">1</span></label>
                     <input type="range" id="sec3ex1RY1Input" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
                       oninput="document.getElementById('sec3ex1RY1').setAttribute('value', this.value); document.getElementById('sec3ex1RY1Val').innerText = this.value; document.getElementById('sec3ex1RY1Code').innerText = this.value; document.getElementById('sec3ex1Rect').setAttribute('fill', `radial([${document.getElementById('sec3ex1RX1Input').value}, ${this.value}], ['#e2e8f0', '#475569'])`);">
                   </div>
@@ -795,15 +795,15 @@
         <!-- SECTION 4: RADIAL GRADIENT (4-VALUE MODE) -->
         <!-- ================================================================= -->
         <h2 style="margin-top: 4rem;">4. Radial Gradient (4-Value Mode)</h2>
-        <p>The 4-value mode allows you to move the gradient's center point away from the default <code>(0.5, 0.5)</code>. You explicitly define the center point <code>(cx1, cy1)</code> followed by the radius point <code>(rx1, ry1)</code>.</p>
-        <p>The Euclidean distance logic remains exactly the same, but the radius is now calculated between your custom center point and the radius point. This is incredibly useful for off-center highlights, lighting effects, or matching a gradient's origin to a specific focal point in your UI.</p>
+        <p>The 4-value mode allows you to move the gradient's origin away from the default <code>(0.5, 0.5)</code>. You explicitly define the origin by setting <strong>Center 0</strong> <code>(cx0, cy0)</code>, followed by the boundary <strong>Radius 1</strong> <code>(rx1, ry1)</code>.</p>
+        <p>The Euclidean distance logic remains exactly the same, but the radius is now calculated between your custom Center 0 point and the Radius 1 point. This is incredibly useful for off-center highlights, lighting effects, or matching a gradient's origin to a specific focal point in your UI.</p>
 
         <div class="callout-info">
           <p class="callout-body" style="margin-bottom: 0.5rem;"><strong>4-Value Mode Syntax:</strong> (Normalized coordinates)</p>
-          <pre style="margin-top: 0; margin-bottom: 0;"><code class="language-javascript">fill="radial([cx1, cy1, rx1, ry1], colorsArray)"</code></pre>
+          <pre style="margin-top: 0; margin-bottom: 0;"><code class="language-javascript">fill="radial([cx0, cy0, rx1, ry1], colorsArray)"</code></pre>
         </div>
 
-        <p style="margin-top: 2rem;">In this example, drag both the center coordinates <code>(cx1, cy1)</code> and the radius coordinates <code>(rx1, ry1)</code>. Notice how the dashed radius circle follows the center point, while its total size is determined by the physical distance to the radius point.</p>
+        <p style="margin-top: 2rem;">In this example, drag both the Center 0 coordinates <code>(cx0, cy0)</code> and the Radius 1 coordinates <code>(rx1, ry1)</code>. Notice how the dashed radius circle follows Center 0, while its total size is determined by the physical distance to the Radius 1 point.</p>
 
         <div class="example-card">
           <div class="example-code">
@@ -813,7 +813,7 @@
       x="500" y="300"
       w="<mark id="sec4ex1RectWCode">400</mark>" h="<mark id="sec4ex1RectHCode">250</mark>" 
       rotate="<mark id="sec4ex1RectRotCode">0</mark>"
-      fill="radial([<mark id="sec4ex1CX1Code">0.3</mark>, <mark id="sec4ex1CY1Code">0.3</mark>, <mark id="sec4ex1RX1Code">1</mark>, <mark id="sec4ex1RY1Code">1</mark>], ['#e2e8f0', '#475569'])"&gt;
+      fill="radial([<mark id="sec4ex1CX0Code">0.3</mark>, <mark id="sec4ex1CY0Code">0.3</mark>, <mark id="sec4ex1RX1Code">1</mark>, <mark id="sec4ex1RY1Code">1</mark>], ['#e2e8f0', '#475569'])"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -833,7 +833,7 @@
               <div class="tab-content" id="sec4ex1RectTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Width</span> <span id="sec4ex1RectWVal">400</span></label>
+                    <label><span>Width <span class="indicator-dot"></span></span> <span id="sec4ex1RectWVal">400</span></label>
                     <input type="range" min="100" max="800" step="10" value="400" autocomplete="off"
                       oninput="document.getElementById('sec4ex1Rect').setAttribute('w', this.value); document.getElementById('sec4ex1RectWVal').innerText = this.value; document.getElementById('sec4ex1RectWCode').innerText = this.value;">
                   </div>
@@ -843,7 +843,7 @@
                       oninput="document.getElementById('sec4ex1Rect').setAttribute('h', this.value); document.getElementById('sec4ex1RectHVal').innerText = this.value; document.getElementById('sec4ex1RectHCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec4ex1RectRotVal">0°</span></label>
+                    <label><span>Rotation</span> <span id="sec4ex1RectRotVal">0°</span></label>
                     <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
                       oninput="document.getElementById('sec4ex1Rect').setAttribute('rotate', this.value); document.getElementById('sec4ex1RectRotVal').innerText = this.value + '°'; document.getElementById('sec4ex1RectRotCode').innerText = this.value;">
                   </div>
@@ -854,24 +854,24 @@
               <div class="tab-content active" id="sec4ex1GradTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Center X (cx1) <span class="indicator-dot"></span></span> <span id="sec4ex1CX1Val">0.3</span></label>
-                    <input type="range" id="sec4ex1CX1Input" min="-0.5" max="1.5" step="0.1" value="0.3" autocomplete="off"
-                      oninput="document.getElementById('sec4ex1CX1').setAttribute('value', this.value); document.getElementById('sec4ex1CX1Val').innerText = this.value; document.getElementById('sec4ex1CX1Code').innerText = this.value; document.getElementById('sec4ex1Rect').setAttribute('fill', `radial([${this.value}, ${document.getElementById('sec4ex1CY1Input').value}, ${document.getElementById('sec4ex1RX1Input').value}, ${document.getElementById('sec4ex1RY1Input').value}], ['#e2e8f0', '#475569'])`);">
+                    <label><span>Center X0 <span class="indicator-dot"></span></span> <span id="sec4ex1CX0Val">0.3</span></label>
+                    <input type="range" id="sec4ex1CX0Input" min="-0.5" max="1.5" step="0.1" value="0.3" autocomplete="off"
+                      oninput="document.getElementById('sec4ex1CX0').setAttribute('value', this.value); document.getElementById('sec4ex1CX0Val').innerText = this.value; document.getElementById('sec4ex1CX0Code').innerText = this.value; document.getElementById('sec4ex1Rect').setAttribute('fill', `radial([${this.value}, ${document.getElementById('sec4ex1CY0Input').value}, ${document.getElementById('sec4ex1RX1Input').value}, ${document.getElementById('sec4ex1RY1Input').value}], ['#e2e8f0', '#475569'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>Center Y (cy1) <span class="indicator-dot"></span></span> <span id="sec4ex1CY1Val">0.3</span></label>
-                    <input type="range" id="sec4ex1CY1Input" min="-0.5" max="1.5" step="0.1" value="0.3" autocomplete="off"
-                      oninput="document.getElementById('sec4ex1CY1').setAttribute('value', this.value); document.getElementById('sec4ex1CY1Val').innerText = this.value; document.getElementById('sec4ex1CY1Code').innerText = this.value; document.getElementById('sec4ex1Rect').setAttribute('fill', `radial([${document.getElementById('sec4ex1CX1Input').value}, ${this.value}, ${document.getElementById('sec4ex1RX1Input').value}, ${document.getElementById('sec4ex1RY1Input').value}], ['#e2e8f0', '#475569'])`);">
+                    <label><span>Center Y0 <span class="indicator-dot"></span></span> <span id="sec4ex1CY0Val">0.3</span></label>
+                    <input type="range" id="sec4ex1CY0Input" min="-0.5" max="1.5" step="0.1" value="0.3" autocomplete="off"
+                      oninput="document.getElementById('sec4ex1CY0').setAttribute('value', this.value); document.getElementById('sec4ex1CY0Val').innerText = this.value; document.getElementById('sec4ex1CY0Code').innerText = this.value; document.getElementById('sec4ex1Rect').setAttribute('fill', `radial([${document.getElementById('sec4ex1CX0Input').value}, ${this.value}, ${document.getElementById('sec4ex1RX1Input').value}, ${document.getElementById('sec4ex1RY1Input').value}], ['#e2e8f0', '#475569'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>Radius X (rx1)</span> <span id="sec4ex1RX1Val">1</span></label>
+                    <label><span>Radius X1</span> <span id="sec4ex1RX1Val">1</span></label>
                     <input type="range" id="sec4ex1RX1Input" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
-                      oninput="document.getElementById('sec4ex1RX1').setAttribute('value', this.value); document.getElementById('sec4ex1RX1Val').innerText = this.value; document.getElementById('sec4ex1RX1Code').innerText = this.value; document.getElementById('sec4ex1Rect').setAttribute('fill', `radial([${document.getElementById('sec4ex1CX1Input').value}, ${document.getElementById('sec4ex1CY1Input').value}, ${this.value}, ${document.getElementById('sec4ex1RY1Input').value}], ['#e2e8f0', '#475569'])`);">
+                      oninput="document.getElementById('sec4ex1RX1').setAttribute('value', this.value); document.getElementById('sec4ex1RX1Val').innerText = this.value; document.getElementById('sec4ex1RX1Code').innerText = this.value; document.getElementById('sec4ex1Rect').setAttribute('fill', `radial([${document.getElementById('sec4ex1CX0Input').value}, ${document.getElementById('sec4ex1CY0Input').value}, ${this.value}, ${document.getElementById('sec4ex1RY1Input').value}], ['#e2e8f0', '#475569'])`);">
                   </div>
                   <div class="control-group">
-                    <label><span>Radius Y (ry1)</span> <span id="sec4ex1RY1Val">1</span></label>
+                    <label><span>Radius Y1</span> <span id="sec4ex1RY1Val">1</span></label>
                     <input type="range" id="sec4ex1RY1Input" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
-                      oninput="document.getElementById('sec4ex1RY1').setAttribute('value', this.value); document.getElementById('sec4ex1RY1Val').innerText = this.value; document.getElementById('sec4ex1RY1Code').innerText = this.value; document.getElementById('sec4ex1Rect').setAttribute('fill', `radial([${document.getElementById('sec4ex1CX1Input').value}, ${document.getElementById('sec4ex1CY1Input').value}, ${document.getElementById('sec4ex1RX1Input').value}, ${this.value}], ['#e2e8f0', '#475569'])`);">
+                      oninput="document.getElementById('sec4ex1RY1').setAttribute('value', this.value); document.getElementById('sec4ex1RY1Val').innerText = this.value; document.getElementById('sec4ex1RY1Code').innerText = this.value; document.getElementById('sec4ex1Rect').setAttribute('fill', `radial([${document.getElementById('sec4ex1CX0Input').value}, ${document.getElementById('sec4ex1CY0Input').value}, ${document.getElementById('sec4ex1RX1Input').value}, ${this.value}], ['#e2e8f0', '#475569'])`);">
                   </div>
                 </div>
               </div>
@@ -883,19 +883,19 @@
                 
                 <pxl-rect id="sec4ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="radial([0.3, 0.3, 1, 1], ['#e2e8f0', '#475569'])"></pxl-rect>
 
-                <pxl-var id="sec4ex1CX1" value="0.3"></pxl-var>
-                <pxl-var id="sec4ex1CY1" value="0.3"></pxl-var>
+                <pxl-var id="sec4ex1CX0" value="0.3"></pxl-var>
+                <pxl-var id="sec4ex1CY0" value="0.3"></pxl-var>
                 <pxl-var id="sec4ex1RX1" value="1"></pxl-var>
                 <pxl-var id="sec4ex1RY1" value="1"></pxl-var>
 
                 <!-- Math Variables for Geometric Projection -->
-                <pxl-var id="sec4ex1Pcx" value="(ref.sec4ex1CX1.value - 0.5) * ref.sec4ex1Rect.w"></pxl-var>
-                <pxl-var id="sec4ex1Pcy" value="(ref.sec4ex1CY1.value - 0.5) * ref.sec4ex1Rect.h"></pxl-var>
+                <pxl-var id="sec4ex1Pcx0" value="(ref.sec4ex1CX0.value - 0.5) * ref.sec4ex1Rect.w"></pxl-var>
+                <pxl-var id="sec4ex1Pcy0" value="(ref.sec4ex1CY0.value - 0.5) * ref.sec4ex1Rect.h"></pxl-var>
                 <pxl-var id="sec4ex1PrxX" value="(ref.sec4ex1RX1.value - 0.5) * ref.sec4ex1Rect.w"></pxl-var>
                 <pxl-var id="sec4ex1PrxY" value="(ref.sec4ex1RY1.value - 0.5) * ref.sec4ex1Rect.h"></pxl-var>
                 
-                <pxl-var id="sec4ex1Dx" value="ref.sec4ex1PrxX.value - ref.sec4ex1Pcx.value"></pxl-var>
-                <pxl-var id="sec4ex1Dy" value="ref.sec4ex1PrxY.value - ref.sec4ex1Pcy.value"></pxl-var>
+                <pxl-var id="sec4ex1Dx" value="ref.sec4ex1PrxX.value - ref.sec4ex1Pcx0.value"></pxl-var>
+                <pxl-var id="sec4ex1Dy" value="ref.sec4ex1PrxY.value - ref.sec4ex1Pcy0.value"></pxl-var>
                 <pxl-var id="sec4ex1Radius" value="sqrt(ref.sec4ex1Dx.value*ref.sec4ex1Dx.value + ref.sec4ex1Dy.value*ref.sec4ex1Dy.value)"></pxl-var>
                 
                 <pxl-group x="ref.sec4ex1Rect.x" y="ref.sec4ex1Rect.y" rotate="ref.sec4ex1Rect.rotate">
@@ -909,20 +909,20 @@
                   <pxl-circle x="ref.sec4ex1Rect.w/2" y="ref.sec4ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
                   <pxl-text x="ref.sec4ex1Rect.w/2" y="ref.sec4ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
 
-                  <!-- Purple center coordinate (cx1, cy1) -->
-                  <pxl-circle x="ref.sec4ex1Pcx.value" y="ref.sec4ex1Pcy.value" r="8" fill="#8b5cf6"></pxl-circle>
-                  <pxl-text x="ref.sec4ex1Pcx.value" y="ref.sec4ex1Pcy.value - 15" text="'(' + ref.sec4ex1CX1.value + ', ' + ref.sec4ex1CY1.value + ')'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+                  <!-- Purple Center 0 coordinate (cx0, cy0) -->
+                  <pxl-circle x="ref.sec4ex1Pcx0.value" y="ref.sec4ex1Pcy0.value" r="8" fill="#8b5cf6"></pxl-circle>
+                  <pxl-text x="ref.sec4ex1Pcx0.value" y="ref.sec4ex1Pcy0.value - 15" text="'(' + ref.sec4ex1CX0.value + ', ' + ref.sec4ex1CY0.value + ')'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
                   
                   <!-- Purple radius coordinate (rx1, ry1) -->
                   <pxl-text x="ref.sec4ex1PrxX.value" y="ref.sec4ex1PrxY.value + 15" text="'(' + ref.sec4ex1RX1.value + ', ' + ref.sec4ex1RY1.value + ')'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
                   
                   <!-- Purple Radius Circle -->
-                  <pxl-circle x="ref.sec4ex1Pcx.value" y="ref.sec4ex1Pcy.value" r="ref.sec4ex1Radius.value" fill="none" stroke="#a78bfa" strokewidth="2" linedash="[4, 4]"></pxl-circle>
+                  <pxl-circle x="ref.sec4ex1Pcx0.value" y="ref.sec4ex1Pcy0.value" r="ref.sec4ex1Radius.value" fill="none" stroke="#a78bfa" strokewidth="2" linedash="[4, 4]"></pxl-circle>
                   
                   <!-- Purple Gradient Radius Arrow -->
                   <pxl-line 
-                    x1="ref.sec4ex1Pcx.value" 
-                    y1="ref.sec4ex1Pcy.value" 
+                    x1="ref.sec4ex1Pcx0.value" 
+                    y1="ref.sec4ex1Pcy0.value" 
                     x2="ref.sec4ex1PrxX.value" 
                     y2="ref.sec4ex1PrxY.value" 
                     stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>

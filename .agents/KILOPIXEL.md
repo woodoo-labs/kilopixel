@@ -410,10 +410,10 @@ The radial gradient API uses a **Point-Based** architecture. You define a Center
 
 | Args | Syntax | Description |
 |:---:|---|---|
-| **2** | `radial([rx1, ry1], colorsArray)` | Centered gradient. The radius extends to `(rx1, ry1)`. |
-| **4** | `radial([cx1, cy1, rx1, ry1], colorsArray)` | You explicitly define the center `(cx1, cy1)` and the radius point `(rx1, ry1)`. |
-| **6** | `radial([cx0, cy0, cx1, cy1, rx1, ry1], colorsArray)` | 3D Spotlight. Start origin is at `(cx0, cy0)`. Outer circle is centered at `(cx1, cy1)` extending to `(rx1, ry1)`. |
-| **8** | `radial([cx0, cy0, rx0, ry0, cx1, cy1, rx1, ry1], colorsArray)` | Full explicit control defining both the inner and outer circles. |
+| **2** | `radial([rx1, ry1], colorsArray)` | The gradient originates from a collapsed point anchored in the exact center of the shape. You only provide the **Radius Point 1** to define the outer boundary. |
+| **4** | `radial([cx0, cy0, rx1, ry1], colorsArray)` | You explicitly define the origin by setting **Center 0**, followed by the boundary **Radius 1**. The outer circle's center (`cx1, cy1`) is implicitly locked to Center 0. |
+| **6** | `radial([cx0, cy0, cx1, cy1, rx1, ry1], colorsArray)` | **"3D Spotlight"**: You unlock the outer circle! You define **Center 0** as an independent point, offset from the outer circle's **Center 1** and its **Radius 1**. |
+| **8** | `radial([cx0, cy0, rx0, ry0, cx1, cy1, rx1, ry1], colorsArray)` | **Full Explicit Control**: You define everything. You can now define **Radius 0** to expand the inner origin into a solid, hollow core before the gradient blends to Circle 1. |
 
 > [!TIP]
 > **No Math Required for Circles!** Because the radius is physically anchored to a point, passing `[1, 0.5]` automatically touches the exact center of the right edge, creating a perfectly fitted circle. Passing `[1, 1]` automatically reaches the exact diagonal corner.
