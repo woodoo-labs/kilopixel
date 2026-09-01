@@ -933,6 +933,176 @@
           </div>
         </div>
 
+        <!-- ================================================================= -->
+        <!-- SECTION 5: RADIAL GRADIENT (6-VALUE MODE) -->
+        <!-- ================================================================= -->
+        <h2 style="margin-top: 4rem;">5. Radial Gradient (6-Value Mode)</h2>
+        <p>The 6-value mode unlocks the classic <strong>"3D Spotlight"</strong> effect. In HTML5 canvas, radial gradients are actually defined by two circles: an inner circle and an outer circle. In this mode, you unlock the outer circle! You define <strong>Center 0</strong> <code>(cx0, cy0)</code> as an independent origin point, completely offset from the outer circle's <strong>Center 1</strong> <code>(cx1, cy1)</code> and its <strong>Radius 1</strong> <code>(rx1, ry1)</code>.</p>
+        <p>By moving the Center 0 origin away from the outer circle's center, the gradient converges towards that specific spot, creating the illusion of 3D spheres, lighting spotlights, or directional glows.</p>
+
+        <div class="callout-info">
+          <p class="callout-body" style="margin-bottom: 0.5rem;"><strong>6-Value Mode Syntax:</strong> (Normalized coordinates)</p>
+          <pre style="margin-top: 0; margin-bottom: 0;"><code class="language-javascript">fill="radial([cx0, cy0, cx1, cy1, rx1, ry1], colorsArray)"</code></pre>
+        </div>
+
+        <p style="margin-top: 2rem;">In this example, drag Center 0 independently from Center 1. Notice how the dashed line shows the offset vector between the two centers, creating the 3D lighting effect. The purple coordinates represent all gradient-related points, while the blue coordinates represent the fixed bounding box.</p>
+
+        <div class="example-card">
+          <div class="example-code">
+            <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-rect 
+      x="500" y="300"
+      w="<mark id="sec5ex1RectWCode">400</mark>" h="<mark id="sec5ex1RectHCode">250</mark>" 
+      rotate="<mark id="sec5ex1RectRotCode">0</mark>"
+      fill="radial([<mark id="sec5ex1CX0Code">0.2</mark>, <mark id="sec5ex1CY0Code">0.2</mark>, <mark id="sec5ex1CX1Code">0.5</mark>, <mark id="sec5ex1CY1Code">0.5</mark>, <mark id="sec5ex1RX1Code">1</mark>, <mark id="sec5ex1RY1Code">1</mark>], ['#e2e8f0', '#475569'])"&gt;
+    &lt;/pxl-rect&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+          </div>
+
+          <div class="demo-container">
+            <div class="demo-controls">
+              <div class="demo-controls-header">
+                <h3 class="demo-controls-title">Controls</h3>
+                <div class="demo-tabs">
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec5ex1RectTab')">Rect</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec5ex1GradTab')">Gradient</button>
+                </div>
+              </div>
+              
+              <!-- Rect Tab -->
+              <div class="tab-content" id="sec5ex1RectTab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Width <span class="indicator-dot"></span></span> <span id="sec5ex1RectWVal">400</span></label>
+                    <input type="range" min="100" max="800" step="10" value="400" autocomplete="off"
+                      oninput="document.getElementById('sec5ex1Rect').setAttribute('w', this.value); document.getElementById('sec5ex1RectWVal').innerText = this.value; document.getElementById('sec5ex1RectWCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Height</span> <span id="sec5ex1RectHVal">250</span></label>
+                    <input type="range" min="50" max="500" step="10" value="250" autocomplete="off"
+                      oninput="document.getElementById('sec5ex1Rect').setAttribute('h', this.value); document.getElementById('sec5ex1RectHVal').innerText = this.value; document.getElementById('sec5ex1RectHCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Rotation</span> <span id="sec5ex1RectRotVal">0°</span></label>
+                    <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec5ex1Rect').setAttribute('rotate', this.value); document.getElementById('sec5ex1RectRotVal').innerText = this.value + '°'; document.getElementById('sec5ex1RectRotCode').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gradient Tab -->
+              <div class="tab-content active" id="sec5ex1GradTab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Center X0 <span class="indicator-dot"></span></span> <span id="sec5ex1CX0Val">0.2</span></label>
+                    <input type="range" id="sec5ex1CX0Input" min="-0.5" max="1.5" step="0.1" value="0.2" autocomplete="off"
+                      oninput="document.getElementById('sec5ex1CX0').setAttribute('value', this.value); document.getElementById('sec5ex1CX0Val').innerText = this.value; document.getElementById('sec5ex1CX0Code').innerText = this.value; document.getElementById('sec5ex1Rect').setAttribute('fill', `radial([${this.value}, ${document.getElementById('sec5ex1CY0Input').value}, ${document.getElementById('sec5ex1CX1Input').value}, ${document.getElementById('sec5ex1CY1Input').value}, ${document.getElementById('sec5ex1RX1Input').value}, ${document.getElementById('sec5ex1RY1Input').value}], ['#e2e8f0', '#475569'])`);">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Center Y0 <span class="indicator-dot"></span></span> <span id="sec5ex1CY0Val">0.2</span></label>
+                    <input type="range" id="sec5ex1CY0Input" min="-0.5" max="1.5" step="0.1" value="0.2" autocomplete="off"
+                      oninput="document.getElementById('sec5ex1CY0').setAttribute('value', this.value); document.getElementById('sec5ex1CY0Val').innerText = this.value; document.getElementById('sec5ex1CY0Code').innerText = this.value; document.getElementById('sec5ex1Rect').setAttribute('fill', `radial([${document.getElementById('sec5ex1CX0Input').value}, ${this.value}, ${document.getElementById('sec5ex1CX1Input').value}, ${document.getElementById('sec5ex1CY1Input').value}, ${document.getElementById('sec5ex1RX1Input').value}, ${document.getElementById('sec5ex1RY1Input').value}], ['#e2e8f0', '#475569'])`);">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Center X1 <span class="indicator-dot"></span></span> <span id="sec5ex1CX1Val">0.5</span></label>
+                    <input type="range" id="sec5ex1CX1Input" min="-0.5" max="1.5" step="0.1" value="0.5" autocomplete="off"
+                      oninput="document.getElementById('sec5ex1CX1').setAttribute('value', this.value); document.getElementById('sec5ex1CX1Val').innerText = this.value; document.getElementById('sec5ex1CX1Code').innerText = this.value; document.getElementById('sec5ex1Rect').setAttribute('fill', `radial([${document.getElementById('sec5ex1CX0Input').value}, ${document.getElementById('sec5ex1CY0Input').value}, ${this.value}, ${document.getElementById('sec5ex1CY1Input').value}, ${document.getElementById('sec5ex1RX1Input').value}, ${document.getElementById('sec5ex1RY1Input').value}], ['#e2e8f0', '#475569'])`);">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Center Y1 <span class="indicator-dot"></span></span> <span id="sec5ex1CY1Val">0.5</span></label>
+                    <input type="range" id="sec5ex1CY1Input" min="-0.5" max="1.5" step="0.1" value="0.5" autocomplete="off"
+                      oninput="document.getElementById('sec5ex1CY1').setAttribute('value', this.value); document.getElementById('sec5ex1CY1Val').innerText = this.value; document.getElementById('sec5ex1CY1Code').innerText = this.value; document.getElementById('sec5ex1Rect').setAttribute('fill', `radial([${document.getElementById('sec5ex1CX0Input').value}, ${document.getElementById('sec5ex1CY0Input').value}, ${document.getElementById('sec5ex1CX1Input').value}, ${this.value}, ${document.getElementById('sec5ex1RX1Input').value}, ${document.getElementById('sec5ex1RY1Input').value}], ['#e2e8f0', '#475569'])`);">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Radius X1</span> <span id="sec5ex1RX1Val">1</span></label>
+                    <input type="range" id="sec5ex1RX1Input" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
+                      oninput="document.getElementById('sec5ex1RX1').setAttribute('value', this.value); document.getElementById('sec5ex1RX1Val').innerText = this.value; document.getElementById('sec5ex1RX1Code').innerText = this.value; document.getElementById('sec5ex1Rect').setAttribute('fill', `radial([${document.getElementById('sec5ex1CX0Input').value}, ${document.getElementById('sec5ex1CY0Input').value}, ${document.getElementById('sec5ex1CX1Input').value}, ${document.getElementById('sec5ex1CY1Input').value}, ${this.value}, ${document.getElementById('sec5ex1RY1Input').value}], ['#e2e8f0', '#475569'])`);">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Radius Y1</span> <span id="sec5ex1RY1Val">1</span></label>
+                    <input type="range" id="sec5ex1RY1Input" min="-0.5" max="1.5" step="0.1" value="1" autocomplete="off"
+                      oninput="document.getElementById('sec5ex1RY1').setAttribute('value', this.value); document.getElementById('sec5ex1RY1Val').innerText = this.value; document.getElementById('sec5ex1RY1Code').innerText = this.value; document.getElementById('sec5ex1Rect').setAttribute('fill', `radial([${document.getElementById('sec5ex1CX0Input').value}, ${document.getElementById('sec5ex1CY0Input').value}, ${document.getElementById('sec5ex1CX1Input').value}, ${document.getElementById('sec5ex1CY1Input').value}, ${document.getElementById('sec5ex1RX1Input').value}, ${this.value}], ['#e2e8f0', '#475569'])`);">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <pxl-stage id="sec5ex1Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                
+                <pxl-rect id="sec5ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="radial([0.2, 0.2, 0.5, 0.5, 1, 1], ['#e2e8f0', '#475569'])"></pxl-rect>
+
+                <pxl-var id="sec5ex1CX0" value="0.2"></pxl-var>
+                <pxl-var id="sec5ex1CY0" value="0.2"></pxl-var>
+                <pxl-var id="sec5ex1CX1" value="0.5"></pxl-var>
+                <pxl-var id="sec5ex1CY1" value="0.5"></pxl-var>
+                <pxl-var id="sec5ex1RX1" value="1"></pxl-var>
+                <pxl-var id="sec5ex1RY1" value="1"></pxl-var>
+
+                <!-- Math Variables for Geometric Projection -->
+                <pxl-var id="sec5ex1Pcx0" value="(ref.sec5ex1CX0.value - 0.5) * ref.sec5ex1Rect.w"></pxl-var>
+                <pxl-var id="sec5ex1Pcy0" value="(ref.sec5ex1CY0.value - 0.5) * ref.sec5ex1Rect.h"></pxl-var>
+                
+                <pxl-var id="sec5ex1Pcx1" value="(ref.sec5ex1CX1.value - 0.5) * ref.sec5ex1Rect.w"></pxl-var>
+                <pxl-var id="sec5ex1Pcy1" value="(ref.sec5ex1CY1.value - 0.5) * ref.sec5ex1Rect.h"></pxl-var>
+                
+                <pxl-var id="sec5ex1Prx1X" value="(ref.sec5ex1RX1.value - 0.5) * ref.sec5ex1Rect.w"></pxl-var>
+                <pxl-var id="sec5ex1Prx1Y" value="(ref.sec5ex1RY1.value - 0.5) * ref.sec5ex1Rect.h"></pxl-var>
+                
+                <pxl-var id="sec5ex1Dx" value="ref.sec5ex1Prx1X.value - ref.sec5ex1Pcx1.value"></pxl-var>
+                <pxl-var id="sec5ex1Dy" value="ref.sec5ex1Prx1Y.value - ref.sec5ex1Pcy1.value"></pxl-var>
+                <pxl-var id="sec5ex1Radius" value="sqrt(ref.sec5ex1Dx.value*ref.sec5ex1Dx.value + ref.sec5ex1Dy.value*ref.sec5ex1Dy.value)"></pxl-var>
+                
+                <pxl-group x="ref.sec5ex1Rect.x" y="ref.sec5ex1Rect.y" rotate="ref.sec5ex1Rect.rotate">
+                  <!-- Solid blue bounding box -->
+                  <pxl-rect x="0" y="0" w="ref.sec5ex1Rect.w" h="ref.sec5ex1Rect.h" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
+                  
+                  <!-- Blue corner coordinates (0,0) and (1,1) -->
+                  <pxl-circle x="-ref.sec5ex1Rect.w/2" y="-ref.sec5ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
+                  <pxl-text x="-ref.sec5ex1Rect.w/2" y="-ref.sec5ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+                  
+                  <pxl-circle x="ref.sec5ex1Rect.w/2" y="ref.sec5ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
+                  <pxl-text x="ref.sec5ex1Rect.w/2" y="ref.sec5ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+
+                  <!-- Purple Center 0 coordinate (cx0, cy0) -->
+                  <pxl-circle x="ref.sec5ex1Pcx0.value" y="ref.sec5ex1Pcy0.value" r="8" fill="#8b5cf6"></pxl-circle>
+                  <pxl-text x="ref.sec5ex1Pcx0.value" y="ref.sec5ex1Pcy0.value - 15" text="'(' + ref.sec5ex1CX0.value + ', ' + ref.sec5ex1CY0.value + ')'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+
+                  <!-- Purple Center 1 coordinate (cx1, cy1) -->
+                  <pxl-circle x="ref.sec5ex1Pcx1.value" y="ref.sec5ex1Pcy1.value" r="8" fill="#8b5cf6"></pxl-circle>
+                  <pxl-text x="ref.sec5ex1Pcx1.value" y="ref.sec5ex1Pcy1.value - 15" text="'(' + ref.sec5ex1CX1.value + ', ' + ref.sec5ex1CY1.value + ')'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+                  
+                  <!-- Purple radius coordinate (rx1, ry1) -->
+                  <pxl-text x="ref.sec5ex1Prx1X.value" y="ref.sec5ex1Prx1Y.value + 15" text="'(' + ref.sec5ex1RX1.value + ', ' + ref.sec5ex1RY1.value + ')'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  
+                  <!-- Purple Radius Circle (anchored to Center 1) -->
+                  <pxl-circle x="ref.sec5ex1Pcx1.value" y="ref.sec5ex1Pcy1.value" r="ref.sec5ex1Radius.value" fill="none" stroke="#a78bfa" strokewidth="2" linedash="[4, 4]"></pxl-circle>
+                  
+                  <!-- Purple Gradient Radius Arrow (Center 1 to Radius 1) -->
+                  <pxl-line 
+                    x1="ref.sec5ex1Pcx1.value" 
+                    y1="ref.sec5ex1Pcy1.value" 
+                    x2="ref.sec5ex1Prx1X.value" 
+                    y2="ref.sec5ex1Prx1Y.value" 
+                    stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
+                    
+                  <!-- Dashed line connecting Center 0 to Center 1 -->
+                  <pxl-line 
+                    x1="ref.sec5ex1Pcx0.value" 
+                    y1="ref.sec5ex1Pcy0.value" 
+                    x2="ref.sec5ex1Pcx1.value" 
+                    y2="ref.sec5ex1Pcy1.value" 
+                    stroke="#a78bfa" strokewidth="2" linedash="[4, 4]"></pxl-line>
+
+                </pxl-group>
+              </pxl-layer>
+            </pxl-stage>
+          </div>
+        </div>
+
       </div>
     </main>
   </div>
