@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alpha & Blend | Kilopixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+  <script src="js/api-tabs.js"></script>
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+        <h1>Alpha &amp; Blend</h1>
+        <p class="lead">Discover the power of Kilopixel's Dual Architecture. Learn how applying compositing attributes like <code>alpha</code> and <code>blend</code> creates fundamentally different effects depending on whether they are applied to a layer or a shape.</p>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: ALPHA (OPACITY) -->
+        <!-- ================================================================= -->
+        <h2>1. Alpha (Opacity)</h2>
+        <p>Kilopixel allows you to apply transparency at two different architectural levels:</p>
+        <ul style="margin-bottom: 1.5rem; line-height: 1.6; color: var(--text-body);">
+          <li><strong>Layer Level:</strong> When <code>alpha</code> is applied to a <code>&lt;pxl-layer&gt;</code>, the shapes inside are drawn normally (blocking each other opaquely). Then, the entire flattened canvas element is made translucent via the CSS <code>opacity</code> property.</li>
+          <li><strong>Shape Level:</strong> When <code>alpha</code> is applied directly to a <code>&lt;pxl-circle&gt;</code>, it maps to the Canvas <code>globalAlpha</code> property. The shapes become translucent during the draw loop, causing them to bleed through each other where they overlap.</li>
+        </ul>
+
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;!-- LEFT: Alpha applied to the Layer --&gt;
+  &lt;pxl-layer alpha="<mark id="sec1LayerAlphaCode">0.5</mark>"&gt;
+    &lt;pxl-circle x="180" y="300" r="140" fill="#f97316"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="320" y="300" r="140" fill="#3b82f6"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+
+  &lt;!-- RIGHT: Alpha applied directly to Shapes --&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-circle x="680" y="300" r="140" fill="#f97316" alpha="<mark id="sec1Shape1AlphaCode">0.5</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="820" y="300" r="140" fill="#3b82f6" alpha="<mark id="sec1Shape2AlphaCode">0.5</mark>"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1AlphaTab')">Alpha</button>
+              </div>
+            </div>
+
+            <!-- Alpha Tab -->
+            <div class="tab-content active" id="sec1AlphaTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Alpha (Opacity)</span> <span id="sec1AlphaVal">0.5</span></label>
+                  <input type="range" min="0" max="1" step="0.05" value="0.5" autocomplete="off"
+                    oninput="
+                      document.getElementById('sec1Layer').setAttribute('alpha', this.value);
+                      document.getElementById('sec1Shape1').setAttribute('alpha', this.value);
+                      document.getElementById('sec1Shape2').setAttribute('alpha', this.value);
+                      document.getElementById('sec1AlphaVal').innerText = this.value;
+                      document.getElementById('sec1LayerAlphaCode').innerText = this.value;
+                      document.getElementById('sec1Shape1AlphaCode').innerText = this.value;
+                      document.getElementById('sec1Shape2AlphaCode').innerText = this.value;
+                    ">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage ratio="5 / 3" class="demo-stage" style="background-color: #fff;">
+            <!-- Background Grid (To make transparency obvious) -->
+            <pxl-layer>
+              <!-- Draw a checkerboard pattern via a custom grid layout -->
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              
+              <!-- Column Titles -->
+              <pxl-text x="250" y="60" text="'LAYER LEVEL'" size="24" font="monospace" weight="700" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="750" y="60" text="'SHAPE LEVEL'" size="24" font="monospace" weight="700" align="center" fill="#64748b"></pxl-text>
+
+              
+              <!-- Divider Line -->
+              <pxl-line x1="500" y1="0" x2="500" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+            </pxl-layer>
+
+            <!-- LEFT: Alpha applied to the Layer -->
+            <pxl-layer id="sec1Layer" alpha="0.5">
+              <pxl-circle x="180" y="300" r="140" fill="#f97316"></pxl-circle>
+              <pxl-circle x="320" y="300" r="140" fill="#3b82f6"></pxl-circle>
+            </pxl-layer>
+
+            <!-- RIGHT: Alpha applied to Shapes -->
+            <pxl-layer>
+              <pxl-circle id="sec1Shape1" x="680" y="300" r="140" fill="#f97316" alpha="0.5"></pxl-circle>
+              <pxl-circle id="sec1Shape2" x="820" y="300" r="140" fill="#3b82f6" alpha="0.5"></pxl-circle>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Prism Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+</body>
+</html>

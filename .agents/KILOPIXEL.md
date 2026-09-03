@@ -346,6 +346,14 @@ Kilopixel uses a strict **Dual Architecture** for context states, separating fla
 - **Zero-Inheritance Groups (`<pxl-group>`)**: Groups are **Pure Spatial Transform Containers** and do *not* support compositing attributes (`alpha`, `blend`, etc.). This enforces a clean 3-tier architecture with maximum performance.
 - **Native Shadows (Shapes Only)**: Raw canvas shadows (`shadowcolor`, `shadowblur`, `shadowx`, `shadowy`) are only supported on Shapes. For layers, use the `filter="dropShadow(...)"` helper instead to cast a unified silhouette shadow.
 
+### Blend vs. Masking (Semantic Separation)
+
+While both `blend` and `mask` on a Shape map to the exact same underlying Canvas property (`ctx.globalCompositeOperation`), they are separated in the API to clarify intent and respect the limitations of the Dual Architecture:
+- **`blend` (Layers & Shapes)**: Designed for color mixing (e.g., `screen`, `multiply`, `overlay`). Because `<pxl-layer>` uses CSS `mix-blend-mode`, it *only* supports these color-mixing algorithms.
+- **`mask` (Shapes Only)**: Designed for Boolean alpha-compositing and clipping (e.g., `destination-in`, `destination-out`, `source-atop`). Because CSS `mix-blend-mode` cannot perform Canvas-style alpha clipping, these operations would fail on a Layer. The `mask` attribute was added strictly to Shapes as a semantic alias, giving developers a dedicated, logical place to execute these Canvas-only boolean operations without causing confusion.
+
+*(Note: If both attributes are applied to a shape, `mask` takes precedence over `blend`.)*
+
 ---
 
 ## The Responsive Unit System

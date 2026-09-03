@@ -75,12 +75,22 @@ class DocsSidebar extends HTMLElement {
           </ul>
         </div>
         <div class="sidebar-section">
-          <div class="sidebar-title">Styling</div>
+          <div class="sidebar-title">Fills &amp; Strokes</div>
           <ul>
             <li><a href="colors.html" class="${currentPath === 'colors.html' ? 'active' : ''}">Colors</a></li>
-            <li><a href="gradients.html" class="${currentPath === 'gradients.html' ? 'active' : ''}">Gradients</a></li>
-            <li><a href="stroke-styles.html" class="${currentPath === 'stroke-styles.html' ? 'active' : ''}">Stroke Styles</a></li>
-            <li><a href="effects.html" class="${currentPath === 'effects.html' ? 'active' : ''}">Effects</a></li>
+            <li><a href="linear.html" class="${currentPath === 'linear.html' ? 'active' : ''}">Linear Gradients</a></li>
+            <li><a href="radial.html" class="${currentPath === 'radial.html' ? 'active' : ''}">Radial Gradients</a></li>
+            <li><a href="conic.html" class="${currentPath === 'conic.html' ? 'active' : ''}">Conic Gradients</a></li>
+            <li><a href="stroke.html" class="${currentPath === 'stroke.html' ? 'active' : ''}">Stroke Styles</a></li>
+          </ul>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">Compositing &amp; Effects</div>
+          <ul>
+            <li><a href="blend.html" class="${currentPath === 'blend.html' ? 'active' : ''}">Alpha &amp; Blend</a></li>
+            <li><a href="mask.html" class="${currentPath === 'mask.html' ? 'active' : ''}">Masking</a></li>
+            <li><a href="shadows.html" class="${currentPath === 'shadows.html' ? 'active' : ''}">Native Shadows</a></li>
+            <li><a href="filters.html" class="${currentPath === 'filters.html' ? 'active' : ''}">CSS Filters</a></li>
           </ul>
         </div>
         <div class="sidebar-section">

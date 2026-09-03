@@ -71,7 +71,7 @@ Interactive playgrounds must follow a standardized DOM architecture to maintain 
 Every documentation example must follow a standardized 3-part layout:
 1. **Visible Declarative Code Block (`<pre><code class="language-html">`)**: Placed **above** the demo container so developers see the declarative syntax immediately. Use `<mark id="code...">` around dynamic values.
 2. **Interactive Controls (`<div class="demo-controls">`)**: Placed **above** `<pxl-stage>` inside `<div class="demo-container">`. Every example must feature interactive controls (sliders or toggle buttons). The header title must be simply `Controls` without redundant prefixes.
-3. **Reactive Stage (`<pxl-stage class="demo-stage">`)**: Placed at the bottom inside `<div class="demo-container">`. The container's CSS flex gap automatically spaces the stage away from the controls.
+3. **Reactive Stage (`<pxl-stage class="demo-stage" ratio="5 / 3">`)**: Placed at the bottom inside `<div class="demo-container">`. The container's CSS flex gap automatically spaces the stage away from the controls. All documentation examples MUST use `ratio="5 / 3"` (logical width 1000, height 600) unless explicitly demonstrating another aspect ratio.
 
 ```html
 <!-- 1. Declarative Code Block Above Container -->
