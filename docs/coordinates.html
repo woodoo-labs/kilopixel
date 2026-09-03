@@ -617,29 +617,29 @@
 
       <h2>6. Reference <code>ref.*</code></h2>
       <p>Any element with an <code>id</code> can be instantly referenced by other shapes. You can declaratively link to its attributes using the <code>ref.*</code> prefix, and Kilopixel will automatically keep them perfectly in sync.</p>
-      <p>This allows for true <strong>cross-attribute linking</strong>. In this example, if you change the <strong>Master</strong> shape, the others react instantly. The <strong>Mirror</strong> perfectly mirrors its X position (<code>1000 - ref.master.x</code>), while the <strong>Reactor</strong> links its size and rotation to the Master's position!</p>
+      <p>This allows for true <strong>cross-attribute linking</strong>. In this example, if you change the <strong>Master</strong> shape, the others react instantly. The <strong>Mirror</strong> perfectly mirrors its X position (<code>1000 - ref.sec7Master.x</code>), while the <strong>Reactor</strong> links its size and rotation to the Master's position!</p>
       
       <pre><code class="language-html">&lt;!-- Linking attributes across different shapes --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec6LayerXCode">0</mark>" y="<mark id="sec6LayerYCode">0</mark>" rotate="<mark id="sec6LayerRotCode">0</mark>"&gt;
     &lt;!-- 1. Master Shape (You control this) --&gt;
-    &lt;pxl-rect id="master" x="<mark id="sec6MasterXCode">250</mark>" y="<mark id="sec6MasterYCode">200</mark>" w="100" h="100" rotate="<mark id="sec6MasterRotCode">0</mark>" stroke="#f97316"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect id="sec7Master" x="<mark id="sec6MasterXCode">250</mark>" y="<mark id="sec6MasterYCode">200</mark>" w="100" h="100" rotate="<mark id="sec6MasterRotCode">0</mark>" stroke="#f97316"&gt;&lt;/pxl-rect&gt;
 
     &lt;!-- 2. Mirror Shape (Moves in reverse) --&gt;
-    &lt;pxl-rect id="mirror" 
-      x="1000 - <mark id="sec6MirrorRefXCode" class="highlight-reactive">ref.master.x</mark>" 
-      y="<mark id="sec6MirrorRefYCode" class="highlight-reactive">ref.master.y</mark>" 
+    &lt;pxl-rect id="sec7Mirror" 
+      x="1000 - <mark id="sec6MirrorRefXCode" class="highlight-reactive">ref.sec7Master.x</mark>" 
+      y="<mark id="sec6MirrorRefYCode" class="highlight-reactive">ref.sec7Master.y</mark>" 
       w="<mark id="sec6MirrorWCode">100</mark>" h="<mark id="sec6MirrorHCode">100</mark>" 
-      rotate="<mark id="sec6MirrorRefRotCode" class="highlight-reactive">-ref.master.rotate</mark>" 
+      rotate="<mark id="sec6MirrorRefRotCode" class="highlight-reactive">-ref.sec7Master.rotate</mark>" 
       stroke="#3b82f6"&gt;
     &lt;/pxl-rect&gt;
 
     &lt;!-- 3. Reactor Shape (Spins and scales) --&gt;
-    &lt;pxl-rect id="reactor" 
+    &lt;pxl-rect id="sec7Reactor" 
       x="<mark id="sec6ReactorXCode">500</mark>" y="<mark id="sec6ReactorYCode">450</mark>" 
-      w="<mark id="sec6ReactorRefWCode" class="highlight-reactive">ref.master.x</mark> / 5" 
-      h="<mark id="sec6ReactorRefHCode" class="highlight-reactive">ref.master.x</mark> / 5" 
-      rotate="<mark id="sec6ReactorRefRotCode" class="highlight-reactive">ref.master.x</mark>" 
+      w="<mark id="sec6ReactorRefWCode" class="highlight-reactive">ref.sec7Master.x</mark> / 5" 
+      h="<mark id="sec6ReactorRefHCode" class="highlight-reactive">ref.sec7Master.x</mark> / 5" 
+      rotate="<mark id="sec6ReactorRefRotCode" class="highlight-reactive">ref.sec7Master.x</mark>" 
       stroke="#22c55e"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
@@ -784,14 +784,14 @@
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec7LayerXCode">500</mark>" y="<mark id="sec7LayerYCode">300</mark>" rotate="<mark id="sec7LayerRotCode">0</mark>"&gt;
     &lt;!-- Global State --&gt;
-    &lt;pxl-var id="hue" value="<mark id="sec7HueCode">250</mark>"&gt;&lt;/pxl-var&gt;
-    &lt;pxl-var id="spread" value="<mark id="sec7SpreadCode">120</mark>"&gt;&lt;/pxl-var&gt;
-    &lt;pxl-var id="size" value="<mark id="sec7SizeCode">150</mark>"&gt;&lt;/pxl-var&gt;
+    &lt;pxl-var id="sec9Hue" value="<mark id="sec7HueCode">250</mark>"&gt;&lt;/pxl-var&gt;
+    &lt;pxl-var id="sec8Spread" value="<mark id="sec7SpreadCode">120</mark>"&gt;&lt;/pxl-var&gt;
+    &lt;pxl-var id="sec8Size" value="<mark id="sec7SizeCode">150</mark>"&gt;&lt;/pxl-var&gt;
 
     &lt;!-- Shapes bound to state --&gt;
-    &lt;pxl-circle dx="<mark id="sec7Circ1SpreadCode" class="highlight-reactive">ref.spread.value</mark>" r="<mark id="sec7Circ1SizeCode" class="highlight-reactive">ref.size.value</mark>" fill="hsla(<mark id="sec7Circ1HueCode" class="highlight-reactive">ref.hue.value</mark> + 25, 80, 60, 0.6)" rotate="0"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle dx="<mark id="sec7Circ2SpreadCode" class="highlight-reactive">ref.spread.value</mark>" r="<mark id="sec7Circ2SizeCode" class="highlight-reactive">ref.size.value</mark>" fill="hsla(<mark id="sec7Circ2HueCode" class="highlight-reactive">ref.hue.value</mark> + 142, 80, 60, 0.6)" rotate="120"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle dx="<mark id="sec7Circ3SpreadCode" class="highlight-reactive">ref.spread.value</mark>" r="<mark id="sec7Circ3SizeCode" class="highlight-reactive">ref.size.value</mark>" fill="hsla(<mark id="sec7Circ3HueCode" class="highlight-reactive">ref.hue.value</mark> + 217, 80, 60, 0.6)" rotate="240"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle dx="<mark id="sec7Circ1SpreadCode" class="highlight-reactive">ref.sec8Spread.value</mark>" r="<mark id="sec7Circ1SizeCode" class="highlight-reactive">ref.sec8Size.value</mark>" fill="hsla(<mark id="sec7Circ1HueCode" class="highlight-reactive">ref.sec9Hue.value</mark> + 25, 80, 60, 0.6)" rotate="0"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle dx="<mark id="sec7Circ2SpreadCode" class="highlight-reactive">ref.sec8Spread.value</mark>" r="<mark id="sec7Circ2SizeCode" class="highlight-reactive">ref.sec8Size.value</mark>" fill="hsla(<mark id="sec7Circ2HueCode" class="highlight-reactive">ref.sec9Hue.value</mark> + 142, 80, 60, 0.6)" rotate="120"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle dx="<mark id="sec7Circ3SpreadCode" class="highlight-reactive">ref.sec8Spread.value</mark>" r="<mark id="sec7Circ3SizeCode" class="highlight-reactive">ref.sec8Size.value</mark>" fill="hsla(<mark id="sec7Circ3HueCode" class="highlight-reactive">ref.sec9Hue.value</mark> + 217, 80, 60, 0.6)" rotate="240"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -877,19 +877,19 @@
       
       <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;!-- Two independent rotating layers with their own shapes --&gt;
-  &lt;pxl-layer id="layer1" x="<mark id="sec8Layer1XCode">350</mark>" y="<mark id="sec8Layer1YCode">250</mark>" rotate="<mark id="sec8Layer1RotCode">0</mark>"&gt;
-    &lt;pxl-circle id="circle1" x="<mark id="sec8Circle1XCode">-150</mark>" y="<mark id="sec8Circle1YCode">-150</mark>" r="<mark id="sec8Circle1RCode">100</mark>" stroke="#f97316"&gt;&lt;/pxl-circle&gt;
+  &lt;pxl-layer id="sec8Layer1" x="<mark id="sec8Layer1XCode">350</mark>" y="<mark id="sec8Layer1YCode">250</mark>" rotate="<mark id="sec8Layer1RotCode">0</mark>"&gt;
+    &lt;pxl-circle id="sec8Circle1" x="<mark id="sec8Circle1XCode">-150</mark>" y="<mark id="sec8Circle1YCode">-150</mark>" r="<mark id="sec8Circle1RCode">100</mark>" stroke="#f97316"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
-  &lt;pxl-layer id="layer2" x="<mark id="sec8Layer2XCode">650</mark>" y="<mark id="sec8Layer2YCode">350</mark>" rotate="<mark id="sec8Layer2RotCode">0</mark>"&gt;
-    &lt;pxl-circle id="circle2" x="<mark id="sec8Circle2XCode">150</mark>" y="<mark id="sec8Circle2YCode">150</mark>" r="<mark id="sec8Circle2RCode">100</mark>" stroke="#3b82f6"&gt;&lt;/pxl-circle&gt;
+  &lt;pxl-layer id="sec8Layer2" x="<mark id="sec8Layer2XCode">650</mark>" y="<mark id="sec8Layer2YCode">350</mark>" rotate="<mark id="sec8Layer2RotCode">0</mark>"&gt;
+    &lt;pxl-circle id="sec8Circle2" x="<mark id="sec8Circle2XCode">150</mark>" y="<mark id="sec8Circle2YCode">150</mark>" r="<mark id="sec8Circle2RCode">100</mark>" stroke="#3b82f6"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
   &lt;!-- A line perfectly tracking two shapes inside different rotating layers --&gt;
   &lt;pxl-layer&gt;
     &lt;pxl-line 
-      x1="toLocal(<mark id="sec8LineRefCirc1X" class="highlight-reactive">ref.circle1, 'x'</mark>)" y1="toLocal(<mark id="sec8LineRefCirc1Y" class="highlight-reactive">ref.circle1, 'y'</mark>)" 
-      x2="toLocal(<mark id="sec8LineRefCirc2X" class="highlight-reactive">ref.circle2, 'x'</mark>)" y2="toLocal(<mark id="sec8LineRefCirc2Y" class="highlight-reactive">ref.circle2, 'y'</mark>)" 
+      x1="toLocal(<mark id="sec8LineRefCirc1X" class="highlight-reactive">ref.sec8Circle1, 'x'</mark>)" y1="toLocal(<mark id="sec8LineRefCirc1Y" class="highlight-reactive">ref.sec8Circle1, 'y'</mark>)" 
+      x2="toLocal(<mark id="sec8LineRefCirc2X" class="highlight-reactive">ref.sec8Circle2, 'x'</mark>)" y2="toLocal(<mark id="sec8LineRefCirc2Y" class="highlight-reactive">ref.sec8Circle2, 'y'</mark>)" 
       stroke="#ff00ff"&gt;
     &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
@@ -1056,16 +1056,16 @@
       <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec9LayerXCode">500</mark>" y="<mark id="sec9LayerYCode">300</mark>" rotate="<mark id="sec9LayerRotCode">0</mark>"&gt;
     &lt;!-- Pure Math: Lissajous curve using sine waves --&gt;
-    &lt;pxl-var id="hue" value="loop(10) * 360"&gt;&lt;/pxl-var&gt;
+    &lt;pxl-var id="sec9Hue" value="loop(10) * 360"&gt;&lt;/pxl-var&gt;
     &lt;!-- Note: shadowcolor safely self-references its own stroke --&gt;
-    &lt;pxl-circle id="oscillator"
+    &lt;pxl-circle id="sec9Oscillator"
       x="sin(t * <mark id="sec9FreqXCode">2</mark>) * 300" 
       y="cos(t * <mark id="sec9FreqYCode">3</mark>) * 150" 
       r="<mark id="sec9RadiusCode">40</mark>" 
-      fill="hsla(ref.hue.value, 100, 60, 0.4)" 
-      stroke="hsl(ref.hue.value, 100, 60)" 
+      fill="hsla(ref.sec9Hue.value, 100, 60, 0.4)" 
+      stroke="hsl(ref.sec9Hue.value, 100, 60)" 
       strokewidth="4"
-      shadowcolor="ref.oscillator.stroke" 
+      shadowcolor="ref.sec9Oscillator.stroke" 
       shadowblur="20"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
@@ -1395,8 +1395,8 @@
       <h2>11. Coordinate Mapping <code>toLocal()</code></h2>
       <p>When shapes orbit or rotate inside nested coordinate spaces, drawing connecting lines or tracking positions requires translating between coordinate systems:</p>
       <ul>
-        <li><strong>Why Raw Attributes Stay Constant:</strong> If you reference <code>ref.pointA.x</code> or <code>ref.pointA.dx</code> directly, you will always get their static declared values even while the point is rotating. Because the local coordinate system rotates <em>with</em> the shape, its internal <code>x</code> and <code>dx</code> numbers never change.</li>
-        <li><strong>How <code>toLocal</code> Solves This:</strong> By wrapping the reference in <code>toLocal(ref.pointA, 'tx')</code> or <code>toLocal(ref.pointA, 'ty')</code> (or <code>x</code> and <code>y</code> for center positions), Kilopixel automatically calculates the shape's true orbiting position and maps it into your current coordinate space â€” no manual trigonometry required!</li>
+        <li><strong>Why Raw Attributes Stay Constant:</strong> If you reference <code>ref.sec11PointA.x</code> or <code>ref.sec11PointA.dx</code> directly, you will always get their static declared values even while the point is rotating. Because the local coordinate system rotates <em>with</em> the shape, its internal <code>x</code> and <code>dx</code> numbers never change.</li>
+        <li><strong>How <code>toLocal</code> Solves This:</strong> By wrapping the reference in <code>toLocal(ref.sec11PointA, 'tx')</code> or <code>toLocal(ref.sec11PointA, 'ty')</code> (or <code>x</code> and <code>y</code> for center positions), Kilopixel automatically calculates the shape's true orbiting position and maps it into your current coordinate space â€” no manual trigonometry required!</li>
       </ul>
       <p>In this "constellation" example, two shapes orbit their centers independently. The connecting line uses <code>toLocal</code> to track their live positions and stay perfectly connected at 60fps.</p>
       
@@ -1404,13 +1404,13 @@
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec11LayerXCode">500</mark>" y="<mark id="sec11LayerYCode">300</mark>" rotate="<mark id="sec11LayerRotCode">0</mark>"&gt;
     &lt;!-- Orbiting Points --&gt;
-    &lt;pxl-circle id="pointA" x="<mark id="sec11PointAXCode">-400</mark>" y="<mark id="sec11PointAYCode">0</mark>" dx="<mark id="sec11PointADxCode">0</mark>" dy="<mark id="sec11PointADyCode">-200</mark>" rotate="<mark id="sec11PointARotCode">0</mark>" r="5" fill="#1d4ed8"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle id="pointB" x="<mark id="sec11PointBXCode">150</mark>" y="<mark id="sec11PointBYCode">0</mark>" dx="<mark id="sec11PointBDxCode">0</mark>" dy="<mark id="sec11PointBDyCode">200</mark>" rotate="<mark id="sec11PointBRotCode">0</mark>" r="5" fill="#c2410c"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle id="sec11PointA" x="<mark id="sec11PointAXCode">-400</mark>" y="<mark id="sec11PointAYCode">0</mark>" dx="<mark id="sec11PointADxCode">0</mark>" dy="<mark id="sec11PointADyCode">-200</mark>" rotate="<mark id="sec11PointARotCode">0</mark>" r="5" fill="#1d4ed8"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle id="sec11PointB" x="<mark id="sec11PointBXCode">150</mark>" y="<mark id="sec11PointBYCode">0</mark>" dx="<mark id="sec11PointBDxCode">0</mark>" dy="<mark id="sec11PointBDyCode">200</mark>" rotate="<mark id="sec11PointBRotCode">0</mark>" r="5" fill="#c2410c"&gt;&lt;/pxl-circle&gt;
 
     &lt;!-- Connecting Line --&gt;
     &lt;pxl-line 
-      x1="toLocal(ref.pointA, 'tx')" y1="toLocal(ref.pointA, 'ty')" 
-      x2="toLocal(ref.pointB, 'tx')" y2="toLocal(ref.pointB, 'ty')" 
+      x1="toLocal(ref.sec11PointA, 'tx')" y1="toLocal(ref.sec11PointA, 'ty')" 
+      x2="toLocal(ref.sec11PointB, 'tx')" y2="toLocal(ref.sec11PointB, 'ty')" 
       stroke="#94a3b8" strokewidth="2"&gt;
     &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
@@ -1753,4 +1753,5 @@
   </script>
 </body>
 </html>
+
 
