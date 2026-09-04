@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mask | Kilopixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+  <script src="js/api-tabs.js"></script>
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+        <h1>Mask</h1>
+        <p class="lead">Use the <code>mask</code> attribute to perform boolean clipping operations (intersections, cutouts, and knockouts) between overlapping shapes.</p>
+        
+        <div style="padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 8px; margin-bottom: 2rem;">
+          <strong style="display: block; margin-bottom: 0.5rem; color: var(--text-heading);">Architecture Rule: Shapes Only</strong>
+          <p style="margin: 0; color: var(--text-body);">The <code>mask</code> attribute applies <strong>strictly to Shapes</strong> (like <code>&lt;pxl-circle&gt;</code> or <code>&lt;pxl-rect&gt;</code>). It is a direct alias for Canvas 2D boolean clipping operations. Because Kilopixel Layers rely on CSS DOM compositing, applying a mask to a <code>&lt;pxl-layer&gt;</code> will be ignored.</p>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: BOOLEAN OPERATIONS -->
+        <!-- ================================================================= -->
+        <h2>1. Boolean Operations</h2>
+        <p>In Canvas graphics, clipping involves a <strong>Destination</strong> shape (what is already drawn on the canvas) and a <strong>Source</strong> shape (what is about to be drawn). By changing the <code>mask</code> mode on the Source shape, you dictate how the two shapes intersect.</p>
+
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- The "Destination" Shape --&gt;
+    &lt;pxl-rect x="400" y="300" w="300" h="300" anchor="center" fill="darkorange"&gt;&lt;/pxl-rect&gt;
+
+    &lt;!-- The "Source" Shape --&gt;
+    &lt;pxl-circle x="<mark id="sec1CodeX">600</mark>" y="<mark id="sec1CodeY">300</mark>" r="150" fill="dodgerblue" mask="<mark id="sec1CodeMask">destination-in</mark>"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <script>
+            window.sec1Update = function() {
+              const mask = document.getElementById('sec1MaskSelect').value;
+              const x = document.getElementById('sec1XSlider').value;
+              const y = document.getElementById('sec1YSlider').value;
+              
+              // Update code block
+              document.getElementById('sec1CodeMask').innerText = mask;
+              document.getElementById('sec1CodeX').innerText = x;
+              document.getElementById('sec1CodeY').innerText = y;
+              
+              // Update stage
+              document.getElementById('sec1Circle').setAttribute('mask', mask);
+              document.getElementById('sec1Circle').setAttribute('x', x);
+              document.getElementById('sec1Circle').setAttribute('y', y);
+            };
+          </script>
+          
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1MaskTab')">Mask Mode</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1PositionTab')">Source Position</button>
+              </div>
+            </div>
+
+            <!-- MASK TAB -->
+            <div class="tab-content active" id="sec1MaskTab">
+              <div class="playground-sliders">
+                <div class="control-group" style="margin-bottom: -14px;">
+                  <label><span>Mask Mode <span class="indicator-dot"></span></span></label>
+                  <select id="sec1MaskSelect" autocomplete="off" onchange="window.sec1Update()" data-mark="sec1CodeMask">
+                    <option value="source-over">source-over (none)</option>
+                    <option value="destination-in" selected>destination-in</option>
+                    <option value="destination-out">destination-out</option>
+                    <option value="destination-over">destination-over</option>
+                    <option value="destination-atop">destination-atop</option>
+                    <option value="source-in">source-in</option>
+                    <option value="source-out">source-out</option>
+                    <option value="source-atop">source-atop</option>
+                    <option value="xor">xor</option>
+                    <option value="lighter">lighter</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- POSITION TAB -->
+            <div class="tab-content" id="sec1PositionTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Center X</span></label>
+                  <input id="sec1XSlider" type="range" min="300" max="700" step="10" value="600" autocomplete="off" oninput="window.sec1Update()" data-mark="sec1CodeX">
+                </div>
+                <div class="control-group">
+                  <label><span>Center Y</span></label>
+                  <input id="sec1YSlider" type="range" min="100" max="500" step="10" value="300" autocomplete="off" oninput="window.sec1Update()" data-mark="sec1CodeY">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage ratio="5 / 3" class="demo-stage">
+            <!-- BACKGROUND PATTERN & GUIDES -->
+            <pxl-layer id="sec1BgLayer">
+              <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
+              <!-- Ghost Outlines (Background) -->
+              <pxl-rect x="400" y="300" w="300" h="300" anchor="center" stroke="#94a3b8" strokewidth="2" linedash="[6, 6]" fill="none"></pxl-rect>
+              <pxl-circle x="ref.sec1Circle.x" y="ref.sec1Circle.y" r="150" stroke="#94a3b8" strokewidth="2" linedash="[6, 6]" fill="none"></pxl-circle>
+            </pxl-layer>
+
+            <!-- MASKING LAYER -->
+            <pxl-layer>
+              <!-- Destination -->
+              <pxl-rect x="400" y="300" w="300" h="300" anchor="center" fill="darkorange"></pxl-rect>
+              <!-- Source -->
+              <pxl-circle id="sec1Circle" x="600" y="300" r="150" fill="dodgerblue" mask="destination-in"></pxl-circle>
+            </pxl-layer>
+
+            <!-- FOREGROUND LABELS -->
+            <pxl-layer>
+              <!-- Labels -->
+              <pxl-text x="400" y="535" text="'Destination Shape'" size="27" font="monospace" align="center" fill="#fb923c"></pxl-text>
+              <pxl-text x="400" y="565" text="'(Orange Square)'" size="27" font="monospace" align="center" fill="#fb923c"></pxl-text>
+              
+              <pxl-text x="750" y="535" text="'Source Shape'" size="27" font="monospace" align="center" fill="#60a5fa"></pxl-text>
+              <pxl-text x="750" y="565" text="'(Blue Circle)'" size="27" font="monospace" align="center" fill="#60a5fa"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Prism Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+</body>
+</html>

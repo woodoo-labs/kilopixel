@@ -27,3 +27,11 @@
 - Build the `<pxl-out>` Custom Web Component as a declarative DOM bridge.
 - Allow placement anywhere in standard HTML to reactively output data (e.g., `ref.main.fps`) from the Kilopixel dependency graph without JavaScript polling.
 - Resolve open design questions regarding the primary attribute syntax (`value="..."` vs `text="..."`) and built-in template literal string formatting.
+
+## 5. Shape Masking & Compound Clipping (Canvas Bug)
+- **Issue**: Applying a `mask` (via `globalCompositeOperation`) to a Kilopixel Shape that has both a `fill` and a `stroke` breaks the output. Because Canvas renders the fill and stroke as sequential paint operations, the mask clips the layer twice (first for the fill, then again for the stroke), obliterating the expected boolean cutout.
+- **Impact**: Developers cannot easily create single-layer masked shapes that have borders.
+- **Options**:
+  - **Option A (Explicit Caching)**: Add a `cache="true"` attribute to shapes/groups. Kilopixel would render the shape to an offscreen canvas first, then composite the flattened raster image onto the main canvas with the mask applied. (Similar to Konva's `.cache()`).
+  - **Option B (Vector Clipping Node)**: Add a dedicated `<pxl-clip>` element or `clip="path-id"` attribute that maps to the native `ctx.clip()` API. This provides true mathematical vector boundaries rather than alpha-pixel clipping.
+  - **Option C (Documentation Only)**: Treat it as a known Canvas limitation and advise users to only apply masks to solid shapes without strokes.
