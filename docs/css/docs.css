@@ -747,9 +747,20 @@ body {
     justify-content: space-between;
     align-items: center;
   }
-  
   .api-meta {
     flex-direction: row;
     flex-wrap: wrap;
   }
+}
+
+/* --- Checkerboard Background Utility --- */
+.bg-checker {
+  background-color: #ffffff;
+  background-image: conic-gradient(
+    #e2e8f0 90deg,
+    transparent 90deg 180deg,
+    #e2e8f0 180deg 270deg,
+    transparent 270deg
+  );
+  background-size: 20px 20px;
 }
