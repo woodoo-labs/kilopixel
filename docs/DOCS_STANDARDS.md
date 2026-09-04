@@ -72,8 +72,8 @@ Whenever highlighting critical architectural rules, notes, or important caveats,
 
 ```html
 <div class="callout-info">
-  <p class="callout-title">Architecture Rule: Shapes Only</p>
-  <p class="callout-body">The <code>mask</code> attribute applies <strong>strictly to Shapes</strong>. It is a direct alias for Canvas 2D boolean clipping operations...</p>
+  <p class="callout-title">Shapes Only!</p>
+  <p class="callout-body">The <code>mask</code> attribute applies strictly to shapes (like <code>&lt;pxl-circle&gt;</code> or <code>&lt;pxl-rect&gt;</code>). Applying a mask to a <code>&lt;pxl-layer&gt;</code> will be ignored.</p>
 </div>
 ```
 

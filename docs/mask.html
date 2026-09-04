@@ -34,55 +34,78 @@
         <p class="lead">Use the <code>mask</code> attribute to perform boolean clipping operations (intersections, cutouts, and knockouts) between overlapping shapes.</p>
         
         <div class="callout-info">
-          <p class="callout-title">Architecture Rule: Shapes Only</p>
-          <p class="callout-body">The <code>mask</code> attribute applies <strong>strictly to Shapes</strong> (like <code>&lt;pxl-circle&gt;</code> or <code>&lt;pxl-rect&gt;</code>). It is a direct alias for Canvas 2D boolean clipping operations. Because Kilopixel Layers rely on CSS DOM compositing, applying a mask to a <code>&lt;pxl-layer&gt;</code> will be ignored.</p>
+          <p class="callout-title">Shapes Only!</p>
+          <p class="callout-body">The <code>mask</code> attribute applies strictly to shapes (like <code>&lt;pxl-circle&gt;</code> or <code>&lt;pxl-rect&gt;</code>). Applying a mask to a <code>&lt;pxl-layer&gt;</code> will be ignored.</p>
         </div>
 
         <!-- ================================================================= -->
         <!-- SECTION 1: BOOLEAN OPERATIONS -->
         <!-- ================================================================= -->
         <h2>1. Boolean Operations</h2>
-        <p>In Canvas graphics, clipping involves a <strong>Destination</strong> shape (what is already drawn on the canvas) and a <strong>Source</strong> shape (what is about to be drawn). By changing the <code>mask</code> mode on the Source shape, you dictate how the two shapes intersect.</p>
+        <p>In Kilopixel, boolean clipping involves <strong>destination shapes</strong> (what is already drawn on the layer) and a <strong>source shape</strong> (what is about to be drawn). By changing the <code>mask</code> mode on the source shape, you dictate how it intersects with the underlying shapes.</p>
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- The Destination Shape --&gt;
-    &lt;pxl-rect x="350" y="300" w="400" h="300" fill="darkorange"&gt;&lt;/pxl-rect&gt;
+    &lt;!-- The Destination Shapes --&gt;
+    &lt;pxl-rect x="<mark id="sec1RectXCode">350</mark>" y="<mark id="sec1RectYCode">300</mark>" w="400" h="300" rotate="<mark id="sec1RectRotCode">0</mark>" alpha="<mark id="sec1RectAlphaCode">1</mark>" fill="darkorange"&gt;&lt;/pxl-rect&gt;
 
     &lt;!-- The Source Shape --&gt;
-    &lt;pxl-ellipse x="<mark id="sec1CodeX">650</mark>" y="<mark id="sec1CodeY">300</mark>" rx="200" ry="150" fill="dodgerblue" mask="<mark id="sec1CodeMask">destination-in</mark>"&gt;&lt;/pxl-ellipse&gt;
+    &lt;pxl-ellipse x="<mark id="sec1EllipseXCode">650</mark>" y="<mark id="sec1EllipseYCode">300</mark>" rx="200" ry="150" rotate="<mark id="sec1EllipseRotCode">0</mark>" alpha="<mark id="sec1EllipseAlphaCode">1</mark>" fill="dodgerblue" mask="<mark id="sec1MaskCode">xor</mark>"&gt;&lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
         <div class="demo-container">
-          <script>
-            window.sec1Update = function() {
-              const mask = document.getElementById('sec1MaskSelect').value;
-              const x = document.getElementById('sec1XSlider').value;
-              const y = document.getElementById('sec1YSlider').value;
-              
-              // Update code block
-              document.getElementById('sec1CodeMask').innerText = mask;
-              document.getElementById('sec1CodeX').innerText = x;
-              document.getElementById('sec1CodeY').innerText = y;
-              
-              // Update UI values
-              document.getElementById('sec1XVal').innerText = x;
-              document.getElementById('sec1YVal').innerText = y;
-              
-              // Update stage
-              document.getElementById('sec1Ellipse').setAttribute('mask', mask);
-              document.getElementById('sec1Ellipse').setAttribute('x', x);
-              document.getElementById('sec1Ellipse').setAttribute('y', y);
-            };
-          </script>
-          
           <div class="demo-controls">
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Controls</h3>
               <div class="demo-tabs">
-                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1MaskTab')">Mask Mode</button>
-                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1PositionTab')">Source Position</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1RectTab')">Rect</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1EllipseTab')">Ellipse</button>
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1MaskTab')">Mask</button>
+              </div>
+            </div>
+
+            <!-- RECT TAB -->
+            <div class="tab-content" id="sec1RectTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Center X</span> <span id="sec1RectXVal">350</span></label>
+                  <input type="range" min="100" max="900" step="10" value="350" autocomplete="off" oninput="document.getElementById('sec1Rect').setAttribute('x', this.value); document.getElementById('sec1RectXVal').innerText = this.value; document.getElementById('sec1RectXCode').innerText = this.value;" data-mark="sec1RectXCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Center Y</span> <span id="sec1RectYVal">300</span></label>
+                  <input type="range" min="100" max="500" step="10" value="300" autocomplete="off" oninput="document.getElementById('sec1Rect').setAttribute('y', this.value); document.getElementById('sec1RectYVal').innerText = this.value; document.getElementById('sec1RectYCode').innerText = this.value;" data-mark="sec1RectYCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Rotation</span> <span id="sec1RectRotVal">0</span></label>
+                  <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off" oninput="document.getElementById('sec1Rect').setAttribute('rotate', this.value); document.getElementById('sec1RectRotVal').innerText = this.value; document.getElementById('sec1RectRotCode').innerText = this.value;" data-mark="sec1RectRotCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Alpha</span> <span id="sec1RectAlphaVal">1</span></label>
+                  <input type="range" min="0" max="1" step="0.05" value="1" autocomplete="off" oninput="document.getElementById('sec1Rect').setAttribute('alpha', this.value); document.getElementById('sec1RectAlphaVal').innerText = this.value; document.getElementById('sec1RectAlphaCode').innerText = this.value;" data-mark="sec1RectAlphaCode">
+                </div>
+              </div>
+            </div>
+
+            <!-- ELLIPSE TAB -->
+            <div class="tab-content" id="sec1EllipseTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Center X</span> <span id="sec1EllipseXVal">650</span></label>
+                  <input type="range" min="100" max="900" step="10" value="650" autocomplete="off" oninput="document.getElementById('sec1Ellipse').setAttribute('x', this.value); document.getElementById('sec1EllipseXVal').innerText = this.value; document.getElementById('sec1EllipseXCode').innerText = this.value;" data-mark="sec1EllipseXCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Center Y</span> <span id="sec1EllipseYVal">300</span></label>
+                  <input type="range" min="100" max="500" step="10" value="300" autocomplete="off" oninput="document.getElementById('sec1Ellipse').setAttribute('y', this.value); document.getElementById('sec1EllipseYVal').innerText = this.value; document.getElementById('sec1EllipseYCode').innerText = this.value;" data-mark="sec1EllipseYCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Rotation</span> <span id="sec1EllipseRotVal">0</span></label>
+                  <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off" oninput="document.getElementById('sec1Ellipse').setAttribute('rotate', this.value); document.getElementById('sec1EllipseRotVal').innerText = this.value; document.getElementById('sec1EllipseRotCode').innerText = this.value;" data-mark="sec1EllipseRotCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Alpha</span> <span id="sec1EllipseAlphaVal">1</span></label>
+                  <input type="range" min="0" max="1" step="0.05" value="1" autocomplete="off" oninput="document.getElementById('sec1Ellipse').setAttribute('alpha', this.value); document.getElementById('sec1EllipseAlphaVal').innerText = this.value; document.getElementById('sec1EllipseAlphaCode').innerText = this.value;" data-mark="sec1EllipseAlphaCode">
+                </div>
               </div>
             </div>
 
@@ -90,33 +113,19 @@
             <div class="tab-content active" id="sec1MaskTab">
               <div class="playground-sliders">
                 <div class="control-group" style="margin-bottom: -14px;">
-                  <label><span>Mask Mode <span class="indicator-dot"></span></span></label>
-                  <select id="sec1MaskSelect" autocomplete="off" onchange="window.sec1Update()" data-mark="sec1CodeMask">
-                    <option value="source-over">source-over (none)</option>
-                    <option value="destination-in" selected>destination-in</option>
+                  <label><span>Mask <span class="indicator-dot"></span></span></label>
+                  <select autocomplete="off" onchange="document.getElementById('sec1Ellipse').setAttribute('mask', this.value); document.getElementById('sec1MaskCode').innerText = this.value;" data-mark="sec1MaskCode">
+                    <option value="source-over">source-over (no mask)</option>
+                    <option value="destination-in">destination-in</option>
                     <option value="destination-out">destination-out</option>
                     <option value="destination-over">destination-over</option>
                     <option value="destination-atop">destination-atop</option>
                     <option value="source-in">source-in</option>
                     <option value="source-out">source-out</option>
                     <option value="source-atop">source-atop</option>
-                    <option value="xor">xor</option>
+                    <option value="xor" selected>xor</option>
                     <option value="lighter">lighter</option>
                   </select>
-                </div>
-              </div>
-            </div>
-
-            <!-- POSITION TAB -->
-            <div class="tab-content" id="sec1PositionTab">
-              <div class="playground-sliders">
-                <div class="control-group">
-                  <label><span>Center X</span> <span id="sec1XVal">650</span></label>
-                  <input id="sec1XSlider" type="range" min="300" max="700" step="10" value="650" autocomplete="off" oninput="window.sec1Update()" data-mark="sec1CodeX">
-                </div>
-                <div class="control-group">
-                  <label><span>Center Y</span> <span id="sec1YVal">300</span></label>
-                  <input id="sec1YSlider" type="range" min="100" max="500" step="10" value="300" autocomplete="off" oninput="window.sec1Update()" data-mark="sec1CodeY">
                 </div>
               </div>
             </div>
@@ -127,25 +136,25 @@
             <pxl-layer id="sec1BgLayer">
               <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
               <!-- Ghost Outlines (Background) -->
-              <pxl-rect x="350" y="300" w="400" h="300" anchor="center" stroke="#94a3b8" strokewidth="2" linedash="[6, 6]" fill="none"></pxl-rect>
-              <pxl-ellipse x="ref.sec1Ellipse.x" y="ref.sec1Ellipse.y" rx="200" ry="150" stroke="#94a3b8" strokewidth="2" linedash="[6, 6]" fill="none"></pxl-ellipse>
+              <pxl-rect x="ref.sec1Rect.x" y="ref.sec1Rect.y" w="400" h="300" stroke="#94a3b8" strokewidth="2" linedash="[6, 6]" fill="none" rotate="ref.sec1Rect.rotate" alpha="ref.sec1Rect.alpha"></pxl-rect>
+              <pxl-ellipse x="ref.sec1Ellipse.x" y="ref.sec1Ellipse.y" rx="200" ry="150" stroke="#94a3b8" strokewidth="2" linedash="[6, 6]" fill="none" rotate="ref.sec1Ellipse.rotate" alpha="ref.sec1Ellipse.alpha"></pxl-ellipse>
             </pxl-layer>
 
             <!-- MASKING LAYER -->
             <pxl-layer>
-              <!-- Destination -->
-              <pxl-rect x="350" y="300" w="400" h="300" fill="darkorange"></pxl-rect>
+              <!-- The Destination Shapes -->
+              <pxl-rect id="sec1Rect" x="350" y="300" w="400" h="300" fill="darkorange" rotate="0" alpha="1"></pxl-rect>
               <!-- Source -->
-              <pxl-ellipse id="sec1Ellipse" x="650" y="300" rx="200" ry="150" fill="dodgerblue" mask="destination-in"></pxl-ellipse>
+              <pxl-ellipse id="sec1Ellipse" x="650" y="300" rx="200" ry="150" fill="dodgerblue" rotate="0" alpha="1" mask="xor"></pxl-ellipse>
             </pxl-layer>
 
             <!-- FOREGROUND LABELS -->
             <pxl-layer>
               <!-- Labels -->
-              <pxl-text x="350" y="535" text="'Destination Shape'" size="27" font="monospace" align="center" fill="#fb923c"></pxl-text>
+              <pxl-text x="350" y="535" text="'Destination Shapes'" size="27" weight="bold" font="monospace" align="center" fill="#fb923c"></pxl-text>
               <pxl-text x="350" y="565" text="'(Orange Rect)'" size="27" font="monospace" align="center" fill="#fb923c"></pxl-text>
               
-              <pxl-text x="650" y="535" text="'Source Shape'" size="27" font="monospace" align="center" fill="#60a5fa"></pxl-text>
+              <pxl-text x="650" y="535" text="'Source Shape'" size="27" weight="bold" font="monospace" align="center" fill="#60a5fa"></pxl-text>
               <pxl-text x="650" y="565" text="'(Blue Ellipse)'" size="27" font="monospace" align="center" fill="#60a5fa"></pxl-text>
             </pxl-layer>
           </pxl-stage>
