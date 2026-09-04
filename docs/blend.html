@@ -73,7 +73,7 @@
               <div class="playground-sliders">
                 <div class="control-group">
                   <label><span>Alpha (Opacity)</span> <span id="sec1AlphaVal">0.5</span></label>
-                  <input type="range" min="0" max="1" step="0.05" value="0.5" autocomplete="off"
+                  <input type="range" min="0" max="1" step="0.05" value="0.5" autocomplete="off" data-mark="sec1LayerAlphaCode, sec1Shape1AlphaCode, sec1Shape2AlphaCode"
                     oninput="
                       document.getElementById('sec1Layer').setAttribute('alpha', this.value);
                       document.getElementById('sec1Shape1').setAttribute('alpha', this.value);
@@ -92,8 +92,8 @@
             <!-- Background Grid (To make transparency obvious) -->
             <pxl-layer>
               <!-- Column Titles -->
-              <pxl-text x="250" y="60" text="'LAYER LEVEL'" size="24" font="monospace" weight="700" align="center" fill="#64748b"></pxl-text>
-              <pxl-text x="750" y="60" text="'SHAPE LEVEL'" size="24" font="monospace" weight="700" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="250" y="60" text="'LAYER LEVEL'" size="27" font="monospace" weight="700" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="750" y="60" text="'SHAPE LEVEL'" size="27" font="monospace" weight="700" align="center" fill="#64748b"></pxl-text>
 
               
               <!-- Divider Line -->
@@ -127,19 +127,19 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;!-- Base Background Layer --&gt;
 &lt;pxl-layer&gt;
-  &lt;pxl-rect x="0" y="0" w="1000" h="600" anchor="top-left" fill="linear(90, [0.2, '#f9a8d4', 0.5, '#fde047', 0.8, '#67e8f9'])"&gt;&lt;/pxl-rect&gt;
+  &lt;pxl-rect x="0" y="0" w="1000" h="600" anchor="top-left" fill="linear(90, [<mark id="sec2CodeC1">0.2</mark>, '#f9a8d4', 0.5, '#fde047', <mark id="sec2CodeC3">0.8</mark>, '#67e8f9'])"&gt;&lt;/pxl-rect&gt;
 &lt;/pxl-layer&gt;
 
-&lt;!-- Layer Level: Blends with background DOM elements --&gt;
+&lt;!-- Layer Level: Blends with background --&gt;
 &lt;pxl-layer blend="<mark id="sec2LayerBlendCode">normal</mark>"&gt;
-  &lt;pxl-circle x="180" y="300" r="140" fill="darkorange"&gt;&lt;/pxl-circle&gt;
-  &lt;pxl-circle x="320" y="300" r="140" fill="dodgerblue"&gt;&lt;/pxl-circle&gt;
+  &lt;pxl-circle x="180" y="<mark id="sec2CodeYL1">300</mark>" r="<mark id="sec2CodeRL1">140</mark>" fill="darkorange"&gt;&lt;/pxl-circle&gt;
+  &lt;pxl-circle x="320" y="<mark id="sec2CodeYL2">300</mark>" r="<mark id="sec2CodeRL2">140</mark>" fill="dodgerblue"&gt;&lt;/pxl-circle&gt;
 &lt;/pxl-layer&gt;
 
-&lt;!-- Shape Level: Blends only with shapes on the same canvas --&gt;
+&lt;!-- Shape Level: Blends only with shapes on the same layer --&gt;
 &lt;pxl-layer&gt;
-  &lt;pxl-circle x="680" y="300" r="140" fill="darkorange"&gt;&lt;/pxl-circle&gt;
-  &lt;pxl-circle x="820" y="300" r="140" fill="dodgerblue" blend="<mark id="sec2ShapeBlendCode">normal</mark>"&gt;&lt;/pxl-circle&gt;
+  &lt;pxl-circle x="680" y="<mark id="sec2CodeYR1">300</mark>" r="<mark id="sec2CodeRR1">140</mark>" fill="darkorange"&gt;&lt;/pxl-circle&gt;
+  &lt;pxl-circle x="820" y="<mark id="sec2CodeYR2">300</mark>" r="<mark id="sec2CodeRR2">140</mark>" fill="dodgerblue" blend="<mark id="sec2ShapeBlendCode">normal</mark>"&gt;&lt;/pxl-circle&gt;
 &lt;/pxl-layer&gt;</code></pre>
 
         <div class="demo-container">
@@ -150,17 +150,30 @@
               document.getElementById('sec2C1Val').innerText = c1;
               document.getElementById('sec2C3Val').innerText = c3;
               document.getElementById('sec2BgRect').setAttribute('fill', `linear(90, [${c1}, '#f9a8d4', 0.5, '#fde047', ${c3}, '#67e8f9'])`);
+              document.getElementById('sec2CodeC1').innerText = c1;
+              document.getElementById('sec2CodeC3').innerText = c3;
             };
             window.sec2UpdateCircles = function() {
               const y = document.getElementById('sec2YSlider').value;
               const r = document.getElementById('sec2RSlider').value;
               document.getElementById('sec2YVal').innerText = y;
               document.getElementById('sec2RVal').innerText = r;
+              
               const shapes = ['sec2ShapeL1', 'sec2ShapeL2', 'sec2ShapeR1', 'sec2ShapeR2'];
               shapes.forEach(id => {
                 document.getElementById(id).setAttribute('y', y);
                 document.getElementById(id).setAttribute('r', r);
               });
+              
+              document.getElementById('sec2CodeYL1').innerText = y;
+              document.getElementById('sec2CodeYL2').innerText = y;
+              document.getElementById('sec2CodeYR1').innerText = y;
+              document.getElementById('sec2CodeYR2').innerText = y;
+              
+              document.getElementById('sec2CodeRL1').innerText = r;
+              document.getElementById('sec2CodeRL2').innerText = r;
+              document.getElementById('sec2CodeRR1').innerText = r;
+              document.getElementById('sec2CodeRR2').innerText = r;
             };
           </script>
           
@@ -179,11 +192,11 @@
               <div class="playground-sliders">
                 <div class="control-group">
                   <label><span>Color 1 Offset</span> <span id="sec2C1Val">0.2</span></label>
-                  <input id="sec2C1Slider" type="range" min="0" max="0.5" step="0.05" value="0.2" autocomplete="off" oninput="window.sec2UpdateBg()">
+                  <input id="sec2C1Slider" type="range" min="0" max="0.5" step="0.05" value="0.2" autocomplete="off" oninput="window.sec2UpdateBg()" data-mark="sec2CodeC1">
                 </div>
                 <div class="control-group">
                   <label><span>Color 3 Offset</span> <span id="sec2C3Val">0.8</span></label>
-                  <input id="sec2C3Slider" type="range" min="0.5" max="1" step="0.05" value="0.8" autocomplete="off" oninput="window.sec2UpdateBg()">
+                  <input id="sec2C3Slider" type="range" min="0.5" max="1" step="0.05" value="0.8" autocomplete="off" oninput="window.sec2UpdateBg()" data-mark="sec2CodeC3">
                 </div>
               </div>
             </div>
@@ -193,11 +206,11 @@
               <div class="playground-sliders">
                 <div class="control-group">
                   <label><span>Center Y</span> <span id="sec2YVal">300</span></label>
-                  <input id="sec2YSlider" type="range" min="100" max="500" step="10" value="300" autocomplete="off" oninput="window.sec2UpdateCircles()">
+                  <input id="sec2YSlider" type="range" min="100" max="500" step="10" value="300" autocomplete="off" oninput="window.sec2UpdateCircles()" data-mark="sec2CodeYL1, sec2CodeYL2, sec2CodeYR1, sec2CodeYR2">
                 </div>
                 <div class="control-group">
                   <label><span>Radius</span> <span id="sec2RVal">140</span></label>
-                  <input id="sec2RSlider" type="range" min="50" max="250" step="10" value="140" autocomplete="off" oninput="window.sec2UpdateCircles()">
+                  <input id="sec2RSlider" type="range" min="50" max="250" step="10" value="140" autocomplete="off" oninput="window.sec2UpdateCircles()" data-mark="sec2CodeRL1, sec2CodeRL2, sec2CodeRR1, sec2CodeRR2">
                 </div>
               </div>
             </div>
@@ -249,8 +262,17 @@
 
             <!-- FOREGROUND GUIDES -->
             <pxl-layer>
-              <pxl-text x="250" y="60" text="'LAYER LEVEL'" size="24" font="monospace" weight="700" align="center" fill="#64748b"></pxl-text>
-              <pxl-text x="750" y="60" text="'SHAPE LEVEL'" size="24" font="monospace" weight="700" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="250" y="60" text="'LAYER LEVEL'" size="27" font="monospace" weight="700" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="750" y="60" text="'SHAPE LEVEL'" size="27" font="monospace" weight="700" align="center" fill="#64748b"></pxl-text>
+              
+              <!-- Bottom Captions -->
+              <pxl-text x="250" y="535" text="'Layer containing circles'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="250" y="565" text="'blends with background'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
+              
+              <pxl-text x="750" y="520" text="'Blue circle blends'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="750" y="550" text="'with orange circle'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="750" y="580" text="'(background is ignored)'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
+
               <pxl-line x1="500" y1="0" x2="500" y2="2000" stroke="#64748b" strokewidth="2" linedash="[6, 6]"></pxl-line>
             </pxl-layer>
           </pxl-stage>
