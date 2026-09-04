@@ -47,10 +47,10 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- The "Destination" Shape --&gt;
-    &lt;pxl-rect x="400" y="300" w="300" h="300" anchor="center" fill="darkorange"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect x="350" y="300" w="400" h="300" anchor="center" fill="darkorange"&gt;&lt;/pxl-rect&gt;
 
     &lt;!-- The "Source" Shape --&gt;
-    &lt;pxl-circle x="<mark id="sec1CodeX">600</mark>" y="<mark id="sec1CodeY">300</mark>" r="150" fill="dodgerblue" mask="<mark id="sec1CodeMask">destination-in</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-ellipse x="<mark id="sec1CodeX">650</mark>" y="<mark id="sec1CodeY">300</mark>" rx="200" ry="150" fill="dodgerblue" mask="<mark id="sec1CodeMask">destination-in</mark>"&gt;&lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -67,9 +67,9 @@
               document.getElementById('sec1CodeY').innerText = y;
               
               // Update stage
-              document.getElementById('sec1Circle').setAttribute('mask', mask);
-              document.getElementById('sec1Circle').setAttribute('x', x);
-              document.getElementById('sec1Circle').setAttribute('y', y);
+              document.getElementById('sec1Ellipse').setAttribute('mask', mask);
+              document.getElementById('sec1Ellipse').setAttribute('x', x);
+              document.getElementById('sec1Ellipse').setAttribute('y', y);
             };
           </script>
           
@@ -108,7 +108,7 @@
               <div class="playground-sliders">
                 <div class="control-group">
                   <label><span>Center X</span></label>
-                  <input id="sec1XSlider" type="range" min="300" max="700" step="10" value="600" autocomplete="off" oninput="window.sec1Update()" data-mark="sec1CodeX">
+                  <input id="sec1XSlider" type="range" min="300" max="700" step="10" value="650" autocomplete="off" oninput="window.sec1Update()" data-mark="sec1CodeX">
                 </div>
                 <div class="control-group">
                   <label><span>Center Y</span></label>
@@ -123,26 +123,26 @@
             <pxl-layer id="sec1BgLayer">
               <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
               <!-- Ghost Outlines (Background) -->
-              <pxl-rect x="400" y="300" w="300" h="300" anchor="center" stroke="#94a3b8" strokewidth="2" linedash="[6, 6]" fill="none"></pxl-rect>
-              <pxl-circle x="ref.sec1Circle.x" y="ref.sec1Circle.y" r="150" stroke="#94a3b8" strokewidth="2" linedash="[6, 6]" fill="none"></pxl-circle>
+              <pxl-rect x="350" y="300" w="400" h="300" anchor="center" stroke="#94a3b8" strokewidth="2" linedash="[6, 6]" fill="none"></pxl-rect>
+              <pxl-ellipse x="ref.sec1Ellipse.x" y="ref.sec1Ellipse.y" rx="200" ry="150" stroke="#94a3b8" strokewidth="2" linedash="[6, 6]" fill="none"></pxl-ellipse>
             </pxl-layer>
 
             <!-- MASKING LAYER -->
             <pxl-layer>
               <!-- Destination -->
-              <pxl-rect x="400" y="300" w="300" h="300" anchor="center" fill="darkorange"></pxl-rect>
+              <pxl-rect x="350" y="300" w="400" h="300" anchor="center" fill="darkorange"></pxl-rect>
               <!-- Source -->
-              <pxl-circle id="sec1Circle" x="600" y="300" r="150" fill="dodgerblue" mask="destination-in"></pxl-circle>
+              <pxl-ellipse id="sec1Ellipse" x="650" y="300" rx="200" ry="150" fill="dodgerblue" mask="destination-in"></pxl-ellipse>
             </pxl-layer>
 
             <!-- FOREGROUND LABELS -->
             <pxl-layer>
               <!-- Labels -->
-              <pxl-text x="400" y="535" text="'Destination Shape'" size="27" font="monospace" align="center" fill="#fb923c"></pxl-text>
-              <pxl-text x="400" y="565" text="'(Orange Square)'" size="27" font="monospace" align="center" fill="#fb923c"></pxl-text>
+              <pxl-text x="350" y="535" text="'Destination Shape'" size="27" font="monospace" align="center" fill="#fb923c"></pxl-text>
+              <pxl-text x="350" y="565" text="'(Orange Rect)'" size="27" font="monospace" align="center" fill="#fb923c"></pxl-text>
               
-              <pxl-text x="750" y="535" text="'Source Shape'" size="27" font="monospace" align="center" fill="#60a5fa"></pxl-text>
-              <pxl-text x="750" y="565" text="'(Blue Circle)'" size="27" font="monospace" align="center" fill="#60a5fa"></pxl-text>
+              <pxl-text x="ref.sec1Ellipse.x" y="535" text="'Source Shape'" size="27" font="monospace" align="center" fill="#60a5fa"></pxl-text>
+              <pxl-text x="ref.sec1Ellipse.x" y="565" text="'(Blue Ellipse)'" size="27" font="monospace" align="center" fill="#60a5fa"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
