@@ -67,6 +67,16 @@ Elements within a `<pxl-layer>` are drawn in strict DOM order (back-to-front). A
 ## 4. UI Controls & Architecture
 Interactive playgrounds must follow a standardized DOM architecture to maintain visual parity across the site.
 
+### Callout Boxes (Notes & Architecture Rules)
+Whenever highlighting critical architectural rules, notes, or important caveats, ALWAYS use the standard framework callout classes instead of inline styles. 
+
+```html
+<div class="callout-info">
+  <p class="callout-title">Architecture Rule: Shapes Only</p>
+  <p class="callout-body">The <code>mask</code> attribute applies <strong>strictly to Shapes</strong>. It is a direct alias for Canvas 2D boolean clipping operations...</p>
+</div>
+```
+
 ### Layout Structure
 Every documentation example must follow a standardized 3-part layout:
 1. **Visible Declarative Code Block (`<pre><code class="language-html">`)**: Placed **above** the demo container so developers see the declarative syntax immediately. Use `<mark id="code...">` around dynamic values.
@@ -138,10 +148,10 @@ Every documentation example must follow a standardized 3-part layout:
   ```
 
 ### Onboarding Beacons
-To combat "interactive blindness" and guide users to the most important sliders in a complex playground, you should use Onboarding Beacons. 
-* **Sliders**: Simply drop `<span class="indicator-dot"></span>` next to a label inside a `.control-group`. The CSS automatically generates a hardware-accelerated, pulsing "Radar Ping" effect.
-* **Auto-Generated Tab Badges**: You NEVER need to manually add dots or badges to `.tab-btn` elements in your HTML. On page load, the JS framework automatically scans every `.tab-content`, counts the number of `.indicator-dot` sliders inside, and dynamically injects an iOS-style numbered notification badge (e.g., `<span class="indicator-badge">3</span>`) onto the controlling `.tab-btn`. 
-* **Automatic Dismissal**: The framework is DOM-aware. The moment a user interacts with a slider (via the `input` event), the framework automatically deletes its ping dot. It then recalculates the parent tab's badge count, updating the number instantly. When the count hits zero, the tab badge pops out of existence. No IDs or manual JavaScript wiring is required!
+To combat "interactive blindness" and guide users to the most important controls in a complex playground, you should use Onboarding Beacons. 
+* **Controls (Sliders & Dropdowns)**: Simply drop `<span class="indicator-dot"></span>` next to a label inside a `.control-group`. The CSS automatically generates a hardware-accelerated, pulsing "Radar Ping" effect.
+* **Auto-Generated Tab Badges**: You NEVER need to manually add dots or badges to `.tab-btn` elements in your HTML. On page load, the JS framework automatically scans every `.tab-content`, counts the number of `.indicator-dot` controls inside, and dynamically injects an iOS-style numbered notification badge (e.g., `<span class="indicator-badge">3</span>`) onto the controlling `.tab-btn`. 
+* **Automatic Dismissal**: The framework is DOM-aware. The moment a user interacts with a control (via the `input` event on sliders or dropdowns), the framework automatically deletes its ping dot. It then recalculates the parent tab's badge count, updating the number instantly. When the count hits zero, the tab badge pops out of existence. No IDs or manual JavaScript wiring is required!
 
 ### 5. ID Naming Conventions
 To ensure perfect consistency across all documentation playgrounds and guides, 100% of HTML IDs must follow our **Universal 100% `camelCase` Hierarchical ID Standard**:

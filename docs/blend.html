@@ -53,8 +53,8 @@
 
   &lt;!-- RIGHT: Alpha applied directly to Shapes --&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-circle x="680" y="300" r="140" fill="darkorange" alpha="<mark id="sec1Shape1AlphaCode">0.5</mark>"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle x="820" y="300" r="140" fill="dodgerblue" alpha="<mark id="sec1Shape2AlphaCode">0.5</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="680" y="300" r="140" alpha="<mark id="sec1Shape1AlphaCode">0.5</mark>" fill="darkorange"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="820" y="300" r="140" alpha="<mark id="sec1Shape2AlphaCode">0.5</mark>" fill="dodgerblue"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -72,7 +72,7 @@
             <div class="tab-content active" id="sec1AlphaTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Alpha (Opacity) <span class="indicator-dot"></span></span> <span id="sec1AlphaVal">0.5</span></label>
+                  <label><span>Alpha <span class="indicator-dot"></span></span> <span id="sec1AlphaVal">0.5</span></label>
                   <input type="range" min="0" max="1" step="0.05" value="0.5" autocomplete="off" data-mark="sec1LayerAlphaCode, sec1Shape1AlphaCode, sec1Shape2AlphaCode"
                     oninput="
                       document.getElementById('sec1Layer').setAttribute('alpha', this.value);
@@ -149,7 +149,7 @@
   &lt;!-- Shape Level: Blends only with shapes on the same layer --&gt;
   &lt;pxl-layer&gt;
     &lt;pxl-circle x="680" y="<mark id="sec2CodeYR1">300</mark>" r="<mark id="sec2CodeRR1">140</mark>" fill="darkorange"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle x="820" y="<mark id="sec2CodeYR2">300</mark>" r="<mark id="sec2CodeRR2">140</mark>" fill="dodgerblue" blend="<mark id="sec2ShapeBlendCode">multiply</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="820" y="<mark id="sec2CodeYR2">300</mark>" r="<mark id="sec2CodeRR2">140</mark>" blend="<mark id="sec2ShapeBlendCode">multiply</mark>" fill="dodgerblue"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -229,7 +229,7 @@
             <div class="tab-content active" id="sec2BlendTab">
               <div class="playground-sliders">
                 <div class="control-group" style="margin-bottom: -14px;">
-                  <label><span>Mix Mode <span class="indicator-dot"></span></span></label>
+                  <label><span>Blend Mode <span class="indicator-dot"></span></span></label>
                   <select autocomplete="off" onchange="document.getElementById('sec2Layer').setAttribute('blend', this.value); document.getElementById('sec2ShapeR2').setAttribute('blend', this.value); document.getElementById('sec2LayerBlendCode').innerText = this.value; document.getElementById('sec2ShapeBlendCode').innerText = this.value;">
                     <option value="normal">normal (no blend)</option>
                     <option value="multiply" selected>multiply</option>

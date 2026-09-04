@@ -33,9 +33,9 @@
         <h1>Mask</h1>
         <p class="lead">Use the <code>mask</code> attribute to perform boolean clipping operations (intersections, cutouts, and knockouts) between overlapping shapes.</p>
         
-        <div style="padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 8px; margin-bottom: 2rem;">
-          <strong style="display: block; margin-bottom: 0.5rem; color: var(--text-heading);">Architecture Rule: Shapes Only</strong>
-          <p style="margin: 0; color: var(--text-body);">The <code>mask</code> attribute applies <strong>strictly to Shapes</strong> (like <code>&lt;pxl-circle&gt;</code> or <code>&lt;pxl-rect&gt;</code>). It is a direct alias for Canvas 2D boolean clipping operations. Because Kilopixel Layers rely on CSS DOM compositing, applying a mask to a <code>&lt;pxl-layer&gt;</code> will be ignored.</p>
+        <div class="callout-info">
+          <p class="callout-title">Architecture Rule: Shapes Only</p>
+          <p class="callout-body">The <code>mask</code> attribute applies <strong>strictly to Shapes</strong> (like <code>&lt;pxl-circle&gt;</code> or <code>&lt;pxl-rect&gt;</code>). It is a direct alias for Canvas 2D boolean clipping operations. Because Kilopixel Layers rely on CSS DOM compositing, applying a mask to a <code>&lt;pxl-layer&gt;</code> will be ignored.</p>
         </div>
 
         <!-- ================================================================= -->
@@ -46,10 +46,10 @@
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- The "Destination" Shape --&gt;
-    &lt;pxl-rect x="350" y="300" w="400" h="300" anchor="center" fill="darkorange"&gt;&lt;/pxl-rect&gt;
+    &lt;!-- The Destination Shape --&gt;
+    &lt;pxl-rect x="350" y="300" w="400" h="300" fill="darkorange"&gt;&lt;/pxl-rect&gt;
 
-    &lt;!-- The "Source" Shape --&gt;
+    &lt;!-- The Source Shape --&gt;
     &lt;pxl-ellipse x="<mark id="sec1CodeX">650</mark>" y="<mark id="sec1CodeY">300</mark>" rx="200" ry="150" fill="dodgerblue" mask="<mark id="sec1CodeMask">destination-in</mark>"&gt;&lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -65,6 +65,10 @@
               document.getElementById('sec1CodeMask').innerText = mask;
               document.getElementById('sec1CodeX').innerText = x;
               document.getElementById('sec1CodeY').innerText = y;
+              
+              // Update UI values
+              document.getElementById('sec1XVal').innerText = x;
+              document.getElementById('sec1YVal').innerText = y;
               
               // Update stage
               document.getElementById('sec1Ellipse').setAttribute('mask', mask);
@@ -107,11 +111,11 @@
             <div class="tab-content" id="sec1PositionTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Center X</span></label>
+                  <label><span>Center X</span> <span id="sec1XVal">650</span></label>
                   <input id="sec1XSlider" type="range" min="300" max="700" step="10" value="650" autocomplete="off" oninput="window.sec1Update()" data-mark="sec1CodeX">
                 </div>
                 <div class="control-group">
-                  <label><span>Center Y</span></label>
+                  <label><span>Center Y</span> <span id="sec1YVal">300</span></label>
                   <input id="sec1YSlider" type="range" min="100" max="500" step="10" value="300" autocomplete="off" oninput="window.sec1Update()" data-mark="sec1CodeY">
                 </div>
               </div>
@@ -130,7 +134,7 @@
             <!-- MASKING LAYER -->
             <pxl-layer>
               <!-- Destination -->
-              <pxl-rect x="350" y="300" w="400" h="300" anchor="center" fill="darkorange"></pxl-rect>
+              <pxl-rect x="350" y="300" w="400" h="300" fill="darkorange"></pxl-rect>
               <!-- Source -->
               <pxl-ellipse id="sec1Ellipse" x="650" y="300" rx="200" ry="150" fill="dodgerblue" mask="destination-in"></pxl-ellipse>
             </pxl-layer>
@@ -141,8 +145,8 @@
               <pxl-text x="350" y="535" text="'Destination Shape'" size="27" font="monospace" align="center" fill="#fb923c"></pxl-text>
               <pxl-text x="350" y="565" text="'(Orange Rect)'" size="27" font="monospace" align="center" fill="#fb923c"></pxl-text>
               
-              <pxl-text x="ref.sec1Ellipse.x" y="535" text="'Source Shape'" size="27" font="monospace" align="center" fill="#60a5fa"></pxl-text>
-              <pxl-text x="ref.sec1Ellipse.x" y="565" text="'(Blue Ellipse)'" size="27" font="monospace" align="center" fill="#60a5fa"></pxl-text>
+              <pxl-text x="650" y="535" text="'Source Shape'" size="27" font="monospace" align="center" fill="#60a5fa"></pxl-text>
+              <pxl-text x="650" y="565" text="'(Blue Ellipse)'" size="27" font="monospace" align="center" fill="#60a5fa"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
