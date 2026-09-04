@@ -111,6 +111,15 @@
               <pxl-circle id="sec1Shape1" x="680" y="300" r="140" fill="darkorange" alpha="0.5"></pxl-circle>
               <pxl-circle id="sec1Shape2" x="820" y="300" r="140" fill="dodgerblue" alpha="0.5"></pxl-circle>
             </pxl-layer>
+
+            <!-- FOREGROUND LABELS -->
+            <pxl-layer>
+              <pxl-text x="250" y="535" text="'Layer with shapes'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="250" y="565" text="'fades into background'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
+              
+              <pxl-text x="750" y="535" text="'Shapes fade'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="750" y="565" text="'together'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
+            </pxl-layer>
           </pxl-stage>
         </div>
 
@@ -132,7 +141,7 @@
   &lt;/pxl-layer&gt;
 
   &lt;!-- Layer Level: Blends with background --&gt;
-  &lt;pxl-layer blend="<mark id="sec2LayerBlendCode">normal</mark>"&gt;
+  &lt;pxl-layer blend="<mark id="sec2LayerBlendCode">multiply</mark>"&gt;
     &lt;pxl-circle x="180" y="<mark id="sec2CodeYL1">300</mark>" r="<mark id="sec2CodeRL1">140</mark>" fill="darkorange"&gt;&lt;/pxl-circle&gt;
     &lt;pxl-circle x="320" y="<mark id="sec2CodeYL2">300</mark>" r="<mark id="sec2CodeRL2">140</mark>" fill="dodgerblue"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
@@ -140,7 +149,7 @@
   &lt;!-- Shape Level: Blends only with shapes on the same layer --&gt;
   &lt;pxl-layer&gt;
     &lt;pxl-circle x="680" y="<mark id="sec2CodeYR1">300</mark>" r="<mark id="sec2CodeRR1">140</mark>" fill="darkorange"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle x="820" y="<mark id="sec2CodeYR2">300</mark>" r="<mark id="sec2CodeRR2">140</mark>" fill="dodgerblue" blend="<mark id="sec2ShapeBlendCode">normal</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="820" y="<mark id="sec2CodeYR2">300</mark>" r="<mark id="sec2CodeRR2">140</mark>" fill="dodgerblue" blend="<mark id="sec2ShapeBlendCode">multiply</mark>"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -222,8 +231,8 @@
                 <div class="control-group" style="margin-bottom: -14px;">
                   <label><span>Mix Mode <span class="indicator-dot"></span></span></label>
                   <select autocomplete="off" onchange="document.getElementById('sec2Layer').setAttribute('blend', this.value); document.getElementById('sec2ShapeR2').setAttribute('blend', this.value); document.getElementById('sec2LayerBlendCode').innerText = this.value; document.getElementById('sec2ShapeBlendCode').innerText = this.value;">
-                    <option value="normal" selected>normal (no blend)</option>
-                    <option value="multiply">multiply</option>
+                    <option value="normal">normal (no blend)</option>
+                    <option value="multiply" selected>multiply</option>
                     <option value="screen">screen</option>
                     <option value="overlay">overlay</option>
                     <option value="darken">darken</option>
@@ -251,7 +260,7 @@
             </pxl-layer>
 
             <!-- LEFT: Blend applied to the Layer (Blends against the Background Layer!) -->
-            <pxl-layer id="sec2Layer" blend="normal">
+            <pxl-layer id="sec2Layer" blend="multiply">
               <pxl-circle id="sec2ShapeL1" x="180" y="300" r="140" fill="darkorange"></pxl-circle>
               <pxl-circle id="sec2ShapeL2" x="320" y="300" r="140" fill="dodgerblue"></pxl-circle>
             </pxl-layer>
@@ -259,7 +268,7 @@
             <!-- RIGHT: Blend applied to the Shapes (Blends against each other, but NOT the Background Layer!) -->
             <pxl-layer id="sec2ShapeLayer">
               <pxl-circle id="sec2ShapeR1" x="680" y="300" r="140" fill="darkorange"></pxl-circle>
-              <pxl-circle id="sec2ShapeR2" x="820" y="300" r="140" fill="dodgerblue" blend="normal"></pxl-circle>
+              <pxl-circle id="sec2ShapeR2" x="820" y="300" r="140" fill="dodgerblue" blend="multiply"></pxl-circle>
             </pxl-layer>
 
             <!-- FOREGROUND GUIDES -->
@@ -268,11 +277,11 @@
               <pxl-text x="750" y="60" text="'SHAPE LEVEL'" size="27" font="monospace" weight="700" align="center" fill="#64748b"></pxl-text>
               
               <!-- Bottom Captions -->
-              <pxl-text x="250" y="535" text="'Layer containing circles'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="250" y="535" text="'Layer with shapes'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
               <pxl-text x="250" y="565" text="'blends with background'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
               
-              <pxl-text x="750" y="520" text="'Blue circle blends'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
-              <pxl-text x="750" y="550" text="'with orange circle'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="750" y="520" text="'Blue shape blends'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="750" y="550" text="'with orange shape'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
               <pxl-text x="750" y="580" text="'(background is ignored)'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
 
               <pxl-line x1="500" y1="0" x2="500" y2="2000" stroke="#64748b" strokewidth="2" linedash="[6, 6]"></pxl-line>

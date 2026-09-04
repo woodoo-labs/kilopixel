@@ -78,9 +78,9 @@ pxlDocs.initHighlighting = function() {
   }
 
   function handleInput(e) {
-    const target = e.target.closest('input[type="range"]');
+    const target = e.target.closest('input[type="range"], select');
     if (target) {
-      // Automatically dismiss any onboarding beacon dot for this slider
+      // Automatically dismiss any onboarding beacon dot for this control
       const group = target.closest('.control-group');
       if (group) {
         const dot = group.querySelector('.indicator-dot');
