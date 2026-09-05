@@ -349,7 +349,7 @@ Kilopixel uses a strict **Dual Architecture** for context states, separating fla
 ### Blend vs. Masking (Semantic Separation)
 
 While both `blend` and `mask` on a Shape map to the exact same underlying Canvas property (`ctx.globalCompositeOperation`), they are separated in the API to clarify intent and respect the limitations of the Dual Architecture:
-- **`blend` (Layers & Shapes)**: Designed for color mixing (e.g., `screen`, `multiply`, `overlay`). Because `<pxl-layer>` uses CSS `mix-blend-mode`, it *only* supports these color-mixing algorithms.
+- **`blend` (Layers & Shapes)**: Designed for color mixing (e.g., `screen`, `multiply`, `overlay`, `lighter`). Because `<pxl-layer>` uses CSS `mix-blend-mode`, it supports standard color-mixing algorithms. *Note: Kilopixel officially supports the Canvas `lighter` mode for additive blending, and automatically translates it to the CSS `plus-lighter` standard when applied to a layer.*
 - **`mask` (Shapes Only)**: Designed for Boolean alpha-compositing and clipping (e.g., `destination-in`, `destination-out`, `source-atop`). Because CSS `mix-blend-mode` cannot perform Canvas-style alpha clipping, these operations would fail on a Layer. The `mask` attribute was added strictly to Shapes as a semantic alias, giving developers a dedicated, logical place to execute these Canvas-only boolean operations without causing confusion.
 
 *(Note: If both attributes are applied to a shape, `mask` takes precedence over `blend`.)*

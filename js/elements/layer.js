@@ -87,7 +87,7 @@ class Layer extends PxlNode {
       this._lastAlpha = alpha;
     }
     
-    const cssBlend = blend === 'source-over' ? 'normal' : blend;
+    const cssBlend = blend === 'source-over' ? 'normal' : (blend === 'lighter' ? 'plus-lighter' : blend);
     if (this._lastBlend !== cssBlend) {
       this.canvas.style.mixBlendMode = cssBlend;
       this._lastBlend = cssBlend;
