@@ -39,7 +39,7 @@
         <!-- ================================================================= -->
         <h2>1. Alpha (Opacity)</h2>
         <p>Kilopixel allows you to apply transparency at two different architectural levels:</p>
-        <ul style="margin-bottom: 1.5rem; line-height: 1.6; color: var(--text-body);">
+        <ul>
           <li><strong>Layer Level:</strong> When <code>alpha</code> is applied to a <code>&lt;pxl-layer&gt;</code>, the shapes inside are drawn normally (blocking each other opaquely). Then, the entire flattened canvas element is made translucent via the CSS <code>opacity</code> property.</li>
           <li><strong>Shape Level:</strong> When <code>alpha</code> is applied directly to a <code>&lt;pxl-circle&gt;</code>, it maps to the Canvas <code>globalAlpha</code> property. The shapes become translucent during the draw loop, causing them to bleed through each other where they overlap.</li>
         </ul>
@@ -128,7 +128,7 @@
         <!-- ================================================================= -->
         <h2>2. Blend Modes</h2>
         <p>In Kilopixel, you can apply any of the 16 standard CSS/Canvas color mix modes using the <code>blend</code> attribute. Just like alpha transparency, the behavior depends entirely on whether you apply it to a layer or a shape:</p>
-        <ul style="margin-bottom: 1.5rem; line-height: 1.6; color: var(--text-body);">
+        <ul>
           <li><strong>Layer Level:</strong> When <code>blend</code> is applied to a <code>&lt;pxl-layer&gt;</code>, the browser blends the entire flattened layer against the layers and CSS backgrounds behind it.</li>
           <li><strong>Shape Level:</strong> When <code>blend</code> is applied to a shape (e.g., a <code>&lt;pxl-circle&gt;</code>), it strictly blends against the other shapes already drawn onto that specific layer's isolated canvas buffer, completely ignoring the background.</li>
         </ul>
@@ -237,7 +237,7 @@
                     <option value="overlay">overlay</option>
                     <option value="darken">darken</option>
                     <option value="lighten">lighten</option>
-                    <option value="lighter">lighter</option>
+                    <option value="lighter">lighter (plus-lighter)</option>
                     <option value="color-dodge">color-dodge</option>
                     <option value="color-burn">color-burn</option>
                     <option value="hard-light">hard-light</option>

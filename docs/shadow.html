@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shadow | Kilopixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+  <script src="js/api-tabs.js"></script>
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+        <h1>Shadow</h1>
+        <p class="lead">Kilopixel features a powerful dual-architecture for shadows: Native Canvas shadows for dynamic shape-level interaction, and CSS drop-shadow filters for unified layer silhouettes.</p>
+        
+        <div class="callout-info">
+          <p class="callout-title">Shape vs Layer Shadows</p>
+          <p class="callout-body">The <code>shadowcolor</code>, <code>shadowblur</code>, <code>shadowx</code>, and <code>shadowy</code> attributes apply strictly to shapes. They cause shapes to cast shadows directly onto each other. To cast a unified silhouette shadow of an entire layer onto the page background, use the <code>filter="dropShadow(...)"</code> attribute on the <code>&lt;pxl-layer&gt;</code> instead.</p>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: SHAPE SHADOWS -->
+        <!-- ================================================================= -->
+        <h2>1. Shape Shadows (Native)</h2>
+        <p>Applying the native <code>shadowcolor</code> attribute to a shape utilizes the raw HTML5 Canvas API. This means that as shapes overlap, the top shape will cast a physical shadow onto the shape below it in 2D space.</p>
+        <p>Notice how the blue circle casts a dark shadow directly across the orange rectangle!</p>
+
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Bottom Shape --&gt;
+    &lt;pxl-rect x="350" y="300" w="400" h="300" fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;&lt;/pxl-rect&gt;
+
+    &lt;!-- Top Shape casting a shadow --&gt;
+    &lt;pxl-circle x="650" y="300" r="150" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
+      shadowcolor="hsla(<mark id="sec1HueCode">220</mark>, 100, 15, 0.7)" shadowblur="<mark id="sec1BlurCode">20</mark>" shadowx="<mark id="sec1OffsetXCode">-30</mark>" shadowy="<mark id="sec1OffsetYCode">20</mark>"&gt;
+    &lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1CircleTab')">Blue Circle Shadows</button>
+              </div>
+            </div>
+
+            <div class="tab-content active" id="sec1CircleTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Shadow Hue <span class="indicator-dot"></span></span> <span id="sec1HueVal">220</span></label>
+                  <input type="range" min="0" max="360" step="1" value="220" autocomplete="off" oninput="document.getElementById('sec1Circle').setAttribute('shadowcolor', 'hsla(' + this.value + ', 100, 15, 0.7)'); document.getElementById('sec1HueVal').innerText = this.value; document.getElementById('sec1HueCode').innerText = this.value;" data-mark="sec1HueCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Shadow Blur</span> <span id="sec1BlurVal">20</span></label>
+                  <input type="range" min="0" max="100" step="1" value="20" autocomplete="off" oninput="document.getElementById('sec1Circle').setAttribute('shadowblur', this.value); document.getElementById('sec1BlurVal').innerText = this.value; document.getElementById('sec1BlurCode').innerText = this.value;" data-mark="sec1BlurCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Shadow X</span> <span id="sec1OffsetXVal">-30</span></label>
+                  <input type="range" min="-100" max="100" step="1" value="-30" autocomplete="off" oninput="document.getElementById('sec1Circle').setAttribute('shadowx', this.value); document.getElementById('sec1OffsetXVal').innerText = this.value; document.getElementById('sec1OffsetXCode').innerText = this.value;" data-mark="sec1OffsetXCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Shadow Y</span> <span id="sec1OffsetYVal">20</span></label>
+                  <input type="range" min="-100" max="100" step="1" value="20" autocomplete="off" oninput="document.getElementById('sec1Circle').setAttribute('shadowy', this.value); document.getElementById('sec1OffsetYVal').innerText = this.value; document.getElementById('sec1OffsetYCode').innerText = this.value;" data-mark="sec1OffsetYCode">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage ratio="5 / 3" class="demo-stage">
+            <!-- BACKGROUND PATTERN & GUIDES -->
+            <pxl-layer id="sec1BgLayer">
+              <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
+            </pxl-layer>
+
+            <!-- SHAPES LAYER -->
+            <pxl-layer>
+              <!-- Bottom Shape -->
+              <pxl-rect id="sec1Rect" x="350" y="300" w="400" h="300" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-rect>
+              
+              <!-- Top Shape with Shadow -->
+              <pxl-circle id="sec1Circle" x="650" y="300" r="150" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4" shadowcolor="hsla(220, 100, 15, 0.7)" shadowblur="20" shadowx="-30" shadowy="20"></pxl-circle>
+            </pxl-layer>
+
+            <!-- FOREGROUND LABELS -->
+            <pxl-layer>
+              <pxl-text x="350" y="535" text="'Bottom Shape'" size="27" weight="bold" font="monospace" align="center" fill="#fb923c"></pxl-text>
+              <pxl-text x="350" y="565" text="'(Receives Shadow)'" size="27" font="monospace" align="center" fill="#fb923c"></pxl-text>
+              
+              <pxl-text x="650" y="535" text="'Top Shape'" size="27" weight="bold" font="monospace" align="center" fill="#60a5fa"></pxl-text>
+              <pxl-text x="650" y="565" text="'(Casts Shadow)'" size="27" font="monospace" align="center" fill="#60a5fa"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Prism Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+</body>
+</html>

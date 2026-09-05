@@ -38,6 +38,11 @@
           <p class="callout-body">The <code>mask</code> attribute applies strictly to shapes (like <code>&lt;pxl-circle&gt;</code> or <code>&lt;pxl-rect&gt;</code>). Applying a mask to a <code>&lt;pxl-layer&gt;</code> will be ignored.</p>
         </div>
 
+        <div class="callout-info">
+          <p class="callout-title">Don't Mix Fill and Stroke</p>
+          <p class="callout-body">Masks work perfectly on shapes that have only a <code>fill</code>, or only a <code>stroke</code>. But if a shape uses <strong>both</strong> at the same time, they will mask each other out and create glitchy overlaps. For clean cutouts, make sure your mask shape only uses one or the other!</p>
+        </div>
+
         <!-- ================================================================= -->
         <!-- SECTION 1: BOOLEAN OPERATIONS -->
         <!-- ================================================================= -->
