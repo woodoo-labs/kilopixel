@@ -60,6 +60,16 @@ body {
 }
 
 /* --- Typography & Markdown --- */
+.text-highlight-blue {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.text-highlight-purple {
+  color: #8b5cf6;
+  font-weight: 600;
+}
+
 .docs-content h1 {
   font-size: 2.5rem;
   font-weight: 600;
@@ -83,6 +93,14 @@ body {
   font-size: 1.75rem;
   margin-top: 48px;
   margin-bottom: 16px;
+}
+
+.docs-content h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-top: 40px;
+  margin-bottom: 16px;
+  color: var(--text-heading);
 }
 
 .docs-content .lead {
@@ -307,6 +325,10 @@ body {
   color: #1e3a8a;
 }
 
+.callout-info .callout-body + .callout-body {
+  margin-top: 12px;
+}
+
 .docs-content .callout-info ul,
 .docs-content .callout-info ol {
   color: inherit;
@@ -323,6 +345,11 @@ body {
   border-radius: 8px;
   font-size: 1em !important;
   line-height: 1.5;
+}
+
+.docs-content pre.syntax-pre {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .docs-content pre mark {
@@ -359,6 +386,13 @@ body {
   margin-bottom: 32px;
 }
 
+.diagram-stage {
+  display: block;
+  width: 100%;
+  background: transparent;
+  margin-top: 1rem;
+}
+
 .demo-container {
   margin-bottom: 32px;
   display: flex;
@@ -393,7 +427,7 @@ body {
   display: none; /* Chrome, Safari and Opera */
 }
 
-.demo-controls-title {
+.docs-content h3.demo-controls-title {
   margin: 0;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -497,6 +531,15 @@ body {
 
 .tab-content.active {
   display: block;
+}
+
+.tab-note {
+  grid-column: 1 / -1;
+  margin-top: 1rem;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-style: italic;
 }
 
 .playground-sliders {

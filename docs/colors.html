@@ -162,7 +162,7 @@
         <!-- ================================================================= -->
         <!-- SECTION 2: RGB & RGBA -->
         <!-- ================================================================= -->
-        <h2 style="margin-top: 4rem;">2. RGB &amp; RGBA</h2>
+        <h2>2. RGB &amp; RGBA</h2>
         <p>The <code>rgb()</code> and <code>rgba()</code> formats break colors down into their core numeric channels: <strong>R</strong>ed, <strong>G</strong>reen, and <strong>B</strong>lue (0-255). The <code>rgba()</code> variant adds a fourth <strong>A</strong>lpha channel (0.0 - 1.0) to control transparency, allowing overlapping shapes to blend together.</p>
 
         <div class="example-card">
@@ -286,12 +286,12 @@
         <!-- ================================================================= -->
         <!-- SECTION 3: HSL & HSLA -->
         <!-- ================================================================= -->
-        <h2 style="margin-top: 4rem;">3. HSL &amp; HSLA</h2>
+        <h2>3. HSL &amp; HSLA</h2>
         <p>The <code>hsl()</code> and <code>hsla()</code> formats use <strong>H</strong>ue (0-360), <strong>S</strong>aturation (0-100), and <strong>L</strong>ightness (0-100). HSL is especially powerful for generative graphics because you can easily animate the Hue channel over time using the <code>t</code> variable.</p>
 
         <div class="callout-info">
           <p class="callout-body"><strong>Golden Rule of hsla Colors:</strong> Never use <code>%</code> signs! By sticking to pure numbers (e.g., <code>fill="hsl(120, 100, 50)"</code>), you can seamlessly animate colors using math and time variables without triggering syntax errors. The engine handles all the CSS units behind the scenes.</p>
-          <p class="callout-body" style="margin-top: 10px;"><em>Exception:</em> If you choose to use Javascript <strong>backticks</strong> (template literals) for string interpolation (e.g., <code>fill="`hsl(${t*90}, 100%, 50%)`"</code>), your math and time variables are evaluated natively by JavaScript. Because this bypasses Kilopixel's formatting helpers, you <strong>must</strong> include the <code>%</code> signs manually so the final generated string is valid CSS.</p>
+          <p class="callout-body"><em>Exception:</em> If you choose to use Javascript <strong>backticks</strong> (template literals) for string interpolation (e.g., <code>fill="`hsl(${t*90}, 100%, 50%)`"</code>), your math and time variables are evaluated natively by JavaScript. Because this bypasses Kilopixel's formatting helpers, you <strong>must</strong> include the <code>%</code> signs manually so the final generated string is valid CSS.</p>
         </div>
 
         <div class="example-card">
@@ -385,7 +385,7 @@
                     <input type="range" min="0" max="360" step="10" value="90" autocomplete="off"
                       oninput="document.getElementById('sec3Circle3').setAttribute('fill', `hsl(t * ${this.value}, 100, 50)`); document.getElementById('sec3Circle3SpeedVal').innerText = this.value; document.getElementById('sec3Circle3SpeedCode').innerText = this.value;">
                   </div>
-                  <p class="callout-body" style="margin-top: 1rem; font-size: 0.9rem; color: var(--slate-500);">This circle's Hue is driven by the time variable <code>t</code>. Adjusting the slider changes the multiplier, affecting how fast the colors cycle.</p>
+                  <p class="tab-note">This circle's Hue is driven by the time variable <code>t</code>. Adjusting the slider changes the multiplier, affecting how fast the colors cycle.</p>
                 </div>
               </div>
 
@@ -396,14 +396,14 @@
         <!-- ================================================================= -->
         <!-- SECTION 4: LINEAR GRADIENTS -->
         <!-- ================================================================= -->
-        <h2 style="margin-top: 4rem;">4. Linear Gradients</h2>
+        <h2>4. Linear Gradients</h2>
         <p>The <code>linear()</code> math helper generates high-performance linear gradients. The first argument defines the direction (either an angle in degrees or an <code>[x1, y1, x2, y2]</code> coordinate array where 0 to 1 represents the element's bounding box). The second argument is an array of colors (which distribute evenly) or explicit <code>[offset, color]</code> pairs.</p>
 
         <div class="callout-info">
           <p class="callout-body"><strong>The 0-to-1 Bounding Box:</strong> In Kilopixel, gradients are locked to the element's bounding box! The top-left corner of any shape is always exactly <code>(0, 0)</code>, and the bottom-right is <code>(1, 1)</code>. This guarantees that if you move, scale, or stretch your shape, the gradient stretches seamlessly with it &mdash; no complex trigonometry required!</p>
-          <p class="callout-body" style="margin-top: 1rem;">In the diagrams below, the <span style="color: #3b82f6; font-weight: 600;">blue coordinates</span> represent the fixed corners of the shape's invisible bounding box. The <span style="color: #8b5cf6; font-weight: 600;">purple vectors</span> represent the actual <code>[x1, y1, x2, y2]</code> array driving the gradient's direction through that box.</p>
+          <p class="callout-body">In the diagrams below, the <span class="text-highlight-blue">blue coordinates</span> represent the fixed corners of the shape's invisible bounding box. The <span class="text-highlight-purple">purple vectors</span> represent the actual <code>[x1, y1, x2, y2]</code> array driving the gradient's direction through that box.</p>
 
-          <pxl-stage ratio="2 / 1" style="width: 100%; background: transparent; margin-top: 1rem;">
+          <pxl-stage ratio="2 / 1" class="diagram-stage">
             <pxl-layer>
               <pxl-grid stroke="#cbd5e1" major="2"></pxl-grid>
               
@@ -444,7 +444,7 @@
         <div class="callout-info" style="margin-top: 2rem;">
           <p class="callout-body"><strong>True Geometric Angles:</strong> When you provide an angle in degrees instead of an array, Kilopixel bypasses the 0-to-1 corner mapping entirely! It projects a geometrically perfect angle from the center of the shape and calculates the exact distance needed to cover the corners. This means a <code>45°</code> gradient is <em>always</em> drawn at a strict 45-degree angle on the screen, even if the bounding box is a wide rectangle!</p>
 
-          <pxl-stage ratio="5 / 2" style="width: 100%; background: transparent; margin-top: 1rem;">
+          <pxl-stage ratio="5 / 2" class="diagram-stage">
             <pxl-layer>
               <pxl-grid stroke="#cbd5e1" major="2"></pxl-grid>
               
@@ -532,7 +532,7 @@
                     <input type="range" min="0" max="1" step="0.05" value="0.5" autocomplete="off"
                       oninput="document.getElementById('sec4Rect2').setAttribute('fill', `linear(90, [0, '#000', ${this.value}, '#f00', 1, '#000'])`); document.getElementById('sec4Rect2OffsetVal').innerText = this.value; document.getElementById('sec4Rect2OffsetCode').innerText = this.value;">
                   </div>
-                  <p class="callout-body" style="margin-top: 1rem; font-size: 0.9rem; color: var(--slate-500);">This gradient uses explicit offsets. The slider moves the red color stop back and forth between 0.0 and 1.0.</p>
+                  <p class="tab-note">This gradient uses explicit offsets. The slider moves the red color stop back and forth between 0.0 and 1.0.</p>
                 </div>
               </div>
 
@@ -570,7 +570,7 @@
                     <input type="range" min="-360" max="360" step="10" value="90" autocomplete="off"
                       oninput="document.getElementById('sec4Rect4').setAttribute('fill', `linear(t * ${this.value}, ['#ffea00', '#ff00a0'])`); document.getElementById('sec4Rect4SpeedVal').innerText = this.value; document.getElementById('sec4Rect4SpeedCode').innerText = this.value;">
                   </div>
-                  <p class="callout-body" style="margin-top: 1rem; font-size: 0.9rem; color: var(--slate-500);">This rectangle's gradient angle is driven by the time variable <code>t</code>. Adjusting the slider changes the multiplier, affecting how fast the gradient spins.</p>
+                  <p class="tab-note">This rectangle's gradient angle is driven by the time variable <code>t</code>. Adjusting the slider changes the multiplier, affecting how fast the gradient spins.</p>
                 </div>
               </div>
 
@@ -581,14 +581,14 @@
         <!-- ================================================================= -->
         <!-- SECTION 5: RADIAL GRADIENTS -->
         <!-- ================================================================= -->
-        <h2 style="margin-top: 4rem;">5. Radial Gradients</h2>
+        <h2>5. Radial Gradients</h2>
         <p>The <code>radial()</code> helper generates radial gradients. The engine uses a <strong>farthest-corner</strong> architecture: a radius of <code>1</code> perfectly and intuitively stretches to the extreme tips of any shape's bounding box. You can pass a simple number, an array of 3 coordinates <code>[x, y, r]</code> to offset the center, or an array of 6 coordinates <code>[x0, y0, r0, x1, y1, r1]</code> to unlock full 3D spotlight effects.</p>
 
         <div class="callout-info">
           <p class="callout-body"><strong>The Farthest-Corner Guarantee:</strong> Kilopixel gradients are mathematically locked to the element's bounding box. For radial gradients, the engine dynamically calculates the distance to the farthest corner so that a radius of <code>1</code> perfectly and intuitively stretches to the extreme tips of any shape.</p>
-          <p class="callout-body" style="margin-top: 1rem;">In the diagrams below, the <span style="color: #3b82f6; font-weight: 600;">solid blue box</span> represents the invisible bounding box, while the <span style="color: #8b5cf6; font-weight: 600;">purple vector</span> represents the generated radius targeting the farthest corner.</p>
+          <p class="callout-body">In the diagrams below, the <span class="text-highlight-blue">solid blue box</span> represents the invisible bounding box, while the <span class="text-highlight-purple">purple vector</span> represents the generated radius targeting the farthest corner.</p>
 
-          <pxl-stage ratio="2 / 1" style="width: 100%; background: transparent; margin-top: 1rem;">
+          <pxl-stage ratio="2 / 1" class="diagram-stage">
             <pxl-layer>
               <pxl-grid stroke="#cbd5e1" major="2"></pxl-grid>
               

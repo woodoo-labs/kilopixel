@@ -33,13 +33,13 @@
         <h1>Gradients</h1>
         <p class="lead">Kilopixel offers a highly flexible generative gradient system. Learn how to map linear, radial, and conic gradients accurately to your shapes, seamlessly animated and updated at 60fps.</p>
 
-        <p class="lead" style="margin-top: 2rem; margin-bottom: 1.5rem;">To work with gradients in Kilopixel, you first need to understand two core concepts: the <strong>Bounding Box</strong> and the <strong>colorsArray</strong>.</p>
+        <p class="lead">To work with gradients in Kilopixel, you first need to understand two core concepts: the <strong>Bounding Box</strong> and the <strong>colorsArray</strong>.</p>
 
         <div class="callout-info">
           <p class="callout-body"><strong>Bounding Box:</strong> In Kilopixel, all gradients are mapped to an element's invisible bounding box. The top-left corner of any shape is always exactly <code>(0, 0)</code>, and the bottom-right is <code>(1, 1)</code>. This guarantees that if you move, scale, or stretch your shape, the gradient stretches seamlessly with it &mdash; no complex trigonometry required!</p>
-          <p class="callout-body" style="margin-top: 1rem;">In the diagrams below, the <span style="color: #3b82f6; font-weight: 600;">blue coordinates</span> represent the fixed corners of the shape's invisible 0-to-1 bounding box space.</p>
+          <p class="callout-body">In the diagrams below, the <span class="text-highlight-blue">blue coordinates</span> represent the fixed corners of the shape's invisible 0-to-1 bounding box space.</p>
 
-          <pxl-stage ratio="5 / 2" style="width: 100%; background: transparent; margin-top: 1rem;">
+          <pxl-stage ratio="5 / 2" class="diagram-stage">
             <pxl-layer>
               <pxl-grid stroke="#cbd5e1" major="2"></pxl-grid>
               
@@ -74,7 +74,7 @@
         <div class="callout-info">
           <p class="callout-body"><strong>colorsArray:</strong> All gradients in Kilopixel share a common parameter called <code>colorsArray</code> to define their colors. You can provide this array in two ways:</p>
           <ul>
-            <li><strong>Colors Only:</strong> Pass an array of just colors (e.g., <code>['red', 'yellow', 'blue']</code>). Kilopixel will automatically space them out evenly from 0.0 to 1.0.</li>
+            <li><strong>Colors Only:</strong> Pass an array of just colors (e.g., <code>['red', 'yellow', 'blue']</code>). Kilopixel will automatically space them out evenly from 0 to 1.</li>
             <li><strong>Color Stops:</strong> Pass an array alternating between numeric offsets (0 to 1) and colors for precise control (e.g., <code>[0, 'red', 0.8, 'blue']</code>).</li>
           </ul>
         </div>
@@ -82,13 +82,13 @@
         <!-- ================================================================= -->
         <!-- SECTION 1: LINEAR GRADIENTS (ANGLE MODE) -->
         <!-- ================================================================= -->
-        <h2 style="margin-top: 4rem;">1. Linear Gradient (Angle Mode)</h2>
+        <h2>1. Linear Gradient (Angle Mode)</h2>
         <p>In Angle Mode, you provide a single number representing the angle in degrees (0 to 360). Kilopixel projects a geometrically perfect angle from the center of the shape and calculates the exact distance needed to cover the farthest corners.</p>
         <p>This means the gradient is always drawn at a strict, perfect angle on the screen, even if the bounding box of the shape is a very wide rectangle.</p>
 
         <div class="callout-info">
           <p class="callout-body" style="margin-bottom: 0.5rem;"><strong>Angle Mode Syntax:</strong> (True geometric degrees)</p>
-          <pre style="margin-top: 0; margin-bottom: 0;"><code class="language-javascript">fill="linear(angle, colorsArray)"</code></pre>
+          <pre class="syntax-pre"><code class="language-javascript">fill="linear(angle, colorsArray)"</code></pre>
         </div>
 
         <div class="example-card">
@@ -222,7 +222,7 @@
         </div>
 
         <!-- 1.2 The Gallery -->
-        <h3 style="margin-top: 3rem;">Example 2: The Gallery</h3>
+        <h3>Example 2: The Gallery</h3>
         <p>Because the angle projection is purely geometric, it works perfectly on every shape and doesn't distort when shapes are rotated or resized. Try adjusting the size and rotation of the shapes below to see how the gradients remain locked to their absolute angles.</p>
 
         <div class="example-card">
@@ -348,15 +348,15 @@
         <!-- ================================================================= -->
         <!-- SECTION 2: LINEAR GRADIENTS (VECTOR MODE) -->
         <!-- ================================================================= -->
-        <h2 style="margin-top: 4rem;">2. Linear Gradient (Vector Mode)</h2>
+        <h2>2. Linear Gradient (Vector Mode)</h2>
         <p>In Vector Mode, instead of providing an angle, you provide an array of four normalized coordinates: <code>[x0, y0, x1, y1]</code>. These coordinates are mapped proportionally to the shape's bounding box. <code>[0, 0]</code> represents the top-left corner, and <code>[1, 1]</code> represents the bottom-right corner.</p>
         
         <div class="callout-info">
           <p class="callout-body" style="margin-bottom: 0.5rem;"><strong>Vector Mode Syntax:</strong> (Normalized coordinates)</p>
-          <pre style="margin-top: 0; margin-bottom: 0;"><code class="language-javascript">fill="linear([x0, y0, x1, y1], colorsArray)"</code></pre>
+          <pre class="syntax-pre"><code class="language-javascript">fill="linear([x0, y0, x1, y1], colorsArray)"</code></pre>
         </div>
 
-        <p style="margin-top: 2rem;">In this example, drag the coordinate sliders to see how the gradient's start and end points move relative to the rectangle's bounding box. The dashed box represents the coordinate space from <code>0</code> to <code>1</code>.</p>
+        <p>In this example, drag the coordinate sliders to see how the gradient's start and end points move relative to the rectangle's bounding box. The dashed box represents the coordinate space from <code>0</code> to <code>1</code>.</p>
 
         <div class="example-card">
           <div class="example-code">
@@ -495,7 +495,7 @@
         </div>
 
         <!-- 2.2 The Gallery -->
-        <h3 style="margin-top: 3rem;">Example 2: The Gallery</h3>
+        <h3>Example 2: The Gallery</h3>
         <p>Because the Vector Mode operates in normalized coordinates, it seamlessly adapts to different shape dimensions. Try adjusting the size and rotation of the shapes below to see how the vector anchors stretch and rotate with the shape's bounding box.</p>
 
         <div class="example-card">
@@ -669,16 +669,16 @@
         <!-- ================================================================= -->
         <!-- SECTION 3: RADIAL GRADIENT (2-VALUE MODE) -->
         <!-- ================================================================= -->
-        <h2 style="margin-top: 4rem;">3. Radial Gradient (2-Value Mode)</h2>
+        <h2>3. Radial Gradient (2-Value Mode)</h2>
         <p>The simplest form of the radial gradient uses a 2-value coordinate array: <code>[rx1, ry1]</code>. In this mode, the center of the gradient is automatically anchored to the exact center of the shape's bounding box <code>(0.5, 0.5)</code>.</p>
         <p>Instead of providing a scalar radius, you provide a <strong>Radius Point 1</strong>. The engine converts both points to physical pixels and calculates the Euclidean distance between them to form a perfect circular radius. This guarantees that the gradient never stretches into an ellipse on non-square rectangles, and makes it incredibly easy to snap gradients to edges or corners.</p>
 
         <div class="callout-info">
           <p class="callout-body" style="margin-bottom: 0.5rem;"><strong>2-Value Mode Syntax:</strong> (Normalized coordinates)</p>
-          <pre style="margin-top: 0; margin-bottom: 0;"><code class="language-javascript">fill="radial([rx1, ry1], colorsArray)"</code></pre>
+          <pre class="syntax-pre"><code class="language-javascript">fill="radial([rx1, ry1], colorsArray)"</code></pre>
         </div>
 
-        <p style="margin-top: 2rem;">In this example, drag the coordinate sliders to see how the gradient's radius point moves relative to the rectangle's bounding box. The dashed purple circle represents the final calculated radius.</p>
+        <p>In this example, drag the coordinate sliders to see how the gradient's radius point moves relative to the rectangle's bounding box. The dashed purple circle represents the final calculated radius.</p>
 
         <div class="example-card">
           <div class="example-code">
@@ -794,16 +794,16 @@
         <!-- ================================================================= -->
         <!-- SECTION 4: RADIAL GRADIENT (4-VALUE MODE) -->
         <!-- ================================================================= -->
-        <h2 style="margin-top: 4rem;">4. Radial Gradient (4-Value Mode)</h2>
+        <h2>4. Radial Gradient (4-Value Mode)</h2>
         <p>The 4-value mode allows you to move the gradient's origin away from the default <code>(0.5, 0.5)</code>. You explicitly define the origin by setting <strong>Center 0</strong> <code>(cx0, cy0)</code>, followed by the boundary <strong>Radius 1</strong> <code>(rx1, ry1)</code>.</p>
         <p>The Euclidean distance logic remains exactly the same, but the radius is now calculated between your custom Center 0 point and the Radius 1 point. This is incredibly useful for off-center highlights, lighting effects, or matching a gradient's origin to a specific focal point in your UI.</p>
 
         <div class="callout-info">
           <p class="callout-body" style="margin-bottom: 0.5rem;"><strong>4-Value Mode Syntax:</strong> (Normalized coordinates)</p>
-          <pre style="margin-top: 0; margin-bottom: 0;"><code class="language-javascript">fill="radial([cx0, cy0, rx1, ry1], colorsArray)"</code></pre>
+          <pre class="syntax-pre"><code class="language-javascript">fill="radial([cx0, cy0, rx1, ry1], colorsArray)"</code></pre>
         </div>
 
-        <p style="margin-top: 2rem;">In this example, drag both the Center 0 coordinates <code>(cx0, cy0)</code> and the Radius 1 coordinates <code>(rx1, ry1)</code>. Notice how the dashed radius circle follows Center 0, while its total size is determined by the physical distance to the Radius 1 point.</p>
+        <p>In this example, drag both the Center 0 coordinates <code>(cx0, cy0)</code> and the Radius 1 coordinates <code>(rx1, ry1)</code>. Notice how the dashed radius circle follows Center 0, while its total size is determined by the physical distance to the Radius 1 point.</p>
 
         <div class="example-card">
           <div class="example-code">
@@ -936,16 +936,16 @@
         <!-- ================================================================= -->
         <!-- SECTION 5: RADIAL GRADIENT (6-VALUE MODE) -->
         <!-- ================================================================= -->
-        <h2 style="margin-top: 4rem;">5. Radial Gradient (6-Value Mode)</h2>
+        <h2>5. Radial Gradient (6-Value Mode)</h2>
         <p>The 6-value mode unlocks the classic <strong>"3D Spotlight"</strong> effect. In HTML5 canvas, radial gradients are actually defined by two circles: an inner circle and an outer circle. In this mode, you unlock the outer circle! You define <strong>Center 0</strong> <code>(cx0, cy0)</code> as an independent origin point, completely offset from the outer circle's <strong>Center 1</strong> <code>(cx1, cy1)</code> and its <strong>Radius 1</strong> <code>(rx1, ry1)</code>.</p>
         <p>By moving the Center 0 origin away from the outer circle's center, the gradient converges towards that specific spot, creating the illusion of 3D spheres, lighting spotlights, or directional glows.</p>
 
         <div class="callout-info">
           <p class="callout-body" style="margin-bottom: 0.5rem;"><strong>6-Value Mode Syntax:</strong> (Normalized coordinates)</p>
-          <pre style="margin-top: 0; margin-bottom: 0;"><code class="language-javascript">fill="radial([cx0, cy0, cx1, cy1, rx1, ry1], colorsArray)"</code></pre>
+          <pre class="syntax-pre"><code class="language-javascript">fill="radial([cx0, cy0, cx1, cy1, rx1, ry1], colorsArray)"</code></pre>
         </div>
 
-        <p style="margin-top: 2rem;">In this example, drag Center 0 independently from Center 1. Notice how the dashed line shows the offset vector between the two centers, creating the 3D lighting effect. The purple coordinates represent all gradient-related points, while the blue coordinates represent the fixed bounding box.</p>
+        <p>In this example, drag Center 0 independently from Center 1. Notice how the dashed line shows the offset vector between the two centers, creating the 3D lighting effect. The purple coordinates represent all gradient-related points, while the blue coordinates represent the fixed bounding box.</p>
 
         <div class="example-card">
           <div class="example-code">
@@ -1106,16 +1106,16 @@
         <!-- ================================================================= -->
         <!-- SECTION 6: RADIAL GRADIENT (8-VALUE MODE) -->
         <!-- ================================================================= -->
-        <h2 style="margin-top: 4rem;">6. Radial Gradient (8-Value Mode)</h2>
+        <h2>6. Radial Gradient (8-Value Mode)</h2>
         <p>The 8-value mode unlocks the full power of the native HTML5 Canvas radial gradient. In this mode, you define two completely independent circles: a <strong>Start Circle</strong> <code>(cx0, cy0, rx0, ry0)</code> and an <strong>End Circle</strong> <code>(cx1, cy1, rx1, ry1)</code>.</p>
         <p>This allows you to give the inner circle (Start Circle) a physical volume. The space inside the Start Circle is filled with the 0% color stop, and the gradient smoothly interpolates through the space between the two circles. This is perfect for advanced lighting, masking, or crescent moon effects.</p>
 
         <div class="callout-info">
           <p class="callout-body" style="margin-bottom: 0.5rem;"><strong>8-Value Mode Syntax:</strong> (Normalized coordinates)</p>
-          <pre style="margin-top: 0; margin-bottom: 0;"><code class="language-javascript">fill="radial([cx0, cy0, rx0, ry0, cx1, cy1, rx1, ry1], colorsArray)"</code></pre>
+          <pre class="syntax-pre"><code class="language-javascript">fill="radial([cx0, cy0, rx0, ry0, cx1, cy1, rx1, ry1], colorsArray)"</code></pre>
         </div>
 
-        <p style="margin-top: 2rem;">In this example, drag the coordinates for the Start Circle and End Circle independently. The purple coordinates represent the gradient, while the blue coordinates represent the fixed bounding box. Notice how giving the Start Circle a radius creates a solid inner core before the gradient begins.</p>
+        <p>In this example, drag the coordinates for the Start Circle and End Circle independently. The purple coordinates represent the gradient, while the blue coordinates represent the fixed bounding box. Notice how giving the Start Circle a radius creates a solid inner core before the gradient begins.</p>
 
         <div class="example-card">
           <div class="example-code">
