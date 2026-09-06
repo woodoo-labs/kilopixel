@@ -186,3 +186,8 @@ To maintain a cohesive, highly professional editorial presentation across all do
   * This "Page Name First" structure ensures browser tabs remain legible when users have many tabs open.
   * Do not append redundant suffixes like "Documentation". 
   * Do not use raw HTML tags or HTML character entities (`&lt;pxl-circle&gt;`). Use clean, plain English names (e.g. `Circle | Kilopixel`).
+
+## 8. CSS & Styling Rules
+* **Strictly No Inline Styles**: You MUST NOT use the `style="..."` attribute anywhere in the documentation HTML. If you need a margin, layout adjustment, typography tweak, or color, you must search `docs/css/docs.css` for an existing utility class or standard component layout.
+* **Permission Required**: If you believe a completely unique inline style or a new global CSS rule is necessary, you MUST stop and ask the user for explicit permission before modifying any CSS or writing the inline style.
+* **Exceptions**: The only exceptions to the inline style ban are functional JavaScript targets (e.g., dynamically controlled `width` or `transform` properties explicitly driven by a slider's Javascript) or critical frontend hacks (like `opacity: 0` for font preloaders).
