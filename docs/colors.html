@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Colors | Kilopixel</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/docs.css">
   
   <!-- Prism Syntax Highlighting -->
@@ -401,7 +401,7 @@
 
         <div class="callout-info">
           <p class="callout-body"><strong>The 0-to-1 Bounding Box:</strong> In Kilopixel, gradients are locked to the element's bounding box! The top-left corner of any shape is always exactly <code>(0, 0)</code>, and the bottom-right is <code>(1, 1)</code>. This guarantees that if you move, scale, or stretch your shape, the gradient stretches seamlessly with it &mdash; no complex trigonometry required!</p>
-          <p class="callout-body">In the diagrams below, the <span class="text-highlight-blue">blue coordinates</span> represent the fixed corners of the shape's invisible bounding box. The <span class="text-highlight-purple">purple vectors</span> represent the actual <code>[x1, y1, x2, y2]</code> array driving the gradient's direction through that box.</p>
+          <p class="callout-body">In the diagrams below, the <span class="text-accent">blue coordinates</span> represent the fixed corners of the shape's invisible bounding box. The <span class="text-violet">purple vectors</span> represent the actual <code>[x1, y1, x2, y2]</code> array driving the gradient's direction through that box.</p>
 
           <pxl-stage ratio="2 / 1" class="diagram-stage">
             <pxl-layer>
@@ -586,7 +586,7 @@
 
         <div class="callout-info">
           <p class="callout-body"><strong>The Farthest-Corner Guarantee:</strong> Kilopixel gradients are mathematically locked to the element's bounding box. For radial gradients, the engine dynamically calculates the distance to the farthest corner so that a radius of <code>1</code> perfectly and intuitively stretches to the extreme tips of any shape.</p>
-          <p class="callout-body">In the diagrams below, the <span class="text-highlight-blue">solid blue box</span> represents the invisible bounding box, while the <span class="text-highlight-purple">purple vector</span> represents the generated radius targeting the farthest corner.</p>
+          <p class="callout-body">In the diagrams below, the <span class="text-accent">solid blue box</span> represents the invisible bounding box, while the <span class="text-violet">purple vector</span> represents the generated radius targeting the farthest corner.</p>
 
           <pxl-stage ratio="2 / 1" class="diagram-stage">
             <pxl-layer>

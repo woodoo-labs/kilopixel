@@ -16,8 +16,6 @@
   --accent-bg: #eff6ff;
   --code-bg: #f1f5f9;
   
-  /* Fonts */
-  --font-mono: 'Fira Code', ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
 }
 
 * { box-sizing: border-box; }
@@ -60,16 +58,6 @@ body {
 }
 
 /* --- Typography & Markdown --- */
-.text-highlight-blue {
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.text-highlight-purple {
-  color: #8b5cf6;
-  font-weight: 600;
-}
-
 .docs-content h1 {
   font-size: 2.5rem;
   font-weight: 600;
@@ -81,7 +69,7 @@ body {
 
 .docs-content h1 + h2 {
   margin-top: 0;
-  margin-bottom: 32px;
+  margin-bottom: 2rem;
 }
 
 .docs-content .subtitle-inline {
@@ -91,15 +79,15 @@ body {
 
 .docs-content h2 {
   font-size: 1.75rem;
-  margin-top: 48px;
-  margin-bottom: 16px;
+  margin-top: 4rem;
+  margin-bottom: 1.5rem;
 }
 
 .docs-content h3 {
   font-size: 1.4rem;
   font-weight: 600;
-  margin-top: 40px;
-  margin-bottom: 16px;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
   color: var(--text-heading);
 }
 
@@ -115,6 +103,7 @@ body {
   font-size: 1.05rem;
   line-height: 1.6;
   color: var(--text-main);
+  margin-top: 0;
   margin-bottom: 24px;
 }
 
@@ -131,7 +120,7 @@ body {
   background-color: var(--code-bg);
   padding: 2px 6px;
   border-radius: 4px;
-  font-family: var(--font-mono);
+  font-family: monospace;
   font-size: 0.9em;
   color: var(--accent);
 }
@@ -210,8 +199,6 @@ body {
   transition: transform 0.3s ease;
   position: relative;
 }
-
-
 
 .sidebar-section { 
   margin-bottom: 32px;
@@ -312,7 +299,6 @@ body {
 }
 
 .callout-info .callout-title {
-  margin-top: 0;
   margin-bottom: 8px;
   font-weight: 600;
   font-size: 1.1rem;
@@ -320,7 +306,6 @@ body {
 }
 
 .callout-info .callout-body {
-  margin-top: 0;
   margin-bottom: 0;
   color: #1e3a8a;
 }
@@ -427,7 +412,7 @@ body {
   display: none; /* Chrome, Safari and Opera */
 }
 
-.docs-content h3.demo-controls-title {
+.demo-container .demo-controls-title {
   margin: 0;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -578,7 +563,7 @@ body {
 .control-group select {
   width: 100%;
   padding: 8px 12px;
-  font-family: var(--font-mono);
+  font-family: monospace;
   font-size: 14px;
   color: var(--accent);
   font-weight: 500;
@@ -662,7 +647,7 @@ body {
   border-radius: 6px;
   display: inline-block;
   width: fit-content;
-  font-family: var(--font-mono);
+  font-family: monospace;
 }
 
 .api-meta {
@@ -674,7 +659,7 @@ body {
 
 .api-pill {
   font-size: 0.8rem;
-  font-family: var(--font-mono);
+  font-family: monospace;
   padding: 3px 8px;
   border-radius: 4px;
   font-weight: 500;
@@ -688,21 +673,29 @@ body {
   color: var(--text-muted);
 }
 
-
 .api-pill.values-pill {
   background-color: rgba(14, 165, 233, 0.12);
   color: #0284c7;
 }
 
-
-
 .api-item-desc {
   font-size: 0.95rem;
   line-height: 1.6;
-  color: var(--text-body);
+  color: var(--text-main);
   min-width: 0;
   overflow-wrap: break-word;
   word-break: break-word;
+}
+
+/* --- Utility Classes --- */
+.text-accent {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.text-violet {
+  color: #8b5cf6;
+  font-weight: 600;
 }
 
 /* --- Tablet Responsiveness (<= 1024px) --- */
