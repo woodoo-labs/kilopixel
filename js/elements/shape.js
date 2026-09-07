@@ -145,22 +145,15 @@ class Shape extends PxlNode {
       grad = ctx.createLinearGradient(gx1, gy1, gx2, gy2);
 
     } else if (styleValue.type === 'radial') {
-      const pcx0 = (box.left + width * styleValue.cx0) * u;
-      const pcy0 = (box.top + height * styleValue.cy0) * u;
-      const prx0 = (box.left + width * styleValue.rx0) * u;
-      const pry0 = (box.top + height * styleValue.ry0) * u;
-      const pcx1 = (box.left + width * styleValue.cx1) * u;
-      const pcy1 = (box.top + height * styleValue.cy1) * u;
-      const prx1 = (box.left + width * styleValue.rx1) * u;
-      const pry1 = (box.top + height * styleValue.ry1) * u;
+      const px0 = (box.left + width * styleValue.x0) * u;
+      const py0 = (box.top + height * styleValue.y0) * u;
+      const px1 = (box.left + width * styleValue.x1) * u;
+      const py1 = (box.top + height * styleValue.y1) * u;
 
-      const dx0 = prx0 - pcx0, dy0 = pry0 - pcy0;
-      const r0 = Math.sqrt(dx0 * dx0 + dy0 * dy0);
+      const pr0 = pxl.resolveRadius(styleValue.r0, styleValue.x0, styleValue.y0, width, height, u);
+      const pr1 = pxl.resolveRadius(styleValue.r1, styleValue.x1, styleValue.y1, width, height, u);
 
-      const dx1 = prx1 - pcx1, dy1 = pry1 - pcy1;
-      const r1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
-
-      grad = ctx.createRadialGradient(pcx0, pcy0, r0, pcx1, pcy1, r1);
+      grad = ctx.createRadialGradient(px0, py0, pr0, px1, py1, pr1);
 
     } else if (styleValue.type === 'conic') {
       const gcx = (box.left + width * styleValue.cx) * u;

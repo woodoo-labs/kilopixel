@@ -83,24 +83,20 @@ pxl.scope.radial = (config, colorsArray) => {
   const a = config;
   const len = a.length;
 
-  let cx0 = 0.5, cy0 = 0.5, rx0 = 0.5, ry0 = 0.5;
-  let cx1 = 0.5, cy1 = 0.5, rx1 = 0.5, ry1 = 0.5;
+  let x0 = 0.5, y0 = 0.5, r0 = 0;
+  let x1 = 0.5, y1 = 0.5, r1 = 0.5;
 
-  if (len === 2) {
-    rx1 = a[0]; ry1 = a[1];
-  } else if (len === 4) {
-    cx0 = a[0]; cy0 = a[1]; rx1 = a[2]; ry1 = a[3];
-    cx1 = cx0; cy1 = cy0;
-    rx0 = cx0; ry0 = cy0;
-  } else if (len === 6) {
-    cx0 = a[0]; cy0 = a[1]; cx1 = a[2]; cy1 = a[3]; rx1 = a[4]; ry1 = a[5];
-    rx0 = cx0; ry0 = cy0;
-  } else if (len >= 8) {
-    cx0 = a[0]; cy0 = a[1]; rx0 = a[2]; ry0 = a[3];
-    cx1 = a[4]; cy1 = a[5]; rx1 = a[6]; ry1 = a[7];
+  if (len === 1) {
+    r1 = a[0];
+  } else if (len === 3) {
+    x0 = a[0]; y0 = a[1]; r1 = a[2];
+    x1 = x0; y1 = y0;
+  } else if (len >= 6) {
+    x0 = a[0]; y0 = a[1]; r0 = a[2];
+    x1 = a[3]; y1 = a[4]; r1 = a[5];
   }
 
-  return { isGradient: true, type: 'radial', cx0, cy0, rx0, ry0, cx1, cy1, rx1, ry1, stops };
+  return { isGradient: true, type: 'radial', x0, y0, r0, x1, y1, r1, stops };
 };
 
 pxl.scope.conic = (angleOrConfig, colorsArray) => {

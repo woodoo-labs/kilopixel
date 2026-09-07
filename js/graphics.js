@@ -4,6 +4,30 @@
 pxl.anchorX = { 'left': 0, 'right': 1, 'center': 0.5, 'top-left': 0, 'top-right': 1, 'bottom-left': 0, 'bottom-right': 1, 'top': 0.5, 'bottom': 0.5 };
 pxl.anchorY = { 'top': 0, 'bottom': 1, 'center': 0.5, 'top-left': 0, 'top-right': 0, 'bottom-left': 1, 'bottom-right': 1, 'left': 0.5, 'right': 0.5 };
 
+// Radial gradient radius resolver: number → scalar (relative to width),
+// string → anchor point distance or CSS dynamic keyword
+pxl.resolveRadius = (r, x, y, w, h, u) => {
+  if (typeof r === 'number') return Math.abs(r * w * u);
+
+  const ax = pxl.anchorX[r];
+  if (ax !== undefined) {
+    const dx = (x - ax) * w * u, dy = (y - pxl.anchorY[r]) * h * u;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  const lx = x * w * u, rx = (1 - x) * w * u;
+  const ty = y * h * u, by = (1 - y) * h * u;
+  switch (r) {
+    case 'closest-side':   return Math.min(lx, rx, ty, by);
+    case 'farthest-side':  return Math.max(lx, rx, ty, by);
+    case 'closest-corner':
+      return Math.min(Math.sqrt(lx*lx+ty*ty), Math.sqrt(rx*rx+ty*ty), Math.sqrt(lx*lx+by*by), Math.sqrt(rx*rx+by*by));
+    case 'farthest-corner':
+      return Math.max(Math.sqrt(lx*lx+ty*ty), Math.sqrt(rx*rx+ty*ty), Math.sqrt(lx*lx+by*by), Math.sqrt(rx*rx+by*by));
+    default: return 0;
+  }
+};
+
 pxl.applyTransformState = function(ctx, u, attributeValues) {
   const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy } = attributeValues;
   
