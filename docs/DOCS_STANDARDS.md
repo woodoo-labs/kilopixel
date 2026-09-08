@@ -135,7 +135,7 @@ Every documentation example must follow a standardized 3-part layout:
 * **Simplified Pedagogical Code Snippets:** HTML code blocks (`<pre><code class="language-html">`) MUST show only the minimal, clean markup needed to teach the section's core concept:
   * **Exclude Stage Helpers:** Never include background grids (`<pxl-grid>`), coordinate axes, dimension lines, or leader markers in the HTML snippet.
   * **Exclude Auxiliary Shapes:** Do not show secondary decorative shapes in the code block.
-  * **Minimal Styling:** Use simple `stroke` or basic `fill` attributes. Do not include verbose `strokewidth`, `alpha`, or long CSS `filter` strings unless that specific styling attribute is what is being demonstrated or controlled.
+  * **Simplified Pedagogical IDs:** HTML snippets must use clean, human-readable IDs (e.g., `id="circle"`, `id="rect"`, `id="layer"`, `id="master"`, `id="mirror"`, `id="reactor"`, `id="hue"`, `id="spread"`, `id="size"`, or numbered `id="circle1"`, `id="circle2"`). Any `ref.*` expressions in the snippet mirror these simplified names (e.g., `ref.master.x`, `ref.spread.value`).
 * **Slider Implementations:** 
   * `oninput` handlers must execute inline JS to do exactly three things:
     1. Update the element property: `document.getElementById('sec4Rect').setAttribute('x', this.value)`
@@ -170,6 +170,9 @@ To ensure perfect consistency across all documentation playgrounds and guides, 1
   * Code Snippet Marks (`[Role]` = `Code`): `sec2CircleXCode`, `sec4LayerRotCode`, `sec4EllipseRxCode`, `sec3ex1RingIRCode`
   * Slider Inputs (`[Role]` = `Input`): `sec2CircleXInput`, `sec4LayerRotInput`
 * **Do not append redundant suffixes** like `Shape` or `Attr`.
+
+> [!NOTE]
+> **Code Snippets vs. Live DOM**: The hierarchical ID formula (`sec[N]...`) applies to 100% of the live DOM elements on the page (stages, shapes, sliders, tabs, and `<mark>` tags). The only exception is the pedagogical code text displayed inside `<pre><code class="language-html">` snippets, which use simplified IDs.
 
 ### 6. Typography & Punctuation Standards
 To maintain a cohesive, highly professional editorial presentation across all documentation and guides, follow this strict typography standard:
