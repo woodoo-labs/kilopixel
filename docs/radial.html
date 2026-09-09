@@ -83,16 +83,18 @@
         <!-- SECTION 1: RADIAL GRADIENT (1-VALUE MODE) -->
         <!-- ================================================================= -->
         <h2>1. Radial Gradient (1-Value Mode)</h2>
-        <p>The 1-value mode is the simplest form of the radial gradient. In this mode, the gradient is automatically centered at the shape's bounding box center <code>(0.5, 0.5)</code>. The parameter <code>r1</code> defines the outer radius circle and supports two distinct modes:</p>
-        <ul>
-          <li><strong>Numeric Radius:</strong> An absolute radius in layer coordinates, behaving just like a circle's <code>r</code> attribute. It produces an isotropic circle of light that maintains its exact size regardless of the shape's width or height (e.g., <code>r1 = 200</code>).</li>
-          <li><strong>Keyword Radius:</strong> A responsive boundary that dynamically calculates distance and snaps to the shape's edges or corners (e.g., <code>r1 = 'top-right'</code>).</li>
-        </ul>
+        <p>The 1-value mode is the simplest form of the radial gradient. In this mode, the gradient is automatically centered at the shape's bounding box center <code>(0.5, 0.5)</code>.</p>
 
         <div class="callout-info">
           <p class="callout-title">1-Value Mode Syntax</p>
           <pre class="syntax-pre"><code class="language-javascript">fill="radial([r1], colorsArray)"</code></pre>
         </div>
+
+        <p>The parameter <code>r1</code> defines the outer radius circle and supports two distinct modes:</p>
+        <ul>
+          <li><strong>Numeric Radius:</strong> An absolute radius in layer coordinates, behaving just like a circle's <code>r</code> attribute. It produces an isotropic circle of light that maintains its exact size regardless of the shape's width or height (e.g., <code>r1 = 200</code>).</li>
+          <li><strong>Keyword Radius:</strong> A responsive boundary that dynamically calculates distance and snaps to the shape's edges or corners (e.g., <code>r1 = 'top-right'</code>).</li>
+        </ul>
 
         <p>In this example, drag the radius slider to see how the gradient expands outward from the center <code>(0.5, 0.5)</code>. The dashed purple circle represents the calculated radius boundary.</p>
 
@@ -147,13 +149,23 @@
                 <div class="playground-sliders">
                   <div class="control-group">
                     <label><span>Radius Mode <span class="indicator-dot"></span></span></label>
-                    <select id="sec1ex1ModeSelect" autocomplete="off" onchange="setRadialRadiusMode('sec1ex1', 'R1', this.value)" data-mark="sec1ex1GradR1Code">
-                      <optgroup label="Numeric Radius">
-                        <option value="slider" selected>Numeric (Slider)</option>
-                      </optgroup>
+                    <div class="toggle-group">
+                      <button type="button" class="toggle-btn active" id="sec1ex1ModeNumericBtn" onclick="sec1ex1SetType('numeric')" data-mark="sec1ex1GradR1Code">Numeric</button>
+                      <button type="button" class="toggle-btn" id="sec1ex1ModeKeywordBtn" onclick="sec1ex1SetType('keyword')" data-mark="sec1ex1GradR1Code">Keyword</button>
+                    </div>
+                  </div>
+                  <div class="control-group" id="sec1ex1SliderGroup">
+                    <label><span>Radius (r1)</span> <span id="sec1ex1GradR1Val">200</span></label>
+                    <input type="range" id="sec1ex1GradR1Input" min="20" max="500" step="10" value="200" autocomplete="off"
+                      data-mark="sec1ex1GradR1Code"
+                      oninput="document.getElementById('sec1ex1R1').setAttribute('value', this.value); document.getElementById('sec1ex1GradR1Val').innerText = this.value; document.getElementById('sec1ex1GradR1Code').innerText = this.value; document.getElementById('sec1ex1Rect').setAttribute('fill', `radial([${this.value}], ['#e2e8f0', '#475569'])`);">
+                  </div>
+                  <div class="control-group" id="sec1ex1KeywordGroup" style="display: none;">
+                    <label><span>Keyword (r1)</span></label>
+                    <select id="sec1ex1KeywordSelect" autocomplete="off" onchange="setRadialRadiusMode('sec1ex1', 'R1', this.value)" data-mark="sec1ex1GradR1Code">
                       <optgroup label="Corner &amp; Side Anchors">
                         <option value="top">top</option>
-                        <option value="top-right">top-right</option>
+                        <option value="top-right" selected>top-right</option>
                         <option value="right">right</option>
                         <option value="bottom-right">bottom-right</option>
                         <option value="bottom">bottom</option>
@@ -168,12 +180,6 @@
                         <option value="farthest-corner">farthest-corner</option>
                       </optgroup>
                     </select>
-                  </div>
-                  <div class="control-group" id="sec1ex1SliderGroup">
-                    <label><span>Radius (r1)</span> <span id="sec1ex1GradR1Val">200</span></label>
-                    <input type="range" id="sec1ex1GradR1Input" min="20" max="500" step="10" value="200" autocomplete="off"
-                      data-mark="sec1ex1GradR1Code"
-                      oninput="document.getElementById('sec1ex1R1').setAttribute('value', this.value); document.getElementById('sec1ex1GradR1Val').innerText = this.value; document.getElementById('sec1ex1GradR1Code').innerText = this.value; document.getElementById('sec1ex1Rect').setAttribute('fill', `radial([${this.value}], ['#e2e8f0', '#475569'])`);">
                   </div>
                 </div>
               </div>
@@ -598,11 +604,7 @@
 
     function setRadialRadiusMode(sec, radiusKey, mode, updateFillFn) {
       const slider = document.getElementById(`${sec}Grad${radiusKey}Input`);
-      const sliderGroup = document.getElementById(`${sec}${radiusKey}SliderGroup`) || document.getElementById(`${sec}SliderGroup`);
       const isSlider = mode === 'slider';
-      
-      if (slider) slider.disabled = !isSlider;
-      if (sliderGroup) sliderGroup.style.opacity = isSlider ? '1' : '0.4';
       
       let dirs = RADIAL_KEYWORD_DIRS[mode] || [1, 0];
       if (mode === 'closest-side' || mode === 'farthest-side') {
@@ -639,11 +641,37 @@
       }
     }
 
-    function refreshRadialKeywords(sec, radiusKey = 'R1') {
-      const select = document.getElementById(`${sec}ModeSelect`);
-      if (select && (select.value === 'closest-side' || select.value === 'farthest-side')) {
-        setRadialRadiusMode(sec, radiusKey, select.value);
+    function setRadialType(sec, radiusKey, type, updateFillFn) {
+      const isNum = type === 'numeric';
+      const numBtn = document.getElementById(`${sec}ModeNumericBtn`) || document.getElementById(`${sec}${radiusKey}ModeNumericBtn`);
+      const kwBtn = document.getElementById(`${sec}ModeKeywordBtn`) || document.getElementById(`${sec}${radiusKey}ModeKeywordBtn`);
+      if (numBtn) numBtn.classList.toggle('active', isNum);
+      if (kwBtn) kwBtn.classList.toggle('active', !isNum);
+
+      const sliderGroup = document.getElementById(`${sec}${radiusKey}SliderGroup`) || document.getElementById(`${sec}SliderGroup`);
+      const kwGroup = document.getElementById(`${sec}${radiusKey}KeywordGroup`) || document.getElementById(`${sec}KeywordGroup`);
+      if (sliderGroup) sliderGroup.style.display = isNum ? 'flex' : 'none';
+      if (kwGroup) kwGroup.style.display = isNum ? 'none' : 'flex';
+
+      if (isNum) {
+        setRadialRadiusMode(sec, radiusKey, 'slider', updateFillFn);
+      } else {
+        const kwSelect = document.getElementById(`${sec}KeywordSelect`) || document.getElementById(`${sec}Grad${radiusKey}Select`);
+        const kw = kwSelect ? kwSelect.value : 'top-right';
+        setRadialRadiusMode(sec, radiusKey, kw, updateFillFn);
       }
+    }
+
+    function refreshRadialKeywords(sec, radiusKey = 'R1') {
+      const kwGroup = document.getElementById(`${sec}${radiusKey}KeywordGroup`) || document.getElementById(`${sec}KeywordGroup`);
+      const kwSelect = document.getElementById(`${sec}KeywordSelect`) || document.getElementById(`${sec}Grad${radiusKey}Select`);
+      if (kwGroup && kwGroup.style.display !== 'none' && kwSelect && (kwSelect.value === 'closest-side' || kwSelect.value === 'farthest-side')) {
+        setRadialRadiusMode(sec, radiusKey, kwSelect.value);
+      }
+    }
+
+    function sec1ex1SetType(type) {
+      setRadialType('sec1ex1', 'R1', type);
     }
 
     // Backward-compatible alias for Section 1

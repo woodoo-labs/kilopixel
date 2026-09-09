@@ -77,19 +77,23 @@ pxlDocs.initHighlighting = function() {
     }
   }
 
-  function handleInput(e) {
-    const target = e.target.closest('input[type="range"], select');
-    if (target) {
-      // Automatically dismiss any onboarding beacon dot for this control
-      const group = target.closest('.control-group');
-      if (group) {
-        const dot = group.querySelector('.indicator-dot');
-        if (dot) {
-          dot.remove();
-          // Update the parent tab's badge count!
-          pxlDocs.updateTabBadge(target.closest('.tab-content'));
-        }
+  function dismissIndicator(target) {
+    if (!target) return;
+    const group = target.closest('.control-group');
+    if (group) {
+      const dot = group.querySelector('.indicator-dot');
+      if (dot) {
+        dot.remove();
+        // Update the parent tab's badge count!
+        pxlDocs.updateTabBadge(target.closest('.tab-content'));
       }
+    }
+  }
+
+  function handleInteraction(e) {
+    const target = e.target.closest('input[type="range"], select, .toggle-btn');
+    if (target) {
+      dismissIndicator(target);
     }
   }
 
@@ -103,7 +107,9 @@ pxlDocs.initHighlighting = function() {
   }
 
   // Universal Interaction Handlers
-  document.body.addEventListener('input', handleInput);
+  document.body.addEventListener('input', handleInteraction);
+  document.body.addEventListener('change', handleInteraction);
+  document.body.addEventListener('click', handleInteraction);
   document.body.addEventListener('pointerdown', handlePressStart);
   document.body.addEventListener('touchstart', handlePressStart, {passive: true});
 
