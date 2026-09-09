@@ -99,6 +99,7 @@
             <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;pxl-rect 
+      id="rect"
       x="500" y="300"
       w="<mark id="sec1ex1RectWCode">400</mark>" h="<mark id="sec1ex1RectHCode">250</mark>" 
       rotate="<mark id="sec1ex1RectRotCode">0</mark>"
@@ -143,8 +144,31 @@
               <div class="tab-content active" id="sec1ex1GradTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Radius (r1) <span class="indicator-dot"></span></span> <span id="sec1ex1GradR1Val">0.5</span></label>
+                    <label><span>Radius Mode <span class="indicator-dot"></span></span></label>
+                    <select id="sec1ex1ModeSelect" autocomplete="off" onchange="sec1ex1SetMode(this.value)" data-mark="sec1ex1GradR1Code">
+                      <option value="slider" selected>Numeric (Slider)</option>
+                      <optgroup label="Corner &amp; Side Anchors">
+                        <option value="top">top</option>
+                        <option value="top-right">top-right</option>
+                        <option value="right">right</option>
+                        <option value="bottom-right">bottom-right</option>
+                        <option value="bottom">bottom</option>
+                        <option value="bottom-left">bottom-left</option>
+                        <option value="left">left</option>
+                        <option value="top-left">top-left</option>
+                      </optgroup>
+                      <optgroup label="Dynamic CSS Keywords">
+                        <option value="closest-side">closest-side</option>
+                        <option value="farthest-side">farthest-side</option>
+                        <option value="closest-corner">closest-corner</option>
+                        <option value="farthest-corner">farthest-corner</option>
+                      </optgroup>
+                    </select>
+                  </div>
+                  <div class="control-group" id="sec1ex1SliderGroup">
+                    <label><span>Radius (r1)</span> <span id="sec1ex1GradR1Val">0.5</span></label>
                     <input type="range" id="sec1ex1GradR1Input" min="0.1" max="1.5" step="0.05" value="0.5" autocomplete="off"
+                      data-mark="sec1ex1GradR1Code"
                       oninput="document.getElementById('sec1ex1R1').setAttribute('value', this.value); document.getElementById('sec1ex1GradR1Val').innerText = this.value; document.getElementById('sec1ex1GradR1Code').innerText = this.value; document.getElementById('sec1ex1Rect').setAttribute('fill', `radial([${this.value}], ['#e2e8f0', '#475569'])`);">
                   </div>
                 </div>
@@ -154,11 +178,19 @@
             <pxl-stage id="sec1ex1Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+                <!-- Top-Left HUD Info -->
+                <pxl-text x="30" y="30" text="'Center = (0.5, 0.5)'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="65" text="'Radius = ' + (typeof ref.sec1ex1R1.value === 'string' ? '\'' + ref.sec1ex1R1.value + '\'' : ref.sec1ex1R1.value)" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 
                 <pxl-rect id="sec1ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="radial([0.5], ['#e2e8f0', '#475569'])"></pxl-rect>
 
                 <pxl-var id="sec1ex1R1" value="0.5"></pxl-var>
-                <pxl-var id="sec1ex1Radius" value="ref.sec1ex1R1.value * ref.sec1ex1Rect.w"></pxl-var>
+                <pxl-var id="sec1ex1DirX" value="1"></pxl-var>
+                <pxl-var id="sec1ex1DirY" value="0"></pxl-var>
+                <pxl-var id="sec1ex1Radius" value="ref.sec1ex1DirX.value === 1 && ref.sec1ex1DirY.value === 0 ? ref.sec1ex1R1.value * ref.sec1ex1Rect.w : pxl.resolveRadius(ref.sec1ex1R1.value, 0.5, 0.5, ref.sec1ex1Rect.w, ref.sec1ex1Rect.h, 1)"></pxl-var>
+                <pxl-var id="sec1ex1TargetX" value="ref.sec1ex1DirX.value === 1 && ref.sec1ex1DirY.value === 0 ? ref.sec1ex1Radius.value : ref.sec1ex1DirX.value * ref.sec1ex1Rect.w"></pxl-var>
+                <pxl-var id="sec1ex1TargetY" value="ref.sec1ex1DirY.value * ref.sec1ex1Rect.h"></pxl-var>
                 
                 <pxl-group x="ref.sec1ex1Rect.x" y="ref.sec1ex1Rect.y" rotate="ref.sec1ex1Rect.rotate">
                   <!-- Solid blue bounding box -->
@@ -171,9 +203,9 @@
                   <pxl-circle x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
                   <pxl-text x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
 
-                  <!-- Purple center coordinate (0.5, 0.5) -->
+                  <!-- Purple center coordinate -->
                   <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
-                  <pxl-text x="0" y="20" text="'(0.5, 0.5)'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <pxl-text x="0" y="20" text="'Center'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
                   
                   <!-- Purple Radius Circle -->
                   <pxl-circle x="0" y="0" r="ref.sec1ex1Radius.value" fill="none" stroke="#a78bfa" strokewidth="2" linedash="[4, 4]"></pxl-circle>
@@ -182,12 +214,16 @@
                   <pxl-line 
                     x1="0" 
                     y1="0" 
-                    x2="ref.sec1ex1Radius.value" 
-                    y2="0" 
+                    x2="ref.sec1ex1TargetX.value" 
+                    y2="ref.sec1ex1TargetY.value" 
                     stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
 
                   <!-- Purple radius label -->
-                  <pxl-text x="ref.sec1ex1Radius.value / 2" y="-12" text="'r = ' + ref.sec1ex1R1.value" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+                  <pxl-text 
+                    x="ref.sec1ex1TargetX.value / 2" 
+                    y="ref.sec1ex1TargetY.value / 2 - 12" 
+                    text="'r'" 
+                    fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
 
                 </pxl-group>
               </pxl-layer>
@@ -538,6 +574,43 @@
 
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+
+  <script>
+    const SEC1_DIRS = {
+      'slider': [1, 0],
+      'top': [0, -0.5],
+      'top-right': [0.5, -0.5],
+      'right': [0.5, 0],
+      'bottom-right': [0.5, 0.5],
+      'bottom': [0, 0.5],
+      'bottom-left': [-0.5, 0.5],
+      'left': [-0.5, 0],
+      'top-left': [-0.5, -0.5],
+      'closest-corner': [0.5, -0.5],
+      'farthest-corner': [0.5, -0.5],
+      'closest-side': [0, -0.5],
+      'farthest-side': [0.5, 0]
+    };
+
+    function sec1ex1SetMode(mode) {
+      const slider = document.getElementById('sec1ex1GradR1Input');
+      const sliderGroup = document.getElementById('sec1ex1SliderGroup');
+      const isSlider = mode === 'slider';
+      
+      slider.disabled = !isSlider;
+      sliderGroup.style.opacity = isSlider ? '1' : '0.4';
+      
+      const dirs = SEC1_DIRS[mode] || [1, 0];
+      document.getElementById('sec1ex1DirX').setAttribute('value', dirs[0]);
+      document.getElementById('sec1ex1DirY').setAttribute('value', dirs[1]);
+
+      const val = isSlider ? slider.value : `'${mode}'`;
+      document.getElementById('sec1ex1R1').setAttribute('value', val);
+      document.getElementById('sec1ex1Rect').setAttribute('fill', `radial([${val}], ['#e2e8f0', '#475569'])`);
+      document.getElementById('sec1ex1GradR1Code').innerText = val;
+      document.getElementById('sec1ex1GradR1Val').innerText = isSlider ? val : mode;
+    }
+  </script>
 </body>
 </html>
 
