@@ -4,10 +4,10 @@
 pxl.anchorX = { 'left': 0, 'right': 1, 'center': 0.5, 'top-left': 0, 'top-right': 1, 'bottom-left': 0, 'bottom-right': 1, 'top': 0.5, 'bottom': 0.5 };
 pxl.anchorY = { 'top': 0, 'bottom': 1, 'center': 0.5, 'top-left': 0, 'top-right': 0, 'bottom-left': 1, 'bottom-right': 1, 'left': 0.5, 'right': 0.5 };
 
-// Radial gradient radius resolver: number → scalar (relative to width),
+// Radial gradient radius resolver: number → absolute logical canvas units,
 // string → anchor point distance or CSS dynamic keyword
 pxl.resolveRadius = (r, x, y, w, h, u) => {
-  if (typeof r === 'number') return Math.abs(r * w * u);
+  if (typeof r === 'number') return Math.abs(r * u);
 
   const ax = pxl.anchorX[r];
   if (ax !== undefined) {

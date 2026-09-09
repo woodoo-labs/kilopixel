@@ -31,12 +31,12 @@
     <main class="docs-content">
       <div class="docs-inner">
         <h1>Radial Gradient</h1>
-        <p class="lead">Kilopixel offers highly flexible radial gradients for circular and elliptical color fills.</p>
+        <p class="lead">Kilopixel offers highly flexible radial gradients for circular color fills, spotlights, and lighting effects.</p>
 
         <p class="lead">To work with gradients in Kilopixel, you first need to understand two core concepts: the <strong>Bounding Box</strong> and the <strong>colorsArray</strong>.</p>
 
         <div class="callout-info">
-          <p class="callout-body"><strong>Bounding Box:</strong> In Kilopixel, all gradients are mapped to an element's invisible bounding box. The top-left corner of any shape is always exactly <code>(0, 0)</code>, and the bottom-right is <code>(1, 1)</code>. This guarantees that if you move, scale, or stretch your shape, the gradient stretches seamlessly with it &mdash; no complex trigonometry required!</p>
+          <p class="callout-body"><strong>Bounding Box:</strong> In Kilopixel, all gradients are mapped to an element's invisible bounding box. The top-left corner of any shape is always exactly <code>(0, 0)</code>, and the bottom-right is <code>(1, 1)</code>. This guarantees that if you move, scale, or stretch your shape, the gradient stretches seamlessly with it — no complex trigonometry required!</p>
           <p class="callout-body">In the diagrams below, the <span class="text-accent">blue coordinates</span> represent the fixed corners of the shape's invisible 0-to-1 bounding box space.</p>
 
           <pxl-stage ratio="5 / 2" class="diagram-stage">
@@ -83,12 +83,14 @@
         <!-- SECTION 1: RADIAL GRADIENT (1-VALUE MODE) -->
         <!-- ================================================================= -->
         <h2>1. Radial Gradient (1-Value Mode)</h2>
-        <p>The 1-value mode is the simplest form of the radial gradient, defined as <code>radial([r1], colorsArray)</code>. In this mode, the gradient is automatically centered at the shape's bounding box center <code>(0.5, 0.5)</code> with an inner start radius of <code>0</code>.</p>
-        <p>The parameter <code>r1</code> defines the outer radius circle. When provided as a number, it represents a scalar radius relative to the shape's bounding box width (calculated as <code>r1 &times; width</code>). Because the radius is derived mathematically, the gradient maintains a perfectly circular shape that scales proportionally with the element.</p>
+        <p>The 1-value mode is the simplest form of the radial gradient. In this mode, the gradient is automatically centered at the shape's bounding box center <code>(0.5, 0.5)</code>. The parameter <code>r1</code> defines the outer radius circle and supports two distinct modes:</p>
+        <ul>
+          <li><strong>Numeric Radius:</strong> An absolute radius in layer coordinates, behaving just like a circle's <code>r</code> attribute. It produces an isotropic circle of light that maintains its exact size regardless of the shape's width or height (e.g., <code>r1 = 200</code>).</li>
+          <li><strong>Keyword Radius:</strong> A responsive boundary that dynamically calculates distance and snaps to the shape's edges or corners (e.g., <code>r1 = 'top-right'</code>).</li>
+        </ul>
 
         <div class="callout-info">
           <p class="callout-title">1-Value Mode Syntax</p>
-          <p class="callout-body">Provide a single radius value (number or keyword) in the configuration array:</p>
           <pre class="syntax-pre"><code class="language-javascript">fill="radial([r1], colorsArray)"</code></pre>
         </div>
 
@@ -103,7 +105,7 @@
       x="500" y="300"
       w="<mark id="sec1ex1RectWCode">400</mark>" h="<mark id="sec1ex1RectHCode">250</mark>" 
       rotate="<mark id="sec1ex1RectRotCode">0</mark>"
-      fill="radial([<mark id="sec1ex1GradR1Code">0.5</mark>], ['#e2e8f0', '#475569'])"&gt;
+      fill="radial([<mark id="sec1ex1GradR1Code">200</mark>], ['#e2e8f0', '#475569'])"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -125,12 +127,12 @@
                   <div class="control-group">
                     <label><span>Width <span class="indicator-dot"></span></span> <span id="sec1ex1RectWVal">400</span></label>
                     <input type="range" min="100" max="800" step="10" value="400" autocomplete="off"
-                      oninput="document.getElementById('sec1ex1Rect').setAttribute('w', this.value); document.getElementById('sec1ex1RectWVal').innerText = this.value; document.getElementById('sec1ex1RectWCode').innerText = this.value;">
+                      oninput="document.getElementById('sec1ex1Rect').setAttribute('w', this.value); document.getElementById('sec1ex1RectWVal').innerText = this.value; document.getElementById('sec1ex1RectWCode').innerText = this.value; refreshRadialKeywords('sec1ex1');">
                   </div>
                   <div class="control-group">
                     <label><span>Height</span> <span id="sec1ex1RectHVal">250</span></label>
                     <input type="range" min="50" max="500" step="10" value="250" autocomplete="off"
-                      oninput="document.getElementById('sec1ex1Rect').setAttribute('h', this.value); document.getElementById('sec1ex1RectHVal').innerText = this.value; document.getElementById('sec1ex1RectHCode').innerText = this.value;">
+                      oninput="document.getElementById('sec1ex1Rect').setAttribute('h', this.value); document.getElementById('sec1ex1RectHVal').innerText = this.value; document.getElementById('sec1ex1RectHCode').innerText = this.value; refreshRadialKeywords('sec1ex1');">
                   </div>
                   <div class="control-group">
                     <label><span>Rotation</span> <span id="sec1ex1RectRotVal">0°</span></label>
@@ -145,8 +147,10 @@
                 <div class="playground-sliders">
                   <div class="control-group">
                     <label><span>Radius Mode <span class="indicator-dot"></span></span></label>
-                    <select id="sec1ex1ModeSelect" autocomplete="off" onchange="sec1ex1SetMode(this.value)" data-mark="sec1ex1GradR1Code">
-                      <option value="slider" selected>Numeric (Slider)</option>
+                    <select id="sec1ex1ModeSelect" autocomplete="off" onchange="setRadialRadiusMode('sec1ex1', 'R1', this.value)" data-mark="sec1ex1GradR1Code">
+                      <optgroup label="Numeric Radius">
+                        <option value="slider" selected>Numeric (Slider)</option>
+                      </optgroup>
                       <optgroup label="Corner &amp; Side Anchors">
                         <option value="top">top</option>
                         <option value="top-right">top-right</option>
@@ -166,8 +170,8 @@
                     </select>
                   </div>
                   <div class="control-group" id="sec1ex1SliderGroup">
-                    <label><span>Radius (r1)</span> <span id="sec1ex1GradR1Val">0.5</span></label>
-                    <input type="range" id="sec1ex1GradR1Input" min="0.1" max="1.5" step="0.05" value="0.5" autocomplete="off"
+                    <label><span>Radius (r1)</span> <span id="sec1ex1GradR1Val">200</span></label>
+                    <input type="range" id="sec1ex1GradR1Input" min="20" max="500" step="10" value="200" autocomplete="off"
                       data-mark="sec1ex1GradR1Code"
                       oninput="document.getElementById('sec1ex1R1').setAttribute('value', this.value); document.getElementById('sec1ex1GradR1Val').innerText = this.value; document.getElementById('sec1ex1GradR1Code').innerText = this.value; document.getElementById('sec1ex1Rect').setAttribute('fill', `radial([${this.value}], ['#e2e8f0', '#475569'])`);">
                   </div>
@@ -181,16 +185,16 @@
 
                 <!-- Top-Left HUD Info -->
                 <pxl-text x="30" y="30" text="'Center = (0.5, 0.5)'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
-                <pxl-text x="30" y="65" text="'Radius = ' + (typeof ref.sec1ex1R1.value === 'string' ? '\'' + ref.sec1ex1R1.value + '\'' : ref.sec1ex1R1.value)" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="65" text="'r1 = ' + (typeof ref.sec1ex1R1.value === 'string' ? '\'' + ref.sec1ex1R1.value + '\'' : ref.sec1ex1R1.value)" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 
-                <pxl-rect id="sec1ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="radial([0.5], ['#e2e8f0', '#475569'])"></pxl-rect>
+                <pxl-rect id="sec1ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="radial([200], ['#e2e8f0', '#475569'])"></pxl-rect>
 
-                <pxl-var id="sec1ex1R1" value="0.5"></pxl-var>
+                <pxl-var id="sec1ex1R1" value="200"></pxl-var>
                 <pxl-var id="sec1ex1DirX" value="1"></pxl-var>
                 <pxl-var id="sec1ex1DirY" value="0"></pxl-var>
-                <pxl-var id="sec1ex1Radius" value="ref.sec1ex1DirX.value === 1 && ref.sec1ex1DirY.value === 0 ? ref.sec1ex1R1.value * ref.sec1ex1Rect.w : pxl.resolveRadius(ref.sec1ex1R1.value, 0.5, 0.5, ref.sec1ex1Rect.w, ref.sec1ex1Rect.h, 1)"></pxl-var>
-                <pxl-var id="sec1ex1TargetX" value="ref.sec1ex1DirX.value === 1 && ref.sec1ex1DirY.value === 0 ? ref.sec1ex1Radius.value : ref.sec1ex1DirX.value * ref.sec1ex1Rect.w"></pxl-var>
+                <pxl-var id="sec1ex1TargetX" value="ref.sec1ex1DirY.value === 0 && ref.sec1ex1DirX.value === 1 ? ref.sec1ex1R1.value : ref.sec1ex1DirX.value * ref.sec1ex1Rect.w"></pxl-var>
                 <pxl-var id="sec1ex1TargetY" value="ref.sec1ex1DirY.value * ref.sec1ex1Rect.h"></pxl-var>
+                <pxl-var id="sec1ex1Radius" value="sqrt(ref.sec1ex1TargetX.value * ref.sec1ex1TargetX.value + ref.sec1ex1TargetY.value * ref.sec1ex1TargetY.value)"></pxl-var>
                 
                 <pxl-group x="ref.sec1ex1Rect.x" y="ref.sec1ex1Rect.y" rotate="ref.sec1ex1Rect.rotate">
                   <!-- Solid blue bounding box -->
@@ -220,10 +224,10 @@
 
                   <!-- Purple radius label -->
                   <pxl-text 
-                    x="ref.sec1ex1TargetX.value / 2" 
-                    y="ref.sec1ex1TargetY.value / 2 - 12" 
-                    text="'r'" 
-                    fill="#8b5cf6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+                    x="ref.sec1ex1TargetX.value / 2 + (ref.sec1ex1TargetY.value / ref.sec1ex1Radius.value) * 22" 
+                    y="ref.sec1ex1TargetY.value / 2 - (ref.sec1ex1TargetX.value / ref.sec1ex1Radius.value) * 22" 
+                    text="'r1'" 
+                    fill="#8b5cf6" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
 
                 </pxl-group>
               </pxl-layer>
@@ -576,7 +580,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
 
   <script>
-    const SEC1_DIRS = {
+    const RADIAL_KEYWORD_DIRS = {
       'slider': [1, 0],
       'top': [0, -0.5],
       'top-right': [0.5, -0.5],
@@ -592,23 +596,59 @@
       'farthest-side': [0.5, 0]
     };
 
-    function sec1ex1SetMode(mode) {
-      const slider = document.getElementById('sec1ex1GradR1Input');
-      const sliderGroup = document.getElementById('sec1ex1SliderGroup');
+    function setRadialRadiusMode(sec, radiusKey, mode, updateFillFn) {
+      const slider = document.getElementById(`${sec}Grad${radiusKey}Input`);
+      const sliderGroup = document.getElementById(`${sec}${radiusKey}SliderGroup`) || document.getElementById(`${sec}SliderGroup`);
       const isSlider = mode === 'slider';
       
-      slider.disabled = !isSlider;
-      sliderGroup.style.opacity = isSlider ? '1' : '0.4';
+      if (slider) slider.disabled = !isSlider;
+      if (sliderGroup) sliderGroup.style.opacity = isSlider ? '1' : '0.4';
       
-      const dirs = SEC1_DIRS[mode] || [1, 0];
-      document.getElementById('sec1ex1DirX').setAttribute('value', dirs[0]);
-      document.getElementById('sec1ex1DirY').setAttribute('value', dirs[1]);
+      let dirs = RADIAL_KEYWORD_DIRS[mode] || [1, 0];
+      if (mode === 'closest-side' || mode === 'farthest-side') {
+        const rect = document.getElementById(`${sec}Rect`);
+        const w = rect ? (parseFloat(rect.getAttribute('w')) || 400) : 400;
+        const h = rect ? (parseFloat(rect.getAttribute('h')) || 250) : 250;
+        if (mode === 'closest-side') {
+          dirs = (w < h) ? [0.5, 0] : [0, -0.5];
+        } else {
+          dirs = (w < h) ? [0, -0.5] : [0.5, 0];
+        }
+      }
 
-      const val = isSlider ? slider.value : `'${mode}'`;
-      document.getElementById('sec1ex1R1').setAttribute('value', val);
-      document.getElementById('sec1ex1Rect').setAttribute('fill', `radial([${val}], ['#e2e8f0', '#475569'])`);
-      document.getElementById('sec1ex1GradR1Code').innerText = val;
-      document.getElementById('sec1ex1GradR1Val').innerText = isSlider ? val : mode;
+      const dirX = document.getElementById(`${sec}DirX${radiusKey}`) || document.getElementById(`${sec}DirX`);
+      const dirY = document.getElementById(`${sec}DirY${radiusKey}`) || document.getElementById(`${sec}DirY`);
+      if (dirX) dirX.setAttribute('value', dirs[0]);
+      if (dirY) dirY.setAttribute('value', dirs[1]);
+
+      const val = isSlider ? (slider ? slider.value : '200') : `'${mode}'`;
+      const varEl = document.getElementById(`${sec}${radiusKey}`);
+      if (varEl) varEl.setAttribute('value', val);
+
+      const codeEl = document.getElementById(`${sec}Grad${radiusKey}Code`);
+      if (codeEl) codeEl.innerText = val;
+
+      const valEl = document.getElementById(`${sec}Grad${radiusKey}Val`);
+      if (valEl) valEl.innerText = isSlider ? val : mode;
+
+      if (typeof updateFillFn === 'function') {
+        updateFillFn(val);
+      } else {
+        const rect = document.getElementById(`${sec}Rect`);
+        if (rect) rect.setAttribute('fill', `radial([${val}], ['#e2e8f0', '#475569'])`);
+      }
+    }
+
+    function refreshRadialKeywords(sec, radiusKey = 'R1') {
+      const select = document.getElementById(`${sec}ModeSelect`);
+      if (select && (select.value === 'closest-side' || select.value === 'farthest-side')) {
+        setRadialRadiusMode(sec, radiusKey, select.value);
+      }
+    }
+
+    // Backward-compatible alias for Section 1
+    function sec1ex1SetMode(mode) {
+      setRadialRadiusMode('sec1ex1', 'R1', mode);
     }
   </script>
 </body>
