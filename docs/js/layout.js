@@ -77,11 +77,11 @@ class DocsSidebar extends HTMLElement {
         <div class="sidebar-section">
           <div class="sidebar-title">Fills &amp; Strokes</div>
           <ul>
-            <li><a href="colors.html" class="${currentPath === 'colors.html' ? 'active' : ''}">Colors</a></li>
-            <li><a href="linear.html" class="${currentPath === 'linear.html' ? 'active' : ''}">Linear Gradients</a></li>
-            <li><a href="radial.html" class="${currentPath === 'radial.html' ? 'active' : ''}">Radial Gradients</a></li>
-            <li><a href="conic.html" class="${currentPath === 'conic.html' ? 'active' : ''}">Conic Gradients</a></li>
-            <li><a href="stroke.html" class="${currentPath === 'stroke.html' ? 'active' : ''}">Stroke Styles</a></li>
+            <li><a href="color.html" class="${currentPath === 'color.html' ? 'active' : ''}">Color</a></li>
+            <li><a href="stroke.html" class="${currentPath === 'stroke.html' ? 'active' : ''}">Stroke Style</a></li>
+            <li><a href="linear.html" class="${currentPath === 'linear.html' ? 'active' : ''}">Linear Gradient</a></li>
+            <li><a href="radial.html" class="${currentPath === 'radial.html' ? 'active' : ''}">Radial Gradient</a></li>
+            <li><a href="conic.html" class="${currentPath === 'conic.html' ? 'active' : ''}">Conic Gradient</a></li>
           </ul>
         </div>
         <div class="sidebar-section">
@@ -99,7 +99,7 @@ class DocsSidebar extends HTMLElement {
             <li><a href="expressions.html" class="${currentPath === 'expressions.html' ? 'active' : ''}">Expressions</a></li>
             <li><a href="referencing.html" class="${currentPath === 'referencing.html' ? 'active' : ''}">Referencing</a></li>
             <li><a href="events.html" class="${currentPath === 'events.html' ? 'active' : ''}">Events</a></li>
-            <li><a href="animation.html" class="${currentPath === 'animation.html' ? 'active' : ''}">Animations</a></li>
+            <li><a href="animation.html" class="${currentPath === 'animation.html' ? 'active' : ''}">Animation</a></li>
           </ul>
         </div>
       </aside>
