@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>CHROMA: VORTEX — Kilopixel Volumetric Spotlight Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="../dist/pxl.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #020308;
+      color: #e2e8f0;
+      font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    pxl-stage {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      cursor: crosshair;
+    }
+
+    /* Glassmorphic Cyber HUD */
+    .hud-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 28px;
+      z-index: 100;
+      transition: opacity 0.3s ease;
+    }
+
+    .hud-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .hud-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .brand-box {
+      background: rgba(8, 12, 28, 0.65);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 14px 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      background: linear-gradient(135deg, #00f0ff 0%, #ff007f 60%, #ffbe0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      color: #8da2c0;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px;
+    }
+
+    .telemetry-box {
+      background: rgba(8, 12, 28, 0.65);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 12px 18px;
+      display: flex;
+      gap: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-label {
+      font-size: 9px;
+      color: #64748b;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .stat-val {
+      font-size: 14px;
+      font-weight: 700;
+      color: #00f0ff;
+    }
+
+    .stat-val.magenta {
+      color: #ff007f;
+    }
+
+    .stat-val.gold {
+      color: #ffbe0b;
+    }
+
+    /* Bottom Control Deck */
+    .hud-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .controls-deck {
+      pointer-events: auto;
+      background: rgba(8, 12, 28, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 14px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .group-label {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #718096;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-right: 4px;
+    }
+
+    .pill-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .pill-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .pill-btn.active {
+      background: rgba(0, 240, 255, 0.18);
+      border-color: #00f0ff;
+      color: #00f0ff;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.35);
+    }
+
+    .pill-btn.active.theme-solar {
+      background: rgba(255, 170, 0, 0.2);
+      border-color: #ffaa00;
+      color: #ffbe0b;
+      box-shadow: 0 0 12px rgba(255, 170, 0, 0.35);
+    }
+
+    .pill-btn.active.theme-ocean {
+      background: rgba(0, 255, 180, 0.2);
+      border-color: #00ffb4;
+      color: #00ffb4;
+      box-shadow: 0 0 12px rgba(0, 255, 180, 0.35);
+    }
+
+    .pill-btn.active.theme-synth {
+      background: rgba(255, 0, 128, 0.2);
+      border-color: #ff007f;
+      color: #ff007f;
+      box-shadow: 0 0 12px rgba(255, 0, 128, 0.35);
+    }
+
+    .toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toggle-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #475569;
+      transition: all 0.2s ease;
+    }
+
+    .pill-btn.active .toggle-dot {
+      background: #00f0ff;
+      box-shadow: 0 0 8px #00f0ff;
+    }
+
+    .shortcut-hints {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #64748b;
+      display: flex;
+      gap: 14px;
+      pointer-events: auto;
+      background: rgba(8, 12, 28, 0.5);
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .kbd-key {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: #94a3b8;
+      font-weight: 700;
+    }
+
+    /* Floating show-HUD toggle for when UI is hidden */
+    .hud-summoner {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      z-index: 90;
+      background: rgba(8, 12, 28, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+
+    .hud-summoner:hover {
+      color: #00f0ff;
+      border-color: #00f0ff;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+    }
+
+    .hud-summoner.visible {
+      opacity: 0.7;
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================================================================= -->
+  <!-- Kilopixel Declarative Stage                                       -->
+  <!-- ================================================================= -->
+  <pxl-stage id="main" ratio="16 / 9">
+
+    <!-- Reactive Variables for Interactive Controls -->
+    <pxl-var id="speed" value="1"></pxl-var>
+    <pxl-var id="followMouse" value="1"></pxl-var>
+    <pxl-var id="showGrid" value="1"></pxl-var>
+
+    <!-- =============================================================== -->
+    <!-- LAYER 1: Deep Cosmic Space & Volumetric Spotlights              -->
+    <!-- =============================================================== -->
+    <pxl-layer id="bgLayer">
+      <!-- Ambient Cosmic Glow centered on stage -->
+      <pxl-rect 
+        x="0" 
+        y="0" 
+        w="1000" 
+        h="ref.main.height" 
+        anchor="top-left"
+        fill="radial([0.5, 0.5, 0, 0.5, 0.5, 950], [0, '#0c1328', 0.45, '#060918', 1, '#020308'])">
+      </pxl-rect>
+
+      <!-- Faint Cyber Grid -->
+      <pxl-grid 
+        stroke="rgba(255, 255, 255, 0.035)" 
+        step="40" 
+        major="5" 
+        alpha="ref.showGrid.value">
+      </pxl-grid>
+
+      <!-- Distant Geometric Guide Rings -->
+      <pxl-group x="500" y="ref.main.height / 2">
+        <pxl-circle r="440" stroke="rgba(255, 255, 255, 0.03)" strokewidth="1" linedash="[4, 10]" fill="none"></pxl-circle>
+        <pxl-circle r="680" stroke="rgba(255, 255, 255, 0.02)" strokewidth="1" linedash="[8, 20]" fill="none"></pxl-circle>
+      </pxl-group>
+
+      <!-- Spotlight 1: Electric Cyan Harmonic Lissajous Beam (Localized circular cone) -->
+      <pxl-circle 
+        id="spot1"
+        x="500 + sin(t * 0.55 * ref.speed.value) * 320" 
+        y="ref.main.height / 2 + cos(t * 0.75 * ref.speed.value) * 180" 
+        r="400" 
+        blend="screen"
+        fill="radial([0.35, 0.35, 8, 0.5, 0.5, 400], [0, 'rgba(0, 255, 235, 0.85)', 0.3, 'rgba(0, 180, 255, 0.4)', 0.7, 'rgba(0, 60, 200, 0.08)', 1, 'rgba(0, 0, 0, 0)'])">
+      </pxl-circle>
+
+      <!-- Spotlight 2: Hot Magenta Counter-Rotating Beam -->
+      <pxl-circle 
+        id="spot2"
+        x="500 + cos(t * 0.7 * ref.speed.value) * 320" 
+        y="ref.main.height / 2 - sin(t * 0.5 * ref.speed.value) * 180" 
+        r="400" 
+        blend="screen"
+        fill="radial([0.65, 0.35, 10, 0.5, 0.5, 400], [0, 'rgba(255, 0, 130, 0.85)', 0.3, 'rgba(210, 0, 255, 0.4)', 0.7, 'rgba(100, 0, 180, 0.08)', 1, 'rgba(0, 0, 0, 0)'])">
+      </pxl-circle>
+
+      <!-- Spotlight 3: Solar Amber Pulsing Core Flare -->
+      <pxl-circle 
+        id="spot3"
+        x="500 + sin(t * 0.4 * ref.speed.value + 1.8) * 180" 
+        y="ref.main.height / 2 + cos(t * 0.6 * ref.speed.value + 1.2) * 140" 
+        r="340" 
+        blend="screen"
+        fill="radial([0.5, 0.5, 12, 0.5, 0.5, 340], [0, 'rgba(255, 200, 0, 0.85)', 0.3, 'rgba(255, 100, 0, 0.35)', 0.7, 'rgba(255, 40, 0, 0.06)', 1, 'rgba(0, 0, 0, 0)'])">
+      </pxl-circle>
+
+      <!-- Spotlight 4: Interactive Cursor Spotlight (Directly tracks pointer) -->
+      <pxl-circle 
+        id="spotMouse"
+        x="ref.main.mouseX" 
+        y="ref.main.mouseY" 
+        r="350" 
+        blend="screen"
+        alpha="ref.followMouse.value"
+        fill="radial([0.5, 0.5, 10, 0.5, 0.5, 350], [0, 'rgba(255, 255, 255, 0.9)', 0.25, 'rgba(140, 235, 255, 0.4)', 0.65, 'rgba(70, 110, 255, 0.08)', 1, 'rgba(0, 0, 0, 0)'])">
+      </pxl-circle>
+    </pxl-layer>
+
+    <!-- =============================================================== -->
+    <!-- LAYER 2: Kinetic Mandala & Sacred Geometry (High-Perf Vectors)  -->
+    <!-- =============================================================== -->
+    <pxl-layer id="mandalaLayer">
+      
+      <!-- Anchored in exact screen center regardless of aspect ratio -->
+      <pxl-group x="500" y="ref.main.height / 2">
+
+        <!-- 1. Outer Orbital Ring with soft glow halo + sharp animated track -->
+        <pxl-circle r="300" stroke="rgba(0, 255, 240, 0.12)" strokewidth="10" fill="none"></pxl-circle>
+        <pxl-circle 
+          r="300" 
+          stroke="rgba(0, 255, 240, 0.8)" 
+          strokewidth="2" 
+          linedash="[12, 24]" 
+          dashoffset="t * 30 * ref.speed.value" 
+          fill="none">
+        </pxl-circle>
+
+        <!-- Orbital Satellite Nodes revolving at r=300 -->
+        <pxl-group rotate="t * 12 * ref.speed.value">
+          <pxl-circle x="300 * cos(0)" y="300 * sin(0)" r="7" fill="#00ffff"></pxl-circle>
+          <pxl-circle x="300 * cos(PI / 2)" y="300 * sin(PI / 2)" r="7" fill="#ff007f"></pxl-circle>
+          <pxl-circle x="300 * cos(PI)" y="300 * sin(PI)" r="7" fill="#00ffff"></pxl-circle>
+          <pxl-circle x="300 * cos(3 * PI / 2)" y="300 * sin(3 * PI / 2)" r="7" fill="#ff007f"></pxl-circle>
+          
+          <pxl-circle x="300 * cos(PI / 4)" y="300 * sin(PI / 4)" r="4" fill="#ffbe0b"></pxl-circle>
+          <pxl-circle x="300 * cos(3 * PI / 4)" y="300 * sin(3 * PI / 4)" r="4" fill="#ffbe0b"></pxl-circle>
+          <pxl-circle x="300 * cos(5 * PI / 4)" y="300 * sin(5 * PI / 4)" r="4" fill="#ffbe0b"></pxl-circle>
+          <pxl-circle x="300 * cos(7 * PI / 4)" y="300 * sin(7 * PI / 4)" r="4" fill="#ffbe0b"></pxl-circle>
+        </pxl-group>
+
+        <!-- 2. Middle Ring: 8-Petal Holographic Lotus (Counter-Clockwise) -->
+        <pxl-group rotate="-(t * 18 * ref.speed.value)">
+          <pxl-circle 
+            r="230" 
+            stroke="rgba(0, 255, 240, 0.4)" 
+            strokewidth="2" 
+            linedash="[6, 14]" 
+            dashoffset="-(t * 40 * ref.speed.value)" 
+            fill="none">
+          </pxl-circle>
+
+          <!-- 8 Radially Dispersed Elliptical Petals (Crisp high-speed alpha vectors) -->
+          <pxl-group rotate="0">
+            <pxl-ellipse rx="14" ry="70" y="130" fill="rgba(0, 255, 240, 0.15)" stroke="rgba(0, 255, 240, 0.7)" strokewidth="1.5"></pxl-ellipse>
+          </pxl-group>
+          <pxl-group rotate="45">
+            <pxl-ellipse rx="14" ry="70" y="130" fill="rgba(255, 0, 128, 0.15)" stroke="rgba(255, 0, 128, 0.7)" strokewidth="1.5"></pxl-ellipse>
+          </pxl-group>
+          <pxl-group rotate="90">
+            <pxl-ellipse rx="14" ry="70" y="130" fill="rgba(0, 255, 240, 0.15)" stroke="rgba(0, 255, 240, 0.7)" strokewidth="1.5"></pxl-ellipse>
+          </pxl-group>
+          <pxl-group rotate="135">
+            <pxl-ellipse rx="14" ry="70" y="130" fill="rgba(255, 0, 128, 0.15)" stroke="rgba(255, 0, 128, 0.7)" strokewidth="1.5"></pxl-ellipse>
+          </pxl-group>
+          <pxl-group rotate="180">
+            <pxl-ellipse rx="14" ry="70" y="130" fill="rgba(0, 255, 240, 0.15)" stroke="rgba(0, 255, 240, 0.7)" strokewidth="1.5"></pxl-ellipse>
+          </pxl-group>
+          <pxl-group rotate="225">
+            <pxl-ellipse rx="14" ry="70" y="130" fill="rgba(255, 0, 128, 0.15)" stroke="rgba(255, 0, 128, 0.7)" strokewidth="1.5"></pxl-ellipse>
+          </pxl-group>
+          <pxl-group rotate="270">
+            <pxl-ellipse rx="14" ry="70" y="130" fill="rgba(0, 255, 240, 0.15)" stroke="rgba(0, 255, 240, 0.7)" strokewidth="1.5"></pxl-ellipse>
+          </pxl-group>
+          <pxl-group rotate="315">
+            <pxl-ellipse rx="14" ry="70" y="130" fill="rgba(255, 0, 128, 0.15)" stroke="rgba(255, 0, 128, 0.7)" strokewidth="1.5"></pxl-ellipse>
+          </pxl-group>
+        </pxl-group>
+
+        <!-- 3. Inner Sacred Polygon Vortex (Clockwise) -->
+        <pxl-group rotate="t * 28 * ref.speed.value">
+          <!-- Interlocking Geometric Squares -->
+          <pxl-rect w="160" h="160" dx="-80" dy="-80" rotate="0" stroke="rgba(255, 0, 128, 0.65)" strokewidth="2" linedash="[8, 12]" dashoffset="t * 20" fill="none"></pxl-rect>
+          <pxl-rect w="160" h="160" dx="-80" dy="-80" rotate="45" stroke="rgba(0, 255, 235, 0.65)" strokewidth="2" linedash="[8, 12]" dashoffset="-(t * 20)" fill="none"></pxl-rect>
+          <pxl-rect w="110" h="110" dx="-55" dy="-55" rotate="22.5" stroke="rgba(255, 215, 0, 0.75)" strokewidth="2" fill="none"></pxl-rect>
+          <pxl-rect w="110" h="110" dx="-55" dy="-55" rotate="67.5" stroke="rgba(255, 215, 0, 0.75)" strokewidth="2" fill="none"></pxl-rect>
+        </pxl-group>
+
+        <!-- Soft Aura Bloom behind Core -->
+        <pxl-circle 
+          r="65 + wave(2.5) * 8" 
+          fill="radial([0.5, 0.5, 0, 0.5, 0.5, 75], [0, 'rgba(0, 255, 240, 0.35)', 0.5, 'rgba(255, 0, 128, 0.12)', 1, 'rgba(0,0,0,0)'])">
+        </pxl-circle>
+
+        <!-- 4. Pulsing Prismatic Core Orb -->
+        <pxl-circle 
+          r="38 + wave(2.5) * 6" 
+          fill="radial([0.35, 0.35, 2, 0.5, 0.5, 45], [0, '#ffffff', 0.25, '#00ffff', 0.65, '#ff007f', 1, 'rgba(0,0,0,0)'])">
+        </pxl-circle>
+
+        <!-- Stellar Focal Flare -->
+        <pxl-circle 
+          r="10 + wave(1.2) * 3" 
+          fill="#ffffff">
+        </pxl-circle>
+
+        <!-- 5. High-Speed Quantum Sparks (Consolidated into this layer) -->
+        <pxl-group rotate="t * 45 * ref.speed.value">
+          <pxl-circle x="180 * cos(0)" y="180 * sin(0)" r="3" fill="#ffffff"></pxl-circle>
+          <pxl-circle x="180 * cos(PI / 3)" y="180 * sin(PI / 3)" r="2.5" fill="#00f0ff"></pxl-circle>
+          <pxl-circle x="180 * cos(2 * PI / 3)" y="180 * sin(2 * PI / 3)" r="3" fill="#ff007f"></pxl-circle>
+          <pxl-circle x="180 * cos(PI)" y="180 * sin(PI)" r="2.5" fill="#ffffff"></pxl-circle>
+          <pxl-circle x="180 * cos(4 * PI / 3)" y="180 * sin(4 * PI / 3)" r="3" fill="#00f0ff"></pxl-circle>
+          <pxl-circle x="180 * cos(5 * PI / 3)" y="180 * sin(5 * PI / 3)" r="2.5" fill="#ff007f"></pxl-circle>
+        </pxl-group>
+
+        <pxl-group rotate="-(t * 35 * ref.speed.value)">
+          <pxl-circle x="340 * cos(PI / 6)" y="340 * sin(PI / 6)" r="2" fill="#ffbe0b"></pxl-circle>
+          <pxl-circle x="340 * cos(3 * PI / 6)" y="340 * sin(3 * PI / 6)" r="2" fill="#00f0ff"></pxl-circle>
+          <pxl-circle x="340 * cos(5 * PI / 6)" y="340 * sin(5 * PI / 6)" r="2" fill="#ff007f"></pxl-circle>
+          <pxl-circle x="340 * cos(7 * PI / 6)" y="340 * sin(7 * PI / 6)" r="2" fill="#ffbe0b"></pxl-circle>
+          <pxl-circle x="340 * cos(9 * PI / 6)" y="340 * sin(9 * PI / 6)" r="2" fill="#00f0ff"></pxl-circle>
+          <pxl-circle x="340 * cos(11 * PI / 6)" y="340 * sin(11 * PI / 6)" r="2" fill="#ff007f"></pxl-circle>
+        </pxl-group>
+
+      </pxl-group>
+    </pxl-layer>
+
+  </pxl-stage>
+
+  <!-- ================================================================= -->
+  <!-- Cyberpunk Telemetry HUD Overlay                                   -->
+  <!-- ================================================================= -->
+  <div class="hud-overlay" id="hud">
+    <!-- Top Header -->
+    <div class="hud-header">
+      <div class="brand-box">
+        <div class="brand-title">CHROMA : VORTEX</div>
+        <div class="brand-subtitle">Volumetric 6-Value Radial Spotlight & Kinetic Engine</div>
+      </div>
+
+      <div class="telemetry-box">
+        <div class="stat-item">
+          <span class="stat-label">Engine FPS</span>
+          <span class="stat-val" id="fpsDisplay">--</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Pointer X / Y</span>
+          <span class="stat-val magenta" id="coordsDisplay">500, 500</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Resolution</span>
+          <span class="stat-val gold" id="resDisplay">1000 × 562</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Controls Deck -->
+    <div class="hud-footer">
+      <div class="controls-deck">
+        <!-- Palette Presets -->
+        <div class="control-group">
+          <span class="group-label">Theme:</span>
+          <button class="pill-btn active" id="btnThemeCyber" onclick="setTheme('cyberpunk')">Cyberpunk</button>
+          <button class="pill-btn" id="btnThemeSolar" onclick="setTheme('solar')">Solar Flare</button>
+          <button class="pill-btn" id="btnThemeOcean" onclick="setTheme('ocean')">Deep Ocean</button>
+          <button class="pill-btn" id="btnThemeSynth" onclick="setTheme('synth')">Synthwave</button>
+        </div>
+
+        <!-- Interactive Toggles -->
+        <div class="control-group">
+          <span class="group-label">Beams:</span>
+          <button class="pill-btn toggle-btn active" id="btnMouseFollow" onclick="toggleMouseFollow()">
+            <span class="toggle-dot"></span> Mouse Spotlight
+          </button>
+          <button class="pill-btn toggle-btn active" id="btnGrid" onclick="toggleGrid()">
+            <span class="toggle-dot"></span> Grid
+          </button>
+        </div>
+
+        <!-- Speed Selector -->
+        <div class="control-group">
+          <span class="group-label">Speed:</span>
+          <button class="pill-btn" id="btnSpd05" onclick="setSpeed(0.5)">0.5×</button>
+          <button class="pill-btn active" id="btnSpd10" onclick="setSpeed(1.0)">1.0×</button>
+          <button class="pill-btn" id="btnSpd15" onclick="setSpeed(1.5)">1.5×</button>
+        </div>
+
+        <!-- Actions -->
+        <div class="control-group">
+          <button class="pill-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+          <button class="pill-btn" onclick="toggleHUD()">👁 Hide HUD</button>
+        </div>
+      </div>
+
+      <!-- Shortcut hints -->
+      <div class="shortcut-hints">
+        <span><span class="kbd-key">F</span> Fullscreen</span>
+        <span><span class="kbd-key">H</span> Toggle HUD</span>
+        <span><span class="kbd-key">SPACE</span> Pause/Resume</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Discreet button to bring back HUD if hidden -->
+  <button class="hud-summoner" id="hudSummoner" onclick="toggleHUD()" title="Show Controls (or press H)">👁</button>
+
+  <!-- ================================================================= -->
+  <!-- Interactive Controller Script                                     -->
+  <!-- ================================================================= -->
+  <script>
+    const stage = document.getElementById('main');
+    const varSpeed = document.getElementById('speed');
+    const varFollow = document.getElementById('followMouse');
+    const varGrid = document.getElementById('showGrid');
+
+    const spot1 = document.getElementById('spot1');
+    const spot2 = document.getElementById('spot2');
+    const spot3 = document.getElementById('spot3');
+    const spotMouse = document.getElementById('spotMouse');
+
+    const hud = document.getElementById('hud');
+    const hudSummoner = document.getElementById('hudSummoner');
+
+    const fpsDisplay = document.getElementById('fpsDisplay');
+    const coordsDisplay = document.getElementById('coordsDisplay');
+    const resDisplay = document.getElementById('resDisplay');
+
+    let currentSpeed = 1.0;
+    let isPaused = false;
+    let mouseFollowActive = true;
+    let gridActive = true;
+    let isHudVisible = true;
+
+    // --- Dynamic Border-to-Border Fullscreen Synchronization ---
+    function syncStageRatio() {
+      if (!stage) return;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const r = (w / h).toFixed(4);
+      stage.setAttribute('ratio', r);
+      if (resDisplay) {
+        resDisplay.innerText = `1000 × ${Math.round(1000 / r)}`;
+      }
+    }
+    window.addEventListener('resize', syncStageRatio);
+    syncStageRatio();
+
+    // --- Color Theme Presets ---
+    const themes = {
+      cyberpunk: {
+        spot1: "radial([0.35, 0.35, 8, 0.5, 0.5, 400], [0, 'rgba(0, 255, 235, 0.85)', 0.3, 'rgba(0, 180, 255, 0.4)', 0.7, 'rgba(0, 60, 200, 0.08)', 1, 'rgba(0, 0, 0, 0)'])",
+        spot2: "radial([0.65, 0.35, 10, 0.5, 0.5, 400], [0, 'rgba(255, 0, 130, 0.85)', 0.3, 'rgba(210, 0, 255, 0.4)', 0.7, 'rgba(100, 0, 180, 0.08)', 1, 'rgba(0, 0, 0, 0)'])",
+        spot3: "radial([0.5, 0.5, 12, 0.5, 0.5, 340], [0, 'rgba(255, 200, 0, 0.85)', 0.3, 'rgba(255, 100, 0, 0.35)', 0.7, 'rgba(255, 40, 0, 0.06)', 1, 'rgba(0, 0, 0, 0)'])",
+        spotMouse: "radial([0.5, 0.5, 10, 0.5, 0.5, 350], [0, 'rgba(255, 255, 255, 0.9)', 0.25, 'rgba(140, 235, 255, 0.4)', 0.65, 'rgba(70, 110, 255, 0.08)', 1, 'rgba(0, 0, 0, 0)'])"
+      },
+      solar: {
+        spot1: "radial([0.35, 0.35, 8, 0.5, 0.5, 400], [0, 'rgba(255, 170, 0, 0.85)', 0.3, 'rgba(255, 90, 0, 0.4)', 0.7, 'rgba(180, 20, 60, 0.08)', 1, 'rgba(0, 0, 0, 0)'])",
+        spot2: "radial([0.65, 0.35, 10, 0.5, 0.5, 400], [0, 'rgba(255, 30, 60, 0.85)', 0.3, 'rgba(200, 10, 100, 0.4)', 0.7, 'rgba(110, 0, 120, 0.08)', 1, 'rgba(0, 0, 0, 0)'])",
+        spot3: "radial([0.5, 0.5, 12, 0.5, 0.5, 340], [0, 'rgba(255, 235, 50, 0.85)', 0.3, 'rgba(255, 160, 0, 0.35)', 0.7, 'rgba(255, 80, 0, 0.06)', 1, 'rgba(0, 0, 0, 0)'])",
+        spotMouse: "radial([0.5, 0.5, 10, 0.5, 0.5, 350], [0, 'rgba(255, 255, 255, 0.9)', 0.25, 'rgba(255, 220, 140, 0.4)', 0.65, 'rgba(255, 100, 30, 0.08)', 1, 'rgba(0, 0, 0, 0)'])"
+      },
+      ocean: {
+        spot1: "radial([0.35, 0.35, 8, 0.5, 0.5, 400], [0, 'rgba(0, 255, 180, 0.85)', 0.3, 'rgba(0, 200, 140, 0.4)', 0.7, 'rgba(0, 80, 160, 0.08)', 1, 'rgba(0, 0, 0, 0)'])",
+        spot2: "radial([0.65, 0.35, 10, 0.5, 0.5, 400], [0, 'rgba(0, 120, 255, 0.85)', 0.3, 'rgba(0, 60, 220, 0.4)', 0.7, 'rgba(0, 20, 150, 0.08)', 1, 'rgba(0, 0, 0, 0)'])",
+        spot3: "radial([0.5, 0.5, 12, 0.5, 0.5, 340], [0, 'rgba(0, 240, 255, 0.85)', 0.3, 'rgba(0, 160, 200, 0.35)', 0.7, 'rgba(0, 80, 140, 0.06)', 1, 'rgba(0, 0, 0, 0)'])",
+        spotMouse: "radial([0.5, 0.5, 10, 0.5, 0.5, 350], [0, 'rgba(255, 255, 255, 0.9)', 0.25, 'rgba(120, 255, 220, 0.4)', 0.65, 'rgba(0, 150, 255, 0.08)', 1, 'rgba(0, 0, 0, 0)'])"
+      },
+      synth: {
+        spot1: "radial([0.35, 0.35, 8, 0.5, 0.5, 400], [0, 'rgba(255, 0, 128, 0.85)', 0.3, 'rgba(200, 0, 160, 0.4)', 0.7, 'rgba(120, 0, 180, 0.08)', 1, 'rgba(0, 0, 0, 0)'])",
+        spot2: "radial([0.65, 0.35, 10, 0.5, 0.5, 400], [0, 'rgba(140, 0, 255, 0.85)', 0.3, 'rgba(75, 0, 200, 0.4)', 0.7, 'rgba(40, 0, 130, 0.08)', 1, 'rgba(0, 0, 0, 0)'])",
+        spot3: "radial([0.5, 0.5, 12, 0.5, 0.5, 340], [0, 'rgba(255, 130, 0, 0.85)', 0.3, 'rgba(255, 50, 0, 0.35)', 0.7, 'rgba(180, 0, 80, 0.06)', 1, 'rgba(0, 0, 0, 0)'])",
+        spotMouse: "radial([0.5, 0.5, 10, 0.5, 0.5, 350], [0, 'rgba(255, 255, 255, 0.9)', 0.25, 'rgba(255, 140, 220, 0.4)', 0.65, 'rgba(160, 50, 255, 0.08)', 1, 'rgba(0, 0, 0, 0)'])"
+      }
+    };
+
+    function setTheme(name) {
+      const t = themes[name];
+      if (!t) return;
+      spot1.setAttribute('fill', t.spot1);
+      spot2.setAttribute('fill', t.spot2);
+      spot3.setAttribute('fill', t.spot3);
+      spotMouse.setAttribute('fill', t.spotMouse);
+
+      document.querySelectorAll('[id^="btnTheme"]').forEach(btn => btn.classList.remove('active', 'theme-solar', 'theme-ocean', 'theme-synth'));
+      if (name === 'cyberpunk') document.getElementById('btnThemeCyber').classList.add('active');
+      if (name === 'solar') document.getElementById('btnThemeSolar').classList.add('active', 'theme-solar');
+      if (name === 'ocean') document.getElementById('btnThemeOcean').classList.add('active', 'theme-ocean');
+      if (name === 'synth') document.getElementById('btnThemeSynth').classList.add('active', 'theme-synth');
+    }
+
+    // --- Interactive Control Helpers ---
+    function toggleMouseFollow() {
+      mouseFollowActive = !mouseFollowActive;
+      varFollow.setAttribute('value', mouseFollowActive ? 1 : 0);
+      document.getElementById('btnMouseFollow').classList.toggle('active', mouseFollowActive);
+    }
+
+    function toggleGrid() {
+      gridActive = !gridActive;
+      varGrid.setAttribute('value', gridActive ? 1 : 0);
+      document.getElementById('btnGrid').classList.toggle('active', gridActive);
+    }
+
+    function setSpeed(spd) {
+      currentSpeed = spd;
+      varSpeed.setAttribute('value', isPaused ? 0 : currentSpeed);
+      document.querySelectorAll('[id^="btnSpd"]').forEach(btn => btn.classList.remove('active'));
+      if (spd === 0.5) document.getElementById('btnSpd05').classList.add('active');
+      if (spd === 1.0) document.getElementById('btnSpd10').classList.add('active');
+      if (spd === 1.5) document.getElementById('btnSpd15').classList.add('active');
+    }
+
+    function togglePause() {
+      isPaused = !isPaused;
+      varSpeed.setAttribute('value', isPaused ? 0 : currentSpeed);
+    }
+
+    function toggleHUD() {
+      isHudVisible = !isHudVisible;
+      hud.classList.toggle('hidden', !isHudVisible);
+      hudSummoner.classList.toggle('visible', !isHudVisible);
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    // --- Keyboard Shortcuts ---
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      } else if (e.key === 'h' || e.key === 'H') {
+        toggleHUD();
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        togglePause();
+      }
+    });
+
+    // --- Telemetry Polling (FPS & Cursor Coordinates) ---
+    setInterval(() => {
+      if (stage && stage.attributeValues) {
+        if (fpsDisplay) {
+          fpsDisplay.innerText = stage.attributeValues.fps || 60;
+        }
+        if (coordsDisplay) {
+          const mx = Math.round(stage.attributeValues.mouseX || 500);
+          const my = Math.round(stage.attributeValues.mouseY || 500);
+          coordsDisplay.innerText = `${mx}, ${my}`;
+        }
+      }
+    }, 250);
+  </script>
+</body>
+</html>

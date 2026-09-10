@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conic Gradient | Kilopixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+  <script src="js/api-tabs.js"></script>
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+        <h1>Conic Gradient</h1>
+        <p class="lead">Kilopixel offers highly flexible conic (angular sweep) gradients for rotational color sweeps, radar effects, color wheels, and angular lighting.</p>
+
+        <p class="lead">To work with gradients in Kilopixel, you first need to understand two core concepts: the <strong>Bounding Box</strong> and the <strong>colorsArray</strong>.</p>
+
+        <div class="callout-info">
+          <p class="callout-body"><strong>Bounding Box:</strong> In Kilopixel, all gradients are mapped to an element's invisible bounding box. The top-left corner of any shape is always exactly <code>(0, 0)</code>, and the bottom-right is <code>(1, 1)</code>. This guarantees that if you move, scale, or stretch your shape, the gradient stretches seamlessly with it — no complex trigonometry required!</p>
+          <p class="callout-body">In the diagrams below, the <span class="text-accent">blue coordinates</span> represent the fixed corners of the shape's invisible 0-to-1 bounding box space.</p>
+
+          <pxl-stage ratio="5 / 2" class="diagram-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#cbd5e1" major="2"></pxl-grid>
+              
+              <!-- 1. Rectangle (w=250, h=150) -->
+              <pxl-rect x="175" y="200" w="250" h="150" fill="#cbd5e1"></pxl-rect>
+              <pxl-rect x="175" y="200" w="250" h="150" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
+              <pxl-circle x="50" y="125" r="8" fill="#3b82f6"></pxl-circle>
+              <pxl-text x="50" y="110" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+              <pxl-circle x="300" y="275" r="8" fill="#3b82f6"></pxl-circle>
+              <pxl-text x="300" y="290" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+        
+              <!-- 2. Ellipse (rx=75, ry=150, so w=150, h=300) -->
+              <pxl-ellipse x="500" y="200" rx="75" ry="150" fill="#cbd5e1"></pxl-ellipse>
+              <pxl-rect x="500" y="200" w="150" h="300" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
+              <pxl-circle x="425" y="50" r="8" fill="#3b82f6"></pxl-circle>
+              <pxl-text x="425" y="35" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+              <pxl-circle x="575" y="350" r="8" fill="#3b82f6"></pxl-circle>
+              <pxl-text x="575" y="365" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+        
+              <!-- 3. Polyline (Worm, w=250, h=200) -->
+              <pxl-polyline points="700,200; 784,100; 866,300; 950,200" smooth="1" closed="false" stroke="#cbd5e1" strokewidth="20" fill="none" linecap="round"></pxl-polyline>
+              <pxl-rect x="825" y="200" w="250" h="200" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
+              <pxl-circle x="700" y="100" r="8" fill="#3b82f6"></pxl-circle>
+              <pxl-text x="700" y="85" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+              <pxl-circle x="950" y="300" r="8" fill="#3b82f6"></pxl-circle>
+              <pxl-text x="950" y="315" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+        
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <div class="callout-info">
+          <p class="callout-body"><strong>colorsArray:</strong> All gradients in Kilopixel share a common parameter called <code>colorsArray</code> to define their colors. You can provide this array in two ways:</p>
+          <ul>
+            <li><strong>Colors Only:</strong> Pass an array of just colors (e.g., <code>['red', 'yellow', 'blue']</code>). Kilopixel will automatically space them out evenly from 0 to 1 around the 360° circle.</li>
+            <li><strong>Color Stops:</strong> Pass an array alternating between numeric offsets (0 to 1) and colors for precise control (e.g., <code>[0, 'red', 0.5, 'yellow', 1, 'blue']</code>).</li>
+          </ul>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: CONIC GRADIENT (1-VALUE MODE) -->
+        <!-- ================================================================= -->
+        <h2>1. Conic Gradient (1-Value Mode)</h2>
+        <p>The 1-value mode is the simplest form of the conic gradient. In this mode, the origin is automatically locked to the shape's bounding box center <code>(0.5, 0.5)</code>.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">1-Value Mode Syntax</p>
+          <pre class="syntax-pre"><code class="language-javascript">fill="conic(startAngle, colorsArray)"</code></pre>
+        </div>
+
+        <p>The parameter <code>startAngle</code> defines the starting angle in degrees (0°–360°). The gradient sweeps clockwise around the center, where <strong>0°</strong> points directly right along the +X axis (3 o'clock).</p>
+
+        <p>In this example, drag the Start Angle slider to rotate the gradient sweep around the center <code>(0.5, 0.5)</code>. The purple arrow indicates the exact angle where the gradient begins (offset 0) and completes its 360° revolution.</p>
+
+        <div class="example-card">
+          <div class="example-code">
+            <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-rect 
+      x="500" y="300"
+      w="<mark id="sec1ex1RectWCode">400</mark>" h="<mark id="sec1ex1RectHCode">250</mark>" 
+      rotate="<mark id="sec1ex1RectRotCode">0</mark>"
+      fill="conic(<mark id="sec1ex1GradAngleCode">0</mark>, ['#e2e8f0', '#475569'])"&gt;
+    &lt;/pxl-rect&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+          </div>
+
+          <div class="demo-container">
+            <div class="demo-controls">
+              <div class="demo-controls-header">
+                <h3 class="demo-controls-title">Controls</h3>
+                <div class="demo-tabs">
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1ex1RectTab')">Rect</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1ex1GradTab')">Gradient</button>
+                </div>
+              </div>
+              
+              <!-- Rect Tab -->
+              <div class="tab-content" id="sec1ex1RectTab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Width <span class="indicator-dot"></span></span> <span id="sec1ex1RectWVal">400</span></label>
+                    <input type="range" min="100" max="800" step="10" value="400" autocomplete="off"
+                      oninput="document.getElementById('sec1ex1Rect').setAttribute('w', this.value); document.getElementById('sec1ex1RectWVal').innerText = this.value; document.getElementById('sec1ex1RectWCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Height</span> <span id="sec1ex1RectHVal">250</span></label>
+                    <input type="range" min="50" max="500" step="10" value="250" autocomplete="off"
+                      oninput="document.getElementById('sec1ex1Rect').setAttribute('h', this.value); document.getElementById('sec1ex1RectHVal').innerText = this.value; document.getElementById('sec1ex1RectHCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Rotation</span> <span id="sec1ex1RectRotVal">0°</span></label>
+                    <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec1ex1Rect').setAttribute('rotate', this.value); document.getElementById('sec1ex1RectRotVal').innerText = this.value + '°'; document.getElementById('sec1ex1RectRotCode').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gradient Tab -->
+              <div class="tab-content active" id="sec1ex1GradTab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Start Angle <span class="indicator-dot"></span></span> <span id="sec1ex1GradAngleVal">0°</span></label>
+                    <input type="range" id="sec1ex1GradAngleInput" min="0" max="360" step="5" value="0" autocomplete="off"
+                      data-mark="sec1ex1GradAngleCode"
+                      oninput="sec1ex1UpdateAngle(this.value)">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <pxl-stage id="sec1ex1Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+                <!-- Top-Left HUD Info -->
+                <pxl-text x="30" y="30" text="'Center = (0.5, 0.5)'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="65" text="'startAngle = ' + ref.sec1ex1Angle.value + '°'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                
+                <pxl-rect id="sec1ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="conic(0, ['#e2e8f0', '#475569'])"></pxl-rect>
+
+                <pxl-var id="sec1ex1Angle" value="0"></pxl-var>
+
+                <!-- Overlay Group locked to Rect -->
+                <pxl-group x="ref.sec1ex1Rect.x" y="ref.sec1ex1Rect.y" rotate="ref.sec1ex1Rect.rotate">
+                  
+                  <!-- Blue Bounding Box outline -->
+                  <pxl-rect x="0" y="0" w="ref.sec1ex1Rect.w" h="ref.sec1ex1Rect.h" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
+                  
+                  <!-- Blue corner coordinates (0,0) and (1,1) -->
+                  <pxl-circle x="-ref.sec1ex1Rect.w/2" y="-ref.sec1ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
+                  <pxl-text x="-ref.sec1ex1Rect.w/2" y="-ref.sec1ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+                  
+                  <pxl-circle x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
+                  <pxl-text x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+
+                  <!-- 0° Baseline Reference Line -->
+                  <pxl-line x1="0" y1="0" x2="160" y2="0" stroke="#a78bfa" strokewidth="2" linedash="[4, 4]"></pxl-line>
+                  <pxl-text x="175" y="0" text="'0°'" fill="#a78bfa" size="22" font="monospace" align="left" baseline="middle"></pxl-text>
+
+                  <!-- Sweep Angle Arc -->
+                  <pxl-circle x="0" y="0" r="50" start="0" sweep="ref.sec1ex1Angle.value" fill="none" stroke="#8b5cf6" strokewidth="2" linedash="[4, 4]" alpha="ref.sec1ex1Angle.value > 0 ? 1 : 0"></pxl-circle>
+
+                  <!-- Start Angle Ray with Arrow -->
+                  <pxl-line 
+                    x1="0" 
+                    y1="0" 
+                    x2="cos(ref.sec1ex1Angle.value * PI / 180) * 140" 
+                    y2="sin(ref.sec1ex1Angle.value * PI / 180) * 140" 
+                    stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
+
+                  <!-- Purple Center Dot & Label -->
+                  <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
+                  <pxl-text x="0" y="20" text="'Center'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+
+                </pxl-group>
+              </pxl-layer>
+            </pxl-stage>
+          </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 2: CONIC GRADIENT (3-VALUE MODE) -->
+        <!-- ================================================================= -->
+        <h2>2. Conic Gradient (3-Value Mode)</h2>
+        <p>The 3-value mode allows you to position the center of rotation anywhere within (or beyond) the shape's bounding box by specifying <strong>Center</strong> <code>[cx, cy]</code> alongside the <strong>Start Angle</strong>.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">3-Value Mode Syntax</p>
+          <pre class="syntax-pre"><code class="language-javascript">fill="conic([startAngle, cx, cy], colorsArray)"</code></pre>
+        </div>
+
+        <p>The parameters <code>cx</code> and <code>cy</code> define the origin using normalized bounding box coordinates (from <code>0</code> to <code>1</code>). A center of <code>[0.5, 0.5]</code> is the geometric center of the shape, while <code>[0, 0]</code> is the top-left corner and <code>[1, 1]</code> is the bottom-right corner.</p>
+
+        <p>In this example, adjust the Center X0 and Center Y0 sliders to shift the center of rotation, and drag the Start Angle slider to orient the sweep. The purple dot marks the center of rotation, and the purple arrow indicates the starting ray.</p>
+
+        <div class="example-card">
+          <div class="example-code">
+            <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-rect 
+      x="500" y="300" 
+      w="<mark id="sec2ex1RectWCode">400</mark>" h="<mark id="sec2ex1RectHCode">250</mark>" 
+      rotate="<mark id="sec2ex1RectRotCode">0</mark>"
+      fill="conic([<mark id="sec2ex1GradAngleCode">45</mark>, <mark id="sec2ex1GradCxCode">0.3</mark>, <mark id="sec2ex1GradCyCode">0.3</mark>], ['#e2e8f0', '#475569'])"&gt;
+    &lt;/pxl-rect&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+          </div>
+
+          <div class="demo-container">
+            <div class="demo-controls">
+              <div class="demo-controls-header">
+                <h3 class="demo-controls-title">Controls</h3>
+                <div class="demo-tabs">
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2ex1RectTab')">Rect</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2ex1GradTab')">Gradient</button>
+                </div>
+              </div>
+              
+              <!-- Rect Tab -->
+              <div class="tab-content" id="sec2ex1RectTab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Width <span class="indicator-dot"></span></span> <span id="sec2ex1RectWVal">400</span></label>
+                    <input type="range" min="100" max="800" step="10" value="400" autocomplete="off"
+                      oninput="document.getElementById('sec2ex1Rect').setAttribute('w', this.value); document.getElementById('sec2ex1RectWVal').innerText = this.value; document.getElementById('sec2ex1RectWCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Height</span> <span id="sec2ex1RectHVal">250</span></label>
+                    <input type="range" min="50" max="500" step="10" value="250" autocomplete="off"
+                      oninput="document.getElementById('sec2ex1Rect').setAttribute('h', this.value); document.getElementById('sec2ex1RectHVal').innerText = this.value; document.getElementById('sec2ex1RectHCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Rotation</span> <span id="sec2ex1RectRotVal">0°</span></label>
+                    <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec2ex1Rect').setAttribute('rotate', this.value); document.getElementById('sec2ex1RectRotVal').innerText = this.value + '°'; document.getElementById('sec2ex1RectRotCode').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gradient Tab -->
+              <div class="tab-content active" id="sec2ex1GradTab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Center X0 <span class="indicator-dot"></span></span> <span id="sec2ex1GradCxVal">0.3</span></label>
+                    <input type="range" id="sec2ex1GradCxInput" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
+                      data-mark="sec2ex1GradCxCode"
+                      oninput="sec2ex1UpdateCenter('Cx', this.value);">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Center Y0</span> <span id="sec2ex1GradCyVal">0.3</span></label>
+                    <input type="range" id="sec2ex1GradCyInput" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
+                      data-mark="sec2ex1GradCyCode"
+                      oninput="sec2ex1UpdateCenter('Cy', this.value);">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Start Angle <span class="indicator-dot"></span></span> <span id="sec2ex1GradAngleVal">45°</span></label>
+                    <input type="range" id="sec2ex1GradAngleInput" min="0" max="360" step="5" value="45" autocomplete="off"
+                      data-mark="sec2ex1GradAngleCode"
+                      oninput="sec2ex1UpdateAngle(this.value)">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <pxl-stage id="sec2ex1Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+                <!-- Top-Left HUD Info -->
+                <pxl-text x="30" y="30" text="'Center = (' + ref.sec2ex1Cx.value + ', ' + ref.sec2ex1Cy.value + ')'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="65" text="'startAngle = ' + ref.sec2ex1Angle.value + '°'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                
+                <pxl-rect id="sec2ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="conic([45, 0.3, 0.3], ['#e2e8f0', '#475569'])"></pxl-rect>
+
+                <pxl-var id="sec2ex1Angle" value="45"></pxl-var>
+                <pxl-var id="sec2ex1Cx" value="0.3"></pxl-var>
+                <pxl-var id="sec2ex1Cy" value="0.3"></pxl-var>
+                <pxl-var id="sec2ex1LocalX" value="(ref.sec2ex1Cx.value - 0.5) * ref.sec2ex1Rect.w"></pxl-var>
+                <pxl-var id="sec2ex1LocalY" value="(ref.sec2ex1Cy.value - 0.5) * ref.sec2ex1Rect.h"></pxl-var>
+
+                <!-- Overlay Group locked to Rect -->
+                <pxl-group x="ref.sec2ex1Rect.x" y="ref.sec2ex1Rect.y" rotate="ref.sec2ex1Rect.rotate">
+                  
+                  <!-- Blue Bounding Box outline -->
+                  <pxl-rect x="0" y="0" w="ref.sec2ex1Rect.w" h="ref.sec2ex1Rect.h" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
+                  
+                  <!-- Blue corner coordinates (0,0) and (1,1) -->
+                  <pxl-circle x="-ref.sec2ex1Rect.w/2" y="-ref.sec2ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
+                  <pxl-text x="-ref.sec2ex1Rect.w/2" y="-ref.sec2ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+                  
+                  <pxl-circle x="ref.sec2ex1Rect.w/2" y="ref.sec2ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
+                  <pxl-text x="ref.sec2ex1Rect.w/2" y="ref.sec2ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+
+                  <!-- 0° Baseline Reference Line from Center -->
+                  <pxl-line 
+                    x1="ref.sec2ex1LocalX.value" 
+                    y1="ref.sec2ex1LocalY.value" 
+                    x2="ref.sec2ex1LocalX.value + 160" 
+                    y2="ref.sec2ex1LocalY.value" 
+                    stroke="#a78bfa" strokewidth="2" linedash="[4, 4]"></pxl-line>
+                  <pxl-text 
+                    x="ref.sec2ex1LocalX.value + 175" 
+                    y="ref.sec2ex1LocalY.value" 
+                    text="'0°'" fill="#a78bfa" size="22" font="monospace" align="left" baseline="middle"></pxl-text>
+
+                  <!-- Sweep Angle Arc -->
+                  <pxl-circle 
+                    x="ref.sec2ex1LocalX.value" 
+                    y="ref.sec2ex1LocalY.value" 
+                    r="50" start="0" sweep="ref.sec2ex1Angle.value" 
+                    fill="none" stroke="#8b5cf6" strokewidth="2" linedash="[4, 4]" 
+                    alpha="ref.sec2ex1Angle.value > 0 ? 1 : 0"></pxl-circle>
+
+                  <!-- Start Angle Ray with Arrow -->
+                  <pxl-line 
+                    x1="ref.sec2ex1LocalX.value" 
+                    y1="ref.sec2ex1LocalY.value" 
+                    x2="ref.sec2ex1LocalX.value + cos(ref.sec2ex1Angle.value * PI / 180) * 140" 
+                    y2="ref.sec2ex1LocalY.value + sin(ref.sec2ex1Angle.value * PI / 180) * 140" 
+                    stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
+
+                  <!-- Purple Center Dot & Label -->
+                  <pxl-circle x="ref.sec2ex1LocalX.value" y="ref.sec2ex1LocalY.value" r="8" fill="#8b5cf6"></pxl-circle>
+                  <pxl-text x="ref.sec2ex1LocalX.value" y="ref.sec2ex1LocalY.value + 20" text="'Center'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+
+                </pxl-group>
+              </pxl-layer>
+            </pxl-stage>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- 
+    FONT PRELOADER FOR CANVAS:
+    The HTML5 Canvas API (ctx.font) does not immediately download web fonts unless they are used in the HTML DOM first.
+    This invisible div renders all 9 weights of 'Inter' to force the browser to download and cache them on page load.
+  -->
+  <div aria-hidden="true" style="opacity: 0; pointer-events: none; position: absolute; width: 0; height: 0; overflow: hidden; font-family: 'Inter', sans-serif;">
+    <span style="font-weight: 100;">pxl</span><span style="font-weight: 200;">pxl</span><span style="font-weight: 300;">pxl</span>
+    <span style="font-weight: 400;">pxl</span><span style="font-weight: 500;">pxl</span><span style="font-weight: 600;">pxl</span>
+    <span style="font-weight: 700;">pxl</span><span style="font-weight: 800;">pxl</span><span style="font-weight: 900;">pxl</span>
+  </div>
+
+  <!-- Prism Syntax Highlighting -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+
+  <!-- Page-Specific Playground Orchestration -->
+  <script>
+    function sec1ex1UpdateAngle(val) {
+      const varEl = document.getElementById('sec1ex1Angle');
+      if (varEl) varEl.setAttribute('value', val);
+      
+      const valEl = document.getElementById('sec1ex1GradAngleVal');
+      if (valEl) valEl.innerText = val + '°';
+      
+      const codeEl = document.getElementById('sec1ex1GradAngleCode');
+      if (codeEl) codeEl.innerText = val;
+      
+      const rect = document.getElementById('sec1ex1Rect');
+      if (rect) rect.setAttribute('fill', `conic(${val}, ['#e2e8f0', '#475569'])`);
+    }
+
+    function sec2ex1UpdateFill() {
+      const rect = document.getElementById('sec2ex1Rect');
+      const angle = document.getElementById('sec2ex1GradAngleInput').value;
+      const cx = document.getElementById('sec2ex1GradCxInput').value;
+      const cy = document.getElementById('sec2ex1GradCyInput').value;
+      if (rect) {
+        rect.setAttribute('fill', `conic([${angle}, ${cx}, ${cy}], ['#e2e8f0', '#475569'])`);
+      }
+    }
+
+    function sec2ex1UpdateAngle(val) {
+      const varEl = document.getElementById('sec2ex1Angle');
+      if (varEl) varEl.setAttribute('value', val);
+      
+      const valEl = document.getElementById('sec2ex1GradAngleVal');
+      if (valEl) valEl.innerText = val + '°';
+      
+      const codeEl = document.getElementById('sec2ex1GradAngleCode');
+      if (codeEl) codeEl.innerText = val;
+      
+      sec2ex1UpdateFill();
+    }
+
+    function sec2ex1UpdateCenter(axis, val) {
+      const varEl = document.getElementById(`sec2ex1${axis}`);
+      if (varEl) varEl.setAttribute('value', val);
+      
+      const valEl = document.getElementById(`sec2ex1Grad${axis}Val`);
+      if (valEl) valEl.innerText = val;
+      
+      const codeEl = document.getElementById(`sec2ex1Grad${axis}Code`);
+      if (codeEl) codeEl.innerText = val;
+      
+      sec2ex1UpdateFill();
+    }
+  </script>
+</body>
+</html>

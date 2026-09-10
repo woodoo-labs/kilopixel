@@ -117,11 +117,20 @@ Every documentation example must follow a standardized 3-part layout:
   <pxl-stage class="demo-stage">...</pxl-stage>
 </div>
 ```
-* **Required Script Imports:** Every documentation page must include `<script src="js/layout.js"></script>` and `<script src="js/docs.js"></script>` in `<head>`.
+* **Script Architecture & Placement (Head vs. Bottom):**
+  * **`<head>` Imports (Engine & Structure):** Every documentation page must load its structural Web Component definitions and core interactive engine in `<head>`: `<script src="js/layout.js"></script>`, `<script src="js/docs.js"></script>`, `<script src="js/api-tabs.js"></script>`, and `<script src="js/pxl.min.js"></script>`. Defining custom elements in `<head>` ensures they are upgraded synchronously during DOM parsing, eliminating Flash of Unstyled Content (FOUC) and Cumulative Layout Shift (CLS), while guaranteeing that `window.pxlDocs` is ready for any inline event handlers (`onclick`, `oninput`).
+  * **Bottom of `<body>` Imports (Syntax Highlighting):** Every documentation page that uses Prism syntax highlighting MUST load its highlighter scripts at the very bottom of `<body>` directly preceding `</body>`:
+    ```html
+    <!-- Prism Syntax Highlighting -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+    ```
+    Placing Prism at the bottom guarantees that all DOM nodes, code snippets, and dynamic Web Component templates are constructed before Prism executes its syntax highlighting pass.
 * **Tab Bars & Mobile Scrolling:** Always use `.demo-tabs` inside `.demo-controls-header` for tab navigation with `onclick="pxlDocs.switchTab(this, '...')"` handlers. The header container (`.demo-controls-header`) automatically scrolls horizontally on mobile devices to prevent wrapping or layout overflow.
 
 ### JavaScript Namespace & Native DOM Methods
-* **Strict Namespacing (`pxlDocs`):** All documentation playground helper functions, utilities, and interactive methods MUST be defined under the `window.pxlDocs` namespace in `docs/js/docs.js` (e.g., `pxlDocs.switchTab`, `pxlDocs.initHighlighting`). Never define global functions on `window` or in ad-hoc `<script>` blocks on individual pages.
+* **Strict Namespacing (`pxlDocs`):** All shared documentation playground helper functions, utilities, and interactive methods MUST be defined under the `window.pxlDocs` namespace in `docs/js/docs.js` (e.g., `pxlDocs.switchTab`, `pxlDocs.initHighlighting`). Do not define arbitrary global functions on `window`.
+* **Page-Specific Playground Scripts:** When an advanced playground requires complex multi-control synchronization (such as dual-mode toggling between numeric sliders and keyword dropdowns, geometric vector projections, or composite string formatting), place these functions in a single dedicated `<script>` block at the very bottom of the page, directly following the Prism scripts. Keep functions cleanly organized and scoped to prevent interference with other playgrounds.
 * **Native DOM API (Zero-Magic Interaction):** When interacting with Kilopixel HTML elements from JavaScript (e.g., in slider `oninput` handlers or custom scripts), ALWAYS use standard native DOM methods like `document.getElementById('id').setAttribute('attr', value)`. This makes it transparent to developers inspecting the source code that Kilopixel has no proprietary or secret JavaScript API — it works 100% via standard declarative HTML attributes and native DOM manipulation.
 
 ### Reactivity & Live Code
@@ -146,6 +155,18 @@ Every documentation example must follow a standardized 3-part layout:
   ```html
   <button class="toggle-btn active" onclick="document.getElementById('sec1Circle').setAttribute('pie', 'false'); pxlDocs.updateToggle(this, 'sec1CirclePieVal', 'sec1CirclePieCode', 'false');">false (Open Arc)</button>
   ```
+* **Dropdown (`<select>`) Implementations:** Dropdown menus provide clean selection across discrete values, keywords, or blend modes:
+  * **Option Groups (`<optgroup>`):** When options fall into distinct categories (e.g., perimeter anchors vs. dynamic CSS keywords), always group them using `<optgroup label="...">` to enhance readability.
+  * **Native DOM `onchange` Handlers:** Similar to sliders, dropdown `onchange` handlers must execute explicit native DOM updates:
+    1. Update the target attribute: `document.getElementById('sec1Rect').setAttribute('anchor', this.value)`
+    2. Update the label text: `document.getElementById('sec1RectAnchorVal').innerText = this.value`
+    3. Update the code snippet: `document.getElementById('sec1RectAnchorCode').innerText = this.value`
+  * **Multi-Highlighting (`data-mark`):** When a dropdown updates a code mark or requires beacon tracking, specify `data-mark="sec1RectAnchorCode"` on the `<select>` element.
+* **Dual-Mode Controls (Numeric Slider vs. Keyword Dropdown):** When a property supports both numeric values and discrete keyword presets (e.g. radial gradient radii, focal offsets):
+  * Provide a `.toggle-group` button pair above the input controls (e.g., "Numeric" vs. "Keyword").
+  * Wrap the numeric slider and the keyword dropdown in separate `.control-group` containers (e.g. `id="sec1R1SliderGroup"` and `id="sec1R1KeywordGroup"`).
+  * Toggle their visibility by switching `style.display` between `'flex'` and `'none'`.
+  * Sync the active button's class (`.active`) and update the target element's attribute and code snippet mark to reflect the newly active control mode.
 
 ### Onboarding Beacons
 To combat "interactive blindness" and guide users to the most important controls in a complex playground, you should use Onboarding Beacons. 
@@ -160,7 +181,7 @@ To ensure perfect consistency across all documentation playgrounds and guides, 1
   * **`[exM]`** *(Optional)*: Example number within that section (`ex1`, `ex2`, `ex3`...). Used when a section has multiple examples or sub-sections. Omitted when a section has only a single interactive example.
   * **`[Entity]`** *(Required)*: Target shape, layer, group, or table category (`Stage`, `Layer`, `Circle`, `Ellipse`, `Styling`, `Transforms`).
   * **`[Target]`** *(Optional)*: Container component (`Tab`) or attribute name (`X`, `Y`, `R`, `Rx`, `Rot`, `Width`).
-  * **`[Role]`** *(Optional)*: UI modifier for attribute controls (`Val`, `Code`, `Input`).
+  * **`[Role]`** *(Optional)*: UI modifier for attribute controls (`Val`, `Code`, `Input`, `Select`, `Btn`, `Group`).
 * **Canvas Target Shapes (`camelCase`):** Any `<pxl-layer>`, `<pxl-var>`, or canvas shape element that will be referenced by `ref.*` in declarative expressions must use strict **camelCase** (`sec4Layer`, `sec4Ellipse`, `sec3ex1Ring`).
   * *(Why? Using hyphens (`-`) in kebab-case breaks JavaScript dot notation in `ref.*` expressions because `-` is evaluated as subtraction — see `.agents/KILOPIXEL.md`).*
 * **Examples by Component Type:**
@@ -169,6 +190,9 @@ To ensure perfect consistency across all documentation playgrounds and guides, 1
   * UI Numeric Label Spans (`[Role]` = `Val`): `sec2CircleXVal`, `sec4LayerRotVal`, `sec4EllipseRxVal`, `sec3ex1RingIRVal`
   * Code Snippet Marks (`[Role]` = `Code`): `sec2CircleXCode`, `sec4LayerRotCode`, `sec4EllipseRxCode`, `sec3ex1RingIRCode`
   * Slider Inputs (`[Role]` = `Input`): `sec2CircleXInput`, `sec4LayerRotInput`
+  * Dropdown Selects (`[Role]` = `Select`): `sec1ex1KeywordSelect`, `sec3ex1R1KeywordSelect`
+  * Toggle & Mode Buttons (`[Role]` = `Btn`): `sec1ex1ModeNumericBtn`, `sec1ex1ModeKeywordBtn`
+  * Conditional Control Groups (`[Role]` = `Group`): `sec1ex1SliderGroup`, `sec1ex1KeywordGroup`
 * **Do not append redundant suffixes** like `Shape` or `Attr`.
 
 > [!NOTE]
@@ -193,4 +217,4 @@ To maintain a cohesive, highly professional editorial presentation across all do
 ## 8. CSS & Styling Rules
 * **Strictly No Inline Styles**: You MUST NOT use the `style="..."` attribute anywhere in the documentation HTML. If you need a margin, layout adjustment, typography tweak, or color, you must search `docs/css/docs.css` for an existing utility class or standard component layout.
 * **Permission Required**: If you believe a completely unique inline style or a new global CSS rule is necessary, you MUST stop and ask the user for explicit permission before modifying any CSS or writing the inline style.
-* **Exceptions**: The only exceptions to the inline style ban are functional JavaScript targets (e.g., dynamically controlled `width` or `transform` properties explicitly driven by a slider's Javascript) or critical frontend hacks (like `opacity: 0` for font preloaders).
+* **Exceptions**: The only exceptions to the inline style ban are functional JavaScript targets (e.g., dynamically controlled `width` or `transform` properties explicitly driven by a slider's Javascript), `style="display: none;"` for initially inactive/hidden dual-mode control group containers, or critical frontend hacks (like `opacity: 0` for font preloaders).

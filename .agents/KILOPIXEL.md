@@ -106,7 +106,7 @@ The framework compiles from these files (in build order):
 | 2 | `js/matrix.js` | Zero-GC 2D affine matrix engine (Float32Array) |
 | 3 | `js/compiler.js` | Multi-tier expression parser, built-in scope, time drivers |
 | 4 | `js/interaction.js` | InteractionEngine class, dummy context hit testing, pointer events |
-| 5 | `js/graphics.js` | Transform pipeline helper, anchor tables, points parser |
+| 5 | `js/graphics.js` | Transform pipeline helper, anchor tables, points parser, radius resolver |
 | 6 | `js/monitor.js` | Performance telemetry (fps, renderAvg, renderMax) |
 | 7 | `js/elements/stage.js` | Root container, canvas host, rAF loop, resize, pointer routing |
 | 8 | `js/elements/node.js` | `PxlNode` base class (extends HTMLElement), matrix tracking |
@@ -414,17 +414,30 @@ Coordinates are **proportional** to the shape's bounding box. `[0, 0]` = top-lef
 
 #### `radial(config, colorsArray)`
 
-The radial gradient API uses a **Point-Based** architecture. You define a Center point `(cx, cy)` and a Radius point `(rx, ry)`, and the engine dynamically calculates the absolute pixel distance between them as the true radius. This eliminates all aspect-ratio ambiguity on non-square shapes.
+The radial gradient API accepts configurations with **1**, **3**, or **6** arguments, mapped directly to HTML5 Canvas 2D radial gradient geometry (`ctx.createRadialGradient(x0, y0, r0, x1, y1, r1)`):
 
 | Args | Syntax | Description |
 |:---:|---|---|
-| **2** | `radial([rx1, ry1], colorsArray)` | The gradient originates from a collapsed point anchored in the exact center of the shape. You only provide the **Radius Point 1** to define the outer boundary. |
-| **4** | `radial([cx0, cy0, rx1, ry1], colorsArray)` | You explicitly define the origin by setting **Center 0**, followed by the boundary **Radius 1**. The outer circle's center (`cx1, cy1`) is implicitly locked to Center 0. |
-| **6** | `radial([cx0, cy0, cx1, cy1, rx1, ry1], colorsArray)` | **"3D Spotlight"**: You unlock the outer circle! You define **Center 0** as an independent point, offset from the outer circle's **Center 1** and its **Radius 1**. |
-| **8** | `radial([cx0, cy0, rx0, ry0, cx1, cy1, rx1, ry1], colorsArray)` | **Full Explicit Control**: You define everything. You can now define **Radius 0** to expand the inner origin into a solid, hollow core before the gradient blends to Circle 1. |
+| **1** | `radial([r1], colorsArray)` | **Concentric, Center-Locked**: Origin is locked to shape center `(0.5, 0.5)` with inner radius `r0 = 0`, expanding out to outer radius `r1`. |
+| **3** | `radial([x0, y0, r1], colorsArray)` | **Concentric, Custom Origin**: Origin is set to point `(x0, y0)` (proportional 0..1 to bounding box) with inner radius `r0 = 0`, expanding out to outer radius `r1`. |
+| **6** | `radial([x0, y0, r0, x1, y1, r1], colorsArray)` | **3D Spotlight / Eccentric Cones**: Full independent control over Start Circle `(x0, y0, r0)` and End Circle `(x1, y1, r1)` for directional beams, 3D spotlights, and hollow cores. |
 
-> [!TIP]
-> **No Math Required for Circles!** Because the radius is physically anchored to a point, passing `[1, 0.5]` automatically touches the exact center of the right edge, creating a perfectly fitted circle. Passing `[1, 1]` automatically reaches the exact diagonal corner.
+##### Radius Formats (`r0`, `r1`)
+Radii can be expressed in three distinct formats:
+1. **Logical Numbers**: Responsive logical canvas units (e.g., `200`, automatically scaled by unit `u` at draw time via `Math.abs(r * u)`).
+2. **Perimeter Anchor Keywords**: Measures Euclidean distance from the circle center `(x, y)` to the chosen perimeter anchor point:
+   - **Sides**: `'top'`, `'right'`, `'bottom'`, `'left'`
+   - **Corners**: `'top-left'`, `'top-right'`, `'bottom-right'`, `'bottom-left'`
+3. **Dynamic CSS Keywords**: Dynamically measures distance to the shape's bounding box edges and corners:
+   - `'closest-side'`: Distance to the nearest bounding box edge.
+   - `'farthest-side'`: Distance to the farthest bounding box edge.
+   - `'closest-corner'`: Distance to the nearest bounding box corner.
+   - `'farthest-corner'`: Distance to the farthest bounding box corner.
+
+##### Distance Model
+The engine uses a continuous monotonic distance model from the circle's origin `(x, y)` to the target anchor point `(ax, ay)`:
+$$\text{radius} = \sqrt{((x - ax) \cdot w \cdot u)^2 + ((y - ay) \cdot h \cdot u)^2}$$
+This guarantees mathematical alignment with the Canvas 2D specification, smooth continuous transitions, and zero GC pressure during 60fps animations.
 
 #### `conic(startAngleOrConfig, colorsArray)`
 
@@ -1353,7 +1366,7 @@ Plain text attributes work without quotes — the compiler's Fast Path handles t
 <!-- These work because parentheses trigger dynamic evaluation -->
 <pxl-circle fill="hsl(t * 36, 80, 50)" ...></pxl-circle>
 <pxl-rect fill="linear(45, ['red', 'blue'])" ...></pxl-rect>
-<pxl-circle fill="radial([1, 1], ['white', 'black'])" ...></pxl-circle>
+<pxl-circle fill="radial(['farthest-corner'], ['white', 'black'])" ...></pxl-circle>
 <pxl-circle fill="conic(0, ['red', 'yellow', 'lime', 'cyan', 'blue', 'magenta', 'red'])" ...></pxl-circle>
 ```
 
@@ -1452,7 +1465,7 @@ Note: `ref.myShape.tx` gives `x + dx` in the shape's OWN local space. `toLocal(r
 - **Don't animate inside static CSS filter strings** → use Array syntax `filter="[blur(wave(2)*10)]"` instead
 - **CSS filter pixels vs logical units** → filter helpers (`blur(5)`) auto-scale the values to physical pixels; native shadows (`shadowblur="5"`) also use responsive logical units (`5 * u`)
 - **Don't nest `<pxl-stage>` inside `<pxl-stage>`** → stages are independent roots
-- **Radial Gradients** → use point coordinates like `[1, 1]` to stretch to the corner, scalar radii are not supported.
+- **Radial Gradients** → Use 1/3/6-value syntax: `radial([r1], colors)`, `radial([x0, y0, r1], colors)`, or `radial([x0, y0, r0, x1, y1, r1], colors)`. Radii accept logical numbers (e.g., `200`), perimeter anchors (`'top'`, `'right'`, `'top-left'`, etc.), or dynamic CSS keywords (`'closest-side'`, `'farthest-corner'`, etc.). Centers `x0`/`y0`/`x1`/`y1` are proportional (`0..1`) to bounding box.
 
 #### 12. Scope Available in Expressions
 
