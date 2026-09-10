@@ -1,20 +1,44 @@
 // =========================================================================
 // Drawing & Transform Helpers
 // =========================================================================
-pxl.anchorX = { 'left': 0, 'right': 1, 'center': 0.5, 'top-left': 0, 'top-right': 1, 'bottom-left': 0, 'bottom-right': 1, 'top': 0.5, 'bottom': 0.5 };
-pxl.anchorY = { 'top': 0, 'bottom': 1, 'center': 0.5, 'top-left': 0, 'top-right': 0, 'bottom-left': 1, 'bottom-right': 1, 'left': 0.5, 'right': 0.5 };
+pxl.anchorX = { 
+  'left': 0, 'right': 1, 'center': 0.5, 
+  'top-left': 0, 'top-right': 1, 'bottom-left': 0, 'bottom-right': 1, 
+  'top': 0.5, 'bottom': 0.5,
+  'top-center': 0.5, 'bottom-center': 0.5,
+  'left-center': 0, 'right-center': 1,
+  'center-top': 0.5, 'center-bottom': 0.5,
+  'center-left': 0, 'center-right': 1
+};
+pxl.anchorY = { 
+  'top': 0, 'bottom': 1, 'center': 0.5, 
+  'top-left': 0, 'top-right': 0, 'bottom-left': 1, 'bottom-right': 1, 
+  'left': 0.5, 'right': 0.5,
+  'top-center': 0, 'bottom-center': 1,
+  'left-center': 0.5, 'right-center': 0.5,
+  'center-top': 0, 'center-bottom': 1,
+  'center-left': 0.5, 'center-right': 0.5
+};
 
 // Radial gradient radius resolver: number → absolute logical canvas units,
 // string → anchor point distance or CSS dynamic keyword
 pxl.resolveRadius = (r, x, y, w, h, u) => {
   if (typeof r === 'number') return Math.abs(r * u);
 
+  // 1. Direct Side Edges (Perpendicular projection: 0 sqrt, 0 object lookups)
+  if (r === 'top')    return Math.abs(y * h * u);
+  if (r === 'bottom') return Math.abs((1 - y) * h * u);
+  if (r === 'left')   return Math.abs(x * w * u);
+  if (r === 'right')  return Math.abs((1 - x) * w * u);
+
+  // 2. Perimeter Points (Euclidean distance to discrete vertex)
   const ax = pxl.anchorX[r];
   if (ax !== undefined) {
     const dx = (x - ax) * w * u, dy = (y - pxl.anchorY[r]) * h * u;
     return Math.sqrt(dx * dx + dy * dy);
   }
 
+  // 3. Dynamic CSS Keywords (Lazy evaluated bounds)
   const lx = x * w * u, rx = (1 - x) * w * u;
   const ty = y * h * u, by = (1 - y) * h * u;
   switch (r) {

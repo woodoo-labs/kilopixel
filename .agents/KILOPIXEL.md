@@ -423,20 +423,27 @@ The radial gradient API accepts configurations with **1**, **3**, or **6** argum
 | **6** | `radial([x0, y0, r0, x1, y1, r1], colorsArray)` | **3D Spotlight / Eccentric Cones**: Full independent control over Start Circle `(x0, y0, r0)` and End Circle `(x1, y1, r1)` for directional beams, 3D spotlights, and hollow cores. |
 
 ##### Radius Formats (`r0`, `r1`)
-Radii can be expressed in three distinct formats:
+Radii can be expressed in four distinct formats:
 1. **Logical Numbers**: Responsive logical canvas units (e.g., `200`, automatically scaled by unit `u` at draw time via `Math.abs(r * u)`).
-2. **Perimeter Anchor Keywords**: Measures Euclidean distance from the circle center `(x, y)` to the chosen perimeter anchor point:
-   - **Sides**: `'top'`, `'right'`, `'bottom'`, `'left'`
-   - **Corners**: `'top-left'`, `'top-right'`, `'bottom-right'`, `'bottom-left'`
-3. **Dynamic CSS Keywords**: Dynamically measures distance to the shape's bounding box edges and corners:
+2. **Side Edge Keywords (Perpendicular Projection)**: Calculates the perpendicular distance straight to the boundary line, ensuring the radial circle is perfectly tangent to the target edge without diagonal overshoot:
+   - `'top'`: Distance straight up to top edge ($y \cdot h \cdot u$).
+   - `'bottom'`: Distance straight down to bottom edge ($(1 - y) \cdot h \cdot u$).
+   - `'left'`: Distance straight left to left edge ($x \cdot w \cdot u$).
+   - `'right'`: Distance straight right to right edge ($(1 - x) \cdot w \cdot u$).
+3. **Perimeter Point Keywords (Euclidean Distance)**: Measures Euclidean distance from circle center `(x, y)` to a discrete perimeter point:
+   - **Corner Vertices**: `'top-left'`, `'top-right'`, `'bottom-right'`, `'bottom-left'`
+   - **Edge Midpoints**: `'top-center'`, `'right-center'`, `'bottom-center'`, `'left-center'`
+4. **Dynamic CSS Keywords**: Dynamically measures distance to the shape's bounding box edges and corners:
    - `'closest-side'`: Distance to the nearest bounding box edge.
    - `'farthest-side'`: Distance to the farthest bounding box edge.
    - `'closest-corner'`: Distance to the nearest bounding box corner.
    - `'farthest-corner'`: Distance to the farthest bounding box corner.
 
 ##### Distance Model
-The engine uses a continuous monotonic distance model from the circle's origin `(x, y)` to the target anchor point `(ax, ay)`:
-$$\text{radius} = \sqrt{((x - ax) \cdot w \cdot u)^2 + ((y - ay) \cdot h \cdot u)^2}$$
+- **For Side Edges**: Perpendicular 1D line projection (0 square roots, zero allocations, sub-nanosecond register execution):
+  $$\text{radius}_{\text{top}} = |y \cdot h \cdot u|, \quad \text{radius}_{\text{left}} = |x \cdot w \cdot u|$$
+- **For Perimeter Points**: Continuous monotonic Euclidean distance from circle origin `(x, y)` to target anchor point `(ax, ay)`:
+  $$\text{radius} = \sqrt{((x - ax) \cdot w \cdot u)^2 + ((y - ay) \cdot h \cdot u)^2}$$
 This guarantees mathematical alignment with the Canvas 2D specification, smooth continuous transitions, and zero GC pressure during 60fps animations.
 
 #### `conic(startAngleOrConfig, colorsArray)`
@@ -1465,7 +1472,7 @@ Note: `ref.myShape.tx` gives `x + dx` in the shape's OWN local space. `toLocal(r
 - **Don't animate inside static CSS filter strings** → use Array syntax `filter="[blur(wave(2)*10)]"` instead
 - **CSS filter pixels vs logical units** → filter helpers (`blur(5)`) auto-scale the values to physical pixels; native shadows (`shadowblur="5"`) also use responsive logical units (`5 * u`)
 - **Don't nest `<pxl-stage>` inside `<pxl-stage>`** → stages are independent roots
-- **Radial Gradients** → Use 1/3/6-value syntax: `radial([r1], colors)`, `radial([x0, y0, r1], colors)`, or `radial([x0, y0, r0, x1, y1, r1], colors)`. Radii accept logical numbers (e.g., `200`), perimeter anchors (`'top'`, `'right'`, `'top-left'`, etc.), or dynamic CSS keywords (`'closest-side'`, `'farthest-corner'`, etc.). Centers `x0`/`y0`/`x1`/`y1` are proportional (`0..1`) to bounding box.
+- **Radial Gradients** → Use 1/3/6-value syntax: `radial([r1], colors)`, `radial([x0, y0, r1], colors)`, or `radial([x0, y0, r0, x1, y1, r1], colors)`. Radii accept logical numbers (e.g., `200`), side edges (`'top'`, `'bottom'`, `'left'`, `'right'`), perimeter points (`'top-center'`, `'top-right'`, etc.), or dynamic CSS keywords (`'closest-side'`, `'farthest-corner'`, etc.). Centers `x0`/`y0`/`x1`/`y1` are proportional (`0..1`) to bounding box.
 
 #### 12. Scope Available in Expressions
 
