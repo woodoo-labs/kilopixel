@@ -18,12 +18,12 @@ pxl.resolveRadius = (r, x, y, w, h, u) => {
   const lx = x * w * u, rx = (1 - x) * w * u;
   const ty = y * h * u, by = (1 - y) * h * u;
   switch (r) {
-    case 'closest-side':   return Math.min(lx, rx, ty, by);
+    case 'closest-side':   return Math.max(0.001, Math.min(lx, rx, ty, by));
     case 'farthest-side':  return Math.max(lx, rx, ty, by);
     case 'closest-corner':
-      return Math.min(Math.sqrt(lx*lx+ty*ty), Math.sqrt(rx*rx+ty*ty), Math.sqrt(lx*lx+by*by), Math.sqrt(rx*rx+by*by));
+      return Math.max(0.001, Math.min(Math.hypot(lx, ty), Math.hypot(rx, ty), Math.hypot(lx, by), Math.hypot(rx, by)));
     case 'farthest-corner':
-      return Math.max(Math.sqrt(lx*lx+ty*ty), Math.sqrt(rx*rx+ty*ty), Math.sqrt(lx*lx+by*by), Math.sqrt(rx*rx+by*by));
+      return Math.max(Math.hypot(lx, ty), Math.hypot(rx, ty), Math.hypot(lx, by), Math.hypot(rx, by));
     default: return 0;
   }
 };
