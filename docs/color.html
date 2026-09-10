@@ -290,8 +290,9 @@
         <p>The <code>hsl()</code> and <code>hsla()</code> formats use <strong>H</strong>ue (0-360), <strong>S</strong>aturation (0-100), and <strong>L</strong>ightness (0-100). HSL is especially powerful for generative graphics because you can easily animate the Hue channel over time using the <code>t</code> variable.</p>
 
         <div class="callout-info">
-          <p class="callout-body"><strong>Golden Rule of hsla Colors:</strong> Never use <code>%</code> signs! By sticking to pure numbers (e.g., <code>fill="hsl(120, 100, 50)"</code>), you can seamlessly animate colors using math and time variables without triggering syntax errors. The engine handles all the CSS units behind the scenes.</p>
-          <p class="callout-body"><em>Exception:</em> If you choose to use Javascript <strong>backticks</strong> (template literals) for string interpolation (e.g., <code>fill="`hsl(${t*90}, 100%, 50%)`"</code>), your math and time variables are evaluated natively by JavaScript. Because this bypasses Kilopixel's formatting helpers, you <strong>must</strong> include the <code>%</code> signs manually so the final generated string is valid CSS.</p>
+          <p class="callout-title">Never Use % Signs!</p>
+          <p class="callout-body">By sticking to pure numbers (e.g., <code>fill="hsl(120, 100, 50)"</code>), you can seamlessly animate colors using math and time variables. The engine handles all the CSS units behind the scenes.</p>
+          <p class="callout-body"><strong>Exception:</strong> If you choose to use Javascript <strong>backticks</strong> (template literals) for string interpolation (e.g., <code>fill="`hsl(${t*90}, 100%, 50%)`"</code>), your math and time variables are evaluated natively by JavaScript. Because this bypasses Kilopixel's formatting helpers, you <strong>must</strong> include the <code>%</code> signs manually so the final generated string is valid CSS.</p>
         </div>
 
         <div class="example-card">

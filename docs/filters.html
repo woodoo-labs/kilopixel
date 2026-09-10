@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Filters | Kilopixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+  <script src="js/api-tabs.js"></script>
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+        <h1>CSS Filters</h1>
+        <p class="lead">Kilopixel provides a unified, responsive API for CSS and Canvas filters that works seamlessly across <strong>shapes and layers</strong>. Learn how to apply blurs, drop shadows, color adjustments, and chained effects &mdash; effortlessly animated at 60fps.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Never Use Units!</p>
+          <p class="callout-body">By sticking to pure numbers (e.g., <code>filter="blur(15)"</code> or <code>contrast(130)</code>), you can seamlessly animate filters using math and time variables. The engine handles all the CSS units (<code>px</code>, <code>%</code>, <code>deg</code>) behind the scenes and automatically scales spatial filters with the stage.</p>
+          <p class="callout-body"><strong>Exception:</strong> If you choose to use JavaScript <strong>backticks</strong> (template literals) for string interpolation (e.g., <code>filter="`blur(${t * 10}px)`"</code>), your math and time variables are evaluated natively by JavaScript. Because this bypasses Kilopixel's formatting helpers, you <strong>must</strong> include the units (<code>px</code>, <code>%</code>, <code>deg</code>) manually so the final generated string is valid CSS.</p>
+        </div>
+
+        <div class="callout-info">
+          <p class="callout-body"><strong>Multiple Filters:</strong> To combine two or more filters, simply wrap them in a standard JavaScript array: <code>filter="[blur(10), contrast(150)]"</code>. Single filters do not require an array (e.g., <code>filter="blur(10)"</code>). The engine automatically separates array items with spaces in the generated CSS.</p>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: INTERACTIVE FILTER PLAYGROUND -->
+        <!-- ================================================================= -->
+        <h2>1. Single Filters &amp; Interactive Playground</h2>
+        <p>You can apply any CSS filter helper directly to a shape or layer using the <code>filter</code> attribute. The example below features a multi-shape composition. Use the tabs and sliders to explore each filter in real time.</p>
+
+        <!-- Declarative Code Block Above Container -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer filter="<mark id="sec1FilterCode">blur(0)</mark>"&gt;
+    &lt;!-- Blue Card --&gt;
+    &lt;pxl-rect x="500" y="300" w="280" h="280" rx="40" fill="#3b82f6" stroke="#2563eb" strokewidth="4"&gt;&lt;/pxl-rect&gt;
+
+    &lt;!-- Orange Accent Circle --&gt;
+    &lt;pxl-circle x="410" y="210" r="85" fill="#f97316" stroke="#ea580c" strokewidth="4"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Emerald Badge Circle --&gt;
+    &lt;pxl-circle x="570" y="370" r="55" fill="#10b981" stroke="#059669" strokewidth="4"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <!-- The controls block above stage -->
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1BlurShadowTab')">Blur &amp; Shadow</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1ColorTab')">Color Tone</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1LightTab')">Light &amp; Contrast</button>
+              </div>
+            </div>
+
+            <!-- Tab 1: Blur & Shadow -->
+            <div class="tab-content active" id="sec1BlurShadowTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Blur Radius (<code>radius</code>)</span> <span id="sec1BlurVal">0</span></label>
+                  <input type="range" min="0" max="40" step="1" value="0" autocomplete="off" id="sec1BlurInput"
+                    oninput="sec1ApplyFilter('blur')">
+                </div>
+                <div class="control-group">
+                  <label><span>Drop Shadow Distance</span> <span id="sec1ShadowDistVal">0</span></label>
+                  <input type="range" min="0" max="50" step="2" value="0" autocomplete="off" id="sec1ShadowDistInput"
+                    oninput="sec1ApplyFilter('dropShadow')">
+                </div>
+                <div class="control-group">
+                  <label><span>Drop Shadow Blur</span> <span id="sec1ShadowBlurVal">15</span></label>
+                  <input type="range" min="0" max="40" step="1" value="15" autocomplete="off" id="sec1ShadowBlurInput"
+                    oninput="sec1ApplyFilter('dropShadow')">
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 2: Color Tone -->
+            <div class="tab-content" id="sec1ColorTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Hue Rotate (<code>degrees</code>)</span> <span id="sec1HueVal">0°</span></label>
+                  <input type="range" min="0" max="360" step="5" value="0" autocomplete="off" id="sec1HueInput"
+                    oninput="sec1ApplyFilter('hueRotate')">
+                </div>
+                <div class="control-group">
+                  <label><span>Saturate (<code>percent</code>)</span> <span id="sec1SatVal">100%</span></label>
+                  <input type="range" min="0" max="300" step="10" value="100" autocomplete="off" id="sec1SatInput"
+                    oninput="sec1ApplyFilter('saturate')">
+                </div>
+                <div class="control-group">
+                  <label><span>Grayscale (<code>percent</code>)</span> <span id="sec1GrayVal">0%</span></label>
+                  <input type="range" min="0" max="100" step="5" value="0" autocomplete="off" id="sec1GrayInput"
+                    oninput="sec1ApplyFilter('grayscale')">
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 3: Light & Contrast -->
+            <div class="tab-content" id="sec1LightTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Brightness (<code>percent</code>)</span> <span id="sec1BrightVal">100%</span></label>
+                  <input type="range" min="0" max="200" step="5" value="100" autocomplete="off" id="sec1BrightInput"
+                    oninput="sec1ApplyFilter('brightness')">
+                </div>
+                <div class="control-group">
+                  <label><span>Contrast (<code>percent</code>)</span> <span id="sec1ContrastVal">100%</span></label>
+                  <input type="range" min="0" max="200" step="5" value="100" autocomplete="off" id="sec1ContrastInput"
+                    oninput="sec1ApplyFilter('contrast')">
+                </div>
+                <div class="control-group">
+                  <label><span>Sepia (<code>percent</code>)</span> <span id="sec1SepiaVal">0%</span></label>
+                  <input type="range" min="0" max="100" step="5" value="0" autocomplete="off" id="sec1SepiaInput"
+                    oninput="sec1ApplyFilter('sepia')">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- The reactive stage -->
+          <pxl-stage ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            </pxl-layer>
+            <pxl-layer id="sec1Layer" filter="blur(0)">
+              <!-- Blue Card -->
+              <pxl-rect x="500" y="300" w="280" h="280" rx="40" fill="#3b82f6" stroke="#2563eb" strokewidth="4"></pxl-rect>
+
+              <!-- Orange Accent Circle -->
+              <pxl-circle x="410" y="210" r="85" fill="#f97316" stroke="#ea580c" strokewidth="4"></pxl-circle>
+
+              <!-- Emerald Badge Circle -->
+              <pxl-circle x="570" y="370" r="55" fill="#10b981" stroke="#059669" strokewidth="4"></pxl-circle>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 2: FILTERS REFERENCE -->
+        <!-- ================================================================= -->
+        <h2>2. Filters Reference</h2>
+        <p>Kilopixel provides 10 built-in scope functions that map directly to standard CSS filters. All numbers are unitless and automatically formatted by the engine.</p>
+
+        <div class="api-list">
+          <div class="api-subheading">Spatial Filters (Stage Scaled)</div>
+
+          <!-- blur -->
+          <div class="api-item">
+            <div class="api-item-header">
+              <code class="api-name">blur(radius)</code>
+              <div class="api-meta">
+                <span class="api-pill values-pill">number &gt;= 0 | expr</span>
+                <span class="api-pill default-pill">default: 0</span>
+              </div>
+            </div>
+            <div class="api-item-desc">
+              Applies a Gaussian blur. The radius is specified in 1000-width stage units and automatically scales with the canvas.
+            </div>
+          </div>
+
+          <!-- dropShadow -->
+          <div class="api-item">
+            <div class="api-item-header">
+              <code class="api-name">dropShadow(x, y, blur, color)</code>
+              <div class="api-meta">
+                <span class="api-pill values-pill">numbers | expr, color</span>
+                <span class="api-pill default-pill">default: '#000'</span>
+              </div>
+            </div>
+            <div class="api-item-desc">
+              Applies a silhouette drop shadow following the alpha channel of the shape. Offsets and blur radius are in stage units. Accepts any standard CSS color string (e.g. <code>'#000'</code>, <code>'blue'</code>, or <code>'rgba(...)'</code>).
+            </div>
+          </div>
+
+          <div class="api-subheading">Color &amp; Tone Filters (Percentages &amp; Angles)</div>
+
+          <!-- brightness -->
+          <div class="api-item">
+            <div class="api-item-header">
+              <code class="api-name">brightness(percent)</code>
+              <div class="api-meta">
+                <span class="api-pill values-pill">number &gt;= 0 | expr</span>
+                <span class="api-pill default-pill">default: 100</span>
+              </div>
+            </div>
+            <div class="api-item-desc">
+              Adjusts the brightness. <code>100</code> is normal, <code>0</code> is completely black, and values above <code>100</code> brighten the element.
+            </div>
+          </div>
+
+          <!-- contrast -->
+          <div class="api-item">
+            <div class="api-item-header">
+              <code class="api-name">contrast(percent)</code>
+              <div class="api-meta">
+                <span class="api-pill values-pill">number &gt;= 0 | expr</span>
+                <span class="api-pill default-pill">default: 100</span>
+              </div>
+            </div>
+            <div class="api-item-desc">
+              Adjusts the contrast. <code>100</code> is normal, <code>0</code> renders solid gray, and values above <code>100</code> increase contrast.
+            </div>
+          </div>
+
+          <!-- hueRotate -->
+          <div class="api-item">
+            <div class="api-item-header">
+              <code class="api-name">hueRotate(degrees)</code>
+              <div class="api-meta">
+                <span class="api-pill values-pill">0 - 360 | expr</span>
+                <span class="api-pill default-pill">default: 0</span>
+              </div>
+            </div>
+            <div class="api-item-desc">
+              Rotates colors around the color wheel in degrees. Perfect for continuous hue animations with <code>t</code> or <code>loop()</code>.
+            </div>
+          </div>
+
+          <!-- saturate -->
+          <div class="api-item">
+            <div class="api-item-header">
+              <code class="api-name">saturate(percent)</code>
+              <div class="api-meta">
+                <span class="api-pill values-pill">number &gt;= 0 | expr</span>
+                <span class="api-pill default-pill">default: 100</span>
+              </div>
+            </div>
+            <div class="api-item-desc">
+              Adjusts color saturation. <code>100</code> is normal, <code>0</code> is completely desaturated, and values above <code>100</code> create super-vivid colors.
+            </div>
+          </div>
+
+          <!-- grayscale -->
+          <div class="api-item">
+            <div class="api-item-header">
+              <code class="api-name">grayscale(percent)</code>
+              <div class="api-meta">
+                <span class="api-pill values-pill">0 - 100 | expr</span>
+                <span class="api-pill default-pill">default: 0</span>
+              </div>
+            </div>
+            <div class="api-item-desc">
+              Converts colors to monochrome. <code>0</code> is full color, and <code>100</code> is completely grayscale.
+            </div>
+          </div>
+
+          <!-- invert -->
+          <div class="api-item">
+            <div class="api-item-header">
+              <code class="api-name">invert(percent)</code>
+              <div class="api-meta">
+                <span class="api-pill values-pill">0 - 100 | expr</span>
+                <span class="api-pill default-pill">default: 0</span>
+              </div>
+            </div>
+            <div class="api-item-desc">
+              Inverts colors. <code>0</code> is normal, and <code>100</code> creates a complete photographic negative effect.
+            </div>
+          </div>
+
+          <!-- sepia -->
+          <div class="api-item">
+            <div class="api-item-header">
+              <code class="api-name">sepia(percent)</code>
+              <div class="api-meta">
+                <span class="api-pill values-pill">0 - 100 | expr</span>
+                <span class="api-pill default-pill">default: 0</span>
+              </div>
+            </div>
+            <div class="api-item-desc">
+              Applies a warm vintage sepia tint. <code>0</code> is normal color, and <code>100</code> is full sepia tone.
+            </div>
+          </div>
+
+          <!-- opacity -->
+          <div class="api-item">
+            <div class="api-item-header">
+              <code class="api-name">opacity(percent)</code>
+              <div class="api-meta">
+                <span class="api-pill values-pill">0 - 100 | expr</span>
+                <span class="api-pill default-pill">default: 100</span>
+              </div>
+            </div>
+            <div class="api-item-desc">
+              Adjusts overall transparency within the filter pipeline. <code>100</code> is fully opaque, and <code>0</code> is fully transparent.
+            </div>
+          </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 3: CHAINING MULTIPLE FILTERS -->
+        <!-- ================================================================= -->
+        <h2>3. Chaining Multiple Filters</h2>
+        <p>To apply two or more filters simultaneously, pass them as a standard JavaScript array: <code>filter="[filter1, filter2, ...]"</code>. The engine automatically separates them with spaces in the generated CSS.</p>
+
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Chained Filter Array --&gt;
+    &lt;pxl-rect x="500" y="300" w="300" h="300" rx="44" fill="#ec4899" stroke="#db2777" strokewidth="4"
+      filter="[<mark id="sec3Code">blur(5), contrast(140), hueRotate(90)</mark>]"&gt;&lt;/pxl-rect&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="sec3ApplyPreset('neon', this)">Neon Glow</button>
+                <button class="tab-btn" onclick="sec3ApplyPreset('vintage', this)">Vintage Sepia</button>
+                <button class="tab-btn" onclick="sec3ApplyPreset('cyber', this)">Cyber Shift</button>
+                <button class="tab-btn" onclick="sec3ApplyPreset('dramatic', this)">Dramatic Contrast</button>
+                <button class="tab-btn" onclick="sec3ApplyPreset('reset', this)">Reset</button>
+              </div>
+            </div>
+
+            <div class="tab-content active">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Blur (<code>radius</code>)</span> <span id="sec3BlurVal">5</span></label>
+                  <input type="range" min="0" max="30" step="1" value="5" autocomplete="off" id="sec3BlurInput"
+                    oninput="sec3UpdateCustom()">
+                </div>
+                <div class="control-group">
+                  <label><span>Contrast (<code>percent</code>)</span> <span id="sec3ContrastVal">140%</span></label>
+                  <input type="range" min="50" max="250" step="10" value="140" autocomplete="off" id="sec3ContrastInput"
+                    oninput="sec3UpdateCustom()">
+                </div>
+                <div class="control-group">
+                  <label><span>Hue Rotate (<code>degrees</code>)</span> <span id="sec3HueVal">90°</span></label>
+                  <input type="range" min="0" max="360" step="15" value="90" autocomplete="off" id="sec3HueInput"
+                    oninput="sec3UpdateCustom()">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              <pxl-rect id="sec3Rect" x="500" y="300" w="300" h="300" rx="44" fill="#ec4899" stroke="#db2777" strokewidth="4"
+                filter="[blur(5), contrast(140), hueRotate(90)]"></pxl-rect>
+              <pxl-circle id="sec3Circle" x="500" y="300" r="70" fill="#facc15" stroke="#eab308" strokewidth="4"></pxl-circle>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 4: SHAPE VS. LAYER FILTERING -->
+        <!-- ================================================================= -->
+        <h2>4. Shape vs. Layer Filtering</h2>
+        <p>Kilopixel supports filters on both individual shapes and entire layers, with an important architectural distinction:</p>
+
+        <ul>
+          <li><strong>Shape-Level (<code>&lt;pxl-circle filter="..."&gt;</code>)</strong>: Applied directly to the HTML5 Canvas context (<code>ctx.filter</code>). The shape is filtered during drawing, allowing multiple overlapping shapes to each have their own independent filters.</li>
+          <li><strong>Layer-Level (<code>&lt;pxl-layer filter="..."&gt;</code>)</strong>: Applied to the layer's <code>&lt;canvas&gt;</code> DOM element (<code>canvas.style.filter</code>). The browser's GPU composites the entire flattened canvas with zero CPU rasterization overhead.</li>
+        </ul>
+
+        <div class="callout-info">
+          <p class="callout-title">CSS-Only Fast Path</p>
+          <p class="callout-body">When a <code>&lt;pxl-layer&gt;</code> only animates compositing properties (like <code>filter</code>, <code>alpha</code>, or <code>blend</code>) and no geometric transforms, Kilopixel activates the <strong>CSS-only fast path</strong>: it skips canvas clearing and child re-rendering completely, allowing the GPU to animate filters at continuous 60fps with zero redraw cost.</p>
+        </div>
+
+        <div class="callout-info">
+          <p class="callout-title">Groups Do Not Support Filters</p>
+          <p class="callout-body">The <code>&lt;pxl-group&gt;</code> element is a lightweight container dedicated strictly to structural grouping and spatial transforms (<code>x</code>, <code>y</code>, <code>rotate</code>, <code>scale</code>). It does not have a canvas buffer and does not support bitmap filtering. To filter multiple shapes together, wrap them in a <code>&lt;pxl-layer&gt;</code>.</p>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Prism Syntax Highlighting -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+
+  <!-- Interactive Controls Page Script -->
+  <script>
+    // Section 1: Single Filter Playground
+    function sec1ApplyFilter(activeType) {
+      const layer = document.getElementById('sec1Layer');
+      const codeEl = document.getElementById('sec1FilterCode');
+      let filterExpr = 'blur(0)';
+
+      if (activeType === 'blur') {
+        const val = document.getElementById('sec1BlurInput').value;
+        document.getElementById('sec1BlurVal').innerText = val;
+        filterExpr = `blur(${val})`;
+      } else if (activeType === 'dropShadow') {
+        const dist = document.getElementById('sec1ShadowDistInput').value;
+        const blur = document.getElementById('sec1ShadowBlurInput').value;
+        document.getElementById('sec1ShadowDistVal').innerText = dist;
+        document.getElementById('sec1ShadowBlurVal').innerText = blur;
+        filterExpr = `dropShadow(0, ${dist}, ${blur}, '#0f172a')`;
+      } else if (activeType === 'hueRotate') {
+        const val = document.getElementById('sec1HueInput').value;
+        document.getElementById('sec1HueVal').innerText = val + '°';
+        filterExpr = `hueRotate(${val})`;
+      } else if (activeType === 'saturate') {
+        const val = document.getElementById('sec1SatInput').value;
+        document.getElementById('sec1SatVal').innerText = val + '%';
+        filterExpr = `saturate(${val})`;
+      } else if (activeType === 'grayscale') {
+        const val = document.getElementById('sec1GrayInput').value;
+        document.getElementById('sec1GrayVal').innerText = val + '%';
+        filterExpr = `grayscale(${val})`;
+      } else if (activeType === 'brightness') {
+        const val = document.getElementById('sec1BrightInput').value;
+        document.getElementById('sec1BrightVal').innerText = val + '%';
+        filterExpr = `brightness(${val})`;
+      } else if (activeType === 'contrast') {
+        const val = document.getElementById('sec1ContrastInput').value;
+        document.getElementById('sec1ContrastVal').innerText = val + '%';
+        filterExpr = `contrast(${val})`;
+      } else if (activeType === 'sepia') {
+        const val = document.getElementById('sec1SepiaInput').value;
+        document.getElementById('sec1SepiaVal').innerText = val + '%';
+        filterExpr = `sepia(${val})`;
+      }
+
+      if (layer) layer.setAttribute('filter', filterExpr);
+      if (codeEl) codeEl.innerText = filterExpr;
+    }
+
+    // Section 3: Chained Filter Presets & Custom Sliders
+    const sec3Presets = {
+      neon: { blur: 8, contrast: 160, hue: 120 },
+      vintage: { blur: 2, contrast: 90, hue: 35 },
+      cyber: { blur: 4, contrast: 180, hue: 200 },
+      dramatic: { blur: 0, contrast: 220, hue: 0 },
+      reset: { blur: 0, contrast: 100, hue: 0 }
+    };
+
+    function sec3ApplyPreset(key, btn) {
+      if (btn) {
+        btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+
+      const preset = sec3Presets[key];
+      if (!preset) return;
+
+      document.getElementById('sec3BlurInput').value = preset.blur;
+      document.getElementById('sec3ContrastInput').value = preset.contrast;
+      document.getElementById('sec3HueInput').value = preset.hue;
+
+      sec3UpdateCustom();
+    }
+
+    function sec3UpdateCustom() {
+      const blur = document.getElementById('sec3BlurInput').value;
+      const contrast = document.getElementById('sec3ContrastInput').value;
+      const hue = document.getElementById('sec3HueInput').value;
+
+      document.getElementById('sec3BlurVal').innerText = blur;
+      document.getElementById('sec3ContrastVal').innerText = contrast + '%';
+      document.getElementById('sec3HueVal').innerText = hue + '°';
+
+      const rect = document.getElementById('sec3Rect');
+      const codeEl = document.getElementById('sec3Code');
+      const filterExpr = `[blur(${blur}), contrast(${contrast}), hueRotate(${hue})]`;
+
+      if (rect) rect.setAttribute('filter', filterExpr);
+      if (codeEl) codeEl.innerText = `blur(${blur}), contrast(${contrast}), hueRotate(${hue})`;
+    }
+  </script>
+</body>
+</html>

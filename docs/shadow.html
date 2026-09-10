@@ -31,18 +31,19 @@
     <main class="docs-content">
       <div class="docs-inner">
         <h1>Shadow</h1>
-        <p class="lead">Kilopixel features a powerful dual-architecture for shadows: Native Canvas shadows for dynamic shape-level interaction, and CSS drop-shadow filters for unified layer silhouettes.</p>
+        <p class="lead">Use native Canvas shadow attributes to cast dynamic shadows directly between overlapping shapes on a layer.</p>
         
         <div class="callout-info">
-          <p class="callout-title">Shape vs Layer Shadows</p>
-          <p class="callout-body">The <code>shadowcolor</code>, <code>shadowblur</code>, <code>shadowx</code>, and <code>shadowy</code> attributes apply strictly to shapes. They cause shapes to cast shadows directly onto each other. To cast a unified silhouette shadow of an entire layer onto the page background, use the <code>filter="dropShadow(...)"</code> attribute on the <code>&lt;pxl-layer&gt;</code> instead.</p>
+          <p class="callout-title">Shapes Only!</p>
+          <p class="callout-body">The <code>shadowcolor</code>, <code>shadowblur</code>, <code>shadowx</code>, and <code>shadowy</code> attributes apply strictly to shapes. They cause shapes to cast shadows directly onto each other.</p>
+          <p class="callout-body"><strong>For Layers:</strong> To cast a unified silhouette shadow of an entire layer onto the page background, use the <code>filter="dropShadow(...)"</code> helper on a <code>&lt;pxl-layer&gt;</code> instead.</p>
         </div>
 
         <!-- ================================================================= -->
         <!-- SECTION 1: SHAPE SHADOWS -->
         <!-- ================================================================= -->
         <h2>1. Shape Shadows (Native)</h2>
-        <p>Applying the native <code>shadowcolor</code> attribute to a shape utilizes the raw HTML5 Canvas API. This means that as shapes overlap, the top shape will cast a physical shadow onto the shape below it in 2D space.</p>
+        <p>Applying a shadow to a shape utilizes the raw HTML5 Canvas API. This means that as shapes overlap, the top shape will cast a physical shadow onto the shape below it.</p>
         <p>Notice how the blue circle casts a dark shadow directly across the orange rectangle!</p>
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
@@ -52,7 +53,10 @@
 
     &lt;!-- Top Shape casting a shadow --&gt;
     &lt;pxl-circle x="650" y="300" r="150" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
-      shadowcolor="hsla(<mark id="sec1HueCode">220</mark>, 100, 15, 0.7)" shadowblur="<mark id="sec1BlurCode">20</mark>" shadowx="<mark id="sec1OffsetXCode">-30</mark>" shadowy="<mark id="sec1OffsetYCode">20</mark>"&gt;
+      shadowcolor="hsla(<mark id="sec1HueCode">220</mark>, 100, 15, 0.7)"
+      shadowblur="<mark id="sec1BlurCode">15</mark>"
+      shadowx="<mark id="sec1OffsetXCode">-30</mark>"
+      shadowy="<mark id="sec1OffsetYCode">20</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -62,7 +66,7 @@
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Controls</h3>
               <div class="demo-tabs">
-                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1CircleTab')">Blue Circle Shadows</button>
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1CircleTab')">Circle</button>
               </div>
             </div>
 
@@ -73,8 +77,8 @@
                   <input type="range" min="0" max="360" step="1" value="220" autocomplete="off" oninput="document.getElementById('sec1Circle').setAttribute('shadowcolor', 'hsla(' + this.value + ', 100, 15, 0.7)'); document.getElementById('sec1HueVal').innerText = this.value; document.getElementById('sec1HueCode').innerText = this.value;" data-mark="sec1HueCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Shadow Blur</span> <span id="sec1BlurVal">20</span></label>
-                  <input type="range" min="0" max="100" step="1" value="20" autocomplete="off" oninput="document.getElementById('sec1Circle').setAttribute('shadowblur', this.value); document.getElementById('sec1BlurVal').innerText = this.value; document.getElementById('sec1BlurCode').innerText = this.value;" data-mark="sec1BlurCode">
+                  <label><span>Shadow Blur</span> <span id="sec1BlurVal">15</span></label>
+                  <input type="range" min="0" max="100" step="1" value="15" autocomplete="off" oninput="document.getElementById('sec1Circle').setAttribute('shadowblur', this.value); document.getElementById('sec1BlurVal').innerText = this.value; document.getElementById('sec1BlurCode').innerText = this.value;" data-mark="sec1BlurCode">
                 </div>
                 <div class="control-group">
                   <label><span>Shadow X</span> <span id="sec1OffsetXVal">-30</span></label>
@@ -100,7 +104,7 @@
               <pxl-rect id="sec1Rect" x="350" y="300" w="400" h="300" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-rect>
               
               <!-- Top Shape with Shadow -->
-              <pxl-circle id="sec1Circle" x="650" y="300" r="150" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4" shadowcolor="hsla(220, 100, 15, 0.7)" shadowblur="20" shadowx="-30" shadowy="20"></pxl-circle>
+              <pxl-circle id="sec1Circle" x="650" y="300" r="150" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4" shadowcolor="hsla(220, 100, 15, 0.7)" shadowblur="15" shadowx="-30" shadowy="20"></pxl-circle>
             </pxl-layer>
 
             <!-- FOREGROUND LABELS -->
