@@ -51,6 +51,7 @@ class DocsSidebar extends HTMLElement {
           <ul>
             <li><a href="index.html" class="${currentPath === 'index.html' ? 'active' : ''}">Introduction</a></li>
             <li><a href="installation.html" class="${currentPath === 'installation.html' ? 'active' : ''}">Installation</a></li>
+            <li><a href="gallery.html" class="${currentPath === 'gallery.html' ? 'active' : ''}">Gallery</a></li>
             <li><a href="coordinates.html" class="${currentPath === 'coordinates.html' ? 'active' : ''}">Coordinate System</a></li>
           </ul>
         </div>

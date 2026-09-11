@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery | Kilopixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+  <script src="js/api-tabs.js"></script>
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+
+  <style>
+    .gallery-showcase {
+      margin-bottom: 3.5rem;
+    }
+
+    .gallery-carousel {
+      width: 100%;
+      margin: 1.5rem 0 0;
+    }
+
+    .gallery-track-wrapper {
+      position: relative;
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border-color, #e2e8f0);
+      background: #ffffff;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .gallery-track {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .gallery-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .gallery-slide {
+      flex: 0 0 100%;
+      width: 100%;
+      scroll-snap-align: center;
+      scroll-snap-stop: always;
+      position: relative;
+    }
+
+    .gallery-slide pxl-stage {
+      display: block;
+      width: 100%;
+      border-radius: 16px;
+    }
+
+    .gallery-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    .gallery-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color, #e2e8f0);
+      background: #ffffff;
+      color: var(--text-primary, #334155);
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .gallery-btn:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      color: #0f172a;
+      transform: scale(1.05);
+    }
+
+    .gallery-btn:active {
+      transform: scale(0.95);
+    }
+
+    .gallery-dots {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .gallery-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .gallery-dot.active {
+      background: #3b82f6;
+      width: 24px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+        <h1>Gallery</h1>
+        <p class="lead">A 2D showcase of creative graphics, interactive UI widgets, and generative patterns built with Kilopixel. Browse categories vertically, or swipe horizontally to discover variations.</p>
+
+        <!-- ================================================================= -->
+        <!-- CATEGORY 1: GENERATIVE ART -->
+        <!-- ================================================================= -->
+        <section class="gallery-showcase">
+          <h2>1. Generative Art</h2>
+          <p>Explore creative canvas compositions with procedural math and dynamic animations.</p>
+
+          <div class="gallery-carousel">
+            <div class="gallery-track-wrapper">
+              <div class="gallery-track" id="cat1Track">
+                
+                <!-- Slide 1 -->
+                <div class="gallery-slide">
+                  <pxl-stage ratio="1 / 1">
+                    <pxl-layer>
+                      <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
+                      <!-- Rotating outer dashed orbital ring -->
+                      <pxl-circle x="500" y="500" r="280" rotate="t * 25" fill="none" stroke="#3b82f6" strokewidth="4" linedash="[10, 10]"></pxl-circle>
+                      <!-- Orbiting blue satellite -->
+                      <pxl-circle x="500 + cos(t * 1.5) * 280" y="500 + sin(t * 1.5) * 280" r="16" fill="#2563eb" stroke="#ffffff" strokewidth="3"></pxl-circle>
+                      <!-- Breathing inner core -->
+                      <pxl-circle x="500" y="500" r="140 + sin(t * 2) * 20" fill="#3b82f622" stroke="#2563eb" strokewidth="3"></pxl-circle>
+                      <pxl-text x="500" y="500" text="'Stage 1: Rings'" size="32" font="monospace" weight="bold" align="center" fill="#1e40af"></pxl-text>
+                    </pxl-layer>
+                  </pxl-stage>
+                </div>
+
+                <!-- Slide 2 -->
+                <div class="gallery-slide">
+                  <pxl-stage ratio="1 / 1">
+                    <pxl-layer>
+                      <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
+                      <!-- Clockwise rotating outer diamond -->
+                      <pxl-rect x="500" y="500" w="420" h="420" rx="30" rotate="45 + t * 20" fill="none" stroke="#f97316" strokewidth="4" linedash="[8, 8]"></pxl-rect>
+                      <!-- Counter-clockwise rotating breathing diamond -->
+                      <pxl-rect x="500" y="500" w="220 + sin(t * 2.5) * 25" h="220 + sin(t * 2.5) * 25" rx="20" rotate="45 - t * 35" fill="#f9731622" stroke="#ea580c" strokewidth="3"></pxl-rect>
+                      <pxl-text x="500" y="500" text="'Stage 2: Diamonds'" size="32" font="monospace" weight="bold" align="center" fill="#c2410c"></pxl-text>
+                    </pxl-layer>
+                  </pxl-stage>
+                </div>
+
+                <!-- Slide 3 -->
+                <div class="gallery-slide">
+                  <pxl-stage ratio="1 / 1">
+                    <pxl-layer>
+                      <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
+                      <!-- Breathing emerald core -->
+                      <pxl-circle x="500" y="500" r="220 + sin(t * 2) * 25" fill="#10b98122" stroke="#059669" strokewidth="4"></pxl-circle>
+                      <!-- Rotating dashed orbital ring -->
+                      <pxl-circle x="500" y="500" r="170" rotate="t * 30" fill="none" stroke="#10b981" strokewidth="2" linedash="[8, 8]"></pxl-circle>
+                      <!-- Symmetrical orbiting satellites -->
+                      <pxl-circle x="500 + cos(t * 2) * 170" y="500 + sin(t * 2) * 170" r="14" fill="#059669"></pxl-circle>
+                      <pxl-circle x="500 - cos(t * 2) * 170" y="500 - sin(t * 2) * 170" r="14" fill="#059669"></pxl-circle>
+                      <pxl-text x="500" y="500" text="'Stage 3: Emerald'" size="32" font="monospace" weight="bold" align="center" fill="#047857"></pxl-text>
+                    </pxl-layer>
+                  </pxl-stage>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Bottom Controls -->
+            <div class="gallery-controls">
+              <button class="gallery-btn" aria-label="Previous" onclick="scrollGallery('cat1Track', -1)">&#x25C0;</button>
+              <div class="gallery-dots" id="cat1Dots">
+                <span class="gallery-dot active" onclick="goToSlide('cat1Track', 0)"></span>
+                <span class="gallery-dot" onclick="goToSlide('cat1Track', 1)"></span>
+                <span class="gallery-dot" onclick="goToSlide('cat1Track', 2)"></span>
+              </div>
+              <button class="gallery-btn" aria-label="Next" onclick="scrollGallery('cat1Track', 1)">&#x25B6;</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- CATEGORY 2: GEOMETRY & MOTION -->
+        <!-- ================================================================= -->
+        <section class="gallery-showcase">
+          <h2>2. Geometry &amp; Motion</h2>
+          <p>Parametric shapes, coordinate grids, and synchronized motion studies.</p>
+
+          <div class="gallery-carousel">
+            <div class="gallery-track-wrapper">
+              <div class="gallery-track" id="cat2Track">
+                
+                <!-- Slide 1 -->
+                <div class="gallery-slide">
+                  <pxl-stage ratio="1 / 1">
+                    <pxl-layer>
+                      <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
+                      <!-- Rotating group with square and cross -->
+                      <pxl-group x="500" y="500" rotate="t * 40">
+                        <pxl-rect x="0" y="0" w="380 + sin(t * 3) * 30" h="380 + sin(t * 3) * 30" fill="none" stroke="#8b5cf6" strokewidth="3"></pxl-rect>
+                        <pxl-line x1="-190" y1="-190" x2="190" y2="190" stroke="#8b5cf6" strokewidth="3"></pxl-line>
+                        <pxl-line x1="190" y1="-190" x2="-190" y2="190" stroke="#8b5cf6" strokewidth="3"></pxl-line>
+                      </pxl-group>
+                      <pxl-text x="500" y="500" text="'Stage 1: Grid Cross'" size="32" font="monospace" weight="bold" align="center" fill="#6d28d9"></pxl-text>
+                    </pxl-layer>
+                  </pxl-stage>
+                </div>
+
+                <!-- Slide 2 -->
+                <div class="gallery-slide">
+                  <pxl-stage ratio="1 / 1">
+                    <pxl-layer>
+                      <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
+                      <!-- Concentric pulsing ripple rings -->
+                      <pxl-circle x="500" y="500" r="90 + sin(t * 2.5) * 15" fill="none" stroke="#ec4899" strokewidth="2"></pxl-circle>
+                      <pxl-circle x="500" y="500" r="175 + sin(t * 2.5 + 0.8) * 20" fill="none" stroke="#ec4899" strokewidth="3" linedash="[6, 6]"></pxl-circle>
+                      <pxl-circle x="500" y="500" r="260 + sin(t * 2.5 + 1.6) * 25" fill="none" stroke="#ec4899" strokewidth="4"></pxl-circle>
+                      <!-- Rotating radar sweep line -->
+                      <pxl-line x1="500" y1="500" x2="500 + cos(t * 3) * 260" y2="500 + sin(t * 3) * 260" stroke="#db2777" strokewidth="4" arrowend="20"></pxl-line>
+                      <pxl-text x="500" y="500" text="'Stage 2: Target'" size="32" font="monospace" weight="bold" align="center" fill="#be185d"></pxl-text>
+                    </pxl-layer>
+                  </pxl-stage>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Bottom Controls -->
+            <div class="gallery-controls">
+              <button class="gallery-btn" aria-label="Previous" onclick="scrollGallery('cat2Track', -1)">&#x25C0;</button>
+              <div class="gallery-dots" id="cat2Dots">
+                <span class="gallery-dot active" onclick="goToSlide('cat2Track', 0)"></span>
+                <span class="gallery-dot" onclick="goToSlide('cat2Track', 1)"></span>
+              </div>
+              <button class="gallery-btn" aria-label="Next" onclick="scrollGallery('cat2Track', 1)">&#x25B6;</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function scrollGallery(trackId, direction) {
+      const track = document.getElementById(trackId);
+      if (!track) return;
+      const slideWidth = track.clientWidth;
+      track.scrollBy({ left: direction * slideWidth, behavior: 'smooth' });
+    }
+
+    function goToSlide(trackId, index) {
+      const track = document.getElementById(trackId);
+      if (!track) return;
+      const slideWidth = track.clientWidth;
+      track.scrollTo({ left: index * slideWidth, behavior: 'smooth' });
+    }
+
+    function setupGallery(trackId, dotsContainerId) {
+      const track = document.getElementById(trackId);
+      const dotsContainer = document.getElementById(dotsContainerId);
+      if (!track || !dotsContainer) return;
+      const dots = dotsContainer.querySelectorAll('.gallery-dot');
+
+      track.addEventListener('scroll', () => {
+        const slideWidth = track.clientWidth;
+        if (slideWidth === 0) return;
+        const activeIndex = Math.round(track.scrollLeft / slideWidth);
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === activeIndex);
+        });
+      }, { passive: true });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setupGallery('cat1Track', 'cat1Dots');
+      setupGallery('cat2Track', 'cat2Dots');
+    });
+  </script>
+
+  <!-- Prism Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+</body>
+</html>
