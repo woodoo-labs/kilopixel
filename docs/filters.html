@@ -47,19 +47,35 @@
         <!-- SECTION 1: INTERACTIVE FILTER PLAYGROUND -->
         <!-- ================================================================= -->
         <h2>1. Single Filters &amp; Interactive Playground</h2>
-        <p>You can apply any CSS filter helper directly to a shape or layer using the <code>filter</code> attribute. The example below features a multi-shape composition. Use the tabs and sliders to explore each filter in real time.</p>
+        <p>You can apply any CSS filter helper directly to a <strong>layer or an individual shape</strong> using the <code>filter</code> attribute. Compare how filters behave when applied to an entire composite layer (left) versus directly to an individual shape (right).</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Layer Filters vs. Shape Filters</p>
+          <p class="callout-body"><strong>Layer Level (CSS):</strong> Filters the entire flattened layer canvas. This produces unified drop shadows and group blurs across all shapes inside the layer, and works seamlessly across 100% of all desktop and mobile browsers.</p>
+          <p class="callout-body"><strong>Shape Level (Canvas 2D):</strong> Uses <code>ctx.filter</code> to apply effects directly to an individual shape during its draw pass (leaving other shapes in the layer crisp and unfiltered). Supported out of the box by Chrome, Firefox, and Edge (and in Safari 18+ via the "Canvas Filters" feature flag).</p>
+        </div>
 
         <!-- Declarative Code Block Above Container -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;!-- 1. LAYER LEVEL: Entire layer is filtered together --&gt;
   &lt;pxl-layer filter="<span id="sec1FilterAttr">[hueRotate(<mark id="sec1Filter1Code">0</mark>), saturate(<mark id="sec1Filter2Code">100</mark>), grayscale(<mark id="sec1Filter3Code">0</mark>)]</span>"&gt;
     &lt;!-- Blue Rect --&gt;
-    &lt;pxl-rect x="500" y="300" w="280" h="280" rx="40" fill="#3b82f6" stroke="#2563eb" strokewidth="4"&gt;&lt;/pxl-rect&gt;
-
+    &lt;pxl-rect x="250" y="300" w="240" h="240" rx="36" fill="#3b82f6" stroke="#2563eb" strokewidth="4"&gt;&lt;/pxl-rect&gt;
     &lt;!-- Orange Circle --&gt;
-    &lt;pxl-circle x="410" y="210" r="85" fill="#f97316" stroke="#ea580c" strokewidth="4"&gt;&lt;/pxl-circle&gt;
-
+    &lt;pxl-circle x="175" y="225" r="70" fill="#f97316" stroke="#ea580c" strokewidth="4"&gt;&lt;/pxl-circle&gt;
     &lt;!-- Green Circle --&gt;
-    &lt;pxl-circle x="570" y="370" r="55" fill="#10b981" stroke="#059669" strokewidth="4"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="310" y="360" r="45" fill="#10b981" stroke="#059669" strokewidth="4"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+
+  &lt;!-- 2. SHAPE LEVEL: Only the blue rect is filtered --&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Blue Rect --&gt;
+    &lt;pxl-rect x="750" y="300" w="240" h="240" rx="36" fill="#3b82f6" stroke="#2563eb" strokewidth="4"
+      filter="<span id="sec1ShapeFilterAttr">[hueRotate(<mark id="sec1Filter1bCode">0</mark>), saturate(<mark id="sec1Filter2bCode">100</mark>), grayscale(<mark id="sec1Filter3bCode">0</mark>)]</span>"&gt;&lt;/pxl-rect&gt;
+    &lt;!-- Orange Circle (Unfiltered) --&gt;
+    &lt;pxl-circle x="675" y="225" r="70" fill="#f97316" stroke="#ea580c" strokewidth="4"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Green Circle (Unfiltered) --&gt;
+    &lt;pxl-circle x="810" y="360" r="45" fill="#10b981" stroke="#059669" strokewidth="4"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -82,17 +98,17 @@
                 <div class="control-group">
                   <label><span>Hue Rotate</span> <span id="sec1HueVal">0°</span></label>
                   <input type="range" min="0" max="360" step="5" value="0" autocomplete="off" id="sec1HueInput"
-                    data-mark="sec1Filter1Code" oninput="sec1UpdateColor()">
+                    data-mark="sec1Filter1Code, sec1Filter1bCode" oninput="sec1UpdateColor()">
                 </div>
                 <div class="control-group">
                   <label><span>Saturate</span> <span id="sec1SatVal">100%</span></label>
                   <input type="range" min="0" max="300" step="10" value="100" autocomplete="off" id="sec1SatInput"
-                    data-mark="sec1Filter2Code" oninput="sec1UpdateColor()">
+                    data-mark="sec1Filter2Code, sec1Filter2bCode" oninput="sec1UpdateColor()">
                 </div>
                 <div class="control-group">
                   <label><span>Grayscale</span> <span id="sec1GrayVal">0%</span></label>
                   <input type="range" min="0" max="100" step="5" value="0" autocomplete="off" id="sec1GrayInput"
-                    data-mark="sec1Filter3Code" oninput="sec1UpdateColor()">
+                    data-mark="sec1Filter3Code, sec1Filter3bCode" oninput="sec1UpdateColor()">
                 </div>
               </div>
             </div>
@@ -103,17 +119,17 @@
                 <div class="control-group">
                   <label><span>Shadow X</span> <span id="sec1ShadowXVal">0</span></label>
                   <input type="range" min="-40" max="40" step="2" value="0" autocomplete="off" id="sec1ShadowXInput"
-                    data-mark="sec1ShadowXCode" oninput="sec1UpdateShadow()">
+                    data-mark="sec1ShadowXCode, sec1ShadowXbCode" oninput="sec1UpdateShadow()">
                 </div>
                 <div class="control-group">
                   <label><span>Shadow Y</span> <span id="sec1ShadowYVal">0</span></label>
                   <input type="range" min="-40" max="40" step="2" value="0" autocomplete="off" id="sec1ShadowYInput"
-                    data-mark="sec1ShadowYCode" oninput="sec1UpdateShadow()">
+                    data-mark="sec1ShadowYCode, sec1ShadowYbCode" oninput="sec1UpdateShadow()">
                 </div>
                 <div class="control-group">
                   <label><span>Shadow Blur</span> <span id="sec1ShadowBlurVal">0</span></label>
                   <input type="range" min="0" max="40" step="1" value="0" autocomplete="off" id="sec1ShadowBlurInput"
-                    data-mark="sec1ShadowBlurCode" oninput="sec1UpdateShadow()">
+                    data-mark="sec1ShadowBlurCode, sec1ShadowBlurbCode" oninput="sec1UpdateShadow()">
                 </div>
               </div>
             </div>
@@ -124,17 +140,17 @@
                 <div class="control-group">
                   <label><span>Brightness</span> <span id="sec1BrightVal">100%</span></label>
                   <input type="range" min="0" max="200" step="5" value="100" autocomplete="off" id="sec1BrightInput"
-                    data-mark="sec1Filter1Code" oninput="sec1UpdateLight()">
+                    data-mark="sec1Filter1Code, sec1Filter1bCode" oninput="sec1UpdateLight()">
                 </div>
                 <div class="control-group">
                   <label><span>Contrast</span> <span id="sec1ContrastVal">100%</span></label>
                   <input type="range" min="0" max="200" step="5" value="100" autocomplete="off" id="sec1ContrastInput"
-                    data-mark="sec1Filter2Code" oninput="sec1UpdateLight()">
+                    data-mark="sec1Filter2Code, sec1Filter2bCode" oninput="sec1UpdateLight()">
                 </div>
                 <div class="control-group">
                   <label><span>Opacity</span> <span id="sec1OpacityVal">100%</span></label>
                   <input type="range" min="0" max="100" step="5" value="100" autocomplete="off" id="sec1OpacityInput"
-                    data-mark="sec1Filter3Code" oninput="sec1UpdateLight()">
+                    data-mark="sec1Filter3Code, sec1Filter3bCode" oninput="sec1UpdateLight()">
                 </div>
               </div>
             </div>
@@ -145,17 +161,17 @@
                 <div class="control-group">
                   <label><span>Blur</span> <span id="sec1BlurVal">0</span></label>
                   <input type="range" min="0" max="20" step="1" value="0" autocomplete="off" id="sec1BlurInput"
-                    data-mark="sec1Filter1Code" oninput="sec1UpdateEffects()">
+                    data-mark="sec1Filter1Code, sec1Filter1bCode" oninput="sec1UpdateEffects()">
                 </div>
                 <div class="control-group">
                   <label><span>Sepia</span> <span id="sec1SepiaVal">0%</span></label>
                   <input type="range" min="0" max="100" step="5" value="0" autocomplete="off" id="sec1SepiaInput"
-                    data-mark="sec1Filter2Code" oninput="sec1UpdateEffects()">
+                    data-mark="sec1Filter2Code, sec1Filter2bCode" oninput="sec1UpdateEffects()">
                 </div>
                 <div class="control-group">
                   <label><span>Invert</span> <span id="sec1InvertVal">0%</span></label>
                   <input type="range" min="0" max="100" step="5" value="0" autocomplete="off" id="sec1InvertInput"
-                    data-mark="sec1Filter3Code" oninput="sec1UpdateEffects()">
+                    data-mark="sec1Filter3Code, sec1Filter3bCode" oninput="sec1UpdateEffects()">
                 </div>
               </div>
             </div>
@@ -163,18 +179,45 @@
 
           <!-- The reactive stage -->
           <pxl-stage ratio="5 / 3" class="demo-stage">
+            <!-- Background Layer: Grid, Column Headers & Divider -->
             <pxl-layer>
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              <!-- Column Titles -->
+              <pxl-text x="250" y="60" text="'LAYER LEVEL'" size="27" font="monospace" weight="700" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="750" y="60" text="'SHAPE LEVEL'" size="27" font="monospace" weight="700" align="center" fill="#64748b"></pxl-text>
+
+              <!-- Divider Line -->
+              <pxl-line x1="500" y1="0" x2="500" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
             </pxl-layer>
+
+            <!-- LEFT: Layer Level Filter (All 3 shapes filtered together via CSS) -->
             <pxl-layer id="sec1Layer" filter="[hueRotate(0), saturate(100), grayscale(0)]">
               <!-- Blue Rect -->
-              <pxl-rect x="500" y="300" w="280" h="280" rx="40" fill="#3b82f6" stroke="#2563eb" strokewidth="4"></pxl-rect>
-
+              <pxl-rect x="250" y="300" w="240" h="240" rx="36" fill="#3b82f6" stroke="#2563eb" strokewidth="4"></pxl-rect>
               <!-- Orange Circle -->
-              <pxl-circle x="410" y="210" r="85" fill="#f97316" stroke="#ea580c" strokewidth="4"></pxl-circle>
-
+              <pxl-circle x="175" y="225" r="70" fill="#f97316" stroke="#ea580c" strokewidth="4"></pxl-circle>
               <!-- Green Circle -->
-              <pxl-circle x="570" y="370" r="55" fill="#10b981" stroke="#059669" strokewidth="4"></pxl-circle>
+              <pxl-circle x="310" y="360" r="45" fill="#10b981" stroke="#059669" strokewidth="4"></pxl-circle>
+            </pxl-layer>
+
+            <!-- RIGHT: Shape Level Filter (Only blue rect filtered via Canvas 2D) -->
+            <pxl-layer>
+              <!-- Blue Rect (Filtered) -->
+              <pxl-rect id="sec1Shape" x="750" y="300" w="240" h="240" rx="36" fill="#3b82f6" stroke="#2563eb" strokewidth="4"
+                filter="[hueRotate(0), saturate(100), grayscale(0)]"></pxl-rect>
+              <!-- Orange Circle (Unfiltered) -->
+              <pxl-circle x="675" y="225" r="70" fill="#f97316" stroke="#ea580c" strokewidth="4"></pxl-circle>
+              <!-- Green Circle (Unfiltered) -->
+              <pxl-circle x="810" y="360" r="45" fill="#10b981" stroke="#059669" strokewidth="4"></pxl-circle>
+            </pxl-layer>
+
+            <!-- Foreground Layer: Footers -->
+            <pxl-layer>
+              <pxl-text x="250" y="535" text="'Entire composition'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="250" y="565" text="'filtered together'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
+              
+              <pxl-text x="750" y="535" text="'Only blue rect'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
+              <pxl-text x="750" y="565" text="'is filtered'" size="27" font="monospace" align="center" fill="#64748b"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -434,13 +477,21 @@
       const xCode = document.getElementById('sec1ShadowXCode');
       const yCode = document.getElementById('sec1ShadowYCode');
       const blurCode = document.getElementById('sec1ShadowBlurCode');
+      const xCodeB = document.getElementById('sec1ShadowXbCode');
+      const yCodeB = document.getElementById('sec1ShadowYbCode');
+      const blurCodeB = document.getElementById('sec1ShadowBlurbCode');
       if (xCode) xCode.innerText = x;
       if (yCode) yCode.innerText = y;
       if (blurCode) blurCode.innerText = blur;
+      if (xCodeB) xCodeB.innerText = x;
+      if (yCodeB) yCodeB.innerText = y;
+      if (blurCodeB) blurCodeB.innerText = blur;
 
       const filterExpr = `dropShadow(${x}, ${y}, ${blur}, '#0f172a')`;
       const layer = document.getElementById('sec1Layer');
+      const shape = document.getElementById('sec1Shape');
       if (layer) layer.setAttribute('filter', filterExpr);
+      if (shape) shape.setAttribute('filter', filterExpr);
     }
 
     function sec1UpdateColor() {
@@ -454,13 +505,21 @@
       const f1 = document.getElementById('sec1Filter1Code');
       const f2 = document.getElementById('sec1Filter2Code');
       const f3 = document.getElementById('sec1Filter3Code');
+      const f1b = document.getElementById('sec1Filter1bCode');
+      const f2b = document.getElementById('sec1Filter2bCode');
+      const f3b = document.getElementById('sec1Filter3bCode');
       if (f1) f1.innerText = hue;
       if (f2) f2.innerText = sat;
       if (f3) f3.innerText = gray;
+      if (f1b) f1b.innerText = hue;
+      if (f2b) f2b.innerText = sat;
+      if (f3b) f3b.innerText = gray;
 
       const filterExpr = `[hueRotate(${hue}), saturate(${sat}), grayscale(${gray})]`;
       const layer = document.getElementById('sec1Layer');
+      const shape = document.getElementById('sec1Shape');
       if (layer) layer.setAttribute('filter', filterExpr);
+      if (shape) shape.setAttribute('filter', filterExpr);
     }
 
     function sec1UpdateLight() {
@@ -474,13 +533,21 @@
       const f1 = document.getElementById('sec1Filter1Code');
       const f2 = document.getElementById('sec1Filter2Code');
       const f3 = document.getElementById('sec1Filter3Code');
+      const f1b = document.getElementById('sec1Filter1bCode');
+      const f2b = document.getElementById('sec1Filter2bCode');
+      const f3b = document.getElementById('sec1Filter3bCode');
       if (f1) f1.innerText = bright;
       if (f2) f2.innerText = contrast;
       if (f3) f3.innerText = opacity;
+      if (f1b) f1b.innerText = bright;
+      if (f2b) f2b.innerText = contrast;
+      if (f3b) f3b.innerText = opacity;
 
       const filterExpr = `[brightness(${bright}), contrast(${contrast}), opacity(${opacity})]`;
       const layer = document.getElementById('sec1Layer');
+      const shape = document.getElementById('sec1Shape');
       if (layer) layer.setAttribute('filter', filterExpr);
+      if (shape) shape.setAttribute('filter', filterExpr);
     }
 
     function sec1UpdateEffects() {
@@ -494,43 +561,55 @@
       const f1 = document.getElementById('sec1Filter1Code');
       const f2 = document.getElementById('sec1Filter2Code');
       const f3 = document.getElementById('sec1Filter3Code');
+      const f1b = document.getElementById('sec1Filter1bCode');
+      const f2b = document.getElementById('sec1Filter2bCode');
+      const f3b = document.getElementById('sec1Filter3bCode');
       if (f1) f1.innerText = blur;
       if (f2) f2.innerText = sepia;
       if (f3) f3.innerText = invert;
+      if (f1b) f1b.innerText = blur;
+      if (f2b) f2b.innerText = sepia;
+      if (f3b) f3b.innerText = invert;
 
       const filterExpr = `[blur(${blur}), sepia(${sepia}), invert(${invert})]`;
       const layer = document.getElementById('sec1Layer');
+      const shape = document.getElementById('sec1Shape');
       if (layer) layer.setAttribute('filter', filterExpr);
+      if (shape) shape.setAttribute('filter', filterExpr);
     }
 
     function sec1SelectTab(tab) {
       sec1CurrentTab = tab;
       const attrContainer = document.getElementById('sec1FilterAttr');
-      if (!attrContainer) return;
+      const shapeAttrContainer = document.getElementById('sec1ShapeFilterAttr');
 
       if (tab === 'shadow') {
         const x = document.getElementById('sec1ShadowXInput').value;
         const y = document.getElementById('sec1ShadowYInput').value;
         const blur = document.getElementById('sec1ShadowBlurInput').value;
-        attrContainer.innerHTML = `dropShadow(<mark id="sec1ShadowXCode">${x}</mark>, <mark id="sec1ShadowYCode">${y}</mark>, <mark id="sec1ShadowBlurCode">${blur}</mark>, '#0f172a')`;
+        if (attrContainer) attrContainer.innerHTML = `dropShadow(<mark id="sec1ShadowXCode">${x}</mark>, <mark id="sec1ShadowYCode">${y}</mark>, <mark id="sec1ShadowBlurCode">${blur}</mark>, '#0f172a')`;
+        if (shapeAttrContainer) shapeAttrContainer.innerHTML = `dropShadow(<mark id="sec1ShadowXbCode">${x}</mark>, <mark id="sec1ShadowYbCode">${y}</mark>, <mark id="sec1ShadowBlurbCode">${blur}</mark>, '#0f172a')`;
         sec1UpdateShadow();
       } else if (tab === 'color') {
         const hue = document.getElementById('sec1HueInput').value;
         const sat = document.getElementById('sec1SatInput').value;
         const gray = document.getElementById('sec1GrayInput').value;
-        attrContainer.innerHTML = `[hueRotate(<mark id="sec1Filter1Code">${hue}</mark>), saturate(<mark id="sec1Filter2Code">${sat}</mark>), grayscale(<mark id="sec1Filter3Code">${gray}</mark>)]`;
+        if (attrContainer) attrContainer.innerHTML = `[hueRotate(<mark id="sec1Filter1Code">${hue}</mark>), saturate(<mark id="sec1Filter2Code">${sat}</mark>), grayscale(<mark id="sec1Filter3Code">${gray}</mark>)]`;
+        if (shapeAttrContainer) shapeAttrContainer.innerHTML = `[hueRotate(<mark id="sec1Filter1bCode">${hue}</mark>), saturate(<mark id="sec1Filter2bCode">${sat}</mark>), grayscale(<mark id="sec1Filter3bCode">${gray}</mark>)]`;
         sec1UpdateColor();
       } else if (tab === 'light') {
         const bright = document.getElementById('sec1BrightInput').value;
         const contrast = document.getElementById('sec1ContrastInput').value;
         const opacity = document.getElementById('sec1OpacityInput').value;
-        attrContainer.innerHTML = `[brightness(<mark id="sec1Filter1Code">${bright}</mark>), contrast(<mark id="sec1Filter2Code">${contrast}</mark>), opacity(<mark id="sec1Filter3Code">${opacity}</mark>)]`;
+        if (attrContainer) attrContainer.innerHTML = `[brightness(<mark id="sec1Filter1Code">${bright}</mark>), contrast(<mark id="sec1Filter2Code">${contrast}</mark>), opacity(<mark id="sec1Filter3Code">${opacity}</mark>)]`;
+        if (shapeAttrContainer) shapeAttrContainer.innerHTML = `[brightness(<mark id="sec1Filter1bCode">${bright}</mark>), contrast(<mark id="sec1Filter2bCode">${contrast}</mark>), opacity(<mark id="sec1Filter3bCode">${opacity}</mark>)]`;
         sec1UpdateLight();
       } else if (tab === 'effects') {
         const blur = document.getElementById('sec1BlurInput').value;
         const sepia = document.getElementById('sec1SepiaInput').value;
         const invert = document.getElementById('sec1InvertInput').value;
-        attrContainer.innerHTML = `[blur(<mark id="sec1Filter1Code">${blur}</mark>), sepia(<mark id="sec1Filter2Code">${sepia}</mark>), invert(<mark id="sec1Filter3Code">${invert}</mark>)]`;
+        if (attrContainer) attrContainer.innerHTML = `[blur(<mark id="sec1Filter1Code">${blur}</mark>), sepia(<mark id="sec1Filter2Code">${sepia}</mark>), invert(<mark id="sec1Filter3Code">${invert}</mark>)]`;
+        if (shapeAttrContainer) shapeAttrContainer.innerHTML = `[blur(<mark id="sec1Filter1bCode">${blur}</mark>), sepia(<mark id="sec1Filter2bCode">${sepia}</mark>), invert(<mark id="sec1Filter3bCode">${invert}</mark>)]`;
         sec1UpdateEffects();
       }
     }
