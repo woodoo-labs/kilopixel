@@ -51,7 +51,7 @@
 
         <!-- Declarative Code Block Above Container -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;pxl-layer filter="<span id="sec1FilterAttr"><mark id="sec1ShadowCode">dropShadow(0, 10, 15, '#0f172a')</mark></span>"&gt;
+  &lt;pxl-layer filter="<span id="sec1FilterAttr">[hueRotate(<mark id="sec1Filter1Code">0</mark>), saturate(<mark id="sec1Filter2Code">100</mark>), grayscale(<mark id="sec1Filter3Code">0</mark>)]</span>"&gt;
     &lt;!-- Blue Rect --&gt;
     &lt;pxl-rect x="500" y="300" w="280" h="280" rx="40" fill="#3b82f6" stroke="#2563eb" strokewidth="4"&gt;&lt;/pxl-rect&gt;
 
@@ -69,45 +69,24 @@
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Controls</h3>
               <div class="demo-tabs">
-                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1ShadowTab'); sec1SelectTab('shadow');">Shadow</button>
-                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1ColorTab'); sec1SelectTab('color');">Color</button>
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1ColorTab'); sec1SelectTab('color');">Color</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1ShadowTab'); sec1SelectTab('shadow');">Shadow</button>
                 <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1LightTab'); sec1SelectTab('light');">Light</button>
                 <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1EffectsTab'); sec1SelectTab('effects');">Effects</button>
               </div>
             </div>
 
-            <!-- Tab 1: Shadow -->
-            <div class="tab-content active" id="sec1ShadowTab">
+            <!-- Tab 1: Color -->
+            <div class="tab-content active" id="sec1ColorTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Shadow X</span> <span id="sec1ShadowXVal">0</span></label>
-                  <input type="range" min="-40" max="40" step="2" value="0" autocomplete="off" id="sec1ShadowXInput"
-                    data-mark="sec1ShadowCode" oninput="sec1UpdateShadow()">
-                </div>
-                <div class="control-group">
-                  <label><span>Shadow Y</span> <span id="sec1ShadowYVal">10</span></label>
-                  <input type="range" min="-40" max="40" step="2" value="10" autocomplete="off" id="sec1ShadowYInput"
-                    data-mark="sec1ShadowCode" oninput="sec1UpdateShadow()">
-                </div>
-                <div class="control-group">
-                  <label><span>Shadow Blur</span> <span id="sec1ShadowBlurVal">15</span></label>
-                  <input type="range" min="0" max="40" step="1" value="15" autocomplete="off" id="sec1ShadowBlurInput"
-                    data-mark="sec1ShadowCode" oninput="sec1UpdateShadow()">
-                </div>
-              </div>
-            </div>
-
-            <!-- Tab 2: Color -->
-            <div class="tab-content" id="sec1ColorTab">
-              <div class="playground-sliders">
-                <div class="control-group">
-                  <label><span>Hue Rotate</span> <span id="sec1HueVal">90°</span></label>
-                  <input type="range" min="0" max="360" step="5" value="90" autocomplete="off" id="sec1HueInput"
+                  <label><span>Hue Rotate</span> <span id="sec1HueVal">0°</span></label>
+                  <input type="range" min="0" max="360" step="5" value="0" autocomplete="off" id="sec1HueInput"
                     data-mark="sec1Filter1Code" oninput="sec1UpdateColor()">
                 </div>
                 <div class="control-group">
-                  <label><span>Saturate</span> <span id="sec1SatVal">160%</span></label>
-                  <input type="range" min="0" max="300" step="10" value="160" autocomplete="off" id="sec1SatInput"
+                  <label><span>Saturate</span> <span id="sec1SatVal">100%</span></label>
+                  <input type="range" min="0" max="300" step="10" value="100" autocomplete="off" id="sec1SatInput"
                     data-mark="sec1Filter2Code" oninput="sec1UpdateColor()">
                 </div>
                 <div class="control-group">
@@ -118,22 +97,43 @@
               </div>
             </div>
 
+            <!-- Tab 2: Shadow -->
+            <div class="tab-content" id="sec1ShadowTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Shadow X</span> <span id="sec1ShadowXVal">0</span></label>
+                  <input type="range" min="-40" max="40" step="2" value="0" autocomplete="off" id="sec1ShadowXInput"
+                    data-mark="sec1ShadowXCode" oninput="sec1UpdateShadow()">
+                </div>
+                <div class="control-group">
+                  <label><span>Shadow Y</span> <span id="sec1ShadowYVal">0</span></label>
+                  <input type="range" min="-40" max="40" step="2" value="0" autocomplete="off" id="sec1ShadowYInput"
+                    data-mark="sec1ShadowYCode" oninput="sec1UpdateShadow()">
+                </div>
+                <div class="control-group">
+                  <label><span>Shadow Blur</span> <span id="sec1ShadowBlurVal">0</span></label>
+                  <input type="range" min="0" max="40" step="1" value="0" autocomplete="off" id="sec1ShadowBlurInput"
+                    data-mark="sec1ShadowBlurCode" oninput="sec1UpdateShadow()">
+                </div>
+              </div>
+            </div>
+
             <!-- Tab 3: Light -->
             <div class="tab-content" id="sec1LightTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Brightness</span> <span id="sec1BrightVal">120%</span></label>
-                  <input type="range" min="0" max="200" step="5" value="120" autocomplete="off" id="sec1BrightInput"
+                  <label><span>Brightness</span> <span id="sec1BrightVal">100%</span></label>
+                  <input type="range" min="0" max="200" step="5" value="100" autocomplete="off" id="sec1BrightInput"
                     data-mark="sec1Filter1Code" oninput="sec1UpdateLight()">
                 </div>
                 <div class="control-group">
-                  <label><span>Contrast</span> <span id="sec1ContrastVal">130%</span></label>
-                  <input type="range" min="0" max="200" step="5" value="130" autocomplete="off" id="sec1ContrastInput"
+                  <label><span>Contrast</span> <span id="sec1ContrastVal">100%</span></label>
+                  <input type="range" min="0" max="200" step="5" value="100" autocomplete="off" id="sec1ContrastInput"
                     data-mark="sec1Filter2Code" oninput="sec1UpdateLight()">
                 </div>
                 <div class="control-group">
-                  <label><span>Opacity</span> <span id="sec1OpacityVal">90%</span></label>
-                  <input type="range" min="0" max="100" step="5" value="90" autocomplete="off" id="sec1OpacityInput"
+                  <label><span>Opacity</span> <span id="sec1OpacityVal">100%</span></label>
+                  <input type="range" min="0" max="100" step="5" value="100" autocomplete="off" id="sec1OpacityInput"
                     data-mark="sec1Filter3Code" oninput="sec1UpdateLight()">
                 </div>
               </div>
@@ -143,13 +143,13 @@
             <div class="tab-content" id="sec1EffectsTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Blur</span> <span id="sec1BlurVal">3</span></label>
-                  <input type="range" min="0" max="20" step="1" value="3" autocomplete="off" id="sec1BlurInput"
+                  <label><span>Blur</span> <span id="sec1BlurVal">0</span></label>
+                  <input type="range" min="0" max="20" step="1" value="0" autocomplete="off" id="sec1BlurInput"
                     data-mark="sec1Filter1Code" oninput="sec1UpdateEffects()">
                 </div>
                 <div class="control-group">
-                  <label><span>Sepia</span> <span id="sec1SepiaVal">40%</span></label>
-                  <input type="range" min="0" max="100" step="5" value="40" autocomplete="off" id="sec1SepiaInput"
+                  <label><span>Sepia</span> <span id="sec1SepiaVal">0%</span></label>
+                  <input type="range" min="0" max="100" step="5" value="0" autocomplete="off" id="sec1SepiaInput"
                     data-mark="sec1Filter2Code" oninput="sec1UpdateEffects()">
                 </div>
                 <div class="control-group">
@@ -166,7 +166,7 @@
             <pxl-layer>
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
             </pxl-layer>
-            <pxl-layer id="sec1Layer" filter="dropShadow(0, 10, 15, '#0f172a')">
+            <pxl-layer id="sec1Layer" filter="[hueRotate(0), saturate(100), grayscale(0)]">
               <!-- Blue Rect -->
               <pxl-rect x="500" y="300" w="280" h="280" rx="40" fill="#3b82f6" stroke="#2563eb" strokewidth="4"></pxl-rect>
 
@@ -341,7 +341,7 @@
   &lt;pxl-layer&gt;
     &lt;!-- Chained Filter Array --&gt;
     &lt;pxl-rect x="500" y="300" w="300" h="300" rx="44" fill="#ec4899" stroke="#db2777" strokewidth="4"
-      filter="[<mark id="sec3Code">blur(5), contrast(140), hueRotate(90)</mark>]"&gt;&lt;/pxl-rect&gt;
+      filter="[blur(<mark id="sec3BlurCode">5</mark>), contrast(<mark id="sec3ContrastCode">140</mark>), hueRotate(<mark id="sec3HueCode">90</mark>)]"&gt;&lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -363,17 +363,17 @@
                 <div class="control-group">
                   <label><span>Blur</span> <span id="sec3BlurVal">5</span></label>
                   <input type="range" min="0" max="30" step="1" value="5" autocomplete="off" id="sec3BlurInput"
-                    oninput="sec3UpdateCustom()">
+                    data-mark="sec3BlurCode" oninput="sec3UpdateCustom()">
                 </div>
                 <div class="control-group">
                   <label><span>Contrast</span> <span id="sec3ContrastVal">140%</span></label>
                   <input type="range" min="50" max="250" step="10" value="140" autocomplete="off" id="sec3ContrastInput"
-                    oninput="sec3UpdateCustom()">
+                    data-mark="sec3ContrastCode" oninput="sec3UpdateCustom()">
                 </div>
                 <div class="control-group">
                   <label><span>Hue Rotate</span> <span id="sec3HueVal">90°</span></label>
                   <input type="range" min="0" max="360" step="15" value="90" autocomplete="off" id="sec3HueInput"
-                    oninput="sec3UpdateCustom()">
+                    data-mark="sec3HueCode" oninput="sec3UpdateCustom()">
                 </div>
               </div>
             </div>
@@ -421,7 +421,7 @@
   <!-- Interactive Controls Page Script -->
   <script>
     // Section 1: Interactive Filters Playground
-    let sec1CurrentTab = 'shadow';
+    let sec1CurrentTab = 'color';
 
     function sec1UpdateShadow() {
       const x = document.getElementById('sec1ShadowXInput').value;
@@ -431,10 +431,14 @@
       document.getElementById('sec1ShadowYVal').innerText = y;
       document.getElementById('sec1ShadowBlurVal').innerText = blur;
 
-      const filterExpr = `dropShadow(${x}, ${y}, ${blur}, '#0f172a')`;
-      const codeEl = document.getElementById('sec1ShadowCode');
-      if (codeEl) codeEl.innerText = filterExpr;
+      const xCode = document.getElementById('sec1ShadowXCode');
+      const yCode = document.getElementById('sec1ShadowYCode');
+      const blurCode = document.getElementById('sec1ShadowBlurCode');
+      if (xCode) xCode.innerText = x;
+      if (yCode) yCode.innerText = y;
+      if (blurCode) blurCode.innerText = blur;
 
+      const filterExpr = `dropShadow(${x}, ${y}, ${blur}, '#0f172a')`;
       const layer = document.getElementById('sec1Layer');
       if (layer) layer.setAttribute('filter', filterExpr);
     }
@@ -450,9 +454,9 @@
       const f1 = document.getElementById('sec1Filter1Code');
       const f2 = document.getElementById('sec1Filter2Code');
       const f3 = document.getElementById('sec1Filter3Code');
-      if (f1) f1.innerText = `hueRotate(${hue})`;
-      if (f2) f2.innerText = `saturate(${sat})`;
-      if (f3) f3.innerText = `grayscale(${gray})`;
+      if (f1) f1.innerText = hue;
+      if (f2) f2.innerText = sat;
+      if (f3) f3.innerText = gray;
 
       const filterExpr = `[hueRotate(${hue}), saturate(${sat}), grayscale(${gray})]`;
       const layer = document.getElementById('sec1Layer');
@@ -470,9 +474,9 @@
       const f1 = document.getElementById('sec1Filter1Code');
       const f2 = document.getElementById('sec1Filter2Code');
       const f3 = document.getElementById('sec1Filter3Code');
-      if (f1) f1.innerText = `brightness(${bright})`;
-      if (f2) f2.innerText = `contrast(${contrast})`;
-      if (f3) f3.innerText = `opacity(${opacity})`;
+      if (f1) f1.innerText = bright;
+      if (f2) f2.innerText = contrast;
+      if (f3) f3.innerText = opacity;
 
       const filterExpr = `[brightness(${bright}), contrast(${contrast}), opacity(${opacity})]`;
       const layer = document.getElementById('sec1Layer');
@@ -490,9 +494,9 @@
       const f1 = document.getElementById('sec1Filter1Code');
       const f2 = document.getElementById('sec1Filter2Code');
       const f3 = document.getElementById('sec1Filter3Code');
-      if (f1) f1.innerText = `blur(${blur})`;
-      if (f2) f2.innerText = `sepia(${sepia})`;
-      if (f3) f3.innerText = `invert(${invert})`;
+      if (f1) f1.innerText = blur;
+      if (f2) f2.innerText = sepia;
+      if (f3) f3.innerText = invert;
 
       const filterExpr = `[blur(${blur}), sepia(${sepia}), invert(${invert})]`;
       const layer = document.getElementById('sec1Layer');
@@ -508,25 +512,25 @@
         const x = document.getElementById('sec1ShadowXInput').value;
         const y = document.getElementById('sec1ShadowYInput').value;
         const blur = document.getElementById('sec1ShadowBlurInput').value;
-        attrContainer.innerHTML = `<mark id="sec1ShadowCode">dropShadow(${x}, ${y}, ${blur}, '#0f172a')</mark>`;
+        attrContainer.innerHTML = `dropShadow(<mark id="sec1ShadowXCode">${x}</mark>, <mark id="sec1ShadowYCode">${y}</mark>, <mark id="sec1ShadowBlurCode">${blur}</mark>, '#0f172a')`;
         sec1UpdateShadow();
       } else if (tab === 'color') {
         const hue = document.getElementById('sec1HueInput').value;
         const sat = document.getElementById('sec1SatInput').value;
         const gray = document.getElementById('sec1GrayInput').value;
-        attrContainer.innerHTML = `[<mark id="sec1Filter1Code">hueRotate(${hue})</mark>, <mark id="sec1Filter2Code">saturate(${sat})</mark>, <mark id="sec1Filter3Code">grayscale(${gray})</mark>]`;
+        attrContainer.innerHTML = `[hueRotate(<mark id="sec1Filter1Code">${hue}</mark>), saturate(<mark id="sec1Filter2Code">${sat}</mark>), grayscale(<mark id="sec1Filter3Code">${gray}</mark>)]`;
         sec1UpdateColor();
       } else if (tab === 'light') {
         const bright = document.getElementById('sec1BrightInput').value;
         const contrast = document.getElementById('sec1ContrastInput').value;
         const opacity = document.getElementById('sec1OpacityInput').value;
-        attrContainer.innerHTML = `[<mark id="sec1Filter1Code">brightness(${bright})</mark>, <mark id="sec1Filter2Code">contrast(${contrast})</mark>, <mark id="sec1Filter3Code">opacity(${opacity})</mark>]`;
+        attrContainer.innerHTML = `[brightness(<mark id="sec1Filter1Code">${bright}</mark>), contrast(<mark id="sec1Filter2Code">${contrast}</mark>), opacity(<mark id="sec1Filter3Code">${opacity}</mark>)]`;
         sec1UpdateLight();
       } else if (tab === 'effects') {
         const blur = document.getElementById('sec1BlurInput').value;
         const sepia = document.getElementById('sec1SepiaInput').value;
         const invert = document.getElementById('sec1InvertInput').value;
-        attrContainer.innerHTML = `[<mark id="sec1Filter1Code">blur(${blur})</mark>, <mark id="sec1Filter2Code">sepia(${sepia})</mark>, <mark id="sec1Filter3Code">invert(${invert})</mark>]`;
+        attrContainer.innerHTML = `[blur(<mark id="sec1Filter1Code">${blur}</mark>), sepia(<mark id="sec1Filter2Code">${sepia}</mark>), invert(<mark id="sec1Filter3Code">${invert}</mark>)]`;
         sec1UpdateEffects();
       }
     }
@@ -565,12 +569,16 @@
       document.getElementById('sec3ContrastVal').innerText = contrast + '%';
       document.getElementById('sec3HueVal').innerText = hue + '°';
 
-      const rect = document.getElementById('sec3Rect');
-      const codeEl = document.getElementById('sec3Code');
-      const filterExpr = `[blur(${blur}), contrast(${contrast}), hueRotate(${hue})]`;
+      const blurCode = document.getElementById('sec3BlurCode');
+      const contrastCode = document.getElementById('sec3ContrastCode');
+      const hueCode = document.getElementById('sec3HueCode');
+      if (blurCode) blurCode.innerText = blur;
+      if (contrastCode) contrastCode.innerText = contrast;
+      if (hueCode) hueCode.innerText = hue;
 
+      const rect = document.getElementById('sec3Rect');
+      const filterExpr = `[blur(${blur}), contrast(${contrast}), hueRotate(${hue})]`;
       if (rect) rect.setAttribute('filter', filterExpr);
-      if (codeEl) codeEl.innerText = `blur(${blur}), contrast(${contrast}), hueRotate(${hue})`;
     }
   </script>
 </body>
