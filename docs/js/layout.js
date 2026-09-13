@@ -91,7 +91,7 @@ class DocsSidebar extends HTMLElement {
             <li><a href="blend.html" class="${currentPath === 'blend.html' ? 'active' : ''}">Alpha &amp; Blend</a></li>
             <li><a href="mask.html" class="${currentPath === 'mask.html' ? 'active' : ''}">Mask</a></li>
             <li><a href="shadow.html" class="${currentPath === 'shadow.html' ? 'active' : ''}">Shadow</a></li>
-            <li><a href="filters.html" class="${currentPath === 'filters.html' ? 'active' : ''}">CSS Filters</a></li>
+            <li><a href="filter.html" class="${currentPath === 'filter.html' ? 'active' : ''}">Filter</a></li>
           </ul>
         </div>
         <div class="sidebar-section">

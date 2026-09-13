@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSS Filters | Kilopixel</title>
+  <title>Filter | Kilopixel</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/docs.css">
   
@@ -30,8 +30,8 @@
     <!-- Main Content Area -->
     <main class="docs-content">
       <div class="docs-inner">
-        <h1>CSS Filters</h1>
-        <p class="lead">Kilopixel provides a unified, responsive API for CSS and Canvas filters that works seamlessly across <strong>shapes and layers</strong>. Learn how to apply blurs, drop shadows, color adjustments, and chained effects &mdash; effortlessly animated at 60fps.</p>
+        <h1>Filter</h1>
+        <p class="lead">Kilopixel provides a unified, responsive Filter API that works seamlessly across <strong>shapes and layers</strong>. Learn how to apply blurs, drop shadows, color adjustments, and chained effects &mdash; effortlessly animated at 60fps.</p>
 
         <div class="callout-info">
           <p class="callout-title">Never Use Units!</p>
@@ -39,42 +39,34 @@
           <p class="callout-body"><strong>Exception:</strong> If you choose to use JavaScript <strong>backticks</strong> (template literals) for string interpolation (e.g., <code>filter="`blur(${t * 10}px)`"</code>), your math and time variables are evaluated natively by JavaScript. Because this bypasses Kilopixel's formatting helpers, you <strong>must</strong> include the units (<code>px</code>, <code>%</code>, <code>deg</code>) manually so the final generated string is valid CSS.</p>
         </div>
 
-        <div class="callout-info">
-          <p class="callout-body"><strong>Multiple Filters:</strong> To combine two or more filters, simply wrap them in a standard JavaScript array: <code>filter="[blur(10), contrast(150)]"</code>. Single filters do not require an array (e.g., <code>filter="blur(10)"</code>). The engine automatically separates array items with spaces in the generated CSS.</p>
-        </div>
-
         <!-- ================================================================= -->
-        <!-- SECTION 1: INTERACTIVE FILTER PLAYGROUND -->
+        <!-- SECTION 1: FILTER PLAYGROUND -->
         <!-- ================================================================= -->
-        <h2>1. Single Filters &amp; Interactive Playground</h2>
-        <p>You can apply any CSS filter helper directly to a <strong>layer or an individual shape</strong> using the <code>filter</code> attribute. Compare how filters behave when applied to an entire composite layer (left) versus directly to an individual shape (right).</p>
-
-        <div class="callout-info">
-          <p class="callout-title">Layer Filters vs. Shape Filters</p>
-          <p class="callout-body"><strong>Layer Level (CSS):</strong> Filters the entire flattened layer canvas. This produces unified drop shadows and group blurs across all shapes inside the layer, and works seamlessly across 100% of all desktop and mobile browsers.</p>
-          <p class="callout-body"><strong>Shape Level (Canvas 2D):</strong> Uses <code>ctx.filter</code> to apply effects directly to an individual shape during its draw pass (leaving other shapes in the layer crisp and unfiltered). Supported out of the box by Chrome, Firefox, and Edge (and in Safari 18+ via the "Canvas Filters" feature flag).</p>
-        </div>
+        <h2>1. Filter Playground</h2>
+        <p>Kilopixel allows you to apply filters at two different architectural levels:</p>
+        <ul>
+          <li><strong>Layer Level:</strong> Applied to the layer canvas via CSS (<code>canvas.style.filter</code>). The entire composition is flattened and filtered together, producing unified drop shadows and group blurs across all shapes. Supported across 100% of desktop and mobile browsers.</li>
+          <li><strong>Shape Level:</strong> Applied directly to the Canvas 2D context (<code>ctx.filter</code>) during the shape's draw pass. This filters only that specific shape, leaving other shapes crisp and unfiltered. Supported out of the box in Chrome, Firefox, and Edge. To enable shape-level filters in Safari, activate the <em>Canvas Filters</em> feature flag in Safari's settings (under Feature Flags).</li>
+        </ul>
+        <p>To combine two or more filters, wrap them in a standard JavaScript array: <code>filter="[blur(10), contrast(150)]"</code>. Single filters do not require an array (e.g., <code>filter="blur(10)"</code>). The engine automatically separates array items with spaces in the generated CSS.</p>
 
         <!-- Declarative Code Block Above Container -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;!-- 1. LAYER LEVEL: Entire layer is filtered together --&gt;
   &lt;pxl-layer filter="<span id="sec1FilterAttr">[hueRotate(<mark id="sec1Filter1Code">0</mark>), saturate(<mark id="sec1Filter2Code">100</mark>), grayscale(<mark id="sec1Filter3Code">0</mark>)]</span>"&gt;
-    &lt;!-- Blue Rect --&gt;
-    &lt;pxl-rect x="250" y="300" w="240" h="240" rx="36" fill="#3b82f6" stroke="#2563eb" strokewidth="4"&gt;&lt;/pxl-rect&gt;
-    &lt;!-- Orange Circle --&gt;
+    &lt;!-- Shapes --&gt;
+    &lt;pxl-rect x="250" y="300" w="240" h="240" rx="36" fill="#3b82f6"&gt;&lt;/pxl-rect&gt;
     &lt;pxl-circle x="175" y="225" r="70" fill="#f97316" stroke="#ea580c" strokewidth="4"&gt;&lt;/pxl-circle&gt;
-    &lt;!-- Green Circle --&gt;
     &lt;pxl-circle x="310" y="360" r="45" fill="#10b981" stroke="#059669" strokewidth="4"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
   &lt;!-- 2. SHAPE LEVEL: Only the blue rect is filtered --&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Blue Rect --&gt;
-    &lt;pxl-rect x="750" y="300" w="240" h="240" rx="36" fill="#3b82f6" stroke="#2563eb" strokewidth="4"
-      filter="<span id="sec1ShapeFilterAttr">[hueRotate(<mark id="sec1Filter1bCode">0</mark>), saturate(<mark id="sec1Filter2bCode">100</mark>), grayscale(<mark id="sec1Filter3bCode">0</mark>)]</span>"&gt;&lt;/pxl-rect&gt;
-    &lt;!-- Orange Circle (Unfiltered) --&gt;
+    &lt;pxl-rect filter="<span id="sec1ShapeFilterAttr">[hueRotate(<mark id="sec1Filter1bCode">0</mark>), saturate(<mark id="sec1Filter2bCode">100</mark>), grayscale(<mark id="sec1Filter3bCode">0</mark>)]</span>"
+      x="750" y="300" w="240" h="240" rx="36" fill="#3b82f6"&gt;&lt;/pxl-rect&gt;
+    &lt;!-- Circles (Unfiltered) --&gt;
     &lt;pxl-circle x="675" y="225" r="70" fill="#f97316" stroke="#ea580c" strokewidth="4"&gt;&lt;/pxl-circle&gt;
-    &lt;!-- Green Circle (Unfiltered) --&gt;
     &lt;pxl-circle x="810" y="360" r="45" fill="#10b981" stroke="#059669" strokewidth="4"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -192,22 +184,19 @@
 
             <!-- LEFT: Layer Level Filter (All 3 shapes filtered together via CSS) -->
             <pxl-layer id="sec1Layer" filter="[hueRotate(0), saturate(100), grayscale(0)]">
-              <!-- Blue Rect -->
-              <pxl-rect x="250" y="300" w="240" h="240" rx="36" fill="#3b82f6" stroke="#2563eb" strokewidth="4"></pxl-rect>
-              <!-- Orange Circle -->
+              <!-- Shapes -->
+              <pxl-rect x="250" y="300" w="240" h="240" rx="36" fill="#3b82f6"></pxl-rect>
               <pxl-circle x="175" y="225" r="70" fill="#f97316" stroke="#ea580c" strokewidth="4"></pxl-circle>
-              <!-- Green Circle -->
               <pxl-circle x="310" y="360" r="45" fill="#10b981" stroke="#059669" strokewidth="4"></pxl-circle>
             </pxl-layer>
 
             <!-- RIGHT: Shape Level Filter (Only blue rect filtered via Canvas 2D) -->
             <pxl-layer>
               <!-- Blue Rect (Filtered) -->
-              <pxl-rect id="sec1Shape" x="750" y="300" w="240" h="240" rx="36" fill="#3b82f6" stroke="#2563eb" strokewidth="4"
-                filter="[hueRotate(0), saturate(100), grayscale(0)]"></pxl-rect>
-              <!-- Orange Circle (Unfiltered) -->
+              <pxl-rect id="sec1Shape" filter="[hueRotate(0), saturate(100), grayscale(0)]"
+                x="750" y="300" w="240" h="240" rx="36" fill="#3b82f6"></pxl-rect>
+              <!-- Circles (Unfiltered) -->
               <pxl-circle x="675" y="225" r="70" fill="#f97316" stroke="#ea580c" strokewidth="4"></pxl-circle>
-              <!-- Green Circle (Unfiltered) -->
               <pxl-circle x="810" y="360" r="45" fill="#10b981" stroke="#059669" strokewidth="4"></pxl-circle>
             </pxl-layer>
 
@@ -222,11 +211,16 @@
           </pxl-stage>
         </div>
 
+        <div class="callout-info">
+          <p class="callout-title">Groups Do Not Support Filters</p>
+          <p class="callout-body">The <code>&lt;pxl-group&gt;</code> element is a lightweight container dedicated strictly to structural grouping and spatial transforms (<code>x</code>, <code>y</code>, <code>rotate</code>, <code>scale</code>). It does not have a canvas buffer and does not support bitmap filtering. To filter multiple shapes together, wrap them in a <code>&lt;pxl-layer&gt;</code>.</p>
+        </div>
+
         <!-- ================================================================= -->
-        <!-- SECTION 2: FILTERS REFERENCE -->
+        <!-- SECTION 2: FILTER REFERENCE -->
         <!-- ================================================================= -->
-        <h2>2. Filters Reference</h2>
-        <p>Kilopixel provides 10 built-in scope functions that map directly to standard CSS filters. All numbers are unitless and automatically formatted by the engine.</p>
+        <h2>2. Filter Reference</h2>
+        <p>Kilopixel provides 10 built-in scope functions that map directly to standard filters. All numbers are unitless and automatically formatted by the engine.</p>
 
         <div class="api-list">
           <div class="api-subheading">Spatial Filters (Stage Scaled)</div>
@@ -372,85 +366,6 @@
               Adjusts overall transparency within the filter pipeline. <code>100</code> is fully opaque, and <code>0</code> is fully transparent.
             </div>
           </div>
-        </div>
-
-        <!-- ================================================================= -->
-        <!-- SECTION 3: CHAINING MULTIPLE FILTERS -->
-        <!-- ================================================================= -->
-        <h2>3. Chaining Multiple Filters</h2>
-        <p>To apply two or more filters simultaneously, pass them as a standard JavaScript array: <code>filter="[filter1, filter2, ...]"</code>. The engine automatically separates them with spaces in the generated CSS.</p>
-
-        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;pxl-layer&gt;
-    &lt;!-- Chained Filter Array --&gt;
-    &lt;pxl-rect x="500" y="300" w="300" h="300" rx="44" fill="#ec4899" stroke="#db2777" strokewidth="4"
-      filter="[blur(<mark id="sec3BlurCode">5</mark>), contrast(<mark id="sec3ContrastCode">140</mark>), hueRotate(<mark id="sec3HueCode">90</mark>)]"&gt;&lt;/pxl-rect&gt;
-  &lt;/pxl-layer&gt;
-&lt;/pxl-stage&gt;</code></pre>
-
-        <div class="demo-container">
-          <div class="demo-controls">
-            <div class="demo-controls-header">
-              <h3 class="demo-controls-title">Controls</h3>
-              <div class="demo-tabs">
-                <button class="tab-btn active" onclick="sec3ApplyPreset('neon', this)">Neon Glow</button>
-                <button class="tab-btn" onclick="sec3ApplyPreset('vintage', this)">Vintage Sepia</button>
-                <button class="tab-btn" onclick="sec3ApplyPreset('cyber', this)">Cyber Shift</button>
-                <button class="tab-btn" onclick="sec3ApplyPreset('dramatic', this)">Dramatic Contrast</button>
-                <button class="tab-btn" onclick="sec3ApplyPreset('reset', this)">Reset</button>
-              </div>
-            </div>
-
-            <div class="tab-content active">
-              <div class="playground-sliders">
-                <div class="control-group">
-                  <label><span>Blur</span> <span id="sec3BlurVal">5</span></label>
-                  <input type="range" min="0" max="30" step="1" value="5" autocomplete="off" id="sec3BlurInput"
-                    data-mark="sec3BlurCode" oninput="sec3UpdateCustom()">
-                </div>
-                <div class="control-group">
-                  <label><span>Contrast</span> <span id="sec3ContrastVal">140%</span></label>
-                  <input type="range" min="50" max="250" step="10" value="140" autocomplete="off" id="sec3ContrastInput"
-                    data-mark="sec3ContrastCode" oninput="sec3UpdateCustom()">
-                </div>
-                <div class="control-group">
-                  <label><span>Hue Rotate</span> <span id="sec3HueVal">90°</span></label>
-                  <input type="range" min="0" max="360" step="15" value="90" autocomplete="off" id="sec3HueInput"
-                    data-mark="sec3HueCode" oninput="sec3UpdateCustom()">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <pxl-stage ratio="5 / 3" class="demo-stage">
-            <pxl-layer>
-              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-              <pxl-rect id="sec3Rect" x="500" y="300" w="300" h="300" rx="44" fill="#ec4899" stroke="#db2777" strokewidth="4"
-                filter="[blur(5), contrast(140), hueRotate(90)]"></pxl-rect>
-              <pxl-circle id="sec3Circle" x="500" y="300" r="70" fill="#facc15" stroke="#eab308" strokewidth="4"></pxl-circle>
-            </pxl-layer>
-          </pxl-stage>
-        </div>
-
-        <!-- ================================================================= -->
-        <!-- SECTION 4: SHAPE VS. LAYER FILTERING -->
-        <!-- ================================================================= -->
-        <h2>4. Shape vs. Layer Filtering</h2>
-        <p>Kilopixel supports filters on both individual shapes and entire layers, with an important architectural distinction:</p>
-
-        <ul>
-          <li><strong>Shape-Level (<code>&lt;pxl-circle filter="..."&gt;</code>)</strong>: Applied directly to the HTML5 Canvas context (<code>ctx.filter</code>). The shape is filtered during drawing, allowing multiple overlapping shapes to each have their own independent filters.</li>
-          <li><strong>Layer-Level (<code>&lt;pxl-layer filter="..."&gt;</code>)</strong>: Applied to the layer's <code>&lt;canvas&gt;</code> DOM element (<code>canvas.style.filter</code>). The browser's GPU composites the entire flattened canvas with zero CPU rasterization overhead.</li>
-        </ul>
-
-        <div class="callout-info">
-          <p class="callout-title">CSS-Only Fast Path</p>
-          <p class="callout-body">When a <code>&lt;pxl-layer&gt;</code> only animates compositing properties (like <code>filter</code>, <code>alpha</code>, or <code>blend</code>) and no geometric transforms, Kilopixel activates the <strong>CSS-only fast path</strong>: it skips canvas clearing and child re-rendering completely, allowing the GPU to animate filters at continuous 60fps with zero redraw cost.</p>
-        </div>
-
-        <div class="callout-info">
-          <p class="callout-title">Groups Do Not Support Filters</p>
-          <p class="callout-body">The <code>&lt;pxl-group&gt;</code> element is a lightweight container dedicated strictly to structural grouping and spatial transforms (<code>x</code>, <code>y</code>, <code>rotate</code>, <code>scale</code>). It does not have a canvas buffer and does not support bitmap filtering. To filter multiple shapes together, wrap them in a <code>&lt;pxl-layer&gt;</code>.</p>
         </div>
 
       </div>
@@ -612,52 +527,6 @@
         if (shapeAttrContainer) shapeAttrContainer.innerHTML = `[blur(<mark id="sec1Filter1bCode">${blur}</mark>), sepia(<mark id="sec1Filter2bCode">${sepia}</mark>), invert(<mark id="sec1Filter3bCode">${invert}</mark>)]`;
         sec1UpdateEffects();
       }
-    }
-
-    // Section 3: Chained Filter Presets & Custom Sliders
-    const sec3Presets = {
-      neon: { blur: 8, contrast: 160, hue: 120 },
-      vintage: { blur: 2, contrast: 90, hue: 35 },
-      cyber: { blur: 4, contrast: 180, hue: 200 },
-      dramatic: { blur: 0, contrast: 220, hue: 0 },
-      reset: { blur: 0, contrast: 100, hue: 0 }
-    };
-
-    function sec3ApplyPreset(key, btn) {
-      if (btn) {
-        btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      }
-
-      const preset = sec3Presets[key];
-      if (!preset) return;
-
-      document.getElementById('sec3BlurInput').value = preset.blur;
-      document.getElementById('sec3ContrastInput').value = preset.contrast;
-      document.getElementById('sec3HueInput').value = preset.hue;
-
-      sec3UpdateCustom();
-    }
-
-    function sec3UpdateCustom() {
-      const blur = document.getElementById('sec3BlurInput').value;
-      const contrast = document.getElementById('sec3ContrastInput').value;
-      const hue = document.getElementById('sec3HueInput').value;
-
-      document.getElementById('sec3BlurVal').innerText = blur;
-      document.getElementById('sec3ContrastVal').innerText = contrast + '%';
-      document.getElementById('sec3HueVal').innerText = hue + '°';
-
-      const blurCode = document.getElementById('sec3BlurCode');
-      const contrastCode = document.getElementById('sec3ContrastCode');
-      const hueCode = document.getElementById('sec3HueCode');
-      if (blurCode) blurCode.innerText = blur;
-      if (contrastCode) contrastCode.innerText = contrast;
-      if (hueCode) hueCode.innerText = hue;
-
-      const rect = document.getElementById('sec3Rect');
-      const filterExpr = `[blur(${blur}), contrast(${contrast}), hueRotate(${hue})]`;
-      if (rect) rect.setAttribute('filter', filterExpr);
     }
   </script>
 </body>

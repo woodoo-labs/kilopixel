@@ -80,33 +80,11 @@ pxl.scaleResponsiveFilter = function(filterStr, u) {
 pxl.resolveFilter = function(node, filter, u) {
   if (!filter || filter === 'none') return 'none';
   
-  if (Array.isArray(filter)) {
-    let changed = !node._lastFilterArr || node._lastFilterArr.length !== filter.length;
-    if (!changed) {
-      for (let i = 0; i < filter.length; i++) {
-        if (node._lastFilterArr[i] !== filter[i]) {
-          changed = true;
-          break;
-        }
-      }
-    }
-    
-    if (changed || node._lastFilterU !== u) {
-      if (changed) {
-        if (!node._lastFilterArr) node._lastFilterArr = [];
-        node._lastFilterArr.length = filter.length;
-        for (let i = 0; i < filter.length; i++) node._lastFilterArr[i] = filter[i];
-        node._lastFilterRaw = filter.join(' ');
-      }
-      node._lastFilterU = u;
-      node._cachedFilterScaled = pxl.scaleResponsiveFilter(node._lastFilterRaw, u);
-    }
-  } else {
-    if (node._lastFilterRaw !== filter || node._lastFilterU !== u) {
-      node._lastFilterRaw = filter;
-      node._lastFilterU = u;
-      node._cachedFilterScaled = pxl.scaleResponsiveFilter(filter, u);
-    }
+  const filterStr = Array.isArray(filter) ? filter.join(' ') : filter;
+  if (node._lastFilterRaw !== filterStr || node._lastFilterU !== u) {
+    node._lastFilterRaw = filterStr;
+    node._lastFilterU = u;
+    node._cachedFilterScaled = pxl.scaleResponsiveFilter(filterStr, u);
   }
   
   return node._cachedFilterScaled;
