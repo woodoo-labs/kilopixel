@@ -137,57 +137,25 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;!-- Base Background Layer --&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-rect x="0" y="0" w="1000" h="600" anchor="top-left" fill="linear(90, [<mark id="sec2CodeC1">0.4</mark>, '#f9a8d4', 0.5, '#fde047', <mark id="sec2CodeC3">0.6</mark>, '#67e8f9'])"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect fill="linear(90, [<mark id="sec2BgC1Code">0.4</mark>, '#f9a8d4', 0.5, '#fde047', <mark id="sec2BgC3Code">0.6</mark>, '#67e8f9'])"
+      x="0" y="0" w="1000" h="600" anchor="top-left"&gt;
+    &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 
   &lt;!-- Layer Level: Blends with background --&gt;
   &lt;pxl-layer blend="<mark id="sec2LayerBlendCode">multiply</mark>"&gt;
-    &lt;pxl-circle x="180" y="<mark id="sec2CodeYL1">300</mark>" r="<mark id="sec2CodeRL1">140</mark>" fill="darkorange"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle x="320" y="<mark id="sec2CodeYL2">300</mark>" r="<mark id="sec2CodeRL2">140</mark>" fill="dodgerblue"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="darkorange" x="180" y="<mark id="sec2CircleYL1Code">300</mark>" r="<mark id="sec2CircleRL1Code">140</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="dodgerblue" x="320" y="<mark id="sec2CircleYL2Code">300</mark>" r="<mark id="sec2CircleRL2Code">140</mark>"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
   &lt;!-- Shape Level: Blends only with shapes on the same layer --&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-circle x="680" y="<mark id="sec2CodeYR1">300</mark>" r="<mark id="sec2CodeRR1">140</mark>" fill="darkorange"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle x="820" y="<mark id="sec2CodeYR2">300</mark>" r="<mark id="sec2CodeRR2">140</mark>" blend="<mark id="sec2ShapeBlendCode">multiply</mark>" fill="dodgerblue"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="darkorange" x="680" y="<mark id="sec2CircleYR1Code">300</mark>" r="<mark id="sec2CircleRR1Code">140</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="dodgerblue" blend="<mark id="sec2ShapeBlendCode">multiply</mark>" x="820" y="<mark id="sec2CircleYR2Code">300</mark>" r="<mark id="sec2CircleRR2Code">140</mark>"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
         <div class="demo-container">
-          <script>
-            window.sec2UpdateBg = function() {
-              const c1 = document.getElementById('sec2C1Slider').value;
-              const c3 = document.getElementById('sec2C3Slider').value;
-              document.getElementById('sec2C1Val').innerText = c1;
-              document.getElementById('sec2C3Val').innerText = c3;
-              document.getElementById('sec2BgRect').setAttribute('fill', `linear(90, [${c1}, '#f9a8d4', 0.5, '#fde047', ${c3}, '#67e8f9'])`);
-              document.getElementById('sec2CodeC1').innerText = c1;
-              document.getElementById('sec2CodeC3').innerText = c3;
-            };
-            window.sec2UpdateCircles = function() {
-              const y = document.getElementById('sec2YSlider').value;
-              const r = document.getElementById('sec2RSlider').value;
-              document.getElementById('sec2YVal').innerText = y;
-              document.getElementById('sec2RVal').innerText = r;
-              
-              const shapes = ['sec2ShapeL1', 'sec2ShapeL2', 'sec2ShapeR1', 'sec2ShapeR2'];
-              shapes.forEach(id => {
-                document.getElementById(id).setAttribute('y', y);
-                document.getElementById(id).setAttribute('r', r);
-              });
-              
-              document.getElementById('sec2CodeYL1').innerText = y;
-              document.getElementById('sec2CodeYL2').innerText = y;
-              document.getElementById('sec2CodeYR1').innerText = y;
-              document.getElementById('sec2CodeYR2').innerText = y;
-              
-              document.getElementById('sec2CodeRL1').innerText = r;
-              document.getElementById('sec2CodeRL2').innerText = r;
-              document.getElementById('sec2CodeRR1').innerText = r;
-              document.getElementById('sec2CodeRR2').innerText = r;
-            };
-          </script>
-          
           <div class="demo-controls">
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Controls</h3>
@@ -202,12 +170,12 @@
             <div class="tab-content" id="sec2BackgroundTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Color 1 Offset</span> <span id="sec2C1Val">0.4</span></label>
-                  <input id="sec2C1Slider" type="range" min="0" max="0.5" step="0.05" value="0.4" autocomplete="off" oninput="window.sec2UpdateBg()" data-mark="sec2CodeC1">
+                  <label><span>Color 1 Offset</span> <span id="sec2BgC1Val">0.4</span></label>
+                  <input id="sec2BgC1Input" type="range" min="0" max="0.5" step="0.05" value="0.4" autocomplete="off" oninput="sec2UpdateBg()" data-mark="sec2BgC1Code">
                 </div>
                 <div class="control-group">
-                  <label><span>Color 3 Offset</span> <span id="sec2C3Val">0.6</span></label>
-                  <input id="sec2C3Slider" type="range" min="0.5" max="1" step="0.05" value="0.6" autocomplete="off" oninput="window.sec2UpdateBg()" data-mark="sec2CodeC3">
+                  <label><span>Color 3 Offset</span> <span id="sec2BgC3Val">0.6</span></label>
+                  <input id="sec2BgC3Input" type="range" min="0.5" max="1" step="0.05" value="0.6" autocomplete="off" oninput="sec2UpdateBg()" data-mark="sec2BgC3Code">
                 </div>
               </div>
             </div>
@@ -216,12 +184,12 @@
             <div class="tab-content" id="sec2CirclesTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Center Y</span> <span id="sec2YVal">300</span></label>
-                  <input id="sec2YSlider" type="range" min="100" max="500" step="10" value="300" autocomplete="off" oninput="window.sec2UpdateCircles()" data-mark="sec2CodeYL1, sec2CodeYL2, sec2CodeYR1, sec2CodeYR2">
+                  <label><span>Center Y</span> <span id="sec2CircleYVal">300</span></label>
+                  <input id="sec2CircleYInput" type="range" min="100" max="500" step="10" value="300" autocomplete="off" oninput="sec2UpdateCircles()" data-mark="sec2CircleYL1Code, sec2CircleYL2Code, sec2CircleYR1Code, sec2CircleYR2Code">
                 </div>
                 <div class="control-group">
-                  <label><span>Radius</span> <span id="sec2RVal">140</span></label>
-                  <input id="sec2RSlider" type="range" min="50" max="250" step="10" value="140" autocomplete="off" oninput="window.sec2UpdateCircles()" data-mark="sec2CodeRL1, sec2CodeRL2, sec2CodeRR1, sec2CodeRR2">
+                  <label><span>Radius</span> <span id="sec2CircleRVal">140</span></label>
+                  <input id="sec2CircleRInput" type="range" min="50" max="250" step="10" value="140" autocomplete="off" oninput="sec2UpdateCircles()" data-mark="sec2CircleRL1Code, sec2CircleRL2Code, sec2CircleRR1Code, sec2CircleRR2Code">
                 </div>
               </div>
             </div>
@@ -230,7 +198,7 @@
               <div class="playground-sliders">
                 <div class="control-group" style="margin-bottom: -14px;">
                   <label><span>Blend Mode <span class="indicator-dot"></span></span></label>
-                  <select autocomplete="off" onchange="document.getElementById('sec2Layer').setAttribute('blend', this.value); document.getElementById('sec2ShapeR2').setAttribute('blend', this.value); document.getElementById('sec2LayerBlendCode').innerText = this.value; document.getElementById('sec2ShapeBlendCode').innerText = this.value;">
+                  <select autocomplete="off" onchange="document.getElementById('sec2Layer').setAttribute('blend', this.value); document.getElementById('sec2CircleR2').setAttribute('blend', this.value); document.getElementById('sec2LayerBlendCode').innerText = this.value; document.getElementById('sec2ShapeBlendCode').innerText = this.value;">
                     <option value="normal">normal (no blend)</option>
                     <option value="multiply" selected>multiply</option>
                     <option value="screen">screen</option>
@@ -257,19 +225,19 @@
           <pxl-stage ratio="5 / 3" class="demo-stage">
             <!-- BACKGROUND LAYER -->
             <pxl-layer id="sec2BgLayer">
-              <pxl-rect id="sec2BgRect" x="0" y="0" w="1000" h="600" anchor="top-left" fill="linear(90, [0.4, '#f9a8d4', 0.5, '#fde047', 0.6, '#67e8f9'])"></pxl-rect>
+              <pxl-rect id="sec2BgRect" fill="linear(90, [0.4, '#f9a8d4', 0.5, '#fde047', 0.6, '#67e8f9'])" x="0" y="0" w="1000" h="600" anchor="top-left"></pxl-rect>
             </pxl-layer>
 
             <!-- LEFT: Blend applied to the Layer (Blends against the Background Layer!) -->
             <pxl-layer id="sec2Layer" blend="multiply">
-              <pxl-circle id="sec2ShapeL1" x="180" y="300" r="140" fill="darkorange"></pxl-circle>
-              <pxl-circle id="sec2ShapeL2" x="320" y="300" r="140" fill="dodgerblue"></pxl-circle>
+              <pxl-circle id="sec2CircleL1" fill="darkorange" x="180" y="300" r="140"></pxl-circle>
+              <pxl-circle id="sec2CircleL2" fill="dodgerblue" x="320" y="300" r="140"></pxl-circle>
             </pxl-layer>
 
             <!-- RIGHT: Blend applied to the Shapes (Blends against each other, but NOT the Background Layer!) -->
             <pxl-layer id="sec2ShapeLayer">
-              <pxl-circle id="sec2ShapeR1" x="680" y="300" r="140" fill="darkorange"></pxl-circle>
-              <pxl-circle id="sec2ShapeR2" x="820" y="300" r="140" fill="dodgerblue" blend="multiply"></pxl-circle>
+              <pxl-circle id="sec2CircleR1" fill="darkorange" x="680" y="300" r="140"></pxl-circle>
+              <pxl-circle id="sec2CircleR2" fill="dodgerblue" blend="multiply" x="820" y="300" r="140"></pxl-circle>
             </pxl-layer>
 
             <!-- FOREGROUND GUIDES -->
@@ -296,5 +264,44 @@
   <!-- Prism Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+
+  <!-- Section 2 Playground Logic -->
+  <script>
+    function sec2UpdateBg() {
+      const c1 = document.getElementById('sec2BgC1Input').value;
+      const c3 = document.getElementById('sec2BgC3Input').value;
+      document.getElementById('sec2BgC1Val').innerText = c1;
+      document.getElementById('sec2BgC3Val').innerText = c3;
+      document.getElementById('sec2BgRect').setAttribute('fill', `linear(90, [${c1}, '#f9a8d4', 0.5, '#fde047', ${c3}, '#67e8f9'])`);
+      document.getElementById('sec2BgC1Code').innerText = c1;
+      document.getElementById('sec2BgC3Code').innerText = c3;
+    }
+
+    function sec2UpdateCircles() {
+      const y = document.getElementById('sec2CircleYInput').value;
+      const r = document.getElementById('sec2CircleRInput').value;
+      document.getElementById('sec2CircleYVal').innerText = y;
+      document.getElementById('sec2CircleRVal').innerText = r;
+
+      const shapes = ['sec2CircleL1', 'sec2CircleL2', 'sec2CircleR1', 'sec2CircleR2'];
+      shapes.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.setAttribute('y', y);
+          el.setAttribute('r', r);
+        }
+      });
+
+      document.getElementById('sec2CircleYL1Code').innerText = y;
+      document.getElementById('sec2CircleYL2Code').innerText = y;
+      document.getElementById('sec2CircleYR1Code').innerText = y;
+      document.getElementById('sec2CircleYR2Code').innerText = y;
+
+      document.getElementById('sec2CircleRL1Code').innerText = r;
+      document.getElementById('sec2CircleRL2Code').innerText = r;
+      document.getElementById('sec2CircleRR1Code').innerText = r;
+      document.getElementById('sec2CircleRR2Code').innerText = r;
+    }
+  </script>
 </body>
 </html>

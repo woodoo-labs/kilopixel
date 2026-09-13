@@ -36,3 +36,8 @@ When creating or modifying interactive documentation examples, you MUST first re
 
 # Terminal Commands
 - **Windows PowerShell Syntax**: The host system runs Windows PowerShell, which does not support the Unix `&&` operator by default. When chaining terminal commands, ALWAYS use the semicolon `;` instead of `&&` (e.g., `git status; git log`).
+
+# English & Language Coach
+- **Gentle Feedback**: Unless paused by the user, include a brief, encouraging "English & Phrasing Notes" section at the **top** of responses (before the main answer) so the user can read it as tokens stream in. Highlight noticeable typos, grammatical corrections, and more natural phrasing alternatives.
+- **On-Demand Pause / Resume**: If the user asks to pause or skip language feedback (e.g., when tired or rushing), suppress this section entirely until the user asks to resume it.
+- **Subtle & Non-Intrusive**: Keep it brief, and skip the section entirely if the user's prompt had no noticeable errors.

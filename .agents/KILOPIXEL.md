@@ -691,6 +691,7 @@ Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile 
 | Attribute | Default | Description |
 |-----------|---------|-------------|
 | `ratio` | `16 / 9` | Sets CSS `aspect-ratio`. Parsed through the expression compiler, so math like `10 / 3` works. |
+| `alwaysrender` | `false` | When `true`, disables the built-in `IntersectionObserver` and forces continuous rendering even when scrolled out of view. |
 
 ### Built-in `attributeValues` (Published via `ref.stageId.*`)
 
@@ -711,6 +712,7 @@ Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile 
 - Sets `display: block`, `position: relative`, `width: 100%` on connect
 - `ResizeObserver` with `device-pixel-content-box` (fallback to `content-box`)
 - `unit = clientWidth / 1000`
+- **Built-in `IntersectionObserver`**: Automatically pauses requestAnimationFrame loops when the stage is scrolled out of the viewport (or out of an overflow scroll container like a carousel), and resumes rendering immediately upon re-entry. Can be overridden with `alwaysrender="true"`.
 - Manages `layers[]` array, sorts by DOM position when dirty
 - Only renders dirty layers: `if (layer.isDirty) layer.render(u, t)`
 - Delegates all pointer events to its `InteractionEngine`
