@@ -74,26 +74,30 @@ pxl.scope.linear = (direction, colorsArray) => {
   if (typeof direction === 'number') {
     return { isGradient: true, type: 'linear', angle: direction, stops };
   }
-  const [x1, y1, x2, y2] = direction;
-  return { isGradient: true, type: 'linear', x1, y1, x2, y2, stops };
+  if (direction) {
+    return { isGradient: true, type: 'linear', x1: direction[0], y1: direction[1], x2: direction[2], y2: direction[3], stops };
+  }
+  return { isGradient: true, type: 'linear', angle: 0, stops };
 };
 
 pxl.scope.radial = (config, colorsArray) => {
   const stops = _parseStops(colorsArray);
-  const a = config;
-  const len = a.length;
-
   let x0 = 0.5, y0 = 0.5, r0 = 0;
   let x1 = 0.5, y1 = 0.5, r1 = 0.5;
 
-  if (len === 1) {
-    r1 = a[0];
-  } else if (len === 3) {
-    x0 = a[0]; y0 = a[1]; r1 = a[2];
-    x1 = x0; y1 = y0;
-  } else if (len >= 6) {
-    x0 = a[0]; y0 = a[1]; r0 = a[2];
-    x1 = a[3]; y1 = a[4]; r1 = a[5];
+  if (typeof config === 'number') {
+    r1 = config;
+  } else if (config) {
+    const len = config.length;
+    if (len === 1) {
+      r1 = config[0];
+    } else if (len === 3) {
+      x0 = config[0]; y0 = config[1]; r1 = config[2];
+      x1 = x0; y1 = y0;
+    } else if (len >= 6) {
+      x0 = config[0]; y0 = config[1]; r0 = config[2];
+      x1 = config[3]; y1 = config[4]; r1 = config[5];
+    }
   }
 
   return { isGradient: true, type: 'radial', x0, y0, r0, x1, y1, r1, stops };
@@ -102,8 +106,13 @@ pxl.scope.radial = (config, colorsArray) => {
 pxl.scope.conic = (angleOrConfig, colorsArray) => {
   const stops = _parseStops(colorsArray);
   let startAngle = 0, cx = 0.5, cy = 0.5;
-  if (typeof angleOrConfig === 'number') startAngle = angleOrConfig;
-  else if (Array.isArray(angleOrConfig)) [startAngle, cx, cy] = angleOrConfig;
+  if (typeof angleOrConfig === 'number') {
+    startAngle = angleOrConfig;
+  } else if (angleOrConfig) {
+    startAngle = angleOrConfig[0] || 0;
+    cx = angleOrConfig[1] ?? 0.5;
+    cy = angleOrConfig[2] ?? 0.5;
+  }
   return { isGradient: true, type: 'conic', startAngle, cx, cy, stops };
 };
 

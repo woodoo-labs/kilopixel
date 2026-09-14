@@ -130,12 +130,25 @@ Every documentation example must follow a standardized 3-part layout:
 
 ### JavaScript Namespace & Native DOM Methods
 * **Strict Namespacing (`pxlDocs`):** All shared documentation playground helper functions, utilities, and interactive methods MUST be defined under the `window.pxlDocs` namespace in `docs/js/docs.js` (e.g., `pxlDocs.switchTab`, `pxlDocs.initHighlighting`). Do not define arbitrary global functions on `window`.
-* **Page-Specific Playground Scripts:** When an advanced playground requires complex multi-control synchronization (such as dual-mode toggling between numeric sliders and keyword dropdowns, geometric vector projections, or composite string formatting), place these functions in a single dedicated `<script>` block at the very bottom of the page, directly following the Prism scripts. Keep functions cleanly organized and scoped to prevent interference with other playgrounds.
+* **Page-Specific Playground Scripts (Tier 3):** When an advanced playground requires complex multi-control synchronization, mode switching (such as dual-mode toggling between numeric sliders and keyword dropdowns), or multi-tab state aggregation (such as compound filter chains), place these functions in a single dedicated `<script>` block at the very bottom of the page, directly following the Prism scripts. Keep functions cleanly organized and scoped to prevent interference with other playgrounds.
 * **Native DOM API (Zero-Magic Interaction):** When interacting with Kilopixel HTML elements from JavaScript (e.g., in slider `oninput` handlers or custom scripts), ALWAYS use standard native DOM methods like `document.getElementById('id').setAttribute('attr', value)`. This makes it transparent to developers inspecting the source code that Kilopixel has no proprietary or secret JavaScript API — it works 100% via standard declarative HTML attributes and native DOM manipulation.
 
 ### Reactivity & Live Code
-* **Variable Placement:** `<pxl-var>` nodes act as invisible shapes in the engine. If they use any mathematical animations (like `t` or `wave()`), they **must** be placed inside a `<pxl-layer>` so their `render` cycle is evaluated by the engine loop.
-* **Direct Manipulation over Variables:** `<pxl-var>` nodes should only be used for shared global state. For direct property control, sliders must directly manipulate the target element using standard HTML5 Web Component DOM methods: `document.getElementById('elementId').setAttribute('property', this.value)`.
+* **Variable Placement & Scope:** `<pxl-var>` nodes act as invisible nodes in the engine. They MUST be placed inside a `<pxl-layer>`. Always declare `<pxl-var>` elements at the **top of the `<pxl-layer>`** (directly below `<pxl-grid>`) before any shapes or helper groups that reference them. This guarantees that variables are registered in `pxl.nodes` with their default values on initial frame load, preventing uninitialized evaluation errors.
+* **The 3-Tier Playground Control Standard:**
+  To maintain a clean balance between declarative transparency and concise code, documentation controls (sliders, buttons, dropdowns) must strictly follow one of three architectural tiers:
+  * **Tier 1: Direct Native DOM (`setAttribute`) — Simple 1-to-1 Attributes:**
+    When a slider or dropdown directly maps to a single property on a target element (e.g., `x`, `y`, `r`, `rotate`, `alpha`, `shadowblur`, or discrete 1-to-1 dropdowns like `mask="xor"`):
+    Use a clean 3-line inline handler without any `<pxl-var>` or bottom scripts:
+    1. `document.getElementById('target').setAttribute('attr', this.value)`
+    2. `document.getElementById('targetVal').innerText = this.value`
+    3. `document.getElementById('targetCode').innerText = this.value`
+  * **Tier 2: Reactive Variables (`<pxl-var>`) — Composite / Multi-Control Attributes:**
+    When multiple inputs contribute to a single compound attribute without UI branching (such as vector coordinates in `linear([x0, y0, x1, y1])`, color components in `rgba(r, g, b, a)`, or geometric projection overlays):
+    Use `<pxl-var>` nodes declared at the top of `<pxl-layer>`. The target shape binds reactively to the variables (`fill="linear([ref.x0.value, ref.y0.value, ...])"`). Sliders simply update their individual `<pxl-var>` (`setAttribute('value', this.value)`) alongside the UI label and code mark. This eliminates messy ~200-character inline template literals and avoids boilerplate external scripts.
+  * **Tier 3: Bottom Scripts (`<script>`) — Mode Switching & Conditional Branching:**
+    When a playground involves branching UI logic, mode switching (such as toggling between numeric sliders and keyword dropdowns in `radial.html`), dynamic visibility toggling (`style.display`), or multi-tab state aggregation (such as compound filter chains in `filter.html`):
+    Place dedicated helper functions in a single `<script>` block at the very bottom of `<body>` directly preceding `</body>` (after the Prism highlighter scripts).
 * HTML code blocks must use `<pre><code class="language-html">`.
 * **Code Highlights & Reactive Bindings:** Values in the code block that change dynamically must be wrapped in a `<mark id="sec[N][Entity][Target]Code">` tag.
   * **Standard Marks:** Use a standard `<mark>` for direct numerical values that are updated by a slider. These will flash a vibrant yellow/orange to indicate direct control.

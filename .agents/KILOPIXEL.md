@@ -1233,6 +1233,22 @@ Mutating from event handlers:
 
 The `set(key, value)` method on `attributeValues` calls `setAttribute()` on the element, triggering recompilation and broadcast.
 
+### Composite Parameter Pattern (Decomposing Compound Attributes)
+
+`<pxl-var>` acts as a clean reactive bridge when multiple UI inputs (such as range sliders) compose a single compound property (such as gradient vectors or color functions):
+
+```html
+<!-- Reactive bridge for gradient coordinates -->
+<pxl-var id="x0" value="0"></pxl-var>
+<pxl-var id="y0" value="0"></pxl-var>
+<pxl-var id="x1" value="1"></pxl-var>
+<pxl-var id="y1" value="1"></pxl-var>
+
+<pxl-rect fill="linear([ref.x0.value, ref.y0.value, ref.x1.value, ref.y1.value], ['red', 'blue'])"></pxl-rect>
+```
+
+Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getElementById('x0').setAttribute('value', this.value)`), completely avoiding complex string interpolation or external JavaScript glue functions.
+
 ---
 
 ## Per-Frame Render Pipeline
@@ -1335,7 +1351,8 @@ node build.js
 
 #### 0. Documentation Pages & Interactive Playgrounds
 
-When creating or modifying documentation pages under `docs/`, you MUST first consult `docs/DOCS_STANDARDS.md` to strictly follow all 3-part layout requirements (`Markup` -> `Stage` -> `Tabbed Controls`), `pxlDocs` namespacing, and Prism syntax highlighting rules.
+When creating or modifying documentation pages under `docs/`, you MUST first consult `docs/DOCS_STANDARDS.md` to strictly follow all 3-part layout requirements (`Markup` -> `Stage` -> `Tabbed Controls`), color semantics, `pxlDocs` namespacing, top-of-layer variable placement, and the **3-Tier Playground Control Standard** (Tier 1: Direct `setAttribute`, Tier 2: Reactive `<pxl-var>`, Tier 3: Bottom `<script>`).
+
 
 #### 1. Always Include These Elements
 
