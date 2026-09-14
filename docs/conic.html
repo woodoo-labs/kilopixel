@@ -146,7 +146,7 @@
                     <label><span>Start Angle <span class="indicator-dot"></span></span> <span id="sec1ex1GradAngleVal">0°</span></label>
                     <input type="range" id="sec1ex1GradAngleInput" min="0" max="360" step="5" value="0" autocomplete="off"
                       data-mark="sec1ex1GradAngleCode"
-                      oninput="sec1ex1UpdateAngle(this.value)">
+                      oninput="document.getElementById('sec1ex1Angle').setAttribute('value', this.value); document.getElementById('sec1ex1GradAngleVal').innerText = this.value + '°'; document.getElementById('sec1ex1GradAngleCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -154,15 +154,15 @@
 
             <pxl-stage id="sec1ex1Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
+                <pxl-var id="sec1ex1Angle" value="0"></pxl-var>
+
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
                 <!-- Top-Left HUD Info -->
                 <pxl-text x="30" y="30" text="'Center = (0.5, 0.5)'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 <pxl-text x="30" y="65" text="'startAngle = ' + ref.sec1ex1Angle.value + '°'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 
-                <pxl-rect id="sec1ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="conic(0, ['#e2e8f0', '#475569'])"></pxl-rect>
-
-                <pxl-var id="sec1ex1Angle" value="0"></pxl-var>
+                <pxl-rect id="sec1ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="conic(ref.sec1ex1Angle.value, ['#e2e8f0', '#475569'])"></pxl-rect>
 
                 <!-- Overlay Group locked to Rect -->
                 <pxl-group x="ref.sec1ex1Rect.x" y="ref.sec1ex1Rect.y" rotate="ref.sec1ex1Rect.rotate">
@@ -269,19 +269,19 @@
                     <label><span>Center X0 <span class="indicator-dot"></span></span> <span id="sec2ex1GradCxVal">0.3</span></label>
                     <input type="range" id="sec2ex1GradCxInput" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
                       data-mark="sec2ex1GradCxCode"
-                      oninput="sec2ex1UpdateCenter('Cx', this.value);">
+                      oninput="document.getElementById('sec2ex1Cx').setAttribute('value', this.value); document.getElementById('sec2ex1GradCxVal').innerText = this.value; document.getElementById('sec2ex1GradCxCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
                     <label><span>Center Y0</span> <span id="sec2ex1GradCyVal">0.3</span></label>
                     <input type="range" id="sec2ex1GradCyInput" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
                       data-mark="sec2ex1GradCyCode"
-                      oninput="sec2ex1UpdateCenter('Cy', this.value);">
+                      oninput="document.getElementById('sec2ex1Cy').setAttribute('value', this.value); document.getElementById('sec2ex1GradCyVal').innerText = this.value; document.getElementById('sec2ex1GradCyCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
                     <label><span>Start Angle <span class="indicator-dot"></span></span> <span id="sec2ex1GradAngleVal">45°</span></label>
                     <input type="range" id="sec2ex1GradAngleInput" min="0" max="360" step="5" value="45" autocomplete="off"
                       data-mark="sec2ex1GradAngleCode"
-                      oninput="sec2ex1UpdateAngle(this.value)">
+                      oninput="document.getElementById('sec2ex1Angle').setAttribute('value', this.value); document.getElementById('sec2ex1GradAngleVal').innerText = this.value + '°'; document.getElementById('sec2ex1GradAngleCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -289,19 +289,19 @@
 
             <pxl-stage id="sec2ex1Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
+                <pxl-var id="sec2ex1Angle" value="45"></pxl-var>
+                <pxl-var id="sec2ex1Cx" value="0.3"></pxl-var>
+                <pxl-var id="sec2ex1Cy" value="0.3"></pxl-var>
+                <pxl-var id="sec2ex1LocalX" value="(ref.sec2ex1Cx.value - 0.5) * ref.sec2ex1Rect.w"></pxl-var>
+                <pxl-var id="sec2ex1LocalY" value="(ref.sec2ex1Cy.value - 0.5) * ref.sec2ex1Rect.h"></pxl-var>
+
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
                 <!-- Top-Left HUD Info -->
                 <pxl-text x="30" y="30" text="'Center = (' + ref.sec2ex1Cx.value + ', ' + ref.sec2ex1Cy.value + ')'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 <pxl-text x="30" y="65" text="'startAngle = ' + ref.sec2ex1Angle.value + '°'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 
-                <pxl-rect id="sec2ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="conic([45, 0.3, 0.3], ['#e2e8f0', '#475569'])"></pxl-rect>
-
-                <pxl-var id="sec2ex1Angle" value="45"></pxl-var>
-                <pxl-var id="sec2ex1Cx" value="0.3"></pxl-var>
-                <pxl-var id="sec2ex1Cy" value="0.3"></pxl-var>
-                <pxl-var id="sec2ex1LocalX" value="(ref.sec2ex1Cx.value - 0.5) * ref.sec2ex1Rect.w"></pxl-var>
-                <pxl-var id="sec2ex1LocalY" value="(ref.sec2ex1Cy.value - 0.5) * ref.sec2ex1Rect.h"></pxl-var>
+                <pxl-rect id="sec2ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="conic([ref.sec2ex1Angle.value, ref.sec2ex1Cx.value, ref.sec2ex1Cy.value], ['#e2e8f0', '#475569'])"></pxl-rect>
 
                 <!-- Overlay Group locked to Rect -->
                 <pxl-group x="ref.sec2ex1Rect.x" y="ref.sec2ex1Rect.y" rotate="ref.sec2ex1Rect.rotate">
@@ -372,58 +372,5 @@
   <!-- Prism Syntax Highlighting -->
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
-
-  <!-- Page-Specific Playground Orchestration -->
-  <script>
-    function sec1ex1UpdateAngle(val) {
-      const varEl = document.getElementById('sec1ex1Angle');
-      if (varEl) varEl.setAttribute('value', val);
-      
-      const valEl = document.getElementById('sec1ex1GradAngleVal');
-      if (valEl) valEl.innerText = val + '°';
-      
-      const codeEl = document.getElementById('sec1ex1GradAngleCode');
-      if (codeEl) codeEl.innerText = val;
-      
-      const rect = document.getElementById('sec1ex1Rect');
-      if (rect) rect.setAttribute('fill', `conic(${val}, ['#e2e8f0', '#475569'])`);
-    }
-
-    function sec2ex1UpdateFill() {
-      const rect = document.getElementById('sec2ex1Rect');
-      const angle = document.getElementById('sec2ex1GradAngleInput').value;
-      const cx = document.getElementById('sec2ex1GradCxInput').value;
-      const cy = document.getElementById('sec2ex1GradCyInput').value;
-      if (rect) {
-        rect.setAttribute('fill', `conic([${angle}, ${cx}, ${cy}], ['#e2e8f0', '#475569'])`);
-      }
-    }
-
-    function sec2ex1UpdateAngle(val) {
-      const varEl = document.getElementById('sec2ex1Angle');
-      if (varEl) varEl.setAttribute('value', val);
-      
-      const valEl = document.getElementById('sec2ex1GradAngleVal');
-      if (valEl) valEl.innerText = val + '°';
-      
-      const codeEl = document.getElementById('sec2ex1GradAngleCode');
-      if (codeEl) codeEl.innerText = val;
-      
-      sec2ex1UpdateFill();
-    }
-
-    function sec2ex1UpdateCenter(axis, val) {
-      const varEl = document.getElementById(`sec2ex1${axis}`);
-      if (varEl) varEl.setAttribute('value', val);
-      
-      const valEl = document.getElementById(`sec2ex1Grad${axis}Val`);
-      if (valEl) valEl.innerText = val;
-      
-      const codeEl = document.getElementById(`sec2ex1Grad${axis}Code`);
-      if (codeEl) codeEl.innerText = val;
-      
-      sec2ex1UpdateFill();
-    }
-  </script>
 </body>
 </html>

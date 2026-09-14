@@ -134,7 +134,13 @@ Every documentation example must follow a standardized 3-part layout:
 * **Native DOM API (Zero-Magic Interaction):** When interacting with Kilopixel HTML elements from JavaScript (e.g., in slider `oninput` handlers or custom scripts), ALWAYS use standard native DOM methods like `document.getElementById('id').setAttribute('attr', value)`. This makes it transparent to developers inspecting the source code that Kilopixel has no proprietary or secret JavaScript API — it works 100% via standard declarative HTML attributes and native DOM manipulation.
 
 ### Reactivity & Live Code
-* **Variable Placement & Scope:** `<pxl-var>` nodes act as invisible nodes in the engine. They MUST be placed inside a `<pxl-layer>`. Always declare `<pxl-var>` elements at the **top of the `<pxl-layer>`** (directly below `<pxl-grid>`) before any shapes or helper groups that reference them. This guarantees that variables are registered in `pxl.nodes` with their default values on initial frame load, preventing uninitialized evaluation errors.
+* **Variable Placement & Layer Organization:** `<pxl-var>` nodes define reactive state and act as invisible nodes in the engine. They MUST be placed inside a `<pxl-layer>`.
+  * **Recommended Best Practice (State-First Organization):** For clean code architecture and human readability, it is recommended best practice to declare `<pxl-var>` elements at the **very top of `<pxl-layer>`** (directly below the opening tag, preceding `<pxl-grid>`). This establishes a clean, predictable separation of concerns:
+    1. **Layer State**: `<pxl-var>` (non-rendering state declarations)
+    2. **Background Canvas**: `<pxl-grid>` (first visual backdrop)
+    3. **Primary Shapes**: `<pxl-rect>`, `<pxl-circle>`, etc.
+    4. **Overlays & HUD**: `<pxl-group>` (helper annotations, bounds, and labels)
+  * **Engine Order-Independence (Not a Hard Requirement):** While state-first placement is recommended for clean code organization, it is **not a technical requirement**. Kilopixel's two-phase reactive broadcast engine is fully DOM order-independent. Variables can be declared anywhere inside the layer (before, between, or after shapes), and elements will automatically resolve and sync via `pxl.broadcast` upon connection.
 * **The 3-Tier Playground Control Standard:**
   To maintain a clean balance between declarative transparency and concise code, documentation controls (sliders, buttons, dropdowns) must strictly follow one of three architectural tiers:
   * **Tier 1: Direct Native DOM (`setAttribute`) — Simple 1-to-1 Attributes:**

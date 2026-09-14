@@ -161,8 +161,6 @@
 
             <pxl-stage id="sec1ex1Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
-                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-
                 <!-- Variables for Gradient & Geometric Projection -->
                 <pxl-var id="sec1ex1Angle" value="45"></pxl-var>
                 <pxl-var id="sec1ex1GradStart" value="0.4"></pxl-var>
@@ -173,6 +171,8 @@
                 <pxl-var id="sec1ex1ProjL" value="800"></pxl-var>
                 <pxl-var id="sec1ex1Px" value="ref.sec1ex1ProjL.value * ref.sec1ex1Sin.value"></pxl-var>
                 <pxl-var id="sec1ex1Py" value="ref.sec1ex1ProjL.value * ref.sec1ex1Cos.value"></pxl-var>
+
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
                 <pxl-rect id="sec1ex1Rect"
                   x="500" y="300"
@@ -436,14 +436,10 @@
 
             <pxl-stage id="sec2ex1Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
-                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-                
                 <pxl-var id="sec2ex1X0" value="0"></pxl-var>
                 <pxl-var id="sec2ex1Y0" value="0"></pxl-var>
                 <pxl-var id="sec2ex1X1" value="1"></pxl-var>
                 <pxl-var id="sec2ex1Y1" value="1"></pxl-var>
-
-                <pxl-rect id="sec2ex1Rect" x="500" y="300" w="500" h="200" rotate="0" fill="linear([ref.sec2ex1X0.value, ref.sec2ex1Y0.value, ref.sec2ex1X1.value, ref.sec2ex1Y1.value], ['#e2e8f0', '#94a3b8'])"></pxl-rect>
 
                 <!-- Math Variables for Geometric Projection -->
                 <pxl-var id="sec2ex1P0x" value="(ref.sec2ex1X0.value - 0.5) * ref.sec2ex1Rect.w"></pxl-var>
@@ -458,6 +454,10 @@
                 <pxl-var id="sec2ex1ProjL" value="800"></pxl-var>
                 <pxl-var id="sec2ex1Nx" value="-(ref.sec2ex1Vy.value / (ref.sec2ex1VLen.value || 1)) * ref.sec2ex1ProjL.value"></pxl-var>
                 <pxl-var id="sec2ex1Ny" value="(ref.sec2ex1Vx.value / (ref.sec2ex1VLen.value || 1)) * ref.sec2ex1ProjL.value"></pxl-var>
+
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+                <pxl-rect id="sec2ex1Rect" x="500" y="300" w="500" h="200" rotate="0" fill="linear([ref.sec2ex1X0.value, ref.sec2ex1Y0.value, ref.sec2ex1X1.value, ref.sec2ex1Y1.value], ['#e2e8f0', '#94a3b8'])"></pxl-rect>
 
                 <pxl-group x="ref.sec2ex1Rect.x" y="ref.sec2ex1Rect.y" rotate="ref.sec2ex1Rect.rotate">
                   <!-- Solid blue bounding box -->
@@ -659,8 +659,6 @@
 
             <pxl-stage id="sec2ex2Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
-                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-
                 <!-- Ellipse Gradient Vars -->
                 <pxl-var id="sec2ex2EllipseX0" value="0.25"></pxl-var>
                 <pxl-var id="sec2ex2EllipseY0" value="0.25"></pxl-var>
@@ -678,6 +676,8 @@
                 <pxl-var id="sec2ex2TextY0" value="0.4"></pxl-var>
                 <pxl-var id="sec2ex2TextX1" value="0"></pxl-var>
                 <pxl-var id="sec2ex2TextY1" value="0.6"></pxl-var>
+
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
                 <pxl-ellipse id="sec2ex2Ellipse" x="150" y="300" rx="100" ry="200" rotate="0" fill="linear([ref.sec2ex2EllipseX0.value, ref.sec2ex2EllipseY0.value, ref.sec2ex2EllipseX1.value, ref.sec2ex2EllipseY1.value], ['darkorange', 'gold', 'crimson'])"></pxl-ellipse>
                 <pxl-rect id="sec2ex2Rect" x="500" y="300" w="300" h="200" r="20" rotate="0" fill="linear([ref.sec2ex2RectX0.value, ref.sec2ex2RectY0.value, ref.sec2ex2RectX1.value, ref.sec2ex2RectY1.value], [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])"></pxl-rect>
