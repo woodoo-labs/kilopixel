@@ -123,11 +123,9 @@ if (layer._maxFps && (t - layer._lastRenderTime) < layer._minInterval) {
   } else if (layer.isDirty && !layer._throttleTimer) {
     // ONE-SHOT TIMER: non-animated layers have no heartbeat.
     // Schedule a single wake-up to flush the dirty flag.
+    // Uses pre-bound _throttleWakeup (created once in constructor) — zero GC.
     const remaining = layer._minInterval - (t - layer._lastRenderTime);
-    layer._throttleTimer = setTimeout(() => {
-      layer._throttleTimer = null;
-      layer.invalidate();
-    }, remaining * 1000);
+    layer._throttleTimer = setTimeout(layer._throttleWakeup, remaining * 1000);
   }
   continue;
 }
@@ -165,10 +163,7 @@ for (let i = 0; i < len; i++) {
         this.requestRender(); // baton relay
       } else if (layer.isDirty && !layer._throttleTimer) {
         const remaining = layer._minInterval - (t - layer._lastRenderTime);
-        layer._throttleTimer = setTimeout(() => {
-          layer._throttleTimer = null;
-          layer.invalidate();
-        }, remaining * 1000);
+        layer._throttleTimer = setTimeout(layer._throttleWakeup, remaining * 1000);
       }
       continue;
     }
@@ -221,9 +216,20 @@ A 60fps variable broadcasting to a shape in a 4fps layer: the reactive callback 
 
 - Add `maxfps` to `observedAttributes` list.
 - Add `maxfps: 0` to default `attributeExpressions` / `attributeValues`.
-- Add internal properties: `_maxFps`, `_minInterval`, `_lastRenderTime`, `_throttleTimer`.
-- In `attributeChangedCallback` (inherited from PxlNode): `maxfps` attribute compiles normally. Add a post-compile hook or override to compute `_minInterval = 1 / maxfps` when `maxfps` changes.
-- In `disconnectedCallback`: clear `_throttleTimer` if active.
+- **Hidden class stability**: Initialize ALL throttle properties in the constructor so every Layer instance has the same V8 hidden class shape from birth. This prevents deoptimization of property access across the entire render pipeline:
+  ```javascript
+  // In Layer constructor:
+  this._maxFps = 0;
+  this._minInterval = 0;
+  this._lastRenderTime = 0;
+  this._throttleTimer = null;
+  this._throttleWakeup = () => {   // Pre-bound — created once per layer, zero GC in hot loop
+      this._throttleTimer = null;
+      this.invalidate();
+  };
+  ```
+- In `attributeChangedCallback` (inherited from PxlNode): `maxfps` attribute compiles normally. Add a post-compile hook or override to compute `_maxFps` and `_minInterval = 1 / maxfps` when `maxfps` changes.
+- In `disconnectedCallback`: clear `_throttleTimer` via `clearTimeout` if active.
 
 ---
 
