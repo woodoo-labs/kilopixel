@@ -237,3 +237,19 @@ To maintain a cohesive, highly professional editorial presentation across all do
 * **Strictly No Inline Styles**: You MUST NOT use the `style="..."` attribute anywhere in the documentation HTML. If you need a margin, layout adjustment, typography tweak, or color, you must search `docs/css/docs.css` for an existing utility class or standard component layout.
 * **Permission Required**: If you believe a completely unique inline style or a new global CSS rule is necessary, you MUST stop and ask the user for explicit permission before modifying any CSS or writing the inline style.
 * **Exceptions**: The only exceptions to the inline style ban are functional JavaScript targets (e.g., dynamically controlled `width` or `transform` properties explicitly driven by a slider's Javascript), `style="display: none;"` for initially inactive/hidden dual-mode control group containers, or critical frontend hacks (like `opacity: 0` for font preloaders).
+
+## 9. Canvas Typography & Font Preloading
+* **Font Preloader Requirement**: The HTML5 Canvas API (`ctx.font`) does not automatically trigger network downloads for `@font-face` web fonts unless they are rendered by an HTML DOM element first.
+* **Strict "Only If Needed" Rule**: The invisible font preloader `<div>` (e.g., rendering all 9 weights of `'Inter'`) must **ONLY** be added to pages where interactive `<pxl-text>` elements actually render external web fonts with dynamic weights or styles (such as `linear.html` and `fill.html`).
+* **Do NOT Include on Standard Pages**: Do NOT include the font preloader on pages that only use system web-safe fonts like `font="monospace"` (e.g., coordinate/angle HUD overlays in `radial.html` and `conic.html`), or pages with no `<pxl-text>` shapes at all (e.g., `stroke.html`).
+* **Auto-Invalidation on Load**: On pages requiring the font preloader, also include the `document.fonts.ready` listener to immediately invalidate layers and redraw the canvas as soon as fonts finish downloading:
+  ```html
+  <script>
+    if (document.fonts) {
+      document.fonts.ready.then(() => {
+        document.querySelectorAll('pxl-layer').forEach(layer => layer.invalidate());
+      });
+    }
+  </script>
+  ```
+

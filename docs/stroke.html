@@ -328,10 +328,10 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- 1. Open Chevron Corner --&gt;
-    &lt;pxl-polyline linejoin="<mark id="sec3JoinCode">miter</mark>" strokewidth="<mark id="sec3WidthCode">40</mark>" points="150,450; 300,<mark id="sec3PeakYCode">150</mark>; 450,450" stroke="#f97316" fill="none"&gt;&lt;/pxl-polyline&gt;
+    &lt;pxl-polyline linejoin="<mark id="sec3JoinCode">miter</mark>" strokewidth="<mark id="sec3WidthCode">70</mark>" points="150,450; 300,<mark id="sec3PeakYCode">150</mark>; 450,450" stroke="#f97316" fill="none"&gt;&lt;/pxl-polyline&gt;
 
     &lt;!-- 2. Closed Polygon Corner --&gt;
-    &lt;pxl-polyline linejoin="<mark id="sec3PolyJoinCode">miter</mark>" strokewidth="<mark id="sec3PolyWidthCode">40</mark>" points="550,450; 700,<mark id="sec3PolyPeakYCode">150</mark>; 850,450" closed="true" stroke="#3b82f6" fill="#dbeafe66"&gt;&lt;/pxl-polyline&gt;
+    &lt;pxl-polyline linejoin="<mark id="sec3PolyJoinCode">round</mark>" strokewidth="<mark id="sec3PolyWidthCode">40</mark>" points="550,450; 700,<mark id="sec3PolyPeakYCode">150</mark>; 850,450" closed="true" stroke="#3b82f6" fill="#dbeafe66"&gt;&lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -349,8 +349,8 @@
             <div class="tab-content active" id="sec3ChevronTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec3WidthVal">40</span></label>
-                  <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec3WidthInput"
+                  <label><span>Stroke Width</span> <span id="sec3WidthVal">70</span></label>
+                  <input type="range" min="10" max="100" step="2" value="70" autocomplete="off" id="sec3WidthInput"
                     oninput="document.getElementById('sec3Chevron').setAttribute('strokewidth', this.value); document.getElementById('sec3WidthVal').innerText = this.value; document.getElementById('sec3WidthCode').innerText = this.value;" data-mark="sec3WidthCode">
                 </div>
                 <div class="control-group">
@@ -387,8 +387,8 @@
                   <label><span>Line Join</span></label>
                   <select id="sec3PolyJoinSelect" autocomplete="off"
                     onchange="document.getElementById('sec3Polygon').setAttribute('linejoin', this.value); document.getElementById('sec3PolyJoinCode').innerText = this.value;" data-mark="sec3PolyJoinCode">
-                    <option value="miter" selected>miter (default)</option>
-                    <option value="round">round</option>
+                    <option value="miter">miter (default)</option>
+                    <option value="round" selected>round</option>
                     <option value="bevel">bevel</option>
                   </select>
                 </div>
@@ -412,10 +412,10 @@
             <!-- Main Shapes Layer -->
             <pxl-layer>
               <!-- Open Chevron Corner -->
-              <pxl-polyline id="sec3Chevron" points="150,450; 300,150; 450,450" stroke="#f97316" strokewidth="40" fill="none" linejoin="miter"></pxl-polyline>
+              <pxl-polyline id="sec3Chevron" points="150,450; 300,150; 450,450" stroke="#f97316" strokewidth="70" fill="none" linejoin="miter"></pxl-polyline>
 
               <!-- Closed Polygon Corner -->
-              <pxl-polyline id="sec3Polygon" points="550,450; 700,150; 850,450" closed="true" stroke="#3b82f6" strokewidth="40" fill="#dbeafe66" linejoin="miter"></pxl-polyline>
+              <pxl-polyline id="sec3Polygon" points="550,450; 700,150; 850,450" closed="true" stroke="#3b82f6" strokewidth="40" fill="#dbeafe66" linejoin="round"></pxl-polyline>
             </pxl-layer>
 
             <!-- Overlay Ghost Lines & Points -->
