@@ -166,6 +166,136 @@
           </pxl-stage>
         </div>
 
+        <!-- ================================================================= -->
+        <!-- SECTION 2: LINE CAPS & JOINS -->
+        <!-- ================================================================= -->
+        <h2>2. Line Caps &amp; Joins</h2>
+        <p>Kilopixel provides precise control over how open stroke endpoints terminate and how corners connect:</p>
+        <ul>
+          <li><strong>Line Cap</strong> (<code>linecap</code>): Controls the ending shape of open paths (such as <code>&lt;pxl-line&gt;</code> and open <code>&lt;pxl-polyline&gt;</code>). Accepts <code>butt</code> (default, flush cut precisely at the coordinate endpoints), <code>round</code> (semicircular cap extending past the endpoints by half the stroke width), or <code>square</code> (rectangular box extending past the endpoints by half the stroke width).</li>
+          <li><strong>Line Join</strong> (<code>linejoin</code>): Controls the shape of corners where two stroke segments meet. Accepts <code>miter</code> (default, sharp corner point), <code>round</code> (circular curved corner), or <code>bevel</code> (flat diagonal cut).</li>
+          <li><strong>Miter Limit</strong> (<code>miterlimit</code>): Sets the maximum allowable ratio between the miter length and the stroke width. When acute angles make the miter point excessively long, Kilopixel automatically clips it to a bevel.</li>
+        </ul>
+
+        <div class="callout-info">
+          <p class="callout-title">The Miter Limit Threshold</p>
+          <p class="callout-body">When two lines meet at an acute angle, extending their outer edges can create an excessively long, spiky point. The <code>miterlimit</code> attribute defines the maximum ratio between the miter length and the stroke width (defaulting to <code>10</code>). If the corner angle is sharper than this threshold, the engine automatically clips the corner into a <code>bevel</code>.</p>
+        </div>
+
+        <!-- Declarative Code Block Above Container -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- 1. Open line demonstrating Line Cap --&gt;
+    &lt;pxl-line linecap="<mark id="sec2LineCapCode">butt</mark>" strokewidth="<mark id="sec2LineWidthCode">40</mark>" x1="120" y1="300" x2="420" y2="300" stroke="#f97316"&gt;&lt;/pxl-line&gt;
+
+    &lt;!-- 2. Polyline corner demonstrating Line Join &amp; Miter Limit --&gt;
+    &lt;pxl-polyline linejoin="<mark id="sec2PolylineJoinCode">miter</mark>" miterlimit="<mark id="sec2MiterLimitCode">3</mark>" strokewidth="<mark id="sec2PolylineWidthCode">40</mark>" points="640,420; 760,<mark id="sec2PeakYCode">160</mark>; 880,420" stroke="#3b82f6" fill="none"&gt;&lt;/pxl-polyline&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2LineCapTab')">Line Caps</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2LineJoinTab')">Line Joins</button>
+              </div>
+            </div>
+
+            <!-- Line Cap Tab -->
+            <div class="tab-content active" id="sec2LineCapTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Line Cap</span></label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn active" id="sec2CapButtBtn" onclick="document.getElementById('sec2Line').setAttribute('linecap', 'butt'); pxlDocs.updateToggle(this, null, 'sec2LineCapCode', 'butt');">butt</button>
+                    <button class="toggle-btn" id="sec2CapRoundBtn" onclick="document.getElementById('sec2Line').setAttribute('linecap', 'round'); pxlDocs.updateToggle(this, null, 'sec2LineCapCode', 'round');">round</button>
+                    <button class="toggle-btn" id="sec2CapSquareBtn" onclick="document.getElementById('sec2Line').setAttribute('linecap', 'square'); pxlDocs.updateToggle(this, null, 'sec2LineCapCode', 'square');">square</button>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec2LineWidthVal">40</span></label>
+                  <input type="range" min="10" max="60" step="2" value="40" autocomplete="off" id="sec2LineWidthInput"
+                    oninput="document.getElementById('sec2Line').setAttribute('strokewidth', this.value); document.getElementById('sec2LineWidthVal').innerText = this.value; document.getElementById('sec2LineWidthCode').innerText = this.value;" data-mark="sec2LineWidthCode">
+                </div>
+              </div>
+            </div>
+
+            <!-- Line Join Tab -->
+            <div class="tab-content" id="sec2LineJoinTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Line Join</span></label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn active" id="sec2JoinMiterBtn" onclick="document.getElementById('sec2Polyline').setAttribute('linejoin', 'miter'); pxlDocs.updateToggle(this, null, 'sec2PolylineJoinCode', 'miter');">miter</button>
+                    <button class="toggle-btn" id="sec2JoinRoundBtn" onclick="document.getElementById('sec2Polyline').setAttribute('linejoin', 'round'); pxlDocs.updateToggle(this, null, 'sec2PolylineJoinCode', 'round');">round</button>
+                    <button class="toggle-btn" id="sec2JoinBevelBtn" onclick="document.getElementById('sec2Polyline').setAttribute('linejoin', 'bevel'); pxlDocs.updateToggle(this, null, 'sec2PolylineJoinCode', 'bevel');">bevel</button>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label><span>Miter Limit</span> <span id="sec2MiterLimitVal">3</span></label>
+                  <input type="range" min="1" max="6" step="0.2" value="3" autocomplete="off" id="sec2MiterLimitInput"
+                    oninput="document.getElementById('sec2Polyline').setAttribute('miterlimit', this.value); document.getElementById('sec2MiterLimitVal').innerText = this.value; document.getElementById('sec2MiterLimitCode').innerText = this.value;" data-mark="sec2MiterLimitCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Corner Peak Y</span> <span id="sec2PeakYVal">160</span></label>
+                  <input type="range" min="80" max="360" step="10" value="160" autocomplete="off" id="sec2PeakYInput"
+                    oninput="const y = this.value; document.getElementById('sec2Polyline').setAttribute('points', '640,420; 760,' + y + '; 880,420'); document.getElementById('sec2GhostPolyline').setAttribute('points', '640,420; 760,' + y + '; 880,420'); document.getElementById('sec2PeakDot').setAttribute('y', y); document.getElementById('sec2PeakYVal').innerText = y; document.getElementById('sec2PeakYCode').innerText = y;" data-mark="sec2PeakYCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec2PolylineWidthVal">40</span></label>
+                  <input type="range" min="10" max="60" step="2" value="40" autocomplete="off" id="sec2PolylineWidthInput"
+                    oninput="document.getElementById('sec2Polyline').setAttribute('strokewidth', this.value); document.getElementById('sec2PolylineWidthVal').innerText = this.value; document.getElementById('sec2PolylineWidthCode').innerText = this.value;" data-mark="sec2PolylineWidthCode">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage id="sec2Stage" ratio="5 / 3" class="demo-stage">
+            <!-- Background Grid -->
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            </pxl-layer>
+
+            <!-- Guide Helpers Layer -->
+            <pxl-layer>
+              <!-- Line endpoint reference guides -->
+              <pxl-line x1="120" y1="180" x2="120" y2="420" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-line x1="420" y1="180" x2="420" y2="420" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-text x="120" y="150" text="'x1 = 120'" size="27" font="monospace" align="center" fill="#94a3b8"></pxl-text>
+              <pxl-text x="420" y="150" text="'x2 = 420'" size="27" font="monospace" align="center" fill="#94a3b8"></pxl-text>
+            </pxl-layer>
+
+            <!-- Main Shapes Layer -->
+            <pxl-layer>
+              <!-- Primary Line demonstrating Line Cap -->
+              <pxl-line id="sec2Line" x1="120" y1="300" x2="420" y2="300" stroke="#f97316" strokewidth="40" linecap="butt"></pxl-line>
+
+              <!-- Polyline demonstrating Line Join & Miter -->
+              <pxl-polyline id="sec2Polyline" points="640,420; 760,160; 880,420" stroke="#3b82f6" strokewidth="40" fill="none" linejoin="miter" miterlimit="3"></pxl-polyline>
+            </pxl-layer>
+
+            <!-- Overlay Ghost Lines & Points -->
+            <pxl-layer>
+              <!-- Line centerline & endpoint anchors -->
+              <pxl-line x1="120" y1="300" x2="420" y2="300" stroke="#ffffff" strokewidth="2" linedash="[4, 4]"></pxl-line>
+              <pxl-circle x="120" y="300" r="5" fill="#c2410c"></pxl-circle>
+              <pxl-circle x="420" y="300" r="5" fill="#c2410c"></pxl-circle>
+
+              <!-- Polyline skeleton & peak anchor -->
+              <pxl-polyline id="sec2GhostPolyline" points="640,420; 760,160; 880,420" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
+              <pxl-circle x="640" y="420" r="5" fill="#1d4ed8"></pxl-circle>
+              <pxl-circle id="sec2PeakDot" x="760" y="160" r="5" fill="#1d4ed8"></pxl-circle>
+              <pxl-circle x="880" y="420" r="5" fill="#1d4ed8"></pxl-circle>
+
+              <!-- Section Labels -->
+              <pxl-text x="270" y="480" text="'Line Cap'" size="27" font="monospace" weight="700" align="center" fill="#fb923c"></pxl-text>
+              <pxl-text x="760" y="480" text="'Line Join &amp; Miter'" size="27" font="monospace" weight="700" align="center" fill="#60a5fa"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
       </div>
     </main>
   </div>
