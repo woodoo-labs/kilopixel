@@ -39,12 +39,12 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECTION 1: STROKE WIDTH & COLOR -->
+        <!-- SECTION 1: STROKE COLOR & WIDTH -->
         <!-- ================================================================= -->
-        <h2>1. Stroke Width &amp; Color</h2>
+        <h2>1. Stroke Color &amp; Width</h2>
         <p>You can outline any Kilopixel shape using the <code>stroke</code> and <code>strokewidth</code> attributes:</p>
         <ul>
-          <li><strong>Stroke Paint</strong> (<code>stroke</code>): Accepts hexadecimal codes (<code>#f97316</code>), CSS color keywords (<code>darkorange</code>), functional color models (<code>rgb()</code>, <code>rgba()</code>, <code>hsl()</code>, <code>hsla()</code>), or dynamic gradient descriptors (<code>linear()</code>, <code>radial()</code>, <code>conic()</code>). If omitted or set to <code>none</code> or <code>transparent</code>, no stroke is drawn.</li>
+          <li><strong>Stroke Color</strong> (<code>stroke</code>): Accepts hexadecimal codes (<code>#f97316</code>), CSS color keywords (<code>darkorange</code>), functional color models (<code>rgb()</code>, <code>rgba()</code>, <code>hsl()</code>, <code>hsla()</code>), or dynamic gradient shaders (<code>linear()</code>, <code>radial()</code>, <code>conic()</code>). If omitted or set to <code>none</code> or <code>transparent</code>, no stroke is drawn.</li>
           <li><strong>Stroke Width</strong> (<code>strokewidth</code>): Sets the thickness of the stroke in unitless logical canvas coordinates. Defaults to <code>1</code>. Setting <code>strokewidth="0"</code> disables stroke rendering.</li>
         </ul>
 
@@ -52,16 +52,10 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Circle with configurable stroke --&gt;
-    &lt;pxl-circle x="320" y="300" r="<mark id="sec1CircleRCode">140</mark>" fill="#ffedd566"
-      stroke="<mark id="sec1CircleStrokeCode">#f97316</mark>"
-      strokewidth="<mark id="sec1CircleWidthCode">8</mark>"&gt;
-    &lt;/pxl-circle&gt;
+    &lt;pxl-circle stroke="<mark id="sec1CircleStrokeCode">#f97316</mark>" strokewidth="<mark id="sec1CircleWidthCode">8</mark>" r="<mark id="sec1CircleRCode">140</mark>" x="300" y="300" fill="#ffedd566"&gt;&lt;/pxl-circle&gt;
 
     &lt;!-- Rounded rectangle with gradient stroke --&gt;
-    &lt;pxl-rect x="680" y="300" w="260" h="260" r="<mark id="sec1RectRCode">36</mark>" fill="#dbeafe66"
-      stroke="<mark id="sec1RectStrokeCode">#3b82f6</mark>"
-      strokewidth="<mark id="sec1RectWidthCode">8</mark>"&gt;
-    &lt;/pxl-rect&gt;
+    &lt;pxl-rect stroke="<mark id="sec1RectStrokeCode">#3b82f6</mark>" strokewidth="<mark id="sec1RectWidthCode">8</mark>" r="<mark id="sec1RectRCode">36</mark>" x="700" y="300" w="260" h="260" fill="#dbeafe66"&gt;&lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -79,7 +73,7 @@
             <div class="tab-content active" id="sec1CircleTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec1CircleWidthVal">8</span></label>
+                  <label><span>Stroke Width</span> <span id="sec1CircleWidthVal">8</span></label>
                   <input type="range" min="0" max="40" step="1" value="8" autocomplete="off" id="sec1CircleWidthInput"
                     oninput="document.getElementById('sec1Circle').setAttribute('strokewidth', this.value); document.getElementById('sec1CircleWidthVal').innerText = this.value; document.getElementById('sec1CircleWidthCode').innerText = this.value;" data-mark="sec1CircleWidthCode">
                 </div>
@@ -89,25 +83,26 @@
                     oninput="document.getElementById('sec1Circle').setAttribute('r', this.value); document.getElementById('sec1CircleRVal').innerText = this.value; document.getElementById('sec1CircleRCode').innerText = this.value;" data-mark="sec1CircleRCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Color</span></label>
+                  <label><span>Stroke Color <span class="indicator-dot"></span></span></label>
                   <select id="sec1CircleStrokeSelect" autocomplete="off"
                     onchange="document.getElementById('sec1Circle').setAttribute('stroke', this.value); document.getElementById('sec1CircleStrokeCode').innerText = this.value;" data-mark="sec1CircleStrokeCode">
                     <optgroup label="Hex Codes">
-                      <option value="#f97316" selected>#f97316 (Hex)</option>
-                      <option value="#ea580c">#ea580c (Hex Dark)</option>
+                      <option value="#f97316" selected>#f97316 (Orange)</option>
+                      <option value="#10b981">#10b981 (Emerald)</option>
+                      <option value="#8b5cf6">#8b5cf6 (Purple)</option>
                     </optgroup>
                     <optgroup label="Named Colors">
-                      <option value="darkorange">darkorange</option>
-                      <option value="tomato">tomato</option>
-                      <option value="coral">coral</option>
+                      <option value="crimson">crimson</option>
+                      <option value="dodgerblue">dodgerblue</option>
+                      <option value="gold">gold</option>
                     </optgroup>
                     <optgroup label="RGB &amp; RGBA">
-                      <option value="rgb(249, 115, 22)">rgb(249, 115, 22)</option>
-                      <option value="rgba(249, 115, 22, 0.65)">rgba(249, 115, 22, 0.65)</option>
+                      <option value="rgb(6, 182, 212)">rgb(6, 182, 212)</option>
+                      <option value="rgba(239, 68, 68, 0.65)">rgba(239, 68, 68, 0.65)</option>
                     </optgroup>
                     <optgroup label="HSL &amp; HSLA">
-                      <option value="hsl(25, 95%, 53%)">hsl(25, 95%, 53%)</option>
-                      <option value="hsla(25, 95%, 53%, 0.65)">hsla(25, 95%, 53%, 0.65)</option>
+                      <option value="hsl(160, 84%, 39%)">hsl(160, 84%, 39%)</option>
+                      <option value="hsla(280, 85%, 60%, 0.65)">hsla(280, 85%, 60%, 0.65)</option>
                     </optgroup>
                   </select>
                 </div>
@@ -138,7 +133,7 @@
                       <option value="#ec4899">#ec4899 (Pink)</option>
                     </optgroup>
                     <optgroup label="Gradient Strokes">
-                      <option value="linear(45, ['#3b82f6', '#8b5cf6'])">linear(45, ['#3b82f6', '#8b5cf6'])</option>
+                      <option value="linear(45, ['#f97316', '#3b82f6'])">linear(45, ['#f97316', '#3b82f6'])</option>
                       <option value="linear(90, ['#10b981', '#3b82f6'])">linear(90, ['#10b981', '#3b82f6'])</option>
                       <option value="conic(0, ['#3b82f6', '#ec4899', '#3b82f6'])">conic(0, ['#3b82f6', '#ec4899', '#3b82f6'])</option>
                     </optgroup>
@@ -149,25 +144,24 @@
           </div>
 
           <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
-            <!-- Background Grid & Divider -->
+            <!-- Background Grid -->
             <pxl-layer>
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-              <pxl-line x1="500" y1="0" x2="500" y2="600" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
             </pxl-layer>
 
             <!-- Shapes Layer -->
             <pxl-layer>
               <!-- Circle with configurable stroke -->
-              <pxl-circle id="sec1Circle" x="320" y="300" r="140" fill="#ffedd566" stroke="#f97316" strokewidth="8"></pxl-circle>
+              <pxl-circle id="sec1Circle" x="300" y="300" r="140" fill="#ffedd566" stroke="#f97316" strokewidth="8"></pxl-circle>
 
               <!-- Rounded Rect with configurable stroke -->
-              <pxl-rect id="sec1Rect" x="680" y="300" w="260" h="260" r="36" fill="#dbeafe66" stroke="#3b82f6" strokewidth="8"></pxl-rect>
+              <pxl-rect id="sec1Rect" x="700" y="300" w="260" h="260" r="36" fill="#dbeafe66" stroke="#3b82f6" strokewidth="8"></pxl-rect>
             </pxl-layer>
 
             <!-- Foreground Labels -->
             <pxl-layer>
-              <pxl-text x="320" y="520" text="'Circle Stroke'" size="27" font="monospace" weight="700" align="center" fill="#fb923c"></pxl-text>
-              <pxl-text x="680" y="520" text="'Rectangle Stroke'" size="27" font="monospace" weight="700" align="center" fill="#60a5fa"></pxl-text>
+              <pxl-text x="300" y="520" text="'Circle Stroke'" size="27" font="monospace" weight="700" align="center" fill="#fb923c"></pxl-text>
+              <pxl-text x="700" y="520" text="'Rectangle Stroke'" size="27" font="monospace" weight="700" align="center" fill="#60a5fa"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>

@@ -416,6 +416,125 @@
           </div>
         </div>
 
+        <!-- ================================================================= -->
+        <!-- SECTION 4: GRADIENTS -->
+        <!-- ================================================================= -->
+        <h2>4. Gradients</h2>
+        <p>The <code>fill</code> attribute also accepts dynamic gradient shaders: <code>linear()</code>, <code>radial()</code>, and <code>conic()</code>. Gradients scale smoothly with the logical canvas and adapt geometrically when shapes are rotated or resized.</p>
+
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- 1. Ellipse --&gt;
+    &lt;pxl-ellipse fill="linear(<mark id="sec4EllipseAngleCode">45</mark>, ['darkorange', 'gold', 'crimson'])" rx="<mark id="sec4EllipseRxCode">100</mark>" ry="<mark id="sec4EllipseRyCode">200</mark>" rotate="<mark id="sec4EllipseRotCode">0</mark>" x="150" y="300"&gt;&lt;/pxl-ellipse&gt;
+      
+    &lt;!-- 2. Hard Split Rounded Rect --&gt;
+    &lt;pxl-rect fill="linear(<mark id="sec4RectAngleCode">135</mark>, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])" w="<mark id="sec4RectWidthCode">300</mark>" h="<mark id="sec4RectHeightCode">200</mark>" r="20" rotate="<mark id="sec4RectRotCode">0</mark>" x="500" y="300"&gt;&lt;/pxl-rect&gt;
+
+    &lt;!-- 3. Gradient Text --&gt;
+    &lt;pxl-text fill="linear(<mark id="sec4TextAngleCode">45</mark>, ['#8b5cf6', '#ec4899', '#f59e0b'])" size="<mark id="sec4TextSizeCode">150</mark>" weight="<mark id="sec4TextWeightCode">800</mark>" rotate="<mark id="sec4TextRotCode">0</mark>" x="850" y="300" font="Inter" text="'pxl'" align="center" baseline="middle"&gt;&lt;/pxl-text&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4EllipseTab')">Ellipse</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4RectTab')">Rectangle</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4TextTab')">Text</button>
+              </div>
+            </div>
+
+            <!-- Ellipse Tab -->
+            <div class="tab-content active" id="sec4EllipseTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Radius X</span> <span id="sec4EllipseRxVal">100</span></label>
+                  <input type="range" min="20" max="150" step="5" value="100" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse').setAttribute('rx', this.value); document.getElementById('sec4EllipseRxVal').innerText = this.value; document.getElementById('sec4EllipseRxCode').innerText = this.value;" data-mark="sec4EllipseRxCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Radius Y</span> <span id="sec4EllipseRyVal">200</span></label>
+                  <input type="range" min="20" max="250" step="5" value="200" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse').setAttribute('ry', this.value); document.getElementById('sec4EllipseRyVal').innerText = this.value; document.getElementById('sec4EllipseRyCode').innerText = this.value;" data-mark="sec4EllipseRyCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Rotation</span> <span id="sec4EllipseRotVal">0°</span></label>
+                  <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse').setAttribute('rotate', this.value); document.getElementById('sec4EllipseRotVal').innerText = this.value + '°'; document.getElementById('sec4EllipseRotCode').innerText = this.value;" data-mark="sec4EllipseRotCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Gradient Angle</span> <span id="sec4EllipseAngleVal">45°</span></label>
+                  <input type="range" min="0" max="360" step="5" value="45" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse').setAttribute('fill', `linear(${this.value}, ['darkorange', 'gold', 'crimson'])`); document.getElementById('sec4EllipseAngleVal').innerText = this.value + '°'; document.getElementById('sec4EllipseAngleCode').innerText = this.value;" data-mark="sec4EllipseAngleCode">
+                </div>
+              </div>
+            </div>
+
+            <!-- Rectangle Tab -->
+            <div class="tab-content" id="sec4RectTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Width</span> <span id="sec4RectWidthVal">300</span></label>
+                  <input type="range" min="50" max="500" step="10" value="300" autocomplete="off"
+                    oninput="document.getElementById('sec4Rect').setAttribute('w', this.value); document.getElementById('sec4RectWidthVal').innerText = this.value; document.getElementById('sec4RectWidthCode').innerText = this.value;" data-mark="sec4RectWidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Height</span> <span id="sec4RectHeightVal">200</span></label>
+                  <input type="range" min="50" max="500" step="10" value="200" autocomplete="off"
+                    oninput="document.getElementById('sec4Rect').setAttribute('h', this.value); document.getElementById('sec4RectHeightVal').innerText = this.value; document.getElementById('sec4RectHeightCode').innerText = this.value;" data-mark="sec4RectHeightCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Rotation</span> <span id="sec4RectRotVal">0°</span></label>
+                  <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec4Rect').setAttribute('rotate', this.value); document.getElementById('sec4RectRotVal').innerText = this.value + '°'; document.getElementById('sec4RectRotCode').innerText = this.value;" data-mark="sec4RectRotCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Gradient Angle</span> <span id="sec4RectAngleVal">135°</span></label>
+                  <input type="range" min="0" max="360" step="5" value="135" autocomplete="off"
+                    oninput="document.getElementById('sec4Rect').setAttribute('fill', `linear(${this.value}, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])`); document.getElementById('sec4RectAngleVal').innerText = this.value + '°'; document.getElementById('sec4RectAngleCode').innerText = this.value;" data-mark="sec4RectAngleCode">
+                </div>
+              </div>
+            </div>
+
+            <!-- Text Tab -->
+            <div class="tab-content" id="sec4TextTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Font Size</span> <span id="sec4TextSizeVal">150</span></label>
+                  <input type="range" min="50" max="350" step="5" value="150" autocomplete="off"
+                    oninput="document.getElementById('sec4Text').setAttribute('size', this.value); document.getElementById('sec4TextSizeVal').innerText = this.value; document.getElementById('sec4TextSizeCode').innerText = this.value;" data-mark="sec4TextSizeCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Font Weight</span> <span id="sec4TextWeightVal">800</span></label>
+                  <input type="range" min="100" max="900" step="100" value="800" autocomplete="off"
+                    oninput="document.getElementById('sec4Text').setAttribute('weight', this.value); document.getElementById('sec4TextWeightVal').innerText = this.value; document.getElementById('sec4TextWeightCode').innerText = this.value;" data-mark="sec4TextWeightCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Rotation</span> <span id="sec4TextRotVal">0°</span></label>
+                  <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec4Text').setAttribute('rotate', this.value); document.getElementById('sec4TextRotVal').innerText = this.value + '°'; document.getElementById('sec4TextRotCode').innerText = this.value;" data-mark="sec4TextRotCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Gradient Angle</span> <span id="sec4TextAngleVal">45°</span></label>
+                  <input type="range" min="0" max="360" step="5" value="45" autocomplete="off"
+                    oninput="document.getElementById('sec4Text').setAttribute('fill', `linear(${this.value}, ['#8b5cf6', '#ec4899', '#f59e0b'])`); document.getElementById('sec4TextAngleVal').innerText = this.value + '°'; document.getElementById('sec4TextAngleCode').innerText = this.value;" data-mark="sec4TextAngleCode">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage id="sec4Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              <pxl-ellipse id="sec4Ellipse" x="150" y="300" rx="100" ry="200" rotate="0" fill="linear(45, ['darkorange', 'gold', 'crimson'])"></pxl-ellipse>
+              <pxl-rect id="sec4Rect" x="500" y="300" w="300" h="200" r="20" rotate="0" fill="linear(135, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])"></pxl-rect>
+              <pxl-text id="sec4Text" x="850" y="300" size="150" weight="800" font="Inter" rotate="0" text="'pxl'" align="center" baseline="middle" fill="linear(45, ['#8b5cf6', '#ec4899', '#f59e0b'])"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
       </div>
     </main>
   </div>
