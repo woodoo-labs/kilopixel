@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stroke | Kilopixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+  <script src="js/api-tabs.js"></script>
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+        <h1>Stroke</h1>
+        <p class="lead">Every vector shape in Kilopixel supports responsive, customizable stroke rendering. Learn how to control line width, apply solid or gradient strokes, configure line caps and joins, and create animated dashed lines &mdash; all rendered crisply across any screen resolution.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Unitless Logical Width</p>
+          <p class="callout-body">Stroke attributes like <code>strokewidth</code>, <code>linedash</code>, and <code>dashoffset</code> operate directly in Kilopixel's 1000-width logical canvas. A <code>strokewidth="4"</code> is always exactly 0.4% of the stage width, automatically scaling to physical device pixels with subpixel precision without blurring.</p>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: STROKE WIDTH & COLOR -->
+        <!-- ================================================================= -->
+        <h2>1. Stroke Width &amp; Color</h2>
+        <p>You can outline any Kilopixel shape using the <code>stroke</code> and <code>strokewidth</code> attributes:</p>
+        <ul>
+          <li><strong>Stroke Paint (<code>stroke</code>):</strong> Accepts hexadecimal codes (<code>#f97316</code>), CSS color keywords (<code>darkorange</code>), functional color models (<code>rgb()</code>, <code>rgba()</code>, <code>hsl()</code>, <code>hsla()</code>), or dynamic gradient descriptors (<code>linear()</code>, <code>radial()</code>, <code>conic()</code>). If omitted or set to <code>none</code> or <code>transparent</code>, no stroke is drawn.</li>
+          <li><strong>Stroke Width (<code>strokewidth</code>):</strong> Sets the thickness of the stroke in unitless logical canvas coordinates. Defaults to <code>1</code>. Setting <code>strokewidth="0"</code> disables stroke rendering.</li>
+        </ul>
+
+        <!-- Declarative Code Block Above Container -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Circle with configurable stroke --&gt;
+    &lt;pxl-circle x="320" y="300" r="<mark id="sec1CircleRCode">140</mark>" fill="#ffedd566"
+      stroke="<mark id="sec1CircleStrokeCode">#f97316</mark>"
+      strokewidth="<mark id="sec1CircleWidthCode">8</mark>"&gt;
+    &lt;/pxl-circle&gt;
+
+    &lt;!-- Rounded rectangle with gradient stroke --&gt;
+    &lt;pxl-rect x="680" y="300" w="260" h="260" r="<mark id="sec1RectRCode">36</mark>" fill="#dbeafe66"
+      stroke="<mark id="sec1RectStrokeCode">#3b82f6</mark>"
+      strokewidth="<mark id="sec1RectWidthCode">8</mark>"&gt;
+    &lt;/pxl-rect&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1CircleTab')">Circle</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1RectTab')">Rectangle</button>
+              </div>
+            </div>
+
+            <!-- Circle Tab -->
+            <div class="tab-content active" id="sec1CircleTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec1CircleWidthVal">8</span></label>
+                  <input type="range" min="0" max="40" step="1" value="8" autocomplete="off" id="sec1CircleWidthInput"
+                    oninput="document.getElementById('sec1Circle').setAttribute('strokewidth', this.value); document.getElementById('sec1CircleWidthVal').innerText = this.value; document.getElementById('sec1CircleWidthCode').innerText = this.value;" data-mark="sec1CircleWidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Radius</span> <span id="sec1CircleRVal">140</span></label>
+                  <input type="range" min="50" max="220" step="5" value="140" autocomplete="off" id="sec1CircleRInput"
+                    oninput="document.getElementById('sec1Circle').setAttribute('r', this.value); document.getElementById('sec1CircleRVal').innerText = this.value; document.getElementById('sec1CircleRCode').innerText = this.value;" data-mark="sec1CircleRCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Color</span> <span id="sec1CircleStrokeVal">#f97316</span></label>
+                  <select id="sec1CircleStrokeSelect" autocomplete="off"
+                    onchange="document.getElementById('sec1Circle').setAttribute('stroke', this.value); document.getElementById('sec1CircleStrokeVal').innerText = this.value; document.getElementById('sec1CircleStrokeCode').innerText = this.value;" data-mark="sec1CircleStrokeCode">
+                    <optgroup label="Hex Codes">
+                      <option value="#f97316" selected>#f97316 (Hex)</option>
+                      <option value="#ea580c">#ea580c (Hex Dark)</option>
+                    </optgroup>
+                    <optgroup label="Named Colors">
+                      <option value="darkorange">darkorange</option>
+                      <option value="tomato">tomato</option>
+                      <option value="coral">coral</option>
+                    </optgroup>
+                    <optgroup label="RGB &amp; RGBA">
+                      <option value="rgb(249, 115, 22)">rgb(249, 115, 22)</option>
+                      <option value="rgba(249, 115, 22, 0.65)">rgba(249, 115, 22, 0.65)</option>
+                    </optgroup>
+                    <optgroup label="HSL &amp; HSLA">
+                      <option value="hsl(25, 95%, 53%)">hsl(25, 95%, 53%)</option>
+                      <option value="hsla(25, 95%, 53%, 0.65)">hsla(25, 95%, 53%, 0.65)</option>
+                    </optgroup>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rectangle Tab -->
+            <div class="tab-content" id="sec1RectTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec1RectWidthVal">8</span></label>
+                  <input type="range" min="0" max="40" step="1" value="8" autocomplete="off" id="sec1RectWidthInput"
+                    oninput="document.getElementById('sec1Rect').setAttribute('strokewidth', this.value); document.getElementById('sec1RectWidthVal').innerText = this.value; document.getElementById('sec1RectWidthCode').innerText = this.value;" data-mark="sec1RectWidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Corner Radius</span> <span id="sec1RectRVal">36</span></label>
+                  <input type="range" min="0" max="100" step="2" value="36" autocomplete="off" id="sec1RectRInput"
+                    oninput="document.getElementById('sec1Rect').setAttribute('r', this.value); document.getElementById('sec1RectRVal').innerText = this.value; document.getElementById('sec1RectRCode').innerText = this.value;" data-mark="sec1RectRCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Color</span> <span id="sec1RectStrokeVal">#3b82f6</span></label>
+                  <select id="sec1RectStrokeSelect" autocomplete="off"
+                    onchange="document.getElementById('sec1Rect').setAttribute('stroke', this.value); document.getElementById('sec1RectStrokeVal').innerText = this.value; document.getElementById('sec1RectStrokeCode').innerText = this.value;" data-mark="sec1RectStrokeCode">
+                    <optgroup label="Solid Colors">
+                      <option value="#3b82f6" selected>#3b82f6 (Blue)</option>
+                      <option value="#8b5cf6">#8b5cf6 (Purple)</option>
+                      <option value="#10b981">#10b981 (Emerald)</option>
+                      <option value="#ec4899">#ec4899 (Pink)</option>
+                    </optgroup>
+                    <optgroup label="Gradient Strokes">
+                      <option value="linear(45, ['#3b82f6', '#8b5cf6'])">linear(45, ['#3b82f6', '#8b5cf6'])</option>
+                      <option value="linear(90, ['#10b981', '#3b82f6'])">linear(90, ['#10b981', '#3b82f6'])</option>
+                      <option value="conic(0, ['#3b82f6', '#ec4899', '#3b82f6'])">conic(0, ['#3b82f6', '#ec4899', '#3b82f6'])</option>
+                    </optgroup>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
+            <!-- Background Grid & Divider -->
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              <pxl-line x1="500" y1="0" x2="500" y2="600" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+            </pxl-layer>
+
+            <!-- Shapes Layer -->
+            <pxl-layer>
+              <!-- Circle with configurable stroke -->
+              <pxl-circle id="sec1Circle" x="320" y="300" r="140" fill="#ffedd566" stroke="#f97316" strokewidth="8"></pxl-circle>
+
+              <!-- Rounded Rect with configurable stroke -->
+              <pxl-rect id="sec1Rect" x="680" y="300" w="260" h="260" r="36" fill="#dbeafe66" stroke="#3b82f6" strokewidth="8"></pxl-rect>
+            </pxl-layer>
+
+            <!-- Foreground Labels -->
+            <pxl-layer>
+              <pxl-text x="320" y="520" text="'Circle Stroke'" size="27" font="monospace" weight="700" align="center" fill="#fb923c"></pxl-text>
+              <pxl-text x="680" y="520" text="'Rectangle Stroke'" size="27" font="monospace" weight="700" align="center" fill="#60a5fa"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Prism Syntax Highlighting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+
+</body>
+</html>
