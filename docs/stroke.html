@@ -172,9 +172,9 @@
         <h2>2. Line Caps</h2>
         <p>The <code>linecap</code> attribute controls the ending shape of open paths&mdash;including <code>&lt;pxl-line&gt;</code>, open <code>&lt;pxl-polyline&gt;</code>, and open circular arcs (<code>&lt;pxl-circle&gt;</code> with <code>sweep</code> or <code>start</code>/<code>end</code>). Kilopixel supports three standard cap styles:</p>
         <ul>
-          <li><strong>Butt Cap:</strong> The default <code>butt</code> style cuts the stroke flush exactly at the path coordinates. No extra pixels extend beyond the endpoints.</li>
-          <li><strong>Round Cap:</strong> The <code>round</code> style adds a semicircular cap extending past each endpoint by half the stroke width (radius = strokewidth / 2).</li>
-          <li><strong>Square Cap:</strong> The <code>square</code> style adds a rectangular cap extending past each endpoint by half the stroke width.</li>
+          <li><strong>Butt:</strong> The default <code>butt</code> style cuts the stroke flush exactly at the path coordinates. No extra pixels extend beyond the endpoints.</li>
+          <li><strong>Round:</strong> The <code>round</code> style adds a semicircular cap extending past each endpoint by half the stroke width (radius = strokewidth / 2).</li>
+          <li><strong>Square:</strong> The <code>square</code> style adds a rectangular cap extending past each endpoint by half the stroke width.</li>
         </ul>
 
         <div class="callout-info">
@@ -186,10 +186,10 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- 1. Straight Line --&gt;
-    &lt;pxl-line linecap="<mark id="sec2LineCapCode">butt</mark>" strokewidth="<mark id="sec2LineWidthCode">40</mark>" x1="150" y1="300" x2="450" y2="300" stroke="#f97316"&gt;&lt;/pxl-line&gt;
+    &lt;pxl-line linecap="<mark id="sec2LineCapCode">butt</mark>" strokewidth="<mark id="sec2LineWidthCode">40</mark>" rotate="<mark id="sec2LineRotCode">0</mark>" x="300" y="300" x1="-150" y1="0" x2="150" y2="0" stroke="#f97316"&gt;&lt;/pxl-line&gt;
 
     &lt;!-- 2. Circular Arc --&gt;
-    &lt;pxl-circle linecap="<mark id="sec2ArcCapCode">butt</mark>" strokewidth="<mark id="sec2ArcWidthCode">40</mark>" r="150" start="135" sweep="270" x="700" y="300" stroke="#3b82f6" fill="none"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle linecap="<mark id="sec2ArcCapCode">butt</mark>" strokewidth="<mark id="sec2ArcWidthCode">40</mark>" sweep="<mark id="sec2ArcSweepCode">270</mark>" r="150" start="135" x="700" y="300" stroke="#3b82f6" fill="none"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -207,17 +207,23 @@
             <div class="tab-content active" id="sec2LineTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Line Cap</span></label>
-                  <div class="toggle-group">
-                    <button class="toggle-btn active" id="sec2LineCapButtBtn" onclick="document.getElementById('sec2Line').setAttribute('linecap', 'butt'); pxlDocs.updateToggle(this, null, 'sec2LineCapCode', 'butt');">butt</button>
-                    <button class="toggle-btn" id="sec2LineCapRoundBtn" onclick="document.getElementById('sec2Line').setAttribute('linecap', 'round'); pxlDocs.updateToggle(this, null, 'sec2LineCapCode', 'round');">round</button>
-                    <button class="toggle-btn" id="sec2LineCapSquareBtn" onclick="document.getElementById('sec2Line').setAttribute('linecap', 'square'); pxlDocs.updateToggle(this, null, 'sec2LineCapCode', 'square');">square</button>
-                  </div>
-                </div>
-                <div class="control-group">
                   <label><span>Stroke Width</span> <span id="sec2LineWidthVal">40</span></label>
                   <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec2LineWidthInput"
                     oninput="document.getElementById('sec2Line').setAttribute('strokewidth', this.value); document.getElementById('sec2LineWidthVal').innerText = this.value; document.getElementById('sec2LineWidthCode').innerText = this.value;" data-mark="sec2LineWidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Rotation</span> <span id="sec2LineRotVal">0°</span></label>
+                  <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off" id="sec2LineRotInput"
+                    oninput="const rot = this.value; document.getElementById('sec2Line').setAttribute('rotate', rot); document.getElementById('sec2LineGuideGroup').setAttribute('rotate', rot); document.getElementById('sec2LineGhostGroup').setAttribute('rotate', rot); document.getElementById('sec2LineRotVal').innerText = rot + '°'; document.getElementById('sec2LineRotCode').innerText = rot;" data-mark="sec2LineRotCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Line Cap <span class="indicator-dot"></span></span></label>
+                  <select id="sec2LineCapSelect" autocomplete="off"
+                    onchange="document.getElementById('sec2Line').setAttribute('linecap', this.value); document.getElementById('sec2LineCapCode').innerText = this.value;" data-mark="sec2LineCapCode">
+                    <option value="butt" selected>butt (default)</option>
+                    <option value="round">round</option>
+                    <option value="square">square</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -226,17 +232,23 @@
             <div class="tab-content" id="sec2ArcTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Line Cap</span></label>
-                  <div class="toggle-group">
-                    <button class="toggle-btn active" id="sec2ArcCapButtBtn" onclick="document.getElementById('sec2Arc').setAttribute('linecap', 'butt'); pxlDocs.updateToggle(this, null, 'sec2ArcCapCode', 'butt');">butt</button>
-                    <button class="toggle-btn" id="sec2ArcCapRoundBtn" onclick="document.getElementById('sec2Arc').setAttribute('linecap', 'round'); pxlDocs.updateToggle(this, null, 'sec2ArcCapCode', 'round');">round</button>
-                    <button class="toggle-btn" id="sec2ArcCapSquareBtn" onclick="document.getElementById('sec2Arc').setAttribute('linecap', 'square'); pxlDocs.updateToggle(this, null, 'sec2ArcCapCode', 'square');">square</button>
-                  </div>
-                </div>
-                <div class="control-group">
                   <label><span>Stroke Width</span> <span id="sec2ArcWidthVal">40</span></label>
                   <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec2ArcWidthInput"
                     oninput="document.getElementById('sec2Arc').setAttribute('strokewidth', this.value); document.getElementById('sec2ArcWidthVal').innerText = this.value; document.getElementById('sec2ArcWidthCode').innerText = this.value;" data-mark="sec2ArcWidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Sweep Angle</span> <span id="sec2ArcSweepVal">270°</span></label>
+                  <input type="range" min="120" max="330" step="5" value="270" autocomplete="off" id="sec2ArcSweepInput"
+                    oninput="const sw = this.value; document.getElementById('sec2Arc').setAttribute('sweep', sw); document.getElementById('sec2ArcGhost').setAttribute('sweep', sw); document.getElementById('sec2ArcEndGuideGroup').setAttribute('rotate', 135 + Number(sw)); document.getElementById('sec2ArcEndDotGroup').setAttribute('rotate', 135 + Number(sw)); document.getElementById('sec2ArcSweepVal').innerText = sw + '°'; document.getElementById('sec2ArcSweepCode').innerText = sw;" data-mark="sec2ArcSweepCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Line Cap</span></label>
+                  <select id="sec2ArcCapSelect" autocomplete="off"
+                    onchange="document.getElementById('sec2Arc').setAttribute('linecap', this.value); document.getElementById('sec2ArcCapCode').innerText = this.value;" data-mark="sec2ArcCapCode">
+                    <option value="butt" selected>butt (default)</option>
+                    <option value="round">round</option>
+                    <option value="square">square</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -250,19 +262,23 @@
 
             <!-- Guide Helpers Layer (Grey reference lines) -->
             <pxl-layer>
-              <!-- Line endpoint reference guides -->
-              <pxl-line x1="150" y1="150" x2="150" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
-              <pxl-line x1="450" y1="150" x2="450" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <!-- Line endpoint reference guides (rotates with line) -->
+              <pxl-group id="sec2LineGuideGroup" x="300" y="300" rotate="ref.sec2Line.rotate">
+                <pxl-line x1="-150" y1="-150" x2="-150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+                <pxl-line x1="150" y1="-150" x2="150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              </pxl-group>
 
-              <!-- Arc radial reference guides (radiating through start and end angles) -->
+              <!-- Arc radial reference guides (start is fixed at 135°, end rotates with sweep) -->
               <pxl-line x1="700" y1="300" x2="550" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
-              <pxl-line x1="700" y1="300" x2="850" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-group id="sec2ArcEndGuideGroup" x="700" y="300" rotate="135 + ref.sec2Arc.sweep">
+                <pxl-line x1="0" y1="0" x2="212" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              </pxl-group>
             </pxl-layer>
 
             <!-- Main Shapes Layer -->
             <pxl-layer>
               <!-- Straight Line demonstrating Line Cap -->
-              <pxl-line id="sec2Line" x1="150" y1="300" x2="450" y2="300" stroke="#f97316" strokewidth="40" linecap="butt"></pxl-line>
+              <pxl-line id="sec2Line" x="300" y="300" x1="-150" y1="0" x2="150" y2="0" rotate="0" stroke="#f97316" strokewidth="40" linecap="butt"></pxl-line>
 
               <!-- Circular Arc demonstrating Line Cap on curves -->
               <pxl-circle id="sec2Arc" x="700" y="300" r="150" start="135" sweep="270" stroke="#3b82f6" strokewidth="40" linecap="butt" fill="none"></pxl-circle>
@@ -270,16 +286,20 @@
 
             <!-- Overlay Ghost Lines & Points -->
             <pxl-layer>
-              <!-- Line centerline skeleton & endpoint anchors -->
-              <pxl-line x1="150" y1="300" x2="450" y2="300" stroke="#ffffff" strokewidth="2" linedash="[4, 4]"></pxl-line>
-              <pxl-circle x="150" y="300" r="5" fill="#c2410c"></pxl-circle>
-              <pxl-circle x="450" y="300" r="5" fill="#c2410c"></pxl-circle>
+              <!-- Line centerline skeleton & endpoint anchors (rotates with line) -->
+              <pxl-group id="sec2LineGhostGroup" x="300" y="300" rotate="ref.sec2Line.rotate">
+                <pxl-line x1="-150" y1="0" x2="150" y2="0" stroke="#ffffff" strokewidth="2" linedash="[4, 4]"></pxl-line>
+                <pxl-circle x="-150" y="0" r="5" fill="#c2410c"></pxl-circle>
+                <pxl-circle x="150" y="0" r="5" fill="#c2410c"></pxl-circle>
+              </pxl-group>
 
               <!-- Arc centerline skeleton & endpoint anchors -->
-              <pxl-circle x="700" y="300" r="150" start="135" sweep="270" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-circle>
+              <pxl-circle id="sec2ArcGhost" x="700" y="300" r="150" start="135" sweep="270" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-circle>
               <pxl-circle x="594" y="406" r="5" fill="#1d4ed8"></pxl-circle>
-              <pxl-circle x="806" y="406" r="5" fill="#1d4ed8"></pxl-circle>
               <pxl-circle x="700" y="300" r="4" fill="#94a3b8"></pxl-circle>
+              <pxl-group id="sec2ArcEndDotGroup" x="700" y="300" rotate="135 + ref.sec2Arc.sweep">
+                <pxl-circle x="150" y="0" r="5" fill="#1d4ed8"></pxl-circle>
+              </pxl-group>
 
               <!-- Section Labels -->
               <pxl-text x="300" y="500" text="'Straight Line'" size="27" font="monospace" weight="700" align="center" fill="#fb923c"></pxl-text>
@@ -294,9 +314,9 @@
         <h2>3. Line Joins</h2>
         <p>The <code>linejoin</code> attribute determines how two connected stroke segments meet at a corner or vertex. Kilopixel supports three standard corner join styles:</p>
         <ul>
-          <li><strong>Miter Join:</strong> The default <code>miter</code> style extends the outer edges of the stroke segments until they intersect in a sharp point.</li>
-          <li><strong>Round Join:</strong> The <code>round</code> style rounds off the corner with a circular curve having a radius equal to half the stroke width.</li>
-          <li><strong>Bevel Join:</strong> The <code>bevel</code> style slices off the outer corner with a flat diagonal edge between the outer endpoints of the two segments.</li>
+          <li><strong>Miter:</strong> The default <code>miter</code> style extends the outer edges of the stroke segments until they intersect in a sharp point.</li>
+          <li><strong>Round:</strong> The <code>round</code> style rounds off the corner with a circular curve having a radius equal to half the stroke width.</li>
+          <li><strong>Bevel:</strong> The <code>bevel</code> style slices off the outer corner with a flat diagonal edge between the outer endpoints of the two segments.</li>
         </ul>
 
         <div class="callout-info">
@@ -329,14 +349,6 @@
             <div class="tab-content active" id="sec3ChevronTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Line Join</span></label>
-                  <div class="toggle-group">
-                    <button class="toggle-btn active" id="sec3ChevronMiterBtn" onclick="document.getElementById('sec3Chevron').setAttribute('linejoin', 'miter'); pxlDocs.updateToggle(this, null, 'sec3JoinCode', 'miter');">miter</button>
-                    <button class="toggle-btn" id="sec3ChevronRoundBtn" onclick="document.getElementById('sec3Chevron').setAttribute('linejoin', 'round'); pxlDocs.updateToggle(this, null, 'sec3JoinCode', 'round');">round</button>
-                    <button class="toggle-btn" id="sec3ChevronBevelBtn" onclick="document.getElementById('sec3Chevron').setAttribute('linejoin', 'bevel'); pxlDocs.updateToggle(this, null, 'sec3JoinCode', 'bevel');">bevel</button>
-                  </div>
-                </div>
-                <div class="control-group">
                   <label><span>Stroke Width</span> <span id="sec3WidthVal">40</span></label>
                   <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec3WidthInput"
                     oninput="document.getElementById('sec3Chevron').setAttribute('strokewidth', this.value); document.getElementById('sec3WidthVal').innerText = this.value; document.getElementById('sec3WidthCode').innerText = this.value;" data-mark="sec3WidthCode">
@@ -346,20 +358,21 @@
                   <input type="range" min="100" max="350" step="10" value="150" autocomplete="off" id="sec3PeakYInput"
                     oninput="const y = this.value; const pts = '150,450; 300,' + y + '; 450,450'; document.getElementById('sec3Chevron').setAttribute('points', pts); document.getElementById('sec3ChevronGhost').setAttribute('points', pts); document.getElementById('sec3ChevronPeakDot').setAttribute('y', y); document.getElementById('sec3PeakYVal').innerText = y; document.getElementById('sec3PeakYCode').innerText = y;" data-mark="sec3PeakYCode">
                 </div>
+                <div class="control-group">
+                  <label><span>Line Join</span></label>
+                  <select id="sec3ChevronJoinSelect" autocomplete="off"
+                    onchange="document.getElementById('sec3Chevron').setAttribute('linejoin', this.value); document.getElementById('sec3JoinCode').innerText = this.value;" data-mark="sec3JoinCode">
+                    <option value="miter" selected>miter (default)</option>
+                    <option value="round">round</option>
+                    <option value="bevel">bevel</option>
+                  </select>
+                </div>
               </div>
             </div>
 
             <!-- Polygon Tab -->
             <div class="tab-content" id="sec3PolygonTab">
               <div class="playground-sliders">
-                <div class="control-group">
-                  <label><span>Line Join</span></label>
-                  <div class="toggle-group">
-                    <button class="toggle-btn active" id="sec3PolyMiterBtn" onclick="document.getElementById('sec3Polygon').setAttribute('linejoin', 'miter'); pxlDocs.updateToggle(this, null, 'sec3PolyJoinCode', 'miter');">miter</button>
-                    <button class="toggle-btn" id="sec3PolyRoundBtn" onclick="document.getElementById('sec3Polygon').setAttribute('linejoin', 'round'); pxlDocs.updateToggle(this, null, 'sec3PolyJoinCode', 'round');">round</button>
-                    <button class="toggle-btn" id="sec3PolyBevelBtn" onclick="document.getElementById('sec3Polygon').setAttribute('linejoin', 'bevel'); pxlDocs.updateToggle(this, null, 'sec3PolyJoinCode', 'bevel');">bevel</button>
-                  </div>
-                </div>
                 <div class="control-group">
                   <label><span>Stroke Width</span> <span id="sec3PolyWidthVal">40</span></label>
                   <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec3PolyWidthInput"
@@ -369,6 +382,15 @@
                   <label><span>Corner Peak Y</span> <span id="sec3PolyPeakYVal">150</span></label>
                   <input type="range" min="100" max="350" step="10" value="150" autocomplete="off" id="sec3PolyPeakYInput"
                     oninput="const y = this.value; const pts = '550,450; 700,' + y + '; 850,450'; document.getElementById('sec3Polygon').setAttribute('points', pts); document.getElementById('sec3PolyGhost').setAttribute('points', pts); document.getElementById('sec3PolyPeakDot').setAttribute('y', y); document.getElementById('sec3PolyPeakYVal').innerText = y; document.getElementById('sec3PolyPeakYCode').innerText = y;" data-mark="sec3PolyPeakYCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Line Join</span></label>
+                  <select id="sec3PolyJoinSelect" autocomplete="off"
+                    onchange="document.getElementById('sec3Polygon').setAttribute('linejoin', this.value); document.getElementById('sec3PolyJoinCode').innerText = this.value;" data-mark="sec3PolyJoinCode">
+                    <option value="miter" selected>miter (default)</option>
+                    <option value="round">round</option>
+                    <option value="bevel">bevel</option>
+                  </select>
                 </div>
               </div>
             </div>
