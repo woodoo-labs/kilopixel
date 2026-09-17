@@ -33,50 +33,9 @@
         <h1>Conic Gradient</h1>
         <p class="lead">Kilopixel offers highly flexible conic (angular sweep) gradients for rotational color sweeps, radar effects, color wheels, and angular lighting.</p>
 
-        <p class="lead">To work with gradients in Kilopixel, you first need to understand two core concepts: the <strong>Bounding Box</strong> and the <strong>colorsArray</strong>.</p>
-
         <div class="callout-info">
-          <p class="callout-body"><strong>Bounding Box:</strong> In Kilopixel, all gradients are mapped to an element's invisible bounding box. The top-left corner of any shape is always exactly <code>(0, 0)</code>, and the bottom-right is <code>(1, 1)</code>. This guarantees that if you move, scale, or stretch your shape, the gradient stretches seamlessly with it — no complex trigonometry required!</p>
-          <p class="callout-body">In the diagrams below, the <span class="text-accent">blue coordinates</span> represent the fixed corners of the shape's invisible 0-to-1 bounding box space.</p>
-
-          <pxl-stage ratio="5 / 2" class="diagram-stage">
-            <pxl-layer>
-              <pxl-grid stroke="#cbd5e1" major="2"></pxl-grid>
-              
-              <!-- 1. Rectangle (w=250, h=150) -->
-              <pxl-rect x="175" y="200" w="250" h="150" fill="#cbd5e1"></pxl-rect>
-              <pxl-rect x="175" y="200" w="250" h="150" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
-              <pxl-circle x="50" y="125" r="8" fill="#3b82f6"></pxl-circle>
-              <pxl-text x="50" y="110" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
-              <pxl-circle x="300" y="275" r="8" fill="#3b82f6"></pxl-circle>
-              <pxl-text x="300" y="290" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
-        
-              <!-- 2. Ellipse (rx=75, ry=150, so w=150, h=300) -->
-              <pxl-ellipse x="500" y="200" rx="75" ry="150" fill="#cbd5e1"></pxl-ellipse>
-              <pxl-rect x="500" y="200" w="150" h="300" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
-              <pxl-circle x="425" y="50" r="8" fill="#3b82f6"></pxl-circle>
-              <pxl-text x="425" y="35" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
-              <pxl-circle x="575" y="350" r="8" fill="#3b82f6"></pxl-circle>
-              <pxl-text x="575" y="365" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
-        
-              <!-- 3. Polyline (Worm, w=250, h=200) -->
-              <pxl-polyline points="700,200; 784,100; 866,300; 950,200" smooth="1" closed="false" stroke="#cbd5e1" strokewidth="20" fill="none" linecap="round"></pxl-polyline>
-              <pxl-rect x="825" y="200" w="250" h="200" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
-              <pxl-circle x="700" y="100" r="8" fill="#3b82f6"></pxl-circle>
-              <pxl-text x="700" y="85" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
-              <pxl-circle x="950" y="300" r="8" fill="#3b82f6"></pxl-circle>
-              <pxl-text x="950" y="315" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
-        
-            </pxl-layer>
-          </pxl-stage>
-        </div>
-
-        <div class="callout-info">
-          <p class="callout-body"><strong>colorsArray:</strong> All gradients in Kilopixel share a common parameter called <code>colorsArray</code> to define their colors. You can provide this array in two ways:</p>
-          <ul>
-            <li><strong>Colors Only:</strong> Pass an array of just colors (e.g., <code>['red', 'yellow', 'blue']</code>). Kilopixel will automatically space them out evenly from 0 to 1 around the 360° circle.</li>
-            <li><strong>Color Stops:</strong> Pass an array alternating between numeric offsets (0 to 1) and colors for precise control (e.g., <code>[0, 'red', 0.5, 'yellow', 1, 'blue']</code>).</li>
-          </ul>
+          <p class="callout-title">Bounding Box &amp; colorsArray</p>
+          <p class="callout-body">Conic gradients map directly to the shape's <a href="linear.html#secBoundingBox">Bounding Box</a> (where top-left is <code>(0, 0)</code> and bottom-right is <code>(1, 1)</code>) and share the universal <a href="linear.html#secColorsArray"><code>colorsArray</code></a> parameter. If you are new to Kilopixel gradients, review the visual diagram in <a href="linear.html">Linear Gradient</a> first.</p>
         </div>
 
         <!-- ================================================================= -->

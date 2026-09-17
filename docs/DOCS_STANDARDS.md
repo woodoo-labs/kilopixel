@@ -176,10 +176,10 @@ Every documentation example must follow a standardized 3-part layout:
   ```
 * **Dropdown (`<select>`) Implementations:** Dropdown menus provide clean selection across discrete values, keywords, or blend modes:
   * **Option Groups (`<optgroup>`):** When options fall into distinct categories (e.g., perimeter anchors vs. dynamic CSS keywords), always group them using `<optgroup label="...">` to enhance readability.
-  * **Native DOM `onchange` Handlers:** Similar to sliders, dropdown `onchange` handlers must execute explicit native DOM updates:
+  * **No Value Readout in Label:** Unlike sliders (which have no text readout), dropdown `<select>` controls explicitly display the currently selected option inside the input element itself. Therefore, `<label>` elements for dropdowns MUST omit `<span id="...Val">` readouts to avoid redundant UI clutter.
+  * **Native DOM `onchange` Handlers:** Dropdown `onchange` handlers execute concise native DOM updates:
     1. Update the target attribute: `document.getElementById('sec1Rect').setAttribute('anchor', this.value)`
-    2. Update the label text: `document.getElementById('sec1RectAnchorVal').innerText = this.value`
-    3. Update the code snippet: `document.getElementById('sec1RectAnchorCode').innerText = this.value`
+    2. Update the code snippet: `document.getElementById('sec1RectAnchorCode').innerText = this.value`
   * **Multi-Highlighting (`data-mark`):** When a dropdown updates a code mark or requires beacon tracking, specify `data-mark="sec1RectAnchorCode"` on the `<select>` element.
 * **Dual-Mode Controls (Numeric Slider vs. Keyword Dropdown):** When a property supports both numeric values and discrete keyword presets (e.g. radial gradient radii, focal offsets):
   * Provide a `.toggle-group` button pair above the input controls (e.g., "Numeric" vs. "Keyword").

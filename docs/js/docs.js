@@ -16,7 +16,34 @@ pxlDocs.switchTab = function(btn, targetId) {
   if (target) target.classList.add('active');
 };
 
-// 2. Toggle Button UI Helper (Option 1: Transparent DOM + UI helper)
+// 2. Universal Code Mark Flasher (1-Second Discrete Pulse)
+pxlDocs.flashMark = function(target, duration = 1000) {
+  let markEls = [];
+  if (typeof target === 'string') {
+    const el = document.getElementById(target);
+    if (el) markEls.push(el);
+  } else if (target instanceof HTMLElement) {
+    const dataMark = target.getAttribute('data-mark');
+    if (dataMark) {
+      dataMark.split(',').forEach(id => {
+        const el = document.getElementById(id.trim());
+        if (el) markEls.push(el);
+      });
+    }
+  }
+  if (markEls.length === 0) return;
+
+  markEls.forEach(mark => {
+    mark.classList.add('highlight-active');
+    if (mark._flashTimer) clearTimeout(mark._flashTimer);
+    mark._flashTimer = setTimeout(() => {
+      mark.classList.remove('highlight-active');
+      mark._flashTimer = null;
+    }, duration);
+  });
+};
+
+// 3. Toggle Button UI Helper (Option 1: Transparent DOM + UI helper)
 pxlDocs.updateToggle = function(btn, lblId, codeId, displayValue) {
   if (lblId) {
     const lblEl = document.getElementById(lblId);
@@ -25,6 +52,7 @@ pxlDocs.updateToggle = function(btn, lblId, codeId, displayValue) {
   if (codeId) {
     const codeEl = document.getElementById(codeId);
     if (codeEl) codeEl.innerText = displayValue;
+    pxlDocs.flashMark(codeId);
   }
   const group = btn?.closest('.toggle-group');
   if (group) {
@@ -33,21 +61,23 @@ pxlDocs.updateToggle = function(btn, lblId, codeId, displayValue) {
   }
 };
 
-// 2. Automatic Code Mark Highlighting (Pointer Event Delegation System)
+// 4. Automatic Code Mark Highlighting (Pointer Event Delegation System)
 pxlDocs.initHighlighting = function() {
-  function updateHighlight(input) {
-    let markIds = [];
+  function getMarkIds(input) {
     const dataMark = input.getAttribute('data-mark');
-    
     if (dataMark) {
-      markIds = dataMark.split(',').map(s => s.trim());
-    } else {
-      const oninputStr = input.getAttribute('oninput');
-      if (oninputStr) {
-        const match = oninputStr.match(/getElementById\(['"]([^'"]+Code)['"]\)/);
-        if (match) markIds = [match[1]];
-      }
+      return dataMark.split(',').map(s => s.trim());
     }
+    const oninputStr = input.getAttribute('oninput');
+    if (oninputStr) {
+      const match = oninputStr.match(/getElementById\(['"]([^'"]+Code)['"]\)/);
+      if (match) return [match[1]];
+    }
+    return [];
+  }
+
+  function updateHighlight(input) {
+    const markIds = getMarkIds(input);
     
     input._activeMarks = input._activeMarks || [];
     
@@ -94,6 +124,14 @@ pxlDocs.initHighlighting = function() {
     const target = e.target.closest('input[type="range"], select, .toggle-btn');
     if (target) {
       dismissIndicator(target);
+    }
+    if (e.type === 'change') {
+      const select = e.target.closest('select');
+      if (select) pxlDocs.flashMark(select);
+    }
+    if (e.type === 'click') {
+      const toggleBtn = e.target.closest('.toggle-btn');
+      if (toggleBtn) pxlDocs.flashMark(toggleBtn);
     }
   }
 

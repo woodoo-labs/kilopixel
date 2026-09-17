@@ -31,14 +31,22 @@
     <main class="docs-content">
       <div class="docs-inner">
         <h1>Fill</h1>
-        <p class="lead">The foundational color systems for Kilopixel shapes. Learn how to apply named colors, hex codes, RGB/RGBA channels, and HSL/HSLA color spaces to any shape's fill or stroke.</p>
+        <p class="lead">The <code>fill</code> attribute paints the interior surface of any vector shape in Kilopixel. Whether you need a vibrant solid backdrop, an alpha-translucent tint, or dynamic reactive shading, <code>fill</code> serves as the primary canvas paint property.</p>
+
+        <p class="lead">Because fills are powered by color, this guide also introduces Kilopixel's foundational color models &mdash; including hex codes, CSS named colors, <code>rgb()</code> / <code>rgba()</code> channels, and <code>hsl()</code> / <code>hsla()</code> color spaces &mdash; all of which can be applied to both <code>fill</code> and <code>stroke</code> attributes.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Fills, Strokes &amp; Gradients</p>
+          <p class="callout-body">By default, shapes have no fill (<code>fill="none"</code>) unless an explicit color or gradient is provided. Fills are always painted before strokes in the Canvas draw pipeline. In addition to the solid color formats covered on this page, the <code>fill</code> attribute also accepts dynamic shaders from the <a href="linear.html">Gradients</a> section (including <code>linear()</code>, <code>radial()</code>, and <code>conic()</code>).</p>
+        </div>
 
 
         <!-- ================================================================= -->
         <!-- SECTION 1: NAMED COLORS & HEX CODES -->
         <!-- ================================================================= -->
         <h2>1. Named Colors &amp; Hex Codes</h2>
-        <p>Because Kilopixel renders directly to HTML5 Canvas, you can use any valid CSS color keyword (like <code>tomato</code> or <code>transparent</code>) or hexadecimal code (like <code>#1e293b</code>) for the <code>fill</code> and <code>stroke</code> attributes.</p>
+        <p>Because Kilopixel renders directly to HTML5 Canvas, you can use any valid CSS color keyword (like <code>dodgerblue</code> or <code>transparent</code>) or hexadecimal code (like <code>#ef4444</code>) for the <code>fill</code> and <code>stroke</code> attributes.</p>
+        <p>In addition to standard 6-digit hex codes and 3-digit shorthand (<code>#f00</code>), Kilopixel fully supports 8-digit hexadecimal colors (<code>#rrggbbaa</code>). The final two digits represent the alpha channel (e.g. <code>#fbbf24aa</code>), creating translucent fills that blend with underlying shapes.</p>
         
         <div class="callout-info">
           <p class="callout-body"><strong>Stacking Order (Z-Index):</strong> Elements are drawn strictly in the order they appear in the HTML. The last element in the markup is drawn on top of the others.</p>
@@ -46,27 +54,24 @@
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Circle 1 (Drawn First, at the bottom) --&gt;
-    &lt;pxl-circle x="<mark id="sec1Circle1XCode">500</mark>" y="<mark id="sec1Circle1YCode">230</mark>" r="<mark id="sec1Circle1RCode">140</mark>" fill="tomato" stroke="#991b1b" strokewidth="<mark id="sec1Circle1WidthCode">10</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Circle 1 (Hex Code) --&gt;
+    &lt;pxl-circle x="<mark id="sec1Circle1XCode">500</mark>" y="<mark id="sec1Circle1YCode">230</mark>" r="<mark id="sec1Circle1RCode">140</mark>"
+      fill="<mark id="sec1Circle1FillCode">#ef4444</mark>" stroke="#991b1b" strokewidth="4"&gt;
+    &lt;/pxl-circle&gt;
       
-    &lt;!-- Circle 2 (Drawn Second, in the middle) --&gt;
-    &lt;pxl-circle x="<mark id="sec1Circle2XCode">420</mark>" y="<mark id="sec1Circle2YCode">370</mark>" r="<mark id="sec1Circle2RCode">140</mark>" fill="#38bdf8" stroke="royalblue" strokewidth="<mark id="sec1Circle2WidthCode">10</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Circle 2 (Named CSS Color) --&gt;
+    &lt;pxl-circle x="<mark id="sec1Circle2XCode">420</mark>" y="<mark id="sec1Circle2YCode">370</mark>" r="<mark id="sec1Circle2RCode">140</mark>"
+      fill="<mark id="sec1Circle2FillCode">dodgerblue</mark>" stroke="royalblue" strokewidth="4"&gt;
+    &lt;/pxl-circle&gt;
       
-    &lt;!-- Circle 3 (Drawn Last, on top) --&gt;
-    &lt;pxl-circle x="<mark id="sec1Circle3XCode">580</mark>" y="<mark id="sec1Circle3YCode">370</mark>" r="<mark id="sec1Circle3RCode">140</mark>" fill="#fbbf24" stroke="#b45309" strokewidth="<mark id="sec1Circle3WidthCode">10</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Circle 3 (8-Digit Hex with Alpha) --&gt;
+    &lt;pxl-circle x="<mark id="sec1Circle3XCode">580</mark>" y="<mark id="sec1Circle3YCode">370</mark>" r="<mark id="sec1Circle3RCode">140</mark>"
+      fill="<mark id="sec1Circle3FillCode">#fbbf24aa</mark>" stroke="#b45309" strokewidth="4"&gt;
+    &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
         <div class="demo-container">
-          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
-            <pxl-layer>
-              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-              <pxl-circle id="sec1Circle1" x="500" y="230" r="140" fill="tomato" stroke="#991b1b" strokewidth="10"></pxl-circle>
-              <pxl-circle id="sec1Circle2" x="420" y="370" r="140" fill="#38bdf8" stroke="royalblue" strokewidth="10"></pxl-circle>
-              <pxl-circle id="sec1Circle3" x="580" y="370" r="140" fill="#fbbf24" stroke="#b45309" strokewidth="10"></pxl-circle>
-            </pxl-layer>
-          </pxl-stage>
-
           <div class="demo-controls">
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Controls</h3>
@@ -90,15 +95,21 @@
                   <input type="range" min="130" max="330" step="10" value="230" autocomplete="off"
                     oninput="document.getElementById('sec1Circle1').setAttribute('y', this.value); document.getElementById('sec1Circle1YVal').innerText = this.value; document.getElementById('sec1Circle1YCode').innerText = this.value;">
                 </div>
-                                <div class="control-group">
+                <div class="control-group">
                   <label><span>Radius</span> <span id="sec1Circle1RVal">140</span></label>
                   <input type="range" min="50" max="250" step="10" value="140" autocomplete="off"
                     oninput="document.getElementById('sec1Circle1').setAttribute('r', this.value); document.getElementById('sec1Circle1RVal').innerText = this.value; document.getElementById('sec1Circle1RCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec1Circle1WidthVal">10</span></label>
-                  <input type="range" min="0" max="50" step="1" value="10" autocomplete="off"
-                    oninput="document.getElementById('sec1Circle1').setAttribute('strokewidth', this.value); document.getElementById('sec1Circle1WidthVal').innerText = this.value; document.getElementById('sec1Circle1WidthCode').innerText = this.value;">
+                  <label><span>Fill Color (Hex) <span class="indicator-dot"></span></span></label>
+                  <select id="sec1Circle1FillSelect" autocomplete="off" onchange="document.getElementById('sec1Circle1').setAttribute('fill', this.value); document.getElementById('sec1Circle1FillCode').innerText = this.value;" data-mark="sec1Circle1FillCode">
+                    <option value="#ef4444" selected>#ef4444 (Red)</option>
+                    <option value="#f97316">#f97316 (Orange)</option>
+                    <option value="#8b5cf6">#8b5cf6 (Purple)</option>
+                    <option value="#10b981">#10b981 (Emerald)</option>
+                    <option value="#06b6d4">#06b6d4 (Cyan)</option>
+                    <option value="#f00">#f00 (3-Digit Shorthand)</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -116,15 +127,21 @@
                   <input type="range" min="270" max="470" step="10" value="370" autocomplete="off"
                     oninput="document.getElementById('sec1Circle2').setAttribute('y', this.value); document.getElementById('sec1Circle2YVal').innerText = this.value; document.getElementById('sec1Circle2YCode').innerText = this.value;">
                 </div>
-                                <div class="control-group">
+                <div class="control-group">
                   <label><span>Radius</span> <span id="sec1Circle2RVal">140</span></label>
                   <input type="range" min="50" max="250" step="10" value="140" autocomplete="off"
                     oninput="document.getElementById('sec1Circle2').setAttribute('r', this.value); document.getElementById('sec1Circle2RVal').innerText = this.value; document.getElementById('sec1Circle2RCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec1Circle2WidthVal">10</span></label>
-                  <input type="range" min="0" max="50" step="1" value="10" autocomplete="off"
-                    oninput="document.getElementById('sec1Circle2').setAttribute('strokewidth', this.value); document.getElementById('sec1Circle2WidthVal').innerText = this.value; document.getElementById('sec1Circle2WidthCode').innerText = this.value;">
+                  <label><span>Fill Color (Named)</span></label>
+                  <select id="sec1Circle2FillSelect" autocomplete="off" onchange="document.getElementById('sec1Circle2').setAttribute('fill', this.value); document.getElementById('sec1Circle2FillCode').innerText = this.value;" data-mark="sec1Circle2FillCode">
+                    <option value="dodgerblue" selected>dodgerblue</option>
+                    <option value="tomato">tomato</option>
+                    <option value="coral">coral</option>
+                    <option value="mediumseagreen">mediumseagreen</option>
+                    <option value="rebeccapurple">rebeccapurple</option>
+                    <option value="transparent">transparent (no fill)</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -142,20 +159,33 @@
                   <input type="range" min="270" max="470" step="10" value="370" autocomplete="off"
                     oninput="document.getElementById('sec1Circle3').setAttribute('y', this.value); document.getElementById('sec1Circle3YVal').innerText = this.value; document.getElementById('sec1Circle3YCode').innerText = this.value;">
                 </div>
-                                <div class="control-group">
+                <div class="control-group">
                   <label><span>Radius</span> <span id="sec1Circle3RVal">140</span></label>
                   <input type="range" min="50" max="250" step="10" value="140" autocomplete="off"
                     oninput="document.getElementById('sec1Circle3').setAttribute('r', this.value); document.getElementById('sec1Circle3RVal').innerText = this.value; document.getElementById('sec1Circle3RCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec1Circle3WidthVal">10</span></label>
-                  <input type="range" min="0" max="50" step="1" value="10" autocomplete="off"
-                    oninput="document.getElementById('sec1Circle3').setAttribute('strokewidth', this.value); document.getElementById('sec1Circle3WidthVal').innerText = this.value; document.getElementById('sec1Circle3WidthCode').innerText = this.value;">
+                  <label><span>Fill Color (8-Digit Hex)</span></label>
+                  <select id="sec1Circle3FillSelect" autocomplete="off" onchange="document.getElementById('sec1Circle3').setAttribute('fill', this.value); document.getElementById('sec1Circle3FillCode').innerText = this.value;" data-mark="sec1Circle3FillCode">
+                    <option value="#fbbf24aa" selected>#fbbf24aa (Amber 67% Alpha)</option>
+                    <option value="#ec489999">#ec489999 (Pink 60% Alpha)</option>
+                    <option value="#38bdf888">#38bdf888 (Sky 53% Alpha)</option>
+                    <option value="#8b5cf6aa">#8b5cf6aa (Purple 67% Alpha)</option>
+                    <option value="#10b98188">#10b98188 (Emerald 53% Alpha)</option>
+                  </select>
                 </div>
               </div>
             </div>
-
           </div>
+
+          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              <pxl-circle id="sec1Circle1" x="500" y="230" r="140" fill="#ef4444" stroke="#991b1b" strokewidth="10"></pxl-circle>
+              <pxl-circle id="sec1Circle2" x="420" y="370" r="140" fill="dodgerblue" stroke="royalblue" strokewidth="10"></pxl-circle>
+              <pxl-circle id="sec1Circle3" x="580" y="370" r="140" fill="#fbbf24aa" stroke="#b45309" strokewidth="10"></pxl-circle>
+            </pxl-layer>
+          </pxl-stage>
         </div>
 
 
