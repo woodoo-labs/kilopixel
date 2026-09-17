@@ -44,15 +44,15 @@
         <h2>1. Stroke Color &amp; Width</h2>
         <p>You can outline any Kilopixel shape using the <code>stroke</code> and <code>strokewidth</code> attributes:</p>
         <ul>
-          <li><strong>Stroke Color</strong> (<code>stroke</code>): Accepts hexadecimal codes (<code>#f97316</code>), CSS color keywords (<code>darkorange</code>), functional color models (<code>rgb()</code>, <code>rgba()</code>, <code>hsl()</code>, <code>hsla()</code>), or dynamic gradient shaders (<code>linear()</code>, <code>radial()</code>, <code>conic()</code>). If omitted or set to <code>none</code> or <code>transparent</code>, no stroke is drawn.</li>
-          <li><strong>Stroke Width</strong> (<code>strokewidth</code>): Sets the thickness of the stroke in unitless logical canvas coordinates. Defaults to <code>1</code>. Setting <code>strokewidth="0"</code> disables stroke rendering.</li>
+          <li><strong>Stroke Color:</strong> The <code>stroke</code> attribute accepts any valid CSS color (hex, RGB, HSL, or named colors) as well as gradient shaders. If omitted or set to <code>none</code>, no stroke is drawn.</li>
+          <li><strong>Stroke Width:</strong> The <code>strokewidth</code> attribute sets the outline thickness in logical canvas coordinates (defaults to 1). Setting it to 0 disables stroke rendering.</li>
         </ul>
 
         <!-- Declarative Code Block Above Container -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Circle with configurable stroke --&gt;
-    &lt;pxl-circle stroke="<mark id="sec1CircleStrokeCode">#f97316</mark>" strokewidth="<mark id="sec1CircleWidthCode">8</mark>" r="<mark id="sec1CircleRCode">150</mark>" x="300" y="300" fill="#ffedd566"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle stroke="<mark id="sec1CircleStrokeCode">#f97316</mark>" strokewidth="<mark id="sec1CircleWidthCode">40</mark>" r="<mark id="sec1CircleRCode">150</mark>" x="300" y="300" fill="#ffedd566"&gt;&lt;/pxl-circle&gt;
 
     &lt;!-- Rounded rectangle with gradient stroke --&gt;
     &lt;pxl-rect stroke="<mark id="sec1RectStrokeCode">#3b82f6</mark>" strokewidth="<mark id="sec1RectWidthCode">8</mark>" r="<mark id="sec1RectRCode">50</mark>" x="700" y="300" w="300" h="300" fill="#dbeafe66"&gt;&lt;/pxl-rect&gt;
@@ -73,8 +73,8 @@
             <div class="tab-content active" id="sec1CircleTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec1CircleWidthVal">8</span></label>
-                  <input type="range" min="0" max="100" step="1" value="8" autocomplete="off" id="sec1CircleWidthInput"
+                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec1CircleWidthVal">40</span></label>
+                  <input type="range" min="0" max="100" step="1" value="40" autocomplete="off" id="sec1CircleWidthInput"
                     oninput="document.getElementById('sec1Circle').setAttribute('strokewidth', this.value); document.getElementById('sec1CircleWidthVal').innerText = this.value; document.getElementById('sec1CircleWidthCode').innerText = this.value;" data-mark="sec1CircleWidthCode">
                 </div>
                 <div class="control-group">
@@ -152,7 +152,7 @@
             <!-- Shapes Layer -->
             <pxl-layer>
               <!-- Circle with configurable stroke -->
-              <pxl-circle id="sec1Circle" x="300" y="300" r="150" fill="#ffedd566" stroke="#f97316" strokewidth="8"></pxl-circle>
+              <pxl-circle id="sec1Circle" x="300" y="300" r="150" fill="#ffedd566" stroke="#f97316" strokewidth="40"></pxl-circle>
 
               <!-- Rounded Rect with configurable stroke -->
               <pxl-rect id="sec1Rect" x="700" y="300" w="300" h="300" r="50" fill="#dbeafe66" stroke="#3b82f6" strokewidth="8"></pxl-rect>
@@ -172,9 +172,9 @@
         <h2>2. Line Caps</h2>
         <p>The <code>linecap</code> attribute controls the ending shape of open paths&mdash;including <code>&lt;pxl-line&gt;</code>, open <code>&lt;pxl-polyline&gt;</code>, and open circular arcs (<code>&lt;pxl-circle&gt;</code> with <code>sweep</code> or <code>start</code>/<code>end</code>). Kilopixel supports three standard cap styles:</p>
         <ul>
-          <li><strong><code>butt</code></strong> (default): The stroke ends flush exactly at the path coordinates. No extra pixels extend beyond the endpoints.</li>
-          <li><strong><code>round</code></strong>: Adds a semicircular cap extending past each endpoint by half the stroke width (radius = strokewidth / 2).</li>
-          <li><strong><code>square</code></strong>: Adds a rectangular cap extending past each endpoint by half the stroke width.</li>
+          <li><strong>Butt Cap:</strong> The default <code>butt</code> style cuts the stroke flush exactly at the path coordinates. No extra pixels extend beyond the endpoints.</li>
+          <li><strong>Round Cap:</strong> The <code>round</code> style adds a semicircular cap extending past each endpoint by half the stroke width (radius = strokewidth / 2).</li>
+          <li><strong>Square Cap:</strong> The <code>square</code> style adds a rectangular cap extending past each endpoint by half the stroke width.</li>
         </ul>
 
         <div class="callout-info">
@@ -284,6 +284,135 @@
               <!-- Section Labels -->
               <pxl-text x="300" y="500" text="'Straight Line'" size="27" font="monospace" weight="700" align="center" fill="#fb923c"></pxl-text>
               <pxl-text x="700" y="500" text="'Circular Arc'" size="27" font="monospace" weight="700" align="center" fill="#60a5fa"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 3: LINE JOINS -->
+        <!-- ================================================================= -->
+        <h2>3. Line Joins</h2>
+        <p>The <code>linejoin</code> attribute determines how two connected stroke segments meet at a corner or vertex. Kilopixel supports three standard corner join styles:</p>
+        <ul>
+          <li><strong>Miter Join:</strong> The default <code>miter</code> style extends the outer edges of the stroke segments until they intersect in a sharp point.</li>
+          <li><strong>Round Join:</strong> The <code>round</code> style rounds off the corner with a circular curve having a radius equal to half the stroke width.</li>
+          <li><strong>Bevel Join:</strong> The <code>bevel</code> style slices off the outer corner with a flat diagonal edge between the outer endpoints of the two segments.</li>
+        </ul>
+
+        <div class="callout-info">
+          <p class="callout-title">Open vs. Closed Corner Joins</p>
+          <p class="callout-body">Line joins apply to every vertex where two segments meet&mdash;including intermediate vertices of open <code>&lt;pxl-polyline&gt;</code> shapes, as well as the closing joint of closed shapes like <code>&lt;pxl-polyline closed="true"&gt;</code> and <code>&lt;pxl-rect&gt;</code>.</p>
+        </div>
+
+        <!-- Declarative Code Block Above Container -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- 1. Open Chevron Corner --&gt;
+    &lt;pxl-polyline linejoin="<mark id="sec3JoinCode">miter</mark>" strokewidth="<mark id="sec3WidthCode">40</mark>" points="150,450; 300,<mark id="sec3PeakYCode">150</mark>; 450,450" stroke="#f97316" fill="none"&gt;&lt;/pxl-polyline&gt;
+
+    &lt;!-- 2. Closed Polygon Corner --&gt;
+    &lt;pxl-polyline linejoin="<mark id="sec3PolyJoinCode">miter</mark>" strokewidth="<mark id="sec3PolyWidthCode">40</mark>" points="550,450; 700,<mark id="sec3PolyPeakYCode">150</mark>; 850,450" closed="true" stroke="#3b82f6" fill="#dbeafe66"&gt;&lt;/pxl-polyline&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3ChevronTab')">Chevron</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3PolygonTab')">Polygon</button>
+              </div>
+            </div>
+
+            <!-- Chevron Tab -->
+            <div class="tab-content active" id="sec3ChevronTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Line Join</span></label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn active" id="sec3ChevronMiterBtn" onclick="document.getElementById('sec3Chevron').setAttribute('linejoin', 'miter'); pxlDocs.updateToggle(this, null, 'sec3JoinCode', 'miter');">miter</button>
+                    <button class="toggle-btn" id="sec3ChevronRoundBtn" onclick="document.getElementById('sec3Chevron').setAttribute('linejoin', 'round'); pxlDocs.updateToggle(this, null, 'sec3JoinCode', 'round');">round</button>
+                    <button class="toggle-btn" id="sec3ChevronBevelBtn" onclick="document.getElementById('sec3Chevron').setAttribute('linejoin', 'bevel'); pxlDocs.updateToggle(this, null, 'sec3JoinCode', 'bevel');">bevel</button>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec3WidthVal">40</span></label>
+                  <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec3WidthInput"
+                    oninput="document.getElementById('sec3Chevron').setAttribute('strokewidth', this.value); document.getElementById('sec3WidthVal').innerText = this.value; document.getElementById('sec3WidthCode').innerText = this.value;" data-mark="sec3WidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Corner Peak Y</span> <span id="sec3PeakYVal">150</span></label>
+                  <input type="range" min="100" max="350" step="10" value="150" autocomplete="off" id="sec3PeakYInput"
+                    oninput="const y = this.value; const pts = '150,450; 300,' + y + '; 450,450'; document.getElementById('sec3Chevron').setAttribute('points', pts); document.getElementById('sec3ChevronGhost').setAttribute('points', pts); document.getElementById('sec3ChevronPeakDot').setAttribute('y', y); document.getElementById('sec3PeakYVal').innerText = y; document.getElementById('sec3PeakYCode').innerText = y;" data-mark="sec3PeakYCode">
+                </div>
+              </div>
+            </div>
+
+            <!-- Polygon Tab -->
+            <div class="tab-content" id="sec3PolygonTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Line Join</span></label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn active" id="sec3PolyMiterBtn" onclick="document.getElementById('sec3Polygon').setAttribute('linejoin', 'miter'); pxlDocs.updateToggle(this, null, 'sec3PolyJoinCode', 'miter');">miter</button>
+                    <button class="toggle-btn" id="sec3PolyRoundBtn" onclick="document.getElementById('sec3Polygon').setAttribute('linejoin', 'round'); pxlDocs.updateToggle(this, null, 'sec3PolyJoinCode', 'round');">round</button>
+                    <button class="toggle-btn" id="sec3PolyBevelBtn" onclick="document.getElementById('sec3Polygon').setAttribute('linejoin', 'bevel'); pxlDocs.updateToggle(this, null, 'sec3PolyJoinCode', 'bevel');">bevel</button>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec3PolyWidthVal">40</span></label>
+                  <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec3PolyWidthInput"
+                    oninput="document.getElementById('sec3Polygon').setAttribute('strokewidth', this.value); document.getElementById('sec3PolyWidthVal').innerText = this.value; document.getElementById('sec3PolyWidthCode').innerText = this.value;" data-mark="sec3PolyWidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Corner Peak Y</span> <span id="sec3PolyPeakYVal">150</span></label>
+                  <input type="range" min="100" max="350" step="10" value="150" autocomplete="off" id="sec3PolyPeakYInput"
+                    oninput="const y = this.value; const pts = '550,450; 700,' + y + '; 850,450'; document.getElementById('sec3Polygon').setAttribute('points', pts); document.getElementById('sec3PolyGhost').setAttribute('points', pts); document.getElementById('sec3PolyPeakDot').setAttribute('y', y); document.getElementById('sec3PolyPeakYVal').innerText = y; document.getElementById('sec3PolyPeakYCode').innerText = y;" data-mark="sec3PolyPeakYCode">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage id="sec3Stage" ratio="5 / 3" class="demo-stage">
+            <!-- Background Grid -->
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            </pxl-layer>
+
+            <!-- Guide Helpers Layer (Grey reference lines) -->
+            <pxl-layer>
+              <!-- Baseline guide for chevron and polygon -->
+              <pxl-line x1="100" y1="450" x2="500" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-line x1="500" y1="450" x2="900" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+            </pxl-layer>
+
+            <!-- Main Shapes Layer -->
+            <pxl-layer>
+              <!-- Open Chevron Corner -->
+              <pxl-polyline id="sec3Chevron" points="150,450; 300,150; 450,450" stroke="#f97316" strokewidth="40" fill="none" linejoin="miter"></pxl-polyline>
+
+              <!-- Closed Polygon Corner -->
+              <pxl-polyline id="sec3Polygon" points="550,450; 700,150; 850,450" closed="true" stroke="#3b82f6" strokewidth="40" fill="#dbeafe66" linejoin="miter"></pxl-polyline>
+            </pxl-layer>
+
+            <!-- Overlay Ghost Lines & Points -->
+            <pxl-layer>
+              <!-- Chevron skeleton & anchor dots -->
+              <pxl-polyline id="sec3ChevronGhost" points="150,450; 300,150; 450,450" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
+              <pxl-circle x="150" y="450" r="5" fill="#c2410c"></pxl-circle>
+              <pxl-circle id="sec3ChevronPeakDot" x="300" y="150" r="5" fill="#c2410c"></pxl-circle>
+              <pxl-circle x="450" y="450" r="5" fill="#c2410c"></pxl-circle>
+
+              <!-- Polygon skeleton & anchor dots -->
+              <pxl-polyline id="sec3PolyGhost" points="550,450; 700,150; 850,450" closed="true" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
+              <pxl-circle x="550" y="450" r="5" fill="#1d4ed8"></pxl-circle>
+              <pxl-circle id="sec3PolyPeakDot" x="700" y="150" r="5" fill="#1d4ed8"></pxl-circle>
+              <pxl-circle x="850" y="450" r="5" fill="#1d4ed8"></pxl-circle>
+
+              <!-- Section Labels -->
+              <pxl-text x="300" y="500" text="'Open Chevron'" size="27" font="monospace" weight="700" align="center" fill="#fb923c"></pxl-text>
+              <pxl-text x="700" y="500" text="'Closed Polygon'" size="27" font="monospace" weight="700" align="center" fill="#60a5fa"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
