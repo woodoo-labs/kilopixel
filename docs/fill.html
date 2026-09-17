@@ -31,9 +31,7 @@
     <main class="docs-content">
       <div class="docs-inner">
         <h1>Fill</h1>
-        <p class="lead">The <code>fill</code> attribute paints the interior surface of any vector shape in Kilopixel. Whether you need a vibrant solid backdrop, an alpha-translucent tint, or dynamic reactive shading, <code>fill</code> serves as the primary canvas paint property.</p>
-
-        <p class="lead">Because fills are powered by color, this guide also introduces Kilopixel's foundational color models &mdash; including hex codes, CSS named colors, <code>rgb()</code> / <code>rgba()</code> channels, and <code>hsl()</code> / <code>hsla()</code> color spaces &mdash; all of which can be applied to both <code>fill</code> and <code>stroke</code> attributes.</p>
+        <p class="lead">The <code>fill</code> attribute paints the interior surface of any vector shape in Kilopixel. Because fills are powered by color, this guide also introduces Kilopixel's foundational color models &mdash; including hex codes, CSS named colors, <code>rgb()</code> / <code>rgba()</code> channels, and <code>hsl()</code> / <code>hsla()</code> color spaces. All of these can be applied to both <code>fill</code> and <code>stroke</code> attributes.</p>
 
         <div class="callout-info">
           <p class="callout-title">Fills, Strokes &amp; Gradients</p>
@@ -45,7 +43,7 @@
         <!-- SECTION 1: NAMED COLORS & HEX CODES -->
         <!-- ================================================================= -->
         <h2>1. Named Colors &amp; Hex Codes</h2>
-        <p>Because Kilopixel renders directly to HTML5 Canvas, you can use any valid CSS color keyword (like <code>dodgerblue</code> or <code>transparent</code>) or hexadecimal code (like <code>#ef4444</code>) for the <code>fill</code> and <code>stroke</code> attributes.</p>
+        <p>In Kilopixel, you can use any valid CSS color keyword (like <code>dodgerblue</code> or <code>transparent</code>) or hexadecimal code (like <code>#ef4444</code>) for the <code>fill</code> and <code>stroke</code> attributes.</p>
         <p>In addition to standard 6-digit hex codes and 3-digit shorthand (<code>#f00</code>), Kilopixel fully supports 8-digit hexadecimal colors (<code>#rrggbbaa</code>). The final two digits represent the alpha channel (e.g. <code>#fbbf24aa</code>), creating translucent fills that blend with underlying shapes.</p>
         
         <div class="callout-info">
@@ -55,19 +53,13 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Circle 1 (Hex Code) --&gt;
-    &lt;pxl-circle x="<mark id="sec1Circle1XCode">500</mark>" y="<mark id="sec1Circle1YCode">230</mark>" r="<mark id="sec1Circle1RCode">140</mark>"
-      fill="<mark id="sec1Circle1FillCode">#ef4444</mark>" stroke="#991b1b" strokewidth="4"&gt;
-    &lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="<mark id="sec1Circle1FillCode">#ef4444</mark>" stroke="#991b1b" x="<mark id="sec1Circle1XCode">500</mark>" y="<mark id="sec1Circle1YCode">230</mark>" r="<mark id="sec1Circle1RCode">140</mark>" strokewidth="4"&gt;&lt;/pxl-circle&gt;
       
     &lt;!-- Circle 2 (Named CSS Color) --&gt;
-    &lt;pxl-circle x="<mark id="sec1Circle2XCode">420</mark>" y="<mark id="sec1Circle2YCode">370</mark>" r="<mark id="sec1Circle2RCode">140</mark>"
-      fill="<mark id="sec1Circle2FillCode">dodgerblue</mark>" stroke="royalblue" strokewidth="4"&gt;
-    &lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="<mark id="sec1Circle2FillCode">dodgerblue</mark>" stroke="royalblue" x="<mark id="sec1Circle2XCode">420</mark>" y="<mark id="sec1Circle2YCode">370</mark>" r="<mark id="sec1Circle2RCode">140</mark>" strokewidth="4"&gt;&lt;/pxl-circle&gt;
       
     &lt;!-- Circle 3 (8-Digit Hex with Alpha) --&gt;
-    &lt;pxl-circle x="<mark id="sec1Circle3XCode">580</mark>" y="<mark id="sec1Circle3YCode">370</mark>" r="<mark id="sec1Circle3RCode">140</mark>"
-      fill="<mark id="sec1Circle3FillCode">#fbbf24aa</mark>" stroke="#b45309" strokewidth="4"&gt;
-    &lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="<mark id="sec1Circle3FillCode">#fbbf24aa</mark>" stroke="#b45309" x="<mark id="sec1Circle3XCode">580</mark>" y="<mark id="sec1Circle3YCode">370</mark>" r="<mark id="sec1Circle3RCode">140</mark>" strokewidth="4"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -200,13 +192,13 @@
             <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Circle 1 (Red) --&gt;
-    &lt;pxl-circle x="500" y="230" r="140" fill="rgba(<mark id="sec2Circle1RedCode">255</mark>, <mark id="sec2Circle1GreenCode">0</mark>, <mark id="sec2Circle1BlueCode">0</mark>, <mark id="sec2Circle1AlphaCode">0.7</mark>)"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="rgba(<mark id="sec2Circle1RedCode">255</mark>, <mark id="sec2Circle1GreenCode">0</mark>, <mark id="sec2Circle1BlueCode">0</mark>, <mark id="sec2Circle1AlphaCode">0.7</mark>)" x="500" y="230" r="140"&gt;&lt;/pxl-circle&gt;
       
     &lt;!-- Circle 2 (Green) --&gt;
-    &lt;pxl-circle x="420" y="370" r="140" fill="rgba(<mark id="sec2Circle2RedCode">0</mark>, <mark id="sec2Circle2GreenCode">255</mark>, <mark id="sec2Circle2BlueCode">0</mark>, <mark id="sec2Circle2AlphaCode">0.7</mark>)"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="rgba(<mark id="sec2Circle2RedCode">0</mark>, <mark id="sec2Circle2GreenCode">255</mark>, <mark id="sec2Circle2BlueCode">0</mark>, <mark id="sec2Circle2AlphaCode">0.7</mark>)" x="420" y="370" r="140"&gt;&lt;/pxl-circle&gt;
       
     &lt;!-- Circle 3 (Blue) --&gt;
-    &lt;pxl-circle x="580" y="370" r="140" fill="rgba(<mark id="sec2Circle3RedCode">0</mark>, <mark id="sec2Circle3GreenCode">0</mark>, <mark id="sec2Circle3BlueCode">255</mark>, <mark id="sec2Circle3AlphaCode">0.7</mark>)"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="rgba(<mark id="sec2Circle3RedCode">0</mark>, <mark id="sec2Circle3GreenCode">0</mark>, <mark id="sec2Circle3BlueCode">255</mark>, <mark id="sec2Circle3AlphaCode">0.7</mark>)" x="580" y="370" r="140"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
           </div>
@@ -330,13 +322,13 @@
             <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Circle 1 (Static HSL) --&gt;
-    &lt;pxl-circle x="500" y="230" r="140" fill="hsl(<mark id="sec3Circle1HueCode">0</mark>, <mark id="sec3Circle1SatCode">100</mark>, <mark id="sec3Circle1LitCode">50</mark>)"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="hsl(<mark id="sec3Circle1HueCode">0</mark>, <mark id="sec3Circle1SatCode">100</mark>, <mark id="sec3Circle1LitCode">50</mark>)" x="500" y="230" r="140"&gt;&lt;/pxl-circle&gt;
       
     &lt;!-- Circle 2 (HSLA with Alpha) --&gt;
-    &lt;pxl-circle x="420" y="370" r="140" fill="hsla(<mark id="sec3Circle2HueCode">120</mark>, <mark id="sec3Circle2SatCode">100</mark>, <mark id="sec3Circle2LitCode">50</mark>, <mark id="sec3Circle2AlphaCode">0.7</mark>)"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="hsla(<mark id="sec3Circle2HueCode">120</mark>, <mark id="sec3Circle2SatCode">100</mark>, <mark id="sec3Circle2LitCode">50</mark>, <mark id="sec3Circle2AlphaCode">0.7</mark>)" x="420" y="370" r="140"&gt;&lt;/pxl-circle&gt;
       
     &lt;!-- Circle 3 (Animated Hue) --&gt;
-    &lt;pxl-circle x="580" y="370" r="140" fill="hsl(t * <mark id="sec3Circle3SpeedCode">90</mark>, 100, 50)"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="hsl(t * <mark id="sec3Circle3SpeedCode">90</mark>, 100, 50)" x="580" y="370" r="140"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
           </div>
