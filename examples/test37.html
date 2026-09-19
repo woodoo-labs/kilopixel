@@ -106,7 +106,7 @@
     <pxl-circle x="500" y="281" r="48 + wave(4) * 5" 
       start="t * 90" sweep="ref.energy.value * 3.6"
       stroke="#00e5ff" strokewidth="2" fill="none"
-      linedash="[1, 3]"></pxl-circle>
+      linedash="1, 3"></pxl-circle>
 
     <!-- ─── RING 1: OUTER ZODIAC (radius 220, rotating clockwise at 8°/s) ─── -->
     <pxl-group x="500" y="281" rotate="t * 8">
@@ -135,7 +135,7 @@
 
       <!-- [42] Ring track — animated dashed circle -->
       <pxl-circle r="150" stroke="hsla(320, 80, 50, 0.15)" strokewidth="0.5" fill="none"
-        linedash="[6, 8]" dashoffset="t * 30"></pxl-circle>
+        linedash="6, 8" dashoffset="t * 30"></pxl-circle>
 
       <!-- [43-50] 8 orbiting diamond-rects with per-corner radii -->
       <pxl-group rotate="0"><pxl-rect dx="150" w="14" h="14" r1="0" r2="7" r3="0" r4="7" fill="hsla(320, 80, 55, 0.7)" stroke="#ff00aa" strokewidth="0.5" rotate="t * 45"></pxl-rect></pxl-group>
@@ -170,12 +170,12 @@
     <!-- [58] Scanning arc A — clockwise, with arrow -->
     <pxl-circle x="500" y="281" r="185" start="t * 25" sweep="50"
       stroke="#00e5ff" strokewidth="1.5" fill="none"
-      linedash="[2, 6]" arrowend="auto" arrowstyle="filled"></pxl-circle>
+      linedash="2, 6" arrowend="auto" arrowstyle="filled"></pxl-circle>
 
     <!-- [59] Scanning arc B — counter, magenta -->
     <pxl-circle x="500" y="281" r="185" start="t * -18 + 180" sweep="40"
       stroke="#ff00aa" strokewidth="1.5" fill="none"
-      linedash="[2, 6]" arrowend="auto" arrowstyle="line"></pxl-circle>
+      linedash="2, 6" arrowend="auto" arrowstyle="line"></pxl-circle>
 
     <!-- [60] Outer boundary circle — very faint -->
     <pxl-circle x="500" y="281" r="260"
@@ -206,12 +206,12 @@
     <!-- [69] Elliptical orbit track — tilted -->
     <pxl-ellipse x="500" y="281" rx="240" ry="100" rotate="25"
       stroke="hsla(270, 60, 50, 0.08)" strokewidth="0.3" fill="none"
-      linedash="[3, 6]"></pxl-ellipse>
+      linedash="3, 6"></pxl-ellipse>
 
     <!-- [70] Second elliptical orbit — opposite tilt -->
     <pxl-ellipse x="500" y="281" rx="240" ry="100" rotate="-25"
       stroke="hsla(180, 60, 50, 0.08)" strokewidth="0.3" fill="none"
-      linedash="[3, 6]"></pxl-ellipse>
+      linedash="3, 6"></pxl-ellipse>
 
     <!-- ─── ORBITING PLANET SYSTEMS ─── -->
 
@@ -240,7 +240,7 @@
     <!-- [76] Counter-rotating dashed circle with strobe() -->
     <pxl-circle x="500" y="281" r="195"
       stroke="hsla(200, 60, 50, 0.06)" strokewidth="0.5" fill="none"
-      linedash="[1, 15]" dashoffset="t * -40"
+      linedash="1, 15" dashoffset="t * -40"
       alpha="0.5 + strobe(4) * 0.3"></pxl-circle>
 
   </pxl-layer>
@@ -322,7 +322,7 @@
     <pxl-circle
       x="toLocal(ref.planetA, 'tx')" y="toLocal(ref.planetA, 'ty')" r="18"
       stroke="#00ffaa" strokewidth="0.5" fill="none"
-      linedash="[3, 3]" alpha="0.5"></pxl-circle>
+      linedash="3, 3" alpha="0.5"></pxl-circle>
     <pxl-circle
       x="toLocal(ref.planetA, 'tx')" y="toLocal(ref.planetA, 'ty')" r="22"
       stroke="#00ffaa" strokewidth="0.3" fill="none"

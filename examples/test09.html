@@ -36,17 +36,17 @@
     <pxl-layer>
       <pxl-group x="500" y="281">
         <!-- Sunburst lines radiating outward -->
-        <pxl-line x1="0" y1="0" x2="-600" y2="-300" strokewidth="2" stroke="linear([1,1, 0,0], ['transparent', '#ff0055'])" linedash="[15, 15]" dashoffset="t * -100"></pxl-line>
-        <pxl-line x1="0" y1="0" x2="-300" y2="-400" strokewidth="2" stroke="linear([1,1, 0,0], ['transparent', '#ff0055'])" linedash="[10, 20]" dashoffset="t * -80"></pxl-line>
-        <pxl-line x1="0" y1="0" x2="0" y2="-400" strokewidth="2" stroke="linear([0.5,1, 0.5,0], ['transparent', '#a200ff'])" linedash="[5, 10]" dashoffset="t * -120"></pxl-line>
-        <pxl-line x1="0" y1="0" x2="300" y2="-400" strokewidth="2" stroke="linear([0,1, 1,0], ['transparent', '#00f2ff'])" linedash="[10, 20]" dashoffset="t * -80"></pxl-line>
-        <pxl-line x1="0" y1="0" x2="600" y2="-300" strokewidth="2" stroke="linear([0,1, 1,0], ['transparent', '#00f2ff'])" linedash="[15, 15]" dashoffset="t * -100"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="-600" y2="-300" strokewidth="2" stroke="linear([1,1, 0,0], ['transparent', '#ff0055'])" linedash="15, 15" dashoffset="t * -100"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="-300" y2="-400" strokewidth="2" stroke="linear([1,1, 0,0], ['transparent', '#ff0055'])" linedash="10, 20" dashoffset="t * -80"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="0" y2="-400" strokewidth="2" stroke="linear([0.5,1, 0.5,0], ['transparent', '#a200ff'])" linedash="5, 10" dashoffset="t * -120"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="300" y2="-400" strokewidth="2" stroke="linear([0,1, 1,0], ['transparent', '#00f2ff'])" linedash="10, 20" dashoffset="t * -80"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="600" y2="-300" strokewidth="2" stroke="linear([0,1, 1,0], ['transparent', '#00f2ff'])" linedash="15, 15" dashoffset="t * -100"></pxl-line>
         
-        <pxl-line x1="0" y1="0" x2="-600" y2="300" strokewidth="2" stroke="linear([1,0, 0,1], ['transparent', '#ff0055'])" linedash="[15, 15]" dashoffset="t * -100"></pxl-line>
-        <pxl-line x1="0" y1="0" x2="-300" y2="400" strokewidth="2" stroke="linear([1,0, 0,1], ['transparent', '#ff0055'])" linedash="[10, 20]" dashoffset="t * -80"></pxl-line>
-        <pxl-line x1="0" y1="0" x2="0" y2="400" strokewidth="2" stroke="linear([0.5,0, 0.5,1], ['transparent', '#a200ff'])" linedash="[5, 10]" dashoffset="t * -120"></pxl-line>
-        <pxl-line x1="0" y1="0" x2="300" y2="400" strokewidth="2" stroke="linear([0,0, 1,1], ['transparent', '#00f2ff'])" linedash="[10, 20]" dashoffset="t * -80"></pxl-line>
-        <pxl-line x1="0" y1="0" x2="600" y2="300" strokewidth="2" stroke="linear([0,0, 1,1], ['transparent', '#00f2ff'])" linedash="[15, 15]" dashoffset="t * -100"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="-600" y2="300" strokewidth="2" stroke="linear([1,0, 0,1], ['transparent', '#ff0055'])" linedash="15, 15" dashoffset="t * -100"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="-300" y2="400" strokewidth="2" stroke="linear([1,0, 0,1], ['transparent', '#ff0055'])" linedash="10, 20" dashoffset="t * -80"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="0" y2="400" strokewidth="2" stroke="linear([0.5,0, 0.5,1], ['transparent', '#a200ff'])" linedash="5, 10" dashoffset="t * -120"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="300" y2="400" strokewidth="2" stroke="linear([0,0, 1,1], ['transparent', '#00f2ff'])" linedash="10, 20" dashoffset="t * -80"></pxl-line>
+        <pxl-line x1="0" y1="0" x2="600" y2="300" strokewidth="2" stroke="linear([0,0, 1,1], ['transparent', '#00f2ff'])" linedash="15, 15" dashoffset="t * -100"></pxl-line>
       </pxl-group>
     </pxl-layer>
 
@@ -70,7 +70,7 @@
 
         <!-- Inner Blob 1 -->
         <pxl-polyline closed="true" smooth="0.8" 
-          stroke="#a200ff" strokewidth="4" linedash="[10, 15]" dashoffset="t * 50"
+          stroke="#a200ff" strokewidth="4" linedash="10, 15" dashoffset="t * 50"
           points="
             -110 - wave(3.1)*20, 0; 
             -55, -110 - wave(2.2)*20; 
@@ -123,7 +123,7 @@
 
         <!-- Dashed snake moving through it -->
         <pxl-polyline closed="false" smooth="1.5" 
-          stroke="#fff" strokewidth="4" linecap="round" linedash="[1, 15]" dashoffset="t * -100"
+          stroke="#fff" strokewidth="4" linecap="round" linedash="1, 15" dashoffset="t * -100"
           points="
             -150, -100 + wave(1)*50;
             -50, 100 - wave(1.2)*50;
@@ -143,7 +143,7 @@
 
         <!-- Loose floating string 2 -->
         <pxl-polyline closed="false" smooth="0.5" 
-          stroke="rgba(255, 0, 85, 0.5)" strokewidth="2" linecap="butt" linedash="[5, 5]" dashoffset="t * 50"
+          stroke="rgba(255, 0, 85, 0.5)" strokewidth="2" linecap="butt" linedash="5, 5" dashoffset="t * 50"
           points="
             -180, 50 - wave(3.1)*100;
             -80, -50 + wave(3.5)*100;
