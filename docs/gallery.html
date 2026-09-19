@@ -154,7 +154,7 @@
                     <pxl-layer>
                       <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
                       <!-- Rotating outer dashed orbital ring -->
-                      <pxl-circle x="500" y="500" r="280" rotate="t * 25" fill="none" stroke="#3b82f6" strokewidth="4" linedash="[10, 10]"></pxl-circle>
+                      <pxl-circle x="500" y="500" r="280" rotate="t * 25" fill="none" stroke="#3b82f6" strokewidth="4" linedash="10, 10"></pxl-circle>
                       <!-- Orbiting blue satellite -->
                       <pxl-circle x="500 + cos(t * 1.5) * 280" y="500 + sin(t * 1.5) * 280" r="16" fill="#2563eb" stroke="#ffffff" strokewidth="3"></pxl-circle>
                       <!-- Breathing inner core -->
@@ -170,7 +170,7 @@
                     <pxl-layer>
                       <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
                       <!-- Clockwise rotating outer diamond -->
-                      <pxl-rect x="500" y="500" w="420" h="420" rx="30" rotate="45 + t * 20" fill="none" stroke="#f97316" strokewidth="4" linedash="[8, 8]"></pxl-rect>
+                      <pxl-rect x="500" y="500" w="420" h="420" rx="30" rotate="45 + t * 20" fill="none" stroke="#f97316" strokewidth="4" linedash="8, 8"></pxl-rect>
                       <!-- Counter-clockwise rotating breathing diamond -->
                       <pxl-rect x="500" y="500" w="220 + sin(t * 2.5) * 25" h="220 + sin(t * 2.5) * 25" rx="20" rotate="45 - t * 35" fill="#f9731622" stroke="#ea580c" strokewidth="3"></pxl-rect>
                       <pxl-text x="500" y="500" text="'Stage 2: Diamonds'" size="32" font="monospace" weight="bold" align="center" fill="#c2410c"></pxl-text>
@@ -186,7 +186,7 @@
                       <!-- Breathing emerald core -->
                       <pxl-circle x="500" y="500" r="220 + sin(t * 2) * 25" fill="#10b98122" stroke="#059669" strokewidth="4"></pxl-circle>
                       <!-- Rotating dashed orbital ring -->
-                      <pxl-circle x="500" y="500" r="170" rotate="t * 30" fill="none" stroke="#10b981" strokewidth="2" linedash="[8, 8]"></pxl-circle>
+                      <pxl-circle x="500" y="500" r="170" rotate="t * 30" fill="none" stroke="#10b981" strokewidth="2" linedash="8, 8"></pxl-circle>
                       <!-- Symmetrical orbiting satellites -->
                       <pxl-circle x="500 + cos(t * 2) * 170" y="500 + sin(t * 2) * 170" r="14" fill="#059669"></pxl-circle>
                       <pxl-circle x="500 - cos(t * 2) * 170" y="500 - sin(t * 2) * 170" r="14" fill="#059669"></pxl-circle>
@@ -253,7 +253,7 @@
                       <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
                       <!-- Concentric pulsing ripple rings -->
                       <pxl-circle x="500" y="500" r="90 + sin(t * 2.5) * 15" fill="none" stroke="#ec4899" strokewidth="2"></pxl-circle>
-                      <pxl-circle x="500" y="500" r="175 + sin(t * 2.5 + 0.8) * 20" fill="none" stroke="#ec4899" strokewidth="3" linedash="[6, 6]"></pxl-circle>
+                      <pxl-circle x="500" y="500" r="175 + sin(t * 2.5 + 0.8) * 20" fill="none" stroke="#ec4899" strokewidth="3" linedash="6, 6"></pxl-circle>
                       <pxl-circle x="500" y="500" r="260 + sin(t * 2.5 + 1.6) * 25" fill="none" stroke="#ec4899" strokewidth="4"></pxl-circle>
                       <!-- Rotating radar sweep line -->
                       <pxl-line x1="500" y1="500" x2="500 + cos(t * 3) * 260" y2="500 + sin(t * 3) * 260" stroke="#db2777" strokewidth="4" arrowend="20"></pxl-line>

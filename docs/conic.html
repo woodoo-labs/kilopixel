@@ -137,11 +137,11 @@
                   <pxl-text x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
 
                   <!-- 0° Baseline Reference Line -->
-                  <pxl-line x1="0" y1="0" x2="160" y2="0" stroke="#a78bfa" strokewidth="2" linedash="[4, 4]"></pxl-line>
+                  <pxl-line x1="0" y1="0" x2="160" y2="0" stroke="#a78bfa" strokewidth="2" linedash="4, 4"></pxl-line>
                   <pxl-text x="175" y="0" text="'0°'" fill="#a78bfa" size="22" font="monospace" align="left" baseline="middle"></pxl-text>
 
                   <!-- Sweep Angle Arc -->
-                  <pxl-circle x="0" y="0" r="50" start="0" sweep="ref.sec1ex1Angle.value" fill="none" stroke="#8b5cf6" strokewidth="2" linedash="[4, 4]" alpha="ref.sec1ex1Angle.value > 0 ? 1 : 0"></pxl-circle>
+                  <pxl-circle x="0" y="0" r="50" start="0" sweep="ref.sec1ex1Angle.value" fill="none" stroke="#8b5cf6" strokewidth="2" linedash="4, 4" alpha="ref.sec1ex1Angle.value > 0 ? 1 : 0"></pxl-circle>
 
                   <!-- Start Angle Ray with Arrow -->
                   <pxl-line 
@@ -281,7 +281,7 @@
                     y1="ref.sec2ex1LocalY.value" 
                     x2="ref.sec2ex1LocalX.value + 160" 
                     y2="ref.sec2ex1LocalY.value" 
-                    stroke="#a78bfa" strokewidth="2" linedash="[4, 4]"></pxl-line>
+                    stroke="#a78bfa" strokewidth="2" linedash="4, 4"></pxl-line>
                   <pxl-text 
                     x="ref.sec2ex1LocalX.value + 175" 
                     y="ref.sec2ex1LocalY.value" 
@@ -292,7 +292,7 @@
                     x="ref.sec2ex1LocalX.value" 
                     y="ref.sec2ex1LocalY.value" 
                     r="50" start="0" sweep="ref.sec2ex1Angle.value" 
-                    fill="none" stroke="#8b5cf6" strokewidth="2" linedash="[4, 4]" 
+                    fill="none" stroke="#8b5cf6" strokewidth="2" linedash="4, 4" 
                     alpha="ref.sec2ex1Angle.value > 0 ? 1 : 0"></pxl-circle>
 
                   <!-- Start Angle Ray with Arrow -->
