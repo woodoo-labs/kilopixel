@@ -188,7 +188,7 @@
       <pxl-layer>
         <pxl-group x="500" y="500">
           
-          <pxl-group rotate="t * 2">
+          <pxl-group>
             <!-- ------------------------------------------------------------- -->
             <!-- TIER A: OUTER PURE HUE RING (r = 390, ir = 290, 100% Sat)    -->
             <!-- ------------------------------------------------------------- -->
@@ -218,7 +218,7 @@
             <pxl-circle r="390" ir="290" start="315" sweep="30" fill="hsl(330, 100, 50)"></pxl-circle>
           </pxl-group>
 
-          <pxl-group rotate="-t * 1.5">
+          <pxl-group>
             <!-- ------------------------------------------------------------- -->
             <!-- TIER B: MIDDLE TINTS RING (r = 290, ir = 210, 75% Lightness)  -->
             <!-- ------------------------------------------------------------- -->
@@ -236,7 +236,7 @@
             <pxl-circle r="290" ir="210" start="315" sweep="30" fill="hsl(330, 85, 72)"></pxl-circle>
           </pxl-group>
 
-          <pxl-group rotate="t * 1">
+          <pxl-group>
             <!-- ------------------------------------------------------------- -->
             <!-- TIER C: INNER SHADES RING (r = 210, ir = 140, 32% Lightness) -->
             <!-- ------------------------------------------------------------- -->
@@ -307,11 +307,11 @@
             <pxl-circle x="290" y="0" r="6" fill="#ffffff"></pxl-circle>
 
             <!-- Vertex 2 Node: Dynamic Hue θ + 120° -->
-            <pxl-circle x="-145" y="251.14" r="18" fill="hsl(t * 8, 100, 50)" stroke="#ffffff" strokewidth="2.5" blend="screen" shadowcolor="hsl(t * 8, 100, 50)" shadowblur="20"></pxl-circle>
+            <pxl-circle x="-145" y="251.14" r="18" fill="hsl(t * 8 + 120, 100, 50)" stroke="#ffffff" strokewidth="2.5" blend="screen" shadowcolor="hsl(t * 8 + 120, 100, 50)" shadowblur="20"></pxl-circle>
             <pxl-circle x="-145" y="251.14" r="6" fill="#ffffff"></pxl-circle>
 
             <!-- Vertex 3 Node: Dynamic Hue θ + 240° -->
-            <pxl-circle x="-145" y="-251.14" r="18" fill="hsl(t * 8, 100, 50)" stroke="#ffffff" strokewidth="2.5" blend="screen" shadowcolor="hsl(t * 8, 100, 50)" shadowblur="20"></pxl-circle>
+            <pxl-circle x="-145" y="-251.14" r="18" fill="hsl(t * 8 + 240, 100, 50)" stroke="#ffffff" strokewidth="2.5" blend="screen" shadowcolor="hsl(t * 8 + 240, 100, 50)" shadowblur="20"></pxl-circle>
             <pxl-circle x="-145" y="-251.14" r="6" fill="#ffffff"></pxl-circle>
           </pxl-group>
 
@@ -331,7 +331,7 @@
 
             <!-- Complementary Pointer B (Left, 180° Opposite) -->
             <pxl-group x="-390" y="0">
-              <pxl-rect w="26" h="26" r="4" fill="hsl(-t * 6, 100, 52)" stroke="#ffffff" strokewidth="2" rotate="45" blend="screen" shadowcolor="hsl(-t * 6, 100, 52)" shadowblur="15"></pxl-rect>
+              <pxl-rect w="26" h="26" r="4" fill="hsl(-t * 6 + 180, 100, 52)" stroke="#ffffff" strokewidth="2" rotate="45" blend="screen" shadowcolor="hsl(-t * 6 + 180, 100, 52)" shadowblur="15"></pxl-rect>
               <pxl-circle r="4" fill="#ffffff"></pxl-circle>
             </pxl-group>
           </pxl-group>
