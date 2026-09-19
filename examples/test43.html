@@ -105,14 +105,14 @@
               y1="toLocal(ref.sec8Layer1Shape, 'ty')" 
               x2="toLocal(ref.sec8Group2Shape, 'tx')" 
               y2="toLocal(ref.sec8Group2Shape, 'ty')" 
-              stroke="#ff00ff" strokewidth="4" linedash="10, 10">
+              stroke="#ff00ff" strokewidth="4" linedash="[10, 10]">
             </pxl-line>
           </pxl-layer>
 
           <!-- Layer 1 -->
           <pxl-layer id="sec8Layer1" x="ref.sec8Layer1X.value" y="ref.sec8Layer1Y.value" rotate="ref.sec8Layer1Rot.value">
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#fed7aa" strokewidth="2" linedash="5, 5"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#fed7aa" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#fed7aa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#fed7aa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#fdba74"></pxl-circle>
             <pxl-text x="15" y="-15" text="'Layer 1 Center'" size="27" fill="#fdba74"></pxl-text>
             
@@ -131,8 +131,8 @@
           <!-- Layer + Group 2 -->
           <pxl-layer>
             <pxl-group id="sec8Group2" x="ref.sec8Group2X.value" y="ref.sec8Group2Y.value" dx="ref.sec8Group2Dx.value" dy="ref.sec8Group2Dy.value" rotate="ref.sec8Group2Rot.value">
-              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#bfdbfe" strokewidth="2" linedash="5, 5"></pxl-line>
-              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#bfdbfe" strokewidth="2" linedash="5, 5"></pxl-line>
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#bfdbfe" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#bfdbfe" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-circle x="0" y="0" r="5" fill="#93c5fd"></pxl-circle>
               <pxl-text x="15" y="-15" text="'Group Local 0,0'" size="27" fill="#93c5fd"></pxl-text>
               
@@ -305,3 +305,4 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
 </body>
 </html>
+

@@ -264,14 +264,14 @@
             <pxl-layer>
               <!-- Line endpoint reference guides (rotates with line) -->
               <pxl-group id="sec2LineGuideGroup" x="300" y="300" rotate="ref.sec2Line.rotate">
-                <pxl-line x1="-150" y1="-150" x2="-150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="6, 6"></pxl-line>
-                <pxl-line x1="150" y1="-150" x2="150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="6, 6"></pxl-line>
+                <pxl-line x1="-150" y1="-150" x2="-150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+                <pxl-line x1="150" y1="-150" x2="150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
               </pxl-group>
 
               <!-- Arc radial reference guides (start is fixed at 135°, end rotates with sweep) -->
-              <pxl-line x1="700" y1="300" x2="550" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="6, 6"></pxl-line>
+              <pxl-line x1="700" y1="300" x2="550" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
               <pxl-group id="sec2ArcEndGuideGroup" x="700" y="300" rotate="135 + ref.sec2Arc.sweep">
-                <pxl-line x1="0" y1="0" x2="212" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="6, 6"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="212" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
               </pxl-group>
             </pxl-layer>
 
@@ -288,13 +288,13 @@
             <pxl-layer>
               <!-- Line centerline skeleton & endpoint anchors (rotates with line) -->
               <pxl-group id="sec2LineGhostGroup" x="300" y="300" rotate="ref.sec2Line.rotate">
-                <pxl-line x1="-150" y1="0" x2="150" y2="0" stroke="#ffffff" strokewidth="2" linedash="4, 4"></pxl-line>
+                <pxl-line x1="-150" y1="0" x2="150" y2="0" stroke="#ffffff" strokewidth="2" linedash="[4, 4]"></pxl-line>
                 <pxl-circle x="-150" y="0" r="5" fill="#c2410c"></pxl-circle>
                 <pxl-circle x="150" y="0" r="5" fill="#c2410c"></pxl-circle>
               </pxl-group>
 
               <!-- Arc centerline skeleton & endpoint anchors -->
-              <pxl-circle id="sec2ArcGhost" x="700" y="300" r="150" start="135" sweep="270" stroke="#ffffff" strokewidth="2" linedash="4, 4" fill="none"></pxl-circle>
+              <pxl-circle id="sec2ArcGhost" x="700" y="300" r="150" start="135" sweep="270" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-circle>
               <pxl-circle x="594" y="406" r="5" fill="#1d4ed8"></pxl-circle>
               <pxl-circle x="700" y="300" r="4" fill="#94a3b8"></pxl-circle>
               <pxl-group id="sec2ArcEndDotGroup" x="700" y="300" rotate="135 + ref.sec2Arc.sweep">
@@ -415,13 +415,13 @@
             <!-- Overlay Ghost Lines & Points -->
             <pxl-layer>
               <!-- Chevron skeleton & anchor dots -->
-              <pxl-polyline id="sec3ChevronGhost" points="150,450; 300,150; 450,450" stroke="#ffffff" strokewidth="2" linedash="4, 4" fill="none"></pxl-polyline>
+              <pxl-polyline id="sec3ChevronGhost" points="150,450; 300,150; 450,450" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
               <pxl-circle x="150" y="450" r="5" fill="#c2410c"></pxl-circle>
               <pxl-circle id="sec3ChevronPeakDot" x="300" y="150" r="5" fill="#c2410c"></pxl-circle>
               <pxl-circle x="450" y="450" r="5" fill="#c2410c"></pxl-circle>
 
               <!-- Polygon skeleton & anchor dots -->
-              <pxl-polyline id="sec3PolyGhost" points="550,450; 700,150; 850,450" closed="true" stroke="#ffffff" strokewidth="2" linedash="4, 4" fill="none"></pxl-polyline>
+              <pxl-polyline id="sec3PolyGhost" points="550,450; 700,150; 850,450" closed="true" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
               <pxl-circle x="550" y="450" r="5" fill="#1d4ed8"></pxl-circle>
               <pxl-circle id="sec3PolyPeakDot" x="700" y="150" r="5" fill="#1d4ed8"></pxl-circle>
               <pxl-circle x="850" y="450" r="5" fill="#1d4ed8"></pxl-circle>
@@ -523,7 +523,7 @@
             <!-- Guide Helpers Layer (Grey reference lines) -->
             <pxl-layer>
               <!-- Centerline vertical guide through diamond apexes -->
-              <pxl-line x1="700" y1="100" x2="700" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="6, 6"></pxl-line>
+              <pxl-line x1="700" y1="100" x2="700" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
             </pxl-layer>
 
             <!-- Main Shapes Layer -->
@@ -538,13 +538,13 @@
             <!-- Overlay Ghost Lines & Points -->
             <pxl-layer>
               <!-- Chevron skeleton & anchor dots -->
-              <pxl-polyline id="sec4ChevronGhost" points="220,450; 300,150; 380,450" stroke="#ffffff" strokewidth="2" linedash="4, 4" fill="none"></pxl-polyline>
+              <pxl-polyline id="sec4ChevronGhost" points="220,450; 300,150; 380,450" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
               <pxl-circle id="sec4ChevronLeftDot" x="220" y="450" r="5" fill="#c2410c"></pxl-circle>
               <pxl-circle id="sec4ChevronApexDot" x="300" y="150" r="5" fill="#c2410c"></pxl-circle>
               <pxl-circle id="sec4ChevronRightDot" x="380" y="450" r="5" fill="#c2410c"></pxl-circle>
 
               <!-- Diamond skeleton & anchor dots -->
-              <pxl-polyline id="sec4DiamondGhost" points="700,150; 762,300; 700,450; 638,300" closed="true" stroke="#ffffff" strokewidth="2" linedash="4, 4" fill="none"></pxl-polyline>
+              <pxl-polyline id="sec4DiamondGhost" points="700,150; 762,300; 700,450; 638,300" closed="true" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
               <pxl-circle id="sec4DiamondTopDot" x="700" y="150" r="5" fill="#1d4ed8"></pxl-circle>
               <pxl-circle id="sec4DiamondRightDot" x="762" y="300" r="5" fill="#1d4ed8"></pxl-circle>
               <pxl-circle id="sec4DiamondBottomDot" x="700" y="450" r="5" fill="#1d4ed8"></pxl-circle>
@@ -563,7 +563,7 @@
         <h2>5. Dashed Strokes &amp; Offset</h2>
         <p>The <code>linedash</code> and <code>dashoffset</code> attributes allow you to create patterned, dashed outlines across any Kilopixel shape. Rather than drawing a continuous path, the stroke alternates between drawn dash segments and empty gaps.</p>
         <ul>
-          <li><strong>Dash Pattern:</strong> The <code>linedash</code> attribute accepts a comma-separated list of numbers defining alternating dash and gap lengths (e.g., <code>linedash="24, 16"</code>), or a single number for equal dashes and gaps (e.g., <code>linedash="24"</code>). JavaScript array notation (e.g., <code>[24, 16]</code>) is also supported.</li>
+          <li><strong>Dash Pattern:</strong> The <code>linedash</code> attribute accepts a comma-separated list of numbers defining alternating dash and gap lengths (e.g., <code>linedash="[24, 16]"</code>), or a single number for equal dashes and gaps (e.g., <code>linedash="24"</code>). JavaScript array notation (e.g., <code>[24, 16]</code>) is also supported.</li>
           <li><strong>Phase Shift:</strong> The <code>dashoffset</code> attribute shifts where the pattern begins along the path perimeter, enabling precise alignment or manual sliding.</li>
         </ul>
 
@@ -674,10 +674,10 @@
             <!-- Main Dashed Shapes Layer -->
             <pxl-layer>
               <!-- Circle with configurable dash, gap, offset -->
-              <pxl-circle id="sec5Circle" x="300" y="300" r="140" stroke="#f97316" strokewidth="20" linecap="butt" fill="none" linedash="24, 28" dashoffset="0"></pxl-circle>
+              <pxl-circle id="sec5Circle" x="300" y="300" r="140" stroke="#f97316" strokewidth="20" linecap="butt" fill="none" linedash="[24, 28]" dashoffset="0"></pxl-circle>
 
               <!-- Polyline with configurable presets -->
-              <pxl-polyline id="sec5Polyline" points="520,300; 640,180; 760,420; 880,300" smooth="1" stroke="#3b82f6" strokewidth="12" linecap="round" fill="none" linedash="44, 28, 10, 28, 10, 28" dashoffset="0"></pxl-polyline>
+              <pxl-polyline id="sec5Polyline" points="520,300; 640,180; 760,420; 880,300" smooth="1" stroke="#3b82f6" strokewidth="12" linecap="round" fill="none" linedash="[44, 28, 10, 28, 10, 28]" dashoffset="0"></pxl-polyline>
             </pxl-layer>
 
             <!-- Section Labels -->
@@ -803,11 +803,11 @@
             <!-- Main Animated Shapes Layer -->
             <pxl-layer>
               <!-- 1. Selection Marquee (Closed Rect) -->
-              <pxl-rect id="sec6Marquee" x="300" y="300" w="280" h="280" stroke="#f97316" strokewidth="4" fill="#ffedd522" linedash="12, 12" dashoffset="-t * 40"></pxl-rect>
+              <pxl-rect id="sec6Marquee" x="300" y="300" w="280" h="280" stroke="#f97316" strokewidth="4" fill="#ffedd522" linedash="[12, 12]" dashoffset="-t * 40"></pxl-rect>
 
               <!-- 2. Signal Conduit (Dormant Wire + Animated Pulse Runner) -->
               <pxl-polyline id="sec6Wire" points="520,300; 640,180; 760,420; 880,300" smooth="1" stroke="#1e3a8a33" strokewidth="20" linecap="round" fill="none"></pxl-polyline>
-              <pxl-polyline id="sec6Flow" points="520,300; 640,180; 760,420; 880,300" smooth="1" stroke="#3b82f6" strokewidth="20" linecap="round" fill="none" linedash="40, 80" dashoffset="-t * 60"></pxl-polyline>
+              <pxl-polyline id="sec6Flow" points="520,300; 640,180; 760,420; 880,300" smooth="1" stroke="#3b82f6" strokewidth="20" linecap="round" fill="none" linedash="[40, 80]" dashoffset="-t * 60"></pxl-polyline>
             </pxl-layer>
 
             <!-- Overlay Details (Corner Handles & Circuit Terminals) -->
@@ -845,26 +845,26 @@
             <pxl-layer>
               <pxl-group x="500" y="500">
                 <!-- Cardinal Rays -->
-                <pxl-line x1="0" y1="0" x2="0" y2="-620" strokewidth="2" stroke="linear([0.5,1, 0.5,0], ['transparent', '#a200ff'])" linedash="5, 10" dashoffset="t * -120"></pxl-line>
-                <pxl-line x1="0" y1="0" x2="620" y2="0" strokewidth="2" stroke="linear([0,0.5, 1,0.5], ['transparent', '#00f2ff'])" linedash="10, 20" dashoffset="t * -80"></pxl-line>
-                <pxl-line x1="0" y1="0" x2="0" y2="620" strokewidth="2" stroke="linear([0.5,0, 0.5,1], ['transparent', '#a200ff'])" linedash="5, 10" dashoffset="t * -120"></pxl-line>
-                <pxl-line x1="0" y1="0" x2="-620" y2="0" strokewidth="2" stroke="linear([1,0.5, 0,0.5], ['transparent', '#ff0055'])" linedash="15, 15" dashoffset="t * -100"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="0" y2="-620" strokewidth="2" stroke="linear([0.5,1, 0.5,0], ['transparent', '#a200ff'])" linedash="[5, 10]" dashoffset="t * -120"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="620" y2="0" strokewidth="2" stroke="linear([0,0.5, 1,0.5], ['transparent', '#00f2ff'])" linedash="[10, 20]" dashoffset="t * -80"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="0" y2="620" strokewidth="2" stroke="linear([0.5,0, 0.5,1], ['transparent', '#a200ff'])" linedash="[5, 10]" dashoffset="t * -120"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="-620" y2="0" strokewidth="2" stroke="linear([1,0.5, 0,0.5], ['transparent', '#ff0055'])" linedash="[15, 15]" dashoffset="t * -100"></pxl-line>
 
                 <!-- Diagonal Rays -->
-                <pxl-line x1="0" y1="0" x2="480" y2="-480" strokewidth="2" stroke="linear([0,1, 1,0], ['transparent', '#00f2ff'])" linedash="10, 20" dashoffset="t * -80"></pxl-line>
-                <pxl-line x1="0" y1="0" x2="480" y2="480" strokewidth="2" stroke="linear([0,0, 1,1], ['transparent', '#00f2ff'])" linedash="10, 20" dashoffset="t * -80"></pxl-line>
-                <pxl-line x1="0" y1="0" x2="-480" y2="480" strokewidth="2" stroke="linear([1,0, 0,1], ['transparent', '#ff0055'])" linedash="15, 15" dashoffset="t * -100"></pxl-line>
-                <pxl-line x1="0" y1="0" x2="-480" y2="-480" strokewidth="2" stroke="linear([1,1, 0,0], ['transparent', '#ff0055'])" linedash="15, 15" dashoffset="t * -100"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="480" y2="-480" strokewidth="2" stroke="linear([0,1, 1,0], ['transparent', '#00f2ff'])" linedash="[10, 20]" dashoffset="t * -80"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="480" y2="480" strokewidth="2" stroke="linear([0,0, 1,1], ['transparent', '#00f2ff'])" linedash="[10, 20]" dashoffset="t * -80"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="-480" y2="480" strokewidth="2" stroke="linear([1,0, 0,1], ['transparent', '#ff0055'])" linedash="[15, 15]" dashoffset="t * -100"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="-480" y2="-480" strokewidth="2" stroke="linear([1,1, 0,0], ['transparent', '#ff0055'])" linedash="[15, 15]" dashoffset="t * -100"></pxl-line>
 
                 <!-- Intermediate Rays -->
-                <pxl-line x1="0" y1="0" x2="260" y2="-580" strokewidth="2" stroke="linear([0,1, 0.5,0], ['transparent', '#00f2ff'])" linedash="10, 20" dashoffset="t * 70"></pxl-line>
-                <pxl-line x1="0" y1="0" x2="580" y2="-260" strokewidth="2" stroke="linear([0,0.5, 1,0], ['transparent', '#00f2ff'])" linedash="15, 15" dashoffset="t * -90"></pxl-line>
-                <pxl-line x1="0" y1="0" x2="580" y2="260" strokewidth="2" stroke="linear([0,0, 1,0.5], ['transparent', '#a200ff'])" linedash="8, 16" dashoffset="t * 60"></pxl-line>
-                <pxl-line x1="0" y1="0" x2="260" y2="580" strokewidth="2" stroke="linear([0,0, 0.5,1], ['transparent', '#ff0055'])" linedash="10, 20" dashoffset="t * -80"></pxl-line>
-                <pxl-line x1="0" y1="0" x2="-260" y2="580" strokewidth="2" stroke="linear([0.5,0, 0,1], ['transparent', '#ff0055'])" linedash="15, 15" dashoffset="t * -100"></pxl-line>
-                <pxl-line x1="0" y1="0" x2="-580" y2="260" strokewidth="2" stroke="linear([1,0, 0,0.5], ['transparent', '#a200ff'])" linedash="8, 16" dashoffset="t * 60"></pxl-line>
-                <pxl-line x1="0" y1="0" x2="-580" y2="-260" strokewidth="2" stroke="linear([1,0.5, 0,0], ['transparent', '#ff0055'])" linedash="10, 20" dashoffset="t * -80"></pxl-line>
-                <pxl-line x1="0" y1="0" x2="-260" y2="-580" strokewidth="2" stroke="linear([0.5,1, 0,0], ['transparent', '#00f2ff'])" linedash="15, 15" dashoffset="t * 80"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="260" y2="-580" strokewidth="2" stroke="linear([0,1, 0.5,0], ['transparent', '#00f2ff'])" linedash="[10, 20]" dashoffset="t * 70"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="580" y2="-260" strokewidth="2" stroke="linear([0,0.5, 1,0], ['transparent', '#00f2ff'])" linedash="[15, 15]" dashoffset="t * -90"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="580" y2="260" strokewidth="2" stroke="linear([0,0, 1,0.5], ['transparent', '#a200ff'])" linedash="[8, 16]" dashoffset="t * 60"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="260" y2="580" strokewidth="2" stroke="linear([0,0, 0.5,1], ['transparent', '#ff0055'])" linedash="[10, 20]" dashoffset="t * -80"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="-260" y2="580" strokewidth="2" stroke="linear([0.5,0, 0,1], ['transparent', '#ff0055'])" linedash="[15, 15]" dashoffset="t * -100"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="-580" y2="260" strokewidth="2" stroke="linear([1,0, 0,0.5], ['transparent', '#a200ff'])" linedash="[8, 16]" dashoffset="t * 60"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="-580" y2="-260" strokewidth="2" stroke="linear([1,0.5, 0,0], ['transparent', '#ff0055'])" linedash="[10, 20]" dashoffset="t * -80"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="-260" y2="-580" strokewidth="2" stroke="linear([0.5,1, 0,0], ['transparent', '#00f2ff'])" linedash="[15, 15]" dashoffset="t * 80"></pxl-line>
               </pxl-group>
             </pxl-layer>
 
@@ -875,7 +875,7 @@
 
               <pxl-group x="500" y="500">
                 <!-- 1. Outer Beaded Pearl Necklace: Demonstrates linecap="round" with static spacing, hue shift & dynamic bead diameter -->
-                <pxl-circle r="380" stroke="hsl(180 + sin(t * 0.8) * 35, 100, 65)" strokewidth="4 + wave(3) * 8" linecap="round" linedash="1, 28" dashoffset="t * -40" fill="none"></pxl-circle>
+                <pxl-circle r="380" stroke="hsl(180 + sin(t * 0.8) * 35, 100, 65)" strokewidth="4 + wave(3) * 8" linecap="round" linedash="[1, 28]" dashoffset="t * -40" fill="none"></pxl-circle>
 
                 <!-- 2. Grand Organic Ribbon: Demonstrates rotating gradient stroke & fixed strokewidth -->
                 <pxl-polyline closed="true" smooth="true" 
@@ -903,7 +903,7 @@
 
                 <!-- 4. Sharp 8-Point Star: Demonstrates smooth="false", linejoin="miter", miterlimit="3", dynamic hue shift -->
                 <pxl-polyline closed="true" smooth="false" 
-                  stroke="hsl(330 + sin(t * 1.2) * 45, 100, 60)" strokewidth="4" linejoin="miter" miterlimit="3" linedash="20, 10, 5, 10" dashoffset="-t * 40" fill="none"
+                  stroke="hsl(330 + sin(t * 1.2) * 45, 100, 60)" strokewidth="4" linejoin="miter" miterlimit="3" linedash="[20, 10, 5, 10]" dashoffset="-t * 40" fill="none"
                   points="
                     0, -170 - wave(1.5)*20; 
                     42, -100; 
@@ -917,7 +917,7 @@
 
                 <!-- 5. Fluid Harmonic Ring: Demonstrates linejoin="round", smooth="1.4", strokewidth="4" -->
                 <pxl-polyline closed="true" smooth="1.4" 
-                  stroke="#00f2ff" strokewidth="4" linejoin="round" linedash="8, 8" dashoffset="t * 70" fill="none"
+                  stroke="#00f2ff" strokewidth="4" linejoin="round" linedash="[8, 8]" dashoffset="t * 70" fill="none"
                   points="
                     -110 - wave(1.6)*20, 0; 
                     -55, -110 - wave(1.9)*25; 
@@ -938,7 +938,7 @@
                   "></pxl-polyline>
 
                 <!-- 7. Orbit Track & Pulsing Core with Math-Driven Dynamic strokewidth -->
-                <pxl-circle r="32" stroke="rgba(255, 255, 255, 0.5)" strokewidth="2" linedash="6, 6" dashoffset="-t * 120" fill="none"></pxl-circle>
+                <pxl-circle r="32" stroke="rgba(255, 255, 255, 0.5)" strokewidth="2" linedash="[6, 6]" dashoffset="-t * 120" fill="none"></pxl-circle>
                 <pxl-circle r="14 + wave(0.5)*8" fill="#ffffff" stroke="#00f2ff" strokewidth="3 + wave(0.5)*3"></pxl-circle>
               </pxl-group>
             </pxl-layer>
@@ -954,3 +954,4 @@
 
 </body>
 </html>
+

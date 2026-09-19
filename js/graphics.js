@@ -148,23 +148,15 @@ pxl.applyLineDash = function(ctx, u, linedash, dashoffset, node) {
       const len = linedash.length;
       node._scaledDash.length = len;
       for (let i = 0; i < len; i++) {
-        node._scaledDash[i] = linedash[i] * u;
+        node._scaledDash[i] = (Number.isFinite(linedash[i]) ? linedash[i] : 0) * u;
       }
-    } else if (typeof linedash === 'string') {
-      const parts = linedash.split(/[\s,]+/);
-      let count = 0;
-      for (let i = 0; i < parts.length; i++) {
-        const n = parseFloat(parts[i]);
-        if (!Number.isNaN(n)) {
-          node._scaledDash[count++] = n * u;
-        }
-      }
-      node._scaledDash.length = count;
     }
   }
 
   ctx.setLineDash((node._scaledDash && node._scaledDash.length > 0) ? node._scaledDash : pxl._emptyDash);
-  ctx.lineDashOffset = (dashoffset || 0) * u;
+  
+  let offset = parseFloat(dashoffset);
+  ctx.lineDashOffset = Number.isFinite(offset) ? (offset * u) : 0;
 };
 
 // =========================================================================

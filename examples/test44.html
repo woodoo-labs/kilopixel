@@ -75,14 +75,14 @@
           <!-- Wireframe Layer (Shows the underlying geometry) -->
           <pxl-layer x="500" y="300">
             <!-- Axes -->
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#e2e8f0" strokewidth="2" linedash="5, 5"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#e2e8f0" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#e2e8f0" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#e2e8f0" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
             <!-- Outer Circle Wireframe -->
-            <pxl-circle r="ref.moonR1.value" stroke="#94a3b8" strokewidth="2" linedash="4, 4" fill="none"></pxl-circle>
+            <pxl-circle r="ref.moonR1.value" stroke="#94a3b8" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-circle>
 
             <!-- Inner Circle Wireframe -->
-            <pxl-circle x="ref.moonDx.value" r="ref.moonR2.value" stroke="#94a3b8" strokewidth="2" linedash="4, 4" fill="none"></pxl-circle>
+            <pxl-circle x="ref.moonDx.value" r="ref.moonR2.value" stroke="#94a3b8" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-circle>
             
             <!-- Exact intersection points (Visual Proof) -->
             <pxl-circle y="-ref.moonR1.value" r="6" fill="#ef4444"></pxl-circle>
@@ -138,3 +138,4 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
 </body>
 </html>
+

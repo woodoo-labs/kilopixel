@@ -328,8 +328,8 @@
 
       <!-- Distant Geometric Guide Rings -->
       <pxl-group x="500" y="ref.main.height / 2">
-        <pxl-circle r="440" stroke="rgba(255, 255, 255, 0.03)" strokewidth="1" linedash="4, 10" fill="none"></pxl-circle>
-        <pxl-circle r="680" stroke="rgba(255, 255, 255, 0.02)" strokewidth="1" linedash="8, 20" fill="none"></pxl-circle>
+        <pxl-circle r="440" stroke="rgba(255, 255, 255, 0.03)" strokewidth="1" linedash="[4, 10]" fill="none"></pxl-circle>
+        <pxl-circle r="680" stroke="rgba(255, 255, 255, 0.02)" strokewidth="1" linedash="[8, 20]" fill="none"></pxl-circle>
       </pxl-group>
 
       <!-- Spotlight 1: Electric Cyan Harmonic Lissajous Beam (Localized circular cone) -->
@@ -388,7 +388,7 @@
           r="300" 
           stroke="rgba(0, 255, 240, 0.8)" 
           strokewidth="2" 
-          linedash="12, 24" 
+          linedash="[12, 24]" 
           dashoffset="t * 30 * ref.speed.value" 
           fill="none">
         </pxl-circle>
@@ -412,7 +412,7 @@
             r="230" 
             stroke="rgba(0, 255, 240, 0.4)" 
             strokewidth="2" 
-            linedash="6, 14" 
+            linedash="[6, 14]" 
             dashoffset="-(t * 40 * ref.speed.value)" 
             fill="none">
           </pxl-circle>
@@ -447,8 +447,8 @@
         <!-- 3. Inner Sacred Polygon Vortex (Clockwise) -->
         <pxl-group rotate="t * 28 * ref.speed.value">
           <!-- Interlocking Geometric Squares -->
-          <pxl-rect w="160" h="160" dx="-80" dy="-80" rotate="0" stroke="rgba(255, 0, 128, 0.65)" strokewidth="2" linedash="8, 12" dashoffset="t * 20" fill="none"></pxl-rect>
-          <pxl-rect w="160" h="160" dx="-80" dy="-80" rotate="45" stroke="rgba(0, 255, 235, 0.65)" strokewidth="2" linedash="8, 12" dashoffset="-(t * 20)" fill="none"></pxl-rect>
+          <pxl-rect w="160" h="160" dx="-80" dy="-80" rotate="0" stroke="rgba(255, 0, 128, 0.65)" strokewidth="2" linedash="[8, 12]" dashoffset="t * 20" fill="none"></pxl-rect>
+          <pxl-rect w="160" h="160" dx="-80" dy="-80" rotate="45" stroke="rgba(0, 255, 235, 0.65)" strokewidth="2" linedash="[8, 12]" dashoffset="-(t * 20)" fill="none"></pxl-rect>
           <pxl-rect w="110" h="110" dx="-55" dy="-55" rotate="22.5" stroke="rgba(255, 215, 0, 0.75)" strokewidth="2" fill="none"></pxl-rect>
           <pxl-rect w="110" h="110" dx="-55" dy="-55" rotate="67.5" stroke="rgba(255, 215, 0, 0.75)" strokewidth="2" fill="none"></pxl-rect>
         </pxl-group>
@@ -725,3 +725,4 @@
   </script>
 </body>
 </html>
+

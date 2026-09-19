@@ -21,8 +21,8 @@
 
     <!-- Background Galaxy -->
     <pxl-group x="500" y="350">
-      <pxl-ellipse rx="800" ry="250" rotate="20" stroke="rgba(255,255,255,0.03)" strokewidth="40" linedash="10, 20" filter="blur(5)"></pxl-ellipse>
-      <pxl-ellipse rx="700" ry="200" rotate="-10" stroke="rgba(56, 189, 248, 0.05)" strokewidth="20" linedash="5, 15" filter="blur(3)"></pxl-ellipse>
+      <pxl-ellipse rx="800" ry="250" rotate="20" stroke="rgba(255,255,255,0.03)" strokewidth="40" linedash="[10, 20]" filter="blur(5)"></pxl-ellipse>
+      <pxl-ellipse rx="700" ry="200" rotate="-10" stroke="rgba(56, 189, 248, 0.05)" strokewidth="20" linedash="[5, 15]" filter="blur(3)"></pxl-ellipse>
     </pxl-group>
 
     <!-- A 3D-looking Solar System utilizing squashed ellipses -->
@@ -64,7 +64,7 @@
 
       <!-- Elliptical Radar Scanner -->
       <pxl-group rotate="30">
-        <pxl-ellipse rx="450" ry="150" stroke="rgba(0, 242, 254, 0.2)" strokewidth="1" linedash="5, 5"></pxl-ellipse>
+        <pxl-ellipse rx="450" ry="150" stroke="rgba(0, 242, 254, 0.2)" strokewidth="1" linedash="[5, 5]"></pxl-ellipse>
         <!-- The Scanner Sweep using an Elliptical Wedge -->
         <pxl-ellipse 
           rx="450" ry="150" 
@@ -83,3 +83,4 @@
 <script src="../dist/pxl.min.js"></script>
 </body>
 </html>
+
