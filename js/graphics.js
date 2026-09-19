@@ -124,6 +124,50 @@ pxl.applyContextState = function(ctx, u, attributeValues, node) {
 };
 
 // =========================================================================
+// Stroke & Line Dash Helpers
+// =========================================================================
+pxl._emptyDash = [];
+
+pxl.applyLineDash = function(ctx, u, linedash, dashoffset, node) {
+  if (!linedash || linedash === 'none' || linedash === 0 || linedash === '0') {
+    ctx.setLineDash(pxl._emptyDash);
+    ctx.lineDashOffset = 0;
+    return;
+  }
+
+  if (node._lastDash !== linedash || node._lastDashU !== u) {
+    node._lastDash = linedash;
+    node._lastDashU = u;
+
+    if (!node._scaledDash) node._scaledDash = [];
+
+    if (typeof linedash === 'number') {
+      node._scaledDash.length = 1;
+      node._scaledDash[0] = linedash * u;
+    } else if (Array.isArray(linedash)) {
+      const len = linedash.length;
+      node._scaledDash.length = len;
+      for (let i = 0; i < len; i++) {
+        node._scaledDash[i] = linedash[i] * u;
+      }
+    } else if (typeof linedash === 'string') {
+      const parts = linedash.split(/[\s,]+/);
+      let count = 0;
+      for (let i = 0; i < parts.length; i++) {
+        const n = parseFloat(parts[i]);
+        if (!Number.isNaN(n)) {
+          node._scaledDash[count++] = n * u;
+        }
+      }
+      node._scaledDash.length = count;
+    }
+  }
+
+  ctx.setLineDash((node._scaledDash && node._scaledDash.length > 0) ? node._scaledDash : pxl._emptyDash);
+  ctx.lineDashOffset = (dashoffset || 0) * u;
+};
+
+// =========================================================================
 // Geometry Parsing
 // =========================================================================
 // Smart Parser: Comma separates X/Y. Semicolon separates pairs.

@@ -16,9 +16,6 @@ class Shape extends PxlNode {
       { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, grad: null },
       { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, grad: null }
     ];
-
-    this._scaledDash = [];  // Pre-allocated for zero-GC line dash scaling
-    this._emptyDash = [];   // Zero-GC empty linedash
     
     this._compiledOnClick = null;
     this._compiledOnEnter = null;
@@ -182,15 +179,6 @@ class Shape extends PxlNode {
     return styleValue;
   }
 
-  createLineDash(u, linedash) {
-    const len = linedash.length;
-    this._scaledDash.length = len;
-    for (let i = 0; i < len; i++) {
-      this._scaledDash[i] = linedash[i] * u;
-    }
-    return this._scaledDash;
-  }
-
   applyStyle(ctx, u) {
     const { fill, stroke, strokewidth, linecap, linejoin, miterlimit, linedash, dashoffset } = this.attributeValues;
 
@@ -207,13 +195,7 @@ class Shape extends PxlNode {
       ctx.lineJoin = linejoin;
       ctx.miterLimit = miterlimit;
       
-      if (linedash && Array.isArray(linedash)) {
-        ctx.setLineDash(this.createLineDash(u, linedash));
-        ctx.lineDashOffset = dashoffset * u;
-      } else {
-        ctx.setLineDash(this._emptyDash);
-        ctx.lineDashOffset = 0;
-      }
+      pxl.applyLineDash(ctx, u, linedash, dashoffset, this);
       
       ctx.stroke();
     }

@@ -264,14 +264,14 @@
             <pxl-layer>
               <!-- Line endpoint reference guides (rotates with line) -->
               <pxl-group id="sec2LineGuideGroup" x="300" y="300" rotate="ref.sec2Line.rotate">
-                <pxl-line x1="-150" y1="-150" x2="-150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
-                <pxl-line x1="150" y1="-150" x2="150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+                <pxl-line x1="-150" y1="-150" x2="-150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="6, 6"></pxl-line>
+                <pxl-line x1="150" y1="-150" x2="150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="6, 6"></pxl-line>
               </pxl-group>
 
               <!-- Arc radial reference guides (start is fixed at 135°, end rotates with sweep) -->
-              <pxl-line x1="700" y1="300" x2="550" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-line x1="700" y1="300" x2="550" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="6, 6"></pxl-line>
               <pxl-group id="sec2ArcEndGuideGroup" x="700" y="300" rotate="135 + ref.sec2Arc.sweep">
-                <pxl-line x1="0" y1="0" x2="212" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="212" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="6, 6"></pxl-line>
               </pxl-group>
             </pxl-layer>
 
@@ -288,13 +288,13 @@
             <pxl-layer>
               <!-- Line centerline skeleton & endpoint anchors (rotates with line) -->
               <pxl-group id="sec2LineGhostGroup" x="300" y="300" rotate="ref.sec2Line.rotate">
-                <pxl-line x1="-150" y1="0" x2="150" y2="0" stroke="#ffffff" strokewidth="2" linedash="[4, 4]"></pxl-line>
+                <pxl-line x1="-150" y1="0" x2="150" y2="0" stroke="#ffffff" strokewidth="2" linedash="4, 4"></pxl-line>
                 <pxl-circle x="-150" y="0" r="5" fill="#c2410c"></pxl-circle>
                 <pxl-circle x="150" y="0" r="5" fill="#c2410c"></pxl-circle>
               </pxl-group>
 
               <!-- Arc centerline skeleton & endpoint anchors -->
-              <pxl-circle id="sec2ArcGhost" x="700" y="300" r="150" start="135" sweep="270" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-circle>
+              <pxl-circle id="sec2ArcGhost" x="700" y="300" r="150" start="135" sweep="270" stroke="#ffffff" strokewidth="2" linedash="4, 4" fill="none"></pxl-circle>
               <pxl-circle x="594" y="406" r="5" fill="#1d4ed8"></pxl-circle>
               <pxl-circle x="700" y="300" r="4" fill="#94a3b8"></pxl-circle>
               <pxl-group id="sec2ArcEndDotGroup" x="700" y="300" rotate="135 + ref.sec2Arc.sweep">
@@ -415,13 +415,13 @@
             <!-- Overlay Ghost Lines & Points -->
             <pxl-layer>
               <!-- Chevron skeleton & anchor dots -->
-              <pxl-polyline id="sec3ChevronGhost" points="150,450; 300,150; 450,450" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
+              <pxl-polyline id="sec3ChevronGhost" points="150,450; 300,150; 450,450" stroke="#ffffff" strokewidth="2" linedash="4, 4" fill="none"></pxl-polyline>
               <pxl-circle x="150" y="450" r="5" fill="#c2410c"></pxl-circle>
               <pxl-circle id="sec3ChevronPeakDot" x="300" y="150" r="5" fill="#c2410c"></pxl-circle>
               <pxl-circle x="450" y="450" r="5" fill="#c2410c"></pxl-circle>
 
               <!-- Polygon skeleton & anchor dots -->
-              <pxl-polyline id="sec3PolyGhost" points="550,450; 700,150; 850,450" closed="true" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
+              <pxl-polyline id="sec3PolyGhost" points="550,450; 700,150; 850,450" closed="true" stroke="#ffffff" strokewidth="2" linedash="4, 4" fill="none"></pxl-polyline>
               <pxl-circle x="550" y="450" r="5" fill="#1d4ed8"></pxl-circle>
               <pxl-circle id="sec3PolyPeakDot" x="700" y="150" r="5" fill="#1d4ed8"></pxl-circle>
               <pxl-circle x="850" y="450" r="5" fill="#1d4ed8"></pxl-circle>
@@ -523,7 +523,7 @@
             <!-- Guide Helpers Layer (Grey reference lines) -->
             <pxl-layer>
               <!-- Centerline vertical guide through diamond apexes -->
-              <pxl-line x1="700" y1="100" x2="700" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-line x1="700" y1="100" x2="700" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="6, 6"></pxl-line>
             </pxl-layer>
 
             <!-- Main Shapes Layer -->
@@ -538,13 +538,13 @@
             <!-- Overlay Ghost Lines & Points -->
             <pxl-layer>
               <!-- Chevron skeleton & anchor dots -->
-              <pxl-polyline id="sec4ChevronGhost" points="220,450; 300,150; 380,450" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
+              <pxl-polyline id="sec4ChevronGhost" points="220,450; 300,150; 380,450" stroke="#ffffff" strokewidth="2" linedash="4, 4" fill="none"></pxl-polyline>
               <pxl-circle id="sec4ChevronLeftDot" x="220" y="450" r="5" fill="#c2410c"></pxl-circle>
               <pxl-circle id="sec4ChevronApexDot" x="300" y="150" r="5" fill="#c2410c"></pxl-circle>
               <pxl-circle id="sec4ChevronRightDot" x="380" y="450" r="5" fill="#c2410c"></pxl-circle>
 
               <!-- Diamond skeleton & anchor dots -->
-              <pxl-polyline id="sec4DiamondGhost" points="700,150; 762,300; 700,450; 638,300" closed="true" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
+              <pxl-polyline id="sec4DiamondGhost" points="700,150; 762,300; 700,450; 638,300" closed="true" stroke="#ffffff" strokewidth="2" linedash="4, 4" fill="none"></pxl-polyline>
               <pxl-circle id="sec4DiamondTopDot" x="700" y="150" r="5" fill="#1d4ed8"></pxl-circle>
               <pxl-circle id="sec4DiamondRightDot" x="762" y="300" r="5" fill="#1d4ed8"></pxl-circle>
               <pxl-circle id="sec4DiamondBottomDot" x="700" y="450" r="5" fill="#1d4ed8"></pxl-circle>
@@ -563,7 +563,7 @@
         <h2>5. Dashed Strokes &amp; Offset</h2>
         <p>The <code>linedash</code> and <code>dashoffset</code> attributes allow you to create patterned, dashed outlines across any Kilopixel shape. Rather than drawing a continuous path, the stroke alternates between drawn dash segments and empty gaps.</p>
         <ul>
-          <li><strong>Array Pattern:</strong> The <code>linedash</code> attribute accepts a bracketed array of numbers defining alternating dash and gap lengths (e.g., <code>linedash="[24, 16]"</code>).</li>
+          <li><strong>Dash Pattern:</strong> The <code>linedash</code> attribute accepts a comma-separated list of numbers defining alternating dash and gap lengths (e.g., <code>linedash="24, 16"</code>), or a single number for equal dashes and gaps (e.g., <code>linedash="24"</code>). JavaScript array notation (e.g., <code>[24, 16]</code>) is also supported.</li>
           <li><strong>Phase Shift:</strong> The <code>dashoffset</code> attribute shifts where the pattern begins along the path perimeter, enabling precise alignment or manual sliding.</li>
         </ul>
 
@@ -572,13 +572,13 @@
   &lt;pxl-layer&gt;
     &lt;!-- 1. Circle with Dash &amp; Gap Spacing --&gt;
     &lt;pxl-circle x="300" y="300" r="140" stroke="#f97316" strokewidth="<mark id="sec5CircleWidthCode">20</mark>" linecap="<mark id="sec5CircleCapCode">butt</mark>" fill="none"
-      linedash="[<mark id="sec5CircleDashCode">24</mark>, <mark id="sec5CircleGapCode">28</mark>]"
+      linedash="<mark id="sec5CircleDashCode">24</mark>, <mark id="sec5CircleGapCode">28</mark>"
       dashoffset="<mark id="sec5CircleOffsetCode">0</mark>"&gt;
     &lt;/pxl-circle&gt;
 
     &lt;!-- 2. Polyline with Pattern Presets --&gt;
     &lt;pxl-polyline points="520,300; 640,180; 760,420; 880,300" smooth="1" stroke="#3b82f6" strokewidth="<mark id="sec5PolyWidthCode">12</mark>" linecap="<mark id="sec5PolyCapCode">round</mark>" fill="none"
-      linedash="<mark id="sec5PolyDashCode">[44, 28, 10, 28, 10, 28]</mark>"
+      linedash="<mark id="sec5PolyDashCode">44, 28, 10, 28, 10, 28</mark>"
       dashoffset="<mark id="sec5PolyOffsetCode">0</mark>"&gt;
     &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
@@ -600,12 +600,12 @@
                 <div class="control-group">
                   <label><span>Dash Length <span class="indicator-dot"></span></span> <span id="sec5CircleDashVal">24</span></label>
                   <input type="range" min="0" max="80" step="2" value="24" autocomplete="off" id="sec5CircleDashInput"
-                    oninput="const d = this.value; const g = document.getElementById('sec5CircleGapInput').value; document.getElementById('sec5Circle').setAttribute('linedash', '[' + d + ', ' + g + ']'); document.getElementById('sec5CircleDashVal').innerText = d; document.getElementById('sec5CircleDashCode').innerText = d;" data-mark="sec5CircleDashCode">
+                    oninput="const d = this.value; const g = document.getElementById('sec5CircleGapInput').value; document.getElementById('sec5Circle').setAttribute('linedash', d + ', ' + g); document.getElementById('sec5CircleDashVal').innerText = d; document.getElementById('sec5CircleDashCode').innerText = d;" data-mark="sec5CircleDashCode">
                 </div>
                 <div class="control-group">
                   <label><span>Gap Length</span> <span id="sec5CircleGapVal">28</span></label>
                   <input type="range" min="4" max="80" step="2" value="28" autocomplete="off" id="sec5CircleGapInput"
-                    oninput="const g = this.value; const d = document.getElementById('sec5CircleDashInput').value; document.getElementById('sec5Circle').setAttribute('linedash', '[' + d + ', ' + g + ']'); document.getElementById('sec5CircleGapVal').innerText = g; document.getElementById('sec5CircleGapCode').innerText = g;" data-mark="sec5CircleGapCode">
+                    oninput="const g = this.value; const d = document.getElementById('sec5CircleDashInput').value; document.getElementById('sec5Circle').setAttribute('linedash', d + ', ' + g); document.getElementById('sec5CircleGapVal').innerText = g; document.getElementById('sec5CircleGapCode').innerText = g;" data-mark="sec5CircleGapCode">
                 </div>
                 <div class="control-group">
                   <label><span>Dash Offset</span> <span id="sec5CircleOffsetVal">0</span></label>
@@ -646,10 +646,10 @@
                   <label><span>Pattern Preset</span></label>
                   <select id="sec5PolyPresetSelect" autocomplete="off"
                     onchange="document.getElementById('sec5Polyline').setAttribute('linedash', this.value); document.getElementById('sec5PolyDashCode').innerText = this.value;" data-mark="sec5PolyDashCode">
-                    <option value="[40, 28, 10, 28]">Dash-Dot: [40, 28, 10, 28]</option>
-                    <option value="[30, 28]">Standard Dash: [30, 28]</option>
-                    <option value="[12, 28]">Dense Dash: [12, 28]</option>
-                    <option value="[44, 28, 10, 28, 10, 28]" selected>Triple Rhythm: [44, 28, 10, 28, 10, 28]</option>
+                    <option value="40, 28, 10, 28">Dash-Dot: 40, 28, 10, 28</option>
+                    <option value="30, 28">Standard Dash: 30, 28</option>
+                    <option value="12, 28">Dense Dash: 12, 28</option>
+                    <option value="44, 28, 10, 28, 10, 28" selected>Triple Rhythm: 44, 28, 10, 28, 10, 28</option>
                   </select>
                 </div>
                 <div class="control-group">
@@ -674,10 +674,10 @@
             <!-- Main Dashed Shapes Layer -->
             <pxl-layer>
               <!-- Circle with configurable dash, gap, offset -->
-              <pxl-circle id="sec5Circle" x="300" y="300" r="140" stroke="#f97316" strokewidth="20" linecap="butt" fill="none" linedash="[24, 28]" dashoffset="0"></pxl-circle>
+              <pxl-circle id="sec5Circle" x="300" y="300" r="140" stroke="#f97316" strokewidth="20" linecap="butt" fill="none" linedash="24, 28" dashoffset="0"></pxl-circle>
 
               <!-- Polyline with configurable presets -->
-              <pxl-polyline id="sec5Polyline" points="520,300; 640,180; 760,420; 880,300" smooth="1" stroke="#3b82f6" strokewidth="12" linecap="round" fill="none" linedash="[44, 28, 10, 28, 10, 28]" dashoffset="0"></pxl-polyline>
+              <pxl-polyline id="sec5Polyline" points="520,300; 640,180; 760,420; 880,300" smooth="1" stroke="#3b82f6" strokewidth="12" linecap="round" fill="none" linedash="44, 28, 10, 28, 10, 28" dashoffset="0"></pxl-polyline>
             </pxl-layer>
 
             <!-- Section Labels -->

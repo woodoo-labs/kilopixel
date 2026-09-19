@@ -106,7 +106,7 @@ The framework compiles from these files (in build order):
 | 2 | `js/matrix.js` | Zero-GC 2D affine matrix engine (Float32Array) |
 | 3 | `js/compiler.js` | Multi-tier expression parser, built-in scope, time drivers |
 | 4 | `js/interaction.js` | InteractionEngine class, dummy context hit testing, pointer events |
-| 5 | `js/graphics.js` | Transform pipeline helper, anchor tables, points parser, radius resolver |
+| 5 | `js/graphics.js` | Transform pipeline helper, anchor tables, points parser, radius resolver, line dash helper |
 | 6 | `js/monitor.js` | Performance telemetry (fps, renderAvg, renderMax) |
 | 7 | `js/elements/stage.js` | Root container, canvas host, rAF loop, resize, pointer routing |
 | 8 | `js/elements/node.js` | `PxlNode` base class (extends HTMLElement), matrix tracking |
@@ -799,10 +799,13 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `sc
 - **`linejoin`**: Defines how two connecting segments are joined. Options: `'miter'` (default), `'round'`, `'bevel'`.
 - **`miterlimit`**: Maximum miter length. Defaults to `10`.
 - **`dashoffset`**: Shifts the start of the dash pattern. Multiplied by the responsive unit `u`. Defaults to `0`.
-- **`linedash`**: Sets the line dash pattern array.
-  > [!WARNING]
-  > **Array Syntax Required**
-  > Because of the Expression Compiler's Fast Path, writing `linedash="5, 5"` will be incorrectly parsed as a static string and silently ignored by the Canvas engine. You **MUST** wrap the values in brackets so the compiler executes it dynamically as a JavaScript array: `linedash="[5, 5]"`.
+- **`linedash`**: Sets the stroke dash pattern. All values are automatically scaled by the responsive unit `u` at draw time. Accepts multiple convenient formats:
+  - **Comma or Space String**: `linedash="20, 10"` or `linedash="20 10"` (SVG format)
+  - **Single Number**: `linedash="20"` or `setAttribute('linedash', 20)` (creates equal repeating dash and gap)
+  - **JavaScript Array**: `linedash="[20, 10]"` or `setAttribute('linedash', [20, 10])`
+  - **Dynamic Expression**: `linedash="[wave(2) * 20, 10]"`
+  - **Reset to Solid**: `linedash="none"`, `linedash="0"`, or `null`
+  Scaled values are cached per-shape (`(linedash, u)`) via `pxl.applyLineDash` with zero-GC overhead.
 
 ### Default Values
 
@@ -821,11 +824,9 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `sc
 
 **`applyStyle(ctx, u)`**: After a path is built:
 1. If `fill` is set (not `none`/`transparent`): resolve gradient, `ctx.fill()`
-2. If `stroke` is set and `strokewidth > 0`: resolve gradient, set lineWidth/lineCap/lineJoin/miterLimit/lineDash, `ctx.stroke()`
+2. If `stroke` is set and `strokewidth > 0`: resolve gradient, set lineWidth/lineCap/lineJoin/miterLimit, apply line dash via `pxl.applyLineDash(ctx, u, linedash, dashoffset, this)`, `ctx.stroke()`
 
-**`createGradient(ctx, u, styleValue)`**: If the value is a gradient descriptor (has `isGradient: true`), creates a `CanvasGradient` from the shape's bounding box. Uses `_lastGradientConfig` cache to avoid recreation.
-
-**`createLineDash(u, linedash)`**: Scales dash array by `u` into pre-allocated `_scaledDash[]`.
+**`createGradient(ctx, u, styleValue, slotIndex)`**: If the value is a gradient descriptor (has `isGradient: true`), creates a `CanvasGradient` from the shape's bounding box. Uses `_gradCache` dual-slot cache to avoid recreation.
 
 **`drawArrow(ctx, u, tipX, tipY, tangent, size, style)`**: Draws arrowhead at a point with given tangent angle. Two styles:
 - `'filled'` — solid triangle, fills with strokeStyle
