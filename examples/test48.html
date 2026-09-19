@@ -187,69 +187,97 @@
       <!-- ================================================================= -->
       <pxl-layer>
         <pxl-group x="500" y="500">
+          
+          <pxl-group rotate="t * 2">
+            <!-- ------------------------------------------------------------- -->
+            <!-- TIER A: OUTER PURE HUE RING (r = 390, ir = 290, 100% Sat)    -->
+            <!-- ------------------------------------------------------------- -->
+            <!-- 0° Red -->
+            <pxl-circle r="390" ir="290" start="-15" sweep="30" fill="hsl(0, 100, 50)"></pxl-circle>
+            <!-- 30° Orange -->
+            <pxl-circle r="390" ir="290" start="15" sweep="30" fill="hsl(30, 100, 50)"></pxl-circle>
+            <!-- 60° Yellow -->
+            <pxl-circle r="390" ir="290" start="45" sweep="30" fill="hsl(60, 100, 50)"></pxl-circle>
+            <!-- 90° Chartreuse -->
+            <pxl-circle r="390" ir="290" start="75" sweep="30" fill="hsl(90, 100, 50)"></pxl-circle>
+            <!-- 120° Green -->
+            <pxl-circle r="390" ir="290" start="105" sweep="30" fill="hsl(120, 100, 50)"></pxl-circle>
+            <!-- 150° Spring Green -->
+            <pxl-circle r="390" ir="290" start="135" sweep="30" fill="hsl(150, 100, 50)"></pxl-circle>
+            <!-- 180° Cyan -->
+            <pxl-circle r="390" ir="290" start="165" sweep="30" fill="hsl(180, 100, 50)"></pxl-circle>
+            <!-- 210° Azure -->
+            <pxl-circle r="390" ir="290" start="195" sweep="30" fill="hsl(210, 100, 50)"></pxl-circle>
+            <!-- 240° Blue -->
+            <pxl-circle r="390" ir="290" start="225" sweep="30" fill="hsl(240, 100, 50)"></pxl-circle>
+            <!-- 270° Violet -->
+            <pxl-circle r="390" ir="290" start="255" sweep="30" fill="hsl(270, 100, 50)"></pxl-circle>
+            <!-- 300° Magenta -->
+            <pxl-circle r="390" ir="290" start="285" sweep="30" fill="hsl(300, 100, 50)"></pxl-circle>
+            <!-- 330° Rose -->
+            <pxl-circle r="390" ir="290" start="315" sweep="30" fill="hsl(330, 100, 50)"></pxl-circle>
+          </pxl-group>
 
-          <!-- ------------------------------------------------------------- -->
-          <!-- TIER A: OUTER PURE HUE RING (r = 390, ir = 290, 100% Sat)    -->
-          <!-- ------------------------------------------------------------- -->
-          <!-- 0° Red -->
-          <pxl-circle r="390" ir="290" start="-14" sweep="28" fill="hsl(0, 100, 50)"></pxl-circle>
-          <!-- 30° Orange -->
-          <pxl-circle r="390" ir="290" start="16" sweep="28" fill="hsl(30, 100, 50)"></pxl-circle>
-          <!-- 60° Yellow -->
-          <pxl-circle r="390" ir="290" start="46" sweep="28" fill="hsl(60, 100, 50)"></pxl-circle>
-          <!-- 90° Chartreuse -->
-          <pxl-circle r="390" ir="290" start="76" sweep="28" fill="hsl(90, 100, 50)"></pxl-circle>
-          <!-- 120° Green -->
-          <pxl-circle r="390" ir="290" start="106" sweep="28" fill="hsl(120, 100, 50)"></pxl-circle>
-          <!-- 150° Spring Green -->
-          <pxl-circle r="390" ir="290" start="136" sweep="28" fill="hsl(150, 100, 50)"></pxl-circle>
-          <!-- 180° Cyan -->
-          <pxl-circle r="390" ir="290" start="166" sweep="28" fill="hsl(180, 100, 50)"></pxl-circle>
-          <!-- 210° Azure -->
-          <pxl-circle r="390" ir="290" start="196" sweep="28" fill="hsl(210, 100, 50)"></pxl-circle>
-          <!-- 240° Blue -->
-          <pxl-circle r="390" ir="290" start="226" sweep="28" fill="hsl(240, 100, 50)"></pxl-circle>
-          <!-- 270° Violet -->
-          <pxl-circle r="390" ir="290" start="256" sweep="28" fill="hsl(270, 100, 50)"></pxl-circle>
-          <!-- 300° Magenta -->
-          <pxl-circle r="390" ir="290" start="286" sweep="28" fill="hsl(300, 100, 50)"></pxl-circle>
-          <!-- 330° Rose -->
-          <pxl-circle r="390" ir="290" start="316" sweep="28" fill="hsl(330, 100, 50)"></pxl-circle>
+          <pxl-group rotate="-t * 1.5">
+            <!-- ------------------------------------------------------------- -->
+            <!-- TIER B: MIDDLE TINTS RING (r = 290, ir = 210, 75% Lightness)  -->
+            <!-- ------------------------------------------------------------- -->
+            <pxl-circle r="290" ir="210" start="-15" sweep="30" fill="hsl(0, 85, 72)"></pxl-circle>
+            <pxl-circle r="290" ir="210" start="15" sweep="30" fill="hsl(30, 85, 72)"></pxl-circle>
+            <pxl-circle r="290" ir="210" start="45" sweep="30" fill="hsl(60, 85, 72)"></pxl-circle>
+            <pxl-circle r="290" ir="210" start="75" sweep="30" fill="hsl(90, 85, 72)"></pxl-circle>
+            <pxl-circle r="290" ir="210" start="105" sweep="30" fill="hsl(120, 85, 72)"></pxl-circle>
+            <pxl-circle r="290" ir="210" start="135" sweep="30" fill="hsl(150, 85, 72)"></pxl-circle>
+            <pxl-circle r="290" ir="210" start="165" sweep="30" fill="hsl(180, 85, 72)"></pxl-circle>
+            <pxl-circle r="290" ir="210" start="195" sweep="30" fill="hsl(210, 85, 72)"></pxl-circle>
+            <pxl-circle r="290" ir="210" start="225" sweep="30" fill="hsl(240, 85, 72)"></pxl-circle>
+            <pxl-circle r="290" ir="210" start="255" sweep="30" fill="hsl(270, 85, 72)"></pxl-circle>
+            <pxl-circle r="290" ir="210" start="285" sweep="30" fill="hsl(300, 85, 72)"></pxl-circle>
+            <pxl-circle r="290" ir="210" start="315" sweep="30" fill="hsl(330, 85, 72)"></pxl-circle>
+          </pxl-group>
 
-          <!-- ------------------------------------------------------------- -->
-          <!-- TIER B: MIDDLE TINTS RING (r = 290, ir = 210, 75% Lightness)  -->
-          <!-- ------------------------------------------------------------- -->
-          <pxl-circle r="290" ir="210" start="-14" sweep="28" fill="hsl(0, 85, 72)"></pxl-circle>
-          <pxl-circle r="290" ir="210" start="16" sweep="28" fill="hsl(30, 85, 72)"></pxl-circle>
-          <pxl-circle r="290" ir="210" start="46" sweep="28" fill="hsl(60, 85, 72)"></pxl-circle>
-          <pxl-circle r="290" ir="210" start="76" sweep="28" fill="hsl(90, 85, 72)"></pxl-circle>
-          <pxl-circle r="290" ir="210" start="106" sweep="28" fill="hsl(120, 85, 72)"></pxl-circle>
-          <pxl-circle r="290" ir="210" start="136" sweep="28" fill="hsl(150, 85, 72)"></pxl-circle>
-          <pxl-circle r="290" ir="210" start="166" sweep="28" fill="hsl(180, 85, 72)"></pxl-circle>
-          <pxl-circle r="290" ir="210" start="196" sweep="28" fill="hsl(210, 85, 72)"></pxl-circle>
-          <pxl-circle r="290" ir="210" start="226" sweep="28" fill="hsl(240, 85, 72)"></pxl-circle>
-          <pxl-circle r="290" ir="210" start="256" sweep="28" fill="hsl(270, 85, 72)"></pxl-circle>
-          <pxl-circle r="290" ir="210" start="286" sweep="28" fill="hsl(300, 85, 72)"></pxl-circle>
-          <pxl-circle r="290" ir="210" start="316" sweep="28" fill="hsl(330, 85, 72)"></pxl-circle>
+          <pxl-group rotate="t * 1">
+            <!-- ------------------------------------------------------------- -->
+            <!-- TIER C: INNER SHADES RING (r = 210, ir = 140, 32% Lightness) -->
+            <!-- ------------------------------------------------------------- -->
+            <pxl-circle r="210" ir="140" start="-15" sweep="30" fill="hsl(0, 90, 32)"></pxl-circle>
+            <pxl-circle r="210" ir="140" start="15" sweep="30" fill="hsl(30, 90, 32)"></pxl-circle>
+            <pxl-circle r="210" ir="140" start="45" sweep="30" fill="hsl(60, 90, 32)"></pxl-circle>
+            <pxl-circle r="210" ir="140" start="75" sweep="30" fill="hsl(90, 90, 32)"></pxl-circle>
+            <pxl-circle r="210" ir="140" start="105" sweep="30" fill="hsl(120, 90, 32)"></pxl-circle>
+            <pxl-circle r="210" ir="140" start="135" sweep="30" fill="hsl(150, 90, 32)"></pxl-circle>
+            <pxl-circle r="210" ir="140" start="165" sweep="30" fill="hsl(180, 90, 32)"></pxl-circle>
+            <pxl-circle r="210" ir="140" start="195" sweep="30" fill="hsl(210, 90, 32)"></pxl-circle>
+            <pxl-circle r="210" ir="140" start="225" sweep="30" fill="hsl(240, 90, 32)"></pxl-circle>
+            <pxl-circle r="210" ir="140" start="255" sweep="30" fill="hsl(270, 90, 32)"></pxl-circle>
+            <pxl-circle r="210" ir="140" start="285" sweep="30" fill="hsl(300, 90, 32)"></pxl-circle>
+            <pxl-circle r="210" ir="140" start="315" sweep="30" fill="hsl(330, 90, 32)"></pxl-circle>
+          </pxl-group>
 
-          <!-- ------------------------------------------------------------- -->
-          <!-- TIER C: INNER SHADES RING (r = 210, ir = 140, 32% Lightness) -->
-          <!-- ------------------------------------------------------------- -->
-          <pxl-circle r="210" ir="140" start="-14" sweep="28" fill="hsl(0, 90, 32)"></pxl-circle>
-          <pxl-circle r="210" ir="140" start="16" sweep="28" fill="hsl(30, 90, 32)"></pxl-circle>
-          <pxl-circle r="210" ir="140" start="46" sweep="28" fill="hsl(60, 90, 32)"></pxl-circle>
-          <pxl-circle r="210" ir="140" start="76" sweep="28" fill="hsl(90, 90, 32)"></pxl-circle>
-          <pxl-circle r="210" ir="140" start="106" sweep="28" fill="hsl(120, 90, 32)"></pxl-circle>
-          <pxl-circle r="210" ir="140" start="136" sweep="28" fill="hsl(150, 90, 32)"></pxl-circle>
-          <pxl-circle r="210" ir="140" start="166" sweep="28" fill="hsl(180, 90, 32)"></pxl-circle>
-          <pxl-circle r="210" ir="140" start="196" sweep="28" fill="hsl(210, 90, 32)"></pxl-circle>
-          <pxl-circle r="210" ir="140" start="226" sweep="28" fill="hsl(240, 90, 32)"></pxl-circle>
-          <pxl-circle r="210" ir="140" start="256" sweep="28" fill="hsl(270, 90, 32)"></pxl-circle>
-          <pxl-circle r="210" ir="140" start="286" sweep="28" fill="hsl(300, 90, 32)"></pxl-circle>
-          <pxl-circle r="210" ir="140" start="316" sweep="28" fill="hsl(330, 90, 32)"></pxl-circle>
+          <!-- NEGATIVE SPACE MASKING GRID -->
+          <pxl-group stroke="#030305" strokewidth="4" fill="none">
+            <!-- 12 Radial Masking Spokes -->
+            <pxl-line x1="140" y1="0" x2="390" y2="0" rotate="15"></pxl-line>
+            <pxl-line x1="140" y1="0" x2="390" y2="0" rotate="45"></pxl-line>
+            <pxl-line x1="140" y1="0" x2="390" y2="0" rotate="75"></pxl-line>
+            <pxl-line x1="140" y1="0" x2="390" y2="0" rotate="105"></pxl-line>
+            <pxl-line x1="140" y1="0" x2="390" y2="0" rotate="135"></pxl-line>
+            <pxl-line x1="140" y1="0" x2="390" y2="0" rotate="165"></pxl-line>
+            <pxl-line x1="140" y1="0" x2="390" y2="0" rotate="195"></pxl-line>
+            <pxl-line x1="140" y1="0" x2="390" y2="0" rotate="225"></pxl-line>
+            <pxl-line x1="140" y1="0" x2="390" y2="0" rotate="255"></pxl-line>
+            <pxl-line x1="140" y1="0" x2="390" y2="0" rotate="285"></pxl-line>
+            <pxl-line x1="140" y1="0" x2="390" y2="0" rotate="315"></pxl-line>
+            <pxl-line x1="140" y1="0" x2="390" y2="0" rotate="345"></pxl-line>
+            
+            <!-- Concentric Masking Rings -->
+            <pxl-circle r="290"></pxl-circle>
+            <pxl-circle r="210"></pxl-circle>
+          </pxl-group>
 
           <!-- Inner Boundary Ring -->
-          <pxl-circle r="140" fill="#06070b" stroke="rgba(255, 255, 255, 0.15)" strokewidth="1.5"></pxl-circle>
+          <pxl-circle r="140" fill="#06070b" stroke="#030305" strokewidth="4"></pxl-circle>
+          <pxl-circle r="138" fill="none" stroke="rgba(255, 255, 255, 0.15)" strokewidth="1.5"></pxl-circle>
         </pxl-group>
       </pxl-layer>
 
@@ -266,7 +294,7 @@
           <pxl-group rotate="t * 8">
             <!-- Translucent Inscribed Geometric Polygon -->
             <pxl-polyline points="290,0 -145,251.14 -145,-251.14" closed="true"
-              fill="rgba(255, 255, 255, 0.05)" stroke="rgba(255, 255, 255, 0.45)" strokewidth="2">
+              fill="rgba(255, 255, 255, 0.05)" stroke="rgba(255, 255, 255, 0.45)" strokewidth="2" blend="screen">
             </pxl-polyline>
 
             <!-- Center-to-Vertex Balance Spokes -->
@@ -275,15 +303,15 @@
             <pxl-line x1="0" y1="0" x2="-145" y2="-251.14" stroke="rgba(255, 255, 255, 0.25)" strokewidth="1.2"></pxl-line>
 
             <!-- Vertex 1 Node: Dynamic Hue θ -->
-            <pxl-circle x="290" y="0" r="18" fill="hsl(t * 8, 100, 50)" stroke="#ffffff" strokewidth="2.5"></pxl-circle>
+            <pxl-circle x="290" y="0" r="18" fill="hsl(t * 8, 100, 50)" stroke="#ffffff" strokewidth="2.5" blend="screen" shadowcolor="hsl(t * 8, 100, 50)" shadowblur="20"></pxl-circle>
             <pxl-circle x="290" y="0" r="6" fill="#ffffff"></pxl-circle>
 
             <!-- Vertex 2 Node: Dynamic Hue θ + 120° -->
-            <pxl-circle x="-145" y="251.14" r="18" fill="hsl(t * 8 + 120, 100, 50)" stroke="#ffffff" strokewidth="2.5"></pxl-circle>
+            <pxl-circle x="-145" y="251.14" r="18" fill="hsl(t * 8, 100, 50)" stroke="#ffffff" strokewidth="2.5" blend="screen" shadowcolor="hsl(t * 8, 100, 50)" shadowblur="20"></pxl-circle>
             <pxl-circle x="-145" y="251.14" r="6" fill="#ffffff"></pxl-circle>
 
             <!-- Vertex 3 Node: Dynamic Hue θ + 240° -->
-            <pxl-circle x="-145" y="-251.14" r="18" fill="hsl(t * 8 + 240, 100, 50)" stroke="#ffffff" strokewidth="2.5"></pxl-circle>
+            <pxl-circle x="-145" y="-251.14" r="18" fill="hsl(t * 8, 100, 50)" stroke="#ffffff" strokewidth="2.5" blend="screen" shadowcolor="hsl(t * 8, 100, 50)" shadowblur="20"></pxl-circle>
             <pxl-circle x="-145" y="-251.14" r="6" fill="#ffffff"></pxl-circle>
           </pxl-group>
 
@@ -297,13 +325,13 @@
 
             <!-- Complementary Pointer A (Right) -->
             <pxl-group x="390" y="0">
-              <pxl-rect w="26" h="26" r="4" fill="hsl(-t * 6, 100, 52)" stroke="#ffffff" strokewidth="2" rotate="45"></pxl-rect>
+              <pxl-rect w="26" h="26" r="4" fill="hsl(-t * 6, 100, 52)" stroke="#ffffff" strokewidth="2" rotate="45" blend="screen" shadowcolor="hsl(-t * 6, 100, 52)" shadowblur="15"></pxl-rect>
               <pxl-circle r="4" fill="#ffffff"></pxl-circle>
             </pxl-group>
 
             <!-- Complementary Pointer B (Left, 180° Opposite) -->
             <pxl-group x="-390" y="0">
-              <pxl-rect w="26" h="26" r="4" fill="hsl(-t * 6 + 180, 100, 52)" stroke="#ffffff" strokewidth="2" rotate="45"></pxl-rect>
+              <pxl-rect w="26" h="26" r="4" fill="hsl(-t * 6, 100, 52)" stroke="#ffffff" strokewidth="2" rotate="45" blend="screen" shadowcolor="hsl(-t * 6, 100, 52)" shadowblur="15"></pxl-rect>
               <pxl-circle r="4" fill="#ffffff"></pxl-circle>
             </pxl-group>
           </pxl-group>
@@ -315,7 +343,7 @@
           <pxl-circle r="80" ir="45" fill="conic(t * 12, ['#f43f5e', '#facc15', '#22c55e', '#06b6d4', '#3b82f6', '#d946ef', '#f43f5e'])"></pxl-circle>
           
           <!-- Mid Bevel Ring -->
-          <pxl-circle r="45" ir="25" fill="linear(t * 15, ['#1e293b', '#0f172a'])" stroke="rgba(255, 255, 255, 0.2)" strokewidth="1"></pxl-circle>
+          <pxl-circle r="45" ir="25" fill="linear(t * 15, ['#1e293b', '#0f172a'])" stroke="rgba(255, 255, 255, 0.3)" strokewidth="1 + wave(t*4)*2"></pxl-circle>
 
           <!-- Golden Center Pivot Pin -->
           <pxl-circle r="25" fill="radial([0.35, 0.35, 25], ['#fef08a', '#eab308', '#78350f'])"></pxl-circle>
