@@ -863,3 +863,19 @@ body {
   );
   background-size: 20px 20px;
 }
+
+/* --- Showcase Architecture --- */
+.showcase-container {
+  width: 100%;
+  margin-top: 24px;
+  margin-bottom: 40px;
+}
+
+.showcase-stage {
+  display: block;
+  width: 100%;
+  background-color: #030305;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
