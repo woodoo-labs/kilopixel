@@ -100,12 +100,12 @@ class DocsApiStyling extends HTMLElement {
                 <div class="api-item-header">
                   <code class="api-name">linedash</code>
                   <div class="api-meta">
-                    <span class="api-pill values-pill">[dash, gap, ...] | expr</span>
+                    <span class="api-pill values-pill">"dash, gap" | number | array | expr</span>
                     <span class="api-pill default-pill">default: null</span>
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Dash pattern array. Values scale responsively with the stage (e.g. <code>linedash="[10, 5]"</code> draws a dash of 10 followed by a gap of 5). Defaults to <code>null</code> (solid line).
+                  Dash pattern. Accepts comma- or space-separated strings (e.g. <code>linedash="20, 10"</code>), a single number for equal dash and gap (e.g. <code>linedash="15"</code>), or JavaScript array notation.
                 </div>
               </div>
 
@@ -118,7 +118,7 @@ class DocsApiStyling extends HTMLElement {
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Phase shift offset of the line dash pattern. Animate with time <code>t</code> to create marching ants effects (e.g. <code>dashoffset="t * 20"</code>).
+                  Phase shift offset of the dash pattern along the path perimeter. Animate with time <code>t</code> to create marching ants effects (e.g. <code>dashoffset="-t * 40"</code>).
                 </div>
               </div>
 

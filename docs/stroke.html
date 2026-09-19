@@ -688,6 +688,151 @@
           </pxl-stage>
         </div>
 
+        <!-- ================================================================= -->
+        <!-- SECTION 6: MARCHING ANTS & ANIMATED STROKES -->
+        <!-- ================================================================= -->
+        <h2>6. Marching Ants &amp; Continuous Animation</h2>
+        <p>Combining <code>linedash</code> with a dynamic <code>dashoffset</code> expression produces continuous stroke animation &mdash; commonly known as <strong>marching ants</strong>. By multiplying the framework's time driver <code>t</code> by a velocity coefficient (e.g. <code>dashoffset="-t * 40"</code>), the dash pattern advances smoothly along the path perimeter at 60fps.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Directionality &amp; Flow</p>
+          <p class="callout-body">A negative offset rate (<code>-t * speed</code>) advances the pattern forward along the path &mdash; moving clockwise around closed boundaries and from start to end along open paths. A positive offset rate (<code>t * speed</code>) reverses the flow direction.</p>
+        </div>
+
+        <!-- Declarative Code Block Above Container -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- 1. Selection Marquee (Closed Rect) --&gt;
+    &lt;pxl-rect x="300" y="300" w="280" h="280"
+      stroke="#f97316" strokewidth="<mark id="sec6MarqueeWidthCode">4</mark>" fill="#ffedd522"
+      linedash="<mark id="sec6MarqueeDashCode">12, 12</mark>"
+      dashoffset="-t * <mark id="sec6MarqueeSpeedCode">40</mark>"&gt;
+    &lt;/pxl-rect&gt;
+
+    &lt;!-- 2. Signal Conduit (Dormant Wire + Animated Pulse Runner) --&gt;
+    &lt;pxl-polyline points="520,300; 640,180; 760,420; 880,300" smooth="1"
+      stroke="#1e3a8a33" strokewidth="<mark id="sec6FlowWidthCode">20</mark>" linecap="round" fill="none"&gt;
+    &lt;/pxl-polyline&gt;
+    &lt;pxl-polyline points="520,300; 640,180; 760,420; 880,300" smooth="1"
+      stroke="#3b82f6" strokewidth="<mark id="sec6FlowWidthCode2">20</mark>" linecap="round" fill="none"
+      linedash="<mark id="sec6FlowDashCode">40, 80</mark>"
+      dashoffset="-t * <mark id="sec6FlowSpeedCode">60</mark>"&gt;
+    &lt;/pxl-polyline&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec6MarqueeTab')">Marquee</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec6FlowTab')">Signal Flow</button>
+              </div>
+            </div>
+
+            <!-- Marquee Tab -->
+            <div class="tab-content active" id="sec6MarqueeTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>March Speed <span class="indicator-dot"></span></span> <span id="sec6MarqueeSpeedVal">40</span></label>
+                  <input type="range" min="-100" max="100" step="5" value="40" autocomplete="off" id="sec6MarqueeSpeedInput"
+                    oninput="const s = this.value; document.getElementById('sec6Marquee').setAttribute('dashoffset', '-t * ' + s); document.getElementById('sec6MarqueeSpeedVal').innerText = s; document.getElementById('sec6MarqueeSpeedCode').innerText = s;" data-mark="sec6MarqueeSpeedCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Dash Length</span> <span id="sec6MarqueeDashVal">12</span></label>
+                  <input type="range" min="4" max="40" step="2" value="12" autocomplete="off" id="sec6MarqueeDashInput"
+                    oninput="const d = this.value; document.getElementById('sec6Marquee').setAttribute('linedash', d + ', ' + d); document.getElementById('sec6MarqueeDashVal').innerText = d; document.getElementById('sec6MarqueeDashCode').innerText = d + ', ' + d;" data-mark="sec6MarqueeDashCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec6MarqueeWidthVal">4</span></label>
+                  <input type="range" min="2" max="16" step="2" value="4" autocomplete="off" id="sec6MarqueeWidthInput"
+                    oninput="const w = this.value; document.getElementById('sec6Marquee').setAttribute('strokewidth', w); document.getElementById('sec6MarqueeWidthVal').innerText = w; document.getElementById('sec6MarqueeWidthCode').innerText = w;" data-mark="sec6MarqueeWidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Pattern Preset</span></label>
+                  <select id="sec6MarqueePresetSelect" autocomplete="off"
+                    onchange="const v = this.value; document.getElementById('sec6Marquee').setAttribute('linedash', v); document.getElementById('sec6MarqueeDashCode').innerText = v; const firstVal = v.split(',')[0].trim(); document.getElementById('sec6MarqueeDashInput').value = firstVal; document.getElementById('sec6MarqueeDashVal').innerText = firstVal;" data-mark="sec6MarqueeDashCode">
+                    <option value="12, 12" selected>Classic: 12, 12</option>
+                    <option value="6, 6">Dense: 6, 6</option>
+                    <option value="20, 20">Long Dash: 20, 20</option>
+                    <option value="4, 12">Dotted: 4, 12</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Signal Flow Tab -->
+            <div class="tab-content" id="sec6FlowTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Flow Speed</span> <span id="sec6FlowSpeedVal">60</span></label>
+                  <input type="range" min="-150" max="150" step="5" value="60" autocomplete="off" id="sec6FlowSpeedInput"
+                    oninput="const s = this.value; document.getElementById('sec6Flow').setAttribute('dashoffset', '-t * ' + s); document.getElementById('sec6FlowSpeedVal').innerText = s; document.getElementById('sec6FlowSpeedCode').innerText = s;" data-mark="sec6FlowSpeedCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Pulse Gap</span> <span id="sec6FlowGapVal">80</span></label>
+                  <input type="range" min="20" max="700" step="20" value="80" autocomplete="off" id="sec6FlowGapInput"
+                    oninput="const g = this.value; const d = 40; document.getElementById('sec6Flow').setAttribute('linedash', d + ', ' + g); document.getElementById('sec6FlowGapVal').innerText = g; document.getElementById('sec6FlowDashCode').innerText = d + ', ' + g;" data-mark="sec6FlowDashCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec6FlowWidthVal">20</span></label>
+                  <input type="range" min="4" max="50" step="2" value="20" autocomplete="off" id="sec6FlowWidthInput"
+                    oninput="const w = this.value; document.getElementById('sec6Wire').setAttribute('strokewidth', w); document.getElementById('sec6Flow').setAttribute('strokewidth', w); document.getElementById('sec6FlowWidthVal').innerText = w; document.getElementById('sec6FlowWidthCode').innerText = w; document.getElementById('sec6FlowWidthCode2').innerText = w;" data-mark="sec6FlowWidthCode, sec6FlowWidthCode2">
+                </div>
+                <div class="control-group">
+                  <label><span>Signal Preset</span></label>
+                  <select id="sec6FlowPresetSelect" autocomplete="off"
+                    onchange="const v = this.value; document.getElementById('sec6Flow').setAttribute('linedash', v); document.getElementById('sec6FlowDashCode').innerText = v; const gapVal = v.split(',')[1] ? v.split(',')[1].trim() : 80; document.getElementById('sec6FlowGapInput').value = gapVal; document.getElementById('sec6FlowGapVal').innerText = gapVal;" data-mark="sec6FlowDashCode">
+                    <option value="40, 80" selected>Data Packets: 40, 80</option>
+                    <option value="80, 600">Single Beacon: 80, 600</option>
+                    <option value="16, 32">High Frequency: 16, 32</option>
+                    <option value="60, 60">Continuous Stream: 60, 60</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage id="sec6Stage" ratio="5 / 3" class="demo-stage">
+            <!-- Background Grid -->
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            </pxl-layer>
+
+            <!-- Main Animated Shapes Layer -->
+            <pxl-layer>
+              <!-- 1. Selection Marquee (Closed Rect) -->
+              <pxl-rect id="sec6Marquee" x="300" y="300" w="280" h="280" stroke="#f97316" strokewidth="4" fill="#ffedd522" linedash="12, 12" dashoffset="-t * 40"></pxl-rect>
+
+              <!-- 2. Signal Conduit (Dormant Wire + Animated Pulse Runner) -->
+              <pxl-polyline id="sec6Wire" points="520,300; 640,180; 760,420; 880,300" smooth="1" stroke="#1e3a8a33" strokewidth="20" linecap="round" fill="none"></pxl-polyline>
+              <pxl-polyline id="sec6Flow" points="520,300; 640,180; 760,420; 880,300" smooth="1" stroke="#3b82f6" strokewidth="20" linecap="round" fill="none" linedash="40, 80" dashoffset="-t * 60"></pxl-polyline>
+            </pxl-layer>
+
+            <!-- Overlay Details (Corner Handles & Circuit Terminals) -->
+            <pxl-layer>
+              <!-- Marquee Corner Resize Handles -->
+              <pxl-rect x="160" y="160" w="10" h="10" fill="#ffffff" stroke="#f97316" strokewidth="2"></pxl-rect>
+              <pxl-rect x="440" y="160" w="10" h="10" fill="#ffffff" stroke="#f97316" strokewidth="2"></pxl-rect>
+              <pxl-rect x="440" y="440" w="10" h="10" fill="#ffffff" stroke="#f97316" strokewidth="2"></pxl-rect>
+              <pxl-rect x="160" y="440" w="10" h="10" fill="#ffffff" stroke="#f97316" strokewidth="2"></pxl-rect>
+
+              <!-- Conduit Start & End Terminals -->
+              <pxl-circle x="520" y="300" r="16" stroke="#3b82f6" strokewidth="4" fill="#ffffff"></pxl-circle>
+              <pxl-circle x="520" y="300" r="6" fill="#3b82f6"></pxl-circle>
+              <pxl-circle x="880" y="300" r="16" stroke="#3b82f6" strokewidth="4" fill="#ffffff"></pxl-circle>
+              <pxl-circle x="880" y="300" r="6" fill="#3b82f6"></pxl-circle>
+            </pxl-layer>
+
+            <!-- Section Labels -->
+            <pxl-layer>
+              <pxl-text x="300" y="520" text="'Selection Marquee'" size="27" font="monospace" weight="700" align="center" fill="#fb923c"></pxl-text>
+              <pxl-text x="700" y="520" text="'Signal Conduit'" size="27" font="monospace" weight="700" align="center" fill="#60a5fa"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
       </div>
     </main>
   </div>
