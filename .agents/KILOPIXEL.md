@@ -799,13 +799,16 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `sc
 - **`linejoin`**: Defines how two connecting segments are joined. Options: `'miter'` (default), `'round'`, `'bevel'`.
 - **`miterlimit`**: Maximum miter length. Defaults to `10`.
 - **`dashoffset`**: Shifts the start of the dash pattern. Multiplied by the responsive unit `u`. Defaults to `0`.
-- **`linedash`**: Sets the stroke dash pattern. All values are automatically scaled by the responsive unit `u` at draw time. Accepts multiple convenient formats:
-  - **Comma or Space String**: `linedash="20, 10"` or `linedash="20 10"` (SVG format)
-  - **Single Number**: `linedash="20"` or `setAttribute('linedash', 20)` (creates equal repeating dash and gap)
-  - **JavaScript Array**: `linedash="[20, 10]"` or `setAttribute('linedash', [20, 10])`
+- **`linedash`**: Sets the stroke dash pattern. All values are automatically scaled by the responsive unit `u` at draw time. 
+  > [!IMPORTANT]
+  > **Architectural Rule (Seamless Animation):** For multiple dash/gap values, you MUST use JavaScript Array syntax (e.g., `linedash="[20, 10]"`). Kilopixel DOES NOT support SVG-style unbracketed strings (like `"20, 10"`). Enforcing the array syntax ensures that transitioning from a static dash to an animated dash (e.g., `linedash="[wave(t) * 20, 10]"`) requires zero syntax changes, keeping the engine clean and GC-free.
+  
+  Accepts the following strict formats:
+  - **JavaScript Array (Required for multiple values)**: `linedash="[20, 10]"` or `setAttribute('linedash', [20, 10])`
   - **Dynamic Expression**: `linedash="[wave(2) * 20, 10]"`
+  - **Single Number (Fast-path)**: `linedash="20"` or `setAttribute('linedash', 20)` (creates equal repeating dash and gap)
   - **Reset to Solid**: `linedash="none"`, `linedash="0"`, or `null`
-  Scaled values are cached per-shape (`(linedash, u)`) via `pxl.applyLineDash` with zero-GC overhead.
+  Scaled values are strictly evaluated by the compiler and cached per-shape (`(linedash, u)`) via `pxl.applyLineDash` with zero-GC overhead.
 
 ### Default Values
 
