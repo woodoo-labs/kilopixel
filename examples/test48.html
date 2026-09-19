@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Johannes Itten 12-Tone Chromatic Harmonograph — Kilopixel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="../dist/pxl.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100vw;
+      min-height: 100vh;
+      background: #040407;
+      color: #f1f5f9;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    .header-bar {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 16px;
+    }
+
+    .title-group h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #f8fafc;
+    }
+
+    .title-group p {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .meta-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 4px 10px;
+      border-radius: 9999px;
+    }
+
+    /* 1:1 Showcase Stage Container */
+    .stage-wrapper {
+      width: 100%;
+      max-width: 800px;
+      aspect-ratio: 1 / 1;
+      background: #030305;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+      position: relative;
+    }
+
+    pxl-stage {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-bar">
+    <div class="title-group">
+      <h1>Johannes Itten 12-Tone Chromatic Harmonograph</h1>
+      <p>Geometric color theory, harmonic chord inspection &amp; 360° HSL kinematics</p>
+    </div>
+    <div class="meta-tag">STAGE 1:1 &bull; 1000&times;1000</div>
+  </div>
+
+  <div class="stage-wrapper">
+    <pxl-stage id="stage" ratio="1 / 1">
+
+      <!-- ================================================================= -->
+      <!-- LAYER 1: STATIC POLAR COORDINATE COMPASS & AMBIENT SPOTLIGHT       -->
+      <!-- ================================================================= -->
+      <pxl-layer>
+        <!-- Atmospheric Center Spotlight -->
+        <pxl-circle x="500" y="500" r="490" fill="radial([490], ['rgba(30, 58, 138, 0.35)', 'rgba(15, 23, 42, 0.2)', 'transparent'])"></pxl-circle>
+
+        <!-- Concentric Guideline Circles -->
+        <pxl-circle x="500" y="500" r="140" fill="none" stroke="rgba(255, 255, 255, 0.06)" strokewidth="1"></pxl-circle>
+        <pxl-circle x="500" y="500" r="210" fill="none" stroke="rgba(255, 255, 255, 0.07)" strokewidth="1"></pxl-circle>
+        <pxl-circle x="500" y="500" r="290" fill="none" stroke="rgba(255, 255, 255, 0.09)" strokewidth="1.2"></pxl-circle>
+        <pxl-circle x="500" y="500" r="390" fill="none" stroke="rgba(255, 255, 255, 0.12)" strokewidth="1.4"></pxl-circle>
+        <pxl-circle x="500" y="500" r="435" fill="none" stroke="rgba(255, 255, 255, 0.05)" strokewidth="1" linedash="2, 6"></pxl-circle>
+
+        <!-- 12 Radial Compass Division Ticks & Degree Labels -->
+        <pxl-group x="500" y="500">
+          <!-- 0° - Red -->
+          <pxl-line x1="395" y1="0" x2="430" y2="0" stroke="rgba(255, 255, 255, 0.25)" strokewidth="1.5"></pxl-line>
+          <pxl-text x="445" y="0" text="'0° RED'" font="monospace" size="10" fill="#f43f5e" baseline="middle"></pxl-text>
+
+          <!-- 30° - Orange -->
+          <pxl-group rotate="30">
+            <pxl-line x1="395" y1="0" x2="425" y2="0" stroke="rgba(255, 255, 255, 0.18)" strokewidth="1"></pxl-line>
+            <pxl-text x="445" y="0" text="'30°'" font="monospace" size="10" fill="#94a3b8" baseline="middle"></pxl-text>
+          </pxl-group>
+
+          <!-- 60° - Yellow -->
+          <pxl-group rotate="60">
+            <pxl-line x1="395" y1="0" x2="430" y2="0" stroke="rgba(255, 255, 255, 0.25)" strokewidth="1.5"></pxl-line>
+            <pxl-text x="445" y="0" text="'60° YEL'" font="monospace" size="10" fill="#facc15" baseline="middle"></pxl-text>
+          </pxl-group>
+
+          <!-- 90° - Chartreuse -->
+          <pxl-group rotate="90">
+            <pxl-line x1="395" y1="0" x2="425" y2="0" stroke="rgba(255, 255, 255, 0.18)" strokewidth="1"></pxl-line>
+            <pxl-text x="445" y="0" text="'90°'" font="monospace" size="10" fill="#94a3b8" baseline="middle"></pxl-text>
+          </pxl-group>
+
+          <!-- 120° - Green -->
+          <pxl-group rotate="120">
+            <pxl-line x1="395" y1="0" x2="430" y2="0" stroke="rgba(255, 255, 255, 0.25)" strokewidth="1.5"></pxl-line>
+            <pxl-text x="445" y="0" text="'120° GRN'" font="monospace" size="10" fill="#22c55e" baseline="middle"></pxl-text>
+          </pxl-group>
+
+          <!-- 150° - Spring Green -->
+          <pxl-group rotate="150">
+            <pxl-line x1="395" y1="0" x2="425" y2="0" stroke="rgba(255, 255, 255, 0.18)" strokewidth="1"></pxl-line>
+            <pxl-text x="445" y="0" text="'150°'" font="monospace" size="10" fill="#94a3b8" baseline="middle"></pxl-text>
+          </pxl-group>
+
+          <!-- 180° - Cyan -->
+          <pxl-group rotate="180">
+            <pxl-line x1="395" y1="0" x2="430" y2="0" stroke="rgba(255, 255, 255, 0.25)" strokewidth="1.5"></pxl-line>
+            <pxl-text x="445" y="0" text="'180° CYN'" font="monospace" size="10" fill="#06b6d4" baseline="middle" scale="-1" scaley="-1"></pxl-text>
+          </pxl-group>
+
+          <!-- 210° - Azure -->
+          <pxl-group rotate="210">
+            <pxl-line x1="395" y1="0" x2="425" y2="0" stroke="rgba(255, 255, 255, 0.18)" strokewidth="1"></pxl-line>
+            <pxl-text x="445" y="0" text="'210°'" font="monospace" size="10" fill="#94a3b8" baseline="middle" scale="-1" scaley="-1"></pxl-text>
+          </pxl-group>
+
+          <!-- 240° - Blue -->
+          <pxl-group rotate="240">
+            <pxl-line x1="395" y1="0" x2="430" y2="0" stroke="rgba(255, 255, 255, 0.25)" strokewidth="1.5"></pxl-line>
+            <pxl-text x="445" y="0" text="'240° BLU'" font="monospace" size="10" fill="#3b82f6" baseline="middle" scale="-1" scaley="-1"></pxl-text>
+          </pxl-group>
+
+          <!-- 270° - Violet -->
+          <pxl-group rotate="270">
+            <pxl-line x1="395" y1="0" x2="425" y2="0" stroke="rgba(255, 255, 255, 0.18)" strokewidth="1"></pxl-line>
+            <pxl-text x="445" y="0" text="'270°'" font="monospace" size="10" fill="#94a3b8" baseline="middle"></pxl-text>
+          </pxl-group>
+
+          <!-- 300° - Magenta -->
+          <pxl-group rotate="300">
+            <pxl-line x1="395" y1="0" x2="430" y2="0" stroke="rgba(255, 255, 255, 0.25)" strokewidth="1.5"></pxl-line>
+            <pxl-text x="445" y="0" text="'300° MAG'" font="monospace" size="10" fill="#d946ef" baseline="middle"></pxl-text>
+          </pxl-group>
+
+          <!-- 330° - Rose -->
+          <pxl-group rotate="330">
+            <pxl-line x1="395" y1="0" x2="425" y2="0" stroke="rgba(255, 255, 255, 0.18)" strokewidth="1"></pxl-line>
+            <pxl-text x="445" y="0" text="'330°'" font="monospace" size="10" fill="#94a3b8" baseline="middle"></pxl-text>
+          </pxl-group>
+        </pxl-group>
+      </pxl-layer>
+
+      <!-- ================================================================= -->
+      <!-- LAYER 2: THE 12-TONE ITTEN CHROMATIC WHEEL (PURE GEOMETRIC FILLS) -->
+      <!-- ================================================================= -->
+      <pxl-layer>
+        <pxl-group x="500" y="500">
+
+          <!-- ------------------------------------------------------------- -->
+          <!-- TIER A: OUTER PURE HUE RING (r = 390, ir = 290, 100% Sat)    -->
+          <!-- ------------------------------------------------------------- -->
+          <!-- 0° Red -->
+          <pxl-circle r="390" ir="290" start="-14" sweep="28" fill="hsl(0, 100, 50)"></pxl-circle>
+          <!-- 30° Orange -->
+          <pxl-circle r="390" ir="290" start="16" sweep="28" fill="hsl(30, 100, 50)"></pxl-circle>
+          <!-- 60° Yellow -->
+          <pxl-circle r="390" ir="290" start="46" sweep="28" fill="hsl(60, 100, 50)"></pxl-circle>
+          <!-- 90° Chartreuse -->
+          <pxl-circle r="390" ir="290" start="76" sweep="28" fill="hsl(90, 100, 50)"></pxl-circle>
+          <!-- 120° Green -->
+          <pxl-circle r="390" ir="290" start="106" sweep="28" fill="hsl(120, 100, 50)"></pxl-circle>
+          <!-- 150° Spring Green -->
+          <pxl-circle r="390" ir="290" start="136" sweep="28" fill="hsl(150, 100, 50)"></pxl-circle>
+          <!-- 180° Cyan -->
+          <pxl-circle r="390" ir="290" start="166" sweep="28" fill="hsl(180, 100, 50)"></pxl-circle>
+          <!-- 210° Azure -->
+          <pxl-circle r="390" ir="290" start="196" sweep="28" fill="hsl(210, 100, 50)"></pxl-circle>
+          <!-- 240° Blue -->
+          <pxl-circle r="390" ir="290" start="226" sweep="28" fill="hsl(240, 100, 50)"></pxl-circle>
+          <!-- 270° Violet -->
+          <pxl-circle r="390" ir="290" start="256" sweep="28" fill="hsl(270, 100, 50)"></pxl-circle>
+          <!-- 300° Magenta -->
+          <pxl-circle r="390" ir="290" start="286" sweep="28" fill="hsl(300, 100, 50)"></pxl-circle>
+          <!-- 330° Rose -->
+          <pxl-circle r="390" ir="290" start="316" sweep="28" fill="hsl(330, 100, 50)"></pxl-circle>
+
+          <!-- ------------------------------------------------------------- -->
+          <!-- TIER B: MIDDLE TINTS RING (r = 290, ir = 210, 75% Lightness)  -->
+          <!-- ------------------------------------------------------------- -->
+          <pxl-circle r="290" ir="210" start="-14" sweep="28" fill="hsl(0, 85, 72)"></pxl-circle>
+          <pxl-circle r="290" ir="210" start="16" sweep="28" fill="hsl(30, 85, 72)"></pxl-circle>
+          <pxl-circle r="290" ir="210" start="46" sweep="28" fill="hsl(60, 85, 72)"></pxl-circle>
+          <pxl-circle r="290" ir="210" start="76" sweep="28" fill="hsl(90, 85, 72)"></pxl-circle>
+          <pxl-circle r="290" ir="210" start="106" sweep="28" fill="hsl(120, 85, 72)"></pxl-circle>
+          <pxl-circle r="290" ir="210" start="136" sweep="28" fill="hsl(150, 85, 72)"></pxl-circle>
+          <pxl-circle r="290" ir="210" start="166" sweep="28" fill="hsl(180, 85, 72)"></pxl-circle>
+          <pxl-circle r="290" ir="210" start="196" sweep="28" fill="hsl(210, 85, 72)"></pxl-circle>
+          <pxl-circle r="290" ir="210" start="226" sweep="28" fill="hsl(240, 85, 72)"></pxl-circle>
+          <pxl-circle r="290" ir="210" start="256" sweep="28" fill="hsl(270, 85, 72)"></pxl-circle>
+          <pxl-circle r="290" ir="210" start="286" sweep="28" fill="hsl(300, 85, 72)"></pxl-circle>
+          <pxl-circle r="290" ir="210" start="316" sweep="28" fill="hsl(330, 85, 72)"></pxl-circle>
+
+          <!-- ------------------------------------------------------------- -->
+          <!-- TIER C: INNER SHADES RING (r = 210, ir = 140, 32% Lightness) -->
+          <!-- ------------------------------------------------------------- -->
+          <pxl-circle r="210" ir="140" start="-14" sweep="28" fill="hsl(0, 90, 32)"></pxl-circle>
+          <pxl-circle r="210" ir="140" start="16" sweep="28" fill="hsl(30, 90, 32)"></pxl-circle>
+          <pxl-circle r="210" ir="140" start="46" sweep="28" fill="hsl(60, 90, 32)"></pxl-circle>
+          <pxl-circle r="210" ir="140" start="76" sweep="28" fill="hsl(90, 90, 32)"></pxl-circle>
+          <pxl-circle r="210" ir="140" start="106" sweep="28" fill="hsl(120, 90, 32)"></pxl-circle>
+          <pxl-circle r="210" ir="140" start="136" sweep="28" fill="hsl(150, 90, 32)"></pxl-circle>
+          <pxl-circle r="210" ir="140" start="166" sweep="28" fill="hsl(180, 90, 32)"></pxl-circle>
+          <pxl-circle r="210" ir="140" start="196" sweep="28" fill="hsl(210, 90, 32)"></pxl-circle>
+          <pxl-circle r="210" ir="140" start="226" sweep="28" fill="hsl(240, 90, 32)"></pxl-circle>
+          <pxl-circle r="210" ir="140" start="256" sweep="28" fill="hsl(270, 90, 32)"></pxl-circle>
+          <pxl-circle r="210" ir="140" start="286" sweep="28" fill="hsl(300, 90, 32)"></pxl-circle>
+          <pxl-circle r="210" ir="140" start="316" sweep="28" fill="hsl(330, 90, 32)"></pxl-circle>
+
+          <!-- Inner Boundary Ring -->
+          <pxl-circle r="140" fill="#06070b" stroke="rgba(255, 255, 255, 0.15)" strokewidth="1.5"></pxl-circle>
+        </pxl-group>
+      </pxl-layer>
+
+      <!-- ================================================================= -->
+      <!-- LAYER 3: KINETIC GEOMETRIC HARMONIC ARMATURES                     -->
+      <!-- ================================================================= -->
+      <pxl-layer>
+        <pxl-group x="500" y="500">
+
+          <!-- ------------------------------------------------------------- -->
+          <!-- ARMATURE 1: TRIADIC EQUILATERAL TRIANGLE (rotate = t * 8)     -->
+          <!-- Samples 3 colors at 120° intervals (e.g. Primaries, Tertiaries)-->
+          <!-- ------------------------------------------------------------- -->
+          <pxl-group rotate="t * 8">
+            <!-- Translucent Inscribed Geometric Polygon -->
+            <pxl-polyline points="290,0 -145,251.14 -145,-251.14" closed="true"
+              fill="rgba(255, 255, 255, 0.05)" stroke="rgba(255, 255, 255, 0.45)" strokewidth="2">
+            </pxl-polyline>
+
+            <!-- Center-to-Vertex Balance Spokes -->
+            <pxl-line x1="0" y1="0" x2="290" y2="0" stroke="rgba(255, 255, 255, 0.25)" strokewidth="1.2"></pxl-line>
+            <pxl-line x1="0" y1="0" x2="-145" y2="251.14" stroke="rgba(255, 255, 255, 0.25)" strokewidth="1.2"></pxl-line>
+            <pxl-line x1="0" y1="0" x2="-145" y2="-251.14" stroke="rgba(255, 255, 255, 0.25)" strokewidth="1.2"></pxl-line>
+
+            <!-- Vertex 1 Node: Dynamic Hue θ -->
+            <pxl-circle x="290" y="0" r="18" fill="hsl(t * 8, 100, 50)" stroke="#ffffff" strokewidth="2.5"></pxl-circle>
+            <pxl-circle x="290" y="0" r="6" fill="#ffffff"></pxl-circle>
+
+            <!-- Vertex 2 Node: Dynamic Hue θ + 120° -->
+            <pxl-circle x="-145" y="251.14" r="18" fill="hsl(t * 8 + 120, 100, 50)" stroke="#ffffff" strokewidth="2.5"></pxl-circle>
+            <pxl-circle x="-145" y="251.14" r="6" fill="#ffffff"></pxl-circle>
+
+            <!-- Vertex 3 Node: Dynamic Hue θ + 240° -->
+            <pxl-circle x="-145" y="-251.14" r="18" fill="hsl(t * 8 + 240, 100, 50)" stroke="#ffffff" strokewidth="2.5"></pxl-circle>
+            <pxl-circle x="-145" y="-251.14" r="6" fill="#ffffff"></pxl-circle>
+          </pxl-group>
+
+          <!-- ------------------------------------------------------------- -->
+          <!-- ARMATURE 2: COUNTER-ROTATING COMPLEMENTARY AXIS (rotate = -t*6)-->
+          <!-- Diametric bar pointing to 180° opposite complementary pairs    -->
+          <!-- ------------------------------------------------------------- -->
+          <pxl-group rotate="-t * 6">
+            <!-- Full Diameter Pointer Bar -->
+            <pxl-line x1="-390" y1="0" x2="390" y2="0" stroke="rgba(255, 255, 255, 0.35)" strokewidth="1.8" linedash="4, 4"></pxl-line>
+
+            <!-- Complementary Pointer A (Right) -->
+            <pxl-group x="390" y="0">
+              <pxl-rect w="26" h="26" r="4" fill="hsl(-t * 6, 100, 52)" stroke="#ffffff" strokewidth="2" rotate="45"></pxl-rect>
+              <pxl-circle r="4" fill="#ffffff"></pxl-circle>
+            </pxl-group>
+
+            <!-- Complementary Pointer B (Left, 180° Opposite) -->
+            <pxl-group x="-390" y="0">
+              <pxl-rect w="26" h="26" r="4" fill="hsl(-t * 6 + 180, 100, 52)" stroke="#ffffff" strokewidth="2" rotate="45"></pxl-rect>
+              <pxl-circle r="4" fill="#ffffff"></pxl-circle>
+            </pxl-group>
+          </pxl-group>
+
+          <!-- ------------------------------------------------------------- -->
+          <!-- CENTRAL CORE: ROTATING BAUHAUS PRISM ROTOR                     -->
+          <!-- ------------------------------------------------------------- -->
+          <!-- Ambient Conic Spectrum Core -->
+          <pxl-circle r="80" ir="45" fill="conic(t * 12, ['#f43f5e', '#facc15', '#22c55e', '#06b6d4', '#3b82f6', '#d946ef', '#f43f5e'])"></pxl-circle>
+          
+          <!-- Mid Bevel Ring -->
+          <pxl-circle r="45" ir="25" fill="linear(t * 15, ['#1e293b', '#0f172a'])" stroke="rgba(255, 255, 255, 0.2)" strokewidth="1"></pxl-circle>
+
+          <!-- Golden Center Pivot Pin -->
+          <pxl-circle r="25" fill="radial([0.35, 0.35, 25], ['#fef08a', '#eab308', '#78350f'])"></pxl-circle>
+          <pxl-circle r="5" fill="#ffffff"></pxl-circle>
+        </pxl-group>
+
+        <!-- =============================================================== -->
+        <!-- LAYER 4: REAL-TIME BAUHAUS ANALYTICAL TELEMETRY HUD             -->
+        <!-- =============================================================== -->
+        <!-- Header Telemetry -->
+        <pxl-text x="32" y="42" text="'JOHANNES ITTEN • 12-TONE CHROMATIC HARMONOGRAPH'" font="monospace" size="13" weight="700" fill="#94a3b8"></pxl-text>
+        
+        <!-- Live Triadic Readout -->
+        <pxl-text x="32" y="72" text="'TRIADIC CHORD (120°): '" font="monospace" size="14" weight="600" fill="#f8fafc"></pxl-text>
+        <pxl-text x="220" y="72" text="'hsl(' + round((t * 8) % 360) + '°, 100, 50)  |  hsl(' + round((t * 8 + 120) % 360) + '°, 100, 50)  |  hsl(' + round((t * 8 + 240) % 360) + '°, 100, 50)'" font="monospace" size="14" fill="#38bdf8"></pxl-text>
+
+        <!-- Live Complementary Readout -->
+        <pxl-text x="32" y="96" text="'COMPLEMENT (180°):   '" font="monospace" size="14" weight="600" fill="#f8fafc"></pxl-text>
+        <pxl-text x="220" y="96" text="'hsl(' + round(((-t * 6) % 360 + 360) % 360) + '°, 100, 50)  ↔  hsl(' + round(((-t * 6 + 180) % 360 + 360) % 360) + '°, 100, 50)'" font="monospace" size="14" fill="#f43f5e"></pxl-text>
+
+        <!-- Performance Telemetry -->
+        <pxl-text x="968" y="42" text="ref.stage.fps + ' FPS | ' + ref.stage.renderAvg + 'ms'" font="monospace" size="13" align="right" fill="#10b981"></pxl-text>
+
+        <!-- Bottom Analytical Labels -->
+        <pxl-text x="32" y="968" text="'BAUHAUS WEIMAR • COLOR CONTRAST & HARMONIC CHORD THEORY • PURE GEOMETRIC FILLS'" font="monospace" size="11" fill="#475569"></pxl-text>
+        <pxl-text x="968" y="968" text="'RATIO 1:1 • 1000×1000 LOGICAL CANVAS'" font="monospace" size="11" align="right" fill="#475569"></pxl-text>
+      </pxl-layer>
+
+    </pxl-stage>
+  </div>
+
+</body>
+</html>

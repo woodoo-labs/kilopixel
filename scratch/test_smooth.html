@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="../docs/js/pxl.min.js"></script>
+  <style>
+    body { font-family: sans-serif; background: #0f172a; color: white; padding: 20px; }
+    .grid { display: flex; flex-wrap: wrap; gap: 20px; }
+    .card { background: #1e293b; padding: 15px; border-radius: 8px; width: 450px; }
+    h3 { margin-top: 0; font-size: 14px; color: #94a3b8; }
+    pxl-stage { width: 100%; height: 260px; display: block; background: #ffffff; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div class="grid">
+    <div class="card">
+      <h3>1. Current (Sharp zigzag, butt cap, miter join)</h3>
+      <pxl-stage ratio="5 / 3">
+        <pxl-layer>
+          <pxl-polyline points="520,420; 640,180; 760,420; 880,180" stroke="#3b82f6" strokewidth="20" linecap="butt" fill="none" linedash="[35, 15, 10, 15]"></pxl-polyline>
+        </pxl-layer>
+      </pxl-stage>
+    </div>
+
+    <div class="card">
+      <h3>2. Sharp zigzag + linejoin="round" + linecap="round"</h3>
+      <pxl-stage ratio="5 / 3">
+        <pxl-layer>
+          <pxl-polyline points="520,420; 640,180; 760,420; 880,180" stroke="#3b82f6" strokewidth="20" linejoin="round" linecap="round" fill="none" linedash="[35, 15, 10, 15]"></pxl-polyline>
+        </pxl-layer>
+      </pxl-stage>
+    </div>
+
+    <div class="card">
+      <h3>3. smooth="true" (tension=1, butt cap)</h3>
+      <pxl-stage ratio="5 / 3">
+        <pxl-layer>
+          <pxl-polyline points="520,420; 640,180; 760,420; 880,180" smooth="true" stroke="#3b82f6" strokewidth="20" linecap="butt" fill="none" linedash="[35, 15, 10, 15]"></pxl-polyline>
+        </pxl-layer>
+      </pxl-stage>
+    </div>
+
+    <div class="card">
+      <h3>4. smooth="true" + linecap="round"</h3>
+      <pxl-stage ratio="5 / 3">
+        <pxl-layer>
+          <pxl-polyline points="520,420; 640,180; 760,420; 880,180" smooth="true" stroke="#3b82f6" strokewidth="20" linecap="round" fill="none" linedash="[35, 15, 10, 15]"></pxl-polyline>
+        </pxl-layer>
+      </pxl-stage>
+    </div>
+
+    <div class="card">
+      <h3>5. smooth="0.6" (gentler curve, butt cap)</h3>
+      <pxl-stage ratio="5 / 3">
+        <pxl-layer>
+          <pxl-polyline points="520,420; 640,180; 760,420; 880,180" smooth="0.6" stroke="#3b82f6" strokewidth="20" linecap="butt" fill="none" linedash="[35, 15, 10, 15]"></pxl-polyline>
+        </pxl-layer>
+      </pxl-stage>
+    </div>
+
+    <div class="card">
+      <h3>6. Relaxed points (wider turns: 500,380; 620,200; 780,400; 900,220) + smooth="true"</h3>
+      <pxl-stage ratio="5 / 3">
+        <pxl-layer>
+          <pxl-polyline points="500,380; 620,200; 780,400; 900,220" smooth="true" stroke="#3b82f6" strokewidth="20" linecap="butt" fill="none" linedash="[35, 15, 10, 15]"></pxl-polyline>
+        </pxl-layer>
+      </pxl-stage>
+    </div>
+  </div>
+</body>
+</html>

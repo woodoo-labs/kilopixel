@@ -85,9 +85,9 @@
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
               
               <!-- 2. Stage Dimension Arrows & Labels -->
-              <pxl-line x1="100" y1="0" x2="100" y2="ref.sec1Stage.height" stroke="#0ea5e9" strokewidth="2" linedash="5, 5" arrowend="17"></pxl-line>
+              <pxl-line x1="100" y1="0" x2="100" y2="ref.sec1Stage.height" stroke="#0ea5e9" strokewidth="2" linedash="[5, 5]" arrowend="17"></pxl-line>
               <pxl-text x="115" y="ref.sec1Stage.height / 2" baseline="middle" align="left" text="`height = ${round(ref.sec1Stage.height)}\n(computed)`" size="27" fill="#0ea5e9" font="monospace"></pxl-text>
-              <pxl-line x1="0" y1="100" x2="1000" y2="100" stroke="#0ea5e9" strokewidth="2" linedash="5, 5" arrowend="17"></pxl-line>
+              <pxl-line x1="0" y1="100" x2="1000" y2="100" stroke="#0ea5e9" strokewidth="2" linedash="[5, 5]" arrowend="17"></pxl-line>
               <pxl-text x="500" y="115" baseline="top" align="center" text="'width = 1000 (fixed)'" size="27" fill="#0ea5e9" font="monospace"></pxl-text>
 
               <!-- 3. Stage Corner & Center Markers -->
@@ -175,17 +175,17 @@
               <pxl-circle x="0" y="ref.sec2Stage.height" r="6" fill="#94a3b8"></pxl-circle>
               <pxl-text x="15" y="ref.sec2Stage.height - 15" baseline="bottom" align="left" text="`(0, ${round(ref.sec2Stage.height)})`" size="27" fill="#94a3b8" font="monospace"></pxl-text>
               
-              <pxl-line x1="0" y1="ref.sec2Layer.y" x2="ref.sec2Layer.x" y2="ref.sec2Layer.y" stroke="#a78bfa" strokewidth="2" linedash="5, 5"></pxl-line>
+              <pxl-line x1="0" y1="ref.sec2Layer.y" x2="ref.sec2Layer.x" y2="ref.sec2Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-text x="ref.sec2Layer.x / 2" y="ref.sec2Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec2Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
-              <pxl-line x1="ref.sec2Layer.x" y1="0" x2="ref.sec2Layer.x" y2="ref.sec2Layer.y" stroke="#a78bfa" strokewidth="2" linedash="5, 5"></pxl-line>
+              <pxl-line x1="ref.sec2Layer.x" y1="0" x2="ref.sec2Layer.x" y2="ref.sec2Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-text x="ref.sec2Layer.x + 15" y="ref.sec2Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec2Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
             </pxl-layer>
   
             <!-- The layer container -->
             <pxl-layer id="sec2Layer" x="500" y="300">
               <!-- 3. Layer Axes -->
-              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
-              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
               
               <!-- 4. Layer Center -->
               <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
@@ -263,26 +263,26 @@
             <!-- Stage Origin -->
             <pxl-circle x="0" y="0" r="6" fill="#0284c7"></pxl-circle>
             <pxl-text x="15" y="15" baseline="top" text="'Stage Origin (0, 0)'" size="27" fill="#0284c7" font="monospace"></pxl-text>
-            <pxl-line x1="0" y1="ref.sec3Layer.y" x2="ref.sec3Layer.x" y2="ref.sec3Layer.y" stroke="#a78bfa" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec3Layer.y" x2="ref.sec3Layer.x" y2="ref.sec3Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec3Layer.x / 2" y="ref.sec3Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec3Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec3Layer.x" y1="0" x2="ref.sec3Layer.x" y2="ref.sec3Layer.y" stroke="#a78bfa" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="ref.sec3Layer.x" y1="0" x2="ref.sec3Layer.x" y2="ref.sec3Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec3Layer.x + 15" y="ref.sec3Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec3Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
           </pxl-layer>
           
           <pxl-layer id="sec3Layer" x="400" y="200">
             <!-- Helpers -->
             <!-- 2. Layer Axes -->
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
             <!-- 3. Layer Center -->
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
             <pxl-text x="15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
 
             <!-- 4. Shape Helpers -->
-            <pxl-line x1="0" y1="ref.sec3Circle.y" x2="ref.sec3Circle.x" y2="ref.sec3Circle.y" stroke="#fdba74" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec3Circle.y" x2="ref.sec3Circle.x" y2="ref.sec3Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec3Circle.x / 2" y="ref.sec3Circle.y + 15" baseline="top" align="center" text="`x = ${ref.sec3Circle.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec3Circle.x" y1="0" x2="ref.sec3Circle.x" y2="ref.sec3Circle.y" stroke="#fdba74" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="ref.sec3Circle.x" y1="0" x2="ref.sec3Circle.x" y2="ref.sec3Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec3Circle.x + 15" y="ref.sec3Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.sec3Circle.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
 
             <!-- 5. The Shape -->
@@ -403,24 +403,24 @@
             <pxl-circle x="0" y="0" r="6" fill="#0284c7"></pxl-circle>
             <pxl-text x="15" y="15" baseline="top" text="'Stage Origin (0, 0)'" size="27" fill="#0284c7" font="monospace"></pxl-text>
             
-            <pxl-line x1="0" y1="ref.sec4Layer.y" x2="ref.sec4Layer.x" y2="ref.sec4Layer.y" stroke="#a78bfa" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec4Layer.y" x2="ref.sec4Layer.x" y2="ref.sec4Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec4Layer.x / 2" y="ref.sec4Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec4Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec4Layer.x" y1="0" x2="ref.sec4Layer.x" y2="ref.sec4Layer.y" stroke="#a78bfa" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="ref.sec4Layer.x" y1="0" x2="ref.sec4Layer.x" y2="ref.sec4Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec4Layer.x + 15" y="ref.sec4Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec4Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
           </pxl-layer>
 
           <!-- The layer container -->
           <pxl-layer id="sec4Layer" x="500" y="300" rotate="0">
             <!-- 3. Layer Axes & Center -->
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
             <pxl-text x="15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
             
             <!-- 4. Shape Helpers -->
-            <pxl-line x1="0" y1="ref.sec4Ellipse.y" x2="ref.sec4Ellipse.x" y2="ref.sec4Ellipse.y" stroke="#fdba74" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec4Ellipse.y" x2="ref.sec4Ellipse.x" y2="ref.sec4Ellipse.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec4Ellipse.x / 2" y="ref.sec4Ellipse.y + 15" baseline="top" align="center" text="`x = ${ref.sec4Ellipse.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec4Ellipse.x" y1="0" x2="ref.sec4Ellipse.x" y2="ref.sec4Ellipse.y" stroke="#fdba74" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="ref.sec4Ellipse.x" y1="0" x2="ref.sec4Ellipse.x" y2="ref.sec4Ellipse.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec4Ellipse.x + 15" y="ref.sec4Ellipse.y / 2" baseline="middle" align="left" text="`y = ${ref.sec4Ellipse.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
 
             <!-- 5. The Shape -->
@@ -537,17 +537,17 @@
             <pxl-circle x="0" y="0" r="6" fill="#0284c7"></pxl-circle>
             <pxl-text x="15" y="15" baseline="top" text="'(0, 0)'" size="27" fill="#0284c7" font="monospace"></pxl-text>
             
-            <pxl-line x1="0" y1="ref.sec5Layer.y" x2="ref.sec5Layer.x" y2="ref.sec5Layer.y" stroke="#a78bfa" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec5Layer.y" x2="ref.sec5Layer.x" y2="ref.sec5Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec5Layer.x / 2" y="ref.sec5Layer.y + 15" baseline="top" align="center" text="`x = ${ref.sec5Layer.x}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec5Layer.x" y1="0" x2="ref.sec5Layer.x" y2="ref.sec5Layer.y" stroke="#a78bfa" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="ref.sec5Layer.x" y1="0" x2="ref.sec5Layer.x" y2="ref.sec5Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec5Layer.x + 15" y="ref.sec5Layer.y / 2" baseline="middle" align="left" text="`y = ${ref.sec5Layer.y}`" size="27" fill="#a78bfa" font="monospace"></pxl-text>
           </pxl-layer>
 
           <!-- The layer container -->
           <pxl-layer id="sec5Layer" x="200" y="150" rotate="0">
             <!-- 3. Layer Axes & Center -->
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
             <pxl-text x="15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
             
@@ -556,20 +556,20 @@
             <!-- Rotating Rect Center Crosshair & Local Offset Helpers (dx, dy) -->
             <pxl-group x="ref.sec5Rect.x" y="ref.sec5Rect.y" rotate="ref.sec5Rect.rotate">
               <!-- Grey Crosshair for Rect Center -->
-              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
-              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
               
               <!-- Red Rotating Helper lines pointing to Rect Offset (dx, dy) -->
-              <pxl-line x1="0" y1="ref.sec5Rect.dy" x2="ref.sec5Rect.dx" y2="ref.sec5Rect.dy" stroke="#ea580c" strokewidth="2" linedash="5, 5"></pxl-line>
+              <pxl-line x1="0" y1="ref.sec5Rect.dy" x2="ref.sec5Rect.dx" y2="ref.sec5Rect.dy" stroke="#ea580c" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-text x="ref.sec5Rect.dx / 2" y="ref.sec5Rect.dy + 15" baseline="top" align="center" text="`dx = ${ref.sec5Rect.dx}`" size="27" fill="#ea580c" font="monospace"></pxl-text>
-              <pxl-line x1="ref.sec5Rect.dx" y1="0" x2="ref.sec5Rect.dx" y2="ref.sec5Rect.dy" stroke="#ea580c" strokewidth="2" linedash="5, 5"></pxl-line>
+              <pxl-line x1="ref.sec5Rect.dx" y1="0" x2="ref.sec5Rect.dx" y2="ref.sec5Rect.dy" stroke="#ea580c" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-text x="ref.sec5Rect.dx + 15" y="ref.sec5Rect.dy / 2" baseline="middle" align="left" text="`dy = ${ref.sec5Rect.dy}`" size="27" fill="#ea580c" font="monospace"></pxl-text>
             </pxl-group>
 
             <!-- Coordinate vectors pointing to Rect Center (x, y) (Drawn AFTER crosshair to stay on top) -->
-            <pxl-line x1="0" y1="ref.sec5Rect.y" x2="ref.sec5Rect.x" y2="ref.sec5Rect.y" stroke="#fdba74" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec5Rect.y" x2="ref.sec5Rect.x" y2="ref.sec5Rect.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec5Rect.x / 2" y="ref.sec5Rect.y + 15" baseline="top" align="center" text="`x = ${ref.sec5Rect.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec5Rect.x" y1="0" x2="ref.sec5Rect.x" y2="ref.sec5Rect.y" stroke="#fdba74" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="ref.sec5Rect.x" y1="0" x2="ref.sec5Rect.x" y2="ref.sec5Rect.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-text x="ref.sec5Rect.x + 15" y="ref.sec5Rect.y / 2" baseline="middle" align="left" text="`y = ${ref.sec5Rect.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
             
             <!-- 5. The Shape -->
@@ -743,22 +743,22 @@
 
           <!-- 2. Fixed Stage-Level Layer Helpers -->
           <pxl-layer>
-            <pxl-line x1="0" y1="ref.sec6Layer.y" x2="ref.sec6Layer.x" y2="ref.sec6Layer.y" stroke="#a78bfa" strokewidth="2" linedash="5, 5"></pxl-line>
-            <pxl-line x1="ref.sec6Layer.x" y1="0" x2="ref.sec6Layer.x" y2="ref.sec6Layer.y" stroke="#a78bfa" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="ref.sec6Layer.y" x2="ref.sec6Layer.x" y2="ref.sec6Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="ref.sec6Layer.x" y1="0" x2="ref.sec6Layer.x" y2="ref.sec6Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
           </pxl-layer>
 
           <pxl-layer id="sec6Layer" x="0" y="0" rotate="0">
             <!-- 3. Layer Axes & Center -->
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
             <pxl-text x="15" y="15" baseline="top" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
 
             <!-- Helper Lines (Drawn behind shapes) -->
             <!-- Line from Master to Mirror -->
-            <pxl-line x1="ref.sec6Master.x" y1="ref.sec6Master.y" x2="ref.sec6Mirror.x" y2="ref.sec6Mirror.y" stroke="#2563eb" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="ref.sec6Master.x" y1="ref.sec6Master.y" x2="ref.sec6Mirror.x" y2="ref.sec6Mirror.y" stroke="#2563eb" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <!-- Line from Master to Reactor -->
-            <pxl-line x1="ref.sec6Master.x" y1="ref.sec6Master.y" x2="ref.sec6Reactor.x" y2="ref.sec6Reactor.y" stroke="#16a34a" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="ref.sec6Master.x" y1="ref.sec6Master.y" x2="ref.sec6Reactor.x" y2="ref.sec6Reactor.y" stroke="#16a34a" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
             <!-- 1. Master Shape (Orange Palette) -->
             <pxl-rect id="sec6Master" x="250" y="200" w="100" h="100" rotate="0" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-rect>
@@ -852,8 +852,8 @@
         <pxl-stage ratio="5 / 3" class="demo-stage">
           <pxl-layer id="sec7Layer" x="500" y="300" rotate="0">
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-            <pxl-line x1="-500" y1="0" x2="500" y2="0" stroke="#cbd5e1" linedash="5, 5"></pxl-line>
-            <pxl-line x1="0" y1="-300" x2="0" y2="300" stroke="#cbd5e1" linedash="5, 5"></pxl-line>
+            <pxl-line x1="-500" y1="0" x2="500" y2="0" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-300" x2="0" y2="300" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
             
             <!-- Global State -->
             <pxl-var id="sec7Hue" value="250"></pxl-var>
@@ -1015,8 +1015,8 @@
 
           <!-- Layer 1 -->
           <pxl-layer id="sec8Layer1" x="ref.sec8Layer1X.value" y="ref.sec8Layer1Y.value" rotate="ref.sec8Layer1Rot.value">
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#fed7aa" strokewidth="2" linedash="5, 5"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#fed7aa" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#fed7aa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#fed7aa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#fdba74"></pxl-circle>
             <pxl-text x="15" y="-15" text="Layer 1 Center" size="27" fill="#fdba74"></pxl-text>
             
@@ -1027,8 +1027,8 @@
 
           <!-- Layer 2 -->
           <pxl-layer id="sec8Layer2" x="ref.sec8Layer2X.value" y="ref.sec8Layer2Y.value" rotate="ref.sec8Layer2Rot.value">
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#bfdbfe" strokewidth="2" linedash="5, 5"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#bfdbfe" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#bfdbfe" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#bfdbfe" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#93c5fd"></pxl-circle>
             <pxl-text x="15" y="-15" text="Layer 2 Center" size="27" fill="#93c5fd"></pxl-text>
             
@@ -1044,7 +1044,7 @@
               y1="toLocal(ref.sec8Circle1, 'y')" 
               x2="toLocal(ref.sec8Circle2, 'x')" 
               y2="toLocal(ref.sec8Circle2, 'y')" 
-              stroke="#ff00ff" strokewidth="4" linedash="10, 10">
+              stroke="#ff00ff" strokewidth="4" linedash="[10, 10]">
             </pxl-line>
           </pxl-layer>
         </pxl-stage>
@@ -1138,8 +1138,8 @@
           <!-- Background Layer (Trace Path) -->
           <pxl-layer id="sec9BgLayer" x="500" y="300" rotate="0">
             <!-- Axes Helpers -->
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
             <!-- Trace Path -->
             <pxl-polyline smooth="true" stroke="linear(t * 50, ['#0ea5e9', '#8b5cf6', '#ec4899'])" strokewidth="4" fill="none" closed="true" points="
@@ -1252,8 +1252,8 @@
             <pxl-var id="sec9OrbX" value="sin(t * ref.sec9FreqX.value) * 450"></pxl-var>
             <pxl-var id="sec9OrbY" value="cos(t * ref.sec9FreqY.value) * 250"></pxl-var>
             <!-- Axes Helpers -->
-            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
-            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="5, 5"></pxl-line>
+            <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
             <!-- Line connecting anchor to orb -->
             <pxl-line x1="0" y1="0" x2="ref.sec9OrbX.value" y2="ref.sec9OrbY.value" stroke="ref.sec9FlyingOrb.stroke" strokewidth="4"></pxl-line>
