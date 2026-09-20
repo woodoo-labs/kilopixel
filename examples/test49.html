@@ -40,9 +40,10 @@
 
   <div class="stage-wrapper">
     <!-- ratio="1 / 1" sets the logical drawing canvas to 1000x1000 square -->
-    <pxl-stage ratio="1 / 1">
+    <pxl-stage id="stage" ratio="1 / 1">
       <!-- By placing x=500 y=500 on the layer, the entire local coordinate system is centered! -->
-      <pxl-layer x="500" y="500">
+      <!-- FAST-PATH ANIMATION: hueRotate triggers the CSS-only fast path, meaning the CPU draws the 36 circles ONCE, and the GPU shifts the colors at 60 FPS for free! -->
+      <pxl-layer x="500" y="500" filter="hueRotate(t * 30)">
         
         <!-- Crucial: We must fill the canvas with white FIRST, or multiply blending against a transparent canvas will fail to render! -->
         <pxl-rect w="1000" h="1000" fill="#ffffff"></pxl-rect>
@@ -84,6 +85,12 @@
       <pxl-circle rotate="340" dx="140" r="280" fill="hsla(340, 100, 65, 0.18)" blend="multiply"></pxl-circle>
       <pxl-circle rotate="350" dx="140" r="280" fill="hsla(350, 100, 65, 0.18)" blend="multiply"></pxl-circle>
       
+      </pxl-layer>
+      
+      <!-- UI Layer (Static, non-rotating) -->
+      <pxl-layer>
+        <!-- Placed at bottom-center (x=500, y=940) so it is not clipped by the circular CSS overflow -->
+        <pxl-text x="500" y="940" text="ref.stage.fps + ' FPS | ' + ref.stage.renderAvg + 'ms'" font="monospace" size="13" align="center" fill="#94a3b8"></pxl-text>
       </pxl-layer>
     </pxl-stage>
   </div>
