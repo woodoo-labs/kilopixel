@@ -563,7 +563,7 @@
         <h2>5. Dashed Strokes &amp; Offset</h2>
         <p>The <code>linedash</code> and <code>dashoffset</code> attributes allow you to create patterned, dashed outlines across any Kilopixel shape. Rather than drawing a continuous path, the stroke alternates between drawn dash segments and empty gaps.</p>
         <ul>
-          <li><strong>Dash Pattern:</strong> The <code>linedash</code> attribute accepts a JavaScript array of numbers defining alternating dash and gap lengths (e.g., <code>linedash="[24, 16]"</code>), or a single number array for equal dashes and gaps (e.g., <code>linedash="[24]"</code>).</li>
+          <li><strong>Dash Pattern:</strong> The <code>linedash</code> attribute accepts a JavaScript array of numbers defining alternating dash and gap lengths (e.g., <code>linedash="[24, 16]"</code>). As a fast-path, a single number without brackets (e.g., <code>linedash="24"</code>) is also supported to create an equal repeating dash and gap.</li>
           <li><strong>Phase Shift:</strong> The <code>dashoffset</code> attribute shifts where the pattern begins along the path perimeter, enabling precise alignment or manual sliding.</li>
         </ul>
 
