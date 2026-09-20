@@ -600,12 +600,12 @@
                 <div class="control-group">
                   <label><span>Dash Length <span class="indicator-dot"></span></span> <span id="sec5CircleDashVal">24</span></label>
                   <input type="range" min="0" max="80" step="2" value="24" autocomplete="off" id="sec5CircleDashInput"
-                    oninput="const d = this.value; const g = document.getElementById('sec5CircleGapInput').value; document.getElementById('sec5Circle').setAttribute('linedash', '[' + d + ', ' + g + ']'); document.getElementById('sec5CircleDashVal').innerText = d; document.getElementById('sec5CircleDashCode').innerText = '[' + d + ', ' + g + ']';" data-mark="sec5CircleDashCode">
+                    oninput="const d = this.value; const g = document.getElementById('sec5CircleGapInput').value; document.getElementById('sec5Circle').setAttribute('linedash', '[' + d + ', ' + g + ']'); document.getElementById('sec5CircleDashVal').innerText = d; document.getElementById('sec5CircleDashCode').innerText = d;" data-mark="sec5CircleDashCode">
                 </div>
                 <div class="control-group">
                   <label><span>Gap Length</span> <span id="sec5CircleGapVal">28</span></label>
                   <input type="range" min="4" max="80" step="2" value="28" autocomplete="off" id="sec5CircleGapInput"
-                    oninput="const g = this.value; const d = document.getElementById('sec5CircleDashInput').value; document.getElementById('sec5Circle').setAttribute('linedash', '[' + d + ', ' + g + ']'); document.getElementById('sec5CircleGapVal').innerText = g; document.getElementById('sec5CircleDashCode').innerText = '[' + d + ', ' + g + ']';" data-mark="sec5CircleDashCode">
+                    oninput="const g = this.value; const d = document.getElementById('sec5CircleDashInput').value; document.getElementById('sec5Circle').setAttribute('linedash', '[' + d + ', ' + g + ']'); document.getElementById('sec5CircleGapVal').innerText = g; document.getElementById('sec5CircleGapCode').innerText = g;" data-mark="sec5CircleGapCode">
                 </div>
                 <div class="control-group">
                   <label><span>Dash Offset</span> <span id="sec5CircleOffsetVal">0</span></label>
