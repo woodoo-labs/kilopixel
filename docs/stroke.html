@@ -563,7 +563,7 @@
         <h2>5. Dashed Strokes &amp; Offset</h2>
         <p>The <code>linedash</code> and <code>dashoffset</code> attributes allow you to create patterned, dashed outlines across any Kilopixel shape. Rather than drawing a continuous path, the stroke alternates between drawn dash segments and empty gaps.</p>
         <ul>
-          <li><strong>Dash Pattern:</strong> The <code>linedash</code> attribute accepts a comma-separated list of numbers defining alternating dash and gap lengths (e.g., <code>linedash="[24, 16]"</code>), or a single number for equal dashes and gaps (e.g., <code>linedash="24"</code>). JavaScript array notation (e.g., <code>[24, 16]</code>) is also supported.</li>
+          <li><strong>Dash Pattern:</strong> The <code>linedash</code> attribute accepts a JavaScript array of numbers defining alternating dash and gap lengths (e.g., <code>linedash="[24, 16]"</code>), or a single number array for equal dashes and gaps (e.g., <code>linedash="[24]"</code>).</li>
           <li><strong>Phase Shift:</strong> The <code>dashoffset</code> attribute shifts where the pattern begins along the path perimeter, enabling precise alignment or manual sliding.</li>
         </ul>
 
@@ -646,10 +646,10 @@
                   <label><span>Pattern Preset</span></label>
                   <select id="sec5PolyPresetSelect" autocomplete="off"
                     onchange="document.getElementById('sec5Polyline').setAttribute('linedash', this.value); document.getElementById('sec5PolyDashCode').innerText = this.value;" data-mark="sec5PolyDashCode">
-                    <option value="[40, 28, 10, 28]">Dash-Dot: 40, 28, 10, 28</option>
-                    <option value="[30, 28]">Standard Dash: 30, 28</option>
-                    <option value="[12, 28]">Dense Dash: 12, 28</option>
-                    <option value="[44, 28, 10, 28, 10, 28]" selected>Triple Rhythm: 44, 28, 10, 28, 10, 28</option>
+                    <option value="[40, 28, 10, 28]">Dash-Dot: [40, 28, 10, 28]</option>
+                    <option value="[30, 28]">Standard Dash: [30, 28]</option>
+                    <option value="[12, 28]">Dense Dash: [12, 28]</option>
+                    <option value="[44, 28, 10, 28, 10, 28]" selected>Triple Rhythm: [44, 28, 10, 28, 10, 28]</option>
                   </select>
                 </div>
                 <div class="control-group">
@@ -753,10 +753,10 @@
                   <label><span>Pattern Preset</span></label>
                   <select id="sec6MarqueePresetSelect" autocomplete="off"
                     onchange="const v = this.value; document.getElementById('sec6Marquee').setAttribute('linedash', v); document.getElementById('sec6MarqueeDashCode').innerText = v; const firstVal = v.replace('[','').split(',')[0].trim(); document.getElementById('sec6MarqueeDashInput').value = firstVal; document.getElementById('sec6MarqueeDashVal').innerText = firstVal;" data-mark="sec6MarqueeDashCode">
-                    <option value="[12, 12]" selected>Classic: 12, 12</option>
-                    <option value="[6, 6]">Dense: 6, 6</option>
-                    <option value="[20, 20]">Long Dash: 20, 20</option>
-                    <option value="[4, 12]">Dotted: 4, 12</option>
+                    <option value="[12, 12]" selected>Classic: [12, 12]</option>
+                    <option value="[6, 6]">Dense: [6, 6]</option>
+                    <option value="[20, 20]">Long Dash: [20, 20]</option>
+                    <option value="[4, 12]">Dotted: [4, 12]</option>
                   </select>
                 </div>
               </div>
@@ -784,10 +784,10 @@
                   <label><span>Signal Preset</span></label>
                   <select id="sec6FlowPresetSelect" autocomplete="off"
                     onchange="const v = this.value; document.getElementById('sec6Flow').setAttribute('linedash', v); document.getElementById('sec6FlowDashCode').innerText = v; const gapVal = v.replace(']','').split(',')[1] ? v.replace(']','').split(',')[1].trim() : 80; document.getElementById('sec6FlowGapInput').value = gapVal; document.getElementById('sec6FlowGapVal').innerText = gapVal;" data-mark="sec6FlowDashCode">
-                    <option value="[40, 80]" selected>Data Packets: 40, 80</option>
-                    <option value="[80, 600]">Single Beacon: 80, 600</option>
-                    <option value="[16, 32]">High Frequency: 16, 32</option>
-                    <option value="[60, 60]">Continuous Stream: 60, 60</option>
+                    <option value="[40, 80]" selected>Data Packets: [40, 80]</option>
+                    <option value="[80, 600]">Single Beacon: [80, 600]</option>
+                    <option value="[16, 32]">High Frequency: [16, 32]</option>
+                    <option value="[60, 60]">Continuous Stream: [60, 60]</option>
                   </select>
                 </div>
               </div>
