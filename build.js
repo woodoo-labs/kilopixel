@@ -50,21 +50,27 @@ function build() {
       fs.mkdirSync(distDir);
     }
 
-    // 3. Write a temporary file for Terser to process
+    // 3. Save unminified bundle
+    const unminifiedOutputPath = path.join(distDir, `kilopixel-v${VERSION}.js`);
+    fs.writeFileSync(unminifiedOutputPath, code, 'utf8');
+    const unminifiedAliasPath = path.join(distDir, 'pxl.js');
+    fs.copyFileSync(unminifiedOutputPath, unminifiedAliasPath);
+
+    // 4. Write a temporary file for Terser to process
     const tempPath = path.join(distDir, 'temp_concat.js');
     fs.writeFileSync(tempPath, code, 'utf8');
 
-    // 4. Minify using npx terser
+    // 5. Minify using npx terser
     const outputPath = path.join(distDir, `kilopixel-v${VERSION}.min.js`);
     console.log(`Running global Terser for v${VERSION} (this may take a second)...`);
     
     // This executes terser on the command line
     execSync(`npx terser "${tempPath}" --compress passes=2 --mangle -o "${outputPath}"`, { stdio: 'inherit' });
 
-    // 5. Clean up temp file
+    // 6. Clean up temp file
     fs.unlinkSync(tempPath);
 
-    // 6. Create generic pxl.min.js alias for tests
+    // 7. Create generic pxl.min.js alias for tests
     const aliasPath = path.join(distDir, 'pxl.min.js');
     fs.copyFileSync(outputPath, aliasPath);
 
@@ -123,7 +129,8 @@ function build() {
     console.log('\n✅ Build successful!');
     console.log(`Original size: ${originalSize} KB`);
     console.log(`Minified size: ${minifiedSize} KB`);
-    console.log(`Saved to: ${outputPath}`);
+    console.log(`Saved unminified: ${unminifiedOutputPath}`);
+    console.log(`Saved minified:   ${outputPath}`);
 
   } catch (err) {
     console.error('\nBuild failed:', err.message);
