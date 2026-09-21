@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Victor Vasarely — Vega Spherical Deformation — Kilopixel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="../dist/pxl.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100vw;
+      min-height: 100vh;
+      background: #040407;
+      color: #f1f5f9;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    .header-bar {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 16px;
+    }
+
+    .title-group h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #f8fafc;
+    }
+
+    .title-group p {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .meta-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 4px 10px;
+      border-radius: 9999px;
+    }
+
+    /* 1:1 Showcase Stage Container copied from test48.html */
+    .stage-wrapper {
+      width: 100%;
+      max-width: 800px;
+      aspect-ratio: 1 / 1;
+      background: #030305;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+      position: relative;
+    }
+
+    pxl-stage {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-bar">
+    <div class="title-group">
+      <h1>Victor Vasarely — Vega Spherical Deformation</h1>
+      <p>Kinetic Op-Art, geometric lens curvature &amp; boolean negative space masking</p>
+    </div>
+    <div class="meta-tag">STAGE 1:1 &bull; 1000&times;1000</div>
+  </div>
+
+  <div class="stage-wrapper">
+    <pxl-stage id="stage" ratio="1 / 1">
+
+      <!-- ================================================================= -->
+      <!-- LAYER 1: AMBIENT GALLERY BACKLIGHT & SUBTLE FRAMING               -->
+      <!-- ================================================================= -->
+      <pxl-layer>
+        <!-- Soft radial aura behind the sphere -->
+        <pxl-circle x="500" y="500" r="460" fill="radial([460], ['rgba(14, 165, 233, 0.12)', 'rgba(99, 102, 241, 0.05)', 'transparent'])"></pxl-circle>
+
+        <!-- Outer square framing border -->
+        <pxl-rect x="500" y="500" w="760" h="760" fill="none" stroke="#1e293b" strokewidth="2"></pxl-rect>
+      </pxl-layer>
+
+      <!-- ================================================================= -->
+      <!-- LAYER 2: UNDISTORTED EXTERIOR GRID (WITH CIRCULAR HOLE CUTOUT)     -->
+      <!-- ================================================================= -->
+      <pxl-layer>
+        <pxl-group x="500" y="500">
+          <!-- Horizontal Grid Lines (Step = 38) -->
+          <pxl-line x1="-380" y1="-342" x2="380" y2="-342" stroke="#334155" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="-304" x2="380" y2="-304" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="-266" x2="380" y2="-266" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="-228" x2="380" y2="-228" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="-190" x2="380" y2="-190" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="-152" x2="380" y2="-152" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="-114" x2="380" y2="-114" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="-76"  x2="380" y2="-76"  stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="-38"  x2="380" y2="-38"  stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="0"    x2="380" y2="0"    stroke="#64748b" strokewidth="3"></pxl-line>
+          <pxl-line x1="-380" y1="38"   x2="380" y2="38"   stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="76"   x2="380" y2="76"   stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="114"  x2="380" y2="114"  stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="152"  x2="380" y2="152"  stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="190"  x2="380" y2="190"  stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="228"  x2="380" y2="228"  stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="266"  x2="380" y2="266"  stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="304"  x2="380" y2="304"  stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-380" y1="342"  x2="380" y2="342"  stroke="#334155" strokewidth="2.5"></pxl-line>
+
+          <!-- Vertical Grid Lines (Step = 38) -->
+          <pxl-line x1="-342" y1="-380" x2="-342" y2="380" stroke="#334155" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-304" y1="-380" x2="-304" y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-266" y1="-380" x2="-266" y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-228" y1="-380" x2="-228" y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-190" y1="-380" x2="-190" y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-152" y1="-380" x2="-152" y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-114" y1="-380" x2="-114" y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-76"  y1="-380" x2="-76"  y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="-38"  y1="-380" x2="-38"  y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="0"    y1="-380" x2="0"    y2="380" stroke="#64748b" strokewidth="3"></pxl-line>
+          <pxl-line x1="38"   y1="-380" x2="38"   y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="76"   y1="-380" x2="76"   y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="114"  y1="-380" x2="114"  y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="152"  y1="-380" x2="152"  y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="190"  y1="-380" x2="190"  y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="228"  y1="-380" x2="228"  y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="266"  y1="-380" x2="266"  y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="304"  y1="-380" x2="304"  y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
+          <pxl-line x1="342"  y1="-380" x2="342"  y2="380" stroke="#334155" strokewidth="2.5"></pxl-line>
+
+          <!-- BOOLEAN MASK (destination-out): Erases the circular center aperture -->
+          <pxl-circle r="300" fill="#fff" mask="destination-out"></pxl-circle>
+        </pxl-group>
+      </pxl-layer>
+
+      <!-- ================================================================= -->
+      <!-- LAYER 3: 3D SPHERICAL BULGE (CLIPPED STRICTLY VIA destination-in) -->
+      <!-- ================================================================= -->
+      <pxl-layer>
+        <pxl-group x="500" y="500">
+          <!-- 
+            SPHERICAL DEFORMATION LINES (Catmull-Rom smoothed polylines):
+            The midpoint bows outward proportionally to create the 3D optical sphere.
+            wave(3.5) modulates the bulging amplitude so the sphere rhythmically breathes!
+          -->
+
+          <!-- Vertical Longitude Arcs (Bowing Left & Right) -->
+          <pxl-polyline smooth="1" points="-266,-340; -266 - wave(3.5)*60,0; -266,340" stroke="#0ea5e9" strokewidth="2.5" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-228,-340; -228 - wave(3.5)*95,0; -228,340" stroke="#38bdf8" strokewidth="2.5" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-190,-340; -190 - wave(3.5)*120,0; -190,340" stroke="#38bdf8" strokewidth="2.5" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-152,-340; -152 - wave(3.5)*135,0; -152,340" stroke="#7dd3fc" strokewidth="3" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-114,-340; -114 - wave(3.5)*130,0; -114,340" stroke="#a5f3fc" strokewidth="3" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-76,-340;  -76  - wave(3.5)*100,0; -76,340"  stroke="#e0f2fe" strokewidth="3" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-38,-340;  -38  - wave(3.5)*50,0;  -38,340"  stroke="#ffffff" strokewidth="3" fill="none"></pxl-polyline>
+
+          <!-- Central Meridian (Straight axis) -->
+          <pxl-line x1="0" y1="-340" x2="0" y2="340" stroke="#ffffff" strokewidth="3.5"></pxl-line>
+
+          <pxl-polyline smooth="1" points="38,-340;   38  + wave(3.5)*50,0;  38,340"   stroke="#ffffff" strokewidth="3" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="76,-340;   76  + wave(3.5)*100,0; 76,340"   stroke="#e0f2fe" strokewidth="3" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="114,-340;  114 + wave(3.5)*130,0; 114,340"  stroke="#a5f3fc" strokewidth="3" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="152,-340;  152 + wave(3.5)*135,0; 152,340"  stroke="#7dd3fc" strokewidth="3" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="190,-340;  190 + wave(3.5)*120,0; 190,340"  stroke="#38bdf8" strokewidth="2.5" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="228,-340;  228 + wave(3.5)*95,0;  228,340"  stroke="#38bdf8" strokewidth="2.5" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="266,-340;  266 + wave(3.5)*60,0;  266,340"  stroke="#0ea5e9" strokewidth="2.5" fill="none"></pxl-polyline>
+
+
+          <!-- Horizontal Latitude Arcs (Bowing Up & Down) -->
+          <pxl-polyline smooth="1" points="-340,-266; 0,-266 - wave(3.5)*60;  340,-266" stroke="#0ea5e9" strokewidth="2.5" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-340,-228; 0,-228 - wave(3.5)*95;  340,-228" stroke="#38bdf8" strokewidth="2.5" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-340,-190; 0,-190 - wave(3.5)*120; 340,-190" stroke="#38bdf8" strokewidth="2.5" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-340,-152; 0,-152 - wave(3.5)*135; 340,-152" stroke="#7dd3fc" strokewidth="3" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-340,-114; 0,-114 - wave(3.5)*130; 340,-114" stroke="#a5f3fc" strokewidth="3" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-340,-76;  0,-76  - wave(3.5)*100; 340,-76"  stroke="#e0f2fe" strokewidth="3" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-340,-38;  0,-38  - wave(3.5)*50;  340,-38"  stroke="#ffffff" strokewidth="3" fill="none"></pxl-polyline>
+
+          <!-- Central Equator (Straight axis) -->
+          <pxl-line x1="-340" y1="0" x2="340" y2="0" stroke="#ffffff" strokewidth="3.5"></pxl-line>
+
+          <pxl-polyline smooth="1" points="-340,38;   0,38  + wave(3.5)*50;  340,38"   stroke="#ffffff" strokewidth="3" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-340,76;   0,76  + wave(3.5)*100; 340,76"   stroke="#e0f2fe" strokewidth="3" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-340,114;  0,114 + wave(3.5)*130; 340,114"  stroke="#a5f3fc" strokewidth="3" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-340,152;  0,152 + wave(3.5)*135; 340,152"  stroke="#7dd3fc" strokewidth="3" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-340,190;  0,190 + wave(3.5)*120; 340,190"  stroke="#38bdf8" strokewidth="2.5" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-340,228;  0,228 + wave(3.5)*95;  340,228"  stroke="#38bdf8" strokewidth="2.5" fill="none"></pxl-polyline>
+          <pxl-polyline smooth="1" points="-340,266;  0,266 + wave(3.5)*60;  340,266"  stroke="#0ea5e9" strokewidth="2.5" fill="none"></pxl-polyline>
+
+          <!-- 
+            BOOLEAN MASK (destination-in): 
+            Clips the entire warped line field strictly to the r=300 circle!
+            This ensures that lines outside r=300 are cropped, matching the Layer 2 hole perfectly.
+          -->
+          <pxl-circle r="300" fill="#fff" mask="destination-in"></pxl-circle>
+        </pxl-group>
+      </pxl-layer>
+
+      <!-- ================================================================= -->
+      <!-- LAYER 4: GLASS RIM REFLECTION & KINETIC HIGHLIGHTS                -->
+      <!-- ================================================================= -->
+      <pxl-layer alpha="wave(3.5)">
+        <pxl-group x="500" y="500">
+          <!-- Glass lens boundary ring -->
+          <pxl-circle r="300" fill="none" stroke="linear(45 + t * 20, ['#38bdf8', 'transparent', '#818cf8', 'transparent', '#38bdf8'])" strokewidth="3"></pxl-circle>
+
+          <!-- Subtle spherical 3D surface glare -->
+          <pxl-circle r="298" fill="radial([-100, -100, 300], ['rgba(255, 255, 255, 0.12)', 'transparent'])"></pxl-circle>
+
+          <!-- Crescent edge highlight -->
+          <pxl-circle r="296" start="200" sweep="75" fill="none" stroke="rgba(255, 255, 255, 0.35)" strokewidth="2"></pxl-circle>
+        </pxl-group>
+      </pxl-layer>
+
+      <!-- ================================================================= -->
+      <!-- LAYER 5: PERFORMANCE TELEMETRY                                    -->
+      <!-- ================================================================= -->
+      <pxl-layer>
+        <pxl-text x="968" y="42" text="ref.stage.fps + ' FPS | ' + ref.stage.renderAvg + 'ms'" font="monospace" size="13" align="right" fill="#10b981"></pxl-text>
+      </pxl-layer>
+
+    </pxl-stage>
+  </div>
+
+</body>
+</html>
