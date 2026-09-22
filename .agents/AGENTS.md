@@ -5,10 +5,6 @@
 - **OPERATIONAL SEQUENCE**: Before executing ANY code edit on a source file, you MUST stop and ask the user for confirmation. A full code preview is not required, but you must clearly explain what you are going to change.
 - **EXPLORATION PHASE**: Assume you only have READ access during the exploration/planning phase. Do not attempt to write code until the user explicitly approves your proposed changes.
 
-## Ignored Files and Directories
-- **Ignore `00 Backup`**: Completely ignore the `00 Backup` folder. Do not read, write, search, or index files inside this directory.
-- **Ignore files starting with underscore**: Completely ignore all files starting with an underscore (e.g., `_*`). Do not read, write, search, or index these files.
-
 ## Temporary and Helper Files
 - **Use Scratch Directory**: All temporary helper scripts (e.g., data generators, one-off Node/Python scripts), text dumps, and experimental code MUST be saved inside the `scratch/` directory. NEVER save temporary files in the root directory.
 - **Do Not Auto-Delete**: Do NOT automatically delete files in the `scratch/` directory when you are finished. They may be needed for follow-up work later. Leave cleanup of the `scratch/` directory to the user.
@@ -24,7 +20,7 @@
 - **Deep Documentation**: For complete, in-depth technical documentation about the engine's architecture, scope, syntax, and capabilities, you MUST consult `.agents/KILOPIXEL.md`.
 
 ## Documentation Structure
-- **`.agents/AGENTS.md`** — Operational rules: approvals, build process, ignored files, terminal syntax.
+- **`.agents/AGENTS.md`** — Operational rules: approvals, build process, scratch directory, terminal syntax.
 - **`.agents/KILOPIXEL.md`** — Complete framework reference: architecture, API, element attributes, expression compiler, and code generation guide.
 - **`.agents/TODO.md`** — Roadmap and open design questions.
 
