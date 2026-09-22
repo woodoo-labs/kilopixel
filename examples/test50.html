@@ -86,7 +86,7 @@
   <div class="header-bar">
     <div class="title-group">
       <h1>Victor Vasarely — Vega Spherical Deformation</h1>
-      <p>Kinetic Op-Art, geometric lens curvature &amp; boolean negative space masking</p>
+      <p>Kinetic Op-Art, geometric lens curvature &amp; rhythmic breathing</p>
     </div>
     <div class="meta-tag">STAGE 1:1 &bull; 1000&times;1000</div>
   </div>
@@ -106,7 +106,7 @@
       </pxl-layer>
 
       <!-- ================================================================= -->
-      <!-- LAYER 2: UNDISTORTED EXTERIOR GRID (WITH CIRCULAR HOLE CUTOUT)     -->
+      <!-- LAYER 2: UNDISTORTED EXTERIOR GRID                                -->
       <!-- ================================================================= -->
       <pxl-layer>
         <pxl-group x="500" y="500">
@@ -152,13 +152,11 @@
           <pxl-line x1="304"  y1="-380" x2="304"  y2="380" stroke="#475569" strokewidth="2.5"></pxl-line>
           <pxl-line x1="342"  y1="-380" x2="342"  y2="380" stroke="#334155" strokewidth="2.5"></pxl-line>
 
-          <!-- BOOLEAN MASK (destination-out): Erases the circular center aperture -->
-          <pxl-circle r="300" fill="#fff" mask="destination-out"></pxl-circle>
         </pxl-group>
       </pxl-layer>
 
       <!-- ================================================================= -->
-      <!-- LAYER 3: 3D SPHERICAL BULGE (CLIPPED STRICTLY VIA destination-in) -->
+      <!-- LAYER 3: 3D SPHERICAL BULGE                                       -->
       <!-- ================================================================= -->
       <pxl-layer>
         <pxl-group x="500" y="500">
@@ -208,13 +206,6 @@
           <pxl-polyline smooth="1" points="-340,190;  0,190 + wave(3.5)*120; 340,190"  stroke="#38bdf8" strokewidth="2.5" fill="none"></pxl-polyline>
           <pxl-polyline smooth="1" points="-340,228;  0,228 + wave(3.5)*95;  340,228"  stroke="#38bdf8" strokewidth="2.5" fill="none"></pxl-polyline>
           <pxl-polyline smooth="1" points="-340,266;  0,266 + wave(3.5)*60;  340,266"  stroke="#0ea5e9" strokewidth="2.5" fill="none"></pxl-polyline>
-
-          <!-- 
-            BOOLEAN MASK (destination-in): 
-            Clips the entire warped line field strictly to the r=300 circle!
-            This ensures that lines outside r=300 are cropped, matching the Layer 2 hole perfectly.
-          -->
-          <pxl-circle r="300" fill="#fff" mask="destination-in"></pxl-circle>
         </pxl-group>
       </pxl-layer>
 
