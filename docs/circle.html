@@ -53,24 +53,7 @@
 &lt;/pxl-stage&gt;</code></pre>
 
         <div class="demo-container">
-          <!-- Hero sandbox stage -->
-          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
-            <pxl-layer>
-              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-              <pxl-line x1="500" y1="0" x2="500" y2="600" stroke="#cbd5e1" strokewidth="2" linedash="[4, 4]"></pxl-line>
-              <pxl-line x1="0" y1="300" x2="1000" y2="300" stroke="#cbd5e1" strokewidth="2" linedash="[4, 4]"></pxl-line>
-
-              <!-- Hero circle shape -->
-              <pxl-circle id="sec1Circle" x="500" y="300" r="180" ir="0" start="0" sweep="270" pie="true"
-                fill="#ffedd566" stroke="#f97316" strokewidth="4" arrowend="0" arrowstyle="filled"></pxl-circle>
-
-              <!-- Center anchor dot -->
-              <pxl-circle x="500" y="300" r="6" fill="#fb923c"></pxl-circle>
-              <pxl-text x="515" y="275" baseline="bottom" text="'Circle (500, 300)'" size="27" fill="#fb923c" font="monospace"></pxl-text>
-            </pxl-layer>
-          </pxl-stage>
-
-          <!-- Controls block below stage -->
+          <!-- Controls block above stage -->
           <div class="demo-controls">
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Controls</h3>
@@ -112,6 +95,23 @@
               </div>
             </div>
           </div>
+
+          <!-- Hero sandbox stage -->
+          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              <pxl-line x1="500" y1="0" x2="500" y2="600" stroke="#cbd5e1" strokewidth="2" linedash="[4, 4]"></pxl-line>
+              <pxl-line x1="0" y1="300" x2="1000" y2="300" stroke="#cbd5e1" strokewidth="2" linedash="[4, 4]"></pxl-line>
+
+              <!-- Hero circle shape -->
+              <pxl-circle id="sec1Circle" x="500" y="300" r="180" ir="0" start="0" sweep="270" pie="true"
+                fill="#ffedd566" stroke="#f97316" strokewidth="4" arrowend="0" arrowstyle="filled"></pxl-circle>
+
+              <!-- Center anchor dot -->
+              <pxl-circle x="500" y="300" r="6" fill="#fb923c"></pxl-circle>
+              <pxl-text x="515" y="275" baseline="bottom" text="'Circle (500, 300)'" size="27" fill="#fb923c" font="monospace"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
         </div>
 
         <!-- ================================================================= -->
@@ -283,9 +283,7 @@
         <h2>3. The Disc &amp; The Ring <code>r, ir</code></h2>
         <p>A simple outer radius (<code>r</code>) draws a solid disc. Providing an inner radius (<code>ir &gt; 0</code>) hollows out the center to produce a concentric ring.</p>
 
-        <div class="example-card">
-
-          <!-- Declarative HTML markup above stage -->
+        <!-- Declarative HTML markup above stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Solid Disc (ir = 0) --&gt;
@@ -297,23 +295,6 @@
 &lt;/pxl-stage&gt;</code></pre>
 
           <div class="demo-container">
-            <!-- Mode 1 stage -->
-            <pxl-stage id="sec3Stage" ratio="5 / 3" class="demo-stage">
-              <pxl-layer>
-                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-                
-                <!-- Left: Solid Disc (Orange Scheme) -->
-                <pxl-circle x="280" y="300" r="110" ir="0" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
-                <pxl-circle x="280" y="300" r="6" fill="#fb923c"></pxl-circle>
-                <pxl-text x="280" y="450" text="'Solid Disc (ir = 0)'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
-
-                <!-- Right: Hollow Ring (Blue Scheme) -->
-                <pxl-circle id="sec3Ring" x="720" y="300" r="110" ir="60" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-circle>
-                <pxl-circle x="720" y="300" r="6" fill="#60a5fa"></pxl-circle>
-                <pxl-text x="720" y="450" text="'Hollow Ring (ir > 0)'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
-              </pxl-layer>
-            </pxl-stage>
-
             <div class="demo-controls">
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Controls</h3>
@@ -333,8 +314,24 @@
                 </div>
               </div>
             </div>
+
+            <!-- Mode 1 stage -->
+            <pxl-stage id="sec3Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                
+                <!-- Left: Solid Disc (Orange Scheme) -->
+                <pxl-circle x="280" y="300" r="110" ir="0" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
+                <pxl-circle x="280" y="300" r="6" fill="#fb923c"></pxl-circle>
+                <pxl-text x="280" y="450" text="'Solid Disc (ir = 0)'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+                <!-- Right: Hollow Ring (Blue Scheme) -->
+                <pxl-circle id="sec3Ring" x="720" y="300" r="110" ir="60" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-circle>
+                <pxl-circle x="720" y="300" r="6" fill="#60a5fa"></pxl-circle>
+                <pxl-text x="720" y="450" text="'Hollow Ring (ir > 0)'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              </pxl-layer>
+            </pxl-stage>
           </div>
-        </div>
 
         <!-- ================================================================= -->
         <!-- SECTION 4: OPEN ARCS & ANIMATED SPINNERS -->
@@ -342,9 +339,7 @@
         <h2>4. Open Arcs &amp; Animated Spinners <code>start, sweep</code></h2>
         <p>By defining <code>start</code> and <code>sweep</code> angles in standard degrees (0°&ndash;360°) along with time-based expressions, a circle becomes an animated loading ring or progress gauge.</p>
 
-        <div class="example-card">
-
-          <!-- Declarative HTML markup above stage -->
+        <!-- Declarative HTML markup above stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Animated Arc (Loading Spinner Mode) --&gt;
@@ -358,30 +353,6 @@
 &lt;/pxl-stage&gt;</code></pre>
 
           <div class="demo-container">
-            <!-- Mode 2 stage -->
-            <pxl-stage id="sec4Stage" ratio="5 / 3" class="demo-stage">
-              <pxl-layer>
-                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-                
-                <!-- Background track ring -->
-                <pxl-circle id="sec4Track" x="500" y="300" r="140" stroke="#cbd5e1" strokewidth="16"></pxl-circle>
-                
-                <!-- Glowing animated arc -->
-                <pxl-circle id="sec4Circle" x="500" y="300" r="140" 
-                  stroke="#f97316" 
-                  strokewidth="16" 
-                  start="t * 180" 
-                  sweep="160 + wave(3) * 120"
-                  filter="dropShadow(0, 0, 15, 'rgba(249,115,22,0.8)')"></pxl-circle>
-
-                <!-- Orbiting satellite dot -->
-                <pxl-circle x="500 + cos(t*3)*180" y="300 + sin(t*3)*180" r="10" fill="#c2410c"></pxl-circle>
-                
-                <!-- Center text -->
-                <pxl-text x="500" y="450" text="'Arc Mode (Loading Spinner)'" size="27" fill="#ea580c" font="monospace" align="center"></pxl-text>
-              </pxl-layer>
-            </pxl-stage>
-
             <div class="demo-controls">
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Controls</h3>
@@ -411,8 +382,31 @@
                 </div>
               </div>
             </div>
+
+            <!-- Mode 2 stage -->
+            <pxl-stage id="sec4Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                
+                <!-- Background track ring -->
+                <pxl-circle id="sec4Track" x="500" y="300" r="140" stroke="#cbd5e1" strokewidth="16"></pxl-circle>
+                
+                <!-- Glowing animated arc -->
+                <pxl-circle id="sec4Circle" x="500" y="300" r="140" 
+                  stroke="#f97316" 
+                  strokewidth="16" 
+                  start="t * 180" 
+                  sweep="160 + wave(3) * 120"
+                  filter="dropShadow(0, 0, 15, 'rgba(249,115,22,0.8)')"></pxl-circle>
+
+                <!-- Orbiting satellite dot -->
+                <pxl-circle x="500 + cos(t*3)*180" y="300 + sin(t*3)*180" r="10" fill="#c2410c"></pxl-circle>
+                
+                <!-- Center text -->
+                <pxl-text x="500" y="450" text="'Arc Mode (Loading Spinner)'" size="27" fill="#ea580c" font="monospace" align="center"></pxl-text>
+              </pxl-layer>
+            </pxl-stage>
           </div>
-        </div>
 
         <!-- ================================================================= -->
         <!-- SECTION 5: PIE WEDGES & DONUT CHARTS -->
@@ -420,9 +414,7 @@
         <h2>5. Pie Wedges &amp; Donut Charts <code>pie, ir</code></h2>
         <p>Setting <code>pie="true"</code> connects the ends of an open arc to the center point to create solid wedges (like Pac-Man). Combining <code>ir &gt; 0</code> with <code>sweep</code> creates concentric donut chart segments.</p>
 
-        <div class="example-card">
-
-          <!-- Declarative HTML markup above stage -->
+        <!-- Declarative HTML markup above stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Animated Pac-Man (Pie Wedge Mode) --&gt;
@@ -440,39 +432,6 @@
 &lt;/pxl-stage&gt;</code></pre>
 
           <div class="demo-container">
-            <!-- Mode 3 stage -->
-            <pxl-stage id="sec5Stage" ratio="5 / 3" class="demo-stage">
-              <pxl-layer>
-                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-                
-                <!-- Left: Animated Pac-Man -->
-                <pxl-group x="280" y="300">
-                  <pxl-circle id="sec5Pacman" r="110" 
-                    fill="#fde047" stroke="#ca8a04" strokewidth="4"
-                    pie="true"
-                    start="bounce(0.4) * 45"
-                    sweep="360 - (bounce(0.4) * 90)"
-                    filter="dropShadow(0, 0, 15, 'rgba(253,224,71,0.5)')"></pxl-circle>
-                  <!-- Pac-Man Eye -->
-                  <pxl-circle x="0" y="-55" r="10" fill="#0f172a"></pxl-circle>
-                  <!-- Pac-Man Food pellets -->
-                  <pxl-circle x="80 - (t * 80) % 80" y="0" r="7" fill="#ca8a04" alpha="0.5 + wave(2)*0.5"></pxl-circle>
-                  <pxl-circle x="160 - (t * 80) % 80" y="0" r="7" fill="#ca8a04" alpha="0.5 + wave(2)*0.5"></pxl-circle>
-                </pxl-group>
-                <pxl-text x="280" y="450" text="'Pie Wedge (pie = true)'" size="27" fill="#ca8a04" font="monospace" align="center"></pxl-text>
-
-                <!-- Right: Donut Chart -->
-                <pxl-group x="720" y="300">
-                  <pxl-circle r="50" fill="radial([1, 1], ['rgba(249,115,22,0.15)', 'transparent'])" scale="1 + wave(3)*0.2"></pxl-circle>
-                  <pxl-circle id="sec5Donut1" r="120" ir="70" fill="#fb7185" start="-90" sweep="135"></pxl-circle>
-                  <pxl-circle id="sec5Donut2" r="120" ir="70" fill="#c084fc" start="45" sweep="115"></pxl-circle>
-                  <pxl-circle id="sec5Donut3" r="120" ir="70" fill="#38bdf8" start="160" sweep="110"></pxl-circle>
-                  <pxl-text text="'75%'" y="5" size="27" weight="bold" fill="#6d28d9" align="center" baseline="middle"></pxl-text>
-                </pxl-group>
-                <pxl-text x="720" y="450" text="'Donut Chart (ir > 0)'" size="27" fill="#6d28d9" font="monospace" align="center"></pxl-text>
-              </pxl-layer>
-            </pxl-stage>
-
             <div class="demo-controls">
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Controls</h3>
@@ -509,8 +468,40 @@
                 </div>
               </div>
             </div>
+
+            <!-- Mode 3 stage -->
+            <pxl-stage id="sec5Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                
+                <!-- Left: Animated Pac-Man -->
+                <pxl-group x="280" y="300">
+                  <pxl-circle id="sec5Pacman" r="110" 
+                    fill="#fde047" stroke="#ca8a04" strokewidth="4"
+                    pie="true"
+                    start="bounce(0.4) * 45"
+                    sweep="360 - (bounce(0.4) * 90)"
+                    filter="dropShadow(0, 0, 15, 'rgba(253,224,71,0.5)')"></pxl-circle>
+                  <!-- Pac-Man Eye -->
+                  <pxl-circle x="0" y="-55" r="10" fill="#0f172a"></pxl-circle>
+                  <!-- Pac-Man Food pellets -->
+                  <pxl-circle x="80 - (t * 80) % 80" y="0" r="7" fill="#ca8a04" alpha="0.5 + wave(2)*0.5"></pxl-circle>
+                  <pxl-circle x="160 - (t * 80) % 80" y="0" r="7" fill="#ca8a04" alpha="0.5 + wave(2)*0.5"></pxl-circle>
+                </pxl-group>
+                <pxl-text x="280" y="450" text="'Pie Wedge (pie = true)'" size="27" fill="#ca8a04" font="monospace" align="center"></pxl-text>
+
+                <!-- Right: Donut Chart -->
+                <pxl-group x="720" y="300">
+                  <pxl-circle r="50" fill="radial([1, 1], ['rgba(249,115,22,0.15)', 'transparent'])" scale="1 + wave(3)*0.2"></pxl-circle>
+                  <pxl-circle id="sec5Donut1" r="120" ir="70" fill="#fb7185" start="-90" sweep="135"></pxl-circle>
+                  <pxl-circle id="sec5Donut2" r="120" ir="70" fill="#c084fc" start="45" sweep="115"></pxl-circle>
+                  <pxl-circle id="sec5Donut3" r="120" ir="70" fill="#38bdf8" start="160" sweep="110"></pxl-circle>
+                  <pxl-text text="'75%'" y="5" size="27" weight="bold" fill="#6d28d9" align="center" baseline="middle"></pxl-text>
+                </pxl-group>
+                <pxl-text x="720" y="450" text="'Donut Chart (ir > 0)'" size="27" fill="#6d28d9" font="monospace" align="center"></pxl-text>
+              </pxl-layer>
+            </pxl-stage>
           </div>
-        </div>
 
         <!-- ================================================================= -->
         <!-- SECTION 6: CURVED VECTOR ARROWS -->
@@ -518,9 +509,7 @@
         <h2>6. Curved Vector Arrows <code>arrowstart, arrowend, arrowstyle</code></h2>
         <p>Adding arrowhead sizes to an open circular arc transforms it into a curved vector diagram arrow, circular dial, or speedometer indicator.</p>
 
-        <div class="example-card">
-
-          <!-- Declarative HTML markup above stage -->
+        <!-- Declarative HTML markup above stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Filled Triangle Arrowhead (arrowstyle="filled") --&gt;
@@ -536,23 +525,6 @@
 &lt;/pxl-stage&gt;</code></pre>
 
           <div class="demo-container">
-            <!-- Mode 4 stage -->
-            <pxl-stage id="sec6Stage" ratio="5 / 3" class="demo-stage">
-              <pxl-layer>
-                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-                
-                <!-- Left: arrowstyle="filled" -->
-                <pxl-circle id="sec6FilledArrow" x="280" y="300" r="100" strokewidth="12" stroke="#f97316" 
-                  start="-135" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-circle>
-                <pxl-text x="280" y="450" text="'arrowstyle=&quot;filled&quot;'" size="27" fill="#ea580c" font="monospace" align="center"></pxl-text>
-
-                <!-- Right: arrowstyle="line" -->
-                <pxl-circle id="sec6LineArrow" x="720" y="300" r="100" strokewidth="12" stroke="#2563eb" 
-                  start="-45" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="line"></pxl-circle>
-                <pxl-text x="720" y="450" text="'arrowstyle=&quot;line&quot;'" size="27" fill="#2563eb" font="monospace" align="center"></pxl-text>
-              </pxl-layer>
-            </pxl-stage>
-
             <div class="demo-controls">
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Controls</h3>
@@ -594,8 +566,24 @@
                 </div>
               </div>
             </div>
+
+            <!-- Mode 4 stage -->
+            <pxl-stage id="sec6Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                
+                <!-- Left: arrowstyle="filled" -->
+                <pxl-circle id="sec6FilledArrow" x="280" y="300" r="100" strokewidth="12" stroke="#f97316" 
+                  start="-135" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-circle>
+                <pxl-text x="280" y="450" text="'arrowstyle=&quot;filled&quot;'" size="27" fill="#ea580c" font="monospace" align="center"></pxl-text>
+
+                <!-- Right: arrowstyle="line" -->
+                <pxl-circle id="sec6LineArrow" x="720" y="300" r="100" strokewidth="12" stroke="#2563eb" 
+                  start="-45" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="line"></pxl-circle>
+                <pxl-text x="720" y="450" text="'arrowstyle=&quot;line&quot;'" size="27" fill="#2563eb" font="monospace" align="center"></pxl-text>
+              </pxl-layer>
+            </pxl-stage>
           </div>
-        </div>
 
         <!-- ================================================================= -->
         <!-- SECTION 7: PRO TIPS, GOTCHAS & PERFORMANCE -->
@@ -621,6 +609,7 @@
             <h4>4. Ellipses use &lt;pxl-ellipse&gt;</h4>
             <p>If you need independent horizontal and vertical radii (<code>rx</code> and <code>ry</code>), use the dedicated <code>&lt;pxl-ellipse&gt;</code> element rather than applying non-uniform scaling to a circle.</p>
           </div>
+        </div>
       </div>
     </main>
 
