@@ -66,30 +66,30 @@
             <div class="tab-content active" id="sec1CircleTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Outer Radius (<code>r</code>)</span> <span id="sec1CircleRVal">180</span></label>
+                  <label><span>Outer Radius</span> <span id="sec1CircleRVal">180</span></label>
                   <input type="range" min="40" max="250" step="10" value="180" autocomplete="off"
                     oninput="document.getElementById('sec1Circle').setAttribute('r', this.value); document.getElementById('sec1CircleRVal').innerText = this.value; document.getElementById('sec1CircleRCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Inner Radius (<code>ir</code>)</span> <span id="sec1CircleIRVal">0</span></label>
+                  <label><span>Inner Radius</span> <span id="sec1CircleIRVal">0</span></label>
                   <input type="range" min="0" max="150" step="10" value="0" autocomplete="off"
                     oninput="document.getElementById('sec1Circle').setAttribute('ir', this.value); document.getElementById('sec1CircleIRVal').innerText = this.value; document.getElementById('sec1CircleIRCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Start Angle (<code>start</code>)</span> <span id="sec1CircleStartVal">0°</span></label>
+                  <label><span>Start Angle</span> <span id="sec1CircleStartVal">0°</span></label>
                   <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
                     oninput="document.getElementById('sec1Circle').setAttribute('start', this.value); document.getElementById('sec1CircleStartVal').innerText = this.value + '°'; document.getElementById('sec1CircleStartCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Sweep (<code>sweep</code>)</span> <span id="sec1CircleSweepVal">270°</span></label>
+                  <label><span>Sweep</span> <span id="sec1CircleSweepVal">270°</span></label>
                   <input type="range" min="45" max="360" step="15" value="270" autocomplete="off"
                     oninput="document.getElementById('sec1Circle').setAttribute('sweep', this.value); document.getElementById('sec1CircleSweepVal').innerText = this.value + '°'; document.getElementById('sec1CircleSweepCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Pie Mode (<code>pie</code>)</span> <span id="sec1CirclePieVal">true</span></label>
+                  <label><span>Pie Mode</span></label>
                   <div class="toggle-group">
-                    <button class="toggle-btn" id="sec1CirclePieFalseBtn" onclick="document.getElementById('sec1Circle').setAttribute('pie', 'false'); pxlDocs.updateToggle(this, 'sec1CirclePieVal', 'sec1CirclePieCode', 'false');">false (Open Arc)</button>
-                    <button class="toggle-btn active" id="sec1CirclePieTrueBtn" onclick="document.getElementById('sec1Circle').setAttribute('pie', 'true'); pxlDocs.updateToggle(this, 'sec1CirclePieVal', 'sec1CirclePieCode', 'true');">true (Pie Wedge)</button>
+                    <button class="toggle-btn" id="sec1CirclePieFalseBtn" onclick="document.getElementById('sec1Circle').setAttribute('pie', 'false'); pxlDocs.updateToggle(this, null, 'sec1CirclePieCode', 'false');">false</button>
+                    <button class="toggle-btn active" id="sec1CirclePieTrueBtn" onclick="document.getElementById('sec1Circle').setAttribute('pie', 'true'); pxlDocs.updateToggle(this, null, 'sec1CirclePieCode', 'true');">true</button>
                   </div>
                 </div>
               </div>
@@ -109,7 +109,7 @@
 
               <!-- Center anchor dot -->
               <pxl-circle x="500" y="300" r="6" fill="#fb923c"></pxl-circle>
-              <pxl-text x="515" y="275" baseline="bottom" text="'Circle (500, 300)'" size="27" fill="#fb923c" font="monospace"></pxl-text>
+              <pxl-text x="515" y="275" baseline="bottom" text="'Circle Center'" size="27" weight="700" fill="#fb923c" font="monospace"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -278,19 +278,19 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECTION 3: THE DISC & THE RING -->
+        <!-- SECTION 3: RADIUS & INNER RADIUS -->
         <!-- ================================================================= -->
-        <h2>3. The Disc &amp; The Ring <code>r, ir</code></h2>
-        <p>A simple outer radius (<code>r</code>) draws a solid disc. Providing an inner radius (<code>ir &gt; 0</code>) hollows out the center to produce a concentric ring.</p>
+        <h2>3. Radius &amp; Inner Radius</h2>
+        <p>A simple outer radius (<code>r</code>) draws a solid disc. Providing an inner radius (<code>ir</code>) hollows out the center to produce a concentric ring.</p>
 
         <!-- Declarative HTML markup above stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Solid Disc (ir = 0) --&gt;
-    &lt;pxl-circle x="280" y="300" r="110" ir="0" fill="#f97316"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Left: Solid Disc --&gt;
+    &lt;pxl-circle x="300" y="300" r="<mark id="sec3Circle1RCode">150</mark>" fill="#f97316"&gt;&lt;/pxl-circle&gt;
 
-    &lt;!-- Right: Hollow Ring (ir &gt; 0) --&gt;
-    &lt;pxl-circle x="720" y="300" r="110" ir="<mark id="sec3RingIRCode">60</mark>" stroke="#3b82f6"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Right: Hollow Ring --&gt;
+    &lt;pxl-circle x="700" y="300" r="<mark id="sec3Circle2RCode">150</mark>" ir="<mark id="sec3Circle2IRCode">50</mark>" stroke="#3b82f6"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -299,17 +299,34 @@
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Controls</h3>
                 <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3RingTab')">Ring</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3Circle1Tab')">Circle 1</button>
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3Circle2Tab')">Circle 2</button>
                 </div>
               </div>
 
-              <!-- Ring Tab -->
-              <div class="tab-content active" id="sec3RingTab">
+              <!-- Circle 1 Tab -->
+              <div class="tab-content active" id="sec3Circle1Tab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Right Shape Inner Radius (<code>ir</code>)</span> <span id="sec3RingIRVal">60</span></label>
-                    <input type="range" min="0" max="95" step="5" value="60" autocomplete="off"
-                      oninput="document.getElementById('sec3Ring').setAttribute('ir', this.value); document.getElementById('sec3RingIRVal').innerText = this.value; document.getElementById('sec3RingIRCode').innerText = this.value;">
+                    <label><span>Radius</span> <span id="sec3Circle1RVal">150</span></label>
+                    <input type="range" min="50" max="220" step="10" value="150" autocomplete="off"
+                      oninput="document.getElementById('sec3Circle1').setAttribute('r', this.value); document.getElementById('sec3Circle1RVal').innerText = this.value; document.getElementById('sec3Circle1RCode').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Circle 2 Tab -->
+              <div class="tab-content" id="sec3Circle2Tab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Radius</span> <span id="sec3Circle2RVal">150</span></label>
+                    <input type="range" min="50" max="220" step="10" value="150" autocomplete="off"
+                      oninput="document.getElementById('sec3Circle2').setAttribute('r', this.value); document.getElementById('sec3Circle2RVal').innerText = this.value; document.getElementById('sec3Circle2RCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Inner Radius</span> <span id="sec3Circle2IRVal">50</span></label>
+                    <input type="range" min="0" max="135" step="5" value="50" autocomplete="off"
+                      oninput="document.getElementById('sec3Circle2').setAttribute('ir', this.value); document.getElementById('sec3Circle2IRVal').innerText = this.value; document.getElementById('sec3Circle2IRCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -321,34 +338,41 @@
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                 
                 <!-- Left: Solid Disc (Orange Scheme) -->
-                <pxl-circle x="280" y="300" r="110" ir="0" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
-                <pxl-circle x="280" y="300" r="6" fill="#fb923c"></pxl-circle>
-                <pxl-text x="280" y="450" text="'Solid Disc (ir = 0)'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+                <pxl-circle id="sec3Circle1" x="300" y="300" r="150" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
+                <pxl-text x="300" y="500" text="'Solid Disc'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
                 <!-- Right: Hollow Ring (Blue Scheme) -->
-                <pxl-circle id="sec3Ring" x="720" y="300" r="110" ir="60" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-circle>
-                <pxl-circle x="720" y="300" r="6" fill="#60a5fa"></pxl-circle>
-                <pxl-text x="720" y="450" text="'Hollow Ring (ir > 0)'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+                <pxl-circle id="sec3Circle2" x="700" y="300" r="150" ir="50" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-circle>
+                <pxl-text x="700" y="500" text="'Hollow Ring'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
               </pxl-layer>
             </pxl-stage>
           </div>
 
         <!-- ================================================================= -->
-        <!-- SECTION 4: OPEN ARCS & ANIMATED SPINNERS -->
+        <!-- SECTION 4: PIE SLICE & DONUT WEDGE -->
         <!-- ================================================================= -->
-        <h2>4. Open Arcs &amp; Animated Spinners <code>start, sweep</code></h2>
-        <p>By defining <code>start</code> and <code>sweep</code> angles in standard degrees (0°&ndash;360°) along with time-based expressions, a circle becomes an animated loading ring or progress gauge.</p>
+        <h2>4. Pie Slice &amp; Donut Wedge</h2>
+        <p>Setting <code>pie="true"</code> connects the ends of an arc to the center point to create a solid pie slice. Combining an inner radius (<code>ir</code>) with a sweep or end angle automatically seals outer and inner arcs into a hollow donut wedge.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Sweep vs. End Angle</p>
+          <p class="callout-body">Kilopixel supports both relative spans and absolute destination angles: <code>sweep</code> defines a relative angular span from <code>start</code> (e.g. <code>start="45" sweep="90"</code> spans 90° to reach 135°), whereas <code>end</code> defines an absolute target angle. If both are specified on the same element, <code>sweep</code> takes priority and <code>end</code> is ignored.</p>
+        </div>
 
         <!-- Declarative HTML markup above stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Animated Arc (Loading Spinner Mode) --&gt;
-    &lt;pxl-circle x="500" y="300" r="<mark id="sec4CircleRCode">140</mark>" 
-      stroke="#f97316" 
-      strokewidth="<mark id="sec4CircleWidthCode">16</mark>" 
-      start="t * 180" 
-      sweep="160 + wave(3) * 120"
-      filter="dropShadow(0, 0, <mark id="sec4CircleGlowCode">15</mark>, 'rgba(249,115,22,0.8)')"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Left: Pie Slice (Sweep Mode) --&gt;
+    &lt;pxl-circle x="300" y="300" strokewidth="<mark id="sec4Circle1WidthCode">10</mark>" pie="true" fill="#ffedd566" stroke="#f97316"
+      r="<mark id="sec4Circle1RCode">150</mark>" 
+      start="<mark id="sec4Circle1StartCode">0</mark>" 
+      sweep="<mark id="sec4Circle1SweepCode">270</mark>"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Right: Donut Wedge (End Angle Mode) --&gt;
+    &lt;pxl-circle x="700" y="300" pie="true" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
+      r="<mark id="sec4Circle2RCode">150</mark>" ir="<mark id="sec4Circle2IRCode">80</mark>" 
+      start="<mark id="sec4Circle2StartCode">0</mark>" 
+      end="<mark id="sec4Circle2EndCode">270</mark>"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -357,27 +381,59 @@
               <div class="demo-controls-header">
                 <h3 class="demo-controls-title">Controls</h3>
                 <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4ArcTab')">Arc</button>
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4Circle1Tab')">Circle 1</button>
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4Circle2Tab')">Circle 2</button>
                 </div>
               </div>
 
-              <!-- Arc Tab -->
-              <div class="tab-content active" id="sec4ArcTab">
+              <!-- Circle 1 Tab -->
+              <div class="tab-content active" id="sec4Circle1Tab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Radius (<code>r</code>)</span> <span id="sec4CircleRVal">140</span></label>
-                    <input type="range" min="50" max="220" step="10" value="140" autocomplete="off"
-                      oninput="document.getElementById('sec4Circle').setAttribute('r', this.value); document.getElementById('sec4Track').setAttribute('r', this.value); document.getElementById('sec4CircleRVal').innerText = this.value; document.getElementById('sec4CircleRCode').innerText = this.value;">
+                    <label><span>Radius</span> <span id="sec4Circle1RVal">150</span></label>
+                    <input type="range" min="50" max="220" step="10" value="150" autocomplete="off"
+                      oninput="document.getElementById('sec4Circle1').setAttribute('r', this.value); document.getElementById('sec4Circle1RVal').innerText = this.value; document.getElementById('sec4Circle1RCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="sec4CircleWidthVal">16</span></label>
-                    <input type="range" min="4" max="40" step="2" value="16" autocomplete="off"
-                      oninput="document.getElementById('sec4Circle').setAttribute('strokewidth', this.value); document.getElementById('sec4Track').setAttribute('strokewidth', this.value); document.getElementById('sec4CircleWidthVal').innerText = this.value; document.getElementById('sec4CircleWidthCode').innerText = this.value;">
+                    <label><span>Stroke Width</span> <span id="sec4Circle1WidthVal">10</span></label>
+                    <input type="range" min="0" max="24" step="1" value="10" autocomplete="off"
+                      oninput="document.getElementById('sec4Circle1').setAttribute('strokewidth', this.value); document.getElementById('sec4Circle1WidthVal').innerText = this.value; document.getElementById('sec4Circle1WidthCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Glow Shadow (<code>filter</code>)</span> <span id="sec4CircleGlowVal">15</span></label>
-                    <input type="range" min="0" max="40" step="5" value="15" autocomplete="off"
-                      oninput="document.getElementById('sec4Circle').setAttribute('filter', `dropShadow(0, 0, ${this.value}, 'rgba(249,115,22,0.8)')`); document.getElementById('sec4CircleGlowVal').innerText = this.value; document.getElementById('sec4CircleGlowCode').innerText = this.value;">
+                    <label><span>Start Angle</span> <span id="sec4Circle1StartVal">0°</span></label>
+                    <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec4Circle1').setAttribute('start', this.value); document.getElementById('sec4Circle1StartVal').innerText = this.value + '°'; document.getElementById('sec4Circle1StartCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Sweep</span> <span id="sec4Circle1SweepVal">270°</span></label>
+                    <input type="range" min="15" max="360" step="15" value="270" autocomplete="off"
+                      oninput="document.getElementById('sec4Circle1').setAttribute('sweep', this.value); document.getElementById('sec4Circle1SweepVal').innerText = this.value + '°'; document.getElementById('sec4Circle1SweepCode').innerText = this.value;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Circle 2 Tab -->
+              <div class="tab-content" id="sec4Circle2Tab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Radius</span> <span id="sec4Circle2RVal">150</span></label>
+                    <input type="range" min="50" max="220" step="10" value="150" autocomplete="off"
+                      oninput="document.getElementById('sec4Circle2').setAttribute('r', this.value); document.getElementById('sec4Circle2RVal').innerText = this.value; document.getElementById('sec4Circle2RCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Inner Radius</span> <span id="sec4Circle2IRVal">80</span></label>
+                    <input type="range" min="0" max="130" step="5" value="80" autocomplete="off"
+                      oninput="document.getElementById('sec4Circle2').setAttribute('ir', this.value); document.getElementById('sec4Circle2IRVal').innerText = this.value; document.getElementById('sec4Circle2IRCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Start Angle</span> <span id="sec4Circle2StartVal">0°</span></label>
+                    <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec4Circle2').setAttribute('start', this.value); document.getElementById('sec4Circle2StartVal').innerText = this.value + '°'; document.getElementById('sec4Circle2StartCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>End Angle</span> <span id="sec4Circle2EndVal">270°</span></label>
+                    <input type="range" min="-180" max="360" step="15" value="270" autocomplete="off"
+                      oninput="document.getElementById('sec4Circle2').setAttribute('end', this.value); document.getElementById('sec4Circle2EndVal').innerText = this.value + '°'; document.getElementById('sec4Circle2EndCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -388,22 +444,15 @@
               <pxl-layer>
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                 
-                <!-- Background track ring -->
-                <pxl-circle id="sec4Track" x="500" y="300" r="140" stroke="#cbd5e1" strokewidth="16"></pxl-circle>
-                
-                <!-- Glowing animated arc -->
-                <pxl-circle id="sec4Circle" x="500" y="300" r="140" 
-                  stroke="#f97316" 
-                  strokewidth="16" 
-                  start="t * 180" 
-                  sweep="160 + wave(3) * 120"
-                  filter="dropShadow(0, 0, 15, 'rgba(249,115,22,0.8)')"></pxl-circle>
+                <!-- Left: Pie Slice (Orange Scheme) -->
+                <pxl-circle id="sec4Circle1" x="300" y="300" r="150" start="0" sweep="270" pie="true"
+                  fill="#ffedd566" stroke="#f97316" strokewidth="10"></pxl-circle>
+                <pxl-text x="300" y="500" text="'Pie Slice'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
-                <!-- Orbiting satellite dot -->
-                <pxl-circle x="500 + cos(t*3)*180" y="300 + sin(t*3)*180" r="10" fill="#c2410c"></pxl-circle>
-                
-                <!-- Center text -->
-                <pxl-text x="500" y="450" text="'Arc Mode (Loading Spinner)'" size="27" fill="#ea580c" font="monospace" align="center"></pxl-text>
+                <!-- Right: Donut Wedge (Blue Scheme) -->
+                <pxl-circle id="sec4Circle2" x="700" y="300" r="150" ir="80" start="0" end="270" pie="true"
+                  fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-circle>
+                <pxl-text x="700" y="500" text="'Donut Wedge'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
               </pxl-layer>
             </pxl-stage>
           </div>
@@ -418,16 +467,16 @@
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Animated Pac-Man (Pie Wedge Mode) --&gt;
-    &lt;pxl-circle x="280" y="300" r="<mark id="sec5PacmanRCode">110</mark>" 
+    &lt;pxl-circle x="300" y="300" r="<mark id="sec5PacmanRCode">110</mark>" 
       fill="#fde047" strokewidth="<mark id="sec5PacmanWidthCode">4</mark>"
       pie="true" 
       start="bounce(0.4) * 45" 
       sweep="360 - (bounce(0.4) * 90)"&gt;&lt;/pxl-circle&gt;
 
     &lt;!-- Right: Concentric Donut Chart Segments (ir &gt; 0) --&gt;
-    &lt;pxl-circle x="720" y="300" r="120" ir="<mark id="sec5DonutIRCode">70</mark>" fill="#fb7185" start="-90" sweep="135"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle x="720" y="300" r="120" ir="70" fill="#c084fc" start="45" sweep="115"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle x="720" y="300" r="120" ir="70" fill="#38bdf8" start="160" sweep="110"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="700" y="300" r="120" ir="<mark id="sec5DonutIRCode">70</mark>" fill="#fb7185" start="-90" sweep="135"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="700" y="300" r="120" ir="70" fill="#c084fc" start="45" sweep="115"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="700" y="300" r="120" ir="70" fill="#38bdf8" start="160" sweep="110"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -445,12 +494,12 @@
               <div class="tab-content active" id="sec5PacmanTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Radius (<code>r</code>)</span> <span id="sec5PacmanRVal">110</span></label>
+                    <label><span>Radius</span> <span id="sec5PacmanRVal">110</span></label>
                     <input type="range" min="50" max="180" step="10" value="110" autocomplete="off"
                       oninput="document.getElementById('sec5Pacman').setAttribute('r', this.value); document.getElementById('sec5PacmanRVal').innerText = this.value; document.getElementById('sec5PacmanRCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="sec5PacmanWidthVal">4</span></label>
+                    <label><span>Stroke Width</span> <span id="sec5PacmanWidthVal">4</span></label>
                     <input type="range" min="0" max="16" step="1" value="4" autocomplete="off"
                       oninput="document.getElementById('sec5Pacman').setAttribute('strokewidth', this.value); document.getElementById('sec5PacmanWidthVal').innerText = this.value; document.getElementById('sec5PacmanWidthCode').innerText = this.value;">
                   </div>
@@ -461,7 +510,7 @@
               <div class="tab-content" id="sec5DonutTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Inner Radius (<code>ir</code>)</span> <span id="sec5DonutIRVal">70</span></label>
+                    <label><span>Inner Radius</span> <span id="sec5DonutIRVal">70</span></label>
                     <input type="range" min="20" max="105" step="5" value="70" autocomplete="off"
                       oninput="document.getElementById('sec5Donut1').setAttribute('ir', this.value); document.getElementById('sec5Donut2').setAttribute('ir', this.value); document.getElementById('sec5Donut3').setAttribute('ir', this.value); document.getElementById('sec5DonutIRVal').innerText = this.value; document.getElementById('sec5DonutIRCode').innerText = this.value;">
                   </div>
@@ -475,7 +524,7 @@
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                 
                 <!-- Left: Animated Pac-Man -->
-                <pxl-group x="280" y="300">
+                <pxl-group x="300" y="300">
                   <pxl-circle id="sec5Pacman" r="110" 
                     fill="#fde047" stroke="#ca8a04" strokewidth="4"
                     pie="true"
@@ -488,17 +537,17 @@
                   <pxl-circle x="80 - (t * 80) % 80" y="0" r="7" fill="#ca8a04" alpha="0.5 + wave(2)*0.5"></pxl-circle>
                   <pxl-circle x="160 - (t * 80) % 80" y="0" r="7" fill="#ca8a04" alpha="0.5 + wave(2)*0.5"></pxl-circle>
                 </pxl-group>
-                <pxl-text x="280" y="450" text="'Pie Wedge (pie = true)'" size="27" fill="#ca8a04" font="monospace" align="center"></pxl-text>
+                <pxl-text x="300" y="500" text="'Pie Wedge (pie = true)'" size="27" weight="700" fill="#ca8a04" font="monospace" align="center"></pxl-text>
 
                 <!-- Right: Donut Chart -->
-                <pxl-group x="720" y="300">
+                <pxl-group x="700" y="300">
                   <pxl-circle r="50" fill="radial([1, 1], ['rgba(249,115,22,0.15)', 'transparent'])" scale="1 + wave(3)*0.2"></pxl-circle>
                   <pxl-circle id="sec5Donut1" r="120" ir="70" fill="#fb7185" start="-90" sweep="135"></pxl-circle>
                   <pxl-circle id="sec5Donut2" r="120" ir="70" fill="#c084fc" start="45" sweep="115"></pxl-circle>
                   <pxl-circle id="sec5Donut3" r="120" ir="70" fill="#38bdf8" start="160" sweep="110"></pxl-circle>
                   <pxl-text text="'75%'" y="5" size="27" weight="bold" fill="#6d28d9" align="center" baseline="middle"></pxl-text>
                 </pxl-group>
-                <pxl-text x="720" y="450" text="'Donut Chart (ir > 0)'" size="27" fill="#6d28d9" font="monospace" align="center"></pxl-text>
+                <pxl-text x="700" y="500" text="'Donut Chart (ir > 0)'" size="27" weight="700" fill="#6d28d9" font="monospace" align="center"></pxl-text>
               </pxl-layer>
             </pxl-stage>
           </div>
@@ -513,12 +562,12 @@
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Filled Triangle Arrowhead (arrowstyle="filled") --&gt;
-    &lt;pxl-circle x="280" y="300" r="<mark id="sec6FilledRCode">100</mark>" strokewidth="<mark id="sec6FilledWidthCode">12</mark>" stroke="#f97316" 
+    &lt;pxl-circle x="300" y="300" r="<mark id="sec6FilledRCode">100</mark>" strokewidth="<mark id="sec6FilledWidthCode">12</mark>" stroke="#f97316" 
       start="-135" sweep="180" 
       arrowstart="auto" arrowend="auto" arrowstyle="filled"&gt;&lt;/pxl-circle&gt;
 
     &lt;!-- Open Line V-Arrowhead (arrowstyle="line") --&gt;
-    &lt;pxl-circle x="720" y="300" r="<mark id="sec6LineRCode">100</mark>" strokewidth="<mark id="sec6LineWidthCode">12</mark>" stroke="#2563eb" 
+    &lt;pxl-circle x="700" y="300" r="<mark id="sec6LineRCode">100</mark>" strokewidth="<mark id="sec6LineWidthCode">12</mark>" stroke="#2563eb" 
       start="-45" sweep="180" 
       arrowstart="auto" arrowend="auto" arrowstyle="line"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
@@ -538,12 +587,12 @@
               <div class="tab-content active" id="sec6FilledTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Radius (<code>r</code>)</span> <span id="sec6FilledRVal">100</span></label>
+                    <label><span>Radius</span> <span id="sec6FilledRVal">100</span></label>
                     <input type="range" min="50" max="170" step="10" value="100" autocomplete="off"
                       oninput="document.getElementById('sec6FilledArrow').setAttribute('r', this.value); document.getElementById('sec6FilledRVal').innerText = this.value; document.getElementById('sec6FilledRCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="sec6FilledWidthVal">12</span></label>
+                    <label><span>Stroke Width</span> <span id="sec6FilledWidthVal">12</span></label>
                     <input type="range" min="2" max="24" step="2" value="12" autocomplete="off"
                       oninput="document.getElementById('sec6FilledArrow').setAttribute('strokewidth', this.value); document.getElementById('sec6FilledWidthVal').innerText = this.value; document.getElementById('sec6FilledWidthCode').innerText = this.value;">
                   </div>
@@ -554,12 +603,12 @@
               <div class="tab-content" id="sec6LineTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Radius (<code>r</code>)</span> <span id="sec6LineRVal">100</span></label>
+                    <label><span>Radius</span> <span id="sec6LineRVal">100</span></label>
                     <input type="range" min="50" max="170" step="10" value="100" autocomplete="off"
                       oninput="document.getElementById('sec6LineArrow').setAttribute('r', this.value); document.getElementById('sec6LineRVal').innerText = this.value; document.getElementById('sec6LineRCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Stroke Width (<code>strokewidth</code>)</span> <span id="sec6LineWidthVal">12</span></label>
+                    <label><span>Stroke Width</span> <span id="sec6LineWidthVal">12</span></label>
                     <input type="range" min="2" max="24" step="2" value="12" autocomplete="off"
                       oninput="document.getElementById('sec6LineArrow').setAttribute('strokewidth', this.value); document.getElementById('sec6LineWidthVal').innerText = this.value; document.getElementById('sec6LineWidthCode').innerText = this.value;">
                   </div>
@@ -573,14 +622,14 @@
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                 
                 <!-- Left: arrowstyle="filled" -->
-                <pxl-circle id="sec6FilledArrow" x="280" y="300" r="100" strokewidth="12" stroke="#f97316" 
+                <pxl-circle id="sec6FilledArrow" x="300" y="300" r="100" strokewidth="12" stroke="#f97316" 
                   start="-135" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-circle>
-                <pxl-text x="280" y="450" text="'arrowstyle=&quot;filled&quot;'" size="27" fill="#ea580c" font="monospace" align="center"></pxl-text>
+                <pxl-text x="300" y="500" text="'arrowstyle=&quot;filled&quot;'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
                 <!-- Right: arrowstyle="line" -->
-                <pxl-circle id="sec6LineArrow" x="720" y="300" r="100" strokewidth="12" stroke="#2563eb" 
+                <pxl-circle id="sec6LineArrow" x="700" y="300" r="100" strokewidth="12" stroke="#2563eb" 
                   start="-45" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="line"></pxl-circle>
-                <pxl-text x="720" y="450" text="'arrowstyle=&quot;line&quot;'" size="27" fill="#2563eb" font="monospace" align="center"></pxl-text>
+                <pxl-text x="700" y="500" text="'arrowstyle=&quot;line&quot;'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
               </pxl-layer>
             </pxl-stage>
           </div>
