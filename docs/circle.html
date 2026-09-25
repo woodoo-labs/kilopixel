@@ -301,20 +301,20 @@
         <!-- SECTION 4: SIMPLE ARCS -->
         <!-- ================================================================= -->
         <h2>4. Arcs</h2>
-        <p>By explicitly setting <code>fill="transparent"</code>, you can use circles to draw simple curved lines. The base Shape class also supports <code>linedash</code> and <code>dashoffset</code>, allowing you to easily create dashed dials and marching ant effects.</p>
+        <p>By simply omitting the <code>fill</code> attribute, you can use circles to draw un-filled, stroked curved lines. The base Shape class also supports <code>linedash</code> and <code>dashoffset</code>, allowing you to easily create dashed dials and marching ant effects.</p>
 
         <!-- Declarative HTML markup above stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Simple Arc (Sweep Mode) --&gt;
-    &lt;pxl-circle x="300" y="300" fill="transparent" stroke="#f97316"
+    &lt;pxl-circle x="300" y="300" stroke="#f97316"
       r="<mark id="sec4Circle1RCode">150</mark>" 
       strokewidth="<mark id="sec4Circle1WidthCode">10</mark>"
       start="<mark id="sec4Circle1StartCode">0</mark>" 
       sweep="<mark id="sec4Circle1SweepCode">180</mark>"&gt;&lt;/pxl-circle&gt;
 
     &lt;!-- Right: Dashed Arc (End Angle Mode) --&gt;
-    &lt;pxl-circle x="700" y="300" fill="transparent" stroke="#3b82f6" strokewidth="4" linedash="[15, 15]"
+    &lt;pxl-circle x="700" y="300" stroke="#3b82f6" strokewidth="4" linedash="[15, 15]"
       r="<mark id="sec4Circle2RCode">150</mark>" 
       dashoffset="<mark id="sec4Circle2OffsetCode">0</mark>"
       start="<mark id="sec4Circle2StartCode">0</mark>" 
@@ -392,219 +392,17 @@
                 
                 <!-- Left: Simple Arc (Orange Scheme) -->
                 <pxl-circle id="sec4Circle1" x="300" y="300" r="150" start="0" sweep="180" 
-                  fill="transparent" stroke="#f97316" strokewidth="10"></pxl-circle>
+                  stroke="#f97316" strokewidth="10"></pxl-circle>
                 <pxl-text x="300" y="500" text="'Simple Arc'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
                 <!-- Right: Dashed Arc (Blue Scheme) -->
                 <pxl-circle id="sec4Circle2" x="700" y="300" r="150" start="0" end="270" 
-                  fill="transparent" stroke="#3b82f6" strokewidth="4" linedash="[15, 15]" dashoffset="0"></pxl-circle>
+                  stroke="#3b82f6" strokewidth="4" linedash="[15, 15]" dashoffset="0"></pxl-circle>
                 <pxl-text x="700" y="500" text="'Dashed Arc'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
               </pxl-layer>
             </pxl-stage>
           </div>
 
-        <!-- ================================================================= -->
-        <!-- SECTION 5: PIE WEDGES & DONUT CHARTS -->
-        <!-- ================================================================= -->
-        <h2>5. Pie Wedges &amp; Donut Charts</h2>
-        <p>Setting <code>pie="true"</code> connects the ends of an open arc to the center point to create solid wedges (like Pac-Man). Combining <code>ir &gt; 0</code> with <code>sweep</code> creates concentric donut chart segments.</p>
-
-        <!-- Declarative HTML markup above stage -->
-          <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;pxl-layer&gt;
-    &lt;!-- Left: Animated Pac-Man (Pie Wedge Mode) --&gt;
-    &lt;pxl-circle x="300" y="300" r="<mark id="sec5PacmanRCode">110</mark>" 
-      fill="#fde047" strokewidth="<mark id="sec5PacmanWidthCode">4</mark>"
-      pie="true" 
-      start="bounce(0.4) * 45" 
-      sweep="360 - (bounce(0.4) * 90)"&gt;&lt;/pxl-circle&gt;
-
-    &lt;!-- Right: Concentric Donut Chart Segments (ir &gt; 0) --&gt;
-    &lt;pxl-circle x="700" y="300" r="120" ir="<mark id="sec5DonutIRCode">70</mark>" fill="#fb7185" start="-90" sweep="135"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle x="700" y="300" r="120" ir="70" fill="#c084fc" start="45" sweep="115"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle x="700" y="300" r="120" ir="70" fill="#38bdf8" start="160" sweep="110"&gt;&lt;/pxl-circle&gt;
-  &lt;/pxl-layer&gt;
-&lt;/pxl-stage&gt;</code></pre>
-
-          <div class="demo-container">
-            <div class="demo-controls">
-              <div class="demo-controls-header">
-                <h3 class="demo-controls-title">Controls</h3>
-                <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec5PacmanTab')">Pac-Man</button>
-                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec5DonutTab')">Donut Chart</button>
-                </div>
-              </div>
-
-              <!-- Pac-Man Tab -->
-              <div class="tab-content active" id="sec5PacmanTab">
-                <div class="playground-sliders">
-                  <div class="control-group">
-                    <label><span>Radius</span> <span id="sec5PacmanRVal">110</span></label>
-                    <input type="range" min="50" max="180" step="10" value="110" autocomplete="off"
-                      oninput="document.getElementById('sec5Pacman').setAttribute('r', this.value); document.getElementById('sec5PacmanRVal').innerText = this.value; document.getElementById('sec5PacmanRCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Stroke Width</span> <span id="sec5PacmanWidthVal">4</span></label>
-                    <input type="range" min="0" max="16" step="1" value="4" autocomplete="off"
-                      oninput="document.getElementById('sec5Pacman').setAttribute('strokewidth', this.value); document.getElementById('sec5PacmanWidthVal').innerText = this.value; document.getElementById('sec5PacmanWidthCode').innerText = this.value;">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Donut Chart Tab -->
-              <div class="tab-content" id="sec5DonutTab">
-                <div class="playground-sliders">
-                  <div class="control-group">
-                    <label><span>Inner Radius</span> <span id="sec5DonutIRVal">70</span></label>
-                    <input type="range" min="20" max="105" step="5" value="70" autocomplete="off"
-                      oninput="document.getElementById('sec5Donut1').setAttribute('ir', this.value); document.getElementById('sec5Donut2').setAttribute('ir', this.value); document.getElementById('sec5Donut3').setAttribute('ir', this.value); document.getElementById('sec5DonutIRVal').innerText = this.value; document.getElementById('sec5DonutIRCode').innerText = this.value;">
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Mode 3 stage -->
-            <pxl-stage id="sec5Stage" ratio="5 / 3" class="demo-stage">
-              <pxl-layer>
-                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-                
-                <!-- Left: Animated Pac-Man -->
-                <pxl-group x="300" y="300">
-                  <pxl-circle id="sec5Pacman" r="110" 
-                    fill="#fde047" stroke="#ca8a04" strokewidth="4"
-                    pie="true"
-                    start="bounce(0.4) * 45"
-                    sweep="360 - (bounce(0.4) * 90)"
-                    filter="dropShadow(0, 0, 15, 'rgba(253,224,71,0.5)')"></pxl-circle>
-                  <!-- Pac-Man Eye -->
-                  <pxl-circle x="0" y="-55" r="10" fill="#0f172a"></pxl-circle>
-                  <!-- Pac-Man Food pellets -->
-                  <pxl-circle x="80 - (t * 80) % 80" y="0" r="7" fill="#ca8a04" alpha="0.5 + wave(2)*0.5"></pxl-circle>
-                  <pxl-circle x="160 - (t * 80) % 80" y="0" r="7" fill="#ca8a04" alpha="0.5 + wave(2)*0.5"></pxl-circle>
-                </pxl-group>
-                <pxl-text x="300" y="500" text="'Pie Wedge (pie = true)'" size="27" weight="700" fill="#ca8a04" font="monospace" align="center"></pxl-text>
-
-                <!-- Right: Donut Chart -->
-                <pxl-group x="700" y="300">
-                  <pxl-circle r="50" fill="radial([1, 1], ['rgba(249,115,22,0.15)', 'transparent'])" scale="1 + wave(3)*0.2"></pxl-circle>
-                  <pxl-circle id="sec5Donut1" r="120" ir="70" fill="#fb7185" start="-90" sweep="135"></pxl-circle>
-                  <pxl-circle id="sec5Donut2" r="120" ir="70" fill="#c084fc" start="45" sweep="115"></pxl-circle>
-                  <pxl-circle id="sec5Donut3" r="120" ir="70" fill="#38bdf8" start="160" sweep="110"></pxl-circle>
-                  <pxl-text text="'75%'" y="5" size="27" weight="bold" fill="#6d28d9" align="center" baseline="middle"></pxl-text>
-                </pxl-group>
-                <pxl-text x="700" y="500" text="'Donut Chart (ir > 0)'" size="27" weight="700" fill="#6d28d9" font="monospace" align="center"></pxl-text>
-              </pxl-layer>
-            </pxl-stage>
-          </div>
-
-        <!-- ================================================================= -->
-        <!-- SECTION 6: CURVED VECTOR ARROWS -->
-        <!-- ================================================================= -->
-        <h2>6. Curved Vector Arrows</h2>
-        <p>Adding arrowhead sizes to an open circular arc transforms it into a curved vector diagram arrow, circular dial, or speedometer indicator.</p>
-
-        <!-- Declarative HTML markup above stage -->
-          <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;pxl-layer&gt;
-    &lt;!-- Filled Triangle Arrowhead (arrowstyle="filled") --&gt;
-    &lt;pxl-circle x="300" y="300" r="<mark id="sec6FilledRCode">100</mark>" strokewidth="<mark id="sec6FilledWidthCode">12</mark>" stroke="#f97316" 
-      start="-135" sweep="180" 
-      arrowstart="auto" arrowend="auto" arrowstyle="filled"&gt;&lt;/pxl-circle&gt;
-
-    &lt;!-- Open Line V-Arrowhead (arrowstyle="line") --&gt;
-    &lt;pxl-circle x="700" y="300" r="<mark id="sec6LineRCode">100</mark>" strokewidth="<mark id="sec6LineWidthCode">12</mark>" stroke="#2563eb" 
-      start="-45" sweep="180" 
-      arrowstart="auto" arrowend="auto" arrowstyle="line"&gt;&lt;/pxl-circle&gt;
-  &lt;/pxl-layer&gt;
-&lt;/pxl-stage&gt;</code></pre>
-
-          <div class="demo-container">
-            <div class="demo-controls">
-              <div class="demo-controls-header">
-                <h3 class="demo-controls-title">Controls</h3>
-                <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec6FilledTab')">Filled Arrow</button>
-                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec6LineTab')">Line Arrow</button>
-                </div>
-              </div>
-
-              <!-- Filled Arrow Tab -->
-              <div class="tab-content active" id="sec6FilledTab">
-                <div class="playground-sliders">
-                  <div class="control-group">
-                    <label><span>Radius</span> <span id="sec6FilledRVal">100</span></label>
-                    <input type="range" min="50" max="170" step="10" value="100" autocomplete="off"
-                      oninput="document.getElementById('sec6FilledArrow').setAttribute('r', this.value); document.getElementById('sec6FilledRVal').innerText = this.value; document.getElementById('sec6FilledRCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Stroke Width</span> <span id="sec6FilledWidthVal">12</span></label>
-                    <input type="range" min="2" max="24" step="2" value="12" autocomplete="off"
-                      oninput="document.getElementById('sec6FilledArrow').setAttribute('strokewidth', this.value); document.getElementById('sec6FilledWidthVal').innerText = this.value; document.getElementById('sec6FilledWidthCode').innerText = this.value;">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Line Arrow Tab -->
-              <div class="tab-content" id="sec6LineTab">
-                <div class="playground-sliders">
-                  <div class="control-group">
-                    <label><span>Radius</span> <span id="sec6LineRVal">100</span></label>
-                    <input type="range" min="50" max="170" step="10" value="100" autocomplete="off"
-                      oninput="document.getElementById('sec6LineArrow').setAttribute('r', this.value); document.getElementById('sec6LineRVal').innerText = this.value; document.getElementById('sec6LineRCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Stroke Width</span> <span id="sec6LineWidthVal">12</span></label>
-                    <input type="range" min="2" max="24" step="2" value="12" autocomplete="off"
-                      oninput="document.getElementById('sec6LineArrow').setAttribute('strokewidth', this.value); document.getElementById('sec6LineWidthVal').innerText = this.value; document.getElementById('sec6LineWidthCode').innerText = this.value;">
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Mode 4 stage -->
-            <pxl-stage id="sec6Stage" ratio="5 / 3" class="demo-stage">
-              <pxl-layer>
-                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-                
-                <!-- Left: arrowstyle="filled" -->
-                <pxl-circle id="sec6FilledArrow" x="300" y="300" r="100" strokewidth="12" stroke="#f97316" 
-                  start="-135" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-circle>
-                <pxl-text x="300" y="500" text="'arrowstyle=&quot;filled&quot;'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
-
-                <!-- Right: arrowstyle="line" -->
-                <pxl-circle id="sec6LineArrow" x="700" y="300" r="100" strokewidth="12" stroke="#2563eb" 
-                  start="-45" sweep="180" arrowstart="auto" arrowend="auto" arrowstyle="line"></pxl-circle>
-                <pxl-text x="700" y="500" text="'arrowstyle=&quot;line&quot;'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
-              </pxl-layer>
-            </pxl-stage>
-          </div>
-
-        <!-- ================================================================= -->
-        <!-- SECTION 7: PRO TIPS, GOTCHAS & PERFORMANCE -->
-        <!-- ================================================================= -->
-        <h2>7. Pro Tips, Gotchas &amp; Performance Best Practices</h2>
-        <div class="pro-tips-grid">
-          <div class="pro-tip-card">
-            <h4>1. Angles are Always in Degrees (0°&ndash;360°)</h4>
-            <p>Unlike standard Canvas 2D methods which require radians, Kilopixel evaluates all <code>start</code>, <code>end</code>, <code>sweep</code>, and <code>rotate</code> angles in standard degrees. Never multiply by <code>Math.PI / 180</code> in your markup!</p>
-          </div>
-
-          <div class="pro-tip-card">
-            <h4>2. Compiler Fast-Path vs. Expression Evaluation</h4>
-            <p>When you pass a raw number like <code>r="100"</code>, Kilopixel hits a zero-cost compilation Fast-Path. Dynamic time expressions like <code>r="100 + wave(2)*20"</code> are compiled once and evaluated per animation frame.</p>
-          </div>
-
-          <div class="pro-tip-card">
-            <h4>3. Rotating Arcs vs. Changing Start/End</h4>
-            <p>To rotate a circular gauge or spinner, use <code>arc</code> with a continuous rotation like <code>rotate="t * 90"</code> rather than manually recalculating moving start and end angles every frame.</p>
-          </div>
-
-          <div class="pro-tip-card">
-            <h4>4. Ellipses use &lt;pxl-ellipse&gt;</h4>
-            <p>If you need independent horizontal and vertical radii (<code>rx</code> and <code>ry</code>), use the dedicated <code>&lt;pxl-ellipse&gt;</code> element rather than applying non-uniform scaling to a circle.</p>
-          </div>
-        </div>
         <!-- ================================================================= -->
         <!-- SECTION 10: ELEMENT REFERENCE -->
         <!-- ================================================================= -->
