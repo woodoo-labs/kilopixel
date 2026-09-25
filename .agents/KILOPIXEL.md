@@ -854,12 +854,12 @@ When `attributeChangedCallback` receives an event attribute (`onclick`, `onenter
 
 ### Additional Observed Attributes
 
-`r`, `ir`, `start`, `end`, `sweep`, `pie`, `anticlockwise`, `arrowstart`, `arrowend`, `arrowstyle`
+`r`, `ir`, `start`, `end`, `sweep`, `pie`, `closed`, `anticlockwise`, `arrowstart`, `arrowend`, `arrowstyle`
 
 ### Additional Defaults
 
 ```javascript
-{ r: 0, ir: 0, start: 0, end: null, sweep: null, pie: false,
+{ r: 0, ir: 0, start: 0, end: null, sweep: null, pie: false, closed: false,
   anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' }
 ```
 
@@ -873,6 +873,7 @@ When `attributeChangedCallback` receives an event attribute (`onclick`, `onenter
 | `end` | number | Arc end angle in degrees (absolute) |
 | `sweep` | number | Arc sweep angle in degrees (relative to start). Takes priority over `end`. |
 | `pie` | boolean | If true, draws lines from arc endpoints to center (pie slice) |
+| `closed` | boolean | If true, explicitly calls closePath() to connect arc endpoints with a straight chord |
 | `anticlockwise` | boolean | Reverses arc direction |
 | `arrowstart` | number/`'auto'` | Arrowhead size at start of arc. `'auto'` = `strokewidth * 3.6` |
 | `arrowend` | number/`'auto'` | Arrowhead size at end of arc |
@@ -901,13 +902,13 @@ When `attributeChangedCallback` receives an event attribute (`onclick`, `onenter
 
 ### Additional Observed Attributes
 
-`rx`, `ry`, `irx`, `iry`, `start`, `end`, `sweep`, `pie`, `anticlockwise`, `arrowstart`, `arrowend`, `arrowstyle`
+`rx`, `ry`, `irx`, `iry`, `start`, `end`, `sweep`, `pie`, `closed`, `anticlockwise`, `arrowstart`, `arrowend`, `arrowstyle`
 
 ### Additional Defaults
 
 ```javascript
 { rx: 0, ry: 0, irx: 0, iry: 0, start: 0, end: null, sweep: null,
-  pie: false, anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' }
+  pie: false, closed: false, anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' }
 ```
 
 ### Drawing Logic
