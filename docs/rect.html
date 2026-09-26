@@ -592,6 +592,309 @@
           </pxl-stage>
         </div>
 
+        <!-- ================================================================= -->
+        <!-- SECTION 6: SHOWCASE                                               -->
+        <!-- ================================================================= -->
+        <h2>6. Showcase</h2>
+        <p class="lead">An homage to László Moholy-Nagy's <em>Light-Space Modulator</em> &mdash; exploring constructivist clockwork, asymmetric corner rounding, and multi-hinged orbital kinematics running at 60 frames per second.</p>
+
+        <div class="showcase-container">
+          <pxl-stage id="sec6Stage" ratio="1 / 1" class="showcase-stage">
+            <!-- ============================================================= -->
+            <!-- LAYER 1: AMBIENT BLUEPRINT & GALLERY GLOW (Static / Cached)   -->
+            <!-- ============================================================= -->
+            <pxl-layer>
+              <!-- Central Ambient Spotlight -->
+              <pxl-circle x="500" y="500" r="500" fill="radial([500], ['rgba(56, 189, 248, 0.14)', 'rgba(99, 102, 241, 0.06)', 'transparent'])"></pxl-circle>
+
+              <!-- Inner Technical Blueprint Square (Outer 880x880 removed) -->
+              <pxl-rect x="500" y="500" w="640" h="640" anchor="center" r="16" stroke="#1e293b" strokewidth="1" linedash="[4, 8]" fill="none"></pxl-rect>
+              <pxl-line x1="500" y1="20" x2="500" y2="980" stroke="#1e293b" strokewidth="1" linedash="[3, 9]"></pxl-line>
+              <pxl-line x1="20" y1="500" x2="980" y2="500" stroke="#1e293b" strokewidth="1" linedash="[3, 9]"></pxl-line>
+
+              <!-- Technical Corner Registration Crosshairs & Meta -->
+              <pxl-line x1="970" y1="30" x2="970" y2="50" stroke="#334155" strokewidth="1"></pxl-line>
+              <pxl-line x1="960" y1="40" x2="980" y2="40" stroke="#334155" strokewidth="1"></pxl-line>
+              <pxl-text x="945" y="45" text="'BAUHAUS MODULATOR [1000 x 1000]'" font="monospace" size="14" fill="#475569" align="right" weight="600"></pxl-text>
+            </pxl-layer>
+
+            <!-- ============================================================= -->
+            <!-- LAYER 2: KINETIC CONSTRUCTIVIST APPARATUS (Full Width, 60 FPS)-->
+            <!-- ============================================================= -->
+            <pxl-layer blend="screen">
+
+              <!-- Live Performance Monitor (similar to blend.html) -->
+              <pxl-text x="24" y="36" text="ref.sec6Stage.fps + ' FPS | AVG: ' + ref.sec6Stage.renderAvg + 'ms | MAX: ' + ref.sec6Stage.renderMax + 'ms'" font="monospace" size="18" fill="#64748b"></pxl-text>
+
+              <!-- =========================================================== -->
+              <!-- TIER 1: FULL-WIDTH OUTER GYROSCOPIC CRAWLERS                -->
+              <!-- =========================================================== -->
+              <pxl-group x="500" y="500">
+                <!-- Giant Outer Reticle: Reaches 950px across the 1000px canvas -->
+                <pxl-rect w="950" h="950" anchor="center" r="220" rotate="t * 4" 
+                  stroke="linear(t * 10, ['#38bdf844', '#818cf844', '#c084fc44', '#38bdf844'])" 
+                  strokewidth="2" linedash="[36, 24, 12, 24]" dashoffset="t * 15" fill="none">
+                </pxl-rect>
+
+                <!-- Counter-Clockwise Slotted Stator Ring -->
+                <pxl-rect w="850" h="850" anchor="center" r="80" rotate="-t * 6" 
+                  stroke="rgba(249, 115, 22, 0.35)" strokewidth="2" linedash="[24, 18]" dashoffset="-t * 20" fill="none">
+                </pxl-rect>
+              </pxl-group>
+
+              <!-- =========================================================== -->
+              <!-- TIER 2: FOUR CORNER-HINGED CANTILEVER ARMS (Full Stage Span)-->
+              <!-- =========================================================== -->
+              <pxl-group x="500" y="500">
+                <!-- Arm 1: Cobalt Blade (w=470 reaches 970 across canvas) -->
+                <pxl-group rotate="t * 16">
+                  <pxl-rect x="0" y="0" w="470" h="54" anchor="left" r1="0" r2="27" r3="27" r4="0"
+                    fill="linear(90, ['#0284c7ee', '#38bdf866'])" stroke="#0284c7" strokewidth="2.5">
+                  </pxl-rect>
+                  <!-- Secondary Orbital Satellite -->
+                  <pxl-rect x="410" y="0" w="96" h="96" anchor="center" r="22" rotate="-t * 48"
+                    fill="linear(45, ['#facc15cc', '#fb923c99'])" stroke="#fef08a" strokewidth="2.5">
+                  </pxl-rect>
+                  <pxl-rect x="410" y="0" w="48" h="48" anchor="center" r="10" rotate="t * 80"
+                    fill="#ffffff" stroke="#0f172a" strokewidth="2">
+                  </pxl-rect>
+                </pxl-group>
+
+                <!-- Arm 2: Vermilion Blade (180° opposite sweep) -->
+                <pxl-group rotate="t * 16 + 180">
+                  <pxl-rect x="0" y="0" w="470" h="54" anchor="left" r1="0" r2="27" r3="27" r4="0"
+                    fill="linear(90, ['#e11d48ee', '#fb718566'])" stroke="#be123c" strokewidth="2.5">
+                  </pxl-rect>
+                  <pxl-rect x="410" y="0" w="96" h="96" anchor="center" r="22" rotate="-t * 48"
+                    fill="linear(45, ['#06b6d4cc', '#3b82f699'])" stroke="#a5f3fc" strokewidth="2.5">
+                  </pxl-rect>
+                  <pxl-rect x="410" y="0" w="48" h="48" anchor="center" r="10" rotate="t * 80"
+                    fill="#ffffff" stroke="#0f172a" strokewidth="2">
+                  </pxl-rect>
+                </pxl-group>
+
+                <!-- Arm 3: Cadmium Amber Balance Arm (90° cross-axis, w=360) -->
+                <pxl-group rotate="-t * 22 + 90">
+                  <pxl-rect x="0" y="0" w="360" h="44" anchor="left" r1="0" r2="22" r3="22" r4="0"
+                    fill="linear(90, ['#f59e0bee', '#fde04755'])" stroke="#d97706" strokewidth="2">
+                  </pxl-rect>
+                  <pxl-rect x="310" y="0" w="76" h="76" anchor="center" r1="38" r2="6" r3="38" r4="6" rotate="t * 66"
+                    fill="#ec4899cc" stroke="#fbcfe8" strokewidth="2">
+                  </pxl-rect>
+                </pxl-group>
+
+                <!-- Arm 4: Emerald Balance Arm (270° cross-axis, w=360) -->
+                <pxl-group rotate="-t * 22 + 270">
+                  <pxl-rect x="0" y="0" w="360" h="44" anchor="left" r1="0" r2="22" r3="22" r4="0"
+                    fill="linear(90, ['#059669ee', '#34d39955'])" stroke="#047857" strokewidth="2">
+                  </pxl-rect>
+                  <pxl-rect x="310" y="0" w="76" h="76" anchor="center" r1="38" r2="6" r3="38" r4="6" rotate="t * 66"
+                    fill="#8b5cf6cc" stroke="#ddd6fe" strokewidth="2">
+                  </pxl-rect>
+                </pxl-group>
+              </pxl-group>
+
+              <!-- =========================================================== -->
+              <!-- TIER 3: EXPANDED INTERSECTING SHIELD PLATES                 -->
+              <!-- =========================================================== -->
+              <pxl-group x="500" y="500">
+                <!-- Shield 1: Ultramarine Aerodynamic Symmetrical Plate -->
+                <pxl-rect w="520" h="270" anchor="center" r1="135" r2="20" r3="135" r4="20" rotate="t * 26"
+                  fill="#1d4ed855" stroke="#60a5fa" strokewidth="2.5">
+                </pxl-rect>
+
+                <!-- Shield 2: Vermilion Orthogonal Intersecting Plate -->
+                <pxl-rect w="270" h="520" anchor="center" r1="20" r2="135" r3="20" r4="135" rotate="-t * 20"
+                  fill="#e11d4855" stroke="#f43f5e" strokewidth="2.5">
+                </pxl-rect>
+
+                <!-- Shield 3: Cadmium Amber Diamond Blade -->
+                <pxl-rect w="370" h="370" anchor="center" r1="185" r2="30" r3="185" r4="30" rotate="t * 34"
+                  fill="#f59e0b44" stroke="#fbbf24" strokewidth="2.5">
+                </pxl-rect>
+
+                <!-- ========================================================= -->
+                <!-- TIER 4: FOUR EXPANDED SATELLITE CORNER-HINGE FLAPS        -->
+                <!-- ========================================================= -->
+                <pxl-rect x="-200" y="-200" w="145" h="145" anchor="bottom-right" r="26" 
+                  rotate="sin(t * 1.8) * 50" fill="#facc15bb" stroke="#ffffff" strokewidth="2">
+                </pxl-rect>
+
+                <pxl-rect x="200" y="-200" w="145" h="145" anchor="bottom-left" r="26" 
+                  rotate="-sin(t * 1.8) * 50" fill="#ec4899bb" stroke="#ffffff" strokewidth="2">
+                </pxl-rect>
+
+                <pxl-rect x="200" y="200" w="145" h="145" anchor="top-left" r="26" 
+                  rotate="sin(t * 1.8) * 50" fill="#06b6d4bb" stroke="#ffffff" strokewidth="2">
+                </pxl-rect>
+
+                <pxl-rect x="-200" y="200" w="145" h="145" anchor="top-right" r="26" 
+                  rotate="-sin(t * 1.8) * 50" fill="#8b5cf6bb" stroke="#ffffff" strokewidth="2">
+                </pxl-rect>
+
+                <!-- ========================================================= -->
+                <!-- TIER 5: HIGH-PRECISION ESCAPEMENT MICRO-CORE              -->
+                <!-- ========================================================= -->
+                <!-- Outer Escapement Housing (Dark Slate with crisp White Border) -->
+                <pxl-rect w="180" h="180" anchor="center" r="40" rotate="-t * 45"
+                  fill="linear(45, ['#090d16', '#1e293b'])" stroke="#f8fafc" strokewidth="3">
+                </pxl-rect>
+
+                <!-- Inner Amber Gear Core -->
+                <pxl-rect w="110" h="110" anchor="center" r1="28" r2="6" r3="28" r4="6" rotate="t * 70"
+                  fill="#f97316" stroke="#ffffff" strokewidth="2.5">
+                </pxl-rect>
+
+                <!-- Micro Pinion Square -->
+                <pxl-rect w="52" h="52" anchor="center" r="12" rotate="-t * 140"
+                  fill="#fde047" stroke="#0f172a" strokewidth="2">
+                </pxl-rect>
+
+                <!-- Central Hinge Pin -->
+                <pxl-circle r="7" fill="#ffffff"></pxl-circle>
+              </pxl-group>
+
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 10: ELEMENT REFERENCE                                     -->
+        <!-- ================================================================= -->
+        <h2>10. Element Reference</h2>
+        <p>The table below covers all attributes, runtime properties, and event handlers supported by <code>&lt;pxl-rect&gt;</code>. Use the tabs to switch between rectangle-specific features and common APIs shared across all shapes.</p>
+
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <div class="demo-tabs">
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec10RectTab')">Rectangle</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec10StylingTab')">Styling</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec10TransformsTab')">Transforms</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec10EventsTab')">Events</button>
+            </div>
+          </div>
+
+          <!-- TAB 1: RECTANGLE SPECIFIC ATTRIBUTES -->
+          <div class="tab-content active" id="sec10RectTab">
+            <div class="api-list">
+              <div class="api-subheading">Dimensions &amp; Anchor</div>
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">w</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">number &gt;= 0 | expr</span>
+                    <span class="api-pill default-pill">default: 0</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Width of the rectangle.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">h</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">number &gt;= 0 | expr</span>
+                    <span class="api-pill default-pill">default: 0</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Height of the rectangle.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">anchor</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">string | expr</span>
+                    <span class="api-pill default-pill">default: 'center'</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Position anchor relative to the rectangle's bounding box that aligns with <code>(x, y)</code> and serves as the pivot for rotations and scaling. Accepts 9 positions: <code>'top-left'</code>, <code>'top'</code>, <code>'top-right'</code>, <code>'left'</code>, <code>'center'</code>, <code>'right'</code>, <code>'bottom-left'</code>, <code>'bottom'</code>, <code>'bottom-right'</code>.
+                </div>
+              </div>
+
+              <div class="api-subheading">Corner Radii</div>
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">r</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">number &gt;= 0 | expr</span>
+                    <span class="api-pill default-pill">default: null</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Universal corner radius applied to all four corners. When set, corners are rounded with circular arcs. Defaults to <code>null</code> (sharp corners).
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">r1</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">number &gt;= 0 | expr</span>
+                    <span class="api-pill default-pill">default: null</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Top-left corner radius override. Falls back to <code>r</code> (or 0) if <code>null</code>.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">r2</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">number &gt;= 0 | expr</span>
+                    <span class="api-pill default-pill">default: null</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Top-right corner radius override. Falls back to <code>r</code> (or 0) if <code>null</code>.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">r3</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">number &gt;= 0 | expr</span>
+                    <span class="api-pill default-pill">default: null</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Bottom-right corner radius override. Falls back to <code>r</code> (or 0) if <code>null</code>.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">r4</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">number &gt;= 0 | expr</span>
+                    <span class="api-pill default-pill">default: null</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Bottom-left corner radius override. Falls back to <code>r</code> (or 0) if <code>null</code>.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: COMMON STYLING -->
+          <docs-api-styling id="sec10StylingTab" class="tab-content"></docs-api-styling>
+
+          <!-- TAB 3: TRANSFORMS & SPATIAL -->
+          <docs-api-transforms id="sec10TransformsTab" class="tab-content"></docs-api-transforms>
+
+          <!-- TAB 4: INTERACTIVE EVENTS -->
+          <docs-api-events id="sec10EventsTab" class="tab-content"></docs-api-events>
+        </div>
+
       </div>
     </main>
   </div>
