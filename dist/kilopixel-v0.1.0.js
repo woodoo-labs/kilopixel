@@ -1867,44 +1867,44 @@ class Circle extends Shape {
     let drawEndRadians = endRadians;
 
     // --- ARROW OFFSET INTERCEPTION ---
-    let arrowStartTipX, arrowStartTipY, arrowStartAngle = 0;
     const arrowStartSize = (arrowstart === 'auto') ? (strokewidth * 3.6) : arrowstart;
-    
+    const arrowEndSize = (arrowend === 'auto') ? (strokewidth * 3.6) : arrowend;
+    let arrowStartTipX, arrowStartTipY, arrowStartAngle = 0, arrowStartDelta = 0;
+    let arrowEndTipX, arrowEndTipY, arrowEndAngle = 0, arrowEndDelta = 0;
+
     if (arrowStartSize > 0 && safeR > 0) {
       arrowStartTipX = safeR * Math.cos(startRadians) * u;
       arrowStartTipY = safeR * Math.sin(startRadians) * u;
       
       const clampL = Math.min(arrowStartSize * 0.75, safeR * 2);
-      const arrowStartDelta = 2 * Math.asin(clampL / (2 * safeR));
+      arrowStartDelta = 2 * Math.asin(clampL / (2 * safeR));
       const baseRadians = startRadians + (isAnti ? -arrowStartDelta : arrowStartDelta);
       
       const basePointX = safeR * Math.cos(baseRadians) * u;
       const basePointY = safeR * Math.sin(baseRadians) * u;
       arrowStartAngle = Math.atan2(arrowStartTipY - basePointY, arrowStartTipX - basePointX);
-
-      if (arrowstyle === 'filled') {
-        drawStartRadians += isAnti ? -arrowStartDelta : arrowStartDelta; 
-      }
     }
-
-    let arrowEndTipX, arrowEndTipY, arrowEndAngle = 0;
-    const arrowEndSize = (arrowend === 'auto') ? (strokewidth * 3.6) : arrowend;
 
     if (arrowEndSize > 0 && safeR > 0) {
       arrowEndTipX = safeR * Math.cos(endRadians) * u;
       arrowEndTipY = safeR * Math.sin(endRadians) * u;
       
       const clampL = Math.min(arrowEndSize * 0.75, safeR * 2);
-      const arrowEndDelta = 2 * Math.asin(clampL / (2 * safeR));
+      arrowEndDelta = 2 * Math.asin(clampL / (2 * safeR));
       const baseRadians = endRadians + (isAnti ? arrowEndDelta : -arrowEndDelta);
       
       const basePointX = safeR * Math.cos(baseRadians) * u;
       const basePointY = safeR * Math.sin(baseRadians) * u;
       arrowEndAngle = Math.atan2(arrowEndTipY - basePointY, arrowEndTipX - basePointX);
+    }
 
-      if (arrowstyle === 'filled') {
-        drawEndRadians += isAnti ? arrowEndDelta : -arrowEndDelta;
-      }
+    // Apply filled-arrow arc pullback only if offsets fit within the sweep
+    const hasArrowPullback = arrowstyle === 'filled' &&
+      (arrowStartDelta + arrowEndDelta) < Math.abs(endRadians - startRadians);
+
+    if (hasArrowPullback) {
+      if (arrowStartDelta > 0) drawStartRadians += isAnti ? -arrowStartDelta : arrowStartDelta;
+      if (arrowEndDelta > 0)   drawEndRadians   += isAnti ?  arrowEndDelta : -arrowEndDelta;
     }
 
     // --- DRAW PATH ---
@@ -1920,7 +1920,7 @@ class Circle extends Shape {
     } else if (isPie && !isFull) {
       ctx.lineTo(0, 0);
       ctx.closePath();
-    } else if (isFull || isClosed) {
+    } else if ((isFull && !hasArrowPullback) || isClosed) {
       ctx.closePath();
     }
 
