@@ -416,9 +416,9 @@
             <pxl-layer>
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
-              <!-- Coordinate Crosshairs intersecting at (500, 300) -->
-              <pxl-line x1="80" y1="300" x2="920" y2="300" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
-              <pxl-line x1="500" y1="40" x2="500" y2="560" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <!-- Coordinate Crosshairs intersecting at (500, 300) to border -->
+              <pxl-line x1="0" y1="300" x2="1000" y2="300" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-line x1="500" y1="0" x2="500" y2="600" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
 
               <!-- Interactive Rectangle (Orange Scheme) -->
               <pxl-rect id="sec4Rect" x="500" y="300" w="320" h="200" r="20" anchor="center" strokewidth="4" fill="#ffedd566" stroke="#f97316"></pxl-rect>
@@ -426,6 +426,168 @@
               <!-- Anchor Reference Point & Label -->
               <pxl-circle x="500" y="300" r="6" fill="#fb923c" stroke="#ffffff" strokewidth="2"></pxl-circle>
               <pxl-text x="515" y="285" baseline="bottom" text="'Anchor'" size="27" fill="#fb923c" font="monospace"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 5: TRANSFORMS                                             -->
+        <!-- ================================================================= -->
+        <h2>5. Transforms</h2>
+        <p>The <code>anchor</code> attribute directly establishes the local transform origin for rotation (<code>rotate</code>) and scaling (<code>scale</code>, <code>scalex</code>, <code>scaley</code>). When a shape transforms, it pivots around the exact reference point designated by its anchor.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Hinges vs. Symmetrical Spins</p>
+          <p class="callout-body">A rectangle with <code>anchor="center"</code> rotates symmetrically in place. Setting <code>anchor="top-left"</code> turns that corner into a stationary hinge, swinging the entire rectangle through an orbital trajectory without having to calculate trigonometric offsets.</p>
+        </div>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Center Spin --&gt;
+    &lt;pxl-rect x="300" y="300" w="220" h="150" fill="#ffedd566" stroke="#f97316" strokewidth="4"
+      anchor="<mark id="sec5Rect1AnchorCode">center</mark>"
+      rotate="<mark id="sec5Rect1RotCode">30</mark>" scalex="<mark id="sec5Rect1ScaleXCode">1.0</mark>" scaley="<mark id="sec5Rect1ScaleYCode">1.0</mark>"&gt;&lt;/pxl-rect&gt;
+
+    &lt;!-- Right: Corner Hinge --&gt;
+    &lt;pxl-rect x="700" y="300" w="220" h="150" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
+      anchor="<mark id="sec5Rect2AnchorCode">top-left</mark>"
+      rotate="<mark id="sec5Rect2RotCode">30</mark>" scalex="<mark id="sec5Rect2ScaleXCode">1.0</mark>" scaley="<mark id="sec5Rect2ScaleYCode">1.0</mark>"&gt;&lt;/pxl-rect&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec5Rect1Tab')">Center Spin</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec5Rect2Tab')">Corner Hinge</button>
+              </div>
+            </div>
+
+            <!-- Left Tab: Center Spin -->
+            <div class="tab-content active" id="sec5Rect1Tab">
+              <div class="playground-sliders">
+                <!-- 1. Rotation -->
+                <div class="control-group">
+                  <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec5Rect1RotVal">30°</span></label>
+                  <input type="range" min="-180" max="180" step="5" value="30" autocomplete="off" id="sec5Rect1RotInput"
+                    oninput="document.getElementById('sec5Rect1').setAttribute('rotate', this.value); document.getElementById('sec5Rect1RotVal').innerText = this.value + '°'; document.getElementById('sec5Rect1RotCode').innerText = this.value;" data-mark="sec5Rect1RotCode">
+                </div>
+
+                <!-- 2. Anchor Dropdown -->
+                <div class="control-group">
+                  <label><span>Anchor</span></label>
+                  <select id="sec5Rect1AnchorSelect" autocomplete="off"
+                    onchange="document.getElementById('sec5Rect1').setAttribute('anchor', this.value); document.getElementById('sec5Ghost1').setAttribute('anchor', this.value); document.getElementById('sec5Rect1AnchorCode').innerText = this.value;" data-mark="sec5Rect1AnchorCode">
+                    <optgroup label="Center">
+                      <option value="center" selected>center (Default)</option>
+                    </optgroup>
+                    <optgroup label="Corners">
+                      <option value="top-left">top-left</option>
+                      <option value="top-right">top-right</option>
+                      <option value="bottom-right">bottom-right</option>
+                      <option value="bottom-left">bottom-left</option>
+                    </optgroup>
+                    <optgroup label="Edges">
+                      <option value="top">top</option>
+                      <option value="right">right</option>
+                      <option value="bottom">bottom</option>
+                      <option value="left">left</option>
+                    </optgroup>
+                  </select>
+                </div>
+
+                <!-- 3. Scale X -->
+                <div class="control-group">
+                  <label><span>Scale X</span> <span id="sec5Rect1ScaleXVal">1.0</span></label>
+                  <input type="range" min="0.4" max="2.0" step="0.1" value="1.0" autocomplete="off" id="sec5Rect1ScaleXInput"
+                    oninput="document.getElementById('sec5Rect1').setAttribute('scalex', this.value); document.getElementById('sec5Ghost1').setAttribute('scalex', this.value); document.getElementById('sec5Rect1ScaleXVal').innerText = this.value; document.getElementById('sec5Rect1ScaleXCode').innerText = this.value;" data-mark="sec5Rect1ScaleXCode">
+                </div>
+
+                <!-- 4. Scale Y -->
+                <div class="control-group">
+                  <label><span>Scale Y</span> <span id="sec5Rect1ScaleYVal">1.0</span></label>
+                  <input type="range" min="0.4" max="2.0" step="0.1" value="1.0" autocomplete="off" id="sec5Rect1ScaleYInput"
+                    oninput="document.getElementById('sec5Rect1').setAttribute('scaley', this.value); document.getElementById('sec5Ghost1').setAttribute('scaley', this.value); document.getElementById('sec5Rect1ScaleYVal').innerText = this.value; document.getElementById('sec5Rect1ScaleYCode').innerText = this.value;" data-mark="sec5Rect1ScaleYCode">
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Tab: Corner Hinge -->
+            <div class="tab-content" id="sec5Rect2Tab">
+              <div class="playground-sliders">
+                <!-- 1. Rotation -->
+                <div class="control-group">
+                  <label><span>Rotation</span> <span id="sec5Rect2RotVal">30°</span></label>
+                  <input type="range" min="-180" max="180" step="5" value="30" autocomplete="off" id="sec5Rect2RotInput"
+                    oninput="document.getElementById('sec5Rect2').setAttribute('rotate', this.value); document.getElementById('sec5Rect2RotVal').innerText = this.value + '°'; document.getElementById('sec5Rect2RotCode').innerText = this.value;" data-mark="sec5Rect2RotCode">
+                </div>
+
+                <!-- 2. Anchor Dropdown -->
+                <div class="control-group">
+                  <label><span>Anchor</span></label>
+                  <select id="sec5Rect2AnchorSelect" autocomplete="off"
+                    onchange="document.getElementById('sec5Rect2').setAttribute('anchor', this.value); document.getElementById('sec5Ghost2').setAttribute('anchor', this.value); document.getElementById('sec5Rect2AnchorCode').innerText = this.value;" data-mark="sec5Rect2AnchorCode">
+                    <optgroup label="Center">
+                      <option value="center">center (Default)</option>
+                    </optgroup>
+                    <optgroup label="Corners">
+                      <option value="top-left" selected>top-left</option>
+                      <option value="top-right">top-right</option>
+                      <option value="bottom-right">bottom-right</option>
+                      <option value="bottom-left">bottom-left</option>
+                    </optgroup>
+                    <optgroup label="Edges">
+                      <option value="top">top</option>
+                      <option value="right">right</option>
+                      <option value="bottom">bottom</option>
+                      <option value="left">left</option>
+                    </optgroup>
+                  </select>
+                </div>
+
+                <!-- 3. Scale X -->
+                <div class="control-group">
+                  <label><span>Scale X</span> <span id="sec5Rect2ScaleXVal">1.0</span></label>
+                  <input type="range" min="0.4" max="2.0" step="0.1" value="1.0" autocomplete="off" id="sec5Rect2ScaleXInput"
+                    oninput="document.getElementById('sec5Rect2').setAttribute('scalex', this.value); document.getElementById('sec5Ghost2').setAttribute('scalex', this.value); document.getElementById('sec5Rect2ScaleXVal').innerText = this.value; document.getElementById('sec5Rect2ScaleXCode').innerText = this.value;" data-mark="sec5Rect2ScaleXCode">
+                </div>
+
+                <!-- 4. Scale Y -->
+                <div class="control-group">
+                  <label><span>Scale Y</span> <span id="sec5Rect2ScaleYVal">1.0</span></label>
+                  <input type="range" min="0.4" max="2.0" step="0.1" value="1.0" autocomplete="off" id="sec5Rect2ScaleYInput"
+                    oninput="document.getElementById('sec5Rect2').setAttribute('scaley', this.value); document.getElementById('sec5Ghost2').setAttribute('scaley', this.value); document.getElementById('sec5Rect2ScaleYVal').innerText = this.value; document.getElementById('sec5Rect2ScaleYCode').innerText = this.value;" data-mark="sec5Rect2ScaleYCode">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 5 Stage -->
+          <pxl-stage id="sec5Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Shared Helper Lines (Extended to border) -->
+              <pxl-line x1="0" y1="300" x2="1000" y2="300" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-line x1="300" y1="0" x2="300" y2="600" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-line x1="700" y1="0" x2="700" y2="600" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+
+              <!-- Left: Center Spin (Orange Scheme) -->
+              <pxl-rect id="sec5Ghost1" x="300" y="300" w="220" h="150" anchor="center" stroke="#fdba7488" strokewidth="2" fill="#ffedd544"></pxl-rect>
+              <pxl-rect id="sec5Rect1" x="300" y="300" w="220" h="150" anchor="center" rotate="30" scalex="1" scaley="1" strokewidth="4" fill="#ffedd566" stroke="#f97316"></pxl-rect>
+              <pxl-circle x="300" y="300" r="6" fill="#fb923c" stroke="#ffffff" strokewidth="2"></pxl-circle>
+              <pxl-text x="315" y="285" baseline="bottom" text="'Anchor'" size="27" fill="#fb923c" font="monospace"></pxl-text>
+              <pxl-text x="300" y="520" text="'Center Spin'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: Corner Hinge (Blue Scheme) -->
+              <pxl-rect id="sec5Ghost2" x="700" y="300" w="220" h="150" anchor="top-left" stroke="#93c5fd88" strokewidth="2" fill="#dbeafe44"></pxl-rect>
+              <pxl-rect id="sec5Rect2" x="700" y="300" w="220" h="150" anchor="top-left" rotate="30" scalex="1" scaley="1" strokewidth="4" fill="#dbeafe66" stroke="#3b82f6"></pxl-rect>
+              <pxl-circle x="700" y="300" r="6" fill="#60a5fa" stroke="#ffffff" strokewidth="2"></pxl-circle>
+              <pxl-text x="715" y="285" baseline="bottom" text="'Anchor'" size="27" fill="#60a5fa" font="monospace"></pxl-text>
+              <pxl-text x="700" y="520" text="'Corner Hinge'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
