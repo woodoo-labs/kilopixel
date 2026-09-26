@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rectangle | Kilopixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+  <script src="js/api-tabs.js"></script>
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+        <h1>Rectangle</h1>
+        <p class="lead">The primary orthogonal primitive in Kilopixel, <code>&lt;pxl-rect&gt;</code> renders sharp boxes, rounded cards, stadium pill buttons, and responsive layouts &mdash; with built-in support for 9-position anchor pinning and independent per-corner radii.</p>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: DIMENSIONS                                             -->
+        <!-- ================================================================= -->
+        <h2>1. Dimensions</h2>
+        <p>A rectangle's size is determined by its width (<code>w</code>) and height (<code>h</code>). By default, the shape is centered directly over its <code>x</code> and <code>y</code> coordinates.</p>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Square --&gt;
+    &lt;pxl-rect x="300" y="300" w="<mark id="sec1Rect1WidthCode">240</mark>" h="<mark id="sec1Rect1HeightCode">240</mark>" fill="#ffedd566" stroke="#f97316"&gt;&lt;/pxl-rect&gt;
+
+    &lt;!-- Right: Rectangle --&gt;
+    &lt;pxl-rect x="700" y="300" w="<mark id="sec1Rect2WidthCode">360</mark>" h="<mark id="sec1Rect2HeightCode">200</mark>" fill="#dbeafe66" stroke="#3b82f6"&gt;&lt;/pxl-rect&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1Rect1Tab')">Square</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1Rect2Tab')">Rectangle</button>
+              </div>
+            </div>
+
+            <!-- Square Tab -->
+            <div class="tab-content active" id="sec1Rect1Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Width <span class="indicator-dot"></span></span> <span id="sec1Rect1WidthVal">240</span></label>
+                  <input type="range" min="40" max="440" step="10" value="240" autocomplete="off" id="sec1Rect1WidthInput"
+                    oninput="document.getElementById('sec1Rect1').setAttribute('w', this.value); document.getElementById('sec1Rect1WidthVal').innerText = this.value; document.getElementById('sec1Rect1WidthCode').innerText = this.value;" data-mark="sec1Rect1WidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Height</span> <span id="sec1Rect1HeightVal">240</span></label>
+                  <input type="range" min="40" max="440" step="10" value="240" autocomplete="off" id="sec1Rect1HeightInput"
+                    oninput="document.getElementById('sec1Rect1').setAttribute('h', this.value); document.getElementById('sec1Rect1HeightVal').innerText = this.value; document.getElementById('sec1Rect1HeightCode').innerText = this.value;" data-mark="sec1Rect1HeightCode">
+                </div>
+              </div>
+            </div>
+
+            <!-- Rectangle Tab -->
+            <div class="tab-content" id="sec1Rect2Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Width</span> <span id="sec1Rect2WidthVal">360</span></label>
+                  <input type="range" min="40" max="480" step="10" value="360" autocomplete="off" id="sec1Rect2WidthInput"
+                    oninput="document.getElementById('sec1Rect2').setAttribute('w', this.value); document.getElementById('sec1Rect2WidthVal').innerText = this.value; document.getElementById('sec1Rect2WidthCode').innerText = this.value;" data-mark="sec1Rect2WidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Height</span> <span id="sec1Rect2HeightVal">200</span></label>
+                  <input type="range" min="40" max="440" step="10" value="200" autocomplete="off" id="sec1Rect2HeightInput"
+                    oninput="document.getElementById('sec1Rect2').setAttribute('h', this.value); document.getElementById('sec1Rect2HeightVal').innerText = this.value; document.getElementById('sec1Rect2HeightCode').innerText = this.value;" data-mark="sec1Rect2HeightCode">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 1 Stage -->
+          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Left: Square (Orange Scheme) -->
+              <pxl-rect id="sec1Rect1" x="300" y="300" w="240" h="240" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-rect>
+              <pxl-circle x="300" y="300" r="5" fill="#fb923c"></pxl-circle>
+              <pxl-text x="300" y="500" text="'Square'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: Rectangle (Blue Scheme) -->
+              <pxl-rect id="sec1Rect2" x="700" y="300" w="360" h="200" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-rect>
+              <pxl-circle x="700" y="300" r="5" fill="#60a5fa"></pxl-circle>
+              <pxl-text x="700" y="500" text="'Rectangle'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Prism Syntax Highlighting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+</body>
+</html>

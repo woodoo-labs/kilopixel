@@ -49,7 +49,7 @@ Elements within a `<pxl-layer>` are drawn in strict DOM order (back-to-front). A
 6. **Shape Center (Top):** Center dots, dynamic tracking dots, and their primary title labels (e.g., `'Circle (150, 200)'`). This ensures identity markers are *always* visible above all helpers and shapes.
 
 ## 3. Typography & Coordinate Labels
-* **Standard Font Size (`size="27"`):** Within the 1000-unit logical canvas, all `<pxl-text>` annotations, coordinate labels, shape titles, and axis guides MUST use `size="27"` by default. This ensures consistent readability across desktop and high-PPI mobile screens without cluttering the canvas.
+* **Standard Font Size (`size="27"`):** Within the 1000-width logical canvas, all `<pxl-text>` annotations, coordinate labels, shape titles, and axis guides MUST use `size="27"` by default. This ensures consistent readability across desktop and high-PPI mobile screens without cluttering the canvas.
 * **Center Point Labels (Canvas):** Center point labels (e.g., the colored dots at the center of layers or shapes) must strictly use descriptive text like `'Layer Center'` or `'Circle Center'`. Do NOT include coordinate tuples `(x, y)` in these labels, as the coordinates are already visualized by the surrounding dashed helper lines.
   * **Exception for Absolute Stage Bounds:** The Stage origin and corners are the only points that use absolute tuple syntax in labels: `'Stage Origin (0, 0)'` or `'(1000, 0)'`.
 * **Coordinate Syntax in Text (Prose):**
