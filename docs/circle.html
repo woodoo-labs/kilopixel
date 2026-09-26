@@ -404,6 +404,154 @@
           </div>
 
         <!-- ================================================================= -->
+        <!-- SECTION 5: ARROWS -->
+        <!-- ================================================================= -->
+        <h2>5. Arrows</h2>
+        <p>Adding arrowheads to an open arc transforms it into a curved vector diagram arrow, circular dial, or speedometer indicator. You can independently apply and scale arrows on both the start and end of the path.</p>
+
+        <!-- Declarative HTML markup above stage -->
+          <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Filled Arrows --&gt;
+    &lt;pxl-circle x="300" y="300" stroke="#f97316" strokewidth="8"
+      start="-45" sweep="270"
+      arrowstyle="filled"
+      arrowstart="<mark id="sec5Circle1StartArrowCode">25</mark>" 
+      arrowend="<mark id="sec5Circle1EndArrowCode">25</mark>"&gt;&lt;/pxl-circle&gt;
+
+    &lt;!-- Right: Line Arrows --&gt;
+    &lt;pxl-circle x="700" y="300" stroke="#3b82f6" strokewidth="8" linedash="[15, 15]"
+      start="-45" sweep="270"
+      arrowstyle="line"
+      arrowstart="<mark id="sec5Circle2StartArrowCode">0</mark>" 
+      arrowend="<mark id="sec5Circle2EndArrowCode">35</mark>"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+          <div class="demo-container">
+            <div class="demo-controls">
+              <div class="demo-controls-header">
+                <h3 class="demo-controls-title">Controls</h3>
+                <div class="demo-tabs">
+                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec5Circle1Tab')">Filled</button>
+                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec5Circle2Tab')">Line</button>
+                </div>
+              </div>
+
+              <!-- Circle 1 Tab -->
+              <div class="tab-content active" id="sec5Circle1Tab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Start Arrow</span> <span id="sec5Circle1StartArrowVal">25</span></label>
+                    <input type="range" min="0" max="60" step="5" value="25" autocomplete="off"
+                      oninput="document.getElementById('sec5Circle1').setAttribute('arrowstart', this.value); document.getElementById('sec5Circle1StartArrowVal').innerText = this.value; document.getElementById('sec5Circle1StartArrowCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>End Arrow</span> <span id="sec5Circle1EndArrowVal">25</span></label>
+                    <input type="range" min="0" max="60" step="5" value="25" autocomplete="off"
+                      oninput="document.getElementById('sec5Circle1').setAttribute('arrowend', this.value); document.getElementById('sec5Circle1EndArrowVal').innerText = this.value; document.getElementById('sec5Circle1EndArrowCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Sweep</span> <span id="sec5Circle1SweepVal">270°</span></label>
+                    <input type="range" min="-40" max="400" step="5" value="270" autocomplete="off"
+                      oninput="document.getElementById('sec5Circle1').setAttribute('sweep', this.value); document.getElementById('sec5Circle1SweepVal').innerText = this.value + '°';">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Circle 2 Tab -->
+              <div class="tab-content" id="sec5Circle2Tab">
+                <div class="playground-sliders">
+                  <div class="control-group">
+                    <label><span>Start Arrow</span> <span id="sec5Circle2StartArrowVal">0</span></label>
+                    <input type="range" min="0" max="60" step="5" value="0" autocomplete="off"
+                      oninput="document.getElementById('sec5Circle2').setAttribute('arrowstart', this.value); document.getElementById('sec5Circle2StartArrowVal').innerText = this.value; document.getElementById('sec5Circle2StartArrowCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>End Arrow</span> <span id="sec5Circle2EndArrowVal">35</span></label>
+                    <input type="range" min="0" max="60" step="5" value="35" autocomplete="off"
+                      oninput="document.getElementById('sec5Circle2').setAttribute('arrowend', this.value); document.getElementById('sec5Circle2EndArrowVal').innerText = this.value; document.getElementById('sec5Circle2EndArrowCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Sweep</span> <span id="sec5Circle2SweepVal">270°</span></label>
+                    <input type="range" min="45" max="360" step="15" value="270" autocomplete="off"
+                      oninput="document.getElementById('sec5Circle2').setAttribute('sweep', this.value); document.getElementById('sec5Circle2SweepVal').innerText = this.value + '°';">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mode 5 stage -->
+            <pxl-stage id="sec5Stage" ratio="5 / 3" class="demo-stage">
+              <pxl-layer>
+                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+                
+                <!-- Left: Filled Arrows (Orange Scheme) -->
+                <pxl-circle id="sec5Circle1" x="300" y="300" r="140" start="-45" sweep="270" 
+                  arrowstyle="filled" arrowstart="25" arrowend="25"
+                  stroke="#f97316" strokewidth="8"></pxl-circle>
+                <pxl-text x="300" y="500" text="'Filled'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+                <!-- Right: Line Arrows (Blue Scheme) -->
+                <pxl-circle id="sec5Circle2" x="700" y="300" r="140" start="-45" sweep="270" 
+                  arrowstyle="line" arrowstart="0" arrowend="35"
+                  stroke="#3b82f6" strokewidth="8" linedash="[15, 15]"></pxl-circle>
+                <pxl-text x="700" y="500" text="'Line'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              </pxl-layer>
+            </pxl-stage>
+          </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 6: SHOWCASE -->
+        <!-- ================================================================= -->
+        <h2>6. Showcase</h2>
+        <p>A complex geometric mosaic inspired by Sonia Delaunay, built by stacking dozens of concentric rings and pie wedges. By grouping the static shapes into a background <code>&lt;pxl-layer&gt;</code>, the engine caches them automatically, allowing the foreground animations to run at a buttery smooth 60fps.</p>
+
+          <div class="showcase-container">
+            <pxl-stage id="sec6Stage" ratio="1 / 1" class="showcase-stage">
+              <!-- Static Background -->
+              <pxl-layer blend="screen" y="200">
+                <!-- Hub 1: Center Left -->
+                <pxl-circle x="350" y="250" r="200" ir="150" start="90" sweep="180" fill="#ef4444"></pxl-circle>
+                <pxl-circle x="350" y="250" r="200" ir="150" start="-90" sweep="180" fill="#facc15"></pxl-circle>
+                <pxl-circle x="350" y="250" r="150" ir="90" start="0" sweep="180" fill="#3b82f6"></pxl-circle>
+                <pxl-circle x="350" y="250" r="150" ir="90" start="180" sweep="180" fill="#22c55e"></pxl-circle>
+                <pxl-circle x="350" y="250" r="90" ir="30" start="45" sweep="180" fill="#f97316"></pxl-circle>
+                <pxl-circle x="350" y="250" r="90" ir="30" start="225" sweep="180" fill="#a855f7"></pxl-circle>
+                <pxl-circle x="350" y="250" r="30" ir="0" start="0" sweep="360" fill="#1e3a8a"></pxl-circle>
+
+                <!-- Hub 2: Top Right -->
+                <pxl-circle x="650" y="150" r="250" ir="180" start="180" sweep="180" fill="#7dd3fc"></pxl-circle>
+                <pxl-circle x="650" y="150" r="180" ir="120" start="90" sweep="90" fill="#ef4444"></pxl-circle>
+                <pxl-circle x="650" y="150" r="180" ir="120" start="180" sweep="90" fill="#facc15"></pxl-circle>
+                <pxl-circle x="650" y="150" r="180" ir="120" start="270" sweep="90" fill="#ec4899"></pxl-circle>
+                <pxl-circle x="650" y="150" r="120" ir="0" start="0" sweep="180" fill="#22c55e"></pxl-circle>
+                <pxl-circle x="650" y="150" r="120" ir="0" start="180" sweep="180" fill="#f97316"></pxl-circle>
+
+                <!-- Hub 3: Bottom Right -->
+                <pxl-circle x="700" y="400" r="180" ir="140" start="0" sweep="180" fill="#1e3a8a"></pxl-circle>
+                <pxl-circle x="700" y="400" r="180" ir="140" start="180" sweep="180" fill="#facc15"></pxl-circle>
+                <pxl-circle x="700" y="400" r="140" ir="80" start="45" sweep="90" fill="#ec4899"></pxl-circle>
+                <pxl-circle x="700" y="400" r="140" ir="80" start="135" sweep="90" fill="#3b82f6"></pxl-circle>
+                <pxl-circle x="700" y="400" r="140" ir="80" start="225" sweep="180" fill="#ef4444"></pxl-circle>
+                <pxl-circle x="700" y="400" r="80" ir="0" start="0" sweep="360" fill="#facc15"></pxl-circle>
+
+                <!-- Floating Shards -->
+                <pxl-circle x="500" y="275" r="300" ir="280" start="45" sweep="45" fill="#f97316"></pxl-circle>
+                <pxl-circle x="500" y="275" r="300" ir="280" start="135" sweep="45" fill="#22c55e"></pxl-circle>
+                <pxl-circle x="500" y="275" r="300" ir="280" start="225" sweep="45" fill="#7dd3fc"></pxl-circle>
+                <pxl-circle x="500" y="275" r="300" ir="280" start="315" sweep="45" fill="#a855f7"></pxl-circle>
+              </pxl-layer>
+
+              <!-- Animated Foreground -->
+              <pxl-layer y="200">
+                <pxl-circle x="500" y="275" r="450" ir="440" stroke="#ffffff" strokewidth="6" linedash="[20, 30]" rotate="t * 15"></pxl-circle>
+                <pxl-circle x="500" y="275" r="450" ir="0" pie="true" sweep="15" fill="#ffffff44" rotate="-t * 20"></pxl-circle>
+              </pxl-layer>
+            </pxl-stage>
+          </div>
+
+        <!-- ================================================================= -->
         <!-- SECTION 10: ELEMENT REFERENCE -->
         <!-- ================================================================= -->
         <h2>10. Element Reference</h2>

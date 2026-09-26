@@ -1810,7 +1810,11 @@ class Shape extends PxlNode {
       ctx.moveTo(wing1X, wing1Y);
       ctx.lineTo(tipX, tipY);
       ctx.lineTo(wing2X, wing2Y);
+      
+      const hasDash = this.attributeValues.linedash && this.attributeValues.linedash !== 'none' && this.attributeValues.linedash !== 0 && this.attributeValues.linedash !== '0';
+      if (hasDash) ctx.setLineDash(pxl._emptyDash);
       ctx.stroke();
+      if (hasDash) pxl.applyLineDash(ctx, u, this.attributeValues.linedash, this.attributeValues.dashoffset, this);
     } else {
       ctx.moveTo(tipX, tipY);
       ctx.lineTo(wing1X, wing1Y);
