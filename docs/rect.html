@@ -224,6 +224,212 @@
           </pxl-stage>
         </div>
 
+        <!-- ================================================================= -->
+        <!-- SECTION 3: PER-CORNER RADII                                       -->
+        <!-- ================================================================= -->
+        <h2>3. Per-Corner Radii</h2>
+        <p>You can independently customize each corner of a rectangle using <code>r1</code> through <code>r4</code>, numbered clockwise starting from the top-left corner. This allows you to construct asymmetric shapes such as tabs, badges, speech bubbles, and organic motifs.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Clockwise Ordering &amp; Fallbacks</p>
+          <p class="callout-body">Corners are mapped in clockwise sequence: <code>r1</code> (top-left), <code>r2</code> (top-right), <code>r3</code> (bottom-right), and <code>r4</code> (bottom-left). Any corner without an explicit override automatically inherits the base <code>r</code> radius (which defaults to <code>0</code>). For example, setting <code>r="15"</code> and <code>r1="60"</code> rounds three corners by 15, while giving the top-left corner an amplified curve of 60.</p>
+        </div>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Tab --&gt;
+    &lt;pxl-rect x="300" y="300" w="260" h="220" strokewidth="4"
+      r1="<mark id="sec3Rect1R1Code">50</mark>" r2="<mark id="sec3Rect1R2Code">50</mark>" r3="<mark id="sec3Rect1R3Code">0</mark>" r4="<mark id="sec3Rect1R4Code">0</mark>"
+      fill="#ffedd566" stroke="#f97316"&gt;&lt;/pxl-rect&gt;
+
+    &lt;!-- Right: Leaf --&gt;
+    &lt;pxl-rect x="700" y="300" w="260" h="260" strokewidth="4"
+      r1="<mark id="sec3Rect2R1Code">0</mark>" r2="<mark id="sec3Rect2R2Code">130</mark>" r3="<mark id="sec3Rect2R3Code">0</mark>" r4="<mark id="sec3Rect2R4Code">130</mark>"
+      fill="#dbeafe66" stroke="#3b82f6"&gt;&lt;/pxl-rect&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3Rect1Tab')">Tab</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3Rect2Tab')">Leaf</button>
+              </div>
+            </div>
+
+            <!-- Tab Shape Tab -->
+            <div class="tab-content active" id="sec3Rect1Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Top-Left <span class="indicator-dot"></span></span> <span id="sec3Rect1R1Val">50</span></label>
+                  <input type="range" min="0" max="130" step="5" value="50" autocomplete="off" id="sec3Rect1R1Input"
+                    oninput="document.getElementById('sec3Rect1').setAttribute('r1', this.value); document.getElementById('sec3Rect1R1Val').innerText = this.value; document.getElementById('sec3Rect1R1Code').innerText = this.value;" data-mark="sec3Rect1R1Code">
+                </div>
+                <div class="control-group">
+                  <label><span>Top-Right</span> <span id="sec3Rect1R2Val">50</span></label>
+                  <input type="range" min="0" max="130" step="5" value="50" autocomplete="off" id="sec3Rect1R2Input"
+                    oninput="document.getElementById('sec3Rect1').setAttribute('r2', this.value); document.getElementById('sec3Rect1R2Val').innerText = this.value; document.getElementById('sec3Rect1R2Code').innerText = this.value;" data-mark="sec3Rect1R2Code">
+                </div>
+                <div class="control-group">
+                  <label><span>Bottom-Right</span> <span id="sec3Rect1R3Val">0</span></label>
+                  <input type="range" min="0" max="130" step="5" value="0" autocomplete="off" id="sec3Rect1R3Input"
+                    oninput="document.getElementById('sec3Rect1').setAttribute('r3', this.value); document.getElementById('sec3Rect1R3Val').innerText = this.value; document.getElementById('sec3Rect1R3Code').innerText = this.value;" data-mark="sec3Rect1R3Code">
+                </div>
+                <div class="control-group">
+                  <label><span>Bottom-Left</span> <span id="sec3Rect1R4Val">0</span></label>
+                  <input type="range" min="0" max="130" step="5" value="0" autocomplete="off" id="sec3Rect1R4Input"
+                    oninput="document.getElementById('sec3Rect1').setAttribute('r4', this.value); document.getElementById('sec3Rect1R4Val').innerText = this.value; document.getElementById('sec3Rect1R4Code').innerText = this.value;" data-mark="sec3Rect1R4Code">
+                </div>
+              </div>
+            </div>
+
+            <!-- Leaf Shape Tab -->
+            <div class="tab-content" id="sec3Rect2Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Top-Left</span> <span id="sec3Rect2R1Val">0</span></label>
+                  <input type="range" min="0" max="130" step="5" value="0" autocomplete="off" id="sec3Rect2R1Input"
+                    oninput="document.getElementById('sec3Rect2').setAttribute('r1', this.value); document.getElementById('sec3Rect2R1Val').innerText = this.value; document.getElementById('sec3Rect2R1Code').innerText = this.value;" data-mark="sec3Rect2R1Code">
+                </div>
+                <div class="control-group">
+                  <label><span>Top-Right</span> <span id="sec3Rect2R2Val">130</span></label>
+                  <input type="range" min="0" max="130" step="5" value="130" autocomplete="off" id="sec3Rect2R2Input"
+                    oninput="document.getElementById('sec3Rect2').setAttribute('r2', this.value); document.getElementById('sec3Rect2R2Val').innerText = this.value; document.getElementById('sec3Rect2R2Code').innerText = this.value;" data-mark="sec3Rect2R2Code">
+                </div>
+                <div class="control-group">
+                  <label><span>Bottom-Right</span> <span id="sec3Rect2R3Val">0</span></label>
+                  <input type="range" min="0" max="130" step="5" value="0" autocomplete="off" id="sec3Rect2R3Input"
+                    oninput="document.getElementById('sec3Rect2').setAttribute('r3', this.value); document.getElementById('sec3Rect2R3Val').innerText = this.value; document.getElementById('sec3Rect2R3Code').innerText = this.value;" data-mark="sec3Rect2R3Code">
+                </div>
+                <div class="control-group">
+                  <label><span>Bottom-Left</span> <span id="sec3Rect2R4Val">130</span></label>
+                  <input type="range" min="0" max="130" step="5" value="130" autocomplete="off" id="sec3Rect2R4Input"
+                    oninput="document.getElementById('sec3Rect2').setAttribute('r4', this.value); document.getElementById('sec3Rect2R4Val').innerText = this.value; document.getElementById('sec3Rect2R4Code').innerText = this.value;" data-mark="sec3Rect2R4Code">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3 Stage -->
+          <pxl-stage id="sec3Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Left: Tab (Orange Scheme) -->
+              <pxl-rect id="sec3Rect1" x="300" y="300" w="260" h="220" strokewidth="4" r1="50" r2="50" r3="0" r4="0" fill="#ffedd566" stroke="#f97316"></pxl-rect>
+              <pxl-circle x="300" y="300" r="5" fill="#fb923c"></pxl-circle>
+              <pxl-text x="300" y="500" text="'Tab'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: Leaf (Blue Scheme) -->
+              <pxl-rect id="sec3Rect2" x="700" y="300" w="260" h="260" strokewidth="4" r1="0" r2="130" r3="0" r4="130" fill="#dbeafe66" stroke="#3b82f6"></pxl-rect>
+              <pxl-circle x="700" y="300" r="5" fill="#60a5fa"></pxl-circle>
+              <pxl-text x="700" y="500" text="'Leaf'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 4: THE 9-POSITION ANCHOR SYSTEM                           -->
+        <!-- ================================================================= -->
+        <h2>4. The 9-Position Anchor System</h2>
+        <p>By default, rectangles position their geometric center at <code>(x, y)</code>. The <code>anchor</code> attribute redefines which point of the rectangle aligns with <code>(x, y)</code>, which also dictates the pivot point for rotations and scaling.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Default Center Alignment</p>
+          <p class="callout-body">Unlike the native HTML5 Canvas API or SVG where rectangles always originate from their top-left corner, Kilopixel defaults to <code>anchor="center"</code>. To align a rectangle like standard canvas or SVG shapes, set <code>anchor="top-left"</code>.</p>
+        </div>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-rect x="500" y="300"
+      w="<mark id="sec4RectWidthCode">320</mark>" h="<mark id="sec4RectHeightCode">200</mark>"
+      anchor="<mark id="sec4RectAnchorCode">center</mark>" r="<mark id="sec4RectRCode">20</mark>"
+      fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;&lt;/pxl-rect&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4RectTab')">Rectangle</button>
+              </div>
+            </div>
+
+            <!-- Rectangle Tab -->
+            <div class="tab-content active" id="sec4RectTab">
+              <div class="playground-sliders">
+                <!-- 1. Width -->
+                <div class="control-group">
+                  <label><span>Width</span> <span id="sec4RectWidthVal">320</span></label>
+                  <input type="range" min="120" max="440" step="10" value="320" autocomplete="off" id="sec4RectWidthInput"
+                    oninput="document.getElementById('sec4Rect').setAttribute('w', this.value); document.getElementById('sec4RectWidthVal').innerText = this.value; document.getElementById('sec4RectWidthCode').innerText = this.value;" data-mark="sec4RectWidthCode">
+                </div>
+
+                <!-- 2. Height -->
+                <div class="control-group">
+                  <label><span>Height</span> <span id="sec4RectHeightVal">200</span></label>
+                  <input type="range" min="100" max="280" step="10" value="200" autocomplete="off" id="sec4RectHeightInput"
+                    oninput="document.getElementById('sec4Rect').setAttribute('h', this.value); document.getElementById('sec4RectHeightVal').innerText = this.value; document.getElementById('sec4RectHeightCode').innerText = this.value;" data-mark="sec4RectHeightCode">
+                </div>
+
+                <!-- 3. Anchor Dropdown -->
+                <div class="control-group">
+                  <label><span>Anchor <span class="indicator-dot"></span></span></label>
+                  <select id="sec4RectAnchorSelect" autocomplete="off"
+                    onchange="document.getElementById('sec4Rect').setAttribute('anchor', this.value); document.getElementById('sec4RectAnchorCode').innerText = this.value;" data-mark="sec4RectAnchorCode">
+                    <optgroup label="Center">
+                      <option value="center" selected>center (Default)</option>
+                    </optgroup>
+                    <optgroup label="Corners">
+                      <option value="top-left">top-left</option>
+                      <option value="top-right">top-right</option>
+                      <option value="bottom-right">bottom-right</option>
+                      <option value="bottom-left">bottom-left</option>
+                    </optgroup>
+                    <optgroup label="Edges">
+                      <option value="top">top</option>
+                      <option value="right">right</option>
+                      <option value="bottom">bottom</option>
+                      <option value="left">left</option>
+                    </optgroup>
+                  </select>
+                </div>
+
+                <!-- 4. Corner Radius -->
+                <div class="control-group">
+                  <label><span>Corner Radius</span> <span id="sec4RectRVal">20</span></label>
+                  <input type="range" min="0" max="80" step="5" value="20" autocomplete="off" id="sec4RectRInput"
+                    oninput="document.getElementById('sec4Rect').setAttribute('r', this.value); document.getElementById('sec4RectRVal').innerText = this.value; document.getElementById('sec4RectRCode').innerText = this.value;" data-mark="sec4RectRCode">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4 Stage -->
+          <pxl-stage id="sec4Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Coordinate Crosshairs intersecting at (500, 300) -->
+              <pxl-line x1="80" y1="300" x2="920" y2="300" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-line x1="500" y1="40" x2="500" y2="560" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+
+              <!-- Interactive Rectangle (Orange Scheme) -->
+              <pxl-rect id="sec4Rect" x="500" y="300" w="320" h="200" r="20" anchor="center" strokewidth="4" fill="#ffedd566" stroke="#f97316"></pxl-rect>
+
+              <!-- Anchor Reference Point & Label -->
+              <pxl-circle x="500" y="300" r="6" fill="#fb923c" stroke="#ffffff" strokewidth="2"></pxl-circle>
+              <pxl-text x="515" y="285" baseline="bottom" text="'Anchor'" size="27" fill="#fb923c" font="monospace"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
       </div>
     </main>
   </div>
