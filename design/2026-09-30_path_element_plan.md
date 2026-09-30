@@ -135,6 +135,35 @@ $$\text{effectiveLineWidth} = \frac{\text{strokewidth} \cdot u}{\text{averageSca
 
 This ensures `strokewidth="2"` renders at exactly 2 logical units regardless of whether the icon is rendered at 24px or 240px.
 
+### 4.5 Multi-Path Icons & Duotone Composition
+
+While ~80–90% of web icons (FontAwesome, Material Symbols) are a single `<path>`, some icons (e.g. Bootstrap `chat-dots`, `bell-fill` with notification badge, or FontAwesome Duotone) consist of 2–3 distinct paths.
+
+Kilopixel provides two seamless patterns to handle multi-path icons:
+
+#### Pattern A: Composed Duotone Group (`<pxl-group>`)
+When sub-parts require distinct colors, different opacities, or independent animation:
+
+```html
+<pxl-group x="500" y="300" rotate="sin(t * 2) * 5">
+  <!-- Path 1: Primary shape -->
+  <pxl-path d="M...bubble..." viewbox="0 0 16 16" size="80" fill="#3b82f6"></pxl-path>
+  <!-- Path 2: Secondary detail / accent -->
+  <pxl-path d="M...dots..." viewbox="0 0 16 16" size="80" fill="white"></pxl-path>
+</pxl-group>
+```
+* Because both paths share identical `viewbox` and `size`, their coordinate spaces align with 100% mathematical precision.
+* The outer `<pxl-group>` handles common positioning (`x`, `y`), rotation, and scaling.
+
+#### Pattern B: Single-Node Sub-Path Merge (MoveTo `M`)
+If the multi-path icon is monochrome and the developer prefers a single DOM node:
+
+```html
+<!-- Concatenate multiple sub-paths into a single d attribute -->
+<pxl-path d="M...subpath 1...Z  M...subpath 2...Z" viewbox="0 0 16 16" size="80" fill="currentColor"></pxl-path>
+```
+Native `Path2D` natively supports multiple `M` (MoveTo) commands in a single string, drawing disconnected contours as a single vector shape.
+
 ---
 
 ## 5. Render Algorithm & Zero-GC Guarantees
@@ -329,3 +358,7 @@ const files = [
 ### Test Case 7: Compositing & Gradients
 * **Setup**: Apply `fill="linear(45, ['gold', 'red'])"` and `mask="destination-out"`.
 * **Expectation**: Linear gradient spans the icon's bounding box and correctly clips out background pixels.
+
+### Test Case 8: Multi-Path & Duotone Composition
+* **Setup**: Assemble Bootstrap `chat-dots` or `bell-fill` using 2 `<pxl-path>` elements sharing `viewbox="0 0 16 16"` inside a `<pxl-group>`.
+* **Expectation**: Primary body and inner details align with 100% precision. Sub-parts can have independent fills/animations while rotating together as a unit. Also test string-concatenation (`M... Z M... Z`) into a single `<pxl-path>` element.
