@@ -1,175 +1,266 @@
-# Design Plan: Single-Function Tween Animation Engine & Quiescence Lifecycle
+# Tween Animation Plan (Unified Specification)
 
 **Date**: 2026-10-01  
-**Status**: Draft  
+**Status**: Approved Specification  
 **Files affected**: [`js/compiler.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js), [`js/elements/node.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/node.js), [`js/elements/layer.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/layer.js), [`js/elements/stage.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/stage.js), [`.agents/KILOPIXEL.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/.agents/KILOPIXEL.md)
 
 ---
 
-## 1. Problem Statement & Motivation
+## 1. Goal & Architecture Overview
 
-Kilopixel provides robust continuous time drivers ([`loop()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L123), [`yoyo()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L124), [`wave()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L125), [`bounce()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L126), [`strobe()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L127), [`glide()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L128), [`pulse()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L129), [`glitch()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L130), [`time()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L131)). These drivers are periodic and run indefinitely.
+Introduce a native `tween()` driver into Kilopixel that provides high-performance, declarative, one-shot animations. 
 
-However, declarative canvas UI and interactive graphics fundamentally require **finite, one-shot transitions**:
-1. **Entrance / Exit Transitions**: Moving a modal, badge, or card from $A \to B$ over a set duration when mounted or shown.
-2. **Interactive State Changes**: Smoothly animating a button, slider, or entity position when a reactive variable mutates (e.g., `ref.game.playerX`).
-3. **Physical Settling & Damped Oscillations**: Elastic overshoots, bouncy drops, and impact shakes that dissipate and come to rest.
-4. **Quiescence (Layer Sleep)**: Infinite drivers force the canvas render loop to run at 60 FPS permanently. A finite transition engine must allow layers to automatically shut down their render loops (0% CPU) once all animations on the layer have settled.
+This specification unifies the **$0 \to 1$ normalized driver philosophy** of Kilopixel with **direct value interpolation convenience**, while solving **multi-element expression caching** and introducing an **automatic 0% CPU quiescence (sleep) engine**.
 
 ---
 
-## 2. API & Syntax Specification
+## 2. API Specification
 
-### 2.1 Single-Function Dual Overload
-
-Rather than fragmenting the API into multiple functions (`tween`, `transition`, `lerpTo`, etc.), Kilopixel implements a single unified `tween()` function with an intuitive signature overload:
+`tween()` supports an intuitive dual-overload signature:
 
 ```javascript
-// Full Form: Interpolates from 'from' to 'to'
-tween(from, to, duration, [ease = 'ease'], [delay = 0])
-
-// Normalized Ratio Form: Interpolates from 0.0 to 1.0 (convenience overload)
+// Overload 1: Normalized Ratio Form (0.0 -> 1.0 clamped)
 tween(duration, [ease = 'ease'], [delay = 0])
+
+// Overload 2: Direct Value Form (Interpolates from -> to)
+tween(from, to, duration, [ease = 'ease'], [delay = 0])
 ```
 
-#### Examples in Declarative Markup:
+### Overload 1: Normalized Ratio Form (`0 -> 1`)
+Consistent with all other Kilopixel time drivers ([`loop()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L123), [`wave()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L125), [`yoyo()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L124)), this form produces a normalized progress value that clamps at `1.0` upon completion:
 ```html
-<!-- Spatial translation from -200 to 500 over 1.5s with back overshoot -->
-<pxl-rect x="tween(-200, 500, 1.5, 'back', 0.2)" width="80" height="80" fill="teal" />
+<!-- Opacity fade-in over 0.8s -->
+<pxl-circle alpha="tween(0.8)" radius="40" fill="coral" />
 
-<!-- Color / opacity fade-in -->
-<pxl-circle alpha="tween(0, 1, 0.8)" radius="40" fill="coral" />
+<!-- Rotation: 0° -> 360° over 1s, then stops -->
+<pxl-rect rotate="tween(1) * 360" width="60" height="60" fill="violet" />
 
-<!-- Normalized ratio used as envelope multiplier -->
-<pxl-shape scale="1 + tween(0.5, 'elastic') * 0.5" />
+<!-- Elastic scale entrance -->
+<pxl-circle scale="1 + tween(0.5, 'elastic', 0.2) * 0.5" radius="30" fill="gold" />
 ```
 
-### 2.2 Built-In Easing Catalog (`pxl.easings`)
+### Overload 2: Direct Value Form (`from -> to`)
+Provides zero-boilerplate convenience for spatial movement, avoiding forced `lerp(...)` wrappers for standard coordinates:
+```html
+<!-- Direct slide from -200 to 500 over 1.5s with back overshoot -->
+<pxl-rect x="tween(-200, 500, 1.5, 'back')" width="80" height="80" fill="teal" />
 
-Kilopixel provides a high-performance, zero-allocation easing table accessible by string name:
+<!-- Direct stroke width transition -->
+<pxl-circle strokewidth="tween(1, 10, 0.6, 'out')" radius="50" stroke="white" />
+```
 
-| Easing Name | Mathematical Character | Common Use Cases |
-| :--- | :--- | :--- |
-| `'linear'` | Constant velocity ($k$) | Marquees, timers, progress rings |
-| `'ease'` *(default)* | Quadratic In-Out smooth curve | General natural motion, UI panels |
-| `'in'` / `'quadIn'` | $k^2$ acceleration | Drop falls, exits |
-| `'out'` / `'quadOut'` | $k(2 - k)$ deceleration | UI snaps, entrances, drawer slides |
-| `'inOut'` / `'quadInOut'` | Smooth bilateral acceleration | Camera pans, smooth transfers |
-| `'cubicIn'` | $k^3$ steep acceleration | Heavy gravity acceleration |
-| `'cubicOut'` | $1 - (1 - k)^3$ gentle stop | Crisp UI snapping |
-| `'cubicInOut'` | Smooth S-curve | Seamless scene transitions |
-| `'back'` / `'backOut'` | Overshoots target and pulls back | Punchy UI buttons, lively popups |
-| `'backIn'` | Anticipates backward before leaping forward | Dramatic launches, jump takeoffs |
-| `'backInOut'` | Anticipates $\to$ shoots $\to$ overshoots $\to$ settles | Hero character transitions |
-| `'elastic'` / `'elasticOut'` | Spring-damper ringing oscillation | Rubber-band drops, jelly bounces |
-| `'bounce'` / `'bounceOut'` | Decay bounce against floor | Falling balls, physical collisions |
-
-*Custom curves*: In addition to string keywords, `tween()` accepts a custom JavaScript unary function: `(p) => p * p * (3 - 2 * p)`.
+> [!TIP]
+> Both forms are mathematically equivalent: `tween(a, b, d, ease, delay)` is internally compiled as `lerp(a, b, tween(d, ease, delay))`.
 
 ---
 
-## 3. The Bounded Lifespan Contract & Hybrid Drivers
+## 3. Composition with Infinite Drivers
 
-A fundamental architectural distinction separates **finite lifecycle boundaries** from **continuous signal modulators**.
-
-### The Rule: "The Outermost Wrapper Governs the Lifespan"
-
-```
-┌────────────────────────────────────────────────────────┐
-│  INSIDE tween(...)   →  Finite Lifespan               │
-│                         Freezes & completes at t_end.  │
-│                         Allows layer to SLEEP (0% CPU).│
-├────────────────────────────────────────────────────────┤
-│  OUTSIDE tween(...)  →  Infinite Lifespan              │
-│                         Runs forever at 60 FPS.        │
-│                         Keeps layer AWAKE.             │
-└────────────────────────────────────────────────────────┘
-```
-
-### 3.1 Inside `tween()`: Finite Transitions & Damped Settling
-Any driver placed inside `tween(...)` is subject to the tween's duration boundary. Once $t \ge t_{\text{start}} + \text{duration} + \text{delay}$, the animation ceases, the final value is locked, and the layer can sleep:
+Tween drivers compose cleanly with continuous time drivers (`wave`, `loop`, `pulse`, etc.) via standard arithmetic:
 
 ```html
-<!-- Damped impact shake: shakes at +-20px, decays to 0, then STOPS and SLEEPS -->
-<pxl-rect dx="tween(wave(0.1) * 20, 0, 1.2, 'out')" width="100" height="100" />
+<!-- Moves to 500 over 2s, then oscillates continuously forever -->
+<pxl-circle x="tween(0, 500, 2) + wave(2) * 30" radius="25" fill="cyan" />
+
+<!-- Ramps wave amplitude from 0 to 50 over 2s (attack envelope), then oscillates forever -->
+<pxl-circle x="tween(2) * wave(1) * 50" radius="25" fill="lime" />
 ```
-* Once 1.2 seconds elapse, `to = 0` is locked. The wave inside expires. The layer enters quiescence.
 
-### 3.2 Outside `tween()`: Unbounded Envelopes & Harmonic Overlays
-When continuous motion is intended to persist indefinitely after an intro transition, the infinite driver is placed **outside** the `tween()`:
-
-* **Additive Overlay** (Continuous wave around an animated anchor):
-  ```html
-  <!-- Moves from 0 to 500 over 2s, but wobbles continuously forever -->
-  <pxl-circle x="tween(0, 500, 2) + wave(2) * 30" radius="25" />
-  ```
-  *The tween finishes at 500, but `wave(2) * 30` is outside, keeping the layer awake and oscillating indefinitely.*
-
-* **Multiplicative Envelope** (Spins up wave amplitude from 0% to 100%):
-  ```html
-  <!-- Ramps wave amplitude from 0 to 50 over 2s, then oscillates forever -->
-  <pxl-circle x="tween(0, 1, 2) * (wave(2) * 50)" radius="25" />
-  ```
-  *`tween(0, 1, 2)` acts as an amplitude attack envelope. Once complete, it stays locked at `1.0`, and `1.0 * (wave(2) * 50)` continues running at 60 FPS.*
+**The Quiescence Rule**:
+* If an expression contains any infinite driver (`wave`, `loop`, `t`, etc.) **anywhere**, the node remains permanently animated (`hasInfiniteDriver = true`), keeping the layer awake at 60 FPS.
+* If an expression consists **only** of `tween()` calls, the node automatically shuts off its animation demand once all tweens complete, allowing the layer to enter **0% CPU sleep**.
 
 ---
 
-## 4. Edge Cases & Engineering Solutions
+## 4. Solving the Multi-Element Cache Problem
 
-### Case 1: Late Mount & SPA Dynamic Elements
-* **Problem**: In web applications, elements are added dynamically minutes after the page loaded. Global time $t = \text{performance.now()} / 1000$ could be at `125.4s`. If a tween compared against $t = 0$, the tween would be finished before the element even connected to the DOM.
-* **Solution**: The compiled expression closure captures `_startTime = null` on initial compilation. On the very first frame the element evaluates, it records `if (_startTime === null) _startTime = t;`. This anchors the origin $t_0$ precisely to the element's first visible tick.
+### 4.1 The Challenge
+In Kilopixel, [`pxl.compileExpression`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L215) caches compiled evaluation functions in `pxl.animationCache`:
+```javascript
+if (this.animationCache.has(str)) return this.animationCache.get(str);
+```
+If two separate elements share the same markup (e.g. 5 circles with `alpha="tween(0.8)"`), they receive the **exact same function reference `fn`**.
 
-### Case 2: Overshoot Easing (`back`, `elastic`)
-* **Problem**: Clamping progress $\tau = \text{clamp}(elapsed / duration, 0, 1)$ prevents values $< 0$ or $> 1$. However, `'back'` easing exceeds $1.0$ (e.g. $1.15$), and `'elastic'` oscillates between $-0.2$ and $1.2$.
-* **Solution**: Time ratio $\tau$ is clamped to $[0, 1]$, but the easing output $E(\tau)$ is **not** clamped. Only after $elapsed \ge duration$ is the final target `to` locked.
+If state slots were stored inside the compiled function closure:
+* Element A mounts at $t = 0$. The closure sets `t0 = 0` and eventually `done = true`.
+* Element B mounts at $t = 5$. It calls the same `fn` and sees `done = true`.
+* **Element B skips animation completely!**
 
-### Case 3: Zero or Negative Duration
-* **Problem**: User passes `duration = 0` or negative values. Division by zero yields `NaN` or `Infinity`.
-* **Solution**: Guard check: `if (duration <= 0) return to;`.
-
-### Case 4: Pre-Start Delay
-* **Problem**: When `delay > 0`, $elapsed = t - t_{\text{start}} - delay < 0$.
-* **Solution**: `if (elapsed <= 0) return from;`. The starting value is returned statically with zero interpolation overhead until the delay passes.
-
-### Case 5: Final Value Precision & Freeze Lock
-* **Problem**: Due to floating-point imprecision in variable frame rates (16.666ms), the final frame might evaluate at $elapsed = 1.498$ or $1.502$. If `to` is a dynamic calculation, evaluating it past duration might cause jitter.
-* **Solution**: When $elapsed \ge duration$, the tween captures `_finalValue = to`, sets `_isComplete = true`, and returns `_finalValue` permanently on all subsequent frames.
-
-### Case 6: Custom Easing Callbacks vs Named Curves
-* **Problem**: Users may pass a string `'back'` or a lambda `(p) => Math.pow(p, 4)`.
-* **Solution**: The easing resolver checks:
-  ```javascript
-  const easeFn = typeof ease === 'function' ? ease : (pxl.easings[ease] || pxl.easings.ease);
-  ```
-
-### Case 7: Multiple Tweens in a Single Expression
-* **Problem**: An expression like `tween(0, 100, 1) + tween(0, 50, 2)` contains two distinct timelines.
-* **Solution**: Expression compiler assigns separate closure states (`_tweenState[0]`, `_tweenState[1]`) so each tween instance tracks its own `_startTime`, `_isComplete`, and `_finalValue` independently.
-
-### Case 8: Reactive Retriggering
-* **Problem**: When a reactive variable changes (e.g. `<pxl-circle x="tween(0, ref.state.targetX, 1.0)" />`), the tween must restart its trajectory to the new destination.
-* **Solution**: In [`variableChangedCallback`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/node.js#L78), whenever an expression depends on the mutated variable, its internal `_startTime` is reset to `null` and `_isComplete = false`. On the next render frame, it automatically captures the new starting time and animates smoothly to the new value.
-
----
-
-## 5. Quiescence & Layer Auto-Sleep Engine
-
-Currently, [`PxlNode.evaluateAnimations`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/node.js#L88) sets `this.isAnimated = true` for any attribute using a time driver, causing [`Layer.render`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/layer.js#L152) to invoke [`stage.requestRender()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/stage.js#L152) on every single frame indefinitely.
-
-### 5.1 Driver Classification in Compiler
-
-In [`js/compiler.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js), we classify expressions into:
-1. **Infinite Drivers**: Expressions containing `wave()`, `loop()`, `yoyo()`, `bounce()`, `strobe()`, `glide()`, `pulse()`, `glitch()`, `time()`, or direct `t`.
-2. **Finite Drivers**: Expressions containing ONLY `tween()` and no uncontained infinite drivers.
+### 4.2 The Solution: Element-Scoped Slot Storage
+Tween state slots are stored on the **element instance** (`this`), not in the shared closure:
 
 ```javascript
-const infiniteDrivers = 'loop|yoyo|wave|bounce|strobe|glide|pulse|glitch|time';
-pxl.infiniteDriverRegex = new RegExp(`(^|[^.])\\bt\\b|\\b(${infiniteDrivers})\\s*\\(`);
-pxl.finiteDriverRegex   = /\btween\s*\(/;
+// Structure on PxlNode instance:
+this._twSlots = {}; // Keyed by attribute name: { x: [slot0, slot1], alpha: [slot0] }
 ```
 
-### 5.2 Quiescence State Machine
+When `fn.call(this, t)` executes:
+1. `this` is the specific DOM element.
+2. The compiled expression looks up `this._twSlots[attrKey]`.
+3. If no slots exist on that element yet, it initializes them locally for that element.
+
+This guarantees:
+* **Total Timeline Isolation**: Elements mounting at different times animate independently, even when sharing identical expressions.
+* **Zero Cache Pollution**: The compiled function remains purely stateless and 100% cacheable in `pxl.animationCache`.
+* **Zero Garbage Collection**: State slots are pre-allocated plain objects created once per element attribute.
+
+---
+
+## 5. Easing Catalog (`pxl.easings`)
+
+A zero-allocation easing table defined in [`js/compiler.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js):
+
+| Name | Formula / Behavior | Common Use Cases |
+| :--- | :--- | :--- |
+| `'linear'` | $t$ | Progress bars, linear scrolls |
+| `'ease'` *(default)* | Quadratic In-Out | General UI motion |
+| `'in'` / `'quadIn'` | $t^2$ | Drops, exits, fall-offs |
+| `'out'` / `'quadOut'` | $t(2 - t)$ | Snappy entrances, drawer opens |
+| `'inOut'` / `'quadInOut'` | Symmetric quad S-curve | Smooth bilateral camera moves |
+| `'cubicIn'` | $t^3$ | Steep acceleration, gravity |
+| `'cubicOut'` | $1 - (1 - t)^3$ | Gentle stops, organic deceleration |
+| `'cubicInOut'` | Smooth cubic S-curve | Scene transitions |
+| `'back'` / `'backOut'` | Overshoots $1.0$, then pulls back | Buttons, popups, lively badges |
+| `'backIn'` | Anticipates backwards before launching | Dramatic takeoffs, catapults |
+| `'backInOut'` | Anticipates $\to$ leaps $\to$ overshoots $\to$ settles | Hero transitions |
+| `'elastic'` / `'elasticOut'` | Spring-damper oscillation | Rubber-band drops, jelly bounces |
+| `'bounce'` / `'bounceOut'` | Decaying floor bounce | Dropping balls, physical impacts |
+
+*Custom Easing*: Accepts custom lambdas: `tween(1, (p) => Math.pow(p, 4))`.
+
+```javascript
+pxl.easings = {
+  linear:     (t) => t,
+  ease:       (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
+  in:         (t) => t * t,
+  out:        (t) => 1 - (1 - t) * (1 - t),
+  inOut:      (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
+  cubicIn:    (t) => t * t * t,
+  cubicOut:   (t) => 1 - Math.pow(1 - t, 3),
+  cubicInOut: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+  back: (t) => {
+    const c1 = 1.70158, c3 = c1 + 1;
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+  },
+  backIn: (t) => {
+    const c1 = 1.70158, c3 = c1 + 1;
+    return c3 * t * t * t - c1 * t * t;
+  },
+  backInOut: (t) => {
+    const c1 = 1.70158 * 1.525;
+    return t < 0.5
+      ? (Math.pow(2 * t, 2) * ((c1 + 1) * 2 * t - c1)) / 2
+      : (Math.pow(2 * t - 2, 2) * ((c1 + 1) * (t * 2 - 2) + c1) + 2) / 2;
+  },
+  elastic: (t) => {
+    if (t === 0 || t === 1) return t;
+    return Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * (2 * Math.PI / 3)) + 1;
+  },
+  bounce: (t) => {
+    const n1 = 7.5625, d1 = 2.75;
+    if (t < 1 / d1) return n1 * t * t;
+    if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75;
+    if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375;
+    return n1 * (t -= 2.625 / d1) * t + 0.984375;
+  }
+};
+
+// Aliases
+pxl.easings.quadIn = pxl.easings.in;
+pxl.easings.quadOut = pxl.easings.out;
+pxl.easings.quadInOut = pxl.easings.inOut;
+pxl.easings.backOut = pxl.easings.back;
+pxl.easings.elasticOut = pxl.easings.elastic;
+pxl.easings.bounceOut = pxl.easings.bounce;
+```
+
+---
+
+## 6. Implementation Architecture
+
+### 6.1 The Element-Bound Runtime Helper (`_evalTween`)
+
+Defined in `compiler.js` and available to all expressions:
+
+```javascript
+pxl._evalTween = function(node, attrName, slotIndex, t, a, b, c, d, e) {
+  // Parse Overload Signatures:
+  let from, to, duration, ease, delay;
+  if (typeof b === 'number' && (typeof c === 'number' || typeof c === 'undefined')) {
+    // Overload 2: tween(from, to, duration, [ease], [delay])
+    from = a; to = b; duration = c; ease = d; delay = e || 0;
+  } else {
+    // Overload 1: tween(duration, [ease], [delay])
+    from = 0; to = 1; duration = a; ease = b; delay = c || 0;
+  }
+
+  if (duration <= 0) return to;
+
+  // Retrieve or initialize element slot
+  const slots = (node._twSlots[attrName] ||= []);
+  let s = slots[slotIndex];
+  if (!s) {
+    s = slots[slotIndex] = { t0: null, done: false, val: from };
+  }
+
+  // Late-mount anchor: capture first tick
+  if (s.t0 === null) s.t0 = t;
+
+  const elapsed = t - s.t0 - delay;
+  if (elapsed <= 0) return from;
+
+  if (s.done) return s.val;
+
+  // Completion clamp & freeze
+  if (elapsed >= duration) {
+    s.done = true;
+    s.val = to;
+    return to;
+  }
+
+  const progress = elapsed / duration;
+  const easeFn = typeof ease === 'function'
+    ? ease
+    : (pxl.easings[ease || 'ease'] || pxl.easings.ease);
+
+  const k = easeFn(progress);
+  return from + (to - from) * k;
+};
+```
+
+### 6.2 Expression Compiler Transformation
+
+In [`pxl.compileExpression`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L213):
+
+1. **Detection & Classification**:
+   ```javascript
+   const infiniteRegex = /(^|[^.])\bt\b|\b(loop|yoyo|wave|bounce|strobe|glide|pulse|glitch|time)\s*\(/;
+   const hasTweens = /(?<!\.\s*)\btween\s*\(/.test(sanitizedStr);
+   const hasInfinite = infiniteRegex.test(sanitizedStr);
+
+   const isAnimated = hasTweens || hasInfinite;
+   ```
+
+2. **Callsite Rewriting**:
+   Each `tween(...)` call in the expression string is rewritten to pass `this`, the current attribute name, and an incremental callsite index:
+   ```javascript
+   let tweenIndex = 0;
+   sanitizedStr = sanitizedStr.replace(/(?<!\.\s*)\btween\s*\(/g, () => {
+     return `pxl._evalTween(this, _attrKey, ${tweenIndex++}, t, `;
+   });
+   ```
+
+3. **Closure Metadata**:
+   The generated function wraps `_attrKey` and exposes metadata:
+   ```javascript
+   fn.isTimeDependent = isAnimated;
+   fn.hasInfiniteDriver = hasInfinite;
+   fn.tweenCount = tweenIndex;
+   ```
+
+---
+
+## 7. Quiescence & Auto-Sleep Engine
 
 ```
                    ┌────────────────────────────────────────┐
@@ -202,146 +293,100 @@ pxl.finiteDriverRegex   = /\btween\s*\(/;
                                         Re-arm & Wake Up
 ```
 
-### 5.3 Layer-Level Sleep Check
+### 7.1 Node-Level Activity Check
 
-In [`Layer.render(u, t)`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/layer.js#L73):
+At the end of [`PxlNode.prototype.evaluateAnimations`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/node.js#L88):
+
 ```javascript
-// Check if any element on this layer is actively demanding render frames
-let layerNeedsAnimation = false;
-for (let i = 0; i < this.childList.length; i++) {
-  if (this.childList[i].isActivelyAnimating) {
-    layerNeedsAnimation = true;
-    break;
+// Determine if node still demands render frames
+if (this.animatedAttributeKeys.length > 0) {
+  let stillActive = false;
+  const numKeys = this.animatedAttributeKeys.length;
+  for (let i = 0; i < numKeys; i++) {
+    const key = this.animatedAttributeKeys[i];
+    const fn = this.attributeExpressions[key];
+
+    // Infinite drivers never sleep
+    if (fn.hasInfiniteDriver) {
+      stillActive = true;
+      break;
+    }
+
+    // Check if any tween slot on this attribute is still running
+    const slots = this._twSlots[key];
+    if (slots) {
+      for (let j = 0; j < slots.length; j++) {
+        if (!slots[j].done) {
+          stillActive = true;
+          break;
+        }
+      }
+    }
+    if (stillActive) break;
+  }
+  this.isAnimated = stillActive;
+}
+
+// Invalidate layer ONLY while node is actively animating
+if (this.isAnimated) this.parentLayer?.invalidate();
+```
+
+### 7.2 Layer Heartbeat & Stage Sleep
+
+In [`Layer.prototype.render`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/layer.js#L152):
+```javascript
+// Check if layer itself or any child is still actively animating
+let layerNeedsAnimation = this.isAnimated;
+if (!layerNeedsAnimation) {
+  const len = this.childList.length;
+  for (let i = 0; i < len; i++) {
+    if (this.childList[i].isAnimated) {
+      layerNeedsAnimation = true;
+      break;
+    }
   }
 }
 
-// Only request next frame if an infinite driver exists or a tween is still in-flight
+// Request next frame ONLY if active
 if (layerNeedsAnimation) {
   this.stage?.requestRender();
 }
 ```
 
-When all tweens settle, `layerNeedsAnimation` becomes `false`, the layer skips `requestRender()`, and the stage goes completely silent until an event or variable mutation occurs.
+When all elements settle:
+1. `this.isAnimated` becomes `false` on every child.
+2. `layerNeedsAnimation` becomes `false`.
+3. `this.stage?.requestRender()` is **not** called.
+4. The stage rAF loop stops. **CPU usage drops to 0%**.
+
+### 7.3 Automatic Wake-Up Triggers
+
+The stage and layer automatically awaken on:
+1. **DOM Attribute Changes**: [`attributeChangedCallback`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/node.js#L23) sets `this.isAnimated = true` and invalidates the layer.
+2. **Reactive Variable Changes**: [`variableChangedCallback`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/node.js#L78) resets the attribute's tween slots (`t0 = null`, `done = false`), sets `this.isAnimated = true`, and requests a render.
+3. **Pointer / Touch Interaction**: [`InteractionEngine`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/interaction.js) calls `stage.requestRender()` on mouse move, enter, leave, and click.
 
 ---
 
-## 6. Implementation Specification
+## 8. Summary of Files Affected
 
-### 6.1 `pxl.easings` Library (in `js/compiler.js`)
-
-```javascript
-pxl.easings = {
-  linear: (t) => t,
-  ease: (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
-  in: (t) => t * t,
-  out: (t) => 1 - (1 - t) * (1 - t),
-  inOut: (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
-  cubicIn: (t) => t * t * t,
-  cubicOut: (t) => 1 - Math.pow(1 - t, 3),
-  cubicInOut: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
-  back: (t) => {
-    const c1 = 1.70158;
-    const c3 = c1 + 1;
-    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
-  },
-  backIn: (t) => {
-    const c1 = 1.70158;
-    const c3 = c1 + 1;
-    return c3 * t * t * t - c1 * t * t;
-  },
-  backInOut: (t) => {
-    const c1 = 1.70158 * 1.525;
-    return t < 0.5
-      ? (Math.pow(2 * t, 2) * ((c1 + 1) * 2 * t - c1)) / 2
-      : (Math.pow(2 * t - 2, 2) * ((c1 + 1) * (t * 2 - 2) + c1) + 2) / 2;
-  },
-  elastic: (t) => {
-    if (t === 0 || t === 1) return t;
-    return Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * ((2 * Math.PI) / 3)) + 1;
-  },
-  bounce: (t) => {
-    const n1 = 7.5625;
-    const d1 = 2.75;
-    if (t < 1 / d1) return n1 * t * t;
-    if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75;
-    if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375;
-    return n1 * (t -= 2.625 / d1) * t + 0.984375;
-  }
-};
-// Aliases
-pxl.easings.quadIn = pxl.easings.in;
-pxl.easings.quadOut = pxl.easings.out;
-pxl.easings.quadInOut = pxl.easings.inOut;
-pxl.easings.backOut = pxl.easings.back;
-pxl.easings.elasticOut = pxl.easings.elastic;
-pxl.easings.bounceOut = pxl.easings.bounce;
-```
-
-### 6.2 The `_createTweenInstance` Factory (in `js/compiler.js`)
-
-Each compiled animation function receives a private state slot array `_tw` for zero-GC state isolation:
-
-```javascript
-function _createTween(slots, index) {
-  let s = slots[index];
-  if (!s) {
-    s = slots[index] = { t0: null, done: false, val: null };
-  }
-  return function(a, b, c, d, e) {
-    let from, to, duration, ease, delay;
-    if (typeof b === 'number' && (typeof c === 'number' || typeof c === 'undefined')) {
-      // Overload 1: tween(from, to, duration, [ease], [delay])
-      from = a; to = b; duration = c; ease = d; delay = e || 0;
-    } else {
-      // Overload 2: tween(duration, [ease], [delay])
-      from = 0; to = 1; duration = a; ease = b; delay = c || 0;
-    }
-
-    if (duration <= 0) return to;
-    if (s.t0 === null) s.t0 = t;
-
-    const elapsed = t - s.t0 - delay;
-    if (elapsed <= 0) return from;
-
-    if (elapsed >= duration) {
-      if (!s.done) {
-        s.done = true;
-        s.val = to;
-      }
-      return s.val;
-    }
-
-    const progress = elapsed / duration;
-    const easeFn = typeof ease === 'function' ? ease : (pxl.easings[ease] || pxl.easings.ease);
-    return from + (to - from) * easeFn(progress);
-  };
-}
-```
+| File | Changes |
+| :--- | :--- |
+| [`js/compiler.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js) | Add `pxl.easings` table, `pxl._evalTween` runtime helper, regex classification (`hasInfiniteDriver`, `hasTweens`), rewrite call sites. |
+| [`js/engine.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/engine.js) | Ensure `_attrKey` context is passed during attribute compilation and reactive evaluation. |
+| [`js/elements/node.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/node.js) | Pre-allocate `this._twSlots = {}`, reset slots on variable changes, add dynamic `isAnimated` calculation at end of `evaluateAnimations()`. |
+| [`js/elements/layer.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/layer.js) | Guard layer heartbeat in `render()` so it only calls `requestRender()` if `this.isAnimated` or any child `child.isAnimated` is true. |
+| [`.agents/KILOPIXEL.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/.agents/KILOPIXEL.md) | Full API reference, syntax examples, and easing table documentation. |
 
 ---
 
-## 7. Verification & Testing Plan
+## 9. Verification & Acceptance Criteria
 
-### 7.1 Automated Unit Tests
-* **Late-Mounting Accuracy**: Mount element with `tween(0, 100, 1)` at $t = 10.0$. Verify value at $t = 10.5$ is $\approx 50$ (or eased equivalent), not $100$.
-* **Overshoot Precision**: Test `'back'` and `'elastic'` output exceeding $1.0$ during interval, but resolving strictly to `to` at completion.
-* **Duration = 0 Guard**: Verify instant return of `to` with zero errors.
-* **Overload Equivalence**: Verify `tween(0, 100, 1)` produces identical values to `tween(1) * 100`.
-
-### 7.2 Quiescence & CPU Verification
-* Create test harness with `<pxl-layer>` containing one `<pxl-circle x="tween(0, 400, 1.0)" />`.
-* Monitor stage rAF ticks.
-* **Expected Outcome**: At $t = 1.0\text{s} + 1\text{ frame}$, stage render requests drop to zero. Browser CPU consumption drops to 0%.
-* Trigger reactive mutation `ref.circle.x = 200`. Verify stage wakes up, renders transition, and goes back to sleep.
-
----
-
-## 8. Summary & Next Steps
-
-This plan establishes `tween()` as a first-class, bulletproof animation primitive in Kilopixel:
-* **Single function** with intuitive signature overloads.
-* **Zero-GC closure isolation** for reliable late-mounting and retriggering.
-* **Clear separation of lifespans** (inside = finite/freeze, outside = infinite/modulation).
-* **Automatic layer quiescence** (0% CPU on completion).
-
-Upon approval, implementation will proceed systematically through [`js/compiler.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js), [`js/elements/node.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/node.js), and [`js/elements/layer.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/layer.js), followed by `node build.js` verification.
+1. **Overload Equivalence**:
+   Verify `<pxl-circle x="tween(0, 500, 1.5)" />` and `<pxl-circle x="lerp(0, 500, tween(1.5))" />` animate identically.
+2. **Multi-Element Cache Independence**:
+   Mount 5 elements with `<pxl-rect alpha="tween(0.8)" />` at staggered intervals (e.g. 0s, 2s, 4s). Verify all 5 elements execute complete fade-ins independently without skipping.
+3. **Quiescence / CPU Drop**:
+   Mount a stage with a 1-second tween. Verify that after $t = 1.05\text{s}$, `stage.render()` stops firing and browser CPU drops to 0%.
+4. **Reactive Wake-Up**:
+   Mutate `ref.test.val` on a sleeping stage. Verify the stage wakes up, animates to the new state, and returns to sleep.
