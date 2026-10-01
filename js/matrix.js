@@ -79,7 +79,7 @@ pxl._scratchMatrixA = pxl.Matrix.create();
 pxl._scratchMatrixB = pxl.Matrix.create();
 pxl._identityMatrix = pxl.Matrix.create();
 
-pxl.mapCoordinate = function(caller, targetObj, prop) {
+pxl.toLocal = function(caller, targetObj, prop) {
   if (!targetObj || !caller) return 0;
   
   const targetNode = targetObj.$node || targetObj; 

@@ -244,7 +244,7 @@ pxl._scratchMatrixA = pxl.Matrix.create();
 pxl._scratchMatrixB = pxl.Matrix.create();
 pxl._identityMatrix = pxl.Matrix.create();
 
-pxl.mapCoordinate = function(caller, targetObj, prop) {
+pxl.toLocal = function(caller, targetObj, prop) {
   if (!targetObj || !caller) return 0;
   
   const targetNode = targetObj.$node || targetObj; 
@@ -509,7 +509,7 @@ pxl.compileExpression = function (str) {
     const isAnimated = this.timeDriverRegex.test(sanitizedStr);
 
     // 4. MATRIX TRACKER INJECTOR
-    sanitizedStr = sanitizedStr.replace(/\btoLocal\(/g, 'pxl.mapCoordinate(this, ');
+    sanitizedStr = sanitizedStr.replace(/\btoLocal\(/g, 'pxl.toLocal(this, ');
 
     // Extract reactive variable dependencies
     const deps = [];

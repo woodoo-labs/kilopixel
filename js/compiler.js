@@ -231,7 +231,7 @@ pxl.compileExpression = function (str) {
     const isAnimated = this.timeDriverRegex.test(sanitizedStr);
 
     // 4. MATRIX TRACKER INJECTOR
-    sanitizedStr = sanitizedStr.replace(/\btoLocal\(/g, 'pxl.mapCoordinate(this, ');
+    sanitizedStr = sanitizedStr.replace(/\btoLocal\(/g, 'pxl.toLocal(this, ');
 
     // Extract reactive variable dependencies
     const deps = [];
