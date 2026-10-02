@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text | Kilopixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+  <script src="js/api-tabs.js"></script>
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+        <h1>Text</h1>
+        <p class="lead">The text shape renders labels, titles, and paragraphs directly in canvas. It supports custom fonts, weights, automatic word-wrapping, and typewriter reveal effects.</p>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: FONT FAMILIES -->
+        <!-- ================================================================= -->
+        <h2>1. Font Families</h2>
+        <p>The <code>font</code> attribute defines the typeface family, while <code>size</code> scales glyphs in virtual canvas units. Kilopixel seamlessly renders both custom loaded web fonts and native system typefaces.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">System Typefaces vs. Web Fonts</p>
+          <p class="callout-body">Standard system typefaces like <code>sans-serif</code>, <code>serif</code>, <code>monospace</code>, and <code>cursive</code> are built into the operating system and draw immediately with zero network latency. External web fonts like &lsquo;Inter&rsquo; must be preloaded in the DOM so Canvas can access their glyphs without delayed layout shifts.</p>
+        </div>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Primary Text --&gt;
+    &lt;pxl-text x="250" y="300" text="KILOPIXEL"
+      font="<mark id="sec1Text1FontCode">Inter</mark>" size="<mark id="sec1Text1SizeCode">70</mark>"
+      fill="#f97316" align="center" baseline="middle"&gt;&lt;/pxl-text&gt;
+
+    &lt;!-- Right: Secondary Text --&gt;
+    &lt;pxl-text x="750" y="300" text="CANVAS ENGINE"
+      font="<mark id="sec1Text2FontCode">serif</mark>" size="<mark id="sec1Text2SizeCode">50</mark>"
+      fill="#3b82f6" align="center" baseline="middle"&gt;&lt;/pxl-text&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1Text1Tab')">Primary</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1Text2Tab')">Secondary</button>
+              </div>
+            </div>
+
+            <!-- Primary Tab -->
+            <div class="tab-content active" id="sec1Text1Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label for="sec1Text1FontSelect">Font Family</label>
+                  <select id="sec1Text1FontSelect" data-mark="sec1Text1FontCode" autocomplete="off"
+                    onchange="document.getElementById('sec1Text1').setAttribute('font', this.value); document.getElementById('sec1Text1FontCode').innerText = this.value;">
+                    <optgroup label="Web Fonts">
+                      <option value="Inter" selected>Inter</option>
+                    </optgroup>
+                    <optgroup label="System Typefaces">
+                      <option value="sans-serif">sans-serif</option>
+                      <option value="serif">serif</option>
+                      <option value="monospace">monospace</option>
+                      <option value="system-ui">system-ui</option>
+                      <option value="cursive">cursive</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="control-group">
+                  <label><span>Size</span> <span id="sec1Text1SizeVal">70</span></label>
+                  <input type="range" min="16" max="110" step="2" value="70" autocomplete="off"
+                    oninput="document.getElementById('sec1Text1').setAttribute('size', this.value); document.getElementById('sec1Text1SizeVal').innerText = this.value; document.getElementById('sec1Text1SizeCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Secondary Tab -->
+            <div class="tab-content" id="sec1Text2Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label for="sec1Text2FontSelect">Font Family</label>
+                  <select id="sec1Text2FontSelect" data-mark="sec1Text2FontCode" autocomplete="off"
+                    onchange="document.getElementById('sec1Text2').setAttribute('font', this.value); document.getElementById('sec1Text2FontCode').innerText = this.value;">
+                    <optgroup label="Web Fonts">
+                      <option value="Inter">Inter</option>
+                    </optgroup>
+                    <optgroup label="System Typefaces">
+                      <option value="sans-serif">sans-serif</option>
+                      <option value="serif" selected>serif</option>
+                      <option value="monospace">monospace</option>
+                      <option value="system-ui">system-ui</option>
+                      <option value="cursive">cursive</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="control-group">
+                  <label><span>Size</span> <span id="sec1Text2SizeVal">50</span></label>
+                  <input type="range" min="16" max="110" step="2" value="50" autocomplete="off"
+                    oninput="document.getElementById('sec1Text2').setAttribute('size', this.value); document.getElementById('sec1Text2SizeVal').innerText = this.value; document.getElementById('sec1Text2SizeCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 1 Stage -->
+          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Left: Primary Text (Orange Scheme) -->
+              <pxl-text id="sec1Text1" x="250" y="300" text="KILOPIXEL"
+                font="Inter" size="70"
+                fill="#f97316" align="center" baseline="middle"></pxl-text>
+              <pxl-text x="250" y="480" text="'Primary'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: Secondary Text (Blue Scheme) -->
+              <pxl-text id="sec1Text2" x="750" y="300" text="CANVAS ENGINE"
+                font="serif" size="50"
+                fill="#3b82f6" align="center" baseline="middle"></pxl-text>
+              <pxl-text x="750" y="480" text="'Secondary'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- 
+    FONT PRELOADER FOR CANVAS:
+    The HTML5 Canvas API (ctx.font) does not immediately download web fonts unless they are used in the HTML DOM first.
+    This invisible div renders all 9 weights of 'Inter' to force the browser to download and cache them on page load.
+    This guarantees that when the user drags the Kilopixel Font Weight slider (100-900), the Canvas draws them instantly without any delayed network "pop-in".
+  -->
+  <div aria-hidden="true" style="opacity: 0; pointer-events: none; position: absolute; width: 0; height: 0; overflow: hidden; font-family: 'Inter', sans-serif;">
+    <span style="font-weight: 100;">pxl</span><span style="font-weight: 200;">pxl</span><span style="font-weight: 300;">pxl</span>
+    <span style="font-weight: 400;">pxl</span><span style="font-weight: 500;">pxl</span><span style="font-weight: 600;">pxl</span>
+    <span style="font-weight: 700;">pxl</span><span style="font-weight: 800;">pxl</span><span style="font-weight: 900;">pxl</span>
+  </div>
+
+  <script>
+    if (document.fonts) {
+      document.fonts.ready.then(() => {
+        document.querySelectorAll('pxl-layer').forEach(layer => layer.invalidate());
+      });
+    }
+  </script>
+
+  <!-- Prism Syntax Highlighting -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+</body>
+</html>

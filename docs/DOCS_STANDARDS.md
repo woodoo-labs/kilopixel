@@ -253,3 +253,17 @@ To maintain a cohesive, highly professional editorial presentation across all do
   </script>
   ```
 
+## 10. Editorial Voice & Neutral Tone
+
+To ensure the documentation feels professional, accessible, and grounded, all documentation text must follow these editorial principles:
+
+* **Engineering Clarity Over Marketing Drama**:
+  Write like modern engineering documentation (e.g., MDN, Tailwind, or Stripe), not a sales brochure or marketing landing page. Avoid buzzwords, drama, and hyperbolic claims:
+  * ❌ *Avoid:* "A multi-mode radial primitive that renders...", "Backed by an intelligent 3-tier layout cache...", "All from a single declarative tag."
+  * ✅ *Prefer:* "The circle shape renders discs, hollow rings, pie slices...", "Renders text directly on canvas with automatic word-wrapping..."
+* **Standard Lead Paragraph Formula**:
+  Every documentation page lead paragraph (`<p class="lead">`) must simply and clearly state what the shape or feature does and list its 2–3 core capabilities in plain English.
+* **Use "Shape" Instead of "Element" for Canvas Primitives**:
+  When introducing visual primitives (`<pxl-circle>`, `<pxl-rect>`, `<pxl-ellipse>`, `<pxl-text>`, etc.), refer to them as "shapes" rather than "elements" (e.g., *"The circle shape renders..."*). This emphasizes that they draw visual 2D canvas graphics rather than traditional HTML DOM boxes. (Reserve "element" or "container" for structural nodes like `<pxl-stage>` and `<pxl-layer>`).
+
+
