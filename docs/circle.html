@@ -225,7 +225,7 @@
     &lt;!-- Left: Open Chord (Default) --&gt;
     &lt;pxl-circle x="300" y="300" strokewidth="10" fill="#ffedd566" stroke="#f97316"
       r="<mark id="sec3Circle1RCode">150</mark>" 
-      sweep="<mark id="sec3Circle1SweepCode">180</mark>"&gt;&lt;/pxl-circle&gt;
+      sweep="<mark id="sec3Circle1SweepCode">270</mark>"&gt;&lt;/pxl-circle&gt;
 
     &lt;!-- Right: Closed Chord (closed="true") --&gt;
     &lt;pxl-circle x="700" y="300" strokewidth="10" fill="#dbeafe66" stroke="#3b82f6"
@@ -254,8 +254,8 @@
                       oninput="document.getElementById('sec3Circle1').setAttribute('r', this.value); document.getElementById('sec3Circle1RVal').innerText = this.value; document.getElementById('sec3Circle1RCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Sweep</span> <span id="sec3Circle1SweepVal">180°</span></label>
-                    <input type="range" min="45" max="360" step="15" value="180" autocomplete="off"
+                    <label><span>Sweep</span> <span id="sec3Circle1SweepVal">270°</span></label>
+                    <input type="range" min="45" max="360" step="15" value="270" autocomplete="off"
                       oninput="document.getElementById('sec3Circle1').setAttribute('sweep', this.value); document.getElementById('sec3Circle1SweepVal').innerText = this.value + '°'; document.getElementById('sec3Circle1SweepCode').innerText = this.value;">
                   </div>
                 </div>
@@ -284,7 +284,7 @@
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                 
                 <!-- Left: Open Chord (Orange Scheme) -->
-                <pxl-circle id="sec3Circle1" x="300" y="300" r="150" sweep="180" 
+                <pxl-circle id="sec3Circle1" x="300" y="300" r="150" sweep="270" 
                   fill="#ffedd566" stroke="#f97316" strokewidth="10"></pxl-circle>
                 <pxl-text x="300" y="500" text="'Open Chord'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
 

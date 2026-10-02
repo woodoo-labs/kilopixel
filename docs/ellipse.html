@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ellipse | Kilopixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+  <script src="js/api-tabs.js"></script>
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+        <h1>Ellipse</h1>
+        <p class="lead">A flexible shape that renders ovals, concentric rings, tilted discs, and curved orbital paths &mdash; ideal for perspective graphics, astronomical diagrams, and geometric illustration.</p>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: RADII & INNER RADII -->
+        <!-- ================================================================= -->
+        <h2>1. Ellipses</h2>
+        <p>An ellipse is defined by its horizontal radius (<code>rx</code>) and vertical radius (<code>ry</code>). Specifying inner horizontal (<code>irx</code>) and vertical (<code>iry</code>) radii hollows out the interior to form a concentric elliptical ring.</p>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Solid Disc --&gt;
+    &lt;pxl-ellipse x="300" y="300" rx="<mark id="sec1Ellipse1RxCode">180</mark>" ry="<mark id="sec1Ellipse1RyCode">110</mark>" fill="#f97316"&gt;&lt;/pxl-ellipse&gt;
+
+    &lt;!-- Right: Hollow Ring --&gt;
+    &lt;pxl-ellipse x="700" y="300" rx="<mark id="sec1Ellipse2RxCode">180</mark>" ry="<mark id="sec1Ellipse2RyCode">110</mark>" irx="<mark id="sec1Ellipse2IrxCode">90</mark>" iry="<mark id="sec1Ellipse2IryCode">55</mark>" stroke="#3b82f6"&gt;&lt;/pxl-ellipse&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1Ellipse1Tab')">Disc</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1Ellipse2Tab')">Ring</button>
+              </div>
+            </div>
+
+            <!-- Ellipse 1 Tab -->
+            <div class="tab-content active" id="sec1Ellipse1Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Radius X</span> <span id="sec1Ellipse1RxVal">180</span></label>
+                  <input type="range" min="40" max="240" step="10" value="180" autocomplete="off"
+                    oninput="document.getElementById('sec1Ellipse1').setAttribute('rx', this.value); document.getElementById('sec1Ellipse1RxVal').innerText = this.value; document.getElementById('sec1Ellipse1RxCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Radius Y</span> <span id="sec1Ellipse1RyVal">110</span></label>
+                  <input type="range" min="30" max="200" step="10" value="110" autocomplete="off"
+                    oninput="document.getElementById('sec1Ellipse1').setAttribute('ry', this.value); document.getElementById('sec1Ellipse1RyVal').innerText = this.value; document.getElementById('sec1Ellipse1RyCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Ellipse 2 Tab -->
+            <div class="tab-content" id="sec1Ellipse2Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Radius X</span> <span id="sec1Ellipse2RxVal">180</span></label>
+                  <input type="range" min="80" max="240" step="10" value="180" autocomplete="off"
+                    oninput="document.getElementById('sec1Ellipse2').setAttribute('rx', this.value); document.getElementById('sec1Ellipse2RxVal').innerText = this.value; document.getElementById('sec1Ellipse2RxCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Radius Y</span> <span id="sec1Ellipse2RyVal">110</span></label>
+                  <input type="range" min="50" max="200" step="10" value="110" autocomplete="off"
+                    oninput="document.getElementById('sec1Ellipse2').setAttribute('ry', this.value); document.getElementById('sec1Ellipse2RyVal').innerText = this.value; document.getElementById('sec1Ellipse2RyCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Inner Radius X</span> <span id="sec1Ellipse2IrxVal">90</span></label>
+                  <input type="range" min="0" max="160" step="5" value="90" autocomplete="off"
+                    oninput="document.getElementById('sec1Ellipse2').setAttribute('irx', this.value); document.getElementById('sec1Ellipse2IrxVal').innerText = this.value; document.getElementById('sec1Ellipse2IrxCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Inner Radius Y</span> <span id="sec1Ellipse2IryVal">55</span></label>
+                  <input type="range" min="0" max="100" step="5" value="55" autocomplete="off"
+                    oninput="document.getElementById('sec1Ellipse2').setAttribute('iry', this.value); document.getElementById('sec1Ellipse2IryVal').innerText = this.value; document.getElementById('sec1Ellipse2IryCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 1 stage -->
+          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              
+              <!-- Left: Solid Disc (Orange Scheme) -->
+              <pxl-ellipse id="sec1Ellipse1" x="300" y="300" rx="180" ry="110" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-ellipse>
+              <pxl-text x="300" y="500" text="'Solid Disc'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: Hollow Ring (Blue Scheme) -->
+              <pxl-ellipse id="sec1Ellipse2" x="700" y="300" rx="180" ry="110" irx="90" iry="55" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-ellipse>
+              <pxl-text x="700" y="500" text="'Hollow Ring'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 2: PIE SLICE & DONUT WEDGE -->
+        <!-- ================================================================= -->
+        <h2>2. Sectors</h2>
+        <p>Setting <code>pie="true"</code> connects the ends of an arc to the center point to create an elliptical pie slice. Combining inner radii (<code>irx</code>, <code>iry</code>) with a sweep or end angle automatically seals outer and inner arcs into a hollow donut wedge.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Sweep vs. End Angle</p>
+          <p class="callout-body">Kilopixel supports both relative spans and absolute destination angles: <code>sweep</code> defines a relative angular span from <code>start</code> (e.g. <code>start="45" sweep="90"</code> spans 90° to reach 135°), whereas <code>end</code> defines an absolute target angle. If both are specified on the same element, <code>sweep</code> takes priority and <code>end</code> is ignored.</p>
+        </div>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Pie Slice (Sweep Mode) --&gt;
+    &lt;pxl-ellipse x="300" y="300" strokewidth="<mark id="sec2Ellipse1WidthCode">10</mark>" pie="true" fill="#ffedd566" stroke="#f97316"
+      rx="<mark id="sec2Ellipse1RxCode">180</mark>" ry="<mark id="sec2Ellipse1RyCode">110</mark>"
+      start="<mark id="sec2Ellipse1StartCode">0</mark>" sweep="<mark id="sec2Ellipse1SweepCode">270</mark>"&gt;&lt;/pxl-ellipse&gt;
+
+    &lt;!-- Right: Donut Wedge (End Angle Mode) --&gt;
+    &lt;pxl-ellipse x="700" y="300" pie="true" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
+      rx="<mark id="sec2Ellipse2RxCode">180</mark>" ry="<mark id="sec2Ellipse2RyCode">110</mark>" irx="<mark id="sec2Ellipse2IrxCode">90</mark>" iry="<mark id="sec2Ellipse2IryCode">55</mark>"
+      start="<mark id="sec2Ellipse2StartCode">0</mark>" end="<mark id="sec2Ellipse2EndCode">270</mark>"&gt;&lt;/pxl-ellipse&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2Ellipse1Tab')">Pie</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2Ellipse2Tab')">Donut</button>
+              </div>
+            </div>
+
+            <!-- Ellipse 1 Tab -->
+            <div class="tab-content active" id="sec2Ellipse1Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Radius X</span> <span id="sec2Ellipse1RxVal">180</span></label>
+                  <input type="range" min="60" max="240" step="10" value="180" autocomplete="off"
+                    oninput="document.getElementById('sec2Ellipse1').setAttribute('rx', this.value); document.getElementById('sec2Ellipse1RxVal').innerText = this.value; document.getElementById('sec2Ellipse1RxCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Radius Y</span> <span id="sec2Ellipse1RyVal">110</span></label>
+                  <input type="range" min="40" max="200" step="10" value="110" autocomplete="off"
+                    oninput="document.getElementById('sec2Ellipse1').setAttribute('ry', this.value); document.getElementById('sec2Ellipse1RyVal').innerText = this.value; document.getElementById('sec2Ellipse1RyCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec2Ellipse1WidthVal">10</span></label>
+                  <input type="range" min="2" max="40" step="2" value="10" autocomplete="off"
+                    oninput="document.getElementById('sec2Ellipse1').setAttribute('strokewidth', this.value); document.getElementById('sec2Ellipse1WidthVal').innerText = this.value; document.getElementById('sec2Ellipse1WidthCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Start Angle</span> <span id="sec2Ellipse1StartVal">0°</span></label>
+                  <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec2Ellipse1').setAttribute('start', this.value); document.getElementById('sec2Ellipse1StartVal').innerText = this.value + '°'; document.getElementById('sec2Ellipse1StartCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Sweep</span> <span id="sec2Ellipse1SweepVal">270°</span></label>
+                  <input type="range" min="15" max="360" step="15" value="270" autocomplete="off"
+                    oninput="document.getElementById('sec2Ellipse1').setAttribute('sweep', this.value); document.getElementById('sec2Ellipse1SweepVal').innerText = this.value + '°'; document.getElementById('sec2Ellipse1SweepCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Ellipse 2 Tab -->
+            <div class="tab-content" id="sec2Ellipse2Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Radius X</span> <span id="sec2Ellipse2RxVal">180</span></label>
+                  <input type="range" min="80" max="240" step="10" value="180" autocomplete="off"
+                    oninput="document.getElementById('sec2Ellipse2').setAttribute('rx', this.value); document.getElementById('sec2Ellipse2RxVal').innerText = this.value; document.getElementById('sec2Ellipse2RxCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Radius Y</span> <span id="sec2Ellipse2RyVal">110</span></label>
+                  <input type="range" min="50" max="200" step="10" value="110" autocomplete="off"
+                    oninput="document.getElementById('sec2Ellipse2').setAttribute('ry', this.value); document.getElementById('sec2Ellipse2RyVal').innerText = this.value; document.getElementById('sec2Ellipse2RyCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Inner Radius X</span> <span id="sec2Ellipse2IrxVal">90</span></label>
+                  <input type="range" min="0" max="150" step="5" value="90" autocomplete="off"
+                    oninput="document.getElementById('sec2Ellipse2').setAttribute('irx', this.value); document.getElementById('sec2Ellipse2IrxVal').innerText = this.value; document.getElementById('sec2Ellipse2IrxCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Inner Radius Y</span> <span id="sec2Ellipse2IryVal">55</span></label>
+                  <input type="range" min="0" max="100" step="5" value="55" autocomplete="off"
+                    oninput="document.getElementById('sec2Ellipse2').setAttribute('iry', this.value); document.getElementById('sec2Ellipse2IryVal').innerText = this.value; document.getElementById('sec2Ellipse2IryCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Start Angle</span> <span id="sec2Ellipse2StartVal">0°</span></label>
+                  <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec2Ellipse2').setAttribute('start', this.value); document.getElementById('sec2Ellipse2StartVal').innerText = this.value + '°'; document.getElementById('sec2Ellipse2StartCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>End Angle</span> <span id="sec2Ellipse2EndVal">270°</span></label>
+                  <input type="range" min="-180" max="360" step="15" value="270" autocomplete="off"
+                    oninput="document.getElementById('sec2Ellipse2').setAttribute('end', this.value); document.getElementById('sec2Ellipse2EndVal').innerText = this.value + '°'; document.getElementById('sec2Ellipse2EndCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2 stage -->
+          <pxl-stage id="sec2Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              
+              <!-- Left: Pie Slice (Sweep Mode) -->
+              <pxl-ellipse id="sec2Ellipse1" x="300" y="300" rx="180" ry="110" 
+                start="0" sweep="270" pie="true"
+                fill="#ffedd566" stroke="#f97316" strokewidth="10"></pxl-ellipse>
+              <pxl-text x="300" y="500" text="'Pie Slice'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: Donut Wedge (End Angle Mode) -->
+              <pxl-ellipse id="sec2Ellipse2" x="700" y="300" rx="180" ry="110" irx="90" iry="55"
+                start="0" end="270" pie="true"
+                fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-ellipse>
+              <pxl-text x="700" y="500" text="'Donut Wedge'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 3: OPEN & CLOSED CHORDS -->
+        <!-- ================================================================= -->
+        <h2>3. Chords</h2>
+        <p>By default, sweeping a partial ellipse creates an <strong>Open Chord</strong>: the interior is filled, but the stroke only follows the curved perimeter. Setting <code>closed="true"</code> explicitly connects the endpoints with a straight chord, forming a <strong>Closed Chord</strong> (an elliptical segment or lens cap) where the stroke fully wraps around the straight edge.</p>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Open Chord (Default) --&gt;
+    &lt;pxl-ellipse x="300" y="300" strokewidth="10" fill="#ffedd566" stroke="#f97316"
+      rx="<mark id="sec3Ellipse1RxCode">180</mark>" ry="<mark id="sec3Ellipse1RyCode">110</mark>"
+      sweep="<mark id="sec3Ellipse1SweepCode">270</mark>"&gt;&lt;/pxl-ellipse&gt;
+
+    &lt;!-- Right: Closed Chord (closed="true") --&gt;
+    &lt;pxl-ellipse x="700" y="300" strokewidth="10" closed="true" fill="#dbeafe66" stroke="#3b82f6"
+      rx="<mark id="sec3Ellipse2RxCode">180</mark>" ry="<mark id="sec3Ellipse2RyCode">110</mark>"
+      sweep="<mark id="sec3Ellipse2SweepCode">180</mark>"&gt;&lt;/pxl-ellipse&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3Ellipse1Tab')">Open Chord</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3Ellipse2Tab')">Closed Chord</button>
+              </div>
+            </div>
+
+            <!-- Ellipse 1 Tab -->
+            <div class="tab-content active" id="sec3Ellipse1Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Radius X</span> <span id="sec3Ellipse1RxVal">180</span></label>
+                  <input type="range" min="60" max="240" step="10" value="180" autocomplete="off"
+                    oninput="document.getElementById('sec3Ellipse1').setAttribute('rx', this.value); document.getElementById('sec3Ellipse1RxVal').innerText = this.value; document.getElementById('sec3Ellipse1RxCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Radius Y</span> <span id="sec3Ellipse1RyVal">110</span></label>
+                  <input type="range" min="40" max="200" step="10" value="110" autocomplete="off"
+                    oninput="document.getElementById('sec3Ellipse1').setAttribute('ry', this.value); document.getElementById('sec3Ellipse1RyVal').innerText = this.value; document.getElementById('sec3Ellipse1RyCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Sweep</span> <span id="sec3Ellipse1SweepVal">270°</span></label>
+                  <input type="range" min="45" max="360" step="15" value="270" autocomplete="off"
+                    oninput="document.getElementById('sec3Ellipse1').setAttribute('sweep', this.value); document.getElementById('sec3Ellipse1SweepVal').innerText = this.value + '°'; document.getElementById('sec3Ellipse1SweepCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Ellipse 2 Tab -->
+            <div class="tab-content" id="sec3Ellipse2Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Radius X</span> <span id="sec3Ellipse2RxVal">180</span></label>
+                  <input type="range" min="60" max="240" step="10" value="180" autocomplete="off"
+                    oninput="document.getElementById('sec3Ellipse2').setAttribute('rx', this.value); document.getElementById('sec3Ellipse2RxVal').innerText = this.value; document.getElementById('sec3Ellipse2RxCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Radius Y</span> <span id="sec3Ellipse2RyVal">110</span></label>
+                  <input type="range" min="40" max="200" step="10" value="110" autocomplete="off"
+                    oninput="document.getElementById('sec3Ellipse2').setAttribute('ry', this.value); document.getElementById('sec3Ellipse2RyVal').innerText = this.value; document.getElementById('sec3Ellipse2RyCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Sweep</span> <span id="sec3Ellipse2SweepVal">180°</span></label>
+                  <input type="range" min="45" max="360" step="15" value="180" autocomplete="off"
+                    oninput="document.getElementById('sec3Ellipse2').setAttribute('sweep', this.value); document.getElementById('sec3Ellipse2SweepVal').innerText = this.value + '°'; document.getElementById('sec3Ellipse2SweepCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3 stage -->
+          <pxl-stage id="sec3Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              
+              <!-- Left: Open Chord (Orange Scheme) -->
+              <pxl-ellipse id="sec3Ellipse1" x="300" y="300" rx="180" ry="110" sweep="270" 
+                fill="#ffedd566" stroke="#f97316" strokewidth="10"></pxl-ellipse>
+              <pxl-text x="300" y="500" text="'Open Chord'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: Closed Chord (Blue Scheme) -->
+              <pxl-ellipse id="sec3Ellipse2" x="700" y="300" rx="180" ry="110" sweep="180" closed="true"
+                fill="#dbeafe66" stroke="#3b82f6" strokewidth="10"></pxl-ellipse>
+              <pxl-text x="700" y="500" text="'Closed Chord'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 4: SIMPLE ARCS -->
+        <!-- ================================================================= -->
+        <h2>4. Arcs</h2>
+        <p>By simply omitting the <code>fill</code> attribute, you can use ellipses to draw un-filled, stroked curved lines &mdash; perfect for orbits and perspective trajectory paths. The base Shape class also supports <code>linedash</code> and <code>dashoffset</code>, allowing you to easily create dashed orbital tracks and marching ant effects.</p>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Simple Arc (Sweep Mode) --&gt;
+    &lt;pxl-ellipse x="300" y="300" stroke="#f97316" strokewidth="<mark id="sec4Ellipse1WidthCode">10</mark>"
+      rx="<mark id="sec4Ellipse1RxCode">180</mark>" ry="<mark id="sec4Ellipse1RyCode">110</mark>"
+      start="<mark id="sec4Ellipse1StartCode">0</mark>" sweep="<mark id="sec4Ellipse1SweepCode">180</mark>"&gt;&lt;/pxl-ellipse&gt;
+
+    &lt;!-- Right: Dashed Arc (End Angle Mode) --&gt;
+    &lt;pxl-ellipse x="700" y="300" stroke="#3b82f6" strokewidth="4" linedash="[15, 15]" dashoffset="<mark id="sec4Ellipse2OffsetCode">0</mark>"
+      rx="<mark id="sec4Ellipse2RxCode">180</mark>" ry="<mark id="sec4Ellipse2RyCode">110</mark>"
+      start="<mark id="sec4Ellipse2StartCode">0</mark>" end="<mark id="sec4Ellipse2EndCode">270</mark>"&gt;&lt;/pxl-ellipse&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4Ellipse1Tab')">Simple Arc</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4Ellipse2Tab')">Dashed Arc</button>
+              </div>
+            </div>
+
+            <!-- Ellipse 1 Tab -->
+            <div class="tab-content active" id="sec4Ellipse1Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Radius X</span> <span id="sec4Ellipse1RxVal">180</span></label>
+                  <input type="range" min="60" max="240" step="10" value="180" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse1').setAttribute('rx', this.value); document.getElementById('sec4Ellipse1RxVal').innerText = this.value; document.getElementById('sec4Ellipse1RxCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Radius Y</span> <span id="sec4Ellipse1RyVal">110</span></label>
+                  <input type="range" min="40" max="200" step="10" value="110" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse1').setAttribute('ry', this.value); document.getElementById('sec4Ellipse1RyVal').innerText = this.value; document.getElementById('sec4Ellipse1RyCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec4Ellipse1WidthVal">10</span></label>
+                  <input type="range" min="2" max="40" step="2" value="10" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse1').setAttribute('strokewidth', this.value); document.getElementById('sec4Ellipse1WidthVal').innerText = this.value; document.getElementById('sec4Ellipse1WidthCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Start Angle</span> <span id="sec4Ellipse1StartVal">0°</span></label>
+                  <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse1').setAttribute('start', this.value); document.getElementById('sec4Ellipse1StartVal').innerText = this.value + '°'; document.getElementById('sec4Ellipse1StartCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Sweep</span> <span id="sec4Ellipse1SweepVal">180°</span></label>
+                  <input type="range" min="45" max="360" step="15" value="180" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse1').setAttribute('sweep', this.value); document.getElementById('sec4Ellipse1SweepVal').innerText = this.value + '°'; document.getElementById('sec4Ellipse1SweepCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Ellipse 2 Tab -->
+            <div class="tab-content" id="sec4Ellipse2Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Radius X</span> <span id="sec4Ellipse2RxVal">180</span></label>
+                  <input type="range" min="60" max="240" step="10" value="180" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse2').setAttribute('rx', this.value); document.getElementById('sec4Ellipse2RxVal').innerText = this.value; document.getElementById('sec4Ellipse2RxCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Radius Y</span> <span id="sec4Ellipse2RyVal">110</span></label>
+                  <input type="range" min="40" max="200" step="10" value="110" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse2').setAttribute('ry', this.value); document.getElementById('sec4Ellipse2RyVal').innerText = this.value; document.getElementById('sec4Ellipse2RyCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Dash Offset</span> <span id="sec4Ellipse2OffsetVal">0</span></label>
+                  <input type="range" min="-100" max="100" step="5" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse2').setAttribute('dashoffset', this.value); document.getElementById('sec4Ellipse2OffsetVal').innerText = this.value; document.getElementById('sec4Ellipse2OffsetCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Start Angle</span> <span id="sec4Ellipse2StartVal">0°</span></label>
+                  <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse2').setAttribute('start', this.value); document.getElementById('sec4Ellipse2StartVal').innerText = this.value + '°'; document.getElementById('sec4Ellipse2StartCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>End Angle</span> <span id="sec4Ellipse2EndVal">270°</span></label>
+                  <input type="range" min="-180" max="360" step="15" value="270" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse2').setAttribute('end', this.value); document.getElementById('sec4Ellipse2EndVal').innerText = this.value + '°'; document.getElementById('sec4Ellipse2EndCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4 stage -->
+          <pxl-stage id="sec4Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              
+              <!-- Left: Simple Arc (Orange Scheme) -->
+              <pxl-ellipse id="sec4Ellipse1" x="300" y="300" rx="180" ry="110" start="0" sweep="180" 
+                stroke="#f97316" strokewidth="10"></pxl-ellipse>
+              <pxl-text x="300" y="500" text="'Simple Arc'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: Dashed Arc (Blue Scheme) -->
+              <pxl-ellipse id="sec4Ellipse2" x="700" y="300" rx="180" ry="110" start="0" end="270" 
+                stroke="#3b82f6" strokewidth="4" linedash="[15, 15]" dashoffset="0"></pxl-ellipse>
+              <pxl-text x="700" y="500" text="'Dashed Arc'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 5: ARROWS -->
+        <!-- ================================================================= -->
+        <h2>5. Arrowheads</h2>
+        <p>Adding arrowheads to an open arc transforms it into a curved vector diagram arrow, perspective flow indicator, or orbital compass. You can independently apply and scale arrows on both the start and end of the path.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Parametric Tangent Alignment</p>
+          <p class="callout-body">Unlike circles where the tangent is always perpendicular to the radius, an ellipse changes curvature dynamically. Kilopixel computes the instantaneous derivative of the ellipse at every angle (&minus;<i>r<sub>x</sub></i>&nbsp;&middot;&nbsp;sin&nbsp;&theta;, <i>r<sub>y</sub></i>&nbsp;&middot;&nbsp;cos&nbsp;&theta;), guaranteeing that arrowheads remain perfectly tangent to the curve without distortion.</p>
+        </div>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Filled Arrows --&gt;
+    &lt;pxl-ellipse x="300" y="300" stroke="#f97316" strokewidth="8"
+      rx="<mark id="sec5Ellipse1RxCode">180</mark>" ry="<mark id="sec5Ellipse1RyCode">110</mark>"
+      start="-45" sweep="<mark id="sec5Ellipse1SweepCode">270</mark>"
+      arrowstyle="filled" arrowstart="<mark id="sec5Ellipse1StartArrowCode">25</mark>" arrowend="<mark id="sec5Ellipse1EndArrowCode">25</mark>"&gt;&lt;/pxl-ellipse&gt;
+
+    &lt;!-- Right: Line Arrows --&gt;
+    &lt;pxl-ellipse x="700" y="300" stroke="#3b82f6" strokewidth="8" linedash="[15, 15]"
+      rx="<mark id="sec5Ellipse2RxCode">180</mark>" ry="<mark id="sec5Ellipse2RyCode">110</mark>"
+      start="-45" sweep="<mark id="sec5Ellipse2SweepCode">270</mark>"
+      arrowstyle="line" arrowstart="<mark id="sec5Ellipse2StartArrowCode">0</mark>" arrowend="<mark id="sec5Ellipse2EndArrowCode">35</mark>"&gt;&lt;/pxl-ellipse&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec5Ellipse1Tab')">Filled</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec5Ellipse2Tab')">Line</button>
+              </div>
+            </div>
+
+            <!-- Ellipse 1 Tab -->
+            <div class="tab-content active" id="sec5Ellipse1Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Start Arrow</span> <span id="sec5Ellipse1StartArrowVal">25</span></label>
+                  <input type="range" min="0" max="60" step="5" value="25" autocomplete="off"
+                    oninput="document.getElementById('sec5Ellipse1').setAttribute('arrowstart', this.value); document.getElementById('sec5Ellipse1StartArrowVal').innerText = this.value; document.getElementById('sec5Ellipse1StartArrowCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>End Arrow</span> <span id="sec5Ellipse1EndArrowVal">25</span></label>
+                  <input type="range" min="0" max="60" step="5" value="25" autocomplete="off"
+                    oninput="document.getElementById('sec5Ellipse1').setAttribute('arrowend', this.value); document.getElementById('sec5Ellipse1EndArrowVal').innerText = this.value; document.getElementById('sec5Ellipse1EndArrowCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Sweep</span> <span id="sec5Ellipse1SweepVal">270°</span></label>
+                  <input type="range" min="45" max="360" step="15" value="270" autocomplete="off"
+                    oninput="document.getElementById('sec5Ellipse1').setAttribute('sweep', this.value); document.getElementById('sec5Ellipse1SweepVal').innerText = this.value + '°'; document.getElementById('sec5Ellipse1SweepCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Ellipse 2 Tab -->
+            <div class="tab-content" id="sec5Ellipse2Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Start Arrow</span> <span id="sec5Ellipse2StartArrowVal">0</span></label>
+                  <input type="range" min="0" max="60" step="5" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec5Ellipse2').setAttribute('arrowstart', this.value); document.getElementById('sec5Ellipse2StartArrowVal').innerText = this.value; document.getElementById('sec5Ellipse2StartArrowCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>End Arrow</span> <span id="sec5Ellipse2EndArrowVal">35</span></label>
+                  <input type="range" min="0" max="60" step="5" value="35" autocomplete="off"
+                    oninput="document.getElementById('sec5Ellipse2').setAttribute('arrowend', this.value); document.getElementById('sec5Ellipse2EndArrowVal').innerText = this.value; document.getElementById('sec5Ellipse2EndArrowCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Sweep</span> <span id="sec5Ellipse2SweepVal">270°</span></label>
+                  <input type="range" min="45" max="360" step="15" value="270" autocomplete="off"
+                    oninput="document.getElementById('sec5Ellipse2').setAttribute('sweep', this.value); document.getElementById('sec5Ellipse2SweepVal').innerText = this.value + '°'; document.getElementById('sec5Ellipse2SweepCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 5 stage -->
+          <pxl-stage id="sec5Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              
+              <!-- Left: Filled Arrows (Orange Scheme) -->
+              <pxl-ellipse id="sec5Ellipse1" x="300" y="300" rx="180" ry="110" start="-45" sweep="270" 
+                arrowstyle="filled" arrowstart="25" arrowend="25"
+                stroke="#f97316" strokewidth="8"></pxl-ellipse>
+              <pxl-text x="300" y="500" text="'Filled Arrowhead'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: Line Arrows (Blue Scheme) -->
+              <pxl-ellipse id="sec5Ellipse2" x="700" y="300" rx="180" ry="110" start="-45" sweep="270" 
+                arrowstyle="line" arrowstart="0" arrowend="35"
+                stroke="#3b82f6" strokewidth="8" linedash="[15, 15]"></pxl-ellipse>
+              <pxl-text x="700" y="500" text="'Line Arrowhead'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 6: SHOWCASE -->
+        <!-- ================================================================= -->
+        <h2>6. Showcase</h2>
+        <p>An astronomical observatory and celestial gyroscope built with nested, rotating ellipses. By separating the static nebula rings into a background <code>&lt;pxl-layer&gt;</code> and driving the animated orbital tracks in a foreground layer, the engine caches static canvas paths automatically &mdash; delivering a locked 60fps even with multiple concurrent rotational transforms.</p>
+
+        <div class="showcase-container">
+          <pxl-stage id="sec6Stage" ratio="1 / 1" class="showcase-stage">
+            <!-- Static Celestial Background -->
+            <pxl-layer blend="screen">
+              <pxl-grid stroke="#1e293b" major="4" step="50"></pxl-grid>
+              <!-- Deep Space Nebula Rings -->
+              <pxl-ellipse x="500" y="500" rx="460" ry="240" rotate="30" stroke="#38bdf822" strokewidth="2" linedash="[8, 16]"></pxl-ellipse>
+              <pxl-ellipse x="500" y="500" rx="420" ry="210" rotate="-20" stroke="#818cf822" strokewidth="2" linedash="[4, 12]"></pxl-ellipse>
+              <pxl-ellipse x="500" y="500" rx="380" ry="180" rotate="65" stroke="#c084fc22" strokewidth="2"></pxl-ellipse>
+              <pxl-ellipse x="500" y="500" rx="480" ry="120" irx="440" iry="90" rotate="-45" fill="#38bdf811" stroke="#0ea5e933" strokewidth="2"></pxl-ellipse>
+              <pxl-ellipse x="500" y="500" rx="300" ry="80" irx="260" iry="60" rotate="15" fill="#f43f5e11" stroke="#fb718533" strokewidth="2"></pxl-ellipse>
+            </pxl-layer>
+
+            <!-- Animated Orbital Gyroscope -->
+            <pxl-layer>
+              <!-- Outer Gimbal Track -->
+              <pxl-ellipse x="500" y="500" rx="440" ry="190" rotate="t * 10" stroke="#38bdf8" strokewidth="3" linedash="[30, 20]"></pxl-ellipse>
+              <pxl-ellipse x="500" y="500" rx="440" ry="190" rotate="t * 10" sweep="40" stroke="#0284c7" strokewidth="7" arrowend="22" arrowstyle="filled"></pxl-ellipse>
+
+              <!-- Mid Inclined Ring -->
+              <pxl-ellipse x="500" y="500" rx="360" ry="150" rotate="-t * 15 + 40" stroke="#818cf8" strokewidth="3" linedash="[20, 15]"></pxl-ellipse>
+              <pxl-ellipse x="500" y="500" rx="360" ry="150" rotate="-t * 15 + 40" start="90" sweep="50" stroke="#6366f1" strokewidth="7" arrowend="22" arrowstyle="filled"></pxl-ellipse>
+
+              <!-- Inner Fast Ring -->
+              <pxl-ellipse x="500" y="500" rx="280" ry="110" rotate="t * 22 - 35" stroke="#f472b6" strokewidth="3" linedash="[15, 10]"></pxl-ellipse>
+              <pxl-ellipse x="500" y="500" rx="280" ry="110" rotate="t * 22 - 35" start="180" sweep="60" stroke="#ec4899" strokewidth="7" arrowend="20" arrowstyle="filled"></pxl-ellipse>
+
+              <!-- High-tilt Polar Ring -->
+              <pxl-ellipse x="500" y="500" rx="200" ry="70" rotate="-t * 30 + 80" stroke="#34d399" strokewidth="3" linedash="[10, 10]"></pxl-ellipse>
+              <pxl-ellipse x="500" y="500" rx="200" ry="70" rotate="-t * 30 + 80" start="-45" sweep="45" stroke="#10b981" strokewidth="6" arrowend="18" arrowstyle="filled"></pxl-ellipse>
+
+              <!-- Central Celestial Core -->
+              <pxl-ellipse x="500" y="500" rx="70" ry="70" fill="#fbbf24" stroke="#f59e0b" strokewidth="4"></pxl-ellipse>
+              <pxl-ellipse x="500" y="500" rx="110" ry="32" rotate="-20" stroke="#fde68a" strokewidth="3" fill="#fde68a22"></pxl-ellipse>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Prism Syntax Highlighting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+</body>
+</html>

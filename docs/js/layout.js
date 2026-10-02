@@ -67,6 +67,7 @@ class DocsSidebar extends HTMLElement {
           <div class="sidebar-title">Shapes</div>
           <ul>
             <li><a href="circle.html" class="${currentPath === 'circle.html' ? 'active' : ''}">Circle</a></li>
+            <li><a href="ellipse.html" class="${currentPath === 'ellipse.html' ? 'active' : ''}">Ellipse</a></li>
             <li><a href="rect.html" class="${currentPath === 'rect.html' ? 'active' : ''}">Rectangle</a></li>
             <li><a href="text.html" class="${currentPath === 'text.html' ? 'active' : ''}">Text</a></li>
             <li><a href="line.html" class="${currentPath === 'line.html' ? 'active' : ''}">Line</a></li>
