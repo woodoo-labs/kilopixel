@@ -67,7 +67,7 @@
               <div class="playground-sliders">
                 <!-- Row 1: Sliders -->
                 <div class="control-group">
-                  <label><span>Size</span> <span id="sec1SizeVal">70</span></label>
+                  <label><span>Font Size</span> <span id="sec1SizeVal">70</span></label>
                   <input type="range" min="16" max="110" step="2" value="70" autocomplete="off"
                     oninput="document.getElementById('sec1Text').setAttribute('size', this.value); document.getElementById('sec1SizeVal').innerText = this.value; document.getElementById('sec1SizeCode').innerText = this.value;">
                 </div>
@@ -156,9 +156,9 @@
                     oninput="document.getElementById('sec2Text').setAttribute('y', this.value); document.getElementById('sec2TextYVal').innerText = this.value; document.getElementById('sec2TextYCode').innerText = this.value;">
                 </div>
 
-                <!-- Row 2: Alignment Toggle & Baseline Dropdown -->
+                <!-- Row 2: Align Toggle & Baseline Dropdown -->
                 <div class="control-group">
-                  <label>Alignment</label>
+                  <label>Align</label>
                   <div class="toggle-group">
                     <button class="toggle-btn active" onclick="document.getElementById('sec2Text').setAttribute('align', 'start'); pxlDocs.updateToggle(this, null, 'sec2TextAlignCode', 'start');">start</button>
                     <button class="toggle-btn" onclick="document.getElementById('sec2Text').setAttribute('align', 'center'); pxlDocs.updateToggle(this, null, 'sec2TextAlignCode', 'center');">center</button>
@@ -238,9 +238,9 @@
                     oninput="document.getElementById('sec3Text').setAttribute('lineheight', this.value); document.getElementById('sec3LineheightVal').innerText = this.value; document.getElementById('sec3LineheightCode').innerText = this.value;">
                 </div>
 
-                <!-- Row 2: Alignment Toggle & Baseline Dropdown -->
+                <!-- Row 2: Align Toggle & Baseline Dropdown -->
                 <div class="control-group">
-                  <label>Alignment</label>
+                  <label>Align</label>
                   <div class="toggle-group">
                     <button class="toggle-btn" onclick="document.getElementById('sec3Text').setAttribute('align', 'start'); pxlDocs.updateToggle(this, null, 'sec3AlignCode', 'start');">start</button>
                     <button class="toggle-btn active" onclick="document.getElementById('sec3Text').setAttribute('align', 'center'); pxlDocs.updateToggle(this, null, 'sec3AlignCode', 'center');">center</button>
@@ -334,9 +334,9 @@
                     oninput="document.getElementById('sec4Text').setAttribute('letterspacing', this.value); document.getElementById('sec4LetterspacingVal').innerText = this.value; document.getElementById('sec4LetterspacingCode').innerText = this.value;">
                 </div>
 
-                <!-- Row 3: Alignment Toggle & Baseline Dropdown -->
+                <!-- Row 3: Align Toggle & Baseline Dropdown -->
                 <div class="control-group">
-                  <label>Alignment</label>
+                  <label>Align</label>
                   <div class="toggle-group">
                     <button class="toggle-btn" onclick="document.getElementById('sec4Text').setAttribute('align', 'start'); pxlDocs.updateToggle(this, null, 'sec4AlignCode', 'start');">start</button>
                     <button class="toggle-btn active" onclick="document.getElementById('sec4Text').setAttribute('align', 'center'); pxlDocs.updateToggle(this, null, 'sec4AlignCode', 'center');">center</button>
