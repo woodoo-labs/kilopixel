@@ -37,7 +37,7 @@
         <!-- SECTION 1: TYPOGRAPHY -->
         <!-- ================================================================= -->
         <h2>1. Typography</h2>
-        <p>The <code>font</code>, <code>size</code>, <code>weight</code>, and <code>fontstyle</code> attributes configure typographic styling. Kilopixel maps numeric weights directly to loaded web fonts and native system typefaces.</p>
+        <p>The <code>size</code>, <code>weight</code>, <code>fontstyle</code>, and <code>font</code> attributes configure typographic styling. Kilopixel maps numeric weights directly to loaded web fonts and native system typefaces.</p>
 
         <div class="callout-info">
           <p class="callout-title">System Typefaces vs. Web Fonts</p>
@@ -48,7 +48,7 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;pxl-text x="500" y="300" text="KILOPIXEL"
-      font="<mark id="sec1FontCode">Inter</mark>" size="<mark id="sec1SizeCode">70</mark>" weight="<mark id="sec1WeightCode">700</mark>" fontstyle="<mark id="sec1StyleCode">normal</mark>"
+      size="<mark id="sec1SizeCode">70</mark>" weight="<mark id="sec1WeightCode">700</mark>" fontstyle="<mark id="sec1StyleCode">normal</mark>" font="<mark id="sec1FontCode">Inter</mark>"
       fill="#f97316" align="center" baseline="middle"&gt;&lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -79,7 +79,7 @@
 
                 <!-- Row 2: Style Toggle & Font Dropdown -->
                 <div class="control-group">
-                  <label>Style</label>
+                  <label>Font Style</label>
                   <div class="toggle-group">
                     <button class="toggle-btn active" onclick="document.getElementById('sec1Text').setAttribute('fontstyle', 'normal'); pxlDocs.updateToggle(this, null, 'sec1StyleCode', 'normal');">normal</button>
                     <button class="toggle-btn" onclick="document.getElementById('sec1Text').setAttribute('fontstyle', 'italic'); pxlDocs.updateToggle(this, null, 'sec1StyleCode', 'italic');">italic</button>
@@ -111,33 +111,24 @@
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
               <pxl-text id="sec1Text" x="500" y="300" text="KILOPIXEL"
-                font="Inter" size="70" weight="700" fontstyle="normal"
+                size="70" weight="700" fontstyle="normal" font="Inter"
                 fill="#f97316" align="center" baseline="middle"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECTION 2: ALIGNMENT & BASELINES -->
+        <!-- SECTION 2: ALIGNMENT -->
         <!-- ================================================================= -->
-        <h2>2. Alignment &amp; Baselines</h2>
-        <p>The <code>align</code> and <code>baseline</code> attributes position text relative to its <code>(x, y)</code> center coordinates. Kilopixel provides full control over horizontal alignment and typographic vertical baselines.</p>
-
-        <div class="callout-info">
-          <p class="callout-title">The Text Center Point</p>
-          <p class="callout-body">In canvas typography, <code>(x, y)</code> does not define a top-left bounding box corner by default. Instead, it serves as a central reference: <code>align</code> shifts glyphs horizontally relative to <code>x</code>, while <code>baseline</code> aligns font vertical metrics (such as the cap-height, middle, or alphabetic baseline) relative to <code>y</code>.</p>
-        </div>
+        <h2>2. Alignment</h2>
+        <p>The <code>align</code> and <code>baseline</code> attributes position text relative to its <code>(x, y)</code> center coordinates. The <code>align</code> attribute shifts text horizontally relative to <code>x</code>, while <code>baseline</code> positions vertical font metrics relative to <code>y</code>.</p>
+        <p>Defaults are <code>align="start"</code> and <code>baseline="alphabetic"</code>, matching native HTML5 Canvas behavior. When omitted, text begins at <code>x</code> and rests directly on the baseline at <code>y</code>.</p>
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Horizontal Alignment --&gt;
-    &lt;pxl-text x="<mark id="sec2Text1XCode">250</mark>" y="300" text="ALIGN" font="Inter" size="48" weight="700"
-      align="<mark id="sec2Text1AlignCode">start</mark>" baseline="middle" fill="#f97316"&gt;&lt;/pxl-text&gt;
-    
-    &lt;!-- Right: Vertical Baseline --&gt;
-    &lt;pxl-text x="750" y="<mark id="sec2Text2YCode">300</mark>" text="BASELINE" font="Inter" size="48" weight="700"
-      align="center" baseline="<mark id="sec2Text2BaselineCode">alphabetic</mark>" fill="#3b82f6"&gt;&lt;/pxl-text&gt;
+    &lt;pxl-text x="<mark id="sec2TextXCode">500</mark>" y="<mark id="sec2TextYCode">300</mark>" text="Kilopixel" font="Inter" size="70" weight="700"
+      align="<mark id="sec2TextAlignCode">start</mark>" baseline="<mark id="sec2TextBaselineCode">alphabetic</mark>" fill="#3b82f6"&gt;&lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -146,42 +137,38 @@
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Controls</h3>
               <div class="demo-tabs">
-                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2Text1Tab')">Alignment</button>
-                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2Text2Tab')">Baseline</button>
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2TextTab')">Text</button>
               </div>
             </div>
 
-            <!-- Alignment Tab -->
-            <div class="tab-content active" id="sec2Text1Tab">
+            <!-- Text Tab -->
+            <div class="tab-content active" id="sec2TextTab">
               <div class="playground-sliders">
+                <!-- Row 1: Sliders -->
+                <div class="control-group">
+                  <label><span>Center X</span> <span id="sec2TextXVal">500</span></label>
+                  <input type="range" min="300" max="700" step="10" value="500" autocomplete="off"
+                    oninput="document.getElementById('sec2Text').setAttribute('x', this.value); document.getElementById('sec2TextXVal').innerText = this.value; document.getElementById('sec2TextXCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Center Y</span> <span id="sec2TextYVal">300</span></label>
+                  <input type="range" min="200" max="400" step="10" value="300" autocomplete="off"
+                    oninput="document.getElementById('sec2Text').setAttribute('y', this.value); document.getElementById('sec2TextYVal').innerText = this.value; document.getElementById('sec2TextYCode').innerText = this.value;">
+                </div>
+
+                <!-- Row 2: Alignment Toggle & Baseline Dropdown -->
                 <div class="control-group">
                   <label>Alignment</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn active" onclick="document.getElementById('sec2Text1').setAttribute('align', 'start'); pxlDocs.updateToggle(this, null, 'sec2Text1AlignCode', 'start');">start</button>
-                    <button class="toggle-btn" onclick="document.getElementById('sec2Text1').setAttribute('align', 'center'); pxlDocs.updateToggle(this, null, 'sec2Text1AlignCode', 'center');">center</button>
-                    <button class="toggle-btn" onclick="document.getElementById('sec2Text1').setAttribute('align', 'end'); pxlDocs.updateToggle(this, null, 'sec2Text1AlignCode', 'end');">end</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec2Text').setAttribute('align', 'start'); pxlDocs.updateToggle(this, null, 'sec2TextAlignCode', 'start');">start</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec2Text').setAttribute('align', 'center'); pxlDocs.updateToggle(this, null, 'sec2TextAlignCode', 'center');">center</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec2Text').setAttribute('align', 'end'); pxlDocs.updateToggle(this, null, 'sec2TextAlignCode', 'end');">end</button>
                   </div>
                 </div>
                 <div class="control-group">
-                  <label><span>Center X</span> <span id="sec2Text1XVal">250</span></label>
-                  <input type="range" min="150" max="350" step="10" value="250" autocomplete="off"
-                    oninput="document.getElementById('sec2Text1').setAttribute('x', this.value); document.getElementById('sec2Text1XVal').innerText = this.value; document.getElementById('sec2Text1XCode').innerText = this.value;">
-                </div>
-              </div>
-            </div>
-
-            <!-- Baseline Tab -->
-            <div class="tab-content" id="sec2Text2Tab">
-              <div class="playground-sliders">
-                <div class="control-group">
-                  <label><span>Center Y</span> <span id="sec2Text2YVal">300</span></label>
-                  <input type="range" min="200" max="400" step="10" value="300" autocomplete="off"
-                    oninput="document.getElementById('sec2Text2').setAttribute('y', this.value); document.getElementById('sec2Text2YVal').innerText = this.value; document.getElementById('sec2Text2YCode').innerText = this.value;">
-                </div>
-                <div class="control-group">
-                  <label for="sec2Text2BaselineSelect">Baseline</label>
-                  <select id="sec2Text2BaselineSelect" data-mark="sec2Text2BaselineCode" autocomplete="off"
-                    onchange="document.getElementById('sec2Text2').setAttribute('baseline', this.value); document.getElementById('sec2Text2BaselineCode').innerText = this.value;">
+                  <label for="sec2TextBaselineSelect">Baseline</label>
+                  <select id="sec2TextBaselineSelect" data-mark="sec2TextBaselineCode" autocomplete="off"
+                    onchange="document.getElementById('sec2Text').setAttribute('baseline', this.value); document.getElementById('sec2TextBaselineCode').innerText = this.value;">
                     <option value="top">top</option>
                     <option value="hanging">hanging</option>
                     <option value="middle">middle</option>
@@ -198,49 +185,32 @@
             <pxl-layer>
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
-              <!-- Left: Alignment Guide Line & Center Dot (Orange) -->
-              <pxl-line x1="ref.sec2Text1.x" y1="140" x2="ref.sec2Text1.x" y2="420" stroke="#fdba74" strokewidth="2" linedash="[6, 6]"></pxl-line>
-              <pxl-circle x="ref.sec2Text1.x" y="300" r="5" fill="#c2410c"></pxl-circle>
+              <!-- Crosshair Guides (Neutral Slate Full-Span) -->
+              <pxl-line x1="ref.sec2Text.x" y1="0" x2="ref.sec2Text.x" y2="600" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-line x1="0" y1="ref.sec2Text.y" x2="1000" y2="ref.sec2Text.y" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
 
-              <!-- Left: Target Text -->
-              <pxl-text id="sec2Text1" x="250" y="300" text="ALIGN"
-                font="Inter" size="48" weight="700" align="start" baseline="middle"
-                fill="#f97316"></pxl-text>
-              <pxl-text x="250" y="490" text="'Alignment'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
-
-              <!-- Right: Baseline Guide Line & Center Dot (Blue) -->
-              <pxl-line x1="570" y1="ref.sec2Text2.y" x2="930" y2="ref.sec2Text2.y" stroke="#93c5fd" strokewidth="2" linedash="[6, 6]"></pxl-line>
-              <pxl-circle x="750" y="ref.sec2Text2.y" r="5" fill="#1d4ed8"></pxl-circle>
-
-              <!-- Right: Target Text -->
-              <pxl-text id="sec2Text2" x="750" y="300" text="BASELINE"
-                font="Inter" size="48" weight="700" align="center" baseline="alphabetic"
+              <!-- Target Text Shape -->
+              <pxl-text id="sec2Text" x="500" y="300" text="Kilopixel"
+                font="Inter" size="70" weight="700" align="start" baseline="alphabetic"
                 fill="#3b82f6"></pxl-text>
-              <pxl-text x="750" y="490" text="'Baseline'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECTION 3: WORD WRAPPING & TYPESETTING -->
+        <!-- SECTION 3: LINE BREAKS -->
         <!-- ================================================================= -->
-        <h2>3. Word Wrapping &amp; Typesetting</h2>
-        <p>The <code>width</code>, <code>lineheight</code>, and <code>letterspacing</code> attributes control multi-line paragraph layout and character spacing. Setting <code>width</code> transforms a single-line label into a wrapped paragraph box.</p>
-
-        <div class="callout-info">
-          <p class="callout-title">Automatic Word Wrapping</p>
-          <p class="callout-body">Unlike standard canvas text rendering which requires manual text-splitting loops, setting <code>width</code> on a <code>&lt;pxl-text&gt;</code> shape enables built-in word wrapping. Kilopixel automatically handles whitespace splitting and multi-line vertical layout while caching calculations for high-performance rendering.</p>
-        </div>
+        <h2>3. Line Breaks</h2>
+        <p>Kilopixel natively parses newline characters (<code>\n</code>) directly inside text strings, splitting labels into multiple lines without requiring a width constraint.</p>
+        <p>The <code>lineheight</code> attribute controls proportional vertical line spacing, while <code>align</code> formats individual lines relative to the shape&rsquo;s center.</p>
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-text x="500" y="210" font="Inter" size="<mark id="sec3SizeCode">32</mark>" weight="500"
-      align="center" baseline="top" fill="#f97316"
-      width="<mark id="sec3WidthCode">460</mark>"
-      lineheight="<mark id="sec3LineheightCode">1.3</mark>"
-      letterspacing="<mark id="sec3LetterspacingCode">0</mark>"
-      text="Kilopixel brings declarative canvas graphics to life with automatic word wrapping, reactive attributes, and smooth typography."&gt;&lt;/pxl-text&gt;
+    &lt;pxl-text x="500" y="300" font="Inter" weight="700" fill="#f97316"
+      size="<mark id="sec3SizeCode">42</mark>" lineheight="<mark id="sec3LineheightCode">1.3</mark>"
+      align="<mark id="sec3AlignCode">center</mark>" baseline="<mark id="sec3BaselineCode">middle</mark>"
+      text="Declarative Canvas\nReactive Animation\nZero Dependencies"&gt;&lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -249,35 +219,44 @@
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Controls</h3>
               <div class="demo-tabs">
-                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3TextTab')">Typesetting</button>
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3TextTab')">Text</button>
               </div>
             </div>
 
-            <!-- Typesetting Tab -->
+            <!-- Manual Line Breaks Tab -->
             <div class="tab-content active" id="sec3TextTab">
               <div class="playground-sliders">
-                <!-- Row 1: Width & Line Height -->
+                <!-- Row 1: Font Size & Line Height -->
                 <div class="control-group">
-                  <label><span>Column Width <span class="indicator-dot"></span></span> <span id="sec3WidthVal">460</span></label>
-                  <input type="range" min="220" max="760" step="10" value="460" autocomplete="off"
-                    oninput="document.getElementById('sec3Text').setAttribute('width', this.value); document.getElementById('sec3WidthVal').innerText = this.value; document.getElementById('sec3WidthCode').innerText = this.value;">
-                </div>
-                <div class="control-group">
-                  <label><span>Line Height</span> <span id="sec3LineheightVal">1.3</span></label>
-                  <input type="range" min="0.9" max="2.2" step="0.1" value="1.3" autocomplete="off"
-                    oninput="document.getElementById('sec3Text').setAttribute('lineheight', this.value); document.getElementById('sec3LineheightVal').innerText = this.value; document.getElementById('sec3LineheightCode').innerText = this.value;">
-                </div>
-
-                <!-- Row 2: Size & Letter Spacing -->
-                <div class="control-group">
-                  <label><span>Font Size</span> <span id="sec3SizeVal">32</span></label>
-                  <input type="range" min="20" max="44" step="2" value="32" autocomplete="off"
+                  <label><span>Font Size</span> <span id="sec3SizeVal">42</span></label>
+                  <input type="range" min="24" max="60" step="2" value="42" autocomplete="off"
                     oninput="document.getElementById('sec3Text').setAttribute('size', this.value); document.getElementById('sec3SizeVal').innerText = this.value; document.getElementById('sec3SizeCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Letter Spacing</span> <span id="sec3LetterspacingVal">0</span></label>
-                  <input type="range" min="-2" max="14" step="1" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec3Text').setAttribute('letterspacing', this.value); document.getElementById('sec3LetterspacingVal').innerText = this.value; document.getElementById('sec3LetterspacingCode').innerText = this.value;">
+                  <label><span>Line Height</span> <span id="sec3LineheightVal">1.3</span></label>
+                  <input type="range" min="0.9" max="2.4" step="0.1" value="1.3" autocomplete="off"
+                    oninput="document.getElementById('sec3Text').setAttribute('lineheight', this.value); document.getElementById('sec3LineheightVal').innerText = this.value; document.getElementById('sec3LineheightCode').innerText = this.value;">
+                </div>
+
+                <!-- Row 2: Alignment Toggle & Baseline Dropdown -->
+                <div class="control-group">
+                  <label>Alignment</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Text').setAttribute('align', 'start'); pxlDocs.updateToggle(this, null, 'sec3AlignCode', 'start');">start</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Text').setAttribute('align', 'center'); pxlDocs.updateToggle(this, null, 'sec3AlignCode', 'center');">center</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Text').setAttribute('align', 'end'); pxlDocs.updateToggle(this, null, 'sec3AlignCode', 'end');">end</button>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="sec3BaselineSelect">Baseline</label>
+                  <select id="sec3BaselineSelect" data-mark="sec3BaselineCode" autocomplete="off"
+                    onchange="document.getElementById('sec3Text').setAttribute('baseline', this.value); document.getElementById('sec3BaselineCode').innerText = this.value;">
+                    <option value="top">top</option>
+                    <option value="hanging">hanging</option>
+                    <option value="middle" selected>middle</option>
+                    <option value="alphabetic">alphabetic</option>
+                    <option value="bottom">bottom</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -288,26 +267,119 @@
             <pxl-layer>
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
-              <!-- Dynamic Boundary Guides (Orange Scheme) -->
-              <pxl-line x1="500 - ref.sec3Text.width / 2" y1="140" x2="500 - ref.sec3Text.width / 2" y2="470" stroke="#fdba74" strokewidth="2" linedash="[6, 6]"></pxl-line>
-              <pxl-line x1="500 + ref.sec3Text.width / 2" y1="140" x2="500 + ref.sec3Text.width / 2" y2="470" stroke="#fdba74" strokewidth="2" linedash="[6, 6]"></pxl-line>
-
-              <!-- Top Dimension Guide Line & Bounding Dots -->
-              <pxl-line x1="500 - ref.sec3Text.width / 2" y1="165" x2="500 + ref.sec3Text.width / 2" y2="165" stroke="#fdba74" strokewidth="2" linedash="[4, 4]"></pxl-line>
-              <pxl-circle x="500 - ref.sec3Text.width / 2" y="165" r="4" fill="#c2410c"></pxl-circle>
-              <pxl-circle x="500 + ref.sec3Text.width / 2" y="165" r="4" fill="#c2410c"></pxl-circle>
-              <pxl-text x="500" y="155" text="'Column Width'" size="27" weight="700" fill="#fb923c" font="monospace" align="center" baseline="bottom"></pxl-text>
+              <!-- Full-Span Crosshair Guides (Neutral Slate) -->
+              <pxl-line x1="500" y1="0" x2="500" y2="600" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-line x1="0" y1="300" x2="1000" y2="300" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
 
               <!-- Target Text Shape -->
-              <pxl-text id="sec3Text" x="500" y="210"
-                text="Kilopixel brings declarative canvas graphics to life with automatic word wrapping, reactive attributes, and smooth typography."
-                font="Inter" size="32" weight="500" fill="#f97316"
-                align="center" baseline="top"
-                width="460" lineheight="1.3" letterspacing="0"></pxl-text>
+              <pxl-text id="sec3Text" x="500" y="300"
+                text="Declarative Canvas\nReactive Animation\nZero Dependencies"
+                font="Inter" weight="700" fill="#f97316"
+                size="42" lineheight="1.3"
+                align="center" baseline="middle"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
 
-              <!-- Center Dot & Section Title -->
-              <pxl-circle x="500" y="210" r="5" fill="#c2410c"></pxl-circle>
-              <pxl-text x="500" y="520" text="'Word Wrapping'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+        <!-- ================================================================= -->
+        <!-- SECTION 4: WORD WRAPPING -->
+        <!-- ================================================================= -->
+        <h2>4. Word Wrapping</h2>
+        <p>Setting the <code>width</code> attribute transforms single-line text into a self-wrapping paragraph box. Kilopixel automatically reflows words at space boundaries to fit inside the column width.</p>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-text x="500" y="210" font="Inter" weight="500" fill="#3b82f6"
+      width="<mark id="sec4WidthCode">460</mark>" size="<mark id="sec4SizeCode">32</mark>"
+      lineheight="<mark id="sec4LineheightCode">1.3</mark>" letterspacing="<mark id="sec4LetterspacingCode">0</mark>"
+      align="<mark id="sec4AlignCode">center</mark>" baseline="<mark id="sec4BaselineCode">top</mark>"
+      text="Kilopixel brings declarative canvas graphics to life with automatic word wrapping, reactive attributes, and smooth typography."&gt;&lt;/pxl-text&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4TextTab')">Text</button>
+              </div>
+            </div>
+
+            <!-- Typesetting Tab -->
+            <div class="tab-content active" id="sec4TextTab">
+              <div class="playground-sliders">
+                <!-- Row 1: Width & Font Size -->
+                <div class="control-group">
+                  <label><span>Column Width <span class="indicator-dot"></span></span> <span id="sec4WidthVal">460</span></label>
+                  <input type="range" min="220" max="760" step="10" value="460" autocomplete="off"
+                    oninput="document.getElementById('sec4Text').setAttribute('width', this.value); document.getElementById('sec4WidthVal').innerText = this.value; document.getElementById('sec4WidthCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Font Size</span> <span id="sec4SizeVal">32</span></label>
+                  <input type="range" min="20" max="44" step="2" value="32" autocomplete="off"
+                    oninput="document.getElementById('sec4Text').setAttribute('size', this.value); document.getElementById('sec4SizeVal').innerText = this.value; document.getElementById('sec4SizeCode').innerText = this.value;">
+                </div>
+
+                <!-- Row 2: Line Height & Letter Spacing -->
+                <div class="control-group">
+                  <label><span>Line Height</span> <span id="sec4LineheightVal">1.3</span></label>
+                  <input type="range" min="0.9" max="2.2" step="0.1" value="1.3" autocomplete="off"
+                    oninput="document.getElementById('sec4Text').setAttribute('lineheight', this.value); document.getElementById('sec4LineheightVal').innerText = this.value; document.getElementById('sec4LineheightCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Letter Spacing</span> <span id="sec4LetterspacingVal">0</span></label>
+                  <input type="range" min="-2" max="14" step="1" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec4Text').setAttribute('letterspacing', this.value); document.getElementById('sec4LetterspacingVal').innerText = this.value; document.getElementById('sec4LetterspacingCode').innerText = this.value;">
+                </div>
+
+                <!-- Row 3: Alignment Toggle & Baseline Dropdown -->
+                <div class="control-group">
+                  <label>Alignment</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn" onclick="document.getElementById('sec4Text').setAttribute('align', 'start'); pxlDocs.updateToggle(this, null, 'sec4AlignCode', 'start');">start</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec4Text').setAttribute('align', 'center'); pxlDocs.updateToggle(this, null, 'sec4AlignCode', 'center');">center</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec4Text').setAttribute('align', 'end'); pxlDocs.updateToggle(this, null, 'sec4AlignCode', 'end');">end</button>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="sec4BaselineSelect">Baseline</label>
+                  <select id="sec4BaselineSelect" data-mark="sec4BaselineCode" autocomplete="off"
+                    onchange="document.getElementById('sec4Text').setAttribute('baseline', this.value); document.getElementById('sec4BaselineCode').innerText = this.value;">
+                    <option value="top" selected>top</option>
+                    <option value="hanging">hanging</option>
+                    <option value="middle">middle</option>
+                    <option value="alphabetic">alphabetic</option>
+                    <option value="bottom">bottom</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4 Stage -->
+          <pxl-stage id="sec4Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Dynamic Boundary Guides (Blue Scheme) -->
+              <pxl-line x1="500 - ref.sec4Text.width / 2" y1="140" x2="500 - ref.sec4Text.width / 2" y2="470" stroke="#93c5fd" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-line x1="500 + ref.sec4Text.width / 2" y1="140" x2="500 + ref.sec4Text.width / 2" y2="470" stroke="#93c5fd" strokewidth="2" linedash="[6, 6]"></pxl-line>
+
+              <!-- Top Dimension Guide Line & Bounding Dots -->
+              <pxl-line x1="500 - ref.sec4Text.width / 2" y1="165" x2="500 + ref.sec4Text.width / 2" y2="165" stroke="#93c5fd" strokewidth="2" linedash="[4, 4]"></pxl-line>
+              <pxl-circle x="500 - ref.sec4Text.width / 2" y="165" r="4" fill="#1d4ed8"></pxl-circle>
+              <pxl-circle x="500 + ref.sec4Text.width / 2" y="165" r="4" fill="#1d4ed8"></pxl-circle>
+              <pxl-text x="500" y="155" text="'width = ' + ref.sec4Text.width" size="27" weight="700" fill="#60a5fa" font="monospace" align="center" baseline="bottom"></pxl-text>
+
+              <!-- Target Text Shape -->
+              <pxl-text id="sec4Text" x="500" y="210"
+                text="Kilopixel brings declarative canvas graphics to life with automatic word wrapping, reactive attributes, and smooth typography."
+                font="Inter" weight="500" fill="#3b82f6"
+                width="460" size="32"
+                lineheight="1.3" letterspacing="0"
+                align="center" baseline="top"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>

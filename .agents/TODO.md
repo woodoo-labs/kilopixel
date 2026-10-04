@@ -74,3 +74,14 @@
   - **Option A (Prune `map()`)**: Remove `map()` from `pxl.scope` to minimize the standard library footprint, eliminate redundant ways of interpolating values alongside `lerp()`, and prevent naming confusion with `Array.prototype.map` or coordinate mapping. Migrate `examples/test31.html` to `lerp()`.
   - **Option B (Retain `map()`)**: Keep `map()` as a convenient 1-line helper for creative coders who want to avoid manual `/ (inMax - inMin)` normalization algebra inside HTML attribute strings.
 
+## 11. Evaluate Default Text Alignment (`align` & `baseline`)
+- **Current Status**: Open architectural question
+- **Background**:
+  - Currently, `<pxl-text>` inherits native HTML5 Canvas defaults: `align="start"` and `baseline="alphabetic"`.
+  - In contrast, other geometric primitives in Kilopixel (`<pxl-circle>`, `<pxl-ellipse>`, `<pxl-rect>`) default to centering around their `(x, y)` coordinates.
+  - Setting defaults to `align="center"` and `baseline="middle"` would be more consistent with other shapes (*"in Kilopixel, `(x, y)` is always the center of the shape"*), making labels inside buttons, circles, and rotating text effortless.
+- **Trade-offs & Considerations**:
+  - **Visual Regressions**: Numerous existing text shapes across documentation and examples lack explicit attributes and rely on `start`/`alphabetic`. Labels manually positioned with hand-tuned `y` coordinates (like `y="500"`) would shift vertically downward by ~14px with `middle`, causing visual misalignment.
+  - **Divergence from Native Canvas**: It would diverge from standard `CanvasRenderingContext2D` defaults (`textAlign = 'start'`, `textBaseline = 'alphabetic'`).
+- **Decision for Now**: Retain `align="start"` and `baseline="alphabetic"` for 100% backward compatibility and native Canvas parity. Revisit if a breaking major version transition is planned.
+
