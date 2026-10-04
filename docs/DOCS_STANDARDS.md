@@ -181,6 +181,7 @@ Every documentation example must follow a standardized 3-part layout:
     1. Update the target attribute: `document.getElementById('sec1Rect').setAttribute('anchor', this.value)`
     2. Update the code snippet: `document.getElementById('sec1RectAnchorCode').innerText = this.value`
   * **Multi-Highlighting (`data-mark`):** When a dropdown updates a code mark or requires beacon tracking, specify `data-mark="sec1RectAnchorCode"` on the `<select>` element.
+  * **Placement on the Last Row:** Because `<select>` dropdowns have a taller input box height than thin slider tracks, placing a dropdown in the same row as a slider creates vertical visual misalignment. Whenever mixing sliders and dropdowns in a `.playground-sliders` container, always place dropdowns on the last row (or group them together).
 * **Dual-Mode Controls (Numeric Slider vs. Keyword Dropdown):** When a property supports both numeric values and discrete keyword presets (e.g. radial gradient radii, focal offsets):
   * Provide a `.toggle-group` button pair above the input controls (e.g., "Numeric" vs. "Keyword").
   * Wrap the numeric slider and the keyword dropdown in separate `.control-group` containers (e.g. `id="sec1R1SliderGroup"` and `id="sec1R1KeywordGroup"`).
