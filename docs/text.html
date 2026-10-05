@@ -620,6 +620,155 @@
           </pxl-stage>
         </div>
 
+        <!-- ================================================================= -->
+        <!-- SECTION 7: OUTLINES & GRADIENTS                                   -->
+        <!-- ================================================================= -->
+        <h2>7. Outlines &amp; Gradients</h2>
+        <p>Text elements can be outlined, hollowed, or filled with rich multi-stop gradients. Specifying <code>stroke</code> and <code>strokewidth</code> creates sharp typography borders. Setting <code>fill="none"</code> creates stencil-like hollow text, while <code>fill="linear(...)"</code> dynamically computes the text&rsquo;s bounding box to project vibrant directional gradients across all letters.</p>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Center Column Divider (Neutral Slate) --&gt;
+    &lt;pxl-line x1="500" y1="40" x2="500" y2="560" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"&gt;&lt;/pxl-line&gt;
+
+    &lt;!-- Left: Hollow &amp; Outlined Text (Orange Scheme) --&gt;
+    &lt;pxl-text x="250" y="300"
+      font="Inter" weight="<mark id="sec7Text1WeightCode">800</mark>" size="70"
+      letterspacing="<mark id="sec7Text1LetterspacingCode">2</mark>"
+      fill="<mark id="sec7Text1FillCode">none</mark>"
+      stroke="#f97316" strokewidth="<mark id="sec7Text1StrokewidthCode">4</mark>"
+      align="center" baseline="middle"
+      text="'OUTLINE'"&gt;&lt;/pxl-text&gt;
+
+    &lt;!-- Right: Linear Gradient Text (Blue Scheme) --&gt;
+    &lt;pxl-text x="750" y="300"
+      font="Inter" weight="<mark id="sec7Text2WeightCode">800</mark>" size="70"
+      letterspacing="<mark id="sec7Text2LetterspacingCode">2</mark>"
+      fill="linear(<mark id="sec7AngleCode">90</mark>, ['#38bdf8', '#3b82f6', '#1d4ed8'])"
+      stroke="#1e3a8a" strokewidth="<mark id="sec7Text2StrokewidthCode">0</mark>"
+      align="center" baseline="middle"
+      text="'GRADIENT'"&gt;&lt;/pxl-text&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec7OutlineTab')">Outline</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec7GradientTab')">Gradient</button>
+              </div>
+            </div>
+
+            <!-- Tab 1: Outline Controls (Orange Scheme) -->
+            <div class="tab-content active" id="sec7OutlineTab">
+              <div class="playground-sliders">
+                <!-- Row 1: Stroke Width & Fill Mode -->
+                <div class="control-group">
+                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec7Text1StrokewidthVal">4</span></label>
+                  <input type="range" min="1" max="12" step="1" value="4" autocomplete="off"
+                    oninput="document.getElementById('sec7Text1').setAttribute('strokewidth', this.value); document.getElementById('sec7Text1StrokewidthVal').innerText = this.value; document.getElementById('sec7Text1StrokewidthCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label>Fill Mode</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn active" onclick="document.getElementById('sec7Text1').setAttribute('fill', 'none'); pxlDocs.updateToggle(this, null, 'sec7Text1FillCode', 'none');">none</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec7Text1').setAttribute('fill', '#ffedd566'); pxlDocs.updateToggle(this, null, 'sec7Text1FillCode', '#ffedd566');">tint</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec7Text1').setAttribute('fill', '#f97316'); pxlDocs.updateToggle(this, null, 'sec7Text1FillCode', '#f97316');">solid</button>
+                  </div>
+                </div>
+
+                <!-- Row 2: Font Weight & Letter Spacing -->
+                <div class="control-group">
+                  <label><span>Font Weight</span> <span id="sec7Text1WeightVal">800</span></label>
+                  <input type="range" min="100" max="900" step="100" value="800" autocomplete="off"
+                    oninput="document.getElementById('sec7Text1').setAttribute('weight', this.value); document.getElementById('sec7Text1WeightVal').innerText = this.value; document.getElementById('sec7Text1WeightCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Letter Spacing</span> <span id="sec7Text1LetterspacingVal">2</span></label>
+                  <input type="range" min="-2" max="16" step="1" value="2" autocomplete="off"
+                    oninput="document.getElementById('sec7Text1').setAttribute('letterspacing', this.value); document.getElementById('sec7Text1LetterspacingVal').innerText = this.value; document.getElementById('sec7Text1LetterspacingCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 2: Gradient Controls (Blue Scheme) -->
+            <div class="tab-content" id="sec7GradientTab">
+              <div class="playground-sliders">
+                <!-- Row 1: Gradient Angle & Stroke Width -->
+                <div class="control-group">
+                  <label><span>Gradient Angle <span class="indicator-dot"></span></span> <span id="sec7AngleVal">90°</span></label>
+                  <input type="range" min="0" max="360" step="5" value="90" autocomplete="off"
+                    oninput="document.getElementById('sec7Angle').setAttribute('value', this.value); document.getElementById('sec7AngleVal').innerText = this.value + '°'; document.getElementById('sec7AngleCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec7Text2StrokewidthVal">0</span></label>
+                  <input type="range" min="0" max="8" step="1" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec7Text2').setAttribute('strokewidth', this.value); document.getElementById('sec7Text2StrokewidthVal').innerText = this.value; document.getElementById('sec7Text2StrokewidthCode').innerText = this.value;">
+                </div>
+
+                <!-- Row 2: Font Weight & Letter Spacing -->
+                <div class="control-group">
+                  <label><span>Font Weight</span> <span id="sec7Text2WeightVal">800</span></label>
+                  <input type="range" min="100" max="900" step="100" value="800" autocomplete="off"
+                    oninput="document.getElementById('sec7Text2').setAttribute('weight', this.value); document.getElementById('sec7Text2WeightVal').innerText = this.value; document.getElementById('sec7Text2WeightCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Letter Spacing</span> <span id="sec7Text2LetterspacingVal">2</span></label>
+                  <input type="range" min="-2" max="16" step="1" value="2" autocomplete="off"
+                    oninput="document.getElementById('sec7Text2').setAttribute('letterspacing', this.value); document.getElementById('sec7Text2LetterspacingVal').innerText = this.value; document.getElementById('sec7Text2LetterspacingCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 7 Stage -->
+          <pxl-stage id="sec7Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <!-- Dynamic Gradient Angle State -->
+              <pxl-var id="sec7Angle" value="90"></pxl-var>
+
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Center Column Divider (Neutral Slate) -->
+              <pxl-line x1="500" y1="40" x2="500" y2="560" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+
+              <!-- Left: Annotation Label (Orange Scheme) -->
+              <pxl-text x="250" y="140"
+                text="'outline / hollow'"
+                size="27" fill="#fb923c" font="monospace"
+                align="center" baseline="bottom"></pxl-text>
+
+              <!-- Left: Hollow & Outlined Text Shape -->
+              <pxl-text id="sec7Text1" x="250" y="300"
+                font="Inter" fill="none"
+                stroke="#f97316" strokewidth="4"
+                size="70" weight="800"
+                letterspacing="2"
+                align="center" baseline="middle"
+                text="'OUTLINE'"></pxl-text>
+
+              <!-- Right: Annotation Label (Blue Scheme) -->
+              <pxl-text x="750" y="140"
+                text="'linear gradient'"
+                size="27" fill="#60a5fa" font="monospace"
+                align="center" baseline="bottom"></pxl-text>
+
+              <!-- Right: Linear Gradient Text Shape -->
+              <pxl-text id="sec7Text2" x="750" y="300"
+                font="Inter"
+                fill="linear(ref.sec7Angle.value, ['#38bdf8', '#3b82f6', '#1d4ed8'])"
+                stroke="#1e3a8a" strokewidth="0"
+                size="70" weight="800"
+                letterspacing="2"
+                align="center" baseline="middle"
+                text="'GRADIENT'"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
       </div>
     </main>
 
