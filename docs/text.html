@@ -33,6 +33,16 @@
         <h1>Text</h1>
         <p class="lead">The text shape renders labels, titles, and paragraphs directly in canvas. It supports custom fonts, weights, automatic word-wrapping, and typewriter reveal effects.</p>
 
+        <div class="callout-info">
+          <p class="callout-title">Quoting Rules &amp; Expression Guard</p>
+          <p class="callout-body">Kilopixel compiles attribute values through an expression engine. To ensure text renders exactly as intended, follow these quoting guidelines:</p>
+          <ul>
+            <li><strong>Plain Words &amp; Sentences:</strong> Standard phrases and full sentences work without inner quotes (e.g., <code>text="Declarative Canvas"</code> or <code>text="Graphics made simple."</code>). Whitespace, commas, and trailing periods are safely preserved.</li>
+            <li><strong>Math Operators &amp; Parentheses:</strong> Wrap text in single quotes if it contains arithmetic operators, parentheses, or hyphenated number ranges (e.g., <code>text="'100 - 50'"</code>, <code>text="'(0, 0)'"</code>, <code>text="'Years 2024-2025'"</code>). Without quotes, expressions with operators like <code>100 - 50</code> or <code>2024-2025</code> are computed mathematically (displaying <code>50</code> or <code>-1</code>), while parentheses attempt a JavaScript function call. Pure numbers and labels like <code>text="2026"</code> or <code>text="Page 42"</code> do not require quotes.</li>
+            <li><strong>Reactive Expressions:</strong> When concatenating variables or using template strings, use standard JavaScript syntax (e.g., <code>text="'Width: ' + ref.box.width"</code> or <code>text="`Count: ${ref.count.value}`"</code>).</li>
+          </ul>
+        </div>
+
         <!-- ================================================================= -->
         <!-- SECTION 1: TYPOGRAPHY -->
         <!-- ================================================================= -->
@@ -202,7 +212,7 @@
         <!-- SECTION 3: LINE BREAKS -->
         <!-- ================================================================= -->
         <h2>3. Line Breaks</h2>
-        <p>Kilopixel natively parses newline characters (<code>\n</code>) directly inside text strings, splitting labels into multiple lines without requiring a width constraint.</p>
+        <p>Kilopixel natively parses newline characters (<code>\n</code>) directly inside text strings, breaking text across multiple lines without requiring a width constraint.</p>
         <p>The <code>lineheight</code> attribute controls proportional vertical line spacing, while <code>align</code> formats individual lines relative to the shape&rsquo;s center.</p>
 
         <!-- Declarative HTML markup above stage -->
