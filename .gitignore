@@ -1,0 +1,3 @@
+# Temporary helper scripts, dumps and screenshots (keep the folder itself)
+scratch/*
+!scratch/.gitkeep
