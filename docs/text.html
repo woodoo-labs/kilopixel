@@ -1005,6 +1005,210 @@
           </pxl-stage>
         </div>
 
+        <!-- ================================================================= -->
+        <!-- SECTION 10: ELEMENT REFERENCE                                     -->
+        <!-- ================================================================= -->
+        <h2>10. Element Reference</h2>
+        <p>The table below covers all attributes, runtime properties, and event handlers supported by <code>&lt;pxl-text&gt;</code>. Use the tabs to switch between text-specific features and common APIs shared across all shapes.</p>
+
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <div class="demo-tabs">
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec10TextTab')">Text</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec10StylingTab')">Styling</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec10TransformsTab')">Transforms</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec10EventsTab')">Events</button>
+            </div>
+          </div>
+
+          <!-- TAB 1: TEXT SPECIFIC ATTRIBUTES -->
+          <div class="tab-content active" id="sec10TextTab">
+            <div class="api-list">
+              <div class="api-subheading">Content &amp; Typography</div>
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">text</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">string | expr</span>
+                    <span class="api-pill default-pill">default: ''</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Text string or reactive JavaScript expression to render. Wrap in single quotes if the content contains arithmetic operators (<code>+</code>, <code>-</code>), parentheses, or function calls. Explicit <code>\n</code> characters create manual line breaks.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">font</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">string | expr</span>
+                    <span class="api-pill default-pill">default: 'sans-serif'</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Font family name. Accepts custom loaded web fonts (such as <code>'Inter'</code>) and standard system fonts (<code>'sans-serif'</code>, <code>'serif'</code>, <code>'monospace'</code>, <code>'system-ui'</code>).
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">size</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">number &gt;= 0 | expr</span>
+                    <span class="api-pill default-pill">default: 16</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Font size in logical canvas coordinates.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">weight</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">'normal' | 'bold' | 100&ndash;900 | expr</span>
+                    <span class="api-pill default-pill">default: 'normal'</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Font weight. Supports standard numeric values (<code>100</code> to <code>900</code> in steps of 100) or CSS keywords (<code>'normal'</code>, <code>'bold'</code>).
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">fontstyle</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">'normal' | 'italic' | 'oblique' | expr</span>
+                    <span class="api-pill default-pill">default: 'normal'</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Font style variant (<code>'normal'</code>, <code>'italic'</code>, or <code>'oblique'</code>).
+                </div>
+              </div>
+
+              <div class="api-subheading">Alignment &amp; Reading Direction</div>
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">align</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">'start' | 'center' | 'end' | 'left' | 'right' | expr</span>
+                    <span class="api-pill default-pill">default: 'start'</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Horizontal text alignment anchor relative to <code>x</code>. In right-to-left reading mode, <code>'start'</code> anchors to the right edge and flows leftwards, while <code>'end'</code> anchors to the left.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">baseline</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">'alphabetic' | 'top' | 'middle' | 'bottom' | 'hanging' | 'ideographic' | expr</span>
+                    <span class="api-pill default-pill">default: 'alphabetic'</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Vertical text alignment anchor relative to <code>y</code>. Use <code>'middle'</code> for vertical centering inside buttons, cards, or geometric shapes.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">direction</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">'ltr' | 'rtl' | 'inherit' | expr</span>
+                    <span class="api-pill default-pill">default: null</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Base text reading direction. Setting <code>'rtl'</code> activates bidirectional text layout, correctly connecting Arabic and Hebrew scripts and reversing the logical anchor orientation of <code>align="start"</code> and <code>align="end"</code>.
+                </div>
+              </div>
+
+              <div class="api-subheading">Layout &amp; Word Wrapping</div>
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">width</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">number &gt;= 0 | expr</span>
+                    <span class="api-pill default-pill">default: 0</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Target container width for automatic word-wrapping in logical coordinates. Words exceeding this width wrap onto subsequent lines. Set to <code>0</code> to disable wrapping.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">maxwidth</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">number &gt;= 0 | expr</span>
+                    <span class="api-pill default-pill">default: 0</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Maximum width passed directly to the native <code>ctx.fillText()</code> call. If rendered text exceeds this boundary, the browser horizontally compresses and squashes glyphs to fit.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">lineheight</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">number &gt;= 0 | expr</span>
+                    <span class="api-pill default-pill">default: 1.2</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Vertical line spacing multiplier for multi-line text (both explicit <code>\n</code> newlines and auto-wrapped lines). Multiplied by <code>size</code> to compute line spacing advance.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">letterspacing</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">number | expr</span>
+                    <span class="api-pill default-pill">default: 0</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Additional horizontal spacing between consecutive characters in logical coordinates. Positive values expand tracking; negative values condense tracking.
+                </div>
+              </div>
+
+              <div class="api-subheading">Animation &amp; Effects</div>
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">reveal</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">number (0.0&ndash;1.0) | expr</span>
+                    <span class="api-pill default-pill">default: null</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Typewriter reveal effect. A normalized ratio from <code>0</code> (completely hidden) to <code>1</code> (fully revealed). Progressively uncovers characters in reading order across lines with high-performance fast-path rendering.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: COMMON STYLING -->
+          <docs-api-styling id="sec10StylingTab" class="tab-content"></docs-api-styling>
+
+          <!-- TAB 3: TRANSFORMS & SPATIAL -->
+          <docs-api-transforms id="sec10TransformsTab" class="tab-content"></docs-api-transforms>
+
+          <!-- TAB 4: INTERACTIVE EVENTS -->
+          <docs-api-events id="sec10EventsTab" class="tab-content"></docs-api-events>
+        </div>
+
       </div>
     </main>
 
