@@ -2491,7 +2491,7 @@ class Text extends Shape {
     ctx.letterSpacing = this._cachedLetterSpacingString;
     ctx.textAlign = align;
     ctx.textBaseline = baseline;
-    if (direction) ctx.direction = direction;
+    ctx.direction = direction || 'inherit';
 
     // ====================================================================
     // TIER 2: Text Layout Cache (Heavy Auto-Wrap Algorithm)
@@ -2729,6 +2729,7 @@ class Grid extends Shape {
       ctx.font = `${labelsize * u}px monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+      ctx.letterSpacing = '0px';
       
       const majorStep = step * major;
       const startX_major = Math.floor(minX / majorStep) * majorStep;

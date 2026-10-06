@@ -103,6 +103,7 @@ class Grid extends Shape {
       ctx.font = `${labelsize * u}px monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+      ctx.letterSpacing = '0px';
       
       const majorStep = step * major;
       const startX_major = Math.floor(minX / majorStep) * majorStep;
