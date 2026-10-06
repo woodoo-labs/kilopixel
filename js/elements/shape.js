@@ -179,8 +179,23 @@ class Shape extends PxlNode {
     return styleValue;
   }
 
+  // Sets all stroke-related context state (style, width, caps, joins, dash).
+  // Shared by path-based shapes (via applyStyle) and non-path shapes like Text (strokeText).
+  applyStrokeState(ctx, u) {
+    const { stroke, strokewidth, linecap, linejoin, miterlimit, linedash, dashoffset } = this.attributeValues;
+
+    ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
+    
+    ctx.lineWidth = strokewidth * u;
+    ctx.lineCap = linecap;
+    ctx.lineJoin = linejoin;
+    ctx.miterLimit = miterlimit;
+    
+    pxl.applyLineDash(ctx, u, linedash, dashoffset, this);
+  }
+
   applyStyle(ctx, u) {
-    const { fill, stroke, strokewidth, linecap, linejoin, miterlimit, linedash, dashoffset } = this.attributeValues;
+    const { fill, stroke, strokewidth } = this.attributeValues;
 
     if (fill && fill !== 'none' && fill !== 'transparent') {
       ctx.fillStyle = this.createGradient(ctx, u, fill, 0);
@@ -188,15 +203,7 @@ class Shape extends PxlNode {
     }
     
     if (stroke && stroke !== 'none' && stroke !== 'transparent' && strokewidth > 0) {
-      ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
-      
-      ctx.lineWidth = strokewidth * u;
-      ctx.lineCap = linecap;
-      ctx.lineJoin = linejoin;
-      ctx.miterLimit = miterlimit;
-      
-      pxl.applyLineDash(ctx, u, linedash, dashoffset, this);
-      
+      this.applyStrokeState(ctx, u);
       ctx.stroke();
     }
   }

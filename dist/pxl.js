@@ -1776,8 +1776,23 @@ class Shape extends PxlNode {
     return styleValue;
   }
 
+  // Sets all stroke-related context state (style, width, caps, joins, dash).
+  // Shared by path-based shapes (via applyStyle) and non-path shapes like Text (strokeText).
+  applyStrokeState(ctx, u) {
+    const { stroke, strokewidth, linecap, linejoin, miterlimit, linedash, dashoffset } = this.attributeValues;
+
+    ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
+    
+    ctx.lineWidth = strokewidth * u;
+    ctx.lineCap = linecap;
+    ctx.lineJoin = linejoin;
+    ctx.miterLimit = miterlimit;
+    
+    pxl.applyLineDash(ctx, u, linedash, dashoffset, this);
+  }
+
   applyStyle(ctx, u) {
-    const { fill, stroke, strokewidth, linecap, linejoin, miterlimit, linedash, dashoffset } = this.attributeValues;
+    const { fill, stroke, strokewidth } = this.attributeValues;
 
     if (fill && fill !== 'none' && fill !== 'transparent') {
       ctx.fillStyle = this.createGradient(ctx, u, fill, 0);
@@ -1785,15 +1800,7 @@ class Shape extends PxlNode {
     }
     
     if (stroke && stroke !== 'none' && stroke !== 'transparent' && strokewidth > 0) {
-      ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
-      
-      ctx.lineWidth = strokewidth * u;
-      ctx.lineCap = linecap;
-      ctx.lineJoin = linejoin;
-      ctx.miterLimit = miterlimit;
-      
-      pxl.applyLineDash(ctx, u, linedash, dashoffset, this);
-      
+      this.applyStrokeState(ctx, u);
       ctx.stroke();
     }
   }
@@ -2450,7 +2457,7 @@ class Text extends Shape {
   }
 
   draw(ctx, u, t) {
-    const { text, size, font, align, baseline, fill, stroke, strokewidth, weight, fontstyle, maxwidth, direction, width, lineheight, letterspacing, reveal, linecap, linejoin, miterlimit, linedash, dashoffset } = this.attributeValues;
+    const { text, size, font, align, baseline, fill, stroke, strokewidth, weight, fontstyle, maxwidth, direction, width, lineheight, letterspacing, reveal } = this.attributeValues;
 
     // Skip drawing if there's no text content to render
     if (text === null || text === undefined || text === '') return;
@@ -2582,14 +2589,7 @@ class Text extends Shape {
     if (!hasFill && !hasStroke) return;
 
     if (hasFill) ctx.fillStyle = this.createGradient(ctx, u, fill, 0);
-    if (hasStroke) {
-      ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
-      ctx.lineWidth = strokewidth * u;
-      if (linecap) ctx.lineCap = linecap;
-      if (linejoin) ctx.lineJoin = linejoin;
-      if (miterlimit) ctx.miterLimit = miterlimit;
-      pxl.applyLineDash(ctx, u, linedash, dashoffset, this);
-    }
+    if (hasStroke) this.applyStrokeState(ctx, u);
 
     // Unified Render Loop
     for (let i = 0; i < this._lines.length; i++) {
@@ -2614,10 +2614,6 @@ class Text extends Shape {
       }
 
       charsRemaining -= (this._lines[i].length + 1); // +1 accounts for wrapped space/newline
-    }
-
-    if (hasStroke && linedash) {
-      ctx.setLineDash(pxl._emptyDash);
     }
   }
 

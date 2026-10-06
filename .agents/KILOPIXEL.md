@@ -827,7 +827,9 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `sc
 
 **`applyStyle(ctx, u)`**: After a path is built:
 1. If `fill` is set (not `none`/`transparent`): resolve gradient, `ctx.fill()`
-2. If `stroke` is set and `strokewidth > 0`: resolve gradient, set lineWidth/lineCap/lineJoin/miterLimit, apply line dash via `pxl.applyLineDash(ctx, u, linedash, dashoffset, this)`, `ctx.stroke()`
+2. If `stroke` is set and `strokewidth > 0`: `this.applyStrokeState(ctx, u)`, then `ctx.stroke()`
+
+**`applyStrokeState(ctx, u)`**: Sets all stroke-related context state in one place: `strokeStyle` (gradient-resolved via slot `1`), `lineWidth = strokewidth * u`, `lineCap`, `lineJoin`, `miterLimit`, and line dash via `pxl.applyLineDash(ctx, u, linedash, dashoffset, this)`. Used by `applyStyle` for path-based shapes and directly by `<pxl-text>` (which cannot use paths because `strokeText()` paints glyphs directly). Convention: stroke state is always **set before stroking** and never reset afterwards — every stroke call site goes through this method, so leaked state from a previous shape is always overwritten.
 
 **`createGradient(ctx, u, styleValue, slotIndex)`**: If the value is a gradient descriptor (has `isGradient: true`), creates a `CanvasGradient` from the shape's bounding box. Uses `_gradCache` dual-slot cache to avoid recreation.
 
@@ -1140,7 +1142,7 @@ Computed dynamically in Tier 3 cache using `ctx.measureText()` metrics (ascent/d
 ### Text Rendering
 
 - Skips empty text
-- Resolves fill/stroke gradients
+- Resolves fill gradient; stroke state is set via the shared `applyStrokeState()` (so `strokewidth`, `linecap`, `linejoin`, `miterlimit`, `linedash`, `dashoffset` behave exactly like on other shapes)
 - Iterates `_lines[]`, applies `fillText` and/or `strokeText`
 - Respects `maxwidth` parameter
 - `letterSpacing` is set on the context as a CSS string (e.g. `"5px"`)
