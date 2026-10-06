@@ -1006,6 +1006,94 @@
         </div>
 
         <!-- ================================================================= -->
+        <!-- SECTION 9: SHOWCASE                                               -->
+        <!-- ================================================================= -->
+        <h2>9. Showcase</h2>
+        <p class="lead">An homage to Jenny Holzer's monumental electronic LED installations &mdash; exploring counter-streaming horizontal tickers, breathing typewriter reveals, hollow neon outlines, and luminescent typographic signboards running at a locked 60 frames per second.</p>
+
+        <div class="showcase-container">
+          <pxl-stage id="sec9Stage" ratio="1 / 1" class="showcase-stage">
+            <!-- ============================================================= -->
+            <!-- LAYER 1: AMBIENT MUSEUM ARCHITECTURE & LED HOUSING (Static)    -->
+            <!-- ============================================================= -->
+            <pxl-layer>
+              <!-- Deep Obsidian Backdrop -->
+              <pxl-rect x="500" y="500" w="1000" h="1000" anchor="center" fill="#030712"></pxl-rect>
+
+              <!-- Ambient Gallery Spotlight Glow -->
+              <pxl-circle x="500" y="500" r="500" fill="radial([500], ['rgba(244, 63, 94, 0.08)', 'rgba(245, 158, 11, 0.04)', 'transparent'])"></pxl-circle>
+
+              <!-- Structural Signboard Housing Frame -->
+              <pxl-rect x="500" y="500" w="940" h="940" anchor="center" stroke="#1e293b" strokewidth="2" fill="none"></pxl-rect>
+              <pxl-rect x="500" y="500" w="920" h="920" anchor="center" stroke="#0f172a" strokewidth="1" fill="none"></pxl-rect>
+
+              <!-- Horizontal LED Slat Louver Dividers -->
+              <pxl-line x1="40" y1="245" x2="960" y2="245" stroke="#1e293b" strokewidth="1.5"></pxl-line>
+              <pxl-line x1="40" y1="745" x2="960" y2="745" stroke="#1e293b" strokewidth="1.5"></pxl-line>
+              <pxl-line x1="40" y1="865" x2="960" y2="865" stroke="#1e293b" strokewidth="1.5"></pxl-line>
+
+              <!-- Architectural Registration & Header -->
+              <pxl-text x="60" y="68" text="'JENNY HOLZER // ELECTRONIC TRUISMS [1000 x 1000]'" font="monospace" size="14" fill="#64748b" weight="600" letterspacing="2"></pxl-text>
+              <pxl-text x="940" y="68" text="'MONUMENTAL MARQUEE WALL'" font="monospace" size="14" fill="#64748b" align="right" weight="600" letterspacing="2"></pxl-text>
+            </pxl-layer>
+
+            <!-- ============================================================= -->
+            <!-- LAYER 2: LUMINESCENT KINETIC TYPOGRAPHY (60 FPS)              -->
+            <!-- ============================================================= -->
+            <pxl-layer>
+              <!-- Tier 1: Upper Fast Stream Ticker (Amber Scheme) -->
+              <pxl-text x="1000 - loop(14) * 2600" y="130"
+                text="'*** EXPIRATION DATE DOES NOT APPLY TO PASSION *** WORDS TEND TO BE INADEQUATE *** THE CRUELTY OF THE CITY CAN BE OVERCOME ***'"
+                font="monospace" size="22" weight="700" letterspacing="3"
+                fill="#f59e0b"></pxl-text>
+
+              <!-- Tier 2: Counter-Streaming Ticker (Ice Cyan Scheme) -->
+              <pxl-text x="-600 + loop(18) * 2400" y="195"
+                text="'+++ IN A DREAM YOU SAW A WAY TO SURVIVE AND YOU WERE FULL OF JOY +++ LACK OF CHARISMA CAN BE FATAL +++'"
+                font="monospace" size="20" weight="700" letterspacing="3"
+                fill="#38bdf8"></pxl-text>
+
+              <!-- Tier 3: Monumental Headline 1 — Electric Rose (Breathing Wave Reveal) -->
+              <pxl-text x="500" y="340" align="center" baseline="middle"
+                text="PROTECT ME FROM WHAT I WANT"
+                font="Inter" size="56" weight="900" letterspacing="6"
+                fill="#f43f5e"
+                reveal="0.2 + wave(5) * 0.8"></pxl-text>
+
+              <!-- Tier 4: Monumental Headline 2 — Hollow Amber Outline (Section 7 Technique) -->
+              <pxl-text x="500" y="455" align="center" baseline="middle"
+                text="ABUSE OF POWER COMES AS NO SURPRISE"
+                font="sans-serif" size="42" weight="800" letterspacing="4"
+                fill="none" stroke="#f59e0b" strokewidth="2.5"></pxl-text>
+
+              <!-- Tier 5: Monumental Headline 3 — Luminous White (Typewriter Loop Reveal) -->
+              <pxl-text x="500" y="570" align="center" baseline="middle"
+                text="A SINCERE EFFORT IS ALL YOU CAN PROMISE"
+                font="Inter" size="38" weight="800" letterspacing="5"
+                fill="#ffffff"
+                reveal="loop(7)"></pxl-text>
+
+              <!-- Tier 6: Monumental Headline 4 — Emerald Pulse -->
+              <pxl-text x="500" y="680" align="center" baseline="middle"
+                text="ACTION CAUSES MORE TROUBLE THAN THOUGHT"
+                font="Inter" size="34" weight="700" letterspacing="5"
+                fill="#10b981"
+                reveal="0.1 + wave(6) * 0.9"></pxl-text>
+
+              <!-- Tier 7: Lower Fast Stream Ticker (Amber / Gold Scheme) -->
+              <pxl-text x="1000 - loop(12) * 2400" y="805"
+                text="'&gt;&gt;&gt; MONEY CREATES TASTE &gt;&gt;&gt; TORTURE IS BARBARIC &gt;&gt;&gt; CHILDREN ARE THE HOPE OF THE FUTURE &gt;&gt;&gt;'"
+                font="monospace" size="22" weight="700" letterspacing="3"
+                fill="#f59e0b"></pxl-text>
+
+              <!-- Tier 8: Architectural Telemetry & Museum Registry -->
+              <pxl-text x="60" y="915" text="'TRUISMS (1977-1979) // SURVIVAL (1983-1985)'" font="monospace" size="14" fill="#64748b" weight="600" letterspacing="2"></pxl-text>
+              <pxl-text x="940" y="915" text="ref.sec9Stage.fps + ' FPS | ' + ref.sec9Stage.renderAvg + 'ms'" font="monospace" size="14" fill="#0ea5e9" align="right" weight="600" letterspacing="2"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
         <!-- SECTION 10: ELEMENT REFERENCE                                     -->
         <!-- ================================================================= -->
         <h2>10. Element Reference</h2>
