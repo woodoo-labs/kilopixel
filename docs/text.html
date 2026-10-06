@@ -47,11 +47,11 @@
         <!-- SECTION 1: TYPOGRAPHY -->
         <!-- ================================================================= -->
         <h2>1. Typography</h2>
-        <p>The <code>size</code>, <code>weight</code>, <code>fontstyle</code>, and <code>font</code> attributes configure typographic styling. Kilopixel maps numeric weights directly to loaded web fonts and native system typefaces.</p>
+        <p>The <code>size</code>, <code>weight</code>, <code>fontstyle</code>, and <code>font</code> attributes configure typographic styling. Kilopixel maps numeric weights directly to loaded web fonts and native system fonts.</p>
 
         <div class="callout-info">
-          <p class="callout-title">System Typefaces vs. Web Fonts</p>
-          <p class="callout-body">Standard system typefaces like <code>sans-serif</code>, <code>serif</code>, <code>monospace</code>, and <code>cursive</code> draw immediately with zero network latency. However, not all typefaces support the full range of numeric weights: system fallbacks typically provide only regular (<code>400</code>) and bold (<code>700</code>), automatically snapping intermediate values to the nearest available cut. External web fonts like &lsquo;Inter&rsquo; must be preloaded in the DOM so Canvas can render all nine weights (<code>100&ndash;900</code>) without layout shifts.</p>
+          <p class="callout-title">System Fonts vs. Web Fonts</p>
+          <p class="callout-body">Standard system fonts like <code>sans-serif</code>, <code>serif</code>, <code>monospace</code>, and <code>cursive</code> draw immediately with zero network latency. However, not all fonts support the full range of numeric weights: system fallbacks typically provide only regular (<code>400</code>) and bold (<code>700</code>), automatically snapping intermediate values to the nearest available cut. External web fonts like &lsquo;Inter&rsquo; must be preloaded in the DOM so Canvas can render all nine weights (<code>100&ndash;900</code>) without layout shifts.</p>
         </div>
 
         <!-- Declarative HTML markup above stage -->
@@ -102,7 +102,7 @@
                     <optgroup label="Web Fonts">
                       <option value="Inter" selected>Inter</option>
                     </optgroup>
-                    <optgroup label="System Typefaces">
+                    <optgroup label="System Fonts">
                       <option value="sans-serif">sans-serif</option>
                       <option value="serif">serif</option>
                       <option value="monospace">monospace</option>
@@ -624,8 +624,8 @@
         <p>Text elements can be rendered in hollow outline mode by setting <code>fill="none"</code> alongside <code>stroke</code> and <code>strokewidth</code>. Outlines support solid colors, custom dash patterns via <code>linedash</code>, and dynamic directional gradients computed across the text&rsquo;s bounding box.</p>
 
         <div class="callout-info">
-          <p class="callout-title">Static Typefaces for Hollow Outlines</p>
-          <p class="callout-body">When creating hollow outlines with <code>fill="none"</code>, static system typefaces like <code>sans-serif</code> are recommended. Modern variable fonts (such as Inter) often construct glyphs using overlapping component contours for weight interpolation, which the browser&rsquo;s <code>strokeText()</code> renders as internal seams. Static typefaces provide merged vector paths for clean, hollow borders.</p>
+          <p class="callout-title">Static Fonts for Hollow Outlines</p>
+          <p class="callout-body">When creating hollow outlines with <code>fill="none"</code>, static system fonts like <code>sans-serif</code> are recommended. Modern variable fonts (such as Inter) often construct glyphs using overlapping component contours for weight interpolation, which the browser&rsquo;s <code>strokeText()</code> renders as internal seams. Static fonts provide merged vector paths for clean, hollow borders.</p>
         </div>
 
         <!-- Declarative HTML markup above stage -->
