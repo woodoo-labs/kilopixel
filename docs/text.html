@@ -497,16 +497,16 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Single-Line Headline (Orange Scheme) --&gt;
-    &lt;pxl-text x="80" y="300" font="monospace" fill="#f97316"
-      reveal="<mark id="sec6Text1RevealCode">0.65</mark>" size="<mark id="sec6Text1SizeCode">28</mark>"
+    &lt;pxl-text x="50" y="150" font="monospace" fill="#f97316"
+      reveal="<mark id="sec6Text1RevealCode">0.65</mark>" size="<mark id="sec6Text1SizeCode">50</mark>"
       letterspacing="<mark id="sec6Text1LetterspacingCode">0</mark>" weight="<mark id="sec6Text1WeightCode">700</mark>"
-      align="start" baseline="middle"
-      text="'&gt; KILOPIXEL CORE READY'"&gt;&lt;/pxl-text&gt;
+      align="start" baseline="top"
+      text="Kilopixel Engine"&gt;&lt;/pxl-text&gt;
 
     &lt;!-- Right: Multi-Line Wrapped Paragraph (Blue Scheme) --&gt;
-    &lt;pxl-text x="540" y="220" font="Inter" fill="#3b82f6"
-      reveal="<mark id="sec6Text2RevealCode">0.55</mark>" width="<mark id="sec6Text2WidthCode">380</mark>"
-      size="<mark id="sec6Text2SizeCode">24</mark>" lineheight="<mark id="sec6Text2LineheightCode">1.4</mark>"
+    &lt;pxl-text x="550" y="150" font="Inter" fill="#3b82f6"
+      reveal="<mark id="sec6Text2RevealCode">0.55</mark>" width="<mark id="sec6Text2WidthCode">400</mark>"
+      size="<mark id="sec6Text2SizeCode">30</mark>" lineheight="<mark id="sec6Text2LineheightCode">1.4</mark>"
       align="start" baseline="top"
       text="'Kilopixel compiles declarative canvas graphics into 60fps animations. Progressive character reveal makes storytelling and narrative dialogue completely effortless.'"&gt;&lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
@@ -532,8 +532,8 @@
                     oninput="document.getElementById('sec6Text1').setAttribute('reveal', this.value); document.getElementById('sec6Text1RevealVal').innerText = this.value; document.getElementById('sec6Text1RevealCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Font Size</span> <span id="sec6Text1SizeVal">28</span></label>
-                  <input type="range" min="18" max="44" step="2" value="28" autocomplete="off"
+                  <label><span>Font Size</span> <span id="sec6Text1SizeVal">50</span></label>
+                  <input type="range" min="20" max="64" step="2" value="50" autocomplete="off"
                     oninput="document.getElementById('sec6Text1').setAttribute('size', this.value); document.getElementById('sec6Text1SizeVal').innerText = this.value; document.getElementById('sec6Text1SizeCode').innerText = this.value;">
                 </div>
 
@@ -561,15 +561,15 @@
                     oninput="document.getElementById('sec6Text2').setAttribute('reveal', this.value); document.getElementById('sec6Text2RevealVal').innerText = this.value; document.getElementById('sec6Text2RevealCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Column Width</span> <span id="sec6Text2WidthVal">380</span></label>
-                  <input type="range" min="260" max="440" step="10" value="380" autocomplete="off"
+                  <label><span>Column Width</span> <span id="sec6Text2WidthVal">400</span></label>
+                  <input type="range" min="260" max="440" step="10" value="400" autocomplete="off"
                     oninput="document.getElementById('sec6Text2').setAttribute('width', this.value); document.getElementById('sec6Text2WidthVal').innerText = this.value; document.getElementById('sec6Text2WidthCode').innerText = this.value;">
                 </div>
 
                 <!-- Row 2: Font Size & Line Height -->
                 <div class="control-group">
-                  <label><span>Font Size</span> <span id="sec6Text2SizeVal">24</span></label>
-                  <input type="range" min="16" max="34" step="2" value="24" autocomplete="off"
+                  <label><span>Font Size</span> <span id="sec6Text2SizeVal">30</span></label>
+                  <input type="range" min="18" max="44" step="2" value="30" autocomplete="off"
                     oninput="document.getElementById('sec6Text2').setAttribute('size', this.value); document.getElementById('sec6Text2SizeVal').innerText = this.value; document.getElementById('sec6Text2SizeCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
@@ -586,68 +586,70 @@
             <pxl-layer>
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
-              <!-- Center Column Divider (Neutral Slate) -->
-              <pxl-line x1="500" y1="40" x2="500" y2="560" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <!-- Left: Single-Line Headline -->
+              <pxl-text id="sec6Text1" x="50" y="150"
+                font="monospace" fill="#f97316"
+                reveal="0.65" size="50"
+                letterspacing="0" weight="700"
+                align="start" baseline="top"
+                text="Kilopixel Engine"></pxl-text>
 
               <!-- Left: Live Headline Readout (Orange Scheme) -->
-              <pxl-text x="80" y="140"
+              <pxl-text x="250" y="500"
                 text="'headline reveal = ' + Math.round(ref.sec6Text1.reveal * 100) + '%'"
                 size="27" fill="#fb923c" font="monospace"
-                align="start" baseline="bottom"></pxl-text>
-
-              <!-- Left: Single-Line Headline -->
-              <pxl-text id="sec6Text1" x="80" y="300"
-                font="monospace" fill="#f97316"
-                reveal="0.65" size="28"
-                letterspacing="0" weight="700"
-                align="start" baseline="middle"
-                text="'&gt; KILOPIXEL CORE READY'"></pxl-text>
-
-              <!-- Right: Live Paragraph Readout (Blue Scheme) -->
-              <pxl-text x="540" y="140"
-                text="'paragraph reveal = ' + Math.round(ref.sec6Text2.reveal * 100) + '%'"
-                size="27" fill="#60a5fa" font="monospace"
-                align="start" baseline="bottom"></pxl-text>
+                align="center"></pxl-text>
 
               <!-- Right: Multi-Line Wrapped Paragraph -->
-              <pxl-text id="sec6Text2" x="540" y="220"
+              <pxl-text id="sec6Text2" x="550" y="150"
                 font="Inter" fill="#3b82f6"
-                reveal="0.55" width="380"
-                size="24" lineheight="1.4"
+                reveal="0.55" width="400"
+                size="30" lineheight="1.4"
                 align="start" baseline="top"
                 text="'Kilopixel compiles declarative canvas graphics into 60fps animations. Progressive character reveal makes storytelling and narrative dialogue completely effortless.'"></pxl-text>
+
+              <!-- Right: Live Paragraph Readout (Blue Scheme) -->
+              <pxl-text x="750" y="500"
+                text="'paragraph reveal = ' + Math.round(ref.sec6Text2.reveal * 100) + '%'"
+                size="27" fill="#60a5fa" font="monospace"
+                align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECTION 7: OUTLINES & GRADIENTS                                   -->
+        <!-- SECTION 7: OUTLINES & DASH PATTERNS                               -->
         <!-- ================================================================= -->
-        <h2>7. Outlines &amp; Gradients</h2>
-        <p>Text elements can be outlined, hollowed, or filled with rich multi-stop gradients. Specifying <code>stroke</code> and <code>strokewidth</code> creates sharp typography borders. Setting <code>fill="none"</code> creates stencil-like hollow text, while <code>fill="linear(...)"</code> dynamically computes the text&rsquo;s bounding box to project vibrant directional gradients across all letters.</p>
+        <h2>7. Outline Styles</h2>
+        <p>Text elements can be rendered in hollow outline mode by setting <code>fill="none"</code> alongside <code>stroke</code> and <code>strokewidth</code>. Outlines support solid colors, custom dash patterns via <code>linedash</code>, and dynamic directional gradients computed across the text&rsquo;s bounding box.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Static Typefaces for Hollow Outlines</p>
+          <p class="callout-body">When creating hollow outlines with <code>fill="none"</code>, static system typefaces like <code>sans-serif</code> are recommended. Modern variable fonts (such as Inter) often construct glyphs using overlapping component contours for weight interpolation, which the browser&rsquo;s <code>strokeText()</code> renders as internal seams. Static typefaces provide merged vector paths for clean, hollow borders.</p>
+        </div>
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Center Column Divider (Neutral Slate) --&gt;
-    &lt;pxl-line x1="500" y1="40" x2="500" y2="560" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"&gt;&lt;/pxl-line&gt;
+    &lt;!-- Lower Left: Solid Outline (Orange Scheme) --&gt;
+    &lt;pxl-text x="240" y="420" font="sans-serif"
+      strokewidth="<mark id="sec7Text1StrokewidthCode">4</mark>" fill="<mark id="sec7Text1FillCode">none</mark>"
+      size="<mark id="sec7Text1SizeCode">64</mark>" weight="<mark id="sec7Text1WeightCode">800</mark>"
+      stroke="#f97316" align="center" baseline="middle"
+      text="'SOLID'"&gt;&lt;/pxl-text&gt;
 
-    &lt;!-- Left: Hollow &amp; Outlined Text (Orange Scheme) --&gt;
-    &lt;pxl-text x="250" y="300"
-      font="Inter" weight="<mark id="sec7Text1WeightCode">800</mark>" size="70"
-      letterspacing="<mark id="sec7Text1LetterspacingCode">2</mark>"
-      fill="<mark id="sec7Text1FillCode">none</mark>"
-      stroke="#f97316" strokewidth="<mark id="sec7Text1StrokewidthCode">4</mark>"
-      align="center" baseline="middle"
-      text="'OUTLINE'"&gt;&lt;/pxl-text&gt;
+    &lt;!-- Upper Center: Dashed Outline (Blue Scheme) --&gt;
+    &lt;pxl-text x="500" y="160" font="sans-serif"
+      linedash="[<mark id="sec7Text2DashCode">6</mark>, 4]" strokewidth="<mark id="sec7Text2StrokewidthCode">4</mark>"
+      size="<mark id="sec7Text2SizeCode">64</mark>" weight="<mark id="sec7Text2WeightCode">800</mark>"
+      stroke="#3b82f6" fill="none" align="center" baseline="middle"
+      text="'DASHED'"&gt;&lt;/pxl-text&gt;
 
-    &lt;!-- Right: Linear Gradient Text (Blue Scheme) --&gt;
-    &lt;pxl-text x="750" y="300"
-      font="Inter" weight="<mark id="sec7Text2WeightCode">800</mark>" size="70"
-      letterspacing="<mark id="sec7Text2LetterspacingCode">2</mark>"
-      fill="linear(<mark id="sec7AngleCode">90</mark>, ['#38bdf8', '#3b82f6', '#1d4ed8'])"
-      stroke="#1e3a8a" strokewidth="<mark id="sec7Text2StrokewidthCode">0</mark>"
-      align="center" baseline="middle"
+    &lt;!-- Lower Right: Gradient Outline (Multi-Stop Linear) --&gt;
+    &lt;pxl-text x="760" y="420" font="sans-serif"
+      stroke="linear(<mark id="sec7AngleCode">90</mark>, ['#f97316', '#ec4899', '#3b82f6'])" strokewidth="<mark id="sec7Text3StrokewidthCode">4</mark>"
+      size="<mark id="sec7Text3SizeCode">64</mark>" weight="<mark id="sec7Text3WeightCode">800</mark>"
+      fill="none" align="center" baseline="middle"
       text="'GRADIENT'"&gt;&lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -657,13 +659,14 @@
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Controls</h3>
               <div class="demo-tabs">
-                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec7OutlineTab')">Outline</button>
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec7SolidTab')">Solid</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec7DashedTab')">Dashed</button>
                 <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec7GradientTab')">Gradient</button>
               </div>
             </div>
 
-            <!-- Tab 1: Outline Controls (Orange Scheme) -->
-            <div class="tab-content active" id="sec7OutlineTab">
+            <!-- Tab 1: Solid Controls (Orange Scheme) -->
+            <div class="tab-content active" id="sec7SolidTab">
               <div class="playground-sliders">
                 <!-- Row 1: Stroke Width & Fill Mode -->
                 <div class="control-group">
@@ -680,21 +683,50 @@
                   </div>
                 </div>
 
-                <!-- Row 2: Font Weight & Letter Spacing -->
+                <!-- Row 2: Font Size & Font Weight -->
+                <div class="control-group">
+                  <label><span>Font Size</span> <span id="sec7Text1SizeVal">64</span></label>
+                  <input type="range" min="36" max="80" step="2" value="64" autocomplete="off"
+                    oninput="document.getElementById('sec7Text1').setAttribute('size', this.value); document.getElementById('sec7Text1SizeVal').innerText = this.value; document.getElementById('sec7Text1SizeCode').innerText = this.value;">
+                </div>
                 <div class="control-group">
                   <label><span>Font Weight</span> <span id="sec7Text1WeightVal">800</span></label>
                   <input type="range" min="100" max="900" step="100" value="800" autocomplete="off"
                     oninput="document.getElementById('sec7Text1').setAttribute('weight', this.value); document.getElementById('sec7Text1WeightVal').innerText = this.value; document.getElementById('sec7Text1WeightCode').innerText = this.value;">
                 </div>
+              </div>
+            </div>
+
+            <!-- Tab 2: Dashed Controls (Blue Scheme) -->
+            <div class="tab-content" id="sec7DashedTab">
+              <div class="playground-sliders">
+                <!-- Row 1: Dash Length & Stroke Width -->
                 <div class="control-group">
-                  <label><span>Letter Spacing</span> <span id="sec7Text1LetterspacingVal">2</span></label>
-                  <input type="range" min="-2" max="16" step="1" value="2" autocomplete="off"
-                    oninput="document.getElementById('sec7Text1').setAttribute('letterspacing', this.value); document.getElementById('sec7Text1LetterspacingVal').innerText = this.value; document.getElementById('sec7Text1LetterspacingCode').innerText = this.value;">
+                  <label><span>Dash Length <span class="indicator-dot"></span></span> <span id="sec7Text2DashVal">6</span></label>
+                  <input type="range" min="2" max="16" step="1" value="6" autocomplete="off"
+                    oninput="document.getElementById('sec7Text2').setAttribute('linedash', '[' + this.value + ', 4]'); document.getElementById('sec7Text2DashVal').innerText = this.value; document.getElementById('sec7Text2DashCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec7Text2StrokewidthVal">4</span></label>
+                  <input type="range" min="1" max="12" step="1" value="4" autocomplete="off"
+                    oninput="document.getElementById('sec7Text2').setAttribute('strokewidth', this.value); document.getElementById('sec7Text2StrokewidthVal').innerText = this.value; document.getElementById('sec7Text2StrokewidthCode').innerText = this.value;">
+                </div>
+
+                <!-- Row 2: Font Size & Font Weight -->
+                <div class="control-group">
+                  <label><span>Font Size</span> <span id="sec7Text2SizeVal">64</span></label>
+                  <input type="range" min="36" max="80" step="2" value="64" autocomplete="off"
+                    oninput="document.getElementById('sec7Text2').setAttribute('size', this.value); document.getElementById('sec7Text2SizeVal').innerText = this.value; document.getElementById('sec7Text2SizeCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Font Weight</span> <span id="sec7Text2WeightVal">800</span></label>
+                  <input type="range" min="100" max="900" step="100" value="800" autocomplete="off"
+                    oninput="document.getElementById('sec7Text2').setAttribute('weight', this.value); document.getElementById('sec7Text2WeightVal').innerText = this.value; document.getElementById('sec7Text2WeightCode').innerText = this.value;">
                 </div>
               </div>
             </div>
 
-            <!-- Tab 2: Gradient Controls (Blue Scheme) -->
+            <!-- Tab 3: Gradient Controls (Purple Scheme) -->
             <div class="tab-content" id="sec7GradientTab">
               <div class="playground-sliders">
                 <!-- Row 1: Gradient Angle & Stroke Width -->
@@ -704,21 +736,21 @@
                     oninput="document.getElementById('sec7Angle').setAttribute('value', this.value); document.getElementById('sec7AngleVal').innerText = this.value + '°'; document.getElementById('sec7AngleCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec7Text2StrokewidthVal">0</span></label>
-                  <input type="range" min="0" max="8" step="1" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec7Text2').setAttribute('strokewidth', this.value); document.getElementById('sec7Text2StrokewidthVal').innerText = this.value; document.getElementById('sec7Text2StrokewidthCode').innerText = this.value;">
+                  <label><span>Stroke Width</span> <span id="sec7Text3StrokewidthVal">4</span></label>
+                  <input type="range" min="1" max="12" step="1" value="4" autocomplete="off"
+                    oninput="document.getElementById('sec7Text3').setAttribute('strokewidth', this.value); document.getElementById('sec7Text3StrokewidthVal').innerText = this.value; document.getElementById('sec7Text3StrokewidthCode').innerText = this.value;">
                 </div>
 
-                <!-- Row 2: Font Weight & Letter Spacing -->
+                <!-- Row 2: Font Size & Font Weight -->
                 <div class="control-group">
-                  <label><span>Font Weight</span> <span id="sec7Text2WeightVal">800</span></label>
-                  <input type="range" min="100" max="900" step="100" value="800" autocomplete="off"
-                    oninput="document.getElementById('sec7Text2').setAttribute('weight', this.value); document.getElementById('sec7Text2WeightVal').innerText = this.value; document.getElementById('sec7Text2WeightCode').innerText = this.value;">
+                  <label><span>Font Size</span> <span id="sec7Text3SizeVal">64</span></label>
+                  <input type="range" min="36" max="80" step="2" value="64" autocomplete="off"
+                    oninput="document.getElementById('sec7Text3').setAttribute('size', this.value); document.getElementById('sec7Text3SizeVal').innerText = this.value; document.getElementById('sec7Text3SizeCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Letter Spacing</span> <span id="sec7Text2LetterspacingVal">2</span></label>
-                  <input type="range" min="-2" max="16" step="1" value="2" autocomplete="off"
-                    oninput="document.getElementById('sec7Text2').setAttribute('letterspacing', this.value); document.getElementById('sec7Text2LetterspacingVal').innerText = this.value; document.getElementById('sec7Text2LetterspacingCode').innerText = this.value;">
+                  <label><span>Font Weight</span> <span id="sec7Text3WeightVal">800</span></label>
+                  <input type="range" min="100" max="900" step="100" value="800" autocomplete="off"
+                    oninput="document.getElementById('sec7Text3').setAttribute('weight', this.value); document.getElementById('sec7Text3WeightVal').innerText = this.value; document.getElementById('sec7Text3WeightCode').innerText = this.value;">
                 </div>
               </div>
             </div>
@@ -732,39 +764,48 @@
 
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
-              <!-- Center Column Divider (Neutral Slate) -->
-              <pxl-line x1="500" y1="40" x2="500" y2="560" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
-
-              <!-- Left: Annotation Label (Orange Scheme) -->
-              <pxl-text x="250" y="140"
-                text="'outline / hollow'"
-                size="27" fill="#fb923c" font="monospace"
-                align="center" baseline="bottom"></pxl-text>
-
-              <!-- Left: Hollow & Outlined Text Shape -->
-              <pxl-text id="sec7Text1" x="250" y="300"
-                font="Inter" fill="none"
+              <!-- Lower Left: Solid Outline Text (Orange Scheme) -->
+              <pxl-text id="sec7Text1" x="240" y="420"
+                font="sans-serif" fill="none"
                 stroke="#f97316" strokewidth="4"
-                size="70" weight="800"
-                letterspacing="2"
+                size="64" weight="800"
                 align="center" baseline="middle"
-                text="'OUTLINE'"></pxl-text>
+                text="'SOLID'"></pxl-text>
 
-              <!-- Right: Annotation Label (Blue Scheme) -->
-              <pxl-text x="750" y="140"
-                text="'linear gradient'"
+              <!-- Lower Left: Annotation Label -->
+              <pxl-text x="240" y="490"
+                text="'solid outline'"
+                size="27" fill="#fb923c" font="monospace"
+                align="center"></pxl-text>
+
+              <!-- Upper Center: Dashed Outline Text (Blue Scheme) -->
+              <pxl-text id="sec7Text2" x="500" y="160"
+                font="sans-serif" fill="none"
+                stroke="#3b82f6" strokewidth="4"
+                linedash="[6, 4]"
+                size="64" weight="800"
+                align="center" baseline="middle"
+                text="'DASHED'"></pxl-text>
+
+              <!-- Upper Center: Annotation Label -->
+              <pxl-text x="500" y="230"
+                text="'dashed outline'"
                 size="27" fill="#60a5fa" font="monospace"
-                align="center" baseline="bottom"></pxl-text>
+                align="center"></pxl-text>
 
-              <!-- Right: Linear Gradient Text Shape -->
-              <pxl-text id="sec7Text2" x="750" y="300"
-                font="Inter"
-                fill="linear(ref.sec7Angle.value, ['#38bdf8', '#3b82f6', '#1d4ed8'])"
-                stroke="#1e3a8a" strokewidth="0"
-                size="70" weight="800"
-                letterspacing="2"
+              <!-- Lower Right: Linear Gradient Outline Text (Rainbow Gradient) -->
+              <pxl-text id="sec7Text3" x="760" y="420"
+                font="sans-serif" fill="none"
+                stroke="linear(ref.sec7Angle.value, ['#f97316', '#ec4899', '#3b82f6'])" strokewidth="4"
+                size="64" weight="800"
                 align="center" baseline="middle"
                 text="'GRADIENT'"></pxl-text>
+
+              <!-- Lower Right: Annotation Label -->
+              <pxl-text x="760" y="490"
+                text="'gradient outline'"
+                size="27" fill="#c084fc" font="monospace"
+                align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>

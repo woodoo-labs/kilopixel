@@ -2450,7 +2450,7 @@ class Text extends Shape {
   }
 
   draw(ctx, u, t) {
-    const { text, size, font, align, baseline, fill, stroke, strokewidth, weight, fontstyle, maxwidth, direction, width, lineheight, letterspacing, reveal } = this.attributeValues;
+    const { text, size, font, align, baseline, fill, stroke, strokewidth, weight, fontstyle, maxwidth, direction, width, lineheight, letterspacing, reveal, linecap, linejoin, miterlimit, linedash, dashoffset } = this.attributeValues;
 
     // Skip drawing if there's no text content to render
     if (text === null || text === undefined || text === '') return;
@@ -2584,7 +2584,11 @@ class Text extends Shape {
     if (hasFill) ctx.fillStyle = this.createGradient(ctx, u, fill, 0);
     if (hasStroke) {
       ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
-      if (strokewidth !== 1) ctx.lineWidth = strokewidth * u;
+      ctx.lineWidth = strokewidth * u;
+      if (linecap) ctx.lineCap = linecap;
+      if (linejoin) ctx.lineJoin = linejoin;
+      if (miterlimit) ctx.miterLimit = miterlimit;
+      pxl.applyLineDash(ctx, u, linedash, dashoffset, this);
     }
 
     // Unified Render Loop
@@ -2610,6 +2614,10 @@ class Text extends Shape {
       }
 
       charsRemaining -= (this._lines[i].length + 1); // +1 accounts for wrapped space/newline
+    }
+
+    if (hasStroke && linedash) {
+      ctx.setLineDash(pxl._emptyDash);
     }
   }
 
