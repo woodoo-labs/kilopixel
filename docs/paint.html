@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Learn how Kilopixel's fill and stroke paint channels work. Discover how to apply solid colors, line styles, and gradient shaders to HTML5 canvas shapes.">
   <title>Fill &amp; Stroke | Kilopixel</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/docs.css">
@@ -31,17 +32,17 @@
     <main class="docs-content">
       <div class="docs-inner">
         <h1>Fill &amp; Stroke</h1>
-        <p class="lead">Every vector shape in Kilopixel features two distinct paint channels: <code>fill</code> for the interior body and <code>stroke</code> for the exterior outline contour. Both attributes accept solid colors and dynamic gradient shaders.</p>
+        <p class="lead">Shapes in Kilopixel are styled using two paint channels: <code>fill</code> for the interior and <code>stroke</code> for the outline. Both attributes accept solid colors and dynamic gradients.</p>
 
         <!-- ================================================================= -->
         <!-- SECTION 1: THE TWO PAINT CHANNELS -->
         <!-- ================================================================= -->
         <h2>1. The Two Paint Channels</h2>
-        <p>A shape's visual appearance is defined by two complementary attributes:</p>
+        <p>A shape's appearance is defined by two complementary attributes:</p>
         <ul>
-          <li><strong>Interior Body (<code>fill</code>):</strong> Paints the inside surface of the shape. Defaults to <code>none</code> (transparent).</li>
-          <li><strong>Boundary Contour (<code>stroke</code>):</strong> Traces the perimeter outline of the shape. Defaults to <code>none</code>.</li>
-          <li><strong>Stroke Thickness (<code>strokewidth</code>):</strong> Controls the line thickness in responsive logical canvas units (defaults to <code>1</code>).</li>
+          <li><strong>Interior:</strong> The <code>fill</code> attribute paints the inside of the shape. Defaults to <code>none</code> (transparent).</li>
+          <li><strong>Outline:</strong> The <code>stroke</code> attribute draws the border around the shape. Defaults to <code>none</code>.</li>
+          <li><strong>Outline Width:</strong> The <code>strokewidth</code> attribute controls the border thickness in responsive logical canvas units (defaults to <code>1</code>).</li>
         </ul>
 
         <div class="callout-info">
