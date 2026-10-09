@@ -51,8 +51,8 @@ class DocsSidebar extends HTMLElement {
           <ul>
             <li><a href="index.html" class="${currentPath === 'index.html' ? 'active' : ''}">Introduction</a></li>
             <li><a href="installation.html" class="${currentPath === 'installation.html' ? 'active' : ''}">Installation</a></li>
+            <li><a href="walkthrough.html" class="${currentPath === 'walkthrough.html' ? 'active' : ''}">Walkthrough</a></li>
             <li><a href="gallery.html" class="${currentPath === 'gallery.html' ? 'active' : ''}">Gallery</a></li>
-            <li><a href="coordinates.html" class="${currentPath === 'coordinates.html' ? 'active' : ''}">Coordinate System</a></li>
           </ul>
         </div>
         <div class="sidebar-section">
@@ -77,15 +77,18 @@ class DocsSidebar extends HTMLElement {
           </ul>
         </div>
         <div class="sidebar-section">
+          <div class="sidebar-title">Position &amp; Transforms</div>
+          <ul>
+            <li><a href="position.html" class="${currentPath === 'position.html' ? 'active' : ''}">Center &amp; Offset</a></li>
+            <li><a href="transform.html" class="${currentPath === 'transform.html' ? 'active' : ''}">Rotate, Scale &amp; Skew</a></li>
+            <li><a href="mapping.html" class="${currentPath === 'mapping.html' ? 'active' : ''}">Coordinate Mapping</a></li>
+          </ul>
+        </div>
+        <div class="sidebar-section">
           <div class="sidebar-title">Fills &amp; Strokes</div>
           <ul>
             <li><a href="fill.html" class="${currentPath === 'fill.html' ? 'active' : ''}">Fill</a></li>
             <li><a href="stroke.html" class="${currentPath === 'stroke.html' ? 'active' : ''}">Stroke</a></li>
-          </ul>
-        </div>
-        <div class="sidebar-section">
-          <div class="sidebar-title">Gradients</div>
-          <ul>
             <li><a href="linear.html" class="${currentPath === 'linear.html' ? 'active' : ''}">Linear Gradient</a></li>
             <li><a href="radial.html" class="${currentPath === 'radial.html' ? 'active' : ''}">Radial Gradient</a></li>
             <li><a href="conic.html" class="${currentPath === 'conic.html' ? 'active' : ''}">Conic Gradient</a></li>
