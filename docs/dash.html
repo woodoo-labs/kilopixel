@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Create dashed strokes, alternating gap patterns, and 60fps marching ants animations using linedash and dashoffset in Kilopixel.">
+  <title>Dashes | Kilopixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+  <script src="js/api-tabs.js"></script>
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+        <h1>Dashes</h1>
+        <p class="lead">Create dashed outlines and animated marching patterns across any Kilopixel shape. Use <code>linedash</code> to specify repeating dash-and-gap sequences and <code>dashoffset</code> to phase-shift or animate borders at 60 frames per second.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">The Dash Array Standard</p>
+          <p class="callout-body">Following the HTML5 Canvas specification, <code>linedash</code> accepts a list of lengths describing alternating dashes and empty gaps (e.g., <code>[dash, gap]</code> or <code>[dash, gap, dot, gap]</code>). Kilopixel automatically repeats the sequence around the entire perimeter of closed shapes and open lines alike.</p>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: DASHED STROKES & OFFSET -->
+        <!-- ================================================================= -->
+        <h2>1. Dashed Strokes &amp; Offset</h2>
+        <p>The <code>linedash</code> and <code>dashoffset</code> attributes allow you to create patterned, dashed outlines across any Kilopixel shape. Rather than drawing a continuous path, the stroke alternates between drawn dash segments and empty gaps.</p>
+        <ul>
+          <li><strong>Dash Pattern:</strong> The <code>linedash</code> attribute accepts a JavaScript array of numbers defining alternating dash and gap lengths (e.g., <code>linedash="[24, 16]"</code>). As a fast-path, a single number without brackets (e.g., <code>linedash="24"</code>) is also supported to create an equal repeating dash and gap.</li>
+          <li><strong>Phase Shift:</strong> The <code>dashoffset</code> attribute shifts where the pattern begins along the path perimeter, enabling precise alignment or manual sliding.</li>
+        </ul>
+
+        <!-- Declarative Code Block Above Container -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- 1. Circle with Dash &amp; Gap Spacing --&gt;
+    &lt;pxl-circle x="300" y="300" r="140" stroke="#f97316" strokewidth="<mark id="sec1CircleWidthCode">20</mark>" linecap="<mark id="sec1CircleCapCode">butt</mark>" fill="none"
+      linedash="[<mark id="sec1CircleDashCode">24</mark>, <mark id="sec1CircleGapCode">28</mark>]"
+      dashoffset="<mark id="sec1CircleOffsetCode">0</mark>"&gt;
+    &lt;/pxl-circle&gt;
+
+    &lt;!-- 2. Polyline with Pattern Presets --&gt;
+    &lt;pxl-polyline points="520,300; 640,180; 760,420; 880,300" smooth="1" stroke="#3b82f6" strokewidth="<mark id="sec1PolyWidthCode">12</mark>" linecap="<mark id="sec1PolyCapCode">round</mark>" fill="none"
+      linedash="<mark id="sec1PolyDashCode">[44, 28, 10, 28, 10, 28]</mark>"
+      dashoffset="<mark id="sec1PolyOffsetCode">0</mark>"&gt;
+    &lt;/pxl-polyline&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1CircleTab')">Circle</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1PolyTab')">Polyline</button>
+              </div>
+            </div>
+
+            <!-- Circle Tab -->
+            <div class="tab-content active" id="sec1CircleTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Dash Length <span class="indicator-dot"></span></span> <span id="sec1CircleDashVal">24</span></label>
+                  <input type="range" min="0" max="80" step="2" value="24" autocomplete="off" id="sec1CircleDashInput"
+                    oninput="const d = this.value; const g = document.getElementById('sec1CircleGapInput').value; document.getElementById('sec1Circle').setAttribute('linedash', '[' + d + ', ' + g + ']'); document.getElementById('sec1CircleDashVal').innerText = d; document.getElementById('sec1CircleDashCode').innerText = d;" data-mark="sec1CircleDashCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Gap Length</span> <span id="sec1CircleGapVal">28</span></label>
+                  <input type="range" min="4" max="80" step="2" value="28" autocomplete="off" id="sec1CircleGapInput"
+                    oninput="const g = this.value; const d = document.getElementById('sec1CircleDashInput').value; document.getElementById('sec1Circle').setAttribute('linedash', '[' + d + ', ' + g + ']'); document.getElementById('sec1CircleGapVal').innerText = g; document.getElementById('sec1CircleGapCode').innerText = g;" data-mark="sec1CircleGapCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Dash Offset</span> <span id="sec1CircleOffsetVal">0</span></label>
+                  <input type="range" min="0" max="100" step="2" value="0" autocomplete="off" id="sec1CircleOffsetInput"
+                    oninput="document.getElementById('sec1Circle').setAttribute('dashoffset', this.value); document.getElementById('sec1CircleOffsetVal').innerText = this.value; document.getElementById('sec1CircleOffsetCode').innerText = this.value;" data-mark="sec1CircleOffsetCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec1CircleWidthVal">20</span></label>
+                  <input type="range" min="4" max="50" step="2" value="20" autocomplete="off" id="sec1CircleWidthInput"
+                    oninput="const w = this.value; document.getElementById('sec1Circle').setAttribute('strokewidth', w); document.getElementById('sec1CircleWidthVal').innerText = w; document.getElementById('sec1CircleWidthCode').innerText = w;" data-mark="sec1CircleWidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Line Cap</span></label>
+                  <select id="sec1CircleCapSelect" autocomplete="off"
+                    onchange="document.getElementById('sec1Circle').setAttribute('linecap', this.value); document.getElementById('sec1CircleCapCode').innerText = this.value;" data-mark="sec1CircleCapCode">
+                    <option value="butt" selected>butt (default)</option>
+                    <option value="round">round</option>
+                    <option value="square">square</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Polyline Tab -->
+            <div class="tab-content" id="sec1PolyTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec1PolyWidthVal">12</span></label>
+                  <input type="range" min="4" max="50" step="2" value="12" autocomplete="off" id="sec1PolyWidthInput"
+                    oninput="const w = this.value; document.getElementById('sec1Polyline').setAttribute('strokewidth', w); document.getElementById('sec1PolyWidthVal').innerText = w; document.getElementById('sec1PolyWidthCode').innerText = w;" data-mark="sec1PolyWidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Dash Offset</span> <span id="sec1PolyOffsetVal">0</span></label>
+                  <input type="range" min="0" max="100" step="2" value="0" autocomplete="off" id="sec1PolyOffsetInput"
+                    oninput="document.getElementById('sec1Polyline').setAttribute('dashoffset', this.value); document.getElementById('sec1PolyOffsetVal').innerText = this.value; document.getElementById('sec1PolyOffsetCode').innerText = this.value;" data-mark="sec1PolyOffsetCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Pattern Preset</span></label>
+                  <select id="sec1PolyPresetSelect" autocomplete="off"
+                    onchange="document.getElementById('sec1Polyline').setAttribute('linedash', this.value); document.getElementById('sec1PolyDashCode').innerText = this.value;" data-mark="sec1PolyDashCode">
+                    <option value="[40, 28, 10, 28]">Dash-Dot: [40, 28, 10, 28]</option>
+                    <option value="[30, 28]">Standard Dash: [30, 28]</option>
+                    <option value="[12, 28]">Dense Dash: [12, 28]</option>
+                    <option value="[44, 28, 10, 28, 10, 28]" selected>Triple Rhythm: [44, 28, 10, 28, 10, 28]</option>
+                  </select>
+                </div>
+                <div class="control-group">
+                  <label><span>Line Cap</span></label>
+                  <select id="sec1PolyCapSelect" autocomplete="off"
+                    onchange="document.getElementById('sec1Polyline').setAttribute('linecap', this.value); document.getElementById('sec1PolyCapCode').innerText = this.value;" data-mark="sec1PolyCapCode">
+                    <option value="butt">butt (default)</option>
+                    <option value="round" selected>round</option>
+                    <option value="square">square</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
+            <!-- Background Grid -->
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            </pxl-layer>
+
+            <!-- Main Dashed Shapes Layer -->
+            <pxl-layer>
+              <!-- Circle with configurable dash, gap, offset -->
+              <pxl-circle id="sec1Circle" x="300" y="300" r="140" stroke="#f97316" strokewidth="20" linecap="butt" fill="none" linedash="[24, 28]" dashoffset="0"></pxl-circle>
+
+              <!-- Polyline with configurable presets -->
+              <pxl-polyline id="sec1Polyline" points="520,300; 640,180; 760,420; 880,300" smooth="1" stroke="#3b82f6" strokewidth="12" linecap="round" fill="none" linedash="[44, 28, 10, 28, 10, 28]" dashoffset="0"></pxl-polyline>
+            </pxl-layer>
+
+            <!-- Section Labels -->
+            <pxl-layer>
+              <pxl-text x="300" y="520" text="'Circle'" size="27" font="monospace" weight="700" align="center" fill="#fb923c"></pxl-text>
+              <pxl-text x="700" y="520" text="'Polyline'" size="27" font="monospace" weight="700" align="center" fill="#60a5fa"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 2: MARCHING ANTS & ANIMATED STROKES -->
+        <!-- ================================================================= -->
+        <h2>2. Marching Ants &amp; Continuous Animation</h2>
+        <p>Combining <code>linedash</code> with a dynamic <code>dashoffset</code> expression produces continuous stroke animation &mdash; commonly known as <strong>marching ants</strong>. By multiplying the framework's time driver <code>t</code> by a velocity coefficient (e.g. <code>dashoffset="-t * 40"</code>), the dash pattern advances smoothly along the path perimeter at 60fps.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Directionality &amp; Flow</p>
+          <p class="callout-body">A negative offset rate (<code>-t * speed</code>) advances the pattern forward along the path &mdash; moving clockwise around closed boundaries and from start to end along open paths. A positive offset rate (<code>t * speed</code>) reverses the flow direction.</p>
+        </div>
+
+        <!-- Declarative Code Block Above Container -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- 1. Selection Marquee (Closed Rect) --&gt;
+    &lt;pxl-rect x="300" y="300" w="280" h="280"
+      stroke="#f97316" strokewidth="<mark id="sec2MarqueeWidthCode">4</mark>" fill="#ffedd522"
+      linedash="<mark id="sec2MarqueeDashCode">[12, 12]</mark>"
+      dashoffset="-t * <mark id="sec2MarqueeSpeedCode">40</mark>"&gt;
+    &lt;/pxl-rect&gt;
+
+    &lt;!-- 2. Signal Conduit (Dormant Wire + Animated Pulse Runner) --&gt;
+    &lt;pxl-polyline points="520,300; 640,180; 760,420; 880,300" smooth="1"
+      stroke="#1e3a8a33" strokewidth="<mark id="sec2FlowWidthCode">20</mark>" linecap="round" fill="none"&gt;
+    &lt;/pxl-polyline&gt;
+    &lt;pxl-polyline points="520,300; 640,180; 760,420; 880,300" smooth="1"
+      stroke="#3b82f6" strokewidth="<mark id="sec2FlowWidthCode2">20</mark>" linecap="round" fill="none"
+      linedash="<mark id="sec2FlowDashCode">[40, 80]</mark>"
+      dashoffset="-t * <mark id="sec2FlowSpeedCode">60</mark>"&gt;
+    &lt;/pxl-polyline&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2MarqueeTab')">Marquee</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2FlowTab')">Signal Flow</button>
+              </div>
+            </div>
+
+            <!-- Marquee Tab -->
+            <div class="tab-content active" id="sec2MarqueeTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>March Speed <span class="indicator-dot"></span></span> <span id="sec2MarqueeSpeedVal">40</span></label>
+                  <input type="range" min="-100" max="100" step="5" value="40" autocomplete="off" id="sec2MarqueeSpeedInput"
+                    oninput="const s = this.value; document.getElementById('sec2Marquee').setAttribute('dashoffset', '-t * ' + s); document.getElementById('sec2MarqueeSpeedVal').innerText = s; document.getElementById('sec2MarqueeSpeedCode').innerText = s;" data-mark="sec2MarqueeSpeedCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Dash Length</span> <span id="sec2MarqueeDashVal">12</span></label>
+                  <input type="range" min="4" max="40" step="2" value="12" autocomplete="off" id="sec2MarqueeDashInput"
+                    oninput="const d = this.value; document.getElementById('sec2Marquee').setAttribute('linedash', '[' + d + ', ' + d + ']'); document.getElementById('sec2MarqueeDashVal').innerText = d; document.getElementById('sec2MarqueeDashCode').innerText = '[' + d + ', ' + d + ']';" data-mark="sec2MarqueeDashCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec2MarqueeWidthVal">4</span></label>
+                  <input type="range" min="2" max="16" step="2" value="4" autocomplete="off" id="sec2MarqueeWidthInput"
+                    oninput="const w = this.value; document.getElementById('sec2Marquee').setAttribute('strokewidth', w); document.getElementById('sec2MarqueeWidthVal').innerText = w; document.getElementById('sec2MarqueeWidthCode').innerText = w;" data-mark="sec2MarqueeWidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Pattern Preset</span></label>
+                  <select id="sec2MarqueePresetSelect" autocomplete="off"
+                    onchange="const v = this.value; document.getElementById('sec2Marquee').setAttribute('linedash', v); document.getElementById('sec2MarqueeDashCode').innerText = v; const firstVal = v.replace('[','').split(',')[0].trim(); document.getElementById('sec2MarqueeDashInput').value = firstVal; document.getElementById('sec2MarqueeDashVal').innerText = firstVal;" data-mark="sec2MarqueeDashCode">
+                    <option value="[12, 12]" selected>Classic: [12, 12]</option>
+                    <option value="[6, 6]">Dense: [6, 6]</option>
+                    <option value="[20, 20]">Long Dash: [20, 20]</option>
+                    <option value="[4, 12]">Dotted: [4, 12]</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Signal Flow Tab -->
+            <div class="tab-content" id="sec2FlowTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Flow Speed</span> <span id="sec2FlowSpeedVal">60</span></label>
+                  <input type="range" min="-150" max="150" step="5" value="60" autocomplete="off" id="sec2FlowSpeedInput"
+                    oninput="const s = this.value; document.getElementById('sec2Flow').setAttribute('dashoffset', '-t * ' + s); document.getElementById('sec2FlowSpeedVal').innerText = s; document.getElementById('sec2FlowSpeedCode').innerText = s;" data-mark="sec2FlowSpeedCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Pulse Gap</span> <span id="sec2FlowGapVal">80</span></label>
+                  <input type="range" min="20" max="700" step="20" value="80" autocomplete="off" id="sec2FlowGapInput"
+                    oninput="const g = this.value; const d = 40; document.getElementById('sec2Flow').setAttribute('linedash', '[' + d + ', ' + g + ']'); document.getElementById('sec2FlowGapVal').innerText = g; document.getElementById('sec2FlowDashCode').innerText = '[' + d + ', ' + g + ']';" data-mark="sec2FlowDashCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec2FlowWidthVal">20</span></label>
+                  <input type="range" min="4" max="50" step="2" value="20" autocomplete="off" id="sec2FlowWidthInput"
+                    oninput="const w = this.value; document.getElementById('sec2Wire').setAttribute('strokewidth', w); document.getElementById('sec2Flow').setAttribute('strokewidth', w); document.getElementById('sec2FlowWidthVal').innerText = w; document.getElementById('sec2FlowWidthCode').innerText = w; document.getElementById('sec2FlowWidthCode2').innerText = w;" data-mark="sec2FlowWidthCode, sec2FlowWidthCode2">
+                </div>
+                <div class="control-group">
+                  <label><span>Signal Preset</span></label>
+                  <select id="sec2FlowPresetSelect" autocomplete="off"
+                    onchange="const v = this.value; document.getElementById('sec2Flow').setAttribute('linedash', v); document.getElementById('sec2FlowDashCode').innerText = v; const gapVal = v.replace(']','').split(',')[1] ? v.replace(']','').split(',')[1].trim() : 80; document.getElementById('sec2FlowGapInput').value = gapVal; document.getElementById('sec2FlowGapVal').innerText = gapVal;" data-mark="sec2FlowDashCode">
+                    <option value="[40, 80]" selected>Data Packets: [40, 80]</option>
+                    <option value="[80, 600]">Single Beacon: [80, 600]</option>
+                    <option value="[16, 32]">High Frequency: [16, 32]</option>
+                    <option value="[60, 60]">Continuous Stream: [60, 60]</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage id="sec2Stage" ratio="5 / 3" class="demo-stage">
+            <!-- Background Grid -->
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            </pxl-layer>
+
+            <!-- Main Animated Shapes Layer -->
+            <pxl-layer>
+              <!-- 1. Selection Marquee (Closed Rect) -->
+              <pxl-rect id="sec2Marquee" x="300" y="300" w="280" h="280" stroke="#f97316" strokewidth="4" fill="#ffedd522" linedash="[12, 12]" dashoffset="-t * 40"></pxl-rect>
+
+              <!-- 2. Signal Conduit (Dormant Wire + Animated Pulse Runner) -->
+              <pxl-polyline id="sec2Wire" points="520,300; 640,180; 760,420; 880,300" smooth="1" stroke="#1e3a8a33" strokewidth="20" linecap="round" fill="none"></pxl-polyline>
+              <pxl-polyline id="sec2Flow" points="520,300; 640,180; 760,420; 880,300" smooth="1" stroke="#3b82f6" strokewidth="20" linecap="round" fill="none" linedash="[40, 80]" dashoffset="-t * 60"></pxl-polyline>
+            </pxl-layer>
+
+            <!-- Overlay Details (Corner Handles & Circuit Terminals) -->
+            <pxl-layer>
+              <!-- Marquee Corner Resize Handles -->
+              <pxl-rect x="160" y="160" w="10" h="10" fill="#ffffff" stroke="#f97316" strokewidth="2"></pxl-rect>
+              <pxl-rect x="440" y="160" w="10" h="10" fill="#ffffff" stroke="#f97316" strokewidth="2"></pxl-rect>
+              <pxl-rect x="440" y="440" w="10" h="10" fill="#ffffff" stroke="#f97316" strokewidth="2"></pxl-rect>
+              <pxl-rect x="160" y="440" w="10" h="10" fill="#ffffff" stroke="#f97316" strokewidth="2"></pxl-rect>
+
+              <!-- Conduit Start & End Terminals -->
+              <pxl-circle x="520" y="300" r="16" stroke="#3b82f6" strokewidth="4" fill="#ffffff"></pxl-circle>
+              <pxl-circle x="520" y="300" r="6" fill="#3b82f6"></pxl-circle>
+              <pxl-circle x="880" y="300" r="16" stroke="#3b82f6" strokewidth="4" fill="#ffffff"></pxl-circle>
+              <pxl-circle x="880" y="300" r="6" fill="#3b82f6"></pxl-circle>
+            </pxl-layer>
+
+            <!-- Section Labels -->
+            <pxl-layer>
+              <pxl-text x="300" y="520" text="'Selection Marquee'" size="27" font="monospace" weight="700" align="center" fill="#fb923c"></pxl-text>
+              <pxl-text x="700" y="520" text="'Signal Conduit'" size="27" font="monospace" weight="700" align="center" fill="#60a5fa"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 3: SHOWCASE                                               -->
+        <!-- ================================================================= -->
+        <h2>3. Showcase</h2>
+        <p>A generative composition demonstrating dynamic stroke styling, organic path topologies, marching dashes, and fluid math drivers running at 60 frames per second.</p>
+
+        <div class="showcase-container">
+          <pxl-stage id="sec3Stage" ratio="1 / 1" class="showcase-stage">
+            <!-- Background: 16 Radial Dashed Sunburst Rays -->
+            <pxl-layer>
+              <pxl-group x="500" y="500">
+                <!-- Cardinal Rays -->
+                <pxl-line x1="0" y1="0" x2="0" y2="-620" strokewidth="2" stroke="linear([0.5,1, 0.5,0], ['transparent', '#a200ff'])" linedash="[5, 10]" dashoffset="t * -120"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="620" y2="0" strokewidth="2" stroke="linear([0,0.5, 1,0.5], ['transparent', '#00f2ff'])" linedash="[10, 20]" dashoffset="t * -80"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="0" y2="620" strokewidth="2" stroke="linear([0.5,0, 0.5,1], ['transparent', '#a200ff'])" linedash="[5, 10]" dashoffset="t * -120"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="-620" y2="0" strokewidth="2" stroke="linear([1,0.5, 0,0.5], ['transparent', '#ff0055'])" linedash="[15, 15]" dashoffset="t * -100"></pxl-line>
+
+                <!-- Diagonal Rays -->
+                <pxl-line x1="0" y1="0" x2="480" y2="-480" strokewidth="2" stroke="linear([0,1, 1,0], ['transparent', '#00f2ff'])" linedash="[10, 20]" dashoffset="t * -80"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="480" y2="480" strokewidth="2" stroke="linear([0,0, 1,1], ['transparent', '#00f2ff'])" linedash="[10, 20]" dashoffset="t * -80"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="-480" y2="480" strokewidth="2" stroke="linear([1,0, 0,1], ['transparent', '#ff0055'])" linedash="[15, 15]" dashoffset="t * -100"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="-480" y2="-480" strokewidth="2" stroke="linear([1,1, 0,0], ['transparent', '#ff0055'])" linedash="[15, 15]" dashoffset="t * -100"></pxl-line>
+
+                <!-- Intermediate Rays -->
+                <pxl-line x1="0" y1="0" x2="260" y2="-580" strokewidth="2" stroke="linear([0,1, 0.5,0], ['transparent', '#00f2ff'])" linedash="[10, 20]" dashoffset="t * 70"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="580" y2="-260" strokewidth="2" stroke="linear([0,0.5, 1,0], ['transparent', '#00f2ff'])" linedash="[15, 15]" dashoffset="t * -90"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="580" y2="260" strokewidth="2" stroke="linear([0,0, 1,0.5], ['transparent', '#a200ff'])" linedash="[8, 16]" dashoffset="t * 60"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="260" y2="580" strokewidth="2" stroke="linear([0,0, 0.5,1], ['transparent', '#ff0055'])" linedash="[10, 20]" dashoffset="t * -80"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="-260" y2="580" strokewidth="2" stroke="linear([0.5,0, 0,1], ['transparent', '#ff0055'])" linedash="[15, 15]" dashoffset="t * -100"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="-580" y2="260" strokewidth="2" stroke="linear([1,0, 0,0.5], ['transparent', '#a200ff'])" linedash="[8, 16]" dashoffset="t * 60"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="-580" y2="-260" strokewidth="2" stroke="linear([1,0.5, 0,0], ['transparent', '#ff0055'])" linedash="[10, 20]" dashoffset="t * -80"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="-260" y2="-580" strokewidth="2" stroke="linear([0.5,1, 0,0], ['transparent', '#00f2ff'])" linedash="[15, 15]" dashoffset="t * 80"></pxl-line>
+              </pxl-group>
+            </pxl-layer>
+
+            <!-- Foreground: Concentric Organic Topology (All Stroke Features) -->
+            <pxl-layer>
+              <!-- Performance Monitor (Temporary) -->
+              <pxl-text x="24" y="36" text="ref.sec3Stage.fps + ' FPS | AVG: ' + ref.sec3Stage.renderAvg + 'ms | MAX: ' + ref.sec3Stage.renderMax + 'ms'" font="monospace" size="18" fill="#0f0"></pxl-text>
+
+              <pxl-group x="500" y="500">
+                <!-- 1. Outer Beaded Pearl Necklace: Demonstrates linecap="round" with static spacing, hue shift & dynamic bead diameter -->
+                <pxl-circle r="380" stroke="hsl(180 + sin(t * 0.8) * 35, 100, 65)" strokewidth="4 + wave(3) * 8" linecap="round" linedash="[1, 28]" dashoffset="t * -40" fill="none"></pxl-circle>
+
+                <!-- 2. Grand Organic Ribbon: Demonstrates rotating gradient stroke & fixed strokewidth -->
+                <pxl-polyline closed="true" smooth="true" 
+                  stroke="linear(t * 20, ['#00f2ff', '#a200ff', '#ff0055'])" strokewidth="8" fill="rgba(0, 242, 255, 0.03)"
+                  points="
+                    -320 - wave(2.1)*60, 0; 
+                    -160, -320 - wave(2.5)*70; 
+                    160, -320 - wave(2.8)*60; 
+                    320 + wave(3.2)*70, 0; 
+                    160, 320 + wave(2.3)*80; 
+                    -160, 320 + wave(2.7)*60
+                  "></pxl-polyline>
+
+                <!-- 3. Pulsing Dashed Wave: Demonstrates linecap="square" with extra-large dash breathing & wide gap -->
+                <pxl-polyline closed="true" smooth="0.9" 
+                  stroke="#a200ff" strokewidth="4" linecap="square" linedash="[6 + wave(8) * 34, 32]" dashoffset="t * 12" fill="none"
+                  points="
+                    -240 - wave(2.8)*40, 0; 
+                    -120, -240 - wave(3.1)*45; 
+                    120, -240 - wave(2.4)*40; 
+                    240 + wave(3.5)*45, 0; 
+                    120, 240 + wave(2.9)*50; 
+                    -120, 240 + wave(2.2)*40
+                  "></pxl-polyline>
+
+                <!-- 4. Sharp 8-Point Star: Demonstrates smooth="false", linejoin="miter", miterlimit="3", dynamic hue shift -->
+                <pxl-polyline closed="true" smooth="false" 
+                  stroke="hsl(330 + sin(t * 1.2) * 45, 100, 60)" strokewidth="4" linejoin="miter" miterlimit="3" linedash="[20, 10, 5, 10]" dashoffset="-t * 40" fill="none"
+                  points="
+                    0, -170 - wave(1.5)*20; 
+                    42, -100; 
+                    170 + wave(1.8)*20, 0; 
+                    100, 42; 
+                    0, 170 + wave(1.4)*20; 
+                    -42, 100; 
+                    -170 - wave(1.7)*20, 0; 
+                    -100, -42
+                  "></pxl-polyline>
+
+                <!-- 5. Fluid Harmonic Ring: Demonstrates linejoin="round", smooth="1.4", strokewidth="4" -->
+                <pxl-polyline closed="true" smooth="1.4" 
+                  stroke="#00f2ff" strokewidth="4" linejoin="round" linedash="[8, 8]" dashoffset="t * 70" fill="none"
+                  points="
+                    -110 - wave(1.6)*20, 0; 
+                    -55, -110 - wave(1.9)*25; 
+                    55, -110 - wave(1.3)*20; 
+                    110 + wave(1.7)*25, 0; 
+                    55, 110 + wave(2.0)*25; 
+                    -55, 110 + wave(1.5)*20
+                  "></pxl-polyline>
+
+                <!-- 6. Inner Beveled Diamond: Demonstrates smooth="false" with linejoin="bevel" -->
+                <pxl-polyline closed="true" smooth="false" 
+                  stroke="#fed7aa" strokewidth="3" linejoin="bevel" fill="none"
+                  points="
+                    0, -60 - wave(0.8)*15; 
+                    60 + wave(1.0)*15, 0; 
+                    0, 60 + wave(0.9)*15; 
+                    -60 - wave(0.7)*15, 0
+                  "></pxl-polyline>
+
+                <!-- 7. Orbit Track & Pulsing Core with Math-Driven Dynamic strokewidth -->
+                <pxl-circle r="32" stroke="rgba(255, 255, 255, 0.5)" strokewidth="2" linedash="[6, 6]" dashoffset="-t * 120" fill="none"></pxl-circle>
+                <pxl-circle r="14 + wave(0.5)*8" fill="#ffffff" stroke="#00f2ff" strokewidth="3 + wave(0.5)*3"></pxl-circle>
+              </pxl-group>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Prism Syntax Highlighting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+
+</body>
+</html>

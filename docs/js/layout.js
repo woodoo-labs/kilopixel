@@ -85,14 +85,20 @@ class DocsSidebar extends HTMLElement {
           </ul>
         </div>
         <div class="sidebar-section">
-          <div class="sidebar-title">Paint &amp; Outlines</div>
+          <div class="sidebar-title">Colors &amp; Styles</div>
           <ul>
-            <li><a href="paint.html" class="${currentPath === 'paint.html' ? 'active' : ''}">Fill &amp; Stroke</a></li>
-            <li><a href="color.html" class="${currentPath === 'color.html' ? 'active' : ''}">Color</a></li>
-            <li><a href="stroke.html" class="${currentPath === 'stroke.html' ? 'active' : ''}">Outline</a></li>
+            <li><a href="fill.html" class="${currentPath === 'fill.html' ? 'active' : ''}">Fill &amp; Color</a></li>
             <li><a href="linear.html" class="${currentPath === 'linear.html' ? 'active' : ''}">Linear Gradient</a></li>
             <li><a href="radial.html" class="${currentPath === 'radial.html' ? 'active' : ''}">Radial Gradient</a></li>
             <li><a href="conic.html" class="${currentPath === 'conic.html' ? 'active' : ''}">Conic Gradient</a></li>
+          </ul>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">Line Styles</div>
+          <ul>
+            <li><a href="stroke.html" class="${currentPath === 'stroke.html' ? 'active' : ''}">Stroke &amp; Width</a></li>
+            <li><a href="caps.html" class="${currentPath === 'caps.html' ? 'active' : ''}">Caps &amp; Joins</a></li>
+            <li><a href="dash.html" class="${currentPath === 'dash.html' ? 'active' : ''}">Dashes</a></li>
           </ul>
         </div>
         <div class="sidebar-section">

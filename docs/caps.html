@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Configure stroke linecap (butt, round, square), linejoin (miter, round, bevel), and miterlimit attributes in Kilopixel's declarative canvas framework.">
+  <title>Caps &amp; Joins | Kilopixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+  <script src="js/api-tabs.js"></script>
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+        <h1>Caps &amp; Joins</h1>
+        <p class="lead">Control how strokes terminate at open endpoints and how connected segments meet at vertices. Kilopixel provides declarative control over <code>linecap</code>, <code>linejoin</code>, and <code>miterlimit</code> across both open lines and closed geometry.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Open Paths vs. Vertices</p>
+          <p class="callout-body"><code>linecap</code> governs the termination of open endpoints (such as <code>&lt;pxl-line&gt;</code>, open <code>&lt;pxl-polyline&gt;</code>, or arc segments). <code>linejoin</code> and <code>miterlimit</code> govern the outer corners where two connected segments meet at a vertex.</p>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: LINE CAPS -->
+        <!-- ================================================================= -->
+        <h2>1. Line Caps</h2>
+        <p>The <code>linecap</code> attribute controls the ending shape of open paths &mdash; including <code>&lt;pxl-line&gt;</code>, open <code>&lt;pxl-polyline&gt;</code>, and open circular arcs (<code>&lt;pxl-circle&gt;</code> with <code>sweep</code> or <code>start</code>/<code>end</code>). Kilopixel supports three standard cap styles:</p>
+        <ul>
+          <li><strong>Butt:</strong> The default <code>butt</code> style cuts the stroke flush exactly at the path coordinates. The stroke ends strictly at the endpoints without extending past them.</li>
+          <li><strong>Round:</strong> The <code>round</code> style adds a semicircular cap extending past each endpoint by half the stroke width (radius = strokewidth / 2).</li>
+          <li><strong>Square:</strong> The <code>square</code> style adds a rectangular cap extending past each endpoint by half the stroke width.</li>
+        </ul>
+
+        <div class="callout-info">
+          <p class="callout-title">Open Paths vs. Closed Shapes</p>
+          <p class="callout-body"><code>linecap</code> only affects paths with open endpoints. Closed shapes (such as <code>&lt;pxl-rect&gt;</code> or full 360&deg; circles) close their subpaths automatically, so line caps are not rendered on them.</p>
+        </div>
+
+        <!-- Declarative Code Block Above Container -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- 1. Straight Line --&gt;
+    &lt;pxl-line linecap="<mark id="sec1LineCapCode">butt</mark>" strokewidth="<mark id="sec1LineWidthCode">40</mark>" rotate="<mark id="sec1LineRotCode">0</mark>" x="300" y="300" x1="-150" y1="0" x2="150" y2="0" stroke="#f97316"&gt;&lt;/pxl-line&gt;
+
+    &lt;!-- 2. Circular Arc --&gt;
+    &lt;pxl-circle linecap="<mark id="sec1ArcCapCode">butt</mark>" strokewidth="<mark id="sec1ArcWidthCode">40</mark>" sweep="<mark id="sec1ArcSweepCode">270</mark>" r="150" start="135" x="700" y="300" stroke="#3b82f6" fill="none"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1LineTab')">Line</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1ArcTab')">Arc</button>
+              </div>
+            </div>
+
+            <!-- Line Tab -->
+            <div class="tab-content active" id="sec1LineTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec1LineWidthVal">40</span></label>
+                  <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec1LineWidthInput"
+                    oninput="document.getElementById('sec1Line').setAttribute('strokewidth', this.value); document.getElementById('sec1LineWidthVal').innerText = this.value; document.getElementById('sec1LineWidthCode').innerText = this.value;" data-mark="sec1LineWidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Rotation</span> <span id="sec1LineRotVal">0°</span></label>
+                  <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off" id="sec1LineRotInput"
+                    oninput="const rot = this.value; document.getElementById('sec1Line').setAttribute('rotate', rot); document.getElementById('sec1LineGuideGroup').setAttribute('rotate', rot); document.getElementById('sec1LineGhostGroup').setAttribute('rotate', rot); document.getElementById('sec1LineRotVal').innerText = rot + '°'; document.getElementById('sec1LineRotCode').innerText = rot;" data-mark="sec1LineRotCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Line Cap <span class="indicator-dot"></span></span></label>
+                  <select id="sec1LineCapSelect" autocomplete="off"
+                    onchange="document.getElementById('sec1Line').setAttribute('linecap', this.value); document.getElementById('sec1LineCapCode').innerText = this.value;" data-mark="sec1LineCapCode">
+                    <option value="butt" selected>butt (default)</option>
+                    <option value="round">round</option>
+                    <option value="square">square</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Arc Tab -->
+            <div class="tab-content" id="sec1ArcTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec1ArcWidthVal">40</span></label>
+                  <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec1ArcWidthInput"
+                    oninput="document.getElementById('sec1Arc').setAttribute('strokewidth', this.value); document.getElementById('sec1ArcWidthVal').innerText = this.value; document.getElementById('sec1ArcWidthCode').innerText = this.value;" data-mark="sec1ArcWidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Sweep Angle</span> <span id="sec1ArcSweepVal">270°</span></label>
+                  <input type="range" min="120" max="330" step="5" value="270" autocomplete="off" id="sec1ArcSweepInput"
+                    oninput="const sw = this.value; document.getElementById('sec1Arc').setAttribute('sweep', sw); document.getElementById('sec1ArcGhost').setAttribute('sweep', sw); document.getElementById('sec1ArcEndGuideGroup').setAttribute('rotate', 135 + Number(sw)); document.getElementById('sec1ArcEndDotGroup').setAttribute('rotate', 135 + Number(sw)); document.getElementById('sec1ArcSweepVal').innerText = sw + '°'; document.getElementById('sec1ArcSweepCode').innerText = sw;" data-mark="sec1ArcSweepCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Line Cap</span></label>
+                  <select id="sec1ArcCapSelect" autocomplete="off"
+                    onchange="document.getElementById('sec1Arc').setAttribute('linecap', this.value); document.getElementById('sec1ArcCapCode').innerText = this.value;" data-mark="sec1ArcCapCode">
+                    <option value="butt" selected>butt (default)</option>
+                    <option value="round">round</option>
+                    <option value="square">square</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
+            <!-- Background Grid -->
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            </pxl-layer>
+
+            <!-- Guide Helpers Layer (Grey reference lines) -->
+            <pxl-layer>
+              <!-- Line endpoint reference guides (rotates with line) -->
+              <pxl-group id="sec1LineGuideGroup" x="300" y="300" rotate="ref.sec1Line.rotate">
+                <pxl-line x1="-150" y1="-150" x2="-150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+                <pxl-line x1="150" y1="-150" x2="150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              </pxl-group>
+
+              <!-- Arc radial reference guides (start is fixed at 135°, end rotates with sweep) -->
+              <pxl-line x1="700" y1="300" x2="550" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-group id="sec1ArcEndGuideGroup" x="700" y="300" rotate="135 + ref.sec1Arc.sweep">
+                <pxl-line x1="0" y1="0" x2="212" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              </pxl-group>
+            </pxl-layer>
+
+            <!-- Main Shapes Layer -->
+            <pxl-layer>
+              <!-- Straight Line demonstrating Line Cap -->
+              <pxl-line id="sec1Line" x="300" y="300" x1="-150" y1="0" x2="150" y2="0" rotate="0" stroke="#f97316" strokewidth="40" linecap="butt"></pxl-line>
+
+              <!-- Circular Arc demonstrating Line Cap on curves -->
+              <pxl-circle id="sec1Arc" x="700" y="300" r="150" start="135" sweep="270" stroke="#3b82f6" strokewidth="40" linecap="butt" fill="none"></pxl-circle>
+            </pxl-layer>
+
+            <!-- Overlay Ghost Lines & Points -->
+            <pxl-layer>
+              <!-- Line centerline skeleton & endpoint anchors (rotates with line) -->
+              <pxl-group id="sec1LineGhostGroup" x="300" y="300" rotate="ref.sec1Line.rotate">
+                <pxl-line x1="-150" y1="0" x2="150" y2="0" stroke="#ffffff" strokewidth="2" linedash="[4, 4]"></pxl-line>
+                <pxl-circle x="-150" y="0" r="5" fill="#c2410c"></pxl-circle>
+                <pxl-circle x="150" y="0" r="5" fill="#c2410c"></pxl-circle>
+              </pxl-group>
+
+              <!-- Arc centerline skeleton & endpoint anchors -->
+              <pxl-circle id="sec1ArcGhost" x="700" y="300" r="150" start="135" sweep="270" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-circle>
+              <pxl-circle x="594" y="406" r="5" fill="#1d4ed8"></pxl-circle>
+              <pxl-circle x="700" y="300" r="4" fill="#94a3b8"></pxl-circle>
+              <pxl-group id="sec1ArcEndDotGroup" x="700" y="300" rotate="135 + ref.sec1Arc.sweep">
+                <pxl-circle x="150" y="0" r="5" fill="#1d4ed8"></pxl-circle>
+              </pxl-group>
+
+              <!-- Section Labels -->
+              <pxl-text x="300" y="500" text="'Straight Line'" size="27" font="monospace" weight="700" align="center" fill="#fb923c"></pxl-text>
+              <pxl-text x="700" y="500" text="'Circular Arc'" size="27" font="monospace" weight="700" align="center" fill="#60a5fa"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 2: LINE JOINS -->
+        <!-- ================================================================= -->
+        <h2>2. Line Joins</h2>
+        <p>The <code>linejoin</code> attribute determines how two connected stroke segments meet at a corner or vertex. Kilopixel supports three standard corner join styles:</p>
+        <ul>
+          <li><strong>Miter:</strong> The default <code>miter</code> style extends the outer edges of the stroke segments until they intersect in a sharp point.</li>
+          <li><strong>Round:</strong> The <code>round</code> style rounds off the corner with a circular curve having a radius equal to half the stroke width.</li>
+          <li><strong>Bevel:</strong> The <code>bevel</code> style slices off the outer corner with a flat diagonal edge between the outer endpoints of the two segments.</li>
+        </ul>
+
+        <div class="callout-info">
+          <p class="callout-title">Open vs. Closed Corner Joins</p>
+          <p class="callout-body">Line joins apply to every vertex where two segments meet &mdash; including intermediate vertices of open <code>&lt;pxl-polyline&gt;</code> shapes, as well as the closing joint of closed shapes like <code>&lt;pxl-polyline closed="true"&gt;</code> and <code>&lt;pxl-rect&gt;</code>.</p>
+        </div>
+
+        <!-- Declarative Code Block Above Container -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- 1. Open Chevron Corner --&gt;
+    &lt;pxl-polyline linejoin="<mark id="sec2JoinCode">miter</mark>" strokewidth="<mark id="sec2WidthCode">70</mark>" points="150,450; 300,<mark id="sec2PeakYCode">150</mark>; 450,450" stroke="#f97316" fill="none"&gt;&lt;/pxl-polyline&gt;
+
+    &lt;!-- 2. Closed Polygon Corner --&gt;
+    &lt;pxl-polyline linejoin="<mark id="sec2PolyJoinCode">round</mark>" strokewidth="<mark id="sec2PolyWidthCode">40</mark>" points="550,450; 700,<mark id="sec2PolyPeakYCode">150</mark>; 850,450" closed="true" stroke="#3b82f6" fill="#dbeafe66"&gt;&lt;/pxl-polyline&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2ChevronTab')">Chevron</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2PolygonTab')">Polygon</button>
+              </div>
+            </div>
+
+            <!-- Chevron Tab -->
+            <div class="tab-content active" id="sec2ChevronTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec2WidthVal">70</span></label>
+                  <input type="range" min="10" max="100" step="2" value="70" autocomplete="off" id="sec2WidthInput"
+                    oninput="document.getElementById('sec2Chevron').setAttribute('strokewidth', this.value); document.getElementById('sec2WidthVal').innerText = this.value; document.getElementById('sec2WidthCode').innerText = this.value;" data-mark="sec2WidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Corner Peak Y</span> <span id="sec2PeakYVal">150</span></label>
+                  <input type="range" min="100" max="350" step="10" value="150" autocomplete="off" id="sec2PeakYInput"
+                    oninput="const y = this.value; const pts = '150,450; 300,' + y + '; 450,450'; document.getElementById('sec2Chevron').setAttribute('points', pts); document.getElementById('sec2ChevronGhost').setAttribute('points', pts); document.getElementById('sec2ChevronPeakDot').setAttribute('y', y); document.getElementById('sec2PeakYVal').innerText = y; document.getElementById('sec2PeakYCode').innerText = y;" data-mark="sec2PeakYCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Line Join <span class="indicator-dot"></span></span></label>
+                  <select id="sec2ChevronJoinSelect" autocomplete="off"
+                    onchange="document.getElementById('sec2Chevron').setAttribute('linejoin', this.value); document.getElementById('sec2JoinCode').innerText = this.value;" data-mark="sec2JoinCode">
+                    <option value="miter" selected>miter (default)</option>
+                    <option value="round">round</option>
+                    <option value="bevel">bevel</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Polygon Tab -->
+            <div class="tab-content" id="sec2PolygonTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec2PolyWidthVal">40</span></label>
+                  <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec2PolyWidthInput"
+                    oninput="document.getElementById('sec2Polygon').setAttribute('strokewidth', this.value); document.getElementById('sec2PolyWidthVal').innerText = this.value; document.getElementById('sec2PolyWidthCode').innerText = this.value;" data-mark="sec2PolyWidthCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Corner Peak Y</span> <span id="sec2PolyPeakYVal">150</span></label>
+                  <input type="range" min="100" max="350" step="10" value="150" autocomplete="off" id="sec2PolyPeakYInput"
+                    oninput="const y = this.value; const pts = '550,450; 700,' + y + '; 850,450'; document.getElementById('sec2Polygon').setAttribute('points', pts); document.getElementById('sec2PolyGhost').setAttribute('points', pts); document.getElementById('sec2PolyPeakDot').setAttribute('y', y); document.getElementById('sec2PolyPeakYVal').innerText = y; document.getElementById('sec2PolyPeakYCode').innerText = y;" data-mark="sec2PolyPeakYCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Line Join</span></label>
+                  <select id="sec2PolyJoinSelect" autocomplete="off"
+                    onchange="document.getElementById('sec2Polygon').setAttribute('linejoin', this.value); document.getElementById('sec2PolyJoinCode').innerText = this.value;" data-mark="sec2PolyJoinCode">
+                    <option value="miter">miter (default)</option>
+                    <option value="round" selected>round</option>
+                    <option value="bevel">bevel</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage id="sec2Stage" ratio="5 / 3" class="demo-stage">
+            <!-- Background Grid -->
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            </pxl-layer>
+
+            <!-- Main Shapes Layer -->
+            <pxl-layer>
+              <!-- Open Chevron Corner -->
+              <pxl-polyline id="sec2Chevron" points="150,450; 300,150; 450,450" stroke="#f97316" strokewidth="70" fill="none" linejoin="miter"></pxl-polyline>
+
+              <!-- Closed Polygon Corner -->
+              <pxl-polyline id="sec2Polygon" points="550,450; 700,150; 850,450" closed="true" stroke="#3b82f6" strokewidth="40" fill="#dbeafe66" linejoin="round"></pxl-polyline>
+            </pxl-layer>
+
+            <!-- Overlay Ghost Lines & Points -->
+            <pxl-layer>
+              <!-- Chevron skeleton & anchor dots -->
+              <pxl-polyline id="sec2ChevronGhost" points="150,450; 300,150; 450,450" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
+              <pxl-circle x="150" y="450" r="5" fill="#c2410c"></pxl-circle>
+              <pxl-circle id="sec2ChevronPeakDot" x="300" y="150" r="5" fill="#c2410c"></pxl-circle>
+              <pxl-circle x="450" y="450" r="5" fill="#c2410c"></pxl-circle>
+
+              <!-- Polygon skeleton & anchor dots -->
+              <pxl-polyline id="sec2PolyGhost" points="550,450; 700,150; 850,450" closed="true" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
+              <pxl-circle x="550" y="450" r="5" fill="#1d4ed8"></pxl-circle>
+              <pxl-circle id="sec2PolyPeakDot" x="700" y="150" r="5" fill="#1d4ed8"></pxl-circle>
+              <pxl-circle x="850" y="450" r="5" fill="#1d4ed8"></pxl-circle>
+
+              <!-- Section Labels -->
+              <pxl-text x="300" y="500" text="'Open Chevron'" size="27" font="monospace" weight="700" align="center" fill="#fb923c"></pxl-text>
+              <pxl-text x="700" y="500" text="'Closed Polygon'" size="27" font="monospace" weight="700" align="center" fill="#60a5fa"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 3: MITER LIMIT -->
+        <!-- ================================================================= -->
+        <h2>3. Miter Limit</h2>
+        <p>The <code>miterlimit</code> attribute establishes the maximum ratio between the outer point of a corner (miter length) and the stroke width. When two connected line segments join at a sharp acute angle, a miter join extends outward into a needle. To prevent runaway spikes from distorting the design, the engine clips the vertex into a flat <code>bevel</code> whenever the miter ratio exceeds this threshold.</p>
+        <ul>
+          <li><strong>Threshold Trigger:</strong> When the miter ratio exceeds <code>miterlimit</code>, the sharp point automatically slices into a flat bevel.</li>
+          <li><strong>Default Limit (10):</strong> Allows sharp miters on almost all natural angles down to roughly 11.5&deg; while preventing runaway spikes.</li>
+        </ul>
+
+        <div class="callout-info">
+          <p class="callout-title">The Miter Ratio &amp; Scale Invariance</p>
+          <p class="callout-body">The geometric miter length is <code>strokewidth / sin(&theta; / 2)</code>. Because the ratio is computed by dividing this length by <code>strokewidth</code>, stroke width cancels out completely: <code>ratio = 1 / sin(&theta; / 2)</code>. This makes clipping purely angle-dependent, ensuring sharp corners behave consistently regardless of stroke thickness or scale.</p>
+        </div>
+
+        <!-- Declarative Code Block Above Container -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- 1. Open Chevron Corner --&gt;
+    &lt;pxl-polyline miterlimit="<mark id="sec3ChevronLimitCode">10</mark>" linejoin="miter" strokewidth="<mark id="sec3ChevronWidthCode">40</mark>" points="<mark id="sec3ChevronPtsCode">220,450; 300,150; 380,450</mark>" stroke="#f97316" fill="none"&gt;&lt;/pxl-polyline&gt;
+
+    &lt;!-- 2. Closed Diamond Corner --&gt;
+    &lt;pxl-polyline miterlimit="<mark id="sec3DiamondLimitCode">10</mark>" linejoin="miter" strokewidth="<mark id="sec3DiamondWidthCode">40</mark>" points="<mark id="sec3DiamondPtsCode">700,150; 762,300; 700,450; 638,300</mark>" closed="true" stroke="#3b82f6" fill="#dbeafe66"&gt;&lt;/pxl-polyline&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3ChevronTab')">Chevron</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3DiamondTab')">Diamond</button>
+              </div>
+            </div>
+
+            <!-- Chevron Tab -->
+            <div class="tab-content active" id="sec3ChevronTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Corner Angle</span> <span id="sec3ChevronAngleVal">30°</span></label>
+                  <input type="range" min="6" max="90" step="1" value="30" autocomplete="off" id="sec3ChevronAngleInput"
+                    oninput="const ang = Number(this.value); const hw = Math.round(300 * Math.tan((ang / 2) * Math.PI / 180)); const pts = (300 - hw) + ',450; 300,150; ' + (300 + hw) + ',450'; document.getElementById('sec3Chevron').setAttribute('points', pts); document.getElementById('sec3ChevronGhost').setAttribute('points', pts); document.getElementById('sec3ChevronLeftDot').setAttribute('x', 300 - hw); document.getElementById('sec3ChevronRightDot').setAttribute('x', 300 + hw); document.getElementById('sec3ChevronAngleVal').innerText = ang + '°'; document.getElementById('sec3ChevronPtsCode').innerText = pts;" data-mark="sec3ChevronPtsCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Miter Limit <span class="indicator-dot"></span></span> <span id="sec3ChevronLimitVal">10</span></label>
+                  <input type="range" min="1" max="15" step="0.5" value="10" autocomplete="off" id="sec3ChevronLimitInput"
+                    oninput="document.getElementById('sec3Chevron').setAttribute('miterlimit', this.value); document.getElementById('sec3ChevronLimitVal').innerText = this.value; document.getElementById('sec3ChevronLimitCode').innerText = this.value;" data-mark="sec3ChevronLimitCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec3ChevronWidthVal">40</span></label>
+                  <input type="range" min="10" max="80" step="2" value="40" autocomplete="off" id="sec3ChevronWidthInput"
+                    oninput="document.getElementById('sec3Chevron').setAttribute('strokewidth', this.value); document.getElementById('sec3ChevronWidthVal').innerText = this.value; document.getElementById('sec3ChevronWidthCode').innerText = this.value;" data-mark="sec3ChevronWidthCode">
+                </div>
+              </div>
+            </div>
+
+            <!-- Diamond Tab -->
+            <div class="tab-content" id="sec3DiamondTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Corner Angle</span> <span id="sec3DiamondAngleVal">45°</span></label>
+                  <input type="range" min="6" max="90" step="1" value="45" autocomplete="off" id="sec3DiamondAngleInput"
+                    oninput="const ang = Number(this.value); const hw = Math.round(150 * Math.tan((ang / 2) * Math.PI / 180)); const pts = '700,150; ' + (700 + hw) + ',300; 700,450; ' + (700 - hw) + ',300'; document.getElementById('sec3Diamond').setAttribute('points', pts); document.getElementById('sec3DiamondGhost').setAttribute('points', pts); document.getElementById('sec3DiamondRightDot').setAttribute('x', 700 + hw); document.getElementById('sec3DiamondLeftDot').setAttribute('x', 700 - hw); document.getElementById('sec3DiamondAngleVal').innerText = ang + '°'; document.getElementById('sec3DiamondPtsCode').innerText = pts;" data-mark="sec3DiamondPtsCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Miter Limit</span> <span id="sec3DiamondLimitVal">10</span></label>
+                  <input type="range" min="1" max="15" step="0.5" value="10" autocomplete="off" id="sec3DiamondLimitInput"
+                    oninput="document.getElementById('sec3Diamond').setAttribute('miterlimit', this.value); document.getElementById('sec3DiamondLimitVal').innerText = this.value; document.getElementById('sec3DiamondLimitCode').innerText = this.value;" data-mark="sec3DiamondLimitCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec3DiamondWidthVal">40</span></label>
+                  <input type="range" min="10" max="80" step="2" value="40" autocomplete="off" id="sec3DiamondWidthInput"
+                    oninput="document.getElementById('sec3Diamond').setAttribute('strokewidth', this.value); document.getElementById('sec3DiamondWidthVal').innerText = this.value; document.getElementById('sec3DiamondWidthCode').innerText = this.value;" data-mark="sec3DiamondWidthCode">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage id="sec3Stage" ratio="5 / 3" class="demo-stage">
+            <!-- Background Grid -->
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            </pxl-layer>
+
+            <!-- Guide Helpers Layer (Grey reference lines) -->
+            <pxl-layer>
+              <!-- Centerline vertical guide through diamond apexes -->
+              <pxl-line x1="700" y1="100" x2="700" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+            </pxl-layer>
+
+            <!-- Main Shapes Layer -->
+            <pxl-layer>
+              <!-- Open Chevron Corner with configurable miter limit -->
+              <pxl-polyline id="sec3Chevron" points="220,450; 300,150; 380,450" stroke="#f97316" strokewidth="40" fill="none" linejoin="miter" miterlimit="10"></pxl-polyline>
+
+              <!-- Closed Diamond Corner with configurable miter limit -->
+              <pxl-polyline id="sec3Diamond" points="700,150; 762,300; 700,450; 638,300" closed="true" stroke="#3b82f6" strokewidth="40" fill="#dbeafe66" linejoin="miter" miterlimit="10"></pxl-polyline>
+            </pxl-layer>
+
+            <!-- Overlay Ghost Lines & Points -->
+            <pxl-layer>
+              <!-- Chevron skeleton & anchor dots -->
+              <pxl-polyline id="sec3ChevronGhost" points="220,450; 300,150; 380,450" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
+              <pxl-circle id="sec3ChevronLeftDot" x="220" y="450" r="5" fill="#c2410c"></pxl-circle>
+              <pxl-circle id="sec3ChevronApexDot" x="300" y="150" r="5" fill="#c2410c"></pxl-circle>
+              <pxl-circle id="sec3ChevronRightDot" x="380" y="450" r="5" fill="#c2410c"></pxl-circle>
+
+              <!-- Diamond skeleton & anchor dots -->
+              <pxl-polyline id="sec3DiamondGhost" points="700,150; 762,300; 700,450; 638,300" closed="true" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
+              <pxl-circle id="sec3DiamondTopDot" x="700" y="150" r="5" fill="#1d4ed8"></pxl-circle>
+              <pxl-circle id="sec3DiamondRightDot" x="762" y="300" r="5" fill="#1d4ed8"></pxl-circle>
+              <pxl-circle id="sec3DiamondBottomDot" x="700" y="450" r="5" fill="#1d4ed8"></pxl-circle>
+              <pxl-circle id="sec3DiamondLeftDot" x="638" y="300" r="5" fill="#1d4ed8"></pxl-circle>
+
+              <!-- Section Labels -->
+              <pxl-text x="300" y="520" text="'Open Chevron'" size="27" font="monospace" weight="700" align="center" fill="#fb923c"></pxl-text>
+              <pxl-text x="700" y="520" text="'Closed Diamond'" size="27" font="monospace" weight="700" align="center" fill="#60a5fa"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Prism Syntax Highlighting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+
+</body>
+</html>
