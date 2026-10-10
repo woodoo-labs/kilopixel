@@ -13,7 +13,7 @@
   /* Accent colors (vibrant blue) */
   --accent: #3b82f6;
   --accent-hover: #2563eb;
-  --accent-bg: #eff6ff;
+  --accent-bg: rgba(59, 130, 246, 0.08);
   --code-bg: #f1f5f9;
   
 }
@@ -188,9 +188,20 @@ body {
 
 /* --- Sidebar --- */
 .sidebar {
+  /* Component-Scoped Tokens */
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e2e8f0;
+  --sidebar-title: #94a3b8;
+  --sidebar-link: #475569;
+  --sidebar-link-hover: #0f172a;
+  --sidebar-hover-bg: rgba(15, 23, 42, 0.03);
+  --sidebar-hover-border: #cbd5e1;
+  --sidebar-active-accent: #2563eb;
+  --sidebar-active-bg: rgba(59, 130, 246, 0.08);
+
   width: 280px;
-  background-color: var(--bg-sidebar);
-  border-right: 1px solid var(--border-color);
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
@@ -207,10 +218,10 @@ body {
 }
 
 .sidebar-title { 
-  font-size: 0.75rem; 
+  font-size: 0.72rem; 
   text-transform: uppercase; 
   letter-spacing: 1.5px; 
-  color: var(--text-muted); 
+  color: var(--sidebar-title); 
   padding: 0 32px;
   margin-bottom: 8px;
   font-weight: 600;
@@ -229,23 +240,31 @@ body {
 .sidebar li a {
   display: block;
   margin-left: 32px;
-  padding: 6px 32px 6px 14px;
-  color: var(--text-muted);
+  padding: 6px 32px 6px 8px;
+  color: var(--sidebar-link);
   text-decoration: none;
   font-size: 0.95rem;
   transition: all 0.2s;
-  border-left: 3px solid transparent;
+  border-left: 2px solid transparent;
 }
 
 .sidebar li a:hover {
-  color: var(--text-heading);
+  border-left-color: var(--sidebar-hover-border);
+  color: var(--sidebar-link-hover);
+  background-color: var(--sidebar-hover-bg);
 }
 
 .sidebar li a.active {
-  border-left-color: var(--accent);
-  color: var(--accent);
-  background-color: var(--accent-bg);
-  font-weight: 500;
+  border-left-color: var(--sidebar-active-accent);
+  color: var(--sidebar-active-accent);
+  background-color: var(--sidebar-active-bg);
+  font-weight: 400;
+}
+
+.sidebar li a.active:hover {
+  border-left-color: var(--sidebar-active-accent);
+  color: var(--sidebar-active-accent);
+  background-color: var(--sidebar-active-bg);
 }
 
 /* --- Callouts & Action Buttons --- */
