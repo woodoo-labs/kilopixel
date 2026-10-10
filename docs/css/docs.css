@@ -201,7 +201,7 @@ body {
 }
 
 .sidebar-section { 
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   position: relative;
   z-index: 1;
 }
@@ -212,7 +212,7 @@ body {
   letter-spacing: 1.5px; 
   color: var(--text-muted); 
   padding: 0 32px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   font-weight: 600;
 }
 
@@ -222,14 +222,14 @@ body {
   margin: 0; 
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
 .sidebar li { margin: 0; padding: 0; }
 
 .sidebar li a {
   display: block;
-  padding: 4px 32px 4px 48px;
+  margin-left: 32px;
+  padding: 6px 32px 6px 14px;
   color: var(--text-muted);
   text-decoration: none;
   font-size: 0.95rem;
