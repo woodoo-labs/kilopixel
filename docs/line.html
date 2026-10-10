@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Line | Kilopixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+  
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+  
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+  <script src="js/api-tabs.js"></script>
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+</head>
+<body>
+  
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+  
+  <div class="layout-container">
+    
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+    
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+        <h1>Line</h1>
+        <p class="lead">The line shape draws straight lines between two points. It supports customizable line caps, dashed stroke patterns, and start and end arrowheads.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Line Styling Topics</p>
+          <p class="callout-body">Looking for stroke colors, line caps, or dash patterns? Check out <a href="stroke.html">Stroke &amp; Width</a>, <a href="caps.html">Caps &amp; Joins</a>, and <a href="dash.html">Dashes</a> for dedicated guides on generic stroke styling.</p>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: START & END POINTS                                     -->
+        <!-- ================================================================= -->
+        <h2>1. Start &amp; End Points</h2>
+        <p>A line connects a start point (<code>x1</code>, <code>y1</code>) to an end point (<code>x2</code>, <code>y2</code>). You can position both points anywhere on the 1000-width stage by setting <code>x1</code> and <code>y1</code> for the start, and <code>x2</code> and <code>y2</code> for the end.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Stroke Required for Visibility</p>
+          <p class="callout-body">Because lines have zero interior area, the <code>fill</code> attribute has no visual effect. A line requires a defined <code>stroke</code> color (and a <code>strokewidth</code> greater than 0) to be visible.</p>
+        </div>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Horizontal Line --&gt;
+    &lt;pxl-line x1="<mark id="sec1Line1X1Code">150</mark>" y1="<mark id="sec1Line1Y1Code">300</mark>" 
+              x2="<mark id="sec1Line1X2Code">450</mark>" y2="<mark id="sec1Line1Y2Code">300</mark>" 
+              stroke="#f97316" strokewidth="4"&gt;&lt;/pxl-line&gt;
+
+    &lt;!-- Right: Diagonal Line --&gt;
+    &lt;pxl-line x1="<mark id="sec1Line2X1Code">600</mark>" y1="<mark id="sec1Line2Y1Code">420</mark>" 
+              x2="<mark id="sec1Line2X2Code">850</mark>" y2="<mark id="sec1Line2Y2Code">180</mark>" 
+              stroke="#3b82f6" strokewidth="4"&gt;&lt;/pxl-line&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1Line1Tab')">Horizontal</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1Line2Tab')">Diagonal</button>
+              </div>
+            </div>
+
+            <!-- Horizontal Tab -->
+            <div class="tab-content active" id="sec1Line1Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Start X <span class="indicator-dot"></span></span> <span id="sec1Line1X1Val">150</span></label>
+                  <input type="range" min="80" max="400" step="10" value="150" autocomplete="off" id="sec1Line1X1Input"
+                    oninput="document.getElementById('sec1Line1').setAttribute('x1', this.value); document.getElementById('sec1Line1X1Val').innerText = this.value; document.getElementById('sec1Line1X1Code').innerText = this.value;" data-mark="sec1Line1X1Code">
+                </div>
+                <div class="control-group">
+                  <label><span>Start Y</span> <span id="sec1Line1Y1Val">300</span></label>
+                  <input type="range" min="120" max="480" step="10" value="300" autocomplete="off" id="sec1Line1Y1Input"
+                    oninput="document.getElementById('sec1Line1').setAttribute('y1', this.value); document.getElementById('sec1Line1Y1Val').innerText = this.value; document.getElementById('sec1Line1Y1Code').innerText = this.value;" data-mark="sec1Line1Y1Code">
+                </div>
+                <div class="control-group">
+                  <label><span>End X <span class="indicator-dot"></span></span> <span id="sec1Line1X2Val">450</span></label>
+                  <input type="range" min="150" max="480" step="10" value="450" autocomplete="off" id="sec1Line1X2Input"
+                    oninput="document.getElementById('sec1Line1').setAttribute('x2', this.value); document.getElementById('sec1Line1X2Val').innerText = this.value; document.getElementById('sec1Line1X2Code').innerText = this.value;" data-mark="sec1Line1X2Code">
+                </div>
+                <div class="control-group">
+                  <label><span>End Y</span> <span id="sec1Line1Y2Val">300</span></label>
+                  <input type="range" min="120" max="480" step="10" value="300" autocomplete="off" id="sec1Line1Y2Input"
+                    oninput="document.getElementById('sec1Line1').setAttribute('y2', this.value); document.getElementById('sec1Line1Y2Val').innerText = this.value; document.getElementById('sec1Line1Y2Code').innerText = this.value;" data-mark="sec1Line1Y2Code">
+                </div>
+              </div>
+            </div>
+
+            <!-- Diagonal Tab -->
+            <div class="tab-content" id="sec1Line2Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Start X</span> <span id="sec1Line2X1Val">600</span></label>
+                  <input type="range" min="550" max="850" step="10" value="600" autocomplete="off" id="sec1Line2X1Input"
+                    oninput="document.getElementById('sec1Line2').setAttribute('x1', this.value); document.getElementById('sec1Line2X1Val').innerText = this.value; document.getElementById('sec1Line2X1Code').innerText = this.value;" data-mark="sec1Line2X1Code">
+                </div>
+                <div class="control-group">
+                  <label><span>Start Y</span> <span id="sec1Line2Y1Val">420</span></label>
+                  <input type="range" min="120" max="480" step="10" value="420" autocomplete="off" id="sec1Line2Y1Input"
+                    oninput="document.getElementById('sec1Line2').setAttribute('y1', this.value); document.getElementById('sec1Line2Y1Val').innerText = this.value; document.getElementById('sec1Line2Y1Code').innerText = this.value;" data-mark="sec1Line2Y1Code">
+                </div>
+                <div class="control-group">
+                  <label><span>End X</span> <span id="sec1Line2X2Val">850</span></label>
+                  <input type="range" min="550" max="920" step="10" value="850" autocomplete="off" id="sec1Line2X2Input"
+                    oninput="document.getElementById('sec1Line2').setAttribute('x2', this.value); document.getElementById('sec1Line2X2Val').innerText = this.value; document.getElementById('sec1Line2X2Code').innerText = this.value;" data-mark="sec1Line2X2Code">
+                </div>
+                <div class="control-group">
+                  <label><span>End Y</span> <span id="sec1Line2Y2Val">180</span></label>
+                  <input type="range" min="120" max="480" step="10" value="180" autocomplete="off" id="sec1Line2Y2Input"
+                    oninput="document.getElementById('sec1Line2').setAttribute('y2', this.value); document.getElementById('sec1Line2Y2Val').innerText = this.value; document.getElementById('sec1Line2Y2Code').innerText = this.value;" data-mark="sec1Line2Y2Code">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 1 Stage -->
+          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Left: Horizontal Line (Orange Scheme) -->
+              <pxl-line id="sec1Line1" x1="150" y1="300" x2="450" y2="300" stroke="#f97316" strokewidth="4"></pxl-line>
+              <pxl-circle x="ref.sec1Line1.x1" y="ref.sec1Line1.y1" r="6" fill="#fb923c"></pxl-circle>
+              <pxl-circle x="ref.sec1Line1.x2" y="ref.sec1Line1.y2" r="6" fill="#c2410c"></pxl-circle>
+              <pxl-text x="300" y="520" text="'Horizontal'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: Diagonal Line (Blue Scheme) -->
+              <pxl-line id="sec1Line2" x1="600" y1="420" x2="850" y2="180" stroke="#3b82f6" strokewidth="4"></pxl-line>
+              <pxl-circle x="ref.sec1Line2.x1" y="ref.sec1Line2.y1" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-circle x="ref.sec1Line2.x2" y="ref.sec1Line2.y2" r="6" fill="#1d4ed8"></pxl-circle>
+              <pxl-text x="725" y="520" text="'Diagonal'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 2: ARROWHEADS                                             -->
+        <!-- ================================================================= -->
+        <h2>2. Arrowheads</h2>
+        <p>Adding arrowheads turns a straight line into a directional vector or diagram arrow. Kilopixel provides independent controls for arrowheads at the start (<code>arrowstart</code>) and end (<code>arrowend</code>) of a line, with two visual styles (<code>arrowstyle</code>): solid <code>'filled'</code> triangles or open <code>'line'</code> chevrons.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Automatic Sizing with 'auto'</p>
+          <p class="callout-body">Setting <code>arrowstart="auto"</code> or <code>arrowend="auto"</code> automatically scales the arrowhead proportionally to the stroke thickness (<code>strokewidth &times; 3.6</code>). You can also specify an explicit number to scale the arrowhead independently of the stroke.</p>
+        </div>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Filled Arrowhead --&gt;
+    &lt;pxl-line x1="150" y1="300" x2="450" y2="300"
+      strokewidth="<mark id="sec2Line1StrokeWidthCode">6</mark>" stroke="#f97316"
+      arrowstyle="filled"
+      arrowstart="<mark id="sec2Line1ArrowStartCode">0</mark>" 
+      arrowend="<mark id="sec2Line1ArrowEndCode">30</mark>"&gt;&lt;/pxl-line&gt;
+
+    &lt;!-- Right: Line Arrowheads --&gt;
+    &lt;pxl-line x1="600" y1="300" x2="900" y2="300"
+      strokewidth="<mark id="sec2Line2StrokeWidthCode">6</mark>" stroke="#3b82f6"
+      arrowstyle="line"
+      arrowstart="<mark id="sec2Line2ArrowStartCode">25</mark>" 
+      arrowend="<mark id="sec2Line2ArrowEndCode">25</mark>"&gt;&lt;/pxl-line&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2Line1Tab')">Filled</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2Line2Tab')">Line</button>
+              </div>
+            </div>
+
+            <!-- Filled Arrow Tab -->
+            <div class="tab-content active" id="sec2Line1Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>End Arrow <span class="indicator-dot"></span></span> <span id="sec2Line1ArrowEndVal">30</span></label>
+                  <input type="range" min="0" max="60" step="5" value="30" autocomplete="off" id="sec2Line1ArrowEndInput"
+                    oninput="document.getElementById('sec2Line1').setAttribute('arrowend', this.value); document.getElementById('sec2Line1ArrowEndVal').innerText = this.value; document.getElementById('sec2Line1ArrowEndCode').innerText = this.value;" data-mark="sec2Line1ArrowEndCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Start Arrow</span> <span id="sec2Line1ArrowStartVal">0</span></label>
+                  <input type="range" min="0" max="60" step="5" value="0" autocomplete="off" id="sec2Line1ArrowStartInput"
+                    oninput="document.getElementById('sec2Line1').setAttribute('arrowstart', this.value); document.getElementById('sec2Line1ArrowStartVal').innerText = this.value; document.getElementById('sec2Line1ArrowStartCode').innerText = this.value;" data-mark="sec2Line1ArrowStartCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec2Line1StrokeWidthVal">6</span></label>
+                  <input type="range" min="2" max="24" step="1" value="6" autocomplete="off" id="sec2Line1StrokeWidthInput"
+                    oninput="document.getElementById('sec2Line1').setAttribute('strokewidth', this.value); document.getElementById('sec2Line1StrokeWidthVal').innerText = this.value; document.getElementById('sec2Line1StrokeWidthCode').innerText = this.value;" data-mark="sec2Line1StrokeWidthCode">
+                </div>
+              </div>
+            </div>
+
+            <!-- Line Arrow Tab -->
+            <div class="tab-content" id="sec2Line2Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>End Arrow</span> <span id="sec2Line2ArrowEndVal">25</span></label>
+                  <input type="range" min="0" max="60" step="5" value="25" autocomplete="off" id="sec2Line2ArrowEndInput"
+                    oninput="document.getElementById('sec2Line2').setAttribute('arrowend', this.value); document.getElementById('sec2Line2ArrowEndVal').innerText = this.value; document.getElementById('sec2Line2ArrowEndCode').innerText = this.value;" data-mark="sec2Line2ArrowEndCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Start Arrow <span class="indicator-dot"></span></span> <span id="sec2Line2ArrowStartVal">25</span></label>
+                  <input type="range" min="0" max="60" step="5" value="25" autocomplete="off" id="sec2Line2ArrowStartInput"
+                    oninput="document.getElementById('sec2Line2').setAttribute('arrowstart', this.value); document.getElementById('sec2Line2ArrowStartVal').innerText = this.value; document.getElementById('sec2Line2ArrowStartCode').innerText = this.value;" data-mark="sec2Line2ArrowStartCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec2Line2StrokeWidthVal">6</span></label>
+                  <input type="range" min="2" max="24" step="1" value="6" autocomplete="off" id="sec2Line2StrokeWidthInput"
+                    oninput="document.getElementById('sec2Line2').setAttribute('strokewidth', this.value); document.getElementById('sec2Line2StrokeWidthVal').innerText = this.value; document.getElementById('sec2Line2StrokeWidthCode').innerText = this.value;" data-mark="sec2Line2StrokeWidthCode">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2 Stage -->
+          <pxl-stage id="sec2Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Left: Filled Arrowhead (Orange Scheme) -->
+              <pxl-line id="sec2Line1" x1="150" y1="300" x2="450" y2="300" strokewidth="6" stroke="#f97316" arrowstyle="filled" arrowstart="0" arrowend="30"></pxl-line>
+              <pxl-text x="300" y="520" text="'Filled Arrowhead'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: Line Arrowheads (Blue Scheme) -->
+              <pxl-line id="sec2Line2" x1="600" y1="300" x2="900" y2="300" strokewidth="6" stroke="#3b82f6" arrowstyle="line" arrowstart="25" arrowend="25"></pxl-line>
+              <pxl-text x="750" y="520" text="'Line Arrowhead'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Prism Syntax Highlighting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+</body>
+</html>

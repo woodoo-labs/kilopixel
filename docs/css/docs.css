@@ -125,6 +125,21 @@ body {
   color: var(--accent);
 }
 
+.docs-content a:not([class*="btn"]) {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: rgba(59, 130, 246, 0.35);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.docs-content a:not([class*="btn"]):hover {
+  color: var(--accent-hover);
+  text-decoration-color: var(--accent-hover);
+}
+
 /* --- Header & Navigation --- */
 .header {
   height: 64px;
@@ -224,7 +239,7 @@ body {
   color: var(--sidebar-title); 
   padding: 0 32px;
   margin-bottom: 8px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .sidebar ul { 
@@ -340,6 +355,17 @@ body {
   color: inherit;
   margin-bottom: 0;
   margin-top: 12px;
+}
+
+.callout-info a {
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration-color: rgba(29, 78, 216, 0.4);
+}
+
+.callout-info a:hover {
+  color: #1e3a8a;
+  text-decoration-color: #1e3a8a;
 }
 
 /* --- Code Blocks (Prism.js adjustments) --- */
