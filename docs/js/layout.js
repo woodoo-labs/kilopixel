@@ -56,7 +56,7 @@ class DocsSidebar extends HTMLElement {
           </ul>
         </div>
         <div class="sidebar-section">
-          <div class="sidebar-title">Containers</div>
+          <div class="sidebar-title">Canvas &amp; Containers</div>
           <ul>
             <li><a href="stage.html" class="${currentPath === 'stage.html' ? 'active' : ''}">Stage</a></li>
             <li><a href="layer.html" class="${currentPath === 'layer.html' ? 'active' : ''}">Layer</a></li>
@@ -64,12 +64,19 @@ class DocsSidebar extends HTMLElement {
           </ul>
         </div>
         <div class="sidebar-section">
-          <div class="sidebar-title">Shapes</div>
+          <div class="sidebar-title">Transformations</div>
+          <ul>
+            <li><a href="position.html" class="${currentPath === 'position.html' ? 'active' : ''}">Center &amp; Offset</a></li>
+            <li><a href="transform.html" class="${currentPath === 'transform.html' ? 'active' : ''}">Rotate, Scale &amp; Skew</a></li>
+            <li><a href="mapping.html" class="${currentPath === 'mapping.html' ? 'active' : ''}">Coordinate Mapping</a></li>
+          </ul>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">Shapes &amp; Paths</div>
           <ul>
             <li><a href="circle.html" class="${currentPath === 'circle.html' ? 'active' : ''}">Circle</a></li>
             <li><a href="ellipse.html" class="${currentPath === 'ellipse.html' ? 'active' : ''}">Ellipse</a></li>
             <li><a href="rect.html" class="${currentPath === 'rect.html' ? 'active' : ''}">Rectangle</a></li>
-            <li><a href="text.html" class="${currentPath === 'text.html' ? 'active' : ''}">Text</a></li>
             <li><a href="line.html" class="${currentPath === 'line.html' ? 'active' : ''}">Line</a></li>
             <li><a href="polyline.html" class="${currentPath === 'polyline.html' ? 'active' : ''}">Polyline</a></li>
             <li><a href="polygon.html" class="${currentPath === 'polygon.html' ? 'active' : ''}">Polygon</a></li>
@@ -77,11 +84,9 @@ class DocsSidebar extends HTMLElement {
           </ul>
         </div>
         <div class="sidebar-section">
-          <div class="sidebar-title">Position &amp; Transforms</div>
+          <div class="sidebar-title">Text &amp; Typography</div>
           <ul>
-            <li><a href="position.html" class="${currentPath === 'position.html' ? 'active' : ''}">Center &amp; Offset</a></li>
-            <li><a href="transform.html" class="${currentPath === 'transform.html' ? 'active' : ''}">Rotate, Scale &amp; Skew</a></li>
-            <li><a href="mapping.html" class="${currentPath === 'mapping.html' ? 'active' : ''}">Coordinate Mapping</a></li>
+            <li><a href="text.html" class="${currentPath === 'text.html' ? 'active' : ''}">Text</a></li>
           </ul>
         </div>
         <div class="sidebar-section">
@@ -102,16 +107,21 @@ class DocsSidebar extends HTMLElement {
           </ul>
         </div>
         <div class="sidebar-section">
-          <div class="sidebar-title">Compositing &amp; Effects</div>
+          <div class="sidebar-title">Compositing &amp; Clipping</div>
           <ul>
             <li><a href="blend.html" class="${currentPath === 'blend.html' ? 'active' : ''}">Alpha &amp; Blend</a></li>
             <li><a href="mask.html" class="${currentPath === 'mask.html' ? 'active' : ''}">Mask</a></li>
+          </ul>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">Shadows &amp; Filters</div>
+          <ul>
             <li><a href="shadow.html" class="${currentPath === 'shadow.html' ? 'active' : ''}">Shadow</a></li>
             <li><a href="filter.html" class="${currentPath === 'filter.html' ? 'active' : ''}">Filter</a></li>
           </ul>
         </div>
         <div class="sidebar-section">
-          <div class="sidebar-title">Engine &amp; Logic</div>
+          <div class="sidebar-title">Engine &amp; Reactivity</div>
           <ul>
             <li><a href="expressions.html" class="${currentPath === 'expressions.html' ? 'active' : ''}">Expressions</a></li>
             <li><a href="referencing.html" class="${currentPath === 'referencing.html' ? 'active' : ''}">Referencing</a></li>
