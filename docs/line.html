@@ -155,13 +155,13 @@
   &lt;pxl-layer&gt;
     &lt;!-- Left: Dashed Line with Round Caps --&gt;
     &lt;pxl-line x1="150" y1="300" x2="450" y2="300" stroke="#f97316"
-      strokewidth="<mark id="sec2Line1StrokeWidthCode">14</mark>"
+      strokewidth="<mark id="sec2Line1StrokeWidthCode">6</mark>"
       linecap="<mark id="sec2Line1LinecapCode">round</mark>"
       linedash="<mark id="sec2Line1DashCode">20</mark>"&gt;&lt;/pxl-line&gt;
 
     &lt;!-- Right: Gradient Stroke Line --&gt;
     &lt;pxl-line x1="550" y1="300" x2="850" y2="300"
-      strokewidth="<mark id="sec2Line2StrokeWidthCode">14</mark>"
+      strokewidth="<mark id="sec2Line2StrokeWidthCode">30</mark>"
       linecap="<mark id="sec2Line2LinecapCode">round</mark>"
       stroke="linear(<mark id="sec2Line2AngleCode">0</mark>, ['#3b82f6', '#ec4899'])"&gt;&lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
@@ -186,8 +186,8 @@
                     oninput="document.getElementById('sec2Line1').setAttribute('linedash', this.value); document.getElementById('sec2Line1DashVal').innerText = this.value; document.getElementById('sec2Line1DashCode').innerText = this.value;" data-mark="sec2Line1DashCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec2Line1StrokeWidthVal">14</span></label>
-                  <input type="range" min="2" max="30" step="1" value="14" autocomplete="off" id="sec2Line1StrokeWidthInput"
+                  <label><span>Stroke Width</span> <span id="sec2Line1StrokeWidthVal">6</span></label>
+                  <input type="range" min="2" max="30" step="1" value="6" autocomplete="off" id="sec2Line1StrokeWidthInput"
                     oninput="document.getElementById('sec2Line1').setAttribute('strokewidth', this.value); document.getElementById('sec2Line1StrokeWidthVal').innerText = this.value; document.getElementById('sec2Line1StrokeWidthCode').innerText = this.value;" data-mark="sec2Line1StrokeWidthCode">
                 </div>
                 <div class="control-group">
@@ -211,8 +211,8 @@
                     oninput="document.getElementById('sec2Line2').setAttribute('stroke', 'linear(' + this.value + ', [\'#3b82f6\', \'#ec4899\'])'); document.getElementById('sec2Line2AngleVal').innerText = this.value + '°'; document.getElementById('sec2Line2AngleCode').innerText = this.value;" data-mark="sec2Line2AngleCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec2Line2StrokeWidthVal">14</span></label>
-                  <input type="range" min="2" max="30" step="1" value="14" autocomplete="off" id="sec2Line2StrokeWidthInput"
+                  <label><span>Stroke Width</span> <span id="sec2Line2StrokeWidthVal">30</span></label>
+                  <input type="range" min="2" max="40" step="1" value="30" autocomplete="off" id="sec2Line2StrokeWidthInput"
                     oninput="document.getElementById('sec2Line2').setAttribute('strokewidth', this.value); document.getElementById('sec2Line2StrokeWidthVal').innerText = this.value; document.getElementById('sec2Line2StrokeWidthCode').innerText = this.value;" data-mark="sec2Line2StrokeWidthCode">
                 </div>
                 <div class="control-group">
@@ -234,11 +234,11 @@
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
               <!-- Left: Dashed Line (Orange Scheme) -->
-              <pxl-line id="sec2Line1" x1="150" y1="300" x2="450" y2="300" strokewidth="14" stroke="#f97316" linecap="round" linedash="20"></pxl-line>
+              <pxl-line id="sec2Line1" x1="150" y1="300" x2="450" y2="300" strokewidth="6" stroke="#f97316" linecap="round" linedash="20"></pxl-line>
               <pxl-text x="300" y="500" text="'Dashed'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
               <!-- Right: Gradient Line (Blue Scheme) -->
-              <pxl-line id="sec2Line2" x1="550" y1="300" x2="850" y2="300" strokewidth="14" linecap="round" stroke="linear(0, ['#3b82f6', '#ec4899'])"></pxl-line>
+              <pxl-line id="sec2Line2" x1="550" y1="300" x2="850" y2="300" strokewidth="30" linecap="round" stroke="linear(0, ['#3b82f6', '#ec4899'])"></pxl-line>
               <pxl-text x="700" y="500" text="'Gradient'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>
@@ -258,7 +258,7 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Filled Arrowhead --&gt;
+    &lt;!-- Left: Filled Arrowheads --&gt;
     &lt;pxl-line x1="150" y1="300" x2="450" y2="300" stroke="#f97316"
       strokewidth="<mark id="sec3Line1StrokeWidthCode">20</mark>" arrowstyle="filled"
       arrowstart="auto" arrowend="auto"&gt;&lt;/pxl-line&gt;
@@ -318,7 +318,7 @@
             <pxl-layer>
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
-              <!-- Left: Filled Arrowhead (Orange Scheme) -->
+              <!-- Left: Filled Arrowheads (Orange Scheme) -->
               <pxl-line id="sec3Line1" x1="150" y1="300" x2="450" y2="300" strokewidth="20" stroke="#f97316" arrowstyle="filled" arrowstart="auto" arrowend="auto"></pxl-line>
               <pxl-text x="150" y="480" text="'arrowstyle=&quot;filled&quot;'" size="27" fill="#fb923c" font="monospace" align="left"></pxl-text>
               <pxl-text x="150" y="535" text="'arrowstart=&quot;auto&quot;'" size="27" fill="#fb923c" font="monospace" align="left"></pxl-text>
