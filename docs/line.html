@@ -33,10 +33,6 @@
         <h1>Line</h1>
         <p class="lead">The line shape draws straight lines between two points. It supports customizable line caps, dashed stroke patterns, and start and end arrowheads.</p>
 
-        <div class="callout-info">
-          <p class="callout-title">Line Styling</p>
-          <p class="callout-body">For stroke colors, caps, and dashes, see <a href="stroke.html">Stroke &amp; Width</a>, <a href="caps.html">Caps &amp; Joins</a>, and <a href="dash.html">Dashes</a> in the Line Styles section.</p>
-        </div>
 
         <!-- ================================================================= -->
         <!-- SECTION 1: START & END POINTS                                     -->
@@ -144,9 +140,96 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECTION 2: ARROWHEADS                                             -->
+        <!-- SECTION 2: LINE STYLES                                            -->
         <!-- ================================================================= -->
-        <h2>2. Arrowheads</h2>
+        <h2>2. Line Styles</h2>
+        <p>Because lines have no interior area, their visual appearance is defined entirely by their stroke styling &mdash; including thickness (<code>strokewidth</code>), end caps (<code>linecap</code>), dash patterns (<code>linedash</code>), and gradient colors (<code>stroke</code>).</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Line Styling</p>
+          <p class="callout-body">For dedicated interactive guides to each stroke feature, see <a href="stroke.html">Stroke &amp; Width</a>, <a href="caps.html">Caps &amp; Joins</a>, and <a href="dash.html">Dashes</a> in the Line Styles section.</p>
+        </div>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Dashed Line with Round Caps --&gt;
+    &lt;pxl-line x1="150" y1="300" x2="450" y2="300" stroke="#f97316"
+      strokewidth="<mark id="sec2Line1StrokeWidthCode">14</mark>" linecap="round"
+      linedash="<mark id="sec2Line1DashCode">20</mark>"&gt;&lt;/pxl-line&gt;
+
+    &lt;!-- Right: Gradient Stroke Line --&gt;
+    &lt;pxl-line x1="550" y1="300" x2="850" y2="300"
+      strokewidth="<mark id="sec2Line2StrokeWidthCode">14</mark>" linecap="round"
+      stroke="linear(<mark id="sec2Line2AngleCode">0</mark>, ['#3b82f6', '#ec4899'])"&gt;&lt;/pxl-line&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2Line1Tab')">Dashed</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2Line2Tab')">Gradient</button>
+              </div>
+            </div>
+
+            <!-- Dashed Line Tab -->
+            <div class="tab-content active" id="sec2Line1Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Dash Pattern <span class="indicator-dot"></span></span> <span id="sec2Line1DashVal">20</span></label>
+                  <input type="range" min="5" max="40" step="5" value="20" autocomplete="off" id="sec2Line1DashInput"
+                    oninput="document.getElementById('sec2Line1').setAttribute('linedash', this.value); document.getElementById('sec2Line1DashVal').innerText = this.value; document.getElementById('sec2Line1DashCode').innerText = this.value;" data-mark="sec2Line1DashCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec2Line1StrokeWidthVal">14</span></label>
+                  <input type="range" min="2" max="30" step="1" value="14" autocomplete="off" id="sec2Line1StrokeWidthInput"
+                    oninput="document.getElementById('sec2Line1').setAttribute('strokewidth', this.value); document.getElementById('sec2Line1StrokeWidthVal').innerText = this.value; document.getElementById('sec2Line1StrokeWidthCode').innerText = this.value;" data-mark="sec2Line1StrokeWidthCode">
+                </div>
+              </div>
+            </div>
+
+            <!-- Gradient Line Tab -->
+            <div class="tab-content" id="sec2Line2Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Gradient Angle</span> <span id="sec2Line2AngleVal">0°</span></label>
+                  <input type="range" min="0" max="360" step="15" value="0" autocomplete="off" id="sec2Line2AngleInput"
+                    oninput="document.getElementById('sec2Line2').setAttribute('stroke', 'linear(' + this.value + ', [\'#3b82f6\', \'#ec4899\'])'); document.getElementById('sec2Line2AngleVal').innerText = this.value + '°'; document.getElementById('sec2Line2AngleCode').innerText = this.value;" data-mark="sec2Line2AngleCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec2Line2StrokeWidthVal">14</span></label>
+                  <input type="range" min="2" max="30" step="1" value="14" autocomplete="off" id="sec2Line2StrokeWidthInput"
+                    oninput="document.getElementById('sec2Line2').setAttribute('strokewidth', this.value); document.getElementById('sec2Line2StrokeWidthVal').innerText = this.value; document.getElementById('sec2Line2StrokeWidthCode').innerText = this.value;" data-mark="sec2Line2StrokeWidthCode">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2 Stage -->
+          <pxl-stage id="sec2Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Left: Dashed Line (Orange Scheme) -->
+              <pxl-line id="sec2Line1" x1="150" y1="300" x2="450" y2="300" strokewidth="14" stroke="#f97316" linecap="round" linedash="20"></pxl-line>
+              <pxl-text x="150" y="480" text="'linecap=&quot;round&quot;'" size="27" fill="#fb923c" font="monospace" align="left"></pxl-text>
+              <pxl-text x="150" y="535" text="'linedash=&quot;' + ref.sec2Line1.linedash + '&quot;'" size="27" fill="#fb923c" font="monospace" align="left"></pxl-text>
+
+              <!-- Right: Gradient Line (Blue Scheme) -->
+              <pxl-line id="sec2Line2" x1="550" y1="300" x2="850" y2="300" strokewidth="14" linecap="round" stroke="linear(0, ['#3b82f6', '#ec4899'])"></pxl-line>
+              <pxl-text x="550" y="480" text="'linecap=&quot;round&quot;'" size="27" fill="#60a5fa" font="monospace" align="left"></pxl-text>
+              <pxl-text x="550" y="535" text="'stroke=&quot;linear(...)&quot;'" size="27" fill="#60a5fa" font="monospace" align="left"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 3: ARROWHEADS                                             -->
+        <!-- ================================================================= -->
+        <h2>3. Arrowheads</h2>
         <p>Straight lines can be turned into directional arrows by adding arrowheads to either endpoint:</p>
         <ul>
           <li><strong>Two Styles:</strong> Solid triangles (<code>arrowstyle="filled"</code>) or open chevrons (<code>arrowstyle="line"</code>).</li>
@@ -159,13 +242,13 @@
   &lt;pxl-layer&gt;
     &lt;!-- Left: Filled Arrowhead --&gt;
     &lt;pxl-line x1="150" y1="300" x2="450" y2="300" stroke="#f97316"
-      strokewidth="<mark id="sec2Line1StrokeWidthCode">20</mark>" arrowstyle="filled"
+      strokewidth="<mark id="sec3Line1StrokeWidthCode">20</mark>" arrowstyle="filled"
       arrowstart="auto" arrowend="auto"&gt;&lt;/pxl-line&gt;
 
     &lt;!-- Right: Line Arrowheads --&gt;
     &lt;pxl-line x1="550" y1="300" x2="850" y2="300" stroke="#3b82f6"
-      strokewidth="<mark id="sec2Line2StrokeWidthCode">6</mark>" arrowstyle="line"
-      arrowstart="<mark id="sec2Line2ArrowStartCode">60</mark>" arrowend="<mark id="sec2Line2ArrowEndCode">25</mark>"&gt;&lt;/pxl-line&gt;
+      strokewidth="<mark id="sec3Line2StrokeWidthCode">6</mark>" arrowstyle="line"
+      arrowstart="<mark id="sec3Line2ArrowStartCode">60</mark>" arrowend="<mark id="sec3Line2ArrowEndCode">25</mark>"&gt;&lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -174,60 +257,60 @@
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Controls</h3>
               <div class="demo-tabs">
-                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2Line1Tab')">Filled</button>
-                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2Line2Tab')">Line</button>
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3Line1Tab')">Filled</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3Line2Tab')">Line</button>
               </div>
             </div>
 
             <!-- Filled Arrow Tab -->
-            <div class="tab-content active" id="sec2Line1Tab">
+            <div class="tab-content active" id="sec3Line1Tab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec2Line1StrokeWidthVal">20</span></label>
-                  <input type="range" min="2" max="36" step="1" value="20" autocomplete="off" id="sec2Line1StrokeWidthInput"
-                    oninput="document.getElementById('sec2Line1').setAttribute('strokewidth', this.value); document.getElementById('sec2Line1StrokeWidthVal').innerText = this.value; document.getElementById('sec2Line1StrokeWidthCode').innerText = this.value;" data-mark="sec2Line1StrokeWidthCode">
+                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec3Line1StrokeWidthVal">20</span></label>
+                  <input type="range" min="2" max="36" step="1" value="20" autocomplete="off" id="sec3Line1StrokeWidthInput"
+                    oninput="document.getElementById('sec3Line1').setAttribute('strokewidth', this.value); document.getElementById('sec3Line1StrokeWidthVal').innerText = this.value; document.getElementById('sec3Line1StrokeWidthCode').innerText = this.value;" data-mark="sec3Line1StrokeWidthCode">
                 </div>
               </div>
             </div>
 
             <!-- Line Arrow Tab -->
-            <div class="tab-content" id="sec2Line2Tab">
+            <div class="tab-content" id="sec3Line2Tab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Start Arrow <span class="indicator-dot"></span></span> <span id="sec2Line2ArrowStartVal">60</span></label>
-                  <input type="range" min="0" max="60" step="5" value="60" autocomplete="off" id="sec2Line2ArrowStartInput"
-                    oninput="document.getElementById('sec2Line2').setAttribute('arrowstart', this.value); document.getElementById('sec2Line2ArrowStartVal').innerText = this.value; document.getElementById('sec2Line2ArrowStartCode').innerText = this.value;" data-mark="sec2Line2ArrowStartCode">
+                  <label><span>Start Arrow <span class="indicator-dot"></span></span> <span id="sec3Line2ArrowStartVal">60</span></label>
+                  <input type="range" min="0" max="60" step="5" value="60" autocomplete="off" id="sec3Line2ArrowStartInput"
+                    oninput="document.getElementById('sec3Line2').setAttribute('arrowstart', this.value); document.getElementById('sec3Line2ArrowStartVal').innerText = this.value; document.getElementById('sec3Line2ArrowStartCode').innerText = this.value;" data-mark="sec3Line2ArrowStartCode">
                 </div>
                 <div class="control-group">
-                  <label><span>End Arrow</span> <span id="sec2Line2ArrowEndVal">25</span></label>
-                  <input type="range" min="0" max="60" step="5" value="25" autocomplete="off" id="sec2Line2ArrowEndInput"
-                    oninput="document.getElementById('sec2Line2').setAttribute('arrowend', this.value); document.getElementById('sec2Line2ArrowEndVal').innerText = this.value; document.getElementById('sec2Line2ArrowEndCode').innerText = this.value;" data-mark="sec2Line2ArrowEndCode">
+                  <label><span>End Arrow</span> <span id="sec3Line2ArrowEndVal">25</span></label>
+                  <input type="range" min="0" max="60" step="5" value="25" autocomplete="off" id="sec3Line2ArrowEndInput"
+                    oninput="document.getElementById('sec3Line2').setAttribute('arrowend', this.value); document.getElementById('sec3Line2ArrowEndVal').innerText = this.value; document.getElementById('sec3Line2ArrowEndCode').innerText = this.value;" data-mark="sec3Line2ArrowEndCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec2Line2StrokeWidthVal">6</span></label>
-                  <input type="range" min="2" max="24" step="1" value="6" autocomplete="off" id="sec2Line2StrokeWidthInput"
-                    oninput="document.getElementById('sec2Line2').setAttribute('strokewidth', this.value); document.getElementById('sec2Line2StrokeWidthVal').innerText = this.value; document.getElementById('sec2Line2StrokeWidthCode').innerText = this.value;" data-mark="sec2Line2StrokeWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec3Line2StrokeWidthVal">6</span></label>
+                  <input type="range" min="2" max="24" step="1" value="6" autocomplete="off" id="sec3Line2StrokeWidthInput"
+                    oninput="document.getElementById('sec3Line2').setAttribute('strokewidth', this.value); document.getElementById('sec3Line2StrokeWidthVal').innerText = this.value; document.getElementById('sec3Line2StrokeWidthCode').innerText = this.value;" data-mark="sec3Line2StrokeWidthCode">
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Section 2 Stage -->
-          <pxl-stage id="sec2Stage" ratio="5 / 3" class="demo-stage">
+          <!-- Section 3 Stage -->
+          <pxl-stage id="sec3Stage" ratio="5 / 3" class="demo-stage">
             <pxl-layer>
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
               <!-- Left: Filled Arrowhead (Orange Scheme) -->
-              <pxl-line id="sec2Line1" x1="150" y1="300" x2="450" y2="300" strokewidth="20" stroke="#f97316" arrowstyle="filled" arrowstart="auto" arrowend="auto"></pxl-line>
+              <pxl-line id="sec3Line1" x1="150" y1="300" x2="450" y2="300" strokewidth="20" stroke="#f97316" arrowstyle="filled" arrowstart="auto" arrowend="auto"></pxl-line>
               <pxl-text x="150" y="480" text="'arrowstyle=&quot;filled&quot;'" size="27" fill="#fb923c" font="monospace" align="left"></pxl-text>
               <pxl-text x="150" y="535" text="'arrowstart=&quot;auto&quot;'" size="27" fill="#fb923c" font="monospace" align="left"></pxl-text>
               <pxl-text x="150" y="570" text="'arrowend=&quot;auto&quot;'" size="27" fill="#fb923c" font="monospace" align="left"></pxl-text>
 
               <!-- Right: Line Arrowheads (Blue Scheme) -->
-              <pxl-line id="sec2Line2" x1="550" y1="300" x2="850" y2="300" strokewidth="6" stroke="#3b82f6" arrowstyle="line" arrowstart="60" arrowend="25"></pxl-line>
+              <pxl-line id="sec3Line2" x1="550" y1="300" x2="850" y2="300" strokewidth="6" stroke="#3b82f6" arrowstyle="line" arrowstart="60" arrowend="25"></pxl-line>
               <pxl-text x="550" y="480" text="'arrowstyle=&quot;line&quot;'" size="27" fill="#60a5fa" font="monospace" align="left"></pxl-text>
-              <pxl-text x="550" y="535" text="'arrowstart=&quot;' + ref.sec2Line2.arrowstart + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="left"></pxl-text>
-              <pxl-text x="550" y="570" text="'arrowend=&quot;' + ref.sec2Line2.arrowend + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="left"></pxl-text>
+              <pxl-text x="550" y="535" text="'arrowstart=&quot;' + ref.sec3Line2.arrowstart + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="left"></pxl-text>
+              <pxl-text x="550" y="570" text="'arrowend=&quot;' + ref.sec3Line2.arrowend + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="left"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>

@@ -85,3 +85,24 @@
   - **Divergence from Native Canvas**: It would diverge from standard `CanvasRenderingContext2D` defaults (`textAlign = 'start'`, `textBaseline = 'alphabetic'`).
 - **Decision for Now**: Retain `align="start"` and `baseline="alphabetic"` for 100% backward compatibility and native Canvas parity. Revisit if a breaking major version transition is planned.
 
+## 12. Dedicated Arrowheads Documentation Page (`arrows.html`)
+- **Status**: ⚪ **Planned Documentation Feature**
+- **Location**: Sidebar / Navigation category **"Line Styles"** in `docs/js/layout.js`.
+- **Motivation**: Arrowheads (`arrowstyle`, `arrowstart`, `arrowend`) are supported across multiple shapes (`<pxl-line>`, `<pxl-polyline>`, `<pxl-circle>`, and `<pxl-ellipse>`). Individual shape pages feature practical, contextual examples, while a centralized hub page (`docs/arrows.html`) under Line Styles will provide the comprehensive reference for arrow geometry, scaling formulas, custom arrow styles, and styling.
+- **Tasks**:
+  - Add `arrows.html` entry to `docs/js/layout.js` under the Line Styles navigation group.
+  - Create interactive `docs/arrows.html` documenting `arrowstyle` (`'filled'`, `'line'`), sizing (`'auto'` vs. numeric), and endpoint orientation.
+  - Cross-link shape pages (`line.html`, `circle.html`, `ellipse.html`, `polyline.html`) to `arrows.html`.
+
+## 13. Fix Stroke Gradient Zero-Dimension Collapse & Degeneracy
+- **Status**: 🟢 **Design Complete & Ready for Implementation**
+- **Reference**: [`design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md)
+- **Problem Solved**:
+  - When linear gradients are applied to the `stroke` of shapes with zero geometric width or height (e.g. horizontal/vertical lines, flat polylines), Canvas 2D linear gradient endpoints collapse to identical coordinates at perpendicular angles ($90^\circ$ and $270^\circ$ for horizontal lines; $0^\circ$ and $180^\circ$ for vertical lines).
+  - W3C Canvas 2D spec mandates that zero-length gradients paint nothing, causing the stroked shape to completely disappear.
+- **Solution Summary**:
+  - Update `Shape.prototype.createGradient` in `js/elements/shape.js` to resolve stroke dimensions against `strokewidth` when `slot === 1` or when raw dimensions are zero.
+  - Clamp projection distance to a minimum of $0.001$ with coordinate separation fallback.
+  - Update `_gradCache` to track `strokewidth` (`sw`) so slider adjustments properly invalidate cached stroke gradients.
+
+
