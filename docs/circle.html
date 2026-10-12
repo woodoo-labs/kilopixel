@@ -119,16 +119,16 @@
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Pie Slice (Sweep Mode) --&gt;
-    &lt;pxl-circle x="300" y="300" strokewidth="<mark id="sec2Circle1WidthCode">10</mark>" pie="true" fill="#ffedd566" stroke="#f97316"
-      r="<mark id="sec2Circle1RCode">150</mark>" 
-      start="<mark id="sec2Circle1StartCode">0</mark>" 
-      sweep="<mark id="sec2Circle1SweepCode">270</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="300" y="300" fill="#ffedd566" stroke="#f97316"
+      pie="true" r="<mark id="sec2Circle1RCode">150</mark>" strokewidth="<mark id="sec2Circle1WidthCode">10</mark>"
+      start="<mark id="sec2Circle1StartCode">0</mark>" sweep="<mark id="sec2Circle1SweepCode">270</mark>">
+    &lt;/pxl-circle&gt;
 
     &lt;!-- Right: Donut Wedge (End Angle Mode) --&gt;
-    &lt;pxl-circle x="700" y="300" pie="true" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
-      r="<mark id="sec2Circle2RCode">150</mark>" ir="<mark id="sec2Circle2IRCode">80</mark>" 
-      start="<mark id="sec2Circle2StartCode">0</mark>" 
-      end="<mark id="sec2Circle2EndCode">270</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="700" y="300" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
+      pie="true" r="<mark id="sec2Circle2RCode">150</mark>" ir="<mark id="sec2Circle2IRCode">80</mark>"
+      start="<mark id="sec2Circle2StartCode">0</mark>" end="<mark id="sec2Circle2EndCode">270</mark>">
+    &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -224,14 +224,14 @@
   &lt;pxl-layer&gt;
     &lt;!-- Left: Open Chord (Default) --&gt;
     &lt;pxl-circle x="300" y="300" strokewidth="10" fill="#ffedd566" stroke="#f97316"
-      r="<mark id="sec3Circle1RCode">150</mark>" 
-      sweep="<mark id="sec3Circle1SweepCode">270</mark>"&gt;&lt;/pxl-circle&gt;
+      r="<mark id="sec3Circle1RCode">150</mark>" sweep="<mark id="sec3Circle1SweepCode">270</mark>">
+    &lt;/pxl-circle&gt;
 
     &lt;!-- Right: Closed Chord (closed="true") --&gt;
     &lt;pxl-circle x="700" y="300" strokewidth="10" fill="#dbeafe66" stroke="#3b82f6"
       closed="true"
-      r="<mark id="sec3Circle2RCode">150</mark>" 
-      sweep="<mark id="sec3Circle2SweepCode">180</mark>"&gt;&lt;/pxl-circle&gt;
+      r="<mark id="sec3Circle2RCode">150</mark>" sweep="<mark id="sec3Circle2SweepCode">180</mark>">
+    &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -309,12 +309,14 @@
     &lt;!-- Left: Simple Arc (Sweep Mode) --&gt;
     &lt;pxl-circle x="300" y="300" stroke="#f97316"
       r="<mark id="sec4Circle1RCode">150</mark>" strokewidth="<mark id="sec4Circle1WidthCode">10</mark>"
-      start="<mark id="sec4Circle1StartCode">0</mark>" sweep="<mark id="sec4Circle1SweepCode">180</mark>"&gt;&lt;/pxl-circle&gt;
+      start="<mark id="sec4Circle1StartCode">0</mark>" sweep="<mark id="sec4Circle1SweepCode">180</mark>"&gt;
+    &lt;/pxl-circle&gt;
 
     &lt;!-- Right: Dashed Arc (End Angle Mode) --&gt;
     &lt;pxl-circle x="700" y="300" stroke="#3b82f6" strokewidth="4"
       r="<mark id="sec4Circle2RCode">150</mark>" linedash="<mark id="sec4Circle2DashCode">15</mark>"
-      start="<mark id="sec4Circle2StartCode">0</mark>" end="<mark id="sec4Circle2EndCode">270</mark>"&gt;&lt;/pxl-circle&gt;
+      start="<mark id="sec4Circle2StartCode">0</mark>" end="<mark id="sec4Circle2EndCode">270</mark>"&gt;
+    &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -412,13 +414,15 @@
     &lt;pxl-circle x="300" y="300" stroke="#f97316" strokewidth="8"
       arrowstart="<mark id="sec5Circle1StartArrowCode">25</mark>" arrowend="<mark id="sec5Circle1EndArrowCode">25</mark>"
       start="-45" sweep="<mark id="sec5Circle1SweepCode">270</mark>"
-      arrowstyle="filled"&gt;&lt;/pxl-circle&gt;
+      arrowstyle="filled"&gt;
+    &lt;/pxl-circle&gt;
 
     &lt;!-- Right: Line Arrows --&gt;
     &lt;pxl-circle x="700" y="300" stroke="#3b82f6" strokewidth="8"
       arrowstart="<mark id="sec5Circle2StartArrowCode">0</mark>" arrowend="<mark id="sec5Circle2EndArrowCode">35</mark>"
       start="-45" sweep="<mark id="sec5Circle2SweepCode">270</mark>"
-      arrowstyle="line" linedash="<mark id="sec5Circle2DashCode">15</mark>"&gt;&lt;/pxl-circle&gt;
+      arrowstyle="line" linedash="<mark id="sec5Circle2DashCode">15</mark>"&gt;
+    &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 

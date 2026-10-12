@@ -49,14 +49,16 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Horizontal Line --&gt;
-    &lt;pxl-line x1="<mark id="sec1Line1X1Code">150</mark>" y1="<mark id="sec1Line1Y1Code">300</mark>" 
-              x2="<mark id="sec1Line1X2Code">450</mark>" y2="<mark id="sec1Line1Y2Code">300</mark>" 
-              stroke="#f97316" strokewidth="20"&gt;&lt;/pxl-line&gt;
+    &lt;pxl-line stroke="#f97316" strokewidth="20"
+      x1="<mark id="sec1Line1X1Code">150</mark>" y1="<mark id="sec1Line1Y1Code">300</mark>"
+      x2="<mark id="sec1Line1X2Code">450</mark>" y2="<mark id="sec1Line1Y2Code">300</mark>"&gt;
+    &lt;/pxl-line&gt;
 
     &lt;!-- Right: Diagonal Line --&gt;
-    &lt;pxl-line x1="<mark id="sec1Line2X1Code">550</mark>" y1="<mark id="sec1Line2Y1Code">450</mark>" 
-              x2="<mark id="sec1Line2X2Code">850</mark>" y2="<mark id="sec1Line2Y2Code">150</mark>" 
-              stroke="#3b82f6" strokewidth="4"&gt;&lt;/pxl-line&gt;
+    &lt;pxl-line stroke="#3b82f6" strokewidth="4"
+      x1="<mark id="sec1Line2X1Code">550</mark>" y1="<mark id="sec1Line2Y1Code">450</mark>"
+      x2="<mark id="sec1Line2X2Code">850</mark>" y2="<mark id="sec1Line2Y2Code">150</mark>"&gt;
+    &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -155,15 +157,15 @@
   &lt;pxl-layer&gt;
     &lt;!-- Left: Dashed Line with Round Caps --&gt;
     &lt;pxl-line x1="150" y1="300" x2="450" y2="300" stroke="#f97316"
-      strokewidth="<mark id="sec2Line1StrokeWidthCode">6</mark>"
-      linecap="<mark id="sec2Line1LinecapCode">round</mark>"
-      linedash="<mark id="sec2Line1DashCode">20</mark>"&gt;&lt;/pxl-line&gt;
+      linedash="<mark id="sec2Line1DashCode">20</mark>" strokewidth="<mark id="sec2Line1StrokeWidthCode">6</mark>"
+      linecap="<mark id="sec2Line1LinecapCode">round</mark>"&gt;
+    &lt;/pxl-line&gt;
 
     &lt;!-- Right: Gradient Stroke Line --&gt;
     &lt;pxl-line x1="550" y1="300" x2="850" y2="300"
-      strokewidth="<mark id="sec2Line2StrokeWidthCode">30</mark>"
-      linecap="<mark id="sec2Line2LinecapCode">round</mark>"
-      stroke="linear(<mark id="sec2Line2AngleCode">0</mark>, ['#3b82f6', '#ec4899'])"&gt;&lt;/pxl-line&gt;
+      stroke="linear(<mark id="sec2Line2AngleCode">0</mark>, ['#3b82f6', '#ec4899'])"
+      strokewidth="<mark id="sec2Line2StrokeWidthCode">30</mark>" linecap="<mark id="sec2Line2LinecapCode">round</mark>"&gt;
+    &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -260,13 +262,15 @@
   &lt;pxl-layer&gt;
     &lt;!-- Left: Filled Arrowheads --&gt;
     &lt;pxl-line x1="150" y1="300" x2="450" y2="300" stroke="#f97316"
-      strokewidth="<mark id="sec3Line1StrokeWidthCode">20</mark>" arrowstyle="filled"
-      arrowstart="auto" arrowend="auto"&gt;&lt;/pxl-line&gt;
+      arrowstart="auto" arrowend="auto"
+      strokewidth="<mark id="sec3Line1StrokeWidthCode">20</mark>" arrowstyle="filled"&gt;
+    &lt;/pxl-line&gt;
 
     &lt;!-- Right: Line Arrowheads --&gt;
     &lt;pxl-line x1="550" y1="300" x2="850" y2="300" stroke="#3b82f6"
-      strokewidth="<mark id="sec3Line2StrokeWidthCode">6</mark>" arrowstyle="line"
-      arrowstart="<mark id="sec3Line2ArrowStartCode">60</mark>" arrowend="<mark id="sec3Line2ArrowEndCode">25</mark>"&gt;&lt;/pxl-line&gt;
+      arrowstart="<mark id="sec3Line2ArrowStartCode">60</mark>" arrowend="<mark id="sec3Line2ArrowEndCode">25</mark>"
+      strokewidth="<mark id="sec3Line2StrokeWidthCode">6</mark>" arrowstyle="line"&gt;
+    &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -343,10 +347,11 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec4LayerXCode">0</mark>" y="<mark id="sec4LayerYCode">0</mark>" rotate="<mark id="sec4LayerRotCode">0</mark>"&gt;
     &lt;pxl-line stroke="#f97316" strokewidth="4"
-      x="<mark id="sec4LineXCode">500</mark>" y="<mark id="sec4LineYCode">300</mark>" 
-      x1="<mark id="sec4LineX1Code">-300</mark>" y1="<mark id="sec4LineY1Code">0</mark>" 
-      x2="<mark id="sec4LineX2Code">300</mark>" y2="<mark id="sec4LineY2Code">0</mark>" 
-      rotate="<mark id="sec4LineRotCode">0</mark>"&gt;&lt;/pxl-line&gt;
+      x="<mark id="sec4LineXCode">500</mark>" y="<mark id="sec4LineYCode">300</mark>"
+      x1="<mark id="sec4LineX1Code">-300</mark>" y1="<mark id="sec4LineY1Code">0</mark>"
+      x2="<mark id="sec4LineX2Code">300</mark>" y2="<mark id="sec4LineY2Code">0</mark>"
+      rotate="<mark id="sec4LineRotCode">0</mark>"&gt;
+    &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
