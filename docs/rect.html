@@ -43,10 +43,16 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Square --&gt;
-    &lt;pxl-rect x="300" y="300" w="<mark id="sec1Rect1WidthCode">240</mark>" h="<mark id="sec1Rect1HeightCode">240</mark>" strokewidth="<mark id="sec1Rect1StrokeWidthCode">4</mark>" fill="#ffedd566" stroke="#f97316"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect x="300" y="300" fill="#ffedd566" stroke="#f97316"
+      w="<mark id="sec1Rect1WidthCode">240</mark>" h="<mark id="sec1Rect1HeightCode">240</mark>"
+      strokewidth="<mark id="sec1Rect1StrokeWidthCode">4</mark>"&gt;
+    &lt;/pxl-rect&gt;
 
     &lt;!-- Right: Rectangle --&gt;
-    &lt;pxl-rect x="700" y="300" w="<mark id="sec1Rect2WidthCode">360</mark>" h="<mark id="sec1Rect2HeightCode">200</mark>" strokewidth="<mark id="sec1Rect2StrokeWidthCode">4</mark>" fill="#dbeafe66" stroke="#3b82f6"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect x="700" y="300" fill="#dbeafe66" stroke="#3b82f6"
+      w="<mark id="sec1Rect2WidthCode">360</mark>" h="<mark id="sec1Rect2HeightCode">200</mark>"
+      strokewidth="<mark id="sec1Rect2StrokeWidthCode">4</mark>"&gt;
+    &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -136,10 +142,16 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Card --&gt;
-    &lt;pxl-rect x="300" y="300" w="<mark id="sec2Rect1WidthCode">260</mark>" h="<mark id="sec2Rect1HeightCode">300</mark>" strokewidth="<mark id="sec2Rect1StrokeWidthCode">4</mark>" r="<mark id="sec2Rect1RCode">30</mark>" fill="#ffedd566" stroke="#f97316"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect x="300" y="300" fill="#ffedd566" stroke="#f97316"
+      w="<mark id="sec2Rect1WidthCode">260</mark>" h="<mark id="sec2Rect1HeightCode">300</mark>"
+      r="<mark id="sec2Rect1RCode">30</mark>" strokewidth="<mark id="sec2Rect1StrokeWidthCode">4</mark>"&gt;
+    &lt;/pxl-rect&gt;
 
     &lt;!-- Right: Pill --&gt;
-    &lt;pxl-rect x="700" y="300" w="<mark id="sec2Rect2WidthCode">360</mark>" h="<mark id="sec2Rect2HeightCode">160</mark>" strokewidth="<mark id="sec2Rect2StrokeWidthCode">4</mark>" r="<mark id="sec2Rect2RCode">80</mark>" fill="#dbeafe66" stroke="#3b82f6"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect x="700" y="300" fill="#dbeafe66" stroke="#3b82f6"
+      w="<mark id="sec2Rect2WidthCode">360</mark>" h="<mark id="sec2Rect2HeightCode">160</mark>"
+      r="<mark id="sec2Rect2RCode">80</mark>" strokewidth="<mark id="sec2Rect2StrokeWidthCode">4</mark>"&gt;
+    &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -167,14 +179,14 @@
                     oninput="document.getElementById('sec2Rect1').setAttribute('h', this.value); document.getElementById('sec2Rect1HeightVal').innerText = this.value; document.getElementById('sec2Rect1HeightCode').innerText = this.value;" data-mark="sec2Rect1HeightCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec2Rect1StrokeWidthVal">4</span></label>
-                  <input type="range" min="0" max="24" step="1" value="4" autocomplete="off" id="sec2Rect1StrokeWidthInput"
-                    oninput="document.getElementById('sec2Rect1').setAttribute('strokewidth', this.value); document.getElementById('sec2Rect1StrokeWidthVal').innerText = this.value; document.getElementById('sec2Rect1StrokeWidthCode').innerText = this.value;" data-mark="sec2Rect1StrokeWidthCode">
-                </div>
-                <div class="control-group">
                   <label><span>Corner Radius <span class="indicator-dot"></span></span> <span id="sec2Rect1RVal">30</span></label>
                   <input type="range" min="0" max="130" step="5" value="30" autocomplete="off" id="sec2Rect1RInput"
                     oninput="document.getElementById('sec2Rect1').setAttribute('r', this.value); document.getElementById('sec2Rect1RVal').innerText = this.value; document.getElementById('sec2Rect1RCode').innerText = this.value;" data-mark="sec2Rect1RCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec2Rect1StrokeWidthVal">4</span></label>
+                  <input type="range" min="0" max="24" step="1" value="4" autocomplete="off" id="sec2Rect1StrokeWidthInput"
+                    oninput="document.getElementById('sec2Rect1').setAttribute('strokewidth', this.value); document.getElementById('sec2Rect1StrokeWidthVal').innerText = this.value; document.getElementById('sec2Rect1StrokeWidthCode').innerText = this.value;" data-mark="sec2Rect1StrokeWidthCode">
                 </div>
               </div>
             </div>
@@ -193,14 +205,14 @@
                     oninput="document.getElementById('sec2Rect2').setAttribute('h', this.value); document.getElementById('sec2Rect2HeightVal').innerText = this.value; document.getElementById('sec2Rect2HeightCode').innerText = this.value;" data-mark="sec2Rect2HeightCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec2Rect2StrokeWidthVal">4</span></label>
-                  <input type="range" min="0" max="24" step="1" value="4" autocomplete="off" id="sec2Rect2StrokeWidthInput"
-                    oninput="document.getElementById('sec2Rect2').setAttribute('strokewidth', this.value); document.getElementById('sec2Rect2StrokeWidthVal').innerText = this.value; document.getElementById('sec2Rect2StrokeWidthCode').innerText = this.value;" data-mark="sec2Rect2StrokeWidthCode">
-                </div>
-                <div class="control-group">
                   <label><span>Corner Radius</span> <span id="sec2Rect2RVal">80</span></label>
                   <input type="range" min="0" max="160" step="5" value="80" autocomplete="off" id="sec2Rect2RInput"
                     oninput="document.getElementById('sec2Rect2').setAttribute('r', this.value); document.getElementById('sec2Rect2RVal').innerText = this.value; document.getElementById('sec2Rect2RCode').innerText = this.value;" data-mark="sec2Rect2RCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec2Rect2StrokeWidthVal">4</span></label>
+                  <input type="range" min="0" max="24" step="1" value="4" autocomplete="off" id="sec2Rect2StrokeWidthInput"
+                    oninput="document.getElementById('sec2Rect2').setAttribute('strokewidth', this.value); document.getElementById('sec2Rect2StrokeWidthVal').innerText = this.value; document.getElementById('sec2Rect2StrokeWidthCode').innerText = this.value;" data-mark="sec2Rect2StrokeWidthCode">
                 </div>
               </div>
             </div>
@@ -239,14 +251,16 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Tab --&gt;
-    &lt;pxl-rect x="300" y="300" w="260" h="220" strokewidth="4"
-      r1="<mark id="sec3Rect1R1Code">50</mark>" r2="<mark id="sec3Rect1R2Code">50</mark>" r3="<mark id="sec3Rect1R3Code">0</mark>" r4="<mark id="sec3Rect1R4Code">0</mark>"
-      fill="#ffedd566" stroke="#f97316"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect x="300" y="300" fill="#ffedd566" stroke="#f97316"
+      w="260" h="220" strokewidth="4"
+      r1="<mark id="sec3Rect1R1Code">50</mark>" r2="<mark id="sec3Rect1R2Code">50</mark>" r3="<mark id="sec3Rect1R3Code">0</mark>" r4="<mark id="sec3Rect1R4Code">0</mark>"&gt;
+    &lt;/pxl-rect&gt;
 
     &lt;!-- Right: Leaf --&gt;
-    &lt;pxl-rect x="700" y="300" w="260" h="260" strokewidth="4"
-      r1="<mark id="sec3Rect2R1Code">0</mark>" r2="<mark id="sec3Rect2R2Code">130</mark>" r3="<mark id="sec3Rect2R3Code">0</mark>" r4="<mark id="sec3Rect2R4Code">130</mark>"
-      fill="#dbeafe66" stroke="#3b82f6"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect x="700" y="300" fill="#dbeafe66" stroke="#3b82f6"
+      w="260" h="260" strokewidth="4"
+      r1="<mark id="sec3Rect2R1Code">0</mark>" r2="<mark id="sec3Rect2R2Code">130</mark>" r3="<mark id="sec3Rect2R3Code">0</mark>" r4="<mark id="sec3Rect2R4Code">130</mark>"&gt;
+    &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -345,10 +359,10 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-rect x="500" y="300"
+    &lt;pxl-rect x="500" y="300" fill="#ffedd566" stroke="#f97316" strokewidth="4"
       w="<mark id="sec4RectWidthCode">320</mark>" h="<mark id="sec4RectHeightCode">200</mark>"
-      anchor="<mark id="sec4RectAnchorCode">center</mark>" r="<mark id="sec4RectRCode">20</mark>"
-      fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;&lt;/pxl-rect&gt;
+      anchor="<mark id="sec4RectAnchorCode">center</mark>" r="<mark id="sec4RectRCode">20</mark>"&gt;
+    &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -445,14 +459,18 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Center Spin --&gt;
-    &lt;pxl-rect x="300" y="300" w="220" h="150" fill="#ffedd566" stroke="#f97316" strokewidth="4"
-      anchor="<mark id="sec5Rect1AnchorCode">center</mark>"
-      rotate="<mark id="sec5Rect1RotCode">30</mark>" scalex="<mark id="sec5Rect1ScaleXCode">1.0</mark>" scaley="<mark id="sec5Rect1ScaleYCode">1.0</mark>"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect x="300" y="300" fill="#ffedd566" stroke="#f97316" strokewidth="4"
+      w="220" h="150"
+      scalex="<mark id="sec5Rect1ScaleXCode">1.0</mark>" scaley="<mark id="sec5Rect1ScaleYCode">1.0</mark>"
+      rotate="<mark id="sec5Rect1RotCode">30</mark>" anchor="<mark id="sec5Rect1AnchorCode">center</mark>"&gt;
+    &lt;/pxl-rect&gt;
 
     &lt;!-- Right: Corner Hinge --&gt;
-    &lt;pxl-rect x="700" y="300" w="220" h="150" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
-      anchor="<mark id="sec5Rect2AnchorCode">top-left</mark>"
-      rotate="<mark id="sec5Rect2RotCode">30</mark>" scalex="<mark id="sec5Rect2ScaleXCode">1.0</mark>" scaley="<mark id="sec5Rect2ScaleYCode">1.0</mark>"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect x="700" y="300" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
+      w="220" h="150"
+      scalex="<mark id="sec5Rect2ScaleXCode">1.0</mark>" scaley="<mark id="sec5Rect2ScaleYCode">1.0</mark>"
+      rotate="<mark id="sec5Rect2RotCode">30</mark>" anchor="<mark id="sec5Rect2AnchorCode">top-left</mark>"&gt;
+    &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -469,14 +487,28 @@
             <!-- Left Tab: Center Spin -->
             <div class="tab-content active" id="sec5Rect1Tab">
               <div class="playground-sliders">
-                <!-- 1. Rotation -->
+                <!-- 1. Scale X -->
+                <div class="control-group">
+                  <label><span>Scale X</span> <span id="sec5Rect1ScaleXVal">1.0</span></label>
+                  <input type="range" min="0.4" max="2.0" step="0.1" value="1.0" autocomplete="off" id="sec5Rect1ScaleXInput"
+                    oninput="document.getElementById('sec5Rect1').setAttribute('scalex', this.value); document.getElementById('sec5Rect1ScaleXVal').innerText = this.value; document.getElementById('sec5Rect1ScaleXCode').innerText = this.value;" data-mark="sec5Rect1ScaleXCode">
+                </div>
+
+                <!-- 2. Scale Y -->
+                <div class="control-group">
+                  <label><span>Scale Y</span> <span id="sec5Rect1ScaleYVal">1.0</span></label>
+                  <input type="range" min="0.4" max="2.0" step="0.1" value="1.0" autocomplete="off" id="sec5Rect1ScaleYInput"
+                    oninput="document.getElementById('sec5Rect1').setAttribute('scaley', this.value); document.getElementById('sec5Rect1ScaleYVal').innerText = this.value; document.getElementById('sec5Rect1ScaleYCode').innerText = this.value;" data-mark="sec5Rect1ScaleYCode">
+                </div>
+
+                <!-- 3. Rotation -->
                 <div class="control-group">
                   <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec5Rect1RotVal">30°</span></label>
                   <input type="range" min="-180" max="180" step="5" value="30" autocomplete="off" id="sec5Rect1RotInput"
                     oninput="document.getElementById('sec5Rect1').setAttribute('rotate', this.value); document.getElementById('sec5Rect1RotVal').innerText = this.value + '°'; document.getElementById('sec5Rect1RotCode').innerText = this.value;" data-mark="sec5Rect1RotCode">
                 </div>
 
-                <!-- 2. Anchor Dropdown -->
+                <!-- 4. Anchor Dropdown -->
                 <div class="control-group">
                   <label><span>Anchor</span></label>
                   <select id="sec5Rect1AnchorSelect" autocomplete="off"
@@ -498,34 +530,34 @@
                     </optgroup>
                   </select>
                 </div>
-
-                <!-- 3. Scale X -->
-                <div class="control-group">
-                  <label><span>Scale X</span> <span id="sec5Rect1ScaleXVal">1.0</span></label>
-                  <input type="range" min="0.4" max="2.0" step="0.1" value="1.0" autocomplete="off" id="sec5Rect1ScaleXInput"
-                    oninput="document.getElementById('sec5Rect1').setAttribute('scalex', this.value); document.getElementById('sec5Rect1ScaleXVal').innerText = this.value; document.getElementById('sec5Rect1ScaleXCode').innerText = this.value;" data-mark="sec5Rect1ScaleXCode">
-                </div>
-
-                <!-- 4. Scale Y -->
-                <div class="control-group">
-                  <label><span>Scale Y</span> <span id="sec5Rect1ScaleYVal">1.0</span></label>
-                  <input type="range" min="0.4" max="2.0" step="0.1" value="1.0" autocomplete="off" id="sec5Rect1ScaleYInput"
-                    oninput="document.getElementById('sec5Rect1').setAttribute('scaley', this.value); document.getElementById('sec5Rect1ScaleYVal').innerText = this.value; document.getElementById('sec5Rect1ScaleYCode').innerText = this.value;" data-mark="sec5Rect1ScaleYCode">
-                </div>
               </div>
             </div>
 
             <!-- Right Tab: Corner Hinge -->
             <div class="tab-content" id="sec5Rect2Tab">
               <div class="playground-sliders">
-                <!-- 1. Rotation -->
+                <!-- 1. Scale X -->
+                <div class="control-group">
+                  <label><span>Scale X</span> <span id="sec5Rect2ScaleXVal">1.0</span></label>
+                  <input type="range" min="0.4" max="2.0" step="0.1" value="1.0" autocomplete="off" id="sec5Rect2ScaleXInput"
+                    oninput="document.getElementById('sec5Rect2').setAttribute('scalex', this.value); document.getElementById('sec5Rect2ScaleXVal').innerText = this.value; document.getElementById('sec5Rect2ScaleXCode').innerText = this.value;" data-mark="sec5Rect2ScaleXCode">
+                </div>
+
+                <!-- 2. Scale Y -->
+                <div class="control-group">
+                  <label><span>Scale Y</span> <span id="sec5Rect2ScaleYVal">1.0</span></label>
+                  <input type="range" min="0.4" max="2.0" step="0.1" value="1.0" autocomplete="off" id="sec5Rect2ScaleYInput"
+                    oninput="document.getElementById('sec5Rect2').setAttribute('scaley', this.value); document.getElementById('sec5Rect2ScaleYVal').innerText = this.value; document.getElementById('sec5Rect2ScaleYCode').innerText = this.value;" data-mark="sec5Rect2ScaleYCode">
+                </div>
+
+                <!-- 3. Rotation -->
                 <div class="control-group">
                   <label><span>Rotation</span> <span id="sec5Rect2RotVal">30°</span></label>
                   <input type="range" min="-180" max="180" step="5" value="30" autocomplete="off" id="sec5Rect2RotInput"
                     oninput="document.getElementById('sec5Rect2').setAttribute('rotate', this.value); document.getElementById('sec5Rect2RotVal').innerText = this.value + '°'; document.getElementById('sec5Rect2RotCode').innerText = this.value;" data-mark="sec5Rect2RotCode">
                 </div>
 
-                <!-- 2. Anchor Dropdown -->
+                <!-- 4. Anchor Dropdown -->
                 <div class="control-group">
                   <label><span>Anchor</span></label>
                   <select id="sec5Rect2AnchorSelect" autocomplete="off"
@@ -546,20 +578,6 @@
                       <option value="left">left</option>
                     </optgroup>
                   </select>
-                </div>
-
-                <!-- 3. Scale X -->
-                <div class="control-group">
-                  <label><span>Scale X</span> <span id="sec5Rect2ScaleXVal">1.0</span></label>
-                  <input type="range" min="0.4" max="2.0" step="0.1" value="1.0" autocomplete="off" id="sec5Rect2ScaleXInput"
-                    oninput="document.getElementById('sec5Rect2').setAttribute('scalex', this.value); document.getElementById('sec5Rect2ScaleXVal').innerText = this.value; document.getElementById('sec5Rect2ScaleXCode').innerText = this.value;" data-mark="sec5Rect2ScaleXCode">
-                </div>
-
-                <!-- 4. Scale Y -->
-                <div class="control-group">
-                  <label><span>Scale Y</span> <span id="sec5Rect2ScaleYVal">1.0</span></label>
-                  <input type="range" min="0.4" max="2.0" step="0.1" value="1.0" autocomplete="off" id="sec5Rect2ScaleYInput"
-                    oninput="document.getElementById('sec5Rect2').setAttribute('scaley', this.value); document.getElementById('sec5Rect2ScaleYVal').innerText = this.value; document.getElementById('sec5Rect2ScaleYCode').innerText = this.value;" data-mark="sec5Rect2ScaleYCode">
                 </div>
               </div>
             </div>
