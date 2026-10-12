@@ -342,12 +342,11 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec4LayerXCode">0</mark>" y="<mark id="sec4LayerYCode">0</mark>" rotate="<mark id="sec4LayerRotCode">0</mark>"&gt;
-    &lt;pxl-line 
+    &lt;pxl-line stroke="#f97316" strokewidth="4"
       x="<mark id="sec4LineXCode">500</mark>" y="<mark id="sec4LineYCode">300</mark>" 
       x1="<mark id="sec4LineX1Code">-300</mark>" y1="<mark id="sec4LineY1Code">0</mark>" 
       x2="<mark id="sec4LineX2Code">300</mark>" y2="<mark id="sec4LineY2Code">0</mark>" 
-      rotate="<mark id="sec4LineRotCode">0</mark>" 
-      stroke="#f97316" strokewidth="4"&gt;&lt;/pxl-line&gt;
+      rotate="<mark id="sec4LineRotCode">0</mark>"&gt;&lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -356,13 +355,13 @@
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Controls</h3>
               <div class="demo-tabs">
-                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4LayerTab')">Layer</button>
-                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4LineTab')">Line</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4LayerTab')">Layer</button>
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4LineTab')">Line</button>
               </div>
             </div>
 
             <!-- Layer Tab -->
-            <div class="tab-content active" id="sec4LayerTab">
+            <div class="tab-content" id="sec4LayerTab">
               <div class="playground-sliders">
                 <div class="control-group">
                   <label><span>Center X</span> <span id="sec4LayerXVal">0</span></label>
@@ -375,7 +374,7 @@
                     oninput="document.getElementById('sec4Layer').setAttribute('y', this.value); document.getElementById('sec4LayerYVal').innerText = this.value; document.getElementById('sec4LayerYCode').innerText = this.value;" data-mark="sec4LayerYCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec4LayerRotVal">0°</span></label>
+                  <label><span>Rotation</span> <span id="sec4LayerRotVal">0°</span></label>
                   <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" id="sec4LayerRotInput"
                     oninput="document.getElementById('sec4Layer').setAttribute('rotate', this.value); document.getElementById('sec4LayerRotVal').innerText = this.value + '°'; document.getElementById('sec4LayerRotCode').innerText = this.value;" data-mark="sec4LayerRotCode">
                 </div>
@@ -383,7 +382,7 @@
             </div>
 
             <!-- Line Tab -->
-            <div class="tab-content" id="sec4LineTab">
+            <div class="tab-content active" id="sec4LineTab">
               <div class="playground-sliders">
                 <div class="control-group">
                   <label><span>Center X</span> <span id="sec4LineXVal">500</span></label>
@@ -448,8 +447,17 @@
               <!-- Line -->
               <pxl-line id="sec4Line" x="500" y="300" x1="-300" y1="0" x2="300" y2="0" rotate="0" stroke="#f97316" strokewidth="4"></pxl-line>
 
-              <!-- Center dot (non-documented visual anchor) -->
+              <!-- Center dot & label (non-documented visual anchor) -->
               <pxl-circle x="ref.sec4Line.x" y="ref.sec4Line.y" r="5" fill="#fb923c"></pxl-circle>
+              <pxl-text 
+                x="ref.sec4Line.x + 15" 
+                y="ref.sec4Line.y - 15" 
+                baseline="bottom" 
+                text="'Line Center'" 
+                size="27" 
+                fill="#fb923c" 
+                font="monospace">
+              </pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>

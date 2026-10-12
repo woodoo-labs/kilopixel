@@ -36,7 +36,7 @@
         <!-- ================================================================= -->
         <!-- SECTION 1: RADII & INNER RADII -->
         <!-- ================================================================= -->
-        <h2>1. Ellipses</h2>
+        <h2>1. Radii</h2>
         <p>An ellipse is defined by its horizontal radius (<code>rx</code>) and vertical radius (<code>ry</code>). Specifying inner horizontal (<code>irx</code>) and vertical (<code>iry</code>) radii hollows out the interior to form a concentric elliptical ring.</p>
 
         <!-- Declarative HTML markup above stage -->
@@ -339,7 +339,7 @@
         <!-- SECTION 4: SIMPLE ARCS -->
         <!-- ================================================================= -->
         <h2>4. Arcs</h2>
-        <p>By simply omitting the <code>fill</code> attribute, you can use ellipses to draw un-filled, stroked curved lines &mdash; perfect for orbits and perspective trajectory paths. The base Shape class also supports <code>linedash</code> and <code>dashoffset</code>, allowing you to easily create dashed orbital tracks and marching ant effects.</p>
+        <p>By simply omitting the <code>fill</code> attribute, you can use ellipses to draw un-filled, stroked curved lines &mdash; perfect for orbits and perspective trajectory paths. The base Shape class also supports <code>linedash</code>, allowing you to easily create dashed orbital tracks and technical indicators.</p>
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
@@ -350,7 +350,7 @@
       start="<mark id="sec4Ellipse1StartCode">0</mark>" sweep="<mark id="sec4Ellipse1SweepCode">180</mark>"&gt;&lt;/pxl-ellipse&gt;
 
     &lt;!-- Right: Dashed Arc (End Angle Mode) --&gt;
-    &lt;pxl-ellipse x="700" y="300" stroke="#3b82f6" strokewidth="4" linedash="[15, 15]" dashoffset="<mark id="sec4Ellipse2OffsetCode">0</mark>"
+    &lt;pxl-ellipse x="700" y="300" stroke="#3b82f6" strokewidth="4" linedash="<mark id="sec4Ellipse2DashCode">15</mark>"
       rx="<mark id="sec4Ellipse2RxCode">180</mark>" ry="<mark id="sec4Ellipse2RyCode">110</mark>"
       start="<mark id="sec4Ellipse2StartCode">0</mark>" end="<mark id="sec4Ellipse2EndCode">270</mark>"&gt;&lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
@@ -411,9 +411,9 @@
                     oninput="document.getElementById('sec4Ellipse2').setAttribute('ry', this.value); document.getElementById('sec4Ellipse2RyVal').innerText = this.value; document.getElementById('sec4Ellipse2RyCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Dash Offset</span> <span id="sec4Ellipse2OffsetVal">0</span></label>
-                  <input type="range" min="-100" max="100" step="5" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec4Ellipse2').setAttribute('dashoffset', this.value); document.getElementById('sec4Ellipse2OffsetVal').innerText = this.value; document.getElementById('sec4Ellipse2OffsetCode').innerText = this.value;">
+                  <label><span>Line Dash</span> <span id="sec4Ellipse2DashVal">15</span></label>
+                  <input type="range" min="0" max="40" step="5" value="15" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse2').setAttribute('linedash', this.value); document.getElementById('sec4Ellipse2DashVal').innerText = this.value; document.getElementById('sec4Ellipse2DashCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
                   <label><span>Start Angle</span> <span id="sec4Ellipse2StartVal">0°</span></label>
@@ -441,7 +441,7 @@
 
               <!-- Right: Dashed Arc (Blue Scheme) -->
               <pxl-ellipse id="sec4Ellipse2" x="700" y="300" rx="180" ry="110" start="0" end="270" 
-                stroke="#3b82f6" strokewidth="4" linedash="[15, 15]" dashoffset="0"></pxl-ellipse>
+                stroke="#3b82f6" strokewidth="4" linedash="15"></pxl-ellipse>
               <pxl-text x="700" y="500" text="'Dashed Arc'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>
@@ -462,16 +462,16 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Filled Arrows --&gt;
-    &lt;pxl-ellipse x="300" y="300" stroke="#f97316" strokewidth="8"
-      rx="<mark id="sec5Ellipse1RxCode">180</mark>" ry="<mark id="sec5Ellipse1RyCode">110</mark>"
+    &lt;pxl-ellipse x="300" y="300" rx="180" ry="110" stroke="#f97316" strokewidth="8"
+      arrowstart="<mark id="sec5Ellipse1StartArrowCode">25</mark>" arrowend="<mark id="sec5Ellipse1EndArrowCode">25</mark>"
       start="-45" sweep="<mark id="sec5Ellipse1SweepCode">270</mark>"
-      arrowstyle="filled" arrowstart="<mark id="sec5Ellipse1StartArrowCode">25</mark>" arrowend="<mark id="sec5Ellipse1EndArrowCode">25</mark>"&gt;&lt;/pxl-ellipse&gt;
+      arrowstyle="filled"&gt;&lt;/pxl-ellipse&gt;
 
     &lt;!-- Right: Line Arrows --&gt;
-    &lt;pxl-ellipse x="700" y="300" stroke="#3b82f6" strokewidth="8" linedash="[15, 15]"
-      rx="<mark id="sec5Ellipse2RxCode">180</mark>" ry="<mark id="sec5Ellipse2RyCode">110</mark>"
+    &lt;pxl-ellipse x="700" y="300" rx="180" ry="110" stroke="#3b82f6" strokewidth="8"
+      arrowstart="<mark id="sec5Ellipse2StartArrowCode">0</mark>" arrowend="<mark id="sec5Ellipse2EndArrowCode">35</mark>"
       start="-45" sweep="<mark id="sec5Ellipse2SweepCode">270</mark>"
-      arrowstyle="line" arrowstart="<mark id="sec5Ellipse2StartArrowCode">0</mark>" arrowend="<mark id="sec5Ellipse2EndArrowCode">35</mark>"&gt;&lt;/pxl-ellipse&gt;
+      arrowstyle="line" linedash="<mark id="sec5Ellipse2DashCode">15</mark>"&gt;&lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -524,6 +524,11 @@
                   <input type="range" min="45" max="360" step="15" value="270" autocomplete="off"
                     oninput="document.getElementById('sec5Ellipse2').setAttribute('sweep', this.value); document.getElementById('sec5Ellipse2SweepVal').innerText = this.value + '°'; document.getElementById('sec5Ellipse2SweepCode').innerText = this.value;">
                 </div>
+                <div class="control-group">
+                  <label><span>Line Dash</span> <span id="sec5Ellipse2DashVal">15</span></label>
+                  <input type="range" min="0" max="40" step="5" value="15" autocomplete="off"
+                    oninput="document.getElementById('sec5Ellipse2').setAttribute('linedash', this.value); document.getElementById('sec5Ellipse2DashVal').innerText = this.value; document.getElementById('sec5Ellipse2DashCode').innerText = this.value;">
+                </div>
               </div>
             </div>
           </div>
@@ -542,7 +547,7 @@
               <!-- Right: Line Arrows (Blue Scheme) -->
               <pxl-ellipse id="sec5Ellipse2" x="700" y="300" rx="180" ry="110" start="-45" sweep="270" 
                 arrowstyle="line" arrowstart="0" arrowend="35"
-                stroke="#3b82f6" strokewidth="8" linedash="[15, 15]"></pxl-ellipse>
+                stroke="#3b82f6" strokewidth="8" linedash="15"></pxl-ellipse>
               <pxl-text x="700" y="500" text="'Line Arrowhead'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>

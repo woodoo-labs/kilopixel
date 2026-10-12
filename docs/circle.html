@@ -36,7 +36,7 @@
         <!-- ================================================================= -->
         <!-- SECTION 1: RADIUS & INNER RADIUS -->
         <!-- ================================================================= -->
-        <h2>1. Circles</h2>
+        <h2>1. Radius</h2>
         <p>A simple outer radius (<code>r</code>) draws a solid disc. Providing an inner radius (<code>ir</code>) hollows out the center to produce a concentric ring.</p>
 
         <!-- Declarative HTML markup above stage -->
@@ -301,24 +301,20 @@
         <!-- SECTION 4: SIMPLE ARCS -->
         <!-- ================================================================= -->
         <h2>4. Arcs</h2>
-        <p>By simply omitting the <code>fill</code> attribute, you can use circles to draw un-filled, stroked curved lines. The base Shape class also supports <code>linedash</code> and <code>dashoffset</code>, allowing you to easily create dashed dials and marching ant effects.</p>
+        <p>By simply omitting the <code>fill</code> attribute, you can use circles to draw un-filled, stroked curved lines. The base Shape class also supports <code>linedash</code>, allowing you to easily create dashed dials and technical gauges.</p>
 
         <!-- Declarative HTML markup above stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Simple Arc (Sweep Mode) --&gt;
     &lt;pxl-circle x="300" y="300" stroke="#f97316"
-      r="<mark id="sec4Circle1RCode">150</mark>" 
-      strokewidth="<mark id="sec4Circle1WidthCode">10</mark>"
-      start="<mark id="sec4Circle1StartCode">0</mark>" 
-      sweep="<mark id="sec4Circle1SweepCode">180</mark>"&gt;&lt;/pxl-circle&gt;
+      r="<mark id="sec4Circle1RCode">150</mark>" strokewidth="<mark id="sec4Circle1WidthCode">10</mark>"
+      start="<mark id="sec4Circle1StartCode">0</mark>" sweep="<mark id="sec4Circle1SweepCode">180</mark>"&gt;&lt;/pxl-circle&gt;
 
     &lt;!-- Right: Dashed Arc (End Angle Mode) --&gt;
-    &lt;pxl-circle x="700" y="300" stroke="#3b82f6" strokewidth="4" linedash="[15, 15]"
-      r="<mark id="sec4Circle2RCode">150</mark>" 
-      dashoffset="<mark id="sec4Circle2OffsetCode">0</mark>"
-      start="<mark id="sec4Circle2StartCode">0</mark>" 
-      end="<mark id="sec4Circle2EndCode">270</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="700" y="300" stroke="#3b82f6" strokewidth="4"
+      r="<mark id="sec4Circle2RCode">150</mark>" linedash="<mark id="sec4Circle2DashCode">15</mark>"
+      start="<mark id="sec4Circle2StartCode">0</mark>" end="<mark id="sec4Circle2EndCode">270</mark>"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -367,9 +363,9 @@
                       oninput="document.getElementById('sec4Circle2').setAttribute('r', this.value); document.getElementById('sec4Circle2RVal').innerText = this.value; document.getElementById('sec4Circle2RCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Dash Offset</span> <span id="sec4Circle2OffsetVal">0</span></label>
-                    <input type="range" min="-100" max="100" step="5" value="0" autocomplete="off"
-                      oninput="document.getElementById('sec4Circle2').setAttribute('dashoffset', this.value); document.getElementById('sec4Circle2OffsetVal').innerText = this.value; document.getElementById('sec4Circle2OffsetCode').innerText = this.value;">
+                    <label><span>Line Dash</span> <span id="sec4Circle2DashVal">15</span></label>
+                    <input type="range" min="0" max="40" step="5" value="15" autocomplete="off"
+                      oninput="document.getElementById('sec4Circle2').setAttribute('linedash', this.value); document.getElementById('sec4Circle2DashVal').innerText = this.value; document.getElementById('sec4Circle2DashCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
                     <label><span>Start Angle</span> <span id="sec4Circle2StartVal">0°</span></label>
@@ -397,7 +393,7 @@
 
                 <!-- Right: Dashed Arc (Blue Scheme) -->
                 <pxl-circle id="sec4Circle2" x="700" y="300" r="150" start="0" end="270" 
-                  stroke="#3b82f6" strokewidth="4" linedash="[15, 15]" dashoffset="0"></pxl-circle>
+                  stroke="#3b82f6" strokewidth="4" linedash="15"></pxl-circle>
                 <pxl-text x="700" y="500" text="'Dashed Arc'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
               </pxl-layer>
             </pxl-stage>
@@ -414,17 +410,15 @@
   &lt;pxl-layer&gt;
     &lt;!-- Left: Filled Arrows --&gt;
     &lt;pxl-circle x="300" y="300" stroke="#f97316" strokewidth="8"
-      start="-45" sweep="270"
-      arrowstyle="filled"
-      arrowstart="<mark id="sec5Circle1StartArrowCode">25</mark>" 
-      arrowend="<mark id="sec5Circle1EndArrowCode">25</mark>"&gt;&lt;/pxl-circle&gt;
+      arrowstart="<mark id="sec5Circle1StartArrowCode">25</mark>" arrowend="<mark id="sec5Circle1EndArrowCode">25</mark>"
+      start="-45" sweep="<mark id="sec5Circle1SweepCode">270</mark>"
+      arrowstyle="filled"&gt;&lt;/pxl-circle&gt;
 
     &lt;!-- Right: Line Arrows --&gt;
-    &lt;pxl-circle x="700" y="300" stroke="#3b82f6" strokewidth="8" linedash="[15, 15]"
-      start="-45" sweep="270"
-      arrowstyle="line"
-      arrowstart="<mark id="sec5Circle2StartArrowCode">0</mark>" 
-      arrowend="<mark id="sec5Circle2EndArrowCode">35</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="700" y="300" stroke="#3b82f6" strokewidth="8"
+      arrowstart="<mark id="sec5Circle2StartArrowCode">0</mark>" arrowend="<mark id="sec5Circle2EndArrowCode">35</mark>"
+      start="-45" sweep="<mark id="sec5Circle2SweepCode">270</mark>"
+      arrowstyle="line" linedash="<mark id="sec5Circle2DashCode">15</mark>"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -454,7 +448,7 @@
                   <div class="control-group">
                     <label><span>Sweep</span> <span id="sec5Circle1SweepVal">270°</span></label>
                     <input type="range" min="-40" max="400" step="5" value="270" autocomplete="off"
-                      oninput="document.getElementById('sec5Circle1').setAttribute('sweep', this.value); document.getElementById('sec5Circle1SweepVal').innerText = this.value + '°';">
+                      oninput="document.getElementById('sec5Circle1').setAttribute('sweep', this.value); document.getElementById('sec5Circle1SweepVal').innerText = this.value + '°'; document.getElementById('sec5Circle1SweepCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -475,7 +469,12 @@
                   <div class="control-group">
                     <label><span>Sweep</span> <span id="sec5Circle2SweepVal">270°</span></label>
                     <input type="range" min="45" max="360" step="15" value="270" autocomplete="off"
-                      oninput="document.getElementById('sec5Circle2').setAttribute('sweep', this.value); document.getElementById('sec5Circle2SweepVal').innerText = this.value + '°';">
+                      oninput="document.getElementById('sec5Circle2').setAttribute('sweep', this.value); document.getElementById('sec5Circle2SweepVal').innerText = this.value + '°'; document.getElementById('sec5Circle2SweepCode').innerText = this.value;">
+                  </div>
+                  <div class="control-group">
+                    <label><span>Line Dash</span> <span id="sec5Circle2DashVal">15</span></label>
+                    <input type="range" min="0" max="40" step="5" value="15" autocomplete="off"
+                      oninput="document.getElementById('sec5Circle2').setAttribute('linedash', this.value); document.getElementById('sec5Circle2DashVal').innerText = this.value; document.getElementById('sec5Circle2DashCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -495,7 +494,7 @@
                 <!-- Right: Line Arrows (Blue Scheme) -->
                 <pxl-circle id="sec5Circle2" x="700" y="300" r="140" start="-45" sweep="270" 
                   arrowstyle="line" arrowstart="0" arrowend="35"
-                  stroke="#3b82f6" strokewidth="8" linedash="[15, 15]"></pxl-circle>
+                  stroke="#3b82f6" strokewidth="8" linedash="15"></pxl-circle>
                 <pxl-text x="700" y="500" text="'Line Arrowhead'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
               </pxl-layer>
             </pxl-stage>
