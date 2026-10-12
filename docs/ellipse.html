@@ -43,10 +43,15 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Solid Disc --&gt;
-    &lt;pxl-ellipse x="300" y="300" rx="<mark id="sec1Ellipse1RxCode">180</mark>" ry="<mark id="sec1Ellipse1RyCode">110</mark>" fill="#f97316"&gt;&lt;/pxl-ellipse&gt;
+    &lt;pxl-ellipse x="300" y="300" fill="#f97316"
+      rx="<mark id="sec1Ellipse1RxCode">180</mark>" ry="<mark id="sec1Ellipse1RyCode">110</mark>"&gt;
+    &lt;/pxl-ellipse&gt;
 
     &lt;!-- Right: Hollow Ring --&gt;
-    &lt;pxl-ellipse x="700" y="300" rx="<mark id="sec1Ellipse2RxCode">180</mark>" ry="<mark id="sec1Ellipse2RyCode">110</mark>" irx="<mark id="sec1Ellipse2IrxCode">90</mark>" iry="<mark id="sec1Ellipse2IryCode">55</mark>" stroke="#3b82f6"&gt;&lt;/pxl-ellipse&gt;
+    &lt;pxl-ellipse x="700" y="300" stroke="#3b82f6"
+      rx="<mark id="sec1Ellipse2RxCode">180</mark>" ry="<mark id="sec1Ellipse2RyCode">110</mark>"
+      irx="<mark id="sec1Ellipse2IrxCode">90</mark>" iry="<mark id="sec1Ellipse2IryCode">55</mark>"&gt;
+    &lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -134,14 +139,17 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Pie Slice (Sweep Mode) --&gt;
-    &lt;pxl-ellipse x="300" y="300" strokewidth="<mark id="sec2Ellipse1WidthCode">10</mark>" pie="true" fill="#ffedd566" stroke="#f97316"
-      rx="<mark id="sec2Ellipse1RxCode">180</mark>" ry="<mark id="sec2Ellipse1RyCode">110</mark>"
-      start="<mark id="sec2Ellipse1StartCode">0</mark>" sweep="<mark id="sec2Ellipse1SweepCode">270</mark>"&gt;&lt;/pxl-ellipse&gt;
+    &lt;pxl-ellipse x="300" y="300" fill="#ffedd566" stroke="#f97316"
+      pie="true" rx="<mark id="sec2Ellipse1RxCode">180</mark>" ry="<mark id="sec2Ellipse1RyCode">110</mark>" strokewidth="<mark id="sec2Ellipse1WidthCode">10</mark>"
+      start="<mark id="sec2Ellipse1StartCode">0</mark>" sweep="<mark id="sec2Ellipse1SweepCode">270</mark>"&gt;
+    &lt;/pxl-ellipse&gt;
 
     &lt;!-- Right: Donut Wedge (End Angle Mode) --&gt;
-    &lt;pxl-ellipse x="700" y="300" pie="true" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
-      rx="<mark id="sec2Ellipse2RxCode">180</mark>" ry="<mark id="sec2Ellipse2RyCode">110</mark>" irx="<mark id="sec2Ellipse2IrxCode">90</mark>" iry="<mark id="sec2Ellipse2IryCode">55</mark>"
-      start="<mark id="sec2Ellipse2StartCode">0</mark>" end="<mark id="sec2Ellipse2EndCode">270</mark>"&gt;&lt;/pxl-ellipse&gt;
+    &lt;pxl-ellipse x="700" y="300" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
+      pie="true" rx="<mark id="sec2Ellipse2RxCode">180</mark>" ry="<mark id="sec2Ellipse2RyCode">110</mark>"
+      irx="<mark id="sec2Ellipse2IrxCode">90</mark>" iry="<mark id="sec2Ellipse2IryCode">55</mark>"
+      start="<mark id="sec2Ellipse2StartCode">0</mark>" end="<mark id="sec2Ellipse2EndCode">270</mark>"&gt;
+    &lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -255,12 +263,15 @@
     &lt;!-- Left: Open Chord (Default) --&gt;
     &lt;pxl-ellipse x="300" y="300" strokewidth="10" fill="#ffedd566" stroke="#f97316"
       rx="<mark id="sec3Ellipse1RxCode">180</mark>" ry="<mark id="sec3Ellipse1RyCode">110</mark>"
-      sweep="<mark id="sec3Ellipse1SweepCode">270</mark>"&gt;&lt;/pxl-ellipse&gt;
+      sweep="<mark id="sec3Ellipse1SweepCode">270</mark>"&gt;
+    &lt;/pxl-ellipse&gt;
 
     &lt;!-- Right: Closed Chord (closed="true") --&gt;
-    &lt;pxl-ellipse x="700" y="300" strokewidth="10" closed="true" fill="#dbeafe66" stroke="#3b82f6"
+    &lt;pxl-ellipse x="700" y="300" strokewidth="10" fill="#dbeafe66" stroke="#3b82f6"
+      closed="true"
       rx="<mark id="sec3Ellipse2RxCode">180</mark>" ry="<mark id="sec3Ellipse2RyCode">110</mark>"
-      sweep="<mark id="sec3Ellipse2SweepCode">180</mark>"&gt;&lt;/pxl-ellipse&gt;
+      sweep="<mark id="sec3Ellipse2SweepCode">180</mark>"&gt;
+    &lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -345,14 +356,18 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Simple Arc (Sweep Mode) --&gt;
-    &lt;pxl-ellipse x="300" y="300" stroke="#f97316" strokewidth="<mark id="sec4Ellipse1WidthCode">10</mark>"
+    &lt;pxl-ellipse x="300" y="300" stroke="#f97316"
       rx="<mark id="sec4Ellipse1RxCode">180</mark>" ry="<mark id="sec4Ellipse1RyCode">110</mark>"
-      start="<mark id="sec4Ellipse1StartCode">0</mark>" sweep="<mark id="sec4Ellipse1SweepCode">180</mark>"&gt;&lt;/pxl-ellipse&gt;
+      start="<mark id="sec4Ellipse1StartCode">0</mark>" sweep="<mark id="sec4Ellipse1SweepCode">180</mark>"
+      strokewidth="<mark id="sec4Ellipse1WidthCode">10</mark>"&gt;
+    &lt;/pxl-ellipse&gt;
 
     &lt;!-- Right: Dashed Arc (End Angle Mode) --&gt;
-    &lt;pxl-ellipse x="700" y="300" stroke="#3b82f6" strokewidth="4" linedash="<mark id="sec4Ellipse2DashCode">15</mark>"
+    &lt;pxl-ellipse x="700" y="300" stroke="#3b82f6" strokewidth="4"
       rx="<mark id="sec4Ellipse2RxCode">180</mark>" ry="<mark id="sec4Ellipse2RyCode">110</mark>"
-      start="<mark id="sec4Ellipse2StartCode">0</mark>" end="<mark id="sec4Ellipse2EndCode">270</mark>"&gt;&lt;/pxl-ellipse&gt;
+      start="<mark id="sec4Ellipse2StartCode">0</mark>" end="<mark id="sec4Ellipse2EndCode">270</mark>"
+      linedash="<mark id="sec4Ellipse2DashCode">15</mark>"&gt;
+    &lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -380,11 +395,6 @@
                     oninput="document.getElementById('sec4Ellipse1').setAttribute('ry', this.value); document.getElementById('sec4Ellipse1RyVal').innerText = this.value; document.getElementById('sec4Ellipse1RyCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec4Ellipse1WidthVal">10</span></label>
-                  <input type="range" min="2" max="40" step="2" value="10" autocomplete="off"
-                    oninput="document.getElementById('sec4Ellipse1').setAttribute('strokewidth', this.value); document.getElementById('sec4Ellipse1WidthVal').innerText = this.value; document.getElementById('sec4Ellipse1WidthCode').innerText = this.value;">
-                </div>
-                <div class="control-group">
                   <label><span>Start Angle</span> <span id="sec4Ellipse1StartVal">0°</span></label>
                   <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
                     oninput="document.getElementById('sec4Ellipse1').setAttribute('start', this.value); document.getElementById('sec4Ellipse1StartVal').innerText = this.value + '°'; document.getElementById('sec4Ellipse1StartCode').innerText = this.value;">
@@ -393,6 +403,11 @@
                   <label><span>Sweep</span> <span id="sec4Ellipse1SweepVal">180°</span></label>
                   <input type="range" min="45" max="360" step="15" value="180" autocomplete="off"
                     oninput="document.getElementById('sec4Ellipse1').setAttribute('sweep', this.value); document.getElementById('sec4Ellipse1SweepVal').innerText = this.value + '°'; document.getElementById('sec4Ellipse1SweepCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec4Ellipse1WidthVal">10</span></label>
+                  <input type="range" min="2" max="40" step="2" value="10" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse1').setAttribute('strokewidth', this.value); document.getElementById('sec4Ellipse1WidthVal').innerText = this.value; document.getElementById('sec4Ellipse1WidthCode').innerText = this.value;">
                 </div>
               </div>
             </div>
@@ -411,11 +426,6 @@
                     oninput="document.getElementById('sec4Ellipse2').setAttribute('ry', this.value); document.getElementById('sec4Ellipse2RyVal').innerText = this.value; document.getElementById('sec4Ellipse2RyCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Line Dash</span> <span id="sec4Ellipse2DashVal">15</span></label>
-                  <input type="range" min="0" max="40" step="5" value="15" autocomplete="off"
-                    oninput="document.getElementById('sec4Ellipse2').setAttribute('linedash', this.value); document.getElementById('sec4Ellipse2DashVal').innerText = this.value; document.getElementById('sec4Ellipse2DashCode').innerText = this.value;">
-                </div>
-                <div class="control-group">
                   <label><span>Start Angle</span> <span id="sec4Ellipse2StartVal">0°</span></label>
                   <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
                     oninput="document.getElementById('sec4Ellipse2').setAttribute('start', this.value); document.getElementById('sec4Ellipse2StartVal').innerText = this.value + '°'; document.getElementById('sec4Ellipse2StartCode').innerText = this.value;">
@@ -424,6 +434,11 @@
                   <label><span>End Angle</span> <span id="sec4Ellipse2EndVal">270°</span></label>
                   <input type="range" min="-180" max="360" step="15" value="270" autocomplete="off"
                     oninput="document.getElementById('sec4Ellipse2').setAttribute('end', this.value); document.getElementById('sec4Ellipse2EndVal').innerText = this.value + '°'; document.getElementById('sec4Ellipse2EndCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Line Dash</span> <span id="sec4Ellipse2DashVal">15</span></label>
+                  <input type="range" min="0" max="40" step="5" value="15" autocomplete="off"
+                    oninput="document.getElementById('sec4Ellipse2').setAttribute('linedash', this.value); document.getElementById('sec4Ellipse2DashVal').innerText = this.value; document.getElementById('sec4Ellipse2DashCode').innerText = this.value;">
                 </div>
               </div>
             </div>
@@ -465,13 +480,15 @@
     &lt;pxl-ellipse x="300" y="300" rx="180" ry="110" stroke="#f97316" strokewidth="8"
       arrowstart="<mark id="sec5Ellipse1StartArrowCode">25</mark>" arrowend="<mark id="sec5Ellipse1EndArrowCode">25</mark>"
       start="-45" sweep="<mark id="sec5Ellipse1SweepCode">270</mark>"
-      arrowstyle="filled"&gt;&lt;/pxl-ellipse&gt;
+      arrowstyle="filled"&gt;
+    &lt;/pxl-ellipse&gt;
 
     &lt;!-- Right: Line Arrows --&gt;
     &lt;pxl-ellipse x="700" y="300" rx="180" ry="110" stroke="#3b82f6" strokewidth="8"
       arrowstart="<mark id="sec5Ellipse2StartArrowCode">0</mark>" arrowend="<mark id="sec5Ellipse2EndArrowCode">35</mark>"
       start="-45" sweep="<mark id="sec5Ellipse2SweepCode">270</mark>"
-      arrowstyle="line" linedash="<mark id="sec5Ellipse2DashCode">15</mark>"&gt;&lt;/pxl-ellipse&gt;
+      arrowstyle="line" linedash="<mark id="sec5Ellipse2DashCode">15</mark>"&gt;
+    &lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
