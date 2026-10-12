@@ -333,6 +333,127 @@
           </pxl-stage>
         </div>
 
+        <!-- ================================================================= -->
+        <!-- SECTION 4: TRANSFORMS                                             -->
+        <!-- ================================================================= -->
+        <h2>4. Transforms</h2>
+        <p>In Kilopixel, every shape lives inside a parent layer. Understanding how a line is positioned and transformed requires seeing both the layer coordinate space and the line's local space in action.</p>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer x="<mark id="sec4LayerXCode">0</mark>" y="<mark id="sec4LayerYCode">0</mark>" rotate="<mark id="sec4LayerRotCode">0</mark>"&gt;
+    &lt;pxl-line 
+      x="<mark id="sec4LineXCode">500</mark>" y="<mark id="sec4LineYCode">300</mark>" 
+      x1="<mark id="sec4LineX1Code">-300</mark>" y1="<mark id="sec4LineY1Code">0</mark>" 
+      x2="<mark id="sec4LineX2Code">300</mark>" y2="<mark id="sec4LineY2Code">0</mark>" 
+      rotate="<mark id="sec4LineRotCode">0</mark>" 
+      stroke="#f97316" strokewidth="4"&gt;&lt;/pxl-line&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4LayerTab')">Layer</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4LineTab')">Line</button>
+              </div>
+            </div>
+
+            <!-- Layer Tab -->
+            <div class="tab-content active" id="sec4LayerTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Center X</span> <span id="sec4LayerXVal">0</span></label>
+                  <input type="range" min="0" max="1000" step="10" value="0" autocomplete="off" id="sec4LayerXInput"
+                    oninput="document.getElementById('sec4Layer').setAttribute('x', this.value); document.getElementById('sec4LayerXVal').innerText = this.value; document.getElementById('sec4LayerXCode').innerText = this.value;" data-mark="sec4LayerXCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Center Y</span> <span id="sec4LayerYVal">0</span></label>
+                  <input type="range" min="0" max="600" step="10" value="0" autocomplete="off" id="sec4LayerYInput"
+                    oninput="document.getElementById('sec4Layer').setAttribute('y', this.value); document.getElementById('sec4LayerYVal').innerText = this.value; document.getElementById('sec4LayerYCode').innerText = this.value;" data-mark="sec4LayerYCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec4LayerRotVal">0°</span></label>
+                  <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" id="sec4LayerRotInput"
+                    oninput="document.getElementById('sec4Layer').setAttribute('rotate', this.value); document.getElementById('sec4LayerRotVal').innerText = this.value + '°'; document.getElementById('sec4LayerRotCode').innerText = this.value;" data-mark="sec4LayerRotCode">
+                </div>
+              </div>
+            </div>
+
+            <!-- Line Tab -->
+            <div class="tab-content" id="sec4LineTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Center X</span> <span id="sec4LineXVal">500</span></label>
+                  <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off" id="sec4LineXInput"
+                    oninput="document.getElementById('sec4Line').setAttribute('x', this.value); document.getElementById('sec4LineXVal').innerText = this.value; document.getElementById('sec4LineXCode').innerText = this.value;" data-mark="sec4LineXCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Center Y</span> <span id="sec4LineYVal">300</span></label>
+                  <input type="range" min="0" max="600" step="10" value="300" autocomplete="off" id="sec4LineYInput"
+                    oninput="document.getElementById('sec4Line').setAttribute('y', this.value); document.getElementById('sec4LineYVal').innerText = this.value; document.getElementById('sec4LineYCode').innerText = this.value;" data-mark="sec4LineYCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Start X</span> <span id="sec4LineX1Val">-300</span></label>
+                  <input type="range" min="-500" max="500" step="10" value="-300" autocomplete="off" id="sec4LineX1Input"
+                    oninput="document.getElementById('sec4Line').setAttribute('x1', this.value); document.getElementById('sec4LineX1Val').innerText = this.value; document.getElementById('sec4LineX1Code').innerText = this.value;" data-mark="sec4LineX1Code">
+                </div>
+                <div class="control-group">
+                  <label><span>Start Y</span> <span id="sec4LineY1Val">0</span></label>
+                  <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off" id="sec4LineY1Input"
+                    oninput="document.getElementById('sec4Line').setAttribute('y1', this.value); document.getElementById('sec4LineY1Val').innerText = this.value; document.getElementById('sec4LineY1Code').innerText = this.value;" data-mark="sec4LineY1Code">
+                </div>
+                <div class="control-group">
+                  <label><span>End X</span> <span id="sec4LineX2Val">300</span></label>
+                  <input type="range" min="-500" max="500" step="10" value="300" autocomplete="off" id="sec4LineX2Input"
+                    oninput="document.getElementById('sec4Line').setAttribute('x2', this.value); document.getElementById('sec4LineX2Val').innerText = this.value; document.getElementById('sec4LineX2Code').innerText = this.value;" data-mark="sec4LineX2Code">
+                </div>
+                <div class="control-group">
+                  <label><span>End Y</span> <span id="sec4LineY2Val">0</span></label>
+                  <input type="range" min="-300" max="300" step="10" value="0" autocomplete="off" id="sec4LineY2Input"
+                    oninput="document.getElementById('sec4Line').setAttribute('y2', this.value); document.getElementById('sec4LineY2Val').innerText = this.value; document.getElementById('sec4LineY2Code').innerText = this.value;" data-mark="sec4LineY2Code">
+                </div>
+                <div class="control-group">
+                  <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec4LineRotVal">0°</span></label>
+                  <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" id="sec4LineRotInput"
+                    oninput="document.getElementById('sec4Line').setAttribute('rotate', this.value); document.getElementById('sec4LineRotVal').innerText = this.value + '°'; document.getElementById('sec4LineRotCode').innerText = this.value;" data-mark="sec4LineRotCode">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4 Stage -->
+          <pxl-stage id="sec4Stage" ratio="5 / 3" class="demo-stage">
+            <!-- 1. Stage-Level Layer Coordinate Vectors (Fixed) -->
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Purple Helper Lines to Layer Center -->
+              <pxl-line x1="0" y1="ref.sec4Layer.y" x2="ref.sec4Layer.x" y2="ref.sec4Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="ref.sec4Layer.x" y1="0" x2="ref.sec4Layer.x" y2="ref.sec4Layer.y" stroke="#a78bfa" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            </pxl-layer>
+
+            <!-- 2. The Interactive Layer Container -->
+            <pxl-layer id="sec4Layer" x="0" y="0" rotate="0">
+              <!-- Layer Axes -->
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+
+              <!-- Layer Center -->
+              <pxl-circle x="0" y="0" r="5" fill="#6d28d9"></pxl-circle>
+              <pxl-text x="15" y="15" baseline="top" text="'Layer Center'" size="27" fill="#6d28d9" font="monospace"></pxl-text>
+
+              <!-- Line -->
+              <pxl-line id="sec4Line" x="500" y="300" x1="-300" y1="0" x2="300" y2="0" rotate="0" stroke="#f97316" strokewidth="4"></pxl-line>
+
+              <!-- Center dot (non-documented visual anchor) -->
+              <pxl-circle x="ref.sec4Line.x" y="ref.sec4Line.y" r="5" fill="#fb923c"></pxl-circle>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
       </div>
     </main>
 
