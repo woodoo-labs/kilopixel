@@ -170,10 +170,65 @@ Every documentation example must follow a standardized 3-part layout:
   * **Standard Marks:** Use a standard `<mark>` for direct numerical values that are updated by a slider. These will flash a vibrant yellow/orange to indicate direct control.
   * **Reactive Marks:** When a value in the code block is a math expression or dependent variable (e.g., `x="-ref.master.rotate"`), you MUST use `<mark class="highlight-reactive">`. This ensures the text looks like normal, transparent code until its upstream dependency changes, at which point it flashes a distinct, softer orange to indicate reactive follow-through.
 * **Prism Syntax Highlighting & Keep-Markup:** Every documentation page that uses Prism syntax highlighting MUST load both `prism.min.js` and `<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>`. Without the `keep-markup` plugin, Prism strips out `<mark id="...">` tags during syntax highlighting, breaking live code updates.
-* **Simplified Pedagogical Code Snippets:** HTML code blocks (`<pre><code class="language-html">`) MUST show only the minimal, clean markup needed to teach the section's core concept:
-  * **Exclude Stage Helpers:** Never include background grids (`<pxl-grid>`), coordinate axes, dimension lines, or leader markers in the HTML snippet.
-  * **Exclude Auxiliary Shapes:** Do not show secondary decorative shapes in the code block.
-  * **Simplified Pedagogical IDs:** HTML snippets must use clean, human-readable IDs (e.g., `id="circle"`, `id="rect"`, `id="layer"`, `id="master"`, `id="mirror"`, `id="reactor"`, `id="hue"`, `id="spread"`, `id="size"`, or numbered `id="circle1"`, `id="circle2"`). Any `ref.*` expressions in the snippet mirror these simplified names (e.g., `ref.master.x`, `ref.spread.value`).
+* **Declarative Code Snippets & Control Synchronization:** HTML code blocks (`<pre><code class="language-html">`) are the primary bridge between interactive experimentation and declarative development. They MUST present minimal, predictable, and immediately scannable markup that strictly mirrors the interactive controls:
+  * **Pedagogical Filtering (Noise Reduction):** Show ONLY the essential declarative markup required to demonstrate the section's core topic:
+    * **Exclude Stage Environment:** Never include background grids (`<pxl-grid>`), coordinate axes, dimension arrows, or leader annotations in the HTML snippet.
+    * **Exclude Auxiliary Shapes:** Do not include non-interactive decorative shapes or visual tracking anchor dots.
+    * **Simplified Pedagogical IDs:** When elements require IDs for references or reactive bindings, use clean, human-readable names (e.g., `id="circle"`, `id="master"`, `id="line1"`, `id="line2"`) rather than internal playground IDs (`sec5Circle1`). Any `ref.*` expressions in the snippet mirror these simplified names (e.g., `ref.master.x`, `ref.spread.value`).
+  * **Vertical Density (The "2-to-4 Line Budget"):** Snippets must balance compact vertical height (preventing controls and stages from being pushed below the fold) with horizontal readability:
+    * **Single-Line Threshold (≤ 4 attributes, ≤ 85 characters):** If a shape declaration is short and simple, keep the entire element on a single line:
+      ```html
+      <pxl-rect x="300" y="300" w="240" h="240" fill="#ffedd566" stroke="#f97316"></pxl-rect>
+      ```
+    * **Multi-Line Budget (2 to 4 attribute lines):** Whenever an element exceeds the single-line threshold, break its attributes across 2 to 4 indented lines. Never format snippets with one attribute per line ("vertical slinky").
+  * **Opening Tag Line (Non-Interactive Context First):** Place the element's static spatial coordinates and baseline styling on the opening line immediately following `<pxl-[shape]`:
+    ```html
+    <pxl-circle x="300" y="300" stroke="#f97316" strokewidth="8"
+    ```
+    * **The Pedagogical Exception:** If an otherwise static attribute is the **core subject being taught** in that example (e.g., `closed="true"` in chords, `pie="true"` in sectors, `anchor="top-left"` in transform hinges, or `direction="rtl"` in typography), it MUST NOT be placed on line 1. Place it prominently on the feature-specific attribute lines below so its educational role is obvious.
+  * **Semantic Attribute Pairing (Natural Geometric Tuples):** Attributes that are functionally or mathematically coupled must be placed together on the same line:
+    * **Spatial Coordinates:** `x="..." y="..."` or `x1="..." y1="..."` and `x2="..." y2="..."`
+    * **Dimensions & Extents:** `w="..." h="..."` or `rx="..." ry="..."` or `r="..." ir="..."`
+    * **Angles & Spans:** `start="..." sweep="..."` or `start="..." end="..."`
+    * **Arrowhead Sizes:** `arrowstart="..." arrowend="..."`
+    * **Stroke Aesthetics:** `stroke="..." strokewidth="..."` or `linecap="..." linejoin="..."`
+    * **Typography:** `font="..." size="..." weight="..."` or `align="..." baseline="..."`
+  * **1-to-1 Control-to-Snippet Synchronization:** The top-to-bottom sequence of interactive controls in the UI MUST match the line-by-line reading order of attributes in the code snippet:
+    1. **Interactive Sliders First:** Dynamic attributes driven by sliders appear first among the feature lines (e.g., line 2 for arrow dimensions `arrowstart` / `arrowend`, line 3 for arc angles `start` / `sweep`).
+    2. **Categorical Controls Last:** Per the controls architecture rule, dropdown menus (`<select>`) and toggle buttons (`.toggle-group`) sit on the **last row** of the controls container. Correspondingly, their attributes (e.g., `arrowstyle`, `anchor`, `linecap`) belong on the **final attribute line** of the snippet.
+  * **Closing Tag Syntax & Vertical Alignment:** Custom Web Components cannot be self-closed (`/>`) in standard HTML. To ensure clean visual scanning and indent-guide alignment:
+    * **Dedicated Closing Line for Multi-Line Shapes:** Whenever an element spans multiple lines, the closing tag (`</pxl-[shape]>`) **MUST sit on its own dedicated line**, indented to match the column of the opening tag. Never glue `></pxl-[shape]>` to the end of the final attribute:
+      ```html
+      <pxl-circle x="300" y="300" stroke="#f97316" strokewidth="8"
+        arrowstart="25" arrowend="25"
+        start="-45" sweep="270"
+        arrowstyle="filled">
+      </pxl-circle>
+      ```
+    * **Inline Closing for Single-Line Shapes:** For single-line elements that fit within the 85-character threshold, close inline on the same line:
+      ```html
+      <pxl-circle x="500" y="300" r="150" fill="#f97316"></pxl-circle>
+      ```
+  * **Canonical Multi-Shape Example:** Reference layout demonstrating two interacting shapes inside a `<pxl-layer>` following every rule:
+    ```html
+    <pxl-stage ratio="5 / 3">
+      <pxl-layer>
+        <!-- Left: Filled Arrows -->
+        <pxl-circle x="300" y="300" stroke="#f97316" strokewidth="8"
+          arrowstart="<mark id="sec5Circle1StartArrowCode">25</mark>" arrowend="<mark id="sec5Circle1EndArrowCode">25</mark>"
+          start="-45" sweep="<mark id="sec5Circle1SweepCode">270</mark>"
+          arrowstyle="filled">
+        </pxl-circle>
+
+        <!-- Right: Line Arrows -->
+        <pxl-circle x="700" y="300" stroke="#3b82f6" strokewidth="8"
+          arrowstart="<mark id="sec5Circle2StartArrowCode">0</mark>" arrowend="<mark id="sec5Circle2EndArrowCode">35</mark>"
+          start="-45" sweep="<mark id="sec5Circle2SweepCode">270</mark>"
+          arrowstyle="line" linedash="<mark id="sec5Circle2DashCode">15</mark>">
+        </pxl-circle>
+      </pxl-layer>
+    </pxl-stage>
+    ```
 * **Slider Implementations:** 
   * `oninput` handlers must execute inline JS to do exactly three things:
     1. Update the element property: `document.getElementById('sec4Rect').setAttribute('x', this.value)`

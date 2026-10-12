@@ -100,12 +100,12 @@ class DocsApiStyling extends HTMLElement {
                 <div class="api-item-header">
                   <code class="api-name">linedash</code>
                   <div class="api-meta">
-                    <span class="api-pill values-pill">"dash, gap" | number | array | expr</span>
+                    <span class="api-pill values-pill">number | array | expr</span>
                     <span class="api-pill default-pill">default: null</span>
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Dash pattern. Accepts comma- or space-separated strings (e.g. <code>linedash="20, 10"</code>), a single number for equal dash and gap (e.g. <code>linedash="15"</code>), or JavaScript array notation.
+                  Stroke dash pattern. Accepts a JavaScript array of alternating dash and gap lengths (e.g. <code>linedash="[20, 10]"</code>), a single number for equal repeating dash and gap (e.g. <code>linedash="15"</code>), or <code>'none'</code> / <code>0</code> to reset to solid.
                 </div>
               </div>
 
