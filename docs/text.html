@@ -57,9 +57,11 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-text x="500" y="300" text="KILOPIXEL"
-      size="<mark id="sec1SizeCode">70</mark>" weight="<mark id="sec1WeightCode">700</mark>" fontstyle="<mark id="sec1StyleCode">normal</mark>" font="<mark id="sec1FontCode">Inter</mark>"
-      fill="#f97316" align="center" baseline="middle"&gt;&lt;/pxl-text&gt;
+    &lt;pxl-text x="500" y="300" fill="#f97316" align="center" baseline="middle"
+      text="KILOPIXEL"
+      size="<mark id="sec1SizeCode">70</mark>" weight="<mark id="sec1WeightCode">700</mark>"
+      fontstyle="<mark id="sec1StyleCode">normal</mark>" font="<mark id="sec1FontCode">Inter</mark>"&gt;
+    &lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -137,8 +139,11 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-text x="<mark id="sec2TextXCode">500</mark>" y="<mark id="sec2TextYCode">300</mark>" text="Kilopixel" font="Inter" size="70" weight="700"
-      align="<mark id="sec2TextAlignCode">start</mark>" baseline="<mark id="sec2TextBaselineCode">alphabetic</mark>" fill="#3b82f6"&gt;&lt;/pxl-text&gt;
+    &lt;pxl-text fill="#3b82f6" font="Inter" size="70" weight="700"
+      text="Kilopixel"
+      x="<mark id="sec2TextXCode">500</mark>" y="<mark id="sec2TextYCode">300</mark>"
+      align="<mark id="sec2TextAlignCode">start</mark>" baseline="<mark id="sec2TextBaselineCode">alphabetic</mark>"&gt;
+    &lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -219,9 +224,10 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;pxl-text x="500" y="300" font="Inter" weight="700" fill="#f97316"
+      text="Declarative Canvas\nReactive Animation\nZero Dependencies"
       size="<mark id="sec3SizeCode">42</mark>" lineheight="<mark id="sec3LineheightCode">1.3</mark>"
-      align="<mark id="sec3AlignCode">center</mark>" baseline="<mark id="sec3BaselineCode">middle</mark>"
-      text="Declarative Canvas\nReactive Animation\nZero Dependencies"&gt;&lt;/pxl-text&gt;
+      align="<mark id="sec3AlignCode">center</mark>" baseline="<mark id="sec3BaselineCode">middle</mark>"&gt;
+    &lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -303,10 +309,11 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;pxl-text x="500" y="300" font="Inter" weight="500" fill="#3b82f6"
+      text="Kilopixel brings declarative canvas graphics to life with automatic word wrapping, reactive attributes, and smooth typography."
       width="<mark id="sec4WidthCode">500</mark>" size="<mark id="sec4SizeCode">32</mark>"
       lineheight="<mark id="sec4LineheightCode">1.3</mark>" letterspacing="<mark id="sec4LetterspacingCode">0</mark>"
-      align="<mark id="sec4AlignCode">center</mark>" baseline="<mark id="sec4BaselineCode">middle</mark>"
-      text="Kilopixel brings declarative canvas graphics to life with automatic word wrapping, reactive attributes, and smooth typography."&gt;&lt;/pxl-text&gt;
+      align="<mark id="sec4AlignCode">center</mark>" baseline="<mark id="sec4BaselineCode">middle</mark>"&gt;
+    &lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -411,11 +418,11 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-text x="500" y="300" font="Inter" fill="#f97316"
+    &lt;pxl-text x="500" y="300" font="Inter" fill="#f97316" align="center" baseline="middle"
+      text="KILOPIXEL DECLARATIVE CANVAS"
       size="<mark id="sec5SizeCode">48</mark>" weight="<mark id="sec5WeightCode">700</mark>"
-      maxwidth="<mark id="sec5MaxwidthCode">460</mark>" letterspacing="<mark id="sec5LetterspacingCode">0</mark>"
-      align="center" baseline="middle"
-      text="KILOPIXEL DECLARATIVE CANVAS"&gt;&lt;/pxl-text&gt;
+      maxwidth="<mark id="sec5MaxwidthCode">460</mark>" letterspacing="<mark id="sec5LetterspacingCode">0</mark>"&gt;
+    &lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -497,18 +504,18 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Single-Line Headline (Orange Scheme) --&gt;
-    &lt;pxl-text x="50" y="150" font="monospace" fill="#f97316"
+    &lt;pxl-text x="50" y="150" font="monospace" fill="#f97316" align="start" baseline="top"
+      text="Kilopixel Engine"
       size="<mark id="sec6Text1SizeCode">50</mark>" weight="<mark id="sec6Text1WeightCode">700</mark>"
-      reveal="<mark id="sec6Text1RevealCode">0.65</mark>" letterspacing="<mark id="sec6Text1LetterspacingCode">0</mark>"
-      align="start" baseline="top"
-      text="Kilopixel Engine"&gt;&lt;/pxl-text&gt;
+      reveal="<mark id="sec6Text1RevealCode">0.65</mark>" letterspacing="<mark id="sec6Text1LetterspacingCode">0</mark>"&gt;
+    &lt;/pxl-text&gt;
 
     &lt;!-- Right: Multi-Line Wrapped Paragraph (Blue Scheme) --&gt;
-    &lt;pxl-text x="550" y="150" font="Inter" fill="#3b82f6"
+    &lt;pxl-text x="550" y="150" font="Inter" fill="#3b82f6" align="start" baseline="top"
+      text="Kilopixel compiles declarative canvas graphics into 60fps animations. Progressive character reveal makes storytelling and narrative dialogue completely effortless."
       size="<mark id="sec6Text2SizeCode">30</mark>" lineheight="<mark id="sec6Text2LineheightCode">1.4</mark>"
-      reveal="<mark id="sec6Text2RevealCode">0.55</mark>" width="<mark id="sec6Text2WidthCode">400</mark>"
-      align="start" baseline="top"
-      text="Kilopixel compiles declarative canvas graphics into 60fps animations. Progressive character reveal makes storytelling and narrative dialogue completely effortless."&gt;&lt;/pxl-text&gt;
+      reveal="<mark id="sec6Text2RevealCode">0.55</mark>" width="<mark id="sec6Text2WidthCode">400</mark>"&gt;
+    &lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -633,21 +640,24 @@
   &lt;pxl-layer&gt;
     &lt;!-- Lower Left: Solid Outline (Orange Scheme) --&gt;
     &lt;pxl-text x="240" y="420" font="sans-serif" stroke="#f97316" align="center" baseline="middle"
+      text="SOLID"
       size="<mark id="sec7Text1SizeCode">80</mark>" weight="<mark id="sec7Text1WeightCode">800</mark>"
-      strokewidth="<mark id="sec7Text1StrokewidthCode">4</mark>" fill="<mark id="sec7Text1FillCode">none</mark>"
-      text="SOLID"&gt;&lt;/pxl-text&gt;
+      strokewidth="<mark id="sec7Text1StrokewidthCode">4</mark>" fill="<mark id="sec7Text1FillCode">none</mark>"&gt;
+    &lt;/pxl-text&gt;
 
     &lt;!-- Upper Center: Dashed Outline (Blue Scheme) --&gt;
     &lt;pxl-text x="500" y="160" font="sans-serif" stroke="#3b82f6" fill="none" align="center" baseline="middle"
+      text="DASHED"
       size="<mark id="sec7Text2SizeCode">80</mark>" weight="<mark id="sec7Text2WeightCode">800</mark>"
-      strokewidth="<mark id="sec7Text2StrokewidthCode">2</mark>" linedash="[<mark id="sec7Text2DashCode">10</mark>, 6]"
-      text="DASHED"&gt;&lt;/pxl-text&gt;
+      strokewidth="<mark id="sec7Text2StrokewidthCode">2</mark>" linedash="[<mark id="sec7Text2DashCode">10</mark>, 6]"&gt;
+    &lt;/pxl-text&gt;
 
     &lt;!-- Lower Right: Gradient Outline (Multi-Stop Linear) --&gt;
     &lt;pxl-text x="760" y="420" font="sans-serif" fill="none" align="center" baseline="middle"
+      text="GRADIENT"
       size="<mark id="sec7Text3SizeCode">80</mark>" weight="<mark id="sec7Text3WeightCode">800</mark>"
-      strokewidth="<mark id="sec7Text3StrokewidthCode">4</mark>" stroke="linear(<mark id="sec7AngleCode">90</mark>, ['#f97316', '#ec4899', '#3b82f6'])"
-      text="GRADIENT"&gt;&lt;/pxl-text&gt;
+      strokewidth="<mark id="sec7Text3StrokewidthCode">4</mark>" stroke="linear(<mark id="sec7AngleCode">90</mark>, ['#f97316', '#ec4899', '#3b82f6'])"&gt;
+    &lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -823,21 +833,24 @@
   &lt;pxl-layer&gt;
     &lt;!-- Upper: Latin (Left-to-Right Default) --&gt;
     &lt;pxl-text x="500" y="160" font="Inter" fill="#f97316" weight="700" baseline="middle"
+      text="Hello Kilopixel!"
       size="<mark id="sec8Text1SizeCode">50</mark>" reveal="<mark id="sec8Text1RevealCode">1</mark>"
-      direction="<mark id="sec8Text1DirectionCode">ltr</mark>" align="<mark id="sec8Text1AlignCode">start</mark>"
-      text="Hello Kilopixel!"&gt;&lt;/pxl-text&gt;
+      direction="<mark id="sec8Text1DirectionCode">ltr</mark>" align="<mark id="sec8Text1AlignCode">start</mark>"&gt;
+    &lt;/pxl-text&gt;
 
     &lt;!-- Center: Arabic (Right-to-Left Default) --&gt;
     &lt;pxl-text x="500" y="300" font="Inter" fill="#3b82f6" weight="700" baseline="middle"
+      text="مرحبا بك في كيلوبيكسل"
       size="<mark id="sec8Text2SizeCode">50</mark>" reveal="<mark id="sec8Text2RevealCode">1</mark>"
-      direction="<mark id="sec8Text2DirectionCode">rtl</mark>" align="<mark id="sec8Text2AlignCode">start</mark>"
-      text="مرحبا بك في كيلوبيكسل"&gt;&lt;/pxl-text&gt;
+      direction="<mark id="sec8Text2DirectionCode">rtl</mark>" align="<mark id="sec8Text2AlignCode">start</mark>"&gt;
+    &lt;/pxl-text&gt;
 
     &lt;!-- Lower: Hebrew (Right-to-Left Default) --&gt;
     &lt;pxl-text x="500" y="440" font="Inter" fill="#a855f7" weight="700" baseline="middle"
+      text="שלום קילופיקסל"
       size="<mark id="sec8Text3SizeCode">50</mark>" reveal="<mark id="sec8Text3RevealCode">1</mark>"
-      direction="<mark id="sec8Text3DirectionCode">rtl</mark>" align="<mark id="sec8Text3AlignCode">start</mark>"
-      text="שלום קילופיקסל"&gt;&lt;/pxl-text&gt;
+      direction="<mark id="sec8Text3DirectionCode">rtl</mark>" align="<mark id="sec8Text3AlignCode">start</mark>"&gt;
+    &lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 

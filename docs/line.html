@@ -250,26 +250,26 @@
         <!-- SECTION 3: ARROWHEADS                                             -->
         <!-- ================================================================= -->
         <h2>3. Arrowheads</h2>
-        <p>Straight lines can be turned into directional arrows by adding arrowheads to either endpoint:</p>
-        <ul>
-          <li><strong>Two Styles:</strong> Solid triangles (<code>arrowstyle="filled"</code>) or open chevrons (<code>arrowstyle="line"</code>).</li>
-          <li><strong>Independent Sizing:</strong> Separate size controls for the start (<code>arrowstart</code>) and end (<code>arrowend</code>) arrowheads.</li>
-          <li><strong>Automatic Sizing:</strong> Sizing defaults to <code>'auto'</code> (scaling proportionally to <code>strokewidth &times; 3.6</code>), with support for explicit numbers.</li>
-        </ul>
+        <p>Straight lines can be turned into directional arrows by adding arrowheads to either endpoint. Kilopixel supports solid triangles (<code>arrowstyle="filled"</code>) and open chevrons (<code>arrowstyle="line"</code>), with automatic proportional scaling (<code>'auto'</code>) or explicit numeric sizing.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Deep Dive: Arrowhead Styling &amp; Mechanics</p>
+          <p class="callout-body">For complete documentation on automatic scaling formulas (<code>'auto' = strokewidth &times; 3.6</code>), tangent calculations, dash interactions, and cross-shape comparisons, see the dedicated <a href="arrows.html">Arrowheads</a> guide in Line Styles.</p>
+        </div>
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Filled Arrowheads --&gt;
+    &lt;!-- Left: Auto-Sized Arrowheads --&gt;
     &lt;pxl-line x1="150" y1="300" x2="450" y2="300" stroke="#f97316"
       arrowstart="auto" arrowend="auto"
-      strokewidth="<mark id="sec3Line1StrokeWidthCode">20</mark>" arrowstyle="filled"&gt;
+      strokewidth="<mark id="sec3Line1StrokeWidthCode">10</mark>" arrowstyle="<mark id="sec3Line1StyleCode">filled</mark>"&gt;
     &lt;/pxl-line&gt;
 
-    &lt;!-- Right: Line Arrowheads --&gt;
+    &lt;!-- Right: Explicit-Sized Arrowheads --&gt;
     &lt;pxl-line x1="550" y1="300" x2="850" y2="300" stroke="#3b82f6"
-      arrowstart="<mark id="sec3Line2ArrowStartCode">60</mark>" arrowend="<mark id="sec3Line2ArrowEndCode">25</mark>"
-      strokewidth="<mark id="sec3Line2StrokeWidthCode">6</mark>" arrowstyle="line"&gt;
+      arrowstart="<mark id="sec3Line2ArrowStartCode">0</mark>" arrowend="<mark id="sec3Line2EndArrowCode">35</mark>"
+      strokewidth="<mark id="sec3Line2StrokeWidthCode">6</mark>" arrowstyle="<mark id="sec3Line2StyleCode">line</mark>"&gt;
     &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -279,39 +279,57 @@
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Controls</h3>
               <div class="demo-tabs">
-                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3Line1Tab')">Filled</button>
-                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3Line2Tab')">Line</button>
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3Line1Tab')">Auto</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3Line2Tab')">Explicit</button>
               </div>
             </div>
 
-            <!-- Filled Arrow Tab -->
+            <!-- Auto Sizing Tab -->
             <div class="tab-content active" id="sec3Line1Tab">
               <div class="playground-sliders">
+                <!-- Row 1: Stroke Width & Arrow Style -->
                 <div class="control-group">
-                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec3Line1StrokeWidthVal">20</span></label>
-                  <input type="range" min="2" max="36" step="1" value="20" autocomplete="off" id="sec3Line1StrokeWidthInput"
+                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec3Line1StrokeWidthVal">10</span></label>
+                  <input type="range" min="2" max="40" step="1" value="10" autocomplete="off" id="sec3Line1StrokeWidthInput"
                     oninput="document.getElementById('sec3Line1').setAttribute('strokewidth', this.value); document.getElementById('sec3Line1StrokeWidthVal').innerText = this.value; document.getElementById('sec3Line1StrokeWidthCode').innerText = this.value;" data-mark="sec3Line1StrokeWidthCode">
+                </div>
+                <div class="control-group">
+                  <label>Arrow Style</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line1').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec3Line1StyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line1').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec3Line1StyleCode', 'line');">line</button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Line Arrow Tab -->
+            <!-- Explicit Sizing Tab -->
             <div class="tab-content" id="sec3Line2Tab">
               <div class="playground-sliders">
+                <!-- Row 1: Start Arrow & End Arrow -->
                 <div class="control-group">
-                  <label><span>Start Arrow <span class="indicator-dot"></span></span> <span id="sec3Line2ArrowStartVal">60</span></label>
-                  <input type="range" min="0" max="60" step="5" value="60" autocomplete="off" id="sec3Line2ArrowStartInput"
+                  <label><span>Start Arrow</span> <span id="sec3Line2ArrowStartVal">0</span></label>
+                  <input type="range" min="0" max="200" step="5" value="0" autocomplete="off" id="sec3Line2ArrowStartInput"
                     oninput="document.getElementById('sec3Line2').setAttribute('arrowstart', this.value); document.getElementById('sec3Line2ArrowStartVal').innerText = this.value; document.getElementById('sec3Line2ArrowStartCode').innerText = this.value;" data-mark="sec3Line2ArrowStartCode">
                 </div>
                 <div class="control-group">
-                  <label><span>End Arrow</span> <span id="sec3Line2ArrowEndVal">25</span></label>
-                  <input type="range" min="0" max="60" step="5" value="25" autocomplete="off" id="sec3Line2ArrowEndInput"
+                  <label><span>End Arrow <span class="indicator-dot"></span></span> <span id="sec3Line2ArrowEndVal">35</span></label>
+                  <input type="range" min="0" max="200" step="5" value="35" autocomplete="off" id="sec3Line2ArrowEndInput"
                     oninput="document.getElementById('sec3Line2').setAttribute('arrowend', this.value); document.getElementById('sec3Line2ArrowEndVal').innerText = this.value; document.getElementById('sec3Line2ArrowEndCode').innerText = this.value;" data-mark="sec3Line2ArrowEndCode">
                 </div>
+
+                <!-- Row 2: Stroke Width & Arrow Style -->
                 <div class="control-group">
                   <label><span>Stroke Width</span> <span id="sec3Line2StrokeWidthVal">6</span></label>
                   <input type="range" min="2" max="24" step="1" value="6" autocomplete="off" id="sec3Line2StrokeWidthInput"
                     oninput="document.getElementById('sec3Line2').setAttribute('strokewidth', this.value); document.getElementById('sec3Line2StrokeWidthVal').innerText = this.value; document.getElementById('sec3Line2StrokeWidthCode').innerText = this.value;" data-mark="sec3Line2StrokeWidthCode">
+                </div>
+                <div class="control-group">
+                  <label>Arrow Style</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line2').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec3Line2StyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line2').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec3Line2StyleCode', 'line');">line</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -322,17 +340,23 @@
             <pxl-layer>
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
-              <!-- Left: Filled Arrowheads (Orange Scheme) -->
-              <pxl-line id="sec3Line1" x1="150" y1="300" x2="450" y2="300" strokewidth="20" stroke="#f97316" arrowstyle="filled" arrowstart="auto" arrowend="auto"></pxl-line>
-              <pxl-text x="150" y="480" text="'arrowstyle=&quot;filled&quot;'" size="27" fill="#fb923c" font="monospace" align="left"></pxl-text>
-              <pxl-text x="150" y="535" text="'arrowstart=&quot;auto&quot;'" size="27" fill="#fb923c" font="monospace" align="left"></pxl-text>
-              <pxl-text x="150" y="570" text="'arrowend=&quot;auto&quot;'" size="27" fill="#fb923c" font="monospace" align="left"></pxl-text>
+              <!-- Left: Auto Arrowheads (Orange Scheme) -->
+              <pxl-text x="300" y="80" text="'arrowstart=&quot;auto&quot;'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+              <pxl-text x="300" y="120" text="'arrowend=&quot;auto&quot;'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
-              <!-- Right: Line Arrowheads (Blue Scheme) -->
-              <pxl-line id="sec3Line2" x1="550" y1="300" x2="850" y2="300" strokewidth="6" stroke="#3b82f6" arrowstyle="line" arrowstart="60" arrowend="25"></pxl-line>
-              <pxl-text x="550" y="480" text="'arrowstyle=&quot;line&quot;'" size="27" fill="#60a5fa" font="monospace" align="left"></pxl-text>
-              <pxl-text x="550" y="535" text="'arrowstart=&quot;' + ref.sec3Line2.arrowstart + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="left"></pxl-text>
-              <pxl-text x="550" y="570" text="'arrowend=&quot;' + ref.sec3Line2.arrowend + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="left"></pxl-text>
+              <pxl-line id="sec3Line1" x1="150" y1="300" x2="450" y2="300" stroke="#f97316" strokewidth="10"
+                arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-line>
+
+              <pxl-text x="300" y="500" text="'arrowstyle=&quot;' + ref.sec3Line1.arrowstyle + '&quot;'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: Explicit Arrowheads (Blue Scheme) -->
+              <pxl-text x="700" y="80" text="'arrowstart=&quot;' + ref.sec3Line2.arrowstart + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              <pxl-text x="700" y="120" text="'arrowend=&quot;' + ref.sec3Line2.arrowend + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+
+              <pxl-line id="sec3Line2" x1="550" y1="300" x2="850" y2="300" stroke="#3b82f6" strokewidth="6"
+                arrowstart="0" arrowend="35" arrowstyle="line"></pxl-line>
+
+              <pxl-text x="700" y="500" text="'arrowstyle=&quot;' + ref.sec3Line2.arrowstyle + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
