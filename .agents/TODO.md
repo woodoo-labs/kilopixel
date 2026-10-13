@@ -105,4 +105,22 @@
   - Clamp projection distance to a minimum of $0.001$ with coordinate separation fallback.
   - Update `_gradCache` to track `strokewidth` (`sw`) so slider adjustments properly invalidate cached stroke gradients.
 
+## 14. Shape-Level Paint Order (`paintorder`)
+- **Status**: ⚪ **Concept Stage** (decided 2026-10-13: keep current behavior until implemented properly)
+- **Visual Comparison**: `scratch/test_paint_order.html` / `scratch/paint_order_comparison.png` (local only, scratch is git-ignored)
+- **Background**:
+  - Path shapes paint via `applyStyle`: fill, then stroke (outline on top, half of `strokewidth` covers the fill).
+  - `<pxl-text>` paints per line, alternating: fill L1 → stroke L1 → fill L2 → stroke L2. Only differs from "all fills, then all strokes" where lines overlap (tight `lineheight` / thick outline) — visually negligible, so not worth changing on its own.
+  - The significant visual difference is painting the **stroke under the fill**: glyphs/shapes keep their full form and only the outer half of the outline is visible. This is the standard technique for readable text on busy backgrounds (map labels, subtitles, meme text).
+- **Proposed Solution**:
+  - Add a Shape-level attribute `paintorder` (`'normal'` default | `'stroke'`), modelled on SVG `paint-order`.
+  - `applyStyle` respects it for all path shapes (circle, ellipse, rect, line, polyline, grid).
+  - `Text.draw()` switches to two passes (all strokes, then all fills when `paintorder="stroke"`; all fills, then all strokes otherwise), reusing `applyStrokeState()`.
+  - Zero-GC: one string comparison per draw; same number of `fillText`/`strokeText` calls.
+- **Considerations**:
+  - With `paintorder="stroke"` only half of `strokewidth` remains visible — must be documented.
+  - Semi-transparent fills will show the stroke underneath (expected, same as SVG).
+  - Arrowheads (`drawArrow`) use the stroke style; check how they should behave with `paintorder="stroke"`.
+  - Add a docs section/example following `docs/DOCS_STANDARDS.md`.
+
 

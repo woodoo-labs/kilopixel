@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hover: Rect vs Text</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      background: #111; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      min-height: 100vh;
+      padding: 24px;
+      color: white;
+      font-family: sans-serif;
+    }
+    .stage-wrapper {
+      width: 100%;
+      max-width: 1000px;
+      aspect-ratio: 2 / 1;
+      background: #000;
+      position: relative;
+    }
+    pxl-stage {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+  <script src="../dist/pxl.min.js"></script>
+</head>
+<body>
+  <div class="stage-wrapper">
+    <pxl-stage id="main" ratio="2 / 1">
+      <pxl-layer>
+
+        <!-- Rect: fill changes on hover -->
+        <pxl-rect id="box"
+          x="250" y="250" w="300" h="200"
+          fill="ref.box.isHovered ? '#ffd400' : '#3296ff'"
+          onclick="console.log('rect clicked')">
+        </pxl-rect>
+
+        <!-- Text: fill changes on hover -->
+        <pxl-text id="label"
+          x="700" y="250"
+          text="'Hover me'" size="60" weight="bold"
+          align="center" baseline="middle"
+          fill="ref.label.isHovered ? '#ffd400' : '#3296ff'"
+          onclick="console.log('text clicked')">
+        </pxl-text>
+
+      </pxl-layer>
+    </pxl-stage>
+  </div>
+</body>
+</html>
