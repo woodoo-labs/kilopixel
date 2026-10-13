@@ -103,7 +103,8 @@ class DocsSidebar extends HTMLElement {
           <ul>
             <li><a href="stroke.html" class="${currentPath === 'stroke.html' ? 'active' : ''}">Stroke &amp; Width</a></li>
             <li><a href="caps.html" class="${currentPath === 'caps.html' ? 'active' : ''}">Caps &amp; Joins</a></li>
-            <li><a href="dash.html" class="${currentPath === 'dash.html' ? 'active' : ''}">Dashes</a></li>
+            <li><a href="dashes.html" class="${currentPath === 'dashes.html' ? 'active' : ''}">Dashes</a></li>
+            <li><a href="arrows.html" class="${currentPath === 'arrows.html' ? 'active' : ''}">Arrowheads</a></li>
           </ul>
         </div>
         <div class="sidebar-section">
