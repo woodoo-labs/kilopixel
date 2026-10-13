@@ -39,7 +39,7 @@ class Ellipse extends Shape {
     let drawEndRadians = endRadians;
 
     // --- ARROW OFFSET INTERCEPTION ---
-    let arrowStartTipX, arrowStartTipY, arrowStartAngle = 0;
+    let arrowStartTipX, arrowStartTipY, arrowStartAngle = 0, arrowStartDelta = 0;
     const arrowStartSize = (arrowstart === 'auto') ? (strokewidth * 3.6) : arrowstart;
     
     if (arrowStartSize > 0 && safeRX > 0 && safeRY > 0) {
@@ -50,20 +50,16 @@ class Ellipse extends Shape {
       const dxStart = -safeRX * Math.sin(startRadians);
       const dyStart = safeRY * Math.cos(startRadians);
       const speedStart = Math.sqrt(dxStart * dxStart + dyStart * dyStart);
-      const arrowStartDelta = clampL / (speedStart || 1);
+      arrowStartDelta = clampL / (speedStart || 1);
       
       const baseRadians = startRadians + (isAnti ? -arrowStartDelta : arrowStartDelta);
       const basePointX = safeRX * Math.cos(baseRadians) * u;
       const basePointY = safeRY * Math.sin(baseRadians) * u;
       
       arrowStartAngle = Math.atan2(arrowStartTipY - basePointY, arrowStartTipX - basePointX);
-
-      if (arrowstyle === 'filled') {
-        drawStartRadians += isAnti ? -arrowStartDelta : arrowStartDelta; 
-      }
     }
 
-    let arrowEndTipX, arrowEndTipY, arrowEndAngle = 0;
+    let arrowEndTipX, arrowEndTipY, arrowEndAngle = 0, arrowEndDelta = 0;
     const arrowEndSize = (arrowend === 'auto') ? (strokewidth * 3.6) : arrowend;
 
     if (arrowEndSize > 0 && safeRX > 0 && safeRY > 0) {
@@ -74,17 +70,22 @@ class Ellipse extends Shape {
       const dxEnd = -safeRX * Math.sin(endRadians);
       const dyEnd = safeRY * Math.cos(endRadians);
       const speedEnd = Math.sqrt(dxEnd * dxEnd + dyEnd * dyEnd);
-      const arrowEndDelta = clampL / (speedEnd || 1);
+      arrowEndDelta = clampL / (speedEnd || 1);
       
       const baseRadians = endRadians + (isAnti ? arrowEndDelta : -arrowEndDelta);
       const basePointX = safeRX * Math.cos(baseRadians) * u;
       const basePointY = safeRY * Math.sin(baseRadians) * u;
       
       arrowEndAngle = Math.atan2(arrowEndTipY - basePointY, arrowEndTipX - basePointX);
+    }
 
-      if (arrowstyle === 'filled') {
-        drawEndRadians += isAnti ? arrowEndDelta : -arrowEndDelta;
-      }
+    // Apply filled-arrow arc pullback only if offsets fit within the sweep
+    const hasArrowPullback = arrowstyle === 'filled' &&
+      (arrowStartDelta + arrowEndDelta) < Math.abs(endRadians - startRadians);
+
+    if (hasArrowPullback) {
+      if (arrowStartDelta > 0) drawStartRadians += isAnti ? -arrowStartDelta : arrowStartDelta;
+      if (arrowEndDelta > 0)   drawEndRadians   += isAnti ?  arrowEndDelta : -arrowEndDelta;
     }
 
     // --- DRAW PATH ---
@@ -100,7 +101,7 @@ class Ellipse extends Shape {
     } else if (isPie && !isFull) {
       ctx.lineTo(0, 0);
       ctx.closePath();
-    } else if (isFull || isClosed) {
+    } else if ((isFull && !hasArrowPullback) || isClosed) {
       ctx.closePath();
     }
 
