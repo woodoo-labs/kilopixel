@@ -250,7 +250,7 @@
         <!-- SECTION 3: ARROWHEADS                                             -->
         <!-- ================================================================= -->
         <h2>3. Arrowheads</h2>
-        <p>Straight lines can be turned into directional arrows by adding arrowheads to either endpoint. Kilopixel supports solid triangles (<code>arrowstyle="filled"</code>) and open chevrons (<code>arrowstyle="line"</code>), with automatic proportional scaling (<code>'auto'</code>) or explicit numeric sizing.</p>
+        <p>Straight lines can be turned into directional arrows by adding arrowheads to either endpoint. Kilopixel supports solid triangles (<code>arrowstyle="filled"</code>) and open chevrons (<code>arrowstyle="line"</code>), with automatic proportional scaling (<code>'auto'</code>) or custom numeric sizing.</p>
 
         <div class="callout-info">
           <p class="callout-title">Deep Dive: Arrowhead Styling &amp; Mechanics</p>
@@ -266,7 +266,7 @@
       strokewidth="<mark id="sec3Line1StrokeWidthCode">10</mark>" arrowstyle="<mark id="sec3Line1StyleCode">filled</mark>"&gt;
     &lt;/pxl-line&gt;
 
-    &lt;!-- Right: Explicit-Sized Arrowheads --&gt;
+    &lt;!-- Right: Custom-Sized Arrowheads --&gt;
     &lt;pxl-line x1="550" y1="300" x2="850" y2="300" stroke="#3b82f6"
       arrowstart="<mark id="sec3Line2ArrowStartCode">0</mark>" arrowend="<mark id="sec3Line2EndArrowCode">35</mark>"
       strokewidth="<mark id="sec3Line2StrokeWidthCode">6</mark>" arrowstyle="<mark id="sec3Line2StyleCode">line</mark>"&gt;
@@ -280,7 +280,7 @@
               <h3 class="demo-controls-title">Controls</h3>
               <div class="demo-tabs">
                 <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3Line1Tab')">Auto</button>
-                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3Line2Tab')">Explicit</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3Line2Tab')">Custom</button>
               </div>
             </div>
 
@@ -303,18 +303,18 @@
               </div>
             </div>
 
-            <!-- Explicit Sizing Tab -->
+            <!-- Custom Sizing Tab -->
             <div class="tab-content" id="sec3Line2Tab">
               <div class="playground-sliders">
                 <!-- Row 1: Start Arrow & End Arrow -->
                 <div class="control-group">
                   <label><span>Start Arrow</span> <span id="sec3Line2ArrowStartVal">0</span></label>
-                  <input type="range" min="0" max="200" step="5" value="0" autocomplete="off" id="sec3Line2ArrowStartInput"
+                  <input type="range" min="0" max="150" step="5" value="0" autocomplete="off" id="sec3Line2ArrowStartInput"
                     oninput="document.getElementById('sec3Line2').setAttribute('arrowstart', this.value); document.getElementById('sec3Line2ArrowStartVal').innerText = this.value; document.getElementById('sec3Line2ArrowStartCode').innerText = this.value;" data-mark="sec3Line2ArrowStartCode">
                 </div>
                 <div class="control-group">
                   <label><span>End Arrow <span class="indicator-dot"></span></span> <span id="sec3Line2ArrowEndVal">35</span></label>
-                  <input type="range" min="0" max="200" step="5" value="35" autocomplete="off" id="sec3Line2ArrowEndInput"
+                  <input type="range" min="0" max="150" step="5" value="35" autocomplete="off" id="sec3Line2ArrowEndInput"
                     oninput="document.getElementById('sec3Line2').setAttribute('arrowend', this.value); document.getElementById('sec3Line2ArrowEndVal').innerText = this.value; document.getElementById('sec3Line2ArrowEndCode').innerText = this.value;" data-mark="sec3Line2ArrowEndCode">
                 </div>
 
@@ -349,7 +349,7 @@
 
               <pxl-text x="300" y="500" text="'arrowstyle=&quot;' + ref.sec3Line1.arrowstyle + '&quot;'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
-              <!-- Right: Explicit Arrowheads (Blue Scheme) -->
+              <!-- Right: Custom Arrowheads (Blue Scheme) -->
               <pxl-text x="700" y="80" text="'arrowstart=&quot;' + ref.sec3Line2.arrowstart + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
               <pxl-text x="700" y="120" text="'arrowend=&quot;' + ref.sec3Line2.arrowend + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
 
