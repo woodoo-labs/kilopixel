@@ -9,10 +9,10 @@ class Line extends Shape {
   }
 
   draw(ctx, u, t) {
-    const { x1, y1, x2, y2, arrowstart, arrowend, arrowstyle, linecap, strokewidth } = this.attributeValues;
+    const { x1, y1, x2, y2, arrowstart, arrowend, arrowstyle, linecap, linejoin, strokewidth } = this.attributeValues;
 
-    const arrowStartSize = (arrowstart === 'auto') ? (strokewidth * 3.6) : arrowstart;
-    const arrowEndSize = (arrowend === 'auto') ? (strokewidth * 3.6) : arrowend;
+    const arrowStartSize = (arrowstart === 'auto') ? (strokewidth * 3.6) : (arrowstart || 0);
+    const arrowEndSize   = (arrowend === 'auto')   ? (strokewidth * 3.6) : (arrowend || 0);
 
     if (arrowStartSize <= 0 && arrowEndSize <= 0) {
       ctx.beginPath();
@@ -22,34 +22,49 @@ class Line extends Shape {
       return;
     }
 
-    let lineStartX = x1 * u;
-    let lineStartY = y1 * u;
-    let lineEndX = x2 * u;
-    let lineEndY = y2 * u;
-    
+    let lineStartX = x1 * u, lineStartY = y1 * u;
+    let lineEndX   = x2 * u, lineEndY   = y2 * u;
+
     let arrowStartTipX = lineStartX, arrowStartTipY = lineStartY;
-    let arrowEndTipX = lineEndX, arrowEndTipY = lineEndY;
-    
+    let arrowEndTipX   = lineEndX,   arrowEndTipY   = lineEndY;
+
     let arrowStartAngle = 0, arrowEndAngle = 0;
-    const swOffset = (linecap === 'square') ? (strokewidth / 2) * u : 0;
+    const sw = strokewidth * u;
+    const capOffset = (linecap !== 'butt') ? (sw * 0.5) : 0;
+    const apexOffset = (linejoin === 'round') ? (sw * 0.5) : sw;
+    const tipOffset = (arrowstyle === 'filled') ? capOffset : (capOffset - apexOffset);
 
     if (arrowStartSize > 0) {
       arrowStartAngle = Math.atan2(y1 - y2, x1 - x2);
-      arrowStartTipX += Math.cos(arrowStartAngle) * swOffset;
-      arrowStartTipY += Math.sin(arrowStartAngle) * swOffset;
+      const cosStart = Math.cos(arrowStartAngle);
+      const sinStart = Math.sin(arrowStartAngle);
+      arrowStartTipX += cosStart * tipOffset;
+      arrowStartTipY += sinStart * tipOffset;
+
       if (arrowstyle === 'filled') {
-        lineStartX -= Math.cos(arrowStartAngle) * arrowStartSize * u * 0.75;
-        lineStartY -= Math.sin(arrowStartAngle) * arrowStartSize * u * 0.75;
+        const startSetback = Math.min(sw + capOffset, arrowStartSize * u * 0.8);
+        lineStartX = arrowStartTipX - cosStart * startSetback;
+        lineStartY = arrowStartTipY - sinStart * startSetback;
+      } else {
+        lineStartX = arrowStartTipX;
+        lineStartY = arrowStartTipY;
       }
     }
 
     if (arrowEndSize > 0) {
       arrowEndAngle = Math.atan2(y2 - y1, x2 - x1);
-      arrowEndTipX += Math.cos(arrowEndAngle) * swOffset;
-      arrowEndTipY += Math.sin(arrowEndAngle) * swOffset;
+      const cosEnd = Math.cos(arrowEndAngle);
+      const sinEnd = Math.sin(arrowEndAngle);
+      arrowEndTipX += cosEnd * tipOffset;
+      arrowEndTipY += sinEnd * tipOffset;
+
       if (arrowstyle === 'filled') {
-        lineEndX -= Math.cos(arrowEndAngle) * arrowEndSize * u * 0.75;
-        lineEndY -= Math.sin(arrowEndAngle) * arrowEndSize * u * 0.75;
+        const endSetback = Math.min(sw + capOffset, arrowEndSize * u * 0.8);
+        lineEndX = arrowEndTipX - cosEnd * endSetback;
+        lineEndY = arrowEndTipY - sinEnd * endSetback;
+      } else {
+        lineEndX = arrowEndTipX;
+        lineEndY = arrowEndTipY;
       }
     }
 
@@ -59,7 +74,7 @@ class Line extends Shape {
     this.applyStyle(ctx, u);
 
     if (arrowStartSize > 0) this.drawArrow(ctx, u, arrowStartTipX, arrowStartTipY, arrowStartAngle, arrowStartSize, arrowstyle);
-    if (arrowEndSize > 0) this.drawArrow(ctx, u, arrowEndTipX, arrowEndTipY, arrowEndAngle, arrowEndSize, arrowstyle);
+    if (arrowEndSize > 0)   this.drawArrow(ctx, u, arrowEndTipX, arrowEndTipY, arrowEndAngle, arrowEndSize, arrowstyle);
   }
 
   getBoundingBox() {

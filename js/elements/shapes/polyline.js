@@ -55,7 +55,7 @@ class Polyline extends Shape {
   draw(ctx, u, t) {
     if (this.pointCount < 4) return;
 
-    const { closed, smooth, arrowstart, arrowend, arrowstyle, linecap, strokewidth } = this.attributeValues;
+    const { closed, smooth, arrowstart, arrowend, arrowstyle, linecap, linejoin, strokewidth } = this.attributeValues;
     const isSmooth = smooth !== false && smooth !== null;
     const tension = typeof smooth === 'number' ? smooth : 1;
 
@@ -71,96 +71,109 @@ class Polyline extends Shape {
 
     const len = this.pointCount / 2;
 
-    // --- ARROW OFFSET INTERCEPTION ---
-    let origLineStartX, origLineStartY, arrowStartTipX, arrowStartTipY, arrowStartAngle = 0;
-    const arrowStartSize = (arrowstart === 'auto') ? (strokewidth * 3.6) : arrowstart;
-    
-    if (arrowStartSize > 0) {
-      origLineStartX = this.flatCache[0]; 
-      origLineStartY = this.flatCache[1];
-      arrowStartTipX = origLineStartX; 
-      arrowStartTipY = origLineStartY;
+    // --- ARROW SETUP & LINE CAP OFFSET ---
+    const arrowStartSize = (arrowstart === 'auto') ? (strokewidth * 3.6) : (arrowstart || 0);
+    const arrowEndSize   = (arrowend === 'auto')   ? (strokewidth * 3.6) : (arrowend || 0);
 
+    const hasStart = arrowStartSize > 0;
+    const hasEnd   = arrowEndSize > 0;
+
+    let arrowStartTipX = this.flatCache[0], arrowStartTipY = this.flatCache[1];
+    let arrowStartAngle = 0, cosStart = 1, sinStart = 0, startSetback = 0;
+
+    const lastX = this.pointCount - 2, lastY = this.pointCount - 1;
+    let arrowEndTipX = this.flatCache[lastX], arrowEndTipY = this.flatCache[lastY];
+    let arrowEndAngle = 0, cosEnd = 1, sinEnd = 0, endSetback = 0;
+
+    const sw = strokewidth * u;
+    const capOffset = (linecap !== 'butt') ? (sw * 0.5) : 0;
+    const apexOffset = (linejoin === 'round') ? (sw * 0.5) : sw;
+    const tipOffset = (arrowstyle === 'filled') ? capOffset : (capOffset - apexOffset);
+
+    if (hasStart) {
       arrowStartAngle = Math.atan2(this.flatCache[1] - this.flatCache[3], this.flatCache[0] - this.flatCache[2]);
-      const swOffset = (linecap === 'square') ? (strokewidth / 2) * u : 0;
-
-      arrowStartTipX += Math.cos(arrowStartAngle) * swOffset;
-      arrowStartTipY += Math.sin(arrowStartAngle) * swOffset;
-
-      if (arrowstyle === 'filled') {
-        this.flatCache[0] -= Math.cos(arrowStartAngle) * arrowStartSize * u * 0.75;
-        this.flatCache[1] -= Math.sin(arrowStartAngle) * arrowStartSize * u * 0.75;
-      }
+      cosStart = Math.cos(arrowStartAngle);
+      sinStart = Math.sin(arrowStartAngle);
+      arrowStartTipX += cosStart * tipOffset;
+      arrowStartTipY += sinStart * tipOffset;
+      startSetback = (arrowstyle === 'filled')
+        ? Math.min(sw + capOffset, arrowStartSize * u * 0.8)
+        : -tipOffset;
     }
 
-    let origLineEndX, origLineEndY, arrowEndTipX, arrowEndTipY, arrowEndAngle = 0;
-    const arrowEndSize = (arrowend === 'auto') ? (strokewidth * 3.6) : arrowend;
-
-    if (arrowEndSize > 0) {
-      const lastX = this.pointCount - 2;
-      const lastY = this.pointCount - 1;
-      
-      origLineEndX = this.flatCache[lastX]; 
-      origLineEndY = this.flatCache[lastY];
-      arrowEndTipX = origLineEndX; 
-      arrowEndTipY = origLineEndY;
-
+    if (hasEnd) {
       arrowEndAngle = Math.atan2(this.flatCache[lastY] - this.flatCache[lastY - 2], this.flatCache[lastX] - this.flatCache[lastX - 2]);
-      const swOffset = (linecap === 'square') ? (strokewidth / 2) * u : 0;
-
-      arrowEndTipX += Math.cos(arrowEndAngle) * swOffset;
-      arrowEndTipY += Math.sin(arrowEndAngle) * swOffset;
-
-      if (arrowstyle === 'filled') {
-        this.flatCache[lastX] -= Math.cos(arrowEndAngle) * arrowEndSize * u * 0.75;
-        this.flatCache[lastY] -= Math.sin(arrowEndAngle) * arrowEndSize * u * 0.75;
-      }
+      cosEnd = Math.cos(arrowEndAngle);
+      sinEnd = Math.sin(arrowEndAngle);
+      arrowEndTipX += cosEnd * tipOffset;
+      arrowEndTipY += sinEnd * tipOffset;
+      endSetback = (arrowstyle === 'filled')
+        ? Math.min(sw + capOffset, arrowEndSize * u * 0.8)
+        : -tipOffset;
     }
 
     ctx.beginPath();
-    ctx.moveTo(this.flatCache[0], this.flatCache[1]);
+    ctx.moveTo(
+      this.flatCache[0] - cosStart * startSetback,
+      this.flatCache[1] - sinStart * startSetback
+    );
 
     if (!isSmooth) {
-      for (let i = 1; i < len; i++) {
-        ctx.lineTo(this.flatCache[i*2], this.flatCache[i*2+1]);
+      for (let i = 1; i < len - 1; i++) {
+        ctx.lineTo(this.flatCache[i * 2], this.flatCache[i * 2 + 1]);
       }
+      ctx.lineTo(
+        this.flatCache[lastX] - cosEnd * endSetback,
+        this.flatCache[lastY] - sinEnd * endSetback
+      );
     } else {
+      const tension6 = tension / 6;
       const loopLen = closed ? len : len - 1;
-      
-      for (let i = 0; i < loopLen; i++) {
+      const normalEnd = (hasEnd && !closed) ? loopLen - 1 : loopLen;
+
+      for (let i = 0; i < normalEnd; i++) {
         const i0 = closed ? (i - 1 + len) % len : Math.max(i - 1, 0);
         const i1 = i;
         const i2 = (i + 1) % len;
         const i3 = closed ? (i + 2) % len : Math.min(i + 2, len - 1);
 
-        const p0x = this.flatCache[i0*2], p0y = this.flatCache[i0*2+1];
-        const p1x = this.flatCache[i1*2], p1y = this.flatCache[i1*2+1];
-        const p2x = this.flatCache[i2*2], p2y = this.flatCache[i2*2+1];
-        const p3x = this.flatCache[i3*2], p3y = this.flatCache[i3*2+1];
+        const p0x = this.flatCache[i0 * 2], p0y = this.flatCache[i0 * 2 + 1];
+        const p1x = this.flatCache[i1 * 2], p1y = this.flatCache[i1 * 2 + 1];
+        const p2x = this.flatCache[i2 * 2], p2y = this.flatCache[i2 * 2 + 1];
+        const p3x = this.flatCache[i3 * 2], p3y = this.flatCache[i3 * 2 + 1];
 
-        const cp1x = p1x + (p2x - p0x) * (tension / 6);
-        const cp1y = p1y + (p2y - p0y) * (tension / 6);
-        const cp2x = p2x - (p3x - p1x) * (tension / 6);
-        const cp2y = p2y - (p3y - p1y) * (tension / 6);
+        ctx.bezierCurveTo(
+          p1x + (p2x - p0x) * tension6,
+          p1y + (p2y - p0y) * tension6,
+          p2x - (p3x - p1x) * tension6,
+          p2y - (p3y - p1y) * tension6,
+          p2x, p2y
+        );
+      }
 
-        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2x, p2y);
+      if (normalEnd < loopLen) {
+        const i = loopLen - 1;
+        const i0 = Math.max(i - 1, 0);
+        const p0x = this.flatCache[i0 * 2], p0y = this.flatCache[i0 * 2 + 1];
+        const p1x = this.flatCache[i * 2], p1y = this.flatCache[i * 2 + 1];
+        const p2x = this.flatCache[lastX], p2y = this.flatCache[lastY];
+
+        ctx.bezierCurveTo(
+          p1x + (p2x - p0x) * tension6,
+          p1y + (p2y - p0y) * tension6,
+          p2x - (p2x - p1x) * tension6,
+          p2y - (p2y - p1y) * tension6,
+          p2x - cosEnd * endSetback,
+          p2y - sinEnd * endSetback
+        );
       }
     }
-    
+
     if (closed) ctx.closePath();
     this.applyStyle(ctx, u);
 
-    // --- CACHE RESTORE & DRAW ARROWS ---
-    if (arrowStartSize > 0) {
-      this.flatCache[0] = origLineStartX; 
-      this.flatCache[1] = origLineStartY;
-      this.drawArrow(ctx, u, arrowStartTipX, arrowStartTipY, arrowStartAngle, arrowStartSize, arrowstyle);
-    }
-    if (arrowEndSize > 0) {
-      this.flatCache[this.pointCount - 2] = origLineEndX; 
-      this.flatCache[this.pointCount - 1] = origLineEndY;
-      this.drawArrow(ctx, u, arrowEndTipX, arrowEndTipY, arrowEndAngle, arrowEndSize, arrowstyle);
-    }
+    if (hasStart) this.drawArrow(ctx, u, arrowStartTipX, arrowStartTipY, arrowStartAngle, arrowStartSize, arrowstyle);
+    if (hasEnd)   this.drawArrow(ctx, u, arrowEndTipX, arrowEndTipY, arrowEndAngle, arrowEndSize, arrowstyle);
   }
 
   getBoundingBox() {
