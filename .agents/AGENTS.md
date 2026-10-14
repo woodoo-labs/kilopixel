@@ -18,6 +18,7 @@
 ## Project Context
 - **Framework Overview**: This project is a custom "Declarative Canvas Framework" (`pixel`) that allows building HTML5 Canvas graphics using custom HTML elements like `<pxl-stage>`, `<pxl-layer>`, `<pxl-group>`, and shape elements (`<pxl-circle>`, `<pxl-rect>`, `<pxl-grid>`, etc.).
 - **Deep Documentation**: For complete, in-depth technical documentation about the engine's architecture, scope, syntax, and capabilities, you MUST consult `.agents/KILOPIXEL.md`.
+- **Pre-Release Status**: Kilopixel is not published yet. Backwards compatibility is not required — prefer the cleanest API and implementation, even if it changes existing behavior or attribute names. Update affected docs pages and examples in the same change instead of keeping legacy code paths.
 
 ## Documentation Structure
 - **`.agents/AGENTS.md`** — Operational rules: approvals, build process, scratch directory, terminal syntax.
