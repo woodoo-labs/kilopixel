@@ -40,7 +40,7 @@ The current code (as of `9a956bd`) has these defects:
 3. **All arrow geometry is in physical pixels** (`·u` applied once, at resolution time). Logical units never enter the trigonometry.
 4. **A single source of truth**: one resolver in `Shape` produces scalar distances. Each shape only maps the *distance along its path* onto its own geometry.
 5. **Zero allocations per frame**, no `atan2`, and a fixed number of canvas calls (§5).
-6. **Continuity**: geometry changes continuously when `arrowstart`/`arrowend`/`strokewidth` are animated. The only exceptions are discrete attribute switches (`linecap`, `linejoin`, `arrowstyle`, and `miterlimit` crossing 2, where canvas itself switches from miter to bevel).
+6. **Continuity**: geometry changes continuously when `arrowstart`/`arrowend`/`strokewidth` are animated. The only exceptions are discrete attribute switches (`linecap`, `linejoin`, `arrowstyle`).
 
 ---
 
@@ -107,9 +107,11 @@ The chevron's stroke extends forward beyond its path vertex `V` by `joinExt`:
 
 | Join | `joinExt` |
 |---|---|
-| `miter` with `miterlimit ≥ 2` (`1/sin30`) | `W` |
-| `bevel`, or `miter` with `miterlimit < 2` (falls back to bevel) | `W/2 · sin30 = 0.25·W` |
+| `miter` (any `miterlimit`; see note below) | `W` |
+| `bevel` | `W/2 · sin30 = 0.25·W` |
 | `round` | `W/2` |
+
+**Update 2026-10-14 — sharp miter tips:** a 60° miter needs a canvas miter limit of 2 (`1/sin30`). `drawArrows` raises `ctx.miterLimit` to at least 4 (headroom for float rounding) for the chevron stroke only, so a low path `miterlimit` (e.g. to blunt sharp polyline corners) never cuts off the arrow tip. Explicit `linejoin="bevel"` / `"round"` are still respected.
 
 ```
 V = tip − joinExt · d = P + (capExt − joinExt) · d

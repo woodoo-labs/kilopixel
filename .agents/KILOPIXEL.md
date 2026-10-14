@@ -530,7 +530,8 @@ Supported on `<pxl-line>`, `<pxl-polyline>`, `<pxl-circle>` and `<pxl-ellipse>` 
 > The linecap defines where the line ends, and the arrow tip ends at the same spot.
 
 - The tip lands on the cap boundary: the end point for `butt`, `strokewidth / 2` beyond it for `square` and `round`. This is the same for both styles.
-- `'line'` chevrons: the stroked corner reaches beyond its path vertex by `strokewidth` (miter), `strokewidth / 2` (round) or `strokewidth / 4` (bevel), and the vertex is pulled back by that amount. A 60° miter needs `miterlimit ≥ 2`; below that canvas falls back to bevel, and the engine accounts for it.
+- `'line'` chevrons: the stroked corner reaches beyond its path vertex by `strokewidth` (miter), `strokewidth / 2` (round) or `strokewidth / 4` (bevel), and the vertex is pulled back by that amount. Chevrons use the shape's `linejoin`.
+- **Miter tips are always sharp**: a 60° miter needs a canvas miter limit of `2`. If the shape's `miterlimit` is lower (e.g. to blunt sharp polyline corners), `drawArrows` raises it for the chevron stroke only, so the path corners stay bevelled while the arrow tip stays pointed.
 
 ### Shaft Pullback (Inset)
 The stroke under the head is shortened ("inset") so it never shows beside or in front of the head:
@@ -879,7 +880,7 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `sc
 **Arrowhead methods** (used by Line, Polyline, Circle, Ellipse; see [Arrowhead System](#arrowhead-system)):
 - **`resolveArrow(rec, attrValue, u)`**: Resolves one arrow end (`arrowstart`/`arrowend` value) into `size`, `len`, `tipAdvance` and `inset` (context units), written into the pre-allocated `rec`. Returns `true` if this end has a head.
 - **`aimArrow(rec, px, py, vx, vy)`**: Sets the unit direction from the vector `(vx, vy)` (pointing out of the path) and places the tip at `P + tipAdvance · dir`. Returns the vector's length.
-- **`drawArrows(ctx, u, recStart, recEnd)`**: Draws both heads in one path: one `fill()` (filled, using `strokeStyle`) or one `stroke()` (line chevrons, dashes temporarily off). Expects stroke state to be applied already.
+- **`drawArrows(ctx, u, recStart, recEnd)`**: Draws both heads in one path: one `fill()` (filled, using `strokeStyle`) or one `stroke()` (line chevrons: dashes temporarily off, miter limit raised to at least 4 so the tip stays sharp). Expects stroke state to be applied already.
 - **`traceArrow(ctx, rec, isLine)`**: Adds one head (triangle or chevron) to the current path.
 
 ### Event Handling
@@ -1537,9 +1538,7 @@ Note: `ref.myShape.tx` gives `x + dx` in the shape's OWN local space. `toLocal(r
 - **Don't animate inside static CSS filter strings** → use Array syntax `filter="[blur(wave(2)*10)]"` instead
 - **CSS filter pixels vs logical units** → filter helpers (`blur(5)`) auto-scale the values to physical pixels; native shadows (`shadowblur="5"`) also use responsive logical units (`5 * u`)
 - **Don't nest `<pxl-stage>` inside `<pxl-stage>`** → stages are independent roots
-- **Arrowheads need an open, stroked path** → they are ignored on `pie`, `closed`, rings (`ir`), closed polylines, and shapes without `stroke`
-- **`arrowstyle="line"` with `linejoin="miter"` needs `miterlimit ≥ 2`** → otherwise canvas bevels the 60° tip (the engine still aligns it correctly, but it looks blunt)
-- **Radial Gradients** → Use 1/3/6-value syntax: `radial([r1], colors)`, `radial([x0, y0, r1], colors)`, or `radial([x0, y0, r0, x1, y1, r1], colors)`. Radii accept logical numbers (e.g., `200`), side edges (`'top'`, `'bottom'`, `'left'`, `'right'`), perimeter points (`'top-center'`, `'top-right'`, etc.), or dynamic CSS keywords (`'closest-side'`, `'farthest-corner'`, etc.). Centers `x0`/`y0`/`x1`/`y1` are proportional (`0..1`) to bounding box.
+- **Arrowheads need an open, stroked path** → they are ignored on `pie`, `closed`, rings (`ir`), closed polylines, and shapes without `stroke`- **Radial Gradients** → Use 1/3/6-value syntax: `radial([r1], colors)`, `radial([x0, y0, r1], colors)`, or `radial([x0, y0, r0, x1, y1, r1], colors)`. Radii accept logical numbers (e.g., `200`), side edges (`'top'`, `'bottom'`, `'left'`, `'right'`), perimeter points (`'top-center'`, `'top-right'`, etc.), or dynamic CSS keywords (`'closest-side'`, `'farthest-corner'`, etc.). Centers `x0`/`y0`/`x1`/`y1` are proportional (`0..1`) to bounding box.
 
 #### 12. Scope Available in Expressions
 

@@ -1830,7 +1830,7 @@ class Shape extends PxlNode {
   // Resolves one arrow end into distances along the path and writes them into rec (zero-GC).
   // Returns true if this end has an arrowhead.
   resolveArrow(rec, attrValue, u) {
-    const { strokewidth, linecap, linejoin, miterlimit, arrowstyle } = this.attributeValues;
+    const { strokewidth, linecap, linejoin, arrowstyle } = this.attributeValues;
     const size = (attrValue === 'auto' ? strokewidth * 3.6 : attrValue) * u;
 
     if (!(size > 0)) {
@@ -1847,10 +1847,10 @@ class Shape extends PxlNode {
 
     if (arrowstyle === 'line') {
       // How far the stroked chevron corner reaches beyond its path vertex.
-      // A 60° miter needs miterlimit >= 2, otherwise canvas falls back to bevel.
+      // Miter tips are always sharp: drawArrows lifts a low miterlimit for the chevron.
       const joinExt = (linejoin === 'round') ? sw * 0.5
-                    : (linejoin === 'miter' && miterlimit >= 2) ? sw
-                    : sw * 0.25;
+                    : (linejoin === 'bevel') ? sw * 0.25
+                    : sw;
       rec.tipAdvance = capExt - joinExt;
       rec.inset = joinExt;
     } else {
@@ -1886,6 +1886,10 @@ class Shape extends PxlNode {
     if (recB.size > 0) this.traceArrow(ctx, recB, isLine);
 
     if (isLine) {
+      // A 60° miter needs a limit of 2 (1 / sin 30°); a lower path miterlimit must not blunt the tip.
+      // 4 leaves headroom for float rounding. Not restored: stroke state is always set before stroking.
+      if (ctx.miterLimit < 4) ctx.miterLimit = 4;
+
       // Chevrons are always solid
       const { linedash, dashoffset } = this.attributeValues;
       const hasDash = linedash && linedash !== 'none' && linedash !== 0 && linedash !== '0';
