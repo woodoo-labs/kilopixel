@@ -79,11 +79,13 @@ class Polyline extends Shape {
     const hasEnd   = arrowEndSize > 0;
 
     let arrowStartTipX = this.flatCache[0], arrowStartTipY = this.flatCache[1];
-    let arrowStartAngle = 0, cosStart = 1, sinStart = 0, startSetback = 0;
+    let arrowStartAngle = 0, cosStart = 1, sinStart = 0;
+    let lineStartX = this.flatCache[0], lineStartY = this.flatCache[1];
 
     const lastX = this.pointCount - 2, lastY = this.pointCount - 1;
     let arrowEndTipX = this.flatCache[lastX], arrowEndTipY = this.flatCache[lastY];
-    let arrowEndAngle = 0, cosEnd = 1, sinEnd = 0, endSetback = 0;
+    let arrowEndAngle = 0, cosEnd = 1, sinEnd = 0;
+    let lineEndX = this.flatCache[lastX], lineEndY = this.flatCache[lastY];
 
     const sw = strokewidth * u;
     const capOffset = (linecap !== 'butt') ? (sw * 0.5) : 0;
@@ -96,9 +98,9 @@ class Polyline extends Shape {
       sinStart = Math.sin(arrowStartAngle);
       arrowStartTipX += cosStart * tipOffset;
       arrowStartTipY += sinStart * tipOffset;
-      startSetback = (arrowstyle === 'filled')
-        ? Math.min(sw + capOffset, arrowStartSize * u * 0.8)
-        : -tipOffset;
+      const startSetback = Math.min(sw + capOffset, arrowStartSize * u * 0.8);
+      lineStartX = arrowStartTipX - cosStart * startSetback;
+      lineStartY = arrowStartTipY - sinStart * startSetback;
     }
 
     if (hasEnd) {
@@ -107,25 +109,19 @@ class Polyline extends Shape {
       sinEnd = Math.sin(arrowEndAngle);
       arrowEndTipX += cosEnd * tipOffset;
       arrowEndTipY += sinEnd * tipOffset;
-      endSetback = (arrowstyle === 'filled')
-        ? Math.min(sw + capOffset, arrowEndSize * u * 0.8)
-        : -tipOffset;
+      const endSetback = Math.min(sw + capOffset, arrowEndSize * u * 0.8);
+      lineEndX = arrowEndTipX - cosEnd * endSetback;
+      lineEndY = arrowEndTipY - sinEnd * endSetback;
     }
 
     ctx.beginPath();
-    ctx.moveTo(
-      this.flatCache[0] - cosStart * startSetback,
-      this.flatCache[1] - sinStart * startSetback
-    );
+    ctx.moveTo(lineStartX, lineStartY);
 
     if (!isSmooth) {
       for (let i = 1; i < len - 1; i++) {
         ctx.lineTo(this.flatCache[i * 2], this.flatCache[i * 2 + 1]);
       }
-      ctx.lineTo(
-        this.flatCache[lastX] - cosEnd * endSetback,
-        this.flatCache[lastY] - sinEnd * endSetback
-      );
+      ctx.lineTo(lineEndX, lineEndY);
     } else {
       const tension6 = tension / 6;
       const loopLen = closed ? len : len - 1;
@@ -163,8 +159,8 @@ class Polyline extends Shape {
           p1y + (p2y - p0y) * tension6,
           p2x - (p2x - p1x) * tension6,
           p2y - (p2y - p1y) * tension6,
-          p2x - cosEnd * endSetback,
-          p2y - sinEnd * endSetback
+          lineEndX,
+          lineEndY
         );
       }
     }

@@ -9,7 +9,7 @@ class Circle extends Shape {
   }
 
   draw(ctx, u, t) {
-    const { r, ir, start, end, sweep, pie, closed, anticlockwise, strokewidth, arrowstart, arrowend, arrowstyle } = this.attributeValues;
+    const { r, ir, start, end, sweep, pie, closed, anticlockwise, strokewidth, linecap, arrowstart, arrowend, arrowstyle } = this.attributeValues;
 
     const safeR = Math.max(0, r);
     const safeIR = Math.max(0, ir);
@@ -42,11 +42,15 @@ class Circle extends Shape {
     let arrowStartTipX, arrowStartTipY, arrowStartAngle = 0, arrowStartDelta = 0;
     let arrowEndTipX, arrowEndTipY, arrowEndAngle = 0, arrowEndDelta = 0;
 
+    const sw = strokewidth * u;
+    const capOffset = (linecap !== 'butt') ? (sw * 0.5) : 0;
+
     if (arrowStartSize > 0 && safeR > 0) {
       arrowStartTipX = safeR * Math.cos(startRadians) * u;
       arrowStartTipY = safeR * Math.sin(startRadians) * u;
       
-      const clampL = Math.min(arrowStartSize * 0.75, safeR * 2);
+      const pullbackDist = Math.min(sw + capOffset, arrowStartSize * 0.8);
+      const clampL = Math.min(pullbackDist, safeR * 2);
       arrowStartDelta = 2 * Math.asin(clampL / (2 * safeR));
       const baseRadians = startRadians + (isAnti ? -arrowStartDelta : arrowStartDelta);
       
@@ -59,7 +63,8 @@ class Circle extends Shape {
       arrowEndTipX = safeR * Math.cos(endRadians) * u;
       arrowEndTipY = safeR * Math.sin(endRadians) * u;
       
-      const clampL = Math.min(arrowEndSize * 0.75, safeR * 2);
+      const pullbackDist = Math.min(sw + capOffset, arrowEndSize * 0.8);
+      const clampL = Math.min(pullbackDist, safeR * 2);
       arrowEndDelta = 2 * Math.asin(clampL / (2 * safeR));
       const baseRadians = endRadians + (isAnti ? arrowEndDelta : -arrowEndDelta);
       
@@ -68,9 +73,8 @@ class Circle extends Shape {
       arrowEndAngle = Math.atan2(arrowEndTipY - basePointY, arrowEndTipX - basePointX);
     }
 
-    // Apply filled-arrow arc pullback only if offsets fit within the sweep
-    const hasArrowPullback = arrowstyle === 'filled' &&
-      (arrowStartDelta + arrowEndDelta) < Math.abs(endRadians - startRadians);
+    // Apply arrow arc pullback only if offsets fit within the sweep
+    const hasArrowPullback = (arrowStartDelta + arrowEndDelta) < Math.abs(endRadians - startRadians);
 
     if (hasArrowPullback) {
       if (arrowStartDelta > 0) drawStartRadians += isAnti ? -arrowStartDelta : arrowStartDelta;

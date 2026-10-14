@@ -1846,7 +1846,7 @@ class Circle extends Shape {
   }
 
   draw(ctx, u, t) {
-    const { r, ir, start, end, sweep, pie, closed, anticlockwise, strokewidth, arrowstart, arrowend, arrowstyle } = this.attributeValues;
+    const { r, ir, start, end, sweep, pie, closed, anticlockwise, strokewidth, linecap, arrowstart, arrowend, arrowstyle } = this.attributeValues;
 
     const safeR = Math.max(0, r);
     const safeIR = Math.max(0, ir);
@@ -1879,11 +1879,15 @@ class Circle extends Shape {
     let arrowStartTipX, arrowStartTipY, arrowStartAngle = 0, arrowStartDelta = 0;
     let arrowEndTipX, arrowEndTipY, arrowEndAngle = 0, arrowEndDelta = 0;
 
+    const sw = strokewidth * u;
+    const capOffset = (linecap !== 'butt') ? (sw * 0.5) : 0;
+
     if (arrowStartSize > 0 && safeR > 0) {
       arrowStartTipX = safeR * Math.cos(startRadians) * u;
       arrowStartTipY = safeR * Math.sin(startRadians) * u;
       
-      const clampL = Math.min(arrowStartSize * 0.75, safeR * 2);
+      const pullbackDist = Math.min(sw + capOffset, arrowStartSize * 0.8);
+      const clampL = Math.min(pullbackDist, safeR * 2);
       arrowStartDelta = 2 * Math.asin(clampL / (2 * safeR));
       const baseRadians = startRadians + (isAnti ? -arrowStartDelta : arrowStartDelta);
       
@@ -1896,7 +1900,8 @@ class Circle extends Shape {
       arrowEndTipX = safeR * Math.cos(endRadians) * u;
       arrowEndTipY = safeR * Math.sin(endRadians) * u;
       
-      const clampL = Math.min(arrowEndSize * 0.75, safeR * 2);
+      const pullbackDist = Math.min(sw + capOffset, arrowEndSize * 0.8);
+      const clampL = Math.min(pullbackDist, safeR * 2);
       arrowEndDelta = 2 * Math.asin(clampL / (2 * safeR));
       const baseRadians = endRadians + (isAnti ? arrowEndDelta : -arrowEndDelta);
       
@@ -1905,9 +1910,8 @@ class Circle extends Shape {
       arrowEndAngle = Math.atan2(arrowEndTipY - basePointY, arrowEndTipX - basePointX);
     }
 
-    // Apply filled-arrow arc pullback only if offsets fit within the sweep
-    const hasArrowPullback = arrowstyle === 'filled' &&
-      (arrowStartDelta + arrowEndDelta) < Math.abs(endRadians - startRadians);
+    // Apply arrow arc pullback only if offsets fit within the sweep
+    const hasArrowPullback = (arrowStartDelta + arrowEndDelta) < Math.abs(endRadians - startRadians);
 
     if (hasArrowPullback) {
       if (arrowStartDelta > 0) drawStartRadians += isAnti ? -arrowStartDelta : arrowStartDelta;
@@ -1964,7 +1968,7 @@ class Ellipse extends Shape {
   }
 
   draw(ctx, u, t) {
-    const { rx, ry, irx, iry, start, end, sweep, pie, closed, anticlockwise, strokewidth, arrowstart, arrowend, arrowstyle } = this.attributeValues;
+    const { rx, ry, irx, iry, start, end, sweep, pie, closed, anticlockwise, strokewidth, linecap, arrowstart, arrowend, arrowstyle } = this.attributeValues;
 
     const safeRX = Math.max(0, rx);
     const safeRY = Math.max(0, ry);
@@ -1997,11 +2001,15 @@ class Ellipse extends Shape {
     let arrowStartTipX, arrowStartTipY, arrowStartAngle = 0, arrowStartDelta = 0;
     const arrowStartSize = (arrowstart === 'auto') ? (strokewidth * 3.6) : arrowstart;
     
+    const sw = strokewidth * u;
+    const capOffset = (linecap !== 'butt') ? (sw * 0.5) : 0;
+
     if (arrowStartSize > 0 && safeRX > 0 && safeRY > 0) {
       arrowStartTipX = safeRX * Math.cos(startRadians) * u;
       arrowStartTipY = safeRY * Math.sin(startRadians) * u;
       
-      const clampL = Math.min(arrowStartSize * 0.75, Math.max(safeRX, safeRY));
+      const pullbackDist = Math.min(sw + capOffset, arrowStartSize * 0.8);
+      const clampL = Math.min(pullbackDist, Math.max(safeRX, safeRY) * 2);
       const dxStart = -safeRX * Math.sin(startRadians);
       const dyStart = safeRY * Math.cos(startRadians);
       const speedStart = Math.sqrt(dxStart * dxStart + dyStart * dyStart);
@@ -2021,7 +2029,8 @@ class Ellipse extends Shape {
       arrowEndTipX = safeRX * Math.cos(endRadians) * u;
       arrowEndTipY = safeRY * Math.sin(endRadians) * u;
       
-      const clampL = Math.min(arrowEndSize * 0.75, Math.max(safeRX, safeRY));
+      const pullbackDist = Math.min(sw + capOffset, arrowEndSize * 0.8);
+      const clampL = Math.min(pullbackDist, Math.max(safeRX, safeRY) * 2);
       const dxEnd = -safeRX * Math.sin(endRadians);
       const dyEnd = safeRY * Math.cos(endRadians);
       const speedEnd = Math.sqrt(dxEnd * dxEnd + dyEnd * dyEnd);
@@ -2034,9 +2043,8 @@ class Ellipse extends Shape {
       arrowEndAngle = Math.atan2(arrowEndTipY - basePointY, arrowEndTipX - basePointX);
     }
 
-    // Apply filled-arrow arc pullback only if offsets fit within the sweep
-    const hasArrowPullback = arrowstyle === 'filled' &&
-      (arrowStartDelta + arrowEndDelta) < Math.abs(endRadians - startRadians);
+    // Apply arrow arc pullback only if offsets fit within the sweep
+    const hasArrowPullback = (arrowStartDelta + arrowEndDelta) < Math.abs(endRadians - startRadians);
 
     if (hasArrowPullback) {
       if (arrowStartDelta > 0) drawStartRadians += isAnti ? -arrowStartDelta : arrowStartDelta;
@@ -2188,14 +2196,9 @@ class Line extends Shape {
       arrowStartTipX += cosStart * tipOffset;
       arrowStartTipY += sinStart * tipOffset;
 
-      if (arrowstyle === 'filled') {
-        const startSetback = Math.min(sw + capOffset, arrowStartSize * u * 0.8);
-        lineStartX = arrowStartTipX - cosStart * startSetback;
-        lineStartY = arrowStartTipY - sinStart * startSetback;
-      } else {
-        lineStartX = arrowStartTipX;
-        lineStartY = arrowStartTipY;
-      }
+      const startSetback = Math.min(sw + capOffset, arrowStartSize * u * 0.8);
+      lineStartX = arrowStartTipX - cosStart * startSetback;
+      lineStartY = arrowStartTipY - sinStart * startSetback;
     }
 
     if (arrowEndSize > 0) {
@@ -2205,14 +2208,9 @@ class Line extends Shape {
       arrowEndTipX += cosEnd * tipOffset;
       arrowEndTipY += sinEnd * tipOffset;
 
-      if (arrowstyle === 'filled') {
-        const endSetback = Math.min(sw + capOffset, arrowEndSize * u * 0.8);
-        lineEndX = arrowEndTipX - cosEnd * endSetback;
-        lineEndY = arrowEndTipY - sinEnd * endSetback;
-      } else {
-        lineEndX = arrowEndTipX;
-        lineEndY = arrowEndTipY;
-      }
+      const endSetback = Math.min(sw + capOffset, arrowEndSize * u * 0.8);
+      lineEndX = arrowEndTipX - cosEnd * endSetback;
+      lineEndY = arrowEndTipY - sinEnd * endSetback;
     }
 
     ctx.beginPath();
@@ -2316,11 +2314,13 @@ class Polyline extends Shape {
     const hasEnd   = arrowEndSize > 0;
 
     let arrowStartTipX = this.flatCache[0], arrowStartTipY = this.flatCache[1];
-    let arrowStartAngle = 0, cosStart = 1, sinStart = 0, startSetback = 0;
+    let arrowStartAngle = 0, cosStart = 1, sinStart = 0;
+    let lineStartX = this.flatCache[0], lineStartY = this.flatCache[1];
 
     const lastX = this.pointCount - 2, lastY = this.pointCount - 1;
     let arrowEndTipX = this.flatCache[lastX], arrowEndTipY = this.flatCache[lastY];
-    let arrowEndAngle = 0, cosEnd = 1, sinEnd = 0, endSetback = 0;
+    let arrowEndAngle = 0, cosEnd = 1, sinEnd = 0;
+    let lineEndX = this.flatCache[lastX], lineEndY = this.flatCache[lastY];
 
     const sw = strokewidth * u;
     const capOffset = (linecap !== 'butt') ? (sw * 0.5) : 0;
@@ -2333,9 +2333,9 @@ class Polyline extends Shape {
       sinStart = Math.sin(arrowStartAngle);
       arrowStartTipX += cosStart * tipOffset;
       arrowStartTipY += sinStart * tipOffset;
-      startSetback = (arrowstyle === 'filled')
-        ? Math.min(sw + capOffset, arrowStartSize * u * 0.8)
-        : -tipOffset;
+      const startSetback = Math.min(sw + capOffset, arrowStartSize * u * 0.8);
+      lineStartX = arrowStartTipX - cosStart * startSetback;
+      lineStartY = arrowStartTipY - sinStart * startSetback;
     }
 
     if (hasEnd) {
@@ -2344,25 +2344,19 @@ class Polyline extends Shape {
       sinEnd = Math.sin(arrowEndAngle);
       arrowEndTipX += cosEnd * tipOffset;
       arrowEndTipY += sinEnd * tipOffset;
-      endSetback = (arrowstyle === 'filled')
-        ? Math.min(sw + capOffset, arrowEndSize * u * 0.8)
-        : -tipOffset;
+      const endSetback = Math.min(sw + capOffset, arrowEndSize * u * 0.8);
+      lineEndX = arrowEndTipX - cosEnd * endSetback;
+      lineEndY = arrowEndTipY - sinEnd * endSetback;
     }
 
     ctx.beginPath();
-    ctx.moveTo(
-      this.flatCache[0] - cosStart * startSetback,
-      this.flatCache[1] - sinStart * startSetback
-    );
+    ctx.moveTo(lineStartX, lineStartY);
 
     if (!isSmooth) {
       for (let i = 1; i < len - 1; i++) {
         ctx.lineTo(this.flatCache[i * 2], this.flatCache[i * 2 + 1]);
       }
-      ctx.lineTo(
-        this.flatCache[lastX] - cosEnd * endSetback,
-        this.flatCache[lastY] - sinEnd * endSetback
-      );
+      ctx.lineTo(lineEndX, lineEndY);
     } else {
       const tension6 = tension / 6;
       const loopLen = closed ? len : len - 1;
@@ -2400,8 +2394,8 @@ class Polyline extends Shape {
           p1y + (p2y - p0y) * tension6,
           p2x - (p2x - p1x) * tension6,
           p2y - (p2y - p1y) * tension6,
-          p2x - cosEnd * endSetback,
-          p2y - sinEnd * endSetback
+          lineEndX,
+          lineEndY
         );
       }
     }

@@ -41,14 +41,9 @@ class Line extends Shape {
       arrowStartTipX += cosStart * tipOffset;
       arrowStartTipY += sinStart * tipOffset;
 
-      if (arrowstyle === 'filled') {
-        const startSetback = Math.min(sw + capOffset, arrowStartSize * u * 0.8);
-        lineStartX = arrowStartTipX - cosStart * startSetback;
-        lineStartY = arrowStartTipY - sinStart * startSetback;
-      } else {
-        lineStartX = arrowStartTipX;
-        lineStartY = arrowStartTipY;
-      }
+      const startSetback = Math.min(sw + capOffset, arrowStartSize * u * 0.8);
+      lineStartX = arrowStartTipX - cosStart * startSetback;
+      lineStartY = arrowStartTipY - sinStart * startSetback;
     }
 
     if (arrowEndSize > 0) {
@@ -58,14 +53,9 @@ class Line extends Shape {
       arrowEndTipX += cosEnd * tipOffset;
       arrowEndTipY += sinEnd * tipOffset;
 
-      if (arrowstyle === 'filled') {
-        const endSetback = Math.min(sw + capOffset, arrowEndSize * u * 0.8);
-        lineEndX = arrowEndTipX - cosEnd * endSetback;
-        lineEndY = arrowEndTipY - sinEnd * endSetback;
-      } else {
-        lineEndX = arrowEndTipX;
-        lineEndY = arrowEndTipY;
-      }
+      const endSetback = Math.min(sw + capOffset, arrowEndSize * u * 0.8);
+      lineEndX = arrowEndTipX - cosEnd * endSetback;
+      lineEndY = arrowEndTipY - sinEnd * endSetback;
     }
 
     ctx.beginPath();
