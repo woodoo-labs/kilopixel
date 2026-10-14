@@ -38,16 +38,17 @@
         <!-- SECTION 1: SIZING ARROWHEADS                                      -->
         <!-- ================================================================= -->
         <h2>1. Sizing Arrowheads</h2>
-        <p>Kilopixel provides two modes for sizing arrowheads: automatic scaling (<code>'auto'</code>), where the arrowhead length scales proportionally with stroke thickness (<code>strokewidth &times; 3.6</code>), and custom numeric sizing, where the arrowhead length is defined explicitly and remains independent of the stroke width.</p>
+        <p>Arrowheads are added to open paths using the <code>arrowstart</code> and <code>arrowend</code> attributes. Both attributes support two sizing modes: automatic scaling (<code>'auto'</code>), where the arrowhead length scales proportionally with stroke thickness (<code>strokewidth &times; 3.6</code>), and custom numeric sizing, where the arrowhead length is defined explicitly and remains independent of the stroke width.</p>
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Auto-Sized Line --&gt;
-    &lt;pxl-line x1="150" y1="300" x2="450" y2="300" stroke="#f97316"
+    &lt;!-- Left: Auto-Sized Circular Arc --&gt;
+    &lt;pxl-circle x="300" y="300" r="120" start="135" sweep="270"
+      stroke="#f97316" fill="none"
       arrowstart="auto" arrowend="auto"
-      strokewidth="<mark id="sec1Line1StrokeWidthCode">10</mark>"&gt;
-    &lt;/pxl-line&gt;
+      strokewidth="<mark id="sec1ArcStrokeWidthCode">10</mark>"&gt;
+    &lt;/pxl-circle&gt;
 
     &lt;!-- Right: Custom-Sized Sine Wave --&gt;
     &lt;pxl-polyline points="550,300; 650,220; 750,380; 850,300" smooth="1" stroke="#3b82f6"
@@ -62,18 +63,18 @@
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Controls</h3>
               <div class="demo-tabs">
-                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1Line1Tab')">Auto</button>
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1ArcTab')">Auto</button>
                 <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1PolyTab')">Custom</button>
               </div>
             </div>
 
             <!-- Auto Sizing Tab -->
-            <div class="tab-content active" id="sec1Line1Tab">
+            <div class="tab-content active" id="sec1ArcTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec1Line1StrokeWidthVal">10</span></label>
-                  <input type="range" min="2" max="40" step="1" value="10" autocomplete="off" id="sec1Line1StrokeWidthInput"
-                    oninput="document.getElementById('sec1Line1').setAttribute('strokewidth', this.value); document.getElementById('sec1Line1StrokeWidthVal').innerText = this.value; document.getElementById('sec1Line1StrokeWidthCode').innerText = this.value;" data-mark="sec1Line1StrokeWidthCode">
+                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec1ArcStrokeWidthVal">10</span></label>
+                  <input type="range" min="2" max="40" step="1" value="10" autocomplete="off" id="sec1ArcStrokeWidthInput"
+                    oninput="document.getElementById('sec1Arc').setAttribute('strokewidth', this.value); document.getElementById('sec1ArcStrokeWidthVal').innerText = this.value; document.getElementById('sec1ArcStrokeWidthCode').innerText = this.value;" data-mark="sec1ArcStrokeWidthCode">
                 </div>
               </div>
             </div>
@@ -81,15 +82,15 @@
             <!-- Custom Sizing Tab -->
             <div class="tab-content" id="sec1PolyTab">
               <div class="playground-sliders">
-                <!-- Row 1: Start Arrow & End Arrow -->
+                <!-- Row 1: Arrow Start & Arrow End -->
                 <div class="control-group">
-                  <label><span>Start Arrow</span> <span id="sec1PolyArrowStartVal">0</span></label>
-                  <input type="range" min="0" max="150" step="5" value="0" autocomplete="off" id="sec1PolyArrowStartInput"
+                  <label><span>Arrow Start</span> <span id="sec1PolyArrowStartVal">0</span></label>
+                  <input type="range" min="0" max="100" step="5" value="0" autocomplete="off" id="sec1PolyArrowStartInput"
                     oninput="document.getElementById('sec1Poly').setAttribute('arrowstart', this.value); document.getElementById('sec1PolyArrowStartVal').innerText = this.value; document.getElementById('sec1PolyArrowStartCode').innerText = this.value;" data-mark="sec1PolyArrowStartCode">
                 </div>
                 <div class="control-group">
-                  <label><span>End Arrow <span class="indicator-dot"></span></span> <span id="sec1PolyEndArrowVal">35</span></label>
-                  <input type="range" min="0" max="150" step="5" value="35" autocomplete="off" id="sec1PolyEndArrowInput"
+                  <label><span>Arrow End <span class="indicator-dot"></span></span> <span id="sec1PolyEndArrowVal">35</span></label>
+                  <input type="range" min="0" max="100" step="5" value="35" autocomplete="off" id="sec1PolyEndArrowInput"
                     oninput="document.getElementById('sec1Poly').setAttribute('arrowend', this.value); document.getElementById('sec1PolyEndArrowVal').innerText = this.value; document.getElementById('sec1PolyEndArrowCode').innerText = this.value;" data-mark="sec1PolyEndArrowCode">
                 </div>
 
@@ -112,8 +113,8 @@
               <pxl-text x="300" y="80" text="'arrowstart=&quot;auto&quot;'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
               <pxl-text x="300" y="120" text="'arrowend=&quot;auto&quot;'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
-              <pxl-line id="sec1Line1" x1="150" y1="300" x2="450" y2="300" stroke="#f97316" strokewidth="10"
-                arrowstart="auto" arrowend="auto"></pxl-line>
+              <pxl-circle id="sec1Arc" x="300" y="300" r="120" start="135" sweep="270" stroke="#f97316" strokewidth="10" fill="none"
+                arrowstart="auto" arrowend="auto"></pxl-circle>
 
               <!-- Right: Custom Arrowheads (Blue Scheme) -->
               <pxl-text x="700" y="80" text="'arrowstart=&quot;' + ref.sec1Poly.arrowstart + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
@@ -121,6 +122,289 @@
 
               <pxl-polyline id="sec1Poly" points="550,300; 650,220; 750,380; 850,300" smooth="1" stroke="#3b82f6" strokewidth="6"
                 arrowstart="0" arrowend="35"></pxl-polyline>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 2: ARROW STYLES                                           -->
+        <!-- ================================================================= -->
+        <h2>2. Arrow Styles</h2>
+        <p>Kilopixel provides two visual styles for arrowheads via the <code>arrowstyle</code> attribute: solid filled triangles (<code>arrowstyle="filled"</code>) and open line chevrons (<code>arrowstyle="line"</code>). Both styles automatically inherit the shape's <code>stroke</code> color, and <code>arrowstyle="line"</code> chevrons automatically share the host path's stroke thickness (<code>strokewidth</code>).</p>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Solid Triangle (Filled) --&gt;
+    &lt;pxl-line x1="150" y1="300" x2="450" y2="300" stroke="#f97316"
+      arrowend="<mark id="sec2Line1ArrowCode">40</mark>" strokewidth="<mark id="sec2Line1StrokeWidthCode">10</mark>"
+      arrowstyle="<mark id="sec2Line1StyleCode">filled</mark>"&gt;
+    &lt;/pxl-line&gt;
+
+    &lt;!-- Right: Open Chevron (Line) --&gt;
+    &lt;pxl-line x1="550" y1="300" x2="850" y2="300" stroke="#3b82f6"
+      arrowend="<mark id="sec2Line2ArrowCode">40</mark>" strokewidth="<mark id="sec2Line2StrokeWidthCode">10</mark>"
+      arrowstyle="<mark id="sec2Line2StyleCode">line</mark>"&gt;
+    &lt;/pxl-line&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2FilledTab')">Filled</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2LineTab')">Line</button>
+              </div>
+            </div>
+
+            <!-- Filled Tab -->
+            <div class="tab-content active" id="sec2FilledTab">
+              <div class="playground-sliders">
+                <!-- Row 1: Arrow End & Stroke Width -->
+                <div class="control-group">
+                  <label><span>Arrow End <span class="indicator-dot"></span></span> <span id="sec2Line1ArrowVal">40</span></label>
+                  <input type="range" min="0" max="100" step="5" value="40" autocomplete="off" id="sec2Line1ArrowInput"
+                    oninput="document.getElementById('sec2Line1').setAttribute('arrowend', this.value); document.getElementById('sec2Line1ArrowVal').innerText = this.value; document.getElementById('sec2Line1ArrowCode').innerText = this.value;" data-mark="sec2Line1ArrowCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec2Line1StrokeWidthVal">10</span></label>
+                  <input type="range" min="2" max="30" step="1" value="10" autocomplete="off" id="sec2Line1StrokeWidthInput"
+                    oninput="document.getElementById('sec2Line1').setAttribute('strokewidth', this.value); document.getElementById('sec2Line1StrokeWidthVal').innerText = this.value; document.getElementById('sec2Line1StrokeWidthCode').innerText = this.value;" data-mark="sec2Line1StrokeWidthCode">
+                </div>
+
+                <!-- Row 2: Arrow Style -->
+                <div class="control-group">
+                  <label>Arrow Style</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn active" onclick="document.getElementById('sec2Line1').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec2Line1StyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec2Line1').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec2Line1StyleCode', 'line');">line</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Line Tab -->
+            <div class="tab-content" id="sec2LineTab">
+              <div class="playground-sliders">
+                <!-- Row 1: Arrow End & Stroke Width -->
+                <div class="control-group">
+                  <label><span>Arrow End</span> <span id="sec2Line2ArrowVal">40</span></label>
+                  <input type="range" min="0" max="100" step="5" value="40" autocomplete="off" id="sec2Line2ArrowInput"
+                    oninput="document.getElementById('sec2Line2').setAttribute('arrowend', this.value); document.getElementById('sec2Line2ArrowVal').innerText = this.value; document.getElementById('sec2Line2ArrowCode').innerText = this.value;" data-mark="sec2Line2ArrowCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec2Line2StrokeWidthVal">10</span></label>
+                  <input type="range" min="2" max="30" step="1" value="10" autocomplete="off" id="sec2Line2StrokeWidthInput"
+                    oninput="document.getElementById('sec2Line2').setAttribute('strokewidth', this.value); document.getElementById('sec2Line2StrokeWidthVal').innerText = this.value; document.getElementById('sec2Line2StrokeWidthCode').innerText = this.value;" data-mark="sec2Line2StrokeWidthCode">
+                </div>
+
+                <!-- Row 2: Arrow Style -->
+                <div class="control-group">
+                  <label>Arrow Style</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn" onclick="document.getElementById('sec2Line2').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec2Line2StyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec2Line2').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec2Line2StyleCode', 'line');">line</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2 Stage -->
+          <pxl-stage id="sec2Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Left: Filled Arrowhead (Orange Scheme) -->
+              <pxl-text x="300" y="80" text="'Solid Triangle'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+              <pxl-line id="sec2Line1" x1="150" y1="300" x2="450" y2="300" stroke="#f97316" strokewidth="10"
+                arrowend="40" arrowstyle="filled"></pxl-line>
+              <pxl-text x="300" y="500" text="'arrowstyle=&quot;' + ref.sec2Line1.arrowstyle + '&quot;'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: Line Chevron Arrowhead (Blue Scheme) -->
+              <pxl-text x="700" y="80" text="'Open Chevron'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              <pxl-line id="sec2Line2" x1="550" y1="300" x2="850" y2="300" stroke="#3b82f6" strokewidth="10"
+                arrowend="40" arrowstyle="line"></pxl-line>
+              <pxl-text x="700" y="500" text="'arrowstyle=&quot;' + ref.sec2Line2.arrowstyle + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 3: LINE CAPS & ALIGNMENT                                  -->
+        <!-- ================================================================= -->
+        <h2>3. Line Caps &amp; Alignment</h2>
+        <p>In canvas graphics, line caps define where a stroked path physically ends. A <code>butt</code> cap cuts flush at the path coordinate, while <code>square</code> and <code>round</code> caps extend past the coordinate by half the stroke width (<code>strokewidth / 2</code>). Kilopixel's arrowhead geometry automatically aligns to this physical boundary:</p>
+        <ul>
+          <li><strong>Butt:</strong> The stroke terminates flush at the coordinate, and the arrowhead tip lands precisely on the endpoint plane.</li>
+          <li><strong>Square &amp; Round:</strong> Both cap styles extend past the endpoint &mdash; the exact same behavior as on any open path shape. Arrowheads automatically advance with this cap extension to stay locked to the outer stroke boundary.</li>
+        </ul>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Top: Butt Cap --&gt;
+    &lt;pxl-line x1="350" y1="160" x2="750" y2="160" stroke="#f97316"
+      strokewidth="<mark id="sec3Line1StrokeWidthCode">20</mark>" arrowend="<mark id="sec3Line1ArrowCode">75</mark>"
+      arrowstyle="<mark id="sec3Line1StyleCode">filled</mark>" linecap="<mark id="sec3Line1CapCode">butt</mark>"&gt;
+    &lt;/pxl-line&gt;
+
+    &lt;!-- Middle: Square Cap --&gt;
+    &lt;pxl-line x1="350" y1="300" x2="750" y2="300" stroke="#3b82f6"
+      strokewidth="<mark id="sec3Line2StrokeWidthCode">20</mark>" arrowend="<mark id="sec3Line2ArrowCode">75</mark>"
+      arrowstyle="<mark id="sec3Line2StyleCode">filled</mark>" linecap="<mark id="sec3Line2CapCode">square</mark>"&gt;
+    &lt;/pxl-line&gt;
+
+    &lt;!-- Bottom: Round Cap --&gt;
+    &lt;pxl-line x1="350" y1="440" x2="750" y2="440" stroke="#22c55e"
+      strokewidth="<mark id="sec3Line3StrokeWidthCode">20</mark>" arrowend="<mark id="sec3Line3ArrowCode">75</mark>"
+      arrowstyle="<mark id="sec3Line3StyleCode">line</mark>" linecap="<mark id="sec3Line3CapCode">round</mark>"&gt;
+    &lt;/pxl-line&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3TopTab')">Top</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3MidTab')">Middle</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3BotTab')">Bottom</button>
+              </div>
+            </div>
+
+            <!-- Top Tab -->
+            <div class="tab-content active" id="sec3TopTab">
+              <div class="playground-sliders">
+                <!-- Row 1: Arrow Size & Stroke Width -->
+                <div class="control-group">
+                  <label><span>Arrow Size</span> <span id="sec3Line1ArrowVal">75</span></label>
+                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec3Line1ArrowInput"
+                    oninput="document.getElementById('sec3Line1').setAttribute('arrowend', this.value); document.getElementById('sec3Line1ArrowVal').innerText = this.value; document.getElementById('sec3Line1ArrowCode').innerText = this.value;" data-mark="sec3Line1ArrowCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec3Line1StrokeWidthVal">20</span></label>
+                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec3Line1StrokeWidthInput"
+                    oninput="document.getElementById('sec3Line1').setAttribute('strokewidth', this.value); document.getElementById('sec3Line1StrokeWidthVal').innerText = this.value; document.getElementById('sec3Line1StrokeWidthCode').innerText = this.value;" data-mark="sec3Line1StrokeWidthCode">
+                </div>
+
+                <!-- Row 2: Arrow Style & Line Cap -->
+                <div class="control-group">
+                  <label>Arrow Style</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line1').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec3Line1StyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line1').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec3Line1StyleCode', 'line');">line</button>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label>Line Cap</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line1').setAttribute('linecap', 'butt'); pxlDocs.updateToggle(this, null, 'sec3Line1CapCode', 'butt');">butt</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line1').setAttribute('linecap', 'square'); pxlDocs.updateToggle(this, null, 'sec3Line1CapCode', 'square');">square</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line1').setAttribute('linecap', 'round'); pxlDocs.updateToggle(this, null, 'sec3Line1CapCode', 'round');">round</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Middle Tab -->
+            <div class="tab-content" id="sec3MidTab">
+              <div class="playground-sliders">
+                <!-- Row 1: Arrow Size & Stroke Width -->
+                <div class="control-group">
+                  <label><span>Arrow Size</span> <span id="sec3Line2ArrowVal">75</span></label>
+                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec3Line2ArrowInput"
+                    oninput="document.getElementById('sec3Line2').setAttribute('arrowend', this.value); document.getElementById('sec3Line2ArrowVal').innerText = this.value; document.getElementById('sec3Line2ArrowCode').innerText = this.value;" data-mark="sec3Line2ArrowCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec3Line2StrokeWidthVal">20</span></label>
+                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec3Line2StrokeWidthInput"
+                    oninput="document.getElementById('sec3Line2').setAttribute('strokewidth', this.value); document.getElementById('sec3Line2StrokeWidthVal').innerText = this.value; document.getElementById('sec3Line2StrokeWidthCode').innerText = this.value;" data-mark="sec3Line2StrokeWidthCode">
+                </div>
+
+                <!-- Row 2: Arrow Style & Line Cap -->
+                <div class="control-group">
+                  <label>Arrow Style</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line2').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec3Line2StyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line2').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec3Line2StyleCode', 'line');">line</button>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label>Line Cap</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line2').setAttribute('linecap', 'butt'); pxlDocs.updateToggle(this, null, 'sec3Line2CapCode', 'butt');">butt</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line2').setAttribute('linecap', 'square'); pxlDocs.updateToggle(this, null, 'sec3Line2CapCode', 'square');">square</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line2').setAttribute('linecap', 'round'); pxlDocs.updateToggle(this, null, 'sec3Line2CapCode', 'round');">round</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Tab -->
+            <div class="tab-content" id="sec3BotTab">
+              <div class="playground-sliders">
+                <!-- Row 1: Arrow Size & Stroke Width -->
+                <div class="control-group">
+                  <label><span>Arrow Size</span> <span id="sec3Line3ArrowVal">75</span></label>
+                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec3Line3ArrowInput"
+                    oninput="document.getElementById('sec3Line3').setAttribute('arrowend', this.value); document.getElementById('sec3Line3ArrowVal').innerText = this.value; document.getElementById('sec3Line3ArrowCode').innerText = this.value;" data-mark="sec3Line3ArrowCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec3Line3StrokeWidthVal">20</span></label>
+                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec3Line3StrokeWidthInput"
+                    oninput="document.getElementById('sec3Line3').setAttribute('strokewidth', this.value); document.getElementById('sec3Line3StrokeWidthVal').innerText = this.value; document.getElementById('sec3Line3StrokeWidthCode').innerText = this.value;" data-mark="sec3Line3StrokeWidthCode">
+                </div>
+
+                <!-- Row 2: Arrow Style & Line Cap -->
+                <div class="control-group">
+                  <label>Arrow Style</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line3').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec3Line3StyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line3').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec3Line3StyleCode', 'line');">line</button>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label>Line Cap</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line3').setAttribute('linecap', 'butt'); pxlDocs.updateToggle(this, null, 'sec3Line3CapCode', 'butt');">butt</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line3').setAttribute('linecap', 'square'); pxlDocs.updateToggle(this, null, 'sec3Line3CapCode', 'square');">square</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line3').setAttribute('linecap', 'round'); pxlDocs.updateToggle(this, null, 'sec3Line3CapCode', 'round');">round</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3 Stage -->
+          <pxl-stage id="sec3Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Grey Dashed Reference Alignment Guides through x1 and x2 -->
+              <pxl-line x1="350" y1="80" x2="350" y2="520" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-text x="350" y="70" baseline="bottom" text="'x1 = 350'" size="27" fill="#94a3b8" font="monospace" align="center"></pxl-text>
+
+              <pxl-line x1="750" y1="80" x2="750" y2="520" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-text x="750" y="70" baseline="bottom" text="'x2 = 750'" size="27" fill="#94a3b8" font="monospace" align="center"></pxl-text>
+
+              <!-- Top Arrow (Orange Scheme) -->
+              <pxl-text x="320" y="160" text="'linecap=&quot;' + ref.sec3Line1.linecap + '&quot;'" size="27" weight="700" fill="#fb923c" font="monospace" align="right" baseline="middle"></pxl-text>
+              <pxl-line id="sec3Line1" x1="350" y1="160" x2="750" y2="160" stroke="#f97316" strokewidth="20"
+                arrowend="75" arrowstyle="filled" linecap="butt"></pxl-line>
+
+              <!-- Middle Arrow (Blue Scheme) -->
+              <pxl-text x="320" y="300" text="'linecap=&quot;' + ref.sec3Line2.linecap + '&quot;'" size="27" weight="700" fill="#60a5fa" font="monospace" align="right" baseline="middle"></pxl-text>
+              <pxl-line id="sec3Line2" x1="350" y1="300" x2="750" y2="300" stroke="#3b82f6" strokewidth="20"
+                arrowend="75" arrowstyle="filled" linecap="square"></pxl-line>
+
+              <!-- Bottom Arrow (Green Scheme) -->
+              <pxl-text x="320" y="440" text="'linecap=&quot;' + ref.sec3Line3.linecap + '&quot;'" size="27" weight="700" fill="#4ade80" font="monospace" align="right" baseline="middle"></pxl-text>
+              <pxl-line id="sec3Line3" x1="350" y1="440" x2="750" y2="440" stroke="#22c55e" strokewidth="20"
+                arrowend="75" arrowstyle="line" linecap="round"></pxl-line>
             </pxl-layer>
           </pxl-stage>
         </div>
