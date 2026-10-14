@@ -6,65 +6,48 @@ class Line extends Shape {
     const defaults = { x1: 0, y1: 0, x2: 0, y2: 0, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
     Object.assign(this.attributeExpressions, defaults);
     Object.assign(this.attributeValues, defaults);
+
+    this._arrowStart = pxl.createArrowRecord();
+    this._arrowEnd = pxl.createArrowRecord();
   }
 
   draw(ctx, u, t) {
-    const { x1, y1, x2, y2, arrowstart, arrowend, arrowstyle, linecap, linejoin, strokewidth } = this.attributeValues;
+    const { x1, y1, x2, y2, arrowstart, arrowend } = this.attributeValues;
+    const startX = x1 * u, startY = y1 * u;
+    const endX = x2 * u, endY = y2 * u;
 
-    const arrowStartSize = (arrowstart === 'auto') ? (strokewidth * 3.6) : (arrowstart || 0);
-    const arrowEndSize   = (arrowend === 'auto')   ? (strokewidth * 3.6) : (arrowend || 0);
+    const arrowStart = this._arrowStart, arrowEnd = this._arrowEnd;
+    const isStroked = this.isStroked();
+    const hasStart = isStroked && this.resolveArrow(arrowStart, arrowstart, u);
+    const hasEnd = isStroked && this.resolveArrow(arrowEnd, arrowend, u);
 
-    if (arrowStartSize <= 0 && arrowEndSize <= 0) {
+    if (!hasStart && !hasEnd) {
       ctx.beginPath();
-      ctx.moveTo(x1 * u, y1 * u);
-      ctx.lineTo(x2 * u, y2 * u);
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
       this.applyStyle(ctx, u);
       return;
     }
 
-    let lineStartX = x1 * u, lineStartY = y1 * u;
-    let lineEndX   = x2 * u, lineEndY   = y2 * u;
+    let length = 0;
+    if (hasStart) length = this.aimArrow(arrowStart, startX, startY, startX - endX, startY - endY);
+    if (hasEnd)   length = this.aimArrow(arrowEnd, endX, endY, endX - startX, endY - startY);
 
-    let arrowStartTipX = lineStartX, arrowStartTipY = lineStartY;
-    let arrowEndTipX   = lineEndX,   arrowEndTipY   = lineEndY;
+    const startInset = hasStart ? arrowStart.inset : 0;
+    const endInset = hasEnd ? arrowEnd.inset : 0;
 
-    let arrowStartAngle = 0, arrowEndAngle = 0;
-    const sw = strokewidth * u;
-    const capOffset = (linecap !== 'butt') ? (sw * 0.5) : 0;
-    const apexOffset = (linejoin === 'round') ? (sw * 0.5) : sw;
-    const tipOffset = (arrowstyle === 'filled') ? capOffset : (capOffset - apexOffset);
-
-    if (arrowStartSize > 0) {
-      arrowStartAngle = Math.atan2(y1 - y2, x1 - x2);
-      const cosStart = Math.cos(arrowStartAngle);
-      const sinStart = Math.sin(arrowStartAngle);
-      arrowStartTipX += cosStart * tipOffset;
-      arrowStartTipY += sinStart * tipOffset;
-
-      const startSetback = Math.min(sw + capOffset, arrowStartSize * u * 0.8);
-      lineStartX = arrowStartTipX - cosStart * startSetback;
-      lineStartY = arrowStartTipY - sinStart * startSetback;
+    // Shaft is trimmed along the line; skipped if both insets would cross each other
+    if (startInset + endInset < length) {
+      const dirX = (endX - startX) / length, dirY = (endY - startY) / length;
+      ctx.beginPath();
+      ctx.moveTo(startX + dirX * startInset, startY + dirY * startInset);
+      ctx.lineTo(endX - dirX * endInset, endY - dirY * endInset);
+      this.applyStyle(ctx, u);
+    } else {
+      this.applyStrokeState(ctx, u);
     }
 
-    if (arrowEndSize > 0) {
-      arrowEndAngle = Math.atan2(y2 - y1, x2 - x1);
-      const cosEnd = Math.cos(arrowEndAngle);
-      const sinEnd = Math.sin(arrowEndAngle);
-      arrowEndTipX += cosEnd * tipOffset;
-      arrowEndTipY += sinEnd * tipOffset;
-
-      const endSetback = Math.min(sw + capOffset, arrowEndSize * u * 0.8);
-      lineEndX = arrowEndTipX - cosEnd * endSetback;
-      lineEndY = arrowEndTipY - sinEnd * endSetback;
-    }
-
-    ctx.beginPath();
-    ctx.moveTo(lineStartX, lineStartY);
-    ctx.lineTo(lineEndX, lineEndY);
-    this.applyStyle(ctx, u);
-
-    if (arrowStartSize > 0) this.drawArrow(ctx, u, arrowStartTipX, arrowStartTipY, arrowStartAngle, arrowStartSize, arrowstyle);
-    if (arrowEndSize > 0)   this.drawArrow(ctx, u, arrowEndTipX, arrowEndTipY, arrowEndAngle, arrowEndSize, arrowstyle);
+    this.drawArrows(ctx, u, arrowStart, arrowEnd);
   }
 
   getBoundingBox() {

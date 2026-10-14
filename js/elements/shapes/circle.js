@@ -6,10 +6,13 @@ class Circle extends Shape {
     const defaults = { r: 0, ir: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
     Object.assign(this.attributeExpressions, defaults);
     Object.assign(this.attributeValues, defaults);
+
+    this._arrowStart = pxl.createArrowRecord();
+    this._arrowEnd = pxl.createArrowRecord();
   }
 
   draw(ctx, u, t) {
-    const { r, ir, start, end, sweep, pie, closed, anticlockwise, strokewidth, linecap, arrowstart, arrowend, arrowstyle } = this.attributeValues;
+    const { r, ir, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.attributeValues;
 
     const safeR = Math.max(0, r);
     const safeIR = Math.max(0, ir);
@@ -21,7 +24,7 @@ class Circle extends Shape {
     const isClosed = closed === true;
 
     const startRadians = start * Math.PI / 180;
-    
+
     let endRadians;
     if (sweep !== null) {
       endRadians = startRadians + (sweep * Math.PI / 180);
@@ -36,77 +39,66 @@ class Circle extends Shape {
     let drawStartRadians = startRadians;
     let drawEndRadians = endRadians;
 
-    // --- ARROW OFFSET INTERCEPTION ---
-    const arrowStartSize = (arrowstart === 'auto') ? (strokewidth * 3.6) : arrowstart;
-    const arrowEndSize = (arrowend === 'auto') ? (strokewidth * 3.6) : arrowend;
-    let arrowStartTipX, arrowStartTipY, arrowStartAngle = 0, arrowStartDelta = 0;
-    let arrowEndTipX, arrowEndTipY, arrowEndAngle = 0, arrowEndDelta = 0;
+    // --- ARROWHEADS (open arcs only) ---
+    const arrowStart = this._arrowStart, arrowEnd = this._arrowEnd;
+    const canHaveArrows = safeR > 0 && safeIR === 0 && !isPie && !isClosed && this.isStroked();
+    const hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart, u);
+    const hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend, u);
+    const hasArrows = hasStart || hasEnd;
+    let drawShaft = true;
 
-    const sw = strokewidth * u;
-    const capOffset = (linecap !== 'butt') ? (sw * 0.5) : 0;
+    if (hasArrows) {
+      const radius = safeR * u;
+      const travel = isAnti ? -1 : 1; // direction of increasing arc position
+      let startInsetRadians = 0, endInsetRadians = 0;
 
-    if (arrowStartSize > 0 && safeR > 0) {
-      arrowStartTipX = safeR * Math.cos(startRadians) * u;
-      arrowStartTipY = safeR * Math.sin(startRadians) * u;
-      
-      const pullbackDist = Math.min(sw + capOffset, arrowStartSize * 0.8);
-      const clampL = Math.min(pullbackDist, safeR * 2);
-      arrowStartDelta = 2 * Math.asin(clampL / (2 * safeR));
-      const baseRadians = startRadians + (isAnti ? -arrowStartDelta : arrowStartDelta);
-      
-      const basePointX = safeR * Math.cos(baseRadians) * u;
-      const basePointY = safeR * Math.sin(baseRadians) * u;
-      arrowStartAngle = Math.atan2(arrowStartTipY - basePointY, arrowStartTipX - basePointX);
-    }
+      if (hasStart) {
+        startInsetRadians = this.aimArcArrow(arrowStart, radius, startRadians, travel);
+      }
+      if (hasEnd) {
+        endInsetRadians = this.aimArcArrow(arrowEnd, radius, endRadians, -travel);
+      }
 
-    if (arrowEndSize > 0 && safeR > 0) {
-      arrowEndTipX = safeR * Math.cos(endRadians) * u;
-      arrowEndTipY = safeR * Math.sin(endRadians) * u;
-      
-      const pullbackDist = Math.min(sw + capOffset, arrowEndSize * 0.8);
-      const clampL = Math.min(pullbackDist, safeR * 2);
-      arrowEndDelta = 2 * Math.asin(clampL / (2 * safeR));
-      const baseRadians = endRadians + (isAnti ? arrowEndDelta : -arrowEndDelta);
-      
-      const basePointX = safeR * Math.cos(baseRadians) * u;
-      const basePointY = safeR * Math.sin(baseRadians) * u;
-      arrowEndAngle = Math.atan2(arrowEndTipY - basePointY, arrowEndTipX - basePointX);
-    }
-
-    // Apply arrow arc pullback only if offsets fit within the sweep
-    const hasArrowPullback = (arrowStartDelta + arrowEndDelta) < Math.abs(endRadians - startRadians);
-
-    if (hasArrowPullback) {
-      if (arrowStartDelta > 0) drawStartRadians += isAnti ? -arrowStartDelta : arrowStartDelta;
-      if (arrowEndDelta > 0)   drawEndRadians   += isAnti ?  arrowEndDelta : -arrowEndDelta;
+      // Skip the arc if both insets would cross each other
+      drawShaft = startInsetRadians + endInsetRadians < Math.abs(endRadians - startRadians);
+      drawStartRadians += travel * startInsetRadians;
+      drawEndRadians -= travel * endInsetRadians;
     }
 
     // --- DRAW PATH ---
-    ctx.beginPath();
-    ctx.arc(0, 0, safeR * u, drawStartRadians, drawEndRadians, isAnti);
+    if (drawShaft) {
+      ctx.beginPath();
+      ctx.arc(0, 0, safeR * u, drawStartRadians, drawEndRadians, isAnti);
 
-    if (safeIR > 0) {
-      if (isFull) {
-        ctx.moveTo((safeIR * u) * Math.cos(drawEndRadians), (safeIR * u) * Math.sin(drawEndRadians));
+      if (safeIR > 0) {
+        if (isFull) {
+          ctx.moveTo((safeIR * u) * Math.cos(drawEndRadians), (safeIR * u) * Math.sin(drawEndRadians));
+        }
+        ctx.arc(0, 0, safeIR * u, drawEndRadians, drawStartRadians, !isAnti);
+        ctx.closePath();
+      } else if (isPie && !isFull) {
+        ctx.lineTo(0, 0);
+        ctx.closePath();
+      } else if ((isFull && !hasArrows) || isClosed) {
+        ctx.closePath();
       }
-      ctx.arc(0, 0, safeIR * u, drawEndRadians, drawStartRadians, !isAnti);
-      ctx.closePath();
-    } else if (isPie && !isFull) {
-      ctx.lineTo(0, 0);
-      ctx.closePath();
-    } else if ((isFull && !hasArrowPullback) || isClosed) {
-      ctx.closePath();
+
+      this.applyStyle(ctx, u);
+    } else {
+      this.applyStrokeState(ctx, u);
     }
 
-    this.applyStyle(ctx, u);
+    if (hasArrows) this.drawArrows(ctx, u, arrowStart, arrowEnd);
+  }
 
-    // --- DRAW ARROWS ---
-    if (arrowStartSize > 0 && safeR > 0) {
-      this.drawArrow(ctx, u, arrowStartTipX, arrowStartTipY, arrowStartAngle, arrowStartSize, arrowstyle);
-    }
-    if (arrowEndSize > 0 && safeR > 0) {
-      this.drawArrow(ctx, u, arrowEndTipX, arrowEndTipY, arrowEndAngle, arrowEndSize, arrowstyle);
-    }
+  // Aims an arrow at the arc end at angle `radians`; `inward` (±1) is the angle direction into the arc.
+  // Direction is the chord from the arc point one head length in, back to the end, so the head's
+  // base sits on the arc. Returns the inset as an angle (exact arc length).
+  aimArcArrow(rec, radius, radians, inward) {
+    const px = radius * Math.cos(radians), py = radius * Math.sin(radians);
+    const baseRadians = radians + inward * 2 * Math.asin(Math.min(rec.len, 2 * radius) / (2 * radius));
+    this.aimArrow(rec, px, py, px - radius * Math.cos(baseRadians), py - radius * Math.sin(baseRadians));
+    return rec.inset / radius;
   }
 
   getBoundingBox() {

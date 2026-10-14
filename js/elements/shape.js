@@ -194,47 +194,119 @@ class Shape extends PxlNode {
     pxl.applyLineDash(ctx, u, linedash, dashoffset, this);
   }
 
+  isStroked() {
+    const { stroke, strokewidth } = this.attributeValues;
+    return !!stroke && stroke !== 'none' && stroke !== 'transparent' && strokewidth > 0;
+  }
+
   applyStyle(ctx, u) {
-    const { fill, stroke, strokewidth } = this.attributeValues;
+    const { fill } = this.attributeValues;
 
     if (fill && fill !== 'none' && fill !== 'transparent') {
       ctx.fillStyle = this.createGradient(ctx, u, fill, 0);
       ctx.fill();
     }
-    
-    if (stroke && stroke !== 'none' && stroke !== 'transparent' && strokewidth > 0) {
+
+    if (this.isStroked()) {
       this.applyStrokeState(ctx, u);
       ctx.stroke();
     }
   }
 
-  drawArrow(ctx, u, tipX, tipY, tangent, size, style) {
-    const phi = Math.PI / 6; // 30 degrees
-    const wing1X = tipX - size * u * Math.cos(tangent - phi);
-    const wing1Y = tipY - size * u * Math.sin(tangent - phi);
-    const wing2X = tipX - size * u * Math.cos(tangent + phi);
-    const wing2Y = tipY - size * u * Math.sin(tangent + phi);
+  // --- ARROWHEADS ---
+  // Geometry: design/2026-10-14_unified_arrowhead_geometry_plan.md
+  // All distances are in context units (logical value × u).
+
+  // Resolves one arrow end into distances along the path and writes them into rec (zero-GC).
+  // Returns true if this end has an arrowhead.
+  resolveArrow(rec, attrValue, u) {
+    const { strokewidth, linecap, linejoin, miterlimit, arrowstyle } = this.attributeValues;
+    const size = (attrValue === 'auto' ? strokewidth * 3.6 : attrValue) * u;
+
+    if (!(size > 0)) {
+      rec.size = 0;
+      return false;
+    }
+
+    const sw = strokewidth * u;
+    const len = size * pxl.ARROW_COS30;
+    const capExt = (linecap === 'butt') ? 0 : sw * 0.5;
+
+    rec.size = size;
+    rec.len = len;
+
+    if (arrowstyle === 'line') {
+      // How far the stroked chevron corner reaches beyond its path vertex.
+      // A 60° miter needs miterlimit >= 2, otherwise canvas falls back to bevel.
+      const joinExt = (linejoin === 'round') ? sw * 0.5
+                    : (linejoin === 'miter' && miterlimit >= 2) ? sw
+                    : sw * 0.25;
+      rec.tipAdvance = capExt - joinExt;
+      rec.inset = joinExt;
+    } else {
+      // Shallowest depth (behind the tip) at which the shaft's visible end fits inside the 30° wedge.
+      const minDepth = (linecap === 'butt') ? sw * pxl.ARROW_COS30
+                     : (linecap === 'square') ? sw * (pxl.ARROW_COS30 + 0.5)
+                     : sw;
+      // Heads narrower than the stroke clamp to the base line: continuous in size and strokewidth.
+      const depth = Math.min(Math.max(minDepth, pxl.ARROW_K_DEPTH * len), len + capExt);
+      rec.tipAdvance = capExt;
+      rec.inset = depth - capExt;
+    }
+    return true;
+  }
+
+  // Points rec away from the path end (px, py) along the vector (vx, vy) and places the tip.
+  // Returns the length of (vx, vy).
+  aimArrow(rec, px, py, vx, vy) {
+    const length = Math.sqrt(vx * vx + vy * vy);
+    rec.dirX = (length > 0) ? vx / length : 1;
+    rec.dirY = (length > 0) ? vy / length : 0;
+    rec.tipX = px + rec.dirX * rec.tipAdvance;
+    rec.tipY = py + rec.dirY * rec.tipAdvance;
+    return length;
+  }
+
+  // Draws both arrowheads in one path. Expects stroke state to be applied already.
+  drawArrows(ctx, u, recA, recB) {
+    const isLine = this.attributeValues.arrowstyle === 'line';
 
     ctx.beginPath();
-    if (style === 'line') {
+    if (recA.size > 0) this.traceArrow(ctx, recA, isLine);
+    if (recB.size > 0) this.traceArrow(ctx, recB, isLine);
+
+    if (isLine) {
+      // Chevrons are always solid
+      const { linedash, dashoffset } = this.attributeValues;
+      const hasDash = linedash && linedash !== 'none' && linedash !== 0 && linedash !== '0';
+      if (hasDash) ctx.setLineDash(pxl._emptyDash);
+      ctx.stroke();
+      if (hasDash) pxl.applyLineDash(ctx, u, linedash, dashoffset, this);
+    } else {
+      const originalFill = ctx.fillStyle;
+      ctx.fillStyle = ctx.strokeStyle;
+      ctx.fill();
+      ctx.fillStyle = originalFill;
+    }
+  }
+
+  traceArrow(ctx, rec, isLine) {
+    const { size, tipX, tipY, dirX, dirY } = rec;
+    // Wings: direction rotated by ±30°, pointing back from the tip
+    const cx = size * dirX * pxl.ARROW_COS30, cy = size * dirY * pxl.ARROW_COS30;
+    const sx = size * dirX * pxl.ARROW_SIN30, sy = size * dirY * pxl.ARROW_SIN30;
+    const wing1X = tipX - cx - sy, wing1Y = tipY - cy + sx;
+    const wing2X = tipX - cx + sy, wing2Y = tipY - cy - sx;
+
+    if (isLine) {
       ctx.moveTo(wing1X, wing1Y);
       ctx.lineTo(tipX, tipY);
       ctx.lineTo(wing2X, wing2Y);
-      
-      const hasDash = this.attributeValues.linedash && this.attributeValues.linedash !== 'none' && this.attributeValues.linedash !== 0 && this.attributeValues.linedash !== '0';
-      if (hasDash) ctx.setLineDash(pxl._emptyDash);
-      ctx.stroke();
-      if (hasDash) pxl.applyLineDash(ctx, u, this.attributeValues.linedash, this.attributeValues.dashoffset, this);
     } else {
       ctx.moveTo(tipX, tipY);
       ctx.lineTo(wing1X, wing1Y);
       ctx.lineTo(wing2X, wing2Y);
       ctx.closePath();
-      
-      const originalFill = ctx.fillStyle;
-      ctx.fillStyle = ctx.strokeStyle; 
-      ctx.fill();
-      ctx.fillStyle = originalFill;
     }
   }
 }

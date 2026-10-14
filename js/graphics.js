@@ -124,6 +124,19 @@ pxl.applyContextState = function(ctx, u, attributeValues, node) {
 };
 
 // =========================================================================
+// Arrowhead Geometry (design/2026-10-14_unified_arrowhead_geometry_plan.md)
+// =========================================================================
+pxl.ARROW_COS30 = Math.cos(Math.PI / 6); // arrowhead half-angle is 30°
+pxl.ARROW_SIN30 = 0.5;
+pxl.ARROW_K_DEPTH = 0.6;                 // min shaft depth inside a filled head, as fraction of head length
+
+// Per-arrow-end record, pre-allocated once per shape (zero-GC). All fields start as doubles
+// so V8 keeps one stable hidden class for every arrow shape.
+pxl.createArrowRecord = function() {
+  return { size: NaN, len: NaN, tipAdvance: NaN, inset: NaN, tipX: NaN, tipY: NaN, dirX: NaN, dirY: NaN };
+};
+
+// =========================================================================
 // Stroke & Line Dash Helpers
 // =========================================================================
 pxl._emptyDash = [];
