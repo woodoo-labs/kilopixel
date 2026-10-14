@@ -35,9 +35,9 @@
         <p class="lead">Arrowheads turn open paths into arrows. They can be added to either end of lines, polylines, circular arcs and elliptical arcs, drawn as filled triangles or open chevrons, and sized automatically from the stroke width or with a fixed value.</p>
 
         <!-- ================================================================= -->
-        <!-- SECTION 1: SIZING ARROWHEADS                                      -->
+        <!-- SECTION 1: SIZING                                                 -->
         <!-- ================================================================= -->
-        <h2>1. Sizing Arrowheads</h2>
+        <h2>1. Sizing</h2>
         <p>Arrowheads are added to open paths using the <code>arrowstart</code> and <code>arrowend</code> attributes. Both attributes support two sizing modes: automatic scaling (<code>'auto'</code>), which sets the arrowhead size to <code>strokewidth &times; 3.6</code>, and custom numeric sizing, where the arrowhead size is defined explicitly and remains independent of the stroke width.</p>
 
         <!-- Declarative HTML markup above stage -->
@@ -127,9 +127,9 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECTION 2: ARROW STYLES                                           -->
+        <!-- SECTION 2: STYLES                                                 -->
         <!-- ================================================================= -->
-        <h2>2. Arrow Styles</h2>
+        <h2>2. Styles</h2>
         <p>Kilopixel provides two visual styles for arrowheads via the <code>arrowstyle</code> attribute: solid filled triangles (<code>arrowstyle="filled"</code>) and open line chevrons (<code>arrowstyle="line"</code>). Both styles automatically inherit the shape's <code>stroke</code> color, and <code>arrowstyle="line"</code> chevrons automatically share the host path's stroke thickness (<code>strokewidth</code>).</p>
 
         <!-- Declarative HTML markup above stage -->
@@ -233,9 +233,9 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECTION 3: LINE CAPS & ALIGNMENT                                  -->
+        <!-- SECTION 3: LINE CAPS                                              -->
         <!-- ================================================================= -->
-        <h2>3. Line Caps &amp; Alignment</h2>
+        <h2>3. Line Caps</h2>
         <p>In canvas graphics, line caps define where a stroked path physically ends. A <code>butt</code> cap cuts flush at the path coordinate, while <code>square</code> and <code>round</code> caps extend past the coordinate by half the stroke width (<code>strokewidth / 2</code>). Kilopixel's arrowhead geometry automatically aligns to this physical boundary:</p>
         <ul>
           <li><strong>Butt:</strong> The stroke terminates flush at the coordinate, and the arrowhead tip lands precisely on the endpoint plane.</li>
