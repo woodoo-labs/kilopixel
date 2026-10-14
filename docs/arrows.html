@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Add directional arrowheads to lines, circle arcs, and elliptical curves in Kilopixel with automatic scaling or custom dimensions.">
+  <meta name="description" content="Add arrowheads to lines, polylines, circular arcs and elliptical arcs in Kilopixel, as filled triangles or open chevrons with automatic or fixed sizing.">
   <title>Arrowheads | Kilopixel</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/docs.css">
@@ -32,7 +32,7 @@
     <main class="docs-content">
       <div class="docs-inner">
         <h1>Arrowheads</h1>
-        <p class="lead">Transform open paths into directional vectors, flow indicators, and dimension lines. Kilopixel supports solid filled triangles and open line chevrons across straight lines, circular arcs, and parametric elliptical curves with automatic proportional scaling or custom pixel sizing.</p>
+        <p class="lead">Arrowheads turn open paths into arrows. They can be added to either end of lines, polylines, circular arcs and elliptical arcs, drawn as filled triangles or open chevrons, and sized automatically from the stroke width or with a fixed value.</p>
 
         <!-- ================================================================= -->
         <!-- SECTION 1: SIZING ARROWHEADS                                      -->
@@ -248,19 +248,19 @@
   &lt;pxl-layer&gt;
     &lt;!-- Top: Line --&gt;
     &lt;pxl-line x1="350" y1="150" x2="750" y2="150" stroke="#f97316"
-      strokewidth="<mark id="sec3LineStrokeWidthCode">20</mark>" arrowend="<mark id="sec3LineArrowCode">75</mark>"
+      arrowend="<mark id="sec3LineArrowCode">75</mark>" strokewidth="<mark id="sec3LineStrokeWidthCode">20</mark>"
       arrowstyle="<mark id="sec3LineStyleCode">filled</mark>" linecap="<mark id="sec3LineCapCode">butt</mark>"&gt;
     &lt;/pxl-line&gt;
 
     &lt;!-- Middle: Polyline --&gt;
     &lt;pxl-polyline points="350,300; 450,250; 550,350; 650,300; 750,300" stroke="#3b82f6"
-      strokewidth="<mark id="sec3PolylineStrokeWidthCode">20</mark>" arrowend="<mark id="sec3PolylineArrowCode">75</mark>"
+      arrowend="<mark id="sec3PolylineArrowCode">75</mark>" strokewidth="<mark id="sec3PolylineStrokeWidthCode">20</mark>"
       arrowstyle="<mark id="sec3PolylineStyleCode">filled</mark>" linecap="<mark id="sec3PolylineCapCode">square</mark>"&gt;
     &lt;/pxl-polyline&gt;
 
     &lt;!-- Bottom: Elliptical Arc --&gt;
     &lt;pxl-ellipse x="750" y="580" rx="400" ry="130" start="180" sweep="90" stroke="#22c55e"
-      strokewidth="<mark id="sec3EllipseStrokeWidthCode">20</mark>" arrowend="<mark id="sec3EllipseArrowCode">75</mark>"
+      arrowend="<mark id="sec3EllipseArrowCode">75</mark>" strokewidth="<mark id="sec3EllipseStrokeWidthCode">20</mark>"
       arrowstyle="<mark id="sec3EllipseStyleCode">line</mark>" linecap="<mark id="sec3EllipseCapCode">round</mark>"&gt;
     &lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
@@ -280,9 +280,9 @@
             <!-- Line Tab -->
             <div class="tab-content active" id="sec3LineTab">
               <div class="playground-sliders">
-                <!-- Row 1: Arrow Size & Stroke Width -->
+                <!-- Row 1: Arrow End & Stroke Width -->
                 <div class="control-group">
-                  <label><span>Arrow Size</span> <span id="sec3LineArrowVal">75</span></label>
+                  <label><span>Arrow End</span> <span id="sec3LineArrowVal">75</span></label>
                   <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec3LineArrowInput"
                     oninput="document.getElementById('sec3Line').setAttribute('arrowend', this.value); document.getElementById('sec3LineArrowVal').innerText = this.value; document.getElementById('sec3LineArrowCode').innerText = this.value;" data-mark="sec3LineArrowCode">
                 </div>
@@ -314,9 +314,9 @@
             <!-- Polyline Tab -->
             <div class="tab-content" id="sec3PolylineTab">
               <div class="playground-sliders">
-                <!-- Row 1: Arrow Size & Stroke Width -->
+                <!-- Row 1: Arrow End & Stroke Width -->
                 <div class="control-group">
-                  <label><span>Arrow Size</span> <span id="sec3PolylineArrowVal">75</span></label>
+                  <label><span>Arrow End</span> <span id="sec3PolylineArrowVal">75</span></label>
                   <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec3PolylineArrowInput"
                     oninput="document.getElementById('sec3Polyline').setAttribute('arrowend', this.value); document.getElementById('sec3PolylineArrowVal').innerText = this.value; document.getElementById('sec3PolylineArrowCode').innerText = this.value;" data-mark="sec3PolylineArrowCode">
                 </div>
@@ -348,9 +348,9 @@
             <!-- Ellipse Tab -->
             <div class="tab-content" id="sec3EllipseTab">
               <div class="playground-sliders">
-                <!-- Row 1: Arrow Size & Stroke Width -->
+                <!-- Row 1: Arrow End & Stroke Width -->
                 <div class="control-group">
-                  <label><span>Arrow Size</span> <span id="sec3EllipseArrowVal">75</span></label>
+                  <label><span>Arrow End</span> <span id="sec3EllipseArrowVal">75</span></label>
                   <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec3EllipseArrowInput"
                     oninput="document.getElementById('sec3Ellipse').setAttribute('arrowend', this.value); document.getElementById('sec3EllipseArrowVal').innerText = this.value; document.getElementById('sec3EllipseArrowCode').innerText = this.value;" data-mark="sec3EllipseArrowCode">
                 </div>
@@ -412,6 +412,161 @@
               <pxl-text x="790" y="500" text="'reference'" size="27" fill="#94a3b8" font="monospace" baseline="middle"></pxl-text>
               <pxl-ellipse id="sec3Ellipse" x="750" y="580" rx="400" ry="130" start="180" sweep="90" stroke="#22c55e" strokewidth="20"
                 arrowend="75" arrowstyle="line" linecap="round"></pxl-ellipse>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 4: LINE JOINS                                             -->
+        <!-- ================================================================= -->
+        <h2>4. Line Joins</h2>
+        <p>Open chevrons (<code>arrowstyle="line"</code>) are stroked, so their tip follows the shape's line join (<code>linejoin</code>): <code>miter</code> draws a sharp tip, <code>bevel</code> a flat tip, and <code>round</code> a rounded tip. The tip still ends at the cap boundary described above. With <code>miter</code>, the tip stays sharp even when <code>miterlimit</code> is lowered to blunt the corners of the path. Filled arrowheads are not affected by <code>linejoin</code>.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Sharp Tips on Rounded Paths</p>
+          <p class="callout-body">Filled arrowheads ignore <code>linejoin</code>. To combine rounded corners with a sharp tip, use <code>arrowstyle="filled"</code>.</p>
+        </div>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Top: Miter Join --&gt;
+    &lt;pxl-polyline points="350,185; 390,115; 430,185; 470,115; 510,185; 750,150" stroke="#f97316"
+      arrowend="<mark id="sec4MiterArrowCode">75</mark>" strokewidth="<mark id="sec4MiterStrokeWidthCode">20</mark>"
+      miterlimit="<mark id="sec4MiterLimitCode">10</mark>"
+      arrowstyle="<mark id="sec4MiterStyleCode">line</mark>" linejoin="miter"&gt;
+    &lt;/pxl-polyline&gt;
+
+    &lt;!-- Middle: Bevel Join --&gt;
+    &lt;pxl-polyline points="350,335; 390,265; 430,335; 470,265; 510,335; 750,300" stroke="#3b82f6"
+      arrowend="<mark id="sec4BevelArrowCode">75</mark>" strokewidth="<mark id="sec4BevelStrokeWidthCode">20</mark>"
+      arrowstyle="<mark id="sec4BevelStyleCode">line</mark>" linejoin="bevel"&gt;
+    &lt;/pxl-polyline&gt;
+
+    &lt;!-- Bottom: Round Join --&gt;
+    &lt;pxl-polyline points="350,485; 390,415; 430,485; 470,415; 510,485; 750,450" stroke="#22c55e"
+      arrowend="<mark id="sec4RoundArrowCode">75</mark>" strokewidth="<mark id="sec4RoundStrokeWidthCode">20</mark>"
+      arrowstyle="<mark id="sec4RoundStyleCode">line</mark>" linejoin="round"&gt;
+    &lt;/pxl-polyline&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4MiterTab')">Miter</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4BevelTab')">Bevel</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec4RoundTab')">Round</button>
+              </div>
+            </div>
+
+            <!-- Miter Tab -->
+            <div class="tab-content active" id="sec4MiterTab">
+              <div class="playground-sliders">
+                <!-- Row 1: Arrow End & Stroke Width -->
+                <div class="control-group">
+                  <label><span>Arrow End</span> <span id="sec4MiterArrowVal">75</span></label>
+                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec4MiterArrowInput"
+                    oninput="document.getElementById('sec4Miter').setAttribute('arrowend', this.value); document.getElementById('sec4MiterArrowVal').innerText = this.value; document.getElementById('sec4MiterArrowCode').innerText = this.value;" data-mark="sec4MiterArrowCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec4MiterStrokeWidthVal">20</span></label>
+                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec4MiterStrokeWidthInput"
+                    oninput="document.getElementById('sec4Miter').setAttribute('strokewidth', this.value); document.getElementById('sec4MiterStrokeWidthVal').innerText = this.value; document.getElementById('sec4MiterStrokeWidthCode').innerText = this.value;" data-mark="sec4MiterStrokeWidthCode">
+                </div>
+
+                <!-- Row 2: Miter Limit -->
+                <div class="control-group">
+                  <label><span>Miter Limit <span class="indicator-dot"></span></span> <span id="sec4MiterLimitVal">10</span></label>
+                  <input type="range" min="1" max="10" step="0.5" value="10" autocomplete="off" id="sec4MiterLimitInput"
+                    oninput="document.getElementById('sec4Miter').setAttribute('miterlimit', this.value); document.getElementById('sec4MiterLimitVal').innerText = this.value; document.getElementById('sec4MiterLimitCode').innerText = this.value;" data-mark="sec4MiterLimitCode">
+                </div>
+
+                <!-- Row 3: Arrow Style -->
+                <div class="control-group">
+                  <label>Arrow Style</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn" onclick="document.getElementById('sec4Miter').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec4MiterStyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec4Miter').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec4MiterStyleCode', 'line');">line</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bevel Tab -->
+            <div class="tab-content" id="sec4BevelTab">
+              <div class="playground-sliders">
+                <!-- Row 1: Arrow End & Stroke Width -->
+                <div class="control-group">
+                  <label><span>Arrow End</span> <span id="sec4BevelArrowVal">75</span></label>
+                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec4BevelArrowInput"
+                    oninput="document.getElementById('sec4Bevel').setAttribute('arrowend', this.value); document.getElementById('sec4BevelArrowVal').innerText = this.value; document.getElementById('sec4BevelArrowCode').innerText = this.value;" data-mark="sec4BevelArrowCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec4BevelStrokeWidthVal">20</span></label>
+                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec4BevelStrokeWidthInput"
+                    oninput="document.getElementById('sec4Bevel').setAttribute('strokewidth', this.value); document.getElementById('sec4BevelStrokeWidthVal').innerText = this.value; document.getElementById('sec4BevelStrokeWidthCode').innerText = this.value;" data-mark="sec4BevelStrokeWidthCode">
+                </div>
+
+                <!-- Row 2: Arrow Style -->
+                <div class="control-group">
+                  <label>Arrow Style</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn" onclick="document.getElementById('sec4Bevel').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec4BevelStyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec4Bevel').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec4BevelStyleCode', 'line');">line</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Round Tab -->
+            <div class="tab-content" id="sec4RoundTab">
+              <div class="playground-sliders">
+                <!-- Row 1: Arrow End & Stroke Width -->
+                <div class="control-group">
+                  <label><span>Arrow End</span> <span id="sec4RoundArrowVal">75</span></label>
+                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec4RoundArrowInput"
+                    oninput="document.getElementById('sec4Round').setAttribute('arrowend', this.value); document.getElementById('sec4RoundArrowVal').innerText = this.value; document.getElementById('sec4RoundArrowCode').innerText = this.value;" data-mark="sec4RoundArrowCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Stroke Width</span> <span id="sec4RoundStrokeWidthVal">20</span></label>
+                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec4RoundStrokeWidthInput"
+                    oninput="document.getElementById('sec4Round').setAttribute('strokewidth', this.value); document.getElementById('sec4RoundStrokeWidthVal').innerText = this.value; document.getElementById('sec4RoundStrokeWidthCode').innerText = this.value;" data-mark="sec4RoundStrokeWidthCode">
+                </div>
+
+                <!-- Row 2: Arrow Style -->
+                <div class="control-group">
+                  <label>Arrow Style</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn" onclick="document.getElementById('sec4Round').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec4RoundStyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec4Round').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec4RoundStyleCode', 'line');">line</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4 Stage -->
+          <pxl-stage id="sec4Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Top: Miter Join (Orange Scheme) -->
+              <pxl-text x="320" y="150" text="'linejoin=&quot;miter&quot;'" size="27" weight="700" fill="#fb923c" font="monospace" align="right" baseline="middle"></pxl-text>
+              <pxl-polyline id="sec4Miter" points="350,185; 390,115; 430,185; 470,115; 510,185; 750,150" stroke="#f97316" strokewidth="20"
+                arrowend="75" miterlimit="10" arrowstyle="line" linejoin="miter"></pxl-polyline>
+
+              <!-- Middle: Bevel Join (Blue Scheme) -->
+              <pxl-text x="320" y="300" text="'linejoin=&quot;bevel&quot;'" size="27" weight="700" fill="#60a5fa" font="monospace" align="right" baseline="middle"></pxl-text>
+              <pxl-polyline id="sec4Bevel" points="350,335; 390,265; 430,335; 470,265; 510,335; 750,300" stroke="#3b82f6" strokewidth="20"
+                arrowend="75" arrowstyle="line" linejoin="bevel"></pxl-polyline>
+
+              <!-- Bottom: Round Join (Green Scheme) -->
+              <pxl-text x="320" y="450" text="'linejoin=&quot;round&quot;'" size="27" weight="700" fill="#4ade80" font="monospace" align="right" baseline="middle"></pxl-text>
+              <pxl-polyline id="sec4Round" points="350,485; 390,415; 430,485; 470,415; 510,485; 750,450" stroke="#22c55e" strokewidth="20"
+                arrowend="75" arrowstyle="line" linejoin="round"></pxl-polyline>
             </pxl-layer>
           </pxl-stage>
         </div>
