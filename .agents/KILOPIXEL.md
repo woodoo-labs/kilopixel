@@ -1,6 +1,6 @@
 # Kilopixel Framework — Complete Technical Reference
 
-> **Version**: 0.1.0 | **Total Source**: ~48KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Total Source**: ~52KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes using custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, etc.) and the framework compiles, evaluates, and renders everything at 60fps automatically.
 
@@ -26,25 +26,26 @@ Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built
 6. [Coordinate System & Transform Pipeline](#coordinate-system--transform-pipeline)
 7. [The Responsive Unit System](#the-responsive-unit-system)
 8. [Color & Gradient System](#color--gradient-system)
-9. [Time Drivers](#time-drivers)
-10. [Interaction System](#interaction-system)
-11. [Matrix Engine & Coordinate Mapping](#matrix-engine--coordinate-mapping)
-12. [Element Reference — Stage](#element-reference--stage)
-13. [Element Reference — Layer](#element-reference--layer)
-14. [Element Reference — Group](#element-reference--group)
-15. [Element Reference — Shape (Base Class)](#element-reference--shape-base-class)
-16. [Element Reference — Circle](#element-reference--circle)
-17. [Element Reference — Ellipse](#element-reference--ellipse)
-18. [Element Reference — Rect](#element-reference--rect)
-19. [Element Reference — Line](#element-reference--line)
-20. [Element Reference — Polyline](#element-reference--polyline)
-21. [Element Reference — Text](#element-reference--text)
-22. [Element Reference — Grid](#element-reference--grid)
-23. [Element Reference — Variable](#element-reference--variable)
-24. [Per-Frame Render Pipeline](#per-frame-render-pipeline)
-25. [Performance Monitor](#performance-monitor)
-26. [Build System](#build-system)
-27. [AI Code Generation Guide](#ai-code-generation-guide)
+9. [Arrowhead System](#arrowhead-system)
+10. [Time Drivers](#time-drivers)
+11. [Interaction System](#interaction-system)
+12. [Matrix Engine & Coordinate Mapping](#matrix-engine--coordinate-mapping)
+13. [Element Reference — Stage](#element-reference--stage)
+14. [Element Reference — Layer](#element-reference--layer)
+15. [Element Reference — Group](#element-reference--group)
+16. [Element Reference — Shape (Base Class)](#element-reference--shape-base-class)
+17. [Element Reference — Circle](#element-reference--circle)
+18. [Element Reference — Ellipse](#element-reference--ellipse)
+19. [Element Reference — Rect](#element-reference--rect)
+20. [Element Reference — Line](#element-reference--line)
+21. [Element Reference — Polyline](#element-reference--polyline)
+22. [Element Reference — Text](#element-reference--text)
+23. [Element Reference — Grid](#element-reference--grid)
+24. [Element Reference — Variable](#element-reference--variable)
+25. [Per-Frame Render Pipeline](#per-frame-render-pipeline)
+26. [Performance Monitor](#performance-monitor)
+27. [Build System](#build-system)
+28. [AI Code Generation Guide](#ai-code-generation-guide)
 
 ---
 
@@ -106,7 +107,7 @@ The framework compiles from these files (in build order):
 | 2 | `js/matrix.js` | Zero-GC 2D affine matrix engine (Float32Array) |
 | 3 | `js/compiler.js` | Multi-tier expression parser, built-in scope, time drivers |
 | 4 | `js/interaction.js` | InteractionEngine class, dummy context hit testing, pointer events |
-| 5 | `js/graphics.js` | Transform pipeline helper, anchor tables, points parser, radius resolver, line dash helper |
+| 5 | `js/graphics.js` | Transform pipeline helper, anchor tables, points parser, radius resolver, arrowhead constants & record factory, line dash helper |
 | 6 | `js/monitor.js` | Performance telemetry (fps, renderAvg, renderMax) |
 | 7 | `js/elements/stage.js` | Root container, canvas host, rAF loop, resize, pointer routing |
 | 8 | `js/elements/node.js` | `PxlNode` base class (extends HTMLElement), matrix tracking |
@@ -117,7 +118,7 @@ The framework compiles from these files (in build order):
 | 13 | `js/elements/shapes/ellipse.js` | `<pxl-ellipse>` — elliptical arcs with independent radii |
 | 14 | `js/elements/shapes/rect.js` | `<pxl-rect>` — per-corner radii, 9-position anchor |
 | 15 | `js/elements/shapes/line.js` | `<pxl-line>` — simple line with arrowheads |
-| 16 | `js/elements/shapes/polyline.js` | `<pxl-polyline>` — per-coordinate animation, Catmull-Rom smoothing |
+| 16 | `js/elements/shapes/polyline.js` | `<pxl-polyline>` — per-coordinate animation, Catmull-Rom smoothing, arrowheads |
 | 17 | `js/elements/shapes/text.js` | `<pxl-text>` — 3-tier caching, word-wrap, reveal effect |
 | 18 | `js/elements/shapes/grid.js` | `<pxl-grid>` — infinite viewport-clipped grid |
 | 19 | `js/elements/variable.js` | `<pxl-var>` — reactive variable element |
@@ -512,6 +513,46 @@ Filters are invoked as standard function calls rather than raw string concatenat
 
 ---
 
+## Arrowhead System
+
+**Source**: `js/elements/shape.js` (shared math), `js/graphics.js` (constants), per-shape mapping in `line.js`, `polyline.js`, `circle.js`, `ellipse.js`  
+**Design**: `design/2026-10-14_unified_arrowhead_geometry_plan.md` (full derivations)
+
+Supported on `<pxl-line>`, `<pxl-polyline>`, `<pxl-circle>` and `<pxl-ellipse>` via `arrowstart`, `arrowend` (number or `'auto'`) and `arrowstyle` (`'filled'` | `'line'`).
+
+### Size
+- The arrowhead is an **equilateral triangle** (60° tip). `size` is its side length, which equals the **base width** (wing corner to wing corner).
+- `'auto'` = `strokewidth × 3.6`. Values `≤ 0` mean no arrowhead.
+- Length from tip to base = `size × cos30° ≈ 0.866 × size`.
+- **No minimum size**: heads narrower than the stroke are allowed (user's choice).
+
+### Alignment Principle
+> The linecap defines where the line ends, and the arrow tip ends at the same spot.
+
+- The tip lands on the cap boundary: the end point for `butt`, `strokewidth / 2` beyond it for `square` and `round`. This is the same for both styles.
+- `'line'` chevrons: the stroked corner reaches beyond its path vertex by `strokewidth` (miter), `strokewidth / 2` (round) or `strokewidth / 4` (bevel), and the vertex is pulled back by that amount. A 60° miter needs `miterlimit ≥ 2`; below that canvas falls back to bevel, and the engine accounts for it.
+
+### Shaft Pullback (Inset)
+The stroke under the head is shortened ("inset") so it never shows beside or in front of the head:
+- **`'filled'`**: the shaft ends at depth `D = min(max(Dmin, 0.6 × length), length + capExt)` behind the tip, where `Dmin` is the exact minimum for the cap (`0.866·sw` butt, `1.366·sw` square, `1·sw` round). This formula is continuous, so animated sizes never jump. Very small heads sit flush on the shaft end like a pointed cap.
+- **`'line'`**: the shaft's visible end is exactly at the chevron vertex (inset = the join extension).
+- **Curves**: circle and ellipse trim by arc length / parameter offset. Smooth polylines trim only their first/last Bézier segment via de Casteljau (`flatCache` is never mutated). The head points along the **chord over its own length**, so its base sits on the curve.
+
+### Rules & Limits
+- Arrowheads only apply to **open** strokes. They are ignored with `pie`, `closed`, `ir` / `irx` / `iry`, and on closed polylines. A full 360° sweep with arrows stays an open arc.
+- Heads inherit the stroke style (colors and gradients). **No `stroke` (or `strokewidth="0"`) means no arrowheads.**
+- `'line'` chevrons are always drawn solid, even on dashed strokes.
+- If a path is shorter than both insets combined, only the heads are drawn.
+- 2-point polylines are drawn straight even with `smooth` (a Catmull-Rom curve through 2 points is a line).
+
+### Performance
+- Zero allocations per frame: each arrow shape pre-allocates two records (`_arrowStart`, `_arrowEnd`) via `pxl.createArrowRecord()`, with all fields initialized as doubles (one stable hidden class).
+- Vector API: directions are unit vectors; wings are a rotation by the constants `pxl.ARROW_COS30` / `pxl.ARROW_SIN30`. There is no `atan2`, and no trig inside the head drawing.
+- Both heads are drawn in one path: one `fill()` or `stroke()` per shape.
+- Fast path: shapes without arrowheads skip all arrow math.
+
+---
+
 ## Time Drivers
 
 All 8 time drivers are defined in `pxl.drivers` and injected into every compiled expression's scope. The variable `t` is in **seconds** (not milliseconds). Each driver takes a `d` parameter (duration/period in seconds) and returns a value in the `[0, 1]` range.
@@ -827,15 +868,19 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `sc
 
 **`applyStyle(ctx, u)`**: After a path is built:
 1. If `fill` is set (not `none`/`transparent`): resolve gradient, `ctx.fill()`
-2. If `stroke` is set and `strokewidth > 0`: `this.applyStrokeState(ctx, u)`, then `ctx.stroke()`
+2. If `isStroked()`: `this.applyStrokeState(ctx, u)`, then `ctx.stroke()`
+
+**`isStroked()`**: True if `stroke` is set (not `none`/`transparent`) and `strokewidth > 0`. Used by `applyStyle` and to decide whether arrowheads are drawn.
 
 **`applyStrokeState(ctx, u)`**: Sets all stroke-related context state in one place: `strokeStyle` (gradient-resolved via slot `1`), `lineWidth = strokewidth * u`, `lineCap`, `lineJoin`, `miterLimit`, and line dash via `pxl.applyLineDash(ctx, u, linedash, dashoffset, this)`. Used by `applyStyle` for path-based shapes and directly by `<pxl-text>` (which cannot use paths because `strokeText()` paints glyphs directly). Convention: stroke state is always **set before stroking** and never reset afterwards — every stroke call site goes through this method, so leaked state from a previous shape is always overwritten.
 
 **`createGradient(ctx, u, styleValue, slotIndex)`**: If the value is a gradient descriptor (has `isGradient: true`), creates a `CanvasGradient` from the shape's bounding box. Uses `_gradCache` dual-slot cache to avoid recreation.
 
-**`drawArrow(ctx, u, tipX, tipY, tangent, size, style)`**: Draws arrowhead at a point with given tangent angle. Two styles:
-- `'filled'` — solid triangle, fills with strokeStyle
-- `'line'` — open V-shape, stroked
+**Arrowhead methods** (used by Line, Polyline, Circle, Ellipse; see [Arrowhead System](#arrowhead-system)):
+- **`resolveArrow(rec, attrValue, u)`**: Resolves one arrow end (`arrowstart`/`arrowend` value) into `size`, `len`, `tipAdvance` and `inset` (context units), written into the pre-allocated `rec`. Returns `true` if this end has a head.
+- **`aimArrow(rec, px, py, vx, vy)`**: Sets the unit direction from the vector `(vx, vy)` (pointing out of the path) and places the tip at `P + tipAdvance · dir`. Returns the vector's length.
+- **`drawArrows(ctx, u, recStart, recEnd)`**: Draws both heads in one path: one `fill()` (filled, using `strokeStyle`) or one `stroke()` (line chevrons, dashes temporarily off). Expects stroke state to be applied already.
+- **`traceArrow(ctx, rec, isLine)`**: Adds one head (triangle or chevron) to the current path.
 
 ### Event Handling
 
@@ -886,7 +931,7 @@ When `attributeChangedCallback` receives an event attribute (`onclick`, `onenter
 - Calculates start/end radians from degrees
 - If `sweep` is set, `endRadians = startRadians + sweep * π/180`
 - If neither `end` nor `sweep`, draws full circle
-- Arrow offset interception: if arrows are enabled, the arc endpoints are pulled back to prevent overlap
+- Arrowheads (open arcs only; see [Arrowhead System](#arrowhead-system)): the arc is trimmed by `inset / R` radians; each head points along the chord from the arc point one head length in (`2·asin(len / 2R)`) back to the end
 - Donut: if `ir > 0`, draws inner arc in reverse direction and closes
 - Pie: if `pie` and not full circle, draws `lineTo(0, 0)` and closes
 
@@ -915,12 +960,7 @@ When `attributeChangedCallback` receives an event attribute (`onclick`, `onenter
 
 ### Drawing Logic
 
-Like Circle but uses `ctx.ellipse()` with independent `rx`/`ry` radii. Arrow angle calculations use the parametric derivative of the ellipse for correct tangent computation:
-```javascript
-dx = -rx * sin(angle)
-dy = ry * cos(angle)
-speed = sqrt(dx² + dy²)
-```
+Like Circle but uses `ctx.ellipse()` with independent `rx`/`ry` radii. Arrowheads (see [Arrowhead System](#arrowhead-system)) convert a distance along the curve into a parameter offset: an estimate from the local speed `sqrt((rx·sin θ)² + (ry·cos θ)²)`, followed by one chord correction step. This is used both for the trim (`inset`) and for the head direction (chord over the head length).
 
 ### Bounding Box
 
@@ -1003,8 +1043,7 @@ Takes anchor into account: `{ left: -w*ax, right: w*(1-ax), top: -h*ay, bottom: 
 ### Drawing Logic
 
 - Fast path: if no arrows, simple `moveTo` + `lineTo` + `applyStyle`
-- With arrows: calculates tangent angles, offsets line endpoints for filled arrows (0.75× arrow size), handles square linecap offset
-- Arrow size: number for explicit size, `'auto'` = `strokewidth * 3.6`
+- With arrows (see [Arrowhead System](#arrowhead-system)): one `sqrt` for the direction; the shaft is trimmed by each end's `inset`. If both insets exceed the line length, only the heads are drawn.
 
 ### Bounding Box
 
@@ -1067,8 +1106,8 @@ When `smooth` is not false:
 
 - Minimum 4 values (2 points) required
 - Fills `flatCache` Float32Array with scaled values
-- If arrows: intercepts start/end points, offsets them, caches originals for restoration after draw
-- Draws path: simple `lineTo` or smooth `bezierCurveTo`
+- Draws path: simple `lineTo` or smooth `bezierCurveTo` (2-point polylines are always straight)
+- Arrowheads (open polylines only; see [Arrowhead System](#arrowhead-system)): `flatCache` is never mutated. Straight: the first/last segment is trimmed by `inset` (clamped to the segment length). Smooth: the first/last Bézier segment is split with de Casteljau at the chord estimate `t = inset / chord`, so the curve stays identical, only shorter; the Catmull-Rom loop in between stays branch-free.
 - If `closed`: `ctx.closePath()`
 
 ### Bounding Box
@@ -1498,6 +1537,8 @@ Note: `ref.myShape.tx` gives `x + dx` in the shape's OWN local space. `toLocal(r
 - **Don't animate inside static CSS filter strings** → use Array syntax `filter="[blur(wave(2)*10)]"` instead
 - **CSS filter pixels vs logical units** → filter helpers (`blur(5)`) auto-scale the values to physical pixels; native shadows (`shadowblur="5"`) also use responsive logical units (`5 * u`)
 - **Don't nest `<pxl-stage>` inside `<pxl-stage>`** → stages are independent roots
+- **Arrowheads need an open, stroked path** → they are ignored on `pie`, `closed`, rings (`ir`), closed polylines, and shapes without `stroke`
+- **`arrowstyle="line"` with `linejoin="miter"` needs `miterlimit ≥ 2`** → otherwise canvas bevels the 60° tip (the engine still aligns it correctly, but it looks blunt)
 - **Radial Gradients** → Use 1/3/6-value syntax: `radial([r1], colors)`, `radial([x0, y0, r1], colors)`, or `radial([x0, y0, r0, x1, y1, r1], colors)`. Radii accept logical numbers (e.g., `200`), side edges (`'top'`, `'bottom'`, `'left'`, `'right'`), perimeter points (`'top-center'`, `'top-right'`, etc.), or dynamic CSS keywords (`'closest-side'`, `'farthest-corner'`, etc.). Centers `x0`/`y0`/`x1`/`y1` are proportional (`0..1`) to bounding box.
 
 #### 12. Scope Available in Expressions
