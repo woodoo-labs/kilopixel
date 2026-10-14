@@ -1,6 +1,6 @@
 # Arrowhead Linecap Alignment & Spline Integrity Plan (de Casteljau Reference)
 
-- **Status**: 📐 **Mathematical Reference Plan (Polynomial de Casteljau Approach)**
+- **Status**: ⚪ **Superseded by `design/2026-10-14_unified_arrowhead_geometry_plan.md`** (kept as history)
 - **Date**: 2026-10-13
 - **Related Plans**: `design/2026-10-12_centralized_arrowhead_geometry_plan.md`, `design/2026-10-13_simplified_arrowhead_geometry_plan.md`
 - **Target Implementation**: `js/elements/shapes/polyline.js`, `js/elements/shapes/line.js`

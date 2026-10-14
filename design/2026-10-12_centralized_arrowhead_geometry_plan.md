@@ -1,6 +1,6 @@
 # Centralized Arrowhead Geometry & Miter Overshoot Normalization
 
-- **Status**: 🟢 **Design Complete & Ready for Implementation**
+- **Status**: ⚪ **Superseded by `design/2026-10-14_unified_arrowhead_geometry_plan.md`** (kept as history)
 - **Date**: 2026-10-12
 - **Target Implementation**: `js/elements/shape.js`, `js/elements/shapes/line.js`, `js/elements/shapes/circle.js`, `js/elements/shapes/ellipse.js`, `js/elements/shapes/polyline.js`
 - **Related Documentation**: `docs/arrows.html`, `docs/line.html`, `docs/circle.html`, `docs/ellipse.html`

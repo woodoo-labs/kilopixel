@@ -1,6 +1,6 @@
 # Simplified Arrowhead Geometry & Linecap Alignment Plan
 
-- **Status**: 🟢 **Approved Specification / Ready for Implementation**
+- **Status**: ⚪ **Superseded by `design/2026-10-14_unified_arrowhead_geometry_plan.md`** (kept as history)
 - **Date**: 2026-10-13
 - **Supersedes**: `design/2026-10-12_centralized_arrowhead_geometry_plan.md`, `design/2026-10-13_arrowhead_linecap_alignment_and_spline_integrity_plan.md`
 - **Target Implementation**: `js/elements/shapes/polyline.js`, `js/elements/shapes/line.js`

@@ -266,4 +266,4 @@ drawArrows(ctx, u, recA, recB) { ... }
   - **New**: arcs with small `r` (tight curvature), eccentric ellipses (`rx ≫ ry`, end on the flat and the pointed side), smooth polyline with a short end segment, single-segment smooth polyline with both arrows, and paths shorter than both insets combined (D9).
 - [x] `scratch/arrow_bench.html`: 1,000 animated arrows, compare `renderAvg` / `renderMax` with today.
 - [ ] Docs: `arrows.html` section 3 (all shapes now advance the tip for the cap), document the open-stroke rule (§4.6), `Kilopixel.md` (element references + `drawArrows`), polyline arrows.
-- [ ] Mark the 12 Oct / 13 Oct plans as "Superseded by 2026-10-14".
+- [x] Mark the 12 Oct / 13 Oct plans as "Superseded by 2026-10-14".
