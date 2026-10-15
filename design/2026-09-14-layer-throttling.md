@@ -183,6 +183,22 @@ if (anyLayerRendered) {
 
 This ensures `ref.main.fps` reports meaningful values — the actual composite rendering rate, not inflated by idle rAF ticks.
 
+### Known Issue: Monitor Freezes When Idle (added 2026-10-15)
+
+Observed with `scratch/text_hit/mixed.html` (static scene, renders only on pointer movement):
+
+- **Values only update during a render.** `pxl.perf.publish()` is called from inside `stage.render()` (at most once per second). Without animation and without input, nothing renders, so `fps` / `renderAvg` / `renderMax` **keep their last values** instead of dropping to `0`. A frozen "26 FPS" on an idle page suggests it is still rendering.
+- **`fps` is "frames since the last publish", not frames per second.** It is not normalized to the elapsed time, so the first value after a pause counts all frames over the whole pause and shows a misleadingly low number.
+
+Idle rendering itself is correct (zero renders, zero cost); only the reporting is off.
+
+**Possible fix:** a lightweight 1-second timer in `pxl.perf`, independent of the render loop:
+- publishes `fps = 0` (and resets the averages) when no frame was rendered since the last publish;
+- computes `fps` from the actual elapsed time (`frames / elapsedSeconds`);
+- only runs while at least one stage is registered (and could pause while no `ref.<stage>.fps` subscriber exists).
+
+Cost: one timer per page, no per-frame work. Decide together with the frame-counting rule above, since `maxfps` makes "how many frames really happened" even more important.
+
 ---
 
 ## `<pxl-var>` and Cross-Layer References

@@ -55,11 +55,15 @@
   - Upward $+Y$ mathematical orientation, 1:1 isotropic scaling, decoupled domain intervals, and pre-allocated `Float32Array` vertex caching.
 
 ## 8. Layer-Level FPS Throttling (`maxfps`) & Granular Profiling
-- **Status**: 🟡 **Plan Drafted**
-- **Reference**: [`design/2026-09-14_stage_variables_and_layer_throttling_plan.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/design/2026-09-14_stage_variables_and_layer_throttling_plan.md)
+- **Status**: 🟡 **Plan Drafted** — needs a dedicated, in-depth session
+- **References** (two overlapping plans, to be merged in that session):
+  - [`design/2026-09-14_stage_variables_and_layer_throttling_plan.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/design/2026-09-14_stage_variables_and_layer_throttling_plan.md) — stage-level `<pxl-var>` **and** `maxfps`, per-layer metrics.
+  - [`design/2026-09-14-layer-throttling.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/design/2026-09-14-layer-throttling.md) (revised 2026-09-15) — `maxfps` only, more detailed (stage gate, baton relay, keep-alive timer, cross-layer variables, frame counting).
+  - The stage-level `<pxl-var>` part could be split off as its own topic.
 - **Core Features**:
   - Add `maxfps` attribute to `<pxl-layer>` to throttle secondary layers (e.g. background effects to 24 FPS, clocks to 1 FPS).
   - Add per-layer profiling telemetry (`layer.fps`, `layer.renderAvg`).
+- **Performance monitor** (found 2026-10-15): values freeze on idle pages instead of dropping to `0`, and `fps` counts "frames since the last publish" rather than per second. Details and a possible fix in `design/2026-09-14-layer-throttling.md` → Performance Metrics → "Known Issue: Monitor Freezes When Idle".
 
 ## 9. Raster Bitmaps & Complex SVG Graphics (`<pxl-image>`)
 - **Status**: ⚪ **Concept Stage**
