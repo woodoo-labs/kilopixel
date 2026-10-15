@@ -153,3 +153,12 @@
     - Possible fix: a global font generation counter, raised on `document.fonts` `loadingdone` and compared in Tier 1 (one integer check, no per-frame cost). Open question: the global side effect (listener + invalidating all layers) and how it relates to the docs pages' own `document.fonts.ready` handler.
   - **`maxwidth` squeezing**: `measureText()` ignores the `maxWidth` argument of `fillText()`, so a horizontally compressed line gets a box that is too wide (hit area and gradients).
     - Possible fix (Tier 3): per line, scale `actualBoundingBoxLeft/Right` by `min(1, maxwidth * u / metrics.width)`.
+
+## 17. Shadows on Multi-Part Shapes (Arrowheads, Fill + Stroke)
+- **Status**: ⚪ **Noted** (2026-10-15)
+- **Problem**: Native shadows (`shadowcolor`, `shadowblur`, `shadowx`, `shadowy`) are applied per canvas draw call. When a shape is drawn with several calls, each part casts its own shadow, and a later part's shadow falls **onto** an earlier part.
+  - **Arrowheads**: the shaft (`stroke()`) and the heads (`drawArrows`, one `fill()` / `stroke()`) are separate calls → visible dark band where the shaft enters the arrowhead.
+  - Likely the same for **fill + stroke** on any shape (`applyStyle`: `fill()` then `stroke()` → the stroke's shadow falls on the fill) and for `<pxl-text>` with fill and stroke. To be verified.
+  - Not affected: overlaps **within one path** (e.g. polyline corners) — a single `stroke()` casts one shadow.
+- **Possible Fix**: two passes only when a shadow is set: draw all parts with the shadow, then draw them again without shadow on top (shadows end up underneath everything). Doubles the draw calls, but only for shapes with a shadow.
+- **Workaround Today**: `filter="dropShadow(...)"` on the `<pxl-layer>` instead of `shadowcolor` on the shape — the layer casts one shadow of the combined silhouette.
