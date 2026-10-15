@@ -86,13 +86,18 @@
 - **Decision for Now**: Retain `align="start"` and `baseline="alphabetic"` for 100% backward compatibility and native Canvas parity. Revisit if a breaking major version transition is planned.
 
 ## 12. Dedicated Arrowheads Documentation Page (`arrows.html`)
-- **Status**: ⚪ **Planned Documentation Feature**
+- **Status**: 🟡 **In Progress** (updated 2026-10-15)
 - **Location**: Sidebar / Navigation category **"Line Styles"** in `docs/js/layout.js`.
 - **Motivation**: Arrowheads (`arrowstyle`, `arrowstart`, `arrowend`) are supported across multiple shapes (`<pxl-line>`, `<pxl-polyline>`, `<pxl-circle>`, and `<pxl-ellipse>`). Individual shape pages feature practical, contextual examples, while a centralized hub page (`docs/arrows.html`) under Line Styles will provide the comprehensive reference for arrow geometry, scaling formulas, custom arrow styles, and styling.
-- **Tasks**:
-  - Add `arrows.html` entry to `docs/js/layout.js` under the Line Styles navigation group.
-  - Create interactive `docs/arrows.html` documenting `arrowstyle` (`'filled'`, `'line'`), sizing (`'auto'` vs. numeric), and endpoint orientation.
-  - Cross-link shape pages (`line.html`, `circle.html`, `ellipse.html`, `polyline.html`) to `arrows.html`.
+- **Done**:
+  - Navigation entry, sections 1. Sizing, 2. Styles, 3. Line Caps (line / polyline / elliptical arc with grey reference strokes), 4. Line Joins (miter / bevel / round, miter limit).
+  - Cross-links from `line.html`, `circle.html`, `ellipse.html` (identical "More on Arrowheads" callout).
+  - Engine: unified arrowhead geometry (`design/2026-10-14_unified_arrowhead_geometry_plan.md`).
+- **Open**:
+  - **Design question:** should `filled` arrowheads also follow `linejoin` (rounded/bevelled triangle corners, radius = `strokewidth / 2`), or a future `arrowjoin` that applies to both styles? Today chevrons follow `linejoin`, filled heads are always sharp. Testable in section 4 by switching Arrow Style.
+  - "Rules & Edge Cases" section: small arrowheads (narrower than stroke), open paths only (`pie` / `closed` / rings / closed polylines ignore arrows), no `stroke` → no arrowheads, path shorter than both heads.
+  - Dashed arrows (chevrons stay solid) and animated dashes / arrowheads.
+  - Cross-link `polyline.html` once it exists.
 
 ## 13. Fix Stroke Gradient Zero-Dimension Collapse & Degeneracy
 - **Status**: 🟢 **Design Complete & Ready for Implementation**
@@ -120,7 +125,18 @@
 - **Considerations**:
   - With `paintorder="stroke"` only half of `strokewidth` remains visible — must be documented.
   - Semi-transparent fills will show the stroke underneath (expected, same as SVG).
-  - Arrowheads (`drawArrow`) use the stroke style; check how they should behave with `paintorder="stroke"`.
+  - Arrowheads (`drawArrows`) use the stroke style; check how they should behave with `paintorder="stroke"`.
   - Add a docs section/example following `docs/DOCS_STANDARDS.md`.
+
+## 15. Smooth Polyline Spline Quality (`smooth`)
+- **Status**: ⚪ **Analyzed, deferred** (decided 2026-10-15: keep current behavior for now)
+- **Background**: `<pxl-polyline smooth>` uses a **uniform** Catmull-Rom spline with **clamped** ends (the missing neighbour of the first/last point is the point itself).
+- **Observed Issues**:
+  - The curve straightens out shortly before the first/last point (end direction is forced onto the chord to the next point). Visible on the section 1 wave in `docs/arrows.html` near `(550, 300)`.
+  - Unevenly spaced points cause overshoot and hooks near the ends (short first/last segment, duplicate points, high `smooth` values). Even unevenly spaced **collinear** points run backwards past the start point (e.g. `20,110; 40,110; 280,110`), which round caps or arrowheads can reveal.
+- **Tested: "natural" ends** (phantom point `2.5·P1 − 2·P2 + 0.5·P3`, scales with tension automatically): looks better for evenly spaced points, but roughly doubles overshoot and flips end directions for uneven spacing → **not recommended on its own**.
+- **Next Idea**: **centripetal** Catmull-Rom (alpha 0.5), which accounts for point distances and avoids loops/hooks with uneven spacing. Costs a few square roots per segment; changes the shape of all smooth polylines, so `smooth` (tension) semantics need re-checking. Possibly combined with natural ends.
+- **Test Setup** (local only, scratch is git-ignored): `scratch/arrows/natural_compare.html` (15 cases side by side), `scratch/arrows/natural_metrics.js` (end directions & overshoot), patched engine copy `scratch/arrows/lib_natural.js`.
+- **Note**: arrow trimming on smooth polylines (`loadSegment` / de Casteljau) must use the same end formula as the drawing loop if the spline changes.
 
 
