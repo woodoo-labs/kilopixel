@@ -82,6 +82,10 @@ pxl.compileAttribute = function(element, name, newValue) {
   const parsed = this.parseAttributeValue(newValue);
   element.attributeExpressions[name] = parsed;
 
+  // Register shapes whose isHovered / isPressed is read here. Time-dependent expressions never
+  // subscribe to ref.*, so their references are sticky (never lazily unregistered).
+  this.trackInteractiveRefs(newValue, typeof parsed === 'function' && parsed.isTimeDependent === true);
+
   if (typeof parsed === 'function') {
     if (parsed.isTimeDependent) {
       // --- 60FPS Time Loop ---

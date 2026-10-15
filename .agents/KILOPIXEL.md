@@ -651,11 +651,16 @@ This reuses the shape's own `draw()` method for pixel-perfect mathematical hit t
 
 ### InteractionEngine Lifecycle
 
-- Elements with event handlers (`onclick`, `onenter`, etc.) or that use `isHovered`/`isPressed` in expressions are registered with `stage.interaction.registerElement(el)`
+- Shapes are registered with `stage.interaction.registerElement(el)` (only registered shapes are hit-tested) when they:
+  - have an event handler (`onclick`, `onenter`, etc.), **or**
+  - have their `isHovered` / `isPressed` read anywhere: in an expression on **any** element (`fill="ref.btn.isHovered ? …"` on `btn` itself or on another shape, a `<pxl-var>`, …) or inside an `on*` handler.
+- **Auto-registration** (`pxl.trackInteractiveRefs`, compile time only): every attribute string and `on*` handler is scanned for `ref.<id>.isHovered` / `ref.<id>.isPressed` (state list: `pxl.INTERACTIVE_STATES`). The id is remembered in `pxl._interactiveIds`; the shape registers immediately if it is already connected, otherwise in its `connectedCallback` (works for any DOM order and for shapes added or re-added later).
+- **Lazy unregister**: on leave / release, a shape without `on*` handlers is unregistered once nobody reads its states any more (no subscribers left on `ref.<id>`). References from time-dependent expressions and from `on*` handlers don't subscribe, so those ids are **sticky** (`pxl._stickyIds`) and stay registered until the shape is disconnected.
+- Limitations: dynamic ids and bracket notation (`ref[name].isHovered`, `ref['btn'].isHovered`, `ref.btn['isHovered']`) are not detected. False positives (e.g. a string literally containing `ref.btn.isHovered`) only cause a harmless extra registration.
 - Pointer events (`pointermove`, `pointerdown`, `pointerup`, `click`, `pointerenter`, `pointerleave`) are handled by the InteractionEngine via `handleEvent()`
 - Hit testing runs in `process()`, called at the end of each `stage.render()`
 - Mouse coordinates are converted to logical units: `offsetX / stage.unit`
-- Interactive elements automatically set `stage.style.cursor = 'pointer'` on hover, resetting to `'default'` when no interactive element is hovered (the DOM style is only written when the cursor actually changes)
+- **Cursor**: the stage shows `cursor = 'pointer'` only over **clickable** shapes (an `onclick` / `ondown` / `onup` handler, or `isPressed` referenced somewhere — `pxl._pressableIds`); hover-only shapes keep `'default'`. The DOM style is only written when the cursor actually changes.
 
 ---
 

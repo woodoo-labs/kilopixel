@@ -83,6 +83,10 @@ pxl.compileAttribute = function(element, name, newValue) {
   const parsed = this.parseAttributeValue(newValue);
   element.attributeExpressions[name] = parsed;
 
+  // Register shapes whose isHovered / isPressed is read here. Time-dependent expressions never
+  // subscribe to ref.*, so their references are sticky (never lazily unregistered).
+  this.trackInteractiveRefs(newValue, typeof parsed === 'function' && parsed.isTimeDependent === true);
+
   if (typeof parsed === 'function') {
     if (parsed.isTimeDependent) {
       // --- 60FPS Time Loop ---
@@ -577,6 +581,34 @@ pxl._hitResult = false;
 pxl.dummyCtx.fill = function() { if (this.isPointInPath(pxl._hitX, pxl._hitY)) pxl._hitResult = true; };
 pxl.dummyCtx.stroke = function() { if (this.isPointInStroke(pxl._hitX, pxl._hitY)) pxl._hitResult = true; };
 
+// =========================================================================
+// Auto-Registration for Interactive States
+// (design/2026-10-15_interactive_state_auto_registration_plan.md)
+// =========================================================================
+pxl.INTERACTIVE_STATES = ['isHovered', 'isPressed'];
+pxl._interactiveStateRegex = new RegExp(
+  `\\bref\\.([a-zA-Z_$][a-zA-Z0-9_$]*)\\??\\.(${pxl.INTERACTIVE_STATES.join('|')})\\b`, 'g'
+);
+pxl._interactiveIds = new Set(); // ids whose shapes must be hit-tested
+pxl._pressableIds = new Set();   // ids whose isPressed is referenced (hand cursor)
+pxl._stickyIds = new Set();      // ids read without a subscription (time-dependent expressions, on* handlers)
+
+// Compile time only: finds ref.<id>.isHovered / isPressed in an attribute string and registers the referenced shape.
+pxl.trackInteractiveRefs = function(source, sticky) {
+  if (typeof source !== 'string' || source.indexOf('.is') === -1) return;
+  const re = pxl._interactiveStateRegex;
+  re.lastIndex = 0;
+  let match;
+  while ((match = re.exec(source)) !== null) {
+    const id = match[1];
+    pxl._interactiveIds.add(id);
+    if (match[2] === 'isPressed') pxl._pressableIds.add(id);
+    if (sticky) pxl._stickyIds.add(id);
+    const node = pxl.nodes[id]?.$node; // already connected? Otherwise Shape.connectedCallback registers it.
+    if (node && node.draw && node.stage) node.stage.interaction.registerElement(node);
+  }
+};
+
 pxl.InteractionEngine = class {
   constructor(stage) {
     this.stage = stage;
@@ -598,6 +630,14 @@ pxl.InteractionEngine = class {
       this._interactiveElements.push(el);
       this.isInteractiveOrderDirty = true;
     }
+  }
+
+  // Lazy unregister, called on leave / release after the state broadcast (subscribers have
+  // re-evaluated and dropped stale subscriptions): nobody reads this element's states any more.
+  releaseIfUnused(el) {
+    if (el.hasEventHandlers() || pxl._stickyIds.has(el.id)) return;
+    const subs = el._refKey ? pxl._subscriptions[el._refKey] : null;
+    if (!subs || subs.length === 0) this.unregisterElement(el);
   }
 
   unregisterElement(el) {
@@ -723,6 +763,7 @@ pxl.InteractionEngine = class {
         if (prevHovered._refKey) pxl.broadcast(prevHovered._refKey);
         if (prevHovered._compiledOnLeave) prevHovered._compiledOnLeave();
         pxl.removeFromArray(this._hoveredElements, prevHovered);
+        this.releaseIfUnused(prevHovered);
       }
     }
 
@@ -734,8 +775,8 @@ pxl.InteractionEngine = class {
       if (hitEl._compiledOnEnter) hitEl._compiledOnEnter();
     }
 
-    // Update Cursor (DOM write only on change)
-    const cursor = hitEl ? 'pointer' : 'default';
+    // Update Cursor: hand only for clickable elements (DOM write only on change)
+    const cursor = (hitEl && hitEl.isClickable()) ? 'pointer' : 'default';
     if (cursor !== this._lastCursor) {
       this.stage.style.cursor = cursor;
       this._lastCursor = cursor;
@@ -754,12 +795,14 @@ pxl.InteractionEngine = class {
     }
 
     if (this._lastUp) {
-      if (this._pressedElement) {
-        this._pressedElement.attributeValues.isPressed = false;
-        if (this._pressedElement._refKey) pxl.broadcast(this._pressedElement._refKey);
+      const released = this._pressedElement;
+      if (released) {
+        released.attributeValues.isPressed = false;
+        if (released._refKey) pxl.broadcast(released._refKey);
         this._pressedElement = null;
       }
       if (hitEl && hitEl._compiledOnUp) hitEl._compiledOnUp();
+      if (released) this.releaseIfUnused(released);
     }
 
     // Reset event flags
@@ -1647,6 +1690,9 @@ class Shape extends PxlNode {
     if (oldValue === newValue) return;
     
     if (name === 'onclick' || name === 'onenter' || name === 'onleave' || name === 'ondown' || name === 'onup' || name === 'onmove') {
+      // Handlers are plain JavaScript and never subscribe to ref.*, so their state references are sticky
+      pxl.trackInteractiveRefs(newValue, true);
+
       let sanitizedStr = newValue.replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.');
       const compiled = new Function('scope', 'ref', `
         const { ${pxl.scopeKeys} } = scope;
@@ -1673,9 +1719,19 @@ class Shape extends PxlNode {
     this.stage = this.closest('pxl-stage');
     super.connectedCallback();
     
-    if (this._compiledOnClick || this._compiledOnEnter || this._compiledOnLeave || this._compiledOnDown || this._compiledOnUp || this._compiledOnMove) {
+    // Register if it has handlers, or if another element reads its isHovered / isPressed
+    if (this.hasEventHandlers() || (this.id && pxl._interactiveIds.has(this.id))) {
       this.stage?.interaction.registerElement(this);
     }
+  }
+
+  hasEventHandlers() {
+    return !!(this._compiledOnClick || this._compiledOnEnter || this._compiledOnLeave || this._compiledOnDown || this._compiledOnUp || this._compiledOnMove);
+  }
+
+  // Hand cursor only for elements that react to clicks or presses
+  isClickable() {
+    return !!(this._compiledOnClick || this._compiledOnDown || this._compiledOnUp) || (!!this.id && pxl._pressableIds.has(this.id));
   }
 
   disconnectedCallback() {

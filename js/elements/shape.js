@@ -29,6 +29,9 @@ class Shape extends PxlNode {
     if (oldValue === newValue) return;
     
     if (name === 'onclick' || name === 'onenter' || name === 'onleave' || name === 'ondown' || name === 'onup' || name === 'onmove') {
+      // Handlers are plain JavaScript and never subscribe to ref.*, so their state references are sticky
+      pxl.trackInteractiveRefs(newValue, true);
+
       let sanitizedStr = newValue.replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.');
       const compiled = new Function('scope', 'ref', `
         const { ${pxl.scopeKeys} } = scope;
@@ -55,9 +58,19 @@ class Shape extends PxlNode {
     this.stage = this.closest('pxl-stage');
     super.connectedCallback();
     
-    if (this._compiledOnClick || this._compiledOnEnter || this._compiledOnLeave || this._compiledOnDown || this._compiledOnUp || this._compiledOnMove) {
+    // Register if it has handlers, or if another element reads its isHovered / isPressed
+    if (this.hasEventHandlers() || (this.id && pxl._interactiveIds.has(this.id))) {
       this.stage?.interaction.registerElement(this);
     }
+  }
+
+  hasEventHandlers() {
+    return !!(this._compiledOnClick || this._compiledOnEnter || this._compiledOnLeave || this._compiledOnDown || this._compiledOnUp || this._compiledOnMove);
+  }
+
+  // Hand cursor only for elements that react to clicks or presses
+  isClickable() {
+    return !!(this._compiledOnClick || this._compiledOnDown || this._compiledOnUp) || (!!this.id && pxl._pressableIds.has(this.id));
   }
 
   disconnectedCallback() {

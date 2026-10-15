@@ -1,6 +1,6 @@
 # Auto-Registration for `isHovered` / `isPressed`
 
-- **Status**: 📝 **Draft — awaiting approval**
+- **Status**: 🟢 **Implemented 2026-10-15** (all 17 test cases passed; regression: examples unchanged except test52, which now works without `onclick`)
 - **Date**: 2026-10-15
 - **Related**: `design/2026-10-13_text_hit_testing_plan.md` (§6 side finding → decided: auto-registration)
 - **Target Implementation**: `js/engine.js` (`pxl.compileAttribute`), `js/elements/shape.js` (event compile, `connectedCallback`), `js/interaction.js` (unchanged API)
@@ -50,16 +50,17 @@ pxl._interactiveStateRegex = new RegExp(
 );
 pxl._interactiveIds = new Set(); // ids whose shapes must be hit-tested
 pxl._pressableIds = new Set();    // ids whose isPressed is referenced (hand cursor, §3.6)
+pxl._stickyIds = new Set();       // ids read without a subscription: never lazily unregistered (§3.5)
 ```
 
 The regex is built from the state list, so adding a state later (e.g. `isDragging`) is a one-line change.
 
 ### 3.2 Detection (compile time only)
 
-New helper, called with the **raw attribute string**:
+New helper, called with the **raw attribute string**. `sticky` marks references that are read **without a subscription** (§3.5):
 
 ```javascript
-pxl.trackInteractiveRefs = function(source) {
+pxl.trackInteractiveRefs = function(source, sticky) {
   if (typeof source !== 'string' || source.indexOf('.is') === -1) return; // fast bail-out
   const re = pxl._interactiveStateRegex;
   re.lastIndex = 0;
@@ -68,6 +69,7 @@ pxl.trackInteractiveRefs = function(source) {
     const id = match[1];
     pxl._interactiveIds.add(id);
     if (match[2] === 'isPressed') pxl._pressableIds.add(id);
+    if (sticky) pxl._stickyIds.add(id);
     const node = pxl.nodes[id]?.$node;              // element already connected?
     if (node && node.draw && node.stage) node.stage.interaction.registerElement(node);
   }
@@ -75,8 +77,8 @@ pxl.trackInteractiveRefs = function(source) {
 ```
 
 Call sites:
-1. **`pxl.compileAttribute`** — for every attribute expression (`fill`, `scale`, `text`, …), before parsing.
-2. **`Shape.attributeChangedCallback`** — for `on*` handler strings too (e.g. `onclick="if (ref.other.isPressed) …"`), so the rule is complete.
+1. **`pxl.compileAttribute`** — for every attribute expression (`fill`, `scale`, `text`, …), **right after parsing**: `pxl.trackInteractiveRefs(newValue, parsed.isTimeDependent === true)`. Time-dependent expressions are evaluated every frame and never subscribe to `ref.*`, so their references are sticky.
+2. **`Shape.attributeChangedCallback`** — for `on*` handler strings too (e.g. `onclick="if (ref.other.isPressed) …"`), so the rule is complete: `pxl.trackInteractiveRefs(newValue, true)`. Handlers are plain JavaScript and never subscribe, so their references are sticky.
 
 Runs only when an attribute is set or changed — **never per frame**. Expression caching (`animationCache` / `staticCache`) is unaffected because the scan reads the raw string.
 
@@ -103,17 +105,18 @@ Covers elements connected after the expression was compiled, and elements that a
 
 **Existing mechanism to build on:** variable subscriptions already clean themselves up lazily (`node.js`, `variableChangedCallback`): when `ref.btn` broadcasts, each subscriber re-evaluates and unsubscribes if none of its expressions depends on `ref.btn` any more.
 
-**New:** whenever the interaction engine broadcasts a state change of a registered element (`isHovered` / `isPressed` changes), it checks right **after** the broadcast:
+**New:** when the interaction engine broadcasts that a registered element is **no longer** hovered (leave) or pressed (release), it checks right **after** the broadcast:
 
 ```javascript
 // el has just broadcast its state change (subscribers have re-evaluated / unsubscribed)
-if (!el.hasEventHandlers() && !(pxl._subscriptions[el._refKey]?.length)) {
+if (!el.hasEventHandlers() && !pxl._stickyIds.has(el.id) && !(pxl._subscriptions[el._refKey]?.length)) {
   this.unregisterElement(el);   // nobody needs this element's states any more
 }
 ```
 
 - `hasEventHandlers()` (new small `Shape` helper): any of `_compiledOnClick`, `_compiledOnEnter`, `_compiledOnLeave`, `_compiledOnDown`, `_compiledOnUp`, `_compiledOnMove` is set.
-- Run the check only after the element has been removed from `_hoveredElements` in the leave step (no array mutation while iterating).
+- **Only on leave and release, never on enter / press:** otherwise an element could be unregistered while it is still the current hit in the same frame (cursor, `onmove`, `onclick`). Run the leave check after the element has been removed from `_hoveredElements` (no array mutation while iterating).
+- **Sticky references (`pxl._stickyIds`):** only reactive expressions subscribe to `ref.*`. Two kinds of readers don't: **time-dependent expressions** (e.g. `fill="ref.btn.isHovered ? hsl(t * 50, 80, 50) : 'blue'"`, evaluated every frame) and **`on*` handlers** (plain JavaScript). Without the sticky check, `btn` would have no subscribers and be unregistered on the next leave although it is still read — the effect would silently stop working. Ids referenced from either kind are therefore never unregistered lazily (only on disconnect).
 - **Lazy:** cleanup happens at the next state change (typically the next hover), which is exactly when the stale registration would matter. No reference counting, no extra bookkeeping.
 - **Imprecise in the safe direction:** if another element still references `btn` for something else (e.g. `ref.btn.x`), `btn` stays registered. Over-registration is harmless (one extra hit test; no hand cursor thanks to §3.6).
 - An element that references its **own** state (`fill="ref.btn.isHovered …"` on `btn`) is subscribed to itself, so it correctly stays registered.
@@ -130,11 +133,17 @@ if (!el.hasEventHandlers() && !(pxl._subscriptions[el._refKey]?.length)) {
 Pure hover elements (`isHovered`, `onenter`, `onleave`, `onmove` only) keep the default cursor. This also makes any stale registration (§3.5) invisible.
 
 ```javascript
-// process(), replacing the cursor line
-this.stage.style.cursor = (hitEl && hitEl.isClickable()) ? 'pointer' : 'default';
+// process(), cursor update (keeps the existing write-only-on-change guard)
+const cursor = (hitEl && hitEl.isClickable()) ? 'pointer' : 'default';
+if (cursor !== this._lastCursor) {
+  this.stage.style.cursor = cursor;
+  this._lastCursor = cursor;
+}
 ```
 
 `isClickable()` (new small `Shape` helper): `!!(this._compiledOnClick || this._compiledOnDown || this._compiledOnUp) || (this.id && pxl._pressableIds.has(this.id))`.
+
+**Known simplification:** `_pressableIds` is never cleaned up. If an `isPressed` expression is removed, the element keeps the hand cursor until the page reloads. Rare and harmless.
 
 ---
 
@@ -143,17 +152,21 @@ this.stage.style.cursor = (hitEl && hitEl.isClickable()) ? 'pointer' : 'default'
 | Topic | Decision | Reason |
 |---|---|---|
 | Scan `on*` handlers too | ✅ yes | Cheap, makes the rule complete |
-| Unregister when an expression stops using the state | ✅ lazily (§3.5) | Reuses the existing self-cleaning subscription lists: after a state broadcast, unregister if no `on*` handler and no subscribers remain. No reference counting. `disconnectedCallback` still unregisters removed elements. |
+| Unregister when an expression stops using the state | ✅ lazily (§3.5) | Reuses the existing self-cleaning subscription lists: on leave / release, unregister if no `on*` handler, no sticky reference and no subscribers remain. No reference counting. `disconnectedCallback` still unregisters removed elements. |
+| References from time-dependent expressions / `on*` handlers | ✅ sticky, never lazily unregistered | They read the state without subscribing, so the subscription lists can't tell whether they still need it |
 | Hand cursor | ✅ clickable elements only (§3.6) | A hand cursor on hover-only elements would suggest "clickable" |
 | Register every shape with an `id` | ❌ rejected | Simplest, but hit-tests far more elements every frame on large scenes |
-| Dynamic ids (`ref[name].isHovered`) | ❌ unsupported | Not detectable by a regex; not used in Kilopixel. Document as a limitation. |
+| Dynamic ids (`ref[name].isHovered`) and bracket notation (`ref['btn'].isHovered`, `ref.btn['isHovered']`) | ❌ unsupported | Not detectable by a regex; not used in Kilopixel. Document as a limitation. |
+| False positives (e.g. a text string literally containing `ref.btn.isHovered`) | ✅ accepted | Only lead to an unnecessary registration — harmless |
 | More states (`isFocused`, `isSelected`, `isDragging`) | ⏸️ not now | No keyboard support; selection is app state (`<pxl-var>`); dragging is a separate feature (skipped for now) |
 
 ---
 
 ## 5. Performance & GC
 
-- Per attribute change: one `indexOf` bail-out; regex only if `.is` occurs. No per-frame work.
+- Per attribute change: one `indexOf` bail-out; regex only if `.is` occurs (its match arrays are compile-time allocations, never in the render loop). No per-frame work.
+- Lazy-unregister check: only on leave / release events, not per frame (one `Set.has`, one array length read).
+- Cursor rule: one `isClickable()` call per frame for at most one element (three property checks + `Set.has`); DOM write only on change.
 - Hit testing cost grows only by the elements that actually need it (same as with an `on*` handler).
 - Zero allocations in the render loop. The `Set` grows only with distinct ids (bounded by the scene).
 
@@ -161,12 +174,12 @@ this.stage.style.cursor = (hitEl && hitEl.isClickable()) ? 'pointer' : 'default'
 
 ## 6. Implementation Steps
 
-1. `js/interaction.js` — `pxl.INTERACTIVE_STATES`, regex, `pxl._interactiveIds`, `pxl._pressableIds`, `pxl.trackInteractiveRefs()`; lazy unregister after state broadcasts (§3.5); cursor rule (§3.6).
-2. `js/engine.js` — call `pxl.trackInteractiveRefs(newValue)` in `pxl.compileAttribute`.
-3. `js/elements/shape.js` — call it for `on*` handler strings; late-arrival check in `connectedCallback`; helpers `hasEventHandlers()` and `isClickable()`.
+1. `js/interaction.js` — `pxl.INTERACTIVE_STATES`, regex, `pxl._interactiveIds`, `pxl._pressableIds`, `pxl._stickyIds`, `pxl.trackInteractiveRefs()`; lazy unregister on leave / release (§3.5); cursor rule (§3.6).
+2. `js/engine.js` — call `pxl.trackInteractiveRefs(newValue, parsed.isTimeDependent === true)` in `pxl.compileAttribute`, after parsing.
+3. `js/elements/shape.js` — call it for `on*` handler strings (`sticky = true`); late-arrival check in `connectedCallback`; helpers `hasEventHandlers()` and `isClickable()`.
 4. `node build.js`.
 5. `examples/test52.html` — remove the `onclick` workaround (after text hit testing is done, see related plan).
-6. `.agents/KILOPIXEL.md` — lifecycle text is already correct; add cross-element references, the lazy unregister, the cursor rule, and the limitation (dynamic ids).
+6. `.agents/KILOPIXEL.md` — lifecycle text is already correct; add cross-element references, the lazy unregister (incl. sticky references), the cursor rule, and the limitations (dynamic ids, bracket notation).
 
 ---
 
@@ -188,5 +201,8 @@ this.stage.style.cursor = (hitEl && hitEl.isClickable()) ? 'pointer' : 'default'
 | 12 | Same as 11, but another element still uses `ref.btn.x` | `btn` stays registered (safe over-registration) |
 | 13 | Hover-only element (`isHovered` / `onenter`, no click handler) | default cursor |
 | 14 | Element with `onclick`, or with `isPressed` referenced | hand cursor |
+| 15 | Time-dependent expression (`fill="ref.btn.isHovered ? hsl(t * 50, 80, 50) : 'blue'"`), hover in and out several times | `btn` stays registered, effect keeps working |
+| 16 | `onclick` on another element reads `ref.btn.isPressed`; hover `btn` in and out | `btn` stays registered |
+| 17 | Leaving an element that qualifies for lazy unregister while another element is hit in the same frame | no error; new hit processed normally |
 
 **Regression:** all `docs/*.html` pages load without console errors; interactive docs examples (buttons, hover effects) still work.
