@@ -640,12 +640,14 @@ The framework uses a **dummy canvas context** (`pxl.dummyCtx`) with intercepted 
 4. During hit testing, the engine:
    - Iterates interactive elements in **reverse DOM order** (front-to-back)
    - Walks the parent chain to build the transform stack
-   - Applies all transforms to the dummy context
-   - Calls the shape's `draw()` method on the dummy context
+   - Applies the **spatial transforms only** (`pxl.applyTransformState`) to the dummy context — alpha, blend, mask, filter and shadows don't affect `isPointInPath`, so they are skipped
+   - Calls the shape's optional **`hitTest(ctx, u)`** hook if it has one, otherwise its `draw()` method, on the dummy context
    - The intercepted fill/stroke methods check if the mouse point is inside
    - First hit wins (topmost element)
 
 This reuses the shape's own `draw()` method for pixel-perfect mathematical hit testing without any separate collision geometry.
+
+**`hitTest(ctx, u)` hook**: for shapes whose hit area can't be expressed as a path. Currently only `<pxl-text>` implements it (glyphs drawn with `fillText` produce no path): it adds its bounding box as a rect and calls the intercepted `ctx.fill()`. See [Element Reference — Text](#element-reference--text).
 
 ### InteractionEngine Lifecycle
 
@@ -653,7 +655,7 @@ This reuses the shape's own `draw()` method for pixel-perfect mathematical hit t
 - Pointer events (`pointermove`, `pointerdown`, `pointerup`, `click`, `pointerenter`, `pointerleave`) are handled by the InteractionEngine via `handleEvent()`
 - Hit testing runs in `process()`, called at the end of each `stage.render()`
 - Mouse coordinates are converted to logical units: `offsetX / stage.unit`
-- Interactive elements automatically set `stage.style.cursor = 'pointer'` on hover, resetting to `''` when no interactive element is hovered
+- Interactive elements automatically set `stage.style.cursor = 'pointer'` on hover, resetting to `'default'` when no interactive element is hovered (the DOM style is only written when the cursor actually changes)
 
 ---
 
@@ -1186,6 +1188,17 @@ Computed dynamically in Tier 3 cache using `ctx.measureText()` metrics (ascent/d
 - Iterates `_lines[]`, applies `fillText` and/or `strokeText`
 - Respects `maxwidth` parameter
 - `letterSpacing` is set on the context as a CSS string (e.g. `"5px"`)
+- Sets `_hasInk = true` only when it actually paints (false for empty text, fully hidden `reveal`, or no fill and no stroke)
+
+### Hit Testing
+
+Glyphs drawn with `fillText` / `strokeText` produce no path, so `<pxl-text>` implements the `hitTest(ctx, u)` hook ([Interaction System](#interaction-system)):
+- The hit area is the **bounding box** from the last `draw()` (Tier 3), not the glyph shapes: the whole word is the target, including gaps between letters and words.
+- Padded by `strokewidth / 2` when the text is stroked, so outline text is hittable across its full stroke.
+- **No hit when nothing is visible** (`_hasInk` is false): empty text, `reveal` hiding all characters, or neither fill nor stroke.
+- Partially revealed text keeps the full box.
+- Transforms (own and ancestors') apply automatically, so rotated, scaled and skewed text works.
+- Known limitations (see `.agents/TODO.md`): web fonts loading after the first measurement keep the fallback font's box until the text changes; `maxwidth` compression is not reflected in the box.
 
 ---
 

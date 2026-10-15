@@ -585,6 +585,7 @@ pxl.InteractionEngine = class {
     this._hoveredElements = [];
     this._pressedElement = null;
     this._hitStack = new Array(50);
+    this._lastCursor = '';
     this._lastClick = false;
     this._lastDown = false;
     this._lastUp = false;
@@ -695,13 +696,16 @@ pxl.InteractionEngine = class {
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
 
+        // Spatial transforms only: alpha, blend, filter and shadows don't affect isPointInPath
         for (let j = stackLen - 1; j >= 0; j--) {
-          pxl.applyContextState(ctx, this.stage.unit, this._hitStack[j].attributeValues, this._hitStack[j]);
+          pxl.applyTransformState(ctx, this.stage.unit, this._hitStack[j].attributeValues);
         }
 
         pxl._hitResult = false;
         ctx.beginPath();
-        el.draw(ctx, this.stage.unit, 0);
+        // Shapes that can't express their hit area as a path (e.g. text) provide hitTest()
+        if (el.hitTest) el.hitTest(ctx, this.stage.unit);
+        else el.draw(ctx, this.stage.unit, 0);
         ctx.restore();
 
         if (pxl._hitResult) {
@@ -730,8 +734,12 @@ pxl.InteractionEngine = class {
       if (hitEl._compiledOnEnter) hitEl._compiledOnEnter();
     }
 
-    // Update Cursor
-    this.stage.style.cursor = hitEl ? 'pointer' : 'default';
+    // Update Cursor (DOM write only on change)
+    const cursor = hitEl ? 'pointer' : 'default';
+    if (cursor !== this._lastCursor) {
+      this.stage.style.cursor = cursor;
+      this._lastCursor = cursor;
+    }
 
     if (hitEl) {
       if (this._lastMove && hitEl._compiledOnMove) hitEl._compiledOnMove();
@@ -2592,10 +2600,13 @@ class Text extends Shape {
     this._cachedLetterSpacingString = '0px';
     this._lines = [];
     this._totalChars = 0;
+    this._hasInk = false; // true only if the last draw() painted something (used by hitTest)
   }
 
   draw(ctx, u, t) {
     const { text, size, font, align, baseline, fill, stroke, strokewidth, weight, fontstyle, maxwidth, direction, width, lineheight, letterspacing, reveal } = this.attributeValues;
+
+    this._hasInk = false;
 
     // Skip drawing if there's no text content to render
     if (text === null || text === undefined || text === '') return;
@@ -2729,6 +2740,8 @@ class Text extends Shape {
     if (hasFill) ctx.fillStyle = this.createGradient(ctx, u, fill, 0);
     if (hasStroke) this.applyStrokeState(ctx, u);
 
+    this._hasInk = true;
+
     // Unified Render Loop
     for (let i = 0; i < this._lines.length; i++) {
       if (charsRemaining <= 0) break;
@@ -2757,6 +2770,16 @@ class Text extends Shape {
 
   getBoundingBox() {
     return this.boundingBox;
+  }
+
+  // Glyphs can't be turned into a path, so the hit area is the bounding box from the last draw()
+  hitTest(ctx, u) {
+    if (!this._hasInk) return; // nothing visible: empty text, reveal hides all, no fill and no stroke
+
+    const b = this.boundingBox;
+    const pad = this.isStroked() ? this.attributeValues.strokewidth / 2 : 0;
+    ctx.rect((b.left - pad) * u, (b.top - pad) * u, (b.right - b.left + 2 * pad) * u, (b.bottom - b.top + 2 * pad) * u);
+    ctx.fill(); // intercepted on pxl.dummyCtx (isPointInPath)
   }
 }
 // Define the custom element tag name

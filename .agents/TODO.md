@@ -140,3 +140,12 @@
 - **Note**: arrow trimming on smooth polylines (`loadSegment` / de Casteljau) must use the same end formula as the drawing loop if the spline changes.
 
 
+
+## 16. Text Measurement Accuracy (`<pxl-text>` Bounding Box)
+- **Status**: ⚪ **Known Limitations** (split off from `design/2026-10-13_text_hit_testing_plan.md`, 2026-10-15)
+- **Background**: The text bounding box (Tier 3 of `Text.draw()`, via `ctx.measureText()`) is used for gradient placement and, since text hit testing, as the hit area.
+- **Issues**:
+  - **Late web fonts**: the box is measured with whatever font is available at that moment. If a web font finishes loading later, the font string is unchanged, Tier 1 is not dirty, and the box keeps the **fallback font metrics** until the text changes. Docs pages invalidate layers on `document.fonts.ready`, but that does not reset the text caches.
+    - Possible fix: a global font generation counter, raised on `document.fonts` `loadingdone` and compared in Tier 1 (one integer check, no per-frame cost). Open question: the global side effect (listener + invalidating all layers) and how it relates to the docs pages' own `document.fonts.ready` handler.
+  - **`maxwidth` squeezing**: `measureText()` ignores the `maxWidth` argument of `fillText()`, so a horizontally compressed line gets a box that is too wide (hit area and gradients).
+    - Possible fix (Tier 3): per line, scale `actualBoundingBoxLeft/Right` by `min(1, maxwidth * u / metrics.width)`.

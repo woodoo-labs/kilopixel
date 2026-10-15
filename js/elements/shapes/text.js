@@ -30,10 +30,13 @@ class Text extends Shape {
     this._cachedLetterSpacingString = '0px';
     this._lines = [];
     this._totalChars = 0;
+    this._hasInk = false; // true only if the last draw() painted something (used by hitTest)
   }
 
   draw(ctx, u, t) {
     const { text, size, font, align, baseline, fill, stroke, strokewidth, weight, fontstyle, maxwidth, direction, width, lineheight, letterspacing, reveal } = this.attributeValues;
+
+    this._hasInk = false;
 
     // Skip drawing if there's no text content to render
     if (text === null || text === undefined || text === '') return;
@@ -167,6 +170,8 @@ class Text extends Shape {
     if (hasFill) ctx.fillStyle = this.createGradient(ctx, u, fill, 0);
     if (hasStroke) this.applyStrokeState(ctx, u);
 
+    this._hasInk = true;
+
     // Unified Render Loop
     for (let i = 0; i < this._lines.length; i++) {
       if (charsRemaining <= 0) break;
@@ -195,6 +200,16 @@ class Text extends Shape {
 
   getBoundingBox() {
     return this.boundingBox;
+  }
+
+  // Glyphs can't be turned into a path, so the hit area is the bounding box from the last draw()
+  hitTest(ctx, u) {
+    if (!this._hasInk) return; // nothing visible: empty text, reveal hides all, no fill and no stroke
+
+    const b = this.boundingBox;
+    const pad = this.isStroked() ? this.attributeValues.strokewidth / 2 : 0;
+    ctx.rect((b.left - pad) * u, (b.top - pad) * u, (b.right - b.left + 2 * pad) * u, (b.bottom - b.top + 2 * pad) * u);
+    ctx.fill(); // intercepted on pxl.dummyCtx (isPointInPath)
   }
 }
 // Define the custom element tag name

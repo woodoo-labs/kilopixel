@@ -21,6 +21,7 @@ pxl.InteractionEngine = class {
     this._hoveredElements = [];
     this._pressedElement = null;
     this._hitStack = new Array(50);
+    this._lastCursor = '';
     this._lastClick = false;
     this._lastDown = false;
     this._lastUp = false;
@@ -131,13 +132,16 @@ pxl.InteractionEngine = class {
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
 
+        // Spatial transforms only: alpha, blend, filter and shadows don't affect isPointInPath
         for (let j = stackLen - 1; j >= 0; j--) {
-          pxl.applyContextState(ctx, this.stage.unit, this._hitStack[j].attributeValues, this._hitStack[j]);
+          pxl.applyTransformState(ctx, this.stage.unit, this._hitStack[j].attributeValues);
         }
 
         pxl._hitResult = false;
         ctx.beginPath();
-        el.draw(ctx, this.stage.unit, 0);
+        // Shapes that can't express their hit area as a path (e.g. text) provide hitTest()
+        if (el.hitTest) el.hitTest(ctx, this.stage.unit);
+        else el.draw(ctx, this.stage.unit, 0);
         ctx.restore();
 
         if (pxl._hitResult) {
@@ -166,8 +170,12 @@ pxl.InteractionEngine = class {
       if (hitEl._compiledOnEnter) hitEl._compiledOnEnter();
     }
 
-    // Update Cursor
-    this.stage.style.cursor = hitEl ? 'pointer' : 'default';
+    // Update Cursor (DOM write only on change)
+    const cursor = hitEl ? 'pointer' : 'default';
+    if (cursor !== this._lastCursor) {
+      this.stage.style.cursor = cursor;
+      this._lastCursor = cursor;
+    }
 
     if (hitEl) {
       if (this._lastMove && hitEl._compiledOnMove) hitEl._compiledOnMove();
