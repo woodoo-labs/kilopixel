@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (no code changes yet)
 - **Date**: 2026-10-17
-- **Related**: `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, introduced `static defaults`), `design/2026-10-17_always_save_restore_plan.md` (state isolation for foreign code), `.agents/TODO.md` §20
+- **Related**: `design/2026-10-17_bundle_scope_plan.md` (`pxl.Shape`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, introduced `static defaults`), `design/2026-10-17_always_save_restore_plan.md` (state isolation for foreign code), `.agents/TODO.md` §20
 - **Target Implementation**: `js/elements/node.js`, `js/elements/shape.js`, `js/elements/shapes/*.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/interaction.js`
 - **Prototype** (local only, scratch is git-ignored): `scratch/custom_shape/star.js`, `scratch/custom_shape/test.html`
 
@@ -14,8 +14,8 @@ Writing a shape, built-in or user-made, should be as short as possible:
 
 ```javascript
 // star.js — loaded after pxl.min.js
-class Star extends Shape {
-  static defaults = { ...Shape.defaults, points: 5, r: 50, ir: 20 };
+class Star extends pxl.Shape {
+  static defaults = { ...pxl.Shape.defaults, points: 5, r: 50, ir: 20 };
 
   draw(ctx, u) {
     const { points, r, ir } = this.attributeValues;
@@ -41,7 +41,7 @@ class Star extends Shape {
 customElements.define('pxl-star', Star);
 ```
 
-One list of attributes (`defaults`), no `observedAttributes`, no constructor, no Kilopixel-specific registration. Everything else is inherited: expressions, animation, `ref.*`, Rule A, transforms, styling, gradients, hit testing and events.
+One list of attributes (`defaults`), no `observedAttributes`, no constructor, no Kilopixel-specific registration. User shapes extend `pxl.Shape` (the bundle exposes no other global names, see `design/2026-10-17_bundle_scope_plan.md`); built-in shapes inside the bundle keep writing `Shape`. Everything else is inherited: expressions, animation, `ref.*`, Rule A, transforms, styling, gradients, hit testing and events.
 
 **Prototype result (2026-10-17):** the same `Star` (with today's extra `observedAttributes` line) already works with the current engine, loaded as a separate file: drawing, gradient fill, `rotate="t * 30"`, reactive `points="ref.pts.value"`, Rule A defaults for its own attributes, hit testing and `onclick`. No engine change was needed; this plan only removes the boilerplate.
 
@@ -194,7 +194,8 @@ Verified 2026-10-17 (frames driven by hand): `running` unset → `impeller` 0, 0
 | Lowercase check | ✅ one `console.warn` per class at `define()` | Silent mismatch is the most likely user mistake; costs nothing per frame |
 | Class fields | ✅ everywhere except Layer | No `super()` boilerplate; Layer's DOM setup stays readable in a constructor |
 | `draw(ctx, u)` | ✅ remove `t` | Documents "draw only reads values"; avoids hit-testing bugs |
-| `pxl.Shape` alias, `pxl.defineShape()`, `this.animate()` | ⏸️ later | Not needed for the template; `Shape` is already a global class |
+| `pxl.Shape` | ✅ via the bundle scope plan | The bundle will expose only `pxl`; global class names break user scripts (`design/2026-10-17_bundle_scope_plan.md`) |
+| `pxl.defineShape()`, `this.animate()` | ⏸️ later | Not needed for the template |
 | Hiding `u` from shape authors | ⏸️ later | Possible (scale the context while building the path), but a separate API decision |
 
 ---

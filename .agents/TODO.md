@@ -35,11 +35,14 @@
 - **Resolution Plan**: Keep current hybrid behavior (best ergonomics for declarative HTML), but inject `deg(rad)` and `rad(deg)` helpers into `pxl.scope` as part of the animation expansion.
 
 ## 5. Implement `<pxl-out>` Declarative HTML Output Component
-- **Status**: 🟡 **Plan Drafted**
+- **Status**: 🟡 **Plan Revised** (2026-10-17, ready for review)
 - **Reference**: [`design/2026-08-02_declarative_html_output_pxl_out_plan.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/design/2026-08-02_declarative_html_output_pxl_out_plan.md)
 - **Core Features**:
   - Custom Web Component acting as a declarative DOM bridge outside `<pxl-stage>`.
   - Reactively outputs canvas telemetry (e.g., `ref.main.fps` or coordinates) without JavaScript polling.
+  - Built on `PxlNode` (Rule A, subscriptions, cleanup); `value` only; DOM write only when the text changes; time expressions not supported (warning).
+  - Freezes while its source stage is scrolled out of view → `alwaysrender="true"` on that stage (document in a callout).
+  - Accessibility: live values as real DOM text; no automatic `aria-live`.
 
 ## 6. Stage-Level `<pxl-var>` Execution
 - **Status**: 🟡 **Plan Drafted**
@@ -185,3 +188,10 @@
 - **Changes**: derive `observedAttributes` from `static defaults` (event handlers appended by `Shape`, `isHovered` / `isPressed` moved out of defaults, Polyline `points: ''`, lowercase-key warning); class fields instead of constructors (except Layer); `draw(ctx, u)` without `t` (hit testing calls `draw()` with `t = 0`).
 - **Custom animation (note)**: time belongs in attribute expressions. Pattern A: `spin="t * 180"` in the HTML. Pattern B: internal animated value via `pxl.compileAttribute` (internal API, a public helper like `this.animate()` later).
 - **Depends on**: §19 (always save / restore) before publishing a "Custom Shapes" docs page — one careless user shape fades the whole layer until always save is implemented.
+
+## 21. Bundle Scope: No Global Names Except `pxl`
+- **Status**: 🟡 **Proposed** (2026-10-17, no code changes yet)
+- **Reference**: `design/2026-10-17_bundle_scope_plan.md`
+- **Problem**: the bundle declares 18 global names (`Stage`, `Shape`, `Circle`, `Line`, `Text`, `Grid`, … and internal `len`, `mathProps`, …). User scripts declaring the same name at top level (`const len = 10`, `class Circle {}`) fail with a SyntaxError, and `Text` hides the DOM's `Text` (`textNode instanceof Text` → false).
+- **Fix**: wrap the bundle in a function in `build.js`, export `pxl.Shape` for custom shapes, remove `window.PxlNode`, keep class names in Terser (`--keep-classnames`).
+- **Decision**: stay a classic script, no ES module (no JavaScript API to import; modules are deferred and don't load from `file://`; zero build step). An extra `pxl.mjs` only if npm / TypeScript users need it later.
