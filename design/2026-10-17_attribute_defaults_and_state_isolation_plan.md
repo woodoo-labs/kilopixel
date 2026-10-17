@@ -1,10 +1,10 @@
 # Attribute Defaults & Canvas State Isolation
 
-- **Status**: 🟢 **Rule A implemented 2026-10-17** (20/20 unit tests in `scratch/rule_a/unit.html`; regression: 76 docs / examples pages, 3,682 elements, identical static values old vs. new bundle, no new console errors). Option B stays undecided.
+- **Status**: 🟢 **Rule A implemented 2026-10-17** (20/20 unit tests in `scratch/rule_a/unit.html`; regression: 76 docs / examples pages, 3,682 elements, identical static values old vs. new bundle, no new console errors). Always save / restore was split off into `design/2026-10-17_always_save_restore_plan.md`.
 - **Date**: 2026-10-17 (reviewed 2026-10-17: hot loop / GC, edge cases)
 - **Related**: `design/2026-10-15_interactive_state_auto_registration_plan.md` (lazy unregister), `.agents/TODO.md` §18
 - **Target Implementation**: `js/engine.js` (`pxl.compileAttribute`), `js/elements/node.js`, `js/elements/shape.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/variable.js`, `js/elements/stage.js`, `js/elements/shapes/*.js`
-- **Measurement Tools** (local only, scratch is git-ignored): `scratch/save_restore_audit.js`, `scratch/save_restore_bench.html`
+- **Test Files** (local only, scratch is git-ignored): `scratch/rule_a/unit.html` (unit tests), `scratch/rule_a/regress.html` (old vs. new bundle on all pages)
 
 ---
 
@@ -163,68 +163,9 @@ Polyline `closed` becomes `closed === true`, like circle and ellipse. All pages 
 
 ---
 
-## 3. Option B: Always `save()` / `restore()` per Shape (Undecided, Not Part of This Implementation)
+## 3. Always `save()` / `restore()` (Split Off)
 
-### 3.1 Idea
-
-Wrap every shape in `ctx.save()` / `ctx.restore()`, not only shapes with transforms or compositing. Each shape then starts from a clean canvas state, whatever earlier shapes did.
-
-### 3.2 How Many Shapes Already Save Today
-
-Static analysis of every shape tag, mirroring `hasStateChanges` (`scratch/save_restore_audit.js`; any expression counts as a state change):
-
-| Scope | Shapes | Already save/restore | Without |
-|---|---|---|---|
-| `examples/` | 1,589 | 1,092 (69%) | 497 |
-| `docs/` | 856 | 578 (68%) | 278 |
-| Animated layers (redraw every frame) | 1,294 | 871 (67%) | 423 |
-| Static layers (drawn once) | 1,071 | 733 (68%) | 338 |
-
-- **Most common trigger:** `x` / `y` (1,234 / 1,226 shapes). For 1,090 shapes, `x` / `y` are the **only** trigger.
-- **Shapes that skip it:** lines (289 of 333), grids (76 of 80), polylines (107 of 284), and circles / rects placed at `0, 0` inside a positioned `<pxl-group>` (290).
-- **Other triggers:** `rotate` 393, `scale` 170, `dx` 162, `blend` 89, `alpha` 80, `dy` 30, `filter` 29, `shadowcolor` 15, `scaley` 7, `mask` 3.
-
-### 3.3 Cost of One Pair
-
-Raw canvas benchmark, no Kilopixel engine (`scratch/save_restore_bench.html`): 2,000 filled and stroked circles per frame, median of several rounds, timing includes rasterization (`getImageData` flush). The browser pane may have been in the background, so treat the numbers as indicative.
-
-| Variant | µs per shape |
-|---|---|
-| Plain draw (absolute coordinates) | ~0.6–0.7 |
-| `save()` + `restore()` added, no transform | +0.58 |
-| `translate` + undo `translate` | ~1.3 total |
-| `save` + `translate` + `restore` | ~2.0 total |
-
-**Impact:** the 423 shapes in animated example layers that skip saving today would add about 0.25 ms per frame **in total**. A page with 100 such shapes adds about 0.06 ms of a 16.7 ms frame budget. A real Kilopixel shape does much more work per frame than the raw benchmark (expression evaluation, transform pipeline, style), so the relative share is smaller in practice.
-
-### 3.4 What It Would and Wouldn't Fix
-
-| | Rule A (defaults) | Option B (always save) |
-|---|---|---|
-| Leaks between shapes (`miterlimit`, text state) | ✅ values are always valid | ✅ clean state per shape |
-| Vanishing shapes (`scale`, `alpha`, `strokewidth` = `null`) | ✅ | ❌ `null` still becomes `0` |
-| Bare `hidden`, `closed`, … | ✅ | ❌ |
-| `on*` removal TypeError | ✅ | ❌ |
-| Robustness against future state leaks | ➖ relies on "always set before use" | ✅ automatic |
-
-**Rule A is required either way. Option B is a robustness / simplicity decision, not a correctness fix.**
-
-### 3.5 What Option B Would Simplify
-
-- `Shape.render()`: the 15-term `hasStateChanges` check disappears; `applyContextState` already skips neutral values.
-- `drawArrows`: the manual `fillStyle` save/reset and the "not restored" `miterLimit` comment (`shape.js`).
-- `Grid.draw`: the manual `lineWidth` reset for major lines.
-- New features that touch context state (e.g. `paintorder`, TODO §14) can't leak into the next shape.
-
-What it does **not** change: rule 1 (set stroke / text state before drawing) is still needed, because state set *inside* a shape's own draw (fill, then stroke, then arrowheads) must still be correct. Layers and groups keep their own conditional save.
-
-### 3.6 Opposite Direction (for Completeness)
-
-For shapes whose only state is `x` / `y` (1,090 shapes), `translate` + undo `translate` measured ~0.6 µs cheaper per shape than `save` + `translate` + `restore`. That would be the speed-oriented alternative. Floating-point drift from undoing translations is negligible but not zero.
-
-### 3.7 Recommendation
-
-After Rule A, measure Option B in the **real engine**: `examples/benchmark.html` and a few animated docs pages, `renderAvg` / `renderMax` with the conditional vs. the unconditional save. Adopt it only if the difference is within noise, for code simplicity.
+Wrapping every shape in `save()` / `restore()` (formerly "Option B") is not part of this plan. Rule A is required either way and already prevents the known leaks; always-save is a separate robustness / simplicity decision. Measurements, trade-offs and the next step: `design/2026-10-17_always_save_restore_plan.md` (TODO §19).
 
 ---
 
@@ -240,7 +181,7 @@ After Rule A, measure Option B in the **real engine**: `examples/benchmark.html`
 | Removing an `on*` handler | ✅ clear it, unregister lazily | No array mutation inside `process()`; reuses `releaseIfUnused()` |
 | Treat `''` as `true` globally | ❌ rejected | Breaks string attributes (`text=""`, `fill=""`) |
 | Whitespace-only / invalid values | ❌ out of scope (§2.7) | Not produced by HTML APIs or frameworks; validation is a separate feature |
-| Option B (always save) | ⏸️ measure after Rule A (§3.7) | Correctness comes from Rule A; B is a simplicity trade-off |
+| Always save / restore per shape | ⏸️ split off (§3) | Correctness comes from Rule A; always-save is a simplicity trade-off |
 
 ---
 
@@ -255,8 +196,6 @@ After Rule A, measure Option B in the **real engine**: `examples/benchmark.html`
 - **Fewer allocations at creation:** the per-constructor defaults literals (`const defaults = { … }` in every shape constructor) disappear; each instance still gets its own `attributeExpressions` / `attributeValues` copy, as today.
 - **Same hidden classes:** key order is unchanged (§2.2).
 - **Event handler removal:** no work in `process()`; `releaseIfUnused()` already runs on leave / release.
-
-**Option B** (if ever adopted): +~0.6 µs per shape per frame for shapes that don't save today (§3.3), zero allocations.
 
 ---
 

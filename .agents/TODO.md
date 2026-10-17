@@ -164,8 +164,15 @@
 - **Workaround Today**: `filter="dropShadow(...)"` on the `<pxl-layer>` instead of `shadowcolor` on the shape — the layer casts one shadow of the combined silhouette.
 
 ## 18. Attribute Defaults & Canvas State Isolation
-- **Status**: 🟢 **Rule A implemented** (2026-10-17); Option B (always save/restore) still open
+- **Status**: 🟢 **Implemented** (2026-10-17)
 - **Reference**: `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md`
-- **Problem**: bare attributes (`''`) and removed attributes (`null`) are stored as-is. Bare `hidden` / `closed` don't work (bare `smooth` does), removed `scale` / `alpha` / `strokewidth` make shapes vanish, removed `miterlimit` / text `align` leak from the previous shape, and removing an `on*` handler throws a TypeError.
-- **Rule A (required)**: bare boolean attribute = `true`; bare or removed other attribute = class default (static `defaults` per class, resolved in `pxl.compileAttribute`).
-- **Option B (undecided)**: always `save()` / `restore()` per shape. ~68% of shapes in examples/docs already save; cost ~0.6 µs per extra shape. Measure in the real engine before deciding.
+- **Problem Solved**: bare attributes (`''`) and removed attributes (`null`) were stored as-is. Bare `hidden` / `closed` didn't work (bare `smooth` did), removed `scale` / `alpha` / `strokewidth` made shapes vanish, removed `miterlimit` / text `align` leaked from the previous shape, and removing an `on*` handler threw a TypeError.
+- **Rule A**: bare boolean attribute = `true`; bare or removed other attribute = class default (static `defaults` per class, resolved in `pxl.compileAttribute`).
+- Always save / restore per shape was split off → §19.
+
+## 19. Always `save()` / `restore()` per Shape
+- **Status**: ⚪ **Undecided** (2026-10-17, real-engine measurement pending)
+- **Reference**: `design/2026-10-17_always_save_restore_plan.md`
+- **Idea**: wrap every shape in `ctx.save()` / `ctx.restore()`, not only shapes with transforms or compositing, so no code path can leak canvas state into the next shape. Simplifies `Shape.render()`, `drawArrows` and `Grid.draw`.
+- **Known so far**: ~68% of shapes in examples / docs already save (mostly because of `x` / `y`); raw canvas cost ~0.6 µs per extra shape. Rule A already prevents the known leaks, so this is a simplicity / robustness decision, not a bug fix.
+- **Next Step**: measure `renderAvg` / `renderMax` in the real engine (`examples/benchmark.html` + animated docs pages) with conditional vs. always save; adopt only if the difference is within noise.
