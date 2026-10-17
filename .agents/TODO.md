@@ -171,8 +171,17 @@
 - Always save / restore per shape was split off → §19.
 
 ## 19. Always `save()` / `restore()` per Shape
-- **Status**: ⚪ **Undecided** (2026-10-17, real-engine measurement pending)
+- **Status**: 🟢 **Decided: adopt** (2026-10-17, implementation pending; plan §5.4)
 - **Reference**: `design/2026-10-17_always_save_restore_plan.md`
 - **Idea**: wrap every shape in `ctx.save()` / `ctx.restore()`, not only shapes with transforms or compositing, so no code path can leak canvas state into the next shape. Simplifies `Shape.render()`, `drawArrows` and `Grid.draw`.
-- **Known so far**: ~68% of shapes in examples / docs already save (mostly because of `x` / `y`); raw canvas cost ~0.6 µs per extra shape. Rule A already prevents the known leaks, so this is a simplicity / robustness decision, not a bug fix.
-- **Next Step**: measure `renderAvg` / `renderMax` in the real engine (`examples/benchmark.html` + animated docs pages) with conditional vs. always save; adopt only if the difference is within noise.
+- **Measured**: real pages within noise; worst case 2,000 bare animated lines +1.3 ms per frame (+42%), still 60 fps. A careless custom shape (e.g. `globalAlpha` not reset) fades the whole layer today; always save contains it.
+- **Reasoning**: simpler engine code (no `hasStateChanges` list to keep in sync with `applyContextState`), safety for custom shapes, cost only outside the target use. Criterion revised from "worst case < 5%" to "real pages within noise, worst case still 60 fps".
+- **Next Step**: implement (plan §6).
+
+## 20. Shape Authoring (Derived Attributes, Class Fields, Custom Animation)
+- **Status**: 🟡 **Proposed** (2026-10-17, no code changes yet)
+- **Reference**: `design/2026-10-17_shape_authoring_plan.md`
+- **Goal**: writing a shape (built-in or user-made, e.g. a separate `star.js` with `class Star extends Shape`) needs only `static defaults`, `draw(ctx, u)` and `getBoundingBox()`. A prototype Star already works with today's engine.
+- **Changes**: derive `observedAttributes` from `static defaults` (event handlers appended by `Shape`, `isHovered` / `isPressed` moved out of defaults, Polyline `points: ''`, lowercase-key warning); class fields instead of constructors (except Layer); `draw(ctx, u)` without `t` (hit testing calls `draw()` with `t = 0`).
+- **Custom animation (note)**: time belongs in attribute expressions. Pattern A: `spin="t * 180"` in the HTML. Pattern B: internal animated value via `pxl.compileAttribute` (internal API, a public helper like `this.animate()` later).
+- **Depends on**: §19 (always save / restore) before publishing a "Custom Shapes" docs page — one careless user shape fades the whole layer until always save is implemented.
