@@ -27,14 +27,15 @@ class Stage extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
     if (name === 'ratio') {
-      this._parsedRatio = pxl.parseAttributeValue(newValue);
+      // Bare or removed ratio falls back to the default 16 / 9
+      this._parsedRatio = (newValue === null || newValue === '') ? 16 / 9 : pxl.parseAttributeValue(newValue);
       this.style.aspectRatio = this._parsedRatio;
       if (this.attributeValues) {
         this.attributeValues.height = 1000 / this._parsedRatio;
         if (this._refKey) pxl.broadcast(this._refKey);
       }
     } else if (name === 'alwaysrender') {
-      const isAlwaysRender = newValue === 'true';
+      const isAlwaysRender = newValue === 'true' || newValue === ''; // bare attribute = true
       if (isAlwaysRender) {
         if (this.intersectionObserver) {
           this.intersectionObserver.disconnect();
@@ -87,7 +88,8 @@ class Stage extends HTMLElement {
     pxl.perf?.registerStage(this);
 
     // Initial setup if not already handled by attributeChangedCallback
-    if (this.getAttribute('alwaysrender') !== 'true' && !this.intersectionObserver) {
+    const alwaysRender = this.getAttribute('alwaysrender');
+    if (alwaysRender !== 'true' && alwaysRender !== '' && !this.intersectionObserver) {
       this.intersectionObserver = new IntersectionObserver((entries) => {
         this.isVisible = entries[0].isIntersecting;
         if (this.isVisible) this.requestRender();

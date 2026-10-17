@@ -1,6 +1,8 @@
 class Polyline extends Shape {
   static get observedAttributes() { return [...super.observedAttributes, 'points', 'closed', 'smooth', 'mode', 'arrowstart', 'arrowend', 'arrowstyle']; }
 
+  static defaults = { ...Shape.defaults, closed: false, smooth: false, mode: 'absolute', arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
+
   constructor() {
     super();
     this.pointCount = 0;
@@ -9,10 +11,6 @@ class Polyline extends Shape {
     // Highly optimized flat cache and pre-calculated string keys
     this.flatCache = new Float32Array(0);
     this.pointKeys = [];
-
-    const defaults = { closed: false, smooth: false, mode: 'absolute', arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
-    Object.assign(this.attributeExpressions, defaults);
-    Object.assign(this.attributeValues, defaults);
 
     this._arrowStart = pxl.createArrowRecord();
     this._arrowEnd = pxl.createArrowRecord();
@@ -62,7 +60,8 @@ class Polyline extends Shape {
   draw(ctx, u, t) {
     if (this.pointCount < 4) return;
 
-    const { closed, smooth, arrowstart, arrowend } = this.attributeValues;
+    const { smooth, arrowstart, arrowend } = this.attributeValues;
+    const closed = this.attributeValues.closed === true;
     const pts = this.flatCache;
     const len = this.pointCount / 2;
     // A Catmull-Rom curve through only 2 points is a straight line

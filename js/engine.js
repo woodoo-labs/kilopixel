@@ -78,8 +78,24 @@ pxl.clearAllVariableSubscriptions = function(element) {
 // =========================================================================
 // State Update Utilities for Web Components
 // =========================================================================
+// Attributes that follow the HTML presence rule: a bare attribute (<pxl-polyline closed>) means true
+pxl.BOOLEAN_ATTRIBUTES = new Set(['hidden', 'closed', 'smooth', 'pie', 'anticlockwise', 'labels']);
+
+// Resolves a bare ('') or removed (null) attribute: bare boolean = true, bare <pxl-var> value = '',
+// otherwise the class default (design/2026-10-17_attribute_defaults_and_state_isolation_plan.md)
+pxl.resolveEmptyAttribute = function(element, name, newValue) {
+  if (newValue === '') {
+    if (this.BOOLEAN_ATTRIBUTES.has(name)) return true;
+    if (name === 'value') return ''; // only <pxl-var> has a value attribute
+  }
+  const value = element.constructor.defaults[name];
+  return value === undefined ? null : value;
+};
+
 pxl.compileAttribute = function(element, name, newValue) {
-  const parsed = this.parseAttributeValue(newValue);
+  const parsed = (newValue === null || newValue === '')
+    ? this.resolveEmptyAttribute(element, name, newValue)
+    : this.parseAttributeValue(newValue);
   element.attributeExpressions[name] = parsed;
 
   // Register shapes whose isHovered / isPressed is read here. Time-dependent expressions never

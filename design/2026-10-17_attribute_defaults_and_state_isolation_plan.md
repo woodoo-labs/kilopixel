@@ -1,8 +1,8 @@
 # Attribute Defaults & Canvas State Isolation
 
-- **Status**: 🟡 **Proposed** (no code changes yet)
-- **Date**: 2026-10-17
-- **Related**: `design/2026-08-02_style_inheritance_plan.md` (context state), `.agents/TODO.md` §15 (smooth polyline)
+- **Status**: 🟢 **Rule A implemented 2026-10-17** (20/20 unit tests in `scratch/rule_a/unit.html`; regression: 76 docs / examples pages, 3,682 elements, identical static values old vs. new bundle, no new console errors). Option B stays undecided.
+- **Date**: 2026-10-17 (reviewed 2026-10-17: hot loop / GC, edge cases)
+- **Related**: `design/2026-10-15_interactive_state_auto_registration_plan.md` (lazy unregister), `.agents/TODO.md` §18
 - **Target Implementation**: `js/engine.js` (`pxl.compileAttribute`), `js/elements/node.js`, `js/elements/shape.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/variable.js`, `js/elements/stage.js`, `js/elements/shapes/*.js`
 - **Measurement Tools** (local only, scratch is git-ignored): `scratch/save_restore_audit.js`, `scratch/save_restore_bench.html`
 
@@ -12,8 +12,8 @@
 
 Kilopixel promises that scenes work "100% via standard HTML attributes and native DOM manipulation". Two common HTML operations break that promise today:
 
-1. **Bare attributes** (`<pxl-polyline closed>`) arrive as an empty string `''`.
-2. **Removed attributes** (`removeAttribute('scale')`) arrive as `null`.
+1. **Bare attributes** (`<pxl-polyline closed>`, `el.hidden = true`, `el.toggleAttribute('pie')`) arrive as an empty string `''`.
+2. **Removed attributes** (`removeAttribute('scale')`, `el.hidden = false`) arrive as `null`.
 
 `pxl.parseAttributeValue` returns both values unchanged (`compiler.js`, first line), so they end up in `attributeValues` as `''` / `null` instead of a meaningful value.
 
@@ -28,7 +28,7 @@ Kilopixel promises that scenes work "100% via standard HTML attributes and nativ
 | grid `labels` | off | truthy |
 | stage `alwaysrender` | off | `=== 'true'` |
 
-- `hidden` is a **global HTML attribute**: `<pxl-circle hidden>` looks like it should hide the shape, but the shape is drawn.
+- `hidden` is a **global HTML attribute** with a reflected property: `el.hidden = true` writes `hidden=""`, so the native API doesn't hide Kilopixel shapes today.
 - `closed="1"` closes a polyline (truthy check) but not a circle (`=== true` check).
 - Bare non-boolean attributes are `''`, which only *happens* to behave like `0` in arithmetic. `<pxl-circle x y r="50">` is drawn at the origin, but `ref.circle.x` is `''`, so `ref.circle.x + 10 + 5` is `'105'` (string concatenation), and `ref.circle.tx` is `'0'`.
 
@@ -56,17 +56,21 @@ All shapes in a layer share one canvas context. Context settings persist until o
 
 Rule 1 only works with **valid** values. Setting `ctx.miterLimit = null` (→ `0`) or `ctx.textAlign = null` is ignored by the canvas, so the previous shape's value stays. The result then depends on DOM order.
 
+### 1.4 Impact on Existing Pages
+
+Audit of `docs/` and `examples/` (2026-10-17): no bare attributes, no empty values, no `removeAttribute` / `toggleAttribute` / `.hidden =`. Boolean attributes only use literal `"true"` / `"false"` (plus numeric `smooth` tensions). **Rule A changes nothing visible on existing pages.**
+
 ---
 
-## 2. Rule A: Empty or Removed Means Default (Required)
+## 2. Rule A: Empty or Removed Means Default
 
 ### 2.1 The Rule
 
-| Incoming value | Boolean attribute | Any other attribute |
-|---|---|---|
-| `''` (bare) | `true` (HTML presence rule) | default |
-| `null` (removed) | default (`false`) | default |
-| any other string | parsed as today | parsed as today |
+| Incoming value | Boolean attribute | `<pxl-var>` `value` | Any other attribute |
+|---|---|---|---|
+| `''` (bare) | `true` (HTML presence rule) | `''` (empty string) | default |
+| `null` (removed) | default (`false`) | default (`0`) | default |
+| any other string | parsed as today | parsed as today | parsed as today |
 
 Boolean attributes (single source of truth):
 
@@ -75,7 +79,8 @@ Boolean attributes (single source of truth):
 pxl.BOOLEAN_ATTRIBUTES = new Set(['hidden', 'closed', 'smooth', 'pie', 'anticlockwise', 'labels']);
 ```
 
-`smooth` accepts a number (tension) as well; bare `smooth` → `true` → tension 1, as today.
+- `smooth` accepts a number (tension) as well; bare `smooth` → `true` → tension 1, as today.
+- **Why `<pxl-var value="">` stays `''`:** a variable is free-form state. A text input bound to it (`setAttribute('value', input.value)`) must show an empty string when the field is cleared, not `0`. For every other attribute, `''` is not a meaningful value (an empty `font`, `strokewidth` or `fill`), and `text` already defaults to `''`.
 
 ### 2.2 Defaults as One Static Object per Class
 
@@ -93,7 +98,10 @@ class Circle extends Shape {
 }
 ```
 
-The `PxlNode` constructor copies `this.constructor.defaults` into both objects once, replacing the per-class `Object.assign` calls. One shared object per class (no per-instance allocation), and each default is declared in exactly one place.
+- The `PxlNode` constructor copies `this.constructor.defaults` into both objects once, replacing the per-class `Object.assign` calls. Subclass constructors keep only their non-default fields (caches, scratch buffers).
+- One shared object per class, declared once. All values are primitives, and the object is only ever **read** (copied by the constructor, looked up by Rule A), so no `Object.freeze` is needed.
+- Key order stays the same as today (base keys first, subclass keys after), so every instance of a class still gets the same hidden class.
+- `Shape.defaults` keeps the runtime states `isHovered` / `isPressed` (they are not observed attributes, so Rule A never resolves them).
 
 ### 2.3 Resolution in `pxl.compileAttribute`
 
@@ -108,33 +116,54 @@ pxl.compileAttribute = function(element, name, newValue) {
   //   which also removes the key from animatedAttributeKeys / reactiveAttributeKeys
 };
 
+// Bare boolean = true; bare var value = ''; otherwise the class default.
 pxl.resolveEmptyAttribute = function(element, name, newValue) {
-  if (newValue === '' && this.BOOLEAN_ATTRIBUTES.has(name)) return true;
-  const value = element.constructor.defaults?.[name];
+  if (newValue === '') {
+    if (this.BOOLEAN_ATTRIBUTES.has(name)) return true;
+    if (name === 'value') return '';  // only <pxl-var> has a value attribute
+  }
+  const value = element.constructor.defaults[name];
   return value === undefined ? null : value;
 };
 ```
 
-- Runs only when an attribute changes, never per frame.
-- `trackInteractiveRefs(newValue, …)` already ignores non-strings.
-- Polyline `points` keeps its own path: `''` / `null` already parse to zero points (nothing drawn), which is the correct default.
+What the existing code then does for free:
+- **Animated / reactive → removed:** the static branch drops the key from `animatedAttributeKeys` / `reactiveAttributeKeys`; `PxlNode.attributeChangedCallback` recomputes `isAnimated`, marks the matrix dirty for spatial keys, broadcasts `ref.<id>` and invalidates the layer. Stale `ref.*` subscriptions clean themselves up on the next broadcast (existing lazy mechanism).
+- **Before connect** (`createElement` + `setAttribute`): same path, values are static.
+- **`trackInteractiveRefs(newValue, …)`** already ignores non-strings.
+- **Polyline `points`** keeps its own path: `''` / `null` already parse to zero points (nothing drawn), which is the correct default. The synthetic `p0…pN` keys are never empty (the parser drops empty coordinates).
+- **Defaults that are `null` on purpose** keep their meaning "not set": rect `r1`–`r4` (fall back to `r`), circle / ellipse `end` / `sweep` (full circle), text `direction` / `reveal`.
 
-### 2.4 Strict Boolean Checks
+### 2.4 Strict Boolean Check for Polyline `closed`
 
-With bare attributes resolved to `true`, all boolean checks can use the same strict form as circle and ellipse:
+Polyline `closed` becomes `closed === true`, like circle and ellipse. All pages use literal `"true"` / `"false"` (§1.4), so nothing changes visibly. `smooth` stays "`false` / `null` = off, `true` = tension 1, number = tension". `hidden` and grid `labels` keep their truthy checks (values are now always booleans, so the check form doesn't matter).
 
-- Polyline: `closed === true` (today truthy). `smooth` stays "`false`/`null` = off, `true` = 1, number = tension".
-- `hidden`, grid `labels`: keep the truthy check (values are now always booleans; no behaviour change for `true` / `false`).
+### 2.5 Event Handlers (`on*`)
 
-### 2.5 Elements Outside the Shared Path
+`Shape.attributeChangedCallback` compiles handler strings directly (not via `compileAttribute`):
 
-- **`on*` handlers** (`Shape.attributeChangedCallback`): on `null`, clear the compiled handler (`this._compiledOnClick = null`, …) instead of compiling. An element without handlers is then unregistered lazily by the existing rule (auto-registration plan §3.5). Bare `onclick` (`''`) compiles to an empty function, as today.
-- **Stage** (not a `PxlNode`): `alwaysrender` → `newValue === 'true' || newValue === ''`; `ratio` → `''` / `null` resolve to `16 / 9` (update `style.aspectRatio` and `attributeValues.height`).
-- **Variable**: `value` resolves to `0`. A `<pxl-var>` meant to hold a string must say so explicitly (`value="''"`).
+- **`null` or `''`** → set the compiled handler to `null`. No compile, no TypeError. (`onclick=""` would compile to an empty function and register the shape for nothing.)
+- **No immediate unregister.** A handler may remove its own attribute while `InteractionEngine.process()` is iterating `_hoveredElements` (e.g. a one-shot button: `onclick="…; this.removeAttribute('onclick')"`). Instead, the existing lazy `releaseIfUnused()` unregisters the shape on its next leave / release, because `hasEventHandlers()` is now false. Until then it is hit-tested once per frame for nothing, which is harmless. The hand cursor disappears immediately, because `isClickable()` reads the handlers.
+- `pxl.trackInteractiveRefs` is only called for non-empty strings.
+
+### 2.6 Stage (Not a `PxlNode`)
+
+- `alwaysrender`: `true` for `'true'` or `''`, in **both** places (`attributeChangedCallback` and the `connectedCallback` check `getAttribute('alwaysrender') !== 'true'`).
+- `ratio`: `''` / `null` → `16 / 9` (update `style.aspectRatio` and `attributeValues.height`).
+
+### 2.7 Out of Scope (Deliberately)
+
+| Case | Today and after Rule A | Why not handled |
+|---|---|---|
+| Whitespace-only value (`strokewidth=" "`) | `Number(" ")` → `0` | Not produced by frameworks or `hidden` / `toggleAttribute`; a `trim()` would allocate on every compile |
+| Invalid values (`miterlimit="abc"`, `linecap="foo"`) | stored as-is, canvas ignores them (may leak) | Validation per attribute type is a separate, larger feature |
+| `closed="1"`, `pie="yes"` | not `true` (strict booleans) | Bare or `"true"` / `"false"` only, as everywhere else |
+| `<pxl-stage hidden>` | stage stays visible (its inline `display: block` wins over the browser's `[hidden]` rule) | Stage has no `hidden` attribute; hide it with CSS |
+| `smooth="0"` | Bézier path with tension 0 (visually straight) | Separate small cleanup |
 
 ---
 
-## 3. Option B: Always `save()` / `restore()` per Shape (Undecided)
+## 3. Option B: Always `save()` / `restore()` per Shape (Undecided, Not Part of This Implementation)
 
 ### 3.1 Idea
 
@@ -195,8 +224,7 @@ For shapes whose only state is `x` / `y` (1,090 shapes), `translate` + undo `tra
 
 ### 3.7 Recommendation
 
-1. Implement **Rule A** (§2).
-2. Then measure Option B in the **real engine**: `examples/benchmark.html` and a few animated docs pages, `renderAvg` / `renderMax` with the conditional vs. the unconditional save. Decide on Option B only if the difference is within noise; favour code simplicity in that case.
+After Rule A, measure Option B in the **real engine**: `examples/benchmark.html` and a few animated docs pages, `renderAvg` / `renderMax` with the conditional vs. the unconditional save. Adopt it only if the difference is within noise, for code simplicity.
 
 ---
 
@@ -204,36 +232,45 @@ For shapes whose only state is `x` / `y` (1,090 shapes), `translate` + undo `tra
 
 | Topic | Decision | Reason |
 |---|---|---|
-| Bare boolean attribute | ✅ `true` | Native HTML rule (`<input disabled>`, `hidden`) |
-| Bare / removed non-boolean attribute | ✅ class default | Matches HTML "removed = default"; no `''` / `null` in `attributeValues` |
-| Defaults storage | ✅ static inherited `defaults` per class | Lookup by name; one declaration per default; no per-instance allocation |
-| `closed="1"`, `pie="yes"` | ❌ not `true` | Strict booleans everywhere (`=== true`); bare or `"true"` only |
+| Bare boolean attribute | ✅ `true` | Native HTML rule (`<input disabled>`, `el.hidden = true`, `toggleAttribute`) |
+| Bare / removed non-boolean attribute | ✅ class default | Matches HTML "removed = default"; no `''` / `null` left in `attributeValues` |
+| Bare `<pxl-var>` `value` | ✅ stays `''` | Free-form state; cleared text inputs must give `''`, not `0` |
+| Defaults storage | ✅ static inherited `defaults` per class | Lookup by name; one declaration per default; no per-instance literal |
+| `Object.freeze` on `defaults` | ❌ not needed | Primitives only, read-only by convention; keeps the code plain |
+| Removing an `on*` handler | ✅ clear it, unregister lazily | No array mutation inside `process()`; reuses `releaseIfUnused()` |
 | Treat `''` as `true` globally | ❌ rejected | Breaks string attributes (`text=""`, `fill=""`) |
-| Option B (always save) | ⏸️ measure first (§3.7) | Correctness comes from Rule A; B is a simplicity trade-off |
-| `smooth="0"` (tension 0 still uses the Bézier path) | ⏸️ separate | Visually straight; could become "off" later, out of scope here |
+| Whitespace-only / invalid values | ❌ out of scope (§2.7) | Not produced by HTML APIs or frameworks; validation is a separate feature |
+| Option B (always save) | ⏸️ measure after Rule A (§3.7) | Correctness comes from Rule A; B is a simplicity trade-off |
 
 ---
 
-## 5. Performance & GC
+## 5. Performance & GC (Hot Loop Review)
 
-- Rule A: one comparison per attribute change (`null` / `''`), one `Set.has` and one property lookup only for empty values. Nothing per frame.
-- Static `defaults` replace per-constructor object literals: fewer allocations when many shapes are created.
-- Option B (if adopted): +~0.6 µs per shape per frame for shapes that don't save today (§3.3), zero allocations.
+**Rule A adds nothing to the 60 fps loop.**
+- `pxl.compileAttribute` and `Shape.attributeChangedCallback` run only when an attribute changes (parser, `setAttribute`, `removeAttribute`, `ref.x.set(…)`). The render loop only calls already-compiled functions (`evaluateAnimations`) and reads `attributeValues`.
+- Even when user code calls `setAttribute` every frame (e.g. slider-driven), the extra cost is two comparisons (`=== null`, `=== ''`) before parsing; `resolveEmptyAttribute` runs only for empty values and allocates nothing (one `Set.has`, one property read).
+
+**Small wins:**
+- **Type stability:** numeric attributes can no longer turn into `''` / `null`, so hot reads like `x || y`, `strokewidth * u` and `scale !== 1` keep seeing numbers (no polymorphic values for the JIT).
+- **Fewer allocations at creation:** the per-constructor defaults literals (`const defaults = { … }` in every shape constructor) disappear; each instance still gets its own `attributeExpressions` / `attributeValues` copy, as today.
+- **Same hidden classes:** key order is unchanged (§2.2).
+- **Event handler removal:** no work in `process()`; `releaseIfUnused()` already runs on leave / release.
+
+**Option B** (if ever adopted): +~0.6 µs per shape per frame for shapes that don't save today (§3.3), zero allocations.
 
 ---
 
 ## 6. Implementation Steps
 
-1. `js/elements/node.js` — copy `this.constructor.defaults` into `attributeExpressions` / `attributeValues` in the constructor.
-2. `js/elements/shape.js`, `layer.js`, `group.js`, `variable.js`, `shapes/*.js` — replace constructor `Object.assign(…)` defaults with `static defaults = { ...Parent.defaults, … }`.
+1. `js/elements/node.js` — constructor copies `this.constructor.defaults` (`PxlNode.defaults = {}`) into `attributeExpressions` / `attributeValues`.
+2. `js/elements/shape.js`, `layer.js`, `group.js`, `variable.js`, `shapes/*.js` — replace constructor defaults with `static defaults = { ...Parent.defaults, … }`; keep non-default constructor fields.
 3. `js/engine.js` — `pxl.BOOLEAN_ATTRIBUTES`, `pxl.resolveEmptyAttribute()`, call it in `pxl.compileAttribute` before parsing.
-4. `js/elements/shape.js` — `on*` removal clears the compiled handler (§2.5).
-5. `js/elements/shapes/polyline.js` — `closed === true`.
-6. `js/elements/stage.js` — bare `alwaysrender`, empty / removed `ratio` (§2.5).
+4. `js/elements/shape.js` — `on*`: `null` / `''` clear the compiled handler; compile and `trackInteractiveRefs` only for non-empty strings (§2.5).
+5. `js/elements/shapes/polyline.js` — `closed === true` (all uses).
+6. `js/elements/stage.js` — bare `alwaysrender` in both places; empty / removed `ratio` (§2.6).
 7. `node build.js`.
-8. `.agents/KILOPIXEL.md` — document Rule A (attribute basics, Common Pitfalls), the boolean list, and the stage / variable cases.
-9. Docs: keep explicit `="true"` in examples for readability; mention the bare form once (e.g. in the Polyline / Circle element reference).
-10. Option B: separate measurement and decision (§3.7).
+8. `.agents/KILOPIXEL.md` — document Rule A (attribute basics and Common Pitfalls), the boolean list, the `<pxl-var>` exception, handler removal, and the stage cases; the existing pitfall "No Redundant Defensive Fallbacks" becomes true after removals too.
+9. Docs: keep explicit `="true"` in examples for readability; mention the bare form once in the element references.
 
 ---
 
@@ -243,17 +280,23 @@ For shapes whose only state is `x` / `y` (1,090 shapes), `translate` + undo `tra
 |---|---|---|
 | 1 | `<pxl-polyline closed>` | closed path |
 | 2 | `<pxl-circle hidden>`, then `removeAttribute('hidden')` | hidden, then visible |
-| 3 | `<pxl-polyline smooth>` | smooth, tension 1 (unchanged) |
-| 4 | `<pxl-circle id="c" x y r="50">` | drawn at origin; `ref.c.x === 0` (number) |
-| 5 | `removeAttribute('scale')` / `('alpha')` on a visible shape | shape stays visible at scale 1 / alpha 1 |
-| 6 | `removeAttribute('strokewidth')` | stroke stays, width 1 |
-| 7 | Polyline A `miterlimit="1"`, polyline B with `miterlimit` removed, swap DOM order | B always uses 10 |
-| 8 | Two texts, remove `align` from the second | second uses `start`, independent of the first |
-| 9 | Animated attribute (`rotate="t * 90"`), then `removeAttribute('rotate')` | animation stops, rotate 0, no stale entry in `animatedAttributeKeys` |
-| 10 | Reactive attribute (`r="ref.size.value"`), then removed | default radius, no further updates from `ref.size` |
-| 11 | `removeAttribute('onclick')` | no error; clicks do nothing; hand cursor gone after lazy unregister |
-| 12 | Stage: bare `alwaysrender`; `removeAttribute('ratio')` | always renders; ratio 16 / 9, finite `ref.stage.height` |
-| 13 | `closed="1"` on polyline | open (strict booleans) |
-| 14 | `<pxl-var value>` | `ref.v.value === 0` |
+| 3 | `el.hidden = true` / `el.hidden = false` on a shape, a group and a layer | hides / shows (native property reflection) |
+| 4 | `el.toggleAttribute('pie')` twice on a circle with `sweep` | pie wedge, then open arc |
+| 5 | `<pxl-polyline smooth>` | smooth, tension 1 (unchanged) |
+| 6 | `<pxl-circle id="c" x y r="50">` | drawn at origin; `ref.c.x === 0` (number) |
+| 7 | `removeAttribute('scale')` / `('alpha')` on a visible shape | shape stays visible at scale 1 / alpha 1 |
+| 8 | `removeAttribute('strokewidth')` | stroke stays, width 1 |
+| 9 | Polyline A `miterlimit="1"`, polyline B with `miterlimit` removed, swap DOM order | B always uses 10 |
+| 10 | Two texts, remove `align` from the second | second uses `start`, independent of the first |
+| 11 | Animated attribute (`rotate="t * 90"`), then `removeAttribute('rotate')` | animation stops, rotate 0, key gone from `animatedAttributeKeys`, `isAnimated` false if it was the only one |
+| 12 | Reactive attribute (`r="ref.size.value"`), then removed | default radius, no further updates from `ref.size` |
+| 13 | Rect `r="20" r1="0"`, then `removeAttribute('r1')` | top-left corner falls back to `r` (20) |
+| 14 | `removeAttribute('onclick')` from outside | no error; clicks do nothing; default cursor; unregistered after the next leave |
+| 15 | One-shot button `onclick="ref.n.set('value', ref.n.value + 1); this.removeAttribute('onclick')"`, click twice | counts once; no error during `process()` |
+| 16 | `onclick=""` | no handler, shape not registered |
+| 17 | Stage: bare `alwaysrender`; `removeAttribute('ratio')` | always renders (also when set before connect); ratio 16 / 9, finite `ref.stage.height` |
+| 18 | `closed="1"` on polyline | open (strict booleans) |
+| 19 | `<pxl-var value>` / `removeAttribute('value')` | `''` / `0` |
+| 20 | Shape created with `document.createElement`, `x` set to `''` before appending | drawn at origin, `ref.<id>.x === 0` |
 
-**Regression:** all `docs/*.html` and `examples/*.html` load without console errors and look unchanged (they only use explicit values).
+**Regression:** all `docs/*.html` and `examples/*.html` load without console errors and look unchanged (§1.4).

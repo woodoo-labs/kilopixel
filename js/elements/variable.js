@@ -1,11 +1,7 @@
 class Variable extends PxlNode {
   static get observedAttributes() { return ['value']; }
 
-  constructor() {
-    super();
-    Object.assign(this.attributeExpressions, { value: 0 });
-    Object.assign(this.attributeValues, this.attributeExpressions);
-  }
+  static defaults = { value: 0 };
 
   connectedCallback() {
     this.style.display = 'none';

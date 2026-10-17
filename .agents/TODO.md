@@ -164,7 +164,7 @@
 - **Workaround Today**: `filter="dropShadow(...)"` on the `<pxl-layer>` instead of `shadowcolor` on the shape — the layer casts one shadow of the combined silhouette.
 
 ## 18. Attribute Defaults & Canvas State Isolation
-- **Status**: 🟡 **Proposed** (2026-10-17, no code changes yet)
+- **Status**: 🟢 **Rule A implemented** (2026-10-17); Option B (always save/restore) still open
 - **Reference**: `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md`
 - **Problem**: bare attributes (`''`) and removed attributes (`null`) are stored as-is. Bare `hidden` / `closed` don't work (bare `smooth` does), removed `scale` / `alpha` / `strokewidth` make shapes vanish, removed `miterlimit` / text `align` leak from the previous shape, and removing an `on*` handler throws a TypeError.
 - **Rule A (required)**: bare boolean attribute = `true`; bare or removed other attribute = class default (static `defaults` per class, resolved in `pxl.compileAttribute`).

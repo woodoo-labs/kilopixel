@@ -3,17 +3,16 @@ class Text extends Shape {
     return [...super.observedAttributes, 'text', 'size', 'font', 'align', 'baseline', 'weight', 'fontstyle', 'maxwidth', 'direction', 'width', 'lineheight', 'letterspacing', 'reveal'];
   }
 
+  static defaults = {
+    ...Shape.defaults,
+    text: '', size: 16, font: 'sans-serif', align: 'start',
+    baseline: 'alphabetic', weight: 'normal', fontstyle: 'normal',
+    maxwidth: 0, direction: null, width: 0, lineheight: 1.2,
+    letterspacing: 0, reveal: null
+  };
+
   constructor() {
     super();
-    const defaults = {
-      text: '', size: 16, font: 'sans-serif', align: 'start', 
-      baseline: 'alphabetic', weight: 'normal', fontstyle: 'normal', 
-      maxwidth: 0, direction: null, width: 0, lineheight: 1.2,
-      letterspacing: 0, reveal: null
-    };
-    Object.assign(this.attributeExpressions, defaults);
-    Object.assign(this.attributeValues, defaults);
-
     this._cachedFontString = '';
     this._lastSize = 0;
     this._lastU = 0;

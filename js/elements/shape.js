@@ -3,11 +3,11 @@
 class Shape extends PxlNode {
   static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'mask', 'filter', 'shadowcolor', 'shadowblur', 'shadowx', 'shadowy', 'hidden', 'onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove']; }
 
+  static defaults = { x: 0, y: 0, dx: 0, dy: 0, fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', mask: 'none', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false, isHovered: false, isPressed: false };
+
   constructor() {
     super();
-    Object.assign(this.attributeExpressions, { x: 0, y: 0, dx: 0, dy: 0, fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', mask: 'none', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false, isHovered: false, isPressed: false });
-    Object.assign(this.attributeValues, this.attributeExpressions);
-    
+
     // Pre-allocated bounding box object (zero-GC)
     this.boundingBox = { left: 0, right: 0, top: 0, bottom: 0 };
     
@@ -29,16 +29,21 @@ class Shape extends PxlNode {
     if (oldValue === newValue) return;
     
     if (name === 'onclick' || name === 'onenter' || name === 'onleave' || name === 'ondown' || name === 'onup' || name === 'onmove') {
-      // Handlers are plain JavaScript and never subscribe to ref.*, so their state references are sticky
-      pxl.trackInteractiveRefs(newValue, true);
+      // Removed or empty: no handler. Not unregistered here (a handler may remove itself during
+      // InteractionEngine.process()); releaseIfUnused() unregisters the shape on its next leave / release.
+      let compiled = null;
+      if (newValue) {
+        // Handlers are plain JavaScript and never subscribe to ref.*, so their state references are sticky
+        pxl.trackInteractiveRefs(newValue, true);
 
-      let sanitizedStr = newValue.replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.');
-      const compiled = new Function('scope', 'ref', `
-        const { ${pxl.scopeKeys} } = scope;
-        return function() { 
-          ${sanitizedStr} 
-        };
-      `)(pxl.scope, pxl.nodes).bind(this);
+        let sanitizedStr = newValue.replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.');
+        compiled = new Function('scope', 'ref', `
+          const { ${pxl.scopeKeys} } = scope;
+          return function() {
+            ${sanitizedStr}
+          };
+        `)(pxl.scope, pxl.nodes).bind(this);
+      }
 
       if (name === 'onclick') this._compiledOnClick = compiled;
       if (name === 'onenter') this._compiledOnEnter = compiled;
@@ -46,8 +51,8 @@ class Shape extends PxlNode {
       if (name === 'ondown')  this._compiledOnDown = compiled;
       if (name === 'onup')    this._compiledOnUp = compiled;
       if (name === 'onmove')  this._compiledOnMove = compiled;
-      
-      this.stage?.interaction.registerElement(this);
+
+      if (compiled) this.stage?.interaction.registerElement(this);
       return;
     }
 

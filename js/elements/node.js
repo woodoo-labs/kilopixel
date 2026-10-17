@@ -1,4 +1,8 @@
 class PxlNode extends HTMLElement {
+  // Attribute defaults per class (read-only). Subclasses extend them: { ...Parent.defaults, ... }.
+  // Also used to resolve bare / removed attributes (pxl.resolveEmptyAttribute).
+  static defaults = {};
+
   constructor() {
     super();
     this.attributeExpressions = {};
@@ -7,6 +11,8 @@ class PxlNode extends HTMLElement {
     Object.defineProperty(this.attributeValues, '$node', { value: this, enumerable: false, writable: false });
     Object.defineProperty(this.attributeValues, 'tx', { get: () => this.attributeValues.x + this.attributeValues.dx, enumerable: false });
     Object.defineProperty(this.attributeValues, 'ty', { get: () => this.attributeValues.y + this.attributeValues.dy, enumerable: false });
+    Object.assign(this.attributeExpressions, this.constructor.defaults);
+    Object.assign(this.attributeValues, this.constructor.defaults);
 
     this.animatedAttributeKeys = [];
     this.reactiveAttributeKeys = [];

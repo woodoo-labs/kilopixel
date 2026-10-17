@@ -3,12 +3,7 @@ class Grid extends Shape {
     return [...super.observedAttributes, 'step', 'major', 'labels', 'labelsize'];
   }
 
-  constructor() {
-    super();
-    const defaults = { step: 50, major: 0, labels: false, labelsize: 12 };
-    Object.assign(this.attributeExpressions, defaults);
-    Object.assign(this.attributeValues, defaults);
-  }
+  static defaults = { ...Shape.defaults, step: 50, major: 0, labels: false, labelsize: 12 };
 
   draw(ctx, u, t) {
     const { step, major, labels, labelsize, strokewidth } = this.attributeValues;

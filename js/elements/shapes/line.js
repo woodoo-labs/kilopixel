@@ -1,12 +1,10 @@
 class Line extends Shape {
   static get observedAttributes() { return [...super.observedAttributes, 'x1', 'y1', 'x2', 'y2', 'arrowstart', 'arrowend', 'arrowstyle']; }
 
+  static defaults = { ...Shape.defaults, x1: 0, y1: 0, x2: 0, y2: 0, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
+
   constructor() {
     super();
-    const defaults = { x1: 0, y1: 0, x2: 0, y2: 0, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
-    Object.assign(this.attributeExpressions, defaults);
-    Object.assign(this.attributeValues, defaults);
-
     this._arrowStart = pxl.createArrowRecord();
     this._arrowEnd = pxl.createArrowRecord();
   }

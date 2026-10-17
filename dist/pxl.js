@@ -79,8 +79,24 @@ pxl.clearAllVariableSubscriptions = function(element) {
 // =========================================================================
 // State Update Utilities for Web Components
 // =========================================================================
+// Attributes that follow the HTML presence rule: a bare attribute (<pxl-polyline closed>) means true
+pxl.BOOLEAN_ATTRIBUTES = new Set(['hidden', 'closed', 'smooth', 'pie', 'anticlockwise', 'labels']);
+
+// Resolves a bare ('') or removed (null) attribute: bare boolean = true, bare <pxl-var> value = '',
+// otherwise the class default (design/2026-10-17_attribute_defaults_and_state_isolation_plan.md)
+pxl.resolveEmptyAttribute = function(element, name, newValue) {
+  if (newValue === '') {
+    if (this.BOOLEAN_ATTRIBUTES.has(name)) return true;
+    if (name === 'value') return ''; // only <pxl-var> has a value attribute
+  }
+  const value = element.constructor.defaults[name];
+  return value === undefined ? null : value;
+};
+
 pxl.compileAttribute = function(element, name, newValue) {
-  const parsed = this.parseAttributeValue(newValue);
+  const parsed = (newValue === null || newValue === '')
+    ? this.resolveEmptyAttribute(element, name, newValue)
+    : this.parseAttributeValue(newValue);
   element.attributeExpressions[name] = parsed;
 
   // Register shapes whose isHovered / isPressed is read here. Time-dependent expressions never
@@ -1089,14 +1105,15 @@ class Stage extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
     if (name === 'ratio') {
-      this._parsedRatio = pxl.parseAttributeValue(newValue);
+      // Bare or removed ratio falls back to the default 16 / 9
+      this._parsedRatio = (newValue === null || newValue === '') ? 16 / 9 : pxl.parseAttributeValue(newValue);
       this.style.aspectRatio = this._parsedRatio;
       if (this.attributeValues) {
         this.attributeValues.height = 1000 / this._parsedRatio;
         if (this._refKey) pxl.broadcast(this._refKey);
       }
     } else if (name === 'alwaysrender') {
-      const isAlwaysRender = newValue === 'true';
+      const isAlwaysRender = newValue === 'true' || newValue === ''; // bare attribute = true
       if (isAlwaysRender) {
         if (this.intersectionObserver) {
           this.intersectionObserver.disconnect();
@@ -1149,7 +1166,8 @@ class Stage extends HTMLElement {
     pxl.perf?.registerStage(this);
 
     // Initial setup if not already handled by attributeChangedCallback
-    if (this.getAttribute('alwaysrender') !== 'true' && !this.intersectionObserver) {
+    const alwaysRender = this.getAttribute('alwaysrender');
+    if (alwaysRender !== 'true' && alwaysRender !== '' && !this.intersectionObserver) {
       this.intersectionObserver = new IntersectionObserver((entries) => {
         this.isVisible = entries[0].isIntersecting;
         if (this.isVisible) this.requestRender();
@@ -1249,6 +1267,10 @@ class Stage extends HTMLElement {
 
 customElements.define('pxl-stage', Stage);
 class PxlNode extends HTMLElement {
+  // Attribute defaults per class (read-only). Subclasses extend them: { ...Parent.defaults, ... }.
+  // Also used to resolve bare / removed attributes (pxl.resolveEmptyAttribute).
+  static defaults = {};
+
   constructor() {
     super();
     this.attributeExpressions = {};
@@ -1257,6 +1279,8 @@ class PxlNode extends HTMLElement {
     Object.defineProperty(this.attributeValues, '$node', { value: this, enumerable: false, writable: false });
     Object.defineProperty(this.attributeValues, 'tx', { get: () => this.attributeValues.x + this.attributeValues.dx, enumerable: false });
     Object.defineProperty(this.attributeValues, 'ty', { get: () => this.attributeValues.y + this.attributeValues.dy, enumerable: false });
+    Object.assign(this.attributeExpressions, this.constructor.defaults);
+    Object.assign(this.attributeValues, this.constructor.defaults);
 
     this.animatedAttributeKeys = [];
     this.reactiveAttributeKeys = [];
@@ -1454,12 +1478,12 @@ window.PxlNode = PxlNode;
 class Layer extends PxlNode {
   static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'filter', 'hidden']; }
 
+  static defaults = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false };
+
   constructor() {
     super();
     this.childList = []; // Groups or shapes
     this.isOrderDirty = false; // Tracks if children need sorting
-    Object.assign(this.attributeExpressions, { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false });
-    Object.assign(this.attributeValues, this.attributeExpressions);
 
     this.isDirty = true;
     this.isCanvasEmpty = false;
@@ -1609,12 +1633,12 @@ customElements.define('pxl-layer', Layer);
 class Group extends PxlNode {
   static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden']; }
 
+  static defaults = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false };
+
   constructor() {
     super();
     this.childList = []; // Groups or shapes
     this.isOrderDirty = false; // Tracks if children need sorting
-    Object.assign(this.attributeExpressions, { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false });
-    Object.assign(this.attributeValues, this.attributeExpressions);
   }
 
   registerChild(child) {
@@ -1664,11 +1688,11 @@ customElements.define('pxl-group', Group);
 class Shape extends PxlNode {
   static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'mask', 'filter', 'shadowcolor', 'shadowblur', 'shadowx', 'shadowy', 'hidden', 'onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove']; }
 
+  static defaults = { x: 0, y: 0, dx: 0, dy: 0, fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', mask: 'none', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false, isHovered: false, isPressed: false };
+
   constructor() {
     super();
-    Object.assign(this.attributeExpressions, { x: 0, y: 0, dx: 0, dy: 0, fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', mask: 'none', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false, isHovered: false, isPressed: false });
-    Object.assign(this.attributeValues, this.attributeExpressions);
-    
+
     // Pre-allocated bounding box object (zero-GC)
     this.boundingBox = { left: 0, right: 0, top: 0, bottom: 0 };
     
@@ -1690,16 +1714,21 @@ class Shape extends PxlNode {
     if (oldValue === newValue) return;
     
     if (name === 'onclick' || name === 'onenter' || name === 'onleave' || name === 'ondown' || name === 'onup' || name === 'onmove') {
-      // Handlers are plain JavaScript and never subscribe to ref.*, so their state references are sticky
-      pxl.trackInteractiveRefs(newValue, true);
+      // Removed or empty: no handler. Not unregistered here (a handler may remove itself during
+      // InteractionEngine.process()); releaseIfUnused() unregisters the shape on its next leave / release.
+      let compiled = null;
+      if (newValue) {
+        // Handlers are plain JavaScript and never subscribe to ref.*, so their state references are sticky
+        pxl.trackInteractiveRefs(newValue, true);
 
-      let sanitizedStr = newValue.replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.');
-      const compiled = new Function('scope', 'ref', `
-        const { ${pxl.scopeKeys} } = scope;
-        return function() { 
-          ${sanitizedStr} 
-        };
-      `)(pxl.scope, pxl.nodes).bind(this);
+        let sanitizedStr = newValue.replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.');
+        compiled = new Function('scope', 'ref', `
+          const { ${pxl.scopeKeys} } = scope;
+          return function() {
+            ${sanitizedStr}
+          };
+        `)(pxl.scope, pxl.nodes).bind(this);
+      }
 
       if (name === 'onclick') this._compiledOnClick = compiled;
       if (name === 'onenter') this._compiledOnEnter = compiled;
@@ -1707,8 +1736,8 @@ class Shape extends PxlNode {
       if (name === 'ondown')  this._compiledOnDown = compiled;
       if (name === 'onup')    this._compiledOnUp = compiled;
       if (name === 'onmove')  this._compiledOnMove = compiled;
-      
-      this.stage?.interaction.registerElement(this);
+
+      if (compiled) this.stage?.interaction.registerElement(this);
       return;
     }
 
@@ -1991,12 +2020,10 @@ class Shape extends PxlNode {
 class Circle extends Shape {
   static get observedAttributes() { return [...super.observedAttributes, 'r', 'ir', 'start', 'end', 'sweep', 'pie', 'closed', 'anticlockwise', 'arrowstart', 'arrowend', 'arrowstyle']; }
 
+  static defaults = { ...Shape.defaults, r: 0, ir: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
+
   constructor() {
     super();
-    const defaults = { r: 0, ir: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
-    Object.assign(this.attributeExpressions, defaults);
-    Object.assign(this.attributeValues, defaults);
-
     this._arrowStart = pxl.createArrowRecord();
     this._arrowEnd = pxl.createArrowRecord();
   }
@@ -2105,12 +2132,10 @@ customElements.define('pxl-circle', Circle);
 class Ellipse extends Shape {
   static get observedAttributes() { return [...super.observedAttributes, 'rx', 'ry', 'irx', 'iry', 'start', 'end', 'sweep', 'pie', 'closed', 'anticlockwise', 'arrowstart', 'arrowend', 'arrowstyle']; }
 
+  static defaults = { ...Shape.defaults, rx: 0, ry: 0, irx: 0, iry: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
+
   constructor() {
     super();
-    const defaults = { rx: 0, ry: 0, irx: 0, iry: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
-    Object.assign(this.attributeExpressions, defaults);
-    Object.assign(this.attributeValues, defaults);
-
     this._arrowStart = pxl.createArrowRecord();
     this._arrowEnd = pxl.createArrowRecord();
   }
@@ -2234,12 +2259,10 @@ customElements.define('pxl-ellipse', Ellipse);
 class Rect extends Shape {
   static get observedAttributes() { return [...super.observedAttributes, 'w', 'h', 'r', 'r1', 'r2', 'r3', 'r4', 'anchor']; }
 
+  static defaults = { ...Shape.defaults, w: 0, h: 0, r: null, r1: null, r2: null, r3: null, r4: null, anchor: 'center' };
+
   constructor() {
     super();
-    const defaults = { w: 0, h: 0, r: null, r1: null, r2: null, r3: null, r4: null, anchor: 'center' };
-    Object.assign(this.attributeExpressions, defaults);
-    Object.assign(this.attributeValues, defaults);
-    
     // Pre-allocated array for zero-allocation roundRect drawing
     this._radii = [0, 0, 0, 0];
   }
@@ -2297,12 +2320,10 @@ customElements.define('pxl-rect', Rect);
 class Line extends Shape {
   static get observedAttributes() { return [...super.observedAttributes, 'x1', 'y1', 'x2', 'y2', 'arrowstart', 'arrowend', 'arrowstyle']; }
 
+  static defaults = { ...Shape.defaults, x1: 0, y1: 0, x2: 0, y2: 0, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
+
   constructor() {
     super();
-    const defaults = { x1: 0, y1: 0, x2: 0, y2: 0, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
-    Object.assign(this.attributeExpressions, defaults);
-    Object.assign(this.attributeValues, defaults);
-
     this._arrowStart = pxl.createArrowRecord();
     this._arrowEnd = pxl.createArrowRecord();
   }
@@ -2360,6 +2381,8 @@ customElements.define('pxl-line', Line);
 class Polyline extends Shape {
   static get observedAttributes() { return [...super.observedAttributes, 'points', 'closed', 'smooth', 'mode', 'arrowstart', 'arrowend', 'arrowstyle']; }
 
+  static defaults = { ...Shape.defaults, closed: false, smooth: false, mode: 'absolute', arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
+
   constructor() {
     super();
     this.pointCount = 0;
@@ -2368,10 +2391,6 @@ class Polyline extends Shape {
     // Highly optimized flat cache and pre-calculated string keys
     this.flatCache = new Float32Array(0);
     this.pointKeys = [];
-
-    const defaults = { closed: false, smooth: false, mode: 'absolute', arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
-    Object.assign(this.attributeExpressions, defaults);
-    Object.assign(this.attributeValues, defaults);
 
     this._arrowStart = pxl.createArrowRecord();
     this._arrowEnd = pxl.createArrowRecord();
@@ -2421,7 +2440,8 @@ class Polyline extends Shape {
   draw(ctx, u, t) {
     if (this.pointCount < 4) return;
 
-    const { closed, smooth, arrowstart, arrowend } = this.attributeValues;
+    const { smooth, arrowstart, arrowend } = this.attributeValues;
+    const closed = this.attributeValues.closed === true;
     const pts = this.flatCache;
     const len = this.pointCount / 2;
     // A Catmull-Rom curve through only 2 points is a straight line
@@ -2629,17 +2649,16 @@ class Text extends Shape {
     return [...super.observedAttributes, 'text', 'size', 'font', 'align', 'baseline', 'weight', 'fontstyle', 'maxwidth', 'direction', 'width', 'lineheight', 'letterspacing', 'reveal'];
   }
 
+  static defaults = {
+    ...Shape.defaults,
+    text: '', size: 16, font: 'sans-serif', align: 'start',
+    baseline: 'alphabetic', weight: 'normal', fontstyle: 'normal',
+    maxwidth: 0, direction: null, width: 0, lineheight: 1.2,
+    letterspacing: 0, reveal: null
+  };
+
   constructor() {
     super();
-    const defaults = {
-      text: '', size: 16, font: 'sans-serif', align: 'start', 
-      baseline: 'alphabetic', weight: 'normal', fontstyle: 'normal', 
-      maxwidth: 0, direction: null, width: 0, lineheight: 1.2,
-      letterspacing: 0, reveal: null
-    };
-    Object.assign(this.attributeExpressions, defaults);
-    Object.assign(this.attributeValues, defaults);
-
     this._cachedFontString = '';
     this._lastSize = 0;
     this._lastU = 0;
@@ -2846,12 +2865,7 @@ class Grid extends Shape {
     return [...super.observedAttributes, 'step', 'major', 'labels', 'labelsize'];
   }
 
-  constructor() {
-    super();
-    const defaults = { step: 50, major: 0, labels: false, labelsize: 12 };
-    Object.assign(this.attributeExpressions, defaults);
-    Object.assign(this.attributeValues, defaults);
-  }
+  static defaults = { ...Shape.defaults, step: 50, major: 0, labels: false, labelsize: 12 };
 
   draw(ctx, u, t) {
     const { step, major, labels, labelsize, strokewidth } = this.attributeValues;
@@ -2972,11 +2986,7 @@ customElements.define('pxl-grid', Grid);
 class Variable extends PxlNode {
   static get observedAttributes() { return ['value']; }
 
-  constructor() {
-    super();
-    Object.assign(this.attributeExpressions, { value: 0 });
-    Object.assign(this.attributeValues, this.attributeExpressions);
-  }
+  static defaults = { value: 0 };
 
   connectedCallback() {
     this.style.display = 'none';

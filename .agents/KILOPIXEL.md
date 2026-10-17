@@ -149,6 +149,7 @@ HTMLElement
 **Source**: `js/elements/node.js`
 
 Every PxlNode has:
+- `static defaults` — read-only attribute defaults of the class, inherited by spreading (`static defaults = { ...Shape.defaults, r: 0, … }`). The `PxlNode` constructor copies them into `attributeExpressions` and `attributeValues`; `pxl.resolveEmptyAttribute` reads them for bare / removed attributes (see [Empty & Removed Attributes](#empty--removed-attributes))
 - `attributeExpressions` — compiled functions or static values for each attribute
 - `attributeValues` — current evaluated values (read by render loop)
 - `animatedAttributeKeys[]` — attributes that depend on `t` (evaluated every frame)
@@ -265,6 +266,23 @@ When `pxl.compileAttribute(element, name, value)` is called:
 | **Static** (number, string, boolean) | `attributeValues[name] = value` | Never re-evaluated |
 | **Time-Dependent Function** (`fn.isTimeDependent = true`) | Added to `animatedAttributeKeys[]` | Every frame via `evaluateAnimations(t)` |
 | **Reactive Function** (has `variableDependencies` but no time) | Added to `reactiveAttributeKeys[]` | Only when referenced variable broadcasts |
+
+### Empty & Removed Attributes
+
+A bare attribute (`<pxl-polyline closed>`, `el.hidden = true`, `toggleAttribute`) arrives as `''`, a removed one (`removeAttribute`, `el.hidden = false`, frameworks dropping `null` / `undefined` bindings) as `null`. `pxl.compileAttribute` resolves both **before** parsing via `pxl.resolveEmptyAttribute`:
+
+| Incoming | Boolean attribute (`pxl.BOOLEAN_ATTRIBUTES`) | `<pxl-var>` `value` | Any other attribute |
+|---|---|---|---|
+| `''` (bare) | `true` (HTML presence rule) | `''` | class default |
+| `null` (removed) | class default (`false`) | `0` | class default |
+
+- Boolean attributes: `hidden`, `closed`, `smooth`, `pie`, `anticlockwise`, `labels`. Only bare, `"true"` and `"false"` are booleans: `closed="1"` is **not** `true`.
+- The resolved value is static, so removing an animated or reactive attribute also stops its animation / subscription.
+- Defaults that are `null` on purpose keep meaning "not set" (rect `r1`–`r4` fall back to `r`, circle `end` / `sweep` mean a full circle).
+- Stage (not a `PxlNode`): bare `alwaysrender` = `true`; bare / removed `ratio` = `16 / 9`.
+- Event handlers: see [Event Handling](#event-handling).
+- Not handled: whitespace-only values (`" "` parses to `0`) and invalid values (`miterlimit="abc"`).
+- Design: `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md`.
 
 ### Variable Change Propagation
 
@@ -739,8 +757,8 @@ Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile 
 
 | Attribute | Default | Description |
 |-----------|---------|-------------|
-| `ratio` | `16 / 9` | Sets CSS `aspect-ratio`. Parsed through the expression compiler, so math like `10 / 3` works. |
-| `alwaysrender` | `false` | When `true`, disables the built-in `IntersectionObserver` and forces continuous rendering even when scrolled out of view. |
+| `ratio` | `16 / 9` | Sets CSS `aspect-ratio`. Parsed through the expression compiler, so math like `10 / 3` works. Bare or removed → `16 / 9`. |
+| `alwaysrender` | `false` | When `true` (or bare), disables the built-in `IntersectionObserver` and forces continuous rendering even when scrolled out of view. |
 
 ### Built-in `attributeValues` (Published via `ref.stageId.*`)
 
@@ -898,6 +916,8 @@ When `attributeChangedCallback` receives an event attribute (`onclick`, `onenter
 3. Bound to the element via `.bind(this)`
 4. Stored in `_compiledOnClick`, `_compiledOnEnter`, etc.
 5. Element is registered with `stage.interaction`
+
+A removed or empty handler (`removeAttribute('onclick')`, `onclick=""`) sets the compiled handler to `null`. The shape is **not** unregistered immediately (a handler may remove itself while `InteractionEngine.process()` iterates); `releaseIfUnused()` unregisters it on its next leave / release.
 
 ---
 
@@ -1115,6 +1135,7 @@ When `smooth` is not false:
 - Minimum 4 values (2 points) required
 - Fills `flatCache` Float32Array with scaled values
 - Draws path: simple `lineTo` or smooth `bezierCurveTo` (2-point polylines are always straight)
+- `closed` is strict (`closed === true`, like circle and ellipse): bare or `"true"` closes, `"1"` does not
 - Arrowheads (open polylines only; see [Arrowhead System](#arrowhead-system)): `flatCache` is never mutated. Straight: the first/last segment is trimmed by `inset` (clamped to the segment length). Smooth: the first/last Bézier segment is split with de Casteljau at the chord estimate `t = inset / chord`, so the curve stays identical, only shorter; the Catmull-Rom loop in between stays branch-free.
 - If `closed`: `ctx.closePath()`
 
@@ -1283,6 +1304,7 @@ Returns zeroed bounding box by default (grid is infinite). However, during draw,
 - Registers in `pxl.nodes` via its `id`, so other elements can read `ref.myVar.value`
 - Has a `render()` method that only calls `evaluateAnimations(t)` — this allows animated variables
 - The `value` attribute can be any expression: static, animated, or reactive
+- Bare `value` (`value=""`) is an empty string, not `0`, so a cleared text input bound to the variable gives `''`. Removed `value` → `0`
 
 ### Usage
 
@@ -1548,7 +1570,8 @@ Note: `ref.myShape.tx` gives `x + dx` in the shape's OWN local space. `toLocal(r
 #### 11. Common Pitfalls
 
 - **No Self-Closing Tags (`/>`)** → Custom Web Components are not void elements in HTML5. Always use explicit closing tags (`<pxl-circle></pxl-circle>`), never `<pxl-circle />` (causes silent DOM nesting bugs)
-- **No Redundant Defensive Fallbacks** → All `PxlNode` attributes are strictly initialized with default values via `attributeExpressions`. Never use `alpha !== undefined` or `(shadowblur || 0)`. Trust the engine's deterministic initialization.
+- **No Redundant Defensive Fallbacks** → All `PxlNode` attributes are strictly initialized with their class `defaults`, and bare / removed attributes resolve to those defaults again ([Empty & Removed Attributes](#empty--removed-attributes)). Never use `alpha !== undefined` or `(shadowblur || 0)`. Trust the engine's deterministic initialization.
+- **Boolean attributes** → `closed`, `pie`, `smooth`, `hidden`, `anticlockwise`, `labels` accept bare (`<pxl-polyline closed>`), `"true"` or `"false"`. Write `="true"` in examples for readability.
 - **Use `onenter` not `onhover`** → The hover-entry event attribute is `onenter`, not `onhover`
 - **Use raw numbers for coordinates** → `x="500"` not `ref.main.width / 2` (logical width is always 1000)
 - **Time `t` is in seconds** → `t * 90` = 90°/sec, `wave(2)` = 2-second cycle. Never treat `t` as milliseconds.
