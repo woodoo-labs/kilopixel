@@ -162,3 +162,10 @@
   - Not affected: overlaps **within one path** (e.g. polyline corners) — a single `stroke()` casts one shadow.
 - **Possible Fix**: two passes only when a shadow is set: draw all parts with the shadow, then draw them again without shadow on top (shadows end up underneath everything). Doubles the draw calls, but only for shapes with a shadow.
 - **Workaround Today**: `filter="dropShadow(...)"` on the `<pxl-layer>` instead of `shadowcolor` on the shape — the layer casts one shadow of the combined silhouette.
+
+## 18. Attribute Defaults & Canvas State Isolation
+- **Status**: 🟡 **Proposed** (2026-10-17, no code changes yet)
+- **Reference**: `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md`
+- **Problem**: bare attributes (`''`) and removed attributes (`null`) are stored as-is. Bare `hidden` / `closed` don't work (bare `smooth` does), removed `scale` / `alpha` / `strokewidth` make shapes vanish, removed `miterlimit` / text `align` leak from the previous shape, and removing an `on*` handler throws a TypeError.
+- **Rule A (required)**: bare boolean attribute = `true`; bare or removed other attribute = class default (static `defaults` per class, resolved in `pxl.compileAttribute`).
+- **Option B (undecided)**: always `save()` / `restore()` per shape. ~68% of shapes in examples/docs already save; cost ~0.6 µs per extra shape. Measure in the real engine before deciding.
