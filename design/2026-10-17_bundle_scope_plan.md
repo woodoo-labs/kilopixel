@@ -1,6 +1,6 @@
 # Bundle Scope: No Global Names Except `pxl`
 
-- **Status**: 🟡 **Proposed** (no code changes yet)
+- **Status**: 🟡 **Proposed** (helper cleanup done 2026-10-17, §1; wrapper not implemented yet)
 - **Date**: 2026-10-17
 - **Related**: `design/2026-10-17_shape_authoring_plan.md` (custom shapes extend `pxl.Shape`), `.agents/TODO.md` §21
 - **Target Implementation**: `build.js`, `js/elements/shape.js`, `js/elements/node.js`
@@ -9,27 +9,24 @@
 
 ## 1. Problem
 
-`build.js` concatenates all source files into one classic script. Every top-level declaration becomes a **global name** shared by all scripts on the page. The bundle declares 18:
+`build.js` concatenates all source files into one classic script. Every top-level declaration becomes a **global name** shared by all scripts on the page. The bundle originally declared 18. The 5 internal helpers (`len`, `mathProps`, `driverNames`, `dummyCanvas`, `_parseStops`) were cleaned up on 2026-10-17: they are now loop-local, inlined, or on `pxl` (`pxl._parseStops`, `pxl.dummyCtx`), following the engine's `pxl.*` / `pxl._*` convention. **13 element classes remain global:**
 
-| Kind | Names |
-|---|---|
-| Element classes | `Stage`, `PxlNode`, `Layer`, `Group`, `Shape`, `Circle`, `Ellipse`, `Rect`, `Line`, `Polyline`, `Text`, `Grid`, `Variable` |
-| Internal helpers (never meant to be public) | `len`, `mathProps`, `driverNames`, `dummyCanvas`, `_parseStops` |
+`Stage`, `PxlNode`, `Layer`, `Group`, `Shape`, `Circle`, `Ellipse`, `Rect`, `Line`, `Polyline`, `Text`, `Grid`, `Variable`
 
 Verified 2026-10-17 (each snippet as its own classic script after `pxl.min.js`):
 
 ### 1.1 User Scripts Fail with a SyntaxError
 
-| User script | Result |
-|---|---|
-| `const len = 10` | ❌ `Identifier 'len' has already been declared` — the whole script doesn't run |
-| `class Circle {}` | ❌ same |
-| `const Line = 1` | ❌ same |
-| `var Grid = 1` | ❌ same |
-| `function Stage() {}` | ❌ same |
-| `let count = 0` | ✅ no clash |
+| User script | Before the helper cleanup | After the helper cleanup |
+|---|---|---|
+| `const len = 10`, `const mathProps = []` | ❌ `Identifier 'len' has already been declared` — the whole script doesn't run | ✅ |
+| `class Circle {}` | ❌ same | ❌ still clashes |
+| `const Line = 1` | ❌ same | ❌ still clashes |
+| `var Grid = 1` | ❌ same | ❌ still clashes |
+| `function Stage() {}` | ❌ same | ❌ still clashes |
+| `let count = 0` | ✅ no clash | ✅ |
 
-`const len = items.length;` at the top of a script is very common; `Circle`, `Line`, `Grid`, `Stage` are typical names in drawing or game code. The error seems unrelated to Kilopixel. Meanwhile `len` (a loop bound from `compiler.js`) is readable by every script and holds `43`.
+`Circle`, `Line`, `Grid`, `Stage` are typical names in drawing or game code. The error seems unrelated to Kilopixel.
 
 ### 1.2 `Text` Hides the DOM's `Text`
 

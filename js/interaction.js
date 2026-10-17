@@ -1,10 +1,8 @@
 // =========================================================================
 // Declarative Event System (Dummy Context)
 // =========================================================================
-const dummyCanvas = document.createElement('canvas');
-dummyCanvas.width = 1;
-dummyCanvas.height = 1;
-pxl.dummyCtx = dummyCanvas.getContext('2d');
+// 1×1 canvas, used only for its context (hit testing never paints)
+pxl.dummyCtx = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d');
 pxl._hitX = 0;
 pxl._hitY = 0;
 pxl._hitResult = false;

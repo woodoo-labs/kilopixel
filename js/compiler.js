@@ -5,22 +5,17 @@
 // --- Pre-built Scope (real functions, created once, passed as argument) ---
 pxl.scope = Object.create(null);
 
-// Hardcoded whitelist of standard Math constants and methods to prevent polyfill contamination
-const mathProps = [
+// Math constants and methods, usable in expressions without the Math. prefix.
+// Hardcoded whitelist of standard names to prevent polyfill contamination.
+for (const prop of [
   'PI', 'E', 'LN2', 'LN10', 'LOG2E', 'LOG10E', 'SQRT1_2', 'SQRT2',
   'abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh',
   'cbrt', 'ceil', 'clz32', 'cos', 'cosh', 'exp', 'expm1', 'floor',
   'fround', 'hypot', 'imul', 'log', 'log10', 'log1p', 'log2', 'max',
   'min', 'pow', 'random', 'round', 'sign', 'sin', 'sinh', 'sqrt',
   'tan', 'tanh', 'trunc'
-];
-
-const len = mathProps.length;
-for (let i = 0; i < len; i++) {
-  const prop = mathProps[i];
-  if (Math[prop] !== undefined) {
-    pxl.scope[prop] = Math[prop];
-  }
+]) {
+  pxl.scope[prop] = Math[prop];
 }
 
 pxl.scope.rgb  = (r, g, b) => `rgb(${r},${g},${b})`;
@@ -53,7 +48,7 @@ pxl.scope.lerp  = (a, b, alpha) => a + (b - a) * alpha;
 pxl.scope.map   = (v, inMin, inMax, outMin, outMax) => (v - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 
 // Shared stop-parsing helper for all gradient types (zero duplication)
-function _parseStops(colorsArray) {
+pxl._parseStops = function(colorsArray) {
   const stops = [];
   if (!Array.isArray(colorsArray) || colorsArray.length === 0) return stops;
   if (typeof colorsArray[0] === 'string') {
@@ -67,10 +62,10 @@ function _parseStops(colorsArray) {
     }
   }
   return stops;
-}
+};
 
 pxl.scope.linear = (direction, colorsArray) => {
-  const stops = _parseStops(colorsArray);
+  const stops = pxl._parseStops(colorsArray);
   if (typeof direction === 'number') {
     return { isGradient: true, type: 'linear', angle: direction, stops };
   }
@@ -81,7 +76,7 @@ pxl.scope.linear = (direction, colorsArray) => {
 };
 
 pxl.scope.radial = (config, colorsArray) => {
-  const stops = _parseStops(colorsArray);
+  const stops = pxl._parseStops(colorsArray);
   let x0 = 0.5, y0 = 0.5, r0 = 0;
   let x1 = 0.5, y1 = 0.5, r1 = 0.5;
 
@@ -104,7 +99,7 @@ pxl.scope.radial = (config, colorsArray) => {
 };
 
 pxl.scope.conic = (angleOrConfig, colorsArray) => {
-  const stops = _parseStops(colorsArray);
+  const stops = pxl._parseStops(colorsArray);
   let startAngle = 0, cx = 0.5, cy = 0.5;
   if (typeof angleOrConfig === 'number') {
     startAngle = angleOrConfig;
@@ -146,8 +141,7 @@ pxl.timeDrivers = Object.entries(pxl.drivers)
   .map(([name, body]) => `const ${name} = ${body};`)
   .join('\n');
 
-const driverNames = Object.keys(pxl.drivers).join('|');
-pxl.timeDriverRegex = new RegExp(`(^|[^.])\\bt\\b|\\b(${driverNames})\\s*\\(`);
+pxl.timeDriverRegex = new RegExp(`(^|[^.])\\bt\\b|\\b(${Object.keys(pxl.drivers).join('|')})\\s*\\(`);
 
 // =========================================================================
 // Expression Parser & Math Engine
