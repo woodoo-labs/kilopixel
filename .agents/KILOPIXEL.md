@@ -219,7 +219,7 @@ When a string reaches this stage:
 1. **Cache lookup** — checks `staticCache` and `animationCache` Maps first
 2. **CSS % sanitizer** — converts illegal JS percentages: `50%` → `'50%'`
 3. **Optional chaining injector** — converts `ref.player.x` → `ref.player?.x` (prevents TypeError before elements connect)
-4. **toLocal rewriter** — converts `toLocal(` → `pxl.mapCoordinate(this, `
+4. **toLocal rewriter** — converts `toLocal(` → `pxl.toLocal(this, `
 5. **Time dependency check** — regex tests for `t` (not preceded by `.`) or any driver function name
 6. **Variable dependency extraction** — regex extracts all `ref.xxx` identifiers
 7. **Smart return detector** — if no `return` keyword, wraps in `return ...;`
@@ -736,7 +736,7 @@ The `toLocal(target, property)` function projects a target element's position in
 <pxl-line x1="toLocal(ref.planet, 'tx')" y1="toLocal(ref.planet, 'ty')" x2="0" y2="0"></pxl-line>
 ```
 
-**Algorithm** (`pxl.mapCoordinate`):
+**Algorithm** (`pxl.toLocal`):
 1. Get the caller's parent's global matrix
 2. Get the target's global matrix
 3. Compute: `Delta = Invert(CallerParentGlobal) × TargetGlobal`
@@ -759,7 +759,7 @@ The `toLocal(target, property)` function projects a target element's position in
 
 **Reactivity**: `toLocal` expressions update automatically via `ref.*` dependency tracking. When a parent's transform changes, `broadcastGlobalMatrixChange()` recursively notifies all tracked children, triggering re-evaluation of any `toLocal` expression referencing them.
 
-Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile time.
+Note: The compiler rewrites `toLocal(` to `pxl.toLocal(this, ` at compile time.
 
 ---
 
