@@ -190,9 +190,9 @@
 - **Depends on**: §19 (always save / restore) before publishing a "Custom Shapes" docs page — one careless user shape fades the whole layer until always save is implemented.
 
 ## 21. Bundle Scope: No Global Names Except `pxl`
-- **Status**: 🟡 **Proposed** (2026-10-17; helper cleanup done, wrapper not implemented yet)
+- **Status**: 🟡 **Proposed** (2026-10-17; helper cleanup done; revised 2026-10-18: pure namespace pattern)
 - **Reference**: `design/2026-10-17_bundle_scope_plan.md`
 - **Problem**: the bundle declares 13 global class names (`Stage`, `PxlNode`, `Layer`, `Group`, `Shape`, `Circle`, `Ellipse`, `Rect`, `Line`, `Polyline`, `Text`, `Grid`, `Variable`). User scripts declaring the same name at top level (`class Circle {}`, `const Line = 1`) fail with a SyntaxError, and `Text` hides the DOM's `Text` (`textNode instanceof Text` → false).
 - **Done (2026-10-17)**: the 5 internal helper globals (`len`, `mathProps`, `driverNames`, `dummyCanvas`, `_parseStops`) are cleaned up (loop-local, inlined, or `pxl._parseStops` / `pxl.dummyCtx`).
-- **Fix**: wrap the bundle in a function in `build.js`, export `pxl.Shape` for custom shapes, remove `window.PxlNode`, keep class names in Terser (`--keep-classnames`).
+- **Fix**: pure namespace pattern like `pxl.InteractionEngine`: `pxl.Line = class Line extends pxl.Shape { … };` for all 13 classes, `customElements.define('pxl-line', pxl.Line)`, remove `window.PxlNode`, build check in `build.js` that fails on any top-level declaration, keep class names in Terser (`--keep-classnames`). An IIFE wrapper was considered and not chosen.
 - **Decision**: stay a classic script, no ES module (no JavaScript API to import; modules are deferred and don't load from `file://`; zero build step). An extra `pxl.mjs` only if npm / TypeScript users need it later.

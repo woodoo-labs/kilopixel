@@ -41,7 +41,7 @@ class Star extends pxl.Shape {
 customElements.define('pxl-star', Star);
 ```
 
-One list of attributes (`defaults`), no `observedAttributes`, no constructor, no Kilopixel-specific registration. User shapes extend `pxl.Shape` (the bundle exposes no other global names, see `design/2026-10-17_bundle_scope_plan.md`); built-in shapes inside the bundle keep writing `Shape`. Everything else is inherited: expressions, animation, `ref.*`, Rule A, transforms, styling, gradients, hit testing and events.
+One list of attributes (`defaults`), no `observedAttributes`, no constructor, no Kilopixel-specific registration. User shapes extend `pxl.Shape`, exactly like the built-in shapes (`pxl.Line = class Line extends pxl.Shape`; all classes live on the `pxl` namespace, see `design/2026-10-17_bundle_scope_plan.md`), so the built-ins are the template. Everything else is inherited: expressions, animation, `ref.*`, Rule A, transforms, styling, gradients, hit testing and events.
 
 **Prototype result (2026-10-17):** the same `Star` (with today's extra `observedAttributes` line) already works with the current engine, loaded as a separate file: drawing, gradient fill, `rotate="t * 30"`, reactive `points="ref.pts.value"`, Rule A defaults for its own attributes, hit testing and `onclick`. No engine change was needed; this plan only removes the boilerplate.
 
@@ -194,7 +194,7 @@ Verified 2026-10-17 (frames driven by hand): `running` unset → `impeller` 0, 0
 | Lowercase check | ✅ one `console.warn` per class at `define()` | Silent mismatch is the most likely user mistake; costs nothing per frame |
 | Class fields | ✅ everywhere except Layer | No `super()` boilerplate; Layer's DOM setup stays readable in a constructor |
 | `draw(ctx, u)` | ✅ remove `t` | Documents "draw only reads values"; avoids hit-testing bugs |
-| `pxl.Shape` | ✅ via the bundle scope plan | The bundle will expose only `pxl`; global class names break user scripts (`design/2026-10-17_bundle_scope_plan.md`) |
+| `pxl.Shape` | ✅ via the bundle scope plan | All engine classes move onto the `pxl` namespace; global class names break user scripts (`design/2026-10-17_bundle_scope_plan.md`) |
 | `pxl.defineShape()`, `this.animate()` | ⏸️ later | Not needed for the template |
 | Hiding `u` from shape authors | ⏸️ later | Possible (scale the context while building the path), but a separate API decision |
 
