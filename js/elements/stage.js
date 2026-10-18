@@ -1,4 +1,4 @@
-class Stage extends HTMLElement {
+pxl.Stage = class Stage extends HTMLElement {
   static get observedAttributes() { return ['ratio', 'alwaysrender']; }
 
   constructor() {
@@ -185,6 +185,6 @@ class Stage extends HTMLElement {
       pxl.perf.publish();
     }
   }
-}
+};
 
-customElements.define('pxl-stage', Stage);
+customElements.define('pxl-stage', pxl.Stage);

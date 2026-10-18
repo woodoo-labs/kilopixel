@@ -1,10 +1,10 @@
-class Text extends Shape {
+pxl.Text = class Text extends pxl.Shape {
   static get observedAttributes() {
     return [...super.observedAttributes, 'text', 'size', 'font', 'align', 'baseline', 'weight', 'fontstyle', 'maxwidth', 'direction', 'width', 'lineheight', 'letterspacing', 'reveal'];
   }
 
   static defaults = {
-    ...Shape.defaults,
+    ...pxl.Shape.defaults,
     text: '', size: 16, font: 'sans-serif', align: 'start',
     baseline: 'alphabetic', weight: 'normal', fontstyle: 'normal',
     maxwidth: 0, direction: null, width: 0, lineheight: 1.2,
@@ -210,6 +210,6 @@ class Text extends Shape {
     ctx.rect((b.left - pad) * u, (b.top - pad) * u, (b.right - b.left + 2 * pad) * u, (b.bottom - b.top + 2 * pad) * u);
     ctx.fill(); // intercepted on pxl.dummyCtx (isPointInPath)
   }
-}
+};
 // Define the custom element tag name
-customElements.define('pxl-text', Text);
+customElements.define('pxl-text', pxl.Text);

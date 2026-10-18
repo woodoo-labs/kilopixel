@@ -190,7 +190,7 @@
 - **Depends on**: §19 (always save / restore) before publishing a "Custom Shapes" docs page — one careless user shape fades the whole layer until always save is implemented.
 
 ## 21. Bundle Scope: No Global Names Except `pxl`
-- **Status**: 🟡 **Proposed** (2026-10-17; helper cleanup done; revised 2026-10-18: pure namespace pattern)
+- **Status**: 🟢 **Implemented** (2026-10-18: pure namespace pattern, build check, `--keep-classnames`)
 - **Reference**: `design/2026-10-17_bundle_scope_plan.md`
 - **Problem**: the bundle declares 13 global class names (`Stage`, `PxlNode`, `Layer`, `Group`, `Shape`, `Circle`, `Ellipse`, `Rect`, `Line`, `Polyline`, `Text`, `Grid`, `Variable`). User scripts declaring the same name at top level (`class Circle {}`, `const Line = 1`) fail with a SyntaxError, and `Text` hides the DOM's `Text` (`textNode instanceof Text` → false).
 - **Done (2026-10-17)**: the 5 internal helper globals (`len`, `mathProps`, `driverNames`, `dummyCanvas`, `_parseStops`) are cleaned up (loop-local, inlined, or `pxl._parseStops` / `pxl.dummyCtx`).

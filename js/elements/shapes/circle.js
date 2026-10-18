@@ -1,7 +1,7 @@
-class Circle extends Shape {
+pxl.Circle = class Circle extends pxl.Shape {
   static get observedAttributes() { return [...super.observedAttributes, 'r', 'ir', 'start', 'end', 'sweep', 'pie', 'closed', 'anticlockwise', 'arrowstart', 'arrowend', 'arrowstyle']; }
 
-  static defaults = { ...Shape.defaults, r: 0, ir: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
+  static defaults = { ...pxl.Shape.defaults, r: 0, ir: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
 
   constructor() {
     super();
@@ -107,5 +107,5 @@ class Circle extends Shape {
     this.boundingBox.bottom = r;
     return this.boundingBox;
   }
-}
-customElements.define('pxl-circle', Circle);
+};
+customElements.define('pxl-circle', pxl.Circle);

@@ -1,4 +1,4 @@
-class PxlNode extends HTMLElement {
+pxl.PxlNode = class PxlNode extends HTMLElement {
   // Attribute defaults per class (read-only). Subclasses extend them: { ...Parent.defaults, ... }.
   // Also used to resolve bare / removed attributes (pxl.resolveEmptyAttribute).
   static defaults = {};
@@ -203,6 +203,5 @@ class PxlNode extends HTMLElement {
 
     return this.globalMatrix;
   }
-}
+};
 
-window.PxlNode = PxlNode;

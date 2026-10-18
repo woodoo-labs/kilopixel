@@ -1,7 +1,7 @@
-class Rect extends Shape {
+pxl.Rect = class Rect extends pxl.Shape {
   static get observedAttributes() { return [...super.observedAttributes, 'w', 'h', 'r', 'r1', 'r2', 'r3', 'r4', 'anchor']; }
 
-  static defaults = { ...Shape.defaults, w: 0, h: 0, r: null, r1: null, r2: null, r3: null, r4: null, anchor: 'center' };
+  static defaults = { ...pxl.Shape.defaults, w: 0, h: 0, r: null, r1: null, r2: null, r3: null, r4: null, anchor: 'center' };
 
   constructor() {
     super();
@@ -56,5 +56,5 @@ class Rect extends Shape {
     this.boundingBox.bottom = h * (1 - ay);
     return this.boundingBox;
   }
-}
-customElements.define('pxl-rect', Rect);
+};
+customElements.define('pxl-rect', pxl.Rect);

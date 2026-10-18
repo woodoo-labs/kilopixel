@@ -1,7 +1,7 @@
-class Polyline extends Shape {
+pxl.Polyline = class Polyline extends pxl.Shape {
   static get observedAttributes() { return [...super.observedAttributes, 'points', 'closed', 'smooth', 'mode', 'arrowstart', 'arrowend', 'arrowstyle']; }
 
-  static defaults = { ...Shape.defaults, closed: false, smooth: false, mode: 'absolute', arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
+  static defaults = { ...pxl.Shape.defaults, closed: false, smooth: false, mode: 'absolute', arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
 
   constructor() {
     super();
@@ -261,5 +261,5 @@ class Polyline extends Shape {
     this.boundingBox.bottom = maxY;
     return this.boundingBox;
   }
-}
-customElements.define('pxl-polyline', Polyline);
+};
+customElements.define('pxl-polyline', pxl.Polyline);

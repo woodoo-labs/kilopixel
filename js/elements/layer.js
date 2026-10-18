@@ -1,4 +1,4 @@
-class Layer extends PxlNode {
+pxl.Layer = class Layer extends pxl.PxlNode {
   static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'filter', 'hidden']; }
 
   static defaults = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false };
@@ -151,5 +151,5 @@ class Layer extends PxlNode {
 
     if (this.isAnimated) this.stage?.requestRender();
   }
-}
-customElements.define('pxl-layer', Layer);
+};
+customElements.define('pxl-layer', pxl.Layer);

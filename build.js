@@ -41,6 +41,14 @@ function build() {
       code += fs.readFileSync(filePath, 'utf8') + '\n';
     }
 
+    // Only `pxl` may be global: a top-level declaration would leak into every script on the page
+    // (design/2026-10-17_bundle_scope_plan.md). Define it on pxl (public) or pxl._ (internal) instead.
+    const leak = code.match(/^(?:async\s+)?(?:class|const|let|var|function\*?)\s+([A-Za-z_$][\w$]*)/m);
+    if (leak) {
+      console.error(`Error: top-level declaration "${leak[1]}" would become a global name. Define it on pxl instead.`);
+      process.exit(1);
+    }
+
     // Inject version into the code
     code = `/** Kilopixel Framework v${VERSION} */\n` + code.replace('window.pxl = {};', `window.pxl = { version: '${VERSION}' };`);
 
@@ -65,7 +73,8 @@ function build() {
     console.log(`Running global Terser for v${VERSION} (this may take a second)...`);
     
     // This executes terser on the command line
-    execSync(`npx terser "${tempPath}" --compress passes=2 --mangle -o "${outputPath}"`, { stdio: 'inherit' });
+    // --keep-classnames: class expressions (pxl.Circle = class Circle …) keep readable names for DevTools and warnings
+    execSync(`npx terser "${tempPath}" --compress passes=2 --mangle --keep-classnames -o "${outputPath}"`, { stdio: 'inherit' });
 
     // 6. Clean up temp file
     fs.unlinkSync(tempPath);

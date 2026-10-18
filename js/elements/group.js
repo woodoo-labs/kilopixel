@@ -1,4 +1,4 @@
-class Group extends PxlNode {
+pxl.Group = class Group extends pxl.PxlNode {
   static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden']; }
 
   static defaults = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false };
@@ -49,5 +49,5 @@ class Group extends PxlNode {
     }
     if (hasStateChanges) ctx.restore();
   }
-}
-customElements.define('pxl-group', Group);
+};
+customElements.define('pxl-group', pxl.Group);

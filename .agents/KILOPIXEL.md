@@ -144,12 +144,30 @@ HTMLElement
         └── Grid (pxl-grid)
 ```
 
+### Namespace (Only `pxl` Is Global)
+
+All classes live on the `pxl` namespace as class expressions, like every other engine object (`pxl.Matrix`, `pxl.InteractionEngine`):
+
+```javascript
+pxl.Line = class Line extends pxl.Shape {
+  static defaults = { ...pxl.Shape.defaults, x1: 0, y1: 0, x2: 0, y2: 0 /* … */ };
+  // …
+};
+customElements.define('pxl-line', pxl.Line);
+```
+
+- **Only `pxl` is global.** Engine code never declares top-level `class`, `const`, `let`, `var` or `function`: public parts go on `pxl.*`, internals on `pxl._*`. A top-level declaration would become a global name for every script on the page (user scripts with the same name fail with a SyntaxError; a global `Text` would hide the DOM's `Text`). `build.js` refuses to build if it finds one.
+- **`class pxl.Line …` is not valid JavaScript** (a declaration needs a plain name); the class expression `pxl.Line = class Line …` keeps the readable name (`pxl.Line.name === 'Line'`) without a global.
+- **Debugging:** type `pxl` in the console to browse all classes, engine functions and state (`pxl.nodes`, `pxl.perf`, …).
+- **Custom shapes** extend `pxl.Shape` (`class Star extends pxl.Shape`), exactly like the built-in shapes.
+- **Classic script, not an ES module:** Kilopixel's interface is HTML plus standard DOM, so there is nothing to `import`; a classic `<script>` in `<head>` upgrades elements during parsing and works without a build step and from `file://`. Design: `design/2026-10-17_bundle_scope_plan.md`.
+
 ### PxlNode (Base Class for Layer/Group/Shape/Variable)
 
 **Source**: `js/elements/node.js`
 
 Every PxlNode has:
-- `static defaults` — read-only attribute defaults of the class, inherited by spreading (`static defaults = { ...Shape.defaults, r: 0, … }`). The `PxlNode` constructor copies them into `attributeExpressions` and `attributeValues`; `pxl.resolveEmptyAttribute` reads them for bare / removed attributes (see [Empty & Removed Attributes](#empty--removed-attributes))
+- `static defaults` — read-only attribute defaults of the class, inherited by spreading (`static defaults = { ...pxl.Shape.defaults, r: 0, … }`). The `PxlNode` constructor copies them into `attributeExpressions` and `attributeValues`; `pxl.resolveEmptyAttribute` reads them for bare / removed attributes (see [Empty & Removed Attributes](#empty--removed-attributes))
 - `attributeExpressions` — compiled functions or static values for each attribute
 - `attributeValues` — current evaluated values (read by render loop)
 - `animatedAttributeKeys[]` — attributes that depend on `t` (evaluated every frame)
@@ -748,7 +766,7 @@ Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile 
 ## Element Reference — Stage
 
 **Tag**: `<pxl-stage>`  
-**Class**: `Stage extends HTMLElement`  
+**Class**: `pxl.Stage extends HTMLElement`  
 **Source**: `js/elements/stage.js`
 
 > Note: Stage does NOT extend PxlNode. It is a standalone root container.
@@ -791,7 +809,7 @@ Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile 
 ## Element Reference — Layer
 
 **Tag**: `<pxl-layer>`  
-**Class**: `Layer extends PxlNode`  
+**Class**: `pxl.Layer extends pxl.PxlNode`  
 **Source**: `js/elements/layer.js`
 
 ### Observed Attributes (14)
@@ -825,7 +843,7 @@ Note: The compiler rewrites `toLocal(` to `pxl.mapCoordinate(this, ` at compile 
 ## Element Reference — Group
 
 **Tag**: `<pxl-group>`  
-**Class**: `Group extends PxlNode`  
+**Class**: `pxl.Group extends pxl.PxlNode`  
 **Source**: `js/elements/group.js`
 
 > [!NOTE]
@@ -848,7 +866,7 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `sc
 ## Element Reference — Shape (Base Class)
 
 **Tag**: N/A (abstract)  
-**Class**: `Shape extends PxlNode`  
+**Class**: `pxl.Shape extends pxl.PxlNode`  
 **Source**: `js/elements/shape.js`
 
 ### Observed Attributes (33)
@@ -924,7 +942,7 @@ A removed or empty handler (`removeAttribute('onclick')`, `onclick=""`) sets the
 ## Element Reference — Circle
 
 **Tag**: `<pxl-circle>`  
-**Class**: `Circle extends Shape`  
+**Class**: `pxl.Circle extends pxl.Shape`  
 **Source**: `js/elements/shapes/circle.js`
 
 ### Additional Observed Attributes
@@ -972,7 +990,7 @@ A removed or empty handler (`removeAttribute('onclick')`, `onclick=""`) sets the
 ## Element Reference — Ellipse
 
 **Tag**: `<pxl-ellipse>`  
-**Class**: `Ellipse extends Shape`  
+**Class**: `pxl.Ellipse extends pxl.Shape`  
 **Source**: `js/elements/shapes/ellipse.js`
 
 ### Additional Observed Attributes
@@ -999,7 +1017,7 @@ Like Circle but uses `ctx.ellipse()` with independent `rx`/`ry` radii. Arrowhead
 ## Element Reference — Rect
 
 **Tag**: `<pxl-rect>`  
-**Class**: `Rect extends Shape`  
+**Class**: `pxl.Rect extends pxl.Shape`  
 **Source**: `js/elements/shapes/rect.js`
 
 ### Additional Observed Attributes
@@ -1055,7 +1073,7 @@ Takes anchor into account: `{ left: -w*ax, right: w*(1-ax), top: -h*ay, bottom: 
 ## Element Reference — Line
 
 **Tag**: `<pxl-line>`  
-**Class**: `Line extends Shape`  
+**Class**: `pxl.Line extends pxl.Shape`  
 **Source**: `js/elements/shapes/line.js`
 
 ### Additional Observed Attributes
@@ -1084,7 +1102,7 @@ Takes anchor into account: `{ left: -w*ax, right: w*(1-ax), top: -h*ay, bottom: 
 ## Element Reference — Polyline
 
 **Tag**: `<pxl-polyline>`  
-**Class**: `Polyline extends Shape`  
+**Class**: `pxl.Polyline extends pxl.Shape`  
 **Source**: `js/elements/shapes/polyline.js`
 
 ### Additional Observed Attributes
@@ -1148,7 +1166,7 @@ Iterates all point values (handling relative mode accumulation) to find min/max 
 ## Element Reference — Text
 
 **Tag**: `<pxl-text>`  
-**Class**: `Text extends Shape`  
+**Class**: `pxl.Text extends pxl.Shape`  
 **Source**: `js/elements/shapes/text.js`
 
 ### Additional Observed Attributes
@@ -1231,7 +1249,7 @@ Glyphs drawn with `fillText` / `strokeText` produce no path, so `<pxl-text>` imp
 ## Element Reference — Grid
 
 **Tag**: `<pxl-grid>`  
-**Class**: `Grid extends Shape`  
+**Class**: `pxl.Grid extends pxl.Shape`  
 **Source**: `js/elements/shapes/grid.js`
 
 ### Additional Observed Attributes
@@ -1284,7 +1302,7 @@ Returns zeroed bounding box by default (grid is infinite). However, during draw,
 ## Element Reference — Variable
 
 **Tag**: `<pxl-var>`  
-**Class**: `Variable extends PxlNode`  
+**Class**: `pxl.Variable extends pxl.PxlNode`  
 **Source**: `js/elements/variable.js`
 
 ### Observed Attributes
@@ -1411,9 +1429,9 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 ### Build Process
 
 1. Reads and concatenates all 19 source files in dependency order
-2. Injects version string: `window.pxl = { version: '0.1.0' };`
-3. Writes concatenated file to `dist/temp_concat.js`
-4. Runs Terser via `npx terser` with `--compress passes=2 --mangle`
+2. **Namespace check:** stops with an error if any line starts with a top-level `class` / `const` / `let` / `var` / `function` (only `pxl` may be global, see [Namespace](#namespace-only-pxl-is-global))
+3. Injects version string: `window.pxl = { version: '0.1.0' };`
+4. Writes concatenated file to `dist/temp_concat.js` and runs Terser via `npx terser` with `--compress passes=2 --mangle --keep-classnames` (class expressions keep readable names for DevTools and warnings)
 5. Outputs to `dist/kilopixel-v0.1.0.min.js`
 6. Copies to `dist/pxl.min.js` (generic alias)
 7. Copies to `docs/js/pxl.min.js` (for GitHub Pages)

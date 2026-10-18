@@ -1,9 +1,9 @@
-class Grid extends Shape {
+pxl.Grid = class Grid extends pxl.Shape {
   static get observedAttributes() {
     return [...super.observedAttributes, 'step', 'major', 'labels', 'labelsize'];
   }
 
-  static defaults = { ...Shape.defaults, step: 50, major: 0, labels: false, labelsize: 12 };
+  static defaults = { ...pxl.Shape.defaults, step: 50, major: 0, labels: false, labelsize: 12 };
 
   draw(ctx, u, t) {
     const { step, major, labels, labelsize, strokewidth } = this.attributeValues;
@@ -117,6 +117,6 @@ class Grid extends Shape {
   getBoundingBox() {
     return this.boundingBox;
   }
-}
+};
 
-customElements.define('pxl-grid', Grid);
+customElements.define('pxl-grid', pxl.Grid);

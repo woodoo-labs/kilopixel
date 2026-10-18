@@ -1,4 +1,4 @@
-class Variable extends PxlNode {
+pxl.Variable = class Variable extends pxl.PxlNode {
   static get observedAttributes() { return ['value']; }
 
   static defaults = { value: 0 };
@@ -11,5 +11,5 @@ class Variable extends PxlNode {
   render(ctx, u, t) {
     this.evaluateAnimations(t);
   }
-}
-customElements.define('pxl-var', Variable);
+};
+customElements.define('pxl-var', pxl.Variable);

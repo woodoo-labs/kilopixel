@@ -1068,7 +1068,7 @@ pxl.perf = {
   }
 };
 
-class Stage extends HTMLElement {
+pxl.Stage = class Stage extends HTMLElement {
   static get observedAttributes() { return ['ratio', 'alwaysrender']; }
 
   constructor() {
@@ -1255,10 +1255,10 @@ class Stage extends HTMLElement {
       pxl.perf.publish();
     }
   }
-}
+};
 
-customElements.define('pxl-stage', Stage);
-class PxlNode extends HTMLElement {
+customElements.define('pxl-stage', pxl.Stage);
+pxl.PxlNode = class PxlNode extends HTMLElement {
   // Attribute defaults per class (read-only). Subclasses extend them: { ...Parent.defaults, ... }.
   // Also used to resolve bare / removed attributes (pxl.resolveEmptyAttribute).
   static defaults = {};
@@ -1463,11 +1463,10 @@ class PxlNode extends HTMLElement {
 
     return this.globalMatrix;
   }
-}
+};
 
-window.PxlNode = PxlNode;
 
-class Layer extends PxlNode {
+pxl.Layer = class Layer extends pxl.PxlNode {
   static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'filter', 'hidden']; }
 
   static defaults = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none', hidden: false };
@@ -1620,9 +1619,9 @@ class Layer extends PxlNode {
 
     if (this.isAnimated) this.stage?.requestRender();
   }
-}
-customElements.define('pxl-layer', Layer);
-class Group extends PxlNode {
+};
+customElements.define('pxl-layer', pxl.Layer);
+pxl.Group = class Group extends pxl.PxlNode {
   static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden']; }
 
   static defaults = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false };
@@ -1673,11 +1672,11 @@ class Group extends PxlNode {
     }
     if (hasStateChanges) ctx.restore();
   }
-}
-customElements.define('pxl-group', Group);
+};
+customElements.define('pxl-group', pxl.Group);
 // TODO
 // Cache Paths?
-class Shape extends PxlNode {
+pxl.Shape = class Shape extends pxl.PxlNode {
   static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'mask', 'filter', 'shadowcolor', 'shadowblur', 'shadowx', 'shadowy', 'hidden', 'onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove']; }
 
   static defaults = { x: 0, y: 0, dx: 0, dy: 0, fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', mask: 'none', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false, isHovered: false, isPressed: false };
@@ -2008,11 +2007,11 @@ class Shape extends PxlNode {
       ctx.closePath();
     }
   }
-}
-class Circle extends Shape {
+};
+pxl.Circle = class Circle extends pxl.Shape {
   static get observedAttributes() { return [...super.observedAttributes, 'r', 'ir', 'start', 'end', 'sweep', 'pie', 'closed', 'anticlockwise', 'arrowstart', 'arrowend', 'arrowstyle']; }
 
-  static defaults = { ...Shape.defaults, r: 0, ir: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
+  static defaults = { ...pxl.Shape.defaults, r: 0, ir: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
 
   constructor() {
     super();
@@ -2118,13 +2117,13 @@ class Circle extends Shape {
     this.boundingBox.bottom = r;
     return this.boundingBox;
   }
-}
-customElements.define('pxl-circle', Circle);
+};
+customElements.define('pxl-circle', pxl.Circle);
 
-class Ellipse extends Shape {
+pxl.Ellipse = class Ellipse extends pxl.Shape {
   static get observedAttributes() { return [...super.observedAttributes, 'rx', 'ry', 'irx', 'iry', 'start', 'end', 'sweep', 'pie', 'closed', 'anticlockwise', 'arrowstart', 'arrowend', 'arrowstyle']; }
 
-  static defaults = { ...Shape.defaults, rx: 0, ry: 0, irx: 0, iry: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
+  static defaults = { ...pxl.Shape.defaults, rx: 0, ry: 0, irx: 0, iry: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
 
   constructor() {
     super();
@@ -2245,13 +2244,13 @@ class Ellipse extends Shape {
     this.boundingBox.bottom = ry;
     return this.boundingBox;
   }
-}
-customElements.define('pxl-ellipse', Ellipse);
+};
+customElements.define('pxl-ellipse', pxl.Ellipse);
 
-class Rect extends Shape {
+pxl.Rect = class Rect extends pxl.Shape {
   static get observedAttributes() { return [...super.observedAttributes, 'w', 'h', 'r', 'r1', 'r2', 'r3', 'r4', 'anchor']; }
 
-  static defaults = { ...Shape.defaults, w: 0, h: 0, r: null, r1: null, r2: null, r3: null, r4: null, anchor: 'center' };
+  static defaults = { ...pxl.Shape.defaults, w: 0, h: 0, r: null, r1: null, r2: null, r3: null, r4: null, anchor: 'center' };
 
   constructor() {
     super();
@@ -2306,13 +2305,13 @@ class Rect extends Shape {
     this.boundingBox.bottom = h * (1 - ay);
     return this.boundingBox;
   }
-}
-customElements.define('pxl-rect', Rect);
+};
+customElements.define('pxl-rect', pxl.Rect);
 
-class Line extends Shape {
+pxl.Line = class Line extends pxl.Shape {
   static get observedAttributes() { return [...super.observedAttributes, 'x1', 'y1', 'x2', 'y2', 'arrowstart', 'arrowend', 'arrowstyle']; }
 
-  static defaults = { ...Shape.defaults, x1: 0, y1: 0, x2: 0, y2: 0, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
+  static defaults = { ...pxl.Shape.defaults, x1: 0, y1: 0, x2: 0, y2: 0, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
 
   constructor() {
     super();
@@ -2367,13 +2366,13 @@ class Line extends Shape {
     this.boundingBox.bottom = Math.max(y1, y2);
     return this.boundingBox;
   }
-}
-customElements.define('pxl-line', Line);
+};
+customElements.define('pxl-line', pxl.Line);
 
-class Polyline extends Shape {
+pxl.Polyline = class Polyline extends pxl.Shape {
   static get observedAttributes() { return [...super.observedAttributes, 'points', 'closed', 'smooth', 'mode', 'arrowstart', 'arrowend', 'arrowstyle']; }
 
-  static defaults = { ...Shape.defaults, closed: false, smooth: false, mode: 'absolute', arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
+  static defaults = { ...pxl.Shape.defaults, closed: false, smooth: false, mode: 'absolute', arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
 
   constructor() {
     super();
@@ -2633,16 +2632,16 @@ class Polyline extends Shape {
     this.boundingBox.bottom = maxY;
     return this.boundingBox;
   }
-}
-customElements.define('pxl-polyline', Polyline);
+};
+customElements.define('pxl-polyline', pxl.Polyline);
 
-class Text extends Shape {
+pxl.Text = class Text extends pxl.Shape {
   static get observedAttributes() {
     return [...super.observedAttributes, 'text', 'size', 'font', 'align', 'baseline', 'weight', 'fontstyle', 'maxwidth', 'direction', 'width', 'lineheight', 'letterspacing', 'reveal'];
   }
 
   static defaults = {
-    ...Shape.defaults,
+    ...pxl.Shape.defaults,
     text: '', size: 16, font: 'sans-serif', align: 'start',
     baseline: 'alphabetic', weight: 'normal', fontstyle: 'normal',
     maxwidth: 0, direction: null, width: 0, lineheight: 1.2,
@@ -2848,16 +2847,16 @@ class Text extends Shape {
     ctx.rect((b.left - pad) * u, (b.top - pad) * u, (b.right - b.left + 2 * pad) * u, (b.bottom - b.top + 2 * pad) * u);
     ctx.fill(); // intercepted on pxl.dummyCtx (isPointInPath)
   }
-}
+};
 // Define the custom element tag name
-customElements.define('pxl-text', Text);
+customElements.define('pxl-text', pxl.Text);
 
-class Grid extends Shape {
+pxl.Grid = class Grid extends pxl.Shape {
   static get observedAttributes() {
     return [...super.observedAttributes, 'step', 'major', 'labels', 'labelsize'];
   }
 
-  static defaults = { ...Shape.defaults, step: 50, major: 0, labels: false, labelsize: 12 };
+  static defaults = { ...pxl.Shape.defaults, step: 50, major: 0, labels: false, labelsize: 12 };
 
   draw(ctx, u, t) {
     const { step, major, labels, labelsize, strokewidth } = this.attributeValues;
@@ -2971,11 +2970,11 @@ class Grid extends Shape {
   getBoundingBox() {
     return this.boundingBox;
   }
-}
+};
 
-customElements.define('pxl-grid', Grid);
+customElements.define('pxl-grid', pxl.Grid);
 
-class Variable extends PxlNode {
+pxl.Variable = class Variable extends pxl.PxlNode {
   static get observedAttributes() { return ['value']; }
 
   static defaults = { value: 0 };
@@ -2988,6 +2987,6 @@ class Variable extends PxlNode {
   render(ctx, u, t) {
     this.evaluateAnimations(t);
   }
-}
-customElements.define('pxl-var', Variable);
+};
+customElements.define('pxl-var', pxl.Variable);
 
