@@ -1,11 +1,11 @@
 // Minimal static file server for local development (no dependencies).
-// Usage: node serve.js  → serves the repo root on http://localhost:8124 (/ redirects to /docs/)
+// Usage: node tools/serve.js  → serves the repo root on http://localhost:8124 (/ redirects to /docs/)
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
 const PORT = 8124;
-const root = __dirname;
+const root = path.resolve(__dirname, '..');
 const types = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon',
