@@ -1128,12 +1128,21 @@ The parser (`pxl.parsePointsIntoArray`) is parenthesis-aware, so functions like 
 ### Per-Coordinate Animation
 
 When `points` attribute changes:
-1. `clearPoints()` removes all synthetic `p0`, `p1`, `p2`... keys
-2. `pxl.parsePointsIntoArray()` splits into individual coordinate strings
+1. `pxl.parsePointsIntoArray()` splits into individual coordinate strings
+2. `clearPoints(count)` removes the synthetic `p0`, `p1`, `p2`... keys from the animated / reactive lists. Only keys beyond the new count are deleted; the others keep their value until recompiled (animated coordinates are only evaluated in the next frame)
 3. Each coordinate is compiled independently as `pxl.compileAttribute(this, 'p0', coordString)`
-4. At draw time, `flatCache[i] = attributeValues[pointKeys[i]] * u`
+4. `ref.<id>` is broadcast (like any other attribute change)
+5. At draw time, `flatCache[i] = attributeValues[pointKeys[i]] * u`
 
 This means each X and Y coordinate can have its own independent animation expression.
+
+### Reading Points (`ref.<id>.pN`) — Internal, Not in Public Docs
+
+Coordinates are readable like attributes: `<pxl-circle x="ref.poly.p2" y="ref.poly.p3">` sits on point 1 and follows it when the points are fixed, animated, reactive or replaced with `setAttribute('points', …)`. The public docs don't show this; they recommend a `<pxl-var>` that both shapes read (`points="150,450; 300, ref.peak.value; 450,450"` + `y="ref.peak.value"`). Limitations:
+- **Flat index**: point *k* is `p(2k)` (x) and `p(2k+1)` (y).
+- **Values as written**: before the polyline's `x`, `y`, `rotate`, `scale`; only correct for readers in the same space. `toLocal()` can't map a single point.
+- **Relative mode**: `pN` is the offset to the previous point, not the position.
+- **Fewer points**: a removed coordinate reads as `undefined` (the reader's shape isn't drawn).
 
 ### Smoothing
 

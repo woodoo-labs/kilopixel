@@ -23,10 +23,11 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'points') {
       if (oldValue === newValue) return;
-      this.clearPoints();
 
       pxl.parsePointsIntoArray(newValue, this.rawParts);
-      this.pointCount = this.rawParts.length;
+      const count = this.rawParts.length;
+      this.clearPoints(count);
+      this.pointCount = count;
 
       this.flatCache = new Float32Array(this.pointCount);
       this.pointKeys.length = this.pointCount;
@@ -38,19 +39,25 @@ pxl.Polyline = class Polyline extends pxl.Shape {
       }
 
       this.isAnimated = this.animatedAttributeKeys.length > 0;
+      // Readers of ref.<id>.pN update like for any other attribute
+      if (this._refKey) pxl.broadcast(this._refKey);
       this.parentLayer?.invalidate();
     } else {
       super.attributeChangedCallback(name, oldValue, newValue);
     }
   }
 
-  clearPoints() {
+  // Keys below keepCount keep their value until recompiled: animated coordinates are only evaluated
+  // in the next frame, so ref.<id>.pN readers would otherwise see undefined in between.
+  clearPoints(keepCount) {
     for (let i = 0; i < this.pointCount; i++) {
       const key = this.pointKeys[i];
       pxl.removeFromArray(this.animatedAttributeKeys, key);
       pxl.removeFromArray(this.reactiveAttributeKeys, key);
-      delete this.attributeExpressions[key];
-      delete this.attributeValues[key];
+      if (i >= keepCount) {
+        delete this.attributeExpressions[key];
+        delete this.attributeValues[key];
+      }
     }
     this.pointCount = 0;
   }

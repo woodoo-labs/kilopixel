@@ -4,7 +4,7 @@
 - **Date**: 2026-10-18
 - **Related**: `design/performance-analysis.md` (Issue #6, point key lookup), `design/2026-10-17_shape_authoring_plan.md` (Polyline `points: ''`, class fields, `draw(ctx, u)`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A), `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming), `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` (TODO §13), `.agents/TODO.md` §15 (spline quality)
 - **Target Implementation**: `js/graphics.js` (parser), `js/elements/shapes/polyline.js`, `.agents/KILOPIXEL.md`
-- **Test Script** (local): `scratch/points_parser_cases.js`
+- **Test Scripts** (local): `scratch/points_parser_cases.js` (today's parser), `scratch/points_parser_sketch.js` (§3.3 sketch)
 
 ---
 
@@ -16,7 +16,7 @@ Three phases, each usable on its own:
 
 | Phase | What | Files | Per-frame effect |
 |---|---|---|---|
-| 1 | Points parser: brackets, quotes, warnings | `graphics.js` | none (runs when `points` changes) |
+| 1 | Points parser: warnings for malformed input | `graphics.js` | none (runs when `points` changes) |
 | 2 | Point storage: numeric arrays, geometry cache, edge cases | `polyline.js` | large (see §4) |
 | 3 | Further optimizations, **only if measurements after phase 2 ask for them** | `polyline.js`, `compiler.js` | depends |
 
@@ -56,26 +56,27 @@ There are **no allocations per frame** today. The cost is the string-keyed prope
 
 ### 2.3 Hidden Costs Outside the Hot Loop
 
-1. **Dictionary mode after a points change.** `clearPoints()` uses `delete this.attributeValues[key]`. Verified with V8 (`node --allow-natives-syntax`, `%HasFastProperties`): an object with deleted keys drops to dictionary (hash table) mode. From then on **every** read of that polyline's `attributeValues` is slower, every frame: `Shape.render()` destructuring, `applyContextState`, `isStroked`, `applyStrokeState`, … `docs/caps.html` triggers this on every slider input.
-2. **More hidden classes.** Polylines with different point counts get different `attributeValues` shapes (`p0…p9` vs `p0…p999`). The shared property reads in `Shape` code see more shapes. (With several shape types on a page these sites are likely megamorphic anyway, so the effect is uncertain. Dictionary mode (1.) is the certain cost.)
-3. **`p0…pN` are public by accident.** `ref.poly.p3` works. Nothing in docs or examples uses it (checked).
-4. **A points change sends no `ref.<id>` broadcast**, unlike every other attribute (`PxlNode.attributeChangedCallback`).
+1. **Dictionary mode — not relevant in practice (corrected 2026-10-19).** `delete` does switch an object to dictionary (hash table) mode, but V8 already does that for any `attributeValues` with **10 or more points** (too many added properties; checked with `%HasFastProperties`). `scratch/polyline_lookup_bench.js` shows no measurable difference between the two modes.
+2. **More hidden classes.** Polylines with different point counts get different `attributeValues` shapes. With several shape types on a page the shared property reads in `Shape` code are likely megamorphic anyway, so the effect is uncertain.
+3. **`ref.poly.pN` is readable.** Kept on purpose since 2026-10-19 and noted in `.agents/KILOPIXEL.md` (internal, not in the public docs, which recommend `<pxl-var>`). Any storage change must keep it.
+4. ~~A points change sends no `ref.<id>` broadcast.~~ **Fixed 2026-10-19**: `polyline.js` broadcasts after a points change, and `clearPoints(count)` only deletes keys beyond the new count, so readers never see `undefined` for a coordinate that still exists.
+
+**Measured cost of the per-frame lookups** (`scratch/polyline_lookup_bench.js`, JavaScript only, Node / V8): 100 points ≈ 1.3 µs, 500 points ≈ 8 µs, 2000 points ≈ 44 µs per frame, i.e. 0.01–0.3 % of the 16.7 ms frame budget. Phase 2 brings this to ≈ 0.1 / 0.7 / 2.7 µs. **Phase 2 is a micro-optimization** for typical point counts.
 5. **Reallocation on every points change.** `new Float32Array(n)` and new `p${i}` key strings, even if the count is unchanged. Matters when JavaScript sets `points` often (slider, live data).
 
 ### 2.4 Parser Behavior (from `scratch/points_parser_cases.js`)
 
 | Input | Result |
 |---|---|
-| `min(50, t * 10)`, `ref.*`, newlines, trailing `;` | ✅ correct |
-| `[100, 200, 300][floor(loop(3) * 3)]` | ❌ split inside `[ ]` |
-| `ref.m.value === 'a,b' ? …` | ❌ split inside the string |
-| `'('` inside a string | ❌ depth broken, **all following points lost** |
-| `{ return 0; } else { … }` | ❌ split inside `{ }`, rest dropped |
+| `min(50, t * 10)`, `ref.*`, ternaries, newlines, trailing `;` | ✅ correct |
 | `0,0; 100; 200,0` (missing y) | ⚠️ point dropped silently |
 | `0,0,5` (three values) | ⚠️ silently becomes `(0, 5)` |
+| `0,0; 100,50,; 200,0` (trailing comma) | ⚠️ point dropped silently |
 | unbalanced `(` / `)` | ⚠️ all following points dropped silently |
 
-All `points` values in docs and examples parse correctly today (only `()`, `ref.*` and function calls are used).
+The real problem is **typos that fail without a message**. All `points` values in docs and examples parse correctly today (only `()`, `ref.*`, function calls and ternaries are used).
+
+Not a real use case (no change planned): commas or `;` inside strings, `[ ]` lists or `{ }` code blocks within a coordinate. These split wrongly today and will keep doing so. Parentheses already protect commas, so a list still works when wrapped: `([100, 200, 300][i])`.
 
 ---
 
@@ -83,17 +84,16 @@ All `points` values in docs and examples parse correctly today (only `()`, `ref.
 
 ### 3.1 Rules
 
-1. **One depth counter** for `()`, `[]` and `{}`. A mismatch like `(]` is a malformed expression anyway; the compiler reports it.
-2. **Strings are skipped**: inside `'…'`, `"…"` and `` `…` `` nothing counts as a separator or bracket. Not handled: a backtick nested inside `${…}` of a template literal (negligible).
-3. **Empty or `null`** (bare / removed attribute) → no points, no warning. No more accidental `"null;"`.
-4. **Structural error** (unbalanced brackets, unclosed string) → **no points at all** + one `console.warn` with the full string. After such an error the split positions are unreliable, so half a shape would be misleading.
-5. **Point error** (one value, three values, an empty value like `100,`) → **that point is skipped** + one `console.warn`. The error is local; the other points are reliable.
-6. **Whitespace-only segments** (trailing `;`, blank lines) are ignored without a warning.
-7. The parser returns whether the input was clean; the **polyline** writes the warning (it knows the element). Warning format follows `shape.js`: `[pxl] Warning: …`.
+1. **Parentheses only**, as today: `,` and `;` inside `( )` don't split. No tracking of `[ ]`, `{ }` or strings (§2.4: no real use case).
+2. **Empty or `null`** (bare / removed attribute) → no points, no warning. No more accidental `"null;"`.
+3. **Unbalanced parentheses** → **no points at all** + one `console.warn` with the full string. After a missing or extra `)` the split positions are unreliable, so half a shape would be misleading.
+4. **Point error** (one value, three values, an empty value like `100,` or `,50`) → **that point is skipped** + one `console.warn`. The error is local; the other points are reliable.
+5. **Whitespace-only segments** (trailing `;`, blank lines) are ignored without a warning.
+6. The parser returns whether the input was clean; the **polyline** writes the warning (it knows the element). Warning format follows `shape.js`: `[pxl] Warning: …`.
 
-### 3.2 The `;` Limit
+### 3.2 Coordinates Are Expressions
 
-A coordinate is an **expression**. Statement code (`if (t < 1) return 0; return 50`) can't be supported, because `;` both separates points and ends statements. With rule 1, the braced form `if (t < 1) { return 0; } else { return 50; }` survives the split, but the docs should simply say: **use a ternary** (`t < 1 ? 0 : 50`).
+A coordinate is a single **expression**: numbers, math, function calls, `ref.*`, ternaries (`t < 1 ? 0 : 50`). Statement code (`if (t < 1) return 0; return 50`) can't work, because `;` separates points. Anything containing a comma outside a function call needs parentheses. The polyline docs page states this.
 
 ### 3.3 Sketch
 
@@ -104,30 +104,25 @@ pxl.parsePointsIntoArray = function(str, targetArray) {
   if (!str) return true;
 
   const len = str.length;
-  let depth = 0, quote = '', start = 0, x = null, clean = true, extra = false;
+  let depth = 0, start = 0, x = null, extra = false, clean = true;
 
   for (let i = 0; i <= len; i++) {
     const ch = i < len ? str[i] : ';'; // virtual terminator, no string concatenation
-    if (quote) {
-      if (ch === quote) quote = '';
-      continue;
-    }
-    if (ch === "'" || ch === '"' || ch === '`') quote = ch;
-    else if (ch === '(' || ch === '[' || ch === '{') depth++;
-    else if (ch === ')' || ch === ']' || ch === '}') { if (--depth < 0) break; }
+    if (ch === '(') depth++;
+    else if (ch === ')') { if (--depth < 0) break; }
     else if (depth === 0 && ch === ',') {
       if (x === null) x = str.substring(start, i).trim();
       else extra = true;
       start = i + 1;
     } else if (depth === 0 && ch === ';') {
-      const y = str.substring(start, Math.min(i, len)).trim();
+      const y = str.substring(start, i).trim();
       if (x !== null && x !== '' && y !== '' && !extra) targetArray.push(x, y);
       else if (x !== null || y !== '') clean = false; // malformed point: skipped
       x = null; extra = false; start = i + 1;
     }
   }
 
-  if (quote || depth !== 0) { // structural error: reject everything
+  if (depth !== 0) { // unbalanced parentheses: reject everything
     targetArray.length = 0;
     return false;
   }
@@ -135,11 +130,11 @@ pxl.parsePointsIntoArray = function(str, targetArray) {
 };
 ```
 
-(Final code to be checked against the test cases in §7; the sketch shows the structure, not the last detail. Note: an unclosed quote swallows the virtual terminator, which is correct: rule 4 rejects the input.)
+Verified with `scratch/points_parser_sketch.js`: all docs / examples patterns parse as today; missing y, three values, trailing comma and empty x warn and skip that point; unbalanced `(` / `)` warn and reject all points; empty and `null` give no points without a warning.
 
 ### 3.4 Cost
 
-Same O(length) scan as today, only when `points` changes. One string comparison more per character. test05 / benchmark (`500 × ~110` characters) stay well under a millisecond. No effect on the frame loop.
+Same O(length) scan as today, only when `points` changes. test05 / benchmark (`500 × ~110` characters) stay well under a millisecond. No effect on the frame loop.
 
 ---
 
@@ -196,9 +191,10 @@ Taking coordinates out of `compileAttribute` means the polyline must do itself w
 | Self-cleaning unsubscribe (bit 1 of the bitmask) | `PxlNode.variableChangedCallback` | override it: combine the attribute result **and** the point result, or the polyline gets unsubscribed from a variable its points still need |
 | **`isAnimated = animatedAttributeKeys.length > 0`** | `PxlNode.attributeChangedCallback` | **re-apply `|| _animIdx.length > 0` after every `super` call**, or changing e.g. `stroke` on an animated polyline stops its animation |
 | Layer heartbeat | `evaluateAnimations` → `if (this.isAnimated) parentLayer.invalidate()` | nothing, as long as `isAnimated` is right |
-| `ref.<id>` broadcast on attribute change | `PxlNode.attributeChangedCallback` | broadcast after a `points` change (fixes §2.3.4) |
+| `ref.<id>` broadcast on attribute change | `PxlNode.attributeChangedCallback` | keep the broadcast after a `points` change (added 2026-10-19) |
+| `ref.<id>.pN` readers (§2.3.3) | `attributeValues.pN` | keep `pN` readable (e.g. mirror `_values` into `attributeValues.pN`), or decide to drop it |
 
-Point value changes (animated or reactive) do **not** broadcast `ref.<id>`: no `ref.*` property depends on point values any more.
+Point value changes (animated or reactive) would need to keep broadcasting `ref.<id>` while `ref.<id>.pN` is supported (today `evaluateAnimations` / `variableChangedCallback` do it, only when someone subscribes).
 
 ### 4.4 Sketch
 
@@ -360,14 +356,14 @@ Build the path once per (`u`, points, `smooth`, `closed`, arrows) and reuse it. 
 
 | Topic | Decision | Reason |
 |---|---|---|
-| Coordinates out of `attributeValues` | ✅ | removes string lookups, `delete`, dictionary mode and the accidental `ref.poly.pN` API |
+| Coordinates out of `attributeValues` | ⏸️ | removes string lookups, but measured gain is small (§2.3) and `ref.poly.pN` must stay readable |
 | Keep `p0…pN`, only cache `flatCache` with a dirty flag | ❌ | keeps `delete` / dictionary mode and string-keyed writes in `evaluateAnimations` |
 | Replicate engine behavior in Polyline (§4.3) instead of generalizing `compileAttribute` | ✅ for now | Polyline is the only multi-value attribute. If a second one appears (`<pxl-path>`, plot), extract a shared "value channel" helper then |
-| Bracket + quote aware parser | ✅ | cheap, compile time only |
-| Structural error → reject all points; point error → skip the point | ✅ | split positions after a structural error are unreliable |
+| Parser stays parentheses-only (no `[ ]`, `{ }`, strings) | ✅ | no real use case in coordinates; parentheses already protect commas |
+| Unbalanced parentheses → reject all points; point error → skip the point | ✅ | split positions after a missing / extra `)` are unreliable |
 | Non-finite coordinate → polyline not drawn | ✅ | predictable, one multiply-add per value, prevents the gradient exception |
 | `Float64Array` for `flatCache` | ✅ | exact relative-mode sums, one array type |
-| Statement code in coordinates | ❌ | `;` ambiguity; document ternaries |
+| Statement code in coordinates | ❌ | `;` separates points; document ternaries |
 | Batch compilation, smooth loop, partial updates | ⏸️ phase 3 | only with measurements |
 | `Path2D` caching | ⏸️ separate engine-wide plan | cross-cuts `applyStyle` and hit testing |
 
@@ -378,6 +374,6 @@ Build the path once per (`u`, points, `smooth`, `closed`, arrows) and reuse it. 
 1. **Phase 1**: `js/graphics.js` — new `parsePointsIntoArray` (returns clean / not clean). `polyline.js` — warn once per change. Test cases 1–2. `node build.js`.
 2. **Phase 2**: `js/elements/shapes/polyline.js` — fields (§4.1), `setPoints`, `attributeChangedCallback` (points, `isAnimated` re-apply), `evaluateAnimations`, `variableChangedCallback`, `evaluatePointsForVariable`, `connectedCallback`, `updateGeometry` (passes A / B), `getBoundingBox` from the cache, finite guard, `smooth="0"` as straight, degenerate end segments for arrows. Remove `clearPoints` and `pointKeys`. `node build.js`.
 3. Tests 3–15. Record performance numbers in §7.
-4. `.agents/KILOPIXEL.md` — Polyline section (points syntax rules, no `p0…pN`, geometry cache, edge cases), parser line ("bracket and quote aware"), Shape defaults list. `design/performance-analysis.md` — mark Issue #6 resolved.
+4. `.agents/KILOPIXEL.md` — Polyline section (points syntax rules, no `p0…pN`, geometry cache, edge cases), parser line (parentheses-aware, warns on malformed points), Shape defaults list. `design/performance-analysis.md` — mark Issue #6 resolved.
 5. Later: the polyline docs page documents the points syntax (expressions, ternaries, `;` and `,`), `closed` without repeating the first point, and duplicate points with `smooth`.
 6. Coordinate with the shape-authoring plan: `points: ''` is already in `defaults` here; constructor fields become class fields when that plan lands.
