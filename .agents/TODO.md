@@ -196,3 +196,17 @@
 - **Done (2026-10-17)**: the 5 internal helper globals (`len`, `mathProps`, `driverNames`, `dummyCanvas`, `_parseStops`) are cleaned up (loop-local, inlined, or `pxl._parseStops` / `pxl.dummyCtx`).
 - **Fix**: pure namespace pattern like `pxl.InteractionEngine`: `pxl.Line = class Line extends pxl.Shape { … };` for all 13 classes, `customElements.define('pxl-line', pxl.Line)`, remove `window.PxlNode`, build check in `build.js` that fails on any top-level declaration, keep class names in Terser (`--keep-classnames`). An IIFE wrapper was considered and not chosen.
 - **Decision**: stay a classic script, no ES module (no JavaScript API to import; modules are deferred and don't load from `file://`; zero build step). An extra `pxl.mjs` only if npm / TypeScript users need it later.
+
+## 22. Polyline Optimization (Parser, Point Storage, Edge Cases)
+- **Status**: ⚪ **Backlog** (2026-10-19)
+- **Reference**: `design/2026-10-18_polyline_optimization_plan.md` (priority table at the top)
+- **Done (2026-10-19)**: `setAttribute('points', …)` updates `ref.<id>.pN` readers (broadcast after a points change; only keys beyond the new count are deleted). `ref.<id>.pN` is internal (`.agents/KILOPIXEL.md`); the public docs recommend a `<pxl-var>` read by both shapes.
+- **Small fixes, do when touched**: arrowhead points right when the first / last two points are identical; all X (or all Y) non-finite + gradient throws in `createGradient`; warnings for typos in `points` (missing / extra values, unbalanced parentheses).
+- **Deferred**: point storage in numeric arrays (measured ≈ 8 µs per frame for 500 points, a micro-optimization) and the measurement-gated phase 3 items.
+
+## 23. Regular Polygon & Star Shape (`<pxl-polygon>`)
+- **Status**: 🟡 **Proposed** (2026-10-19, no code changes yet)
+- **Reference**: `design/2026-10-19_polygon_star_shape_plan.md`; prototypes `scratch/regular_polygon/test.html` and `relative.html`
+- **Idea**: one shape for regular polygons and stars: `sides`, `r`, a relative star amount (`0` = polygon, `1` = spokes, negative = bulges, same look for every number of sides) and `start`. Arbitrary polygons stay `<pxl-polyline closed="true">`.
+- **Open decisions** (plan §7): name of the star amount (`indent` proposed; not `star`, which reads like a switch), element name, default `start` (`-90` = first corner up), default `sides`.
+- **Sidebar**: the "Polygon" placeholder link was removed (2026-10-19); it comes back with `docs/polygon.html`.

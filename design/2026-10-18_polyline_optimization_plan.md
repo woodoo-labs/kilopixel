@@ -1,6 +1,6 @@
 # Polyline Optimization: Points Parser, Point Storage & Edge Cases
 
-- **Status**: 🟡 **Proposed** (no code changes yet)
+- **Status**: ⚪ **Backlog** (2026-10-19: measured gains are small, §2.3; the `ref.<id>.pN` fix is implemented, §2.3.4; priorities below)
 - **Date**: 2026-10-18
 - **Related**: `design/performance-analysis.md` (Issue #6, point key lookup), `design/2026-10-17_shape_authoring_plan.md` (Polyline `points: ''`, class fields, `draw(ctx, u)`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A), `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming), `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` (TODO §13), `.agents/TODO.md` §15 (spline quality)
 - **Target Implementation**: `js/graphics.js` (parser), `js/elements/shapes/polyline.js`, `.agents/KILOPIXEL.md`
@@ -19,6 +19,19 @@ Three phases, each usable on its own:
 | 1 | Points parser: warnings for malformed input | `graphics.js` | none (runs when `points` changes) |
 | 2 | Point storage: numeric arrays, geometry cache, edge cases | `polyline.js` | large (see §4) |
 | 3 | Further optimizations, **only if measurements after phase 2 ask for them** | `polyline.js`, `compiler.js` | depends |
+
+### Priorities (2026-10-19)
+
+All existing docs and examples work. Nothing here blocks the polyline docs page.
+
+| Task | Real bug? | Effort | Priority |
+|---|---|---|---|
+| `setAttribute('points', …)` updates `ref.<id>.pN` readers | ✅ | 1 line + key handling | ✅ **done** (2026-10-19) |
+| Arrowhead points right when the first or last two points are identical (§5 #7) | ✅ visual, rare input | ~10 lines | low: fix when touched |
+| All X (or all Y) non-finite + gradient → exception in `createGradient` (§5 #5) | ✅ very rare | ~3 lines guard | low: fix when touched |
+| Phase 1: warnings for typos in `points` (§3) | no, developer experience | ~30 lines | low |
+| Phase 2: point storage (§4) | no | large, touches reactivity | deferred: ≈ 8 µs per frame for 500 points |
+| Phase 3 (§6) | no | large | deferred |
 
 ---
 

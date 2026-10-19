@@ -79,7 +79,6 @@ class DocsSidebar extends HTMLElement {
             <li><a href="rect.html" class="${currentPath === 'rect.html' ? 'active' : ''}">Rectangle</a></li>
             <li><a href="line.html" class="${currentPath === 'line.html' ? 'active' : ''}">Line</a></li>
             <li><a href="polyline.html" class="${currentPath === 'polyline.html' ? 'active' : ''}">Polyline</a></li>
-            <li><a href="polygon.html" class="${currentPath === 'polygon.html' ? 'active' : ''}">Polygon</a></li>
             <li><a href="grid.html" class="${currentPath === 'grid.html' ? 'active' : ''}">Grid</a></li>
           </ul>
         </div>
