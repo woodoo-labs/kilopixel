@@ -381,7 +381,7 @@
           <pxl-stage id="sec4Stage" ratio="5 / 3" class="demo-stage">
             <pxl-layer>
               <!-- Column Left Edge (Align-Reactive) -->
-              <pxl-var id="sec4Left" value="500 - (ref.sec4Text.align === 'start' ? 0 : ref.sec4Text.align === 'end' ? ref.sec4Text.width : ref.sec4Text.width / 2)"></pxl-var>
+              <pxl-var id="sec4VarLeft" value="500 - (ref.sec4Text.align === 'start' ? 0 : ref.sec4Text.align === 'end' ? ref.sec4Text.width : ref.sec4Text.width / 2)"></pxl-var>
 
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
@@ -391,12 +391,12 @@
               <pxl-circle x="500" y="300" r="5" fill="#94a3b8"></pxl-circle>
 
               <!-- Dynamic Boundary Guides (Blue Scheme Full-Span) -->
-              <pxl-line x1="ref.sec4Left.value" y1="0" x2="ref.sec4Left.value" y2="600" stroke="#93c5fd" strokewidth="3" linedash="[5, 5]"></pxl-line>
-              <pxl-line x1="ref.sec4Left.value + ref.sec4Text.width" y1="0" x2="ref.sec4Left.value + ref.sec4Text.width" y2="600" stroke="#93c5fd" strokewidth="3" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="ref.sec4VarLeft.value" y1="0" x2="ref.sec4VarLeft.value" y2="600" stroke="#93c5fd" strokewidth="3" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="ref.sec4VarLeft.value + ref.sec4Text.width" y1="0" x2="ref.sec4VarLeft.value + ref.sec4Text.width" y2="600" stroke="#93c5fd" strokewidth="3" linedash="[5, 5]"></pxl-line>
 
               <!-- Top Dimension Guide Line & Arrowheads -->
-              <pxl-line x1="ref.sec4Left.value" y1="50" x2="ref.sec4Left.value + ref.sec4Text.width" y2="50" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]" arrowstart="15" arrowend="15"></pxl-line>
-              <pxl-text x="ref.sec4Left.value + ref.sec4Text.width / 2" y="40" text="'width = ' + ref.sec4Text.width" size="27" fill="#60a5fa" font="monospace" align="center" baseline="bottom"></pxl-text>
+              <pxl-line x1="ref.sec4VarLeft.value" y1="50" x2="ref.sec4VarLeft.value + ref.sec4Text.width" y2="50" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]" arrowstart="15" arrowend="15"></pxl-line>
+              <pxl-text x="ref.sec4VarLeft.value + ref.sec4Text.width / 2" y="40" text="'width = ' + ref.sec4Text.width" size="27" fill="#60a5fa" font="monospace" align="center" baseline="bottom"></pxl-text>
 
               <!-- Target Text Shape -->
               <pxl-text id="sec4Text" x="500" y="300"
@@ -755,9 +755,9 @@
                     oninput="document.getElementById('sec7Text3').setAttribute('strokewidth', this.value); document.getElementById('sec7Text3StrokewidthVal').innerText = this.value; document.getElementById('sec7Text3StrokewidthCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Gradient Angle <span class="indicator-dot"></span></span> <span id="sec7AngleVal">90°</span></label>
+                  <label><span>Gradient Angle <span class="indicator-dot"></span></span> <span id="sec7Var1Val">90°</span></label>
                   <input type="range" min="0" max="360" step="5" value="90" autocomplete="off"
-                    oninput="document.getElementById('sec7Angle').setAttribute('value', this.value); document.getElementById('sec7AngleVal').innerText = this.value + '°'; document.getElementById('sec7AngleCode').innerText = this.value;">
+                    oninput="document.getElementById('sec7Var1').setAttribute('value', this.value); document.getElementById('sec7Var1Val').innerText = this.value + '°'; document.getElementById('sec7AngleCode').innerText = this.value;">
                 </div>
               </div>
             </div>
@@ -767,7 +767,8 @@
           <pxl-stage id="sec7Stage" ratio="5 / 3" class="demo-stage">
             <pxl-layer>
               <!-- Dynamic Gradient Angle State -->
-              <pxl-var id="sec7Angle" value="90"></pxl-var>
+              <!-- Var1: outline gradient angle -->
+              <pxl-var id="sec7Var1" value="90"></pxl-var>
 
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
@@ -803,7 +804,7 @@
               <!-- Lower Right: Linear Gradient Outline Text (Rainbow Gradient) -->
               <pxl-text id="sec7Text3" x="760" y="420"
                 font="sans-serif" fill="none"
-                stroke="linear(ref.sec7Angle.value, ['#f97316', '#ec4899', '#3b82f6'])" strokewidth="4"
+                stroke="linear(ref.sec7Var1.value, ['#f97316', '#ec4899', '#3b82f6'])" strokewidth="4"
                 size="80" weight="800"
                 align="center" baseline="middle"
                 text="GRADIENT"></pxl-text>

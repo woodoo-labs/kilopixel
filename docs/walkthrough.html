@@ -812,19 +812,19 @@
           <div class="tab-content active" id="sec7VarsTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label><span>Hue <span class="indicator-dot"></span></span> <span id="sec7HueVal">250</span></label>
+                <label><span>Hue <span class="indicator-dot"></span></span> <span id="sec7Var1Val">250</span></label>
                 <input type="range" min="0" max="360" step="5" value="250" autocomplete="off" data-mark="sec7HueCode, sec7Circ1HueCode, sec7Circ2HueCode, sec7Circ3HueCode"
-                  oninput="document.getElementById('sec7Hue').setAttribute('value', this.value); document.getElementById('sec7HueVal').innerText = this.value; document.getElementById('sec7HueCode').innerText = this.value;">
+                  oninput="document.getElementById('sec7Var1').setAttribute('value', this.value); document.getElementById('sec7Var1Val').innerText = this.value; document.getElementById('sec7HueCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label><span>Spread <span class="indicator-dot"></span></span> <span id="sec7SpreadVal">120</span></label>
+                <label><span>Spread <span class="indicator-dot"></span></span> <span id="sec7Var2Val">120</span></label>
                 <input type="range" min="0" max="250" step="10" value="120" autocomplete="off" data-mark="sec7SpreadCode, sec7Circ1SpreadCode, sec7Circ2SpreadCode, sec7Circ3SpreadCode"
-                  oninput="document.getElementById('sec7Spread').setAttribute('value', this.value); document.getElementById('sec7SpreadVal').innerText = this.value; document.getElementById('sec7SpreadCode').innerText = this.value;">
+                  oninput="document.getElementById('sec7Var2').setAttribute('value', this.value); document.getElementById('sec7Var2Val').innerText = this.value; document.getElementById('sec7SpreadCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Size <span id="sec7SizeVal">150</span></label>
+                <label>Size <span id="sec7Var3Val">150</span></label>
                 <input type="range" min="10" max="250" step="10" value="150" autocomplete="off" data-mark="sec7SizeCode, sec7Circ1SizeCode, sec7Circ2SizeCode, sec7Circ3SizeCode"
-                  oninput="document.getElementById('sec7Size').setAttribute('value', this.value); document.getElementById('sec7SizeVal').innerText = this.value; document.getElementById('sec7SizeCode').innerText = this.value;">
+                  oninput="document.getElementById('sec7Var3').setAttribute('value', this.value); document.getElementById('sec7Var3Val').innerText = this.value; document.getElementById('sec7SizeCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -856,14 +856,15 @@
             <pxl-line x1="0" y1="-300" x2="0" y2="300" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
             
             <!-- Global State -->
-            <pxl-var id="sec7Hue" value="250"></pxl-var>
-            <pxl-var id="sec7Spread" value="120"></pxl-var>
-            <pxl-var id="sec7Size" value="150"></pxl-var>
+            <!-- Var1: hue; Var2: spread (offset); Var3: size (radius) -->
+            <pxl-var id="sec7Var1" value="250"></pxl-var>
+            <pxl-var id="sec7Var2" value="120"></pxl-var>
+            <pxl-var id="sec7Var3" value="150"></pxl-var>
 
             <!-- Shapes bound to state -->
-            <pxl-circle id="sec7Shape1" dx="ref.sec7Spread.value" r="ref.sec7Size.value" fill="hsla(ref.sec7Hue.value + 25, 80, 60, 0.6)" rotate="0"  ></pxl-circle>
-            <pxl-circle id="sec7Shape2" dx="ref.sec7Spread.value" r="ref.sec7Size.value" fill="hsla(ref.sec7Hue.value + 142, 80, 60, 0.6)" rotate="120"></pxl-circle>
-            <pxl-circle id="sec7Shape3" dx="ref.sec7Spread.value" r="ref.sec7Size.value" fill="hsla(ref.sec7Hue.value + 217, 80, 60, 0.6)" rotate="240"></pxl-circle>
+            <pxl-circle id="sec7Shape1" dx="ref.sec7Var2.value" r="ref.sec7Var3.value" fill="hsla(ref.sec7Var1.value + 25, 80, 60, 0.6)" rotate="0"  ></pxl-circle>
+            <pxl-circle id="sec7Shape2" dx="ref.sec7Var2.value" r="ref.sec7Var3.value" fill="hsla(ref.sec7Var1.value + 142, 80, 60, 0.6)" rotate="120"></pxl-circle>
+            <pxl-circle id="sec7Shape3" dx="ref.sec7Var2.value" r="ref.sec7Var3.value" fill="hsla(ref.sec7Var1.value + 217, 80, 60, 0.6)" rotate="240"></pxl-circle>
 
           </pxl-layer>
         </pxl-stage>
@@ -914,19 +915,19 @@
           <div class="tab-content active" id="sec8Layer1Tab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec8Layer1XVal">350</span></label>
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec8Var1Val">350</span></label>
                 <input type="range" min="0" max="1000" step="10" value="350" autocomplete="off" data-mark="sec8Layer1XCode, sec8LineRefCirc1X"
-                  oninput="document.getElementById('sec8Layer1X').setAttribute('value', this.value); document.getElementById('sec8Layer1XVal').innerText = this.value; document.getElementById('sec8Layer1XCode').innerText = this.value;">
+                  oninput="document.getElementById('sec8Var1').setAttribute('value', this.value); document.getElementById('sec8Var1Val').innerText = this.value; document.getElementById('sec8Layer1XCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec8Layer1YVal">250</span></label>
+                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec8Var2Val">250</span></label>
                 <input type="range" min="0" max="600" step="10" value="250" autocomplete="off" data-mark="sec8Layer1YCode, sec8LineRefCirc1Y"
-                  oninput="document.getElementById('sec8Layer1Y').setAttribute('value', this.value); document.getElementById('sec8Layer1YVal').innerText = this.value; document.getElementById('sec8Layer1YCode').innerText = this.value;">
+                  oninput="document.getElementById('sec8Var2').setAttribute('value', this.value); document.getElementById('sec8Var2Val').innerText = this.value; document.getElementById('sec8Layer1YCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec8Layer1RotVal">0°</span></label>
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec8Var3Val">0°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec8Layer1RotCode, sec8LineRefCirc1X, sec8LineRefCirc1Y"
-                  oninput="document.getElementById('sec8Layer1Rot').setAttribute('value', this.value); document.getElementById('sec8Layer1RotVal').innerText = this.value + '°'; document.getElementById('sec8Layer1RotCode').innerText = this.value;">
+                  oninput="document.getElementById('sec8Var3').setAttribute('value', this.value); document.getElementById('sec8Var3Val').innerText = this.value + '°'; document.getElementById('sec8Layer1RotCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -934,19 +935,19 @@
           <div class="tab-content" id="sec8Circle1Tab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec8Circle1XVal">-150</span></label>
+                <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec8Var7Val">-150</span></label>
                 <input type="range" min="-500" max="500" step="10" value="-150" autocomplete="off" data-mark="sec8Circle1XCode, sec8LineRefCirc1X"
-                  oninput="document.getElementById('sec8Circle1X').setAttribute('value', this.value); document.getElementById('sec8Circle1XVal').innerText = this.value; document.getElementById('sec8Circle1XCode').innerText = this.value;">
+                  oninput="document.getElementById('sec8Var7').setAttribute('value', this.value); document.getElementById('sec8Var7Val').innerText = this.value; document.getElementById('sec8Circle1XCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec8Circle1YVal">-150</span></label>
+                <label>Center Y <span id="sec8Var8Val">-150</span></label>
                 <input type="range" min="-500" max="500" step="10" value="-150" autocomplete="off" data-mark="sec8Circle1YCode, sec8LineRefCirc1Y"
-                  oninput="document.getElementById('sec8Circle1Y').setAttribute('value', this.value); document.getElementById('sec8Circle1YVal').innerText = this.value; document.getElementById('sec8Circle1YCode').innerText = this.value;">
+                  oninput="document.getElementById('sec8Var8').setAttribute('value', this.value); document.getElementById('sec8Var8Val').innerText = this.value; document.getElementById('sec8Circle1YCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius <span id="sec8Circle1RVal">100</span></label>
+                <label>Radius <span id="sec8Var9Val">100</span></label>
                 <input type="range" min="0" max="200" step="5" value="100" autocomplete="off" data-mark="sec8Circle1RCode"
-                  oninput="document.getElementById('sec8Circle1R').setAttribute('value', this.value); document.getElementById('sec8Circle1RVal').innerText = this.value; document.getElementById('sec8Circle1RCode').innerText = this.value;">
+                  oninput="document.getElementById('sec8Var9').setAttribute('value', this.value); document.getElementById('sec8Var9Val').innerText = this.value; document.getElementById('sec8Circle1RCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -954,19 +955,19 @@
           <div class="tab-content" id="sec8Layer2Tab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec8Layer2XVal">650</span></label>
+                <label>Center X <span id="sec8Var4Val">650</span></label>
                 <input type="range" min="0" max="1000" step="10" value="650" autocomplete="off" data-mark="sec8Layer2XCode, sec8LineRefCirc2X"
-                  oninput="document.getElementById('sec8Layer2X').setAttribute('value', this.value); document.getElementById('sec8Layer2XVal').innerText = this.value; document.getElementById('sec8Layer2XCode').innerText = this.value;">
+                  oninput="document.getElementById('sec8Var4').setAttribute('value', this.value); document.getElementById('sec8Var4Val').innerText = this.value; document.getElementById('sec8Layer2XCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec8Layer2YVal">350</span></label>
+                <label>Center Y <span id="sec8Var5Val">350</span></label>
                 <input type="range" min="0" max="600" step="10" value="350" autocomplete="off" data-mark="sec8Layer2YCode, sec8LineRefCirc2Y"
-                  oninput="document.getElementById('sec8Layer2Y').setAttribute('value', this.value); document.getElementById('sec8Layer2YVal').innerText = this.value; document.getElementById('sec8Layer2YCode').innerText = this.value;">
+                  oninput="document.getElementById('sec8Var5').setAttribute('value', this.value); document.getElementById('sec8Var5Val').innerText = this.value; document.getElementById('sec8Layer2YCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec8Layer2RotVal">0°</span></label>
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec8Var6Val">0°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec8Layer2RotCode, sec8LineRefCirc2X, sec8LineRefCirc2Y"
-                  oninput="document.getElementById('sec8Layer2Rot').setAttribute('value', this.value); document.getElementById('sec8Layer2RotVal').innerText = this.value + '°'; document.getElementById('sec8Layer2RotCode').innerText = this.value;">
+                  oninput="document.getElementById('sec8Var6').setAttribute('value', this.value); document.getElementById('sec8Var6Val').innerText = this.value + '°'; document.getElementById('sec8Layer2RotCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -974,19 +975,19 @@
           <div class="tab-content" id="sec8Circle2Tab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec8Circle2XVal">150</span></label>
+                <label>Center X <span id="sec8Var10Val">150</span></label>
                 <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off" data-mark="sec8Circle2XCode, sec8LineRefCirc2X"
-                  oninput="document.getElementById('sec8Circle2X').setAttribute('value', this.value); document.getElementById('sec8Circle2XVal').innerText = this.value; document.getElementById('sec8Circle2XCode').innerText = this.value;">
+                  oninput="document.getElementById('sec8Var10').setAttribute('value', this.value); document.getElementById('sec8Var10Val').innerText = this.value; document.getElementById('sec8Circle2XCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec8Circle2YVal">150</span></label>
+                <label><span>Center Y <span class="indicator-dot"></span></span> <span id="sec8Var11Val">150</span></label>
                 <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off" data-mark="sec8Circle2YCode, sec8LineRefCirc2Y"
-                  oninput="document.getElementById('sec8Circle2Y').setAttribute('value', this.value); document.getElementById('sec8Circle2YVal').innerText = this.value; document.getElementById('sec8Circle2YCode').innerText = this.value;">
+                  oninput="document.getElementById('sec8Var11').setAttribute('value', this.value); document.getElementById('sec8Var11Val').innerText = this.value; document.getElementById('sec8Circle2YCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius <span id="sec8Circle2RVal">100</span></label>
+                <label>Radius <span id="sec8Var12Val">100</span></label>
                 <input type="range" min="0" max="200" step="5" value="100" autocomplete="off" data-mark="sec8Circle2RCode"
-                  oninput="document.getElementById('sec8Circle2R').setAttribute('value', this.value); document.getElementById('sec8Circle2RVal').innerText = this.value; document.getElementById('sec8Circle2RCode').innerText = this.value;">
+                  oninput="document.getElementById('sec8Var12').setAttribute('value', this.value); document.getElementById('sec8Var12Val').innerText = this.value; document.getElementById('sec8Circle2RCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -994,47 +995,48 @@
         <pxl-stage ratio="5 / 3" class="demo-stage">
           <!-- Background Grid & Variables -->
           <pxl-layer>
-            <pxl-var id="sec8Layer1X" value="350"></pxl-var>
-            <pxl-var id="sec8Layer1Y" value="250"></pxl-var>
-            <pxl-var id="sec8Layer1Rot" value="0"></pxl-var>
+            <!-- Var1–Var3: layer 1 (x, y, rotation); Var4–Var6: layer 2 (x, y, rotation); Var7–Var9: circle 1 (x, y, radius); Var10–Var12: circle 2 (x, y, radius) -->
+            <pxl-var id="sec8Var1" value="350"></pxl-var>
+            <pxl-var id="sec8Var2" value="250"></pxl-var>
+            <pxl-var id="sec8Var3" value="0"></pxl-var>
             
-            <pxl-var id="sec8Layer2X" value="650"></pxl-var>
-            <pxl-var id="sec8Layer2Y" value="350"></pxl-var>
-            <pxl-var id="sec8Layer2Rot" value="0"></pxl-var>
+            <pxl-var id="sec8Var4" value="650"></pxl-var>
+            <pxl-var id="sec8Var5" value="350"></pxl-var>
+            <pxl-var id="sec8Var6" value="0"></pxl-var>
 
-            <pxl-var id="sec8Circle1X" value="-150"></pxl-var>
-            <pxl-var id="sec8Circle1Y" value="-150"></pxl-var>
-            <pxl-var id="sec8Circle1R" value="100"></pxl-var>
+            <pxl-var id="sec8Var7" value="-150"></pxl-var>
+            <pxl-var id="sec8Var8" value="-150"></pxl-var>
+            <pxl-var id="sec8Var9" value="100"></pxl-var>
             
-            <pxl-var id="sec8Circle2X" value="150"></pxl-var>
-            <pxl-var id="sec8Circle2Y" value="150"></pxl-var>
-            <pxl-var id="sec8Circle2R" value="100"></pxl-var>
+            <pxl-var id="sec8Var10" value="150"></pxl-var>
+            <pxl-var id="sec8Var11" value="150"></pxl-var>
+            <pxl-var id="sec8Var12" value="100"></pxl-var>
 
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
           </pxl-layer>
 
           <!-- Layer 1 -->
-          <pxl-layer id="sec8Layer1" x="ref.sec8Layer1X.value" y="ref.sec8Layer1Y.value" rotate="ref.sec8Layer1Rot.value">
+          <pxl-layer id="sec8Layer1" x="ref.sec8Var1.value" y="ref.sec8Var2.value" rotate="ref.sec8Var3.value">
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#fed7aa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#fed7aa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#fdba74"></pxl-circle>
             <pxl-text x="15" y="-15" text="Layer 1 Center" size="27" fill="#fdba74"></pxl-text>
             
-            <pxl-circle id="sec8Circle1" x="ref.sec8Circle1X.value" y="ref.sec8Circle1Y.value" r="ref.sec8Circle1R.value" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
-            <pxl-circle x="ref.sec8Circle1X.value" y="ref.sec8Circle1Y.value" r="5" fill="#f97316"></pxl-circle>
-            <pxl-text x="ref.sec8Circle1X.value + 15" y="ref.sec8Circle1Y.value - 15" text="Circle 1 Center" size="27" fill="#fb923c"></pxl-text>
+            <pxl-circle id="sec8Circle1" x="ref.sec8Var7.value" y="ref.sec8Var8.value" r="ref.sec8Var9.value" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
+            <pxl-circle x="ref.sec8Var7.value" y="ref.sec8Var8.value" r="5" fill="#f97316"></pxl-circle>
+            <pxl-text x="ref.sec8Var7.value + 15" y="ref.sec8Var8.value - 15" text="Circle 1 Center" size="27" fill="#fb923c"></pxl-text>
           </pxl-layer>
 
           <!-- Layer 2 -->
-          <pxl-layer id="sec8Layer2" x="ref.sec8Layer2X.value" y="ref.sec8Layer2Y.value" rotate="ref.sec8Layer2Rot.value">
+          <pxl-layer id="sec8Layer2" x="ref.sec8Var4.value" y="ref.sec8Var5.value" rotate="ref.sec8Var6.value">
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#bfdbfe" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#bfdbfe" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#93c5fd"></pxl-circle>
             <pxl-text x="15" y="-15" text="Layer 2 Center" size="27" fill="#93c5fd"></pxl-text>
             
-            <pxl-circle id="sec8Circle2" x="ref.sec8Circle2X.value" y="ref.sec8Circle2Y.value" r="ref.sec8Circle2R.value" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-circle>
-            <pxl-circle x="ref.sec8Circle2X.value" y="ref.sec8Circle2Y.value" r="5" fill="#3b82f6"></pxl-circle>
-            <pxl-text x="ref.sec8Circle2X.value + 15" y="ref.sec8Circle2Y.value - 15" text="Circle 2 Center" size="27" fill="#60a5fa"></pxl-text>
+            <pxl-circle id="sec8Circle2" x="ref.sec8Var10.value" y="ref.sec8Var11.value" r="ref.sec8Var12.value" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-circle>
+            <pxl-circle x="ref.sec8Var10.value" y="ref.sec8Var11.value" r="5" fill="#3b82f6"></pxl-circle>
+            <pxl-text x="ref.sec8Var10.value + 15" y="ref.sec8Var11.value - 15" text="Circle 2 Center" size="27" fill="#60a5fa"></pxl-text>
           </pxl-layer>
 
           <!-- Cross-Space Connecting Line -->
@@ -1107,19 +1109,19 @@
           <div class="tab-content active" id="sec9ControlsTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label><span>Frequency X <span class="indicator-dot"></span></span> <span id="sec9FreqXVal">2</span></label>
+                <label><span>Frequency X <span class="indicator-dot"></span></span> <span id="sec9Var1Val">2</span></label>
                 <input type="range" min="1" max="10" step="1" value="2" autocomplete="off"
-                  oninput="document.getElementById('sec9FreqX').setAttribute('value', this.value); document.getElementById('sec9FreqXVal').innerText = this.value; document.getElementById('sec9FreqXCode').innerText = this.value;">
+                  oninput="document.getElementById('sec9Var1').setAttribute('value', this.value); document.getElementById('sec9Var1Val').innerText = this.value; document.getElementById('sec9FreqXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label><span>Frequency Y <span class="indicator-dot"></span></span> <span id="sec9FreqYVal">3</span></label>
+                <label><span>Frequency Y <span class="indicator-dot"></span></span> <span id="sec9Var2Val">3</span></label>
                 <input type="range" min="1" max="10" step="1" value="3" autocomplete="off"
-                  oninput="document.getElementById('sec9FreqY').setAttribute('value', this.value); document.getElementById('sec9FreqYVal').innerText = this.value; document.getElementById('sec9FreqYCode').innerText = this.value;">
+                  oninput="document.getElementById('sec9Var2').setAttribute('value', this.value); document.getElementById('sec9Var2Val').innerText = this.value; document.getElementById('sec9FreqYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius <span id="sec9RadiusVal">40</span></label>
+                <label>Radius <span id="sec9Var3Val">40</span></label>
                 <input type="range" min="10" max="150" step="5" value="40" autocomplete="off"
-                  oninput="document.getElementById('sec9Radius').setAttribute('value', this.value); document.getElementById('sec9RadiusVal').innerText = this.value; document.getElementById('sec9RadiusCode').innerText = this.value;">
+                  oninput="document.getElementById('sec9Var3').setAttribute('value', this.value); document.getElementById('sec9Var3Val').innerText = this.value; document.getElementById('sec9RadiusCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -1127,9 +1129,10 @@
         <pxl-stage class="demo-stage" ratio="5 / 3">
           <!-- Background Grid & Variables -->
           <pxl-layer>
-            <pxl-var id="sec9FreqX" value="2"></pxl-var>
-            <pxl-var id="sec9FreqY" value="3"></pxl-var>
-            <pxl-var id="sec9Radius" value="40"></pxl-var>
+            <!-- Var1, Var2: orbit frequency (x, y); Var3: orb radius -->
+            <pxl-var id="sec9Var1" value="2"></pxl-var>
+            <pxl-var id="sec9Var2" value="3"></pxl-var>
+            <pxl-var id="sec9Var3" value="40"></pxl-var>
 
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
           </pxl-layer>
@@ -1143,128 +1146,128 @@
 
             <!-- Trace Path -->
             <pxl-polyline smooth="true" stroke="linear(t * 50, ['#0ea5e9', '#8b5cf6', '#ec4899'])" strokewidth="4" fill="none" closed="true" points="
-              sin(0 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(0 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(1 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(1 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(2 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(2 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(3 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(3 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(4 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(4 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(5 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(5 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(6 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(6 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(7 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(7 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(8 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(8 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(9 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(9 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(10 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(10 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(11 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(11 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(12 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(12 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(13 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(13 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(14 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(14 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(15 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(15 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(16 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(16 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(17 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(17 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(18 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(18 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(19 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(19 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(20 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(20 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(21 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(21 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(22 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(22 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(23 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(23 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(24 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(24 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(25 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(25 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(26 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(26 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(27 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(27 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(28 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(28 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(29 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(29 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(30 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(30 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(31 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(31 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(32 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(32 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(33 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(33 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(34 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(34 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(35 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(35 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(36 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(36 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(37 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(37 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(38 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(38 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(39 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(39 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(40 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(40 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(41 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(41 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(42 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(42 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(43 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(43 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(44 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(44 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(45 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(45 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(46 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(46 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(47 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(47 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(48 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(48 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(49 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(49 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(50 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(50 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(51 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(51 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(52 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(52 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(53 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(53 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(54 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(54 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(55 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(55 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(56 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(56 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(57 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(57 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(58 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(58 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(59 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(59 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(60 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(60 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(61 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(61 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(62 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(62 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(63 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(63 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(64 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(64 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(65 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(65 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(66 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(66 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(67 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(67 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(68 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(68 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(69 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(69 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(70 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(70 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(71 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(71 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(72 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(72 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(73 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(73 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(74 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(74 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(75 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(75 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(76 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(76 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(77 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(77 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(78 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(78 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(79 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(79 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(80 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(80 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(81 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(81 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(82 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(82 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(83 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(83 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(84 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(84 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(85 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(85 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(86 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(86 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(87 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(87 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(88 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(88 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(89 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(89 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(90 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(90 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(91 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(91 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(92 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(92 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(93 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(93 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(94 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(94 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(95 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(95 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(96 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(96 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(97 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(97 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(98 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(98 * 2 * PI / 100 * ref.sec9FreqY.value) * 250;
-              sin(99 * 2 * PI / 100 * ref.sec9FreqX.value) * 450, cos(99 * 2 * PI / 100 * ref.sec9FreqY.value) * 250
+              sin(0 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(0 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(1 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(1 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(2 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(2 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(3 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(3 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(4 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(4 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(5 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(5 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(6 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(6 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(7 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(7 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(8 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(8 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(9 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(9 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(10 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(10 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(11 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(11 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(12 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(12 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(13 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(13 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(14 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(14 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(15 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(15 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(16 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(16 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(17 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(17 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(18 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(18 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(19 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(19 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(20 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(20 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(21 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(21 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(22 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(22 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(23 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(23 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(24 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(24 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(25 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(25 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(26 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(26 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(27 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(27 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(28 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(28 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(29 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(29 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(30 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(30 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(31 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(31 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(32 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(32 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(33 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(33 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(34 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(34 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(35 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(35 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(36 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(36 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(37 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(37 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(38 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(38 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(39 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(39 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(40 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(40 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(41 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(41 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(42 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(42 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(43 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(43 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(44 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(44 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(45 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(45 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(46 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(46 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(47 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(47 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(48 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(48 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(49 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(49 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(50 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(50 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(51 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(51 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(52 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(52 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(53 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(53 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(54 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(54 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(55 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(55 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(56 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(56 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(57 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(57 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(58 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(58 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(59 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(59 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(60 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(60 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(61 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(61 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(62 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(62 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(63 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(63 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(64 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(64 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(65 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(65 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(66 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(66 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(67 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(67 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(68 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(68 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(69 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(69 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(70 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(70 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(71 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(71 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(72 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(72 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(73 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(73 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(74 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(74 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(75 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(75 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(76 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(76 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(77 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(77 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(78 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(78 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(79 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(79 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(80 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(80 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(81 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(81 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(82 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(82 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(83 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(83 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(84 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(84 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(85 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(85 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(86 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(86 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(87 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(87 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(88 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(88 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(89 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(89 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(90 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(90 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(91 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(91 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(92 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(92 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(93 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(93 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(94 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(94 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(95 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(95 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(96 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(96 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(97 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(97 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(98 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(98 * 2 * PI / 100 * ref.sec9Var2.value) * 250;
+              sin(99 * 2 * PI / 100 * ref.sec9Var1.value) * 450, cos(99 * 2 * PI / 100 * ref.sec9Var2.value) * 250
             "></pxl-polyline>
           </pxl-layer>
 
           <pxl-layer id="sec9Layer" x="500" y="300" rotate="0">
             <!-- Animated Variables -->
-            <pxl-var id="sec9OrbHue" value="loop(10) * 360"></pxl-var>
-            <pxl-var id="sec9OrbX" value="sin(t * ref.sec9FreqX.value) * 450"></pxl-var>
-            <pxl-var id="sec9OrbY" value="cos(t * ref.sec9FreqY.value) * 250"></pxl-var>
+            <pxl-var id="sec9VarOrbHue" value="loop(10) * 360"></pxl-var>
+            <pxl-var id="sec9VarOrbX" value="sin(t * ref.sec9Var1.value) * 450"></pxl-var>
+            <pxl-var id="sec9VarOrbY" value="cos(t * ref.sec9Var2.value) * 250"></pxl-var>
             <!-- Axes Helpers -->
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
             <!-- Line connecting anchor to orb -->
-            <pxl-line x1="0" y1="0" x2="ref.sec9OrbX.value" y2="ref.sec9OrbY.value" stroke="ref.sec9FlyingOrb.stroke" strokewidth="4"></pxl-line>
+            <pxl-line x1="0" y1="0" x2="ref.sec9VarOrbX.value" y2="ref.sec9VarOrbY.value" stroke="ref.sec9FlyingOrb.stroke" strokewidth="4"></pxl-line>
 
             <!-- Central Anchor Shape (Orange Scheme) -->
             <pxl-circle r="5" fill="#f97316"></pxl-circle>
             <pxl-text x="25" y="-20" text="'Anchor'" size="27" fill="#fb923c"></pxl-text>
 
             <!-- Flying Orb -->
-            <pxl-circle id="sec9FlyingOrb" x="ref.sec9OrbX.value" y="ref.sec9OrbY.value" r="ref.sec9Radius.value" fill="hsla(ref.sec9OrbHue.value, 100, 60, 0.4)" stroke="hsl(ref.sec9OrbHue.value, 100, 60)" strokewidth="4" shadowcolor="ref.sec9FlyingOrb.stroke" shadowblur="20"></pxl-circle>
-            <pxl-text x="ref.sec9OrbX.value + 50" y="ref.sec9OrbY.value - 20" text="'Oscillator'" size="27" fill="ref.sec9FlyingOrb.stroke"></pxl-text>
+            <pxl-circle id="sec9FlyingOrb" x="ref.sec9VarOrbX.value" y="ref.sec9VarOrbY.value" r="ref.sec9Var3.value" fill="hsla(ref.sec9VarOrbHue.value, 100, 60, 0.4)" stroke="hsl(ref.sec9VarOrbHue.value, 100, 60)" strokewidth="4" shadowcolor="ref.sec9FlyingOrb.stroke" shadowblur="20"></pxl-circle>
+            <pxl-text x="ref.sec9VarOrbX.value + 50" y="ref.sec9VarOrbY.value - 20" text="'Oscillator'" size="27" fill="ref.sec9FlyingOrb.stroke"></pxl-text>
           </pxl-layer>
         </pxl-stage>
       </div>

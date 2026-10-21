@@ -170,14 +170,14 @@
             <div class="tab-content" id="sec2BackgroundTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Color 1 Offset</span> <span id="sec2BgC1Val">0.4</span></label>
-                  <input id="sec2BgC1Input" type="range" min="0" max="0.5" step="0.05" value="0.4" autocomplete="off"
-                    oninput="document.getElementById('sec2BgC1').setAttribute('value', this.value); document.getElementById('sec2BgC1Val').innerText = this.value; document.getElementById('sec2BgC1Code').innerText = this.value;" data-mark="sec2BgC1Code">
+                  <label><span>Color 1 Offset</span> <span id="sec2Var1Val">0.4</span></label>
+                  <input id="sec2Var1Input" type="range" min="0" max="0.5" step="0.05" value="0.4" autocomplete="off"
+                    oninput="document.getElementById('sec2Var1').setAttribute('value', this.value); document.getElementById('sec2Var1Val').innerText = this.value; document.getElementById('sec2BgC1Code').innerText = this.value;" data-mark="sec2BgC1Code">
                 </div>
                 <div class="control-group">
-                  <label><span>Color 3 Offset</span> <span id="sec2BgC3Val">0.6</span></label>
-                  <input id="sec2BgC3Input" type="range" min="0.5" max="1" step="0.05" value="0.6" autocomplete="off"
-                    oninput="document.getElementById('sec2BgC3').setAttribute('value', this.value); document.getElementById('sec2BgC3Val').innerText = this.value; document.getElementById('sec2BgC3Code').innerText = this.value;" data-mark="sec2BgC3Code">
+                  <label><span>Color 3 Offset</span> <span id="sec2Var2Val">0.6</span></label>
+                  <input id="sec2Var2Input" type="range" min="0.5" max="1" step="0.05" value="0.6" autocomplete="off"
+                    oninput="document.getElementById('sec2Var2').setAttribute('value', this.value); document.getElementById('sec2Var2Val').innerText = this.value; document.getElementById('sec2BgC3Code').innerText = this.value;" data-mark="sec2BgC3Code">
                 </div>
               </div>
             </div>
@@ -186,14 +186,14 @@
             <div class="tab-content" id="sec2CirclesTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Center Y</span> <span id="sec2CircleYVal">300</span></label>
-                  <input id="sec2CircleYInput" type="range" min="100" max="500" step="10" value="300" autocomplete="off"
-                    oninput="document.getElementById('sec2CircleY').setAttribute('value', this.value); document.getElementById('sec2CircleYVal').innerText = this.value; ['sec2CircleYL1Code', 'sec2CircleYL2Code', 'sec2CircleYR1Code', 'sec2CircleYR2Code'].forEach(id => document.getElementById(id).innerText = this.value);" data-mark="sec2CircleYL1Code, sec2CircleYL2Code, sec2CircleYR1Code, sec2CircleYR2Code">
+                  <label><span>Center Y</span> <span id="sec2Var3Val">300</span></label>
+                  <input id="sec2Var3Input" type="range" min="100" max="500" step="10" value="300" autocomplete="off"
+                    oninput="document.getElementById('sec2Var3').setAttribute('value', this.value); document.getElementById('sec2Var3Val').innerText = this.value; ['sec2CircleYL1Code', 'sec2CircleYL2Code', 'sec2CircleYR1Code', 'sec2CircleYR2Code'].forEach(id => document.getElementById(id).innerText = this.value);" data-mark="sec2CircleYL1Code, sec2CircleYL2Code, sec2CircleYR1Code, sec2CircleYR2Code">
                 </div>
                 <div class="control-group">
-                  <label><span>Radius</span> <span id="sec2CircleRVal">140</span></label>
-                  <input id="sec2CircleRInput" type="range" min="50" max="250" step="10" value="140" autocomplete="off"
-                    oninput="document.getElementById('sec2CircleR').setAttribute('value', this.value); document.getElementById('sec2CircleRVal').innerText = this.value; ['sec2CircleRL1Code', 'sec2CircleRL2Code', 'sec2CircleRR1Code', 'sec2CircleRR2Code'].forEach(id => document.getElementById(id).innerText = this.value);" data-mark="sec2CircleRL1Code, sec2CircleRL2Code, sec2CircleRR1Code, sec2CircleRR2Code">
+                  <label><span>Radius</span> <span id="sec2Var4Val">140</span></label>
+                  <input id="sec2Var4Input" type="range" min="50" max="250" step="10" value="140" autocomplete="off"
+                    oninput="document.getElementById('sec2Var4').setAttribute('value', this.value); document.getElementById('sec2Var4Val').innerText = this.value; ['sec2CircleRL1Code', 'sec2CircleRL2Code', 'sec2CircleRR1Code', 'sec2CircleRR2Code'].forEach(id => document.getElementById(id).innerText = this.value);" data-mark="sec2CircleRL1Code, sec2CircleRL2Code, sec2CircleRR1Code, sec2CircleRR2Code">
                 </div>
               </div>
             </div>
@@ -230,24 +230,25 @@
             <!-- BACKGROUND LAYER -->
             <pxl-layer id="sec2BgLayer">
               <!-- State Variables -->
-              <pxl-var id="sec2BgC1" value="0.4"></pxl-var>
-              <pxl-var id="sec2BgC3" value="0.6"></pxl-var>
-              <pxl-var id="sec2CircleY" value="300"></pxl-var>
-              <pxl-var id="sec2CircleR" value="140"></pxl-var>
+              <!-- Var1, Var2: background gradient, first and last color stop position; Var3, Var4: circles, center y and radius -->
+              <pxl-var id="sec2Var1" value="0.4"></pxl-var>
+              <pxl-var id="sec2Var2" value="0.6"></pxl-var>
+              <pxl-var id="sec2Var3" value="300"></pxl-var>
+              <pxl-var id="sec2Var4" value="140"></pxl-var>
 
-              <pxl-rect id="sec2BgRect" fill="linear(90, [ref.sec2BgC1.value, '#f9a8d4', 0.5, '#fde047', ref.sec2BgC3.value, '#67e8f9'])" x="0" y="0" w="1000" h="600" anchor="top-left"></pxl-rect>
+              <pxl-rect id="sec2BgRect" fill="linear(90, [ref.sec2Var1.value, '#f9a8d4', 0.5, '#fde047', ref.sec2Var2.value, '#67e8f9'])" x="0" y="0" w="1000" h="600" anchor="top-left"></pxl-rect>
             </pxl-layer>
 
             <!-- LEFT: Blend applied to the Layer (Blends against the Background Layer!) -->
             <pxl-layer id="sec2Layer" blend="multiply">
-              <pxl-circle id="sec2CircleL1" fill="darkorange" x="180" y="ref.sec2CircleY.value" r="ref.sec2CircleR.value"></pxl-circle>
-              <pxl-circle id="sec2CircleL2" fill="dodgerblue" x="320" y="ref.sec2CircleY.value" r="ref.sec2CircleR.value"></pxl-circle>
+              <pxl-circle id="sec2CircleL1" fill="darkorange" x="180" y="ref.sec2Var3.value" r="ref.sec2Var4.value"></pxl-circle>
+              <pxl-circle id="sec2CircleL2" fill="dodgerblue" x="320" y="ref.sec2Var3.value" r="ref.sec2Var4.value"></pxl-circle>
             </pxl-layer>
 
             <!-- RIGHT: Blend applied to the Shapes (Blends against each other, but NOT the Background Layer!) -->
             <pxl-layer id="sec2ShapeLayer">
-              <pxl-circle id="sec2CircleR1" fill="darkorange" x="680" y="ref.sec2CircleY.value" r="ref.sec2CircleR.value"></pxl-circle>
-              <pxl-circle id="sec2CircleR2" fill="dodgerblue" blend="multiply" x="820" y="ref.sec2CircleY.value" r="ref.sec2CircleR.value"></pxl-circle>
+              <pxl-circle id="sec2CircleR1" fill="darkorange" x="680" y="ref.sec2Var3.value" r="ref.sec2Var4.value"></pxl-circle>
+              <pxl-circle id="sec2CircleR2" fill="dodgerblue" blend="multiply" x="820" y="ref.sec2Var3.value" r="ref.sec2Var4.value"></pxl-circle>
             </pxl-layer>
 
             <!-- FOREGROUND GUIDES -->

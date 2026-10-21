@@ -210,3 +210,10 @@
 - **Idea**: one shape for regular polygons and stars: `sides`, `r`, a relative star amount (`0` = polygon, `1` = spokes, negative = bulges, same look for every number of sides) and `start`. Arbitrary polygons stay `<pxl-polyline closed="true">`.
 - **Open decisions** (plan §7): name of the star amount (`indent` proposed; not `star`, which reads like a switch), element name, default `start` (`-90` = first corner up), default `sides`.
 - **Sidebar**: the "Polygon" placeholder link was removed (2026-10-19); it comes back with `docs/polygon.html`.
+
+## 24. Docs: Migrate `radial.html` Variables to the `Var` Naming Rule
+- **Status**: 🟡 **Open** (2026-10-21)
+- **Rule**: `docs/DOCS_STANDARDS.md` §5 "Variables": entity is always `Var`; input variables set by a control are numbered (`sec1Var1`, controls `sec1Var1Input` / `sec1Var1Val`, meaning in an HTML comment); computed variables are named (`sec3ex1VarTargetX1`). Code marks keep naming the shape attribute. Snippet variables keep short descriptive names.
+- **Done (2026-10-21)**: polyline, blend, text, conic, walkthrough, linear (75 variables). Migrated with `scratch/var_migration/migrate.js`, verified with `scratch/var_migration/verify.html` (old vs. new page: same control sequence, all values identical, no errors, no missing IDs).
+- **Open: `radial.html`** (45 variables, 178 `ref.*` uses). Its bottom script builds IDs from parts (`${sec}DirX${radiusKey}`, `${sec}${radiusKey}`, `${sec}Grad${radiusKey}Input`), so a text replacement would break it: the script has to be rewritten to use the new names (e.g. a lookup table per section). Sliders there are also named differently from their variables (`sec1ex1GradR1Input` sets `sec1ex1R1`).
+- **Then**: run `migrate.js` (dry run first) and `verify.html` with `radial.html` added to the page list.

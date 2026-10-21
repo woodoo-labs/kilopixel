@@ -269,6 +269,13 @@ To ensure perfect consistency across all documentation playgrounds and guides, 1
   * **`[Role]`** *(Optional)*: UI modifier for attribute controls (`Val`, `Code`, `Input`, `Select`, `Btn`, `Group`).
 * **Canvas Target Shapes (`camelCase`):** Any `<pxl-layer>`, `<pxl-var>`, or canvas shape element that will be referenced by `ref.*` in declarative expressions must use strict **camelCase** (`sec4Layer`, `sec4Ellipse`, `sec3ex1Ring`).
   * *(Why? Using hyphens (`-`) in kebab-case breaks JavaScript dot notation in `ref.*` expressions because `-` is evaluated as subtraction — see `.agents/KILOPIXEL.md`).*
+* **Variables (`<pxl-var>`):** A variable's `[Entity]` is always `Var`, so every variable is recognizable as one. There are two kinds:
+  * **Input Variables (Set by a Control):** Numbered in declaration order within their section or example: **`sec[N][exM]Var[M]`** (`sec1Var1`, `sec1Var2`, `sec2ex1Var1`). Like shapes (`sec1Polyline1`), the ID names the element, not its meaning: no `[Target]` such as `PeakX`. Describe what each one is for in an HTML comment directly above the variables (e.g. `<!-- Var1, Var2: Zig-Zag peak (x, y) -->`).
+  * **Computed Variables (Derived from Other Values):** Named, not numbered: **`sec[N][exM]Var[Name]`** (`sec3ex1VarTargetX1`, `sec1ex1VarCos`). Their value is an expression of other variables, and the name keeps formulas readable (`ref.sec3ex1VarPcx1.value + ref.sec3ex1VarDx1.value`).
+  * **Rule of Thumb:** Inputs are numbered, derived values are named.
+  * **Controls Follow the Variable:** A slider, readout or dropdown that drives a variable takes the variable's ID plus `[Role]`: `sec1Var1Input`, `sec1Var1Val`, `sec1Var1Select`.
+  * **Code Marks Follow the Shape:** A `<mark>` in the code snippet names the shape attribute whose value it shows, even when a variable drives it: `sec1Polyline1PeakXCode`.
+  * **Code Snippets:** Variables shown inside `<pre><code>` snippets use short, descriptive camelCase names instead (`id="angle"`, `ref.angle.value`), following the pedagogical ID rule below.
 * **Examples by Component Type:**
   * Base Canvas Shapes & Layers: `sec1Stage`, `sec2Circle`, `sec4Layer`, `sec4Ellipse`, `sec3ex1Ring`
   * Tab Content Boxes (`[Target]` = `Tab`): `sec2CircleTab`, `sec4LayerTab`, `sec4EllipseTab`, `sec3ex1RingTab`
@@ -278,6 +285,8 @@ To ensure perfect consistency across all documentation playgrounds and guides, 1
   * Dropdown Selects (`[Role]` = `Select`): `sec1ex1KeywordSelect`, `sec3ex1R1KeywordSelect`
   * Toggle & Mode Buttons (`[Role]` = `Btn`): `sec1ex1ModeNumericBtn`, `sec1ex1ModeKeywordBtn`
   * Conditional Control Groups (`[Role]` = `Group`): `sec1ex1SliderGroup`, `sec1ex1KeywordGroup`
+  * Input Variables (`[Entity]` = `Var`, numbered): `sec1Var1`, `sec1Var1Input`, `sec1Var1Val`, `sec2ex1Var3`
+  * Computed Variables (`[Entity]` = `Var`, named): `sec1ex1VarCos`, `sec3ex1VarTargetX1`
 * **Do not append redundant suffixes** like `Shape` or `Attr`.
 
 > [!NOTE]

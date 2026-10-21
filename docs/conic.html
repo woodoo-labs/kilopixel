@@ -102,10 +102,10 @@
               <div class="tab-content active" id="sec1ex1GradTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Start Angle <span class="indicator-dot"></span></span> <span id="sec1ex1GradAngleVal">0°</span></label>
-                    <input type="range" id="sec1ex1GradAngleInput" min="0" max="360" step="5" value="0" autocomplete="off"
+                    <label><span>Start Angle <span class="indicator-dot"></span></span> <span id="sec1ex1Var1Val">0°</span></label>
+                    <input type="range" id="sec1ex1Var1Input" min="0" max="360" step="5" value="0" autocomplete="off"
                       data-mark="sec1ex1GradAngleCode"
-                      oninput="document.getElementById('sec1ex1Angle').setAttribute('value', this.value); document.getElementById('sec1ex1GradAngleVal').innerText = this.value + '°'; document.getElementById('sec1ex1GradAngleCode').innerText = this.value;">
+                      oninput="document.getElementById('sec1ex1Var1').setAttribute('value', this.value); document.getElementById('sec1ex1Var1Val').innerText = this.value + '°'; document.getElementById('sec1ex1GradAngleCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -113,15 +113,16 @@
 
             <pxl-stage id="sec1ex1Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
-                <pxl-var id="sec1ex1Angle" value="0"></pxl-var>
+                <!-- Var1: gradient start angle -->
+                <pxl-var id="sec1ex1Var1" value="0"></pxl-var>
 
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
                 <!-- Top-Left HUD Info -->
                 <pxl-text x="30" y="30" text="'Center = (0.5, 0.5)'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
-                <pxl-text x="30" y="65" text="'startAngle = ' + ref.sec1ex1Angle.value + '°'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="65" text="'startAngle = ' + ref.sec1ex1Var1.value + '°'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 
-                <pxl-rect id="sec1ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="conic(ref.sec1ex1Angle.value, ['#e2e8f0', '#475569'])"></pxl-rect>
+                <pxl-rect id="sec1ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="conic(ref.sec1ex1Var1.value, ['#e2e8f0', '#475569'])"></pxl-rect>
 
                 <!-- Overlay Group locked to Rect -->
                 <pxl-group x="ref.sec1ex1Rect.x" y="ref.sec1ex1Rect.y" rotate="ref.sec1ex1Rect.rotate">
@@ -141,14 +142,14 @@
                   <pxl-text x="175" y="0" text="'0°'" fill="#a78bfa" size="22" font="monospace" align="left" baseline="middle"></pxl-text>
 
                   <!-- Sweep Angle Arc -->
-                  <pxl-circle x="0" y="0" r="50" start="0" sweep="ref.sec1ex1Angle.value" fill="none" stroke="#8b5cf6" strokewidth="2" linedash="[4, 4]" alpha="ref.sec1ex1Angle.value > 0 ? 1 : 0"></pxl-circle>
+                  <pxl-circle x="0" y="0" r="50" start="0" sweep="ref.sec1ex1Var1.value" fill="none" stroke="#8b5cf6" strokewidth="2" linedash="[4, 4]" alpha="ref.sec1ex1Var1.value > 0 ? 1 : 0"></pxl-circle>
 
                   <!-- Start Angle Ray with Arrow -->
                   <pxl-line 
                     x1="0" 
                     y1="0" 
-                    x2="cos(ref.sec1ex1Angle.value * PI / 180) * 140" 
-                    y2="sin(ref.sec1ex1Angle.value * PI / 180) * 140" 
+                    x2="cos(ref.sec1ex1Var1.value * PI / 180) * 140" 
+                    y2="sin(ref.sec1ex1Var1.value * PI / 180) * 140" 
                     stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
 
                   <!-- Purple Center Dot & Label -->
@@ -225,22 +226,22 @@
               <div class="tab-content active" id="sec2ex1GradTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Center X0 <span class="indicator-dot"></span></span> <span id="sec2ex1GradCxVal">0.3</span></label>
-                    <input type="range" id="sec2ex1GradCxInput" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
+                    <label><span>Center X0 <span class="indicator-dot"></span></span> <span id="sec2ex1Var2Val">0.3</span></label>
+                    <input type="range" id="sec2ex1Var2Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
                       data-mark="sec2ex1GradCxCode"
-                      oninput="document.getElementById('sec2ex1Cx').setAttribute('value', this.value); document.getElementById('sec2ex1GradCxVal').innerText = this.value; document.getElementById('sec2ex1GradCxCode').innerText = this.value;">
+                      oninput="document.getElementById('sec2ex1Var2').setAttribute('value', this.value); document.getElementById('sec2ex1Var2Val').innerText = this.value; document.getElementById('sec2ex1GradCxCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Center Y0</span> <span id="sec2ex1GradCyVal">0.3</span></label>
-                    <input type="range" id="sec2ex1GradCyInput" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
+                    <label><span>Center Y0</span> <span id="sec2ex1Var3Val">0.3</span></label>
+                    <input type="range" id="sec2ex1Var3Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
                       data-mark="sec2ex1GradCyCode"
-                      oninput="document.getElementById('sec2ex1Cy').setAttribute('value', this.value); document.getElementById('sec2ex1GradCyVal').innerText = this.value; document.getElementById('sec2ex1GradCyCode').innerText = this.value;">
+                      oninput="document.getElementById('sec2ex1Var3').setAttribute('value', this.value); document.getElementById('sec2ex1Var3Val').innerText = this.value; document.getElementById('sec2ex1GradCyCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Start Angle <span class="indicator-dot"></span></span> <span id="sec2ex1GradAngleVal">45°</span></label>
-                    <input type="range" id="sec2ex1GradAngleInput" min="0" max="360" step="5" value="45" autocomplete="off"
+                    <label><span>Start Angle <span class="indicator-dot"></span></span> <span id="sec2ex1Var1Val">45°</span></label>
+                    <input type="range" id="sec2ex1Var1Input" min="0" max="360" step="5" value="45" autocomplete="off"
                       data-mark="sec2ex1GradAngleCode"
-                      oninput="document.getElementById('sec2ex1Angle').setAttribute('value', this.value); document.getElementById('sec2ex1GradAngleVal').innerText = this.value + '°'; document.getElementById('sec2ex1GradAngleCode').innerText = this.value;">
+                      oninput="document.getElementById('sec2ex1Var1').setAttribute('value', this.value); document.getElementById('sec2ex1Var1Val').innerText = this.value + '°'; document.getElementById('sec2ex1GradAngleCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -248,19 +249,20 @@
 
             <pxl-stage id="sec2ex1Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
-                <pxl-var id="sec2ex1Angle" value="45"></pxl-var>
-                <pxl-var id="sec2ex1Cx" value="0.3"></pxl-var>
-                <pxl-var id="sec2ex1Cy" value="0.3"></pxl-var>
-                <pxl-var id="sec2ex1LocalX" value="(ref.sec2ex1Cx.value - 0.5) * ref.sec2ex1Rect.w"></pxl-var>
-                <pxl-var id="sec2ex1LocalY" value="(ref.sec2ex1Cy.value - 0.5) * ref.sec2ex1Rect.h"></pxl-var>
+                <!-- Var1: gradient start angle; Var2, Var3: gradient center (x, y) -->
+                <pxl-var id="sec2ex1Var1" value="45"></pxl-var>
+                <pxl-var id="sec2ex1Var2" value="0.3"></pxl-var>
+                <pxl-var id="sec2ex1Var3" value="0.3"></pxl-var>
+                <pxl-var id="sec2ex1VarLocalX" value="(ref.sec2ex1Var2.value - 0.5) * ref.sec2ex1Rect.w"></pxl-var>
+                <pxl-var id="sec2ex1VarLocalY" value="(ref.sec2ex1Var3.value - 0.5) * ref.sec2ex1Rect.h"></pxl-var>
 
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
                 <!-- Top-Left HUD Info -->
-                <pxl-text x="30" y="30" text="'Center = (' + ref.sec2ex1Cx.value + ', ' + ref.sec2ex1Cy.value + ')'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
-                <pxl-text x="30" y="65" text="'startAngle = ' + ref.sec2ex1Angle.value + '°'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="30" text="'Center = (' + ref.sec2ex1Var2.value + ', ' + ref.sec2ex1Var3.value + ')'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="65" text="'startAngle = ' + ref.sec2ex1Var1.value + '°'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 
-                <pxl-rect id="sec2ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="conic([ref.sec2ex1Angle.value, ref.sec2ex1Cx.value, ref.sec2ex1Cy.value], ['#e2e8f0', '#475569'])"></pxl-rect>
+                <pxl-rect id="sec2ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="conic([ref.sec2ex1Var1.value, ref.sec2ex1Var2.value, ref.sec2ex1Var3.value], ['#e2e8f0', '#475569'])"></pxl-rect>
 
                 <!-- Overlay Group locked to Rect -->
                 <pxl-group x="ref.sec2ex1Rect.x" y="ref.sec2ex1Rect.y" rotate="ref.sec2ex1Rect.rotate">
@@ -277,35 +279,35 @@
 
                   <!-- 0° Baseline Reference Line from Center -->
                   <pxl-line 
-                    x1="ref.sec2ex1LocalX.value" 
-                    y1="ref.sec2ex1LocalY.value" 
-                    x2="ref.sec2ex1LocalX.value + 160" 
-                    y2="ref.sec2ex1LocalY.value" 
+                    x1="ref.sec2ex1VarLocalX.value" 
+                    y1="ref.sec2ex1VarLocalY.value" 
+                    x2="ref.sec2ex1VarLocalX.value + 160" 
+                    y2="ref.sec2ex1VarLocalY.value" 
                     stroke="#a78bfa" strokewidth="2" linedash="[4, 4]"></pxl-line>
                   <pxl-text 
-                    x="ref.sec2ex1LocalX.value + 175" 
-                    y="ref.sec2ex1LocalY.value" 
+                    x="ref.sec2ex1VarLocalX.value + 175" 
+                    y="ref.sec2ex1VarLocalY.value" 
                     text="'0°'" fill="#a78bfa" size="22" font="monospace" align="left" baseline="middle"></pxl-text>
 
                   <!-- Sweep Angle Arc -->
                   <pxl-circle 
-                    x="ref.sec2ex1LocalX.value" 
-                    y="ref.sec2ex1LocalY.value" 
-                    r="50" start="0" sweep="ref.sec2ex1Angle.value" 
+                    x="ref.sec2ex1VarLocalX.value" 
+                    y="ref.sec2ex1VarLocalY.value" 
+                    r="50" start="0" sweep="ref.sec2ex1Var1.value" 
                     fill="none" stroke="#8b5cf6" strokewidth="2" linedash="[4, 4]" 
-                    alpha="ref.sec2ex1Angle.value > 0 ? 1 : 0"></pxl-circle>
+                    alpha="ref.sec2ex1Var1.value > 0 ? 1 : 0"></pxl-circle>
 
                   <!-- Start Angle Ray with Arrow -->
                   <pxl-line 
-                    x1="ref.sec2ex1LocalX.value" 
-                    y1="ref.sec2ex1LocalY.value" 
-                    x2="ref.sec2ex1LocalX.value + cos(ref.sec2ex1Angle.value * PI / 180) * 140" 
-                    y2="ref.sec2ex1LocalY.value + sin(ref.sec2ex1Angle.value * PI / 180) * 140" 
+                    x1="ref.sec2ex1VarLocalX.value" 
+                    y1="ref.sec2ex1VarLocalY.value" 
+                    x2="ref.sec2ex1VarLocalX.value + cos(ref.sec2ex1Var1.value * PI / 180) * 140" 
+                    y2="ref.sec2ex1VarLocalY.value + sin(ref.sec2ex1Var1.value * PI / 180) * 140" 
                     stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
 
                   <!-- Purple Center Dot & Label -->
-                  <pxl-circle x="ref.sec2ex1LocalX.value" y="ref.sec2ex1LocalY.value" r="8" fill="#8b5cf6"></pxl-circle>
-                  <pxl-text x="ref.sec2ex1LocalX.value" y="ref.sec2ex1LocalY.value + 20" text="'Center'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <pxl-circle x="ref.sec2ex1VarLocalX.value" y="ref.sec2ex1VarLocalY.value" r="8" fill="#8b5cf6"></pxl-circle>
+                  <pxl-text x="ref.sec2ex1VarLocalX.value" y="ref.sec2ex1VarLocalY.value + 20" text="'Center'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
 
                 </pxl-group>
               </pxl-layer>
