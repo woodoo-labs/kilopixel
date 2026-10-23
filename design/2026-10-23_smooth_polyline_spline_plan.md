@@ -99,7 +99,28 @@ next(i) = wrap ? (i + 1) % m     : i + 1   (missing → zero-length side)
 
 - **Rolling distances**: segment `i → i+1` needs `dIn` of `Pi`, the segment itself and `dOut` of `Pi+1`. Carry the previous segment's length and root into the next iteration: **one new length per segment = 2 `Math.sqrt` per segment** (length and its root), no arrays, zero allocations.
 - The `aIn < ε` guards are ternaries in the loop body. They are taken only at free ends and duplicate points, so they predict well. The "branch-free hot loop" claim of the arrow plan (§4.3 there) is relaxed to "no branches except the two degenerate-side ternaries".
-- Today the loop has no `sqrt` at all. Expected cost: about 2 `sqrt` + ~20 multiplications per segment more. **Measure** (§7) with 500 and 2000 points, static and animated.
+- Today the loop has no `sqrt` at all. The planned loop adds 2 `sqrt` + ~20 multiplications per segment.
+
+#### 4.3.1 Measured (2026-10-23, `scratch/polyline_shapes/smooth_bench.html`)
+
+Sketch of the planned loop (rolling distances, seam lookup) against today's loop, both reading a `Float32Array` like `flatCache`; verified against the reference formula (max difference 3·10⁻¹⁴). Chromium (browser pane), µs per frame, best of 3:
+
+| Points | Math only (today → planned) | Path building, `beginPath` + `bezierCurveTo` (today → planned) |
+|---|---|---|
+| 50 | 0.5 → 1.0 | 1.6 → 2.5 (+0.9) |
+| 500 | 3.9 → 8.3 | 17 → 23 (+5.5) |
+| 2000 | 15.6 → 32.6 | 68 → 82 (+14) |
+
+- The math alone is about **2× slower**. Path building, which includes the canvas calls the engine makes anyway, is 1.2–1.6× slower: **+5.5 µs for 500 points, +14 µs for 2000 points** of a 16 700 µs frame (0.03 % / 0.08 %).
+- **Stroking dominates.** 50 points: 454 vs 460 µs per frame (same within noise). 500 extremely dense, unevenly spaced points (≈ 2 px apart): 7.5 vs 8.1 ms. That gap is ~100× larger than the path-building gap, so it comes from rasterizing a *different curve* (centripetal reshapes uneven spacing), not from the new code. On evenly spaced points the curves are the same.
+- Point coordinates are already evaluated and copied into `flatCache` every frame (`draw()`), so the extra math is small next to the per-frame work that exists today.
+
+#### 4.3.2 GC and hot-loop rules
+
+- **Zero allocations**: only local numbers (rolling `dIn` / `aIn` / handle of the previous point); no arrays, objects or closures per frame. The seam test is 2 comparisons per frame.
+- **No function call per segment**: the neighbour lookup and the handle code are inlined in the loop. `loadSegment()` (arrows, once per arrow per frame) may call a shared helper; it computes 3 lengths = 6 `sqrt` per arrow.
+- **Branches**: the two degenerate-side ternaries (`a > ε ? … : 0`) and the next-neighbour test. Move the last segment (and, with a seam, the wrap) out of the loop like the 2026-10-18 plan §6.2, so the inner loop needs no `%` and no end test.
+- **Static polylines** (the common case) could cache the handles until a point changes, removing the extra cost entirely. That belongs to the geometry cache of the 2026-10-18 plan (phase 2), not to this plan: +5.5 µs for 500 points doesn't justify it on its own.
 
 ## 5. Arrowheads
 
@@ -134,7 +155,7 @@ Every smooth polyline with free ends or uneven spacing changes shape near those 
 | 7 | Arrowheads on smooth polylines (`arrows.html` cases, short end segments, seam) | head on the curve, pointing along it |
 | 8 | Hit testing (`onclick` / hover) on a smooth polyline | hit area follows the new curve |
 | 9 | `mode="relative"` + smooth, and a seam produced by relative offsets | seam detected after accumulation |
-| 10 | Benchmark: 500 / 2000 points, static and animated, before / after | report µs per frame |
+| 10 | Benchmark: 500 / 2000 points, static and animated, before / after, in the engine | close to §4.3.1 (path building +5 to +15 µs) |
 | 11 | Pages in §6 | visual review, screenshots before / after |
 
 ## 8. Steps
