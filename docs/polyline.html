@@ -39,20 +39,21 @@
         <!-- SECTION 1: POINTS                                                 -->
         <!-- ================================================================= -->
         <h2>1. Points</h2>
-        <p>A polyline connects a list of <code>points</code> with straight segments. Points are separated by semicolons and the x and y values of a point by a comma, so <code>points="50,300; 150,150; 250,300; 350,450; 450,300"</code> draws a zig-zag through <code>(50, 300)</code>, <code>(150, 150)</code>, <code>(250, 300)</code>, <code>(350, 450)</code> and <code>(450, 300)</code>.</p>
-        <p>Every x and every y value is its own expression. A value can use math like <code>min(a, b)</code>, follow a variable like <code>ref.*</code> or animate on its own like <code>sin(t)</code>, while all other points stay where they are: <code>points="50,300; 150,150 + sin(t) * 100; 250,300; 350,450; 450,300"</code> moves only the peak up and down.</p>
+        <p>A polyline connects a list of <code>points</code> with straight segments. Points are separated by semicolons and the x and y values of a point by a comma, so <code>points="50,300; 150,200; 350,400; 450,300"</code> draws a zig-zag through <code>(50, 300)</code>, <code>(150, 200)</code>, <code>(350, 400)</code> and <code>(450, 300)</code>.</p>
+        <p>Every x and every y value is its own expression. A value can use math like <code>min(a, b)</code>, follow a variable like <code>ref.*</code> or animate on its own like <code>sin(t)</code>, while all other points stay where they are: <code>points="50,300; 150,200 + sin(t) * 100; 350,400; 450,300"</code> moves only the peak up and down.</p>
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Zig-Zag --&gt;
     &lt;pxl-polyline stroke="#f97316"
-      points="50,300; <mark id="sec1Polyline1PeakXCode">150</mark>,<mark id="sec1Polyline1PeakYCode">150</mark>; 250,300; 350,450; 450,300"&gt;
+      points="50,300; <mark id="sec1Polyline1PeakXCode">150</mark>,<mark id="sec1Polyline1PeakYCode">200</mark>; 350,400; 450,300"&gt;
     &lt;/pxl-polyline&gt;
 
-    &lt;!-- Right: Spiral --&gt;
+    &lt;!-- Right: Bow Tie --&gt;
     &lt;pxl-polyline stroke="#3b82f6"
-      points="550,100; 900,100; 900,450; 650,450; 650,200; 800,200; <mark id="sec1Polyline2EndXCode">800</mark>,<mark id="sec1Polyline2EndYCode">350</mark>"&gt;
+      points="750,300; <mark id="sec1Polyline2TopXCode">850</mark>,<mark id="sec1Polyline2TopYCode">200</mark>; 950,300; 850,400;
+              750,300; 650,200; 550,300; 650,400; 750,300"&gt;
     &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -63,7 +64,7 @@
               <h3 class="demo-controls-title">Controls</h3>
               <div class="demo-tabs">
                 <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec1Polyline1Tab')">Zig-Zag</button>
-                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1Polyline2Tab')">Spiral</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec1Polyline2Tab')">Bow Tie</button>
               </div>
             </div>
 
@@ -76,25 +77,25 @@
                     oninput="document.getElementById('sec1Var1').setAttribute('value', this.value); document.getElementById('sec1Var1Val').innerText = this.value; document.getElementById('sec1Polyline1PeakXCode').innerText = this.value;" data-mark="sec1Polyline1PeakXCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Peak Y <span class="indicator-dot"></span></span> <span id="sec1Var2Val">150</span></label>
-                  <input type="range" min="50" max="450" step="10" value="150" autocomplete="off" id="sec1Var2Input"
+                  <label><span>Peak Y <span class="indicator-dot"></span></span> <span id="sec1Var2Val">200</span></label>
+                  <input type="range" min="50" max="450" step="10" value="200" autocomplete="off" id="sec1Var2Input"
                     oninput="document.getElementById('sec1Var2').setAttribute('value', this.value); document.getElementById('sec1Var2Val').innerText = this.value; document.getElementById('sec1Polyline1PeakYCode').innerText = this.value;" data-mark="sec1Polyline1PeakYCode">
                 </div>
               </div>
             </div>
 
-            <!-- Spiral Tab -->
+            <!-- Bow Tie Tab -->
             <div class="tab-content" id="sec1Polyline2Tab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>End X <span class="indicator-dot"></span></span> <span id="sec1Var3Val">800</span></label>
-                  <input type="range" min="650" max="850" step="10" value="800" autocomplete="off" id="sec1Var3Input"
-                    oninput="document.getElementById('sec1Var3').setAttribute('value', this.value); document.getElementById('sec1Var3Val').innerText = this.value; document.getElementById('sec1Polyline2EndXCode').innerText = this.value;" data-mark="sec1Polyline2EndXCode">
+                  <label><span>Top X <span class="indicator-dot"></span></span> <span id="sec1Var3Val">850</span></label>
+                  <input type="range" min="750" max="950" step="10" value="850" autocomplete="off" id="sec1Var3Input"
+                    oninput="document.getElementById('sec1Var3').setAttribute('value', this.value); document.getElementById('sec1Var3Val').innerText = this.value; document.getElementById('sec1Polyline2TopXCode').innerText = this.value;" data-mark="sec1Polyline2TopXCode">
                 </div>
                 <div class="control-group">
-                  <label><span>End Y <span class="indicator-dot"></span></span> <span id="sec1Var4Val">350</span></label>
-                  <input type="range" min="200" max="400" step="10" value="350" autocomplete="off" id="sec1Var4Input"
-                    oninput="document.getElementById('sec1Var4').setAttribute('value', this.value); document.getElementById('sec1Var4Val').innerText = this.value; document.getElementById('sec1Polyline2EndYCode').innerText = this.value;" data-mark="sec1Polyline2EndYCode">
+                  <label><span>Top Y <span class="indicator-dot"></span></span> <span id="sec1Var4Val">200</span></label>
+                  <input type="range" min="100" max="300" step="10" value="200" autocomplete="off" id="sec1Var4Input"
+                    oninput="document.getElementById('sec1Var4').setAttribute('value', this.value); document.getElementById('sec1Var4Val').innerText = this.value; document.getElementById('sec1Polyline2TopYCode').innerText = this.value;" data-mark="sec1Polyline2TopYCode">
                 </div>
               </div>
             </div>
@@ -103,30 +104,124 @@
           <!-- Section 1 Stage -->
           <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
             <pxl-layer>
-              <!-- Var1, Var2: Zig-Zag peak (x, y); Var3, Var4: Spiral end point (x, y) -->
+              <!-- Var1, Var2: Zig-Zag peak (x, y); Var3, Var4: Bow Tie top corner (x, y) -->
               <pxl-var id="sec1Var1" value="150"></pxl-var>
-              <pxl-var id="sec1Var2" value="150"></pxl-var>
-              <pxl-var id="sec1Var3" value="800"></pxl-var>
-              <pxl-var id="sec1Var4" value="350"></pxl-var>
+              <pxl-var id="sec1Var2" value="200"></pxl-var>
+              <pxl-var id="sec1Var3" value="850"></pxl-var>
+              <pxl-var id="sec1Var4" value="200"></pxl-var>
 
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
               <!-- Left: Zig-Zag (Orange Scheme) -->
-              <pxl-polyline id="sec1Polyline1" points="50,300; ref.sec1Var1.value, ref.sec1Var2.value; 250,300; 350,450; 450,300" stroke="#f97316" strokewidth="4"></pxl-polyline>
+              <pxl-polyline id="sec1Polyline1" points="50,300; ref.sec1Var1.value, ref.sec1Var2.value; 350,400; 450,300" stroke="#f97316" strokewidth="4"></pxl-polyline>
               <pxl-circle x="50" y="300" r="6" fill="#fb923c"></pxl-circle>
-              <pxl-circle x="250" y="300" r="6" fill="#fb923c"></pxl-circle>
-              <pxl-circle x="350" y="450" r="6" fill="#fb923c"></pxl-circle>
+              <pxl-circle x="350" y="400" r="6" fill="#fb923c"></pxl-circle>
               <pxl-circle x="450" y="300" r="6" fill="#fb923c"></pxl-circle>
               <pxl-circle x="ref.sec1Var1.value" y="ref.sec1Var2.value" r="8" fill="#c2410c"></pxl-circle>
               <pxl-text x="ref.sec1Var1.value" y="ref.sec1Var2.value - 20" text="'Peak'" size="27" fill="#c2410c" font="monospace" align="center" baseline="bottom"></pxl-text>
               <pxl-text x="250" y="500" text="'Zig-Zag'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
-              <!-- Right: Spiral (Blue Scheme) -->
-              <pxl-polyline id="sec1Polyline2" points="550,100; 900,100; 900,450; 650,450; 650,200; 800,200; ref.sec1Var3.value, ref.sec1Var4.value" stroke="#3b82f6" strokewidth="4"></pxl-polyline>
-              <pxl-circle x="550" y="100" r="6" fill="#60a5fa"></pxl-circle>
+              <!-- Right: Bow Tie (Blue Scheme) -->
+              <pxl-polyline id="sec1Polyline2" points="750,300; ref.sec1Var3.value, ref.sec1Var4.value; 950,300; 850,400; 750,300; 650,200; 550,300; 650,400; 750,300" stroke="#3b82f6" strokewidth="4"></pxl-polyline>
+              <pxl-circle x="750" y="300" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-circle x="950" y="300" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-circle x="850" y="400" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-circle x="650" y="200" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-circle x="550" y="300" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-circle x="650" y="400" r="6" fill="#60a5fa"></pxl-circle>
               <pxl-circle x="ref.sec1Var3.value" y="ref.sec1Var4.value" r="8" fill="#1d4ed8"></pxl-circle>
-              <pxl-text x="ref.sec1Var3.value" y="ref.sec1Var4.value + 20" text="'End'" size="27" fill="#1d4ed8" font="monospace" align="center" baseline="top"></pxl-text>
-              <pxl-text x="725" y="500" text="'Spiral'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              <pxl-text x="ref.sec1Var3.value" y="ref.sec1Var4.value - 20" text="'Top'" size="27" fill="#1d4ed8" font="monospace" align="center" baseline="bottom"></pxl-text>
+              <pxl-text x="750" y="500" text="'Bow Tie'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+
+        <!-- ================================================================= -->
+        <!-- SECTION 2: SMOOTH                                                 -->
+        <!-- ================================================================= -->
+        <h2>2. Smooth</h2>
+        <p><code>smooth</code> turns the straight segments into a curve that still passes through every point. A bare <code>smooth</code> is the same as <code>smooth="1"</code>.</p>
+        <p>The number sets the tension: <code>0</code> keeps the segments straight, <code>1</code> is the default and higher values bend the curve further out. At <code>1</code> the zig-zag becomes a wave, at about <code>1.7</code> the lobes of the bow tie become almost round.</p>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Zig-Zag --&gt;
+    &lt;pxl-polyline stroke="#f97316" smooth="<mark id="sec2Polyline1SmoothCode">1</mark>"
+      points="50,300; 150,200; 350,400; 450,300"&gt;
+    &lt;/pxl-polyline&gt;
+
+    &lt;!-- Right: Bow Tie --&gt;
+    &lt;pxl-polyline stroke="#3b82f6" smooth="<mark id="sec2Polyline2SmoothCode">1</mark>"
+      points="750,300; 850,200; 950,300; 850,400;
+              750,300; 650,200; 550,300; 650,400; 750,300"&gt;
+    &lt;/pxl-polyline&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2Polyline1Tab')">Zig-Zag</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2Polyline2Tab')">Bow Tie</button>
+              </div>
+            </div>
+
+            <!-- Zig-Zag Tab -->
+            <div class="tab-content active" id="sec2Polyline1Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Smooth <span class="indicator-dot"></span></span> <span id="sec2Var1Val">1</span></label>
+                  <input type="range" min="0" max="2" step="0.1" value="1" autocomplete="off" id="sec2Var1Input"
+                    oninput="document.getElementById('sec2Var1').setAttribute('value', this.value); document.getElementById('sec2Var1Val').innerText = this.value; document.getElementById('sec2Polyline1SmoothCode').innerText = this.value;" data-mark="sec2Polyline1SmoothCode">
+                </div>
+              </div>
+            </div>
+
+            <!-- Bow Tie Tab -->
+            <div class="tab-content" id="sec2Polyline2Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Smooth <span class="indicator-dot"></span></span> <span id="sec2Var2Val">1</span></label>
+                  <input type="range" min="0" max="2" step="0.1" value="1" autocomplete="off" id="sec2Var2Input"
+                    oninput="document.getElementById('sec2Var2').setAttribute('value', this.value); document.getElementById('sec2Var2Val').innerText = this.value; document.getElementById('sec2Polyline2SmoothCode').innerText = this.value;" data-mark="sec2Polyline2SmoothCode">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2 Stage -->
+          <pxl-stage id="sec2Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <!-- Var1: Zig-Zag smooth; Var2: Bow Tie smooth -->
+              <pxl-var id="sec2Var1" value="1"></pxl-var>
+              <pxl-var id="sec2Var2" value="1"></pxl-var>
+
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Left: Zig-Zag (Orange Scheme), straight outline behind the curve -->
+              <pxl-polyline points="50,300; 150,200; 350,400; 450,300" stroke="#fed7aa" strokewidth="2"></pxl-polyline>
+              <pxl-polyline id="sec2Polyline1" points="50,300; 150,200; 350,400; 450,300" smooth="ref.sec2Var1.value" stroke="#f97316" strokewidth="4"></pxl-polyline>
+              <pxl-circle x="50" y="300" r="6" fill="#fb923c"></pxl-circle>
+              <pxl-circle x="150" y="200" r="6" fill="#fb923c"></pxl-circle>
+              <pxl-circle x="350" y="400" r="6" fill="#fb923c"></pxl-circle>
+              <pxl-circle x="450" y="300" r="6" fill="#fb923c"></pxl-circle>
+              <pxl-text x="250" y="500" text="'Zig-Zag'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: Bow Tie (Blue Scheme), straight outline behind the curve -->
+              <pxl-polyline points="750,300; 850,200; 950,300; 850,400; 750,300; 650,200; 550,300; 650,400; 750,300" stroke="#bfdbfe" strokewidth="2"></pxl-polyline>
+              <pxl-polyline id="sec2Polyline2" points="750,300; 850,200; 950,300; 850,400; 750,300; 650,200; 550,300; 650,400; 750,300" smooth="ref.sec2Var2.value" stroke="#3b82f6" strokewidth="4"></pxl-polyline>
+              <pxl-circle x="750" y="300" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-circle x="850" y="200" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-circle x="950" y="300" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-circle x="850" y="400" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-circle x="650" y="200" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-circle x="550" y="300" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-circle x="650" y="400" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-text x="750" y="500" text="'Bow Tie'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
