@@ -136,14 +136,16 @@
   - Add a docs section/example following `docs/DOCS_STANDARDS.md`.
 
 ## 15. Smooth Polyline Spline Quality (`smooth`)
-- **Status**: ⚪ **Analyzed, deferred** (decided 2026-10-15: keep current behavior for now)
+- **Status**: ⚪ **Planned** (2026-10-23)
+- **Reference**: `design/2026-10-23_smooth_polyline_spline_plan.md`
+- **Decision (2026-10-23)**: centripetal Catmull-Rom with the end handle on the end point (D3 `curveCatmullRom`), `smooth` as handle multiplier, plus a **seam rule**: a polyline that ends on its first point is smoothed across that point (also fixes the kink of a `closed` polyline that repeats its first point). Evenly spaced inner segments stay identical.
+- **Compared** (`scratch/polyline_shapes/smooth_ends.html`, 17 cases × 6 variants): natural ends overshoot at high `smooth` and with uneven spacing (uniform and centripetal); Konva-style quadratic ends are nearly as good; D3 style alone dents the bow tie at `smooth="1.7"`, fixed by the seam rule.
 - **Background**: `<pxl-polyline smooth>` uses a **uniform** Catmull-Rom spline with **clamped** ends (the missing neighbour of the first/last point is the point itself).
 - **Observed Issues**:
   - The curve straightens out shortly before the first/last point (end direction is forced onto the chord to the next point). Visible on the section 1 wave in `docs/arrows.html` near `(550, 300)`.
   - Unevenly spaced points cause overshoot and hooks near the ends (short first/last segment, duplicate points, high `smooth` values). Even unevenly spaced **collinear** points run backwards past the start point (e.g. `20,110; 40,110; 280,110`), which round caps or arrowheads can reveal.
 - **Tested: "natural" ends** (phantom point `2.5·P1 − 2·P2 + 0.5·P3`, scales with tension automatically): looks better for evenly spaced points, but roughly doubles overshoot and flips end directions for uneven spacing → **not recommended on its own**.
-- **Next Idea**: **centripetal** Catmull-Rom (alpha 0.5), which accounts for point distances and avoids loops/hooks with uneven spacing. Costs a few square roots per segment; changes the shape of all smooth polylines, so `smooth` (tension) semantics need re-checking. Possibly combined with natural ends.
-- **Test Setup** (local only, scratch is git-ignored): `scratch/arrows/natural_compare.html` (15 cases side by side), `scratch/arrows/natural_metrics.js` (end directions & overshoot), patched engine copy `scratch/arrows/lib_natural.js`.
+- **Test Setup** (local only, scratch is git-ignored): `scratch/polyline_shapes/smooth_ends.html` (2026-10-23, all variants); older: `scratch/arrows/natural_compare.html` (15 cases side by side), `scratch/arrows/natural_metrics.js` (end directions & overshoot), patched engine copy `scratch/arrows/lib_natural.js`.
 - **Note**: arrow trimming on smooth polylines (`loadSegment` / de Casteljau) must use the same end formula as the drawing loop if the spline changes.
 
 
