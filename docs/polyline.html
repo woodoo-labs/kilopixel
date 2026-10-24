@@ -344,24 +344,29 @@
         <!-- SECTION 4: SHARP CORNERS                                          -->
         <!-- ================================================================= -->
         <h2>4. Sharp Corners</h2>
-        <p>A smooth polyline bends at every point. To keep a sharp corner, repeat that point, like <code>250,450; 250,450</code>: the curve arrives and leaves the point without rounding it, while all other points stay smooth. The heart repeats its bottom tip and the dip between its lobes.</p>
-        <p>The same works at the start of a closed polyline. The closed teardrop writes its top point <code>750,150</code> once, so its tip is round like every other point. Repeat it at the end and the tip turns sharp. Point lists from other formats often end on their first point, which gives a corner there: for a smooth loop, drop the last point and use <code>closed</code>.</p>
+        <p>A smooth polyline bends at every point. To keep a sharp corner, repeat that point, like <code>250,200; 250,200</code>: the curve arrives and leaves the point without rounding it, while all other points stay smooth. The heart repeats the dip between its lobes and ends on its first point <code>250,450</code>, which keeps the bottom tip sharp.</p>
+        <p>The closed teardrop writes its top point <code>750,150</code> once, so its tip is round. Repeat it at the end and the tip turns sharp. Point lists from other formats often end on their first point: for a smooth loop, drop the last point and use <code>closed</code>.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Round or Sharp?</p>
+          <p class="callout-body">With <code>smooth</code>, the points decide where the corners are: the two ends of an open polyline are sharp, every other point is round, and a point written twice is sharp. <code>closed</code> removes the ends, so a closed polyline is round all the way around unless it repeats a point.</p>
+        </div>
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Heart --&gt;
     &lt;pxl-polyline stroke="#f97316" fill="#ffedd566"
-      points="<mark id="sec4Polyline1TipCode">250,450; </mark>250,450; 50,250; 150,150;
-              <mark id="sec4Polyline1DipCode">250,200; </mark>250,200; 350,150; 450,250"
-      smooth="<mark id="sec4Polyline1SmoothCode">1</mark>" closed="true"&gt;
+      points="250,450; 50,250; 150,150; <mark id="sec4Polyline1DipCode">250,200; </mark>250,200;
+              350,150; 450,250<mark id="sec4Polyline1TipCode">; 250,450</mark>"
+      smooth="<mark id="sec4Polyline1SmoothCode">1.6</mark>" closed="true"&gt;
     &lt;/pxl-polyline&gt;
 
     &lt;!-- Right: Teardrop --&gt;
     &lt;pxl-polyline stroke="#3b82f6" fill="#dbeafe66"
       points="750,150; 850,300; 800,400; 700,400;
               650,300<mark id="sec4Polyline2EndCode">; 750,150</mark>"
-      smooth="<mark id="sec4Polyline2SmoothCode">1</mark>" closed="true"&gt;
+      smooth="<mark id="sec4Polyline2SmoothCode">1.3</mark>" closed="true"&gt;
     &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -380,15 +385,15 @@
             <div class="tab-content active" id="sec4Polyline1Tab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Smooth</span> <span id="sec4Polyline1SmoothVal">1</span></label>
-                  <input type="range" min="0" max="2" step="0.1" value="1" autocomplete="off" id="sec4Polyline1SmoothInput"
+                  <label><span>Smooth</span> <span id="sec4Polyline1SmoothVal">1.6</span></label>
+                  <input type="range" min="0" max="2" step="0.1" value="1.6" autocomplete="off" id="sec4Polyline1SmoothInput"
                     oninput="document.getElementById('sec4Polyline1').setAttribute('smooth', this.value); document.getElementById('sec4Polyline1SmoothVal').innerText = this.value; document.getElementById('sec4Polyline1SmoothCode').innerText = this.value;" data-mark="sec4Polyline1SmoothCode">
                 </div>
                 <div class="control-group">
                   <label><span>Corners <span class="indicator-dot"></span></span></label>
                   <div class="toggle-group">
                     <button class="toggle-btn" onclick="document.getElementById('sec4Polyline1').setAttribute('points', '250,450; 50,250; 150,150; 250,200; 350,150; 450,250'); pxlDocs.updateToggle(this, null, 'sec4Polyline1TipCode', ''); document.getElementById('sec4Polyline1DipCode').innerText = ''; pxlDocs.flashMark('sec4Polyline1DipCode');">round</button>
-                    <button class="toggle-btn active" onclick="document.getElementById('sec4Polyline1').setAttribute('points', '250,450; 250,450; 50,250; 150,150; 250,200; 250,200; 350,150; 450,250'); pxlDocs.updateToggle(this, null, 'sec4Polyline1TipCode', '250,450; '); document.getElementById('sec4Polyline1DipCode').innerText = '250,200; '; pxlDocs.flashMark('sec4Polyline1DipCode');">sharp</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec4Polyline1').setAttribute('points', '250,450; 50,250; 150,150; 250,200; 250,200; 350,150; 450,250; 250,450'); pxlDocs.updateToggle(this, null, 'sec4Polyline1TipCode', '; 250,450'); document.getElementById('sec4Polyline1DipCode').innerText = '250,200; '; pxlDocs.flashMark('sec4Polyline1DipCode');">sharp</button>
                   </div>
                 </div>
               </div>
@@ -398,8 +403,8 @@
             <div class="tab-content" id="sec4Polyline2Tab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Smooth</span> <span id="sec4Polyline2SmoothVal">1</span></label>
-                  <input type="range" min="0" max="2" step="0.1" value="1" autocomplete="off" id="sec4Polyline2SmoothInput"
+                  <label><span>Smooth</span> <span id="sec4Polyline2SmoothVal">1.3</span></label>
+                  <input type="range" min="0" max="2" step="0.1" value="1.3" autocomplete="off" id="sec4Polyline2SmoothInput"
                     oninput="document.getElementById('sec4Polyline2').setAttribute('smooth', this.value); document.getElementById('sec4Polyline2SmoothVal').innerText = this.value; document.getElementById('sec4Polyline2SmoothCode').innerText = this.value;" data-mark="sec4Polyline2SmoothCode">
                 </div>
                 <div class="control-group">
@@ -419,7 +424,7 @@
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
               <!-- Left: Heart (Orange Scheme) -->
-              <pxl-polyline id="sec4Polyline1" points="250,450; 250,450; 50,250; 150,150; 250,200; 250,200; 350,150; 450,250" closed="true" smooth="1" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-polyline>
+              <pxl-polyline id="sec4Polyline1" points="250,450; 50,250; 150,150; 250,200; 250,200; 350,150; 450,250; 250,450" closed="true" smooth="1.6" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-polyline>
               <pxl-circle x="250" y="450" r="6" fill="#fb923c"></pxl-circle>
               <pxl-circle x="50" y="250" r="6" fill="#fb923c"></pxl-circle>
               <pxl-circle x="150" y="150" r="6" fill="#fb923c"></pxl-circle>
@@ -429,7 +434,7 @@
               <pxl-text x="250" y="500" text="'Heart'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
               <!-- Right: Teardrop (Blue Scheme) -->
-              <pxl-polyline id="sec4Polyline2" points="750,150; 850,300; 800,400; 700,400; 650,300; 750,150" closed="true" smooth="1" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-polyline>
+              <pxl-polyline id="sec4Polyline2" points="750,150; 850,300; 800,400; 700,400; 650,300; 750,150" closed="true" smooth="1.3" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-polyline>
               <pxl-circle x="750" y="150" r="6" fill="#60a5fa"></pxl-circle>
               <pxl-circle x="850" y="300" r="6" fill="#60a5fa"></pxl-circle>
               <pxl-circle x="800" y="400" r="6" fill="#60a5fa"></pxl-circle>
