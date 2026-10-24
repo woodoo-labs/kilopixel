@@ -36,7 +36,7 @@ To ensure crisp rendering on high-PPI mobile screens (avoiding subpixel alpha-fa
 
 * **Helper Lines & Guides (`strokewidth="2"`):** All dashed coordinate axes, layer origin lines, center-tracking lines, local offset lines (`dx`, `dy`), guidelines, and orbit ring guides MUST be set to `strokewidth="2"`.
 * **Primary Shapes & Emphasis Vectors (`strokewidth="4"`):** The primary interactive shapes being demonstrated (`<pxl-circle>`, `<pxl-rect>`, `<pxl-ellipse>`, etc.) and critical connecting/leader vectors MUST use `strokewidth="4"` (or `strokewidth="2"` minimum for secondary/nested shapes). This ensures the primary subject stands out boldly above `strokewidth="2"` background helper lines.
-* **Minimal Code Snippets:** In pedagogical `<pre><code class="language-html">` snippets, omit explicit `strokewidth` attributes unless `strokewidth` is the specific property being taught.
+* **Stroke Width in Code Snippets:** In pedagogical `<pre><code class="language-html">` snippets, show `strokewidth` directly after `stroke` whenever the stage sets it, so the snippet matches what is drawn (e.g. `stroke="#f97316" strokewidth="4"`). If a slider drives `strokewidth`, it moves to a feature line in control order (see 1-to-1 Control-to-Snippet Synchronization).
 
 ## 2. Visual Stacking Order (Z-Index)
 Elements within a `<pxl-layer>` are drawn in strict DOM order (back-to-front). All examples must adhere to this semantic layering:

@@ -46,12 +46,12 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Zig-Zag --&gt;
-    &lt;pxl-polyline stroke="#f97316"
+    &lt;pxl-polyline stroke="#f97316" strokewidth="4"
       points="50,300; <mark id="sec1Polyline1PeakXCode">150</mark>,<mark id="sec1Polyline1PeakYCode">200</mark>; 350,400; 450,300"&gt;
     &lt;/pxl-polyline&gt;
 
     &lt;!-- Right: Bow Tie --&gt;
-    &lt;pxl-polyline stroke="#3b82f6"
+    &lt;pxl-polyline stroke="#3b82f6" strokewidth="6"
       points="850,200; 950,300; <mark id="sec1Polyline2BottomXCode">850</mark>,<mark id="sec1Polyline2BottomYCode">400</mark>; 650,200;
               550,300; 650,400; 850,200"&gt;
     &lt;/pxl-polyline&gt;
@@ -77,7 +77,7 @@
                     oninput="document.getElementById('sec1Var1').setAttribute('value', this.value); document.getElementById('sec1Var1Val').innerText = this.value; document.getElementById('sec1Polyline1PeakXCode').innerText = this.value;" data-mark="sec1Polyline1PeakXCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Peak Y <span class="indicator-dot"></span></span> <span id="sec1Var2Val">200</span></label>
+                  <label><span>Peak Y</span> <span id="sec1Var2Val">200</span></label>
                   <input type="range" min="100" max="500" step="10" value="200" autocomplete="off" id="sec1Var2Input"
                     oninput="document.getElementById('sec1Var2').setAttribute('value', this.value); document.getElementById('sec1Var2Val').innerText = this.value; document.getElementById('sec1Polyline1PeakYCode').innerText = this.value;" data-mark="sec1Polyline1PeakYCode">
                 </div>
@@ -93,7 +93,7 @@
                     oninput="document.getElementById('sec1Var3').setAttribute('value', this.value); document.getElementById('sec1Var3Val').innerText = this.value; document.getElementById('sec1Polyline2BottomXCode').innerText = this.value;" data-mark="sec1Polyline2BottomXCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Bottom Y <span class="indicator-dot"></span></span> <span id="sec1Var4Val">400</span></label>
+                  <label><span>Bottom Y</span> <span id="sec1Var4Val">400</span></label>
                   <input type="range" min="100" max="500" step="10" value="400" autocomplete="off" id="sec1Var4Input"
                     oninput="document.getElementById('sec1Var4').setAttribute('value', this.value); document.getElementById('sec1Var4Val').innerText = this.value; document.getElementById('sec1Polyline2BottomYCode').innerText = this.value;" data-mark="sec1Polyline2BottomYCode">
                 </div>
@@ -114,20 +114,12 @@
 
               <!-- Left: Zig-Zag (Orange Scheme) -->
               <pxl-polyline id="sec1Polyline1" points="50,300; ref.sec1Var1.value, ref.sec1Var2.value; 350,400; 450,300" stroke="#f97316" strokewidth="4"></pxl-polyline>
-              <pxl-circle x="50" y="300" r="6" fill="#fb923c"></pxl-circle>
-              <pxl-circle x="350" y="400" r="6" fill="#fb923c"></pxl-circle>
-              <pxl-circle x="450" y="300" r="6" fill="#fb923c"></pxl-circle>
               <pxl-circle x="ref.sec1Var1.value" y="ref.sec1Var2.value" r="8" fill="#c2410c"></pxl-circle>
               <pxl-text x="ref.sec1Var1.value" y="ref.sec1Var2.value - 20" text="'Peak'" size="27" fill="#c2410c" font="monospace" align="center" baseline="bottom"></pxl-text>
               <pxl-text x="250" y="500" text="'Zig-Zag'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
               <!-- Right: Bow Tie (Blue Scheme) -->
-              <pxl-polyline id="sec1Polyline2" points="850,200; 950,300; ref.sec1Var3.value, ref.sec1Var4.value; 650,200; 550,300; 650,400; 850,200" stroke="#3b82f6" strokewidth="4"></pxl-polyline>
-              <pxl-circle x="850" y="200" r="6" fill="#60a5fa"></pxl-circle>
-              <pxl-circle x="950" y="300" r="6" fill="#60a5fa"></pxl-circle>
-              <pxl-circle x="650" y="200" r="6" fill="#60a5fa"></pxl-circle>
-              <pxl-circle x="550" y="300" r="6" fill="#60a5fa"></pxl-circle>
-              <pxl-circle x="650" y="400" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-polyline id="sec1Polyline2" points="850,200; 950,300; ref.sec1Var3.value, ref.sec1Var4.value; 650,200; 550,300; 650,400; 850,200" stroke="#3b82f6" strokewidth="6"></pxl-polyline>
               <pxl-circle x="ref.sec1Var3.value" y="ref.sec1Var4.value" r="8" fill="#1d4ed8"></pxl-circle>
               <pxl-text x="ref.sec1Var3.value" y="ref.sec1Var4.value + 20" text="'Bottom'" size="27" fill="#1d4ed8" font="monospace" align="center" baseline="top"></pxl-text>
               <pxl-text x="750" y="500" text="'Bow Tie'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
@@ -147,13 +139,13 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Zig-Zag --&gt;
-    &lt;pxl-polyline stroke="#f97316" fill="#ffedd566"
+    &lt;pxl-polyline stroke="#f97316" strokewidth="4" fill="#ffedd566"
       points="50,300; 150,200; 350,400; 450,300"
       closed="<mark id="sec2Polyline1ClosedCode">false</mark>"&gt;
     &lt;/pxl-polyline&gt;
 
     &lt;!-- Right: Bow Tie --&gt;
-    &lt;pxl-polyline stroke="#3b82f6" fill="#dbeafe66"
+    &lt;pxl-polyline stroke="#3b82f6" strokewidth="4" fill="#dbeafe66"
       points="850,200; 950,300; 850,400; 650,200; 550,300; 650,400"
       closed="<mark id="sec2Polyline2ClosedCode">true</mark>"&gt;
     &lt;/pxl-polyline&gt;
@@ -204,20 +196,10 @@
 
               <!-- Left: Zig-Zag (Orange Scheme) -->
               <pxl-polyline id="sec2Polyline1" points="50,300; 150,200; 350,400; 450,300" closed="false" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-polyline>
-              <pxl-circle x="50" y="300" r="6" fill="#fb923c"></pxl-circle>
-              <pxl-circle x="150" y="200" r="6" fill="#fb923c"></pxl-circle>
-              <pxl-circle x="350" y="400" r="6" fill="#fb923c"></pxl-circle>
-              <pxl-circle x="450" y="300" r="6" fill="#fb923c"></pxl-circle>
               <pxl-text x="250" y="500" text="'Zig-Zag'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
               <!-- Right: Bow Tie (Blue Scheme) -->
               <pxl-polyline id="sec2Polyline2" points="850,200; 950,300; 850,400; 650,200; 550,300; 650,400" closed="true" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-polyline>
-              <pxl-circle x="850" y="200" r="6" fill="#60a5fa"></pxl-circle>
-              <pxl-circle x="950" y="300" r="6" fill="#60a5fa"></pxl-circle>
-              <pxl-circle x="850" y="400" r="6" fill="#60a5fa"></pxl-circle>
-              <pxl-circle x="650" y="200" r="6" fill="#60a5fa"></pxl-circle>
-              <pxl-circle x="550" y="300" r="6" fill="#60a5fa"></pxl-circle>
-              <pxl-circle x="650" y="400" r="6" fill="#60a5fa"></pxl-circle>
               <pxl-text x="750" y="500" text="'Bow Tie'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>
@@ -235,15 +217,16 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Zig-Zag --&gt;
-    &lt;pxl-polyline stroke="#f97316" smooth="<mark id="sec3Polyline1SmoothCode">1</mark>"
-      points="50,300; <mark id="sec3Polyline1PeakXCode">150</mark>,<mark id="sec3Polyline1PeakYCode">200</mark>; 350,400; 450,300"&gt;
+    &lt;pxl-polyline stroke="#f97316" strokewidth="4"
+      points="50,300; <mark id="sec3Polyline1PeakXCode">150</mark>,<mark id="sec3Polyline1PeakYCode">200</mark>; 350,400; 450,300"
+      smooth="<mark id="sec3Polyline1SmoothCode">1</mark>"&gt;
     &lt;/pxl-polyline&gt;
 
     &lt;!-- Right: Bow Tie --&gt;
-    &lt;pxl-polyline stroke="#3b82f6" smooth="<mark id="sec3Polyline2SmoothCode">1</mark>"
+    &lt;pxl-polyline stroke="#3b82f6" strokewidth="4"
       points="850,200; 950,300; <mark id="sec3Polyline2BottomXCode">850</mark>,<mark id="sec3Polyline2BottomYCode">400</mark>; 650,200;
               550,300; 650,400"
-      closed="true"&gt;
+      smooth="<mark id="sec3Polyline2SmoothCode">1</mark>" closed="true"&gt;
     &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -356,14 +339,14 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Heart --&gt;
-    &lt;pxl-polyline stroke="#f97316" fill="#ffedd566"
+    &lt;pxl-polyline stroke="#f97316" strokewidth="4" fill="#ffedd566"
       points="250,450; 50,250; 150,150; <mark id="sec4Polyline1DipCode">250,200; </mark>250,200;
               350,150; 450,250<mark id="sec4Polyline1TipCode">; 250,450</mark>"
       smooth="<mark id="sec4Polyline1SmoothCode">1.6</mark>" closed="true"&gt;
     &lt;/pxl-polyline&gt;
 
     &lt;!-- Right: Teardrop --&gt;
-    &lt;pxl-polyline stroke="#3b82f6" fill="#dbeafe66"
+    &lt;pxl-polyline stroke="#3b82f6" strokewidth="4" fill="#dbeafe66"
       points="750,150; 850,300; 800,400; 700,400;
               650,300<mark id="sec4Polyline2EndCode">; 750,150</mark>"
       smooth="<mark id="sec4Polyline2SmoothCode">1.3</mark>" closed="true"&gt;
@@ -457,13 +440,13 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Staircase --&gt;
-    &lt;pxl-polyline stroke="#f97316"
+    &lt;pxl-polyline stroke="#f97316" strokewidth="4"
       points="<mark id="sec5Polyline1StartXCode">50</mark>,<mark id="sec5Polyline1StartYCode">400</mark>; 100,0; 0,-100; 100,0; 0,-100; 100,0; 0,-100; 100,0"
       mode="relative"&gt;
     &lt;/pxl-polyline&gt;
 
     &lt;!-- Right: House --&gt;
-    &lt;pxl-polyline stroke="#3b82f6" fill="#dbeafe66"
+    &lt;pxl-polyline stroke="#3b82f6" strokewidth="4" fill="#dbeafe66"
       points="<mark id="sec5Polyline2StartXCode">650</mark>,<mark id="sec5Polyline2StartYCode">400</mark>; 200,0; 0,-150; -100,-100; -100,100"
       mode="relative" closed="true"&gt;
     &lt;/pxl-polyline&gt;
@@ -535,6 +518,122 @@
               <pxl-circle x="ref.sec5Var3.value" y="ref.sec5Var4.value" r="8" fill="#1d4ed8"></pxl-circle>
               <pxl-text x="ref.sec5Var3.value" y="ref.sec5Var4.value + 20" text="'Start'" size="27" fill="#1d4ed8" font="monospace" align="center" baseline="top"></pxl-text>
               <pxl-text x="750" y="500" text="'House'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+
+        <!-- ================================================================= -->
+        <!-- SECTION 6: ARROWHEADS                                             -->
+        <!-- ================================================================= -->
+        <h2>6. Arrowheads</h2>
+        <p>An open polyline can carry an arrowhead at its first point (<code>arrowstart</code>) and at its last point (<code>arrowend</code>). On a smooth polyline the head follows the curve into its end, and the stroke stops inside the head, so neither pokes out of the other.</p>
+        <p>A closed polyline has no ends, so it ignores arrowheads.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">More on Arrowheads</p>
+          <p class="callout-body">For sizing, styles, and further examples, see the dedicated <a href="arrows.html">Arrowheads</a> guide.</p>
+        </div>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Zig-Zag --&gt;
+    &lt;pxl-polyline stroke="#f97316" strokewidth="6"
+      points="50,300; 150,200; 350,400; 450,300"
+      smooth="<mark id="sec6Polyline1SmoothCode">1</mark>" arrowend="<mark id="sec6Polyline1ArrowEndCode">40</mark>"
+      arrowstyle="<mark id="sec6Polyline1StyleCode">filled</mark>"&gt;
+    &lt;/pxl-polyline&gt;
+
+    &lt;!-- Right: U-Turn --&gt;
+    &lt;pxl-polyline stroke="#3b82f6" strokewidth="6"
+      points="600,200; 800,200; 900,300; 800,400; 650,400"
+      arrowstart="<mark id="sec6Polyline2ArrowStartCode">0</mark>" arrowend="<mark id="sec6Polyline2ArrowEndCode">40</mark>" smooth="<mark id="sec6Polyline2SmoothCode">1</mark>"
+      arrowstyle="<mark id="sec6Polyline2StyleCode">line</mark>"&gt;
+    &lt;/pxl-polyline&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec6Polyline1Tab')">Zig-Zag</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec6Polyline2Tab')">U-Turn</button>
+              </div>
+            </div>
+
+            <!-- Zig-Zag Tab -->
+            <div class="tab-content active" id="sec6Polyline1Tab">
+              <div class="playground-sliders">
+                <!-- Row 1: Smooth & End Arrow -->
+                <div class="control-group">
+                  <label><span>Smooth</span> <span id="sec6Polyline1SmoothVal">1</span></label>
+                  <input type="range" min="0" max="2" step="0.1" value="1" autocomplete="off" id="sec6Polyline1SmoothInput"
+                    oninput="document.getElementById('sec6Polyline1').setAttribute('smooth', this.value); document.getElementById('sec6Polyline1SmoothVal').innerText = this.value; document.getElementById('sec6Polyline1SmoothCode').innerText = this.value;" data-mark="sec6Polyline1SmoothCode">
+                </div>
+                <div class="control-group">
+                  <label><span>End Arrow <span class="indicator-dot"></span></span> <span id="sec6Polyline1ArrowEndVal">40</span></label>
+                  <input type="range" min="0" max="100" step="5" value="40" autocomplete="off" id="sec6Polyline1ArrowEndInput"
+                    oninput="document.getElementById('sec6Polyline1').setAttribute('arrowend', this.value); document.getElementById('sec6Polyline1ArrowEndVal').innerText = this.value; document.getElementById('sec6Polyline1ArrowEndCode').innerText = this.value;" data-mark="sec6Polyline1ArrowEndCode">
+                </div>
+
+                <!-- Row 2: Arrow Style -->
+                <div class="control-group">
+                  <label>Arrow Style</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn active" onclick="document.getElementById('sec6Polyline1').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec6Polyline1StyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec6Polyline1').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec6Polyline1StyleCode', 'line');">line</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- U-Turn Tab -->
+            <div class="tab-content" id="sec6Polyline2Tab">
+              <div class="playground-sliders">
+                <!-- Row 1: Start Arrow & End Arrow -->
+                <div class="control-group">
+                  <label><span>Start Arrow <span class="indicator-dot"></span></span> <span id="sec6Polyline2ArrowStartVal">0</span></label>
+                  <input type="range" min="0" max="100" step="5" value="0" autocomplete="off" id="sec6Polyline2ArrowStartInput"
+                    oninput="document.getElementById('sec6Polyline2').setAttribute('arrowstart', this.value); document.getElementById('sec6Polyline2ArrowStartVal').innerText = this.value; document.getElementById('sec6Polyline2ArrowStartCode').innerText = this.value;" data-mark="sec6Polyline2ArrowStartCode">
+                </div>
+                <div class="control-group">
+                  <label><span>End Arrow</span> <span id="sec6Polyline2ArrowEndVal">40</span></label>
+                  <input type="range" min="0" max="100" step="5" value="40" autocomplete="off" id="sec6Polyline2ArrowEndInput"
+                    oninput="document.getElementById('sec6Polyline2').setAttribute('arrowend', this.value); document.getElementById('sec6Polyline2ArrowEndVal').innerText = this.value; document.getElementById('sec6Polyline2ArrowEndCode').innerText = this.value;" data-mark="sec6Polyline2ArrowEndCode">
+                </div>
+
+                <!-- Row 2: Smooth & Arrow Style -->
+                <div class="control-group">
+                  <label><span>Smooth</span> <span id="sec6Polyline2SmoothVal">1</span></label>
+                  <input type="range" min="0" max="2" step="0.1" value="1" autocomplete="off" id="sec6Polyline2SmoothInput"
+                    oninput="document.getElementById('sec6Polyline2').setAttribute('smooth', this.value); document.getElementById('sec6Polyline2SmoothVal').innerText = this.value; document.getElementById('sec6Polyline2SmoothCode').innerText = this.value;" data-mark="sec6Polyline2SmoothCode">
+                </div>
+                <div class="control-group">
+                  <label>Arrow Style</label>
+                  <div class="toggle-group">
+                    <button class="toggle-btn" onclick="document.getElementById('sec6Polyline2').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec6Polyline2StyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec6Polyline2').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec6Polyline2StyleCode', 'line');">line</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 6 Stage -->
+          <pxl-stage id="sec6Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Left: Zig-Zag (Orange Scheme) -->
+              <pxl-polyline id="sec6Polyline1" points="50,300; 150,200; 350,400; 450,300" smooth="1" arrowend="40" arrowstyle="filled" stroke="#f97316" strokewidth="6"></pxl-polyline>
+              <pxl-text x="250" y="500" text="'Zig-Zag'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: U-Turn (Blue Scheme) -->
+              <pxl-polyline id="sec6Polyline2" points="600,200; 800,200; 900,300; 800,400; 650,400" smooth="1" arrowstart="0" arrowend="40" arrowstyle="line" stroke="#3b82f6" strokewidth="6"></pxl-polyline>
+              <pxl-text x="750" y="500" text="'U-Turn'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
