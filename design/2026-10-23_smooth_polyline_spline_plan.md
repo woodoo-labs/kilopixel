@@ -1,6 +1,6 @@
-# Smooth Polyline Spline: Centripetal Catmull-Rom (D3 Style) + Seam Rule
+# Smooth Polyline Spline: Centripetal Catmull-Rom (D3 Style)
 
-- **Status**: 🟢 **Implemented** (2026-10-24; deviation from §4.3: one shared `loadSegment()` per segment instead of an inline rolling loop, §4.3.3)
+- **Status**: 🟢 **Implemented** (2026-10-24; deviation from §4.3: one shared `loadSegment()` per segment instead of an inline rolling loop, §4.3.3). **The seam rule (§4.2) was implemented and removed again the same day**: round or sharp is decided by the points alone, `closed` only adds the closing segment (§4.2).
 - **Date**: 2026-10-23
 - **Related**: `.agents/TODO.md` §15 (spline quality), `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming on smooth polylines, §4.3), `design/2026-10-18_polyline_optimization_plan.md` (§5 edge cases #8, #9, #11, #12; §6.2 smooth loop), `design/2026-09-07_plot_element_plan.md` and `design/2026-09-30_path_element_plan.md` (both reuse the polyline spline)
 - **Target Implementation**: `js/elements/shapes/polyline.js`, `js/elements/shapes/circle.js` and `ellipse.js` (arrow trim, §5.4), `.agents/KILOPIXEL.md` (Smoothing, Arrowheads), `docs/polyline.html` (section 2)
@@ -14,7 +14,7 @@
 
 - **Ends**: the curve must not straighten out before the first / last point.
 - **Uneven spacing**: no hooks next to short segments, no run-back past an end point, collinear points stay straight.
-- **Paths that end on their first point** (bow tie, figure eight, a `closed` polyline that repeats its first point): smooth across that point, like a closed curve.
+- ~~**Paths that end on their first point** (bow tie, figure eight, a `closed` polyline that repeats its first point): smooth across that point, like a closed curve.~~ Dropped on 2026-10-24 (§4.2): such a path has a corner at its start; smooth loops use `closed`.
 - `smooth="1"` stays the default, `0` stays straight, higher values bend further out.
 
 ## 2. Today
@@ -54,7 +54,7 @@ How other libraries handle the ends: D3 `curveCardinal` and Chart.js clamp (like
 
 Not considered: **global splines** (D3 `curveNatural`, Paper.js `'continuous'`): moving one point changes the whole curve, animated points need a solve over all points per frame, no tension. **Monotone** (Chart.js, D3 `curveMonotoneX`): data running left to right only. **B-splines** (D3 `curveBasis`): don't pass through the points. **p5.js `curveVertex`**: the user supplies extra end control points.
 
-**Decision: F.**
+**Decision: F.** *(2026-10-24: changed to **D**. The seam rule was removed, §4.2. The bow tie's dent is avoided by writing it with 6 points and `closed`.)*
 
 ## 4. The Spline
 
@@ -78,7 +78,18 @@ hIn   = −k · T / (3 · aOut · (aIn + aOut))      handle towards Pj−1   (cp
 - `smooth="0"` → all handles 0 → straight (as today; the 2026-10-18 plan #11 can still route it to `traceStraight`).
 - Negative `smooth` → flipped handles → loops (unchanged, 2026-10-18 plan #12).
 
-### 4.2 Seam rule
+### 4.2 Seam rule (removed 2026-10-24)
+
+**Removed.** Without it the rules are consistent: `smooth` rounds every point, **a point written twice is a corner**, and ending on the start counts as writing the start twice. `closed` only adds the closing segment; it never decides round or sharp:
+
+| Points | `closed="false"` | `closed="true"` |
+|---|---|---|
+| `A; B; C; D` (each point once) | open curve, free ends | **round** loop |
+| `A; B; C; D; A` (ends on the start) | loop, **sharp** at A (free ends meet) | loop, **sharp** at A (A repeated) |
+
+With the seam, the repeated start/end pair was an exception to "a repeated point is a corner". Removing it also drops the 0.01 px tolerance for relative mode and the switch while an end point is animated onto the start. Drawback: point lists that repeat the first point at the end out of habit (SVG point lists, GeoJSON rings) get a corner there; the docs say to drop the last point and use `closed`. Only `docs/polyline.html` relied on the seam (sections 2 and 4); no other page or example did (scan of 77 pages, 2026-10-24).
+
+The bow tie example therefore uses 6 points and `closed` wherever it is smoothed. The original seam rule, as implemented on 2026-10-24 and kept for reference:
 
 After `* u` and relative-mode accumulation, if the first and last point are **less than 0.01 px apart** (`|Δx| < 0.01 && |Δy| < 0.01`) and there are at least 4 points, the polyline has a seam.
 
@@ -96,7 +107,7 @@ With a seam:
 
 ### 4.3 Loop
 
-One shared neighbour lookup for all three cases (open, closed, seam), so the drawing loop and `loadSegment()` (arrows) can never disagree:
+One shared neighbour lookup for all three cases (open, closed, seam), so the drawing loop and `loadSegment()` (arrows) can never disagree. *(Since the seam was removed: `wrap = closed`, `m = n`; `loadSegment(i, len, closed, k3)`.)*
 
 ```
 wrap  = closed || seam

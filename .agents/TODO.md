@@ -136,10 +136,10 @@
   - Add a docs section/example following `docs/DOCS_STANDARDS.md`.
 
 ## 15. Smooth Polyline Spline Quality (`smooth`)
-- **Status**: 🟢 **Implemented** (2026-10-24) — `polyline.js` (centripetal spline, seam, distance trim, arrows walk inward), `circle.js` / `ellipse.js` (one arrow trim definition). Tests: `scratch/polyline_shapes/engine_tests.html` (111 checks).
+- **Status**: 🟢 **Implemented** (2026-10-24) — `polyline.js` (centripetal spline, distance trim, arrows walk inward), `circle.js` / `ellipse.js` (one arrow trim definition). Tests: `scratch/polyline_shapes/engine_tests.html` (112 checks). The seam rule was removed again the same day: a path that ends on its start has a corner there, smooth loops use `closed`.
 - **Reference**: `design/2026-10-23_smooth_polyline_spline_plan.md`
-- **Decision (2026-10-23)**: centripetal Catmull-Rom with the end handle on the end point (D3 `curveCatmullRom`), `smooth` as handle multiplier, plus a **seam rule**: a polyline that ends on its first point is smoothed across that point (also fixes the kink of a `closed` polyline that repeats its first point). Evenly spaced inner segments stay identical.
-- **Compared** (`scratch/polyline_shapes/smooth_ends.html`, 17 cases × 6 variants): natural ends overshoot at high `smooth` and with uneven spacing (uniform and centripetal); Konva-style quadratic ends are nearly as good; D3 style alone dents the bow tie at `smooth="1.7"`, fixed by the seam rule.
+- **Decision (2026-10-23)**: centripetal Catmull-Rom with the end handle on the end point (D3 `curveCatmullRom`), `smooth` as handle multiplier; a point written twice (including ending on the start) is a corner. Evenly spaced inner segments stay identical.
+- **Compared** (`scratch/polyline_shapes/smooth_ends.html`, 17 cases × 6 variants): natural ends overshoot at high `smooth` and with uneven spacing (uniform and centripetal); Konva-style quadratic ends are nearly as good; D3 style alone dents the bow tie at `smooth="1.7"` when it ends on its start (written with 6 points + `closed` instead).
 - **Background**: `<pxl-polyline smooth>` uses a **uniform** Catmull-Rom spline with **clamped** ends (the missing neighbour of the first/last point is the point itself).
 - **Observed Issues**:
   - The curve straightens out shortly before the first/last point (end direction is forced onto the chord to the next point). Visible on the section 1 wave in `docs/arrows.html` near `(550, 300)`.

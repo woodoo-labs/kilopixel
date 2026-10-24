@@ -157,19 +157,15 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     const pts = this.flatCache;
     const segment = this._segment, split = this._split;
 
-    // Seam: a path that ends on its first point is smoothed across it, so neighbours wrap like on a closed path
-    const seam = len >= 4 && this.isSamePoint(0, len - 1);
-    const wrap = closed || seam;
-    const m = seam ? len - 1 : len;     // distinct points for the neighbour lookup
     let from = first;
-    const to = closed ? m : last;       // segments from..to-1
+    const to = closed ? len : last;     // segments from..to-1
 
     ctx.beginPath();
 
     // First segment, trimmed from the front
     if (hasStart) {
       const a = this._arrowStart;
-      this.loadSegment(from, len, m, wrap, k3);
+      this.loadSegment(from, len, closed, k3);
       // Direction: chord from the curve point one head length in, back to the start
       this.splitSegment(this.trimParameter(a.len, false));
       this.aimArrow(a, segment[0], segment[1], segment[0] - split[4], segment[1] - split[5]);
@@ -184,14 +180,14 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     // Hot loop: the same segment loader as the arrow trimming, so both always agree
     const end = hasEnd ? to - 1 : to;
     for (let i = from; i < end; i++) {
-      this.loadSegment(i, len, m, wrap, k3);
+      this.loadSegment(i, len, closed, k3);
       ctx.bezierCurveTo(segment[2], segment[3], segment[4], segment[5], segment[6], segment[7]);
     }
 
     // Last segment, trimmed from the back
     if (hasEnd) {
       const b = this._arrowEnd;
-      this.loadSegment(to - 1, len, m, wrap, k3);
+      this.loadSegment(to - 1, len, closed, k3);
       this.splitSegment(this.trimParameter(b.len, true));
       this.aimArrow(b, segment[6], segment[7], segment[6] - split[4], segment[7] - split[5]);
       this.splitSegment(this.trimParameter(b.inset, true));
@@ -202,13 +198,13 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   }
 
   // Loads segment i (point A = i to point B = i + 1) as a cubic Bézier into this._segment.
-  // Centripetal handles (D3 curveCatmullRom), scaled by k3 = smooth / 3. With `wrap`, neighbours wrap over the
-  // first m points; otherwise a missing neighbour (free end) counts as a zero-length side: no handle.
-  loadSegment(i, len, m, wrap, k3) {
+  // Centripetal handles (D3 curveCatmullRom), scaled by k3 = smooth / 3. On a closed path neighbours wrap around;
+  // on an open path a missing neighbour (free end) counts as a zero-length side: no handle.
+  loadSegment(i, len, closed, k3) {
     const pts = this.flatCache, segment = this._segment;
-    const a = wrap ? i % m : i, b = wrap ? (i + 1) % m : i + 1;
-    const p = wrap ? (a - 1 + m) % m : a - 1;   // neighbour before A
-    const q = wrap ? (b + 1) % m : b + 1;       // neighbour after B
+    const a = i, b = closed ? (i + 1) % len : i + 1;
+    const p = closed ? (a - 1 + len) % len : a - 1;   // neighbour before A
+    const q = closed ? (b + 1) % len : b + 1;         // neighbour after B
 
     const ax = pts[a * 2], ay = pts[a * 2 + 1], bx = pts[b * 2], by = pts[b * 2 + 1];
     const abx = bx - ax, aby = by - ay;
@@ -255,7 +251,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     return (lo + hi) / 2;
   }
 
-  // Points closer than 0.01 px count as the same (seam, zero-length end segments)
+  // Points closer than 0.01 px count as the same (zero-length end segments for arrows)
   isSamePoint(i, j) {
     const pts = this.flatCache;
     return Math.abs(pts[i * 2] - pts[j * 2]) < 0.01 && Math.abs(pts[i * 2 + 1] - pts[j * 2 + 1]) < 0.01;

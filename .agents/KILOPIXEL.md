@@ -1153,7 +1153,7 @@ When `smooth` is not false:
 - Handles at point `P` with incoming segment `Δin` (length `dIn`) and outgoing `Δout` (`dOut`), `aIn = √dIn`, `aOut = √dOut`: tangent `T = dIn·Δout + dOut·Δin`, outgoing handle `k·T / (3·aIn·(aIn + aOut))`, incoming handle `−k·T / (3·aOut·(aIn + aOut))`. Evenly spaced points give the uniform `(pNext − pPrev)·k/6`
 - **Free ends** (first/last point of an open path) get no handle: the curve leaves them towards the next control point instead of straightening out
 - **Duplicate points** make a corner (both handles 0); the handles shrink continuously as two points move together
-- **Seam**: a polyline (open or closed) whose last point is within 0.01 px of its first point is smoothed across that point (neighbours wrap like on a closed path). Repeat the start point at the end to keep a sharp point there
+- **Ending on the start makes a corner**: a polyline whose last point repeats its first point has a corner there (two free ends meet, or with `closed` a repeated point). For a smooth loop, use `closed` and write each point once. There is no seam rule: `closed` only adds the closing segment, round or sharp is decided by the points alone (seam rule tried and removed on 2026-10-24)
 - One segment loader (`loadSegment`) serves the drawing loop and the arrow trimming, so both always agree. Cost: 6 `sqrt` per segment, no allocations
 
 ### Modes
