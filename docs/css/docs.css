@@ -393,6 +393,11 @@ body {
   transition: background-color 0.2s, color 0.2s;
 }
 
+/* Empty marks (e.g. an optional repeated point toggled off) take no space */
+.docs-content pre mark:empty {
+  display: none;
+}
+
 .docs-content pre mark.highlight-reactive {
   background-color: transparent;
 }
