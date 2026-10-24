@@ -1,6 +1,6 @@
 # Smooth Polyline Spline: Centripetal Catmull-Rom (D3 Style) + Seam Rule
 
-- **Status**: ⚪ **Planned** (2026-10-23, edge cases reviewed 2026-10-24, no engine changes yet)
+- **Status**: 🟢 **Implemented** (2026-10-24; deviation from §4.3: one shared `loadSegment()` per segment instead of an inline rolling loop, §4.3.3)
 - **Date**: 2026-10-23
 - **Related**: `.agents/TODO.md` §15 (spline quality), `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming on smooth polylines, §4.3), `design/2026-10-18_polyline_optimization_plan.md` (§5 edge cases #8, #9, #11, #12; §6.2 smooth loop), `design/2026-09-07_plot_element_plan.md` and `design/2026-09-30_path_element_plan.md` (both reuse the polyline spline)
 - **Target Implementation**: `js/elements/shapes/polyline.js`, `js/elements/shapes/circle.js` and `ellipse.js` (arrow trim, §5.4), `.agents/KILOPIXEL.md` (Smoothing, Arrowheads), `docs/polyline.html` (section 2)
@@ -131,6 +131,21 @@ Sketch of the planned loop (rolling distances, seam lookup) against today's loop
 - **Branches**: the two degenerate-side ternaries (`a > ε ? … : 0`) and the next-neighbour test. Move the last segment (and, with a seam, the wrap) out of the loop like the 2026-10-18 plan §6.2, so the inner loop needs no `%` and no end test.
 - **Static polylines** (the common case) could cache the handles until a point changes, removing the extra cost entirely. That belongs to the geometry cache of the 2026-10-18 plan (phase 2), not to this plan: +5.5 µs for 500 points doesn't justify it on its own.
 
+#### 4.3.3 As implemented (2026-10-24)
+
+The drawing loop calls the same `loadSegment(i, len, m, wrap, k3)` as the arrow trimming, instead of an inline loop with rolling distances. Drawing and trimming can't disagree, and the spline math exists once. Cost: 3 lengths per segment (6 `sqrt`) instead of 1 (2 `sqrt`).
+
+Measured in the engine (`scratch/polyline_shapes/engine_bench.html`, previous build vs. new build, `draw()` with path building only, µs per frame):
+
+| Points | Before | After |
+|---|---|---|
+| 50 | 3.8 | 5.2 (+1.4) |
+| 50 + both arrows | 5.4 | 6.9 (+1.5) |
+| 500 | 37.7 | 48.3 (+10.7, 0.06 % of a frame) |
+| 2000 | 151 | 201 (+50, 0.3 % of a frame) |
+
+With stroking, the differences disappear in the rasterization time (50 points: 462 vs 467 µs). The inline rolling loop would save about half of the extra cost; switch only if a real scene needs it.
+
 ## 5. Arrowheads
 
 ### 5.1 What stays
@@ -251,7 +266,7 @@ Every smooth polyline with free ends or uneven spacing changes shape near those 
 | 6 | Animated last point passing through the first point | change only while within 0.01 px, no exception |
 | 7 | Arrowheads on smooth polylines (`arrows.html` cases, `arrow_trim.html` cases, short end segments, seam), strokewidth 4 / 6 / 12, filled and `line` style | shaft ends at the intended inset (±0.1 px), never past the head; head on the curve, pointing along it |
 | 7b | Duplicate first / last point + arrowheads, straight and smooth | head points along the line (walks inward), no arrow if all points are identical |
-| 7c | Ellipse arrows at the tip: 300 × 200, 300 × 60, 300 × 30, 100 × 10, strokewidth 4 / 6 / 12, both ends, `anticlockwise` | shaft ends at the intended inset (±0.1 px), head straight on the line; round ellipses unchanged |
+| 7c | Ellipse arrows at the tip: 300 × 200, 300 × 60, 300 × 30, 100 × 10, strokewidth 4 / 6 / 12, both ends, `anticlockwise` | shaft ends at the intended inset within the bisection resolution (`rx · π / 8192`, 0.12 px for rx = 300), head straight on the line; round ellipses unchanged |
 | 7d | Circle arrows on small circles (r 15–30) with large heads | shaft end at the intended straight distance |
 | 8 | Hit testing (`onclick` / hover) on a smooth polyline | hit area follows the new curve |
 | 9 | `mode="relative"` + smooth, a seam produced by relative offsets, stage resized (several `u`) | seam detected after accumulation at every size |

@@ -32,6 +32,7 @@ if (!arrowstart && !arrowend) {
   - Start Angle: `Math.atan2(firstY - secondY, firstX - secondX)`
   - End Angle: `Math.atan2(lastY - secondToLastY, lastX - secondToLastX)`
   - **Why this works for `smooth` (Catmull-Rom) polylines**: In the open Catmull-Rom algorithm, the imaginary control point for the final node is clamped to the final node itself. Because the cubic Bezier curve uses `cp2 = p2 - (p3 - p1) * (tension/6)`, and `p3 == p2`, the vector from `cp2` to the end point `p2` is exactly parallel to the line between `p1` and `p2`. This brilliant geometric property means **the tangent of the smoothed curve at the endpoint is mathematically identical to the straight line tangent**. Therefore, we can bypass expensive Bezier derivatives entirely and just use `Math.atan2` on the last two points!
+  - *(2026-10-24: no longer true. Smooth polylines use centripetal Catmull-Rom with free ends (`design/2026-10-23_smooth_polyline_spline_plan.md`), so the end tangent is not the chord. The engine measures the head direction from the drawn curve.)*
 - **Render**: Temporarily mutate the first and last points in `this.flatCache` to pull back the physical drawn path by `0.75 * arrowSize`. Stroke the path, call `this.drawArrow(...)`, then exactly restore the `flatCache` instantly to prevent permanent mutation.
 
 #### `Circle`

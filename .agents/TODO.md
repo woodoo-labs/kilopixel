@@ -136,7 +136,7 @@
   - Add a docs section/example following `docs/DOCS_STANDARDS.md`.
 
 ## 15. Smooth Polyline Spline Quality (`smooth`)
-- **Status**: ⚪ **Planned** (2026-10-23)
+- **Status**: 🟢 **Implemented** (2026-10-24) — `polyline.js` (centripetal spline, seam, distance trim, arrows walk inward), `circle.js` / `ellipse.js` (one arrow trim definition). Tests: `scratch/polyline_shapes/engine_tests.html` (111 checks).
 - **Reference**: `design/2026-10-23_smooth_polyline_spline_plan.md`
 - **Decision (2026-10-23)**: centripetal Catmull-Rom with the end handle on the end point (D3 `curveCatmullRom`), `smooth` as handle multiplier, plus a **seam rule**: a polyline that ends on its first point is smoothed across that point (also fixes the kink of a `closed` polyline that repeats its first point). Evenly spaced inner segments stay identical.
 - **Compared** (`scratch/polyline_shapes/smooth_ends.html`, 17 cases × 6 variants): natural ends overshoot at high `smooth` and with uneven spacing (uniform and centripetal); Konva-style quadratic ends are nearly as good; D3 style alone dents the bow tie at `smooth="1.7"`, fixed by the seam rule.
@@ -203,7 +203,8 @@
 - **Status**: ⚪ **Backlog** (2026-10-19)
 - **Reference**: `design/2026-10-18_polyline_optimization_plan.md` (priority table at the top)
 - **Done (2026-10-19)**: `setAttribute('points', …)` updates `ref.<id>.pN` readers (broadcast after a points change; only keys beyond the new count are deleted). `ref.<id>.pN` is internal (`.agents/KILOPIXEL.md`); the public docs recommend a `<pxl-var>` read by both shapes.
-- **Small fixes, do when touched**: arrowhead points right when the first / last two points are identical; all X (or all Y) non-finite + gradient throws in `createGradient`; warnings for typos in `points` (missing / extra values, unbalanced parentheses).
+- **Done (2026-10-24, §15)**: arrowhead points right when the first / last two points are identical (arrows walk inward past zero-length end segments).
+- **Small fixes, do when touched**: all X (or all Y) non-finite + gradient throws in `createGradient`; warnings for typos in `points` (missing / extra values, unbalanced parentheses).
 - **Deferred**: point storage in numeric arrays (measured ≈ 8 µs per frame for 500 points, a micro-optimization) and the measurement-gated phase 3 items.
 
 ## 23. Regular Polygon & Star Shape (`<pxl-polygon>`)

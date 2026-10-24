@@ -2101,12 +2101,12 @@ pxl.Circle = class Circle extends pxl.Shape {
 
   // Aims an arrow at the arc end at angle `radians`; `inward` (±1) is the angle direction into the arc.
   // Direction is the chord from the arc point one head length in, back to the end, so the head's
-  // base sits on the arc. Returns the inset as an angle (exact arc length).
+  // base sits on the arc. Returns the inset as an angle (straight distance from the end, like all arrowheads).
   aimArcArrow(rec, radius, radians, inward) {
     const px = radius * Math.cos(radians), py = radius * Math.sin(radians);
     const baseRadians = radians + inward * 2 * Math.asin(Math.min(rec.len, 2 * radius) / (2 * radius));
     this.aimArrow(rec, px, py, px - radius * Math.cos(baseRadians), py - radius * Math.sin(baseRadians));
-    return rec.inset / radius;
+    return 2 * Math.asin(Math.min(rec.inset, 2 * radius) / (2 * radius));
   }
 
   getBoundingBox() {
@@ -2223,17 +2223,17 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
     return this.parameterOffset(radiusX, radiusY, radians, inward, rec.inset);
   }
 
-  // Parameter offset that moves `distance` away from `radians`: local-speed estimate plus one chord correction.
+  // Parameter offset (towards `inward`) where the arc is `distance` away from `radians` in a straight line.
+  // Bisection: a local estimate fails at the tip of thin ellipses, where the curve turns fast.
   parameterOffset(radiusX, radiusY, radians, inward, distance) {
-    const speedX = radiusX * Math.sin(radians), speedY = radiusY * Math.cos(radians);
-    let offset = distance / (Math.sqrt(speedX * speedX + speedY * speedY) || 1);
-
-    const target = radians + inward * offset;
-    const chordX = radiusX * (Math.cos(target) - Math.cos(radians));
-    const chordY = radiusY * (Math.sin(target) - Math.sin(radians));
-    const chord = Math.sqrt(chordX * chordX + chordY * chordY);
-    if (chord > 0) offset *= distance / chord;
-    return offset;
+    const cos = Math.cos(radians), sin = Math.sin(radians);
+    let lo = 0, hi = Math.PI;
+    for (let i = 0; i < 12; i++) {
+      const mid = (lo + hi) / 2, target = radians + inward * mid;
+      const x = radiusX * (Math.cos(target) - cos), y = radiusY * (Math.sin(target) - sin);
+      if (x * x + y * y > distance * distance) hi = mid; else lo = mid;
+    }
+    return (lo + hi) / 2;
   }
 
   getBoundingBox() {
@@ -2442,9 +2442,6 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     const closed = this.attributeValues.closed === true;
     const pts = this.flatCache;
     const len = this.pointCount / 2;
-    // A Catmull-Rom curve through only 2 points is a straight line
-    const isSmooth = smooth !== false && smooth !== null && len > 2;
-    const tension6 = (typeof smooth === 'number' ? smooth : 1) / 6;
 
     for (let i = 0; i < this.pointCount; i++) {
       pts[i] = this.attributeValues[this.pointKeys[i]] * u;
@@ -2459,13 +2456,29 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     // Arrowheads only apply to open strokes
     const arrowStart = this._arrowStart, arrowEnd = this._arrowEnd;
     const canHaveArrows = !closed && this.isStroked();
-    const hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart, u);
-    const hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend, u);
+    let hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart, u);
+    let hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend, u);
+
+    // Arrows sit on the first / last point with a distinct neighbour: zero-length end segments are skipped
+    let first = 0, last = len - 1;
+    if (hasStart || hasEnd) {
+      while (first < last && this.isSamePoint(first, first + 1)) first++;
+      while (last > first && this.isSamePoint(last, last - 1)) last--;
+      if (first === last) {
+        hasStart = hasEnd = false;
+        first = 0;
+        last = len - 1;
+      }
+    }
+
+    // A smooth curve through only 2 points (with free ends) is a straight line
+    const isSmooth = smooth !== false && smooth !== null && last - first > 1;
 
     if (isSmooth) {
-      this.traceSmooth(ctx, len, closed, tension6, hasStart, hasEnd);
+      const k3 = (typeof smooth === 'number' ? smooth : 1) / 3;
+      this.traceSmooth(ctx, len, closed, k3, hasStart, hasEnd, first, last);
       this.applyStyle(ctx, u);
-    } else if (this.traceStraight(ctx, len, closed, hasStart, hasEnd)) {
+    } else if (this.traceStraight(ctx, closed, hasStart, hasEnd, first, last)) {
       this.applyStyle(ctx, u);
     } else {
       this.applyStrokeState(ctx, u);
@@ -2474,34 +2487,34 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     if (hasStart || hasEnd) this.drawArrows(ctx, u, arrowStart, arrowEnd);
   }
 
-  // Returns false if the shaft is skipped (single segment shorter than both arrow insets).
-  traceStraight(ctx, len, closed, hasStart, hasEnd) {
+  // Draws points first..last. Returns false if the shaft is skipped (single segment shorter than both arrow insets).
+  traceStraight(ctx, closed, hasStart, hasEnd, first, last) {
     const pts = this.flatCache;
-    const lastX = this.pointCount - 2, lastY = this.pointCount - 1;
-    let startX = pts[0], startY = pts[1];
-    let endX = pts[lastX], endY = pts[lastY];
+    const f = first * 2, l = last * 2;
+    let startX = pts[f], startY = pts[f + 1];
+    let endX = pts[l], endY = pts[l + 1];
 
     // flatCache is never mutated: only the drawn end points are trimmed, each within its own segment
     let startInset = 0, endInset = 0, firstLength = 0;
     if (hasStart) {
       const a = this._arrowStart;
-      firstLength = this.aimArrow(a, startX, startY, startX - pts[2], startY - pts[3]);
+      firstLength = this.aimArrow(a, startX, startY, startX - pts[f + 2], startY - pts[f + 3]);
       startInset = Math.min(a.inset, firstLength);
       startX -= a.dirX * startInset;
       startY -= a.dirY * startInset;
     }
     if (hasEnd) {
       const b = this._arrowEnd;
-      const lastLength = this.aimArrow(b, endX, endY, endX - pts[lastX - 2], endY - pts[lastY - 2]);
+      const lastLength = this.aimArrow(b, endX, endY, endX - pts[l - 2], endY - pts[l - 1]);
       endInset = Math.min(b.inset, lastLength);
       endX -= b.dirX * endInset;
       endY -= b.dirY * endInset;
     }
-    if (len === 2 && hasStart && hasEnd && startInset + endInset >= firstLength) return false;
+    if (last - first === 1 && hasStart && hasEnd && startInset + endInset >= firstLength) return false;
 
     ctx.beginPath();
     ctx.moveTo(startX, startY);
-    for (let i = 2; i < lastX; i += 2) {
+    for (let i = f + 2; i < l; i += 2) {
       ctx.lineTo(pts[i], pts[i + 1]);
     }
     ctx.lineTo(endX, endY);
@@ -2509,82 +2522,114 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     return true;
   }
 
-  traceSmooth(ctx, len, closed, tension6, hasStart, hasEnd) {
+  // Centripetal Catmull-Rom through points first..last (design/2026-10-23_smooth_polyline_spline_plan.md).
+  // `k3` is smooth / 3. Arrows imply an open path with >= 2 segments between first and last.
+  traceSmooth(ctx, len, closed, k3, hasStart, hasEnd, first, last) {
     const pts = this.flatCache;
     const segment = this._segment, split = this._split;
-    const loopLen = closed ? len : len - 1;
+
+    // Seam: a path that ends on its first point is smoothed across it, so neighbours wrap like on a closed path
+    const seam = len >= 4 && this.isSamePoint(0, len - 1);
+    const wrap = closed || seam;
+    const m = seam ? len - 1 : len;     // distinct points for the neighbour lookup
+    let from = first;
+    const to = closed ? m : last;       // segments from..to-1
 
     ctx.beginPath();
 
-    // First segment, trimmed from the front (arrows imply an open path with >= 2 segments)
-    let first = 0;
+    // First segment, trimmed from the front
     if (hasStart) {
       const a = this._arrowStart;
-      const chord = this.loadSegment(0, len, tension6);
+      this.loadSegment(from, len, m, wrap, k3);
       // Direction: chord from the curve point one head length in, back to the start
-      this.splitSegment(Math.min(a.len / chord, 1));
+      this.splitSegment(this.trimParameter(a.len, false));
       this.aimArrow(a, segment[0], segment[1], segment[0] - split[4], segment[1] - split[5]);
-      this.splitSegment(Math.min(a.inset / chord, 1));
+      this.splitSegment(this.trimParameter(a.inset, false));
       ctx.moveTo(split[4], split[5]);
       ctx.bezierCurveTo(split[6], split[7], split[8], split[9], segment[6], segment[7]);
-      first = 1;
+      from++;
     } else {
-      ctx.moveTo(pts[0], pts[1]);
+      ctx.moveTo(pts[first * 2], pts[first * 2 + 1]);
     }
 
-    // Hot loop: untouched Catmull-Rom segments (branch-free body)
-    const last = hasEnd ? loopLen - 1 : loopLen;
-    for (let i = first; i < last; i++) {
-      const i0 = closed ? (i - 1 + len) % len : Math.max(i - 1, 0);
-      const i1 = i;
-      const i2 = (i + 1) % len;
-      const i3 = closed ? (i + 2) % len : Math.min(i + 2, len - 1);
-
-      const p0x = pts[i0 * 2], p0y = pts[i0 * 2 + 1];
-      const p1x = pts[i1 * 2], p1y = pts[i1 * 2 + 1];
-      const p2x = pts[i2 * 2], p2y = pts[i2 * 2 + 1];
-      const p3x = pts[i3 * 2], p3y = pts[i3 * 2 + 1];
-
-      ctx.bezierCurveTo(
-        p1x + (p2x - p0x) * tension6,
-        p1y + (p2y - p0y) * tension6,
-        p2x - (p3x - p1x) * tension6,
-        p2y - (p3y - p1y) * tension6,
-        p2x, p2y
-      );
+    // Hot loop: the same segment loader as the arrow trimming, so both always agree
+    const end = hasEnd ? to - 1 : to;
+    for (let i = from; i < end; i++) {
+      this.loadSegment(i, len, m, wrap, k3);
+      ctx.bezierCurveTo(segment[2], segment[3], segment[4], segment[5], segment[6], segment[7]);
     }
 
     // Last segment, trimmed from the back
     if (hasEnd) {
       const b = this._arrowEnd;
-      const chord = this.loadSegment(loopLen - 1, len, tension6);
-      this.splitSegment(Math.max(1 - b.len / chord, 0));
+      this.loadSegment(to - 1, len, m, wrap, k3);
+      this.splitSegment(this.trimParameter(b.len, true));
       this.aimArrow(b, segment[6], segment[7], segment[6] - split[4], segment[7] - split[5]);
-      this.splitSegment(Math.max(1 - b.inset / chord, 0));
+      this.splitSegment(this.trimParameter(b.inset, true));
       ctx.bezierCurveTo(split[0], split[1], split[2], split[3], split[4], split[5]);
     }
 
     if (closed) ctx.closePath();
   }
 
-  // Loads open Catmull-Rom segment i as a cubic Bézier into this._segment. Returns its chord length.
-  loadSegment(i, len, tension6) {
+  // Loads segment i (point A = i to point B = i + 1) as a cubic Bézier into this._segment.
+  // Centripetal handles (D3 curveCatmullRom), scaled by k3 = smooth / 3. With `wrap`, neighbours wrap over the
+  // first m points; otherwise a missing neighbour (free end) counts as a zero-length side: no handle.
+  loadSegment(i, len, m, wrap, k3) {
     const pts = this.flatCache, segment = this._segment;
-    const i0 = Math.max(i - 1, 0), i2 = i + 1, i3 = Math.min(i + 2, len - 1);
-    const p1x = pts[i * 2], p1y = pts[i * 2 + 1];
-    const p2x = pts[i2 * 2], p2y = pts[i2 * 2 + 1];
+    const a = wrap ? i % m : i, b = wrap ? (i + 1) % m : i + 1;
+    const p = wrap ? (a - 1 + m) % m : a - 1;   // neighbour before A
+    const q = wrap ? (b + 1) % m : b + 1;       // neighbour after B
 
-    segment[0] = p1x;
-    segment[1] = p1y;
-    segment[2] = p1x + (p2x - pts[i0 * 2]) * tension6;
-    segment[3] = p1y + (p2y - pts[i0 * 2 + 1]) * tension6;
-    segment[4] = p2x - (pts[i3 * 2] - p1x) * tension6;
-    segment[5] = p2y - (pts[i3 * 2 + 1] - p1y) * tension6;
-    segment[6] = p2x;
-    segment[7] = p2y;
+    const ax = pts[a * 2], ay = pts[a * 2 + 1], bx = pts[b * 2], by = pts[b * 2 + 1];
+    const abx = bx - ax, aby = by - ay;
+    const dAB = Math.sqrt(abx * abx + aby * aby), rAB = Math.sqrt(dAB);
 
-    const dx = p2x - p1x, dy = p2y - p1y;
-    return Math.sqrt(dx * dx + dy * dy);
+    let pax = 0, pay = 0, dPA = 0, bqx = 0, bqy = 0, dBQ = 0;
+    if (p >= 0) {
+      pax = ax - pts[p * 2]; pay = ay - pts[p * 2 + 1];
+      dPA = Math.sqrt(pax * pax + pay * pay);
+    }
+    if (q < len) {
+      bqx = pts[q * 2] - bx; bqy = pts[q * 2 + 1] - by;
+      dBQ = Math.sqrt(bqx * bqx + bqy * bqy);
+    }
+    const rPA = Math.sqrt(dPA), rBQ = Math.sqrt(dBQ);
+
+    // Tangent at A: dPA·AB + dAB·PA; at B: dAB·BQ + dBQ·AB. A zero-length side gets no handle (corner, free end).
+    const fa = rPA > 1e-6 ? k3 / (rPA * (rPA + rAB)) : 0;
+    const fb = rBQ > 1e-6 ? k3 / (rBQ * (rAB + rBQ)) : 0;
+
+    segment[0] = ax;
+    segment[1] = ay;
+    segment[2] = ax + (dPA * abx + dAB * pax) * fa;
+    segment[3] = ay + (dPA * aby + dAB * pay) * fa;
+    segment[4] = bx - (dAB * bqx + dBQ * abx) * fb;
+    segment[5] = by - (dAB * bqy + dBQ * aby) * fb;
+    segment[6] = bx;
+    segment[7] = by;
+  }
+
+  // Curve parameter on this._segment where the curve is `dist` away from its start (or end) in a straight line,
+  // like all arrowhead trims. Bisection: free ends leave the end point slowly, so a chord estimate trims too little.
+  trimParameter(dist, fromEnd) {
+    const g = this._segment;
+    const ex = fromEnd ? g[6] : g[0], ey = fromEnd ? g[7] : g[1];
+    let lo = 0, hi = 1;
+    for (let i = 0; i < 12; i++) {
+      const t = (lo + hi) / 2, u = 1 - t;
+      const a = u * u * u, b = 3 * u * u * t, c = 3 * u * t * t, e = t * t * t;
+      const x = a * g[0] + b * g[2] + c * g[4] + e * g[6] - ex;
+      const y = a * g[1] + b * g[3] + c * g[5] + e * g[7] - ey;
+      if ((x * x + y * y > dist * dist) === fromEnd) lo = t; else hi = t;
+    }
+    return (lo + hi) / 2;
+  }
+
+  // Points closer than 0.01 px count as the same (seam, zero-length end segments)
+  isSamePoint(i, j) {
+    const pts = this.flatCache;
+    return Math.abs(pts[i * 2] - pts[j * 2]) < 0.01 && Math.abs(pts[i * 2 + 1] - pts[j * 2 + 1]) < 0.01;
   }
 
   // de Casteljau split of this._segment at t. Left part: p1, q0, r0, s. Right part: s, r1, q2, p2.

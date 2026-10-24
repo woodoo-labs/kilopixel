@@ -91,12 +91,12 @@ pxl.Circle = class Circle extends pxl.Shape {
 
   // Aims an arrow at the arc end at angle `radians`; `inward` (±1) is the angle direction into the arc.
   // Direction is the chord from the arc point one head length in, back to the end, so the head's
-  // base sits on the arc. Returns the inset as an angle (exact arc length).
+  // base sits on the arc. Returns the inset as an angle (straight distance from the end, like all arrowheads).
   aimArcArrow(rec, radius, radians, inward) {
     const px = radius * Math.cos(radians), py = radius * Math.sin(radians);
     const baseRadians = radians + inward * 2 * Math.asin(Math.min(rec.len, 2 * radius) / (2 * radius));
     this.aimArrow(rec, px, py, px - radius * Math.cos(baseRadians), py - radius * Math.sin(baseRadians));
-    return rec.inset / radius;
+    return 2 * Math.asin(Math.min(rec.inset, 2 * radius) / (2 * radius));
   }
 
   getBoundingBox() {

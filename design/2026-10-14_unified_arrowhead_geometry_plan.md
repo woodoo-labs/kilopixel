@@ -160,7 +160,7 @@ Each shape does exactly three things per arrow end:
 ### 4.3 `<pxl-polyline smooth>`: exact end-segment trimming (fixes D7)
 The Catmull-Rom segments are computed exactly as today, from the untouched `flatCache`. Only the **first and last Bézier segment** get special handling (outside the hot loop, so the loop stays branch-free):
 
-1. **Find the parameter** `tI` from the chord estimate `tI = 1 − inset / |p2 − p1|` (clamped to `[0, 1]`). *(Simplified on 2026-10-14: no secant refinement. The inset is short compared with the segment, so the error is sub-pixel.)*
+1. **Find the parameter** `tI` from the chord estimate `tI = 1 − inset / |p2 − p1|` (clamped to `[0, 1]`). *(Simplified on 2026-10-14: no secant refinement. The inset is short compared with the segment, so the error is sub-pixel.)* *(2026-10-24: the error was not sub-pixel (11.2 px intended → 7.1 px), and with free ends far worse. Replaced by `trimParameter`: 12 bisection steps on the straight distance from the end, `design/2026-10-23_smooth_polyline_spline_plan.md` §5.2. Same for `tL` in step 4.)*
 2. **Split with de Casteljau** at `tI` (about 20 multiplications). For the end segment, emit the sub-curve `[0, tI]` as `bezierCurveTo(q0, r0, S)`. For the start segment, `moveTo(S)` followed by `bezierCurveTo(r1, q2, p2)` for the sub-curve `[tI, 1]`.
 3. **Polylines with only 2 points** are treated as straight even when `smooth` is set. With clamped end points, the Catmull-Rom curve through 2 points *is* a straight line. This removes the "single segment with both arrows" special case. *(Simplified on 2026-10-14.)*
 4. **Direction**: evaluate `B(tL)` with the chord estimate for the distance `len`, then `d = normalize(P − B(tL))`.
@@ -169,7 +169,7 @@ The curve that is drawn is **pixel-identical** to the curve without arrows, only
 
 ### 4.4 `<pxl-circle>`
 - `Rpx = safeR · u` (**the fix for D1**: all values in px).
-- Trim angle (exact, arc length): `δI = inset / Rpx`.
+- Trim angle (exact, arc length): `δI = inset / Rpx`. *(2026-10-24: now the straight distance like all arrowheads, `δI = 2·asin(min(inset, 2·Rpx) / (2·Rpx))`; `design/2026-10-23_smooth_polyline_spline_plan.md` §5.4.)*
 - Base point for the direction (chord of length `len`): `δL = 2·asin(min(len, 2·Rpx) / (2·Rpx))`. `B = Rpx·(cos(θ ∓ δL), sin(θ ∓ δL))`, `d = normalize(P − B)`.
 - `P = Rpx·(cos θ, sin θ)` reuses the same `cos`/`sin`. Per arrow that's one `asin`, 2× cos/sin and one `sqrt`.
 - **Too short (D9)**: if `δI_start + δI_end ≥ |sweep|`, skip the arc stroke and still draw the arrows.
@@ -245,7 +245,7 @@ drawArrows(ctx, u, recA, recB) { ... }
 ## 7. Known Limitations / Non-Goals
 - On straight polylines, an inset longer than the last segment does not walk back across further vertices (§4.2).
 - The dash phase of the shaft shifts by `inset` at the start (the shaft begins later). This could be compensated with `lineDashOffset` if it bothers anyone; not part of this plan.
-- Ellipse trimming is approximate (1 correction step), but more than accurate enough at the pixel level.
+- Ellipse trimming is approximate (1 correction step), but more than accurate enough at the pixel level. *(2026-10-24: not at the tip of thin ellipses (100 × 10: 11.2 px intended → 3.2 px, the shaft poked out). Replaced by 12 bisection steps on the angle; `design/2026-10-23_smooth_polyline_spline_plan.md` §5.4.)*
 - `paintorder` interaction (TODO.md) is out of scope.
 
 ---

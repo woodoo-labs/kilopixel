@@ -101,17 +101,17 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
     return this.parameterOffset(radiusX, radiusY, radians, inward, rec.inset);
   }
 
-  // Parameter offset that moves `distance` away from `radians`: local-speed estimate plus one chord correction.
+  // Parameter offset (towards `inward`) where the arc is `distance` away from `radians` in a straight line.
+  // Bisection: a local estimate fails at the tip of thin ellipses, where the curve turns fast.
   parameterOffset(radiusX, radiusY, radians, inward, distance) {
-    const speedX = radiusX * Math.sin(radians), speedY = radiusY * Math.cos(radians);
-    let offset = distance / (Math.sqrt(speedX * speedX + speedY * speedY) || 1);
-
-    const target = radians + inward * offset;
-    const chordX = radiusX * (Math.cos(target) - Math.cos(radians));
-    const chordY = radiusY * (Math.sin(target) - Math.sin(radians));
-    const chord = Math.sqrt(chordX * chordX + chordY * chordY);
-    if (chord > 0) offset *= distance / chord;
-    return offset;
+    const cos = Math.cos(radians), sin = Math.sin(radians);
+    let lo = 0, hi = Math.PI;
+    for (let i = 0; i < 12; i++) {
+      const mid = (lo + hi) / 2, target = radians + inward * mid;
+      const x = radiusX * (Math.cos(target) - cos), y = radiusY * (Math.sin(target) - sin);
+      if (x * x + y * y > distance * distance) hi = mid; else lo = mid;
+    }
+    return (lo + hi) / 2;
   }
 
   getBoundingBox() {

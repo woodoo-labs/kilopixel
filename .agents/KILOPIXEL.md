@@ -573,14 +573,15 @@ Supported on `<pxl-line>`, `<pxl-polyline>`, `<pxl-circle>` and `<pxl-ellipse>` 
 The stroke under the head is shortened ("inset") so it never shows beside or in front of the head:
 - **`'filled'`**: the shaft ends at depth `D = min(max(Dmin, 0.6 × length), length + capExt)` behind the tip, where `Dmin` is the exact minimum for the cap (`0.866·sw` butt, `1.366·sw` square, `1·sw` round). This formula is continuous, so animated sizes never jump. Very small heads sit flush on the shaft end like a pointed cap.
 - **`'line'`**: the shaft's visible end is exactly at the chevron vertex (inset = the join extension).
-- **Curves**: circle and ellipse trim by arc length / parameter offset. Smooth polylines trim only their first/last Bézier segment via de Casteljau (`flatCache` is never mutated). The head points along the **chord over its own length**, so its base sits on the curve.
+- **One trim definition**: the shaft end and the head base lie `inset` / the head length away from the tip **in a straight line**, on every shape. Lines: exact along the line. Circles: `2·asin(d / 2R)`. Ellipses and smooth polylines: 12 bisection steps (ellipse: on the angle; polyline: on the first/last Bézier segment, split with de Casteljau, `flatCache` is never mutated). The head points along the **chord over its own length**, so its base sits on the curve.
 
 ### Rules & Limits
 - Arrowheads only apply to **open** strokes. They are ignored with `pie`, `closed`, `ir` / `irx` / `iry`, and on closed polylines. A full 360° sweep with arrows stays an open arc.
 - Heads inherit the stroke style (colors and gradients). **No `stroke` (or `strokewidth="0"`) means no arrowheads.**
 - `'line'` chevrons are always drawn solid, even on dashed strokes.
 - If a path is shorter than both insets combined, only the heads are drawn.
-- 2-point polylines are drawn straight even with `smooth` (a Catmull-Rom curve through 2 points is a line).
+- 2-point polylines are drawn straight even with `smooth` (a curve through 2 points with free ends is a line).
+- Polylines: arrows skip zero-length end segments (first/last points closer than 0.01 px) and sit on the first/last point with a distinct neighbour. If all points are the same, no heads are drawn.
 
 ### Performance
 - Zero allocations per frame: each arrow shape pre-allocates two records (`_arrowStart`, `_arrowEnd`) via `pxl.createArrowRecord()`, with all fields initialized as doubles (one stable hidden class).
@@ -977,7 +978,7 @@ A removed or empty handler (`removeAttribute('onclick')`, `onclick=""`) sets the
 - Calculates start/end radians from degrees
 - If `sweep` is set, `endRadians = startRadians + sweep * π/180`
 - If neither `end` nor `sweep`, draws full circle
-- Arrowheads (open arcs only; see [Arrowhead System](#arrowhead-system)): the arc is trimmed by `inset / R` radians; each head points along the chord from the arc point one head length in (`2·asin(len / 2R)`) back to the end
+- Arrowheads (open arcs only; see [Arrowhead System](#arrowhead-system)): the arc is trimmed by `2·asin(inset / 2R)` radians (straight distance `inset` from the end); each head points along the chord from the arc point one head length in (`2·asin(len / 2R)`) back to the end
 - Donut: if `ir > 0`, draws inner arc in reverse direction and closes
 - Pie: if `pie` and not full circle, draws `lineTo(0, 0)` and closes
 
@@ -1006,7 +1007,7 @@ A removed or empty handler (`removeAttribute('onclick')`, `onclick=""`) sets the
 
 ### Drawing Logic
 
-Like Circle but uses `ctx.ellipse()` with independent `rx`/`ry` radii. Arrowheads (see [Arrowhead System](#arrowhead-system)) convert a distance along the curve into a parameter offset: an estimate from the local speed `sqrt((rx·sin θ)² + (ry·cos θ)²)`, followed by one chord correction step. This is used both for the trim (`inset`) and for the head direction (chord over the head length).
+Like Circle but uses `ctx.ellipse()` with independent `rx`/`ry` radii. Arrowheads (see [Arrowhead System](#arrowhead-system)) convert a straight distance from the arc end into a parameter offset with 12 bisection steps on the angle (a local estimate fails at the tip of thin ellipses). This is used both for the trim (`inset`) and for the head direction (chord over the head length).
 
 ### Bounding Box
 
@@ -1147,10 +1148,13 @@ Coordinates are readable like attributes: `<pxl-circle x="ref.poly.p2" y="ref.po
 ### Smoothing
 
 When `smooth` is not false:
-- Uses **Catmull-Rom** spline interpolation via `ctx.bezierCurveTo()`
-- `smooth` can be a number to control tension (default `1` when truthy)
-- Control points: `cp = p + (pNext - pPrev) * (tension / 6)`
-- Handles both open and closed polylines correctly
+- **Centripetal Catmull-Rom** (alpha 0.5, like D3 `curveCatmullRom`) via `ctx.bezierCurveTo()`. Design: `design/2026-10-23_smooth_polyline_spline_plan.md`
+- `smooth` can be a number: it scales every handle (default `1` when truthy, `0` = straight, negative = loops)
+- Handles at point `P` with incoming segment `Δin` (length `dIn`) and outgoing `Δout` (`dOut`), `aIn = √dIn`, `aOut = √dOut`: tangent `T = dIn·Δout + dOut·Δin`, outgoing handle `k·T / (3·aIn·(aIn + aOut))`, incoming handle `−k·T / (3·aOut·(aIn + aOut))`. Evenly spaced points give the uniform `(pNext − pPrev)·k/6`
+- **Free ends** (first/last point of an open path) get no handle: the curve leaves them towards the next control point instead of straightening out
+- **Duplicate points** make a corner (both handles 0); the handles shrink continuously as two points move together
+- **Seam**: a polyline (open or closed) whose last point is within 0.01 px of its first point is smoothed across that point (neighbours wrap like on a closed path). Repeat the start point at the end to keep a sharp point there
+- One segment loader (`loadSegment`) serves the drawing loop and the arrow trimming, so both always agree. Cost: 6 `sqrt` per segment, no allocations
 
 ### Modes
 
@@ -1163,7 +1167,7 @@ When `smooth` is not false:
 - Fills `flatCache` Float32Array with scaled values
 - Draws path: simple `lineTo` or smooth `bezierCurveTo` (2-point polylines are always straight)
 - `closed` is strict (`closed === true`, like circle and ellipse): bare or `"true"` closes, `"1"` does not
-- Arrowheads (open polylines only; see [Arrowhead System](#arrowhead-system)): `flatCache` is never mutated. Straight: the first/last segment is trimmed by `inset` (clamped to the segment length). Smooth: the first/last Bézier segment is split with de Casteljau at the chord estimate `t = inset / chord`, so the curve stays identical, only shorter; the Catmull-Rom loop in between stays branch-free.
+- Arrowheads (open polylines only; see [Arrowhead System](#arrowhead-system)): `flatCache` is never mutated. Straight: the first/last segment is trimmed by `inset` (clamped to the segment length). Smooth: the first/last Bézier segment is split with de Casteljau at the parameter where the curve is `inset` away from the end in a straight line (`trimParameter`, 12 bisection steps), so the curve stays identical, only shorter.
 - If `closed`: `ctx.closePath()`
 
 ### Bounding Box

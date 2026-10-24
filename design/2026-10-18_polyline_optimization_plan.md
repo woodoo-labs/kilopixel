@@ -27,7 +27,7 @@ All existing docs and examples work. Nothing here blocks the polyline docs page.
 | Task | Real bug? | Effort | Priority |
 |---|---|---|---|
 | `setAttribute('points', …)` updates `ref.<id>.pN` readers | ✅ | 1 line + key handling | ✅ **done** (2026-10-19) |
-| Arrowhead points right when the first or last two points are identical (§5 #7) | ✅ visual, rare input | ~10 lines | low: fix when touched |
+| Arrowhead points right when the first or last two points are identical (§5 #7) | ✅ visual, rare input | ~10 lines | ✅ **done** (2026-10-24, smooth spline plan §5.3) |
 | All X (or all Y) non-finite + gradient → exception in `createGradient` (§5 #5) | ✅ very rare | ~3 lines guard | low: fix when touched |
 | Phase 1: warnings for typos in `points` (§3) | no, developer experience | ~30 lines | low |
 | Phase 2: point storage (§4) | no | large, touches reactivity | deferred: ≈ 8 µs per frame for 500 points |
@@ -290,8 +290,8 @@ Behavior spec for phase 1 + 2. "Today" is verified in code or with the test scri
 | 5 | All X (or all Y) non-finite **and** a gradient fill/stroke | bounding box `±Infinity` → gradient arguments `NaN` → `createLinearGradient` etc. **throw** (WebIDL `double`). The exception leaves `stage.render()`: later shapes in the layer, later layers, hit testing and perf telemetry stop updating | can't happen: `draw()` returns before `applyStyle` |
 | 6 | Expression that throws at runtime (`ref.a.value.b` with `value` undefined) | exception in `evaluateAnimations` | unchanged — engine-wide issue for all attributes, out of scope |
 | 7 | Two identical consecutive end points + arrowhead | straight: `aimArrow` gets a zero vector → falls back to direction `(1, 0)`, head points right; smooth: chord 0 → `len / chord = Infinity` → whole first segment trimmed, same wrong direction | straight: walk inward to the first distinct point for the direction; if all points are identical, no arrowheads. Smooth: direction from the first distinct point, no trim on a zero-length end segment. Verify visually |
-| 8 | Duplicate points inside a **smooth** polyline | Catmull-Rom makes a cusp / small loop | unchanged (spline quality, TODO §15); document "avoid duplicate points with `smooth`" |
-| 9 | `closed` polyline that repeats its first point at the end | straight: harmless; smooth: kink at the seam | unchanged; document "don't repeat the first point, `closed` connects it" |
+| 8 | Duplicate points inside a **smooth** polyline | Catmull-Rom makes a cusp / small loop | ✅ 2026-10-24: a duplicate point makes a corner (smooth spline plan §4.1); document it as a feature |
+| 9 | `closed` polyline that repeats its first point at the end | straight: harmless; smooth: kink at the seam | ✅ 2026-10-24: seam rule, smoothed across the repeated point (smooth spline plan §4.2) |
 | 10 | 2 points + `smooth` | drawn straight | same |
 | 11 | `smooth="0"` | Bézier path with control points on the end points (= straight, but via the smooth code and its trim) | treat as straight (`traceStraight`): same picture, exact straight arrow trim, cheaper |
 | 12 | Negative `smooth` | loops (control points flipped) | unchanged, user's choice; document |
