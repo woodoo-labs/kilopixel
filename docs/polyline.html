@@ -344,7 +344,7 @@
         <!-- SECTION 4: SHARP CORNERS                                          -->
         <!-- ================================================================= -->
         <h2>4. Sharp Corners</h2>
-        <p>A smooth polyline bends at every point. To keep a sharp corner, repeat that point, like <code>250,200; 250,200</code>: the curve arrives and leaves the point without rounding it, while all other points stay smooth. The heart repeats the dip between its lobes and ends on its first point <code>250,450</code>, which keeps the bottom tip sharp.</p>
+        <p>A smooth polyline bends at every point. To keep a sharp corner, repeat that point, like <code>250,200; 250,200</code>: the curve arrives and leaves the point without rounding it, while all other points stay smooth. The heart repeats the dip between its lobes. It also ends on its first point <code>250,450</code>: a closed path connects its end back to its start, so the same start and end point counts as a repeated point, and the bottom tip stays sharp.</p>
         <p>The closed teardrop writes its top point <code>750,150</code> once, so its tip is round. Repeat it at the end and the tip turns sharp. Point lists from other formats often end on their first point: for a smooth loop, drop the last point and use <code>closed</code>.</p>
 
         <div class="callout-info">
@@ -441,6 +441,100 @@
               <pxl-circle x="700" y="400" r="6" fill="#60a5fa"></pxl-circle>
               <pxl-circle x="650" y="300" r="6" fill="#60a5fa"></pxl-circle>
               <pxl-text x="750" y="500" text="'Teardrop'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+
+        <!-- ================================================================= -->
+        <!-- SECTION 5: RELATIVE MODE                                          -->
+        <!-- ================================================================= -->
+        <h2>5. Relative Mode</h2>
+        <p>With <code>mode="relative"</code>, every point after the first is an offset from the point before it: <code>100,0</code> means 100 to the right, <code>0,-100</code> means 100 up. Only the first point is a position on the stage.</p>
+        <p>Moving the first point moves the whole polyline, and repeating patterns are easy to write: the staircase repeats <code>100,0; 0,-100</code>. Each offset is still its own expression, so it can follow a variable or animate like any other value.</p>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Staircase --&gt;
+    &lt;pxl-polyline stroke="#f97316"
+      points="<mark id="sec5Polyline1StartXCode">50</mark>,<mark id="sec5Polyline1StartYCode">400</mark>; 100,0; 0,-100; 100,0; 0,-100; 100,0; 0,-100; 100,0"
+      mode="relative"&gt;
+    &lt;/pxl-polyline&gt;
+
+    &lt;!-- Right: House --&gt;
+    &lt;pxl-polyline stroke="#3b82f6" fill="#dbeafe66"
+      points="<mark id="sec5Polyline2StartXCode">650</mark>,<mark id="sec5Polyline2StartYCode">400</mark>; 200,0; 0,-150; -100,-100; -100,100"
+      mode="relative" closed="true"&gt;
+    &lt;/pxl-polyline&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec5Polyline1Tab')">Staircase</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec5Polyline2Tab')">House</button>
+              </div>
+            </div>
+
+            <!-- Staircase Tab -->
+            <div class="tab-content active" id="sec5Polyline1Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Start X <span class="indicator-dot"></span></span> <span id="sec5Var1Val">50</span></label>
+                  <input type="range" min="0" max="500" step="10" value="50" autocomplete="off" id="sec5Var1Input"
+                    oninput="document.getElementById('sec5Var1').setAttribute('value', this.value); document.getElementById('sec5Var1Val').innerText = this.value; document.getElementById('sec5Polyline1StartXCode').innerText = this.value;" data-mark="sec5Polyline1StartXCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Start Y <span class="indicator-dot"></span></span> <span id="sec5Var2Val">400</span></label>
+                  <input type="range" min="300" max="500" step="10" value="400" autocomplete="off" id="sec5Var2Input"
+                    oninput="document.getElementById('sec5Var2').setAttribute('value', this.value); document.getElementById('sec5Var2Val').innerText = this.value; document.getElementById('sec5Polyline1StartYCode').innerText = this.value;" data-mark="sec5Polyline1StartYCode">
+                </div>
+              </div>
+            </div>
+
+            <!-- House Tab -->
+            <div class="tab-content" id="sec5Polyline2Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Start X <span class="indicator-dot"></span></span> <span id="sec5Var3Val">650</span></label>
+                  <input type="range" min="500" max="800" step="10" value="650" autocomplete="off" id="sec5Var3Input"
+                    oninput="document.getElementById('sec5Var3').setAttribute('value', this.value); document.getElementById('sec5Var3Val').innerText = this.value; document.getElementById('sec5Polyline2StartXCode').innerText = this.value;" data-mark="sec5Polyline2StartXCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Start Y <span class="indicator-dot"></span></span> <span id="sec5Var4Val">400</span></label>
+                  <input type="range" min="300" max="500" step="10" value="400" autocomplete="off" id="sec5Var4Input"
+                    oninput="document.getElementById('sec5Var4').setAttribute('value', this.value); document.getElementById('sec5Var4Val').innerText = this.value; document.getElementById('sec5Polyline2StartYCode').innerText = this.value;" data-mark="sec5Polyline2StartYCode">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 5 Stage -->
+          <pxl-stage id="sec5Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <!-- Var1, Var2: Staircase start point (x, y); Var3, Var4: House start point (x, y) -->
+              <pxl-var id="sec5Var1" value="50"></pxl-var>
+              <pxl-var id="sec5Var2" value="400"></pxl-var>
+              <pxl-var id="sec5Var3" value="650"></pxl-var>
+              <pxl-var id="sec5Var4" value="400"></pxl-var>
+
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Left: Staircase (Orange Scheme) -->
+              <pxl-polyline id="sec5Polyline1" points="ref.sec5Var1.value, ref.sec5Var2.value; 100,0; 0,-100; 100,0; 0,-100; 100,0; 0,-100; 100,0" mode="relative" stroke="#f97316" strokewidth="4"></pxl-polyline>
+              <pxl-circle x="ref.sec5Var1.value" y="ref.sec5Var2.value" r="8" fill="#c2410c"></pxl-circle>
+              <pxl-text x="ref.sec5Var1.value" y="ref.sec5Var2.value + 20" text="'Start'" size="27" fill="#c2410c" font="monospace" align="center" baseline="top"></pxl-text>
+              <pxl-text x="250" y="500" text="'Staircase'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: House (Blue Scheme) -->
+              <pxl-polyline id="sec5Polyline2" points="ref.sec5Var3.value, ref.sec5Var4.value; 200,0; 0,-150; -100,-100; -100,100" mode="relative" closed="true" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-polyline>
+              <pxl-circle x="ref.sec5Var3.value" y="ref.sec5Var4.value" r="8" fill="#1d4ed8"></pxl-circle>
+              <pxl-text x="ref.sec5Var3.value" y="ref.sec5Var4.value + 20" text="'Start'" size="27" fill="#1d4ed8" font="monospace" align="center" baseline="top"></pxl-text>
+              <pxl-text x="750" y="500" text="'House'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
