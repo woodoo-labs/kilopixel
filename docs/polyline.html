@@ -370,16 +370,16 @@
   &lt;pxl-layer&gt;
     &lt;!-- Left: Heart --&gt;
     &lt;pxl-polyline stroke="#f97316" strokewidth="4" fill="#ffedd566"
-      smooth="<mark id="sec4Polyline1SmoothCode">1.6</mark>" closed="true"
       points="250,450; 50,250; 150,150; <mark id="sec4Polyline1DipCode">250,200; </mark>250,200;
-              350,150; 450,250<mark id="sec4Polyline1TipCode">; 250,450</mark>"&gt;
+              <mark id="sec4Polyline1LobeXCode">350</mark>,<mark id="sec4Polyline1LobeYCode">150</mark>; 450,250<mark id="sec4Polyline1TipCode">; 250,450</mark>"
+      smooth="<mark id="sec4Polyline1SmoothCode">1.6</mark>" closed="true"&gt;
     &lt;/pxl-polyline&gt;
 
     &lt;!-- Right: Teardrop --&gt;
     &lt;pxl-polyline stroke="#3b82f6" strokewidth="4" fill="#dbeafe66"
-      smooth="<mark id="sec4Polyline2SmoothCode">1.3</mark>" closed="true"
-      points="750,150; 850,300; 800,400; 700,400;
-              650,300<mark id="sec4Polyline2EndCode">; 750,150</mark>"&gt;
+      points="750,150; <mark id="sec4Polyline2SideXCode">850</mark>,<mark id="sec4Polyline2SideYCode">300</mark>; 800,400; 700,400;
+              650,300<mark id="sec4Polyline2EndCode">; 750,150</mark>"
+      smooth="<mark id="sec4Polyline2SmoothCode">1.3</mark>" closed="true"&gt;
     &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -398,6 +398,16 @@
             <div class="tab-content active" id="sec4Polyline1Tab">
               <div class="playground-sliders">
                 <div class="control-group">
+                  <label><span>Lobe X</span> <span id="sec4Var1Val">350</span></label>
+                  <input type="range" min="0" max="500" step="10" value="350" autocomplete="off" id="sec4Var1Input"
+                    oninput="document.getElementById('sec4Var1').setAttribute('value', this.value); document.getElementById('sec4Var1Val').innerText = this.value; document.getElementById('sec4Polyline1LobeXCode').innerText = this.value;" data-mark="sec4Polyline1LobeXCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Lobe Y</span> <span id="sec4Var2Val">150</span></label>
+                  <input type="range" min="100" max="500" step="10" value="150" autocomplete="off" id="sec4Var2Input"
+                    oninput="document.getElementById('sec4Var2').setAttribute('value', this.value); document.getElementById('sec4Var2Val').innerText = this.value; document.getElementById('sec4Polyline1LobeYCode').innerText = this.value;" data-mark="sec4Polyline1LobeYCode">
+                </div>
+                <div class="control-group">
                   <label><span>Smooth</span> <span id="sec4Polyline1SmoothVal">1.6</span></label>
                   <input type="range" min="0" max="2" step="0.1" value="1.6" autocomplete="off" id="sec4Polyline1SmoothInput"
                     oninput="document.getElementById('sec4Polyline1').setAttribute('smooth', this.value); document.getElementById('sec4Polyline1SmoothVal').innerText = this.value; document.getElementById('sec4Polyline1SmoothCode').innerText = this.value;" data-mark="sec4Polyline1SmoothCode">
@@ -405,8 +415,8 @@
                 <div class="control-group">
                   <label><span>Corners <span class="indicator-dot"></span></span></label>
                   <div class="toggle-group">
-                    <button class="toggle-btn" onclick="document.getElementById('sec4Polyline1').setAttribute('points', '250,450; 50,250; 150,150; 250,200; 350,150; 450,250'); pxlDocs.updateToggle(this, null, 'sec4Polyline1TipCode', ''); document.getElementById('sec4Polyline1DipCode').innerText = ''; pxlDocs.flashMark('sec4Polyline1DipCode');">round</button>
-                    <button class="toggle-btn active" onclick="document.getElementById('sec4Polyline1').setAttribute('points', '250,450; 50,250; 150,150; 250,200; 250,200; 350,150; 450,250; 250,450'); pxlDocs.updateToggle(this, null, 'sec4Polyline1TipCode', '; 250,450'); document.getElementById('sec4Polyline1DipCode').innerText = '250,200; '; pxlDocs.flashMark('sec4Polyline1DipCode');">sharp</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec4Polyline1').setAttribute('points', '250,450; 50,250; 150,150; 250,200; ref.sec4Var1.value, ref.sec4Var2.value; 450,250'); pxlDocs.updateToggle(this, null, 'sec4Polyline1TipCode', ''); document.getElementById('sec4Polyline1DipCode').innerText = ''; pxlDocs.flashMark('sec4Polyline1DipCode');">round</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec4Polyline1').setAttribute('points', '250,450; 50,250; 150,150; 250,200; 250,200; ref.sec4Var1.value, ref.sec4Var2.value; 450,250; 250,450'); pxlDocs.updateToggle(this, null, 'sec4Polyline1TipCode', '; 250,450'); document.getElementById('sec4Polyline1DipCode').innerText = '250,200; '; pxlDocs.flashMark('sec4Polyline1DipCode');">sharp</button>
                   </div>
                 </div>
               </div>
@@ -416,6 +426,16 @@
             <div class="tab-content" id="sec4Polyline2Tab">
               <div class="playground-sliders">
                 <div class="control-group">
+                  <label><span>Side X</span> <span id="sec4Var3Val">850</span></label>
+                  <input type="range" min="500" max="1000" step="10" value="850" autocomplete="off" id="sec4Var3Input"
+                    oninput="document.getElementById('sec4Var3').setAttribute('value', this.value); document.getElementById('sec4Var3Val').innerText = this.value; document.getElementById('sec4Polyline2SideXCode').innerText = this.value;" data-mark="sec4Polyline2SideXCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Side Y</span> <span id="sec4Var4Val">300</span></label>
+                  <input type="range" min="100" max="500" step="10" value="300" autocomplete="off" id="sec4Var4Input"
+                    oninput="document.getElementById('sec4Var4').setAttribute('value', this.value); document.getElementById('sec4Var4Val').innerText = this.value; document.getElementById('sec4Polyline2SideYCode').innerText = this.value;" data-mark="sec4Polyline2SideYCode">
+                </div>
+                <div class="control-group">
                   <label><span>Smooth</span> <span id="sec4Polyline2SmoothVal">1.3</span></label>
                   <input type="range" min="0" max="2" step="0.1" value="1.3" autocomplete="off" id="sec4Polyline2SmoothInput"
                     oninput="document.getElementById('sec4Polyline2').setAttribute('smooth', this.value); document.getElementById('sec4Polyline2SmoothVal').innerText = this.value; document.getElementById('sec4Polyline2SmoothCode').innerText = this.value;" data-mark="sec4Polyline2SmoothCode">
@@ -423,8 +443,8 @@
                 <div class="control-group">
                   <label><span>Tip <span class="indicator-dot"></span></span></label>
                   <div class="toggle-group">
-                    <button class="toggle-btn" onclick="document.getElementById('sec4Polyline2').setAttribute('points', '750,150; 850,300; 800,400; 700,400; 650,300'); pxlDocs.updateToggle(this, null, 'sec4Polyline2EndCode', '');">round</button>
-                    <button class="toggle-btn active" onclick="document.getElementById('sec4Polyline2').setAttribute('points', '750,150; 850,300; 800,400; 700,400; 650,300; 750,150'); pxlDocs.updateToggle(this, null, 'sec4Polyline2EndCode', '; 750,150');">sharp</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec4Polyline2').setAttribute('points', '750,150; ref.sec4Var3.value, ref.sec4Var4.value; 800,400; 700,400; 650,300'); pxlDocs.updateToggle(this, null, 'sec4Polyline2EndCode', '');">round</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec4Polyline2').setAttribute('points', '750,150; ref.sec4Var3.value, ref.sec4Var4.value; 800,400; 700,400; 650,300; 750,150'); pxlDocs.updateToggle(this, null, 'sec4Polyline2EndCode', '; 750,150');">sharp</button>
                   </div>
                 </div>
               </div>
@@ -434,25 +454,33 @@
           <!-- Section 4 Stage -->
           <pxl-stage id="sec4Stage" ratio="5 / 3" class="demo-stage">
             <pxl-layer>
+              <!-- Var1, Var2: Heart lobe top (x, y); Var3, Var4: Teardrop side (x, y) -->
+              <pxl-var id="sec4Var1" value="350"></pxl-var>
+              <pxl-var id="sec4Var2" value="150"></pxl-var>
+              <pxl-var id="sec4Var3" value="850"></pxl-var>
+              <pxl-var id="sec4Var4" value="300"></pxl-var>
+
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
               <!-- Left: Heart (Orange Scheme) -->
-              <pxl-polyline id="sec4Polyline1" points="250,450; 50,250; 150,150; 250,200; 250,200; 350,150; 450,250; 250,450" closed="true" smooth="1.6" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-polyline>
+              <pxl-polyline id="sec4Polyline1" points="250,450; 50,250; 150,150; 250,200; 250,200; ref.sec4Var1.value, ref.sec4Var2.value; 450,250; 250,450" closed="true" smooth="1.6" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-polyline>
               <pxl-circle x="250" y="450" r="6" fill="#fb923c"></pxl-circle>
               <pxl-circle x="50" y="250" r="6" fill="#fb923c"></pxl-circle>
               <pxl-circle x="150" y="150" r="6" fill="#fb923c"></pxl-circle>
               <pxl-circle x="250" y="200" r="6" fill="#fb923c"></pxl-circle>
-              <pxl-circle x="350" y="150" r="6" fill="#fb923c"></pxl-circle>
               <pxl-circle x="450" y="250" r="6" fill="#fb923c"></pxl-circle>
+              <pxl-circle x="ref.sec4Var1.value" y="ref.sec4Var2.value" r="8" fill="#c2410c"></pxl-circle>
+              <pxl-text x="ref.sec4Var1.value" y="ref.sec4Var2.value - 20" text="'Lobe'" size="27" fill="#c2410c" font="monospace" align="center" baseline="bottom"></pxl-text>
               <pxl-text x="250" y="500" text="'Heart'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
               <!-- Right: Teardrop (Blue Scheme) -->
-              <pxl-polyline id="sec4Polyline2" points="750,150; 850,300; 800,400; 700,400; 650,300; 750,150" closed="true" smooth="1.3" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-polyline>
+              <pxl-polyline id="sec4Polyline2" points="750,150; ref.sec4Var3.value, ref.sec4Var4.value; 800,400; 700,400; 650,300; 750,150" closed="true" smooth="1.3" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-polyline>
               <pxl-circle x="750" y="150" r="6" fill="#60a5fa"></pxl-circle>
-              <pxl-circle x="850" y="300" r="6" fill="#60a5fa"></pxl-circle>
               <pxl-circle x="800" y="400" r="6" fill="#60a5fa"></pxl-circle>
               <pxl-circle x="700" y="400" r="6" fill="#60a5fa"></pxl-circle>
               <pxl-circle x="650" y="300" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-circle x="ref.sec4Var3.value" y="ref.sec4Var4.value" r="8" fill="#1d4ed8"></pxl-circle>
+              <pxl-text x="ref.sec4Var3.value + 20" y="ref.sec4Var4.value" text="'Side'" size="27" fill="#1d4ed8" font="monospace" align="left" baseline="middle"></pxl-text>
               <pxl-text x="750" y="500" text="'Teardrop'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>
