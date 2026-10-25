@@ -512,7 +512,7 @@
 
     &lt;!-- Right: House --&gt;
     &lt;pxl-polyline stroke="#3b82f6" strokewidth="4" fill="#dbeafe66"
-      points="650,400; 200,0; 0,-<mark id="sec5Polyline2WallCode">150</mark>; -100,-100; -100,100"
+      points="600,400; 200,0; 0,-<mark id="sec5Polyline2WallCode">150</mark>; -100,-100; -100,100"
       mode="relative" closed="true"&gt;
     &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
@@ -566,17 +566,20 @@
 
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
-              <!-- Left: Staircase (Orange Scheme) -->
+              <!-- Left: Staircase (Orange Scheme), ghost of the default 100 x 100 steps behind it -->
+              <pxl-polyline points="50,400; 100,0; 0,-100; 100,0; 0,-100; 100,0; 0,-100; 100,0" mode="relative" stroke="#cbd5e1" strokewidth="4"></pxl-polyline>
               <pxl-polyline id="sec5Polyline1" points="50,400; ref.sec5Var1.value,0; 0,-ref.sec5Var2.value; ref.sec5Var1.value,0; 0,-ref.sec5Var2.value; ref.sec5Var1.value,0; 0,-ref.sec5Var2.value; ref.sec5Var1.value,0" mode="relative" stroke="#f97316" strokewidth="4"></pxl-polyline>
-              <pxl-circle x="50" y="400" r="8" fill="#c2410c"></pxl-circle>
-              <pxl-text x="50" y="420" text="'Start'" size="27" fill="#c2410c" font="monospace" align="center" baseline="top"></pxl-text>
               <pxl-text x="250" y="500" text="'Staircase'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
               <!-- Right: House (Blue Scheme) -->
-              <pxl-polyline id="sec5Polyline2" points="650,400; 200,0; 0,-ref.sec5Var3.value; -100,-100; -100,100" mode="relative" closed="true" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-polyline>
-              <pxl-circle x="650" y="400" r="8" fill="#1d4ed8"></pxl-circle>
-              <pxl-text x="650" y="420" text="'Start'" size="27" fill="#1d4ed8" font="monospace" align="center" baseline="top"></pxl-text>
-              <pxl-text x="750" y="500" text="'House'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              <pxl-polyline id="sec5Polyline2" points="600,400; 200,0; 0,-ref.sec5Var3.value; -100,-100; -100,100" mode="relative" closed="true" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-polyline>
+              <pxl-circle x="600" y="400" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-circle x="800" y="400" r="6" fill="#60a5fa"></pxl-circle>
+              <!-- Wall offset (the slider) and the points that follow it -->
+              <pxl-circle x="800" y="400 - ref.sec5Var3.value" r="8" fill="#1d4ed8"></pxl-circle>
+              <pxl-text x="820" y="400 - ref.sec5Var3.value" text="'Wall Height'" size="27" fill="#1d4ed8" font="monospace" align="left" baseline="middle"></pxl-text>
+              <pxl-circle x="700" y="300 - ref.sec5Var3.value" r="6" fill="#60a5fa"></pxl-circle>
+              <pxl-circle x="600" y="400 - ref.sec5Var3.value" r="6" fill="#60a5fa"></pxl-circle>              <pxl-text x="700" y="500" text="'House'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
