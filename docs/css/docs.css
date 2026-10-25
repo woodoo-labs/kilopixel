@@ -398,12 +398,16 @@ body {
   display: none;
 }
 
+/* Reactive marks take no extra space, so the code keeps its alignment; the active halo is a shadow, not padding */
 .docs-content pre mark.highlight-reactive {
   background-color: transparent;
+  padding: 0;
+  margin: 0;
 }
 
 .docs-content pre mark.highlight-reactive.highlight-active {
   background-color: #fdba74; /* Very soft, light pastel orange */
+  box-shadow: 0 0 0 2px #fdba74; /* Stacked lines keep a 1px gap (5px between marks) */
   color: #fff;
 }
 
