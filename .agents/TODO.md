@@ -220,3 +220,11 @@
 - **Done (2026-10-21)**: polyline, blend, text, conic, walkthrough, linear (75 variables). Migrated with `scratch/var_migration/migrate.js`, verified with `scratch/var_migration/verify.html` (old vs. new page: same control sequence, all values identical, no errors, no missing IDs).
 - **Open: `radial.html`** (45 variables, 178 `ref.*` uses). Its bottom script builds IDs from parts (`${sec}DirX${radiusKey}`, `${sec}${radiusKey}`, `${sec}Grad${radiusKey}Input`), so a text replacement would break it: the script has to be rewritten to use the new names (e.g. a lookup table per section). Sliders there are also named differently from their variables (`sec1ex1GradR1Input` sets `sec1ex1R1`).
 - **Then**: run `migrate.js` (dry run first) and `verify.html` with `radial.html` added to the page list.
+
+## 25. Refs Across Coordinate Spaces (`toLocal` Point Form, `ref.<id>.points`)
+- **Status**: ⚪ **Discussion** (2026-10-25, no code changes decided)
+- **Reference**: `design/2026-10-25_refs_across_spaces_note.md`
+- **Finding**: refs (`ref.v.value`, `ref.box.x`, `ref.zig.pN`) are values in the target's space, not positions; only `toLocal()` crosses spaces, and it maps only an element's frame (`x`, `y`, `tx`, `ty`, `rotate`, `scale`), not points inside it.
+- **Works today**: shared space; track one point via `dx` / `dy` + `toLocal(ref, 'tx')`; anchors (`pxl-group` or a drawn / hidden dot) in the shape's space; phantom groups as spatial variables; sizes and angles by composition (`ref.c.r * toLocal(ref.c, 'scale')`).
+- **Possible later**: `toLocal(ref.el, 'x', px, py)` point form; `toLocal(ref.zig, 'pN')` sugar (relative mode); lazy evaluated `ref.zig.points`; list-expression rule for `points="ref.zig.points"` with a quote-aware parser.
+- **Docs**: `ref.<id>.pN` stays internal; teach the patterns in the walkthrough's `toLocal` section.
