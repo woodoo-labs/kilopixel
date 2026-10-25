@@ -992,6 +992,130 @@
           </pxl-stage>
         </div>
 
+        <!-- ================================================================= -->
+        <!-- SECTION 10: ELEMENT REFERENCE                                     -->
+        <!-- ================================================================= -->
+        <h2>10. Element Reference</h2>
+        <p>The table below covers all attributes, runtime properties, and event handlers supported by <code>&lt;pxl-polyline&gt;</code>. Use the tabs to switch between polyline-specific features and common APIs shared across all shapes.</p>
+
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <div class="demo-tabs">
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec10PolylineTab')">Polyline</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec10StylingTab')">Styling</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec10TransformsTab')">Transforms</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec10EventsTab')">Events</button>
+            </div>
+          </div>
+
+          <!-- TAB 1: POLYLINE SPECIFIC ATTRIBUTES -->
+          <div class="tab-content active" id="sec10PolylineTab">
+            <div class="api-list">
+              <div class="api-subheading">Polyline Path Attributes</div>
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">points</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">'x,y; x,y; …' (each value number | expr)</span>
+                    <span class="api-pill default-pill">default: none</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  List of points: semicolons separate the points, a comma separates the x and y value of a point (e.g. <code>points="50,300; 150,200; 350,400"</code>). Every x and y value is its own expression. Points are measured from the center point (<code>x</code>, <code>y</code>). At least 2 points are needed to draw anything.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">closed</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">false | true</span>
+                    <span class="api-pill default-pill">default: false</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  When <code>true</code>, adds the segment from the last point back to the first one, so the outline wraps around. There is no need to repeat the first point. The <code>fill</code> always reaches back to the first point; <code>closed</code> only decides whether that last edge is stroked.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">smooth</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">false | true | number | expr</span>
+                    <span class="api-pill default-pill">default: false</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Turns the straight segments into a curve that passes through every point. A bare <code>smooth</code> or <code>true</code> is the same as <code>1</code>. The number sets the tension: <code>0</code> keeps the segments straight, higher values bend the curve further out. A point written twice stays a sharp corner.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">mode</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">'absolute' | 'relative'</span>
+                    <span class="api-pill default-pill">default: 'absolute'</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  With <code>'relative'</code>, every point after the first is an offset from the point before it. Only the first point is a position.
+                </div>
+              </div>
+
+              <div class="api-subheading">Arrowhead Decorations</div>
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">arrowstart</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">'auto' | number</span>
+                    <span class="api-pill default-pill">default: 0</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Draws an arrowhead at the first point of an open polyline. Use <code>'auto'</code> to automatically scale the size to <code>strokewidth * 3.6</code>. On a smooth polyline the head follows the curve into its end. Arrowheads require a <code>stroke</code> and are ignored on closed polylines.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">arrowend</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">'auto' | number</span>
+                    <span class="api-pill default-pill">default: 0</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Draws an arrowhead at the last point of an open polyline. Use <code>'auto'</code> to automatically scale the size to <code>strokewidth * 3.6</code>.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">arrowstyle</code>
+                  <div class="api-meta">
+                    <span class="api-pill values-pill">'filled' | 'line'</span>
+                    <span class="api-pill default-pill">default: 'filled'</span>
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  Visual appearance of the arrowheads (<code>'filled'</code> solid triangle vs. <code>'line'</code> open v-shape).
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: COMMON STYLING -->
+          <docs-api-styling id="sec10StylingTab" class="tab-content"></docs-api-styling>
+
+          <!-- TAB 3: TRANSFORMS & SPATIAL -->
+          <docs-api-transforms id="sec10TransformsTab" class="tab-content"></docs-api-transforms>
+
+          <!-- TAB 4: INTERACTIVE EVENTS -->
+          <docs-api-events id="sec10EventsTab" class="tab-content"></docs-api-events>
+        </div>
+
       </div>
     </main>
 
