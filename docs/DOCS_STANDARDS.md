@@ -91,7 +91,7 @@ Whenever highlighting critical architectural rules, notes, or important caveats,
 Every documentation example must follow a standardized 3-part layout:
 1. **Visible Declarative Code Block (`<pre><code class="language-html">`)**: Placed **above** the demo container so developers see the declarative syntax immediately. Use `<mark id="code...">` around dynamic values.
 2. **Interactive Controls (`<div class="demo-controls">`)**: Placed **above** `<pxl-stage>` inside `<div class="demo-container">`. Every example must feature interactive controls (sliders or toggle buttons). The header title must be simply `Controls` without redundant prefixes.
-3. **Reactive Stage (`<pxl-stage class="demo-stage" ratio="5 / 3">`)**: Placed at the bottom inside `<div class="demo-container">`. The container's CSS flex gap automatically spaces the stage away from the controls. All documentation examples MUST use `ratio="5 / 3"` (logical width 1000, height 600) unless explicitly demonstrating another aspect ratio.
+3. **Reactive Stage (`<pxl-stage class="demo-stage" ratio="5 / 3">`)**: Placed at the bottom inside `<div class="demo-container">`. The container's CSS flex gap automatically spaces the stage away from the controls. All documentation examples MUST use `ratio="5 / 3"` (logical width 1000, height 600) unless explicitly demonstrating another aspect ratio. Showcase sections are square (`ratio="1 / 1"`, see §11).
 
 ```html
 <!-- 1. Declarative Code Block Above Container -->
@@ -340,5 +340,17 @@ To ensure the documentation feels professional, accessible, and grounded, all do
   Every documentation page lead paragraph (`<p class="lead">`) must simply and clearly state what the shape or feature does and list its 2–3 core capabilities in plain English.
 * **Use "Shape" Instead of "Element" for Canvas Primitives**:
   When introducing visual primitives (`<pxl-circle>`, `<pxl-rect>`, `<pxl-ellipse>`, `<pxl-text>`, etc.), refer to them as "shapes" rather than "elements" (e.g., *"The circle shape renders..."*). This emphasizes that they draw visual 2D canvas graphics rather than traditional HTML DOM boxes. (Reserve "element" or "container" for structural nodes like `<pxl-stage>` and `<pxl-layer>`).
+
+## 11. Showcase Sections
+A showcase is one artistic, animated composition near the end of a feature page. It shows what the page's feature can do when used freely, after the sections have taught it step by step.
+
+* **Optional:** Not every page needs a showcase. Technical topics (e.g. `caps.html`) can do without one.
+* **Placement:** The last numbered section before the Element Reference, titled `[N]. Showcase`.
+* **Markup:** `<div class="showcase-container">` around `<pxl-stage id="sec[N]Stage" ratio="1 / 1" class="showcase-stage">`. Showcases are square (an exception to the `5 / 3` rule in §4) and dark (set by `.showcase-stage`).
+* **Pure Declarative HTML:** No controls, no code snippet, no JavaScript, no HUD text or FPS counters. Everything is drawn with Kilopixel elements and expressions.
+* **Built From the Page's Feature:** The composition is made mainly from the shape or feature the page teaches (e.g. only `<pxl-rect>` on `rect.html`). Other shapes may support it but not dominate.
+* **Static and Animated Layers:** Put shapes that never change into a background `<pxl-layer>` and animated shapes into a foreground layer, so the static layer is not redrawn every frame.
+* **Free Colors and Sizes:** The color semantics (§1), the stroke width hierarchy and the `size="27"` font rule do not apply. Showcases use their own palette.
+* **One Paragraph:** A single `<p>` directly below the heading says what the composition shows (an homage to an artist or work, if there is one) and which technique of the page it uses. It follows §10: neutral tone, no performance claims such as "60fps" or "GPU-accelerated".
 
 
