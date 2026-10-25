@@ -32,12 +32,10 @@
       <div class="docs-inner">
       <h1>Kilopixel</h1>
       <h2>The Declarative Canvas Framework <span class="subtitle-inline">&mdash; HTML5 Canvas, Reinvented.</span></h2>
-      <p class="lead">Kilopixel bridges the gap between the raw performance of the HTML5 Canvas and the ease of declarative HTML. Without needing to write a single line of JavaScript, you can build complex, responsive graphics using nothing but custom HTML elements like <code>&lt;pxl-stage&gt;</code> and <code>&lt;pxl-circle&gt;</code>.</p>
-      
-      <p class="lead">Powered by a lightning-fast evaluation engine, Kilopixel processes math expressions, element reactivity, and continuous animations natively at 60 frames per second &mdash; all with absolutely zero build tools required.</p>
-      
+      <p class="lead">Kilopixel draws responsive graphics on the HTML5 canvas using custom HTML elements such as <code>&lt;pxl-stage&gt;</code> and <code>&lt;pxl-circle&gt;</code>. Any attribute can be a math expression that animates over time or reacts to the pointer and to other shapes, without writing JavaScript or setting up a build step.</p>
+
       <h2>See it in Action</h2>
-      <p>The simple HTML snippet below generates the live, continuous canvas animation underneath it. Notice how the circle's movement and color are driven purely by mathematical expressions written directly inside the element's attributes!</p>
+      <p>The HTML snippet below draws the animation underneath it. The circle's movement, size, and color are math expressions written directly in its attributes.</p>
       <pre><code class="language-html">&lt;!-- An autonomous, color-shifting circle gliding across the canvas --&gt;
 &lt;pxl-stage ratio="16 / 9"&gt;
   &lt;pxl-layer x="500" y="280"&gt;
@@ -67,8 +65,8 @@
       <ul>
         <li><strong>Zero Build Steps:</strong> No NPM, Webpack, or bundling required. Just drop in a single script tag and start writing.</li>
         <li><strong>Declarative Syntax:</strong> Describe your graphics visually using nested custom HTML elements.</li>
-        <li><strong>Native Reactivity:</strong> Bind properties to mouse coordinates, time, or other elements using the zero-GC <code>ref.*</code> registry.</li>
-        <li><strong>Blazing Fast:</strong> The internal engine bypasses the slow DOM entirely during the 60fps render loop.</li>
+        <li><strong>Built-In Reactivity:</strong> Bind attributes to the pointer position, to time, or to other shapes with <code>ref.*</code> references.</li>
+        <li><strong>Canvas Rendering:</strong> Shapes are drawn on canvas instead of as DOM elements, and layers that don't change are not redrawn.</li>
       </ul>
       </div>
     </main>
