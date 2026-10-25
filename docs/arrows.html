@@ -34,8 +34,13 @@
         <h1>Arrowheads</h1>
         <p class="lead">Arrowheads turn open paths into arrows. They can be added to either end of lines, polylines, circular arcs and elliptical arcs, drawn as filled triangles (<code>arrowstyle="filled"</code>) or open chevrons (<code>arrowstyle="line"</code>), and sized automatically from the stroke width or with a fixed value.</p>
 
+        <div class="callout-info">
+          <p class="callout-title">Open, Stroked Paths Only</p>
+          <p class="callout-body">Arrowheads need a <code>stroke</code> and are drawn in its color, including gradients. They are ignored on closed paths: arcs with <code>closed</code> or <code>pie</code>, rings with an inner radius (<code>ir</code>, <code>irx</code>, <code>iry</code>), and closed polylines. On dashed strokes (<code>linedash</code>), <code>arrowstyle="line"</code> arrowheads stay solid.</p>
+        </div>
+
         <!-- ================================================================= -->
-        <!-- SECTION 1: SIZING                                                 -->
+        <!-- SECTION 1: SIZING                                                -->
         <!-- ================================================================= -->
         <h2>1. Sizing</h2>
         <p>Arrowheads are added to open paths using the <code>arrowstart</code> and <code>arrowend</code> attributes. Both attributes support two sizing modes: automatic scaling (<code>'auto'</code>), which sets the arrowhead size to <code>strokewidth &times; 3.6</code>, and custom numeric sizing, where the arrowhead size is defined explicitly and remains independent of the stroke width.</p>
