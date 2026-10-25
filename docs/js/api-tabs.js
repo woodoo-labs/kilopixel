@@ -419,18 +419,6 @@ class DocsApiEvents extends HTMLElement {
                   Active Press State: Reactive boolean property that is <code>true</code> while the primary pointer button is held down over the shape.
                 </div>
               </div>
-
-              <div class="api-item" style="border-left: 3px solid var(--accent); background: var(--code-bg);">
-                <div class="api-item-header">
-                  <code class="api-name">Stage Properties (Tip)</code>
-                  <div class="api-meta">
-                    <span class="api-pill values-pill">global stage reference</span>
-                  </div>
-                </div>
-                <div class="api-item-desc">
-                  Inside any shape expression, you can also access global reactive properties from the parent stage, including <code>ref.main.mouseX</code>, <code>ref.main.mouseY</code>, <code>ref.main.width</code>, <code>ref.main.height</code>, and <code>ref.main.fps</code>.
-                </div>
-              </div>
             </div>
     `;
   }

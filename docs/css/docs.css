@@ -526,6 +526,11 @@ body {
   animation: radar-ping 2.2s infinite ease-out;
 }
 
+/* Dot inside a sentence: even spacing on both sides */
+.indicator-dot-inline {
+  margin: 0 4px;
+}
+
 @keyframes radar-ping {
   0% {
     transform: scale(0.8);
