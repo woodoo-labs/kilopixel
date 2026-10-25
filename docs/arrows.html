@@ -32,7 +32,7 @@
     <main class="docs-content">
       <div class="docs-inner">
         <h1>Arrowheads</h1>
-        <p class="lead">Arrowheads turn open paths into arrows. They can be added to either end of lines, polylines, circular arcs and elliptical arcs, drawn as filled triangles or open chevrons, and sized automatically from the stroke width or with a fixed value.</p>
+        <p class="lead">Arrowheads turn open paths into arrows. They can be added to either end of lines, polylines, circular arcs and elliptical arcs, drawn as filled triangles (<code>arrowstyle="filled"</code>) or open chevrons (<code>arrowstyle="line"</code>), and sized automatically from the stroke width or with a fixed value.</p>
 
         <!-- ================================================================= -->
         <!-- SECTION 1: SIZING                                                 -->
@@ -130,7 +130,7 @@
         <!-- SECTION 2: STYLES                                                 -->
         <!-- ================================================================= -->
         <h2>2. Styles</h2>
-        <p>Kilopixel provides two visual styles for arrowheads via the <code>arrowstyle</code> attribute: solid filled triangles (<code>arrowstyle="filled"</code>) and open line chevrons (<code>arrowstyle="line"</code>). Both styles automatically inherit the shape's <code>stroke</code> color, and <code>arrowstyle="line"</code> chevrons automatically share the host path's stroke thickness (<code>strokewidth</code>).</p>
+        <p>Kilopixel provides two visual styles for arrowheads via the <code>arrowstyle</code> attribute: filled triangles (<code>arrowstyle="filled"</code>) and open chevrons (<code>arrowstyle="line"</code>). Both styles use the shape's <code>stroke</code> color, and <code>arrowstyle="line"</code> arrowheads use the shape's stroke width (<code>strokewidth</code>).</p>
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
@@ -420,7 +420,7 @@
         <!-- SECTION 4: LINE JOINS                                             -->
         <!-- ================================================================= -->
         <h2>4. Line Joins</h2>
-        <p>Open chevrons (<code>arrowstyle="line"</code>) are stroked, so their tip follows the shape's line join (<code>linejoin</code>): <code>miter</code> draws a sharp tip, <code>bevel</code> a flat tip, and <code>round</code> a rounded tip. The tip still ends at the cap boundary described above. With <code>miter</code>, the tip stays sharp even when <code>miterlimit</code> is lowered to blunt the corners of the path. Filled arrowheads are not affected by <code>linejoin</code>.</p>
+        <p><code>arrowstyle="line"</code> arrowheads are stroked, so their tip follows the shape's line join (<code>linejoin</code>): <code>miter</code> draws a sharp tip, <code>bevel</code> a flat tip, and <code>round</code> a rounded tip. The tip still ends at the cap boundary described above. With <code>miter</code>, the tip stays sharp even when <code>miterlimit</code> is lowered to blunt the corners of the path. Filled arrowheads are not affected by <code>linejoin</code>.</p>
 
         <div class="callout-info">
           <p class="callout-title">Sharp Tips on Rounded Paths</p>
