@@ -233,6 +233,6 @@
 
 ## 26. `toLocal` Readers in a Moving Space
 - **Status**: ✅ **Done** (2026-10-26)
-- **Reference**: `design/2026-10-26_tolocal_fix_plan.md`; tests `scratch/tolocal_numbers.html`, `scratch/tolocal_fix_tests.html`
+- **Reference**: `design/2026-10-26_tolocal_fix_plan.md`; tests in `tests/index.html` (`toLocal:` tests, committed); demos `scratch/tolocal_numbers.html`, `scratch/tolocal_reader_lines.html` (local only)
 - **Bug**: `toLocal()` results went stale when the reader's own layer or group moved (only the target side was tracked). Example: the walkthrough §8 line leaves both circles when its own layer rotates.
 - **Fix**: compiler flags `toLocal` expressions (`fn.usesToLocal`); elements list them in `toLocalAttributeKeys`; `broadcastGlobalMatrixChange()` re-evaluates them via `pxl.evaluateToLocalAttributes()`. No cost while nothing moves (walk measured ≈ 0.15 µs per frame for 50 shapes, same as before).

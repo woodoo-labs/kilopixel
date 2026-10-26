@@ -5,6 +5,7 @@
 - **Related**: `design/2026-10-25_refs_across_spaces_note.md` (what `toLocal` maps), `design/coordinate_mapping_implementation_plan.md` (original `toLocal` design), `.agents/TODO.md` §25
 - **Target Implementation**: `js/compiler.js` (`compileExpression`), `js/engine.js` (`compileAttribute`, new `evaluateToLocalAttributes`), `js/elements/node.js` (constructor, `broadcastGlobalMatrixChange`)
 - **Demo** (local only, scratch is git-ignored): `scratch/tolocal_numbers.html`
+- **Tests** (committed): `tests/index.html`, the `toLocal:` tests (10, added 2026-10-26)
 
 ---
 

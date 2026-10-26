@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engine Tests | Kilopixel</title>
+  <link rel="stylesheet" href="../docs/css/docs.css">
+  <style>
+    .test-summary { font-weight: 700; margin: 16px 0; }
+    .test-pass { color: #15803d; }
+    .test-fail { color: #b91c1c; }
+    .test-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .test-table td { border-bottom: 1px solid #e2e8f0; padding: 6px 8px; vertical-align: top; }
+    .test-stages { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 24px; }
+    .test-stages pxl-stage { border: 1px solid #e2e8f0; }
+  </style>
+  <!-- The built bundle: run `node build.js` before opening this page -->
+  <script src="../dist/pxl.min.js"></script>
+</head>
+<body>
+  <main class="docs-content">
+    <div class="docs-inner">
+      <h1>Engine Tests</h1>
+      <p>Open after every engine change (after <code>node build.js</code>), via the dev server: <code>http://localhost:8124/tests/</code>. All tests run automatically; the result is also shown in the tab title (<code>Tests: 10/10 passed</code>) and stored in <code>window.kilopixelTests</code>. Add a test for every engine fix.</p>
+
+      <p id="summary" class="test-summary">Running…</p>
+      <table class="test-table"><tbody id="results"></tbody></table>
+
+      <!-- ================================================================= -->
+      <!-- TEST STAGES                                                       -->
+      <!-- Every stage uses alwaysrender, so tests also run when off-screen. -->
+      <!-- ================================================================= -->
+      <div class="test-stages">
+
+        <!-- toLocal: reader inside a rotating, scaled layer (design/2026-10-26_tolocal_fix_plan.md) -->
+        <pxl-stage id="tlStage1" ratio="5 / 3" alwaysrender>
+          <pxl-layer>
+            <pxl-circle id="tlSun1" x="150" y="150" r="18" fill="#fb923c"></pxl-circle>
+          </pxl-layer>
+          <pxl-layer x="600" y="350" rotate="t * 12" scale="1.5">
+            <pxl-circle id="tlReader1" x="toLocal(ref.tlSun1, 'x')" y="toLocal(ref.tlSun1, 'y')" r="16" stroke="#1d4ed8" strokewidth="3"></pxl-circle>
+          </pxl-layer>
+        </pxl-stage>
+
+        <!-- toLocal: static move of the reader's layer (setAttribute), then idle -->
+        <pxl-stage id="tlStage2" ratio="5 / 3" alwaysrender>
+          <pxl-layer>
+            <pxl-circle id="tlSun2" x="150" y="150" r="18" fill="#fb923c"></pxl-circle>
+          </pxl-layer>
+          <pxl-layer id="tlLayer2" x="600" y="350">
+            <pxl-circle id="tlReader2" x="toLocal(ref.tlSun2, 'x')" y="toLocal(ref.tlSun2, 'y')" r="16" stroke="#1d4ed8" strokewidth="3"></pxl-circle>
+          </pxl-layer>
+        </pxl-stage>
+
+        <!-- toLocal: nested group, pxl-var and polyline point readers -->
+        <pxl-stage id="tlStage3" ratio="5 / 3" alwaysrender>
+          <pxl-layer>
+            <pxl-circle id="tlSun3" x="200" y="150" r="18" fill="#fb923c"></pxl-circle>
+          </pxl-layer>
+          <pxl-layer x="600" y="350" rotate="t * 12" scale="1.2">
+            <pxl-var id="tlVar3" value="toLocal(ref.tlSun3, 'x')"></pxl-var>
+            <pxl-group x="50" y="20" rotate="-t * 30" scale="0.8">
+              <pxl-circle id="tlReader3" x="toLocal(ref.tlSun3, 'x')" y="toLocal(ref.tlSun3, 'y')" r="16" stroke="#1d4ed8" strokewidth="3"></pxl-circle>
+              <pxl-polyline id="tlPoly3" points="0,0; toLocal(ref.tlSun3, 'x'), toLocal(ref.tlSun3, 'y')" stroke="#22c55e" strokewidth="3"></pxl-polyline>
+            </pxl-group>
+          </pxl-layer>
+        </pxl-stage>
+
+        <!-- toLocal: reader and target in the same moving subtree -->
+        <pxl-stage id="tlStage4" ratio="5 / 3" alwaysrender>
+          <pxl-layer x="500" y="300" rotate="t * 15">
+            <pxl-circle id="tlTarget4" x="200" dx="60" rotate="t * 40" r="18" fill="#fb923c"></pxl-circle>
+            <pxl-group x="-150" rotate="t * -25">
+              <pxl-circle id="tlReader4" x="toLocal(ref.tlTarget4, 'tx')" y="toLocal(ref.tlTarget4, 'ty')" r="16" stroke="#1d4ed8" strokewidth="3"></pxl-circle>
+            </pxl-group>
+          </pxl-layer>
+        </pxl-stage>
+
+        <!-- toLocal: line connecting two circles in other layers (walkthrough §8 case) -->
+        <pxl-stage id="tlStage5" ratio="5 / 3" alwaysrender>
+          <pxl-layer id="tlLayer5a" x="350" y="250">
+            <pxl-circle id="tlCircle5a" x="-150" y="-150" r="40" stroke="#f97316" strokewidth="4"></pxl-circle>
+          </pxl-layer>
+          <pxl-layer id="tlLayer5b" x="650" y="350">
+            <pxl-circle id="tlCircle5b" x="150" y="150" r="40" stroke="#3b82f6" strokewidth="4"></pxl-circle>
+          </pxl-layer>
+          <pxl-layer id="tlLayer5c">
+            <pxl-line id="tlLine5"
+              x1="toLocal(ref.tlCircle5a, 'x')" y1="toLocal(ref.tlCircle5a, 'y')"
+              x2="toLocal(ref.tlCircle5b, 'x')" y2="toLocal(ref.tlCircle5b, 'y')"
+              stroke="#ec4899" strokewidth="4" linedash="[10, 8]">
+            </pxl-line>
+          </pxl-layer>
+        </pxl-stage>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // --- Minimal test runner (no dependencies) ---
+    const tests = [];
+    const test = (name, fn) => tests.push({ name, fn });
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const el = (id) => pxl.nodes[id].$node;
+    const round = (n) => Math.round(n * 10) / 10;
+
+    // Stored attribute values of `reader` must equal a fresh toLocal() of `target`
+    function expectMapped(readerId, targetId, pairs) {
+      const reader = el(readerId), target = pxl.nodes[targetId];
+      for (const [attr, prop] of pairs) {
+        const stored = reader.attributeValues[attr];
+        const fresh = pxl.toLocal(reader, target, prop);
+        if (!(Math.abs(stored - fresh) < 0.01)) {
+          throw new Error(`${readerId}.${attr} is ${round(stored)}, toLocal(${targetId}, '${prop}') is ${round(fresh)}`);
+        }
+      }
+    }
+    const XY = [['x', 'x'], ['y', 'y']];
+
+    // Runs `check` several times while the stages animate
+    async function sampled(check, times = 3, gap = 300) {
+      for (let i = 0; i < times; i++) {
+        await wait(gap);
+        check();
+      }
+    }
+
+    // ===================================================================
+    // toLocal (design/2026-10-26_tolocal_fix_plan.md)
+    // ===================================================================
+
+    test('toLocal: reader in a rotating, scaled layer follows a still target', () =>
+      sampled(() => expectMapped('tlReader1', 'tlSun1', XY)));
+
+    test('toLocal: static move of the reader\'s layer updates the reader', async () => {
+      expectMapped('tlReader2', 'tlSun2', XY);
+      const layer = el('tlLayer2');
+      layer.setAttribute('x', '450');
+      layer.setAttribute('rotate', '35');
+      layer.setAttribute('scale', '1.4');
+      await wait(100);
+      expectMapped('tlReader2', 'tlSun2', XY);
+    });
+
+    test('toLocal: nothing redraws while nothing moves (stage idle at 0 FPS)', async () => {
+      await wait(2200); // fps is published once per second
+      const fps = pxl.nodes.tlStage2.fps;
+      if (fps !== 0) throw new Error(`static stage renders at ${fps} FPS`);
+    });
+
+    test('toLocal: reader in a nested group inside a rotating layer', () =>
+      sampled(() => expectMapped('tlReader3', 'tlSun3', XY)));
+
+    test('toLocal: <pxl-var> reader inside a rotating layer', () =>
+      sampled(() => expectMapped('tlVar3', 'tlSun3', [['value', 'x']])));
+
+    test('toLocal: polyline point reader inside a rotating layer', () =>
+      sampled(() => expectMapped('tlPoly3', 'tlSun3', [['p2', 'x'], ['p3', 'y']])));
+
+    test('toLocal: reader and target in the same moving subtree', () =>
+      sampled(() => expectMapped('tlReader4', 'tlTarget4', [['x', 'tx'], ['y', 'ty']])));
+
+    test('toLocal: line follows when its own layer moves (walkthrough §8 case)', async () => {
+      const ends = (a, b) => { expectMapped('tlLine5', a, [['x1', 'x'], ['y1', 'y']]); expectMapped('tlLine5', b, [['x2', 'x'], ['y2', 'y']]); };
+      ends('tlCircle5a', 'tlCircle5b');
+      const layer = el('tlLayer5c');
+      layer.setAttribute('x', '500');
+      layer.setAttribute('y', '300');
+      layer.setAttribute('rotate', '30');
+      await wait(100);
+      ends('tlCircle5a', 'tlCircle5b');
+    });
+
+    test('toLocal: line follows when a target\'s layer moves (target side)', async () => {
+      el('tlLayer5b').setAttribute('rotate', '45');
+      el('tlLayer5a').setAttribute('scale', '0.7');
+      await wait(100);
+      expectMapped('tlLine5', 'tlCircle5a', [['x1', 'x'], ['y1', 'y']]);
+      expectMapped('tlLine5', 'tlCircle5b', [['x2', 'x'], ['y2', 'y']]);
+    });
+
+    test('toLocal: replacing a toLocal attribute with a number removes it from toLocalAttributeKeys', async () => {
+      const reader = el('tlReader2');
+      if (!reader.toLocalAttributeKeys.includes('x')) throw new Error('x missing before the change');
+      reader.setAttribute('x', '10');
+      if (reader.toLocalAttributeKeys.includes('x')) throw new Error('x still listed after setAttribute(\'x\', \'10\')');
+      reader.setAttribute('x', "toLocal(ref.tlSun2, 'x')");
+      if (!reader.toLocalAttributeKeys.includes('x')) throw new Error('x not listed again after restoring toLocal');
+    });
+
+    // --- Run all tests in order ---
+    (async () => {
+      const results = [];
+      const rows = document.getElementById('results');
+      await wait(300); // let stages connect and render once
+
+      for (const { name, fn } of tests) {
+        let error = null;
+        try { await fn(); } catch (e) { error = e; }
+        results.push({ name, passed: !error, error: error ? error.message : null });
+
+        const row = rows.insertRow();
+        row.insertCell().textContent = error ? '✗' : '✓';
+        row.cells[0].className = error ? 'test-fail' : 'test-pass';
+        row.insertCell().textContent = name + (error ? ` — ${error.message}` : '');
+      }
+
+      const passed = results.filter((r) => r.passed).length;
+      const summary = `Tests: ${passed}/${results.length} passed`;
+      const summaryEl = document.getElementById('summary');
+      summaryEl.textContent = summary;
+      summaryEl.className = 'test-summary ' + (passed === results.length ? 'test-pass' : 'test-fail');
+      document.title = summary;
+      window.kilopixelTests = { passed, total: results.length, results };
+    })();
+  </script>
+</body>
+</html>

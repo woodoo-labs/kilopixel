@@ -1,0 +1,13 @@
+# Line endings: LF in the repository and in every working copy, on every machine and for every tool
+# (Windows' core.autocrlf would otherwise turn files into CRLF on checkout while tools write LF).
+* text=auto eol=lf
+
+# Binary files: never convert
+*.zip binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

@@ -14,7 +14,8 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 | `js/` | Engine source. Build order is the `files` list in `build.js` |
 | `docs/` | Public documentation site. Rules: `docs/DOCS_STANDARDS.md` |
 | `design/` | Plans and notes, named `YYYY-MM-DD_<topic>_plan.md` (or `_note.md`) |
-| `examples/test*.html` | Manual test pages (there are no automated tests) |
+| `tests/index.html` | Automated engine tests in the browser (`http://localhost:8124/tests/`); result in the tab title and `window.kilopixelTests` |
+| `examples/test*.html` | Manual demo and test pages |
 | `scratch/` | Temporary files, gitignored |
 | `dist/`, `docs/js/pxl.min.js`, `docs/download/*` | **Build output.** Never edit by hand; they are committed |
 
@@ -26,6 +27,8 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 - **Keep the reference in sync:** when engine behavior or an attribute changes, update `.agents/KILOPIXEL.md` in the same change, plus the affected docs pages and examples.
 - **Plan bigger changes first:** for non-trivial engine work, write a plan in `design/` and agree on it before implementing.
 - **Verify in the browser:** the dev server is `node tools/serve.js` (launch config `kilopixel`, http://localhost:8124, `/` redirects to `/docs/`). Check docs pages and `examples/` there, including the console.
+- **Engine tests:** after every engine change and build, open `tests/index.html`; all tests must pass. Every engine fix gets a test there (committed, unlike `scratch/`).
+- **Line endings:** LF everywhere, set by `.gitattributes`. Don't change it per file.
 - **Temporary files** (helper scripts, dumps, screenshots, visual prototypes) go in `scratch/`, not the project root. Don't delete them afterwards; the user cleans up.
 - **Commits:** only when asked. Conventional style `type(scope): summary`, e.g. `feat(polyline): …`, `fix(arrows): …`, `docs(circle, ellipse): …`, `docs(design): …`, `refactor(engine): …`.
 
