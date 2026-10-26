@@ -222,12 +222,14 @@
 - **Then**: run `migrate.js` (dry run first) and `verify.html` with `radial.html` added to the page list.
 
 ## 25. Refs Across Coordinate Spaces (`toLocal` Point Form, `ref.<id>.points`)
-- **Status**: ⚪ **Discussion** (2026-10-25, no code changes decided)
-- **Reference**: `design/2026-10-25_refs_across_spaces_note.md`
+- **Status**: ⚪ **Discussion** (2026-10-25, ideas added 2026-10-26; no code changes decided, "keep everything as it is for now")
+- **Reference**: `design/2026-10-25_refs_across_spaces_note.md` (hub: index of all related documents in §0, ideas in §7)
 - **Finding**: refs (`ref.v.value`, `ref.box.x`, `ref.zig.pN`) are values in the target's space, not positions; only `toLocal()` crosses spaces, and it maps only an element's frame (`x`, `y`, `tx`, `ty`, `rotate`, `scale`), not points inside it.
 - **Works today**: shared space; track one point via `dx` / `dy` + `toLocal(ref, 'tx')`; anchors (`pxl-group` or a drawn / hidden dot) in the shape's space; phantom groups as spatial variables; sizes and angles by composition (`ref.c.r * toLocal(ref.c, 'scale')`).
 - **Possible later**: `toLocal(ref.el, 'x', px, py)` point form; `toLocal(ref.zig, 'pN')` sugar (relative mode); lazy evaluated `ref.zig.points`; list-expression rule for `points="ref.zig.points"` with a quote-aware parser.
 - **Docs**: `ref.<id>.pN` stays internal; teach the patterns in the walkthrough's `toLocal` section.
+- **Ideas 2026-10-26** (note §7): point names `xN` / `yN` counted from 1 like `<pxl-line>` (§7.1); `toLocal` maps the whole point even when asked for one coordinate (§7.2); one-argument syntax `toLocal(ref.zig.x3)` via a compiler rewrite (§7.3, preferred); the reader-line rule with example (§7.4); "always hit the point" by letting the attribute decide the space, about 40 lines, scoped (§7.5); flip-the-roles workaround (§7.6); other frameworks (§7.7); over-engineering check, next step is a plan with one real use case (§7.8).
+- **Older ideas**: mapping raw points such as the mouse into a group (`design/local_coordinates_implementation_plan.md`, never implemented).
 
 ## 26. `toLocal` Readers in a Moving Space
 - **Status**: ✅ **Done** (2026-10-26)

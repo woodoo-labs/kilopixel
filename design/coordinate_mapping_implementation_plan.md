@@ -1,5 +1,7 @@
 # Coordinate Mapping & Transformation Pipeline Implementation Plan
 
+> **Status (added 2026-10-26)**: ✅ Implemented (the original `toLocal`). Kept unchanged as history. Current state and open ideas: `design/2026-10-25_refs_across_spaces_note.md`.
+
 ## Goal Description
 Establish 100% consistent, lowercase attribute naming across the Kilopixel engine and introduce a mathematical symmetry between simple property reads (`ref.shape.*`) and relative global-to-local matrix mapping (`toLocal(ref.shape, '...')`). 
 

@@ -1,5 +1,7 @@
 # Local Coordinates & Mouse Tracking Implementation Plan
 
+> **Status (added 2026-10-26)**: ⚪ Never implemented (`pxl.toLocal` takes no raw coordinates). Kept unchanged as an open idea; related to the point form in `design/2026-10-25_refs_across_spaces_note.md` §5.1 (the hub for this topic).
+
 ## The Problem
 When building complex 2D editors or games, the global screen mouse coordinates (`ref.main.mouseX`) do not match the local coordinates inside a rotated, scaled, or translated group/layer. Users need a way to easily map arbitrary global coordinates (like the mouse) into the local space of any specific container, so elements can track the mouse accurately regardless of camera zoom or group rotation.
 
