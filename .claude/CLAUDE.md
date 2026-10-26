@@ -32,6 +32,13 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 - **Temporary files** (helper scripts, dumps, screenshots, visual prototypes) go in `scratch/`, not the project root. Don't delete them afterwards; the user cleans up.
 - **Commits:** only when asked. Conventional style `type(scope): summary`, e.g. `feat(polyline): …`, `fix(arrows): …`, `docs(circle, ellipse): …`, `docs(design): …`, `refactor(engine): …`.
 
+## Working on Another Machine
+
+The user works on two Windows laptops. When a session starts on a machine that hasn't pulled for a while, or when the user asks to sync:
+1. `git fetch` and `git status`; show what's new and pull only after the user's OK.
+2. **Line endings, once per machine:** if `git ls-files --eol` shows working files as `w/crlf`, the copy predates `.gitattributes`. With no uncommitted work, rewrite them once: `git rm -r --cached -q . && git reset -q --hard HEAD`.
+3. Start the dev server and open `tests/index.html`; the tab title must show all tests passed.
+
 ## Working Style
 
 - **Pragmatic over engineered:** measure before optimizing (e.g. a micro-benchmark against the 16.7 ms frame budget) and judge edge cases by whether real users would hit them. Lead with real bugs and cheap, high-impact fixes; label micro-optimizations as such; give a concrete use case when proposing an API change.
