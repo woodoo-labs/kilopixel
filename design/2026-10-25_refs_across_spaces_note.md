@@ -3,6 +3,7 @@
 - **Status**: ⚪ **Discussion note** (2026-10-25). No engine changes decided; nothing implemented.
 - **Context**: polyline docs (section 8 and the planned Element Reference). Question: should `ref.<id>.pN` be documented, and how do readers attach to a polyline point from another layer?
 - **TODO**: `.agents/TODO.md` §25
+- **Related**: `design/2026-10-26_tolocal_fix_plan.md` (implemented 2026-10-26): `toLocal` readers now also update when their own space moves. Any point form (§5.1, §5.2) builds on that reactivity.
 
 ## 1. Core Finding: Refs Are Values, Not Positions
 

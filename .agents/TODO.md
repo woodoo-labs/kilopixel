@@ -228,3 +228,9 @@
 - **Works today**: shared space; track one point via `dx` / `dy` + `toLocal(ref, 'tx')`; anchors (`pxl-group` or a drawn / hidden dot) in the shape's space; phantom groups as spatial variables; sizes and angles by composition (`ref.c.r * toLocal(ref.c, 'scale')`).
 - **Possible later**: `toLocal(ref.el, 'x', px, py)` point form; `toLocal(ref.zig, 'pN')` sugar (relative mode); lazy evaluated `ref.zig.points`; list-expression rule for `points="ref.zig.points"` with a quote-aware parser.
 - **Docs**: `ref.<id>.pN` stays internal; teach the patterns in the walkthrough's `toLocal` section.
+
+## 26. `toLocal` Readers in a Moving Space
+- **Status**: ✅ **Done** (2026-10-26)
+- **Reference**: `design/2026-10-26_tolocal_fix_plan.md`; tests `scratch/tolocal_numbers.html`, `scratch/tolocal_fix_tests.html`
+- **Bug**: `toLocal()` results went stale when the reader's own layer or group moved (only the target side was tracked). Example: the walkthrough §8 line leaves both circles when its own layer rotates.
+- **Fix**: compiler flags `toLocal` expressions (`fn.usesToLocal`); elements list them in `toLocalAttributeKeys`; `broadcastGlobalMatrixChange()` re-evaluates them via `pxl.evaluateToLocalAttributes()`. No cost while nothing moves (walk measured ≈ 0.15 µs per frame for 50 shapes, same as before).

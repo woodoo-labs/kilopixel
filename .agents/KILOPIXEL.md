@@ -1,6 +1,6 @@
 # Kilopixel Framework — Complete Technical Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~54KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~55KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes using custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, etc.) and the framework compiles, evaluates, and renders everything at 60fps automatically.
 
@@ -172,6 +172,7 @@ Every PxlNode has:
 - `attributeValues` — current evaluated values (read by render loop)
 - `animatedAttributeKeys[]` — attributes that depend on `t` (evaluated every frame)
 - `reactiveAttributeKeys[]` — attributes that depend on `ref.*` variables (evaluated on change)
+- `toLocalAttributeKeys[]` — reactive attributes using `toLocal()`, also re-evaluated when an ancestor's transform changes (see [Coordinate Mapping](#coordinate-mapping-tolocal))
 - `isAnimated` — true if any attribute uses time-dependent expressions
 - `localMatrix` / `globalMatrix` — lazy Float32Array affine matrices
 - `parentLayer` — reference to closest `<pxl-layer>` ancestor
@@ -246,6 +247,7 @@ The outer function (factory) executes ONCE, destructuring the entire scope. The 
 **Properties added to the function**:
 - `fn.isTimeDependent` — true if uses `t` or time drivers
 - `fn.variableDependencies` — array of `ref.xxx` strings (if any)
+- `fn.usesToLocal` — true if the expression calls `toLocal()` (reader-side reactivity, see [Coordinate Mapping](#coordinate-mapping-tolocal))
 
 **Static Path** (no time, no variables):
 Evaluated once via `new Function`, result cached in `staticCache`.
@@ -758,7 +760,11 @@ The `toLocal(target, property)` function projects a target element's position in
 
 **Algebraic Identity**: `toLocal(target, 'x') + toLocal(target, 'dx')` equals `toLocal(target, 'tx')`. The `'tx'`/`'ty'` properties are shortcuts for the sum of center + offset. Use `'tx'`/`'ty'` when tracking where a shape actually appears (e.g., connecting lines). Use `'x'`/`'y'` when tracking the pivot point (e.g., drawing orbit rings around a center).
 
-**Reactivity**: `toLocal` expressions update automatically via `ref.*` dependency tracking. When a parent's transform changes, `broadcastGlobalMatrixChange()` recursively notifies all tracked children, triggering re-evaluation of any `toLocal` expression referencing them.
+**Reactivity**: `toLocal` results update when either side moves:
+- **Target side**: the reader subscribes to `ref.<target>`. When the target changes, or an ancestor of the target changes its transform, the target is broadcast (`broadcastGlobalMatrixChange()` walks the ancestor's subtree and broadcasts every tracked child).
+- **Reader side**: the compiler flags `toLocal` expressions (`fn.usesToLocal`); `pxl.compileAttribute` lists reactive ones in the reader's `toLocalAttributeKeys`. When an ancestor of the reader changes its transform, the same walk calls `pxl.evaluateToLocalAttributes()` on the reader. If that moves the reader, its own subtree is walked by `setLocalMatrixDirty()`. The walk runs before the children are drawn, so there is no one-frame lag.
+- Nothing is evaluated while nothing moves. Time-dependent `toLocal` expressions are evaluated every frame anyway and are not listed.
+- Design: `design/2026-10-26_tolocal_fix_plan.md`.
 
 Note: The compiler rewrites `toLocal(` to `pxl.toLocal(this, ` at compile time.
 

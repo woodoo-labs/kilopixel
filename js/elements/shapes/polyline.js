@@ -54,6 +54,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
       const key = this.pointKeys[i];
       pxl.removeFromArray(this.animatedAttributeKeys, key);
       pxl.removeFromArray(this.reactiveAttributeKeys, key);
+      pxl.removeFromArray(this.toLocalAttributeKeys, key);
       if (i >= keepCount) {
         delete this.attributeExpressions[key];
         delete this.attributeValues[key];

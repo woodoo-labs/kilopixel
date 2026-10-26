@@ -16,6 +16,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
     this.animatedAttributeKeys = [];
     this.reactiveAttributeKeys = [];
+    this.toLocalAttributeKeys = []; // reactive keys using toLocal(): also depend on this element's own space
     this.isAnimated = false;
     
     // Zero-GC Lazy Matrix Tracking
@@ -136,14 +137,21 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       const subs = pxl._subscriptions;
       for (let i = 0; i < len; i++) {
         const child = this.childList[i];
-        
+
+        // The child's own space moved: its toLocal() results are stale (design/2026-10-26_tolocal_fix_plan.md).
+        // If re-evaluating moves the child, setLocalMatrixDirty() has already walked its subtree.
+        let walked = false;
+        if (child.toLocalAttributeKeys.length > 0) {
+          walked = (pxl.evaluateToLocalAttributes(child) & 2) !== 0;
+        }
+
         // Broadcast the child if someone is explicitly tracking its global matrix
         if (child._refKey && subs[child._refKey] && subs[child._refKey].length > 0) {
           pxl.broadcast(child._refKey);
         }
-        
+
         // Recursively push the matrix dirty flag down the DOM tree (zero-cost if no tracked children)
-        if (typeof child.broadcastGlobalMatrixChange === 'function') {
+        if (!walked && typeof child.broadcastGlobalMatrixChange === 'function') {
           child.broadcastGlobalMatrixChange();
         }
       }

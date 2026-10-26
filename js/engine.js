@@ -107,10 +107,18 @@ pxl.compileAttribute = function(element, name, newValue) {
       // --- 60FPS Time Loop ---
       if (!element.animatedAttributeKeys.includes(name)) element.animatedAttributeKeys.push(name);
       this.removeFromArray(element.reactiveAttributeKeys, name);
+      this.removeFromArray(element.toLocalAttributeKeys, name);
     } else {
       // --- Reactive Variable Engine ---
       this.removeFromArray(element.animatedAttributeKeys, name);
       if (!element.reactiveAttributeKeys.includes(name)) element.reactiveAttributeKeys.push(name);
+
+      // toLocal results also depend on the element's own space (re-evaluated by broadcastGlobalMatrixChange)
+      if (parsed.usesToLocal) {
+        if (!element.toLocalAttributeKeys.includes(name)) element.toLocalAttributeKeys.push(name);
+      } else {
+        this.removeFromArray(element.toLocalAttributeKeys, name);
+      }
 
       // Globally subscribe the element to the variables it needs
       const deps = parsed.variableDependencies;
@@ -130,8 +138,31 @@ pxl.compileAttribute = function(element, name, newValue) {
     // --- Static Primitive ---
     this.removeFromArray(element.animatedAttributeKeys, name);
     this.removeFromArray(element.reactiveAttributeKeys, name);
+    this.removeFromArray(element.toLocalAttributeKeys, name);
     element.attributeValues[name] = parsed;
   }
+};
+
+// Re-evaluates toLocal() attributes after the element's own space moved (an ancestor's matrix changed).
+// Returns a bitmask: 1 = values changed, 2 = matrix dirtied (setLocalMatrixDirty already walked the subtree).
+pxl.evaluateToLocalAttributes = function(element) {
+  let result = 0;
+  const keys = element.toLocalAttributeKeys;
+  const len = keys.length;
+
+  for (let i = 0; i < len; i++) {
+    const key = keys[i];
+    const newVal = element.attributeExpressions[key].call(element, 0);
+    if (element.attributeValues[key] !== newVal) {
+      element.attributeValues[key] = newVal;
+      result |= 1;
+      if (pxl.isSpatialKey(key)) result |= 2;
+    }
+  }
+
+  if (result & 2) element.setLocalMatrixDirty();
+  if (result & 1) element.parentLayer?.invalidate();
+  return result;
 };
 
 pxl.evaluateAttributesForVariable = function(element, varName) {

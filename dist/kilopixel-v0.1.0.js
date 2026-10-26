@@ -108,10 +108,18 @@ pxl.compileAttribute = function(element, name, newValue) {
       // --- 60FPS Time Loop ---
       if (!element.animatedAttributeKeys.includes(name)) element.animatedAttributeKeys.push(name);
       this.removeFromArray(element.reactiveAttributeKeys, name);
+      this.removeFromArray(element.toLocalAttributeKeys, name);
     } else {
       // --- Reactive Variable Engine ---
       this.removeFromArray(element.animatedAttributeKeys, name);
       if (!element.reactiveAttributeKeys.includes(name)) element.reactiveAttributeKeys.push(name);
+
+      // toLocal results also depend on the element's own space (re-evaluated by broadcastGlobalMatrixChange)
+      if (parsed.usesToLocal) {
+        if (!element.toLocalAttributeKeys.includes(name)) element.toLocalAttributeKeys.push(name);
+      } else {
+        this.removeFromArray(element.toLocalAttributeKeys, name);
+      }
 
       // Globally subscribe the element to the variables it needs
       const deps = parsed.variableDependencies;
@@ -131,8 +139,31 @@ pxl.compileAttribute = function(element, name, newValue) {
     // --- Static Primitive ---
     this.removeFromArray(element.animatedAttributeKeys, name);
     this.removeFromArray(element.reactiveAttributeKeys, name);
+    this.removeFromArray(element.toLocalAttributeKeys, name);
     element.attributeValues[name] = parsed;
   }
+};
+
+// Re-evaluates toLocal() attributes after the element's own space moved (an ancestor's matrix changed).
+// Returns a bitmask: 1 = values changed, 2 = matrix dirtied (setLocalMatrixDirty already walked the subtree).
+pxl.evaluateToLocalAttributes = function(element) {
+  let result = 0;
+  const keys = element.toLocalAttributeKeys;
+  const len = keys.length;
+
+  for (let i = 0; i < len; i++) {
+    const key = keys[i];
+    const newVal = element.attributeExpressions[key].call(element, 0);
+    if (element.attributeValues[key] !== newVal) {
+      element.attributeValues[key] = newVal;
+      result |= 1;
+      if (pxl.isSpatialKey(key)) result |= 2;
+    }
+  }
+
+  if (result & 2) element.setLocalMatrixDirty();
+  if (result & 1) element.parentLayer?.invalidate();
+  return result;
 };
 
 pxl.evaluateAttributesForVariable = function(element, varName) {
@@ -523,6 +554,8 @@ pxl.compileExpression = function (str) {
     const isAnimated = this.timeDriverRegex.test(sanitizedStr);
 
     // 4. MATRIX TRACKER INJECTOR
+    // Readers are re-evaluated when their own space moves (design/2026-10-26_tolocal_fix_plan.md)
+    const usesToLocal = /\btoLocal\(/.test(sanitizedStr);
     sanitizedStr = sanitizedStr.replace(/\btoLocal\(/g, 'pxl.toLocal(this, ');
 
     // Extract reactive variable dependencies
@@ -553,6 +586,7 @@ pxl.compileExpression = function (str) {
 
       fn.isTimeDependent = isAnimated;
       if (hasVars) fn.variableDependencies = deps;
+      if (usesToLocal) fn.usesToLocal = true;
 
       this.animationCache.set(str, fn);
       return fn;
@@ -1276,6 +1310,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
     this.animatedAttributeKeys = [];
     this.reactiveAttributeKeys = [];
+    this.toLocalAttributeKeys = []; // reactive keys using toLocal(): also depend on this element's own space
     this.isAnimated = false;
     
     // Zero-GC Lazy Matrix Tracking
@@ -1396,14 +1431,21 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       const subs = pxl._subscriptions;
       for (let i = 0; i < len; i++) {
         const child = this.childList[i];
-        
+
+        // The child's own space moved: its toLocal() results are stale (design/2026-10-26_tolocal_fix_plan.md).
+        // If re-evaluating moves the child, setLocalMatrixDirty() has already walked its subtree.
+        let walked = false;
+        if (child.toLocalAttributeKeys.length > 0) {
+          walked = (pxl.evaluateToLocalAttributes(child) & 2) !== 0;
+        }
+
         // Broadcast the child if someone is explicitly tracking its global matrix
         if (child._refKey && subs[child._refKey] && subs[child._refKey].length > 0) {
           pxl.broadcast(child._refKey);
         }
-        
+
         // Recursively push the matrix dirty flag down the DOM tree (zero-cost if no tracked children)
-        if (typeof child.broadcastGlobalMatrixChange === 'function') {
+        if (!walked && typeof child.broadcastGlobalMatrixChange === 'function') {
           child.broadcastGlobalMatrixChange();
         }
       }
@@ -2425,6 +2467,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
       const key = this.pointKeys[i];
       pxl.removeFromArray(this.animatedAttributeKeys, key);
       pxl.removeFromArray(this.reactiveAttributeKeys, key);
+      pxl.removeFromArray(this.toLocalAttributeKeys, key);
       if (i >= keepCount) {
         delete this.attributeExpressions[key];
         delete this.attributeValues[key];

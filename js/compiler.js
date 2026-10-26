@@ -225,6 +225,8 @@ pxl.compileExpression = function (str) {
     const isAnimated = this.timeDriverRegex.test(sanitizedStr);
 
     // 4. MATRIX TRACKER INJECTOR
+    // Readers are re-evaluated when their own space moves (design/2026-10-26_tolocal_fix_plan.md)
+    const usesToLocal = /\btoLocal\(/.test(sanitizedStr);
     sanitizedStr = sanitizedStr.replace(/\btoLocal\(/g, 'pxl.toLocal(this, ');
 
     // Extract reactive variable dependencies
@@ -255,6 +257,7 @@ pxl.compileExpression = function (str) {
 
       fn.isTimeDependent = isAnimated;
       if (hasVars) fn.variableDependencies = deps;
+      if (usesToLocal) fn.usesToLocal = true;
 
       this.animationCache.set(str, fn);
       return fn;
