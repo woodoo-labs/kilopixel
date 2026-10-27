@@ -187,9 +187,10 @@ Every PxlNode has:
 - `getLocalMatrix()` / `getGlobalMatrix()` — lazy versioned matrix computation with parent chain walking
 
 **The `attributeValues` Object**:
-Has two hidden (non-enumerable) properties:
+Has four hidden (non-enumerable) properties:
 - `set(key, value)` — calls `this.setAttribute(key, value)` on the element. Used by imperative event handlers: `ref.myVar.set('value', 100)`
 - `$node` — back-reference to the DOM element itself
+- `tx` / `ty` — getters for the element's **drawn origin** in its parent space (the space of its own `x` / `y`): the local matrix translation, i.e. `x` / `y` plus the `dx` / `dy` offset turned by the element's own `rotate`, `scale` and `skew`. Equal to `x + dx` / `y + dy` only without those. Same value as `toLocal(ref.el, 'tx' | 'ty')` for a reader in the same space
 
 ---
 
@@ -1602,7 +1603,7 @@ Kilopixel provides a unified API for CSS and Canvas filters using `pxl.scope` he
 
 `'tx'`/`'ty'` = total drawn position (center + offset). `'x'`/`'y'` = pivot center only. `'tx' = 'x' + 'dx'` algebraically.
 
-Note: `ref.myShape.tx` gives `x + dx` in the shape's OWN local space. `toLocal(ref.myShape, 'tx')` projects that into the CALLER's parent coordinate space. Use `toLocal` when shapes are in different layers or groups.
+Note: `ref.myShape.tx` gives the shape's drawn origin in its own parent space (`x` plus the offset `dx` turned by the shape's own `rotate` / `scale` / `skew`), correct for readers in the same space. `toLocal(ref.myShape, 'tx')` projects that into the CALLER's parent coordinate space. Use `toLocal` when shapes are in different layers or groups.
 
 #### 11. Common Pitfalls
 

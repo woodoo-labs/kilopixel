@@ -1303,8 +1303,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this.attributeValues = {};
     Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
     Object.defineProperty(this.attributeValues, '$node', { value: this, enumerable: false, writable: false });
-    Object.defineProperty(this.attributeValues, 'tx', { get: () => this.attributeValues.x + this.attributeValues.dx, enumerable: false });
-    Object.defineProperty(this.attributeValues, 'ty', { get: () => this.attributeValues.y + this.attributeValues.dy, enumerable: false });
+    // Drawn origin in the parent space: dx / dy are applied after rotate / scale / skew, so it's the local matrix translation
+    Object.defineProperty(this.attributeValues, 'tx', { get: () => this.getLocalMatrix()[4], enumerable: false });
+    Object.defineProperty(this.attributeValues, 'ty', { get: () => this.getLocalMatrix()[5], enumerable: false });
     Object.assign(this.attributeExpressions, this.constructor.defaults);
     Object.assign(this.attributeValues, this.constructor.defaults);
 

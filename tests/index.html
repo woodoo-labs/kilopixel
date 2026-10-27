@@ -93,6 +93,14 @@
           </pxl-layer>
         </pxl-stage>
 
+        <!-- ref.<id>.tx / ty: drawn origin in the same space, after the element's own rotate / scale / skew -->
+        <pxl-stage id="txStage" ratio="5 / 3" alwaysrender>
+          <pxl-layer x="100" y="50">
+            <pxl-rect id="txBox" x="300" y="150" dx="150" rotate="90" w="80" h="80" stroke="#f97316" strokewidth="4"></pxl-rect>
+            <pxl-circle id="txReader" x="ref.txBox.tx" y="ref.txBox.ty" r="10" fill="#c2410c"></pxl-circle>
+          </pxl-layer>
+        </pxl-stage>
+
       </div>
     </div>
   </main>
@@ -187,6 +195,26 @@
       if (reader.toLocalAttributeKeys.includes('x')) throw new Error('x still listed after setAttribute(\'x\', \'10\')');
       reader.setAttribute('x', "toLocal(ref.tlSun2, 'x')");
       if (!reader.toLocalAttributeKeys.includes('x')) throw new Error('x not listed again after restoring toLocal');
+    });
+
+    // ===================================================================
+    // ref.<id>.tx / ty
+    // ===================================================================
+
+    test('ref.tx: includes the element\'s own rotate (x=300, dx=150, rotate=90 → 300, 300)', () => {
+      const { tx, ty } = pxl.nodes.txBox;
+      if (Math.abs(tx - 300) > 0.01 || Math.abs(ty - 300) > 0.01) throw new Error(`tx, ty is ${round(tx)}, ${round(ty)}`);
+    });
+
+    test('ref.tx: same-space reader follows rotate / scale / skew changes and equals toLocal(…, \'tx\')', async () => {
+      expectMapped('txReader', 'txBox', [['x', 'tx'], ['y', 'ty']]);
+      const box = el('txBox');
+      box.setAttribute('rotate', '35');
+      box.setAttribute('scalex', '1.5');
+      box.setAttribute('skewx', '20');
+      box.setAttribute('dy', '40');
+      await wait(100);
+      expectMapped('txReader', 'txBox', [['x', 'tx'], ['y', 'ty']]);
     });
 
     // --- Run all tests in order ---
