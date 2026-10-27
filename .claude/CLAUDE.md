@@ -51,6 +51,18 @@ The user works on two Windows laptops. When a session starts on a machine that h
 - **No defensive fallbacks** for attribute values (`alpha !== undefined`, `shadowblur || 0`): every attribute is initialized from `static defaults`.
 - **Public vs. internal:** some behavior in KILOPIXEL.md is internal on purpose (e.g. `ref.<id>.pN`). Don't document it in `docs/` unless the user decides to.
 
+## Engine Code Style
+
+Decided 2026-10-27 (`design/2026-10-27_engine_cleanup_inventory_note.md` §2). The newest code (`line.js`, `polyline.js`, `matrix.js`) is the reference.
+
+- **`pxl.` inside namespace functions:** `pxl.*` functions refer to other parts as `pxl.x`, never `this.x` (works when a function is passed around). Class and object methods use `this` as usual.
+- **Fields in the constructor:** every field an object will ever have is set in its constructor (stable hidden classes, one place to see the state). Helpers that cache on a node (`pxl.applyLineDash`, `pxl.resolveFilter`) have their fields declared by the owning class.
+- **Leading `_`:** used only inside its own class or file. No `_` = read by other classes or users. Applies to new code; existing names referenced in the design history stay.
+- **Invalid user values:** guard only where an invalid value would throw or freeze (e.g. `step <= 0` in the grid), with a short comment. Otherwise no guard (an invalid value may simply draw nothing).
+- **Reuse helpers instead of repeating checks:** `pxl.sortByDOMPosition`, `pxl.rewriteExpression`, `pxl.hasLineDash`, `hasFill()` / `isStroked()`, `pxl.arcEndRadians`.
+- **Comments explain why**, in plain sentences. No history (git has it), no CAPS labels, no "zero-GC" / "highly optimized" tags; mention allocation only where the choice isn't obvious. Sections: `// ===` banners between top-level parts of a file, `// --- Section ---` inside classes and long methods.
+- **Formatting:** 2 spaces, single quotes, `function(` without space, camelCase. `observedAttributes` / `defaults` longer than ~120 characters are split over lines, grouped like the KILOPIXEL.md tables. Deliberate alignment (`if (prop === 'x')      return …`) is fine; there is no auto-formatter. `.editorconfig` sets indentation, LF and trimming; `build.js` refuses trailing whitespace.
+
 ## Documentation Pages
 
 - Read `docs/DOCS_STANDARDS.md` before creating or changing a docs page, and follow it (layout, colors, IDs, snippet formatting, no inline styles, neutral tone).

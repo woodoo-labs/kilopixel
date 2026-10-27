@@ -49,6 +49,16 @@ function build() {
       process.exit(1);
     }
 
+    // Style checks (CLAUDE.md "Engine Code Style"); .editorconfig trims whitespace in most editors already
+    for (const file of files) {
+      const lines = fs.readFileSync(path.join(__dirname, file), 'utf8').split('\n');
+      const bad = lines.findIndex(line => /[ \t]+$/.test(line));
+      if (bad !== -1) {
+        console.error(`Error: trailing whitespace in ${file}:${bad + 1}`);
+        process.exit(1);
+      }
+    }
+
     // Inject version into the code
     code = `/** Kilopixel Framework v${VERSION} */\n` + code.replace('window.pxl = {};', `window.pxl = { version: '${VERSION}' };`);
 
