@@ -1,6 +1,10 @@
 pxl.Text = class Text extends pxl.Shape {
   static get observedAttributes() {
-    return [...super.observedAttributes, 'text', 'size', 'font', 'align', 'baseline', 'weight', 'fontstyle', 'maxwidth', 'direction', 'width', 'lineheight', 'letterspacing', 'reveal'];
+    return [
+      ...super.observedAttributes,
+      'text', 'size', 'font', 'align', 'baseline', 'weight', 'fontstyle', 'maxwidth',
+      'direction', 'width', 'lineheight', 'letterspacing', 'reveal'
+    ];
   }
 
   static defaults = {
@@ -29,20 +33,23 @@ pxl.Text = class Text extends pxl.Shape {
     this._cachedLetterSpacingString = '0px';
     this._lines = [];
     this._totalChars = 0;
+    this._startY = 0;
     this._hasInk = false; // true only if the last draw() painted something (used by hitTest)
   }
 
+  // Three caches, each rebuilt only when its inputs change: font string → line layout → bounding box
   draw(ctx, u, t) {
-    const { text, size, font, align, baseline, fill, stroke, strokewidth, weight, fontstyle, maxwidth, direction, width, lineheight, letterspacing, reveal } = this.attributeValues;
+    const {
+      text, size, font, align, baseline, weight, fontstyle, maxwidth,
+      direction, width, lineheight, letterspacing, reveal
+    } = this.attributeValues;
 
     this._hasInk = false;
 
-    // Skip drawing if there's no text content to render
+    // null / undefined: a ref that isn't connected yet
     if (text === null || text === undefined || text === '') return;
-    
-    // ====================================================================
-    // TIER 1: Font State Cache (String Building)
-    // ====================================================================
+
+    // --- 1. Font string ---
     let tier1Dirty = false;
     if (
       this._lastSize !== size ||
@@ -64,20 +71,18 @@ pxl.Text = class Text extends pxl.Shape {
       this._lastLetterspacing = letterspacing;
     }
 
-    // Always apply context state for accurate measuring and drawing
+    // Context state is set every time: measuring and drawing both depend on it
     ctx.font = this._cachedFontString;
     ctx.letterSpacing = this._cachedLetterSpacingString;
     ctx.textAlign = align;
     ctx.textBaseline = baseline;
     ctx.direction = direction || 'inherit';
 
-    // ====================================================================
-    // TIER 2: Text Layout Cache (Heavy Auto-Wrap Algorithm)
-    // ====================================================================
+    // --- 2. Line layout (word wrap when width > 0) ---
     let tier2Dirty = false;
     if (tier1Dirty || this._lastText !== text || this._lastWidth !== width) {
       tier2Dirty = true;
-      
+
       const textStr = String(text).replace(/\\n/g, '\n');
       this._lines = [];
 
@@ -86,7 +91,7 @@ pxl.Text = class Text extends pxl.Shape {
         for (let p = 0; p < paragraphs.length; p++) {
           const words = paragraphs[p].split(' ');
           let currentLine = words[0] || '';
-          
+
           for (let i = 1; i < words.length; i++) {
             const testLine = currentLine + ' ' + words[i];
             if (ctx.measureText(testLine).width / u > width) {
@@ -102,17 +107,16 @@ pxl.Text = class Text extends pxl.Shape {
         this._lines = textStr.split('\n');
       }
 
-      // Cache total character count for flawless reveal percentage math
+      // reveal counts characters of the whole text
       this._totalChars = textStr.length;
 
       this._lastText = text;
       this._lastWidth = width;
     }
 
-    // ====================================================================
-    // TIER 3: Bounding Box & Alignment Cache
-    // ====================================================================
-    if (tier2Dirty || this._lastAlign !== align || this._lastBaseline !== baseline || this._lastLineheight !== lineheight || this._lastDirection !== direction) {
+    // --- 3. Bounding box and first baseline ---
+    if (tier2Dirty || this._lastAlign !== align || this._lastBaseline !== baseline ||
+        this._lastLineheight !== lineheight || this._lastDirection !== direction) {
       let maxLeft = 0;
       let maxRight = 0;
       let maxAscent = 0;
@@ -130,7 +134,7 @@ pxl.Text = class Text extends pxl.Shape {
       this.boundingBox.right = maxRight / u;
 
       const totalBlockHeight = Math.max(0, this._lines.length - 1) * (size * lineheight) * u;
-      
+
       let startY = 0;
       if (baseline === 'middle') {
         startY = -totalBlockHeight / 2;
@@ -148,46 +152,40 @@ pxl.Text = class Text extends pxl.Shape {
       this._lastDirection = direction;
     }
 
-    // ====================================================================
-    // RENDER LOOP
-    // ====================================================================
+    // --- Drawing ---
 
-    // Typewriter Reveal effect (Always Percentage 0.0 - 1.0)
+    // Typewriter reveal: 0 = nothing, 1 = everything
     let charsRemaining = Infinity;
     if (reveal !== null && reveal >= 0) {
       charsRemaining = Math.floor(reveal * (this._totalChars + 1));
-      
-      // Fast-path bailout: If text is completely hidden, skip all gradients and loops
       if (charsRemaining <= 0) return;
     }
 
-    const hasFill = fill && fill !== 'none' && fill !== 'transparent';
-    const hasStroke = stroke && stroke !== 'none' && stroke !== 'transparent' && strokewidth > 0;
-
+    const hasFill = this.hasFill();
+    const hasStroke = this.isStroked();
     if (!hasFill && !hasStroke) return;
 
-    if (hasFill) ctx.fillStyle = this.createGradient(ctx, u, fill, 0);
+    if (hasFill) ctx.fillStyle = this.createGradient(ctx, u, this.attributeValues.fill, 0);
     if (hasStroke) this.applyStrokeState(ctx, u);
 
     this._hasInk = true;
 
-    // Unified Render Loop
+    const pxWidth = maxwidth > 0 ? maxwidth * u : undefined;
     for (let i = 0; i < this._lines.length; i++) {
       if (charsRemaining <= 0) break;
-      
+
       let lineStr = this._lines[i];
       if (lineStr.length > charsRemaining) {
         lineStr = lineStr.substring(0, charsRemaining);
       }
 
       const yOffset = this._startY + (i * size * lineheight);
-      const pxWidth = maxwidth > 0 ? maxwidth * u : undefined;
 
       if (hasFill) {
         if (pxWidth) ctx.fillText(lineStr, 0, yOffset * u, pxWidth);
         else ctx.fillText(lineStr, 0, yOffset * u);
       }
-      
+
       if (hasStroke) {
         if (pxWidth) ctx.strokeText(lineStr, 0, yOffset * u, pxWidth);
         else ctx.strokeText(lineStr, 0, yOffset * u);
@@ -211,5 +209,4 @@ pxl.Text = class Text extends pxl.Shape {
     ctx.fill(); // intercepted on pxl.dummyCtx (isPointInPath)
   }
 };
-// Define the custom element tag name
 customElements.define('pxl-text', pxl.Text);

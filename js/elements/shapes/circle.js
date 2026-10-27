@@ -1,7 +1,17 @@
 pxl.Circle = class Circle extends pxl.Shape {
-  static get observedAttributes() { return [...super.observedAttributes, 'r', 'ir', 'start', 'end', 'sweep', 'pie', 'closed', 'anticlockwise', 'arrowstart', 'arrowend', 'arrowstyle']; }
+  static get observedAttributes() {
+    return [
+      ...super.observedAttributes,
+      'r', 'ir', 'start', 'end', 'sweep', 'pie', 'closed', 'anticlockwise',
+      'arrowstart', 'arrowend', 'arrowstyle'
+    ];
+  }
 
-  static defaults = { ...pxl.Shape.defaults, r: 0, ir: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
+  static defaults = {
+    ...pxl.Shape.defaults,
+    r: 0, ir: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false,
+    arrowstart: 0, arrowend: 0, arrowstyle: 'filled'
+  };
 
   constructor() {
     super();
@@ -22,22 +32,13 @@ pxl.Circle = class Circle extends pxl.Shape {
     const isClosed = closed === true;
 
     const startRadians = start * Math.PI / 180;
-
-    let endRadians;
-    if (sweep !== null) {
-      endRadians = startRadians + (sweep * Math.PI / 180);
-    } else if (end !== null) {
-      endRadians = end * Math.PI / 180;
-    } else {
-      endRadians = startRadians + Math.PI * 2;
-    }
-
-    const isFull = Math.abs(endRadians - startRadians) >= (Math.PI * 2 - 1e-4);
+    const endRadians = pxl.arcEndRadians(startRadians, end, sweep);
+    const isFull = pxl.isFullTurn(startRadians, endRadians);
 
     let drawStartRadians = startRadians;
     let drawEndRadians = endRadians;
 
-    // --- ARROWHEADS (open arcs only) ---
+    // Arrowheads (open arcs only)
     const arrowStart = this._arrowStart, arrowEnd = this._arrowEnd;
     const canHaveArrows = safeR > 0 && safeIR === 0 && !isPie && !isClosed && this.isStroked();
     const hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart, u);
@@ -63,7 +64,6 @@ pxl.Circle = class Circle extends pxl.Shape {
       drawEndRadians -= travel * endInsetRadians;
     }
 
-    // --- DRAW PATH ---
     if (drawShaft) {
       ctx.beginPath();
       ctx.arc(0, 0, safeR * u, drawStartRadians, drawEndRadians, isAnti);

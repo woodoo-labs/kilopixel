@@ -1,18 +1,20 @@
 pxl.Group = class Group extends pxl.PxlNode {
-  static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden']; }
+  static get observedAttributes() {
+    return ['x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden'];
+  }
 
   static defaults = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false };
 
   constructor() {
     super();
-    this.childList = []; // Groups or shapes
-    this.isOrderDirty = false; // Tracks if children need sorting
+    this.childList = []; // groups and shapes
+    this.isOrderDirty = false; // children need sorting by DOM position
   }
 
   registerChild(child) {
     if (!this.childList.includes(child)) {
       this.childList.push(child);
-      this.isOrderDirty = true; // Flag that a sort is needed
+      this.isOrderDirty = true;
       this.parentLayer?.invalidate();
     }
   }
@@ -22,11 +24,10 @@ pxl.Group = class Group extends pxl.PxlNode {
     this.parentLayer?.invalidate();
   }
 
+  // Draws into the parent layer's canvas
   render(ctx, u, t) {
     if (this.isOrderDirty) {
-      this.childList.sort((a, b) => 
-        (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_PRECEDING) ? 1 : -1
-      );
+      this.childList.sort(pxl.sortByDOMPosition);
       this.isOrderDirty = false;
     }
 
@@ -35,16 +36,15 @@ pxl.Group = class Group extends pxl.PxlNode {
     if (this.attributeValues.hidden) return;
 
     const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy } = this.attributeValues;
-    const hasStateChanges = x || y || dx || dy || rotate || 
-                            scale !== 1 || scalex !== 1 || scaley !== 1 || 
+    const hasStateChanges = x || y || dx || dy || rotate ||
+                            scale !== 1 || scalex !== 1 || scaley !== 1 ||
                             skewx || skewy;
 
     if (hasStateChanges) {
       ctx.save();
       pxl.applyTransformState(ctx, u, this.attributeValues);
     }
-    const len = this.childList.length;
-    for (let i = 0; i < len; i++) {
+    for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].render(ctx, u, t);
     }
     if (hasStateChanges) ctx.restore();

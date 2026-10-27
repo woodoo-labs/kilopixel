@@ -1,8 +1,8 @@
 // =========================================================================
-// Sandbox Engine Configuration & Drivers
+// Expression Scope & Time Drivers
 // =========================================================================
 
-// --- Pre-built Scope (real functions, created once, passed as argument) ---
+// Names available in every expression (created once, passed to each compiled function)
 pxl.scope = Object.create(null);
 
 // Math constants and methods, usable in expressions without the Math. prefix.
@@ -47,7 +47,7 @@ pxl.scope.clamp = (v, low, high) => Math.max(low, Math.min(high, v));
 pxl.scope.lerp  = (a, b, alpha) => a + (b - a) * alpha;
 pxl.scope.map   = (v, inMin, inMax, outMin, outMax) => (v - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 
-// Shared stop-parsing helper for all gradient types (zero duplication)
+// Color stops for all gradient types: ['red', 'blue'] (evenly spaced) or [0, 'red', 1, 'blue']
 pxl._parseStops = function(colorsArray) {
   const stops = [];
   if (!Array.isArray(colorsArray) || colorsArray.length === 0) return stops;
@@ -113,7 +113,7 @@ pxl.scope.conic = (angleOrConfig, colorsArray) => {
 
 pxl.scopeKeys = Object.keys(pxl.scope).join(', ');
 
-// --- Time Driver Registry (single source of truth) ---
+// Time drivers: source code, injected into every compiled expression (they read its `t`)
 pxl.drivers = {
   loop:   '(d) => (t % d) / d',
   yoyo:   '(d) => 1 - abs((t % (d * 2)) / d - 1)',
@@ -144,138 +144,133 @@ pxl.timeDrivers = Object.entries(pxl.drivers)
 pxl.timeDriverRegex = new RegExp(`(^|[^.])\\bt\\b|\\b(${Object.keys(pxl.drivers).join('|')})\\s*\\(`);
 
 // =========================================================================
-// Expression Parser & Math Engine
+// Expression Compiler
 // =========================================================================
 
-// Stores compiled FUNCTIONS for 60fps animations
+// Compiled functions (time-dependent or reactive), shared by every element using the same string
 pxl.animationCache = new Map();
 
-// Stores raw NUMBERS/STRINGS for instant startup 
+// Results of static expressions, evaluated once
 pxl.staticCache = new Map();
 
-// Parses strings into numbers or booleans. Calls compileExpression for static or animated Math expressions.
-pxl.parseAttributeValue = function (value) {
-  if (value === null || value === '') return value;
+// Rewrites shared by attribute expressions and on* handlers:
+// ref.a.b → ref.a?.b (the referenced element may not be connected yet),
+// toLocal( → pxl.toLocal(this, (the caller is the element the code belongs to)
+pxl.rewriteExpression = function(str) {
+  return str
+    .replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.')
+    .replace(/\btoLocal\(/g, 'pxl.toLocal(this, ');
+};
 
+// Turns a non-empty attribute string into a static value (number, boolean, string)
+// or a compiled function. Cheap checks run first; most attributes never reach the compiler.
+pxl.parseAttributeValue = function(value) {
   const firstChar = value[0];
 
-  // 1. FAST PATH: Hex Colors (e.g., "#ff0000", "#fff")
+  // Hex colors: "#ff0000", "#fff"
   if (firstChar === '#') return value;
 
-  // 2. EXPLICIT JS PATH: Template Literals always compile dynamically
-  if (firstChar === '`') return this.compileExpression(value);
+  // Template literals always compile
+  if (firstChar === '`') return pxl.compileExpression(value);
 
-  // 3. FAST PATH: Alphabetical Words & Keywords (e.g., "red", "none", "true", "t", "Hello World")
+  // Words: "red", "none", "true", "t", "Hello World"
   if ((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z')) {
     if (/^[a-zA-Z\s]+$/.test(value)) {
-      if (value === 't') return this.compileExpression(value);
+      if (value === 't') return pxl.compileExpression(value);
       if (value === 'true') return true;
       if (value === 'false') return false;
-      
-      // Fast path for raw Math constants (e.g. PI, E)
-      if (Object.prototype.hasOwnProperty.call(this.scope, value) && typeof this.scope[value] === 'number') {
-        return this.scope[value];
+
+      // Math constants: "PI", "E"
+      if (Object.prototype.hasOwnProperty.call(pxl.scope, value) && typeof pxl.scope[value] === 'number') {
+        return pxl.scope[value];
       }
       return value;
     }
 
-    // Fast Path for static CSS color functions (e.g., "rgba(124, 211, 15, 0.8)")
+    // Static CSS colors: "rgba(124, 211, 15, 0.8)"
     if (/^(rgb|rgba)\([\d\s.,%]+\)$/i.test(value)) {
       return value;
     }
   }
 
-  // 3. FAST PATH: Pure String Literals (e.g., "'Hello loop(2) World'")
-  if ((firstChar === "'" || firstChar === '"') && value[value.length - 1] === firstChar) {
+  // A single quoted string: "'Hello loop(2) World'"
+  if ((firstChar === '\'' || firstChar === '"') && value[value.length - 1] === firstChar) {
     if (value.indexOf(firstChar, 1) === value.length - 1) {
       return value.slice(1, -1);
     }
   }
 
-  // 4. FAST PATH: Pure Numbers (e.g., "100", "-50", "0.25", ".5")
+  // Numbers: "100", "-50", "0.25", ".5"
   const num = Number(value);
   if (!Number.isNaN(num)) return num;
 
-  // 5. SLOW PATH: Math & Animation Guard (e.g., "100 * 2", "loop(2)")
+  // Anything that looks like math, time, refs or code: "100 * 2", "loop(2)", "ref.a.x"
   if (/(^|[^.])\bt\b|\bref\.|\btoLocal\(|\(|\[|(?:\d\s*[-+*/%<>=!&|]|[-+*/%<>=!&|]\s*\d)|['"`]\s*\+|\+\s*['"`]/.test(value)) {
-    return this.compileExpression(value);
+    return pxl.compileExpression(value);
   }
 
   return value;
 };
 
-pxl.compileExpression = function (str) {
-  // 1. FAST LOOKUP: Check caches up front to minimize compiling overhead
-  if (this.staticCache.has(str)) return this.staticCache.get(str);
-  if (this.animationCache.has(str)) return this.animationCache.get(str);
+pxl.compileExpression = function(str) {
+  if (pxl.staticCache.has(str)) return pxl.staticCache.get(str);
+  if (pxl.animationCache.has(str)) return pxl.animationCache.get(str);
 
   try {
-    // 2. CSS PERCENTAGE SANITIZER: Safely convert illegal JS percentages to strings
-    let sanitizedStr = str;
-    if (sanitizedStr.includes('%') && sanitizedStr[0] !== '`') {
-      sanitizedStr = sanitizedStr.replace(/(\d+(?:\.\d+)?)%(\s*[,)])/g, "'$1%'$2");
+    // CSS percentages aren't valid JavaScript: hsl(120, 50%, 40%) → hsl(120, '50%', '40%')
+    let source = str;
+    if (source.includes('%') && source[0] !== '`') {
+      source = source.replace(/(\d+(?:\.\d+)?)%(\s*[,)])/g, '\'$1%\'$2');
     }
 
-    // 3. OPTIONAL CHAINING INJECTOR: Safely convert ref.player.x to ref.player?.x
-    // This prevents fatal TypeErrors during initial eager evaluation before elements are connected to the DOM.
-    sanitizedStr = sanitizedStr.replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.');
-    
-    // Detect 60fps timeline drivers OR self-referencing keyword
-    // IMPORTANT: We must check this BEFORE replacing toLocal, because toLocal injects 'this'.
-    const isAnimated = this.timeDriverRegex.test(sanitizedStr);
+    const isAnimated = pxl.timeDriverRegex.test(source);
+    // toLocal readers are also re-evaluated when their own space moves (design/2026-10-26_tolocal_fix_plan.md)
+    const usesToLocal = /\btoLocal\(/.test(source);
+    source = pxl.rewriteExpression(source);
 
-    // 4. MATRIX TRACKER INJECTOR
-    // Readers are re-evaluated when their own space moves (design/2026-10-26_tolocal_fix_plan.md)
-    const usesToLocal = /\btoLocal\(/.test(sanitizedStr);
-    sanitizedStr = sanitizedStr.replace(/\btoLocal\(/g, 'pxl.toLocal(this, ');
-
-    // Extract reactive variable dependencies
     const deps = [];
-    const varRegex = /\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
+    const refRegex = /\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
     let match;
-    while ((match = varRegex.exec(sanitizedStr)) !== null) {
+    while ((match = refRegex.exec(source)) !== null) {
       const fullKey = `ref.${match[1]}`;
       if (!deps.includes(fullKey)) deps.push(fullKey);
     }
     const hasVars = deps.length > 0;
 
-    // SMART RETURN DETECTOR
-    const code = /\breturn\b/.test(sanitizedStr) ? sanitizedStr : `return ${sanitizedStr};`;
+    // A plain expression gets a return; code with its own return statements is used as written
+    const code = /\breturn\b/.test(source) ? source : `return ${source};`;
 
     if (isAnimated || hasVars) {
-      // --- ANIMATION PATH (Factory Closure Pattern) ---
+      // The outer function runs once (destructures the scope); the returned closure runs per evaluation
       const fn = new Function('scope', 'ref', `
-        const { ${this.scopeKeys} } = scope;
+        const { ${pxl.scopeKeys} } = scope;
         let t;
         const _d = new Date();
-        ${this.timeDrivers}
+        ${pxl.timeDrivers}
         return function(_t) {
           t = _t;
           ${code}
         };
-      `)(this.scope, this.nodes);
+      `)(pxl.scope, pxl.nodes);
 
       fn.isTimeDependent = isAnimated;
       if (hasVars) fn.variableDependencies = deps;
       if (usesToLocal) fn.usesToLocal = true;
 
-      this.animationCache.set(str, fn);
+      pxl.animationCache.set(str, fn);
       return fn;
-
-    } else {
-      // --- STATIC PATH (Evaluated once, returns absolute numeric/string value) ---
-      const result = new Function('scope', `
-        const { ${this.scopeKeys} } = scope;
-        ${code} 
-      `)(this.scope);
-
-      const val = (result !== undefined) ? result : str;
-
-      this.staticCache.set(str, val);
-      return val;
     }
+
+    // Static: evaluated once
+    const result = new Function('scope', `
+      const { ${pxl.scopeKeys} } = scope;
+      ${code}
+    `)(pxl.scope);
+    const val = (result !== undefined) ? result : str;
+    pxl.staticCache.set(str, val);
+    return val;
   } catch (e) {
-    this.staticCache.set(str, str);
+    pxl.staticCache.set(str, str);
     console.warn(`Failed to compile expression, returned string instead: ${str}`, e);
     return str;
   }

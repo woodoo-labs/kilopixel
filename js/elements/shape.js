@@ -1,22 +1,47 @@
-// TODO
-// Cache Paths?
 pxl.Shape = class Shape extends pxl.PxlNode {
-  static get observedAttributes() { return ['x', 'y', 'dx', 'dy', 'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'alpha', 'blend', 'mask', 'filter', 'shadowcolor', 'shadowblur', 'shadowx', 'shadowy', 'hidden', 'onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove']; }
+  static get observedAttributes() {
+    return [
+      'x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy',
+      'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset',
+      'alpha', 'blend', 'mask', 'filter', 'shadowcolor', 'shadowblur', 'shadowx', 'shadowy', 'hidden',
+      'onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove'
+    ];
+  }
 
-  static defaults = { x: 0, y: 0, dx: 0, dy: 0, fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', mask: 'none', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false, isHovered: false, isPressed: false };
+  static defaults = {
+    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0,
+    fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0,
+    alpha: 1, blend: 'source-over', mask: 'none', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false,
+    isHovered: false, isPressed: false
+  };
+
+  // Event attribute → field holding its compiled handler
+  static HANDLER_FIELDS = {
+    onclick: '_compiledOnClick', onenter: '_compiledOnEnter', onleave: '_compiledOnLeave',
+    ondown: '_compiledOnDown', onup: '_compiledOnUp', onmove: '_compiledOnMove'
+  };
 
   constructor() {
     super();
+    this.stage = null; // set in connectedCallback
 
-    // Pre-allocated bounding box object (zero-GC)
+    // Reused by getBoundingBox() every frame
     this.boundingBox = { left: 0, right: 0, top: 0, bottom: 0 };
-    
-    // Dual-Slot Gradient Cache: [0] = fill, [1] = stroke (pre-allocated, zero-GC)
+
+    // Gradient cache per slot: [0] = fill, [1] = stroke (createGradient)
     this._gradCache = [
       { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, grad: null },
       { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, grad: null }
     ];
-    
+
+    // Written by pxl.applyLineDash and pxl.resolveFilter
+    this._lastDash = null;
+    this._lastDashU = 0;
+    this._scaledDash = [];
+    this._lastFilterRaw = null;
+    this._lastFilterU = 0;
+    this._cachedFilterScaled = 'none';
+
     this._compiledOnClick = null;
     this._compiledOnEnter = null;
     this._compiledOnLeave = null;
@@ -27,31 +52,24 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
-    
-    if (name === 'onclick' || name === 'onenter' || name === 'onleave' || name === 'ondown' || name === 'onup' || name === 'onmove') {
+
+    const field = pxl.Shape.HANDLER_FIELDS[name];
+    if (field) {
       // Removed or empty: no handler. Not unregistered here (a handler may remove itself during
       // InteractionEngine.process()); releaseIfUnused() unregisters the shape on its next leave / release.
       let compiled = null;
       if (newValue) {
         // Handlers are plain JavaScript and never subscribe to ref.*, so their state references are sticky
         pxl.trackInteractiveRefs(newValue, true);
-
-        let sanitizedStr = newValue.replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.');
         compiled = new Function('scope', 'ref', `
           const { ${pxl.scopeKeys} } = scope;
           return function() {
-            ${sanitizedStr}
+            ${pxl.rewriteExpression(newValue)}
           };
         `)(pxl.scope, pxl.nodes).bind(this);
       }
 
-      if (name === 'onclick') this._compiledOnClick = compiled;
-      if (name === 'onenter') this._compiledOnEnter = compiled;
-      if (name === 'onleave') this._compiledOnLeave = compiled;
-      if (name === 'ondown')  this._compiledOnDown = compiled;
-      if (name === 'onup')    this._compiledOnUp = compiled;
-      if (name === 'onmove')  this._compiledOnMove = compiled;
-
+      this[field] = compiled;
       if (compiled) this.stage?.interaction.registerElement(this);
       return;
     }
@@ -62,7 +80,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   connectedCallback() {
     this.stage = this.closest('pxl-stage');
     super.connectedCallback();
-    
+
     // Register if it has handlers, or if another element reads its isHovered / isPressed
     if (this.hasEventHandlers() || (this.id && pxl._interactiveIds.has(this.id))) {
       this.stage?.interaction.registerElement(this);
@@ -70,7 +88,8 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   hasEventHandlers() {
-    return !!(this._compiledOnClick || this._compiledOnEnter || this._compiledOnLeave || this._compiledOnDown || this._compiledOnUp || this._compiledOnMove);
+    return !!(this._compiledOnClick || this._compiledOnEnter || this._compiledOnLeave ||
+              this._compiledOnDown || this._compiledOnUp || this._compiledOnMove);
   }
 
   // Hand cursor only for elements that react to clicks or presses
@@ -89,13 +108,13 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     if (this.attributeValues.hidden) return;
 
     const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy, alpha, blend, mask, filter, shadowcolor } = this.attributeValues;
-    const hasStateChanges = x || y || dx || dy || rotate || 
-                            scale !== 1 || scalex !== 1 || scaley !== 1 || 
-                            skewx || skewy || 
+    const hasStateChanges = x || y || dx || dy || rotate ||
+                            scale !== 1 || scalex !== 1 || scaley !== 1 ||
+                            skewx || skewy ||
                             alpha !== 1 || blend !== 'source-over' || mask !== 'none' || filter !== 'none' ||
                             shadowcolor;
 
-    // Global Pipeline Sandbox
+    // save / restore only when the shape changes the context state
     if (hasStateChanges) {
       ctx.save();
       pxl.applyContextState(ctx, u, this.attributeValues, this);
@@ -106,9 +125,9 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     }
   }
 
+  // Custom shapes override this (gradients are sized to it); without it, gradients collapse to a point
   getBoundingBox() {
     console.warn(`[pxl] Warning: Subclass ${this.constructor.name} does not implement getBoundingBox(). Fallback to zeroed bounding box.`);
-    // Safe default for unknown shapes
     this.boundingBox.left = 0;
     this.boundingBox.right = 0;
     this.boundingBox.top = 0;
@@ -124,7 +143,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     const box = this.getBoundingBox();
     const c = this._gradCache[slot];
 
-    // Dual-Slot Gradient Cache (bbox-aware)
+    // Reuse while the descriptor, the unit and the bounding box are unchanged
     if (c.config === styleValue && c.u === u &&
         c.bl === box.left && c.bt === box.top &&
         c.br === box.right && c.bb === box.bottom) {
@@ -138,7 +157,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
     if (styleValue.type === 'linear') {
       let gx1, gy1, gx2, gy2;
-      
+
       if (styleValue.angle !== undefined) {
         const bx = (box.left + box.right) / 2;
         const by = (box.top + box.bottom) / 2;
@@ -156,7 +175,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
         gx2 = (box.left + width * styleValue.x2) * u;
         gy2 = (box.top + height * styleValue.y2) * u;
       }
-      
+
       grad = ctx.createLinearGradient(gx1, gy1, gx2, gy2);
 
     } else if (styleValue.type === 'radial') {
@@ -170,31 +189,26 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
       grad = ctx.createRadialGradient(px0, py0, pr0, px1, py1, pr1);
 
-    } else if (styleValue.type === 'conic') {
+    } else {
+      // conic (descriptors only come from linear(), radial() and conic())
       const gcx = (box.left + width * styleValue.cx) * u;
       const gcy = (box.top + height * styleValue.cy) * u;
-      
       grad = ctx.createConicGradient(styleValue.startAngle * Math.PI / 180, gcx, gcy);
     }
 
-    if (grad) {
-      const stops = styleValue.stops;
-      const len = stops.length;
-      for (let i = 0; i < len; i++) {
-        grad.addColorStop(stops[i].offset, stops[i].color);
-      }
-
-      c.config = styleValue;
-      c.u = u;
-      c.bl = box.left;
-      c.bt = box.top;
-      c.br = box.right;
-      c.bb = box.bottom;
-      c.grad = grad;
-      return grad;
+    const stops = styleValue.stops;
+    for (let i = 0; i < stops.length; i++) {
+      grad.addColorStop(stops[i].offset, stops[i].color);
     }
 
-    return styleValue;
+    c.config = styleValue;
+    c.u = u;
+    c.bl = box.left;
+    c.bt = box.top;
+    c.br = box.right;
+    c.bb = box.bottom;
+    c.grad = grad;
+    return grad;
   }
 
   // Sets all stroke-related context state (style, width, caps, joins, dash).
@@ -203,13 +217,18 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     const { stroke, strokewidth, linecap, linejoin, miterlimit, linedash, dashoffset } = this.attributeValues;
 
     ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
-    
+
     ctx.lineWidth = strokewidth * u;
     ctx.lineCap = linecap;
     ctx.lineJoin = linejoin;
     ctx.miterLimit = miterlimit;
-    
+
     pxl.applyLineDash(ctx, u, linedash, dashoffset, this);
+  }
+
+  hasFill() {
+    const { fill } = this.attributeValues;
+    return !!fill && fill !== 'none' && fill !== 'transparent';
   }
 
   isStroked() {
@@ -218,10 +237,8 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   applyStyle(ctx, u) {
-    const { fill } = this.attributeValues;
-
-    if (fill && fill !== 'none' && fill !== 'transparent') {
-      ctx.fillStyle = this.createGradient(ctx, u, fill, 0);
+    if (this.hasFill()) {
+      ctx.fillStyle = this.createGradient(ctx, u, this.attributeValues.fill, 0);
       ctx.fill();
     }
 
@@ -231,11 +248,11 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     }
   }
 
-  // --- ARROWHEADS ---
+  // --- Arrowheads ---
   // Geometry: design/2026-10-14_unified_arrowhead_geometry_plan.md
   // All distances are in context units (logical value × u).
 
-  // Resolves one arrow end into distances along the path and writes them into rec (zero-GC).
+  // Resolves one arrow end into distances along the path and writes them into the pre-allocated rec.
   // Returns true if this end has an arrowhead.
   resolveArrow(rec, attrValue, u) {
     const { strokewidth, linecap, linejoin, arrowstyle } = this.attributeValues;
@@ -300,7 +317,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
       // Chevrons are always solid
       const { linedash, dashoffset } = this.attributeValues;
-      const hasDash = linedash && linedash !== 'none' && linedash !== 0 && linedash !== '0';
+      const hasDash = pxl.hasLineDash(linedash);
       if (hasDash) ctx.setLineDash(pxl._emptyDash);
       ctx.stroke();
       if (hasDash) pxl.applyLineDash(ctx, u, linedash, dashoffset, this);

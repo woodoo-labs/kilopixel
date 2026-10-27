@@ -2,6 +2,7 @@
 // Performance Monitor
 // =========================================================================
 
+// Publishes fps, renderAvg and renderMax of every stage once per second (ref.<stageId>.*)
 pxl.perf = {
   stages: [],
   lastUpdate: 0,
@@ -15,16 +16,13 @@ pxl.perf = {
   },
 
   publish: function() {
-    const len = this.stages.length;
-    for (let i = 0; i < len; i++) {
+    for (let i = 0; i < this.stages.length; i++) {
       const stage = this.stages[i];
-      
-      if (stage.attributeValues) {
-        stage.attributeValues.fps = stage.perfFrames;
-        stage.attributeValues.renderAvg = (stage.perfFrames > 0 ? (stage.perfAccumulated / stage.perfFrames) : 0).toFixed(2);
-        stage.attributeValues.renderMax = stage.perfMax.toFixed(2);
-        if (stage._refKey) pxl.broadcast(stage._refKey);
-      }
+      const values = stage.attributeValues;
+      values.fps = stage.perfFrames;
+      values.renderAvg = (stage.perfFrames > 0 ? stage.perfAccumulated / stage.perfFrames : 0).toFixed(2);
+      values.renderMax = stage.perfMax.toFixed(2);
+      if (stage._refKey) pxl.broadcast(stage._refKey);
 
       // Reset counters for the next interval
       stage.perfFrames = 0;

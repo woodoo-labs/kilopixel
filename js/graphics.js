@@ -1,18 +1,18 @@
 // =========================================================================
 // Drawing & Transform Helpers
 // =========================================================================
-pxl.anchorX = { 
-  'left': 0, 'right': 1, 'center': 0.5, 
-  'top-left': 0, 'top-right': 1, 'bottom-left': 0, 'bottom-right': 1, 
+pxl.anchorX = {
+  'left': 0, 'right': 1, 'center': 0.5,
+  'top-left': 0, 'top-right': 1, 'bottom-left': 0, 'bottom-right': 1,
   'top': 0.5, 'bottom': 0.5,
   'top-center': 0.5, 'bottom-center': 0.5,
   'left-center': 0, 'right-center': 1,
   'center-top': 0.5, 'center-bottom': 0.5,
   'center-left': 0, 'center-right': 1
 };
-pxl.anchorY = { 
-  'top': 0, 'bottom': 1, 'center': 0.5, 
-  'top-left': 0, 'top-right': 0, 'bottom-left': 1, 'bottom-right': 1, 
+pxl.anchorY = {
+  'top': 0, 'bottom': 1, 'center': 0.5,
+  'top-left': 0, 'top-right': 0, 'bottom-left': 1, 'bottom-right': 1,
   'left': 0.5, 'right': 0.5,
   'top-center': 0, 'bottom-center': 1,
   'left-center': 0.5, 'right-center': 0.5,
@@ -20,25 +20,25 @@ pxl.anchorY = {
   'center-left': 0.5, 'center-right': 0.5
 };
 
-// Radial gradient radius resolver: number → absolute logical canvas units,
-// string → anchor point distance or CSS dynamic keyword
-pxl.resolveRadius = (r, x, y, w, h, u) => {
+// Radial gradient radius: a number is a logical length; a string is the distance from the center (x, y)
+// to a side, a perimeter point or a CSS keyword of the bounding box (w × h)
+pxl.resolveRadius = function(r, x, y, w, h, u) {
   if (typeof r === 'number') return Math.abs(r * u);
 
-  // 1. Direct Side Edges (Perpendicular projection: 0 sqrt, 0 object lookups)
+  // Sides: perpendicular distance
   if (r === 'top')    return Math.abs(y * h * u);
   if (r === 'bottom') return Math.abs((1 - y) * h * u);
   if (r === 'left')   return Math.abs(x * w * u);
   if (r === 'right')  return Math.abs((1 - x) * w * u);
 
-  // 2. Perimeter Points (Euclidean distance to discrete vertex)
+  // Perimeter points (corners, edge midpoints): straight distance
   const ax = pxl.anchorX[r];
   if (ax !== undefined) {
     const dx = (x - ax) * w * u, dy = (y - pxl.anchorY[r]) * h * u;
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  // 3. Dynamic CSS Keywords (Lazy evaluated bounds)
+  // CSS keywords
   const lx = x * w * u, rx = (1 - x) * w * u;
   const ty = y * h * u, by = (1 - y) * h * u;
   switch (r) {
@@ -52,12 +52,13 @@ pxl.resolveRadius = (r, x, y, w, h, u) => {
   }
 };
 
+// Same order as pxl.Matrix.updateLocal: translate(x, y) → rotate → scale → skew → translate(dx, dy)
 pxl.applyTransformState = function(ctx, u, attributeValues) {
   const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy } = attributeValues;
-  
+
   if (x || y) ctx.translate(x * u, y * u);
   if (rotate) ctx.rotate(rotate * Math.PI / 180);
-  
+
   const finalScaleX = scale !== 1 ? scale : scalex;
   const finalScaleY = scale !== 1 ? scale : scaley;
   if (finalScaleX !== 1 || finalScaleY !== 1) ctx.scale(finalScaleX, finalScaleY);
@@ -70,41 +71,36 @@ pxl.applyTransformState = function(ctx, u, attributeValues) {
   if (dx || dy) ctx.translate(dx * u, dy * u);
 };
 
+// Scales the px values written by the filter helpers (blur(5) → 'blur(5px)') by the unit u
 pxl.scaleResponsiveFilter = function(filterStr, u) {
-  // Only match and scale values explicitly suffixed with 'px' from pxl.scope helpers
-  return filterStr.replace(/(-?\d+\.?\d*)px/g, (match, val) => {
-    return (parseFloat(val) * u) + 'px';
-  });
+  return filterStr.replace(/(-?\d+\.?\d*)px/g, (match, val) => (parseFloat(val) * u) + 'px');
 };
 
+// Filter string for a layer or shape, cached on the node per (filter, u)
 pxl.resolveFilter = function(node, filter, u) {
-  if (!filter || filter === 'none') return 'none';
-  
   const filterStr = Array.isArray(filter) ? filter.join(' ') : filter;
   if (node._lastFilterRaw !== filterStr || node._lastFilterU !== u) {
     node._lastFilterRaw = filterStr;
     node._lastFilterU = u;
     node._cachedFilterScaled = pxl.scaleResponsiveFilter(filterStr, u);
   }
-  
   return node._cachedFilterScaled;
 };
 
 pxl.applyContextState = function(ctx, u, attributeValues, node) {
   pxl.applyTransformState(ctx, u, attributeValues);
-  
+
   const { alpha, blend, mask, filter, shadowcolor, shadowblur, shadowx, shadowy } = attributeValues;
-  
-  // 2. Rendering States
+
   if (alpha !== 1) ctx.globalAlpha *= alpha;
-  
-  if (mask && mask !== 'none') {
+
+  if (mask !== 'none') {
     ctx.globalCompositeOperation = mask;
   } else if (blend !== 'source-over') {
     ctx.globalCompositeOperation = blend;
   }
-  
-  if (filter && filter !== 'none') {
+
+  if (filter !== 'none') {
     ctx.filter = pxl.resolveFilter(node, filter, u);
   }
 
@@ -124,13 +120,28 @@ pxl.applyContextState = function(ctx, u, attributeValues, node) {
 };
 
 // =========================================================================
+// Arc Angles (circle, ellipse)
+// =========================================================================
+
+// End angle in radians: sweep (relative to start) wins over end; neither means a full turn
+pxl.arcEndRadians = function(startRadians, end, sweep) {
+  if (sweep !== null) return startRadians + sweep * Math.PI / 180;
+  if (end !== null) return end * Math.PI / 180;
+  return startRadians + Math.PI * 2;
+};
+
+pxl.isFullTurn = function(startRadians, endRadians) {
+  return Math.abs(endRadians - startRadians) >= Math.PI * 2 - 1e-4;
+};
+
+// =========================================================================
 // Arrowhead Geometry (design/2026-10-14_unified_arrowhead_geometry_plan.md)
 // =========================================================================
 pxl.ARROW_COS30 = Math.cos(Math.PI / 6); // arrowhead half-angle is 30°
 pxl.ARROW_SIN30 = 0.5;
 pxl.ARROW_K_DEPTH = 0.6;                 // min shaft depth inside a filled head, as fraction of head length
 
-// Per-arrow-end record, pre-allocated once per shape (zero-GC). All fields start as doubles
+// Per-arrow-end record, allocated once per shape and reused every frame. All fields start as doubles
 // so V8 keeps one stable hidden class for every arrow shape.
 pxl.createArrowRecord = function() {
   return { size: NaN, len: NaN, tipAdvance: NaN, inset: NaN, tipX: NaN, tipY: NaN, dirX: NaN, dirY: NaN };
@@ -141,8 +152,14 @@ pxl.createArrowRecord = function() {
 // =========================================================================
 pxl._emptyDash = [];
 
+// Solid line: null (default), 'none' or 0
+pxl.hasLineDash = function(linedash) {
+  return !!linedash && linedash !== 'none' && linedash !== '0';
+};
+
+// Sets the shape's dash pattern scaled by u. The scaled array is cached on the shape per (linedash, u).
 pxl.applyLineDash = function(ctx, u, linedash, dashoffset, node) {
-  if (!linedash || linedash === 'none' || linedash === 0 || linedash === '0') {
+  if (!pxl.hasLineDash(linedash)) {
     ctx.setLineDash(pxl._emptyDash);
     ctx.lineDashOffset = 0;
     return;
@@ -152,54 +169,47 @@ pxl.applyLineDash = function(ctx, u, linedash, dashoffset, node) {
     node._lastDash = linedash;
     node._lastDashU = u;
 
-    if (!node._scaledDash) node._scaledDash = [];
-
+    const scaled = node._scaledDash;
     if (typeof linedash === 'number') {
-      node._scaledDash.length = 1;
-      node._scaledDash[0] = linedash * u;
+      scaled.length = 1;
+      scaled[0] = linedash * u;
     } else if (Array.isArray(linedash)) {
-      const len = linedash.length;
-      node._scaledDash.length = len;
-      for (let i = 0; i < len; i++) {
-        node._scaledDash[i] = (Number.isFinite(linedash[i]) ? linedash[i] : 0) * u;
+      scaled.length = linedash.length;
+      for (let i = 0; i < linedash.length; i++) {
+        scaled[i] = linedash[i] * u;
       }
     }
   }
 
-  ctx.setLineDash((node._scaledDash && node._scaledDash.length > 0) ? node._scaledDash : pxl._emptyDash);
-  
-  let offset = parseFloat(dashoffset);
-  ctx.lineDashOffset = Number.isFinite(offset) ? (offset * u) : 0;
+  ctx.setLineDash(node._scaledDash);
+  ctx.lineDashOffset = dashoffset * u;
 };
 
 // =========================================================================
 // Geometry Parsing
 // =========================================================================
-// Smart Parser: Comma separates X/Y. Semicolon separates pairs.
+// Splits "x,y; x,y; …" into coordinate strings [x0, y0, x1, y1, …]. Commas and semicolons
+// inside parentheses belong to the expression: min(a, b) stays one coordinate.
 pxl.parsePointsIntoArray = function(str, targetArray) {
   targetArray.length = 0;
   let start = 0;
   let depth = 0;
   let currentX = null;
-  // Add a semicolon at the end to ensure the last point is processed
-  const input = str + ";"; 
+  const input = str + ';'; // the last point ends like all others
 
   for (let i = 0; i < input.length; i++) {
     const char = input[i];
-    
-    // Track parentheses so we don't split math functions like min(a, b)
+
     if (char === '(') depth++;
     else if (char === ')') depth--;
 
     if (depth === 0) {
       if (char === ',') {
-        // We found the end of X
         currentX = input.substring(start, i).trim();
         start = i + 1;
       } else if (char === ';') {
-        // We found the end of Y
         const currentY = input.substring(start, i).trim();
-        if (currentX !== null && currentX !== "" && currentY !== "") {
+        if (currentX !== null && currentX !== '' && currentY !== '') {
           targetArray.push(currentX, currentY);
         }
         currentX = null;

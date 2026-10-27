@@ -1,5 +1,5 @@
 // =========================================================================
-// pxl.Matrix - Zero-GC 2D Affine Engine
+// pxl.Matrix: 2D affine matrices [a, b, c, d, tx, ty], written into existing arrays
 // =========================================================================
 
 pxl.Matrix = {
@@ -79,34 +79,34 @@ pxl._scratchMatrixA = pxl.Matrix.create();
 pxl._scratchMatrixB = pxl.Matrix.create();
 pxl._identityMatrix = pxl.Matrix.create();
 
+// toLocal(ref.target, prop) in expressions (the compiler adds the caller): the target's frame
+// in the caller's parent space, the space of the caller's own x / y.
 pxl.toLocal = function(caller, targetObj, prop) {
-  if (!targetObj || !caller) return 0;
-  
-  const targetNode = targetObj.$node || targetObj; 
-  
+  if (!targetObj) return 0; // ref.<id> of an element that isn't connected yet
+
+  const targetNode = targetObj.$node;
+  if (!targetNode.getGlobalMatrix) return 0; // pxl-stage: no frame
+
   const callerParentGlobal = caller.parentContainer ? caller.parentContainer.getGlobalMatrix() : pxl._identityMatrix;
-  
-  const targetGlobal = targetNode.getGlobalMatrix ? targetNode.getGlobalMatrix() : null;
-  if (!targetGlobal) return 0;
 
-  // Delta = Invert(CallerParentGlobal) * TargetGlobal
+  // d = inverse(caller parent global) × target global
   pxl.Matrix.invert(pxl._scratchMatrixA, callerParentGlobal);
-  pxl.Matrix.multiply(pxl._scratchMatrixB, pxl._scratchMatrixA, targetGlobal);
+  const d = pxl.Matrix.multiply(pxl._scratchMatrixB, pxl._scratchMatrixA, targetNode.getGlobalMatrix());
 
-  const dx = targetNode.attributeValues.dx;
-  const dy = targetNode.attributeValues.dy;
-  const tdx = pxl._scratchMatrixB[0] * dx + pxl._scratchMatrixB[2] * dy;
-  const tdy = pxl._scratchMatrixB[1] * dx + pxl._scratchMatrixB[3] * dy;
+  // The target's offset (dx, dy) in the caller's space; the translation d[4], d[5] already includes it
+  const { dx, dy } = targetNode.attributeValues;
+  const tdx = d[0] * dx + d[2] * dy;
+  const tdy = d[1] * dx + d[3] * dy;
 
-  if (prop === 'x')      return pxl._scratchMatrixB[4] - tdx;
-  if (prop === 'y')      return pxl._scratchMatrixB[5] - tdy;
+  if (prop === 'x')      return d[4] - tdx;
+  if (prop === 'y')      return d[5] - tdy;
   if (prop === 'dx')     return tdx;
   if (prop === 'dy')     return tdy;
-  if (prop === 'tx')     return pxl._scratchMatrixB[4];
-  if (prop === 'ty')     return pxl._scratchMatrixB[5];
-  if (prop === 'rotate') return Math.atan2(pxl._scratchMatrixB[1], pxl._scratchMatrixB[0]) * 180 / Math.PI;
-  if (prop === 'scale' || prop === 'scalex') return Math.sqrt(pxl._scratchMatrixB[0]*pxl._scratchMatrixB[0] + pxl._scratchMatrixB[1]*pxl._scratchMatrixB[1]);
-  if (prop === 'scaley') return Math.sqrt(pxl._scratchMatrixB[2]*pxl._scratchMatrixB[2] + pxl._scratchMatrixB[3]*pxl._scratchMatrixB[3]);
-  
+  if (prop === 'tx')     return d[4];
+  if (prop === 'ty')     return d[5];
+  if (prop === 'rotate') return Math.atan2(d[1], d[0]) * 180 / Math.PI;
+  if (prop === 'scale' || prop === 'scalex') return Math.sqrt(d[0] * d[0] + d[1] * d[1]);
+  if (prop === 'scaley') return Math.sqrt(d[2] * d[2] + d[3] * d[3]);
+
   return 0;
 };

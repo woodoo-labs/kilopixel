@@ -1,15 +1,30 @@
 pxl.Stage = class Stage extends HTMLElement {
   static get observedAttributes() { return ['ratio', 'alwaysrender']; }
 
+  // Pointer events handled by the stage's InteractionEngine (its handleEvent)
+  static POINTER_EVENTS = ['pointermove', 'pointerdown', 'pointerup', 'pointerenter', 'pointerleave', 'click'];
+
   constructor() {
     super();
     this.layers = [];
     this.isOrderDirty = false;
     this.isUpdatePending = false;
     this.isSizePending = true;
+    this.isVisible = true;
     this.unit = 0;
     this.dpr = 1;
     this.resizeObserver = null;
+    this.intersectionObserver = null;
+    this._parsedRatio = 16 / 9;
+    this._refKey = null;
+
+    // Published as ref.<id>.*; renderAvg / renderMax are strings with 2 decimals (pxl.perf.publish)
+    this.attributeValues = {
+      mouseX: 500, mouseY: 500, isHovered: false, width: 1000, height: 1000 / this._parsedRatio,
+      fps: 0, renderAvg: '0.00', renderMax: '0.00'
+    };
+    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
+    Object.defineProperty(this.attributeValues, '$node', { value: this, enumerable: false, writable: false });
 
     // Performance metrics
     this.perfFrames = 0;
@@ -30,35 +45,22 @@ pxl.Stage = class Stage extends HTMLElement {
       // Bare or removed ratio falls back to the default 16 / 9
       this._parsedRatio = (newValue === null || newValue === '') ? 16 / 9 : pxl.parseAttributeValue(newValue);
       this.style.aspectRatio = this._parsedRatio;
-      if (this.attributeValues) {
-        this.attributeValues.height = 1000 / this._parsedRatio;
-        if (this._refKey) pxl.broadcast(this._refKey);
-      }
+      this.attributeValues.height = 1000 / this._parsedRatio;
+      if (this._refKey) pxl.broadcast(this._refKey);
     } else if (name === 'alwaysrender') {
-      const isAlwaysRender = newValue === 'true' || newValue === ''; // bare attribute = true
-      if (isAlwaysRender) {
-        if (this.intersectionObserver) {
-          this.intersectionObserver.disconnect();
-          this.intersectionObserver = null;
-        }
+      if (this.isAlwaysRender()) {
+        this.intersectionObserver?.disconnect();
+        this.intersectionObserver = null;
         this.isVisible = true;
         this.requestRender();
-      } else {
-        if (!this.intersectionObserver && this.isConnected) {
-          this.intersectionObserver = new IntersectionObserver((entries) => {
-            this.isVisible = entries[0].isIntersecting;
-            if (this.isVisible) this.requestRender();
-          });
-          this.intersectionObserver.observe(this);
-        }
+      } else if (this.isConnected) {
+        this.observeVisibility();
       }
     }
   }
 
   connectedCallback() {
     this.isVisible = true;
-    this.attributeValues = { mouseX: 500, mouseY: 500, isHovered: false, width: 1000, height: 1000, fps: 0, renderAvg: 0, renderMax: 0 };
-    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
     if (this.id) {
       pxl.nodes[this.id] = this.attributeValues;
       this._refKey = `ref.${this.id}`;
@@ -68,54 +70,47 @@ pxl.Stage = class Stage extends HTMLElement {
     this.style.display = 'block';
     this.style.position = 'relative';
     this.style.width = '100%';
-    this._parsedRatio ||= 16 / 9;
     this.style.aspectRatio = this._parsedRatio;
 
     this.resizeObserver = new ResizeObserver(() => this.resize());
     try {
       this.resizeObserver.observe(this, { box: 'device-pixel-content-box' });
     } catch (e) {
-      this.resizeObserver.observe(this, { box: 'content-box' });
+      this.resizeObserver.observe(this, { box: 'content-box' }); // Safari: no device-pixel-content-box
     }
 
-    this.addEventListener('pointermove', this.interaction);
-    this.addEventListener('pointerdown', this.interaction);
-    this.addEventListener('pointerup', this.interaction);
-    this.addEventListener('pointerenter', this.interaction);
-    this.addEventListener('pointerleave', this.interaction);
-    this.addEventListener('click', this.interaction);
+    for (const type of pxl.Stage.POINTER_EVENTS) this.addEventListener(type, this.interaction);
+    pxl.perf.registerStage(this);
 
-    pxl.perf?.registerStage(this);
-
-    // Initial setup if not already handled by attributeChangedCallback
-    const alwaysRender = this.getAttribute('alwaysrender');
-    if (alwaysRender !== 'true' && alwaysRender !== '' && !this.intersectionObserver) {
-      this.intersectionObserver = new IntersectionObserver((entries) => {
-        this.isVisible = entries[0].isIntersecting;
-        if (this.isVisible) this.requestRender();
-      });
-      this.intersectionObserver.observe(this);
-    }
+    if (!this.isAlwaysRender()) this.observeVisibility();
   }
 
   disconnectedCallback() {
-    if (this.intersectionObserver) {
-      this.intersectionObserver.disconnect();
-      this.intersectionObserver = null;
-    }
+    this.intersectionObserver?.disconnect();
+    this.intersectionObserver = null;
     this.resizeObserver.disconnect();
     this.resizeObserver = null;
     this.isUpdatePending = false;
     this.layers = [];
-    
-    this.removeEventListener('pointermove', this.interaction);
-    this.removeEventListener('pointerdown', this.interaction);
-    this.removeEventListener('pointerup', this.interaction);
-    this.removeEventListener('pointerenter', this.interaction);
-    this.removeEventListener('pointerleave', this.interaction);
-    this.removeEventListener('click', this.interaction);
 
-    pxl.perf?.unregisterStage(this);
+    for (const type of pxl.Stage.POINTER_EVENTS) this.removeEventListener(type, this.interaction);
+    pxl.perf.unregisterStage(this);
+  }
+
+  // Bare attribute or "true": render even when scrolled out of view
+  isAlwaysRender() {
+    const value = this.getAttribute('alwaysrender');
+    return value === 'true' || value === '';
+  }
+
+  // Pauses rendering while the stage is out of view
+  observeVisibility() {
+    if (this.intersectionObserver) return;
+    this.intersectionObserver = new IntersectionObserver((entries) => {
+      this.isVisible = entries[0].isIntersecting;
+      if (this.isVisible) this.requestRender();
+    });
+    this.intersectionObserver.observe(this);
   }
 
   registerLayer(layer) {
@@ -141,11 +136,10 @@ pxl.Stage = class Stage extends HTMLElement {
     this.attributeValues.height = 1000 / this._parsedRatio;
     if (this._refKey) pxl.broadcast(this._refKey);
 
-    this.dpr = window.devicePixelRatio || 1;
+    this.dpr = window.devicePixelRatio;
     this.isSizePending = false;
 
-    const len = this.layers.length;
-    for (let i = 0; i < len; i++) {
+    for (let i = 0; i < this.layers.length; i++) {
       this.layers[i].resize(w, h, this.dpr);
     }
     this.render(performance.now() / 1000);
@@ -161,14 +155,11 @@ pxl.Stage = class Stage extends HTMLElement {
     const start = performance.now();
 
     if (this.isOrderDirty) {
-      this.layers.sort((a, b) => 
-        (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_PRECEDING) ? 1 : -1
-      );
+      this.layers.sort(pxl.sortByDOMPosition);
       this.isOrderDirty = false;
     }
 
-    const len = this.layers.length;
-    for (let i = 0; i < len; i++) {
+    for (let i = 0; i < this.layers.length; i++) {
       const layer = this.layers[i];
       if (layer.isDirty || layer.isAnimated) layer.render(this.unit, t);
     }
@@ -180,7 +171,7 @@ pxl.Stage = class Stage extends HTMLElement {
 
     this.interaction.process();
 
-    if (pxl.perf && start - pxl.perf.lastUpdate >= 1000) {
+    if (start - pxl.perf.lastUpdate >= 1000) {
       pxl.perf.lastUpdate = start;
       pxl.perf.publish();
     }

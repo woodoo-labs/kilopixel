@@ -19,13 +19,20 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this.reactiveAttributeKeys = [];
     this.toLocalAttributeKeys = []; // reactive keys using toLocal(): also depend on this element's own space
     this.isAnimated = false;
-    
-    // Zero-GC Lazy Matrix Tracking
-    this.localMatrix = null;
-    this.globalMatrix = null;
-    this._isLocalMatrixDirty = false;
+
+    // Set in connectedCallback
+    this.parentLayer = null;
+    this.parentContainer = null;
+    this._refKey = null;
+
+    // Matrices are recomputed lazily: a version counter per matrix tells children when to recompute theirs
+    this.localMatrix = pxl.Matrix.create();
+    this.globalMatrix = pxl.Matrix.create();
+    this._isLocalMatrixDirty = true;
+    this._localMatrixVersion = 0;
+    this._lastLocalMatrixVersion = -1;
     this._globalMatrixVersion = 0;
-    this._parentMatrixVersion = -1;
+    this._lastParentMatrixVersion = -1;
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -42,29 +49,24 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   connectedCallback() {
     this.parentLayer = this.closest('pxl-layer');
     this.parentContainer = this.parentElement.closest('pxl-group, pxl-layer');
+    this._lastParentMatrixVersion = -1; // a new parent's version may equal the old one's
     this.parentContainer?.registerChild(this);
     pxl.restoreVariableSubscriptions(this);
 
-    // ZERO-GC FIX: Initial evaluation of reactive attributes now that we have a spatial context
+    // Reactive attributes are evaluated now: their refs and toLocal() need the element in the DOM
     const keys = this.reactiveAttributeKeys;
-    if (keys) {
-      const numKeys = keys.length;
-      if (numKeys > 0) {
-        for (let i = 0; i < numKeys; i++) {
-          const key = keys[i];
-          const newVal = this.attributeExpressions[key].call(this, 0);
-          
-          if (this.attributeValues[key] !== newVal) {
-            this.attributeValues[key] = newVal;
-            if (pxl.isSpatialKey(key)) {
-              this.setLocalMatrixDirty();
-            }
-          }
-        }
-        if (this._isLocalMatrixDirty) {
-          this.parentLayer?.invalidate();
-        }
+    let matrixDirtied = false;
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const newVal = this.attributeExpressions[key].call(this, 0);
+      if (this.attributeValues[key] !== newVal) {
+        this.attributeValues[key] = newVal;
+        if (pxl.isSpatialKey(key)) matrixDirtied = true;
       }
+    }
+    if (matrixDirtied) {
+      this.setLocalMatrixDirty();
+      this.parentLayer?.invalidate();
     }
 
     if (this.id) {
@@ -96,37 +98,30 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   evaluateAnimations(t) {
     let animatedValuesChanged = false;
     let matrixDirtied = false;
-    const animLen = this.animatedAttributeKeys.length;
-    if (animLen > 0) {
-      for (let i = 0; i < animLen; i++) {
-        const key = this.animatedAttributeKeys[i];
-        const newVal = this.attributeExpressions[key].call(this, t);
-        if (this.attributeValues[key] !== newVal) {
-          this.attributeValues[key] = newVal;
-          animatedValuesChanged = true;
-          
-          if (pxl.isSpatialKey(key)) {
-            matrixDirtied = true;
-          }
-        }
+    const keys = this.animatedAttributeKeys;
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const newVal = this.attributeExpressions[key].call(this, t);
+      if (this.attributeValues[key] !== newVal) {
+        this.attributeValues[key] = newVal;
+        animatedValuesChanged = true;
+        if (pxl.isSpatialKey(key)) matrixDirtied = true;
       }
     }
-    
-    if (matrixDirtied) {
-      this.setLocalMatrixDirty();
-    }
-    
+
+    if (matrixDirtied) this.setLocalMatrixDirty();
+
     if (this._refKey && animatedValuesChanged && pxl._subscriptions[this._refKey]) {
       pxl.broadcast(this._refKey);
     }
 
     if (this.isAnimated) this.parentLayer?.invalidate();
-    
+
     return animatedValuesChanged;
   }
 
-  // --- Spatial Reactivity Cascade ---
-  
+  // --- Spatial Reactivity ---
+
   setLocalMatrixDirty() {
     this._isLocalMatrixDirty = true;
     this.broadcastGlobalMatrixChange();
@@ -151,65 +146,44 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
           pxl.broadcast(child._refKey);
         }
 
-        // Recursively push the matrix dirty flag down the DOM tree (zero-cost if no tracked children)
-        if (!walked && typeof child.broadcastGlobalMatrixChange === 'function') {
-          child.broadcastGlobalMatrixChange();
-        }
+        // Walk on: deeper elements may be tracked or read toLocal() too
+        if (!walked) child.broadcastGlobalMatrixChange();
       }
     }
   }
 
-  // --- Lazy Matrix Tracking Getters ---
+  // --- Lazy Matrices ---
 
   getLocalMatrix() {
-    if (!this.localMatrix) this.localMatrix = pxl.Matrix.create();
-    
-    if (this._isLocalMatrixDirty || !this._localMatrixVersion) {
+    if (this._isLocalMatrixDirty) {
       const v = this.attributeValues;
       const sX = v.scale !== 1 ? v.scale : v.scalex;
       const sY = v.scale !== 1 ? v.scale : v.scaley;
-      
       pxl.Matrix.updateLocal(this.localMatrix, v.x, v.y, v.dx, v.dy, v.rotate, sX, sY, v.skewx, v.skewy);
       this._isLocalMatrixDirty = false;
-      this._localMatrixVersion = (this._localMatrixVersion || 0) + 1; 
+      this._localMatrixVersion++;
     }
     return this.localMatrix;
   }
 
   getGlobalMatrix() {
-    if (!this.globalMatrix) this.globalMatrix = pxl.Matrix.create();
-
-    this.getLocalMatrix(); // ensure local is clean
-
-    let isDirty = false;
-
-    if (this._lastLocalMatrixVersion !== this._localMatrixVersion) {
-      this._lastLocalMatrixVersion = this._localMatrixVersion;
-      isDirty = true;
-    }
+    const local = this.getLocalMatrix();
+    let isDirty = this._lastLocalMatrixVersion !== this._localMatrixVersion;
+    this._lastLocalMatrixVersion = this._localMatrixVersion;
 
     if (this.parentContainer) {
-      const parentGlobal = this.parentContainer.getGlobalMatrix(); // recursively updates parent!
+      const parentGlobal = this.parentContainer.getGlobalMatrix(); // updates the parent's version first
       const parentVersion = this.parentContainer._globalMatrixVersion;
-
       if (this._lastParentMatrixVersion !== parentVersion) {
         this._lastParentMatrixVersion = parentVersion;
         isDirty = true;
       }
-
-      if (isDirty) {
-        pxl.Matrix.multiply(this.globalMatrix, parentGlobal, this.localMatrix);
-        this._globalMatrixVersion = (this._globalMatrixVersion || 0) + 1;
-      }
-    } else {
-      if (isDirty) {
-        this.globalMatrix.set(this.localMatrix); 
-        this._globalMatrixVersion = (this._globalMatrixVersion || 0) + 1;
-      }
+      if (isDirty) pxl.Matrix.multiply(this.globalMatrix, parentGlobal, local);
+    } else if (isDirty) {
+      this.globalMatrix.set(local);
     }
 
-    if (!this._globalMatrixVersion) this._globalMatrixVersion = 1;
-
+    if (isDirty) this._globalMatrixVersion++;
     return this.globalMatrix;
   }
 };

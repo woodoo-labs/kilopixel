@@ -7,7 +7,7 @@ pxl._hitX = 0;
 pxl._hitY = 0;
 pxl._hitResult = false;
 
-// Global interceptors - these never trigger GC!
+// fill() / stroke() test the hit point instead of painting: a shape's own draw() becomes its hit test
 pxl.dummyCtx.fill = function() { if (this.isPointInPath(pxl._hitX, pxl._hitY)) pxl._hitResult = true; };
 pxl.dummyCtx.stroke = function() { if (this.isPointInStroke(pxl._hitX, pxl._hitY)) pxl._hitResult = true; };
 
@@ -39,7 +39,7 @@ pxl.trackInteractiveRefs = function(source, sticky) {
   }
 };
 
-pxl.InteractionEngine = class {
+pxl.InteractionEngine = class InteractionEngine {
   constructor(stage) {
     this.stage = stage;
     this._interactiveElements = [];
@@ -72,7 +72,7 @@ pxl.InteractionEngine = class {
 
   unregisterElement(el) {
     pxl.removeFromArray(this._interactiveElements, el);
-    
+
     if (this._hoveredElements.includes(el)) {
       pxl.removeFromArray(this._hoveredElements, el);
       el.attributeValues.isHovered = false;
@@ -131,7 +131,7 @@ pxl.InteractionEngine = class {
     if (len === 0) return;
 
     if (this.isInteractiveOrderDirty) {
-      elements.sort(pxl.sortByDOMPosition || ((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_PRECEDING) ? 1 : -1));
+      elements.sort(pxl.sortByDOMPosition);
       this.isInteractiveOrderDirty = false;
     }
 
@@ -145,7 +145,7 @@ pxl.InteractionEngine = class {
       for (let i = len - 1; i >= 0; i--) {
         const el = elements[i];
         if (!el.draw) continue;
-        
+
         let curr = el;
         let isHidden = false;
         let stackLen = 0;
@@ -215,7 +215,7 @@ pxl.InteractionEngine = class {
     if (hitEl) {
       if (this._lastMove && hitEl._compiledOnMove) hitEl._compiledOnMove();
       if (this._lastClick && hitEl._compiledOnClick) hitEl._compiledOnClick();
-      
+
       if (this._lastDown) {
         hitEl.attributeValues.isPressed = true;
         this._pressedElement = hitEl;

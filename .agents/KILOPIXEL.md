@@ -1,6 +1,6 @@
 # Kilopixel Framework — Complete Technical Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~55KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~53KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes using custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, etc.) and the framework compiles, evaluates, and renders everything at 60fps automatically.
 
@@ -174,7 +174,7 @@ Every PxlNode has:
 - `reactiveAttributeKeys[]` — attributes that depend on `ref.*` variables (evaluated on change)
 - `toLocalAttributeKeys[]` — reactive attributes using `toLocal()`, also re-evaluated when an ancestor's transform changes (see [Coordinate Mapping](#coordinate-mapping-tolocal))
 - `isAnimated` — true if any attribute uses time-dependent expressions
-- `localMatrix` / `globalMatrix` — lazy Float32Array affine matrices
+- `localMatrix` / `globalMatrix` — Float32Array affine matrices, recomputed lazily
 - `parentLayer` — reference to closest `<pxl-layer>` ancestor
 - `parentContainer` — reference to closest `<pxl-group>` or `<pxl-layer>` parent
 
@@ -220,11 +220,10 @@ When a string reaches this stage:
 
 1. **Cache lookup** — checks `staticCache` and `animationCache` Maps first
 2. **CSS % sanitizer** — converts illegal JS percentages: `50%` → `'50%'`
-3. **Optional chaining injector** — converts `ref.player.x` → `ref.player?.x` (prevents TypeError before elements connect)
-4. **toLocal rewriter** — converts `toLocal(` → `pxl.toLocal(this, `
-5. **Time dependency check** — regex tests for `t` (not preceded by `.`) or any driver function name
-6. **Variable dependency extraction** — regex extracts all `ref.xxx` identifiers
-7. **Smart return detector** — if no `return` keyword, wraps in `return ...;`
+3. **Time dependency check** — regex tests for `t` (not preceded by `.`) or any driver function name; `toLocal(` sets `usesToLocal`
+4. **`pxl.rewriteExpression()`** (shared with `on*` handlers) — `ref.player.x` → `ref.player?.x` (no TypeError before elements connect) and `toLocal(` → `pxl.toLocal(this, `
+5. **Variable dependency extraction** — regex extracts all `ref.xxx` identifiers
+6. **Smart return detector** — if no `return` keyword, wraps in `return ...;`
 
 Then branches:
 
@@ -724,10 +723,10 @@ Three pre-allocated scratch matrices prevent GC pressure:
 
 ### Lazy Versioned Matrix Tracking
 
-Each PxlNode tracks matrix state to avoid recomputation:
-- `_isLocalMatrixDirty` — boolean flag, set true when transform attributes change
-- `_globalMatrixVersion` — increments when local or parent matrix changes
-- `_parentMatrixVersion` — tracks parent's version for dirty detection
+Each PxlNode creates both matrices in its constructor and tracks their state to avoid recomputation:
+- `_isLocalMatrixDirty` — set when a transform attribute changes (starts `true`)
+- `_localMatrixVersion` / `_globalMatrixVersion` — increment when the matrix is recomputed
+- `_lastLocalMatrixVersion` / `_lastParentMatrixVersion` — the versions the global matrix was built from; `_lastParentMatrixVersion` is reset on connect, because a new parent may have the same version number as the old one
 
 `getGlobalMatrix()` recursively walks the parent chain, only recomputing when version mismatches are detected.
 
@@ -796,8 +795,10 @@ Note: The compiler rewrites `toLocal(` to `pxl.toLocal(this, ` at compile time.
 | `width` | number | Always 1000 (fixed logical width) |
 | `height` | number | Dynamic, based on aspect ratio (`1000 / parsedRatio`) |
 | `fps` | number | Frames rendered in last second |
-| `renderAvg` | string | Average ms per frame (2 decimal places) |
-| `renderMax` | string | Worst frame ms in last second (2 decimal places) |
+| `renderAvg` | string | Average ms per frame (2 decimal places, `'0.00'` before the first publish) |
+| `renderMax` | string | Worst frame ms in last second (2 decimal places, `'0.00'` before the first publish) |
+
+Like on every element, `attributeValues` also has the hidden `set(key, value)` and `$node` properties. It is created in the constructor and kept on reconnect (mouse position and stats survive moving the stage in the DOM). `toLocal(ref.<stageId>, …)` returns `0`: the stage has no frame.
 
 ### Key Behavior
 
@@ -937,7 +938,7 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `sc
 ### Event Handling
 
 When `attributeChangedCallback` receives an event attribute (`onclick`, `onenter`, etc.):
-1. The string is sanitized (ref optional chaining injected)
+1. The string goes through `pxl.rewriteExpression()` like attribute expressions: `ref.a.b` → `ref.a?.b`, and `toLocal()` works (the caller is the shape)
 2. Compiled via `new Function` with full scope access
 3. Bound to the element via `.bind(this)`
 4. Stored in `_compiledOnClick`, `_compiledOnEnter`, etc.
@@ -1069,8 +1070,9 @@ Internally uses lookup tables: `pxl.anchorX` and `pxl.anchorY` mapping names to 
 ### Drawing Logic
 
 - Calculates `startX = -w * anchorX * u`, `startY = -h * anchorY * u`
-- If any corner radius > 0: uses `ctx.roundRect()` (with fallback to `ctx.rect()`)
-- Pre-allocated `_radii = [0,0,0,0]` array for zero-GC roundRect
+- If any corner radius > 0: uses `ctx.roundRect()` (supported by every browser that has `createConicGradient`, which the engine needs anyway), otherwise `ctx.rect()`
+- Pre-allocated `_radii = [0,0,0,0]` array, reused every frame
+- An unknown `anchor` name is not replaced by `center`: the rect is not drawn (NaN coordinates)
 
 ### Bounding Box
 
@@ -1450,15 +1452,16 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 
 1. Reads and concatenates all 19 source files in dependency order
 2. **Namespace check:** stops with an error if any line starts with a top-level `class` / `const` / `let` / `var` / `function` (only `pxl` may be global, see [Namespace](#namespace-only-pxl-is-global))
-3. Injects version string: `window.pxl = { version: '0.1.0' };`
-4. Writes concatenated file to `dist/temp_concat.js` and runs Terser via `npx terser` with `--compress passes=2 --mangle --keep-classnames` (class expressions keep readable names for DevTools and warnings)
-5. Outputs to `dist/kilopixel-v0.1.0.min.js`
-6. Copies to `dist/pxl.min.js` (generic alias)
-7. Copies to `docs/js/pxl.min.js` (for GitHub Pages)
-8. Copies to `docs/download/pxl.min.js` (for downloads page)
-9. Generates `docs/download/kilopixel-boilerplate.zip` (starter package with `js/pxl.min.js` and modified `index.html`)
-10. Cleans up legacy zip locations (`dist/` and `docs/`)
-11. Reports original and minified sizes
+3. **Style check:** stops with an error on trailing whitespace in any engine file (`.editorconfig` trims it in most editors)
+4. Injects version string: `window.pxl = { version: '0.1.0' };`
+5. Writes concatenated file to `dist/temp_concat.js` and runs Terser via `npx terser` with `--compress passes=2 --mangle --keep-classnames` (class expressions keep readable names for DevTools and warnings)
+6. Outputs to `dist/kilopixel-v0.1.0.min.js`
+7. Copies to `dist/pxl.min.js` (generic alias)
+8. Copies to `docs/js/pxl.min.js` (for GitHub Pages)
+9. Copies to `docs/download/pxl.min.js` (for downloads page)
+10. Generates `docs/download/kilopixel-boilerplate.zip` (starter package with `js/pxl.min.js` and modified `index.html`)
+11. Cleans up legacy zip locations (`dist/` and `docs/`)
+12. Reports original and minified sizes
 
 ### Build Command
 

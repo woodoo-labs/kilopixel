@@ -1,21 +1,27 @@
 pxl.Polyline = class Polyline extends pxl.Shape {
-  static get observedAttributes() { return [...super.observedAttributes, 'points', 'closed', 'smooth', 'mode', 'arrowstart', 'arrowend', 'arrowstyle']; }
+  static get observedAttributes() {
+    return [...super.observedAttributes, 'points', 'closed', 'smooth', 'mode', 'arrowstart', 'arrowend', 'arrowstyle'];
+  }
 
-  static defaults = { ...pxl.Shape.defaults, closed: false, smooth: false, mode: 'absolute', arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
+  static defaults = {
+    ...pxl.Shape.defaults,
+    closed: false, smooth: false, mode: 'absolute', arrowstart: 0, arrowend: 0, arrowstyle: 'filled'
+  };
 
   constructor() {
     super();
     this.pointCount = 0;
-    this.rawParts = []; // Reusable array for parser output
+    this.rawParts = []; // parser output, reused
 
-    // Highly optimized flat cache and pre-calculated string keys
+    // Each coordinate is its own attribute p0, p1, … (keys built once per points change);
+    // draw() copies their values, scaled by u, into flatCache
     this.flatCache = new Float32Array(0);
     this.pointKeys = [];
 
     this._arrowStart = pxl.createArrowRecord();
     this._arrowEnd = pxl.createArrowRecord();
 
-    // Scratch buffers for trimming the first/last spline segment (zero-GC)
+    // Reused buffers for trimming the first / last spline segment
     this._segment = new Float64Array(8);  // p1, cp1, cp2, p2
     this._split = new Float64Array(10);   // q0, r0, s, r1, q2
   }
@@ -24,7 +30,8 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     if (name === 'points') {
       if (oldValue === newValue) return;
 
-      pxl.parsePointsIntoArray(newValue, this.rawParts);
+      // Removed (null) or bare (''): no points
+      pxl.parsePointsIntoArray(newValue ?? '', this.rawParts);
       const count = this.rawParts.length;
       this.clearPoints(count);
       this.pointCount = count;
@@ -62,8 +69,6 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     }
     this.pointCount = 0;
   }
-
-  // variableChangedCallback — INHERITED from Shape. No override needed.
 
   draw(ctx, u, t) {
     if (this.pointCount < 4) return;
@@ -289,7 +294,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
 
     for (let i = 0; i < this.pointCount; i += 2) {
       const px = this.attributeValues[this.pointKeys[i]];
-      const py = this.attributeValues[this.pointKeys[i+1]];
+      const py = this.attributeValues[this.pointKeys[i + 1]];
 
       if (isRelative && i > 0) {
         currentX += px;

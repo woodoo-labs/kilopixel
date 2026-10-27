@@ -101,6 +101,22 @@
           </pxl-layer>
         </pxl-stage>
 
+        <!-- Engine cleanup fixes (design/2026-10-27_engine_cleanup_inventory_note.md §3 A) -->
+        <pxl-stage id="ecStage" ratio="5 / 3" alwaysrender>
+          <pxl-layer>
+            <pxl-var id="ecVar" value="0"></pxl-var>
+            <pxl-grid id="ecGrid" step="100" stroke="#e2e8f0"></pxl-grid>
+            <pxl-group id="ecGroupA" x="100">
+              <pxl-circle id="ecMover" x="20" y="100" r="12" fill="#fb923c"></pxl-circle>
+            </pxl-group>
+            <pxl-group id="ecGroupB" x="300"></pxl-group>
+            <pxl-circle id="ecTarget" x="640" y="120" r="12" fill="#3b82f6"></pxl-circle>
+            <pxl-rect id="ecButton" x="200" y="400" w="80" h="40" fill="#22c55e"
+              onclick="ref.ecVar.set('value', toLocal(ref.ecTarget, 'x'))"></pxl-rect>
+            <pxl-polyline id="ecPoly" points="100,500; 300,550" stroke="#ec4899" strokewidth="3"></pxl-polyline>
+          </pxl-layer>
+        </pxl-stage>
+
       </div>
     </div>
   </main>
@@ -215,6 +231,54 @@
       box.setAttribute('dy', '40');
       await wait(100);
       expectMapped('txReader', 'txBox', [['x', 'tx'], ['y', 'ty']]);
+    });
+
+    // ===================================================================
+    // Engine cleanup fixes (design/2026-10-27_engine_cleanup_inventory_note.md §3 A)
+    // ===================================================================
+
+    test('grid: bounding box is the visible stage area (corners mapped without a per-frame closure)', () => {
+      el('ecStage').resize(); // sizes and draws the stage now (ResizeObserver doesn't fire in a hidden tab)
+      const b = el('ecGrid').boundingBox;
+      const h = pxl.nodes.ecStage.height;
+      if (round(b.left) !== 0 || round(b.top) !== 0 || round(b.right) !== 1000 || round(b.bottom) !== round(h)) {
+        throw new Error(`box is ${round(b.left)}, ${round(b.top)} → ${round(b.right)}, ${round(b.bottom)}`);
+      }
+    });
+
+    test('matrix: a shape moved to another group uses the new group\'s matrix', async () => {
+      const mover = el('ecMover');
+      if (round(mover.getGlobalMatrix()[4]) !== 120) throw new Error('setup: x is not 120 in group A');
+      el('ecGroupB').getGlobalMatrix(); // both groups now have the same matrix version
+      el('ecGroupB').appendChild(mover);
+      await wait(50);
+      const x = mover.getGlobalMatrix()[4];
+      if (round(x) !== 320) throw new Error(`global x is ${round(x)}, expected 320 (group B at 300 + 20)`);
+    });
+
+    test('InteractionEngine has a class name', () => {
+      if (pxl.InteractionEngine.name !== 'InteractionEngine') throw new Error(`name is '${pxl.InteractionEngine.name}'`);
+    });
+
+    test('on* handlers can use toLocal()', () => {
+      el('ecButton')._compiledOnClick();
+      const value = pxl.nodes.ecVar.value;
+      if (value !== 640) throw new Error(`ref.ecVar.value is ${value}, expected 640`);
+    });
+
+    test('polyline: removing points leaves no points', () => {
+      const poly = el('ecPoly');
+      poly.removeAttribute('points');
+      if (poly.pointCount !== 0) throw new Error(`pointCount is ${poly.pointCount}`);
+      if ('p0' in poly.attributeValues) throw new Error('p0 is still set');
+    });
+
+    test('stage: renderAvg / renderMax are strings from the start; toLocal(stage) is 0', () => {
+      const stage = document.createElement('pxl-stage');
+      const { renderAvg, renderMax } = stage.attributeValues;
+      if (renderAvg !== '0.00' || renderMax !== '0.00') throw new Error(`renderAvg ${JSON.stringify(renderAvg)}, renderMax ${JSON.stringify(renderMax)}`);
+      const result = pxl.toLocal(el('ecTarget'), pxl.nodes.ecStage, 'x');
+      if (result !== 0) throw new Error(`toLocal(stage) is ${result}`);
     });
 
     // --- Run all tests in order ---

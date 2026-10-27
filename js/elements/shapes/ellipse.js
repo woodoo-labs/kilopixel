@@ -1,7 +1,17 @@
 pxl.Ellipse = class Ellipse extends pxl.Shape {
-  static get observedAttributes() { return [...super.observedAttributes, 'rx', 'ry', 'irx', 'iry', 'start', 'end', 'sweep', 'pie', 'closed', 'anticlockwise', 'arrowstart', 'arrowend', 'arrowstyle']; }
+  static get observedAttributes() {
+    return [
+      ...super.observedAttributes,
+      'rx', 'ry', 'irx', 'iry', 'start', 'end', 'sweep', 'pie', 'closed', 'anticlockwise',
+      'arrowstart', 'arrowend', 'arrowstyle'
+    ];
+  }
 
-  static defaults = { ...pxl.Shape.defaults, rx: 0, ry: 0, irx: 0, iry: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
+  static defaults = {
+    ...pxl.Shape.defaults,
+    rx: 0, ry: 0, irx: 0, iry: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false,
+    arrowstart: 0, arrowend: 0, arrowstyle: 'filled'
+  };
 
   constructor() {
     super();
@@ -25,22 +35,13 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
     const hasInner = safeIRX > 0 || safeIRY > 0;
 
     const startRadians = start * Math.PI / 180;
-
-    let endRadians;
-    if (sweep !== null) {
-      endRadians = startRadians + (sweep * Math.PI / 180);
-    } else if (end !== null) {
-      endRadians = end * Math.PI / 180;
-    } else {
-      endRadians = startRadians + Math.PI * 2;
-    }
-
-    const isFull = Math.abs(endRadians - startRadians) >= (Math.PI * 2 - 1e-4);
+    const endRadians = pxl.arcEndRadians(startRadians, end, sweep);
+    const isFull = pxl.isFullTurn(startRadians, endRadians);
 
     let drawStartRadians = startRadians;
     let drawEndRadians = endRadians;
 
-    // --- ARROWHEADS (open arcs only) ---
+    // Arrowheads (open arcs only)
     const arrowStart = this._arrowStart, arrowEnd = this._arrowEnd;
     const canHaveArrows = safeRX > 0 && safeRY > 0 && !hasInner && !isPie && !isClosed && this.isStroked();
     const hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart, u);
@@ -66,7 +67,6 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
       drawEndRadians -= travel * endInsetRadians;
     }
 
-    // --- DRAW PATH ---
     if (drawShaft) {
       ctx.beginPath();
       ctx.ellipse(0, 0, safeRX * u, safeRY * u, 0, drawStartRadians, drawEndRadians, isAnti);

@@ -4,6 +4,7 @@ window.pxl = {};
 // Generic Utilities
 // =========================================================================
 
+// Removes an item by swapping in the last element (order is not kept, no allocation)
 pxl.removeFromArray = function(arr, item) {
   const idx = arr.indexOf(item);
   if (idx !== -1) {
@@ -18,8 +19,8 @@ pxl.sortByDOMPosition = function(a, b) {
 };
 
 pxl.isSpatialKey = function(key) {
-  return key === 'x' || key === 'y' || key === 'dx' || key === 'dy' || 
-         key === 'rotate' || key === 'scale' || key === 'scalex' || 
+  return key === 'x' || key === 'y' || key === 'dx' || key === 'dy' ||
+         key === 'rotate' || key === 'scale' || key === 'scalex' ||
          key === 'scaley' || key === 'skewx' || key === 'skewy';
 };
 
@@ -27,57 +28,49 @@ pxl.isSpatialKey = function(key) {
 // Reactivity Engine
 // =========================================================================
 
-// Centralized Pub-Sub Bus
+// Subscribers per ref key: { 'ref.id': [element, …] }
 pxl._subscriptions = {};
 
-// The zero-cost plain object registry for DOM nodes
+// Element id → its attributeValues, read by expressions as ref.<id>.<name>
 pxl.nodes = {};
 
 pxl.broadcast = function(fullKey) {
-  const subs = this._subscriptions[fullKey];
+  const subs = pxl._subscriptions[fullKey];
   if (subs) {
-    // Loop backwards to support safe in-place unsubscribing (Zero-GC)
+    // Backwards: a subscriber may unsubscribe itself during the loop
     for (let i = subs.length - 1; i >= 0; i--) {
       subs[i].variableChangedCallback(fullKey);
     }
   }
 };
 
-// Proxies and global system variables have been removed in favor of explicit ref.* architecture
-
 pxl.subscribeToVariable = function(fullKey, element) {
-  if (!this._subscriptions[fullKey]) this._subscriptions[fullKey] = [];
-  if (!this._subscriptions[fullKey].includes(element)) {
-    this._subscriptions[fullKey].push(element);
+  if (!pxl._subscriptions[fullKey]) pxl._subscriptions[fullKey] = [];
+  if (!pxl._subscriptions[fullKey].includes(element)) {
+    pxl._subscriptions[fullKey].push(element);
   }
 };
 
 pxl.unsubscribeFromVariable = function(fullKey, element) {
-  const subs = this._subscriptions[fullKey];
+  const subs = pxl._subscriptions[fullKey];
   if (!subs) return;
 
-  // 1. Zero-GC Array Mutation using helper
-  this.removeFromArray(subs, element);
-
-  // 2. Dashboard Safeguard: Delete the key if the array is empty
-  if (subs.length === 0) {
-    delete this._subscriptions[fullKey];
-  }
+  pxl.removeFromArray(subs, element);
+  if (subs.length === 0) delete pxl._subscriptions[fullKey]; // keeps the map small for debugging
 };
 
 pxl.clearAllVariableSubscriptions = function(element) {
-  // 1. Take a static snapshot of the current variables being tracked.
-  const trackedKeys = Object.keys(this._subscriptions);
-  const len = trackedKeys.length;
-
-  // 2. Safely loop through the snapshot
-  for (let i = 0; i < len; i++) {
-    this.unsubscribeFromVariable(trackedKeys[i], element);
+  // Snapshot of the keys: unsubscribing deletes empty keys while we loop
+  const trackedKeys = Object.keys(pxl._subscriptions);
+  for (let i = 0; i < trackedKeys.length; i++) {
+    pxl.unsubscribeFromVariable(trackedKeys[i], element);
   }
 };
+
 // =========================================================================
-// State Update Utilities for Web Components
+// Attribute Compilation
 // =========================================================================
+
 // Attributes that follow the HTML presence rule: a bare attribute (<pxl-polyline closed>) means true
 pxl.BOOLEAN_ATTRIBUTES = new Set(['hidden', 'closed', 'smooth', 'pie', 'anticlockwise', 'labels']);
 
@@ -85,7 +78,7 @@ pxl.BOOLEAN_ATTRIBUTES = new Set(['hidden', 'closed', 'smooth', 'pie', 'anticloc
 // otherwise the class default (design/2026-10-17_attribute_defaults_and_state_isolation_plan.md)
 pxl.resolveEmptyAttribute = function(element, name, newValue) {
   if (newValue === '') {
-    if (this.BOOLEAN_ATTRIBUTES.has(name)) return true;
+    if (pxl.BOOLEAN_ATTRIBUTES.has(name)) return true;
     if (name === 'value') return ''; // only <pxl-var> has a value attribute
   }
   const value = element.constructor.defaults[name];
@@ -94,51 +87,47 @@ pxl.resolveEmptyAttribute = function(element, name, newValue) {
 
 pxl.compileAttribute = function(element, name, newValue) {
   const parsed = (newValue === null || newValue === '')
-    ? this.resolveEmptyAttribute(element, name, newValue)
-    : this.parseAttributeValue(newValue);
+    ? pxl.resolveEmptyAttribute(element, name, newValue)
+    : pxl.parseAttributeValue(newValue);
   element.attributeExpressions[name] = parsed;
 
   // Register shapes whose isHovered / isPressed is read here. Time-dependent expressions never
   // subscribe to ref.*, so their references are sticky (never lazily unregistered).
-  this.trackInteractiveRefs(newValue, typeof parsed === 'function' && parsed.isTimeDependent === true);
+  pxl.trackInteractiveRefs(newValue, typeof parsed === 'function' && parsed.isTimeDependent === true);
 
   if (typeof parsed === 'function') {
     if (parsed.isTimeDependent) {
-      // --- 60FPS Time Loop ---
+      // Evaluated every frame (evaluateAnimations)
       if (!element.animatedAttributeKeys.includes(name)) element.animatedAttributeKeys.push(name);
-      this.removeFromArray(element.reactiveAttributeKeys, name);
-      this.removeFromArray(element.toLocalAttributeKeys, name);
+      pxl.removeFromArray(element.reactiveAttributeKeys, name);
+      pxl.removeFromArray(element.toLocalAttributeKeys, name);
     } else {
-      // --- Reactive Variable Engine ---
-      this.removeFromArray(element.animatedAttributeKeys, name);
+      // Evaluated when a ref.* dependency broadcasts. Functions are only compiled for time or refs,
+      // so a reactive function always has variableDependencies.
+      pxl.removeFromArray(element.animatedAttributeKeys, name);
       if (!element.reactiveAttributeKeys.includes(name)) element.reactiveAttributeKeys.push(name);
 
       // toLocal results also depend on the element's own space (re-evaluated by broadcastGlobalMatrixChange)
       if (parsed.usesToLocal) {
         if (!element.toLocalAttributeKeys.includes(name)) element.toLocalAttributeKeys.push(name);
       } else {
-        this.removeFromArray(element.toLocalAttributeKeys, name);
+        pxl.removeFromArray(element.toLocalAttributeKeys, name);
       }
 
-      // Globally subscribe the element to the variables it needs
       const deps = parsed.variableDependencies;
-      if (deps) {
-        const len = deps.length;
-        for (let i = 0; i < len; i++) {
-          this.subscribeToVariable(deps[i], element);
-        }
+      for (let i = 0; i < deps.length; i++) {
+        pxl.subscribeToVariable(deps[i], element);
       }
-      
-      // ONLY evaluate if we are connected to the DOM. If we aren't, connectedCallback will handle it.
+
+      // Not connected yet: connectedCallback evaluates it
       if (element.isConnected) {
         element.attributeValues[name] = parsed.call(element, 0);
       }
     }
   } else {
-    // --- Static Primitive ---
-    this.removeFromArray(element.animatedAttributeKeys, name);
-    this.removeFromArray(element.reactiveAttributeKeys, name);
-    this.removeFromArray(element.toLocalAttributeKeys, name);
+    pxl.removeFromArray(element.animatedAttributeKeys, name);
+    pxl.removeFromArray(element.reactiveAttributeKeys, name);
+    pxl.removeFromArray(element.toLocalAttributeKeys, name);
     element.attributeValues[name] = parsed;
   }
 };
@@ -148,9 +137,8 @@ pxl.compileAttribute = function(element, name, newValue) {
 pxl.evaluateToLocalAttributes = function(element) {
   let result = 0;
   const keys = element.toLocalAttributeKeys;
-  const len = keys.length;
 
-  for (let i = 0; i < len; i++) {
+  for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
     const newVal = element.attributeExpressions[key].call(element, 0);
     if (element.attributeValues[key] !== newVal) {
@@ -165,50 +153,38 @@ pxl.evaluateToLocalAttributes = function(element) {
   return result;
 };
 
+// Re-evaluates the reactive attributes that depend on varName.
+// Returns a bitmask: 1 = varName is still needed, 2 = values changed.
 pxl.evaluateAttributesForVariable = function(element, varName) {
-  let result = 0; // Bitmask: 1 = isVarStillNeeded, 2 = hasChanges
+  let result = 0;
   let matrixDirtied = false;
-  const len = element.reactiveAttributeKeys.length;
+  const keys = element.reactiveAttributeKeys;
 
-  for (let i = 0; i < len; i++) {
-    const key = element.reactiveAttributeKeys[i];
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
     const fn = element.attributeExpressions[key];
 
-    if (fn.variableDependencies?.includes(varName)) {
-      result |= 1; // Flag bit 1
+    if (fn.variableDependencies.includes(varName)) {
+      result |= 1;
       const newVal = fn.call(element, 0);
       if (element.attributeValues[key] !== newVal) {
         element.attributeValues[key] = newVal;
-        result |= 2; // Flag bit 2
-
-        if (pxl.isSpatialKey(key)) {
-          matrixDirtied = true;
-        }
+        result |= 2;
+        if (pxl.isSpatialKey(key)) matrixDirtied = true;
       }
     }
   }
-  
-  if (matrixDirtied) {
-    element.setLocalMatrixDirty();
-  }
-  
+
+  if (matrixDirtied) element.setLocalMatrixDirty();
   return result;
 };
 
 pxl.restoreVariableSubscriptions = function(element) {
-  if (!element.reactiveAttributeKeys) return;
-  const len = element.reactiveAttributeKeys.length;
-  for (let i = 0; i < len; i++) {
-    const key = element.reactiveAttributeKeys[i];
-    const fn = element.attributeExpressions[key];
-    const deps = fn?.variableDependencies;
-    if (deps) {
-      const depLen = deps.length;
-      for (let j = 0; j < depLen; j++) {
-        this.subscribeToVariable(deps[j], element);
-      }
+  const keys = element.reactiveAttributeKeys;
+  for (let i = 0; i < keys.length; i++) {
+    const deps = element.attributeExpressions[keys[i]].variableDependencies;
+    for (let j = 0; j < deps.length; j++) {
+      pxl.subscribeToVariable(deps[j], element);
     }
   }
 };
-
-
