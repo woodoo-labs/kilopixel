@@ -1,7 +1,6 @@
 :root {
   /* Crisp, bright Light Mode palette */
   --bg-main: #ffffff;
-  --bg-sidebar: #f8fafc;
   --bg-header: #ffffff;
   --border-color: #e2e8f0;
   
@@ -15,7 +14,9 @@
   --accent-hover: #2563eb;
   --accent-bg: rgba(59, 130, 246, 0.08);
   --code-bg: #f1f5f9;
-  
+
+  /* Fonts */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 * { box-sizing: border-box; }
@@ -44,6 +45,7 @@ body {
   overflow-y: auto;
   min-width: 0;
   width: 100%;
+  overflow-anchor: none;
 }
 
 .docs-inner {
@@ -51,10 +53,6 @@ body {
   max-width: 900px;
   width: 100%;
   margin: 0 auto;
-}
-
-.docs-content {
-  overflow-anchor: none;
 }
 
 /* --- Typography & Markdown --- */
@@ -81,6 +79,7 @@ body {
   font-size: 1.75rem;
   margin-top: 4rem;
   margin-bottom: 1.5rem;
+  color: var(--text-heading);
 }
 
 .docs-content h3 {
@@ -120,7 +119,7 @@ body {
   background-color: var(--code-bg);
   padding: 2px 6px;
   border-radius: 4px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.95em;
   color: var(--accent);
 }
@@ -153,7 +152,6 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  width: 100%;
   z-index: 1000;
 }
 
@@ -204,15 +202,15 @@ body {
 /* --- Sidebar --- */
 .sidebar {
   /* Component-Scoped Tokens */
-  --sidebar-bg: #ffffff;
-  --sidebar-border: #e2e8f0;
+  --sidebar-bg: var(--bg-main);
+  --sidebar-border: var(--border-color);
   --sidebar-title: #94a3b8;
   --sidebar-link: #475569;
-  --sidebar-link-hover: #0f172a;
+  --sidebar-link-hover: var(--text-heading);
   --sidebar-hover-bg: rgba(15, 23, 42, 0.03);
   --sidebar-hover-border: #cbd5e1;
-  --sidebar-active-accent: #2563eb;
-  --sidebar-active-bg: rgba(59, 130, 246, 0.08);
+  --sidebar-active-accent: var(--accent-hover);
+  --sidebar-active-bg: var(--accent-bg);
 
   width: 280px;
   background-color: var(--sidebar-bg);
@@ -278,12 +276,6 @@ body {
   font-weight: 400;
 }
 
-.sidebar li a.active:hover {
-  border-left-color: var(--sidebar-active-accent);
-  color: var(--sidebar-active-accent);
-  background-color: var(--sidebar-active-bg);
-}
-
 /* --- Callouts & Action Buttons --- */
 .download-actions {
   display: flex;
@@ -312,7 +304,6 @@ body {
 
 .btn-download-primary:hover {
   background: var(--accent-hover);
-  color: #ffffff;
 }
 
 .btn-download-secondary {
@@ -322,7 +313,6 @@ body {
 
 .btn-download-secondary:hover {
   background: #1e293b;
-  color: #ffffff;
 }
 
 .callout-info {
@@ -456,11 +446,9 @@ body {
   gap: 24px;
   align-items: center;
   border-bottom: 1px solid var(--border-color);
-  padding: 0;
   overflow-x: auto;
   white-space: nowrap;
   scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
 }
 
 .demo-controls-header::-webkit-scrollbar {
@@ -623,7 +611,7 @@ body {
 .control-group select {
   width: 100%;
   padding: 8px 32px 8px 12px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 14px;
   color: var(--accent);
   font-weight: 500;
@@ -648,7 +636,7 @@ body {
 }
 
 .control-group select option {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--font-mono);
   color: var(--text-main);
   font-weight: normal;
 }
@@ -659,7 +647,7 @@ body {
 
 .control-group select:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 /* --- Segmented Toggle Controls --- */
@@ -754,7 +742,7 @@ body {
   border-radius: 6px;
   display: inline-block;
   width: fit-content;
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 .api-meta {
@@ -766,7 +754,7 @@ body {
 
 .api-pill {
   font-size: 0.8rem;
-  font-family: monospace;
+  font-family: var(--font-mono);
   padding: 3px 8px;
   border-radius: 4px;
   font-weight: 500;
@@ -797,11 +785,6 @@ body {
 /* --- Utility Classes --- */
 .text-accent {
   color: var(--accent);
-  font-weight: 600;
-}
-
-.text-violet {
-  color: #8b5cf6;
   font-weight: 600;
 }
 
@@ -852,7 +835,6 @@ body {
     bottom: 0;
     z-index: 90;
     transform: translateX(-100%);
-    background-color: var(--bg-main);
     box-shadow: 4px 0 15px rgba(0,0,0,0.05);
   }
   

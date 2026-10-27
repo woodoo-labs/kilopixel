@@ -188,8 +188,8 @@
         <h2>2. RGB &amp; RGBA</h2>
         <p>The <code>rgb()</code> and <code>rgba()</code> formats break colors down into their core numeric channels: <strong>R</strong>ed, <strong>G</strong>reen, and <strong>B</strong>lue (0-255). The <code>rgba()</code> variant adds a fourth <strong>A</strong>lpha channel (0.0 - 1.0) to control transparency, allowing overlapping shapes to blend together.</p>
 
-        <div class="example-card">
-          <div class="example-code">
+        <div>
+          <div>
             <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Circle 1 (Red) --&gt;
@@ -318,8 +318,8 @@
           <p class="callout-body"><strong>Exception:</strong> If you choose to use Javascript <strong>backticks</strong> (template literals) for string interpolation (e.g., <code>fill="`hsl(${t*90}, 100%, 50%)`"</code>), your math and time variables are evaluated natively by JavaScript. Because this bypasses Kilopixel's formatting helpers, you <strong>must</strong> include the <code>%</code> signs manually so the final generated string is valid CSS.</p>
         </div>
 
-        <div class="example-card">
-          <div class="example-code">
+        <div>
+          <div>
             <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Circle 1 (Static HSL) --&gt;
