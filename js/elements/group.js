@@ -8,13 +8,13 @@ pxl.Group = class Group extends pxl.PxlNode {
   constructor() {
     super();
     this.childList = []; // groups and shapes
-    this.isOrderDirty = false; // children need sorting by DOM position
+    this._isOrderDirty = false; // children need sorting by DOM position
   }
 
   registerChild(child) {
     if (!this.childList.includes(child)) {
       this.childList.push(child);
-      this.isOrderDirty = true;
+      this._isOrderDirty = true;
       this.parentLayer?.invalidate();
     }
   }
@@ -26,9 +26,9 @@ pxl.Group = class Group extends pxl.PxlNode {
 
   // Draws into the parent layer's canvas
   render(ctx, u, t) {
-    if (this.isOrderDirty) {
+    if (this._isOrderDirty) {
       this.childList.sort(pxl.sortByDOMPosition);
-      this.isOrderDirty = false;
+      this._isOrderDirty = false;
     }
 
     this.evaluateAnimations(t);

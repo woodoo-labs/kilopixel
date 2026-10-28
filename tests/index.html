@@ -261,7 +261,7 @@
     });
 
     test('on* handlers can use toLocal()', () => {
-      el('ecButton')._compiledOnClick();
+      el('ecButton').handlers.click();
       const value = pxl.nodes.ecVar.value;
       if (value !== 640) throw new Error(`ref.ecVar.value is ${value}, expected 640`);
     });
@@ -269,7 +269,7 @@
     test('polyline: removing points leaves no points', () => {
       const poly = el('ecPoly');
       poly.removeAttribute('points');
-      if (poly.pointCount !== 0) throw new Error(`pointCount is ${poly.pointCount}`);
+      if (poly._pointCount !== 0) throw new Error(`pointCount is ${poly._pointCount}`);
       if ('p0' in poly.attributeValues) throw new Error('p0 is still set');
     });
 

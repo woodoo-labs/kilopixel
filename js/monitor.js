@@ -22,7 +22,7 @@ pxl.perf = {
       values.fps = stage.perfFrames;
       values.renderAvg = (stage.perfFrames > 0 ? stage.perfAccumulated / stage.perfFrames : 0).toFixed(2);
       values.renderMax = stage.perfMax.toFixed(2);
-      if (stage._refKey) pxl.broadcast(stage._refKey);
+      if (stage.refKey) pxl.broadcast(stage.refKey);
 
       // Reset counters for the next interval
       stage.perfFrames = 0;

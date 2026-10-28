@@ -43,7 +43,7 @@ pxl.InteractionEngine = class InteractionEngine {
   constructor(stage) {
     this.stage = stage;
     this._interactiveElements = [];
-    this.isInteractiveOrderDirty = false;
+    this._isOrderDirty = false;
     this._hoveredElements = [];
     this._pressedElement = null;
     this._hitStack = new Array(50);
@@ -58,7 +58,7 @@ pxl.InteractionEngine = class InteractionEngine {
   registerElement(el) {
     if (!this._interactiveElements.includes(el)) {
       this._interactiveElements.push(el);
-      this.isInteractiveOrderDirty = true;
+      this._isOrderDirty = true;
     }
   }
 
@@ -66,7 +66,7 @@ pxl.InteractionEngine = class InteractionEngine {
   // re-evaluated and dropped stale subscriptions): nobody reads this element's states any more.
   releaseIfUnused(el) {
     if (el.hasEventHandlers() || pxl._stickyIds.has(el.id)) return;
-    const subs = el._refKey ? pxl._subscriptions[el._refKey] : null;
+    const subs = el.refKey ? pxl._subscriptions[el.refKey] : null;
     if (!subs || subs.length === 0) this.unregisterElement(el);
   }
 
@@ -76,12 +76,12 @@ pxl.InteractionEngine = class InteractionEngine {
     if (this._hoveredElements.includes(el)) {
       pxl.removeFromArray(this._hoveredElements, el);
       el.attributeValues.isHovered = false;
-      if (el._refKey) pxl.broadcast(el._refKey);
+      if (el.refKey) pxl.broadcast(el.refKey);
     }
     if (this._pressedElement === el) {
       this._pressedElement = null;
       el.attributeValues.isPressed = false;
-      if (el._refKey) pxl.broadcast(el._refKey);
+      if (el.refKey) pxl.broadcast(el.refKey);
     }
   }
 
@@ -122,7 +122,7 @@ pxl.InteractionEngine = class InteractionEngine {
 
   process() {
     if (this._isMouseDirty) {
-      if (this.stage._refKey) pxl.broadcast(this.stage._refKey);
+      if (this.stage.refKey) pxl.broadcast(this.stage.refKey);
       this._isMouseDirty = false;
     }
 
@@ -130,9 +130,9 @@ pxl.InteractionEngine = class InteractionEngine {
     const len = elements.length;
     if (len === 0) return;
 
-    if (this.isInteractiveOrderDirty) {
+    if (this._isOrderDirty) {
       elements.sort(pxl.sortByDOMPosition);
-      this.isInteractiveOrderDirty = false;
+      this._isOrderDirty = false;
     }
 
     const ctx = pxl.dummyCtx;
@@ -190,8 +190,8 @@ pxl.InteractionEngine = class InteractionEngine {
       const prevHovered = this._hoveredElements[i];
       if (prevHovered !== hitEl) {
         prevHovered.attributeValues.isHovered = false;
-        if (prevHovered._refKey) pxl.broadcast(prevHovered._refKey);
-        if (prevHovered._compiledOnLeave) prevHovered._compiledOnLeave();
+        if (prevHovered.refKey) pxl.broadcast(prevHovered.refKey);
+        if (prevHovered.handlers.leave) prevHovered.handlers.leave();
         pxl.removeFromArray(this._hoveredElements, prevHovered);
         this.releaseIfUnused(prevHovered);
       }
@@ -201,8 +201,8 @@ pxl.InteractionEngine = class InteractionEngine {
     if (hitEl && !this._hoveredElements.includes(hitEl)) {
       this._hoveredElements.push(hitEl);
       hitEl.attributeValues.isHovered = true;
-      if (hitEl._refKey) pxl.broadcast(hitEl._refKey);
-      if (hitEl._compiledOnEnter) hitEl._compiledOnEnter();
+      if (hitEl.refKey) pxl.broadcast(hitEl.refKey);
+      if (hitEl.handlers.enter) hitEl.handlers.enter();
     }
 
     // Update Cursor: hand only for clickable elements (DOM write only on change)
@@ -213,14 +213,14 @@ pxl.InteractionEngine = class InteractionEngine {
     }
 
     if (hitEl) {
-      if (this._lastMove && hitEl._compiledOnMove) hitEl._compiledOnMove();
-      if (this._lastClick && hitEl._compiledOnClick) hitEl._compiledOnClick();
+      if (this._lastMove && hitEl.handlers.move) hitEl.handlers.move();
+      if (this._lastClick && hitEl.handlers.click) hitEl.handlers.click();
 
       if (this._lastDown) {
         hitEl.attributeValues.isPressed = true;
         this._pressedElement = hitEl;
-        if (hitEl._refKey) pxl.broadcast(hitEl._refKey);
-        if (hitEl._compiledOnDown) hitEl._compiledOnDown();
+        if (hitEl.refKey) pxl.broadcast(hitEl.refKey);
+        if (hitEl.handlers.down) hitEl.handlers.down();
       }
     }
 
@@ -228,10 +228,10 @@ pxl.InteractionEngine = class InteractionEngine {
       const released = this._pressedElement;
       if (released) {
         released.attributeValues.isPressed = false;
-        if (released._refKey) pxl.broadcast(released._refKey);
+        if (released.refKey) pxl.broadcast(released.refKey);
         this._pressedElement = null;
       }
-      if (hitEl && hitEl._compiledOnUp) hitEl._compiledOnUp();
+      if (hitEl && hitEl.handlers.up) hitEl.handlers.up();
       if (released) this.releaseIfUnused(released);
     }
 

@@ -50,13 +50,39 @@ function build() {
     }
 
     // Style checks (CLAUDE.md "Engine Code Style"); .editorconfig trims whitespace in most editors already
+    const sources = {};
     for (const file of files) {
-      const lines = fs.readFileSync(path.join(__dirname, file), 'utf8').split('\n');
-      const bad = lines.findIndex(line => /[ \t]+$/.test(line));
+      sources[file] = fs.readFileSync(path.join(__dirname, file), 'utf8');
+      const bad = sources[file].split('\n').findIndex(line => /[ \t]+$/.test(line));
       if (bad !== -1) {
         console.error(`Error: trailing whitespace in ${file}:${bad + 1}`);
         process.exit(1);
       }
+    }
+
+    // Field ownership: a field with a leading _ is used only in the file that sets it (this._x = …);
+    // a field without _ is also used in another engine file. Matched by name, so equal names in
+    // different classes count together.
+    const ownerFiles = {};
+    for (const file of files) {
+      for (const m of sources[file].matchAll(/\bthis\.([A-Za-z_$][\w$]*)\s*=(?!=)/g)) {
+        (ownerFiles[m[1]] ||= new Set()).add(file);
+      }
+    }
+    const ownershipErrors = [];
+    for (const [name, owners] of Object.entries(ownerFiles)) {
+      const use = new RegExp(`\\.${name.replace(/\$/g, '\\$')}(?![\\w$])`);
+      const otherFiles = files.filter(f => !owners.has(f) && use.test(sources[f]));
+      const where = [...owners].map(f => path.basename(f)).join(', ');
+      if (name.startsWith('_') && otherFiles.length > 0) {
+        ownershipErrors.push(`${name} (${where}) is also used in ${otherFiles.map(f => path.basename(f)).join(', ')}: rename it without _`);
+      } else if (!name.startsWith('_') && otherFiles.length === 0) {
+        ownershipErrors.push(`${name} (${where}) is used only there: rename it to _${name}`);
+      }
+    }
+    if (ownershipErrors.length > 0) {
+      console.error('Error: field names break the underscore rule (CLAUDE.md "Engine Code Style"):\n  ' + ownershipErrors.join('\n  '));
+      process.exit(1);
     }
 
     // Inject version into the code

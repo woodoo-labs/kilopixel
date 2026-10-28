@@ -10,13 +10,13 @@ pxl.Polyline = class Polyline extends pxl.Shape {
 
   constructor() {
     super();
-    this.pointCount = 0;
-    this.rawParts = []; // parser output, reused
+    this._pointCount = 0;
+    this._rawParts = []; // parser output, reused
 
     // Each coordinate is its own attribute p0, p1, … (keys built once per points change);
     // draw() copies their values, scaled by u, into flatCache
-    this.flatCache = new Float32Array(0);
-    this.pointKeys = [];
+    this._flatCache = new Float32Array(0);
+    this._pointKeys = [];
 
     this._arrowStart = pxl.createArrowRecord();
     this._arrowEnd = pxl.createArrowRecord();
@@ -31,23 +31,23 @@ pxl.Polyline = class Polyline extends pxl.Shape {
       if (oldValue === newValue) return;
 
       // Removed (null) or bare (''): no points
-      pxl.parsePointsIntoArray(newValue ?? '', this.rawParts);
-      const count = this.rawParts.length;
+      pxl.parsePointsIntoArray(newValue ?? '', this._rawParts);
+      const count = this._rawParts.length;
       this.clearPoints(count);
-      this.pointCount = count;
+      this._pointCount = count;
 
-      this.flatCache = new Float32Array(this.pointCount);
-      this.pointKeys.length = this.pointCount;
+      this._flatCache = new Float32Array(this._pointCount);
+      this._pointKeys.length = this._pointCount;
 
-      for (let i = 0; i < this.pointCount; i++) {
+      for (let i = 0; i < this._pointCount; i++) {
         const key = `p${i}`;
-        this.pointKeys[i] = key;
-        pxl.compileAttribute(this, key, this.rawParts[i]);
+        this._pointKeys[i] = key;
+        pxl.compileAttribute(this, key, this._rawParts[i]);
       }
 
       this.isAnimated = this.animatedAttributeKeys.length > 0;
       // Readers of ref.<id>.pN update like for any other attribute
-      if (this._refKey) pxl.broadcast(this._refKey);
+      if (this.refKey) pxl.broadcast(this.refKey);
       this.parentLayer?.invalidate();
     } else {
       super.attributeChangedCallback(name, oldValue, newValue);
@@ -57,8 +57,8 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   // Keys below keepCount keep their value until recompiled: animated coordinates are only evaluated
   // in the next frame, so ref.<id>.pN readers would otherwise see undefined in between.
   clearPoints(keepCount) {
-    for (let i = 0; i < this.pointCount; i++) {
-      const key = this.pointKeys[i];
+    for (let i = 0; i < this._pointCount; i++) {
+      const key = this._pointKeys[i];
       pxl.removeFromArray(this.animatedAttributeKeys, key);
       pxl.removeFromArray(this.reactiveAttributeKeys, key);
       pxl.removeFromArray(this.toLocalAttributeKeys, key);
@@ -67,23 +67,23 @@ pxl.Polyline = class Polyline extends pxl.Shape {
         delete this.attributeValues[key];
       }
     }
-    this.pointCount = 0;
+    this._pointCount = 0;
   }
 
   draw(ctx, u, t) {
-    if (this.pointCount < 4) return;
+    if (this._pointCount < 4) return;
 
     const { smooth, arrowstart, arrowend } = this.attributeValues;
     const closed = this.attributeValues.closed === true;
-    const pts = this.flatCache;
-    const len = this.pointCount / 2;
+    const pts = this._flatCache;
+    const len = this._pointCount / 2;
 
-    for (let i = 0; i < this.pointCount; i++) {
-      pts[i] = this.attributeValues[this.pointKeys[i]] * u;
+    for (let i = 0; i < this._pointCount; i++) {
+      pts[i] = this.attributeValues[this._pointKeys[i]] * u;
     }
 
     if (this.attributeValues.mode === 'relative') {
-      for (let i = 2; i < this.pointCount; i++) {
+      for (let i = 2; i < this._pointCount; i++) {
         pts[i] += pts[i - 2];
       }
     }
@@ -124,7 +124,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
 
   // Draws points first..last. Returns false if the shaft is skipped (single segment shorter than both arrow insets).
   traceStraight(ctx, closed, hasStart, hasEnd, first, last) {
-    const pts = this.flatCache;
+    const pts = this._flatCache;
     const f = first * 2, l = last * 2;
     let startX = pts[f], startY = pts[f + 1];
     let endX = pts[l], endY = pts[l + 1];
@@ -160,7 +160,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   // Centripetal Catmull-Rom through points first..last (design/2026-10-23_smooth_polyline_spline_plan.md).
   // `k3` is smooth / 3. Arrows imply an open path with >= 2 segments between first and last.
   traceSmooth(ctx, len, closed, k3, hasStart, hasEnd, first, last) {
-    const pts = this.flatCache;
+    const pts = this._flatCache;
     const segment = this._segment, split = this._split;
 
     let from = first;
@@ -207,7 +207,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   // Centripetal handles (D3 curveCatmullRom), scaled by k3 = smooth / 3. On a closed path neighbours wrap around;
   // on an open path a missing neighbour (free end) counts as a zero-length side: no handle.
   loadSegment(i, len, closed, k3) {
-    const pts = this.flatCache, segment = this._segment;
+    const pts = this._flatCache, segment = this._segment;
     const a = i, b = closed ? (i + 1) % len : i + 1;
     const p = closed ? (a - 1 + len) % len : a - 1;   // neighbour before A
     const q = closed ? (b + 1) % len : b + 1;         // neighbour after B
@@ -259,7 +259,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
 
   // Points closer than 0.01 px count as the same (zero-length end segments for arrows)
   isSamePoint(i, j) {
-    const pts = this.flatCache;
+    const pts = this._flatCache;
     return Math.abs(pts[i * 2] - pts[j * 2]) < 0.01 && Math.abs(pts[i * 2 + 1] - pts[j * 2 + 1]) < 0.01;
   }
 
@@ -281,7 +281,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   }
 
   getBoundingBox() {
-    if (this.pointCount < 4) {
+    if (this._pointCount < 4) {
       this.boundingBox.left = 0;
       this.boundingBox.right = 0;
       this.boundingBox.top = 0;
@@ -292,9 +292,9 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     let currentX = 0, currentY = 0;
     const isRelative = this.attributeValues.mode === 'relative';
 
-    for (let i = 0; i < this.pointCount; i += 2) {
-      const px = this.attributeValues[this.pointKeys[i]];
-      const py = this.attributeValues[this.pointKeys[i + 1]];
+    for (let i = 0; i < this._pointCount; i += 2) {
+      const px = this.attributeValues[this._pointKeys[i]];
+      const py = this.attributeValues[this._pointKeys[i + 1]];
 
       if (isRelative && i > 0) {
         currentX += px;

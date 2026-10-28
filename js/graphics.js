@@ -76,17 +76,6 @@ pxl.scaleResponsiveFilter = function(filterStr, u) {
   return filterStr.replace(/(-?\d+\.?\d*)px/g, (match, val) => (parseFloat(val) * u) + 'px');
 };
 
-// Filter string for a layer or shape, cached on the node per (filter, u)
-pxl.resolveFilter = function(node, filter, u) {
-  const filterStr = Array.isArray(filter) ? filter.join(' ') : filter;
-  if (node._lastFilterRaw !== filterStr || node._lastFilterU !== u) {
-    node._lastFilterRaw = filterStr;
-    node._lastFilterU = u;
-    node._cachedFilterScaled = pxl.scaleResponsiveFilter(filterStr, u);
-  }
-  return node._cachedFilterScaled;
-};
-
 pxl.applyContextState = function(ctx, u, attributeValues, node) {
   pxl.applyTransformState(ctx, u, attributeValues);
 
@@ -101,7 +90,7 @@ pxl.applyContextState = function(ctx, u, attributeValues, node) {
   }
 
   if (filter !== 'none') {
-    ctx.filter = pxl.resolveFilter(node, filter, u);
+    ctx.filter = node.resolveFilter(filter, u);
   }
 
   if (shadowcolor) {
@@ -155,34 +144,6 @@ pxl._emptyDash = [];
 // Solid line: null (default), 'none' or 0
 pxl.hasLineDash = function(linedash) {
   return !!linedash && linedash !== 'none' && linedash !== '0';
-};
-
-// Sets the shape's dash pattern scaled by u. The scaled array is cached on the shape per (linedash, u).
-pxl.applyLineDash = function(ctx, u, linedash, dashoffset, node) {
-  if (!pxl.hasLineDash(linedash)) {
-    ctx.setLineDash(pxl._emptyDash);
-    ctx.lineDashOffset = 0;
-    return;
-  }
-
-  if (node._lastDash !== linedash || node._lastDashU !== u) {
-    node._lastDash = linedash;
-    node._lastDashU = u;
-
-    const scaled = node._scaledDash;
-    if (typeof linedash === 'number') {
-      scaled.length = 1;
-      scaled[0] = linedash * u;
-    } else if (Array.isArray(linedash)) {
-      scaled.length = linedash.length;
-      for (let i = 0; i < linedash.length; i++) {
-        scaled[i] = linedash[i] * u;
-      }
-    }
-  }
-
-  ctx.setLineDash(node._scaledDash);
-  ctx.lineDashOffset = dashoffset * u;
 };
 
 // =========================================================================

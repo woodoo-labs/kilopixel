@@ -353,7 +353,7 @@ pxl.scope.lerp  = (a, b, alpha) => a + (b - a) * alpha;
 pxl.scope.map   = (v, inMin, inMax, outMin, outMax) => (v - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 
 // Color stops for all gradient types: ['red', 'blue'] (evenly spaced) or [0, 'red', 1, 'blue']
-pxl._parseStops = function(colorsArray) {
+pxl.parseStops = function(colorsArray) {
   const stops = [];
   if (!Array.isArray(colorsArray) || colorsArray.length === 0) return stops;
   if (typeof colorsArray[0] === 'string') {
@@ -370,7 +370,7 @@ pxl._parseStops = function(colorsArray) {
 };
 
 pxl.scope.linear = (direction, colorsArray) => {
-  const stops = pxl._parseStops(colorsArray);
+  const stops = pxl.parseStops(colorsArray);
   if (typeof direction === 'number') {
     return { isGradient: true, type: 'linear', angle: direction, stops };
   }
@@ -381,7 +381,7 @@ pxl.scope.linear = (direction, colorsArray) => {
 };
 
 pxl.scope.radial = (config, colorsArray) => {
-  const stops = pxl._parseStops(colorsArray);
+  const stops = pxl.parseStops(colorsArray);
   let x0 = 0.5, y0 = 0.5, r0 = 0;
   let x1 = 0.5, y1 = 0.5, r1 = 0.5;
 
@@ -404,7 +404,7 @@ pxl.scope.radial = (config, colorsArray) => {
 };
 
 pxl.scope.conic = (angleOrConfig, colorsArray) => {
-  const stops = pxl._parseStops(colorsArray);
+  const stops = pxl.parseStops(colorsArray);
   let startAngle = 0, cx = 0.5, cy = 0.5;
   if (typeof angleOrConfig === 'number') {
     startAngle = angleOrConfig;
@@ -626,7 +626,7 @@ pxl.InteractionEngine = class InteractionEngine {
   constructor(stage) {
     this.stage = stage;
     this._interactiveElements = [];
-    this.isInteractiveOrderDirty = false;
+    this._isOrderDirty = false;
     this._hoveredElements = [];
     this._pressedElement = null;
     this._hitStack = new Array(50);
@@ -641,7 +641,7 @@ pxl.InteractionEngine = class InteractionEngine {
   registerElement(el) {
     if (!this._interactiveElements.includes(el)) {
       this._interactiveElements.push(el);
-      this.isInteractiveOrderDirty = true;
+      this._isOrderDirty = true;
     }
   }
 
@@ -649,7 +649,7 @@ pxl.InteractionEngine = class InteractionEngine {
   // re-evaluated and dropped stale subscriptions): nobody reads this element's states any more.
   releaseIfUnused(el) {
     if (el.hasEventHandlers() || pxl._stickyIds.has(el.id)) return;
-    const subs = el._refKey ? pxl._subscriptions[el._refKey] : null;
+    const subs = el.refKey ? pxl._subscriptions[el.refKey] : null;
     if (!subs || subs.length === 0) this.unregisterElement(el);
   }
 
@@ -659,12 +659,12 @@ pxl.InteractionEngine = class InteractionEngine {
     if (this._hoveredElements.includes(el)) {
       pxl.removeFromArray(this._hoveredElements, el);
       el.attributeValues.isHovered = false;
-      if (el._refKey) pxl.broadcast(el._refKey);
+      if (el.refKey) pxl.broadcast(el.refKey);
     }
     if (this._pressedElement === el) {
       this._pressedElement = null;
       el.attributeValues.isPressed = false;
-      if (el._refKey) pxl.broadcast(el._refKey);
+      if (el.refKey) pxl.broadcast(el.refKey);
     }
   }
 
@@ -705,7 +705,7 @@ pxl.InteractionEngine = class InteractionEngine {
 
   process() {
     if (this._isMouseDirty) {
-      if (this.stage._refKey) pxl.broadcast(this.stage._refKey);
+      if (this.stage.refKey) pxl.broadcast(this.stage.refKey);
       this._isMouseDirty = false;
     }
 
@@ -713,9 +713,9 @@ pxl.InteractionEngine = class InteractionEngine {
     const len = elements.length;
     if (len === 0) return;
 
-    if (this.isInteractiveOrderDirty) {
+    if (this._isOrderDirty) {
       elements.sort(pxl.sortByDOMPosition);
-      this.isInteractiveOrderDirty = false;
+      this._isOrderDirty = false;
     }
 
     const ctx = pxl.dummyCtx;
@@ -773,8 +773,8 @@ pxl.InteractionEngine = class InteractionEngine {
       const prevHovered = this._hoveredElements[i];
       if (prevHovered !== hitEl) {
         prevHovered.attributeValues.isHovered = false;
-        if (prevHovered._refKey) pxl.broadcast(prevHovered._refKey);
-        if (prevHovered._compiledOnLeave) prevHovered._compiledOnLeave();
+        if (prevHovered.refKey) pxl.broadcast(prevHovered.refKey);
+        if (prevHovered.handlers.leave) prevHovered.handlers.leave();
         pxl.removeFromArray(this._hoveredElements, prevHovered);
         this.releaseIfUnused(prevHovered);
       }
@@ -784,8 +784,8 @@ pxl.InteractionEngine = class InteractionEngine {
     if (hitEl && !this._hoveredElements.includes(hitEl)) {
       this._hoveredElements.push(hitEl);
       hitEl.attributeValues.isHovered = true;
-      if (hitEl._refKey) pxl.broadcast(hitEl._refKey);
-      if (hitEl._compiledOnEnter) hitEl._compiledOnEnter();
+      if (hitEl.refKey) pxl.broadcast(hitEl.refKey);
+      if (hitEl.handlers.enter) hitEl.handlers.enter();
     }
 
     // Update Cursor: hand only for clickable elements (DOM write only on change)
@@ -796,14 +796,14 @@ pxl.InteractionEngine = class InteractionEngine {
     }
 
     if (hitEl) {
-      if (this._lastMove && hitEl._compiledOnMove) hitEl._compiledOnMove();
-      if (this._lastClick && hitEl._compiledOnClick) hitEl._compiledOnClick();
+      if (this._lastMove && hitEl.handlers.move) hitEl.handlers.move();
+      if (this._lastClick && hitEl.handlers.click) hitEl.handlers.click();
 
       if (this._lastDown) {
         hitEl.attributeValues.isPressed = true;
         this._pressedElement = hitEl;
-        if (hitEl._refKey) pxl.broadcast(hitEl._refKey);
-        if (hitEl._compiledOnDown) hitEl._compiledOnDown();
+        if (hitEl.refKey) pxl.broadcast(hitEl.refKey);
+        if (hitEl.handlers.down) hitEl.handlers.down();
       }
     }
 
@@ -811,10 +811,10 @@ pxl.InteractionEngine = class InteractionEngine {
       const released = this._pressedElement;
       if (released) {
         released.attributeValues.isPressed = false;
-        if (released._refKey) pxl.broadcast(released._refKey);
+        if (released.refKey) pxl.broadcast(released.refKey);
         this._pressedElement = null;
       }
-      if (hitEl && hitEl._compiledOnUp) hitEl._compiledOnUp();
+      if (hitEl && hitEl.handlers.up) hitEl.handlers.up();
       if (released) this.releaseIfUnused(released);
     }
 
@@ -904,17 +904,6 @@ pxl.scaleResponsiveFilter = function(filterStr, u) {
   return filterStr.replace(/(-?\d+\.?\d*)px/g, (match, val) => (parseFloat(val) * u) + 'px');
 };
 
-// Filter string for a layer or shape, cached on the node per (filter, u)
-pxl.resolveFilter = function(node, filter, u) {
-  const filterStr = Array.isArray(filter) ? filter.join(' ') : filter;
-  if (node._lastFilterRaw !== filterStr || node._lastFilterU !== u) {
-    node._lastFilterRaw = filterStr;
-    node._lastFilterU = u;
-    node._cachedFilterScaled = pxl.scaleResponsiveFilter(filterStr, u);
-  }
-  return node._cachedFilterScaled;
-};
-
 pxl.applyContextState = function(ctx, u, attributeValues, node) {
   pxl.applyTransformState(ctx, u, attributeValues);
 
@@ -929,7 +918,7 @@ pxl.applyContextState = function(ctx, u, attributeValues, node) {
   }
 
   if (filter !== 'none') {
-    ctx.filter = pxl.resolveFilter(node, filter, u);
+    ctx.filter = node.resolveFilter(filter, u);
   }
 
   if (shadowcolor) {
@@ -983,34 +972,6 @@ pxl._emptyDash = [];
 // Solid line: null (default), 'none' or 0
 pxl.hasLineDash = function(linedash) {
   return !!linedash && linedash !== 'none' && linedash !== '0';
-};
-
-// Sets the shape's dash pattern scaled by u. The scaled array is cached on the shape per (linedash, u).
-pxl.applyLineDash = function(ctx, u, linedash, dashoffset, node) {
-  if (!pxl.hasLineDash(linedash)) {
-    ctx.setLineDash(pxl._emptyDash);
-    ctx.lineDashOffset = 0;
-    return;
-  }
-
-  if (node._lastDash !== linedash || node._lastDashU !== u) {
-    node._lastDash = linedash;
-    node._lastDashU = u;
-
-    const scaled = node._scaledDash;
-    if (typeof linedash === 'number') {
-      scaled.length = 1;
-      scaled[0] = linedash * u;
-    } else if (Array.isArray(linedash)) {
-      scaled.length = linedash.length;
-      for (let i = 0; i < linedash.length; i++) {
-        scaled[i] = linedash[i] * u;
-      }
-    }
-  }
-
-  ctx.setLineDash(node._scaledDash);
-  ctx.lineDashOffset = dashoffset * u;
 };
 
 // =========================================================================
@@ -1071,7 +1032,7 @@ pxl.perf = {
       values.fps = stage.perfFrames;
       values.renderAvg = (stage.perfFrames > 0 ? stage.perfAccumulated / stage.perfFrames : 0).toFixed(2);
       values.renderMax = stage.perfMax.toFixed(2);
-      if (stage._refKey) pxl.broadcast(stage._refKey);
+      if (stage.refKey) pxl.broadcast(stage.refKey);
 
       // Reset counters for the next interval
       stage.perfFrames = 0;
@@ -1089,17 +1050,17 @@ pxl.Stage = class Stage extends HTMLElement {
 
   constructor() {
     super();
-    this.layers = [];
-    this.isOrderDirty = false;
-    this.isUpdatePending = false;
-    this.isSizePending = true;
-    this.isVisible = true;
+    this._layers = [];
+    this._isOrderDirty = false;
+    this._isUpdatePending = false;
+    this._isSizePending = true;
+    this._isVisible = true;
     this.unit = 0;
-    this.dpr = 1;
-    this.resizeObserver = null;
-    this.intersectionObserver = null;
+    this._dpr = 1;
+    this._resizeObserver = null;
+    this._intersectionObserver = null;
     this._parsedRatio = 16 / 9;
-    this._refKey = null;
+    this.refKey = null;
 
     // Published as ref.<id>.*; renderAvg / renderMax are strings with 2 decimals (pxl.perf.publish)
     this.attributeValues = {
@@ -1114,8 +1075,8 @@ pxl.Stage = class Stage extends HTMLElement {
     this.perfAccumulated = 0;
     this.perfMax = 0;
 
-    this.frameCallback = (t) => {
-      this.isUpdatePending = false;
+    this._frameCallback = (t) => {
+      this._isUpdatePending = false;
       this.render(t / 1000);
     };
 
@@ -1129,12 +1090,12 @@ pxl.Stage = class Stage extends HTMLElement {
       this._parsedRatio = (newValue === null || newValue === '') ? 16 / 9 : pxl.parseAttributeValue(newValue);
       this.style.aspectRatio = this._parsedRatio;
       this.attributeValues.height = 1000 / this._parsedRatio;
-      if (this._refKey) pxl.broadcast(this._refKey);
+      if (this.refKey) pxl.broadcast(this.refKey);
     } else if (name === 'alwaysrender') {
       if (this.isAlwaysRender()) {
-        this.intersectionObserver?.disconnect();
-        this.intersectionObserver = null;
-        this.isVisible = true;
+        this._intersectionObserver?.disconnect();
+        this._intersectionObserver = null;
+        this._isVisible = true;
         this.requestRender();
       } else if (this.isConnected) {
         this.observeVisibility();
@@ -1143,11 +1104,11 @@ pxl.Stage = class Stage extends HTMLElement {
   }
 
   connectedCallback() {
-    this.isVisible = true;
+    this._isVisible = true;
     if (this.id) {
       pxl.nodes[this.id] = this.attributeValues;
-      this._refKey = `ref.${this.id}`;
-      pxl.broadcast(this._refKey);
+      this.refKey = `ref.${this.id}`;
+      pxl.broadcast(this.refKey);
     }
 
     this.style.display = 'block';
@@ -1155,11 +1116,11 @@ pxl.Stage = class Stage extends HTMLElement {
     this.style.width = '100%';
     this.style.aspectRatio = this._parsedRatio;
 
-    this.resizeObserver = new ResizeObserver(() => this.resize());
+    this._resizeObserver = new ResizeObserver(() => this.resize());
     try {
-      this.resizeObserver.observe(this, { box: 'device-pixel-content-box' });
+      this._resizeObserver.observe(this, { box: 'device-pixel-content-box' });
     } catch (e) {
-      this.resizeObserver.observe(this, { box: 'content-box' }); // Safari: no device-pixel-content-box
+      this._resizeObserver.observe(this, { box: 'content-box' }); // Safari: no device-pixel-content-box
     }
 
     for (const type of pxl.Stage.POINTER_EVENTS) this.addEventListener(type, this.interaction);
@@ -1169,12 +1130,12 @@ pxl.Stage = class Stage extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.intersectionObserver?.disconnect();
-    this.intersectionObserver = null;
-    this.resizeObserver.disconnect();
-    this.resizeObserver = null;
-    this.isUpdatePending = false;
-    this.layers = [];
+    this._intersectionObserver?.disconnect();
+    this._intersectionObserver = null;
+    this._resizeObserver.disconnect();
+    this._resizeObserver = null;
+    this._isUpdatePending = false;
+    this._layers = [];
 
     for (const type of pxl.Stage.POINTER_EVENTS) this.removeEventListener(type, this.interaction);
     pxl.perf.unregisterStage(this);
@@ -1188,25 +1149,25 @@ pxl.Stage = class Stage extends HTMLElement {
 
   // Pauses rendering while the stage is out of view
   observeVisibility() {
-    if (this.intersectionObserver) return;
-    this.intersectionObserver = new IntersectionObserver((entries) => {
-      this.isVisible = entries[0].isIntersecting;
-      if (this.isVisible) this.requestRender();
+    if (this._intersectionObserver) return;
+    this._intersectionObserver = new IntersectionObserver((entries) => {
+      this._isVisible = entries[0].isIntersecting;
+      if (this._isVisible) this.requestRender();
     });
-    this.intersectionObserver.observe(this);
+    this._intersectionObserver.observe(this);
   }
 
   registerLayer(layer) {
-    if (this.layers.includes(layer)) return;
-    this.layers.push(layer);
-    this.isOrderDirty = true;
-    if (this.isSizePending) return;
-    layer.resize(this.clientWidth, this.clientHeight, this.dpr);
+    if (this._layers.includes(layer)) return;
+    this._layers.push(layer);
+    this._isOrderDirty = true;
+    if (this._isSizePending) return;
+    layer.resize(this.clientWidth, this.clientHeight, this._dpr);
     this.requestRender();
   }
 
   unregisterLayer(layer) {
-    pxl.removeFromArray(this.layers, layer);
+    pxl.removeFromArray(this._layers, layer);
     this.requestRender();
   }
 
@@ -1217,33 +1178,33 @@ pxl.Stage = class Stage extends HTMLElement {
 
     this.unit = w / 1000;
     this.attributeValues.height = 1000 / this._parsedRatio;
-    if (this._refKey) pxl.broadcast(this._refKey);
+    if (this.refKey) pxl.broadcast(this.refKey);
 
-    this.dpr = window.devicePixelRatio;
-    this.isSizePending = false;
+    this._dpr = window.devicePixelRatio;
+    this._isSizePending = false;
 
-    for (let i = 0; i < this.layers.length; i++) {
-      this.layers[i].resize(w, h, this.dpr);
+    for (let i = 0; i < this._layers.length; i++) {
+      this._layers[i].resize(w, h, this._dpr);
     }
     this.render(performance.now() / 1000);
   }
 
   requestRender() {
-    if (!this.isVisible || this.isSizePending || this.isUpdatePending) return;
-    this.isUpdatePending = true;
-    requestAnimationFrame(this.frameCallback);
+    if (!this._isVisible || this._isSizePending || this._isUpdatePending) return;
+    this._isUpdatePending = true;
+    requestAnimationFrame(this._frameCallback);
   }
 
   render(t) {
     const start = performance.now();
 
-    if (this.isOrderDirty) {
-      this.layers.sort(pxl.sortByDOMPosition);
-      this.isOrderDirty = false;
+    if (this._isOrderDirty) {
+      this._layers.sort(pxl.sortByDOMPosition);
+      this._isOrderDirty = false;
     }
 
-    for (let i = 0; i < this.layers.length; i++) {
-      const layer = this.layers[i];
+    for (let i = 0; i < this._layers.length; i++) {
+      const layer = this._layers[i];
       if (layer.isDirty || layer.isAnimated) layer.render(this.unit, t);
     }
 
@@ -1288,16 +1249,21 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     // Set in connectedCallback
     this.parentLayer = null;
     this.parentContainer = null;
-    this._refKey = null;
+    this.refKey = null;
 
     // Matrices are recomputed lazily: a version counter per matrix tells children when to recompute theirs
-    this.localMatrix = pxl.Matrix.create();
-    this.globalMatrix = pxl.Matrix.create();
+    this._localMatrix = pxl.Matrix.create();
+    this._globalMatrix = pxl.Matrix.create();
     this._isLocalMatrixDirty = true;
     this._localMatrixVersion = 0;
     this._lastLocalMatrixVersion = -1;
     this._globalMatrixVersion = 0;
     this._lastParentMatrixVersion = -1;
+
+    // Scaled filter string, cached per (filter, u) by resolveFilter() (layers and shapes)
+    this._lastFilterRaw = null;
+    this._lastFilterU = 0;
+    this._cachedFilterScaled = 'none';
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -1307,7 +1273,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     if (pxl.isSpatialKey(name)) {
       this.setLocalMatrixDirty();
     }
-    if (this._refKey) pxl.broadcast(this._refKey);
+    if (this.refKey) pxl.broadcast(this.refKey);
     this.parentLayer?.invalidate();
   }
 
@@ -1336,9 +1302,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
     if (this.id) {
       pxl.nodes[this.id] = this.attributeValues;
-      this._refKey = `ref.${this.id}`;
+      this.refKey = `ref.${this.id}`;
       // Broadcast arrival so any elements initialized earlier can successfully re-evaluate
-      pxl.broadcast(this._refKey);
+      pxl.broadcast(this.refKey);
     }
   }
 
@@ -1355,7 +1321,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
     if ((result & 1) === 0) pxl.unsubscribeFromVariable(varName, this);
     if ((result & 2) !== 0) {
-      if (this._refKey) pxl.broadcast(this._refKey);
+      if (this.refKey) pxl.broadcast(this.refKey);
       this.parentLayer?.invalidate();
     }
   }
@@ -1376,13 +1342,24 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
     if (matrixDirtied) this.setLocalMatrixDirty();
 
-    if (this._refKey && animatedValuesChanged && pxl._subscriptions[this._refKey]) {
-      pxl.broadcast(this._refKey);
+    if (this.refKey && animatedValuesChanged && pxl._subscriptions[this.refKey]) {
+      pxl.broadcast(this.refKey);
     }
 
     if (this.isAnimated) this.parentLayer?.invalidate();
 
     return animatedValuesChanged;
+  }
+
+  // Filter string with the helpers' px values scaled by u (layers: CSS filter, shapes: ctx.filter)
+  resolveFilter(filter, u) {
+    const filterStr = Array.isArray(filter) ? filter.join(' ') : filter;
+    if (this._lastFilterRaw !== filterStr || this._lastFilterU !== u) {
+      this._lastFilterRaw = filterStr;
+      this._lastFilterU = u;
+      this._cachedFilterScaled = pxl.scaleResponsiveFilter(filterStr, u);
+    }
+    return this._cachedFilterScaled;
   }
 
   // --- Spatial Reactivity ---
@@ -1407,8 +1384,8 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
         }
 
         // Broadcast the child if someone is explicitly tracking its global matrix
-        if (child._refKey && subs[child._refKey] && subs[child._refKey].length > 0) {
-          pxl.broadcast(child._refKey);
+        if (child.refKey && subs[child.refKey] && subs[child.refKey].length > 0) {
+          pxl.broadcast(child.refKey);
         }
 
         // Walk on: deeper elements may be tracked or read toLocal() too
@@ -1424,11 +1401,11 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       const v = this.attributeValues;
       const sX = v.scale !== 1 ? v.scale : v.scalex;
       const sY = v.scale !== 1 ? v.scale : v.scaley;
-      pxl.Matrix.updateLocal(this.localMatrix, v.x, v.y, v.dx, v.dy, v.rotate, sX, sY, v.skewx, v.skewy);
+      pxl.Matrix.updateLocal(this._localMatrix, v.x, v.y, v.dx, v.dy, v.rotate, sX, sY, v.skewx, v.skewy);
       this._isLocalMatrixDirty = false;
       this._localMatrixVersion++;
     }
-    return this.localMatrix;
+    return this._localMatrix;
   }
 
   getGlobalMatrix() {
@@ -1443,13 +1420,13 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
         this._lastParentMatrixVersion = parentVersion;
         isDirty = true;
       }
-      if (isDirty) pxl.Matrix.multiply(this.globalMatrix, parentGlobal, local);
+      if (isDirty) pxl.Matrix.multiply(this._globalMatrix, parentGlobal, local);
     } else if (isDirty) {
-      this.globalMatrix.set(local);
+      this._globalMatrix.set(local);
     }
 
     if (isDirty) this._globalMatrixVersion++;
-    return this.globalMatrix;
+    return this._globalMatrix;
   }
 };
 
@@ -1470,25 +1447,21 @@ pxl.Layer = class Layer extends pxl.PxlNode {
   constructor() {
     super();
     this.childList = []; // groups and shapes
-    this.isOrderDirty = false; // children need sorting by DOM position
+    this._isOrderDirty = false; // children need sorting by DOM position
 
     this.isDirty = true;
-    this.isCanvasEmpty = false;
+    this._isCanvasEmpty = false;
     this.stage = null;
-    this.dpr = 1; // set by the stage
+    this._dpr = 1; // set by the stage
 
-    this.canvas = document.createElement('canvas');
-    this.canvas.style.cssText = 'display: block; position: absolute; left: 0; top: 0; width: 100%; height: 100%;';
-    this.ctx = this.canvas.getContext('2d');
+    this._canvas = document.createElement('canvas');
+    this._canvas.style.cssText = 'display: block; position: absolute; left: 0; top: 0; width: 100%; height: 100%;';
+    this._ctx = this._canvas.getContext('2d');
 
     // Compositing is CSS on the canvas element; only written when it changes
     this._lastAlpha = null;
     this._lastBlend = null;
     this._lastAppliedFilter = 'none';
-    // Written by pxl.resolveFilter
-    this._lastFilterRaw = null;
-    this._lastFilterU = 0;
-    this._cachedFilterScaled = 'none';
   }
 
   connectedCallback() {
@@ -1496,7 +1469,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     this.style.position = 'absolute';
     this.style.inset = '0';
 
-    if (!this.contains(this.canvas)) this.appendChild(this.canvas);
+    if (!this.contains(this._canvas)) this.appendChild(this._canvas);
     this.stage = this.closest('pxl-stage');
     this.stage?.registerLayer(this);
 
@@ -1514,7 +1487,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
   registerChild(child) {
     if (this.childList.includes(child)) return;
     this.childList.push(child);
-    this.isOrderDirty = true;
+    this._isOrderDirty = true;
     this.invalidate();
   }
 
@@ -1527,24 +1500,24 @@ pxl.Layer = class Layer extends pxl.PxlNode {
   invalidate() {
     this.isDirty = true;
     // A hidden layer renders once more to clear its canvas, then stays idle
-    if (this.attributeExpressions.hidden && this.isCanvasEmpty) return;
+    if (this.attributeExpressions.hidden && this._isCanvasEmpty) return;
     this.stage?.requestRender();
   }
 
   // Called by the stage on every resize (also when the window moves to a screen with another pixel ratio).
   // Setting the canvas size resets the context, so the DPR scale is applied again.
   resize(w, h, dpr) {
-    this.dpr = dpr;
-    this.canvas.width = Math.floor(w * dpr);
-    this.canvas.height = Math.floor(h * dpr);
-    this.ctx.scale(dpr, dpr);
+    this._dpr = dpr;
+    this._canvas.width = Math.floor(w * dpr);
+    this._canvas.height = Math.floor(h * dpr);
+    this._ctx.scale(dpr, dpr);
     this.invalidate();
   }
 
   render(u, t) {
-    if (this.isOrderDirty) {
+    if (this._isOrderDirty) {
       this.childList.sort(pxl.sortByDOMPosition);
-      this.isOrderDirty = false;
+      this._isOrderDirty = false;
     }
 
     this.evaluateAnimations(t);
@@ -1552,19 +1525,19 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     const { alpha, blend, filter, hidden } = this.attributeValues;
 
     if (this._lastAlpha !== alpha) {
-      this.canvas.style.opacity = alpha;
+      this._canvas.style.opacity = alpha;
       this._lastAlpha = alpha;
     }
 
     const cssBlend = blend === 'source-over' ? 'normal' : (blend === 'lighter' ? 'plus-lighter' : blend);
     if (this._lastBlend !== cssBlend) {
-      this.canvas.style.mixBlendMode = cssBlend;
+      this._canvas.style.mixBlendMode = cssBlend;
       this._lastBlend = cssBlend;
     }
 
-    const filterStr = filter === 'none' ? 'none' : pxl.resolveFilter(this, filter, u);
+    const filterStr = filter === 'none' ? 'none' : this.resolveFilter(filter, u);
     if (this._lastAppliedFilter !== filterStr) {
-      this.canvas.style.filter = filterStr;
+      this._canvas.style.filter = filterStr;
       this._lastAppliedFilter = filterStr;
     }
 
@@ -1582,17 +1555,17 @@ pxl.Layer = class Layer extends pxl.PxlNode {
       return;
     }
 
-    const ctx = this.ctx;
-    ctx.clearRect(0, 0, this.canvas.width / this.dpr, this.canvas.height / this.dpr);
+    const ctx = this._ctx;
+    ctx.clearRect(0, 0, this._canvas.width / this._dpr, this._canvas.height / this._dpr);
     this.isDirty = false;
 
     if (hidden) {
-      this.isCanvasEmpty = true;
+      this._isCanvasEmpty = true;
       if (this.isAnimated) this.stage.requestRender();
       return;
     }
 
-    this.isCanvasEmpty = false;
+    this._isCanvasEmpty = false;
 
     const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy } = this.attributeValues;
     const hasTransformChanges = x || y || dx || dy || rotate ||
@@ -1623,13 +1596,13 @@ pxl.Group = class Group extends pxl.PxlNode {
   constructor() {
     super();
     this.childList = []; // groups and shapes
-    this.isOrderDirty = false; // children need sorting by DOM position
+    this._isOrderDirty = false; // children need sorting by DOM position
   }
 
   registerChild(child) {
     if (!this.childList.includes(child)) {
       this.childList.push(child);
-      this.isOrderDirty = true;
+      this._isOrderDirty = true;
       this.parentLayer?.invalidate();
     }
   }
@@ -1641,9 +1614,9 @@ pxl.Group = class Group extends pxl.PxlNode {
 
   // Draws into the parent layer's canvas
   render(ctx, u, t) {
-    if (this.isOrderDirty) {
+    if (this._isOrderDirty) {
       this.childList.sort(pxl.sortByDOMPosition);
-      this.isOrderDirty = false;
+      this._isOrderDirty = false;
     }
 
     this.evaluateAnimations(t);
@@ -1684,11 +1657,8 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     isHovered: false, isPressed: false
   };
 
-  // Event attribute → field holding its compiled handler
-  static HANDLER_FIELDS = {
-    onclick: '_compiledOnClick', onenter: '_compiledOnEnter', onleave: '_compiledOnLeave',
-    ondown: '_compiledOnDown', onup: '_compiledOnUp', onmove: '_compiledOnMove'
-  };
+  // Event attribute → its key in this.handlers
+  static HANDLER_EVENTS = { onclick: 'click', onenter: 'enter', onleave: 'leave', ondown: 'down', onup: 'up', onmove: 'move' };
 
   constructor() {
     super();
@@ -1703,27 +1673,20 @@ pxl.Shape = class Shape extends pxl.PxlNode {
       { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, grad: null }
     ];
 
-    // Written by pxl.applyLineDash and pxl.resolveFilter
+    // Scaled dash pattern, cached per (linedash, u) by applyLineDash()
     this._lastDash = null;
     this._lastDashU = 0;
     this._scaledDash = [];
-    this._lastFilterRaw = null;
-    this._lastFilterU = 0;
-    this._cachedFilterScaled = 'none';
 
-    this._compiledOnClick = null;
-    this._compiledOnEnter = null;
-    this._compiledOnLeave = null;
-    this._compiledOnDown = null;
-    this._compiledOnUp = null;
-    this._compiledOnMove = null;
+    // Compiled on* handlers, called by the InteractionEngine
+    this.handlers = { click: null, enter: null, leave: null, down: null, up: null, move: null };
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
 
-    const field = pxl.Shape.HANDLER_FIELDS[name];
-    if (field) {
+    const event = pxl.Shape.HANDLER_EVENTS[name];
+    if (event) {
       // Removed or empty: no handler. Not unregistered here (a handler may remove itself during
       // InteractionEngine.process()); releaseIfUnused() unregisters the shape on its next leave / release.
       let compiled = null;
@@ -1738,7 +1701,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
         `)(pxl.scope, pxl.nodes).bind(this);
       }
 
-      this[field] = compiled;
+      this.handlers[event] = compiled;
       if (compiled) this.stage?.interaction.registerElement(this);
       return;
     }
@@ -1757,13 +1720,14 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   hasEventHandlers() {
-    return !!(this._compiledOnClick || this._compiledOnEnter || this._compiledOnLeave ||
-              this._compiledOnDown || this._compiledOnUp || this._compiledOnMove);
+    const h = this.handlers;
+    return !!(h.click || h.enter || h.leave || h.down || h.up || h.move);
   }
 
   // Hand cursor only for elements that react to clicks or presses
   isClickable() {
-    return !!(this._compiledOnClick || this._compiledOnDown || this._compiledOnUp) || (!!this.id && pxl._pressableIds.has(this.id));
+    const h = this.handlers;
+    return !!(h.click || h.down || h.up) || (!!this.id && pxl._pressableIds.has(this.id));
   }
 
   disconnectedCallback() {
@@ -1883,7 +1847,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // Sets all stroke-related context state (style, width, caps, joins, dash).
   // Shared by path-based shapes (via applyStyle) and non-path shapes like Text (strokeText).
   applyStrokeState(ctx, u) {
-    const { stroke, strokewidth, linecap, linejoin, miterlimit, linedash, dashoffset } = this.attributeValues;
+    const { stroke, strokewidth, linecap, linejoin, miterlimit } = this.attributeValues;
 
     ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
 
@@ -1892,7 +1856,36 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     ctx.lineJoin = linejoin;
     ctx.miterLimit = miterlimit;
 
-    pxl.applyLineDash(ctx, u, linedash, dashoffset, this);
+    this.applyLineDash(ctx, u);
+  }
+
+  // Dash pattern scaled by u; the scaled array is cached per (linedash, u)
+  applyLineDash(ctx, u) {
+    const { linedash, dashoffset } = this.attributeValues;
+    if (!pxl.hasLineDash(linedash)) {
+      ctx.setLineDash(pxl._emptyDash);
+      ctx.lineDashOffset = 0;
+      return;
+    }
+
+    if (this._lastDash !== linedash || this._lastDashU !== u) {
+      this._lastDash = linedash;
+      this._lastDashU = u;
+
+      const scaled = this._scaledDash;
+      if (typeof linedash === 'number') {
+        scaled.length = 1;
+        scaled[0] = linedash * u;
+      } else if (Array.isArray(linedash)) {
+        scaled.length = linedash.length;
+        for (let i = 0; i < linedash.length; i++) {
+          scaled[i] = linedash[i] * u;
+        }
+      }
+    }
+
+    ctx.setLineDash(this._scaledDash);
+    ctx.lineDashOffset = dashoffset * u;
   }
 
   hasFill() {
@@ -1985,11 +1978,10 @@ pxl.Shape = class Shape extends pxl.PxlNode {
       if (ctx.miterLimit < 4) ctx.miterLimit = 4;
 
       // Chevrons are always solid
-      const { linedash, dashoffset } = this.attributeValues;
-      const hasDash = pxl.hasLineDash(linedash);
+      const hasDash = pxl.hasLineDash(this.attributeValues.linedash);
       if (hasDash) ctx.setLineDash(pxl._emptyDash);
       ctx.stroke();
-      if (hasDash) pxl.applyLineDash(ctx, u, linedash, dashoffset, this);
+      if (hasDash) this.applyLineDash(ctx, u);
     } else {
       const originalFill = ctx.fillStyle;
       ctx.fillStyle = ctx.strokeStyle;
@@ -2380,13 +2372,13 @@ pxl.Polyline = class Polyline extends pxl.Shape {
 
   constructor() {
     super();
-    this.pointCount = 0;
-    this.rawParts = []; // parser output, reused
+    this._pointCount = 0;
+    this._rawParts = []; // parser output, reused
 
     // Each coordinate is its own attribute p0, p1, … (keys built once per points change);
     // draw() copies their values, scaled by u, into flatCache
-    this.flatCache = new Float32Array(0);
-    this.pointKeys = [];
+    this._flatCache = new Float32Array(0);
+    this._pointKeys = [];
 
     this._arrowStart = pxl.createArrowRecord();
     this._arrowEnd = pxl.createArrowRecord();
@@ -2401,23 +2393,23 @@ pxl.Polyline = class Polyline extends pxl.Shape {
       if (oldValue === newValue) return;
 
       // Removed (null) or bare (''): no points
-      pxl.parsePointsIntoArray(newValue ?? '', this.rawParts);
-      const count = this.rawParts.length;
+      pxl.parsePointsIntoArray(newValue ?? '', this._rawParts);
+      const count = this._rawParts.length;
       this.clearPoints(count);
-      this.pointCount = count;
+      this._pointCount = count;
 
-      this.flatCache = new Float32Array(this.pointCount);
-      this.pointKeys.length = this.pointCount;
+      this._flatCache = new Float32Array(this._pointCount);
+      this._pointKeys.length = this._pointCount;
 
-      for (let i = 0; i < this.pointCount; i++) {
+      for (let i = 0; i < this._pointCount; i++) {
         const key = `p${i}`;
-        this.pointKeys[i] = key;
-        pxl.compileAttribute(this, key, this.rawParts[i]);
+        this._pointKeys[i] = key;
+        pxl.compileAttribute(this, key, this._rawParts[i]);
       }
 
       this.isAnimated = this.animatedAttributeKeys.length > 0;
       // Readers of ref.<id>.pN update like for any other attribute
-      if (this._refKey) pxl.broadcast(this._refKey);
+      if (this.refKey) pxl.broadcast(this.refKey);
       this.parentLayer?.invalidate();
     } else {
       super.attributeChangedCallback(name, oldValue, newValue);
@@ -2427,8 +2419,8 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   // Keys below keepCount keep their value until recompiled: animated coordinates are only evaluated
   // in the next frame, so ref.<id>.pN readers would otherwise see undefined in between.
   clearPoints(keepCount) {
-    for (let i = 0; i < this.pointCount; i++) {
-      const key = this.pointKeys[i];
+    for (let i = 0; i < this._pointCount; i++) {
+      const key = this._pointKeys[i];
       pxl.removeFromArray(this.animatedAttributeKeys, key);
       pxl.removeFromArray(this.reactiveAttributeKeys, key);
       pxl.removeFromArray(this.toLocalAttributeKeys, key);
@@ -2437,23 +2429,23 @@ pxl.Polyline = class Polyline extends pxl.Shape {
         delete this.attributeValues[key];
       }
     }
-    this.pointCount = 0;
+    this._pointCount = 0;
   }
 
   draw(ctx, u, t) {
-    if (this.pointCount < 4) return;
+    if (this._pointCount < 4) return;
 
     const { smooth, arrowstart, arrowend } = this.attributeValues;
     const closed = this.attributeValues.closed === true;
-    const pts = this.flatCache;
-    const len = this.pointCount / 2;
+    const pts = this._flatCache;
+    const len = this._pointCount / 2;
 
-    for (let i = 0; i < this.pointCount; i++) {
-      pts[i] = this.attributeValues[this.pointKeys[i]] * u;
+    for (let i = 0; i < this._pointCount; i++) {
+      pts[i] = this.attributeValues[this._pointKeys[i]] * u;
     }
 
     if (this.attributeValues.mode === 'relative') {
-      for (let i = 2; i < this.pointCount; i++) {
+      for (let i = 2; i < this._pointCount; i++) {
         pts[i] += pts[i - 2];
       }
     }
@@ -2494,7 +2486,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
 
   // Draws points first..last. Returns false if the shaft is skipped (single segment shorter than both arrow insets).
   traceStraight(ctx, closed, hasStart, hasEnd, first, last) {
-    const pts = this.flatCache;
+    const pts = this._flatCache;
     const f = first * 2, l = last * 2;
     let startX = pts[f], startY = pts[f + 1];
     let endX = pts[l], endY = pts[l + 1];
@@ -2530,7 +2522,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   // Centripetal Catmull-Rom through points first..last (design/2026-10-23_smooth_polyline_spline_plan.md).
   // `k3` is smooth / 3. Arrows imply an open path with >= 2 segments between first and last.
   traceSmooth(ctx, len, closed, k3, hasStart, hasEnd, first, last) {
-    const pts = this.flatCache;
+    const pts = this._flatCache;
     const segment = this._segment, split = this._split;
 
     let from = first;
@@ -2577,7 +2569,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   // Centripetal handles (D3 curveCatmullRom), scaled by k3 = smooth / 3. On a closed path neighbours wrap around;
   // on an open path a missing neighbour (free end) counts as a zero-length side: no handle.
   loadSegment(i, len, closed, k3) {
-    const pts = this.flatCache, segment = this._segment;
+    const pts = this._flatCache, segment = this._segment;
     const a = i, b = closed ? (i + 1) % len : i + 1;
     const p = closed ? (a - 1 + len) % len : a - 1;   // neighbour before A
     const q = closed ? (b + 1) % len : b + 1;         // neighbour after B
@@ -2629,7 +2621,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
 
   // Points closer than 0.01 px count as the same (zero-length end segments for arrows)
   isSamePoint(i, j) {
-    const pts = this.flatCache;
+    const pts = this._flatCache;
     return Math.abs(pts[i * 2] - pts[j * 2]) < 0.01 && Math.abs(pts[i * 2 + 1] - pts[j * 2 + 1]) < 0.01;
   }
 
@@ -2651,7 +2643,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   }
 
   getBoundingBox() {
-    if (this.pointCount < 4) {
+    if (this._pointCount < 4) {
       this.boundingBox.left = 0;
       this.boundingBox.right = 0;
       this.boundingBox.top = 0;
@@ -2662,9 +2654,9 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     let currentX = 0, currentY = 0;
     const isRelative = this.attributeValues.mode === 'relative';
 
-    for (let i = 0; i < this.pointCount; i += 2) {
-      const px = this.attributeValues[this.pointKeys[i]];
-      const py = this.attributeValues[this.pointKeys[i + 1]];
+    for (let i = 0; i < this._pointCount; i += 2) {
+      const px = this.attributeValues[this._pointKeys[i]];
+      const py = this.attributeValues[this._pointKeys[i + 1]];
 
       if (isRelative && i > 0) {
         currentX += px;

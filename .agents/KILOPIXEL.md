@@ -174,7 +174,7 @@ Every PxlNode has:
 - `reactiveAttributeKeys[]` — attributes that depend on `ref.*` variables (evaluated on change)
 - `toLocalAttributeKeys[]` — reactive attributes using `toLocal()`, also re-evaluated when an ancestor's transform changes (see [Coordinate Mapping](#coordinate-mapping-tolocal))
 - `isAnimated` — true if any attribute uses time-dependent expressions
-- `localMatrix` / `globalMatrix` — Float32Array affine matrices, recomputed lazily
+- `_localMatrix` / `_globalMatrix` — Float32Array affine matrices, recomputed lazily
 - `parentLayer` — reference to closest `<pxl-layer>` ancestor
 - `parentContainer` — reference to closest `<pxl-group>` or `<pxl-layer>` parent
 
@@ -575,7 +575,7 @@ Supported on `<pxl-line>`, `<pxl-polyline>`, `<pxl-circle>` and `<pxl-ellipse>` 
 The stroke under the head is shortened ("inset") so it never shows beside or in front of the head:
 - **`'filled'`**: the shaft ends at depth `D = min(max(Dmin, 0.6 × length), length + capExt)` behind the tip, where `Dmin` is the exact minimum for the cap (`0.866·sw` butt, `1.366·sw` square, `1·sw` round). This formula is continuous, so animated sizes never jump. Very small heads sit flush on the shaft end like a pointed cap.
 - **`'line'`**: the shaft's visible end is exactly at the chevron vertex (inset = the join extension).
-- **One trim definition**: the shaft end and the head base lie `inset` / the head length away from the tip **in a straight line**, on every shape. Lines: exact along the line. Circles: `2·asin(d / 2R)`. Ellipses and smooth polylines: 12 bisection steps (ellipse: on the angle; polyline: on the first/last Bézier segment, split with de Casteljau, `flatCache` is never mutated). The head points along the **chord over its own length**, so its base sits on the curve.
+- **One trim definition**: the shaft end and the head base lie `inset` / the head length away from the tip **in a straight line**, on every shape. Lines: exact along the line. Circles: `2·asin(d / 2R)`. Ellipses and smooth polylines: 12 bisection steps (ellipse: on the angle; polyline: on the first/last Bézier segment, split with de Casteljau, `_flatCache` is never mutated). The head points along the **chord over its own length**, so its base sits on the curve.
 
 ### Rules & Limits
 - Arrowheads only apply to **open** strokes. They are ignored with `pie`, `closed`, `ir` / `irx` / `iry`, and on closed polylines. A full 360° sweep with arrows stays an open arc.
@@ -807,7 +807,7 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 - `ResizeObserver` with `device-pixel-content-box` (fallback to `content-box`)
 - `unit = clientWidth / 1000`
 - **Built-in `IntersectionObserver`**: Automatically pauses requestAnimationFrame loops when the stage is scrolled out of the viewport (or out of an overflow scroll container like a carousel), and resumes rendering immediately upon re-entry. Can be overridden with `alwaysrender="true"`.
-- Manages `layers[]` array, sorts by DOM position when dirty
+- Manages its `_layers` array, sorts by DOM position when dirty
 - Only renders dirty layers: `if (layer.isDirty) layer.render(u, t)`
 - Delegates all pointer events to its `InteractionEngine`
 - Registers with `pxl.perf` for telemetry
@@ -837,14 +837,14 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 
 - Each layer creates its own `<canvas>` element, absolutely positioned over the stage
 - `isDirty` flag controls whether the layer re-renders
-- `isCanvasEmpty` tracks whether the canvas was just cleared (optimization for hidden layers)
+- `_isCanvasEmpty` tracks whether the canvas was just cleared (optimization for hidden layers)
 - `invalidate()` sets `isDirty = true` and calls `stage.requestRender()`
-- Hidden optimization: if `hidden` (checked against `attributeExpressions`) AND `isCanvasEmpty`, `invalidate()` returns early without scheduling rAF
+- Hidden optimization: if `hidden` (checked against `attributeExpressions`) AND `_isCanvasEmpty`, `invalidate()` returns early without scheduling rAF
 - Layer compositing uses **CSS DOM properties** (`canvas.style.opacity`, `canvas.style.mixBlendMode`, `canvas.style.filter`) — not Canvas context state. The `'source-over'` blend mode maps to CSS `'normal'`.
 - Layer transforms use `pxl.applyTransformState()` (spatial only), NOT `pxl.applyContextState()` (which adds compositing). This enforces the dual architecture.
 - **CSS-Only Fast Path**: When a layer's only animated attributes are compositing properties (`alpha`, `blend`, `filter`) and NOT transforms, the layer skips canvas clearing and child re-rendering entirely — it only updates CSS DOM properties and requests the next frame.
 - **Heartbeat**: animated layers call `this.stage?.requestRender()` at the end of `render()` (deliberately without setting `isDirty`, enabling the CSS-Only Fast Path)
-- Children (groups and shapes) sorted by DOM position when `isOrderDirty`
+- Children (groups and shapes) sorted by DOM position when `_isOrderDirty`
 - `resize(w, h, dpr)` — called by stage, resizes canvas to physical pixels, scales context by DPR
 
 ---
@@ -902,7 +902,7 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `sc
   - **Dynamic Expression**: `linedash="[wave(2) * 20, 10]"`
   - **Single Number (Fast-path)**: `linedash="20"` or `setAttribute('linedash', 20)` (creates equal repeating dash and gap)
   - **Reset to Solid**: `linedash="none"`, `linedash="0"`, or `null`
-  Scaled values are strictly evaluated by the compiler and cached per-shape (`(linedash, u)`) via `pxl.applyLineDash` with zero-GC overhead.
+  Scaled values are strictly evaluated by the compiler and cached per-shape (`(linedash, u)`) by the shape method `applyLineDash(ctx, u)`, without allocations per frame.
 
 ### Default Values
 
@@ -925,7 +925,7 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `sc
 
 **`isStroked()`**: True if `stroke` is set (not `none`/`transparent`) and `strokewidth > 0`. Used by `applyStyle` and to decide whether arrowheads are drawn.
 
-**`applyStrokeState(ctx, u)`**: Sets all stroke-related context state in one place: `strokeStyle` (gradient-resolved via slot `1`), `lineWidth = strokewidth * u`, `lineCap`, `lineJoin`, `miterLimit`, and line dash via `pxl.applyLineDash(ctx, u, linedash, dashoffset, this)`. Used by `applyStyle` for path-based shapes and directly by `<pxl-text>` (which cannot use paths because `strokeText()` paints glyphs directly). Convention: stroke state is always **set before stroking** and never reset afterwards — every stroke call site goes through this method, so leaked state from a previous shape is always overwritten.
+**`applyStrokeState(ctx, u)`**: Sets all stroke-related context state in one place: `strokeStyle` (gradient-resolved via slot `1`), `lineWidth = strokewidth * u`, `lineCap`, `lineJoin`, `miterLimit`, and line dash via `this.applyLineDash(ctx, u)`. Used by `applyStyle` for path-based shapes and directly by `<pxl-text>` (which cannot use paths because `strokeText()` paints glyphs directly). Convention: stroke state is always **set before stroking** and never reset afterwards — every stroke call site goes through this method, so leaked state from a previous shape is always overwritten.
 
 **`createGradient(ctx, u, styleValue, slotIndex)`**: If the value is a gradient descriptor (has `isGradient: true`), creates a `CanvasGradient` from the shape's bounding box. Uses `_gradCache` dual-slot cache to avoid recreation.
 
@@ -941,7 +941,7 @@ When `attributeChangedCallback` receives an event attribute (`onclick`, `onenter
 1. The string goes through `pxl.rewriteExpression()` like attribute expressions: `ref.a.b` → `ref.a?.b`, and `toLocal()` works (the caller is the shape)
 2. Compiled via `new Function` with full scope access
 3. Bound to the element via `.bind(this)`
-4. Stored in `_compiledOnClick`, `_compiledOnEnter`, etc.
+4. Stored in `this.handlers` (`handlers.click`, `handlers.enter`, …); the InteractionEngine calls them from there
 5. Element is registered with `stage.interaction`
 
 A removed or empty handler (`removeAttribute('onclick')`, `onclick=""`) sets the compiled handler to `null`. The shape is **not** unregistered immediately (a handler may remove itself while `InteractionEngine.process()` iterates); `releaseIfUnused()` unregisters it on its next leave / release.
@@ -1142,7 +1142,7 @@ When `points` attribute changes:
 2. `clearPoints(count)` removes the synthetic `p0`, `p1`, `p2`... keys from the animated / reactive lists. Only keys beyond the new count are deleted; the others keep their value until recompiled (animated coordinates are only evaluated in the next frame)
 3. Each coordinate is compiled independently as `pxl.compileAttribute(this, 'p0', coordString)`
 4. `ref.<id>` is broadcast (like any other attribute change)
-5. At draw time, `flatCache[i] = attributeValues[pointKeys[i]] * u`
+5. At draw time, `_flatCache[i] = attributeValues[_pointKeys[i]] * u`
 
 This means each X and Y coordinate can have its own independent animation expression.
 
@@ -1168,15 +1168,15 @@ When `smooth` is not false:
 ### Modes
 
 - `mode="absolute"` (default) — coordinates are absolute
-- `mode="relative"` — each point is relative to the previous (accumulated: `flatCache[i] += flatCache[i-2]`)
+- `mode="relative"` — each point is relative to the previous (accumulated: `_flatCache[i] += _flatCache[i-2]`)
 
 ### Drawing Logic
 
 - Minimum 4 values (2 points) required
-- Fills `flatCache` Float32Array with scaled values
+- Fills `_flatCache` Float32Array with scaled values
 - Draws path: simple `lineTo` or smooth `bezierCurveTo` (2-point polylines are always straight)
 - `closed` is strict (`closed === true`, like circle and ellipse): bare or `"true"` closes, `"1"` does not
-- Arrowheads (open polylines only; see [Arrowhead System](#arrowhead-system)): `flatCache` is never mutated. Straight: the first/last segment is trimmed by `inset` (clamped to the segment length). Smooth: the first/last Bézier segment is split with de Casteljau at the parameter where the curve is `inset` away from the end in a straight line (`trimParameter`, 12 bisection steps), so the curve stays identical, only shorter.
+- Arrowheads (open polylines only; see [Arrowhead System](#arrowhead-system)): `_flatCache` is never mutated. Straight: the first/last segment is trimmed by `inset` (clamped to the segment length). Smooth: the first/last Bézier segment is split with de Casteljau at the parameter where the curve is `inset` away from the end in a straight line (`trimParameter`, 12 bisection steps), so the curve stays identical, only shorter.
 - If `closed`: `ctx.closePath()`
 
 ### Bounding Box
@@ -1394,10 +1394,10 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 
 3. stage.render(t):
    ├─ Record performance: start = performance.now()
-   ├─ Sort layers by DOM position (if isOrderDirty)
+   ├─ Sort layers by DOM position (if _isOrderDirty)
    ├─ For each layer where isDirty:
    │   └─ layer.render(u, t)
-   │       ├─ Sort children by DOM position (if isOrderDirty)
+   │       ├─ Sort children by DOM position (if _isOrderDirty)
    │       ├─ layer.evaluateAnimations(t)  ← evaluate layer's own animations
    │       ├─ ctx.clearRect(full canvas)
    │       ├─ layer.isDirty = false
@@ -1452,7 +1452,9 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 
 1. Reads and concatenates all 19 source files in dependency order
 2. **Namespace check:** stops with an error if any line starts with a top-level `class` / `const` / `let` / `var` / `function` (only `pxl` may be global, see [Namespace](#namespace-only-pxl-is-global))
-3. **Style check:** stops with an error on trailing whitespace in any engine file (`.editorconfig` trims it in most editors)
+3. **Style checks:** stops with an error on
+   - trailing whitespace in any engine file (`.editorconfig` trims it in most editors);
+   - a field that breaks the underscore rule: every field set with `this.x = …` is found by name; a `_x` field used in another engine file, or an `x` field used only in its own file, is listed with the fix (rule: CLAUDE.md "Engine Code Style")
 4. Injects version string: `window.pxl = { version: '0.1.0' };`
 5. Writes concatenated file to `dist/temp_concat.js` and runs Terser via `npx terser` with `--compress passes=2 --mangle --keep-classnames` (class expressions keep readable names for DevTools and warnings)
 6. Outputs to `dist/kilopixel-v0.1.0.min.js`

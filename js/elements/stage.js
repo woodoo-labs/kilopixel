@@ -6,17 +6,17 @@ pxl.Stage = class Stage extends HTMLElement {
 
   constructor() {
     super();
-    this.layers = [];
-    this.isOrderDirty = false;
-    this.isUpdatePending = false;
-    this.isSizePending = true;
-    this.isVisible = true;
+    this._layers = [];
+    this._isOrderDirty = false;
+    this._isUpdatePending = false;
+    this._isSizePending = true;
+    this._isVisible = true;
     this.unit = 0;
-    this.dpr = 1;
-    this.resizeObserver = null;
-    this.intersectionObserver = null;
+    this._dpr = 1;
+    this._resizeObserver = null;
+    this._intersectionObserver = null;
     this._parsedRatio = 16 / 9;
-    this._refKey = null;
+    this.refKey = null;
 
     // Published as ref.<id>.*; renderAvg / renderMax are strings with 2 decimals (pxl.perf.publish)
     this.attributeValues = {
@@ -31,8 +31,8 @@ pxl.Stage = class Stage extends HTMLElement {
     this.perfAccumulated = 0;
     this.perfMax = 0;
 
-    this.frameCallback = (t) => {
-      this.isUpdatePending = false;
+    this._frameCallback = (t) => {
+      this._isUpdatePending = false;
       this.render(t / 1000);
     };
 
@@ -46,12 +46,12 @@ pxl.Stage = class Stage extends HTMLElement {
       this._parsedRatio = (newValue === null || newValue === '') ? 16 / 9 : pxl.parseAttributeValue(newValue);
       this.style.aspectRatio = this._parsedRatio;
       this.attributeValues.height = 1000 / this._parsedRatio;
-      if (this._refKey) pxl.broadcast(this._refKey);
+      if (this.refKey) pxl.broadcast(this.refKey);
     } else if (name === 'alwaysrender') {
       if (this.isAlwaysRender()) {
-        this.intersectionObserver?.disconnect();
-        this.intersectionObserver = null;
-        this.isVisible = true;
+        this._intersectionObserver?.disconnect();
+        this._intersectionObserver = null;
+        this._isVisible = true;
         this.requestRender();
       } else if (this.isConnected) {
         this.observeVisibility();
@@ -60,11 +60,11 @@ pxl.Stage = class Stage extends HTMLElement {
   }
 
   connectedCallback() {
-    this.isVisible = true;
+    this._isVisible = true;
     if (this.id) {
       pxl.nodes[this.id] = this.attributeValues;
-      this._refKey = `ref.${this.id}`;
-      pxl.broadcast(this._refKey);
+      this.refKey = `ref.${this.id}`;
+      pxl.broadcast(this.refKey);
     }
 
     this.style.display = 'block';
@@ -72,11 +72,11 @@ pxl.Stage = class Stage extends HTMLElement {
     this.style.width = '100%';
     this.style.aspectRatio = this._parsedRatio;
 
-    this.resizeObserver = new ResizeObserver(() => this.resize());
+    this._resizeObserver = new ResizeObserver(() => this.resize());
     try {
-      this.resizeObserver.observe(this, { box: 'device-pixel-content-box' });
+      this._resizeObserver.observe(this, { box: 'device-pixel-content-box' });
     } catch (e) {
-      this.resizeObserver.observe(this, { box: 'content-box' }); // Safari: no device-pixel-content-box
+      this._resizeObserver.observe(this, { box: 'content-box' }); // Safari: no device-pixel-content-box
     }
 
     for (const type of pxl.Stage.POINTER_EVENTS) this.addEventListener(type, this.interaction);
@@ -86,12 +86,12 @@ pxl.Stage = class Stage extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.intersectionObserver?.disconnect();
-    this.intersectionObserver = null;
-    this.resizeObserver.disconnect();
-    this.resizeObserver = null;
-    this.isUpdatePending = false;
-    this.layers = [];
+    this._intersectionObserver?.disconnect();
+    this._intersectionObserver = null;
+    this._resizeObserver.disconnect();
+    this._resizeObserver = null;
+    this._isUpdatePending = false;
+    this._layers = [];
 
     for (const type of pxl.Stage.POINTER_EVENTS) this.removeEventListener(type, this.interaction);
     pxl.perf.unregisterStage(this);
@@ -105,25 +105,25 @@ pxl.Stage = class Stage extends HTMLElement {
 
   // Pauses rendering while the stage is out of view
   observeVisibility() {
-    if (this.intersectionObserver) return;
-    this.intersectionObserver = new IntersectionObserver((entries) => {
-      this.isVisible = entries[0].isIntersecting;
-      if (this.isVisible) this.requestRender();
+    if (this._intersectionObserver) return;
+    this._intersectionObserver = new IntersectionObserver((entries) => {
+      this._isVisible = entries[0].isIntersecting;
+      if (this._isVisible) this.requestRender();
     });
-    this.intersectionObserver.observe(this);
+    this._intersectionObserver.observe(this);
   }
 
   registerLayer(layer) {
-    if (this.layers.includes(layer)) return;
-    this.layers.push(layer);
-    this.isOrderDirty = true;
-    if (this.isSizePending) return;
-    layer.resize(this.clientWidth, this.clientHeight, this.dpr);
+    if (this._layers.includes(layer)) return;
+    this._layers.push(layer);
+    this._isOrderDirty = true;
+    if (this._isSizePending) return;
+    layer.resize(this.clientWidth, this.clientHeight, this._dpr);
     this.requestRender();
   }
 
   unregisterLayer(layer) {
-    pxl.removeFromArray(this.layers, layer);
+    pxl.removeFromArray(this._layers, layer);
     this.requestRender();
   }
 
@@ -134,33 +134,33 @@ pxl.Stage = class Stage extends HTMLElement {
 
     this.unit = w / 1000;
     this.attributeValues.height = 1000 / this._parsedRatio;
-    if (this._refKey) pxl.broadcast(this._refKey);
+    if (this.refKey) pxl.broadcast(this.refKey);
 
-    this.dpr = window.devicePixelRatio;
-    this.isSizePending = false;
+    this._dpr = window.devicePixelRatio;
+    this._isSizePending = false;
 
-    for (let i = 0; i < this.layers.length; i++) {
-      this.layers[i].resize(w, h, this.dpr);
+    for (let i = 0; i < this._layers.length; i++) {
+      this._layers[i].resize(w, h, this._dpr);
     }
     this.render(performance.now() / 1000);
   }
 
   requestRender() {
-    if (!this.isVisible || this.isSizePending || this.isUpdatePending) return;
-    this.isUpdatePending = true;
-    requestAnimationFrame(this.frameCallback);
+    if (!this._isVisible || this._isSizePending || this._isUpdatePending) return;
+    this._isUpdatePending = true;
+    requestAnimationFrame(this._frameCallback);
   }
 
   render(t) {
     const start = performance.now();
 
-    if (this.isOrderDirty) {
-      this.layers.sort(pxl.sortByDOMPosition);
-      this.isOrderDirty = false;
+    if (this._isOrderDirty) {
+      this._layers.sort(pxl.sortByDOMPosition);
+      this._isOrderDirty = false;
     }
 
-    for (let i = 0; i < this.layers.length; i++) {
-      const layer = this.layers[i];
+    for (let i = 0; i < this._layers.length; i++) {
+      const layer = this._layers[i];
       if (layer.isDirty || layer.isAnimated) layer.render(this.unit, t);
     }
 

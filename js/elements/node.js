@@ -23,16 +23,21 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     // Set in connectedCallback
     this.parentLayer = null;
     this.parentContainer = null;
-    this._refKey = null;
+    this.refKey = null;
 
     // Matrices are recomputed lazily: a version counter per matrix tells children when to recompute theirs
-    this.localMatrix = pxl.Matrix.create();
-    this.globalMatrix = pxl.Matrix.create();
+    this._localMatrix = pxl.Matrix.create();
+    this._globalMatrix = pxl.Matrix.create();
     this._isLocalMatrixDirty = true;
     this._localMatrixVersion = 0;
     this._lastLocalMatrixVersion = -1;
     this._globalMatrixVersion = 0;
     this._lastParentMatrixVersion = -1;
+
+    // Scaled filter string, cached per (filter, u) by resolveFilter() (layers and shapes)
+    this._lastFilterRaw = null;
+    this._lastFilterU = 0;
+    this._cachedFilterScaled = 'none';
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -42,7 +47,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     if (pxl.isSpatialKey(name)) {
       this.setLocalMatrixDirty();
     }
-    if (this._refKey) pxl.broadcast(this._refKey);
+    if (this.refKey) pxl.broadcast(this.refKey);
     this.parentLayer?.invalidate();
   }
 
@@ -71,9 +76,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
     if (this.id) {
       pxl.nodes[this.id] = this.attributeValues;
-      this._refKey = `ref.${this.id}`;
+      this.refKey = `ref.${this.id}`;
       // Broadcast arrival so any elements initialized earlier can successfully re-evaluate
-      pxl.broadcast(this._refKey);
+      pxl.broadcast(this.refKey);
     }
   }
 
@@ -90,7 +95,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
     if ((result & 1) === 0) pxl.unsubscribeFromVariable(varName, this);
     if ((result & 2) !== 0) {
-      if (this._refKey) pxl.broadcast(this._refKey);
+      if (this.refKey) pxl.broadcast(this.refKey);
       this.parentLayer?.invalidate();
     }
   }
@@ -111,13 +116,24 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
     if (matrixDirtied) this.setLocalMatrixDirty();
 
-    if (this._refKey && animatedValuesChanged && pxl._subscriptions[this._refKey]) {
-      pxl.broadcast(this._refKey);
+    if (this.refKey && animatedValuesChanged && pxl._subscriptions[this.refKey]) {
+      pxl.broadcast(this.refKey);
     }
 
     if (this.isAnimated) this.parentLayer?.invalidate();
 
     return animatedValuesChanged;
+  }
+
+  // Filter string with the helpers' px values scaled by u (layers: CSS filter, shapes: ctx.filter)
+  resolveFilter(filter, u) {
+    const filterStr = Array.isArray(filter) ? filter.join(' ') : filter;
+    if (this._lastFilterRaw !== filterStr || this._lastFilterU !== u) {
+      this._lastFilterRaw = filterStr;
+      this._lastFilterU = u;
+      this._cachedFilterScaled = pxl.scaleResponsiveFilter(filterStr, u);
+    }
+    return this._cachedFilterScaled;
   }
 
   // --- Spatial Reactivity ---
@@ -142,8 +158,8 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
         }
 
         // Broadcast the child if someone is explicitly tracking its global matrix
-        if (child._refKey && subs[child._refKey] && subs[child._refKey].length > 0) {
-          pxl.broadcast(child._refKey);
+        if (child.refKey && subs[child.refKey] && subs[child.refKey].length > 0) {
+          pxl.broadcast(child.refKey);
         }
 
         // Walk on: deeper elements may be tracked or read toLocal() too
@@ -159,11 +175,11 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       const v = this.attributeValues;
       const sX = v.scale !== 1 ? v.scale : v.scalex;
       const sY = v.scale !== 1 ? v.scale : v.scaley;
-      pxl.Matrix.updateLocal(this.localMatrix, v.x, v.y, v.dx, v.dy, v.rotate, sX, sY, v.skewx, v.skewy);
+      pxl.Matrix.updateLocal(this._localMatrix, v.x, v.y, v.dx, v.dy, v.rotate, sX, sY, v.skewx, v.skewy);
       this._isLocalMatrixDirty = false;
       this._localMatrixVersion++;
     }
-    return this.localMatrix;
+    return this._localMatrix;
   }
 
   getGlobalMatrix() {
@@ -178,13 +194,13 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
         this._lastParentMatrixVersion = parentVersion;
         isDirty = true;
       }
-      if (isDirty) pxl.Matrix.multiply(this.globalMatrix, parentGlobal, local);
+      if (isDirty) pxl.Matrix.multiply(this._globalMatrix, parentGlobal, local);
     } else if (isDirty) {
-      this.globalMatrix.set(local);
+      this._globalMatrix.set(local);
     }
 
     if (isDirty) this._globalMatrixVersion++;
-    return this.globalMatrix;
+    return this._globalMatrix;
   }
 };
 

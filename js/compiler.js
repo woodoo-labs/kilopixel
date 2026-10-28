@@ -48,7 +48,7 @@ pxl.scope.lerp  = (a, b, alpha) => a + (b - a) * alpha;
 pxl.scope.map   = (v, inMin, inMax, outMin, outMax) => (v - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 
 // Color stops for all gradient types: ['red', 'blue'] (evenly spaced) or [0, 'red', 1, 'blue']
-pxl._parseStops = function(colorsArray) {
+pxl.parseStops = function(colorsArray) {
   const stops = [];
   if (!Array.isArray(colorsArray) || colorsArray.length === 0) return stops;
   if (typeof colorsArray[0] === 'string') {
@@ -65,7 +65,7 @@ pxl._parseStops = function(colorsArray) {
 };
 
 pxl.scope.linear = (direction, colorsArray) => {
-  const stops = pxl._parseStops(colorsArray);
+  const stops = pxl.parseStops(colorsArray);
   if (typeof direction === 'number') {
     return { isGradient: true, type: 'linear', angle: direction, stops };
   }
@@ -76,7 +76,7 @@ pxl.scope.linear = (direction, colorsArray) => {
 };
 
 pxl.scope.radial = (config, colorsArray) => {
-  const stops = pxl._parseStops(colorsArray);
+  const stops = pxl.parseStops(colorsArray);
   let x0 = 0.5, y0 = 0.5, r0 = 0;
   let x1 = 0.5, y1 = 0.5, r1 = 0.5;
 
@@ -99,7 +99,7 @@ pxl.scope.radial = (config, colorsArray) => {
 };
 
 pxl.scope.conic = (angleOrConfig, colorsArray) => {
-  const stops = pxl._parseStops(colorsArray);
+  const stops = pxl.parseStops(colorsArray);
   let startAngle = 0, cx = 0.5, cy = 0.5;
   if (typeof angleOrConfig === 'number') {
     startAngle = angleOrConfig;

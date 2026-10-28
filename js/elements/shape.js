@@ -15,11 +15,8 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     isHovered: false, isPressed: false
   };
 
-  // Event attribute → field holding its compiled handler
-  static HANDLER_FIELDS = {
-    onclick: '_compiledOnClick', onenter: '_compiledOnEnter', onleave: '_compiledOnLeave',
-    ondown: '_compiledOnDown', onup: '_compiledOnUp', onmove: '_compiledOnMove'
-  };
+  // Event attribute → its key in this.handlers
+  static HANDLER_EVENTS = { onclick: 'click', onenter: 'enter', onleave: 'leave', ondown: 'down', onup: 'up', onmove: 'move' };
 
   constructor() {
     super();
@@ -34,27 +31,20 @@ pxl.Shape = class Shape extends pxl.PxlNode {
       { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, grad: null }
     ];
 
-    // Written by pxl.applyLineDash and pxl.resolveFilter
+    // Scaled dash pattern, cached per (linedash, u) by applyLineDash()
     this._lastDash = null;
     this._lastDashU = 0;
     this._scaledDash = [];
-    this._lastFilterRaw = null;
-    this._lastFilterU = 0;
-    this._cachedFilterScaled = 'none';
 
-    this._compiledOnClick = null;
-    this._compiledOnEnter = null;
-    this._compiledOnLeave = null;
-    this._compiledOnDown = null;
-    this._compiledOnUp = null;
-    this._compiledOnMove = null;
+    // Compiled on* handlers, called by the InteractionEngine
+    this.handlers = { click: null, enter: null, leave: null, down: null, up: null, move: null };
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
 
-    const field = pxl.Shape.HANDLER_FIELDS[name];
-    if (field) {
+    const event = pxl.Shape.HANDLER_EVENTS[name];
+    if (event) {
       // Removed or empty: no handler. Not unregistered here (a handler may remove itself during
       // InteractionEngine.process()); releaseIfUnused() unregisters the shape on its next leave / release.
       let compiled = null;
@@ -69,7 +59,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
         `)(pxl.scope, pxl.nodes).bind(this);
       }
 
-      this[field] = compiled;
+      this.handlers[event] = compiled;
       if (compiled) this.stage?.interaction.registerElement(this);
       return;
     }
@@ -88,13 +78,14 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   hasEventHandlers() {
-    return !!(this._compiledOnClick || this._compiledOnEnter || this._compiledOnLeave ||
-              this._compiledOnDown || this._compiledOnUp || this._compiledOnMove);
+    const h = this.handlers;
+    return !!(h.click || h.enter || h.leave || h.down || h.up || h.move);
   }
 
   // Hand cursor only for elements that react to clicks or presses
   isClickable() {
-    return !!(this._compiledOnClick || this._compiledOnDown || this._compiledOnUp) || (!!this.id && pxl._pressableIds.has(this.id));
+    const h = this.handlers;
+    return !!(h.click || h.down || h.up) || (!!this.id && pxl._pressableIds.has(this.id));
   }
 
   disconnectedCallback() {
@@ -214,7 +205,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // Sets all stroke-related context state (style, width, caps, joins, dash).
   // Shared by path-based shapes (via applyStyle) and non-path shapes like Text (strokeText).
   applyStrokeState(ctx, u) {
-    const { stroke, strokewidth, linecap, linejoin, miterlimit, linedash, dashoffset } = this.attributeValues;
+    const { stroke, strokewidth, linecap, linejoin, miterlimit } = this.attributeValues;
 
     ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
 
@@ -223,7 +214,36 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     ctx.lineJoin = linejoin;
     ctx.miterLimit = miterlimit;
 
-    pxl.applyLineDash(ctx, u, linedash, dashoffset, this);
+    this.applyLineDash(ctx, u);
+  }
+
+  // Dash pattern scaled by u; the scaled array is cached per (linedash, u)
+  applyLineDash(ctx, u) {
+    const { linedash, dashoffset } = this.attributeValues;
+    if (!pxl.hasLineDash(linedash)) {
+      ctx.setLineDash(pxl._emptyDash);
+      ctx.lineDashOffset = 0;
+      return;
+    }
+
+    if (this._lastDash !== linedash || this._lastDashU !== u) {
+      this._lastDash = linedash;
+      this._lastDashU = u;
+
+      const scaled = this._scaledDash;
+      if (typeof linedash === 'number') {
+        scaled.length = 1;
+        scaled[0] = linedash * u;
+      } else if (Array.isArray(linedash)) {
+        scaled.length = linedash.length;
+        for (let i = 0; i < linedash.length; i++) {
+          scaled[i] = linedash[i] * u;
+        }
+      }
+    }
+
+    ctx.setLineDash(this._scaledDash);
+    ctx.lineDashOffset = dashoffset * u;
   }
 
   hasFill() {
@@ -316,11 +336,10 @@ pxl.Shape = class Shape extends pxl.PxlNode {
       if (ctx.miterLimit < 4) ctx.miterLimit = 4;
 
       // Chevrons are always solid
-      const { linedash, dashoffset } = this.attributeValues;
-      const hasDash = pxl.hasLineDash(linedash);
+      const hasDash = pxl.hasLineDash(this.attributeValues.linedash);
       if (hasDash) ctx.setLineDash(pxl._emptyDash);
       ctx.stroke();
-      if (hasDash) pxl.applyLineDash(ctx, u, linedash, dashoffset, this);
+      if (hasDash) this.applyLineDash(ctx, u);
     } else {
       const originalFill = ctx.fillStyle;
       ctx.fillStyle = ctx.strokeStyle;
