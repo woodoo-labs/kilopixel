@@ -328,15 +328,15 @@
       stroke="#00ffaa" strokewidth="0.3" fill="none"
       alpha="0.3" rotate="t * -30"></pxl-circle>
 
-    <!-- [92-93] Self-referencing showcase — circle whose color depends on its own position -->
-    <pxl-circle x="500 + sin(t * 0.7) * 280" y="281 + cos(t * 1.1) * 120" r="6"
-      fill="`hsl(${this.attributeValues.x / 3}, 80, 60)`"
-      stroke="`hsl(${this.attributeValues.x / 3}, 90, 80)`"
+    <!-- [92-93] Self-referencing showcase — circle whose color depends on its own position (ref.<own id>) -->
+    <pxl-circle id="selfRefA" x="500 + sin(t * 0.7) * 280" y="281 + cos(t * 1.1) * 120" r="6"
+      fill="hsl(ref.selfRefA.x / 3, 80, 60)"
+      stroke="hsl(ref.selfRefA.x / 3, 90, 80)"
       strokewidth="0.5"
       alpha="0.7"></pxl-circle>
-    <pxl-circle x="500 + sin(t * 0.7 + PI) * 280" y="281 + cos(t * 1.1 + PI) * 120" r="6"
-      fill="`hsl(${this.attributeValues.x / 3 + 180}, 80, 60)`"
-      stroke="`hsl(${this.attributeValues.x / 3 + 180}, 90, 80)`"
+    <pxl-circle id="selfRefB" x="500 + sin(t * 0.7 + PI) * 280" y="281 + cos(t * 1.1 + PI) * 120" r="6"
+      fill="hsl(ref.selfRefB.x / 3 + 180, 80, 60)"
+      stroke="hsl(ref.selfRefB.x / 3 + 180, 90, 80)"
       strokewidth="0.5"
       alpha="0.7"></pxl-circle>
 
@@ -405,9 +405,9 @@
     <pxl-circle x="120" y="540" r="2" fill="#ffbb00" alpha="0.5"></pxl-circle>
     <pxl-circle x="880" y="540" r="2" fill="#aa44ff" alpha="0.5"></pxl-circle>
 
-    <!-- [113] System node tracker -->
+    <!-- [113] System node tracker: ref.s makes it reactive (recounted when the stage publishes, once per second) -->
     <pxl-text x="500" y="15"
-      text="`REF.NODES: ${Object.keys(ref).length}`"
+      text="`REF.NODES: ${ref.s ? Object.keys(ref).length : 0}`"
       size="8" font="monospace" fill="hsla(120, 60, 50, 0.3)"
       align="center" baseline="top"
       alpha="0.4"></pxl-text>
