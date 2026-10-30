@@ -19,6 +19,7 @@ All documents on this topic, oldest first. Older plans are kept unchanged as his
 | **This note** | 2026-10-25 | Refs are values, not positions; patterns that work today; possible additions | ⚪ Open ideas |
 | `design/2026-10-26_tolocal_fix_plan.md` | 2026-10-26 | Readers update when their **own** space moves | ✅ Implemented |
 | `design/2026-10-29_tolocal_decomposition_plan.md` | 2026-10-29 | Frame decomposition (`skewx`, signed `scaley`, `zoom`), warning for unknown names; the `scale` attribute becomes `zoom` (multiplier) | ✅ Implemented |
+| `design/2026-10-30_space_attribute_plan.md` | 2026-10-30 | `space="ref.A"`: draw an element in another element's space (exact overlays, points inside the target, attachments) | 🟡 Proposed |
 
 ## 1. Core Finding: Refs Are Values, Not Positions
 

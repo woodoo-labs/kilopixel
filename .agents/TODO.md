@@ -243,3 +243,16 @@
 - **toLocal**: `skewx` (new), `scaley` signed (mirrors survive), `zoom` = √|det| (total zoom, exact without stretching in the pipeline); `scale` removed; `skewy` not offered (not unique); literal unknown names warn at compile time.
 - **`zoom` attribute**: replaces `scale` and multiplies `scalex` / `scaley` (no override, no jump at 1). `test48` labels use `zoom="-1"`.
 - **Docs sidebar**: "Zoom & Scale" (`scale.html`) and "Rotate & Skew" (`transform.html`), both pages still to be written.
+
+## 28. `space` Attribute: Draw an Element in Another Element's Space
+- **Status**: 🟡 **Proposed** (2026-10-30)
+- **Reference**: `design/2026-10-30_space_attribute_plan.md`
+- **Idea**: `space="ref.A"` makes A's frame (its global matrix, incl. `dx` / `dy`) the element's parent space: exact overlays without the toLocal clone rule, points inside the target (corners) as elements, labels attached to moving shapes. Drawing via one extra relative transform in `applyTransformState`; hit testing needs no change.
+- **Open**: name (`space` / `frame`), origin (drawing origin / pivot), scope (shapes and groups / also layers), hidden target.
+
+## 29. Two-Phase Frame: Evaluate Everything, Then Draw
+- **Status**: ⚪ **Idea** (2026-10-30), no plan yet
+- **Problem**: a frame is one walk in DOM order; each element evaluates its animated values inside `render()` (`evaluateAnimations`) and then draws. A reader drawn before its target (toLocal, `space`, plain `ref.*`) sees the target's values from the previous frame: a one-frame lag. Today's rule avoids it: put readers in a layer after their targets.
+- **Idea**: split the frame into an update phase (the stage runs `evaluateAnimations` for every element of every layer; reactive refs and toLocal readers settle through the existing broadcasts) and a draw phase (every layer draws with this frame's values). Removes the lag whatever the DOM order. Each value is still evaluated once; the cost is a second walk over the elements.
+- **Open**: measure the extra walk (benchmark presets, docs pages); layers whose only animated attributes are compositing skip drawing today (CSS fast path in `Layer.render()`), the update phase must keep that; static layers must stay idle (0 FPS); order of broadcasts during the update phase.
+- **Related**: not fixed by always save / restore (§19), which isolates canvas *state*, not *values*; the same render path, though. `design/2026-10-30_space_attribute_plan.md` §3.5, KILOPIXEL.md toLocal draw-order note.

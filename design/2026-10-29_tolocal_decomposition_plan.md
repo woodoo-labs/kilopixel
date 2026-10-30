@@ -300,7 +300,7 @@ All 79 tracked `.html` files were searched (attributes, `setAttribute` calls, `t
 | A `matrix` property returning all six numbers | Attributes take one number each; Kilopixel has no matrix attribute to receive it. |
 | Polar decomposition (rotation × symmetric stretch) | Doesn't match Kilopixel's attribute model (no "stretch along an angle" attribute). |
 
-**Later idea, not part of this plan: `space="ref.el"`.** An element drawn in another element's space (its global matrix = the target's global matrix × its own local matrix). It copies a frame exactly without toLocal, needs no decomposition, and would also give any local point of the target (a corner: `space="ref.rect1" x="-50" y="-25"`). Open questions: which point of the target is the origin (drawing origin or pivot), only geometry (not alpha / filter / clip), draw order, cycles, hit testing. Worth its own plan when needed.
+**Later idea, not part of this plan: `space="ref.el"`.** An element drawn in another element's space (its global matrix = the target's global matrix × its own local matrix). It copies a frame exactly without toLocal, needs no decomposition, and would also give any local point of the target (a corner: `space="ref.rect1" x="-50" y="-25"`). Open questions: which point of the target is the origin (drawing origin or pivot), only geometry (not alpha / filter / clip), draw order, cycles, hit testing. Plan: `design/2026-10-30_space_attribute_plan.md` (proposed 2026-10-30).
 
 ## 8. Tests (`tests/index.html`)
 
