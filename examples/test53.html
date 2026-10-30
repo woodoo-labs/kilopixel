@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Four Layer Spaces</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #f8fafc;
+      color: #0f172a;
+      font-family: sans-serif;
+      padding: 24px;
+    }
+    .stage-wrapper {
+      width: 1200px;
+      max-width: 100%;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+    }
+    .controls {
+      width: 1200px;
+      max-width: 100%;
+      margin: 16px auto 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .control-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 12px;
+      padding: 8px 12px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      align-content: start;
+    }
+    .control-column h3 { font-size: 14px; grid-column: 1 / -1; }
+    /* Label text and value on one line, slider below */
+    .control-column label { display: grid; grid-template-columns: auto 1fr; gap: 4px 6px; font-size: 13px; }
+    .control-column label span { text-align: right; }
+    .control-column input { width: 100%; grid-column: 1 / -1; }
+    .control-column .full-row { grid-column: 1 / -1; }
+    .control-column select { width: 100%; grid-column: 1 / -1; font-size: 13px; }
+    .layer1 h3 { color: #ea580c; }
+    .layer2 h3 { color: #2563eb; }
+    .layer3 h3 { color: #16a34a; }
+    .layer4 h3 { color: #7c3aed; }
+    /* Card titles have the color of what they control on the stage:
+       layer cards the layer center (600), rect cards the rect stroke (500) */
+    .rect.layer1 h3 { color: #f97316; }
+    .rect.layer2 h3 { color: #3b82f6; }
+    .rect.layer3 h3 { color: #22c55e; }
+    .rect.layer4 h3 { color: #8b5cf6; }
+  </style>
+  <script src="../dist/pxl.min.js"></script>
+</head>
+<body>
+  <div class="stage-wrapper">
+    <pxl-stage id="main" ratio="5 / 3">
+      <!-- Background grid in stage space -->
+      <pxl-layer>
+        <pxl-grid stroke="#f1f5f9" step="25" major="4"></pxl-grid>
+      </pxl-layer>
+
+      <!-- Layer 1 (orange) -->
+      <pxl-layer id="layer1" x="250" y="150">
+        <!-- The group cancels the layer's offset, so the markers stay on the layer's x / y -->
+        <pxl-group dx="-ref.layer1.dx" dy="-ref.layer1.dy">
+          <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#fdba74" strokewidth="1" linedash="[5, 5]"></pxl-line>
+          <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#fdba74" strokewidth="1" linedash="[5, 5]"></pxl-line>
+          <pxl-circle r="4" fill="#ea580c"></pxl-circle>
+          <pxl-text x="8" y="-8" text="Layer 1 Center" size="14" fill="#ea580c"></pxl-text>
+        </pxl-group>
+        <pxl-rect id="rect1" x="-75" y="-50" w="100" h="50" fill="#ffedd566" stroke="#f97316" strokewidth="2"></pxl-rect>
+        <pxl-circle x="ref.rect1.x" y="ref.rect1.y" r="3" fill="#fb923c"></pxl-circle>
+        <!-- Top-left corner of rect1: same transform, offset by the anchor-to-corner vector -->
+        <pxl-circle id="corner1" x="ref.rect1.x" y="ref.rect1.y" rotate="ref.rect1.rotate"
+          scale="ref.rect1.scale" scalex="ref.rect1.scalex" scaley="ref.rect1.scaley" skewx="ref.rect1.skewx" skewy="ref.rect1.skewy"
+          dx="ref.rect1.dx - ref.rect1.w * pxl.anchorX[ref.rect1.anchor]" dy="ref.rect1.dy - ref.rect1.h * pxl.anchorY[ref.rect1.anchor]"
+          r="3" fill="#eab308"></pxl-circle>
+      </pxl-layer>
+
+      <!-- Layer 2 (blue) -->
+      <pxl-layer id="layer2" x="750" y="150">
+        <!-- The group cancels the layer's offset, so the markers stay on the layer's x / y -->
+        <pxl-group dx="-ref.layer2.dx" dy="-ref.layer2.dy">
+          <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#93c5fd" strokewidth="1" linedash="[5, 5]"></pxl-line>
+          <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#93c5fd" strokewidth="1" linedash="[5, 5]"></pxl-line>
+          <pxl-circle r="4" fill="#2563eb"></pxl-circle>
+          <pxl-text x="8" y="-8" text="Layer 2 Center" size="14" fill="#2563eb"></pxl-text>
+        </pxl-group>
+        <pxl-rect id="rect2" x="-75" y="-50" w="100" h="50" fill="#dbeafe66" stroke="#3b82f6" strokewidth="2"></pxl-rect>
+        <pxl-circle x="ref.rect2.x" y="ref.rect2.y" r="3" fill="#60a5fa"></pxl-circle>
+        <!-- Top-left corner of rect2: same transform, offset by the anchor-to-corner vector -->
+        <pxl-circle id="corner2" x="ref.rect2.x" y="ref.rect2.y" rotate="ref.rect2.rotate"
+          scale="ref.rect2.scale" scalex="ref.rect2.scalex" scaley="ref.rect2.scaley" skewx="ref.rect2.skewx" skewy="ref.rect2.skewy"
+          dx="ref.rect2.dx - ref.rect2.w * pxl.anchorX[ref.rect2.anchor]" dy="ref.rect2.dy - ref.rect2.h * pxl.anchorY[ref.rect2.anchor]"
+          r="3" fill="#eab308"></pxl-circle>
+      </pxl-layer>
+
+      <!-- Layer 3 (green) -->
+      <pxl-layer id="layer3" x="250" y="450">
+        <!-- The group cancels the layer's offset, so the markers stay on the layer's x / y -->
+        <pxl-group dx="-ref.layer3.dx" dy="-ref.layer3.dy">
+          <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#86efac" strokewidth="1" linedash="[5, 5]"></pxl-line>
+          <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#86efac" strokewidth="1" linedash="[5, 5]"></pxl-line>
+          <pxl-circle r="4" fill="#16a34a"></pxl-circle>
+          <pxl-text x="8" y="-8" text="Layer 3 Center" size="14" fill="#16a34a"></pxl-text>
+        </pxl-group>
+        <pxl-rect id="rect3" x="-75" y="-50" w="100" h="50" fill="#dcfce766" stroke="#22c55e" strokewidth="2"></pxl-rect>
+        <pxl-circle x="ref.rect3.x" y="ref.rect3.y" r="3" fill="#4ade80"></pxl-circle>
+        <!-- Top-left corner of rect3: same transform, offset by the anchor-to-corner vector -->
+        <pxl-circle id="corner3" x="ref.rect3.x" y="ref.rect3.y" rotate="ref.rect3.rotate"
+          scale="ref.rect3.scale" scalex="ref.rect3.scalex" scaley="ref.rect3.scaley" skewx="ref.rect3.skewx" skewy="ref.rect3.skewy"
+          dx="ref.rect3.dx - ref.rect3.w * pxl.anchorX[ref.rect3.anchor]" dy="ref.rect3.dy - ref.rect3.h * pxl.anchorY[ref.rect3.anchor]"
+          r="3" fill="#eab308"></pxl-circle>
+      </pxl-layer>
+
+      <!-- Layer 4 (violet) -->
+      <pxl-layer id="layer4" x="750" y="450">
+        <!-- The group cancels the layer's offset, so the markers stay on the layer's x / y -->
+        <pxl-group dx="-ref.layer4.dx" dy="-ref.layer4.dy">
+          <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#c4b5fd" strokewidth="1" linedash="[5, 5]"></pxl-line>
+          <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#c4b5fd" strokewidth="1" linedash="[5, 5]"></pxl-line>
+          <pxl-circle r="4" fill="#7c3aed"></pxl-circle>
+          <pxl-text x="8" y="-8" text="Layer 4 Center" size="14" fill="#7c3aed"></pxl-text>
+        </pxl-group>
+        <pxl-rect id="rect4" x="-75" y="-50" w="100" h="50" fill="#ede9fe66" stroke="#8b5cf6" strokewidth="2"></pxl-rect>
+        <pxl-circle x="ref.rect4.x" y="ref.rect4.y" r="3" fill="#a78bfa"></pxl-circle>
+        <!-- Top-left corner of rect4: same transform, offset by the anchor-to-corner vector -->
+        <pxl-circle id="corner4" x="ref.rect4.x" y="ref.rect4.y" rotate="ref.rect4.rotate"
+          scale="ref.rect4.scale" scalex="ref.rect4.scalex" scaley="ref.rect4.scaley" skewx="ref.rect4.skewx" skewy="ref.rect4.skewy"
+          dx="ref.rect4.dx - ref.rect4.w * pxl.anchorX[ref.rect4.anchor]" dy="ref.rect4.dy - ref.rect4.h * pxl.anchorY[ref.rect4.anchor]"
+          r="3" fill="#eab308"></pxl-circle>
+      </pxl-layer>
+      <!-- Connector: the rect centers mapped from their layers into this untransformed layer.
+           Drawn last, so it reads the rects after they moved in the same frame. -->
+      <pxl-layer>
+        <pxl-polyline closed="true" stroke="#ec4899" strokewidth="1" linedash="[10, 10]"
+          points="toLocal(ref.rect1, 'x'), toLocal(ref.rect1, 'y');
+                  toLocal(ref.rect2, 'x'), toLocal(ref.rect2, 'y');
+                  toLocal(ref.rect4, 'x'), toLocal(ref.rect4, 'y');
+                  toLocal(ref.rect3, 'x'), toLocal(ref.rect3, 'y')">
+        </pxl-polyline>
+        <!-- The drawing origins (x + dx, y + dy, the offset turned by the rect's own transform) -->
+        <pxl-polyline closed="true" stroke="#06b6d4" strokewidth="1" linedash="[10, 10]"
+          points="toLocal(ref.rect1, 'x') + toLocal(ref.rect1, 'dx'), toLocal(ref.rect1, 'y') + toLocal(ref.rect1, 'dy');
+                  toLocal(ref.rect2, 'x') + toLocal(ref.rect2, 'dx'), toLocal(ref.rect2, 'y') + toLocal(ref.rect2, 'dy');
+                  toLocal(ref.rect4, 'x') + toLocal(ref.rect4, 'dx'), toLocal(ref.rect4, 'y') + toLocal(ref.rect4, 'dy');
+                  toLocal(ref.rect3, 'x') + toLocal(ref.rect3, 'dx'), toLocal(ref.rect3, 'y') + toLocal(ref.rect3, 'dy')">
+        </pxl-polyline>
+        <!-- The top-left corners, read from the corner markers -->
+        <pxl-polyline closed="true" stroke="#eab308" strokewidth="1" linedash="[10, 10]"
+          points="toLocal(ref.corner1, 'tx'), toLocal(ref.corner1, 'ty');
+                  toLocal(ref.corner2, 'tx'), toLocal(ref.corner2, 'ty');
+                  toLocal(ref.corner4, 'tx'), toLocal(ref.corner4, 'ty');
+                  toLocal(ref.corner3, 'tx'), toLocal(ref.corner3, 'ty')">
+        </pxl-polyline>
+      </pxl-layer>
+    </pxl-stage>
+  </div>
+
+  <div class="controls">
+    <div class="control-column layer1">
+      <h3>Layer 1</h3>
+      <label>Center X <span id="layer1XVal">250</span>
+        <input type="range" min="0" max="1000" step="25" value="250" autocomplete="off"
+          oninput="document.getElementById('layer1').setAttribute('x', this.value); document.getElementById('layer1XVal').innerText = this.value;">
+      </label>
+      <label>Center Y <span id="layer1YVal">150</span>
+        <input type="range" min="0" max="600" step="25" value="150" autocomplete="off"
+          oninput="document.getElementById('layer1').setAttribute('y', this.value); document.getElementById('layer1YVal').innerText = this.value;">
+      </label>
+      <label>Rotate <span id="layer1RotVal">0°</span>
+        <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
+          oninput="document.getElementById('layer1').setAttribute('rotate', this.value); document.getElementById('layer1RotVal').innerText = this.value + '°';">
+      </label>
+      <span></span>
+      <label>Scale X <span id="layer1ScaleXVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('layer1').setAttribute('scalex', this.value); document.getElementById('layer1ScaleXVal').innerText = this.value;">
+      </label>
+      <label>Scale Y <span id="layer1ScaleYVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('layer1').setAttribute('scaley', this.value); document.getElementById('layer1ScaleYVal').innerText = this.value;">
+      </label>
+      <label>Skew X <span id="layer1SkewXVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('layer1').setAttribute('skewx', this.value); document.getElementById('layer1SkewXVal').innerText = this.value + '°';">
+      </label>
+      <label>Skew Y <span id="layer1SkewYVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('layer1').setAttribute('skewy', this.value); document.getElementById('layer1SkewYVal').innerText = this.value + '°';">
+      </label>
+      <label>Offset DX <span id="layer1DXVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('layer1').setAttribute('dx', this.value); document.getElementById('layer1DXVal').innerText = this.value;">
+      </label>
+      <label>Offset DY <span id="layer1DYVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('layer1').setAttribute('dy', this.value); document.getElementById('layer1DYVal').innerText = this.value;">
+      </label>
+    </div>
+
+    <div class="control-column layer2">
+      <h3>Layer 2</h3>
+      <label>Center X <span id="layer2XVal">750</span>
+        <input type="range" min="0" max="1000" step="25" value="750" autocomplete="off"
+          oninput="document.getElementById('layer2').setAttribute('x', this.value); document.getElementById('layer2XVal').innerText = this.value;">
+      </label>
+      <label>Center Y <span id="layer2YVal">150</span>
+        <input type="range" min="0" max="600" step="25" value="150" autocomplete="off"
+          oninput="document.getElementById('layer2').setAttribute('y', this.value); document.getElementById('layer2YVal').innerText = this.value;">
+      </label>
+      <label>Rotate <span id="layer2RotVal">0°</span>
+        <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
+          oninput="document.getElementById('layer2').setAttribute('rotate', this.value); document.getElementById('layer2RotVal').innerText = this.value + '°';">
+      </label>
+      <span></span>
+      <label>Scale X <span id="layer2ScaleXVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('layer2').setAttribute('scalex', this.value); document.getElementById('layer2ScaleXVal').innerText = this.value;">
+      </label>
+      <label>Scale Y <span id="layer2ScaleYVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('layer2').setAttribute('scaley', this.value); document.getElementById('layer2ScaleYVal').innerText = this.value;">
+      </label>
+      <label>Skew X <span id="layer2SkewXVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('layer2').setAttribute('skewx', this.value); document.getElementById('layer2SkewXVal').innerText = this.value + '°';">
+      </label>
+      <label>Skew Y <span id="layer2SkewYVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('layer2').setAttribute('skewy', this.value); document.getElementById('layer2SkewYVal').innerText = this.value + '°';">
+      </label>
+      <label>Offset DX <span id="layer2DXVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('layer2').setAttribute('dx', this.value); document.getElementById('layer2DXVal').innerText = this.value;">
+      </label>
+      <label>Offset DY <span id="layer2DYVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('layer2').setAttribute('dy', this.value); document.getElementById('layer2DYVal').innerText = this.value;">
+      </label>
+    </div>
+
+    <div class="control-column layer3">
+      <h3>Layer 3</h3>
+      <label>Center X <span id="layer3XVal">250</span>
+        <input type="range" min="0" max="1000" step="25" value="250" autocomplete="off"
+          oninput="document.getElementById('layer3').setAttribute('x', this.value); document.getElementById('layer3XVal').innerText = this.value;">
+      </label>
+      <label>Center Y <span id="layer3YVal">450</span>
+        <input type="range" min="0" max="600" step="25" value="450" autocomplete="off"
+          oninput="document.getElementById('layer3').setAttribute('y', this.value); document.getElementById('layer3YVal').innerText = this.value;">
+      </label>
+      <label>Rotate <span id="layer3RotVal">0°</span>
+        <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
+          oninput="document.getElementById('layer3').setAttribute('rotate', this.value); document.getElementById('layer3RotVal').innerText = this.value + '°';">
+      </label>
+      <span></span>
+      <label>Scale X <span id="layer3ScaleXVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('layer3').setAttribute('scalex', this.value); document.getElementById('layer3ScaleXVal').innerText = this.value;">
+      </label>
+      <label>Scale Y <span id="layer3ScaleYVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('layer3').setAttribute('scaley', this.value); document.getElementById('layer3ScaleYVal').innerText = this.value;">
+      </label>
+      <label>Skew X <span id="layer3SkewXVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('layer3').setAttribute('skewx', this.value); document.getElementById('layer3SkewXVal').innerText = this.value + '°';">
+      </label>
+      <label>Skew Y <span id="layer3SkewYVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('layer3').setAttribute('skewy', this.value); document.getElementById('layer3SkewYVal').innerText = this.value + '°';">
+      </label>
+      <label>Offset DX <span id="layer3DXVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('layer3').setAttribute('dx', this.value); document.getElementById('layer3DXVal').innerText = this.value;">
+      </label>
+      <label>Offset DY <span id="layer3DYVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('layer3').setAttribute('dy', this.value); document.getElementById('layer3DYVal').innerText = this.value;">
+      </label>
+    </div>
+
+    <div class="control-column layer4">
+      <h3>Layer 4</h3>
+      <label>Center X <span id="layer4XVal">750</span>
+        <input type="range" min="0" max="1000" step="25" value="750" autocomplete="off"
+          oninput="document.getElementById('layer4').setAttribute('x', this.value); document.getElementById('layer4XVal').innerText = this.value;">
+      </label>
+      <label>Center Y <span id="layer4YVal">450</span>
+        <input type="range" min="0" max="600" step="25" value="450" autocomplete="off"
+          oninput="document.getElementById('layer4').setAttribute('y', this.value); document.getElementById('layer4YVal').innerText = this.value;">
+      </label>
+      <label>Rotate <span id="layer4RotVal">0°</span>
+        <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
+          oninput="document.getElementById('layer4').setAttribute('rotate', this.value); document.getElementById('layer4RotVal').innerText = this.value + '°';">
+      </label>
+      <span></span>
+      <label>Scale X <span id="layer4ScaleXVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('layer4').setAttribute('scalex', this.value); document.getElementById('layer4ScaleXVal').innerText = this.value;">
+      </label>
+      <label>Scale Y <span id="layer4ScaleYVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('layer4').setAttribute('scaley', this.value); document.getElementById('layer4ScaleYVal').innerText = this.value;">
+      </label>
+      <label>Skew X <span id="layer4SkewXVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('layer4').setAttribute('skewx', this.value); document.getElementById('layer4SkewXVal').innerText = this.value + '°';">
+      </label>
+      <label>Skew Y <span id="layer4SkewYVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('layer4').setAttribute('skewy', this.value); document.getElementById('layer4SkewYVal').innerText = this.value + '°';">
+      </label>
+      <label>Offset DX <span id="layer4DXVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('layer4').setAttribute('dx', this.value); document.getElementById('layer4DXVal').innerText = this.value;">
+      </label>
+      <label>Offset DY <span id="layer4DYVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('layer4').setAttribute('dy', this.value); document.getElementById('layer4DYVal').innerText = this.value;">
+      </label>
+    </div>
+
+    <div class="control-column rect layer1">
+      <h3>Rect 1</h3>
+      <label>Center X <span id="rect1XVal">-75</span>
+        <input type="range" min="-300" max="300" step="25" value="-75" autocomplete="off"
+          oninput="document.getElementById('rect1').setAttribute('x', this.value); document.getElementById('rect1XVal').innerText = this.value;">
+      </label>
+      <label>Center Y <span id="rect1YVal">-50</span>
+        <input type="range" min="-300" max="300" step="25" value="-50" autocomplete="off"
+          oninput="document.getElementById('rect1').setAttribute('y', this.value); document.getElementById('rect1YVal').innerText = this.value;">
+      </label>
+      <label>Width <span id="rect1WVal">100</span>
+        <input type="range" min="0" max="400" step="25" value="100" autocomplete="off"
+          oninput="document.getElementById('rect1').setAttribute('w', this.value); document.getElementById('rect1WVal').innerText = this.value;">
+      </label>
+      <label>Height <span id="rect1HVal">50</span>
+        <input type="range" min="0" max="400" step="25" value="50" autocomplete="off"
+          oninput="document.getElementById('rect1').setAttribute('h', this.value); document.getElementById('rect1HVal').innerText = this.value;">
+      </label>
+      <label>Rotate <span id="rect1RotVal">0°</span>
+        <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
+          oninput="document.getElementById('rect1').setAttribute('rotate', this.value); document.getElementById('rect1RotVal').innerText = this.value + '°';">
+      </label>
+      <span></span>
+      <label>Scale X <span id="rect1ScaleXVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('rect1').setAttribute('scalex', this.value); document.getElementById('rect1ScaleXVal').innerText = this.value;">
+      </label>
+      <label>Scale Y <span id="rect1ScaleYVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('rect1').setAttribute('scaley', this.value); document.getElementById('rect1ScaleYVal').innerText = this.value;">
+      </label>
+      <label>Skew X <span id="rect1SkewXVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('rect1').setAttribute('skewx', this.value); document.getElementById('rect1SkewXVal').innerText = this.value + '°';">
+      </label>
+      <label>Skew Y <span id="rect1SkewYVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('rect1').setAttribute('skewy', this.value); document.getElementById('rect1SkewYVal').innerText = this.value + '°';">
+      </label>
+      <label>Offset DX <span id="rect1DXVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('rect1').setAttribute('dx', this.value); document.getElementById('rect1DXVal').innerText = this.value;">
+      </label>
+      <label>Offset DY <span id="rect1DYVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('rect1').setAttribute('dy', this.value); document.getElementById('rect1DYVal').innerText = this.value;">
+      </label>
+      <label class="full-row">Anchor
+        <select autocomplete="off" onchange="document.getElementById('rect1').setAttribute('anchor', this.value);">
+          <option value="top-left">top-left</option>
+          <option value="top">top</option>
+          <option value="top-right">top-right</option>
+          <option value="left">left</option>
+          <option value="center" selected>center</option>
+          <option value="right">right</option>
+          <option value="bottom-left">bottom-left</option>
+          <option value="bottom">bottom</option>
+          <option value="bottom-right">bottom-right</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="control-column rect layer2">
+      <h3>Rect 2</h3>
+      <label>Center X <span id="rect2XVal">-75</span>
+        <input type="range" min="-300" max="300" step="25" value="-75" autocomplete="off"
+          oninput="document.getElementById('rect2').setAttribute('x', this.value); document.getElementById('rect2XVal').innerText = this.value;">
+      </label>
+      <label>Center Y <span id="rect2YVal">-50</span>
+        <input type="range" min="-300" max="300" step="25" value="-50" autocomplete="off"
+          oninput="document.getElementById('rect2').setAttribute('y', this.value); document.getElementById('rect2YVal').innerText = this.value;">
+      </label>
+      <label>Width <span id="rect2WVal">100</span>
+        <input type="range" min="0" max="400" step="25" value="100" autocomplete="off"
+          oninput="document.getElementById('rect2').setAttribute('w', this.value); document.getElementById('rect2WVal').innerText = this.value;">
+      </label>
+      <label>Height <span id="rect2HVal">50</span>
+        <input type="range" min="0" max="400" step="25" value="50" autocomplete="off"
+          oninput="document.getElementById('rect2').setAttribute('h', this.value); document.getElementById('rect2HVal').innerText = this.value;">
+      </label>
+      <label>Rotate <span id="rect2RotVal">0°</span>
+        <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
+          oninput="document.getElementById('rect2').setAttribute('rotate', this.value); document.getElementById('rect2RotVal').innerText = this.value + '°';">
+      </label>
+      <span></span>
+      <label>Scale X <span id="rect2ScaleXVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('rect2').setAttribute('scalex', this.value); document.getElementById('rect2ScaleXVal').innerText = this.value;">
+      </label>
+      <label>Scale Y <span id="rect2ScaleYVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('rect2').setAttribute('scaley', this.value); document.getElementById('rect2ScaleYVal').innerText = this.value;">
+      </label>
+      <label>Skew X <span id="rect2SkewXVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('rect2').setAttribute('skewx', this.value); document.getElementById('rect2SkewXVal').innerText = this.value + '°';">
+      </label>
+      <label>Skew Y <span id="rect2SkewYVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('rect2').setAttribute('skewy', this.value); document.getElementById('rect2SkewYVal').innerText = this.value + '°';">
+      </label>
+      <label>Offset DX <span id="rect2DXVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('rect2').setAttribute('dx', this.value); document.getElementById('rect2DXVal').innerText = this.value;">
+      </label>
+      <label>Offset DY <span id="rect2DYVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('rect2').setAttribute('dy', this.value); document.getElementById('rect2DYVal').innerText = this.value;">
+      </label>
+      <label class="full-row">Anchor
+        <select autocomplete="off" onchange="document.getElementById('rect2').setAttribute('anchor', this.value);">
+          <option value="top-left">top-left</option>
+          <option value="top">top</option>
+          <option value="top-right">top-right</option>
+          <option value="left">left</option>
+          <option value="center" selected>center</option>
+          <option value="right">right</option>
+          <option value="bottom-left">bottom-left</option>
+          <option value="bottom">bottom</option>
+          <option value="bottom-right">bottom-right</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="control-column rect layer3">
+      <h3>Rect 3</h3>
+      <label>Center X <span id="rect3XVal">-75</span>
+        <input type="range" min="-300" max="300" step="25" value="-75" autocomplete="off"
+          oninput="document.getElementById('rect3').setAttribute('x', this.value); document.getElementById('rect3XVal').innerText = this.value;">
+      </label>
+      <label>Center Y <span id="rect3YVal">-50</span>
+        <input type="range" min="-300" max="300" step="25" value="-50" autocomplete="off"
+          oninput="document.getElementById('rect3').setAttribute('y', this.value); document.getElementById('rect3YVal').innerText = this.value;">
+      </label>
+      <label>Width <span id="rect3WVal">100</span>
+        <input type="range" min="0" max="400" step="25" value="100" autocomplete="off"
+          oninput="document.getElementById('rect3').setAttribute('w', this.value); document.getElementById('rect3WVal').innerText = this.value;">
+      </label>
+      <label>Height <span id="rect3HVal">50</span>
+        <input type="range" min="0" max="400" step="25" value="50" autocomplete="off"
+          oninput="document.getElementById('rect3').setAttribute('h', this.value); document.getElementById('rect3HVal').innerText = this.value;">
+      </label>
+      <label>Rotate <span id="rect3RotVal">0°</span>
+        <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
+          oninput="document.getElementById('rect3').setAttribute('rotate', this.value); document.getElementById('rect3RotVal').innerText = this.value + '°';">
+      </label>
+      <span></span>
+      <label>Scale X <span id="rect3ScaleXVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('rect3').setAttribute('scalex', this.value); document.getElementById('rect3ScaleXVal').innerText = this.value;">
+      </label>
+      <label>Scale Y <span id="rect3ScaleYVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('rect3').setAttribute('scaley', this.value); document.getElementById('rect3ScaleYVal').innerText = this.value;">
+      </label>
+      <label>Skew X <span id="rect3SkewXVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('rect3').setAttribute('skewx', this.value); document.getElementById('rect3SkewXVal').innerText = this.value + '°';">
+      </label>
+      <label>Skew Y <span id="rect3SkewYVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('rect3').setAttribute('skewy', this.value); document.getElementById('rect3SkewYVal').innerText = this.value + '°';">
+      </label>
+      <label>Offset DX <span id="rect3DXVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('rect3').setAttribute('dx', this.value); document.getElementById('rect3DXVal').innerText = this.value;">
+      </label>
+      <label>Offset DY <span id="rect3DYVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('rect3').setAttribute('dy', this.value); document.getElementById('rect3DYVal').innerText = this.value;">
+      </label>
+      <label class="full-row">Anchor
+        <select autocomplete="off" onchange="document.getElementById('rect3').setAttribute('anchor', this.value);">
+          <option value="top-left">top-left</option>
+          <option value="top">top</option>
+          <option value="top-right">top-right</option>
+          <option value="left">left</option>
+          <option value="center" selected>center</option>
+          <option value="right">right</option>
+          <option value="bottom-left">bottom-left</option>
+          <option value="bottom">bottom</option>
+          <option value="bottom-right">bottom-right</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="control-column rect layer4">
+      <h3>Rect 4</h3>
+      <label>Center X <span id="rect4XVal">-75</span>
+        <input type="range" min="-300" max="300" step="25" value="-75" autocomplete="off"
+          oninput="document.getElementById('rect4').setAttribute('x', this.value); document.getElementById('rect4XVal').innerText = this.value;">
+      </label>
+      <label>Center Y <span id="rect4YVal">-50</span>
+        <input type="range" min="-300" max="300" step="25" value="-50" autocomplete="off"
+          oninput="document.getElementById('rect4').setAttribute('y', this.value); document.getElementById('rect4YVal').innerText = this.value;">
+      </label>
+      <label>Width <span id="rect4WVal">100</span>
+        <input type="range" min="0" max="400" step="25" value="100" autocomplete="off"
+          oninput="document.getElementById('rect4').setAttribute('w', this.value); document.getElementById('rect4WVal').innerText = this.value;">
+      </label>
+      <label>Height <span id="rect4HVal">50</span>
+        <input type="range" min="0" max="400" step="25" value="50" autocomplete="off"
+          oninput="document.getElementById('rect4').setAttribute('h', this.value); document.getElementById('rect4HVal').innerText = this.value;">
+      </label>
+      <label>Rotate <span id="rect4RotVal">0°</span>
+        <input type="range" min="-180" max="180" step="15" value="0" autocomplete="off"
+          oninput="document.getElementById('rect4').setAttribute('rotate', this.value); document.getElementById('rect4RotVal').innerText = this.value + '°';">
+      </label>
+      <span></span>
+      <label>Scale X <span id="rect4ScaleXVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('rect4').setAttribute('scalex', this.value); document.getElementById('rect4ScaleXVal').innerText = this.value;">
+      </label>
+      <label>Scale Y <span id="rect4ScaleYVal">1</span>
+        <input type="range" min="0.25" max="3" step="0.25" value="1" autocomplete="off"
+          oninput="document.getElementById('rect4').setAttribute('scaley', this.value); document.getElementById('rect4ScaleYVal').innerText = this.value;">
+      </label>
+      <label>Skew X <span id="rect4SkewXVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('rect4').setAttribute('skewx', this.value); document.getElementById('rect4SkewXVal').innerText = this.value + '°';">
+      </label>
+      <label>Skew Y <span id="rect4SkewYVal">0°</span>
+        <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off"
+          oninput="document.getElementById('rect4').setAttribute('skewy', this.value); document.getElementById('rect4SkewYVal').innerText = this.value + '°';">
+      </label>
+      <label>Offset DX <span id="rect4DXVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('rect4').setAttribute('dx', this.value); document.getElementById('rect4DXVal').innerText = this.value;">
+      </label>
+      <label>Offset DY <span id="rect4DYVal">0</span>
+        <input type="range" min="-100" max="100" step="25" value="0" autocomplete="off"
+          oninput="document.getElementById('rect4').setAttribute('dy', this.value); document.getElementById('rect4DYVal').innerText = this.value;">
+      </label>
+      <label class="full-row">Anchor
+        <select autocomplete="off" onchange="document.getElementById('rect4').setAttribute('anchor', this.value);">
+          <option value="top-left">top-left</option>
+          <option value="top">top</option>
+          <option value="top-right">top-right</option>
+          <option value="left">left</option>
+          <option value="center" selected>center</option>
+          <option value="right">right</option>
+          <option value="bottom-left">bottom-left</option>
+          <option value="bottom">bottom</option>
+          <option value="bottom-right">bottom-right</option>
+        </select>
+      </label>
+    </div>
+  </div>
+</body>
+</html>
