@@ -101,6 +101,37 @@
           </pxl-layer>
         </pxl-stage>
 
+        <!-- toLocal decomposition and zoom (design/2026-10-29_tolocal_decomposition_plan.md) -->
+        <pxl-stage id="dcStage" ratio="5 / 3" alwaysrender>
+          <pxl-layer>
+            <pxl-circle id="dcReader" r="1"></pxl-circle>
+            <pxl-group x="200" y="100" scalex="-1">
+              <pxl-circle id="dcMirror" r="10" fill="#fb923c"></pxl-circle>
+            </pxl-group>
+            <pxl-rect id="dcSkew" x="400" y="100" skewx="30" w="60" h="40" stroke="#3b82f6"></pxl-rect>
+            <pxl-group x="700" y="100" scalex="2" scaley="0.5">
+              <pxl-circle id="dcStretched" r="10" fill="#22c55e"></pxl-circle>
+            </pxl-group>
+            <pxl-rect id="dcZoomRect" x="100" y="450" zoom="2" scalex="1.5" w="20" h="20" stroke="#8b5cf6"></pxl-rect>
+          </pxl-layer>
+          <pxl-layer x="250" y="300" rotate="30" zoom="1.5">
+            <pxl-circle id="dcUniform" r="10" fill="#fb923c"></pxl-circle>
+            <pxl-circle id="dcZoomed" x="40" zoom="2" r="6" fill="#3b82f6"></pxl-circle>
+          </pxl-layer>
+          <!-- Clone rule: the outline copies the part's frame from another space -->
+          <pxl-layer x="650" y="350" rotate="t * 12">
+            <pxl-group scalex="2">
+              <pxl-rect id="dcPart" x="60" rotate="40" dx="30" w="50" h="25" fill="#22c55e"></pxl-rect>
+            </pxl-group>
+          </pxl-layer>
+          <pxl-layer>
+            <pxl-rect id="dcClone" x="toLocal(ref.dcPart, 'x')" y="toLocal(ref.dcPart, 'y')"
+              rotate="toLocal(ref.dcPart, 'rotate')" skewx="toLocal(ref.dcPart, 'skewx')"
+              scalex="toLocal(ref.dcPart, 'scalex')" scaley="toLocal(ref.dcPart, 'scaley')"
+              dx="ref.dcPart.dx" dy="ref.dcPart.dy" w="50" h="25" stroke="#0f172a" strokewidth="2"></pxl-rect>
+          </pxl-layer>
+        </pxl-stage>
+
         <!-- Engine cleanup fixes (design/2026-10-27_engine_cleanup_inventory_note.md §3 A) -->
         <pxl-stage id="ecStage" ratio="5 / 3" alwaysrender>
           <pxl-layer>
@@ -231,6 +262,81 @@
       box.setAttribute('dy', '40');
       await wait(100);
       expectMapped('txReader', 'txBox', [['x', 'tx'], ['y', 'ty']]);
+    });
+
+    // ===================================================================
+    // toLocal decomposition and zoom (design/2026-10-29_tolocal_decomposition_plan.md)
+    // ===================================================================
+
+    // toLocal() of `targetId` as seen from dcReader (untransformed layer), compared with `expected`
+    function expectFrame(targetId, expected) {
+      for (const prop in expected) {
+        const value = pxl.toLocal(el('dcReader'), pxl.nodes[targetId], prop);
+        if (!(Math.abs(value - expected[prop]) < 0.01)) {
+          throw new Error(`toLocal(${targetId}, '${prop}') is ${round(value)}, expected ${expected[prop]}`);
+        }
+      }
+    }
+
+    test('toLocal decomposition: a mirrored target rebuilds as a mirror, not a 180° turn', () =>
+      expectFrame('dcMirror', { rotate: 180, scalex: 1, scaley: -1, skewx: 0, zoom: 1 }));
+
+    test('toLocal decomposition: skewx="30" comes back as skewx 30', () =>
+      expectFrame('dcSkew', { rotate: 0, scalex: 1, scaley: 1, skewx: 30, zoom: 1 }));
+
+    test('toLocal decomposition: uniform layer (rotate 30, zoom 1.5) gives zoom = scalex = scaley', () =>
+      expectFrame('dcUniform', { rotate: 30, scalex: 1.5, scaley: 1.5, skewx: 0, zoom: 1.5 }));
+
+    test('toLocal zoom: zoom 2 in a layer with zoom 1.5 is 3, also with skew; a stretched group gives the area factor', async () => {
+      expectFrame('dcZoomed', { zoom: 3 });
+      el('dcZoomed').setAttribute('skewx', '30');
+      await wait(50);
+      expectFrame('dcZoomed', { zoom: 3 });
+      expectFrame('dcStretched', { scalex: 2, scaley: 0.5, zoom: 1 });
+    });
+
+    test('toLocal clone rule: the outline\'s global matrix equals the part\'s while the layer turns', () =>
+      sampled(() => {
+        const part = el('dcPart').getGlobalMatrix(), clone = el('dcClone').getGlobalMatrix();
+        for (let i = 0; i < 6; i++) {
+          if (!(Math.abs(part[i] - clone[i]) < 0.01)) {
+            throw new Error(`matrix entry ${i}: part ${round(part[i])}, clone ${round(clone[i])}`);
+          }
+        }
+      }));
+
+    test('zoom multiplies scalex / scaley: zoom 2 and scalex 1.5 give 3 / 2', () => {
+      const m = el('dcZoomRect').getLocalMatrix();
+      if (round(m[0]) !== 3 || round(m[3]) !== 2) throw new Error(`scale is ${round(m[0])} / ${round(m[3])}`);
+    });
+
+    test('zoom passing 1 next to scalex 3 scales x smoothly (no jump to the override)', async () => {
+      const rect = el('dcZoomRect');
+      rect.setAttribute('scalex', '3');
+      const xScales = [];
+      for (const zoom of ['0.99', '1', '1.01']) {
+        rect.setAttribute('zoom', zoom);
+        xScales.push(rect.getLocalMatrix()[0]);
+      }
+      const expected = [2.97, 3, 3.03];
+      if (xScales.some((s, i) => Math.abs(s - expected[i]) > 0.001)) throw new Error(`x scales ${xScales.map(round).join(', ')}`);
+    });
+
+    test('toLocal: unknown names (skewy, scale, typos) warn once at compile time; valid names don\'t', () => {
+      const warnings = [];
+      const originalWarn = console.warn;
+      console.warn = (msg) => warnings.push(msg);
+      try {
+        // Unique strings, so the compile cache doesn't skip the check
+        pxl.compileExpression(`toLocal(ref.dcPart, 'skewy') + ${Math.random()}`);
+        pxl.compileExpression(`toLocal(ref.dcPart, 'scale') + ${Math.random()}`);
+        pxl.compileExpression(`toLocal(ref.dcPart, "rotat") + ${Math.random()}`);
+        pxl.compileExpression(`toLocal(ref.dcPart, 'skewx') + toLocal(ref.dcPart, 'zoom') + ${Math.random()}`);
+      } finally {
+        console.warn = originalWarn;
+      }
+      const named = ['skewy', 'scale', 'rotat'].map((name) => warnings.filter((w) => w.includes(`'${name}'`)).length);
+      if (warnings.length !== 3 || named.some((n) => n !== 1)) throw new Error(`${warnings.length} warnings: ${warnings.join(' | ')}`);
     });
 
     // ===================================================================

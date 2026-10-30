@@ -224,8 +224,8 @@
 ## 25. Refs Across Coordinate Spaces (`toLocal` Point Form, `ref.<id>.points`)
 - **Status**: ⚪ **Discussion** (2026-10-25, ideas added 2026-10-26; no code changes decided, "keep everything as it is for now")
 - **Reference**: `design/2026-10-25_refs_across_spaces_note.md` (hub: index of all related documents in §0, ideas in §7)
-- **Finding**: refs (`ref.v.value`, `ref.box.x`, `ref.zig.pN`) are values in the target's space, not positions; only `toLocal()` crosses spaces, and it maps only an element's frame (`x`, `y`, `tx`, `ty`, `rotate`, `scale`), not points inside it.
-- **Works today**: shared space; track one point via `dx` / `dy` + `toLocal(ref, 'tx')`; anchors (`pxl-group` or a drawn / hidden dot) in the shape's space; phantom groups as spatial variables; sizes and angles by composition (`ref.c.r * toLocal(ref.c, 'scale')`).
+- **Finding**: refs (`ref.v.value`, `ref.box.x`, `ref.zig.pN`) are values in the target's space, not positions; only `toLocal()` crosses spaces, and it maps only an element's frame (`x`, `y`, `tx`, `ty`, `rotate`, `scalex`, `scaley`, `skewx`, `zoom`), not points inside it.
+- **Works today**: shared space; track one point via `dx` / `dy` + `toLocal(ref, 'tx')`; anchors (`pxl-group` or a drawn / hidden dot) in the shape's space; phantom groups as spatial variables; sizes and angles by composition (`ref.c.r * toLocal(ref.c, 'zoom')`).
 - **Possible later**: `toLocal(ref.el, 'x', px, py)` point form; `toLocal(ref.zig, 'pN')` sugar (relative mode); lazy evaluated `ref.zig.points`; list-expression rule for `points="ref.zig.points"` with a quote-aware parser.
 - **Docs**: `ref.<id>.pN` stays internal; teach the patterns in the walkthrough's `toLocal` section.
 - **Ideas 2026-10-26** (note §7): point names `xN` / `yN` counted from 1 like `<pxl-line>` (§7.1); `toLocal` maps the whole point even when asked for one coordinate (§7.2); one-argument syntax `toLocal(ref.zig.x3)` via a compiler rewrite (§7.3, preferred); the reader-line rule with example (§7.4); "always hit the point" by letting the attribute decide the space, about 40 lines, scoped (§7.5); flip-the-roles workaround (§7.6); other frameworks (§7.7); over-engineering check, next step is a plan with one real use case (§7.8).
@@ -236,3 +236,10 @@
 - **Reference**: `design/2026-10-26_tolocal_fix_plan.md`; tests in `tests/index.html` (`toLocal:` tests, committed); demos `scratch/tolocal_numbers.html`, `scratch/tolocal_reader_lines.html` (local only)
 - **Bug**: `toLocal()` results went stale when the reader's own layer or group moved (only the target side was tracked). Example: the walkthrough §8 line leaves both circles when its own layer rotates.
 - **Fix**: compiler flags `toLocal` expressions (`fn.usesToLocal`); elements list them in `toLocalAttributeKeys`; `broadcastGlobalMatrixChange()` re-evaluates them via `pxl.evaluateToLocalAttributes()`. No cost while nothing moves (walk measured ≈ 0.15 µs per frame for 50 shapes, same as before).
+
+## 27. toLocal Decomposition and the `zoom` Attribute
+- **Status**: ✅ **Done** (2026-10-30)
+- **Reference**: `design/2026-10-29_tolocal_decomposition_plan.md`; tests in `tests/index.html` (`toLocal decomposition`, `toLocal zoom`, `toLocal clone rule`, `zoom` tests); demo `examples/test53.html`
+- **toLocal**: `skewx` (new), `scaley` signed (mirrors survive), `zoom` = √|det| (total zoom, exact without stretching in the pipeline); `scale` removed; `skewy` not offered (not unique); literal unknown names warn at compile time.
+- **`zoom` attribute**: replaces `scale` and multiplies `scalex` / `scaley` (no override, no jump at 1). `test48` labels use `zoom="-1"`.
+- **Docs sidebar**: "Zoom & Scale" (`scale.html`) and "Rotate & Skew" (`transform.html`), both pages still to be written.

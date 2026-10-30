@@ -18,6 +18,7 @@ All documents on this topic, oldest first. Older plans are kept unchanged as his
 | `design/2026-10-18_polyline_optimization_plan.md` §2.3.4 | 2026-10-18 | `ref.<id>.pN` readers update when `points` is replaced | ✅ Implemented |
 | **This note** | 2026-10-25 | Refs are values, not positions; patterns that work today; possible additions | ⚪ Open ideas |
 | `design/2026-10-26_tolocal_fix_plan.md` | 2026-10-26 | Readers update when their **own** space moves | ✅ Implemented |
+| `design/2026-10-29_tolocal_decomposition_plan.md` | 2026-10-29 | Frame decomposition (`skewx`, signed `scaley`, `zoom`), warning for unknown names; the `scale` attribute becomes `zoom` (multiplier) | ✅ Implemented |
 
 ## 1. Core Finding: Refs Are Values, Not Positions
 
@@ -35,8 +36,8 @@ Only `toLocal()` crosses spaces, because only it knows both sides (target global
 ## 2. What `toLocal` Supports Today
 
 - **Targets**: every `pxl.PxlNode` with a frame: all shapes, `pxl-group`, `pxl-layer`. Not `pxl-stage` (not a PxlNode, returns 0). Not `pxl-var` (a PxlNode, but it observes only `value`; `x` / `y` attributes are ignored, so the matrix is built from `undefined` and the result is `NaN`).
-- **Properties** (same for every target): `x`, `y`, `dx`, `dy`, `tx`, `ty`, `rotate`, `scale` / `scalex`, `scaley`. Anything else returns 0.
-- All of them describe the element's **frame** (origin, rotation, scale), never the geometry inside it (`r`, `w`, `x2`, points).
+- **Properties** (same for every target): `x`, `y`, `dx`, `dy`, `tx`, `ty`, `rotate`, `scalex`, `scaley` (signed), `skewx`, `zoom` (since 2026-10-30, `design/2026-10-29_tolocal_decomposition_plan.md`). Anything else returns 0, and a literal unknown name warns at compile time.
+- All of them describe the element's **frame** (origin, rotation, scale, skew), never the geometry inside it (`r`, `w`, `x2`, points).
 - A single number can't be mapped: rotation mixes x and y, so mapping needs a full (x, y) pair.
 
 ## 3. Three Kinds of Values
@@ -47,10 +48,10 @@ Only `toLocal()` crosses spaces, because only it knows both sides (target global
 | Sizes | `r`, `w`, `h`, `strokewidth` | scale only; no single answer under non-uniform scale or skew |
 | Angles | `rotate`, circle `start` / `end` | rotations add; distorted under skew / non-uniform scale |
 
-Sizes and angles already work by **composition** (uniform scale):
+Sizes and angles already work by **composition** (uniform zoom):
 
 ```html
-r="ref.c.r * toLocal(ref.c, 'scale')"
+r="ref.c.r * toLocal(ref.c, 'zoom')"
 start="ref.c.start + toLocal(ref.c, 'rotate')"
 ```
 

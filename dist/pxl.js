@@ -296,12 +296,21 @@ pxl.toLocal = function(caller, targetObj, prop) {
   if (prop === 'dy')     return tdy;
   if (prop === 'tx')     return d[4];
   if (prop === 'ty')     return d[5];
+  // Kilopixel's order rotate → scale → skew: rotate, scalex, scaley (negative = mirrored) and skewx
+  // rebuild any target frame. zoom is the uniform factor with the same area change.
   if (prop === 'rotate') return Math.atan2(d[1], d[0]) * 180 / Math.PI;
-  if (prop === 'scale' || prop === 'scalex') return Math.sqrt(d[0] * d[0] + d[1] * d[1]);
-  if (prop === 'scaley') return Math.sqrt(d[2] * d[2] + d[3] * d[3]);
+  const det = d[0] * d[3] - d[1] * d[2];
+  const lenX = Math.sqrt(d[0] * d[0] + d[1] * d[1]);
+  if (prop === 'scalex') return lenX;
+  if (prop === 'scaley') return det / lenX;
+  if (prop === 'skewx')  return Math.atan((d[0] * d[2] + d[1] * d[3]) / (lenX * lenX)) * 180 / Math.PI;
+  if (prop === 'zoom')   return Math.sqrt(Math.abs(det));
 
+  // Unknown names are reported once by the compiler (pxl.checkToLocalProperties), not here in the frame loop
   return 0;
 };
+
+pxl.toLocalProperties = ['x', 'y', 'dx', 'dy', 'tx', 'ty', 'rotate', 'scalex', 'scaley', 'skewx', 'zoom'];
 
 // =========================================================================
 // Expression Scope & Time Drivers
@@ -467,6 +476,20 @@ pxl.rewriteExpression = function(str) {
     .replace(/\btoLocal\(/g, 'pxl.toLocal(this, ');
 };
 
+// Warns about toLocal() property names that don't exist (e.g. 'skewy', which isn't unique, or a typo).
+// Runs once per expression at compile time; pxl.toLocal itself returns 0 for them without logging,
+// because it runs every frame. Names given as variables can't be checked here.
+pxl.checkToLocalProperties = function(str) {
+  const propRegex = /\btoLocal\([^,]*,\s*(['"])([^'"]*)\1\s*\)/g;
+  let match;
+  while ((match = propRegex.exec(str)) !== null) {
+    if (!pxl.toLocalProperties.includes(match[2])) {
+      console.warn(`toLocal(): '${match[2]}' is not available. Use one of ${pxl.toLocalProperties.join(', ')}. ` +
+        `To copy a frame, map rotate, scalex, scaley and skewx: ${str}`);
+    }
+  }
+};
+
 // Turns a non-empty attribute string into a static value (number, boolean, string)
 // or a compiled function. Cheap checks run first; most attributes never reach the compiler.
 pxl.parseAttributeValue = function(value) {
@@ -531,6 +554,7 @@ pxl.compileExpression = function(str) {
     const isAnimated = pxl.timeDriverRegex.test(source);
     // toLocal readers are also re-evaluated when their own space moves (design/2026-10-26_tolocal_fix_plan.md)
     const usesToLocal = /\btoLocal\(/.test(source);
+    if (usesToLocal) pxl.checkToLocalProperties(str);
     source = pxl.rewriteExpression(source);
 
     const deps = [];

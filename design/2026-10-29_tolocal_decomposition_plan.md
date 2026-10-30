@@ -1,6 +1,6 @@
 # toLocal Decomposition and the `zoom` Attribute
 
-- **Status**: 🟡 **Proposed** (2026-10-29, updated 2026-10-30, no code changes yet)
+- **Status**: ✅ **Implemented** (2026-10-30)
 - **Date**: 2026-10-29
 - **Related**: `design/2026-10-25_refs_across_spaces_note.md` (hub for `toLocal`, §2 and §3), `design/coordinate_mapping_implementation_plan.md` (original property list), `design/2026-10-26_tolocal_fix_plan.md` (reactivity)
 - **Target Implementation**: `js/matrix.js` (`pxl.toLocal`), `js/compiler.js` (warning for unknown `toLocal` names); for §5 (`zoom`) also `js/elements/node.js` (`getLocalMatrix`), `js/graphics.js` (`applyContextState`), `js/engine.js` (`isSpatialKey`), `js/elements/shape.js`, `group.js`, `layer.js` (attribute lists, defaults, `hasStateChanges`), and every page that uses `scale="…"`
@@ -270,7 +270,7 @@ All 79 tracked `.html` files were searched (attributes, `setAttribute` calls, `t
 - `ref.scale.value` in `examples/test05.html`, `test06.html`, `test18.html` and `benchmark.html`: a `pxl-var` with the id `scale`, not the attribute.
 - `scalex` / `scaley` in `docs/rect.html` (sliders and snippets) and `examples/test37.html`: unchanged attributes.
 - `initial-scale` in the viewport meta tag of every docs page.
-- `examples/test53.html` (untracked): no `scale`.
+- `examples/test53.html` (committed after this overview): 4 corner helpers with `scale="ref.rectN.scale"`, renamed to `zoom="ref.rectN.zoom"` during the implementation.
 
 `.agents/KILOPIXEL.md` uses `scale` in two examples (hover / press, lines ~653 and ~1570) and in prose (lines ~193, ~1153, ~1611); see §9.
 

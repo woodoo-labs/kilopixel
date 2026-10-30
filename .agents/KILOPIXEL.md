@@ -754,9 +754,30 @@ The `toLocal(target, property)` function projects a target element's position in
 | `'dy'` | `tdy` | Same for Y axis |
 | `'tx'` | `delta[4]` | Target's **total position** (center + offset) |
 | `'ty'` | `delta[5]` | Same for Y axis |
-| `'rotate'` | `atan2(delta[1], delta[0]) × 180/π` | Accumulated rotation in degrees |
-| `'scale'` / `'scalex'` | `√(delta[0]² + delta[1]²)` | Accumulated X scale |
-| `'scaley'` | `√(delta[2]² + delta[3]²)` | Accumulated Y scale |
+| `'rotate'` | `atan2(delta[1], delta[0]) × 180/π` | Direction of the target's x axis in degrees |
+| `'scalex'` | `√(delta[0]² + delta[1]²)` | Length of the target's x axis (total, includes every `zoom`) |
+| `'scaley'` | `det / scalex` | Height perpendicular to the x axis, **signed** (negative = mirrored) |
+| `'skewx'` | `atan((delta[0]·delta[2] + delta[1]·delta[3]) / scalex²) × 180/π` | Lean of the target's y axis in degrees |
+| `'zoom'` | `√|det|` | Total uniform zoom (see below) |
+
+`det = delta[0]·delta[3] − delta[1]·delta[2]`. The frame properties decompose the delta in Kilopixel's own order (rotate → scale → skew) with `skewy = 0`: `rotate`, `scalex`, `scaley` and `skewx` rebuild any 2×2 matrix (mirrors and skew included). `skewy` is not offered: it isn't unique (`skewy="30"` is the same matrix as `rotate="30" scalex="1.155" scaley="0.866" skewx="23.4"`), so it would always be `0`.
+
+**`'zoom'` (total zoom)**: the factor by which the target's frame changes areas, as a length factor. As long as nothing between the reader and the target (the target included) is stretched (`scalex ≠ scaley`), it is exactly the product of all `zoom` (and uniform `scalex = scaley`) factors, also with rotation, skew or mirroring in between; e.g. `zoom="2"` in a layer with `zoom="1.5"` gives `3`. With stretching in the pipeline it is the average factor (same area): then read `'scalex'` and `'scaley'` instead. Typical use: `r="ref.c.r * toLocal(ref.c, 'zoom')"` or `zoom="toLocal(ref.planet, 'zoom')"`.
+
+**Totals, not attributes**: toLocal returns how the target looks from the reader's space, not which attribute caused it. Even in the same space, a target with `zoom="2"` reports `'scalex'` = 2 (its `ref.el.scalex` is 1), and one with `scalex="2"` reports `'zoom'` = 1.41 (its `ref.el.zoom` is 1). A matrix can't tell `zoom="2"` from `scalex="2" scaley="2"`.
+
+**Clone rule** (exact copy of a frame from another space):
+
+```html
+x="toLocal(ref.el, 'x')" y="toLocal(ref.el, 'y')"
+rotate="toLocal(ref.el, 'rotate')" skewx="toLocal(ref.el, 'skewx')"
+scalex="toLocal(ref.el, 'scalex')" scaley="toLocal(ref.el, 'scaley')"
+dx="ref.el.dx" dy="ref.el.dy"
+```
+
+The reader doesn't set `skewy` and keeps `zoom` at `1` (or uses it on purpose: `zoom="1.1"` is an outline 10 % larger). The offset comes from the plain ref, because the reader's own rotate / scale / skew turn it exactly like the target's.
+
+**Unknown names**: `pxl.checkToLocalProperties` warns once at compile time when a literal property name isn't in `pxl.toLocalProperties` (e.g. `'skewy'`, the removed `'scale'`, typos). `pxl.toLocal` itself returns `0` for them without logging, because it runs every frame. Names given as variables aren't checked.
 
 **Algebraic Identity**: `toLocal(target, 'x') + toLocal(target, 'dx')` equals `toLocal(target, 'tx')`. The `'tx'`/`'ty'` properties are shortcuts for the sum of center + offset. Use `'tx'`/`'ty'` when tracking where a shape actually appears (e.g., connecting lines). Use `'x'`/`'y'` when tracking the pivot point (e.g., drawing orbit rings around a center).
 
@@ -1641,6 +1662,6 @@ Note: `ref.myShape.tx` gives the shape's drawn origin in its own parent space (`
 
 **Reactive references**: `ref.xxx.property`
 
-**Coordinate mapping**: `toLocal(ref.target, 'x'|'y'|'dx'|'dy'|'tx'|'ty'|'rotate'|'scale'|'scalex'|'scaley')`
+**Coordinate mapping**: `toLocal(ref.target, 'x'|'y'|'dx'|'dy'|'tx'|'ty'|'rotate'|'scalex'|'scaley'|'skewx'|'zoom')`
 
 **Variables**: `t` (time in seconds)
