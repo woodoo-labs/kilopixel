@@ -256,3 +256,11 @@
 - **Idea**: split the frame into an update phase (the stage runs `evaluateAnimations` for every element of every layer; reactive refs and toLocal readers settle through the existing broadcasts) and a draw phase (every layer draws with this frame's values). Removes the lag whatever the DOM order. Each value is still evaluated once; the cost is a second walk over the elements.
 - **Open**: measure the extra walk (benchmark presets, docs pages); layers whose only animated attributes are compositing skip drawing today (CSS fast path in `Layer.render()`), the update phase must keep that; static layers must stay idle (0 FPS); order of broadcasts during the update phase.
 - **Related**: not fixed by always save / restore (§19), which isolates canvas *state*, not *values*; the same render path, though. `design/2026-10-30_space_attribute_plan.md` §3.5, KILOPIXEL.md Coordinate Mapping, "Draw order (one-frame lag)".
+
+## 30. Framework Compatibility (DOM Contract)
+- **Status**: 🟡 **Proposed** (2026-10-30)
+- **Reference**: `design/2026-10-30_framework_compatibility_plan.md`; prototypes `scratch/frameworks/` (React 19, Vue 3.5; local only)
+- **Idea**: target the DOM contract frameworks use (attributes, properties, events, insert / move / remove, style, hydration), not the frameworks. Conformance test page `tests/frameworks.html` without any framework.
+- **Phase 1**: observe `id`; DOM events on shapes (`click`, `pointer*`) + `interactive` for delegating frameworks; rename the `on*` handlers (collide with native `onclick` and framework `on*` rules; proposed `pxl-click` …); layer canvas in a shadow root and default styles in a stylesheet; bounded expression caches.
+- **Phase 2**: attribute properties (numbers without compiling, values set before upgrade). **Phase 3**: `docs/frameworks.html`, optional TypeScript typings.
+- **Open**: handler names, scoped names instead of global ids, native vs. synthetic `click` on the stage, cursor for delegated listeners.
