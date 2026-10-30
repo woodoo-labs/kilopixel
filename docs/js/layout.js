@@ -67,7 +67,8 @@ class DocsSidebar extends HTMLElement {
           <div class="sidebar-title">Transformations</div>
           <ul>
             <li><a href="position.html" class="${currentPath === 'position.html' ? 'active' : ''}">Center &amp; Offset</a></li>
-            <li><a href="transform.html" class="${currentPath === 'transform.html' ? 'active' : ''}">Rotate, Scale &amp; Skew</a></li>
+            <li><a href="scale.html" class="${currentPath === 'scale.html' ? 'active' : ''}">Zoom &amp; Scale</a></li>
+            <li><a href="transform.html" class="${currentPath === 'transform.html' ? 'active' : ''}">Rotate &amp; Skew</a></li>
             <li><a href="mapping.html" class="${currentPath === 'mapping.html' ? 'active' : ''}">Coordinate Mapping</a></li>
           </ul>
         </div>

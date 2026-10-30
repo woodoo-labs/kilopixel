@@ -17,7 +17,7 @@
       <pxl-text x="500" y="50" text="'GLOBAL MATRIX TRACKING'" size="30" fill="white" align="center"></pxl-text>
       
       <!-- Source world (Scaled to 0.5, shifted, and rotated) -->
-      <pxl-group scale="0.5" rotate="t*10" x="500" y="500">
+      <pxl-group zoom="0.5" rotate="t*10" x="500" y="500">
         <pxl-group rotate="-t*20" x="200" y="200">
           <!-- The Target Shape moving in its deeply nested world -->
           <pxl-circle id="target" x="sin(t*2)*300" y="cos(t*2)*300" r="60" fill="#f00"></pxl-circle>
@@ -26,7 +26,7 @@
     </pxl-layer>
 
     <!-- NEW LAYER: Entirely detached canvas context with an arbitrary coordinate space! -->
-    <pxl-layer x="-200" y="150" scale="1.2" rotate="15">
+    <pxl-layer x="-200" y="150" zoom="1.2" rotate="15">
       <pxl-group>
         <!-- Tracker mathematically translates local coordinates to global ones -->
         <pxl-rect id="tracker" 

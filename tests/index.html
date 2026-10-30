@@ -37,7 +37,7 @@
           <pxl-layer>
             <pxl-circle id="tlSun1" x="150" y="150" r="18" fill="#fb923c"></pxl-circle>
           </pxl-layer>
-          <pxl-layer x="600" y="350" rotate="t * 12" scale="1.5">
+          <pxl-layer x="600" y="350" rotate="t * 12" zoom="1.5">
             <pxl-circle id="tlReader1" x="toLocal(ref.tlSun1, 'x')" y="toLocal(ref.tlSun1, 'y')" r="16" stroke="#1d4ed8" strokewidth="3"></pxl-circle>
           </pxl-layer>
         </pxl-stage>
@@ -57,9 +57,9 @@
           <pxl-layer>
             <pxl-circle id="tlSun3" x="200" y="150" r="18" fill="#fb923c"></pxl-circle>
           </pxl-layer>
-          <pxl-layer x="600" y="350" rotate="t * 12" scale="1.2">
+          <pxl-layer x="600" y="350" rotate="t * 12" zoom="1.2">
             <pxl-var id="tlVar3" value="toLocal(ref.tlSun3, 'x')"></pxl-var>
-            <pxl-group x="50" y="20" rotate="-t * 30" scale="0.8">
+            <pxl-group x="50" y="20" rotate="-t * 30" zoom="0.8">
               <pxl-circle id="tlReader3" x="toLocal(ref.tlSun3, 'x')" y="toLocal(ref.tlSun3, 'y')" r="16" stroke="#1d4ed8" strokewidth="3"></pxl-circle>
               <pxl-polyline id="tlPoly3" points="0,0; toLocal(ref.tlSun3, 'x'), toLocal(ref.tlSun3, 'y')" stroke="#22c55e" strokewidth="3"></pxl-polyline>
             </pxl-group>
@@ -162,7 +162,7 @@
       const layer = el('tlLayer2');
       layer.setAttribute('x', '450');
       layer.setAttribute('rotate', '35');
-      layer.setAttribute('scale', '1.4');
+      layer.setAttribute('zoom', '1.4');
       await wait(100);
       expectMapped('tlReader2', 'tlSun2', XY);
     });
@@ -198,7 +198,7 @@
 
     test('toLocal: line follows when a target\'s layer moves (target side)', async () => {
       el('tlLayer5b').setAttribute('rotate', '45');
-      el('tlLayer5a').setAttribute('scale', '0.7');
+      el('tlLayer5a').setAttribute('zoom', '0.7');
       await wait(100);
       expectMapped('tlLine5', 'tlCircle5a', [['x1', 'x'], ['y1', 'y']]);
       expectMapped('tlLine5', 'tlCircle5b', [['x2', 'x'], ['y2', 'y']]);

@@ -38,7 +38,7 @@
     <!-- [2] Subtle animated synthwave grid -->
     <pxl-grid x="500" y="281" step="40" major="5"
       stroke="hsla(240, 60, 20, 0.06)" strokewidth="0.3"
-      rotate="t * 0.3" scale="1 + wave(40) * 0.03"></pxl-grid>
+      rotate="t * 0.3" zoom="1 + wave(40) * 0.03"></pxl-grid>
 
     <!-- [3-18] Star field — 16 twinkling stars using pulse() driver -->
     <pxl-circle x="78"  y="42"  r="1.5 + pulse(2.8) * 2"   fill="white"   alpha="0.4 + pulse(2.8) * 0.6"></pxl-circle>
@@ -67,7 +67,7 @@
       dx="-15" rotate="t * -0.3"></pxl-circle>
     <pxl-circle x="500" y="281" r="260"
       fill="radial([0.85, 0.85], [hsla(320, 70, 25, 0.04), 'transparent'])"
-      scale="1 + wave(20) * 0.05"></pxl-circle>
+      zoom="1 + wave(20) * 0.05"></pxl-circle>
     <pxl-circle x="130" y="440" r="150"
       fill="radial([0.9, 0.9], [hsla(180, 80, 25, 0.05), 'transparent'])"
       dx="10" rotate="t * 0.2"></pxl-circle>
@@ -272,7 +272,7 @@
     <pxl-rect id="nodeA" x="80" y="60" w="40" h="40" r="8"
       fill="ref.nodeA.isPressed ? '#00ccdd' : (ref.nodeA.isHovered ? '#005566' : '#002233')"
       stroke="ref.nodeA.isHovered ? '#00e5ff' : '#004455'" strokewidth="1"
-      scale="ref.nodeA.isPressed ? 0.9 : (ref.nodeA.isHovered ? 1.15 : 1)"
+      zoom="ref.nodeA.isPressed ? 0.9 : (ref.nodeA.isHovered ? 1.15 : 1)"
       filter="ref.nodeA.isHovered ? dropShadow(0, 0, 8, '#00e5ff') : 'none'"
       onclick="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
     <pxl-text x="80" y="60" text="'⬡'" size="16" fill="#00e5ff" align="center" baseline="middle"
@@ -282,7 +282,7 @@
     <pxl-rect id="nodeB" x="920" y="60" w="40" h="40" r="8"
       fill="ref.nodeB.isPressed ? '#cc0088' : (ref.nodeB.isHovered ? '#550033' : '#220022')"
       stroke="ref.nodeB.isHovered ? '#ff00aa' : '#440044'" strokewidth="1"
-      scale="ref.nodeB.isPressed ? 0.9 : (ref.nodeB.isHovered ? 1.15 : 1)"
+      zoom="ref.nodeB.isPressed ? 0.9 : (ref.nodeB.isHovered ? 1.15 : 1)"
       filter="ref.nodeB.isHovered ? dropShadow(0, 0, 8, '#ff00aa') : 'none'"
       onclick="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
     <pxl-text x="920" y="60" text="'◈'" size="16" fill="#ff00aa" align="center" baseline="middle"
@@ -292,7 +292,7 @@
     <pxl-rect id="nodeC" x="80" y="502" w="40" h="40" r="8"
       fill="ref.nodeC.isPressed ? '#cc8800' : (ref.nodeC.isHovered ? '#553300' : '#221a00')"
       stroke="ref.nodeC.isHovered ? '#ffbb00' : '#443300'" strokewidth="1"
-      scale="ref.nodeC.isPressed ? 0.9 : (ref.nodeC.isHovered ? 1.15 : 1)"
+      zoom="ref.nodeC.isPressed ? 0.9 : (ref.nodeC.isHovered ? 1.15 : 1)"
       filter="ref.nodeC.isHovered ? dropShadow(0, 0, 8, '#ffbb00') : 'none'"
       onclick="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
     <pxl-text x="80" y="502" text="'◇'" size="16" fill="#ffbb00" align="center" baseline="middle"
@@ -302,7 +302,7 @@
     <pxl-rect id="nodeD" x="920" y="502" w="40" h="40" r="8"
       fill="ref.nodeD.isPressed ? '#7700cc' : (ref.nodeD.isHovered ? '#330055' : '#1a0033')"
       stroke="ref.nodeD.isHovered ? '#aa44ff' : '#330055'" strokewidth="1"
-      scale="ref.nodeD.isPressed ? 0.9 : (ref.nodeD.isHovered ? 1.15 : 1)"
+      zoom="ref.nodeD.isPressed ? 0.9 : (ref.nodeD.isHovered ? 1.15 : 1)"
       filter="ref.nodeD.isHovered ? dropShadow(0, 0, 8, '#aa44ff') : 'none'"
       onclick="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
     <pxl-text x="920" y="502" text="'✦'" size="16" fill="#aa44ff" align="center" baseline="middle"

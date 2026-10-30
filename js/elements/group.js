@@ -1,9 +1,9 @@
 pxl.Group = class Group extends pxl.PxlNode {
   static get observedAttributes() {
-    return ['x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden'];
+    return ['x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden'];
   }
 
-  static defaults = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false };
+  static defaults = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false };
 
   constructor() {
     super();
@@ -35,9 +35,9 @@ pxl.Group = class Group extends pxl.PxlNode {
 
     if (this.attributeValues.hidden) return;
 
-    const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy } = this.attributeValues;
+    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.attributeValues;
     const hasStateChanges = x || y || dx || dy || rotate ||
-                            scale !== 1 || scalex !== 1 || scaley !== 1 ||
+                            zoom !== 1 || scalex !== 1 || scaley !== 1 ||
                             skewx || skewy;
 
     if (hasStateChanges) {

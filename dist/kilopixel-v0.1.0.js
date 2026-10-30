@@ -21,7 +21,7 @@ pxl.sortByDOMPosition = function(a, b) {
 
 pxl.isSpatialKey = function(key) {
   return key === 'x' || key === 'y' || key === 'dx' || key === 'dy' ||
-         key === 'rotate' || key === 'scale' || key === 'scalex' ||
+         key === 'rotate' || key === 'zoom' || key === 'scalex' ||
          key === 'scaley' || key === 'skewx' || key === 'skewy';
 };
 
@@ -882,13 +882,13 @@ pxl.resolveRadius = function(r, x, y, w, h, u) {
 
 // Same order as pxl.Matrix.updateLocal: translate(x, y) → rotate → scale → skew → translate(dx, dy)
 pxl.applyTransformState = function(ctx, u, attributeValues) {
-  const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy } = attributeValues;
+  const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = attributeValues;
 
   if (x || y) ctx.translate(x * u, y * u);
   if (rotate) ctx.rotate(rotate * Math.PI / 180);
 
-  const finalScaleX = scale !== 1 ? scale : scalex;
-  const finalScaleY = scale !== 1 ? scale : scaley;
+  const finalScaleX = zoom * scalex;
+  const finalScaleY = zoom * scaley;
   if (finalScaleX !== 1 || finalScaleY !== 1) ctx.scale(finalScaleX, finalScaleY);
 
   if (skewx || skewy) {
@@ -1399,8 +1399,8 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   getLocalMatrix() {
     if (this._isLocalMatrixDirty) {
       const v = this.attributeValues;
-      const sX = v.scale !== 1 ? v.scale : v.scalex;
-      const sY = v.scale !== 1 ? v.scale : v.scaley;
+      const sX = v.zoom * v.scalex;
+      const sY = v.zoom * v.scaley;
       pxl.Matrix.updateLocal(this._localMatrix, v.x, v.y, v.dx, v.dy, v.rotate, sX, sY, v.skewx, v.skewy);
       this._isLocalMatrixDirty = false;
       this._localMatrixVersion++;
@@ -1434,13 +1434,13 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 pxl.Layer = class Layer extends pxl.PxlNode {
   static get observedAttributes() {
     return [
-      'x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy',
+      'x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy',
       'alpha', 'blend', 'filter', 'hidden'
     ];
   }
 
   static defaults = {
-    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0,
+    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0,
     alpha: 1, blend: 'source-over', filter: 'none', hidden: false
   };
 
@@ -1567,9 +1567,9 @@ pxl.Layer = class Layer extends pxl.PxlNode {
 
     this._isCanvasEmpty = false;
 
-    const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy } = this.attributeValues;
+    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.attributeValues;
     const hasTransformChanges = x || y || dx || dy || rotate ||
-                                scale !== 1 || scalex !== 1 || scaley !== 1 ||
+                                zoom !== 1 || scalex !== 1 || scaley !== 1 ||
                                 skewx || skewy;
 
     if (hasTransformChanges) {
@@ -1588,10 +1588,10 @@ pxl.Layer = class Layer extends pxl.PxlNode {
 customElements.define('pxl-layer', pxl.Layer);
 pxl.Group = class Group extends pxl.PxlNode {
   static get observedAttributes() {
-    return ['x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden'];
+    return ['x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden'];
   }
 
-  static defaults = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false };
+  static defaults = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false };
 
   constructor() {
     super();
@@ -1623,9 +1623,9 @@ pxl.Group = class Group extends pxl.PxlNode {
 
     if (this.attributeValues.hidden) return;
 
-    const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy } = this.attributeValues;
+    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.attributeValues;
     const hasStateChanges = x || y || dx || dy || rotate ||
-                            scale !== 1 || scalex !== 1 || scaley !== 1 ||
+                            zoom !== 1 || scalex !== 1 || scaley !== 1 ||
                             skewx || skewy;
 
     if (hasStateChanges) {
@@ -1643,7 +1643,7 @@ customElements.define('pxl-group', pxl.Group);
 pxl.Shape = class Shape extends pxl.PxlNode {
   static get observedAttributes() {
     return [
-      'x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy',
+      'x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy',
       'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset',
       'alpha', 'blend', 'mask', 'filter', 'shadowcolor', 'shadowblur', 'shadowx', 'shadowy', 'hidden',
       'onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove'
@@ -1651,7 +1651,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   static defaults = {
-    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0,
+    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0,
     fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0,
     alpha: 1, blend: 'source-over', mask: 'none', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false,
     isHovered: false, isPressed: false
@@ -1740,9 +1740,9 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
     if (this.attributeValues.hidden) return;
 
-    const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy, alpha, blend, mask, filter, shadowcolor } = this.attributeValues;
+    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy, alpha, blend, mask, filter, shadowcolor } = this.attributeValues;
     const hasStateChanges = x || y || dx || dy || rotate ||
-                            scale !== 1 || scalex !== 1 || scaley !== 1 ||
+                            zoom !== 1 || scalex !== 1 || scaley !== 1 ||
                             skewx || skewy ||
                             alpha !== 1 || blend !== 'source-over' || mask !== 'none' || filter !== 'none' ||
                             shadowcolor;

@@ -20,7 +20,7 @@ pxl.sortByDOMPosition = function(a, b) {
 
 pxl.isSpatialKey = function(key) {
   return key === 'x' || key === 'y' || key === 'dx' || key === 'dy' ||
-         key === 'rotate' || key === 'scale' || key === 'scalex' ||
+         key === 'rotate' || key === 'zoom' || key === 'scalex' ||
          key === 'scaley' || key === 'skewx' || key === 'skewy';
 };
 

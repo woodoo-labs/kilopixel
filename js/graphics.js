@@ -54,13 +54,13 @@ pxl.resolveRadius = function(r, x, y, w, h, u) {
 
 // Same order as pxl.Matrix.updateLocal: translate(x, y) → rotate → scale → skew → translate(dx, dy)
 pxl.applyTransformState = function(ctx, u, attributeValues) {
-  const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy } = attributeValues;
+  const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = attributeValues;
 
   if (x || y) ctx.translate(x * u, y * u);
   if (rotate) ctx.rotate(rotate * Math.PI / 180);
 
-  const finalScaleX = scale !== 1 ? scale : scalex;
-  const finalScaleY = scale !== 1 ? scale : scaley;
+  const finalScaleX = zoom * scalex;
+  const finalScaleY = zoom * scaley;
   if (finalScaleX !== 1 || finalScaleY !== 1) ctx.scale(finalScaleX, finalScaleY);
 
   if (skewx || skewy) {

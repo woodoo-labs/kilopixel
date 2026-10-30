@@ -1,13 +1,13 @@
 pxl.Layer = class Layer extends pxl.PxlNode {
   static get observedAttributes() {
     return [
-      'x', 'y', 'dx', 'dy', 'rotate', 'scale', 'scalex', 'scaley', 'skewx', 'skewy',
+      'x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy',
       'alpha', 'blend', 'filter', 'hidden'
     ];
   }
 
   static defaults = {
-    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0,
+    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0,
     alpha: 1, blend: 'source-over', filter: 'none', hidden: false
   };
 
@@ -134,9 +134,9 @@ pxl.Layer = class Layer extends pxl.PxlNode {
 
     this._isCanvasEmpty = false;
 
-    const { x, y, dx, dy, rotate, scale, scalex, scaley, skewx, skewy } = this.attributeValues;
+    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.attributeValues;
     const hasTransformChanges = x || y || dx || dy || rotate ||
-                                scale !== 1 || scalex !== 1 || scaley !== 1 ||
+                                zoom !== 1 || scalex !== 1 || scaley !== 1 ||
                                 skewx || skewy;
 
     if (hasTransformChanges) {

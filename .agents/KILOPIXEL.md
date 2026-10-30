@@ -190,7 +190,7 @@ Every PxlNode has:
 Has four hidden (non-enumerable) properties:
 - `set(key, value)` — calls `this.setAttribute(key, value)` on the element. Used by imperative event handlers: `ref.myVar.set('value', 100)`
 - `$node` — back-reference to the DOM element itself
-- `tx` / `ty` — getters for the element's **drawn origin** in its parent space (the space of its own `x` / `y`): the local matrix translation, i.e. `x` / `y` plus the `dx` / `dy` offset turned by the element's own `rotate`, `scale` and `skew`. Equal to `x + dx` / `y + dy` only without those. Same value as `toLocal(ref.el, 'tx' | 'ty')` for a reader in the same space
+- `tx` / `ty` — getters for the element's **drawn origin** in its parent space (the space of its own `x` / `y`): the local matrix translation, i.e. `x` / `y` plus the `dx` / `dy` offset turned by the element's own `rotate`, `zoom` / `scalex` / `scaley` and skew. Equal to `x + dx` / `y + dy` only without those. Same value as `toLocal(ref.el, 'tx' | 'ty')` for a reader in the same space
 
 ---
 
@@ -349,7 +349,7 @@ Applied by `pxl.applyContextState()` in this exact order:
 ```
 1. ctx.translate(x * u, y * u)      ← Move to center (transform origin)
 2. ctx.rotate(rotate * π/180)        ← Rotate around pivot
-3. ctx.scale(scalex, scaley)         ← Scale around center
+3. ctx.scale(zoom * scalex, zoom * scaley) ← Zoom and scale around center
 4. ctx.transform(1, skewy, skewx, 1) ← Skew
 5. ctx.translate(dx * u, dy * u)     ← Offset AFTER rotation/scale
 6. ctx.globalAlpha *= alpha           ← Compound opacity
@@ -357,7 +357,7 @@ Applied by `pxl.applyContextState()` in this exact order:
 8. ctx.filter                         ← CSS filter
 ```
 
-**Scale Resolution & Symmetry Guarantee**: Uniform scaling uses `scale="..."` (applying identically to both axes), while non-uniform scaling uses `scalex="..."` and/or `scaley="..."`. **Do not combine both on the same element.** If this rule is broken and `scale` is applied alongside `scalex` or `scaley`, `scale` strictly overrides the individual axis multipliers (`scale !== 1 ? scale : scalex`). This guarantees that whenever a uniform `scale` attribute is set, the element transforms with 100% geometric symmetry and safe aspect-ratio preservation.
+**Zoom and Scale**: `scalex` / `scaley` are the two arguments of the canvas `ctx.scale(x, y)` (two attributes, because splitting one `scale="x, y"` expression at commas isn't safe). `zoom` is a uniform factor on top: it **multiplies** both axes (`zoom * scalex`, `zoom * scaley`), so `zoom="2" scalex="1.5"` draws at 3 / 2, and an animated `zoom` (a pulse, hover feedback) can be combined with a stretched shape. `zoom="-1"` turns the element by 180° (both axes negative). Design: `design/2026-10-29_tolocal_decomposition_plan.md` §5.
 
 ### Why This Matters
 
@@ -650,7 +650,7 @@ Automatically updated boolean properties on shape elements:
 ```html
 <pxl-rect id="btn" w="100" h="40"
   fill="ref.btn.isPressed ? '#333' : (ref.btn.isHovered ? '#666' : '#999')"
-  scale="ref.btn.isPressed ? 0.95 : (ref.btn.isHovered ? 1.05 : 1)"></pxl-rect>
+  zoom="ref.btn.isPressed ? 0.95 : (ref.btn.isHovered ? 1.05 : 1)"></pxl-rect>
 ```
 
 #### 2. Imperative Events (for logic/scripting)
@@ -823,12 +823,12 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 
 ### Observed Attributes (14)
 
-`x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`, `alpha`, `blend`, `filter`, `hidden`
+`x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `scalex`, `scaley`, `skewx`, `skewy`, `alpha`, `blend`, `filter`, `hidden`
 
 ### Default Values
 
 ```javascript
-{ x: 0, y: 0, dx: 0, dy: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1,
+{ x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1,
   skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', filter: 'none',
   hidden: false }
 ```
@@ -861,7 +861,7 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 
 ### Observed Attributes (11)
 
-Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`, `hidden`
+Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `scalex`, `scaley`, `skewx`, `skewy`, `hidden`
 
 ### Key Behavior
 
@@ -880,7 +880,7 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `sc
 
 ### Observed Attributes (33)
 
-**Transform**: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`  
+**Transform**: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `scalex`, `scaley`, `skewx`, `skewy`  
 **Style**: `fill`, `stroke`, `strokewidth`, `linecap`, `linejoin`, `miterlimit`, `linedash`, `dashoffset`  
 **Render**: `alpha`, `blend`, `mask`, `filter`, `shadowcolor`, `shadowblur`, `shadowx`, `shadowy`, `hidden`  
 **Events**: `onclick`, `onenter`, `onleave`, `ondown`, `onup`, `onmove`
@@ -909,7 +909,7 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `sc
 ```javascript
 { x: 0, y: 0, dx: 0, dy: 0, fill: null, stroke: null, strokewidth: 1,
   linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null,
-  dashoffset: 0, rotate: 0, scale: 1, scalex: 1, scaley: 1,
+  dashoffset: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1,
   skewx: 0, skewy: 0, alpha: 1, blend: 'source-over', mask: 'none', filter: 'none',
   shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0,
   hidden: false, isHovered: false, isPressed: false }
@@ -1150,7 +1150,7 @@ This means each X and Y coordinate can have its own independent animation expres
 
 Coordinates are readable like attributes: `<pxl-circle x="ref.poly.p2" y="ref.poly.p3">` sits on point 1 and follows it when the points are fixed, animated, reactive or replaced with `setAttribute('points', …)`. The public docs don't show this; they recommend a `<pxl-var>` that both shapes read (`points="150,450; 300, ref.peak.value; 450,450"` + `y="ref.peak.value"`). Limitations:
 - **Flat index**: point *k* is `p(2k)` (x) and `p(2k+1)` (y).
-- **Values as written**: before the polyline's `x`, `y`, `rotate`, `scale`; only correct for readers in the same space. `toLocal()` can't map a single point.
+- **Values as written**: before the polyline's `x`, `y`, `rotate`, `zoom`; only correct for readers in the same space. `toLocal()` can't map a single point.
 - **Relative mode**: `pN` is the offset to the previous point, not the position.
 - **Fewer points**: a removed coordinate reads as `undefined` (the reader's shape isn't drawn).
 
@@ -1567,7 +1567,7 @@ Kilopixel provides a unified API for CSS and Canvas filters using `pxl.scope` he
 <!-- Declarative hover/press styling -->
 <pxl-rect id="btn" x="500" y="300" w="120" h="50" r="10"
   fill="ref.btn.isPressed ? '#222' : (ref.btn.isHovered ? '#555' : '#888')"
-  scale="ref.btn.isPressed ? 0.95 : (ref.btn.isHovered ? 1.05 : 1)"
+  zoom="ref.btn.isPressed ? 0.95 : (ref.btn.isHovered ? 1.05 : 1)"
   onclick="ref.counter.set('value', ref.counter.value + 1)"></pxl-rect>
 ```
 
@@ -1608,7 +1608,7 @@ Kilopixel provides a unified API for CSS and Canvas filters using `pxl.scope` he
 
 `'tx'`/`'ty'` = total drawn position (center + offset). `'x'`/`'y'` = pivot center only. `'tx' = 'x' + 'dx'` algebraically.
 
-Note: `ref.myShape.tx` gives the shape's drawn origin in its own parent space (`x` plus the offset `dx` turned by the shape's own `rotate` / `scale` / `skew`), correct for readers in the same space. `toLocal(ref.myShape, 'tx')` projects that into the CALLER's parent coordinate space. Use `toLocal` when shapes are in different layers or groups.
+Note: `ref.myShape.tx` gives the shape's drawn origin in its own parent space (`x` plus the offset `dx` turned by the shape's own `rotate` / `zoom` / `scalex` / `scaley` / skew), correct for readers in the same space. `toLocal(ref.myShape, 'tx')` projects that into the CALLER's parent coordinate space. Use `toLocal` when shapes are in different layers or groups.
 
 #### 11. Common Pitfalls
 

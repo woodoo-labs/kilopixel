@@ -173,8 +173,8 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   getLocalMatrix() {
     if (this._isLocalMatrixDirty) {
       const v = this.attributeValues;
-      const sX = v.scale !== 1 ? v.scale : v.scalex;
-      const sY = v.scale !== 1 ? v.scale : v.scaley;
+      const sX = v.zoom * v.scalex;
+      const sY = v.zoom * v.scaley;
       pxl.Matrix.updateLocal(this._localMatrix, v.x, v.y, v.dx, v.dy, v.rotate, sX, sY, v.skewx, v.skewy);
       this._isLocalMatrixDirty = false;
       this._localMatrixVersion++;
