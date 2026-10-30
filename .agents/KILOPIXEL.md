@@ -787,6 +787,10 @@ The reader doesn't set `skewy` and keeps `zoom` at `1` (or uses it on purpose: `
 - Nothing is evaluated while nothing moves. Time-dependent `toLocal` expressions are evaluated every frame anyway and are not listed.
 - Design: `design/2026-10-26_tolocal_fix_plan.md`.
 
+**Targets**: shapes, groups and layers (anything with a frame). `ref.<stage>` returns `0` (the stage has no frame), a not yet connected `ref.<id>` returns `0`, and a `pxl-var` returns `NaN` (it observes only `value`, so its matrix is built from `undefined`).
+
+**Draw order (one-frame lag)**: an element evaluates its animated values while it is drawn (`evaluateAnimations()` in `render()`); layers draw in DOM order, children in DOM order. A reader drawn **before** an animated target therefore reads the target's values from the previous frame; the target's broadcast then re-evaluates the reader and redraws its layer in the next frame. Rule: put readers after their targets (a later layer, or later in the same layer), like the connecting line in the walkthrough's §8 and the connector layer in `examples/test53.html`, which are the last layers. The reader-side walk above has no lag. The same applies to plain `ref.*` readers. A general fix (evaluate everything, then draw) is an idea in `.agents/TODO.md` §29.
+
 Note: The compiler rewrites `toLocal(` to `pxl.toLocal(this, ` at compile time.
 
 ---
@@ -1625,9 +1629,15 @@ Kilopixel provides a unified API for CSS and Canvas filters using `pxl.scope` he
 <pxl-circle 
   x="toLocal(ref.planet, 'x')" y="toLocal(ref.planet, 'y')" 
   r="150" stroke="gray" fill="none"></pxl-circle>
+
+<!-- Point in the planet's direction, and grow with its total zoom -->
+<pxl-polyline x="toLocal(ref.planet, 'tx')" y="toLocal(ref.planet, 'ty')"
+  rotate="toLocal(ref.planet, 'rotate')" points="0, 0; 60, 0" arrowend="auto" stroke="white"></pxl-polyline>
+<pxl-circle x="toLocal(ref.planet, 'tx')" y="toLocal(ref.planet, 'ty')"
+  r="ref.planet.r * toLocal(ref.planet, 'zoom') + 10" stroke="white" fill="none"></pxl-circle>
 ```
 
-`'tx'`/`'ty'` = total drawn position (center + offset). `'x'`/`'y'` = pivot center only. `'tx' = 'x' + 'dx'` algebraically.
+`'tx'`/`'ty'` = total drawn position (center + offset). `'x'`/`'y'` = pivot center only. `'tx' = 'x' + 'dx'` algebraically. `'rotate'` = direction of the target's x axis; `'zoom'` = total uniform zoom (exact while nothing in between is stretched, otherwise use `'scalex'` / `'scaley'`). To copy a whole frame (skew and mirror included), use the clone rule in [Coordinate Mapping](#coordinate-mapping-tolocal). Put readers in a layer after their target (one-frame lag otherwise).
 
 Note: `ref.myShape.tx` gives the shape's drawn origin in its own parent space (`x` plus the offset `dx` turned by the shape's own `rotate` / `zoom` / `scalex` / `scaley` / skew), correct for readers in the same space. `toLocal(ref.myShape, 'tx')` projects that into the CALLER's parent coordinate space. Use `toLocal` when shapes are in different layers or groups.
 
