@@ -6,9 +6,21 @@ This guide establishes the visual and architectural standards for creating inter
 We use a strict color-coding system to separate context (the stage/layer) from content (the shapes).
 
 * **Sky Blue (`#0284c7`, `#0ea5e9`, `#7dd3fc`)**: Used for the **Stage Environment** (Stage space). This includes solid `#0284c7` (`sky-600`) for the Stage origin dot (`Stage (0, 0)`), `#0ea5e9` (`sky-500`) for Stage dimension arrows (`width = 1000 (fixed)`) and helper lines, and `#7dd3fc` (`sky-300`) for other Stage corners and their labels (`(1000, 0)`).
-* **Violet / Purple (`#6d28d9`, `#a78bfa`)**: Used for the **Layer Environment** (Layer space). This includes solid `#6d28d9` (`violet-700`) for Layer Center coordinates/dots and `#a78bfa` (`violet-400`) for subtle Layer coordinate helper lines and labels (`x =`, `y =`).
+* **Color Steps (every layer, group and shape):** Each layer, group and shape uses the same palette steps in its own hue, so center and offset markers build up the same way everywhere:
+
+  | Role | Step |
+  |---|---|
+  | Center helper lines and labels (`x =`, `y =`), orbit guides | `300` |
+  | Center dot and label (`'Layer Center'`, `'Circle Center'`) | `400` |
+  | Shape border (`stroke`) | `500` |
+  | Offset helper lines and labels (`dx =`, `dy =`), offset vectors | `600` |
+  | Offset dot, active point and label | `700` |
+
+  Points that a shape is defined by, such as the start point of a line, are centers (`400`), not offsets.
+* **Violet / Purple (`#c4b5fd`, `#a78bfa`, `#7c3aed`, `#6d28d9`)**: Used for the **Layer Environment** (Layer space) when a demo shows one layer: `#c4b5fd` (`violet-300`) for Layer coordinate helper lines and labels (`x =`, `y =`), `#a78bfa` (`violet-400`) for the Layer Center dot and label, `#7c3aed` (`violet-600`) and `#6d28d9` (`violet-700`) for layer offset helpers and the layer offset point.
+* **Two or More Layers:** As soon as a demo shows the centers of two or more layers, each layer takes the hue of the shapes inside it instead of violet (e.g. layer 1 and its circle orange, layer 2 and its circle blue). The layer then sits one step below its shapes so the hue still builds up from layer to shape: layer crosshairs and helpers `200` (`#fed7aa`, `#bfdbfe`, `#bbf7d0`), Layer Center dot and label `300` (`#fdba74`, `#93c5fd`, `#86efac`), then the shape steps above. A layer that shows no center or crosshairs (e.g. an untransformed layer that only holds a reader) does not count.
 * **Neutral Slate (`#f1f5f9`, `#cbd5e1`)**: Used for **Background Grids** (`#f1f5f9`) and internal coordinate crosshair lines (`#cbd5e1`) to ensure they remain subtle and do not visually compete with the environment or shape coordinates.
-* **Shape Palettes (Orange, Blue, Green)**: When demonstrating single or multiple independent interacting shapes, use these standardized single-palette lighter/darker color schemes (`400` Center, `600` Offset Vectors, `700` Offsets, `300` Background Guides):
+* **Shape Palettes (Orange, Blue, Green)**: When demonstrating single or multiple independent interacting shapes, use these standardized single-palette color schemes. Several shapes in the same layer each keep their own scheme:
   * **1. Orange Shape Scheme (Primary / Default):**
     * **Center Dot & Title Label:** `#fb923c` (`orange-400`, Lighter anchor tone)
     * **Offset Dot, Active Point & Offset Label:** `#c2410c` (`orange-700`, Deeper accent tone)
