@@ -69,7 +69,6 @@ class DocsSidebar extends HTMLElement {
             <li><a href="position.html" class="${currentPath === 'position.html' ? 'active' : ''}">Center &amp; Offset</a></li>
             <li><a href="scale.html" class="${currentPath === 'scale.html' ? 'active' : ''}">Zoom &amp; Scale</a></li>
             <li><a href="transform.html" class="${currentPath === 'transform.html' ? 'active' : ''}">Rotate &amp; Skew</a></li>
-            <li><a href="mapping.html" class="${currentPath === 'mapping.html' ? 'active' : ''}">Coordinate Mapping</a></li>
           </ul>
         </div>
         <div class="sidebar-section">
@@ -126,6 +125,7 @@ class DocsSidebar extends HTMLElement {
           <ul>
             <li><a href="expressions.html" class="${currentPath === 'expressions.html' ? 'active' : ''}">Expressions</a></li>
             <li><a href="referencing.html" class="${currentPath === 'referencing.html' ? 'active' : ''}">Referencing</a></li>
+            <li><a href="mapping.html" class="${currentPath === 'mapping.html' ? 'active' : ''}">Coordinate Mapping</a></li>
             <li><a href="events.html" class="${currentPath === 'events.html' ? 'active' : ''}">Events</a></li>
             <li><a href="animation.html" class="${currentPath === 'animation.html' ? 'active' : ''}">Animation</a></li>
           </ul>
