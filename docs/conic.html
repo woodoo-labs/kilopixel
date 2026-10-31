@@ -51,7 +51,7 @@
 
         <p>The parameter <code>startAngle</code> defines the starting angle in degrees (0°–360°). The gradient sweeps clockwise around the center, where <strong>0°</strong> points directly right along the +X axis (3 o'clock).</p>
 
-        <p>In this example, drag the Start Angle slider to rotate the gradient sweep around the center <code>(0.5, 0.5)</code>. The purple arrow indicates the exact angle where the gradient begins (offset 0) and completes its 360° revolution.</p>
+        <p>In this example, drag the Start Angle slider to rotate the gradient sweep around the center <code>(0.5, 0.5)</code>. The pink arrow indicates the exact angle where the gradient begins (offset 0) and completes its 360° revolution.</p>
 
         <div>
           <div>
@@ -61,7 +61,7 @@
       x="500" y="300"
       w="<mark id="sec1ex1RectWCode">400</mark>" h="<mark id="sec1ex1RectHCode">250</mark>" 
       rotate="<mark id="sec1ex1RectRotCode">0</mark>"
-      fill="conic(<mark id="sec1ex1GradAngleCode">0</mark>, ['#e2e8f0', '#475569'])"&gt;
+      fill="conic(<mark id="sec1ex1GradAngleCode">0</mark>, ['#f8fafc', '#475569'])"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -119,10 +119,10 @@
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
                 <!-- Top-Left HUD Info -->
-                <pxl-text x="30" y="30" text="'Center = (0.5, 0.5)'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
-                <pxl-text x="30" y="65" text="'startAngle = ' + ref.sec1ex1Var1.value + '°'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="30" text="'Center = (0.5, 0.5)'" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="65" text="'startAngle = ' + ref.sec1ex1Var1.value + '°'" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 
-                <pxl-rect id="sec1ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="conic(ref.sec1ex1Var1.value, ['#e2e8f0', '#475569'])"></pxl-rect>
+                <pxl-rect id="sec1ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="conic(ref.sec1ex1Var1.value, ['#f8fafc', '#475569'])"></pxl-rect>
 
                 <!-- Overlay Group locked to Rect -->
                 <pxl-group x="ref.sec1ex1Rect.x" y="ref.sec1ex1Rect.y" rotate="ref.sec1ex1Rect.rotate">
@@ -131,18 +131,18 @@
                   <pxl-rect x="0" y="0" w="ref.sec1ex1Rect.w" h="ref.sec1ex1Rect.h" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
                   
                   <!-- Blue corner coordinates (0,0) and (1,1) -->
-                  <pxl-circle x="-ref.sec1ex1Rect.w/2" y="-ref.sec1ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
-                  <pxl-text x="-ref.sec1ex1Rect.w/2" y="-ref.sec1ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+                  <pxl-circle x="-ref.sec1ex1Rect.w/2" y="-ref.sec1ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
+                  <pxl-text x="-ref.sec1ex1Rect.w/2" y="-ref.sec1ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
                   
-                  <pxl-circle x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
-                  <pxl-text x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <pxl-circle x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
+                  <pxl-text x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="top"></pxl-text>
 
                   <!-- 0° Baseline Reference Line -->
-                  <pxl-line x1="0" y1="0" x2="160" y2="0" stroke="#a78bfa" strokewidth="2" linedash="[4, 4]"></pxl-line>
-                  <pxl-text x="175" y="0" text="'0°'" fill="#a78bfa" size="22" font="monospace" align="left" baseline="middle"></pxl-text>
+                  <pxl-line x1="0" y1="0" x2="160" y2="0" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]"></pxl-line>
+                  <pxl-text x="175" y="0" text="'0°'" fill="#f9a8d4" size="22" font="monospace" align="left" baseline="middle"></pxl-text>
 
                   <!-- Sweep Angle Arc -->
-                  <pxl-circle x="0" y="0" r="50" start="0" sweep="ref.sec1ex1Var1.value" fill="none" stroke="#8b5cf6" strokewidth="2" linedash="[4, 4]" alpha="ref.sec1ex1Var1.value > 0 ? 1 : 0"></pxl-circle>
+                  <pxl-circle x="0" y="0" r="50" start="0" sweep="ref.sec1ex1Var1.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec1ex1Var1.value > 0 ? 1 : 0"></pxl-circle>
 
                   <!-- Start Angle Ray with Arrow -->
                   <pxl-line 
@@ -150,11 +150,11 @@
                     y1="0" 
                     x2="cos(ref.sec1ex1Var1.value * PI / 180) * 140" 
                     y2="sin(ref.sec1ex1Var1.value * PI / 180) * 140" 
-                    stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
+                    stroke="#ec4899" strokewidth="4" arrowend="25"></pxl-line>
 
-                  <!-- Purple Center Dot & Label -->
-                  <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
-                  <pxl-text x="0" y="20" text="'Center'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <!-- Pink Center Dot & Label -->
+                  <pxl-circle x="0" y="0" r="8" fill="#f472b6"></pxl-circle>
+                  <pxl-text x="0" y="20" text="'Center'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
 
                 </pxl-group>
               </pxl-layer>
@@ -175,7 +175,7 @@
 
         <p>The parameters <code>cx</code> and <code>cy</code> define the origin using normalized bounding box coordinates (from <code>0</code> to <code>1</code>). A center of <code>[0.5, 0.5]</code> is the geometric center of the shape, while <code>[0, 0]</code> is the top-left corner and <code>[1, 1]</code> is the bottom-right corner.</p>
 
-        <p>In this example, adjust the Center X0 and Center Y0 sliders to shift the center of rotation, and drag the Start Angle slider to orient the sweep. The purple dot marks the center of rotation, and the purple arrow indicates the starting ray.</p>
+        <p>In this example, adjust the Center X0 and Center Y0 sliders to shift the center of rotation, and drag the Start Angle slider to orient the sweep. The pink dot marks the center of rotation, and the pink arrow indicates the starting ray.</p>
 
         <div>
           <div>
@@ -185,7 +185,7 @@
       x="500" y="300" 
       w="<mark id="sec2ex1RectWCode">400</mark>" h="<mark id="sec2ex1RectHCode">250</mark>" 
       rotate="<mark id="sec2ex1RectRotCode">0</mark>"
-      fill="conic([<mark id="sec2ex1GradAngleCode">45</mark>, <mark id="sec2ex1GradCxCode">0.3</mark>, <mark id="sec2ex1GradCyCode">0.3</mark>], ['#e2e8f0', '#475569'])"&gt;
+      fill="conic([<mark id="sec2ex1GradAngleCode">45</mark>, <mark id="sec2ex1GradCxCode">0.3</mark>, <mark id="sec2ex1GradCyCode">0.3</mark>], ['#f8fafc', '#475569'])"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -259,10 +259,10 @@
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
                 <!-- Top-Left HUD Info -->
-                <pxl-text x="30" y="30" text="'Center = (' + ref.sec2ex1Var2.value + ', ' + ref.sec2ex1Var3.value + ')'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
-                <pxl-text x="30" y="65" text="'startAngle = ' + ref.sec2ex1Var1.value + '°'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="30" text="'Center = (' + ref.sec2ex1Var2.value + ', ' + ref.sec2ex1Var3.value + ')'" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="65" text="'startAngle = ' + ref.sec2ex1Var1.value + '°'" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 
-                <pxl-rect id="sec2ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="conic([ref.sec2ex1Var1.value, ref.sec2ex1Var2.value, ref.sec2ex1Var3.value], ['#e2e8f0', '#475569'])"></pxl-rect>
+                <pxl-rect id="sec2ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="conic([ref.sec2ex1Var1.value, ref.sec2ex1Var2.value, ref.sec2ex1Var3.value], ['#f8fafc', '#475569'])"></pxl-rect>
 
                 <!-- Overlay Group locked to Rect -->
                 <pxl-group x="ref.sec2ex1Rect.x" y="ref.sec2ex1Rect.y" rotate="ref.sec2ex1Rect.rotate">
@@ -271,11 +271,11 @@
                   <pxl-rect x="0" y="0" w="ref.sec2ex1Rect.w" h="ref.sec2ex1Rect.h" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
                   
                   <!-- Blue corner coordinates (0,0) and (1,1) -->
-                  <pxl-circle x="-ref.sec2ex1Rect.w/2" y="-ref.sec2ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
-                  <pxl-text x="-ref.sec2ex1Rect.w/2" y="-ref.sec2ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+                  <pxl-circle x="-ref.sec2ex1Rect.w/2" y="-ref.sec2ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
+                  <pxl-text x="-ref.sec2ex1Rect.w/2" y="-ref.sec2ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
                   
-                  <pxl-circle x="ref.sec2ex1Rect.w/2" y="ref.sec2ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
-                  <pxl-text x="ref.sec2ex1Rect.w/2" y="ref.sec2ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <pxl-circle x="ref.sec2ex1Rect.w/2" y="ref.sec2ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
+                  <pxl-text x="ref.sec2ex1Rect.w/2" y="ref.sec2ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="top"></pxl-text>
 
                   <!-- 0° Baseline Reference Line from Center -->
                   <pxl-line 
@@ -283,18 +283,18 @@
                     y1="ref.sec2ex1VarLocalY.value" 
                     x2="ref.sec2ex1VarLocalX.value + 160" 
                     y2="ref.sec2ex1VarLocalY.value" 
-                    stroke="#a78bfa" strokewidth="2" linedash="[4, 4]"></pxl-line>
+                    stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]"></pxl-line>
                   <pxl-text 
                     x="ref.sec2ex1VarLocalX.value + 175" 
                     y="ref.sec2ex1VarLocalY.value" 
-                    text="'0°'" fill="#a78bfa" size="22" font="monospace" align="left" baseline="middle"></pxl-text>
+                    text="'0°'" fill="#f9a8d4" size="22" font="monospace" align="left" baseline="middle"></pxl-text>
 
                   <!-- Sweep Angle Arc -->
                   <pxl-circle 
                     x="ref.sec2ex1VarLocalX.value" 
                     y="ref.sec2ex1VarLocalY.value" 
                     r="50" start="0" sweep="ref.sec2ex1Var1.value" 
-                    fill="none" stroke="#8b5cf6" strokewidth="2" linedash="[4, 4]" 
+                    fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" 
                     alpha="ref.sec2ex1Var1.value > 0 ? 1 : 0"></pxl-circle>
 
                   <!-- Start Angle Ray with Arrow -->
@@ -303,11 +303,11 @@
                     y1="ref.sec2ex1VarLocalY.value" 
                     x2="ref.sec2ex1VarLocalX.value + cos(ref.sec2ex1Var1.value * PI / 180) * 140" 
                     y2="ref.sec2ex1VarLocalY.value + sin(ref.sec2ex1Var1.value * PI / 180) * 140" 
-                    stroke="#8b5cf6" strokewidth="3" arrowend="25"></pxl-line>
+                    stroke="#ec4899" strokewidth="4" arrowend="25"></pxl-line>
 
-                  <!-- Purple Center Dot & Label -->
-                  <pxl-circle x="ref.sec2ex1VarLocalX.value" y="ref.sec2ex1VarLocalY.value" r="8" fill="#8b5cf6"></pxl-circle>
-                  <pxl-text x="ref.sec2ex1VarLocalX.value" y="ref.sec2ex1VarLocalY.value + 20" text="'Center'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <!-- Pink Center Dot & Label -->
+                  <pxl-circle x="ref.sec2ex1VarLocalX.value" y="ref.sec2ex1VarLocalY.value" r="8" fill="#f472b6"></pxl-circle>
+                  <pxl-text x="ref.sec2ex1VarLocalX.value" y="ref.sec2ex1VarLocalY.value + 20" text="'Center'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
 
                 </pxl-group>
               </pxl-layer>

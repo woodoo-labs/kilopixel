@@ -55,7 +55,7 @@
           <li><strong>Keyword Radius:</strong> A responsive boundary that dynamically calculates distance and snaps to the shape's edges or corners (e.g., <code>r1 = 'top-right'</code>).</li>
         </ul>
 
-        <p>In this example, select a keyword anchor or switch to numeric mode to see how the gradient expands outward from the center <code>(0.5, 0.5)</code>. The dashed purple circle represents the calculated radius boundary.</p>
+        <p>In this example, select a keyword anchor or switch to numeric mode to see how the gradient expands outward from the center <code>(0.5, 0.5)</code>. The dashed pink circle represents the calculated radius boundary.</p>
 
         <div>
           <div>
@@ -65,7 +65,7 @@
       x="500" y="300"
       w="<mark id="sec1ex1RectWCode">400</mark>" h="<mark id="sec1ex1RectHCode">250</mark>" 
       rotate="<mark id="sec1ex1RectRotCode">0</mark>"
-      fill="radial([<mark id="sec1ex1GradR1Code">'top-right'</mark>], ['#e2e8f0', '#475569'])"&gt;
+      fill="radial([<mark id="sec1ex1GradR1Code">'top-right'</mark>], ['#f8fafc', '#475569'])"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -162,45 +162,45 @@
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
                 <!-- Top-Left HUD Info -->
-                <pxl-text x="30" y="30" text="'Center = (0.5, 0.5)'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
-                <pxl-text x="30" y="65" text="'r1 = ' + (typeof ref.sec1ex1R1.value === 'string' ? '\'' + ref.sec1ex1R1.value + '\'' : ref.sec1ex1R1.value)" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="30" text="'Center = (0.5, 0.5)'" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="65" text="'r1 = ' + (typeof ref.sec1ex1R1.value === 'string' ? '\'' + ref.sec1ex1R1.value + '\'' : ref.sec1ex1R1.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 
-                <pxl-rect id="sec1ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="radial([ref.sec1ex1R1.value], ['#e2e8f0', '#475569'])"></pxl-rect>
+                <pxl-rect id="sec1ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="radial([ref.sec1ex1R1.value], ['#f8fafc', '#475569'])"></pxl-rect>
                 
                 <pxl-group x="ref.sec1ex1Rect.x" y="ref.sec1ex1Rect.y" rotate="ref.sec1ex1Rect.rotate">
                   <!-- Solid blue bounding box -->
                   <pxl-rect x="0" y="0" w="ref.sec1ex1Rect.w" h="ref.sec1ex1Rect.h" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
                   
                   <!-- Blue corner coordinates (0,0) and (1,1) -->
-                  <pxl-circle x="-ref.sec1ex1Rect.w/2" y="-ref.sec1ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
-                  <pxl-text x="-ref.sec1ex1Rect.w/2" y="-ref.sec1ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+                  <pxl-circle x="-ref.sec1ex1Rect.w/2" y="-ref.sec1ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
+                  <pxl-text x="-ref.sec1ex1Rect.w/2" y="-ref.sec1ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
                   
-                  <pxl-circle x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
-                  <pxl-text x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <pxl-circle x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
+                  <pxl-text x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="top"></pxl-text>
 
-                  <!-- Purple center coordinate -->
-                  <pxl-circle x="0" y="0" r="8" fill="#8b5cf6"></pxl-circle>
-                  <pxl-text x="0" y="20" text="'Center'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <!-- Pink center coordinate -->
+                  <pxl-circle x="0" y="0" r="8" fill="#f472b6"></pxl-circle>
+                  <pxl-text x="0" y="20" text="'Center'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
                   
-                  <!-- Purple Radius Circle -->
-                  <pxl-circle x="0" y="0" r="ref.sec1ex1Radius.value" fill="none" stroke="#a78bfa" strokewidth="2" linedash="[4, 4]" alpha="ref.sec1ex1Radius.value > 0 ? 1 : 0"></pxl-circle>
+                  <!-- Pink Radius Circle -->
+                  <pxl-circle x="0" y="0" r="ref.sec1ex1Radius.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec1ex1Radius.value > 0 ? 1 : 0"></pxl-circle>
                   
-                  <!-- Purple Gradient Radius Arrow -->
+                  <!-- Pink Gradient Radius Arrow -->
                   <pxl-line 
                     x1="0" 
                     y1="0" 
                     x2="ref.sec1ex1TargetX.value" 
                     y2="ref.sec1ex1TargetY.value" 
-                    stroke="#8b5cf6" strokewidth="3" arrowend="ref.sec1ex1Radius.value > 0 ? 25 : 0"
+                    stroke="#ec4899" strokewidth="4" arrowend="ref.sec1ex1Radius.value > 0 ? 25 : 0"
                     alpha="ref.sec1ex1Radius.value > 0 ? 1 : 0"></pxl-line>
 
-                  <!-- Purple radius label -->
+                  <!-- Pink radius label -->
                   <pxl-text 
                     x="ref.sec1ex1TargetX.value / 2 + (ref.sec1ex1Radius.value === 0 ? 0 : (ref.sec1ex1TargetY.value / ref.sec1ex1Radius.value) * 22)" 
                     y="ref.sec1ex1TargetY.value / 2 - (ref.sec1ex1Radius.value === 0 ? 0 : (ref.sec1ex1TargetX.value / ref.sec1ex1Radius.value) * 22)" 
                     text="'r1'" 
                     alpha="ref.sec1ex1Radius.value > 0 ? 1 : 0"
-                    fill="#8b5cf6" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
+                    fill="#ec4899" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
 
                 </pxl-group>
               </pxl-layer>
@@ -226,7 +226,7 @@
           <li><strong>Keyword Radius:</strong> A responsive boundary that dynamically calculates distance from <code>(x0, y0)</code> and snaps to the shape's edges or corners (e.g., <code>r1 = 'top-right'</code>).</li>
         </ul>
 
-        <p>In this example, adjust the gradient origin with the Center X0 and Center Y0 sliders, and select a keyword anchor or switch to numeric mode to see how the gradient radiates outward from the custom center point. The dashed purple circle represents the calculated radius boundary.</p>
+        <p>In this example, adjust the gradient origin with the Center X0 and Center Y0 sliders, and select a keyword anchor or switch to numeric mode to see how the gradient radiates outward from the custom center point. The dashed pink circle represents the calculated radius boundary.</p>
 
         <div>
           <div>
@@ -236,7 +236,7 @@
       x="500" y="300"
       w="<mark id="sec2ex1RectWCode">400</mark>" h="<mark id="sec2ex1RectHCode">250</mark>" 
       rotate="<mark id="sec2ex1RectRotCode">0</mark>"
-      fill="radial([<mark id="sec2ex1GradX0Code">0.3</mark>, <mark id="sec2ex1GradY0Code">0.3</mark>, <mark id="sec2ex1GradR1Code">'top-right'</mark>], ['#e2e8f0', '#475569'])"&gt;
+      fill="radial([<mark id="sec2ex1GradX0Code">0.3</mark>, <mark id="sec2ex1GradY0Code">0.3</mark>, <mark id="sec2ex1GradR1Code">'top-right'</mark>], ['#f8fafc', '#475569'])"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -354,45 +354,45 @@
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
                 <!-- Top-Left HUD Info -->
-                <pxl-text x="30" y="30" text="'Center = (' + ref.sec2ex1X0.value + ', ' + ref.sec2ex1Y0.value + ')'" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
-                <pxl-text x="30" y="65" text="'r1 = ' + (typeof ref.sec2ex1R1.value === 'string' ? '\'' + ref.sec2ex1R1.value + '\'' : ref.sec2ex1R1.value)" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="30" text="'Center = (' + ref.sec2ex1X0.value + ', ' + ref.sec2ex1Y0.value + ')'" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="65" text="'r1 = ' + (typeof ref.sec2ex1R1.value === 'string' ? '\'' + ref.sec2ex1R1.value + '\'' : ref.sec2ex1R1.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 
-                <pxl-rect id="sec2ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="radial([ref.sec2ex1X0.value, ref.sec2ex1Y0.value, ref.sec2ex1R1.value], ['#e2e8f0', '#475569'])"></pxl-rect>
+                <pxl-rect id="sec2ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="radial([ref.sec2ex1X0.value, ref.sec2ex1Y0.value, ref.sec2ex1R1.value], ['#f8fafc', '#475569'])"></pxl-rect>
                 
                 <pxl-group x="ref.sec2ex1Rect.x" y="ref.sec2ex1Rect.y" rotate="ref.sec2ex1Rect.rotate">
                   <!-- Solid blue bounding box -->
                   <pxl-rect x="0" y="0" w="ref.sec2ex1Rect.w" h="ref.sec2ex1Rect.h" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
                   
                   <!-- Blue corner coordinates (0,0) and (1,1) -->
-                  <pxl-circle x="-ref.sec2ex1Rect.w/2" y="-ref.sec2ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
-                  <pxl-text x="-ref.sec2ex1Rect.w/2" y="-ref.sec2ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+                  <pxl-circle x="-ref.sec2ex1Rect.w/2" y="-ref.sec2ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
+                  <pxl-text x="-ref.sec2ex1Rect.w/2" y="-ref.sec2ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
                   
-                  <pxl-circle x="ref.sec2ex1Rect.w/2" y="ref.sec2ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
-                  <pxl-text x="ref.sec2ex1Rect.w/2" y="ref.sec2ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <pxl-circle x="ref.sec2ex1Rect.w/2" y="ref.sec2ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
+                  <pxl-text x="ref.sec2ex1Rect.w/2" y="ref.sec2ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="top"></pxl-text>
 
-                  <!-- Purple center coordinate -->
-                  <pxl-circle x="ref.sec2ex1Pcx0.value" y="ref.sec2ex1Pcy0.value" r="8" fill="#8b5cf6"></pxl-circle>
-                  <pxl-text x="ref.sec2ex1Pcx0.value" y="ref.sec2ex1Pcy0.value + 20" text="'Center'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <!-- Pink center coordinate -->
+                  <pxl-circle x="ref.sec2ex1Pcx0.value" y="ref.sec2ex1Pcy0.value" r="8" fill="#f472b6"></pxl-circle>
+                  <pxl-text x="ref.sec2ex1Pcx0.value" y="ref.sec2ex1Pcy0.value + 20" text="'Center'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
                   
-                  <!-- Purple Radius Circle -->
-                  <pxl-circle x="ref.sec2ex1Pcx0.value" y="ref.sec2ex1Pcy0.value" r="ref.sec2ex1Radius.value" fill="none" stroke="#a78bfa" strokewidth="2" linedash="[4, 4]" alpha="ref.sec2ex1Radius.value > 0 ? 1 : 0"></pxl-circle>
+                  <!-- Pink Radius Circle -->
+                  <pxl-circle x="ref.sec2ex1Pcx0.value" y="ref.sec2ex1Pcy0.value" r="ref.sec2ex1Radius.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec2ex1Radius.value > 0 ? 1 : 0"></pxl-circle>
                   
-                  <!-- Purple Gradient Radius Arrow -->
+                  <!-- Pink Gradient Radius Arrow -->
                   <pxl-line 
                     x1="ref.sec2ex1Pcx0.value" 
                     y1="ref.sec2ex1Pcy0.value" 
                     x2="ref.sec2ex1TargetX.value" 
                     y2="ref.sec2ex1TargetY.value" 
-                    stroke="#8b5cf6" strokewidth="3" arrowend="ref.sec2ex1Radius.value > 0 ? 25 : 0"
+                    stroke="#ec4899" strokewidth="4" arrowend="ref.sec2ex1Radius.value > 0 ? 25 : 0"
                     alpha="ref.sec2ex1Radius.value > 0 ? 1 : 0"></pxl-line>
 
-                  <!-- Purple radius label -->
+                  <!-- Pink radius label -->
                   <pxl-text 
                     x="ref.sec2ex1Pcx0.value + ref.sec2ex1Dx.value / 2 + (ref.sec2ex1Radius.value === 0 ? 0 : (ref.sec2ex1Dy.value / ref.sec2ex1Radius.value) * 22)" 
                     y="ref.sec2ex1Pcy0.value + ref.sec2ex1Dy.value / 2 - (ref.sec2ex1Radius.value === 0 ? 0 : (ref.sec2ex1Dx.value / ref.sec2ex1Radius.value) * 22)" 
                     text="'r1'" 
                     alpha="ref.sec2ex1Radius.value > 0 ? 1 : 0"
-                    fill="#8b5cf6" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
+                    fill="#ec4899" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
 
                 </pxl-group>
               </pxl-layer>
@@ -422,7 +422,7 @@
       x="500" y="300"
       w="<mark id="sec3ex1RectWCode">400</mark>" h="<mark id="sec3ex1RectHCode">300</mark>" 
       rotate="<mark id="sec3ex1RectRotCode">0</mark>"
-      fill="radial([<mark id="sec3ex1GradX0Code">0.3</mark>, <mark id="sec3ex1GradY0Code">0.3</mark>, <mark id="sec3ex1GradR0Code">40</mark>, <mark id="sec3ex1GradX1Code">0.6</mark>, <mark id="sec3ex1GradY1Code">0.6</mark>, <mark id="sec3ex1GradR1Code">200</mark>], ['#e2e8f0', '#475569'])"&gt;
+      fill="radial([<mark id="sec3ex1GradX0Code">0.3</mark>, <mark id="sec3ex1GradY0Code">0.3</mark>, <mark id="sec3ex1GradR0Code">40</mark>, <mark id="sec3ex1GradX1Code">0.6</mark>, <mark id="sec3ex1GradY1Code">0.6</mark>, <mark id="sec3ex1GradR1Code">200</mark>], ['#f8fafc', '#475569'])"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -615,57 +615,57 @@
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
                 <!-- Top-Left HUD Info -->
-                <pxl-text x="30" y="30" text="'Start: (' + ref.sec3ex1X0.value + ', ' + ref.sec3ex1Y0.value + ') | r0 = ' + (typeof ref.sec3ex1R0.value === 'string' ? '\'' + ref.sec3ex1R0.value + '\'' : ref.sec3ex1R0.value)" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
-                <pxl-text x="30" y="65" text="'End:   (' + ref.sec3ex1X1.value + ', ' + ref.sec3ex1Y1.value + ') | r1 = ' + (typeof ref.sec3ex1R1.value === 'string' ? '\'' + ref.sec3ex1R1.value + '\'' : ref.sec3ex1R1.value)" fill="#8b5cf6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="30" text="'Start: (' + ref.sec3ex1X0.value + ', ' + ref.sec3ex1Y0.value + ') | r0 = ' + (typeof ref.sec3ex1R0.value === 'string' ? '\'' + ref.sec3ex1R0.value + '\'' : ref.sec3ex1R0.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="65" text="'End:   (' + ref.sec3ex1X1.value + ', ' + ref.sec3ex1Y1.value + ') | r1 = ' + (typeof ref.sec3ex1R1.value === 'string' ? '\'' + ref.sec3ex1R1.value + '\'' : ref.sec3ex1R1.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 
-                <pxl-rect id="sec3ex1Rect" x="500" y="300" w="400" h="300" rotate="0" fill="radial([ref.sec3ex1X0.value, ref.sec3ex1Y0.value, ref.sec3ex1R0.value, ref.sec3ex1X1.value, ref.sec3ex1Y1.value, ref.sec3ex1R1.value], ['#e2e8f0', '#475569'])"></pxl-rect>
+                <pxl-rect id="sec3ex1Rect" x="500" y="300" w="400" h="300" rotate="0" fill="radial([ref.sec3ex1X0.value, ref.sec3ex1Y0.value, ref.sec3ex1R0.value, ref.sec3ex1X1.value, ref.sec3ex1Y1.value, ref.sec3ex1R1.value], ['#f8fafc', '#475569'])"></pxl-rect>
                 
                 <pxl-group x="ref.sec3ex1Rect.x" y="ref.sec3ex1Rect.y" rotate="ref.sec3ex1Rect.rotate">
                   <!-- Solid blue bounding box -->
                   <pxl-rect x="0" y="0" w="ref.sec3ex1Rect.w" h="ref.sec3ex1Rect.h" fill="none" stroke="#3b82f6" strokewidth="2"></pxl-rect>
                   
                   <!-- Blue corner coordinates (0,0) and (1,1) -->
-                  <pxl-circle x="-ref.sec3ex1Rect.w/2" y="-ref.sec3ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
-                  <pxl-text x="-ref.sec3ex1Rect.w/2" y="-ref.sec3ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+                  <pxl-circle x="-ref.sec3ex1Rect.w/2" y="-ref.sec3ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
+                  <pxl-text x="-ref.sec3ex1Rect.w/2" y="-ref.sec3ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
                   
-                  <pxl-circle x="ref.sec3ex1Rect.w/2" y="ref.sec3ex1Rect.h/2" r="8" fill="#3b82f6"></pxl-circle>
-                  <pxl-text x="ref.sec3ex1Rect.w/2" y="ref.sec3ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#3b82f6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <pxl-circle x="ref.sec3ex1Rect.w/2" y="ref.sec3ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
+                  <pxl-text x="ref.sec3ex1Rect.w/2" y="ref.sec3ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="top"></pxl-text>
 
-                  <!-- Purple Start Circle (Center 0 + Radius 0) -->
-                  <pxl-circle x="ref.sec3ex1Pcx0.value" y="ref.sec3ex1Pcy0.value" r="8" fill="#8b5cf6"></pxl-circle>
-                  <pxl-text x="ref.sec3ex1Pcx0.value" y="ref.sec3ex1Pcy0.value + 20" text="'Center 0'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
-                  <pxl-circle x="ref.sec3ex1Pcx0.value" y="ref.sec3ex1Pcy0.value" r="ref.sec3ex1Radius0.value" fill="none" stroke="#a78bfa" strokewidth="2" linedash="[4, 4]" alpha="ref.sec3ex1Radius0.value > 0 ? 1 : 0"></pxl-circle>
+                  <!-- Pink Start Circle (Center 0 + Radius 0) -->
+                  <pxl-circle x="ref.sec3ex1Pcx0.value" y="ref.sec3ex1Pcy0.value" r="8" fill="#f472b6"></pxl-circle>
+                  <pxl-text x="ref.sec3ex1Pcx0.value" y="ref.sec3ex1Pcy0.value + 20" text="'Center 0'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <pxl-circle x="ref.sec3ex1Pcx0.value" y="ref.sec3ex1Pcy0.value" r="ref.sec3ex1Radius0.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec3ex1Radius0.value > 0 ? 1 : 0"></pxl-circle>
                   <pxl-line 
                     x1="ref.sec3ex1Pcx0.value" 
                     y1="ref.sec3ex1Pcy0.value" 
                     x2="ref.sec3ex1TargetX0.value" 
                     y2="ref.sec3ex1TargetY0.value" 
-                    stroke="#8b5cf6" strokewidth="3" arrowend="ref.sec3ex1Radius0.value > 0 ? 25 : 0"
+                    stroke="#ec4899" strokewidth="4" arrowend="ref.sec3ex1Radius0.value > 0 ? 25 : 0"
                     alpha="ref.sec3ex1Radius0.value > 0 ? 1 : 0"></pxl-line>
                   <pxl-text 
                     x="ref.sec3ex1Pcx0.value + ref.sec3ex1Dx0.value / 2 + (ref.sec3ex1Radius0.value === 0 ? 0 : (ref.sec3ex1Dy0.value / ref.sec3ex1Radius0.value) * 22)" 
                     y="ref.sec3ex1Pcy0.value + ref.sec3ex1Dy0.value / 2 - (ref.sec3ex1Radius0.value === 0 ? 0 : (ref.sec3ex1Dx0.value / ref.sec3ex1Radius0.value) * 22)" 
                     text="'r0'" 
                     alpha="ref.sec3ex1Radius0.value > 0 ? 1 : 0"
-                    fill="#8b5cf6" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
+                    fill="#ec4899" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
 
-                  <!-- Purple End Circle (Center 1 + Radius 1) -->
-                  <pxl-circle x="ref.sec3ex1Pcx1.value" y="ref.sec3ex1Pcy1.value" r="8" fill="#8b5cf6"></pxl-circle>
-                  <pxl-text x="ref.sec3ex1Pcx1.value" y="ref.sec3ex1Pcy1.value + 20" text="'Center 1'" fill="#8b5cf6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
-                  <pxl-circle x="ref.sec3ex1Pcx1.value" y="ref.sec3ex1Pcy1.value" r="ref.sec3ex1Radius1.value" fill="none" stroke="#a78bfa" strokewidth="2" linedash="[4, 4]" alpha="ref.sec3ex1Radius1.value > 0 ? 1 : 0"></pxl-circle>
+                  <!-- Pink End Circle (Center 1 + Radius 1) -->
+                  <pxl-circle x="ref.sec3ex1Pcx1.value" y="ref.sec3ex1Pcy1.value" r="8" fill="#f472b6"></pxl-circle>
+                  <pxl-text x="ref.sec3ex1Pcx1.value" y="ref.sec3ex1Pcy1.value + 20" text="'Center 1'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <pxl-circle x="ref.sec3ex1Pcx1.value" y="ref.sec3ex1Pcy1.value" r="ref.sec3ex1Radius1.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec3ex1Radius1.value > 0 ? 1 : 0"></pxl-circle>
                   <pxl-line 
                     x1="ref.sec3ex1Pcx1.value" 
                     y1="ref.sec3ex1Pcy1.value" 
                     x2="ref.sec3ex1TargetX1.value" 
                     y2="ref.sec3ex1TargetY1.value" 
-                    stroke="#8b5cf6" strokewidth="3" arrowend="ref.sec3ex1Radius1.value > 0 ? 25 : 0"
+                    stroke="#ec4899" strokewidth="4" arrowend="ref.sec3ex1Radius1.value > 0 ? 25 : 0"
                     alpha="ref.sec3ex1Radius1.value > 0 ? 1 : 0"></pxl-line>
                   <pxl-text 
                     x="ref.sec3ex1Pcx1.value + ref.sec3ex1Dx1.value / 2 + (ref.sec3ex1Radius1.value === 0 ? 0 : (ref.sec3ex1Dy1.value / ref.sec3ex1Radius1.value) * 22)" 
                     y="ref.sec3ex1Pcy1.value + ref.sec3ex1Dy1.value / 2 - (ref.sec3ex1Radius1.value === 0 ? 0 : (ref.sec3ex1Dx1.value / ref.sec3ex1Radius1.value) * 22)" 
                     text="'r1'" 
                     alpha="ref.sec3ex1Radius1.value > 0 ? 1 : 0"
-                    fill="#8b5cf6" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
+                    fill="#ec4899" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
 
                 </pxl-group>
               </pxl-layer>
