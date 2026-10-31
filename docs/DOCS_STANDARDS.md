@@ -11,12 +11,15 @@ We use a strict color-coding system to separate context (the stage/layer) from c
   | Role | Step |
   |---|---|
   | Center helper lines and labels (`x =`, `y =`), orbit guides | `300` |
+  | Ghost outline of a shape (solid, `strokewidth="2"`) | `300` |
   | Center dot and label (`'Layer Center'`, `'Circle Center'`) | `400` |
+  | Defining points (polyline vertices, line ends) | `400` |
   | Shape border (`stroke`) | `500` |
   | Offset helper lines and labels (`dx =`, `dy =`), offset vectors | `600` |
-  | Offset dot, active point and label | `700` |
+  | Offset dot and label | `700` |
+  | Active point and label | `700` |
 
-  Points that a shape is defined by, such as the start point of a line, are centers (`400`), not offsets.
+  The active point is the one defining point that the demo's controls move (e.g. the slider-driven polyline vertex or the start point of a line). Centers stay `400` even when controls move them.
 * **Violet / Purple (`#c4b5fd`, `#a78bfa`, `#7c3aed`, `#6d28d9`)**: Used for the **Layer Environment** (Layer space) when a demo shows one layer: `#c4b5fd` (`violet-300`) for Layer coordinate helper lines and labels (`x =`, `y =`), `#a78bfa` (`violet-400`) for the Layer Center dot and label, `#7c3aed` (`violet-600`) and `#6d28d9` (`violet-700`) for layer offset helpers and the layer offset point.
 * **Two or More Layers:** As soon as a demo shows the centers of two or more layers, each layer takes the hue of the shapes inside it instead of violet (e.g. layer 1 and its circle orange, layer 2 and its circle blue). The layer then sits one step below its shapes so the hue still builds up from layer to shape: layer crosshairs and helpers `200` (`#fed7aa`, `#bfdbfe`, `#bbf7d0`), Layer Center dot and label `300` (`#fdba74`, `#93c5fd`, `#86efac`), then the shape steps above. A layer that shows no center or crosshairs (e.g. an untransformed layer that only holds a reader) does not count.
 * **Neutral Slate (`#f1f5f9`, `#cbd5e1`)**: Used for **Background Grids** (`#f1f5f9`) and internal coordinate crosshair lines (`#cbd5e1`) to ensure they remain subtle and do not visually compete with the environment or shape coordinates.
@@ -47,6 +50,7 @@ We use a strict color-coding system to separate context (the stage/layer) from c
 To ensure crisp rendering on high-PPI mobile screens (avoiding subpixel alpha-fading) while maintaining a clear visual hierarchy between foreground shapes and background guides, all documentation stage examples MUST use the following tiered stroke widths:
 
 * **Helper Lines & Guides (`strokewidth="2"`):** All dashed coordinate axes, layer origin lines, center-tracking lines, local offset lines (`dx`, `dy`), guidelines, and orbit ring guides MUST be set to `strokewidth="2"`.
+* **Helper Dash Pattern (`linedash="[5, 5]"`):** All dashed helper lines (crosshairs, center and offset helpers, orbit guides) use `linedash="[5, 5]"`. Other dash patterns are only for shapes whose dash is the subject of the demo (e.g. `dashes.html`, `arrows.html`) and for showcases.
 * **Primary Shapes & Emphasis Vectors (`strokewidth="4"`):** The primary interactive shapes being demonstrated (`<pxl-circle>`, `<pxl-rect>`, `<pxl-ellipse>`, etc.) and critical connecting/leader vectors MUST use `strokewidth="4"` (or `strokewidth="2"` minimum for secondary/nested shapes). This ensures the primary subject stands out boldly above `strokewidth="2"` background helper lines.
 * **Stroke Width in Code Snippets:** In pedagogical `<pre><code class="language-html">` snippets, show `strokewidth` directly after `stroke` whenever the stage sets it, so the snippet matches what is drawn (e.g. `stroke="#f97316" strokewidth="4"`). If a slider drives `strokewidth`, it moves to a feature line in control order (see 1-to-1 Control-to-Snippet Synchronization).
 

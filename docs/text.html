@@ -391,12 +391,12 @@
               <pxl-circle x="500" y="300" r="5" fill="#94a3b8"></pxl-circle>
 
               <!-- Dynamic Boundary Guides (Blue Scheme Full-Span) -->
-              <pxl-line x1="ref.sec4VarLeft.value" y1="0" x2="ref.sec4VarLeft.value" y2="600" stroke="#93c5fd" strokewidth="3" linedash="[5, 5]"></pxl-line>
-              <pxl-line x1="ref.sec4VarLeft.value + ref.sec4Text.width" y1="0" x2="ref.sec4VarLeft.value + ref.sec4Text.width" y2="600" stroke="#93c5fd" strokewidth="3" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="ref.sec4VarLeft.value" y1="0" x2="ref.sec4VarLeft.value" y2="600" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="ref.sec4VarLeft.value + ref.sec4Text.width" y1="0" x2="ref.sec4VarLeft.value + ref.sec4Text.width" y2="600" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
               <!-- Top Dimension Guide Line & Arrowheads -->
               <pxl-line x1="ref.sec4VarLeft.value" y1="50" x2="ref.sec4VarLeft.value + ref.sec4Text.width" y2="50" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]" arrowstart="15" arrowend="15"></pxl-line>
-              <pxl-text x="ref.sec4VarLeft.value + ref.sec4Text.width / 2" y="40" text="'width = ' + ref.sec4Text.width" size="27" fill="#60a5fa" font="monospace" align="center" baseline="bottom"></pxl-text>
+              <pxl-text x="ref.sec4VarLeft.value + ref.sec4Text.width / 2" y="40" text="'width = ' + ref.sec4Text.width" size="27" fill="#93c5fd" font="monospace" align="center" baseline="bottom"></pxl-text>
 
               <!-- Target Text Shape -->
               <pxl-text id="sec4Text" x="500" y="300"
@@ -471,12 +471,12 @@
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
               <!-- Dynamic Boundary Guides (Orange Scheme Full-Span) -->
-              <pxl-line x1="500 - ref.sec5Text.maxwidth / 2" y1="0" x2="500 - ref.sec5Text.maxwidth / 2" y2="600" stroke="#fdba74" strokewidth="3" linedash="[5, 5]"></pxl-line>
-              <pxl-line x1="500 + ref.sec5Text.maxwidth / 2" y1="0" x2="500 + ref.sec5Text.maxwidth / 2" y2="600" stroke="#fdba74" strokewidth="3" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="500 - ref.sec5Text.maxwidth / 2" y1="0" x2="500 - ref.sec5Text.maxwidth / 2" y2="600" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="500 + ref.sec5Text.maxwidth / 2" y1="0" x2="500 + ref.sec5Text.maxwidth / 2" y2="600" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
               <!-- Top Dimension Guide Line & Arrowheads -->
               <pxl-line x1="500 - ref.sec5Text.maxwidth / 2" y1="50" x2="500 + ref.sec5Text.maxwidth / 2" y2="50" stroke="#fdba74" strokewidth="2" linedash="[5, 5]" arrowstart="15" arrowend="15"></pxl-line>
-              <pxl-text x="500" y="40" text="'maxwidth = ' + ref.sec5Text.maxwidth" size="27" fill="#fb923c" font="monospace" align="center" baseline="bottom"></pxl-text>
+              <pxl-text x="500" y="40" text="'maxwidth = ' + ref.sec5Text.maxwidth" size="27" fill="#fdba74" font="monospace" align="center" baseline="bottom"></pxl-text>
 
               <!-- Target Text Shape -->
               <pxl-text id="sec5Text" x="500" y="300"
@@ -733,7 +733,7 @@
               </div>
             </div>
 
-            <!-- Tab 3: Gradient Controls (Purple Scheme) -->
+            <!-- Tab 3: Gradient Controls (Green Scheme) -->
             <div class="tab-content" id="sec7GradientTab">
               <div class="playground-sliders">
                 <!-- Row 1: Font Size & Font Weight -->
@@ -812,7 +812,7 @@
               <!-- Lower Right: Annotation Label -->
               <pxl-text x="760" y="490"
                 text="gradient outline"
-                size="27" fill="#c084fc" font="monospace"
+                size="27" fill="#4ade80" font="monospace"
                 align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>
@@ -847,7 +847,7 @@
     &lt;/pxl-text&gt;
 
     &lt;!-- Lower: Hebrew (Right-to-Left Default) --&gt;
-    &lt;pxl-text x="500" y="440" font="Inter" fill="#a855f7" weight="700" baseline="middle"
+    &lt;pxl-text x="500" y="440" font="Inter" fill="#22c55e" weight="700" baseline="middle"
       text="שלום קילופיקסל"
       size="<mark id="sec8Text3SizeCode">50</mark>" reveal="<mark id="sec8Text3RevealCode">1</mark>"
       direction="<mark id="sec8Text3DirectionCode">rtl</mark>" align="<mark id="sec8Text3AlignCode">start</mark>"&gt;
@@ -936,7 +936,7 @@
               </div>
             </div>
 
-            <!-- Tab 3: Hebrew Controls (Purple Scheme) -->
+            <!-- Tab 3: Hebrew Controls (Green Scheme) -->
             <div class="tab-content" id="sec8HebrewTab">
               <div class="playground-sliders">
                 <!-- Row 1: Font Size & Reveal -->
@@ -978,7 +978,7 @@
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
               <!-- Central Vertical Anchor Axis (Neutral Slate) -->
-              <pxl-line x1="500" y1="0" x2="500" y2="600" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-line x1="500" y1="0" x2="500" y2="600" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
               <!-- Upper: Latin (Orange Scheme) -->
               <pxl-text id="sec8Text1" x="500" y="160"
@@ -1004,16 +1004,16 @@
                 size="27" fill="#60a5fa" font="monospace"
                 align="center"></pxl-text>
 
-              <!-- Lower: Hebrew (Purple Scheme) -->
+              <!-- Lower: Hebrew (Green Scheme) -->
               <pxl-text id="sec8Text3" x="500" y="440"
-                font="Inter" fill="#a855f7"
+                font="Inter" fill="#22c55e"
                 size="50" weight="700"
                 direction="rtl" align="start" baseline="middle"
                 reveal="1"
                 text="שלום קילופיקסל"></pxl-text>
               <pxl-text x="500" y="490"
                 text="'Hebrew (RTL default)'"
-                size="27" fill="#c084fc" font="monospace"
+                size="27" fill="#4ade80" font="monospace"
                 align="center"></pxl-text>
             </pxl-layer>
           </pxl-stage>
