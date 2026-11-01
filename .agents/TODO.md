@@ -134,6 +134,7 @@
   - Semi-transparent fills will show the stroke underneath (expected, same as SVG).
   - Arrowheads (`drawArrows`) use the stroke style; check how they should behave with `paintorder="stroke"`.
   - Add a docs section/example following `docs/DOCS_STANDARDS.md`.
+- **Related**: build after §19 and §31 (`design/2026-11-01_isolated_shape_compositing_plan.md` §9). Without isolation, `paintorder="stroke"` has the same compositing bug as §31 (with a shadow, the fill's shadow falls onto the stroke drawn before it); with isolation it only swaps two draw calls.
 
 ## 15. Smooth Polyline Spline Quality (`smooth`)
 - **Status**: 🟢 **Implemented** (2026-10-24) — `polyline.js` (centripetal spline, distance trim, arrows walk inward), `circle.js` / `ellipse.js` (one arrow trim definition). Tests: `scratch/polyline_shapes/engine_tests.html` (112 checks). The seam rule was removed again the same day: a path that ends on its start has a corner there, smooth loops use `closed`.
@@ -182,6 +183,7 @@
 - **Measured**: real pages within noise; worst case 2,000 bare animated lines +1.3 ms per frame (+42%), still 60 fps. A careless custom shape (e.g. `globalAlpha` not reset) fades the whole layer today; always save contains it.
 - **Reasoning**: simpler engine code (no `hasStateChanges` list to keep in sync with `applyContextState`), safety for custom shapes, cost only outside the target use. Criterion revised from "worst case < 5%" to "real pages within noise, worst case still 60 fps".
 - **Next Step**: implement (plan §6).
+- **Related**: build before §31 (isolated compositing builds on the single save → transform → draw → restore path) and §14 `paintorder`; order in `design/2026-11-01_isolated_shape_compositing_plan.md` §9.
 
 ## 20. Shape Authoring (Derived Attributes, Class Fields, Custom Animation)
 - **Status**: 🟡 **Proposed** (2026-10-17, no code changes yet)
@@ -273,3 +275,4 @@
 - **Measured**: 0.75–0.9 ms per isolated shape with the full scratch canvas, 0.35 ms with the bounding box (DPR 2); direct 0.01 ms.
 - **Open**: `alpha` (recommended: not isolated for now), bounding box in step 1 or 2 (recommended: step 2), transform copy without `getTransform()` allocation.
 - **Docs**: afterwards `mask.html` shapes get fill + stroke and the standard ghosts; the "Ghosts of fill-only shapes" note in DOCS_STANDARDS.md goes.
+- **Related**: build after §19 (always save / restore) and before §14 (`paintorder`); plan §9.

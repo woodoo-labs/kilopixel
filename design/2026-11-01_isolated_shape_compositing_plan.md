@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (2026-11-01, no code changes yet)
 - **Date**: 2026-11-01
-- **Related**: `design/2026-10-17_always_save_restore_plan.md` (same function, `Shape.render()`), `docs/DOCS_STANDARDS.md` §1 ("Ghosts of fill-only shapes", the docs rule this removes)
+- **Related**: `design/2026-10-17_always_save_restore_plan.md` (TODO §19, same function `Shape.render()`; build it first, §9), TODO §14 `paintorder` (changes the order of the same draw calls; build it after this plan, §9), `docs/DOCS_STANDARDS.md` §1 ("Ghosts of fill-only shapes", the docs rule this removes)
 - **Target Implementation**: `js/elements/shape.js` (`render()`), `js/graphics.js` (`applyContextState` split), `js/elements/stage.js` (scratch canvas size), `js/elements/shapes/text.js` and `grid.js` (draw count)
 - **Prototypes**: `scratch/mask_fill_stroke.html` (today vs isolated, every mask mode plus alpha, blend, shadow, multi-line text), `scratch/isolation_bench.html` (cost)
 
@@ -136,9 +136,17 @@ Pixel reads on a small stage, one test per row:
 
 ## 8. Steps
 
-1. Agree on this plan (§6.1, §6.2).
+1. Agree on this plan (§6.1, §6.2); implement always save / restore (TODO §19) first (§9).
 2. Split `applyContextState`; add `needsIsolation()` and the isolated path in `Shape.render()`; scratch canvas sized by the layers.
 3. Tests §7; `node build.js`; all tests pass.
 4. KILOPIXEL.md, TODO.md entry.
 5. Docs: `mask.html` shapes with fill and stroke and the standard ghosts; remove the "Ghosts of fill-only shapes" note; check `shadow.html` §1, `blend.html` and `fill.html`.
 6. Step 2: bounding-box scratch region, measured with `scratch/isolation_bench.html` again.
+
+## 9. Build Order with Related Plans
+
+Three plans change how a shape's draw calls (fill, stroke, arrowheads, text lines) reach the layer. Built in this order, each one makes the next simpler:
+
+1. **Always `save()` / `restore()` per shape** (`design/2026-10-17_always_save_restore_plan.md`, TODO §19, decided): `Shape.render()` gets one path, save → transform → draw → restore, instead of the `hasStateChanges` check. The isolated path then only swaps the target of `draw()` (the scratch canvas) instead of adding a third path. The shared scratch canvas also needs the same protection against custom shapes that change canvas state and don't reset it (§19's `GhostStar` test): a leak there would reach every isolated shape after it.
+2. **This plan** (TODO §31).
+3. **`paintorder`** (TODO §14, concept): `paintorder="stroke"` draws the stroke first and the fill on top. Without isolation it has the same compositing bug: with a shadow, the fill's shadow falls onto the stroke drawn just before it. With isolation it only swaps two calls inside the scratch canvas, and shadow, mask and filter apply to the finished shape. Shared open questions: arrowheads (§3.1 counts them as an extra draw call; §14 asks how they paint with `paintorder="stroke"`) and semi-transparent fills (§14 "fills show the stroke underneath", here §6.1 `alpha`).
