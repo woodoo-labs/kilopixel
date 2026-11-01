@@ -137,14 +137,14 @@
             <pxl-layer>
               <!-- Line endpoint reference guides (rotates with line) -->
               <pxl-group id="sec1LineGuideGroup" x="300" y="300" rotate="ref.sec1Line.rotate">
-                <pxl-line x1="-150" y1="-150" x2="-150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
-                <pxl-line x1="150" y1="-150" x2="150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+                <pxl-line x1="-150" y1="-150" x2="-150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+                <pxl-line x1="150" y1="-150" x2="150" y2="150" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
               </pxl-group>
 
               <!-- Arc radial reference guides (start is fixed at 135°, end rotates with sweep) -->
-              <pxl-line x1="700" y1="300" x2="550" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-line x1="700" y1="300" x2="550" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-group id="sec1ArcEndGuideGroup" x="700" y="300" rotate="135 + ref.sec1Arc.sweep">
-                <pxl-line x1="0" y1="0" x2="212" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="212" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
               </pxl-group>
             </pxl-layer>
 
@@ -161,15 +161,15 @@
             <pxl-layer>
               <!-- Line centerline skeleton & endpoint anchors (rotates with line) -->
               <pxl-group id="sec1LineGhostGroup" x="300" y="300" rotate="ref.sec1Line.rotate">
-                <pxl-line x1="-150" y1="0" x2="150" y2="0" stroke="#ffffff" strokewidth="2" linedash="[4, 4]"></pxl-line>
+                <pxl-line x1="-150" y1="0" x2="150" y2="0" stroke="#ffffff" strokewidth="2" linedash="[5, 5]"></pxl-line>
                 <pxl-circle x="-150" y="0" r="5" fill="#c2410c"></pxl-circle>
                 <pxl-circle x="150" y="0" r="5" fill="#c2410c"></pxl-circle>
               </pxl-group>
 
               <!-- Arc centerline skeleton & endpoint anchors -->
-              <pxl-circle id="sec1ArcGhost" x="700" y="300" r="150" start="135" sweep="270" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-circle>
+              <pxl-circle id="sec1ArcGhost" x="700" y="300" r="150" start="135" sweep="270" stroke="#ffffff" strokewidth="2" linedash="[5, 5]" fill="none"></pxl-circle>
               <pxl-circle x="594" y="406" r="5" fill="#1d4ed8"></pxl-circle>
-              <pxl-circle x="700" y="300" r="4" fill="#94a3b8"></pxl-circle>
+              <pxl-circle x="700" y="300" r="4" fill="#60a5fa"></pxl-circle>
               <pxl-group id="sec1ArcEndDotGroup" x="700" y="300" rotate="135 + ref.sec1Arc.sweep">
                 <pxl-circle x="150" y="0" r="5" fill="#1d4ed8"></pxl-circle>
               </pxl-group>
@@ -287,13 +287,13 @@
             <!-- Overlay Ghost Lines & Points -->
             <pxl-layer>
               <!-- Chevron skeleton & anchor dots -->
-              <pxl-polyline id="sec2ChevronGhost" points="150,450; 300,150; 450,450" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
+              <pxl-polyline id="sec2ChevronGhost" points="150,450; 300,150; 450,450" stroke="#ffffff" strokewidth="2" linedash="[5, 5]" fill="none"></pxl-polyline>
               <pxl-circle x="150" y="450" r="5" fill="#c2410c"></pxl-circle>
               <pxl-circle id="sec2ChevronPeakDot" x="300" y="150" r="5" fill="#c2410c"></pxl-circle>
               <pxl-circle x="450" y="450" r="5" fill="#c2410c"></pxl-circle>
 
               <!-- Polygon skeleton & anchor dots -->
-              <pxl-polyline id="sec2PolyGhost" points="550,450; 700,150; 850,450" closed="true" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
+              <pxl-polyline id="sec2PolyGhost" points="550,450; 700,150; 850,450" closed="true" stroke="#ffffff" strokewidth="2" linedash="[5, 5]" fill="none"></pxl-polyline>
               <pxl-circle x="550" y="450" r="5" fill="#1d4ed8"></pxl-circle>
               <pxl-circle id="sec2PolyPeakDot" x="700" y="150" r="5" fill="#1d4ed8"></pxl-circle>
               <pxl-circle x="850" y="450" r="5" fill="#1d4ed8"></pxl-circle>
@@ -393,7 +393,7 @@
             <!-- Guide Helpers Layer (Grey reference lines) -->
             <pxl-layer>
               <!-- Centerline vertical guide through diamond apexes -->
-              <pxl-line x1="700" y1="100" x2="700" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+              <pxl-line x1="700" y1="100" x2="700" y2="450" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             </pxl-layer>
 
             <!-- Main Shapes Layer -->
@@ -408,13 +408,13 @@
             <!-- Overlay Ghost Lines & Points -->
             <pxl-layer>
               <!-- Chevron skeleton & anchor dots -->
-              <pxl-polyline id="sec3ChevronGhost" points="220,450; 300,150; 380,450" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
+              <pxl-polyline id="sec3ChevronGhost" points="220,450; 300,150; 380,450" stroke="#ffffff" strokewidth="2" linedash="[5, 5]" fill="none"></pxl-polyline>
               <pxl-circle id="sec3ChevronLeftDot" x="220" y="450" r="5" fill="#c2410c"></pxl-circle>
               <pxl-circle id="sec3ChevronApexDot" x="300" y="150" r="5" fill="#c2410c"></pxl-circle>
               <pxl-circle id="sec3ChevronRightDot" x="380" y="450" r="5" fill="#c2410c"></pxl-circle>
 
               <!-- Diamond skeleton & anchor dots -->
-              <pxl-polyline id="sec3DiamondGhost" points="700,150; 762,300; 700,450; 638,300" closed="true" stroke="#ffffff" strokewidth="2" linedash="[4, 4]" fill="none"></pxl-polyline>
+              <pxl-polyline id="sec3DiamondGhost" points="700,150; 762,300; 700,450; 638,300" closed="true" stroke="#ffffff" strokewidth="2" linedash="[5, 5]" fill="none"></pxl-polyline>
               <pxl-circle id="sec3DiamondTopDot" x="700" y="150" r="5" fill="#1d4ed8"></pxl-circle>
               <pxl-circle id="sec3DiamondRightDot" x="762" y="300" r="5" fill="#1d4ed8"></pxl-circle>
               <pxl-circle id="sec3DiamondBottomDot" x="700" y="450" r="5" fill="#1d4ed8"></pxl-circle>
