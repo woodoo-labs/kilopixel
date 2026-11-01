@@ -35,9 +35,9 @@
 
 
         <!-- ================================================================= -->
-        <!-- SECTION 1: READING ACROSS SPACES                                  -->
+        <!-- SECTION 1: TARGET IN A TRANSFORMED LAYER                          -->
         <!-- ================================================================= -->
-        <h2>1. Reading Across Spaces</h2>
+        <h2>1. Target in a Transformed Layer</h2>
         <p>A shape inside a moved, rotated or zoomed layer keeps its <code>x</code> and <code>y</code> while the layer carries it across the stage. A plain reference such as <code>ref.planet.x</code> therefore returns the position inside the layer, not where the planet appears.</p>
         <p>To reach the planet from outside its layer, use <code>toLocal(ref.planet, 'x')</code> and <code>toLocal(ref.planet, 'y')</code>. They return the planet's position in the space where the reading shape's own coordinates are read, so the result can be used directly as an attribute value. Here, the end point of a line follows the planet.</p>
 
@@ -158,9 +158,9 @@
 
 
         <!-- ================================================================= -->
-        <!-- SECTION 2: READERS IN TRANSFORMED LAYERS                          -->
+        <!-- SECTION 2: READER IN A TRANSFORMED LAYER                          -->
         <!-- ================================================================= -->
-        <h2>2. Readers in Transformed Layers</h2>
+        <h2>2. Reader in a Transformed Layer</h2>
         <p><code>toLocal()</code> returns values for the space in which the reading shape's own <code>x</code> and <code>y</code> are read: the space of its parent. The reading shape can therefore sit in a moved or rotated layer itself. Here, a ring in layer 2 surrounds the planet in layer 1.</p>
         <p>The readout shows the returned values. They are coordinates of layer 2, not of the stage: when layer 2 moves or rotates, the values change and the ring stays on the planet.</p>
 
@@ -248,7 +248,6 @@
               <pxl-text x="-15" y="-15" baseline="bottom" text="'Layer 1 Center'" size="27" fill="#fdba74" font="monospace" align="right"></pxl-text>
 
               <pxl-circle id="sec2Planet" x="150" y="0" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
-              <pxl-text x="ref.sec2Planet.x" y="ref.sec2Planet.y - 55" baseline="bottom" text="'Planet'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
             </pxl-layer>
 
             <!-- Layer 2 With the Ring -->
@@ -264,12 +263,16 @@
 
               <pxl-circle id="sec2Ring" x="toLocal(ref.sec2Planet, 'x')" y="toLocal(ref.sec2Planet, 'y')" r="60" stroke="#3b82f6" strokewidth="4"></pxl-circle>
               <pxl-circle x="ref.sec2Ring.x" y="ref.sec2Ring.y" r="5" fill="#60a5fa"></pxl-circle>
+              <pxl-text x="ref.sec2Ring.x" y="ref.sec2Ring.y - ref.sec2Ring.r - 15" baseline="bottom" text="'Ring'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
             </pxl-layer>
 
-            <!-- Readout of the Mapped Values -->
+            <!-- Readout of the Mapped Values; the values in blue 500 like the ring -->
             <pxl-layer>
-              <pxl-text x="355" y="530" baseline="bottom" text="'Mapped x = ' + Math.round(ref.sec2Ring.x)" size="27" fill="#1d4ed8" font="monospace"></pxl-text>
-              <pxl-text x="355" y="570" baseline="bottom" text="'Mapped y = ' + Math.round(ref.sec2Ring.y)" size="27" fill="#1d4ed8" font="monospace"></pxl-text>
+              <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Ring's Space:`"></pxl-text>
+              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped x: '"></pxl-text>
+              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'          ' + Math.round(ref.sec2Ring.x)"></pxl-text>
+              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped y: '"></pxl-text>
+              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'          ' + Math.round(ref.sec2Ring.y)"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -415,11 +418,11 @@
               <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Line's Space:`"></pxl-text>
               <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace"
                 text="'x ' + Math.round(toLocal(ref.sec3Planet, 'x')) + ' + dx ' + Math.round(toLocal(ref.sec3Planet, 'dx')) + ' = '"></pxl-text>
-              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#15803d" font="monospace"
+              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#22c55e" font="monospace"
                 text="' '.repeat(('x ' + Math.round(toLocal(ref.sec3Planet, 'x')) + ' + dx ' + Math.round(toLocal(ref.sec3Planet, 'dx')) + ' = ').length) + 'tx ' + Math.round(toLocal(ref.sec3Planet, 'tx'))"></pxl-text>
               <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace"
                 text="'y ' + Math.round(toLocal(ref.sec3Planet, 'y')) + ' + dy ' + Math.round(toLocal(ref.sec3Planet, 'dy')) + ' = '"></pxl-text>
-              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#15803d" font="monospace"
+              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#22c55e" font="monospace"
                 text="' '.repeat(('y ' + Math.round(toLocal(ref.sec3Planet, 'y')) + ' + dy ' + Math.round(toLocal(ref.sec3Planet, 'dy')) + ' = ').length) + 'ty ' + Math.round(toLocal(ref.sec3Planet, 'ty'))"></pxl-text>
             </pxl-layer>
           </pxl-stage>
@@ -564,11 +567,11 @@
               <pxl-circle x="850" y="150" r="5" fill="#60a5fa"></pxl-circle>
               <pxl-text x="850" y="35" baseline="bottom" text="'Needle'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
 
-              <!-- Readout: own rotate vs. total direction; the value in blue 700 like the needle -->
+              <!-- Readout: own rotate vs. total direction; the value in blue 500 like the needle -->
               <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Needle's Space:`"></pxl-text>
               <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Own Rotate:   ' + Math.round(ref.sec4Pointer.rotate)"></pxl-text>
               <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Total Rotate: '"></pxl-text>
-              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#1d4ed8" font="monospace" text="'              ' + Math.round(toLocal(ref.sec4Pointer, 'rotate'))"></pxl-text>
+              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'              ' + Math.round(toLocal(ref.sec4Pointer, 'rotate'))"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -713,11 +716,11 @@
             <pxl-layer>
               <pxl-circle id="sec5Ring" x="toLocal(ref.sec5Planet, 'x')" y="toLocal(ref.sec5Planet, 'y')" r="ref.sec5Planet.r * toLocal(ref.sec5Planet, 'zoom') + 15" stroke="#3b82f6" strokewidth="4"></pxl-circle>
 
-              <!-- Readout: own zoom vs. total zoom; the value in blue 700 like the ring -->
+              <!-- Readout: own zoom vs. total zoom; the value in blue 500 like the ring -->
               <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Ring's Space:`"></pxl-text>
               <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Own Zoom:   ' + ref.sec5Planet.zoom"></pxl-text>
               <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Total Zoom: '"></pxl-text>
-              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#1d4ed8" font="monospace" text="'            ' + Math.round(toLocal(ref.sec5Planet, 'zoom') * 100) / 100"></pxl-text>
+              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'            ' + Math.round(toLocal(ref.sec5Planet, 'zoom') * 100) / 100"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
