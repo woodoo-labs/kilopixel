@@ -153,12 +153,24 @@
               <pxl-text x="ref.sec1Line.x1" y="ref.sec1Line.y1 - 15" baseline="bottom" text="'Start Point'" size="27" fill="#4ade80" font="monospace" align="center"></pxl-text>
               <pxl-circle x="ref.sec1Line.x2" y="ref.sec1Line.y2" r="5" fill="#4ade80"></pxl-circle>
 
-              <!-- Readout of the mapped end point; the values in green 500 like the line -->
-              <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Line's Space:`"></pxl-text>
-              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped x2: '"></pxl-text>
-              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#22c55e" font="monospace" text="'           ' + Math.round(ref.sec1Line.x2)"></pxl-text>
-              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped y2: '"></pxl-text>
-              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#22c55e" font="monospace" text="'           ' + Math.round(ref.sec1Line.y2)"></pxl-text>
+              <!-- Readout: mapped end point = layer (violet 400) + planet (orange 400), both in the line's space; total in green 500 -->
+              <pxl-text x="600" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Line's Space:`"></pxl-text>
+              <pxl-text x="600" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace"
+                text="'Mapped x2: ' + ' '.repeat(String(Math.round(ref.sec1Line.x2)).length) + ' (' + ' '.repeat(String(Math.round(toLocal(ref.sec1Layer, 'x'))).length) + ' + ' + ' '.repeat(String((Math.round(ref.sec1Line.x2) - Math.round(toLocal(ref.sec1Layer, 'x')))).length) + ')'"></pxl-text>
+              <pxl-text x="600" y="530" baseline="bottom" size="27" fill="#22c55e" font="monospace"
+                text="' '.repeat(11) + Math.round(ref.sec1Line.x2)"></pxl-text>
+              <pxl-text x="600" y="530" baseline="bottom" size="27" fill="#a78bfa" font="monospace"
+                text="' '.repeat(11 + String(Math.round(ref.sec1Line.x2)).length + 2) + Math.round(toLocal(ref.sec1Layer, 'x'))"></pxl-text>
+              <pxl-text x="600" y="530" baseline="bottom" size="27" fill="#fb923c" font="monospace"
+                text="' '.repeat(11 + String(Math.round(ref.sec1Line.x2)).length + 2 + String(Math.round(toLocal(ref.sec1Layer, 'x'))).length + 3) + (Math.round(ref.sec1Line.x2) - Math.round(toLocal(ref.sec1Layer, 'x')))"></pxl-text>
+              <pxl-text x="600" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace"
+                text="'Mapped y2: ' + ' '.repeat(String(Math.round(ref.sec1Line.y2)).length) + ' (' + ' '.repeat(String(Math.round(toLocal(ref.sec1Layer, 'y'))).length) + ' + ' + ' '.repeat(String((Math.round(ref.sec1Line.y2) - Math.round(toLocal(ref.sec1Layer, 'y')))).length) + ')'"></pxl-text>
+              <pxl-text x="600" y="570" baseline="bottom" size="27" fill="#22c55e" font="monospace"
+                text="' '.repeat(11) + Math.round(ref.sec1Line.y2)"></pxl-text>
+              <pxl-text x="600" y="570" baseline="bottom" size="27" fill="#a78bfa" font="monospace"
+                text="' '.repeat(11 + String(Math.round(ref.sec1Line.y2)).length + 2) + Math.round(toLocal(ref.sec1Layer, 'y'))"></pxl-text>
+              <pxl-text x="600" y="570" baseline="bottom" size="27" fill="#fb923c" font="monospace"
+                text="' '.repeat(11 + String(Math.round(ref.sec1Line.y2)).length + 2 + String(Math.round(toLocal(ref.sec1Layer, 'y'))).length + 3) + (Math.round(ref.sec1Line.y2) - Math.round(toLocal(ref.sec1Layer, 'y')))"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -273,13 +285,30 @@
               <pxl-text x="ref.sec2Ring.x" y="ref.sec2Ring.y - ref.sec2Ring.r - 15" baseline="bottom" text="'Ring'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
             </pxl-layer>
 
-            <!-- Readout of the Mapped Values; the values in blue 500 like the ring -->
+            <!-- Readout: ring center = layer 1 (orange 300) + planet (orange 400) - layer 2 (blue 300), all turned into
+                 layer 2's axes; total in blue 500 like the ring -->
             <pxl-layer>
-              <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Ring's Space:`"></pxl-text>
-              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped x: '"></pxl-text>
-              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'          ' + Math.round(ref.sec2Ring.x)"></pxl-text>
-              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped y: '"></pxl-text>
-              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'          ' + Math.round(ref.sec2Ring.y)"></pxl-text>
+              <pxl-text x="490" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Ring's Space:`"></pxl-text>
+              <pxl-text x="490" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace"
+                text="'Mapped x: ' + ' '.repeat(String(Math.round(ref.sec2Ring.x)).length) + ' (' + ' '.repeat(String(Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x + sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y)).length) + ((Math.round(ref.sec2Ring.x) - Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x + sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y) + Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.x + sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.y)) < 0 ? ' - ' : ' + ') + ' '.repeat(String(Math.abs((Math.round(ref.sec2Ring.x) - Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x + sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y) + Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.x + sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.y)))).length) + (Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.x + sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.y) < 0 ? ' + ' : ' - ') + ' '.repeat(String(Math.abs(Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.x + sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.y))).length) + ')'"></pxl-text>
+              <pxl-text x="490" y="530" baseline="bottom" size="27" fill="#3b82f6" font="monospace"
+                text="' '.repeat(10) + Math.round(ref.sec2Ring.x)"></pxl-text>
+              <pxl-text x="490" y="530" baseline="bottom" size="27" fill="#fdba74" font="monospace"
+                text="' '.repeat(10 + String(Math.round(ref.sec2Ring.x)).length + 2) + Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x + sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y)"></pxl-text>
+              <pxl-text x="490" y="530" baseline="bottom" size="27" fill="#fb923c" font="monospace"
+                text="' '.repeat(10 + String(Math.round(ref.sec2Ring.x)).length + 2 + String(Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x + sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y)).length + 3) + Math.abs((Math.round(ref.sec2Ring.x) - Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x + sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y) + Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.x + sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.y)))"></pxl-text>
+              <pxl-text x="490" y="530" baseline="bottom" size="27" fill="#93c5fd" font="monospace"
+                text="' '.repeat(10 + String(Math.round(ref.sec2Ring.x)).length + 2 + String(Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x + sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y)).length + 3 + String(Math.abs((Math.round(ref.sec2Ring.x) - Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x + sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y) + Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.x + sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.y)))).length + 3) + Math.abs(Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.x + sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.y))"></pxl-text>
+              <pxl-text x="490" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace"
+                text="'Mapped y: ' + ' '.repeat(String(Math.round(ref.sec2Ring.y)).length) + ' (' + ' '.repeat(String(Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y - sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x)).length) + ((Math.round(ref.sec2Ring.y) - Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y - sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x) + Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.y - sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.x)) < 0 ? ' - ' : ' + ') + ' '.repeat(String(Math.abs((Math.round(ref.sec2Ring.y) - Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y - sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x) + Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.y - sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.x)))).length) + (Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.y - sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.x) < 0 ? ' + ' : ' - ') + ' '.repeat(String(Math.abs(Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.y - sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.x))).length) + ')'"></pxl-text>
+              <pxl-text x="490" y="570" baseline="bottom" size="27" fill="#3b82f6" font="monospace"
+                text="' '.repeat(10) + Math.round(ref.sec2Ring.y)"></pxl-text>
+              <pxl-text x="490" y="570" baseline="bottom" size="27" fill="#fdba74" font="monospace"
+                text="' '.repeat(10 + String(Math.round(ref.sec2Ring.y)).length + 2) + Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y - sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x)"></pxl-text>
+              <pxl-text x="490" y="570" baseline="bottom" size="27" fill="#fb923c" font="monospace"
+                text="' '.repeat(10 + String(Math.round(ref.sec2Ring.y)).length + 2 + String(Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y - sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x)).length + 3) + Math.abs((Math.round(ref.sec2Ring.y) - Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y - sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x) + Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.y - sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.x)))"></pxl-text>
+              <pxl-text x="490" y="570" baseline="bottom" size="27" fill="#93c5fd" font="monospace"
+                text="' '.repeat(10 + String(Math.round(ref.sec2Ring.y)).length + 2 + String(Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y - sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x)).length + 3 + String(Math.abs((Math.round(ref.sec2Ring.y) - Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.y - sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer1.x) + Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.y - sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.x)))).length + 3) + Math.abs(Math.round(cos(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.y - sin(ref.sec2Layer2.rotate * PI / 180) * ref.sec2Layer2.x))"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
