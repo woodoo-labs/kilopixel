@@ -149,9 +149,16 @@
             <!-- Line in an Untransformed Layer (Green Scheme) -->
             <pxl-layer>
               <pxl-line id="sec1Line" x1="150" y1="150" x2="toLocal(ref.sec1Planet, 'x')" y2="toLocal(ref.sec1Planet, 'y')" stroke="#22c55e" strokewidth="4"></pxl-line>
-              <pxl-circle x="ref.sec1Line.x1" y="ref.sec1Line.y1" r="5" fill="#15803d"></pxl-circle>
-              <pxl-text x="ref.sec1Line.x1" y="ref.sec1Line.y1 - 15" baseline="bottom" text="'Start Point'" size="27" fill="#15803d" font="monospace" align="center"></pxl-text>
+              <pxl-circle x="ref.sec1Line.x1" y="ref.sec1Line.y1" r="5" fill="#4ade80"></pxl-circle>
+              <pxl-text x="ref.sec1Line.x1" y="ref.sec1Line.y1 - 15" baseline="bottom" text="'Start Point'" size="27" fill="#4ade80" font="monospace" align="center"></pxl-text>
               <pxl-circle x="ref.sec1Line.x2" y="ref.sec1Line.y2" r="5" fill="#4ade80"></pxl-circle>
+
+              <!-- Readout of the mapped end point; the values in green 500 like the line -->
+              <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Line's Space:`"></pxl-text>
+              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped x2: '"></pxl-text>
+              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#22c55e" font="monospace" text="'           ' + Math.round(ref.sec1Line.x2)"></pxl-text>
+              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped y2: '"></pxl-text>
+              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#22c55e" font="monospace" text="'           ' + Math.round(ref.sec1Line.y2)"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -186,13 +193,13 @@
             <div class="demo-controls-header">
               <h3 class="demo-controls-title">Controls</h3>
               <div class="demo-tabs">
-                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2Layer1Tab')">Layer 1</button>
-                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2Layer2Tab')">Layer 2</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2Layer1Tab')">Layer 1</button>
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2Layer2Tab')">Layer 2</button>
               </div>
             </div>
 
             <!-- Layer 1 Tab -->
-            <div class="tab-content active" id="sec2Layer1Tab">
+            <div class="tab-content" id="sec2Layer1Tab">
               <div class="playground-sliders">
                 <div class="control-group">
                   <label><span>Center X</span> <span id="sec2Layer1XVal">300</span></label>
@@ -205,7 +212,7 @@
                     oninput="document.getElementById('sec2Layer1').setAttribute('y', this.value); document.getElementById('sec2Layer1YVal').innerText = this.value; document.getElementById('sec2Layer1YCode').innerText = this.value;" data-mark="sec2Layer1YCode, sec2RingXCode, sec2RingYCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec2Layer1RotVal">0°</span></label>
+                  <label><span>Rotation</span> <span id="sec2Layer1RotVal">0°</span></label>
                   <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off" id="sec2Layer1RotInput"
                     oninput="document.getElementById('sec2Layer1').setAttribute('rotate', this.value); document.getElementById('sec2Layer1RotVal').innerText = this.value + '°'; document.getElementById('sec2Layer1RotCode').innerText = this.value;" data-mark="sec2Layer1RotCode, sec2RingXCode, sec2RingYCode">
                 </div>
@@ -213,7 +220,7 @@
             </div>
 
             <!-- Layer 2 Tab -->
-            <div class="tab-content" id="sec2Layer2Tab">
+            <div class="tab-content active" id="sec2Layer2Tab">
               <div class="playground-sliders">
                 <div class="control-group">
                   <label><span>Center X</span> <span id="sec2Layer2XVal">700</span></label>
@@ -410,9 +417,9 @@
 
               <!-- Line to the drawn planet (Green Scheme) -->
               <pxl-line id="sec3Line" x1="150" y1="520" x2="toLocal(ref.sec3Planet, 'tx')" y2="toLocal(ref.sec3Planet, 'ty')" stroke="#22c55e" strokewidth="4"></pxl-line>
-              <pxl-circle x="ref.sec3Line.x1" y="ref.sec3Line.y1" r="5" fill="#15803d"></pxl-circle>
-              <pxl-text x="ref.sec3Line.x1" y="ref.sec3Line.y1 - 15" baseline="bottom" text="'Start Point'" size="27" fill="#15803d" font="monospace" align="center"></pxl-text>
-              <pxl-circle x="ref.sec3Line.x2" y="ref.sec3Line.y2" r="5" fill="#15803d"></pxl-circle>
+              <pxl-circle x="ref.sec3Line.x1" y="ref.sec3Line.y1" r="5" fill="#4ade80"></pxl-circle>
+              <pxl-text x="ref.sec3Line.x1" y="ref.sec3Line.y1 - 15" baseline="bottom" text="'Start Point'" size="27" fill="#4ade80" font="monospace" align="center"></pxl-text>
+              <pxl-circle x="ref.sec3Line.x2" y="ref.sec3Line.y2" r="5" fill="#4ade80"></pxl-circle>
 
               <!-- Readout in the readers' space: x + dx = tx. The green text starts with spaces as wide as the grey part (monospace) -->
               <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Line's Space:`"></pxl-text>
