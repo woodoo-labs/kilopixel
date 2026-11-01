@@ -421,16 +421,28 @@
               <pxl-text x="ref.sec3Line.x1" y="ref.sec3Line.y1 - 15" baseline="bottom" text="'Start Point'" size="27" fill="#4ade80" font="monospace" align="center"></pxl-text>
               <pxl-circle x="ref.sec3Line.x2" y="ref.sec3Line.y2" r="5" fill="#4ade80"></pxl-circle>
 
-              <!-- Readout in the readers' space: x + dx = tx. The green text starts with spaces as wide as the grey part (monospace) -->
-              <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Line's Space:`"></pxl-text>
-              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace"
-                text="'x ' + Math.round(toLocal(ref.sec3Planet, 'x')) + ' + dx ' + Math.round(toLocal(ref.sec3Planet, 'dx')) + ' = '"></pxl-text>
-              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#22c55e" font="monospace"
-                text="' '.repeat(('x ' + Math.round(toLocal(ref.sec3Planet, 'x')) + ' + dx ' + Math.round(toLocal(ref.sec3Planet, 'dx')) + ' = ').length) + 'tx ' + Math.round(toLocal(ref.sec3Planet, 'tx'))"></pxl-text>
-              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace"
-                text="'y ' + Math.round(toLocal(ref.sec3Planet, 'y')) + ' + dy ' + Math.round(toLocal(ref.sec3Planet, 'dy')) + ' = '"></pxl-text>
-              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#22c55e" font="monospace"
-                text="' '.repeat(('y ' + Math.round(toLocal(ref.sec3Planet, 'y')) + ' + dy ' + Math.round(toLocal(ref.sec3Planet, 'dy')) + ' = ').length) + 'ty ' + Math.round(toLocal(ref.sec3Planet, 'ty'))"></pxl-text>
+              <!-- Readout: mapped end point = layer (violet 400) + planet center (orange 400) + offset (orange 600), in the line's space -->
+              <pxl-text x="495" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Line's Space:`"></pxl-text>
+              <pxl-text x="495" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace"
+                text="'Mapped x2: ' + ' '.repeat(String(Math.round(toLocal(ref.sec3Planet, 'tx'))).length) + ' (' + ' '.repeat(String(Math.round(toLocal(ref.sec3Layer, 'x'))).length) + ' + ' + ' '.repeat(String((Math.round(toLocal(ref.sec3Planet, 'tx')) - Math.round(toLocal(ref.sec3Layer, 'x')) - Math.round(toLocal(ref.sec3Planet, 'dx')))).length) + ' + ' + ' '.repeat(String(Math.round(toLocal(ref.sec3Planet, 'dx'))).length) + ')'"></pxl-text>
+              <pxl-text x="495" y="530" baseline="bottom" size="27" fill="#22c55e" font="monospace"
+                text="' '.repeat(11) + Math.round(toLocal(ref.sec3Planet, 'tx'))"></pxl-text>
+              <pxl-text x="495" y="530" baseline="bottom" size="27" fill="#a78bfa" font="monospace"
+                text="' '.repeat(11 + String(Math.round(toLocal(ref.sec3Planet, 'tx'))).length + 2) + Math.round(toLocal(ref.sec3Layer, 'x'))"></pxl-text>
+              <pxl-text x="495" y="530" baseline="bottom" size="27" fill="#fb923c" font="monospace"
+                text="' '.repeat(11 + String(Math.round(toLocal(ref.sec3Planet, 'tx'))).length + 2 + String(Math.round(toLocal(ref.sec3Layer, 'x'))).length + 3) + (Math.round(toLocal(ref.sec3Planet, 'tx')) - Math.round(toLocal(ref.sec3Layer, 'x')) - Math.round(toLocal(ref.sec3Planet, 'dx')))"></pxl-text>
+              <pxl-text x="495" y="530" baseline="bottom" size="27" fill="#ea580c" font="monospace"
+                text="' '.repeat(11 + String(Math.round(toLocal(ref.sec3Planet, 'tx'))).length + 2 + String(Math.round(toLocal(ref.sec3Layer, 'x'))).length + 3 + String((Math.round(toLocal(ref.sec3Planet, 'tx')) - Math.round(toLocal(ref.sec3Layer, 'x')) - Math.round(toLocal(ref.sec3Planet, 'dx')))).length + 3) + Math.round(toLocal(ref.sec3Planet, 'dx'))"></pxl-text>
+              <pxl-text x="495" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace"
+                text="'Mapped y2: ' + ' '.repeat(String(Math.round(toLocal(ref.sec3Planet, 'ty'))).length) + ' (' + ' '.repeat(String(Math.round(toLocal(ref.sec3Layer, 'y'))).length) + ' + ' + ' '.repeat(String((Math.round(toLocal(ref.sec3Planet, 'ty')) - Math.round(toLocal(ref.sec3Layer, 'y')) - Math.round(toLocal(ref.sec3Planet, 'dy')))).length) + ' + ' + ' '.repeat(String(Math.round(toLocal(ref.sec3Planet, 'dy'))).length) + ')'"></pxl-text>
+              <pxl-text x="495" y="570" baseline="bottom" size="27" fill="#22c55e" font="monospace"
+                text="' '.repeat(11) + Math.round(toLocal(ref.sec3Planet, 'ty'))"></pxl-text>
+              <pxl-text x="495" y="570" baseline="bottom" size="27" fill="#a78bfa" font="monospace"
+                text="' '.repeat(11 + String(Math.round(toLocal(ref.sec3Planet, 'ty'))).length + 2) + Math.round(toLocal(ref.sec3Layer, 'y'))"></pxl-text>
+              <pxl-text x="495" y="570" baseline="bottom" size="27" fill="#fb923c" font="monospace"
+                text="' '.repeat(11 + String(Math.round(toLocal(ref.sec3Planet, 'ty'))).length + 2 + String(Math.round(toLocal(ref.sec3Layer, 'y'))).length + 3) + (Math.round(toLocal(ref.sec3Planet, 'ty')) - Math.round(toLocal(ref.sec3Layer, 'y')) - Math.round(toLocal(ref.sec3Planet, 'dy')))"></pxl-text>
+              <pxl-text x="495" y="570" baseline="bottom" size="27" fill="#ea580c" font="monospace"
+                text="' '.repeat(11 + String(Math.round(toLocal(ref.sec3Planet, 'ty'))).length + 2 + String(Math.round(toLocal(ref.sec3Layer, 'y'))).length + 3 + String((Math.round(toLocal(ref.sec3Planet, 'ty')) - Math.round(toLocal(ref.sec3Layer, 'y')) - Math.round(toLocal(ref.sec3Planet, 'dy')))).length + 3) + Math.round(toLocal(ref.sec3Planet, 'dy'))"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
