@@ -6,27 +6,27 @@
   <title>Introduction | Kilopixel</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/docs.css">
-  
+
   <!-- Prism Syntax Highlighting -->
   <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
-  
+
   <!-- Kilopixel Engine -->
   <script src="js/pxl.min.js"></script>
-  
+
   <!-- Import our custom layout elements and interactive framework -->
   <script src="js/layout.js"></script>
   <script src="js/docs.js"></script>
 </head>
 <body>
-  
+
   <!-- Centralized Header -->
   <docs-header></docs-header>
-  
+
   <div class="layout-container">
-    
+
     <!-- Centralized Sidebar -->
     <docs-sidebar></docs-sidebar>
-    
+
     <!-- Main Content Area -->
     <main class="docs-content">
       <div class="docs-inner">
@@ -40,24 +40,18 @@
 &lt;pxl-stage ratio="16 / 9"&gt;
   &lt;pxl-layer x="500" y="280"&gt;
     &lt;pxl-grid stroke="#f1f5f9" fill="#94a3b8" major="4" labels="true" labelsize="18"&gt;&lt;/pxl-grid&gt;
-    &lt;pxl-circle 
-      x="wave(4) * 300" 
-      y="0" 
-      r="40 + wave(2) * 20" 
-      fill="hsl(t * 100, 100, 60)" 
-    &gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="wave(4) * 300" r="40 + wave(2) * 20"
+      fill="hsl(t * 100, 100, 60)"&gt;
+    &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
       <pxl-stage ratio="16 / 9" class="demo-stage">
         <pxl-layer x="500" y="280">
           <pxl-grid stroke="#f1f5f9" fill="#94a3b8" major="4" labels="true" labelsize="18"></pxl-grid>
-          <pxl-circle 
-            x="wave(4) * 300" 
-            y="0" 
-            r="40 + wave(2) * 20" 
-            fill="hsl(t * 100, 100, 60)" 
-          ></pxl-circle>
+          <pxl-circle x="wave(4) * 300" r="40 + wave(2) * 20"
+            fill="hsl(t * 100, 100, 60)">
+          </pxl-circle>
         </pxl-layer>
       </pxl-stage>
 
