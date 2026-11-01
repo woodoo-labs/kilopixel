@@ -426,11 +426,11 @@
 
 
         <!-- ================================================================= -->
-        <!-- SECTION 4: DIRECTION                                              -->
+        <!-- SECTION 4: ROTATION                                               -->
         <!-- ================================================================= -->
-        <h2>4. Direction</h2>
+        <h2>4. Rotation</h2>
         <p>A shape's rotation (<code>rotate</code>) turns it inside its parent. When the parent layer and group are rotated as well, the rotations add up: the pointer below points in the direction of both angles plus its own. <code>ref.pointer.rotate</code> still returns only the pointer's own value.</p>
-        <p><code>toLocal(ref.pointer, 'rotate')</code> returns the total direction of the pointer's x axis in degrees, seen from the reading shape's space. The needle uses it as its own <code>rotate</code>, so it points the same way as the pointer, although it sits in another layer.</p>
+        <p><code>toLocal(ref.pointer, 'rotate')</code> returns the pointer's total rotation in degrees, seen from the reading shape's space. The needle uses it as its own <code>rotate</code>, so it points the same way as the pointer, although it sits in another layer.</p>
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
