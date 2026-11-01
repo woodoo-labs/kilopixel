@@ -264,3 +264,12 @@
 - **Phase 1**: observe `id`; DOM events on shapes (`click`, `pointer*`) + `interactive` for delegating frameworks; rename the `on*` handlers (collide with native `onclick` and framework `on*` rules; proposed `pxl-click` …); layer canvas in a shadow root and default styles in a stylesheet; bounded expression caches.
 - **Phase 2**: attribute properties (numbers without compiling, values set before upgrade). **Phase 3**: `docs/frameworks.html`, optional TypeScript typings.
 - **Open**: handler names, scoped names instead of global ids, native vs. synthetic `click` on the stage, cursor for delegated listeners.
+
+## 31. Isolated Shape Compositing (Fill and Stroke Composite as One)
+- **Status**: 🟡 **Proposed** (2026-11-01)
+- **Reference**: `design/2026-11-01_isolated_shape_compositing_plan.md`; prototypes `scratch/mask_fill_stroke.html`, `scratch/isolation_bench.html` (local only)
+- **Problem**: a shape that draws more than once (fill + stroke, arrowheads, multi-line text, grid major lines or labels) composites each draw call separately. With `mask` 7 of 9 modes are wrong (`source-in` erases the fill, `xor` cuts the stroke into the fill); with `shadowcolor` the stroke casts a shadow onto the shape's own fill (visible in `shadow.html` §1); `filter` and `blend` are affected too.
+- **Idea**: draw such a shape normally into one shared scratch canvas, then composite it onto the layer once with its alpha / mask / blend / filter / shadow. Single-draw shapes keep the direct path.
+- **Measured**: 0.75–0.9 ms per isolated shape with the full scratch canvas, 0.35 ms with the bounding box (DPR 2); direct 0.01 ms.
+- **Open**: `alpha` (recommended: not isolated for now), bounding box in step 1 or 2 (recommended: step 2), transform copy without `getTransform()` allocation.
+- **Docs**: afterwards `mask.html` shapes get fill + stroke and the standard ghosts; the "Ghosts of fill-only shapes" note in DOCS_STANDARDS.md goes.
