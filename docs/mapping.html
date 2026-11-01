@@ -258,6 +258,10 @@
               <pxl-circle x="0" y="0" r="5" fill="#93c5fd"></pxl-circle>
               <pxl-text x="15" y="-15" baseline="bottom" text="'Layer 2 Center'" size="27" fill="#93c5fd" font="monospace"></pxl-text>
 
+              <!-- Ring center to the axes (offset helpers, step 600) -->
+              <pxl-line x1="ref.sec2Ring.x" y1="ref.sec2Ring.y" x2="ref.sec2Ring.x" y2="0" stroke="#2563eb" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="ref.sec2Ring.x" y1="ref.sec2Ring.y" x2="0" y2="ref.sec2Ring.y" stroke="#2563eb" strokewidth="2" linedash="[5, 5]"></pxl-line>
+
               <pxl-circle id="sec2Ring" x="toLocal(ref.sec2Planet, 'x')" y="toLocal(ref.sec2Planet, 'y')" r="60" stroke="#3b82f6" strokewidth="4"></pxl-circle>
             </pxl-layer>
 
