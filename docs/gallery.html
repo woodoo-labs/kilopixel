@@ -152,7 +152,7 @@
                 <div class="gallery-slide">
                   <pxl-stage ratio="1 / 1">
                     <pxl-layer>
-                      <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
+                      <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                       <!-- Rotating outer dashed orbital ring -->
                       <pxl-circle x="500" y="500" r="280" rotate="t * 25" fill="none" stroke="#3b82f6" strokewidth="4" linedash="[10, 10]"></pxl-circle>
                       <!-- Orbiting blue satellite -->
@@ -168,7 +168,7 @@
                 <div class="gallery-slide">
                   <pxl-stage ratio="1 / 1">
                     <pxl-layer>
-                      <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
+                      <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                       <!-- Clockwise rotating outer diamond -->
                       <pxl-rect x="500" y="500" w="420" h="420" rx="30" rotate="45 + t * 20" fill="none" stroke="#f97316" strokewidth="4" linedash="[8, 8]"></pxl-rect>
                       <!-- Counter-clockwise rotating breathing diamond -->
@@ -182,15 +182,15 @@
                 <div class="gallery-slide">
                   <pxl-stage ratio="1 / 1">
                     <pxl-layer>
-                      <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
+                      <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                       <!-- Breathing emerald core -->
-                      <pxl-circle x="500" y="500" r="220 + sin(t * 2) * 25" fill="#10b98122" stroke="#059669" strokewidth="4"></pxl-circle>
+                      <pxl-circle x="500" y="500" r="220 + sin(t * 2) * 25" fill="#22c55e22" stroke="#16a34a" strokewidth="4"></pxl-circle>
                       <!-- Rotating dashed orbital ring -->
-                      <pxl-circle x="500" y="500" r="170" rotate="t * 30" fill="none" stroke="#10b981" strokewidth="2" linedash="[8, 8]"></pxl-circle>
+                      <pxl-circle x="500" y="500" r="170" rotate="t * 30" fill="none" stroke="#22c55e" strokewidth="2" linedash="[8, 8]"></pxl-circle>
                       <!-- Symmetrical orbiting satellites -->
-                      <pxl-circle x="500 + cos(t * 2) * 170" y="500 + sin(t * 2) * 170" r="14" fill="#059669"></pxl-circle>
-                      <pxl-circle x="500 - cos(t * 2) * 170" y="500 - sin(t * 2) * 170" r="14" fill="#059669"></pxl-circle>
-                      <pxl-text x="500" y="500" text="'Stage 3: Emerald'" size="32" font="monospace" weight="bold" align="center" fill="#047857"></pxl-text>
+                      <pxl-circle x="500 + cos(t * 2) * 170" y="500 + sin(t * 2) * 170" r="14" fill="#16a34a"></pxl-circle>
+                      <pxl-circle x="500 - cos(t * 2) * 170" y="500 - sin(t * 2) * 170" r="14" fill="#16a34a"></pxl-circle>
+                      <pxl-text x="500" y="500" text="'Stage 3: Green'" size="32" font="monospace" weight="bold" align="center" fill="#15803d"></pxl-text>
                     </pxl-layer>
                   </pxl-stage>
                 </div>
@@ -234,14 +234,14 @@
                 <div class="gallery-slide">
                   <pxl-stage ratio="1 / 1">
                     <pxl-layer>
-                      <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
+                      <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                       <!-- Rotating group with square and cross -->
                       <pxl-group x="500" y="500" rotate="t * 40">
-                        <pxl-rect x="0" y="0" w="380 + sin(t * 3) * 30" h="380 + sin(t * 3) * 30" fill="none" stroke="#8b5cf6" strokewidth="3"></pxl-rect>
-                        <pxl-line x1="-190" y1="-190" x2="190" y2="190" stroke="#8b5cf6" strokewidth="3"></pxl-line>
-                        <pxl-line x1="190" y1="-190" x2="-190" y2="190" stroke="#8b5cf6" strokewidth="3"></pxl-line>
+                        <pxl-rect id="sec2ex1Rect" x="0" y="0" w="380 + sin(t * 3) * 30" h="380 + sin(t * 3) * 30" fill="none" stroke="#3b82f6" strokewidth="3"></pxl-rect>
+                        <pxl-line x1="-ref.sec2ex1Rect.w / 2" y1="-ref.sec2ex1Rect.h / 2" x2="ref.sec2ex1Rect.w / 2" y2="ref.sec2ex1Rect.h / 2" stroke="#3b82f6" strokewidth="3"></pxl-line>
+                        <pxl-line x1="ref.sec2ex1Rect.w / 2" y1="-ref.sec2ex1Rect.h / 2" x2="-ref.sec2ex1Rect.w / 2" y2="ref.sec2ex1Rect.h / 2" stroke="#3b82f6" strokewidth="3"></pxl-line>
                       </pxl-group>
-                      <pxl-text x="500" y="500" text="'Stage 1: Grid Cross'" size="32" font="monospace" weight="bold" align="center" fill="#6d28d9"></pxl-text>
+                      <pxl-text x="500" y="500" text="'Stage 1: Grid Cross'" size="32" font="monospace" weight="bold" align="center" fill="#1d4ed8"></pxl-text>
                     </pxl-layer>
                   </pxl-stage>
                 </div>
@@ -250,14 +250,14 @@
                 <div class="gallery-slide">
                   <pxl-stage ratio="1 / 1">
                     <pxl-layer>
-                      <pxl-grid stroke="#e2e8f0" major="2"></pxl-grid>
+                      <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
                       <!-- Concentric pulsing ripple rings -->
-                      <pxl-circle x="500" y="500" r="90 + sin(t * 2.5) * 15" fill="none" stroke="#ec4899" strokewidth="2"></pxl-circle>
-                      <pxl-circle x="500" y="500" r="175 + sin(t * 2.5 + 0.8) * 20" fill="none" stroke="#ec4899" strokewidth="3" linedash="[6, 6]"></pxl-circle>
-                      <pxl-circle x="500" y="500" r="260 + sin(t * 2.5 + 1.6) * 25" fill="none" stroke="#ec4899" strokewidth="4"></pxl-circle>
+                      <pxl-circle x="500" y="500" r="90 + sin(t * 2.5) * 15" fill="none" stroke="#f97316" strokewidth="2"></pxl-circle>
+                      <pxl-circle x="500" y="500" r="175 + sin(t * 2.5 + 0.8) * 20" fill="none" stroke="#f97316" strokewidth="3" linedash="[6, 6]"></pxl-circle>
+                      <pxl-circle id="sec2ex2Ring" x="500" y="500" r="260 + sin(t * 2.5 + 1.6) * 25" fill="none" stroke="#f97316" strokewidth="4"></pxl-circle>
                       <!-- Rotating radar sweep line -->
-                      <pxl-line x1="500" y1="500" x2="500 + cos(t * 3) * 260" y2="500 + sin(t * 3) * 260" stroke="#db2777" strokewidth="4" arrowend="20"></pxl-line>
-                      <pxl-text x="500" y="500" text="'Stage 2: Target'" size="32" font="monospace" weight="bold" align="center" fill="#be185d"></pxl-text>
+                      <pxl-line x="500" y="500" x2="ref.sec2ex2Ring.r" rotate="t * 180" stroke="#ea580c" strokewidth="4" arrowend="20"></pxl-line>
+                      <pxl-text x="500" y="500" text="'Stage 2: Target'" size="32" font="monospace" weight="bold" align="center" fill="#c2410c"></pxl-text>
                     </pxl-layer>
                   </pxl-stage>
                 </div>
