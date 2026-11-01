@@ -773,8 +773,8 @@
         <p>Together, these six values rebuild any combination of rotation, zoom, stretch, skew and mirror. There is no <code>'skewy'</code>: a skew along y can always be written with <code>rotate</code>, <code>scalex</code>, <code>scaley</code> and <code>skewx</code>. The outline's own <code>zoom</code> stays free, so <code>zoom="1.2"</code> draws the copy 20 % larger around the flag's center. If the target has an offset (<code>dx</code>, <code>dy</code>), map <code>'tx'</code> and <code>'ty'</code> instead of <code>'x'</code> and <code>'y'</code> and leave out the offset: the copy then sits on the drawn shape, and its own <code>zoom</code> grows it around the shape instead of around the distant center.</p>
 
         <div class="callout-info">
-          <p class="callout-title">Totals, Not Attributes</p>
-          <p class="callout-body"><code>toLocal()</code> returns how the target looks from the reading shape's space, not which attribute caused it. A target with <code>zoom="2"</code> returns 2 for <code>'scalex'</code> and <code>'scaley'</code>, although its own <code>scalex</code> is 1.</p>
+          <p class="callout-title">Zoom Counts as Scale</p>
+          <p class="callout-body">A shape with <code>zoom="2"</code> returns 2 for <code>'scalex'</code> and <code>'scaley'</code>, even though its <code>scalex</code> attribute is 1. <code>toLocal()</code> reports the shape's total size, not the attribute that set it.</p>
         </div>
 
         <!-- Declarative HTML markup above stage -->
