@@ -923,9 +923,11 @@ pxl.applyTransformState = function(ctx, u, attributeValues) {
   if (dx || dy) ctx.translate(dx * u, dy * u);
 };
 
-// Scales the px values written by the filter helpers (blur(5) → 'blur(5px)') by the unit u
+// Scales every px value in the final filter string by the unit u: the helpers' (blur(5) → 'blur(5px)')
+// and those written in backticks. JavaScript prints values near 0 in exponent notation (1.2e-15),
+// so the number includes an optional exponent; otherwise only '-15px' would be scaled.
 pxl.scaleResponsiveFilter = function(filterStr, u) {
-  return filterStr.replace(/(-?\d+\.?\d*)px/g, (match, val) => (parseFloat(val) * u) + 'px');
+  return filterStr.replace(/(-?\d*\.?\d+(?:e[-+]?\d+)?)px/g, (match, val) => (parseFloat(val) * u) + 'px');
 };
 
 pxl.applyContextState = function(ctx, u, attributeValues, node) {

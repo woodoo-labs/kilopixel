@@ -387,6 +387,16 @@
       if (result !== 0) throw new Error(`toLocal(stage) is ${result}`);
     });
 
+    test('filter: px values in exponent notation scale as one number and stay valid CSS', () => {
+      const tiny = pxl.scope.blur(Math.abs(Math.sin(Math.PI)) * 10); // 'blur(1.22…e-15px)'
+      const scaled = pxl.scaleResponsiveFilter(tiny, 0.5);
+      if (!CSS.supports('filter', scaled)) throw new Error(`'${scaled}' is not valid CSS`);
+      const shadow = pxl.scaleResponsiveFilter('drop-shadow(10px -4px 2e1px #000)', 0.5);
+      if (shadow !== 'drop-shadow(5px -2px 10px #000)') throw new Error(`drop-shadow gives '${shadow}'`);
+      const backtick = pxl.scaleResponsiveFilter(`blur(${0.5 * 10}px) hue-rotate(90deg)`, 0.5);
+      if (backtick !== 'blur(2.5px) hue-rotate(90deg)') throw new Error(`backtick blur gives '${backtick}'`);
+    });
+
     // --- Run all tests in order ---
     (async () => {
       const results = [];

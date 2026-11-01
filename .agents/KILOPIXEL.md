@@ -548,6 +548,8 @@ Filters are invoked as standard function calls rather than raw string concatenat
 
 > [!IMPORTANT]
 > **No Units Required**: Do not provide `px`, `%`, or `deg` manually! The scope helpers automatically append the correct units (`blur(5)` → `blur(5px)`). Kilopixel's graphics pipeline automatically detects pixel values and multiplies them by the physical scaling factor (`u`) before drawing.
+>
+> **Scaling happens on the final string** (`pxl.scaleResponsiveFilter`, called by `resolveFilter()`): every number followed by `px` is multiplied by `u`, including exponent notation (`1.2e-15px`, which JavaScript prints for values near 0). So `px` values written in backticks (`` filter="`blur(${t * 10}px)`" ``) scale with the stage too; `px` means stage units there, not screen pixels. `%` and `deg` are not scaled.
 
 ---
 
@@ -1553,7 +1555,7 @@ Plain text attributes work without quotes — the compiler's Fast Path handles t
 
 #### 4. Unified Responsive Filters (Arrays vs Strings)
 
-Kilopixel provides a unified API for CSS and Canvas filters using `pxl.scope` helpers. Do NOT use backticks for filters!
+Write filters with the `pxl.scope` helpers, also when they are animated: they add the units and the CSS syntax for you. Backticks work too (their `px` values scale with the stage, see Unified Responsive Filters), but every unit is then up to you: a missing `px` makes the whole filter string invalid, and the browser ignores it without an error. Use backticks only for CSS filter syntax without a helper, e.g. `url(#svgFilter)`.
 
 ```html
 <!-- Static filter (Single function call) -->

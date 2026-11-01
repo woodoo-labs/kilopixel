@@ -36,7 +36,7 @@
         <div class="callout-info">
           <p class="callout-title">Never Use Units!</p>
           <p class="callout-body">By sticking to pure numbers (e.g., <code>filter="blur(15)"</code> or <code>contrast(130)</code>), you can seamlessly animate filters using math and time variables. The engine handles all the CSS units (<code>px</code>, <code>%</code>, <code>deg</code>) behind the scenes and automatically scales spatial filters with the stage.</p>
-          <p class="callout-body"><strong>Exception:</strong> If you choose to use JavaScript <strong>backticks</strong> (template literals) for string interpolation (e.g., <code>filter="`blur(${t * 10}px)`"</code>), your math and time variables are evaluated natively by JavaScript. Because this bypasses Kilopixel's formatting helpers, you <strong>must</strong> include the units (<code>px</code>, <code>%</code>, <code>deg</code>) manually so the final generated string is valid CSS.</p>
+          <p class="callout-body"><strong>Exception:</strong> With JavaScript <strong>backticks</strong> (template literals), e.g. <code>filter="`blur(${t * 10}px)`"</code>, JavaScript builds the string, so you write the units (<code>px</code>, <code>%</code>, <code>deg</code>) yourself. <code>px</code> values still scale with the stage, like the helpers' values: <code>px</code> means stage units here, not screen pixels.</p>
         </div>
 
         <!-- ================================================================= -->
