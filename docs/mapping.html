@@ -760,6 +760,147 @@
         </div>
 
 
+        <!-- ================================================================= -->
+        <!-- SECTION 6: COPYING A WHOLE FRAME                                  -->
+        <!-- ================================================================= -->
+        <h2>6. Copying a Whole Frame</h2>
+        <p>Rotation and zoom are enough as long as nothing along the way is skewed, stretched or mirrored. To copy a target's frame exactly, the reading shape maps six values, as the outline around the flag below does:</p>
+        <ul>
+          <li><strong>Center:</strong> <code>toLocal(ref.flag, 'x')</code> and <code>toLocal(ref.flag, 'y')</code> return the flag's center, as in section 1.</li>
+          <li><strong>Direction and Lean:</strong> <code>toLocal(ref.flag, 'rotate')</code> returns the direction of the flag's x axis, <code>toLocal(ref.flag, 'skewx')</code> the lean of its y axis.</li>
+          <li><strong>Width and Height:</strong> <code>toLocal(ref.flag, 'scalex')</code> and <code>toLocal(ref.flag, 'scaley')</code> return the total scale along both axes. <code>'scaley'</code> is negative when the flag is mirrored.</li>
+        </ul>
+        <p>Together, these six values rebuild any combination of rotation, zoom, stretch, skew and mirror. There is no <code>'skewy'</code>: a skew along y can always be written with the other four. The outline's own <code>zoom</code> stays free, so <code>zoom="1.2"</code> draws the copy 20 % larger around the flag's center.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Totals, Not Attributes</p>
+          <p class="callout-body"><code>toLocal()</code> returns how the target looks from the reading shape's space, not which attribute caused it. A target with <code>zoom="2"</code> returns 2 for <code>'scalex'</code> and <code>'scaley'</code>, although its own <code>scalex</code> is 1.</p>
+        </div>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;!-- Flag in a rotated layer --&gt;
+  &lt;pxl-layer x="<mark id="sec6LayerXCode">300</mark>" y="<mark id="sec6LayerYCode">300</mark>" rotate="<mark id="sec6LayerRotCode">20</mark>"&gt;
+    &lt;pxl-polyline id="flag" closed="true" points="-60,90; -60,-90; 90,-45; -30,0; -30,90"
+      fill="#ffedd566" stroke="#f97316" strokewidth="4"
+      x="<mark id="sec6FlagXCode">150</mark>" y="<mark id="sec6FlagYCode">0</mark>" skewx="<mark id="sec6FlagSkewCode">20</mark>" scaley="<mark id="sec6FlagScaleYCode">1</mark>"&gt;
+    &lt;/pxl-polyline&gt;
+  &lt;/pxl-layer&gt;
+
+  &lt;!-- Outline in an untransformed layer: copies the whole frame --&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-polyline closed="true" points="-60,90; -60,-90; 90,-45; -30,0; -30,90"
+      stroke="#3b82f6" strokewidth="4" zoom="1.2"
+      x="<mark id="sec6OutlineXCode" class="highlight-reactive">toLocal(ref.flag, 'x')</mark>" y="<mark id="sec6OutlineYCode" class="highlight-reactive">toLocal(ref.flag, 'y')</mark>"
+      rotate="<mark id="sec6OutlineRotCode" class="highlight-reactive">toLocal(ref.flag, 'rotate')</mark>" skewx="<mark id="sec6OutlineSkewCode" class="highlight-reactive">toLocal(ref.flag, 'skewx')</mark>"
+      scalex="<mark id="sec6OutlineScaleXCode" class="highlight-reactive">toLocal(ref.flag, 'scalex')</mark>" scaley="<mark id="sec6OutlineScaleYCode" class="highlight-reactive">toLocal(ref.flag, 'scaley')</mark>"&gt;
+    &lt;/pxl-polyline&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec6LayerTab')">Layer</button>
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec6FlagTab')">Flag</button>
+              </div>
+            </div>
+
+            <!-- Layer Tab -->
+            <div class="tab-content" id="sec6LayerTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Center X</span> <span id="sec6LayerXVal">300</span></label>
+                  <input type="range" min="0" max="1000" step="10" value="300" autocomplete="off" id="sec6LayerXInput"
+                    oninput="document.getElementById('sec6Layer').setAttribute('x', this.value); document.getElementById('sec6LayerXVal').innerText = this.value; document.getElementById('sec6LayerXCode').innerText = this.value;" data-mark="sec6LayerXCode, sec6OutlineXCode, sec6OutlineYCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Center Y</span> <span id="sec6LayerYVal">300</span></label>
+                  <input type="range" min="0" max="600" step="10" value="300" autocomplete="off" id="sec6LayerYInput"
+                    oninput="document.getElementById('sec6Layer').setAttribute('y', this.value); document.getElementById('sec6LayerYVal').innerText = this.value; document.getElementById('sec6LayerYCode').innerText = this.value;" data-mark="sec6LayerYCode, sec6OutlineXCode, sec6OutlineYCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Rotation</span> <span id="sec6LayerRotVal">20°</span></label>
+                  <input type="range" min="-180" max="180" step="5" value="20" autocomplete="off" id="sec6LayerRotInput"
+                    oninput="document.getElementById('sec6Layer').setAttribute('rotate', this.value); document.getElementById('sec6LayerRotVal').innerText = this.value + '°'; document.getElementById('sec6LayerRotCode').innerText = this.value;" data-mark="sec6LayerRotCode, sec6OutlineXCode, sec6OutlineYCode, sec6OutlineRotCode">
+                </div>
+              </div>
+            </div>
+
+            <!-- Flag Tab -->
+            <div class="tab-content active" id="sec6FlagTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Center X</span> <span id="sec6FlagXVal">150</span></label>
+                  <input type="range" min="-300" max="300" step="10" value="150" autocomplete="off" id="sec6FlagXInput"
+                    oninput="document.getElementById('sec6Flag').setAttribute('x', this.value); document.getElementById('sec6FlagXVal').innerText = this.value; document.getElementById('sec6FlagXCode').innerText = this.value;" data-mark="sec6FlagXCode, sec6OutlineXCode, sec6OutlineYCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Center Y</span> <span id="sec6FlagYVal">0</span></label>
+                  <input type="range" min="-200" max="200" step="10" value="0" autocomplete="off" id="sec6FlagYInput"
+                    oninput="document.getElementById('sec6Flag').setAttribute('y', this.value); document.getElementById('sec6FlagYVal').innerText = this.value; document.getElementById('sec6FlagYCode').innerText = this.value;" data-mark="sec6FlagYCode, sec6OutlineXCode, sec6OutlineYCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Skew X <span class="indicator-dot"></span></span> <span id="sec6FlagSkewVal">20°</span></label>
+                  <input type="range" min="-60" max="60" step="5" value="20" autocomplete="off" id="sec6FlagSkewInput"
+                    oninput="document.getElementById('sec6Flag').setAttribute('skewx', this.value); document.getElementById('sec6FlagSkewVal').innerText = this.value + '°'; document.getElementById('sec6FlagSkewCode').innerText = this.value;" data-mark="sec6FlagSkewCode, sec6OutlineSkewCode">
+                </div>
+                <div class="control-group">
+                  <label><span>Scale Y <span class="indicator-dot"></span></span> <span id="sec6FlagScaleYVal">1</span></label>
+                  <input type="range" min="-1.5" max="1.5" step="0.1" value="1" autocomplete="off" id="sec6FlagScaleYInput"
+                    oninput="document.getElementById('sec6Flag').setAttribute('scaley', this.value); document.getElementById('sec6FlagScaleYVal').innerText = this.value; document.getElementById('sec6FlagScaleYCode').innerText = this.value;" data-mark="sec6FlagScaleYCode, sec6OutlineScaleYCode, sec6OutlineSkewCode">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 6 Stage -->
+          <pxl-stage id="sec6Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+            </pxl-layer>
+
+            <!-- Rotated Layer With the Flag -->
+            <pxl-layer id="sec6Layer" x="300" y="300" rotate="20">
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-circle x="0" y="0" r="5" fill="#a78bfa"></pxl-circle>
+              <pxl-text x="-15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#a78bfa" font="monospace" align="right"></pxl-text>
+
+              <!-- Flag position along the layer's axes (center helpers 300) -->
+              <pxl-line x2="ref.sec6Flag.x" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="ref.sec6Flag.x" x2="ref.sec6Flag.x" y2="ref.sec6Flag.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+
+              <pxl-polyline id="sec6Flag" closed="true" points="-60,90; -60,-90; 90,-45; -30,0; -30,90" x="150" y="0" skewx="20" scaley="1" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-polyline>
+              <pxl-circle x="ref.sec6Flag.x" y="ref.sec6Flag.y" r="5" fill="#fb923c"></pxl-circle>
+              <pxl-text x="ref.sec6Flag.x" y="ref.sec6Flag.y" dy="125" baseline="top" text="'Flag Center'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+
+            <!-- Outline in an Untransformed Layer (Blue Scheme) -->
+            <pxl-layer>
+              <pxl-polyline id="sec6Outline" closed="true" points="-60,90; -60,-90; 90,-45; -30,0; -30,90" zoom="1.2"
+                x="toLocal(ref.sec6Flag, 'x')" y="toLocal(ref.sec6Flag, 'y')"
+                rotate="toLocal(ref.sec6Flag, 'rotate')" skewx="toLocal(ref.sec6Flag, 'skewx')"
+                scalex="toLocal(ref.sec6Flag, 'scalex')" scaley="toLocal(ref.sec6Flag, 'scaley')"
+                stroke="#3b82f6" strokewidth="4"></pxl-polyline>
+
+              <!-- Readout: the four mapped frame values in the outline's space; values in blue 500 like the outline -->
+              <pxl-text x="620" y="410" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Outline's Space:`"></pxl-text>
+              <pxl-text x="620" y="450" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped rotate: '"></pxl-text>
+              <pxl-text x="620" y="450" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'               ' + Math.round(ref.sec6Outline.rotate)"></pxl-text>
+              <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped skewx:  '"></pxl-text>
+              <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'               ' + Math.round(ref.sec6Outline.skewx)"></pxl-text>
+              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped scalex: '"></pxl-text>
+              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'               ' + Math.round(ref.sec6Outline.scalex * 100) / 100"></pxl-text>
+              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped scaley: '"></pxl-text>
+              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'               ' + Math.round(ref.sec6Outline.scaley * 100) / 100"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+
       </div>
     </main>
 
