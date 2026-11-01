@@ -7,34 +7,34 @@
   <title>Installation | Kilopixel</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/docs.css">
-  
+
   <!-- Prism Syntax Highlighting -->
   <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
-  
+
   <!-- Kilopixel Engine -->
   <script src="js/pxl.min.js"></script>
-  
+
   <!-- Import our custom layout elements and interactive framework -->
   <script src="js/layout.js"></script>
   <script src="js/docs.js"></script>
 </head>
 <body>
-  
+
   <docs-header></docs-header>
-  
+
   <div class="layout-container">
-    
+
     <docs-sidebar></docs-sidebar>
-    
+
     <main class="docs-content">
       <div class="docs-inner">
       <h1>Installation</h1>
       <p class="lead">Kilopixel is a single JavaScript file. Include it with a <code>&lt;script&gt;</code> tag in any HTML file: there are no dependencies, no build tools, and no local web server to set up.</p>
-      
+
       <h2>1. Download & Include</h2>
       <p>Download the minified engine file (<code>pxl.min.js</code>, ~53KB) or the complete boilerplate starter kit using the buttons below and save it to your computer.</p>
       <p>Include the script at the bottom of your HTML document's <code>&lt;body&gt;</code> tag (right before the closing <code>&lt;/body&gt;</code>). Placing it at the bottom ensures that all declarative HTML5 elements are already parsed in the DOM when the script initializes and registers Kilopixel's custom HTML elements.</p>
-      
+
       <pre><code class="language-html">&lt;!-- Include Kilopixel at the bottom of your document body --&gt;
 &lt;script src="pxl.min.js"&gt;&lt;/script&gt;</code></pre>
 
@@ -51,7 +51,7 @@
 
       <h2>2. Fullscreen Starter Boilerplate</h2>
       <p>Here is a complete, copy-pasteable starter template. It uses a tiny 4-line CSS reset in the <code>&lt;head&gt;</code> to remove browser margins and enable a sleek, fullscreen responsive canvas &mdash; without requiring external stylesheets or inline style attributes.</p>
-      
+
       <pre><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
@@ -72,10 +72,10 @@
   &lt;pxl-stage ratio="16 / 9"&gt;
     &lt;pxl-layer&gt;
       &lt;pxl-grid stroke="#1e293b" major="4"&gt;&lt;/pxl-grid&gt;
-      &lt;pxl-circle 
-        x="500" 
-        y="300" 
-        r="80 + wave(2) * 20" 
+      &lt;pxl-circle
+        x="500"
+        y="300"
+        r="80 + wave(2) * 20"
         fill="#f97316"&gt;
       &lt;/pxl-circle&gt;
     &lt;/pxl-layer&gt;
@@ -95,39 +95,6 @@
       <p>Use the interactive controls below to verify that the Kilopixel engine is loaded and responsive:</p>
 
       <div class="demo-container">
-        <pxl-stage ratio="16 / 9" class="demo-stage">
-          <pxl-layer>
-            <!-- 1. Background Grid -->
-            <pxl-grid stroke="#f1f5f9" major="4"></pxl-grid>
-
-            <!-- 2. Shape helpers -->
-            <pxl-line x1="0" y1="ref.sec4Circle.y" x2="ref.sec4Circle.x" y2="ref.sec4Circle.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.sec4Circle.x / 2" y="ref.sec4Circle.y + 15" baseline="top" align="center" text="`x = ${ref.sec4Circle.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec4Circle.x" y1="0" x2="ref.sec4Circle.x" y2="ref.sec4Circle.y" stroke="#fdba74" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.sec4Circle.x + 15" y="ref.sec4Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.sec4Circle.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
-
-            <!-- 3. The shape -->
-            <pxl-circle id="sec4Circle"
-              x="500" 
-              y="300" 
-              r="80 + wave(2) * 20" 
-              fill="#ffedd566" stroke="#f97316" strokewidth="2">
-            </pxl-circle>
-
-            <!-- 4. Shape center (Top) -->
-            <pxl-circle x="ref.sec4Circle.x" y="ref.sec4Circle.y" r="5" fill="#fb923c"></pxl-circle>
-            <pxl-text 
-              x="ref.sec4Circle.x + 15" 
-              y="ref.sec4Circle.y - 15" 
-              baseline="bottom"
-              text="`Circle (${ref.sec4Circle.x}, ${ref.sec4Circle.y})`" 
-              size="27" 
-              fill="#fb923c" 
-              font="monospace">
-            </pxl-text>
-          </pxl-layer>
-        </pxl-stage>
-
         <!-- Tabbed Controls -->
         <div class="demo-controls">
           <div class="demo-controls-header">
@@ -142,16 +109,41 @@
               <div class="control-group">
                 <label>Center X <span id="sec4CircleXVal">500</span></label>
                 <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
-                  oninput="pxl.nodes.sec4Circle.set('x', this.value); document.getElementById('sec4CircleXVal').innerText = this.value;">
+                  oninput="document.getElementById('sec4Circle').setAttribute('x', this.value); document.getElementById('sec4CircleXVal').innerText = this.value;">
               </div>
               <div class="control-group">
                 <label>Center Y <span id="sec4CircleYVal">300</span></label>
                 <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
-                  oninput="pxl.nodes.sec4Circle.set('y', this.value); document.getElementById('sec4CircleYVal').innerText = this.value;">
+                  oninput="document.getElementById('sec4Circle').setAttribute('y', this.value); document.getElementById('sec4CircleYVal').innerText = this.value;">
               </div>
             </div>
           </div>
         </div>
+
+        <pxl-stage ratio="5 / 3" class="demo-stage">
+          <pxl-layer>
+            <!-- 1. Background Grid -->
+            <pxl-grid stroke="#f1f5f9" major="4"></pxl-grid>
+
+            <!-- 2. Shape helpers -->
+            <pxl-line x1="0" y1="ref.sec4Circle.y" x2="ref.sec4Circle.x" y2="ref.sec4Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec4Circle.x / 2" y="ref.sec4Circle.y + 15" baseline="top" align="center" text="`x = ${ref.sec4Circle.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+            <pxl-line x1="ref.sec4Circle.x" y1="0" x2="ref.sec4Circle.x" y2="ref.sec4Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec4Circle.x + 15" y="ref.sec4Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.sec4Circle.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+
+            <!-- 3. The shape -->
+            <pxl-circle id="sec4Circle" x="500" y="300" r="80 + wave(2) * 20"
+              fill="#ffedd566" stroke="#f97316" strokewidth="4">
+            </pxl-circle>
+
+            <!-- 4. Shape center -->
+            <pxl-circle x="ref.sec4Circle.x" y="ref.sec4Circle.y" r="5" fill="#fb923c"></pxl-circle>
+            <pxl-text x="ref.sec4Circle.x + 15" y="ref.sec4Circle.y - 15" baseline="bottom"
+              text="`Circle (${ref.sec4Circle.x}, ${ref.sec4Circle.y})`"
+              size="27" fill="#fb923c" font="monospace">
+            </pxl-text>
+          </pxl-layer>
+        </pxl-stage>
       </div>
 
       </div>
