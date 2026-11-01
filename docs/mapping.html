@@ -586,11 +586,19 @@
               <pxl-circle x="850" y="150" r="5" fill="#60a5fa"></pxl-circle>
               <pxl-text x="850" y="35" baseline="bottom" text="'Needle'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
 
-              <!-- Readout: own rotate vs. total direction; the value in blue 500 like the needle -->
-              <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Needle's Space:`"></pxl-text>
-              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Own Rotate:   ' + Math.round(ref.sec4Pointer.rotate)"></pxl-text>
-              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Total Rotate: '"></pxl-text>
-              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'              ' + Math.round(toLocal(ref.sec4Pointer, 'rotate'))"></pxl-text>
+              <!-- Readout: total rotation = layer (violet 400) + group (orange 300) + pointer (orange 400); total in blue 500 like the needle.
+                   The raw sum, not toLocal's value: toLocal wraps to -180..180, so 300 would show as -60 next to (120 + 90 + 90). -->
+              <pxl-text x="465" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Needle's Space:`"></pxl-text>
+              <pxl-text x="465" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace"
+                text="'Mapped rotate: ' + ' '.repeat(String(Math.round(ref.sec4Layer.rotate + ref.sec4Group.rotate + ref.sec4Pointer.rotate)).length) + ' (' + ' '.repeat(String(Math.round(ref.sec4Layer.rotate)).length) + ' + ' + ' '.repeat(String(Math.round(ref.sec4Group.rotate)).length) + ' + ' + ' '.repeat(String(Math.round(ref.sec4Pointer.rotate)).length) + ')'"></pxl-text>
+              <pxl-text x="465" y="570" baseline="bottom" size="27" fill="#3b82f6" font="monospace"
+                text="' '.repeat(15) + Math.round(ref.sec4Layer.rotate + ref.sec4Group.rotate + ref.sec4Pointer.rotate)"></pxl-text>
+              <pxl-text x="465" y="570" baseline="bottom" size="27" fill="#a78bfa" font="monospace"
+                text="' '.repeat(15 + String(Math.round(ref.sec4Layer.rotate + ref.sec4Group.rotate + ref.sec4Pointer.rotate)).length + 2) + Math.round(ref.sec4Layer.rotate)"></pxl-text>
+              <pxl-text x="465" y="570" baseline="bottom" size="27" fill="#fdba74" font="monospace"
+                text="' '.repeat(15 + String(Math.round(ref.sec4Layer.rotate + ref.sec4Group.rotate + ref.sec4Pointer.rotate)).length + 2 + String(Math.round(ref.sec4Layer.rotate)).length + 3) + Math.round(ref.sec4Group.rotate)"></pxl-text>
+              <pxl-text x="465" y="570" baseline="bottom" size="27" fill="#fb923c" font="monospace"
+                text="' '.repeat(15 + String(Math.round(ref.sec4Layer.rotate + ref.sec4Group.rotate + ref.sec4Pointer.rotate)).length + 2 + String(Math.round(ref.sec4Layer.rotate)).length + 3 + String(Math.round(ref.sec4Group.rotate)).length + 3) + Math.round(ref.sec4Pointer.rotate)"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -735,11 +743,18 @@
             <pxl-layer>
               <pxl-circle id="sec5Ring" x="toLocal(ref.sec5Planet, 'x')" y="toLocal(ref.sec5Planet, 'y')" r="ref.sec5Planet.r * toLocal(ref.sec5Planet, 'zoom') + 15" stroke="#3b82f6" strokewidth="4"></pxl-circle>
 
-              <!-- Readout: own zoom vs. total zoom; the value in blue 500 like the ring -->
-              <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Ring's Space:`"></pxl-text>
-              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Own Zoom:   ' + ref.sec5Planet.zoom"></pxl-text>
-              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Total Zoom: '"></pxl-text>
-              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'            ' + Math.round(toLocal(ref.sec5Planet, 'zoom') * 100) / 100"></pxl-text>
+              <!-- Readout: total zoom = layer (violet 400) × group (orange 300) × planet (orange 400); total in blue 500 like the ring -->
+              <pxl-text x="480" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Ring's Space:`"></pxl-text>
+              <pxl-text x="480" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace"
+                text="'Mapped zoom: ' + ' '.repeat(String(Math.round(toLocal(ref.sec5Planet, 'zoom') * 100) / 100).length) + ' (' + ' '.repeat(String(ref.sec5Layer.zoom).length) + ' × ' + ' '.repeat(String(ref.sec5Group.zoom).length) + ' × ' + ' '.repeat(String(ref.sec5Planet.zoom).length) + ')'"></pxl-text>
+              <pxl-text x="480" y="570" baseline="bottom" size="27" fill="#3b82f6" font="monospace"
+                text="' '.repeat(13) + Math.round(toLocal(ref.sec5Planet, 'zoom') * 100) / 100"></pxl-text>
+              <pxl-text x="480" y="570" baseline="bottom" size="27" fill="#a78bfa" font="monospace"
+                text="' '.repeat(13 + String(Math.round(toLocal(ref.sec5Planet, 'zoom') * 100) / 100).length + 2) + ref.sec5Layer.zoom"></pxl-text>
+              <pxl-text x="480" y="570" baseline="bottom" size="27" fill="#fdba74" font="monospace"
+                text="' '.repeat(13 + String(Math.round(toLocal(ref.sec5Planet, 'zoom') * 100) / 100).length + 2 + String(ref.sec5Layer.zoom).length + 3) + ref.sec5Group.zoom"></pxl-text>
+              <pxl-text x="480" y="570" baseline="bottom" size="27" fill="#fb923c" font="monospace"
+                text="' '.repeat(13 + String(Math.round(toLocal(ref.sec5Planet, 'zoom') * 100) / 100).length + 2 + String(ref.sec5Layer.zoom).length + 3 + String(ref.sec5Group.zoom).length + 3) + ref.sec5Planet.zoom"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
