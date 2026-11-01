@@ -258,11 +258,12 @@
               <pxl-circle x="0" y="0" r="5" fill="#93c5fd"></pxl-circle>
               <pxl-text x="15" y="-15" baseline="bottom" text="'Layer 2 Center'" size="27" fill="#93c5fd" font="monospace"></pxl-text>
 
-              <!-- Ring center to the axes (offset helpers, step 600) -->
-              <pxl-line x1="ref.sec2Ring.x" y1="ref.sec2Ring.y" x2="ref.sec2Ring.x" y2="0" stroke="#2563eb" strokewidth="2" linedash="[5, 5]"></pxl-line>
-              <pxl-line x1="ref.sec2Ring.x" y1="ref.sec2Ring.y" x2="0" y2="ref.sec2Ring.y" stroke="#2563eb" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <!-- Ring center to the axes (center helpers, step 300) -->
+              <pxl-line x1="ref.sec2Ring.x" y1="ref.sec2Ring.y" x2="ref.sec2Ring.x" y2="0" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="ref.sec2Ring.x" y1="ref.sec2Ring.y" x2="0" y2="ref.sec2Ring.y" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
               <pxl-circle id="sec2Ring" x="toLocal(ref.sec2Planet, 'x')" y="toLocal(ref.sec2Planet, 'y')" r="60" stroke="#3b82f6" strokewidth="4"></pxl-circle>
+              <pxl-circle x="ref.sec2Ring.x" y="ref.sec2Ring.y" r="5" fill="#60a5fa"></pxl-circle>
             </pxl-layer>
 
             <!-- Readout of the Mapped Values -->
@@ -396,7 +397,7 @@
               <pxl-circle x="ref.sec3Planet.x" y="ref.sec3Planet.y" r="5" fill="#fb923c"></pxl-circle>
               <pxl-text x="ref.sec3Planet.x" y="ref.sec3Planet.y - 15" baseline="bottom" text="'Planet Center'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
               <pxl-circle x="ref.sec3Planet.tx" y="ref.sec3Planet.ty" r="5" fill="#c2410c"></pxl-circle>
-              <pxl-text x="ref.sec3Planet.tx + 55" y="ref.sec3Planet.ty" baseline="middle" text="'Planet'" size="27" fill="#fb923c" font="monospace"></pxl-text>
+              <pxl-text x="ref.sec3Planet.tx + 55" y="ref.sec3Planet.ty" baseline="middle" text="'Planet'" size="27" fill="#c2410c" font="monospace"></pxl-text>
             </pxl-layer>
 
             <!-- Readers in an Untransformed Layer -->
@@ -445,7 +446,7 @@
 
   &lt;!-- Needle in an untransformed layer --&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-line x="780" y="270" x1="-80" x2="80"
+    &lt;pxl-line x="850" y="150" x1="-50" x2="50"
       stroke="#3b82f6" strokewidth="4" arrowend="auto"
       rotate="<mark id="sec4NeedleRotCode" class="highlight-reactive">toLocal(ref.pointer, 'rotate')</mark>"&gt;
     &lt;/pxl-line&gt;
@@ -540,30 +541,28 @@
               <pxl-circle x="0" y="0" r="5" fill="#a78bfa"></pxl-circle>
               <pxl-text x="-15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#a78bfa" font="monospace" align="right"></pxl-text>
 
-              <!-- Arm to the group (offset helper, step 600) and its center (step 400) -->
-              <pxl-line x2="ref.sec4Group.x" y2="ref.sec4Group.y" stroke="#ea580c" strokewidth="2" linedash="[5, 5]"></pxl-line>
-              <pxl-circle x="ref.sec4Group.x" y="ref.sec4Group.y" r="5" fill="#fb923c"></pxl-circle>
+              <!-- Layer center to group center (center helper 300) and the group center (300, two-layer colors) -->
+              <pxl-line x2="ref.sec4Group.x" y2="ref.sec4Group.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-circle x="ref.sec4Group.x" y="ref.sec4Group.y" r="5" fill="#fdba74"></pxl-circle>
 
               <pxl-group id="sec4Group" x="150" y="-100" rotate="0">
-                <pxl-line x2="ref.sec4Pointer.x" y2="ref.sec4Pointer.y" stroke="#ea580c" strokewidth="2" linedash="[5, 5]"></pxl-line>
+                <pxl-text x="0" y="-15" baseline="bottom" text="'Group Center'" size="27" fill="#fdba74" font="monospace" align="center"></pxl-text>
+                <pxl-line x2="ref.sec4Pointer.x" y2="ref.sec4Pointer.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
                 <pxl-circle x="ref.sec4Pointer.x" y="ref.sec4Pointer.y" r="5" fill="#fb923c"></pxl-circle>
 
                 <pxl-line id="sec4Pointer" x="100" y="50" x2="100" rotate="90" stroke="#f97316" strokewidth="4" arrowend="auto"></pxl-line>
+                <!-- Label past the arrow's tip, across the arrow: turned 90° less than the pointer, so the offset dy runs along the arrow -->
+                <pxl-text x="ref.sec4Pointer.x" y="ref.sec4Pointer.y" dy="ref.sec4Pointer.x2 + 15" rotate="ref.sec4Pointer.rotate - 90" baseline="top" text="'Pointer'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
               </pxl-group>
             </pxl-layer>
 
             <!-- Needle in an Untransformed Layer (Blue Scheme) -->
             <pxl-layer>
-              <!-- Dial and the 0° direction (center helpers, step 300) -->
-              <pxl-circle x="780" y="270" r="110" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]"></pxl-circle>
-              <pxl-line x1="780" y1="270" x2="890" y2="270" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]"></pxl-line>
-              <pxl-line id="sec4Needle" x="780" y="270" x1="-80" x2="80" rotate="toLocal(ref.sec4Pointer, 'rotate')" stroke="#3b82f6" strokewidth="4" arrowend="auto"></pxl-line>
-              <pxl-circle x="780" y="270" r="5" fill="#60a5fa"></pxl-circle>
-              <pxl-text x="780" y="145" baseline="bottom" text="'Needle'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
-
-              <!-- Labels at the centers, placed with toLocal so they don't turn with the layer and group -->
-              <pxl-text x="toLocal(ref.sec4Group, 'x') + 15" y="toLocal(ref.sec4Group, 'y') - 15" baseline="bottom" text="'Group Center'" size="27" fill="#fb923c" font="monospace"></pxl-text>
-              <pxl-text x="toLocal(ref.sec4Pointer, 'x') - 15" y="toLocal(ref.sec4Pointer, 'y') + 15" baseline="top" text="'Pointer'" size="27" fill="#fb923c" font="monospace" align="right"></pxl-text>
+              <!-- Dial (center helper, step 300) -->
+              <pxl-circle x="850" y="150" r="100" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]"></pxl-circle>
+              <pxl-line id="sec4Needle" x="850" y="150" x1="-50" x2="50" rotate="toLocal(ref.sec4Pointer, 'rotate')" stroke="#3b82f6" strokewidth="4" arrowend="auto"></pxl-line>
+              <pxl-circle x="850" y="150" r="5" fill="#60a5fa"></pxl-circle>
+              <pxl-text x="850" y="35" baseline="bottom" text="'Needle'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
 
               <!-- Readout: own rotate vs. total direction; the value in blue 700 like the needle -->
               <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Needle's Space:`"></pxl-text>
@@ -693,25 +692,26 @@
               <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-circle x="0" y="0" r="5" fill="#a78bfa"></pxl-circle>
+              <pxl-text x="-15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#a78bfa" font="monospace" align="right"></pxl-text>
 
-              <!-- Arm to the group (offset helper, step 600) and its center (step 400) -->
-              <pxl-line x2="ref.sec5Group.x" y2="ref.sec5Group.y" stroke="#ea580c" strokewidth="2" linedash="[5, 5]"></pxl-line>
-              <pxl-circle x="ref.sec5Group.x" y="ref.sec5Group.y" r="5" fill="#fb923c"></pxl-circle>
+              <!-- Group position along the layer's axes (center helpers, step 300) -->
+              <pxl-line x2="ref.sec5Group.x" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="ref.sec5Group.x" x2="ref.sec5Group.x" y2="ref.sec5Group.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
 
               <pxl-group id="sec5Group" x="150" y="0" zoom="1.5">
-                <pxl-line x2="ref.sec5Planet.x" y2="ref.sec5Planet.y" stroke="#ea580c" strokewidth="2" linedash="[5, 5]"></pxl-line>
+                <!-- Group center (300, two-layer colors) and the planet's position along the group's axes (center helpers 300) -->
+                <pxl-circle x="0" y="0" r="5" fill="#fdba74"></pxl-circle>
+                <pxl-text x="-15" y="15" baseline="top" text="'Group Center'" size="27" fill="#fdba74" font="monospace" align="right"></pxl-text>
+                <pxl-line x2="ref.sec5Planet.x" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+                <pxl-line x1="ref.sec5Planet.x" x2="ref.sec5Planet.x" y2="ref.sec5Planet.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
                 <pxl-circle id="sec5Planet" x="100" y="0" zoom="1" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
+                <pxl-text x="ref.sec5Planet.x" y="ref.sec5Planet.y - ref.sec5Planet.r * ref.sec5Planet.zoom - 15" baseline="bottom" text="'Planet'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
               </pxl-group>
             </pxl-layer>
 
             <!-- Ring in an Untransformed Layer (Blue Scheme) -->
             <pxl-layer>
               <pxl-circle id="sec5Ring" x="toLocal(ref.sec5Planet, 'x')" y="toLocal(ref.sec5Planet, 'y')" r="ref.sec5Planet.r * toLocal(ref.sec5Planet, 'zoom') + 15" stroke="#3b82f6" strokewidth="4"></pxl-circle>
-
-              <!-- Labels placed with toLocal, so they don't scale with the layer and group -->
-              <pxl-text x="toLocal(ref.sec5Layer, 'x') - 15" y="toLocal(ref.sec5Layer, 'y') - 15" baseline="bottom" text="'Layer Center'" size="27" fill="#a78bfa" font="monospace" align="right"></pxl-text>
-              <pxl-text x="toLocal(ref.sec5Group, 'x')" y="toLocal(ref.sec5Group, 'y') - 15" baseline="bottom" text="'Group Center'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
-              <pxl-text x="ref.sec5Ring.x" y="ref.sec5Ring.y - ref.sec5Ring.r - 15" baseline="bottom" text="'Planet'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
 
               <!-- Readout: own zoom vs. total zoom; the value in blue 700 like the ring -->
               <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Ring's Space:`"></pxl-text>
