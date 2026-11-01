@@ -770,7 +770,7 @@
           <li><strong>Direction and Lean:</strong> <code>toLocal(ref.flag, 'rotate')</code> returns the direction of the flag's x axis, <code>toLocal(ref.flag, 'skewx')</code> the lean of its y axis.</li>
           <li><strong>Width and Height:</strong> <code>toLocal(ref.flag, 'scalex')</code> and <code>toLocal(ref.flag, 'scaley')</code> return the total scale along both axes. <code>'scaley'</code> is negative when the flag is mirrored.</li>
         </ul>
-        <p>Together, these six values rebuild any combination of rotation, zoom, stretch, skew and mirror. There is no <code>'skewy'</code>: a skew along y can always be written with the other four. The outline's own <code>zoom</code> stays free, so <code>zoom="1.2"</code> draws the copy 20 % larger around the flag's center.</p>
+        <p>Together, these six values rebuild any combination of rotation, zoom, stretch, skew and mirror. There is no <code>'skewy'</code>: a skew along y can always be written with <code>rotate</code>, <code>scalex</code>, <code>scaley</code> and <code>skewx</code>. The outline's own <code>zoom</code> stays free, so <code>zoom="1.2"</code> draws the copy 20 % larger around the flag's center. If the target has an offset (<code>dx</code>, <code>dy</code>), map <code>'tx'</code> and <code>'ty'</code> instead of <code>'x'</code> and <code>'y'</code> and leave out the offset: the copy then sits on the drawn shape, and its own <code>zoom</code> grows it around the shape instead of around the distant center.</p>
 
         <div class="callout-info">
           <p class="callout-title">Totals, Not Attributes</p>

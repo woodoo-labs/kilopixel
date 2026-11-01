@@ -779,6 +779,8 @@ dx="ref.el.dx" dy="ref.el.dy"
 
 The reader doesn't set `skewy` and keeps `zoom` at `1` (or uses it on purpose: `zoom="1.1"` is an outline 10 % larger). The offset comes from the plain ref, because the reader's own rotate / scale / skew turn it exactly like the target's.
 
+**Variant with the total position**: `x="toLocal(ref.el, 'tx')" y="toLocal(ref.el, 'ty')"` and no `dx` / `dy`, with the same four frame values, draws the same shape: an offset is applied after rotate / scale / skew, so moving the pivot to the drawn position gives the same picture. The two variants differ only in the copy's own pivot. With `'tx'` / `'ty'`, the copy's own `zoom` or `rotate` acts around the drawn shape, which is what an outline around a target with an offset needs (`zoom="1.1"` stays centered on it). With `'x'` / `'y'` + `dx` / `dy`, they act around the target's pivot, so a zoomed outline drifts away from the shape, and an added `rotate` makes the copy orbit the same pivot.
+
 **Unknown names**: `pxl.checkToLocalProperties` warns once at compile time when a literal property name isn't in `pxl.toLocalProperties` (e.g. `'skewy'`, the removed `'scale'`, typos). `pxl.toLocal` itself returns `0` for them without logging, because it runs every frame. Names given as variables aren't checked.
 
 **Algebraic Identity**: `toLocal(target, 'x') + toLocal(target, 'dx')` equals `toLocal(target, 'tx')`. The `'tx'`/`'ty'` properties are shortcuts for the sum of center + offset. Use `'tx'`/`'ty'` when tracking where a shape actually appears (e.g., connecting lines). Use `'x'`/`'y'` when tracking the pivot point (e.g., drawing orbit rings around a center).
