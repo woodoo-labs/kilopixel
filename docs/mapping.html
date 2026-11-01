@@ -408,13 +408,18 @@
               <pxl-line id="sec3Line" x1="150" y1="520" x2="toLocal(ref.sec3Planet, 'tx')" y2="toLocal(ref.sec3Planet, 'ty')" stroke="#22c55e" strokewidth="4"></pxl-line>
               <pxl-circle x="ref.sec3Line.x1" y="ref.sec3Line.y1" r="5" fill="#15803d"></pxl-circle>
               <pxl-text x="ref.sec3Line.x1" y="ref.sec3Line.y1 - 15" baseline="bottom" text="'Start Point'" size="27" fill="#15803d" font="monospace" align="center"></pxl-text>
-              <pxl-circle x="ref.sec3Line.x2" y="ref.sec3Line.y2" r="5" fill="#4ade80"></pxl-circle>
+              <pxl-circle x="ref.sec3Line.x2" y="ref.sec3Line.y2" r="5" fill="#15803d"></pxl-circle>
 
-              <!-- Readout: x + dx = tx -->
-              <pxl-text x="570" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace"
-                text="'x ' + Math.round(toLocal(ref.sec3Planet, 'x')) + ' + dx ' + Math.round(toLocal(ref.sec3Planet, 'dx')) + ' = tx ' + Math.round(toLocal(ref.sec3Planet, 'tx'))"></pxl-text>
-              <pxl-text x="570" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace"
-                text="'y ' + Math.round(toLocal(ref.sec3Planet, 'y')) + ' + dy ' + Math.round(toLocal(ref.sec3Planet, 'dy')) + ' = ty ' + Math.round(toLocal(ref.sec3Planet, 'ty'))"></pxl-text>
+              <!-- Readout in the readers' space: x + dx = tx. The green text starts with spaces as wide as the grey part (monospace) -->
+              <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Line's Space:`"></pxl-text>
+              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace"
+                text="'x ' + Math.round(toLocal(ref.sec3Planet, 'x')) + ' + dx ' + Math.round(toLocal(ref.sec3Planet, 'dx')) + ' = '"></pxl-text>
+              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#15803d" font="monospace"
+                text="' '.repeat(('x ' + Math.round(toLocal(ref.sec3Planet, 'x')) + ' + dx ' + Math.round(toLocal(ref.sec3Planet, 'dx')) + ' = ').length) + 'tx ' + Math.round(toLocal(ref.sec3Planet, 'tx'))"></pxl-text>
+              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace"
+                text="'y ' + Math.round(toLocal(ref.sec3Planet, 'y')) + ' + dy ' + Math.round(toLocal(ref.sec3Planet, 'dy')) + ' = '"></pxl-text>
+              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#15803d" font="monospace"
+                text="' '.repeat(('y ' + Math.round(toLocal(ref.sec3Planet, 'y')) + ' + dy ' + Math.round(toLocal(ref.sec3Planet, 'dy')) + ' = ').length) + 'ty ' + Math.round(toLocal(ref.sec3Planet, 'ty'))"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
