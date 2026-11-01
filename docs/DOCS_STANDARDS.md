@@ -90,7 +90,7 @@ Elements within a `<pxl-layer>` are drawn in strict DOM order (back-to-front). A
     * **Canonical Examples:**
       * Dimensions: `width (<code>w</code>)`, `height (<code>h</code>)`, `thickness (<code>strokewidth</code>)`
       * Radii: `outer radius (<code>r</code>)`, `inner radius (<code>ir</code>)`, `corner radius (<code>r</code>)`
-      * Transforms: `rotation (<code>rotate</code>)`, `scaling (<code>scale</code>, <code>scalex</code>, <code>scaley</code>)`
+      * Transforms: `rotation (<code>rotate</code>)`, `uniform scale (<code>zoom</code>)`, `scaling (<code>zoom</code>, <code>scalex</code>, <code>scaley</code>)`
       * Line Styles: `end caps (<code>linecap</code>)`, `dash patterns (<code>linedash</code>)`
       * Arrowheads: `start (<code>arrowstart</code>) and end (<code>arrowend</code>) arrowheads`
     * **Consistency Rule:** Always place the plain lowercase English concept first, immediately followed by the exact `<code>` attribute tag enclosed in parentheses. This establishes a predictable, effortless visual bridge between conceptual design terms and concrete Kilopixel HTML markup.

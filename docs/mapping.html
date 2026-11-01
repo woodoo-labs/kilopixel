@@ -608,7 +608,7 @@
         <!-- SECTION 5: ZOOM                                                   -->
         <!-- ================================================================= -->
         <h2>5. Zoom</h2>
-        <p>A shape's zoom (<code>zoom</code>) scales it inside its parent. When the parent layer and group are zoomed as well, the factors multiply: the planet below is drawn 1.2 × 1.5 = 1.8 times its size. <code>ref.planet.zoom</code> still returns only the planet's own value.</p>
+        <p>A shape's uniform scale (<code>zoom</code>) resizes it inside its parent. When the parent layer and group are zoomed as well, the factors multiply: the planet below is drawn 1.2 × 1.5 = 1.8 times its size. <code>ref.planet.zoom</code> still returns only the planet's own value.</p>
         <p><code>toLocal(ref.planet, 'zoom')</code> returns the planet's total zoom, seen from the reading shape's space. The ring multiplies the planet's radius by it and adds 15, so it surrounds the planet with the same gap at any zoom.</p>
 
         <div class="callout-info">
