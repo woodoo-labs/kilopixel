@@ -930,6 +930,94 @@
         </div>
 
 
+        <!-- ================================================================= -->
+        <!-- SECTION 7: DRAW ORDER                                             -->
+        <!-- ================================================================= -->
+        <h2>7. Draw Order</h2>
+        <p>Layers are drawn in the order they appear in the markup, and the shapes inside a layer as well. A value that changes over time (<code>t</code>, <code>wave()</code>) is evaluated when its shape is drawn. A shape that reads such a target before the target is drawn gets the value from the previous frame and trails one frame behind.</p>
+        <p>Put reading shapes after their targets: in a later layer, or later in the same layer. Below, both planets orbit at the same speed. On the left, the ring's layer comes before the planet's layer and the ring lags behind; on the right, it comes after and the ring stays on the planet. The faster the orbit, the larger the gap.</p>
+
+        <div class="callout-info">
+          <p class="callout-title">Slider Changes Don't Lag</p>
+          <p class="callout-body">Values set from outside (a slider, <code>setAttribute()</code>, a <code>&lt;pxl-var&gt;</code> that a slider changes) update every reading shape right away, in any order. Only values that change over time depend on the order. An animated <code>&lt;pxl-var&gt;</code> belongs before everything that reads it, for example at the top of the first layer that uses it.</p>
+        </div>
+
+        <!-- Declarative HTML markup above stage -->
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;!-- Left: the ring's layer comes before the planet's layer --&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-circle r="45" stroke="#3b82f6" strokewidth="4"
+      x="<mark class="highlight-reactive">toLocal(ref.leftPlanet, 'x')</mark>" y="<mark class="highlight-reactive">toLocal(ref.leftPlanet, 'y')</mark>"&gt;
+    &lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+  &lt;pxl-layer x="250" y="330" rotate="t * <mark id="sec7LeftSpeedCode">180</mark>"&gt;
+    &lt;pxl-circle id="leftPlanet" x="170" r="30" fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+
+  &lt;!-- Right: the ring's layer comes after the planet's layer --&gt;
+  &lt;pxl-layer x="750" y="330" rotate="t * <mark id="sec7RightSpeedCode">180</mark>"&gt;
+    &lt;pxl-circle id="rightPlanet" x="170" r="30" fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;&lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+  &lt;pxl-layer&gt;
+    &lt;pxl-circle r="45" stroke="#3b82f6" strokewidth="4"
+      x="<mark class="highlight-reactive">toLocal(ref.rightPlanet, 'x')</mark>" y="<mark class="highlight-reactive">toLocal(ref.rightPlanet, 'y')</mark>"&gt;
+    &lt;/pxl-circle&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec7PlanetsTab')">Planets</button>
+              </div>
+            </div>
+
+            <!-- Planets Tab -->
+            <div class="tab-content active" id="sec7PlanetsTab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Speed <span class="indicator-dot"></span></span> <span id="sec7SpeedVal">180°/s</span></label>
+                  <input type="range" min="0" max="360" step="30" value="180" autocomplete="off" id="sec7SpeedInput"
+                    oninput="document.getElementById('sec7LeftOrbit').setAttribute('rotate', 't * ' + this.value); document.getElementById('sec7RightOrbit').setAttribute('rotate', 't * ' + this.value); document.getElementById('sec7SpeedVal').innerText = this.value + '°/s'; document.getElementById('sec7LeftSpeedCode').innerText = this.value; document.getElementById('sec7RightSpeedCode').innerText = this.value;" data-mark="sec7LeftSpeedCode, sec7RightSpeedCode">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 7 Stage -->
+          <pxl-stage id="sec7Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              <pxl-text x="250" y="40" baseline="top" size="27" fill="#64748b" font="monospace" align="center" text="'Ring Before Planet'"></pxl-text>
+              <pxl-text x="750" y="40" baseline="top" size="27" fill="#64748b" font="monospace" align="center" text="'Ring After Planet'"></pxl-text>
+            </pxl-layer>
+
+            <!-- Left: the ring's layer before the planet's layer -->
+            <pxl-layer>
+              <pxl-circle id="sec7LeftRing" r="45" x="toLocal(ref.sec7LeftPlanet, 'x')" y="toLocal(ref.sec7LeftPlanet, 'y')" stroke="#3b82f6" strokewidth="4"></pxl-circle>
+            </pxl-layer>
+            <pxl-layer id="sec7LeftOrbit" x="250" y="330" rotate="t * 180">
+              <!-- Layer center (violet 400) and the orbit at the planet's distance (center helper 300) -->
+              <pxl-circle r="170" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-circle>
+              <pxl-circle r="5" fill="#a78bfa"></pxl-circle>
+              <pxl-circle id="sec7LeftPlanet" x="170" r="30" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
+            </pxl-layer>
+
+            <!-- Right: the ring's layer after the planet's layer -->
+            <pxl-layer id="sec7RightOrbit" x="750" y="330" rotate="t * 180">
+              <pxl-circle r="170" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-circle>
+              <pxl-circle r="5" fill="#a78bfa"></pxl-circle>
+              <pxl-circle id="sec7RightPlanet" x="170" r="30" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
+            </pxl-layer>
+            <pxl-layer>
+              <pxl-circle id="sec7RightRing" r="45" x="toLocal(ref.sec7RightPlanet, 'x')" y="toLocal(ref.sec7RightPlanet, 'y')" stroke="#3b82f6" strokewidth="4"></pxl-circle>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+
       </div>
     </main>
 
