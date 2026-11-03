@@ -17,13 +17,13 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 | `tests/index.html` | Automated engine tests in the browser (`http://localhost:8124/tests/`); result in the tab title and `window.kilopixelTests` |
 | `examples/test*.html` | Manual demo and test pages |
 | `scratch/` | Temporary files, gitignored |
-| `dist/`, `docs/js/pxl.min.js`, `docs/download/*` | **Build output.** Never edit by hand; they are committed |
+| `dist/`, `docs/js/pxl.min.js`, `docs/download/*` | **Build output.** Never edit by hand; they are committed. Exception: `docs/download/index.html` is the starter kit source, from which `node build.js` makes the zip |
 
 ## Workflow
 
 - **Approval before edits:** before changing any project file outside `scratch/`, describe what you will change and wait for an explicit OK. A code preview is not required. Reading, searching, running the dev server and writing to `scratch/` need no approval.
 - **Build:** run `node build.js` after changing anything in `js/` (not after `.html` / `.md`-only changes). It runs Terser through `npx`; never install packages locally or create `node_modules` (use `npx` or a global install).
-- **File size after a build:** update the `~NNKB` size of `pxl.min.js` (the build's "Minified size", rounded to whole KB) in `docs/installation.html` (section 1 text and download button) and in the header line of `.agents/KILOPIXEL.md`.
+- **File size after a build:** update the `~NNKB` size of `pxl.min.js` (the build's "Minified size", rounded to whole KB) in `docs/installation.html` (section 1 text and download button) and in the header line of `.agents/KILOPIXEL.md`, and the `~NNKB gzipped` size (the build's "Gzipped size") in the section 1 text of `docs/installation.html`.
 - **Keep the reference in sync:** when engine behavior or an attribute changes, update `.agents/KILOPIXEL.md` in the same change, plus the affected docs pages and examples.
 - **Plan bigger changes first:** for non-trivial engine work, write a plan in `design/` and agree on it before implementing.
 - **Verify in the browser:** the dev server is `node tools/serve.js` (launch config `kilopixel`, http://localhost:8124, `/` redirects to `/docs/`). Check docs pages and `examples/` there, including the console.

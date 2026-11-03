@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const zlib = require('zlib');
 
 const VERSION = '0.1.0';
 
@@ -170,10 +171,13 @@ function build() {
     const minifiedCode = fs.readFileSync(outputPath, 'utf8');
     const originalSize = (Buffer.byteLength(code, 'utf8') / 1024).toFixed(2);
     const minifiedSize = (Buffer.byteLength(minifiedCode, 'utf8') / 1024).toFixed(2);
+    // What a server that compresses JavaScript (GitHub Pages, most hosts) sends over the network
+    const gzippedSize = (zlib.gzipSync(minifiedCode, { level: 9 }).length / 1024).toFixed(2);
     
     console.log('\n✅ Build successful!');
     console.log(`Original size: ${originalSize} KB`);
     console.log(`Minified size: ${minifiedSize} KB`);
+    console.log(`Gzipped size:  ${gzippedSize} KB`);
     console.log(`Saved unminified: ${unminifiedOutputPath}`);
     console.log(`Saved minified:   ${outputPath}`);
 
