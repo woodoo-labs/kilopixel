@@ -4,7 +4,7 @@
 - **Date**: 2026-11-04
 - **Related**: `design/2026-10-17_bundle_scope_plan.md` (classic script in `<head>`), `docs/installation.html` (script in `<head>` since 5891224)
 - **Target Implementation**: `js/elements/stage.js` (default styles, warning), `js/elements/variable.js` (`display: none`), `tests/index.html`, `docs/installation.html`, `.agents/KILOPIXEL.md` (Stage, Key Behavior)
-- **Prototypes**: `scratch/stage_width_check.html` (today, eight layouts), `scratch/stage_sizing_prototype.html` (defaults in a cascade layer; `?fallback=min` and `?fallback=minpct` for the rejected fallback widths)
+- **Prototypes**: `scratch/stage_width_check.html` (today, eight layouts), `scratch/stage_sizing_prototype.html` (defaults in a cascade layer; `?fallback=min` and `?fallback=minpct` for the rejected fallback widths), `scratch/zero_width_while_parsing.html` (width 0 while the page is parsed)
 
 ---
 
@@ -70,23 +70,40 @@ At load, `stage.js` adds one `<style>` element at the start of `<head>`:
 
 ### 4.2 Zero-Width Warning
 
-In `resize()`, before the early return:
+A width of 0 alone is not an error: while the page is still loading, the parent may not have its width yet. Measured in `scratch/zero_width_while_parsing.html` (script in `<head>`, stage in a centered wrapper, a paragraph that widens the wrapper later in the HTML): the stage reports `0 (loading, rects 1)`, then `828 (complete, rects 1)`. Warning at the first 0 would flag a page that works. So the warning waits until the page has loaded:
 
 ```js
-if (w === 0) {
-  // Laid out but 0 px wide (hidden stages have no box): the parent sizes itself to its content
-  if (!this._hasWarnedZeroWidth && this.getClientRects().length > 0) {
-    this._hasWarnedZeroWidth = true;
+resize() {
+  const w = this.clientWidth;
+  const h = this.clientHeight;
+  if (!this._hasCheckedWidth && this.getClientRects().length > 0) this.checkWidth(w);
+  if (w === 0) return;
+  …
+}
+
+// The first time the stage is laid out, a width of 0 usually means its parent sizes itself to its content.
+// While the page loads, later HTML, images or load scripts can still give the parent its width, so the
+// warning waits for the load event and one frame.
+checkWidth(w) {
+  this._hasCheckedWidth = true;
+  if (w > 0) return;
+
+  const check = () => requestAnimationFrame(() => {
+    if (!this.isConnected || this.clientWidth > 0 || this.getClientRects().length === 0) return;
     console.warn('<pxl-stage> has no width: its parent sizes itself to its content (a flex or grid item, ' +
-      'inline-block, absolute). Give the parent a width, e.g. width: 100% or 600px.', this);
-  }
-  return;
+      'inline-block, absolute). Give the parent a width, e.g. width: 100% or 600px. ' +
+      'If the stage is meant to be hidden, ignore this.', this);
+  });
+  if (document.readyState === 'complete') check();
+  else window.addEventListener('load', check, { once: true });
 }
 ```
 
-- **Hidden stages stay quiet:** the ResizeObserver also fires with width 0 for a stage inside `display: none` (a closed tab), but then `getClientRects()` is empty. Measured: case B fires with width 0 and 1 rect, a stage in a `display: none` parent with width 0 and 0 rects.
-- **Once per stage:** `_hasWarnedZeroWidth` is set in the constructor; it isn't reset, so resizing a broken layout doesn't repeat the warning.
-- **Cost:** none per frame; `resize()` runs only when the size changes.
+- **Hidden stages stay quiet:** the ResizeObserver also fires with width 0 for a stage inside `display: none` (a closed tab), but then `getClientRects()` is empty. Measured: case B fires with width 0 and 1 rect, a stage in a `display: none` parent with width 0 and 0 rects. Such a stage is checked the first time it is shown.
+- **Only the first layout:** `_hasCheckedWidth` (set in the constructor) is set at the first `resize()` where the stage has a box, so a stage that shrinks to 0 later (a panel being closed) never warns, and the warning appears at most once per stage.
+- **Waits for loading:** the load event covers parsing, images without a size and most scripts that size containers at load. One more frame lets their layout settle.
+- **Remaining false alarm:** a stage in a panel that is already collapsed when the page opens (`width: 0; overflow: hidden`). Rare; the last sentence of the message covers it.
+- **Cost:** none per frame; `resize()` runs only when the size changes, and the check once per stage.
 
 ### 4.3 Rejected
 
@@ -116,12 +133,13 @@ The docs pages don't set a stage width (`docs.css` `.demo-stage` sets only `disp
 In `tests/index.html`:
 
 - An author rule `width: 300px` on a stage gives `clientWidth` 300.
-- A stage in a centered flex wrapper logs the warning once (spy on `console.warn`); a stage in a `display: none` parent logs nothing.
+- A stage in a centered flex wrapper logs the warning once, one frame after it is added (spy on `console.warn`).
+- No warning when the wrapper gets its width before that frame (a wide sibling added right after the stage), and none for a stage in a `display: none` parent.
 
 ## 8. Steps
 
 1. `stage.js`: add the sheet, remove the three inline styles; `variable.js`: remove the inline `display`.
-2. `stage.js`: the warning in `resize()`, the field in the constructor.
+2. `stage.js`: `checkWidth()` called from `resize()`, the `_hasCheckedWidth` field in the constructor.
 3. `node build.js`, update the sizes (CLAUDE.md "File size after a build").
 4. Tests; `tests/index.html` all passing.
 5. Check the examples in §5, all docs pages and the console.
