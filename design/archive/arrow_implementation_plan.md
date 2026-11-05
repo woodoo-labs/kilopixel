@@ -1,5 +1,7 @@
 # Add Dynamic Arrowheads to Shapes
 
+- **Status**: ⚪ **Superseded by** `design/2026-10-14_unified_arrowhead_geometry_plan.md`
+
 This plan introduces native arrowhead support for `<pxl-line>`, `<pxl-polyline>`, `<pxl-circle>`, and `<pxl-ellipse>`. It implements the mathematical offset and formatting rules we discussed, and ensures **zero performance overhead** by preventing irrelevant shapes from tracking arrow properties.
 
 *(Note: The `<pxl-line>` element has already been implemented and tested successfully).*

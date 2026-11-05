@@ -1,7 +1,7 @@
 # Technical Implementation Plan: Declarative `<pxl-plot>` Element
 
 **Date**: 2026-09-07  
-**Status**: Proposed Architecture & Design Specification  
+**Status**: 🟡 **Proposed** (2026-09-07)  
 **Target Files**: 
 - `js/compiler.js` (Expression compiler parameter injection & static-path guard)
 - `js/elements/shapes/plot.js` (New Custom Element implementation)

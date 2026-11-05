@@ -1,7 +1,7 @@
 # Circle API: `closed` Attribute vs. `mode` Enum
 
 **Date:** 2026-09-24  
-**Status:** Design Discussion (Decision Pending)  
+**Status**: ✅ **Implemented** (decision: the `closed` attribute instead of a `mode` enum)  
 **Supersedes Section 4.5 of:** `2026-09-23_circle_geometry_hardening_and_annular_sector_plan.md`  
 **Target Component:** `js/elements/shapes/circle.js`
 

@@ -1,7 +1,7 @@
 # Design Plan: `<pxl-path>` — Native SVG Path2D Element & Vector Sprites
 
 **Date**: 2026-09-30  
-**Status**: Draft  
+**Status**: 🟡 **Proposed** (2026-09-30; written before `scale` became `zoom`: update before implementing)  
 **Files affected**: `js/elements/shapes/path.js` (new), `js/elements/shape.js`, `js/interaction.js`, `build.js`
 
 ---

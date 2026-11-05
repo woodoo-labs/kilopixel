@@ -1,5 +1,7 @@
 # Option 5: Relative Pivot (dx/dy as pivot offset)
 
+- **Status**: ⚪ **Dropped** (the transform order x / y → rotate → scale → skew → dx / dy was kept)
+
 ## Summary
 
 Change the transform pipeline so that `x/y` = **visual position** and `dx/dy` = **relative pivot offset from position**. The pivot moves with the shape. Children of groups are positioned relative to `x/y`.

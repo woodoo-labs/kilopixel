@@ -1,6 +1,6 @@
 # Declarative HTML Output Element (`<pxl-out>`)
 
-- **Status**: 🟡 **Revised 2026-10-17, ready for review** (first draft 2026-08-02)
+- **Status**: 🟡 **Proposed** (revised 2026-10-17, first draft 2026-08-02)
 - **Date**: 2026-08-02 (revised 2026-10-17: based on `PxlNode`, Rule A, write-on-change, stage pause / `alwaysrender`, accessibility)
 - **Related**: `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, `static defaults`), `design/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`), `.agents/TODO.md` §5
 - **Target Implementation**: new `js/elements/out.js` (after `variable.js` in `build.js`)

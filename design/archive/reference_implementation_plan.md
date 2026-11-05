@@ -1,5 +1,7 @@
 # Implementation Plan: Zero-Cost Element Referencing (`ref.`)
 
+- **Status**: ✅ **Implemented** (current behavior: `.agents/KILOPIXEL.md`)
+
 This plan introduces the Zero-Cost element referencing registry with extreme 60fps performance optimizations.
 *(Note: The declarative `<pxl-var>` component has been deferred for a future update).*
 

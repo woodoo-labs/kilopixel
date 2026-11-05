@@ -1,6 +1,6 @@
 # Smooth Polyline Spline: Centripetal Catmull-Rom (D3 Style)
 
-- **Status**: 🟢 **Implemented** (2026-10-24; deviation from §4.3: one shared `loadSegment()` per segment instead of an inline rolling loop, §4.3.3). **The seam rule (§4.2) was implemented and removed again the same day**: round or sharp is decided by the points alone, `closed` only adds the closing segment (§4.2).
+- **Status**: ✅ **Implemented** (2026-10-24; deviation from §4.3: one shared `loadSegment()` per segment instead of an inline rolling loop, §4.3.3). **The seam rule (§4.2) was implemented and removed again the same day**: round or sharp is decided by the points alone, `closed` only adds the closing segment (§4.2).
 - **Date**: 2026-10-23
 - **Related**: `.agents/TODO.md` §15 (spline quality), `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming on smooth polylines, §4.3), `design/2026-10-18_polyline_optimization_plan.md` (§5 edge cases #8, #9, #11, #12; §6.2 smooth loop), `design/2026-09-07_plot_element_plan.md` and `design/2026-09-30_path_element_plan.md` (both reuse the polyline spline)
 - **Target Implementation**: `js/elements/shapes/polyline.js`, `js/elements/shapes/circle.js` and `ellipse.js` (arrow trim, §5.4), `.agents/KILOPIXEL.md` (Smoothing, Arrowheads), `docs/polyline.html` (section 2)
@@ -163,7 +163,7 @@ With stroking, the differences disappear in the rasterization time (50 points: 4
 
 - `splitSegment()` (de Casteljau), the arrow direction measured from the drawn curve (`aimArrow` from the curve point one head length in) and the drawing of the trimmed segment stay as they are (arrow plan §4.3).
 - `loadSegment(i, …)` must load the **new** control points. It calls the shared handle code (§4.3) instead of its own `tension6` formula, and no longer needs to return the chord length.
-- `design/arrow_implementation_plan.md` relies on "the end tangent equals the chord to the previous point". That's no longer true. Add a short note there; the current code doesn't depend on it.
+- `design/archive/arrow_implementation_plan.md` relies on "the end tangent equals the chord to the previous point". That's no longer true. Add a short note there; the current code doesn't depend on it.
 - With a seam, the start and end arrows sit on the seam point. Allowed, nothing special.
 
 ### 5.2 Distance trim (`trimParameter`)
@@ -290,7 +290,7 @@ Every smooth polyline with free ends or uneven spacing changes shape near those 
 2. `polyline.js`: `trimParameter()` replaces the chord estimates in `traceSmooth` (§5.2); arrows walk inward past zero-length end segments in `traceSmooth` and `traceStraight` (§5.3). `circle.js`: shaft end via `asin`; `ellipse.js`: `parameterOffset` via bisection (§5.4). `node build.js`.
 3. Tests §7 (scratch harness, compare against column F and `arrow_trim.html`; benchmark).
 4. `.agents/KILOPIXEL.md` → Smoothing: centripetal Catmull-Rom (D3 `curveCatmullRom`), handle formula, free ends, duplicate points as corners, seam rule, `smooth` as handle multiplier. Arrowheads: distance trim.
-5. `design/arrow_implementation_plan.md`: the end tangent is no longer the chord. `design/2026-10-14_unified_arrowhead_geometry_plan.md`: §4.3 chord estimate replaced by the distance trim; §4.4 circle trim angle is the straight distance (`asin`), not the arc length; ellipse trim by bisection; one trim definition for all shapes (§5.4 here). `design/2026-10-18_polyline_optimization_plan.md` §5: #7, #8 and #9 fixed by this plan.
+5. `design/archive/arrow_implementation_plan.md`: the end tangent is no longer the chord. `design/2026-10-14_unified_arrowhead_geometry_plan.md`: §4.3 chord estimate replaced by the distance trim; §4.4 circle trim angle is the straight distance (`asin`), not the arc length; ellipse trim by bisection; one trim definition for all shapes (§5.4 here). `design/2026-10-18_polyline_optimization_plan.md` §5: #7, #8 and #9 fixed by this plan.
 6. Docs: `polyline.html` section 2 (and the later sections: a repeated point makes a corner; a path that ends on its first point is smoothed across it); review the pages in §6.
 7. TODO §15 → implemented; TODO §22: remove the arrowhead "small fix" (done here).
 

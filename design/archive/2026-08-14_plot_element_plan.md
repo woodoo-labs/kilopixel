@@ -1,5 +1,7 @@
 # Implement Universal `<pxl-plot>` Element
 
+- **Status**: ⚪ **Superseded by** `design/2026-09-07_plot_element_plan.md`
+
 This plan outlines the architecture and implementation for a dedicated `<pxl-plot>` shape that supports both standard mathematical functions ($y = f(x)$) and parametric equations ($x = f(v), y = g(v)$) natively in the DOM, while maintaining the engine's strict zero-GC 60fps performance requirements.
 
 ## Proposed Changes

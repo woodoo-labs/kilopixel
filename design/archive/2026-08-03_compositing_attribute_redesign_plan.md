@@ -1,5 +1,7 @@
 # Kilopixel — Compositing Redesign Implementation Plan
 
+- **Status**: ✅ **Implemented**, later changed (no `blur` / `composite` attributes; `mask` came instead). Current behavior: `.agents/KILOPIXEL.md`
+
 ## Goal
 
 Redesign the attribute inheritance model for `<pxl-layer>`, `<pxl-group>`, and shapes to be

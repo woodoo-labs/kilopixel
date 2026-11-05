@@ -1,7 +1,7 @@
 # Stroke Gradient Zero-Dimension Hardening & Degeneracy Prevention Plan
 
 **Date:** 2026-10-11  
-**Status:** Approved Design Plan  
+**Status**: 🟢 **Decided** (2026-10-11, not implemented yet; the bug is still in `createGradient`)  
 **Target Component:** `js/elements/shape.js` (`Shape.prototype.createGradient`, `this._gradCache`)  
 **Related Components:** `js/elements/shapes/line.js`, `js/elements/shapes/polyline.js`
 

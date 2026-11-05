@@ -1,8 +1,8 @@
 # String Literals in Expressions
 
-- **Status**: Proposed (2026-11-02). The code in §3 was drafted and checked in Node (§3.6); implementation postponed. Open decisions in §7.
+- **Status**: 🟡 **Proposed** (2026-11-02). The code in §3 was drafted and checked in Node (§3.6); implementation postponed. Open decisions in §7.
 - **Date**: 2026-11-02
-- **Related**: `design/quote-aware-percent-sanitizer.md` (2026-07-13, never implemented; this plan covers its case), `docs/text.html` (`text` attribute: when to quote)
+- **Related**: `design/archive/quote-aware-percent-sanitizer.md` (2026-07-13, never implemented; this plan covers its case), `docs/text.html` (`text` attribute: when to quote)
 - **Target Implementation**: `js/compiler.js` (`rewriteExpression`, `compileExpression`, `parseAttributeValue`)
 - **Tests** (committed): `tests/index.html`, new section "Expression compiler: string literals"
 
@@ -195,7 +195,7 @@ Not yet checked: the browser (build, `tests/index.html`, docs pages).
 - **`text='"It's"'`** (HTML single-quoted attribute) already works; nothing to change. Not used in the docs: a different HTML quote style in one snippet catches the eye.
 - **`'It's'`** (unescaped apostrophe in single quotes) stays raw text with its quotes. It isn't valid JavaScript, and `'a' + 'b'` also starts and ends with `'`, so the parser can't simply strip the outer quotes. Use backticks or `\'`.
 - **`docs/mapping.html`** keeps `` text="`In the Ring's Space:`" ``: backticks for an apostrophe are the convention (§5), not a workaround.
-- **`design/quote-aware-percent-sanitizer.md`**: set its status to "Superseded by `2026-11-02_string_literals_in_expressions_plan.md`".
+- **`design/archive/quote-aware-percent-sanitizer.md`**: set its status to "Superseded by `2026-11-02_string_literals_in_expressions_plan.md`".
 
 ---
 

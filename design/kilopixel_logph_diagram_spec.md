@@ -1,5 +1,7 @@
 # Kilopixel Log-P-H Diagram Architecture & Scale Interface Specification
 
+- **Status**: 💬 **Discussion** (2026-07-19, never built: a log-p-h diagram and a `mapX` / `mapY` scale interface)
+
 This document defines the architectural blueprint for implementing a thermodynamic log-p-h (Pressure-Enthalpy) diagram within the Kilopixel framework. It also formalizes the **Scale Interface** (`mapX` / `mapY`) as a core framework feature applicable to all shapes.
 
 ---

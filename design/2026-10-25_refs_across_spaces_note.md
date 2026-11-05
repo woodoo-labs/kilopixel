@@ -1,6 +1,6 @@
 # Refs Across Coordinate Spaces (Points, Variables, `toLocal`)
 
-- **Status**: ⚪ **Living note: open ideas, no decisions yet** (started 2026-10-25, ideas added 2026-10-26). This is the hub for refs, points and `toLocal`; start here.
+- **Status**: 💬 **Discussion** (living note, no decisions yet; started 2026-10-25, ideas added 2026-10-26). This is the hub for refs, points and `toLocal`; start here.
 - **Context**: polyline docs (section 8 and the planned Element Reference). Question: should `ref.<id>.pN` be documented, and how do readers attach to a polyline point from another layer?
 - **TODO**: `.agents/TODO.md` §25
 - **Related**: `design/2026-10-26_tolocal_fix_plan.md` (implemented 2026-10-26): `toLocal` readers now also update when their own space moves. Any point form (§5.1, §5.2, §7) builds on that reactivity.
@@ -11,10 +11,10 @@ All documents on this topic, oldest first. Older plans are kept unchanged as his
 
 | Document | Date | Content | Status |
 |---|---|---|---|
-| `design/reference_implementation_plan.md` | 2026-07 | The `ref.*` registry (`pxl.nodes`, broadcast) | ✅ Implemented (history) |
-| `design/variable_implementation_plan.md` | 2026-07 | Explicit `ref.*` everywhere, `<pxl-var>`, flat ID namespace | ✅ Implemented (history) |
-| `design/local_coordinates_implementation_plan.md` | 2026-07 | Map **raw** global points (e.g. the mouse) into a group: `toLocal(ref.main.mouseX, ref.main.mouseY, 'x')` | ⚪ **Never implemented**: an open idea, related to the point form (§5.1) |
-| `design/coordinate_mapping_implementation_plan.md` | 2026-07 | The original `toLocal` (`x`, `y`, `dx`, `dy`, `tx`, `ty`, `rotate`, `scale*`), `ref.<id>.tx` / `ty` getters, lowercase attribute names | ✅ Implemented |
+| `design/archive/reference_implementation_plan.md` | 2026-07 | The `ref.*` registry (`pxl.nodes`, broadcast) | ✅ Implemented (history) |
+| `design/archive/variable_implementation_plan.md` | 2026-07 | Explicit `ref.*` everywhere, `<pxl-var>`, flat ID namespace | ✅ Implemented (history) |
+| `design/archive/local_coordinates_implementation_plan.md` | 2026-07 | Map **raw** global points (e.g. the mouse) into a group: `toLocal(ref.main.mouseX, ref.main.mouseY, 'x')` | ⚪ **Never implemented**: an open idea, related to the point form (§5.1) |
+| `design/archive/coordinate_mapping_implementation_plan.md` | 2026-07 | The original `toLocal` (`x`, `y`, `dx`, `dy`, `tx`, `ty`, `rotate`, `scale*`), `ref.<id>.tx` / `ty` getters, lowercase attribute names | ✅ Implemented |
 | `design/2026-10-18_polyline_optimization_plan.md` §2.3.4 | 2026-10-18 | `ref.<id>.pN` readers update when `points` is replaced | ✅ Implemented |
 | **This note** | 2026-10-25 | Refs are values, not positions; patterns that work today; possible additions | ⚪ Open ideas |
 | `design/2026-10-26_tolocal_fix_plan.md` | 2026-10-26 | Readers update when their **own** space moves | ✅ Implemented |

@@ -2,7 +2,7 @@
 
 - **Status**: ✅ **Implemented** (2026-10-30)
 - **Date**: 2026-10-29
-- **Related**: `design/2026-10-25_refs_across_spaces_note.md` (hub for `toLocal`, §2 and §3), `design/coordinate_mapping_implementation_plan.md` (original property list), `design/2026-10-26_tolocal_fix_plan.md` (reactivity)
+- **Related**: `design/2026-10-25_refs_across_spaces_note.md` (hub for `toLocal`, §2 and §3), `design/archive/coordinate_mapping_implementation_plan.md` (original property list), `design/2026-10-26_tolocal_fix_plan.md` (reactivity)
 - **Target Implementation**: `js/matrix.js` (`pxl.toLocal`), `js/compiler.js` (warning for unknown `toLocal` names); for §5 (`zoom`) also `js/elements/node.js` (`getLocalMatrix`), `js/graphics.js` (`applyContextState`), `js/engine.js` (`isSpatialKey`), `js/elements/shape.js`, `group.js`, `layer.js` (attribute lists, defaults, `hasStateChanges`), and every page that uses `scale="…"`
 - **Check** (local only, scratch is git-ignored): `scratch/decompose_check.js` (decompose and rebuild 100,000 random matrices, max error 7·10⁻¹⁴); `scratch/tolocal_bench.js` (cost per toLocal call, §3.5); demo of the current limits: `scratch/tolocal_probe.html` (P4); `examples/test53.html` (four transformed layers, toLocal lines through the rects)
 

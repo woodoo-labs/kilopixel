@@ -1,5 +1,7 @@
 # Radial Gradient: Unified 6-Value Mode
 
+- **Status**: ✅ **Implemented**, later changed (number radii are logical lengths; `radial()` takes 1, 3 or 6 values). Current behavior: `.agents/KILOPIXEL.md`
+
 ## 1. The Problem
 
 The current `radial()` function uses a **point-based** radius system with 4 overloaded sub-modes (2, 4, 6, 8 values). This creates several issues:

@@ -9,11 +9,11 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 | Path | What |
 |---|---|
 | `.agents/KILOPIXEL.md` | Complete technical reference (architecture, compiler, every element and attribute). Read the relevant sections before engine or docs work. |
-| `.agents/TODO.md` | Roadmap and open design questions |
+| `.agents/TODO.md` | Roadmap: open work and open design questions only |
 | `.agents/AGENTS.md` | Rules for Google Antigravity, kept in case it is used again. Ignore it: this file is authoritative. When a rule changes here, mention whether AGENTS.md should get the same change |
 | `js/` | Engine source. Build order is the `files` list in `build.js` |
 | `docs/` | Public documentation site. Rules: `docs/DOCS_STANDARDS.md` |
-| `design/` | Plans and notes, named `YYYY-MM-DD_<topic>_plan.md` (or `_note.md`) |
+| `design/` | Plans and notes, named `YYYY-MM-DD_<topic>_plan.md` (or `_note.md`). `design/archive/`: superseded, dropped and outdated plans |
 | `tests/index.html` | Automated engine tests in the browser (`http://localhost:8124/tests/`); result in the tab title and `window.kilopixelTests` |
 | `examples/test*.html` | Manual demo and test pages |
 | `scratch/` | Temporary files, gitignored |
@@ -26,6 +26,15 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 - **File size after a build:** update the `~NNKB` size of `pxl.min.js` (the build's "Minified size", rounded to whole KB) in `docs/installation.html` (section 1 text and download button) and in the header line of `.agents/KILOPIXEL.md`, and the `~NNKB gzipped` size (the build's "Gzipped size") in the section 1 text of `docs/installation.html`.
 - **Keep the reference in sync:** when engine behavior or an attribute changes, update `.agents/KILOPIXEL.md` in the same change, plus the affected docs pages and examples.
 - **Plan bigger changes first:** for non-trivial engine work, write a plan in `design/` and agree on it before implementing.
+- **Plans and TODO:** every plan starts with a status line right after its title: `- **Status**: 🟡 **Proposed** (date, short note)`. Six words only:
+  - 💬 **Discussion**: ideas, nothing decided
+  - 🟡 **Proposed**: complete plan, waiting for a decision
+  - 🟢 **Decided**: agreed, not built yet
+  - ✅ **Implemented**
+  - ⚪ **Superseded by** `<file>`
+  - ⚪ **Dropped**: decided not to do it. Never use it for "not built yet" (that is 🟡 or 🟢).
+
+  `.agents/TODO.md` lists open work only (💬 🟡 🟢), each item linked to its plan. Change a plan's status and TODO.md in the same change: implemented → ✅ in the plan and the TODO item removed (its number stays free; new items take the next number). Superseded, dropped, or implemented but no longer describing the current code → the plan moves to `design/archive/` (fix the links to it). Implemented plans that still explain the current code stay in `design/`.
 - **Verify in the browser:** the dev server is `node tools/serve.js` (launch config `kilopixel`, http://localhost:8124, `/` redirects to `/docs/`). Check docs pages and `examples/` there, including the console.
 - **Engine tests:** after every engine change and build, open `tests/index.html`; all tests must pass. Every engine fix gets a test there (committed, unlike `scratch/`).
 - **Line endings:** LF everywhere, set by `.gitattributes`. Don't change it per file.

@@ -1,5 +1,7 @@
 # Radial Gradient — Point-Based Syntax
 
+- **Status**: ⚪ **Superseded by** `design/archive/2026-09-07_radial_gradient_unified_mode.md`
+
 ## Goal
 
 Replace the current scalar-radius radial gradient API with a point-based system where every radius is defined by the Euclidean distance between two points in normalized 0–1 bounding-box space. This eliminates the ambiguity of what a scalar radius means on non-square bounding boxes.

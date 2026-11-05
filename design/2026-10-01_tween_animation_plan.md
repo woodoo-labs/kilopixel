@@ -1,7 +1,7 @@
 # Tween Animation Plan (Unified Specification)
 
 **Date**: 2026-10-01  
-**Status**: Approved Specification  
+**Status**: 🟡 **Proposed** (2026-10-01)  
 **Files affected**: [`js/compiler.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js), [`js/elements/node.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/node.js), [`js/elements/layer.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/layer.js), [`js/elements/stage.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/stage.js), [`.agents/KILOPIXEL.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/.agents/KILOPIXEL.md)
 
 ---

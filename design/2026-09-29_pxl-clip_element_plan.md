@@ -1,7 +1,7 @@
 # Design Plan: `<pxl-clip>` — Compound Clipping Geometry
 
 **Date**: 2026-09-29  
-**Status**: Draft  
+**Status**: 🟡 **Proposed** (2026-09-29)  
 **Files affected**: `js/elements/clip.js` (new), `js/elements/node.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/shape.js`, all 7 shape classes, `build.js`
 
 ---

@@ -1,5 +1,7 @@
 # Gradient System Overhaul
 
+- **Status**: ✅ **Implemented** (current behavior: `.agents/KILOPIXEL.md`)
+
 Complete cleanup of the gradient subsystem: fix cache bugs, add dual cache slots, clean up dead code, add conic gradients, and harden edge cases.
 
 ## Proposed Changes

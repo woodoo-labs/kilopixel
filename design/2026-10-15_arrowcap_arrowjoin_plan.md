@@ -1,6 +1,6 @@
 # Arrowhead Look: `arrowcap` & `arrowjoin` (Separating Arrow Style from Shape Style)
 
-- **Status**: 💬 **Discussion / Draft** — direction agreed, open decisions listed in §6
+- **Status**: 💬 **Discussion** (direction agreed, open decisions listed in §6)
 - **Date**: 2026-10-15
 - **Builds on**: `design/2026-10-14_unified_arrowhead_geometry_plan.md` (geometry, insets, zero-GC records)
 - **Target Implementation**: `js/elements/shape.js`, `js/elements/shapes/line.js`, `polyline.js`, `circle.js`, `ellipse.js`

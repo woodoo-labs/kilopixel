@@ -1,7 +1,7 @@
 # Text Hit Testing (`<pxl-text>` Pointer Events) Implementation Plan
 
 **Date:** 2026-10-13  
-**Status:** Implemented 2026-10-15 (tests in §8 passed; regression: docs pages + test24 load without errors)  
+**Status**: ✅ **Implemented** (2026-10-15; tests in §8 passed; regression: docs pages + test24 load without errors)  
 **Target Components:** `js/interaction.js` (`InteractionEngine.process`), `js/elements/shapes/text.js` (`Text`)  
 **Related Components:** `js/elements/shape.js` (event registration), `.agents/KILOPIXEL.md`  
 **Test File:** [`examples/test52.html`](../examples/test52.html)

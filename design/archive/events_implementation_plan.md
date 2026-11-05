@@ -1,5 +1,7 @@
 # Precise Implementation Plan: Zero-GC Declarative Events
 
+- **Status**: ✅ **Implemented**, later changed (`onhover` became `onenter`; registration: `design/2026-10-15_interactive_state_auto_registration_plan.md`)
+
 This document contains the exact architectural blueprint and code modifications required to implement `onclick`, `onhover`, and `onleave` within the framework's strict performance constraints. It serves as the single source of truth for the implementation.
 
 ---

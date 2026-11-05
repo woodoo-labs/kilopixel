@@ -1,5 +1,7 @@
 # Layer CSS Compositing Upgrade
 
+- **Status**: ✅ **Implemented** (current behavior: `.agents/KILOPIXEL.md`)
+
 This plan finalizes the architectural separation of context states in Kilopixel by migrating `<pxl-layer>`'s context states (`alpha`, `blend`, `filter`) from the Canvas API to the CSS DOM API.
 
 ## Goal Description

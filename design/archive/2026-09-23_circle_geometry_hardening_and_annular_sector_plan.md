@@ -1,14 +1,14 @@
 # Circle & Ellipse Geometry Hardening, Zero-GC Safety & 'mode' Architecture
 
 **Date:** 2026-09-23 (Updated 2026-09-24)  
-**Status:** Approved Design Plan  
+**Status**: ✅ **Implemented** (except §4.5, replaced by `design/archive/2026-09-24_circle_closed_attribute_vs_mode_enum.md`)  
 **Target Components:** `js/elements/shapes/circle.js`, `js/elements/shapes/ellipse.js`
 
 ---
 
 ## 1. Executive Summary & Context
 
-During an architectural audit and redesign of [`docs/circle.html`](../docs/circle.html), we analyzed how `<pxl-circle>` behaves across its primary geometric archetypes: **solid discs**, **hollow rings**, **open arcs**, **circular segments**, **pie slices (circular sectors)**, and **donut wedges (annular sectors)**.
+During an architectural audit and redesign of [`docs/circle.html`](../../docs/circle.html), we analyzed how `<pxl-circle>` behaves across its primary geometric archetypes: **solid discs**, **hollow rings**, **open arcs**, **circular segments**, **pie slices (circular sectors)**, and **donut wedges (annular sectors)**.
 
 Two fundamental architectural questions emerged:
 1. **Should the engine support partial-arc inner radii (`ir > 0` with `sweep`) as native Annular Sectors?**
@@ -410,7 +410,7 @@ Create a test script in `scratch/test_circle_hardening.js` to execute via Node:
 9. Verify `mode="pie"` calls `lineTo(0, 0)` and `closePath()`.
 
 ### 6.2 Browser Verification
-1. Open [`docs/circle.html`](../docs/circle.html) in browser.
+1. Open [`docs/circle.html`](../../docs/circle.html) in browser.
 2. Confirm Section 1 (Hero sandbox), Section 3 (Radius & Inner Radius), and Section 4 (Pie Slice & Donut Wedge) render correctly using `mode="pie"` and `mode="open"`.
 3. In Section 4 Circle 2, drag the `ir` slider to `0` and verify it smoothly morphs into a solid pie slice without glitches.
 4. In an oscillating animation crossing $0^\circ$ (e.g. `sweep="sin(t) * 90"`), verify the stroke remains smooth and flicker-free without 1-frame dropouts.

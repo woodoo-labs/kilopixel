@@ -1,8 +1,14 @@
 # Kilopixel — TODO & Roadmap
 
+Open work only. Done items are removed: the plan's status line, `.agents/KILOPIXEL.md` and git history keep the record.
+
+- **Status words** (same as in the plans): 💬 **Discussion** (ideas, nothing decided) · 🟡 **Proposed** (complete plan, waiting for a decision) · 🟢 **Decided** (agreed, not built yet). Plans also use ✅ **Implemented**, ⚪ **Superseded by** `<file>` and ⚪ **Dropped** (decided not to do it); those have no TODO item.
+- **Numbers are stable:** other files refer to items as "TODO §29". A removed item leaves a gap; a new item gets the next free number (next: §36).
+- **Plans:** `design/`; superseded, dropped and outdated plans are in `design/archive/`. Workflow: `.claude/CLAUDE.md` → "Plans and TODO".
+
 ## 1. Native SVG Path2D & Vector Sprites (`<pxl-path>`)
-- **Status**: 🟢 **Design Complete & Ready for Implementation**
-- **Reference**: [`design/2026-09-30_path_element_plan.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/design/2026-09-30_path_element_plan.md)
+- **Status**: 🟡 **Proposed** (2026-09-30; written before `scale` became `zoom`: update the plan before implementing)
+- **Reference**: `design/2026-09-30_path_element_plan.md`
 - **Core Features**:
   - Direct integration with native browser `Path2D` API for sub-1 KB bundle footprint.
   - Native copy-paste support for SVG icons (Figma, Lucide, Heroicons, Material, FontAwesome).
@@ -12,31 +18,26 @@
   - Multi-path and duotone composition via `<pxl-group>` or sub-path `M` (MoveTo) concatenation.
 
 ## 2. Compound Vector Clipping Element (`<pxl-clip>`)
-- **Status**: 🟢 **Design Complete & Ready for Implementation**
-- **Reference**: [`design/2026-09-29_pxl-clip_element_plan.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/design/2026-09-29_pxl-clip_element_plan.md)
-- **Problem Solved**: Fixes the Canvas 2D bug where applying a `mask` to a shape with both a `fill` and `stroke` obliterates the cutout.
+- **Status**: 🟡 **Proposed** (2026-09-29)
+- **Reference**: `design/2026-09-29_pxl-clip_element_plan.md`
+- **Problem Solved**: Fixes the Canvas 2D bug where applying a `mask` to a shape with both a `fill` and `stroke` obliterates the cutout (see also §31, which fixes `mask` on such shapes directly).
 - **Core Features**:
   - Dedicated structural container element `<pxl-clip>` mapping to native `ctx.clip()`.
   - Supports compound path unions, `fillrule="evenodd"` boolean holes, and nested intersection clipping without offscreen canvas buffers.
 
 ## 3. Animation, Easing & Physics Expansion (`tween`, `ease`, `spring`)
-- **Status**: ⚪ **Concept Stage**
+- **Status**: 🟡 **Proposed** (`tween`, 2026-10-01); easing, springs and angle helpers: 💬 **Discussion**
+- **Reference**: `design/2026-10-01_tween_animation_plan.md` (`tween` only)
 - **Motivation**: Current time drivers are strictly periodic loops (`loop`, `wave`, `bounce`). Interactive UIs need one-shot animations and smooth organic state transitions.
 - **Proposed Additions**:
   - **One-Shot Tweens (`tween(duration, [ease], [delay])`)**: Progresses 0 to 1 once and clamps at 1.0 forever (essential for entrance/exit animations).
   - **Penner Easing Suite (`ease('back', p)`, `ease('elastic', p)`)**: Adds overshoot, bounce decay, and exponential curves beyond basic `glide()`.
   - **Stateful Physics Springs (`spring(target, [stiffness], [damping])`)**: Eliminates instant snapping on reactive state changes (e.g. `ref.btn.isHovered ? 1.2 : 1.0`) by maintaining zero-GC velocity state per element attribute.
-  - **Angle & Vector Helpers**: `deg(rad)` and `rad(deg)` to resolve the degrees vs. radians boundary ergonomically.
-
-## 4. Evaluate Degrees vs. Radians Consistency
-- **Current Status**: Mixed angular unit boundary:
-  - All Kilopixel attributes use **Degrees** (`rotate`, `start`, `end`, `sweep`, `skewx`, `skewy`).
-  - All expression Math functions use **Radians** (`sin`, `cos`, `tan`, `atan2`).
-- **Resolution Plan**: Keep current hybrid behavior (best ergonomics for declarative HTML), but inject `deg(rad)` and `rad(deg)` helpers into `pxl.scope` as part of the animation expansion.
+  - **Angle Helpers (`deg(rad)`, `rad(deg)`)**: All Kilopixel attributes use degrees (`rotate`, `start`, `end`, `sweep`, `skewx`, `skewy`), all expression Math functions use radians (`sin`, `cos`, `tan`, `atan2`). Keep this split (best for declarative HTML) and add the two helpers to `pxl.scope`.
 
 ## 5. Implement `<pxl-out>` Declarative HTML Output Component
-- **Status**: 🟡 **Plan Revised** (2026-10-17, ready for review)
-- **Reference**: [`design/2026-08-02_declarative_html_output_pxl_out_plan.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/design/2026-08-02_declarative_html_output_pxl_out_plan.md)
+- **Status**: 🟡 **Proposed** (revised 2026-10-17)
+- **Reference**: `design/2026-08-02_declarative_html_output_pxl_out_plan.md`
 - **Core Features**:
   - Custom Web Component acting as a declarative DOM bridge outside `<pxl-stage>`.
   - Reactively outputs canvas telemetry (e.g., `ref.main.fps` or coordinates) without JavaScript polling.
@@ -44,36 +45,28 @@
   - Freezes while its source stage is scrolled out of view → `alwaysrender="true"` on that stage (document in a callout).
   - Accessibility: live values as real DOM text; no automatic `aria-live`.
 
-## 6. Stage-Level `<pxl-var>` Execution
-- **Status**: 🟡 **Plan Drafted**
-- **Reference**: [`design/2026-09-14_stage_variables_and_layer_throttling_plan.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/design/2026-09-14_stage_variables_and_layer_throttling_plan.md)
-- **Problem Solved**: Direct child `<pxl-var>` elements under `<pxl-stage>` currently do not evaluate during animation frames.
-- **Proposed Solution**: Update `PxlStage` to register direct `<pxl-var>` children and evaluate animated variables before the layer render loop, avoiding unnecessary empty `<pxl-layer>` buffers.
-
 ## 7. Declarative Math Plotting Element (`<pxl-plot>`)
-- **Status**: 🟡 **Plan Drafted**
-- **Reference**: [`design/2026-09-07_plot_element_plan.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/design/2026-09-07_plot_element_plan.md)
+- **Status**: 🟡 **Proposed** (2026-09-07)
+- **Reference**: `design/2026-09-07_plot_element_plan.md`
 - **Core Features**:
   - Dedicated shape element for high-performance plotting of functions ($y = f(x)$) and parametric curves ($x = f(v), y = g(v)$).
   - Upward $+Y$ mathematical orientation, 1:1 isotropic scaling, decoupled domain intervals, and pre-allocated `Float32Array` vertex caching.
 
-## 8. Layer-Level FPS Throttling (`maxfps`) & Granular Profiling
-- **Status**: 🟡 **Plan Drafted** — needs a dedicated, in-depth session
+## 8. Layer FPS Throttling (`maxfps`), Stage-Level `<pxl-var>` & Performance Monitor
+- **Status**: 🟡 **Proposed** — needs a dedicated, in-depth session
 - **References** (two overlapping plans, to be merged in that session):
-  - [`design/2026-09-14_stage_variables_and_layer_throttling_plan.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/design/2026-09-14_stage_variables_and_layer_throttling_plan.md) — stage-level `<pxl-var>` **and** `maxfps`, per-layer metrics.
-  - [`design/2026-09-14-layer-throttling.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/design/2026-09-14-layer-throttling.md) (revised 2026-09-15) — `maxfps` only, more detailed (stage gate, baton relay, keep-alive timer, cross-layer variables, frame counting).
-  - The stage-level `<pxl-var>` part could be split off as its own topic.
-- **Core Features**:
-  - Add `maxfps` attribute to `<pxl-layer>` to throttle secondary layers (e.g. background effects to 24 FPS, clocks to 1 FPS).
-  - Add per-layer profiling telemetry (`layer.fps`, `layer.renderAvg`).
-- **Performance monitor** (found 2026-10-15): values freeze on idle pages instead of dropping to `0`, and `fps` counts "frames since the last publish" rather than per second. Details and a possible fix in `design/2026-09-14-layer-throttling.md` → Performance Metrics → "Known Issue: Monitor Freezes When Idle".
+  - `design/2026-09-14_stage_variables_and_layer_throttling_plan.md` — stage-level `<pxl-var>` **and** `maxfps`, per-layer metrics.
+  - `design/2026-09-14-layer-throttling.md` (revised 2026-09-15) — `maxfps` only, more detailed (stage gate, baton relay, keep-alive timer, cross-layer variables, frame counting).
+- **Layer throttling**: a `maxfps` attribute on `<pxl-layer>` throttles secondary layers (e.g. background effects to 24 FPS, clocks to 1 FPS); per-layer profiling telemetry (`layer.fps`, `layer.renderAvg`).
+- **Stage-level `<pxl-var>`**: a `<pxl-var>` directly under `<pxl-stage>` is never evaluated today (only layers render their children). The stage would register its direct `<pxl-var>` children and evaluate animated ones before the layer loop, so no empty `<pxl-layer>` (and canvas) is needed just to hold variables. Could be split off as its own topic.
+- **Performance monitor** (found 2026-10-15, confirmed in the code 2026-11-05): values freeze on idle pages instead of dropping to `0`, because `pxl.perf.publish()` only runs inside `stage.render()`; and `fps` counts "frames since the last publish" rather than per second. Details and a possible fix in `design/2026-09-14-layer-throttling.md` → Performance Metrics → "Known Issue: Monitor Freezes When Idle".
 
 ## 9. Raster Bitmaps & Complex SVG Graphics (`<pxl-image>`)
-- **Status**: ⚪ **Concept Stage**
+- **Status**: 💬 **Discussion** (no plan yet)
 - **Motivation**: Complete the visual asset suite by allowing developers to load raster images (PNG, JPEG, WebP) and complex multi-color SVGs directly into the canvas via native `ctx.drawImage()`, with aspect-ratio fitting (`contain` / `cover`) and anchor transforms.
 
 ## 10. Evaluate `map()` Utility Retention vs. API Pruning
-- **Current Status**: Open design question
+- **Status**: 💬 **Discussion**
 - **Background**:
   - `pxl.scope.map(v, inMin, inMax, outMin, outMax)` provides linear range remapping (familiar from Processing/p5.js).
   - It is currently only used in `examples/test31.html` for distance-to-style mapping, but all such calculations can be written using `lerp(a, b, t)` with normalized progress or raw arithmetic.
@@ -82,33 +75,31 @@
   - **Option B (Retain `map()`)**: Keep `map()` as a convenient 1-line helper for creative coders who want to avoid manual `/ (inMax - inMin)` normalization algebra inside HTML attribute strings.
 
 ## 11. Evaluate Default Text Alignment (`align` & `baseline`)
-- **Current Status**: Open architectural question
+- **Status**: 💬 **Discussion**
 - **Background**:
   - Currently, `<pxl-text>` inherits native HTML5 Canvas defaults: `align="start"` and `baseline="alphabetic"`.
   - In contrast, other geometric primitives in Kilopixel (`<pxl-circle>`, `<pxl-ellipse>`, `<pxl-rect>`) default to centering around their `(x, y)` coordinates.
   - Setting defaults to `align="center"` and `baseline="middle"` would be more consistent with other shapes (*"in Kilopixel, `(x, y)` is always the center of the shape"*), making labels inside buttons, circles, and rotating text effortless.
 - **Trade-offs & Considerations**:
-  - **Visual Regressions**: Numerous existing text shapes across documentation and examples lack explicit attributes and rely on `start`/`alphabetic`. Labels manually positioned with hand-tuned `y` coordinates (like `y="500"`) would shift vertically downward by ~14px with `middle`, causing visual misalignment.
+  - **Docs and examples**: Many text shapes rely on `start` / `alphabetic` without setting them. Labels positioned with hand-tuned `y` coordinates would shift by ~14px with `middle` and need explicit attributes or new values.
   - **Divergence from Native Canvas**: It would diverge from standard `CanvasRenderingContext2D` defaults (`textAlign = 'start'`, `textBaseline = 'alphabetic'`).
-- **Decision for Now**: Retain `align="start"` and `baseline="alphabetic"` for 100% backward compatibility and native Canvas parity. Revisit if a breaking major version transition is planned.
+- **Timing**: Kilopixel is pre-release, so no backwards compatibility is needed (`.claude/CLAUDE.md`). If the defaults change, now is the cheapest time; afterwards it would be a breaking change.
 
 ## 12. Dedicated Arrowheads Documentation Page (`arrows.html`)
-- **Status**: 🟡 **In Progress** (updated 2026-10-15)
+- **Status**: 🟢 **Decided** (page in progress, updated 2026-10-15)
+- **Reference**: `design/2026-10-14_unified_arrowhead_geometry_plan.md` (geometry); `design/2026-10-15_arrowcap_arrowjoin_plan.md` (💬, arrowhead look)
 - **Location**: Sidebar / Navigation category **"Line Styles"** in `docs/js/layout.js`.
 - **Motivation**: Arrowheads (`arrowstyle`, `arrowstart`, `arrowend`) are supported across multiple shapes (`<pxl-line>`, `<pxl-polyline>`, `<pxl-circle>`, and `<pxl-ellipse>`). Individual shape pages feature practical, contextual examples, while a centralized hub page (`docs/arrows.html`) under Line Styles will provide the comprehensive reference for arrow geometry, scaling formulas, custom arrow styles, and styling.
-- **Done**:
-  - Navigation entry, sections 1. Sizing, 2. Styles, 3. Line Caps (line / polyline / elliptical arc with grey reference strokes), 4. Line Joins (miter / bevel / round, miter limit).
-  - Cross-links from `line.html`, `circle.html`, `ellipse.html` (identical "More on Arrowheads" callout).
-  - Engine: unified arrowhead geometry (`design/2026-10-14_unified_arrowhead_geometry_plan.md`).
+- **Done**: Navigation entry, sections 1. Sizing, 2. Styles, 3. Line Caps, 4. Line Joins; cross-links from `line.html`, `circle.html`, `ellipse.html` (identical "More on Arrowheads" callout).
 - **Open**:
-  - **Design question:** should `filled` arrowheads also follow `linejoin` (rounded/bevelled triangle corners, radius = `strokewidth / 2`), or a future `arrowjoin` that applies to both styles? Today chevrons follow `linejoin`, filled heads are always sharp. Testable in section 4 by switching Arrow Style.
+  - **Design question:** should `filled` arrowheads also follow `linejoin` (rounded/bevelled triangle corners, radius = `strokewidth / 2`), or a future `arrowjoin` that applies to both styles? Today chevrons follow `linejoin`, filled heads are always sharp. Testable in section 4 by switching Arrow Style. Discussed in `design/2026-10-15_arrowcap_arrowjoin_plan.md`.
   - "Rules & Edge Cases" section: small arrowheads (narrower than stroke), open paths only (`pie` / `closed` / rings / closed polylines ignore arrows), no `stroke` → no arrowheads, path shorter than both heads.
   - Dashed arrows (chevrons stay solid) and animated dashes / arrowheads.
-  - Cross-link `polyline.html` once it exists.
+  - Cross-link `polyline.html` (the page exists now; `arrows.html` doesn't link it yet).
 
 ## 13. Fix Stroke Gradient Zero-Dimension Collapse & Degeneracy
-- **Status**: 🟢 **Design Complete & Ready for Implementation**
-- **Reference**: [`design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md)
+- **Status**: 🟢 **Decided** (2026-10-11, not implemented yet; the bug is still in `createGradient`)
+- **Reference**: `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`
 - **Problem Solved**:
   - When linear gradients are applied to the `stroke` of shapes with zero geometric width or height (e.g. horizontal/vertical lines, flat polylines), Canvas 2D linear gradient endpoints collapse to identical coordinates at perpendicular angles ($90^\circ$ and $270^\circ$ for horizontal lines; $0^\circ$ and $180^\circ$ for vertical lines).
   - W3C Canvas 2D spec mandates that zero-length gradients paint nothing, causing the stroked shape to completely disappear.
@@ -118,7 +109,7 @@
   - Update `_gradCache` to track `strokewidth` (`sw`) so slider adjustments properly invalidate cached stroke gradients.
 
 ## 14. Shape-Level Paint Order (`paintorder`)
-- **Status**: ⚪ **Concept Stage** (decided 2026-10-13: keep current behavior until implemented properly)
+- **Status**: 💬 **Discussion** (decided 2026-10-13: keep current behavior until implemented properly; no plan yet)
 - **Visual Comparison**: `scratch/test_paint_order.html` / `scratch/paint_order_comparison.png` (local only, scratch is git-ignored)
 - **Background**:
   - Path shapes paint via `applyStyle`: fill, then stroke (outline on top, half of `strokewidth` covers the fill).
@@ -136,23 +127,8 @@
   - Add a docs section/example following `docs/DOCS_STANDARDS.md`.
 - **Related**: build after §19 and §31 (`design/2026-11-01_isolated_shape_compositing_plan.md` §9). Without isolation, `paintorder="stroke"` has the same compositing bug as §31 (with a shadow, the fill's shadow falls onto the stroke drawn before it); with isolation it only swaps two draw calls.
 
-## 15. Smooth Polyline Spline Quality (`smooth`)
-- **Status**: 🟢 **Implemented** (2026-10-24) — `polyline.js` (centripetal spline, distance trim, arrows walk inward), `circle.js` / `ellipse.js` (one arrow trim definition). Tests: `scratch/polyline_shapes/engine_tests.html` (112 checks). The seam rule was removed again the same day: a path that ends on its start has a corner there, smooth loops use `closed`.
-- **Reference**: `design/2026-10-23_smooth_polyline_spline_plan.md`
-- **Decision (2026-10-23)**: centripetal Catmull-Rom with the end handle on the end point (D3 `curveCatmullRom`), `smooth` as handle multiplier; a point written twice (including ending on the start) is a corner. Evenly spaced inner segments stay identical.
-- **Compared** (`scratch/polyline_shapes/smooth_ends.html`, 17 cases × 6 variants): natural ends overshoot at high `smooth` and with uneven spacing (uniform and centripetal); Konva-style quadratic ends are nearly as good; D3 style alone dents the bow tie at `smooth="1.7"` when it ends on its start (written with 6 points + `closed` instead).
-- **Background**: `<pxl-polyline smooth>` uses a **uniform** Catmull-Rom spline with **clamped** ends (the missing neighbour of the first/last point is the point itself).
-- **Observed Issues**:
-  - The curve straightens out shortly before the first/last point (end direction is forced onto the chord to the next point). Visible on the section 1 wave in `docs/arrows.html` near `(550, 300)`.
-  - Unevenly spaced points cause overshoot and hooks near the ends (short first/last segment, duplicate points, high `smooth` values). Even unevenly spaced **collinear** points run backwards past the start point (e.g. `20,110; 40,110; 280,110`), which round caps or arrowheads can reveal.
-- **Tested: "natural" ends** (phantom point `2.5·P1 − 2·P2 + 0.5·P3`, scales with tension automatically): looks better for evenly spaced points, but roughly doubles overshoot and flips end directions for uneven spacing → **not recommended on its own**.
-- **Test Setup** (local only, scratch is git-ignored): `scratch/polyline_shapes/smooth_ends.html` (2026-10-23, all variants); older: `scratch/arrows/natural_compare.html` (15 cases side by side), `scratch/arrows/natural_metrics.js` (end directions & overshoot), patched engine copy `scratch/arrows/lib_natural.js`.
-- **Note**: arrow trimming on smooth polylines (`loadSegment` / de Casteljau) must use the same end formula as the drawing loop if the spline changes.
-
-
-
 ## 16. Text Measurement Accuracy (`<pxl-text>` Bounding Box)
-- **Status**: ⚪ **Known Limitations** (split off from `design/2026-10-13_text_hit_testing_plan.md`, 2026-10-15)
+- **Status**: 💬 **Discussion** (known limitations, split off from `design/2026-10-13_text_hit_testing_plan.md` on 2026-10-15)
 - **Background**: The text bounding box (Tier 3 of `Text.draw()`, via `ctx.measureText()`) is used for gradient placement and, since text hit testing, as the hit area.
 - **Issues**:
   - **Late web fonts**: the box is measured with whatever font is available at that moment. If a web font finishes loading later, the font string is unchanged, Tier 1 is not dirty, and the box keeps the **fallback font metrics** until the text changes. Docs pages invalidate layers on `document.fonts.ready`, but that does not reset the text caches.
@@ -160,30 +136,13 @@
   - **`maxwidth` squeezing**: `measureText()` ignores the `maxWidth` argument of `fillText()`, so a horizontally compressed line gets a box that is too wide (hit area and gradients).
     - Possible fix (Tier 3): per line, scale `actualBoundingBoxLeft/Right` by `min(1, maxwidth * u / metrics.width)`.
 
-## 17. Shadows on Multi-Part Shapes (Arrowheads, Fill + Stroke)
-- **Status**: ⚪ **Noted** (2026-10-15)
-- **Problem**: Native shadows (`shadowcolor`, `shadowblur`, `shadowx`, `shadowy`) are applied per canvas draw call. When a shape is drawn with several calls, each part casts its own shadow, and a later part's shadow falls **onto** an earlier part.
-  - **Arrowheads**: the shaft (`stroke()`) and the heads (`drawArrows`, one `fill()` / `stroke()`) are separate calls → visible dark band where the shaft enters the arrowhead.
-  - Likely the same for **fill + stroke** on any shape (`applyStyle`: `fill()` then `stroke()` → the stroke's shadow falls on the fill) and for `<pxl-text>` with fill and stroke. To be verified.
-  - Not affected: overlaps **within one path** (e.g. polyline corners) — a single `stroke()` casts one shadow.
-- **Possible Fix**: two passes only when a shadow is set: draw all parts with the shadow, then draw them again without shadow on top (shadows end up underneath everything). Doubles the draw calls, but only for shapes with a shadow.
-- **Workaround Today**: `filter="dropShadow(...)"` on the `<pxl-layer>` instead of `shadowcolor` on the shape — the layer casts one shadow of the combined silhouette.
-
-## 18. Attribute Defaults & Canvas State Isolation
-- **Status**: 🟢 **Implemented** (2026-10-17)
-- **Reference**: `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md`
-- **Problem Solved**: bare attributes (`''`) and removed attributes (`null`) were stored as-is. Bare `hidden` / `closed` didn't work (bare `smooth` did), removed `scale` / `alpha` / `strokewidth` made shapes vanish, removed `miterlimit` / text `align` leaked from the previous shape, and removing an `on*` handler threw a TypeError.
-- **Rule A**: bare boolean attribute = `true`; bare or removed other attribute = class default (static `defaults` per class, resolved in `pxl.compileAttribute`).
-- Always save / restore per shape was split off → §19.
-
 ## 19. Always `save()` / `restore()` per Shape
-- **Status**: 🟢 **Decided: adopt** (2026-10-17, implementation pending; plan §5.4)
+- **Status**: 🟢 **Decided** (2026-10-17: adopt; implementation pending, plan §6)
 - **Reference**: `design/2026-10-17_always_save_restore_plan.md`
 - **Idea**: wrap every shape in `ctx.save()` / `ctx.restore()`, not only shapes with transforms or compositing, so no code path can leak canvas state into the next shape. Simplifies `Shape.render()`, `drawArrows` and `Grid.draw`.
 - **Measured**: real pages within noise; worst case 2,000 bare animated lines +1.3 ms per frame (+42%), still 60 fps. A careless custom shape (e.g. `globalAlpha` not reset) fades the whole layer today; always save contains it.
 - **Reasoning**: simpler engine code (no `hasStateChanges` list to keep in sync with `applyContextState`), safety for custom shapes, cost only outside the target use. Criterion revised from "worst case < 5%" to "real pages within noise, worst case still 60 fps".
-- **Next Step**: implement (plan §6).
-- **Related**: build before §31 (isolated compositing builds on the single save → transform → draw → restore path) and §14 `paintorder`; order in `design/2026-11-01_isolated_shape_compositing_plan.md` §9.
+- **Related**: build before §31 (isolated compositing builds on the single save → transform → draw → restore path) and §14 `paintorder`; order in `design/2026-11-01_isolated_shape_compositing_plan.md` §9. §20 needs it before a "Custom Shapes" docs page.
 
 ## 20. Shape Authoring (Derived Attributes, Class Fields, Custom Animation)
 - **Status**: 🟡 **Proposed** (2026-10-17, no code changes yet)
@@ -193,21 +152,12 @@
 - **Custom animation (note)**: time belongs in attribute expressions. Pattern A: `spin="t * 180"` in the HTML. Pattern B: internal animated value via `pxl.compileAttribute` (internal API, a public helper like `this.animate()` later).
 - **Depends on**: §19 (always save / restore) before publishing a "Custom Shapes" docs page — one careless user shape fades the whole layer until always save is implemented.
 
-## 21. Bundle Scope: No Global Names Except `pxl`
-- **Status**: 🟢 **Implemented** (2026-10-18: pure namespace pattern, build check, `--keep-classnames`)
-- **Reference**: `design/2026-10-17_bundle_scope_plan.md`
-- **Problem**: the bundle declares 13 global class names (`Stage`, `PxlNode`, `Layer`, `Group`, `Shape`, `Circle`, `Ellipse`, `Rect`, `Line`, `Polyline`, `Text`, `Grid`, `Variable`). User scripts declaring the same name at top level (`class Circle {}`, `const Line = 1`) fail with a SyntaxError, and `Text` hides the DOM's `Text` (`textNode instanceof Text` → false).
-- **Done (2026-10-17)**: the 5 internal helper globals (`len`, `mathProps`, `driverNames`, `dummyCanvas`, `_parseStops`) are cleaned up (loop-local, inlined, or `pxl._parseStops` / `pxl.dummyCtx`).
-- **Fix**: pure namespace pattern like `pxl.InteractionEngine`: `pxl.Line = class Line extends pxl.Shape { … };` for all 13 classes, `customElements.define('pxl-line', pxl.Line)`, remove `window.PxlNode`, build check in `build.js` that fails on any top-level declaration, keep class names in Terser (`--keep-classnames`). An IIFE wrapper was considered and not chosen.
-- **Decision**: stay a classic script, no ES module (no JavaScript API to import; modules are deferred and don't load from `file://`; zero build step). An extra `pxl.mjs` only if npm / TypeScript users need it later.
-
 ## 22. Polyline Optimization (Parser, Point Storage, Edge Cases)
-- **Status**: ⚪ **Backlog** (2026-10-19)
+- **Status**: 🟡 **Proposed** (low priority; measured gains are small)
 - **Reference**: `design/2026-10-18_polyline_optimization_plan.md` (priority table at the top)
-- **Done (2026-10-19)**: `setAttribute('points', …)` updates `ref.<id>.pN` readers (broadcast after a points change; only keys beyond the new count are deleted). `ref.<id>.pN` is internal (`.agents/KILOPIXEL.md`); the public docs recommend a `<pxl-var>` read by both shapes.
-- **Done (2026-10-24, §15)**: arrowhead points right when the first / last two points are identical (arrows walk inward past zero-length end segments).
 - **Small fixes, do when touched**: all X (or all Y) non-finite + gradient throws in `createGradient`; warnings for typos in `points` (missing / extra values, unbalanced parentheses).
 - **Deferred**: point storage in numeric arrays (measured ≈ 8 µs per frame for 500 points, a micro-optimization) and the measurement-gated phase 3 items.
+- **Note**: `ref.<id>.pN` is internal (`.agents/KILOPIXEL.md`); the public docs recommend a `<pxl-var>` read by both shapes.
 
 ## 23. Regular Polygon & Star Shape (`<pxl-polygon>`)
 - **Status**: 🟡 **Proposed** (2026-10-19, no code changes yet)
@@ -217,34 +167,21 @@
 - **Sidebar**: the "Polygon" placeholder link was removed (2026-10-19); it comes back with `docs/polygon.html`.
 
 ## 24. Docs: Migrate `radial.html` Variables to the `Var` Naming Rule
-- **Status**: 🟡 **Open** (2026-10-21)
+- **Status**: 🟢 **Decided** (rule decided 2026-10-21; `radial.html` still open)
 - **Rule**: `docs/DOCS_STANDARDS.md` §5 "Variables": entity is always `Var`; input variables set by a control are numbered (`sec1Var1`, controls `sec1Var1Input` / `sec1Var1Val`, meaning in an HTML comment); computed variables are named (`sec3ex1VarTargetX1`). Code marks keep naming the shape attribute. Snippet variables keep short descriptive names.
 - **Done (2026-10-21)**: polyline, blend, text, conic, walkthrough, linear (75 variables). Migrated with `scratch/var_migration/migrate.js`, verified with `scratch/var_migration/verify.html` (old vs. new page: same control sequence, all values identical, no errors, no missing IDs).
 - **Open: `radial.html`** (45 variables, 178 `ref.*` uses). Its bottom script builds IDs from parts (`${sec}DirX${radiusKey}`, `${sec}${radiusKey}`, `${sec}Grad${radiusKey}Input`), so a text replacement would break it: the script has to be rewritten to use the new names (e.g. a lookup table per section). Sliders there are also named differently from their variables (`sec1ex1GradR1Input` sets `sec1ex1R1`).
 - **Then**: run `migrate.js` (dry run first) and `verify.html` with `radial.html` added to the page list.
 
 ## 25. Refs Across Coordinate Spaces (`toLocal` Point Form, `ref.<id>.points`)
-- **Status**: ⚪ **Discussion** (2026-10-25, ideas added 2026-10-26; no code changes decided, "keep everything as it is for now")
+- **Status**: 💬 **Discussion** (2026-10-25, ideas added 2026-10-26; no code changes decided, "keep everything as it is for now")
 - **Reference**: `design/2026-10-25_refs_across_spaces_note.md` (hub: index of all related documents in §0, ideas in §7)
 - **Finding**: refs (`ref.v.value`, `ref.box.x`, `ref.zig.pN`) are values in the target's space, not positions; only `toLocal()` crosses spaces, and it maps only an element's frame (`x`, `y`, `tx`, `ty`, `rotate`, `scalex`, `scaley`, `skewx`, `zoom`), not points inside it.
 - **Works today**: shared space; track one point via `dx` / `dy` + `toLocal(ref, 'tx')`; anchors (`pxl-group` or a drawn / hidden dot) in the shape's space; phantom groups as spatial variables; sizes and angles by composition (`ref.c.r * toLocal(ref.c, 'zoom')`).
-- **Possible later**: `toLocal(ref.el, 'x', px, py)` point form; `toLocal(ref.zig, 'pN')` sugar (relative mode); lazy evaluated `ref.zig.points`; list-expression rule for `points="ref.zig.points"` with a quote-aware parser.
+- **Possible later**: `toLocal(ref.el, 'x', px, py)` point form; `toLocal(ref.zig, 'pN')` sugar (relative mode); lazy evaluated `ref.zig.points`; list-expression rule for `points="ref.zig.points"` with a quote-aware parser (could reuse `pxl.splitStringLiterals` from §34).
 - **Docs**: `ref.<id>.pN` stays internal; teach the patterns in the walkthrough's `toLocal` section.
 - **Ideas 2026-10-26** (note §7): point names `xN` / `yN` counted from 1 like `<pxl-line>` (§7.1); `toLocal` maps the whole point even when asked for one coordinate (§7.2); one-argument syntax `toLocal(ref.zig.x3)` via a compiler rewrite (§7.3, preferred); the reader-line rule with example (§7.4); "always hit the point" by letting the attribute decide the space, about 40 lines, scoped (§7.5); flip-the-roles workaround (§7.6); other frameworks (§7.7); over-engineering check, next step is a plan with one real use case (§7.8).
-- **Older ideas**: mapping raw points such as the mouse into a group (`design/local_coordinates_implementation_plan.md`, never implemented).
-
-## 26. `toLocal` Readers in a Moving Space
-- **Status**: ✅ **Done** (2026-10-26)
-- **Reference**: `design/2026-10-26_tolocal_fix_plan.md`; tests in `tests/index.html` (`toLocal:` tests, committed); demos `scratch/tolocal_numbers.html`, `scratch/tolocal_reader_lines.html` (local only)
-- **Bug**: `toLocal()` results went stale when the reader's own layer or group moved (only the target side was tracked). Example: the walkthrough §8 line leaves both circles when its own layer rotates.
-- **Fix**: compiler flags `toLocal` expressions (`fn.usesToLocal`); elements list them in `toLocalAttributeKeys`; `broadcastGlobalMatrixChange()` re-evaluates them via `pxl.evaluateToLocalAttributes()`. No cost while nothing moves (walk measured ≈ 0.15 µs per frame for 50 shapes, same as before).
-
-## 27. toLocal Decomposition and the `zoom` Attribute
-- **Status**: ✅ **Done** (2026-10-30)
-- **Reference**: `design/2026-10-29_tolocal_decomposition_plan.md`; tests in `tests/index.html` (`toLocal decomposition`, `toLocal zoom`, `toLocal clone rule`, `zoom` tests); demo `examples/test53.html`
-- **toLocal**: `skewx` (new), `scaley` signed (mirrors survive), `zoom` = √|det| (total zoom, exact without stretching in the pipeline); `scale` removed; `skewy` not offered (not unique); literal unknown names warn at compile time.
-- **`zoom` attribute**: replaces `scale` and multiplies `scalex` / `scaley` (no override, no jump at 1). `test48` labels use `zoom="-1"`.
-- **Docs sidebar**: "Zoom & Scale" (`scale.html`) and "Rotate & Skew" (`transform.html`), both pages still to be written.
+- **Older ideas**: mapping raw points such as the mouse into a group (`design/archive/local_coordinates_implementation_plan.md`, never implemented; continued as the point form in the note).
 
 ## 28. `space` Attribute: Draw an Element in Another Element's Space
 - **Status**: 🟡 **Proposed** (2026-10-30)
@@ -253,7 +190,7 @@
 - **Open**: name (`space` / `frame`), origin (drawing origin / pivot), scope (shapes and groups / also layers), hidden target.
 
 ## 29. Two-Phase Frame: Evaluate Everything, Then Draw
-- **Status**: ⚪ **Idea** (2026-10-30), no plan yet
+- **Status**: 💬 **Discussion** (idea 2026-10-30, no plan yet)
 - **Problem**: a frame is one walk in DOM order; each element evaluates its animated values inside `render()` (`evaluateAnimations`) and then draws. A reader drawn before its target (toLocal, `space`, plain `ref.*`) sees the target's values from the previous frame: a one-frame lag. Today's rule avoids it: put readers in a layer after their targets.
 - **Idea**: split the frame into an update phase (the stage runs `evaluateAnimations` for every element of every layer; reactive refs and toLocal readers settle through the existing broadcasts) and a draw phase (every layer draws with this frame's values). Removes the lag whatever the DOM order. Each value is still evaluated once; the cost is a second walk over the elements.
 - **Open**: measure the extra walk (benchmark presets, docs pages); layers whose only animated attributes are compositing skip drawing today (CSS fast path in `Layer.render()`), the update phase must keep that; static layers must stay idle (0 FPS); order of broadcasts during the update phase.
@@ -268,13 +205,40 @@
 - **Phase 1**: observe `id`; DOM events on shapes (`click`, `pointer*`) + `interactive` for delegating frameworks; rename the `on*` handlers (collide with native `onclick` and framework `on*` rules; proposed `pxl-click` …); layer canvas in a shadow root and default styles in a stylesheet; bounded expression caches.
 - **Phase 2**: attribute properties (numbers without compiling, values set before upgrade). **Phase 3**: `docs/frameworks.html`, optional TypeScript typings.
 - **Open**: handler names, scoped names instead of global ids, native vs. synthetic `click` on the stage, cursor for delegated listeners.
+- **Related**: §33 (stage sizing) also moves the stage's default styles out of inline styles.
 
 ## 31. Isolated Shape Compositing (Fill and Stroke Composite as One)
 - **Status**: 🟡 **Proposed** (2026-11-01)
 - **Reference**: `design/2026-11-01_isolated_shape_compositing_plan.md`; prototypes `scratch/mask_fill_stroke.html`, `scratch/isolation_bench.html` (local only)
 - **Problem**: a shape that draws more than once (fill + stroke, arrowheads, multi-line text, grid major lines or labels) composites each draw call separately. With `mask` 7 of 9 modes are wrong (`source-in` erases the fill, `xor` cuts the stroke into the fill); with `shadowcolor` the stroke casts a shadow onto the shape's own fill (visible in `shadow.html` §1); `filter` and `blend` are affected too.
+- **Shadows on arrowheads** (noted 2026-10-15): the shaft (`stroke()`) and the heads (`drawArrows`) are separate calls, so a dark band shows where the shaft enters the head. Overlaps within one path (polyline corners) cast one shadow and are fine. Workaround today: `filter="dropShadow(...)"` on the `<pxl-layer>` instead of `shadowcolor` on the shape (one shadow of the combined silhouette).
 - **Idea**: draw such a shape normally into one shared scratch canvas, then composite it onto the layer once with its alpha / mask / blend / filter / shadow. Single-draw shapes keep the direct path.
 - **Measured**: 0.75–0.9 ms per isolated shape with the full scratch canvas, 0.35 ms with the bounding box (DPR 2); direct 0.01 ms.
 - **Open**: `alpha` (recommended: not isolated for now), bounding box in step 1 or 2 (recommended: step 2), transform copy without `getTransform()` allocation.
 - **Docs**: afterwards `mask.html` shapes get fill + stroke and the standard ghosts; the "Ghosts of fill-only shapes" note in DOCS_STANDARDS.md goes.
 - **Related**: build after §19 (always save / restore) and before §14 (`paintorder`); plan §9.
+
+## 32. Docs: "Zoom & Scale" and "Rotate & Skew" Pages
+- **Status**: 🟢 **Decided** (sidebar entries added with the `zoom` attribute, 2026-10-30)
+- **Problem**: the sidebar (`docs/js/layout.js`) links `scale.html` ("Zoom & Scale") and `transform.html` ("Rotate & Skew"), but neither page exists: both links give a 404 on the live site.
+- **Content**: `zoom` multiplies `scalex` / `scaley` (`design/2026-10-29_tolocal_decomposition_plan.md` §5); `rotate`, `skewx` / `skewy` and the transform order (KILOPIXEL.md "Transform Pipeline Order").
+- **Until then**: hide the two links, or write the pages first.
+
+## 33. Stage Sizing: Overridable Defaults and a Zero-Width Warning
+- **Status**: 🟡 **Proposed** (2026-11-04, no code changes yet)
+- **Reference**: `design/2026-11-04_stage_sizing_plan.md`
+- **Problem**: the stage takes `width: 100%` of its parent. In a wrapper that sizes itself to its content (centered flex or grid item, `inline-block`, absolutely positioned card) it gets 0 × 0, draws nothing and logs nothing. Author CSS such as `pxl-stage { width: 600px }` is ignored, because `connectedCallback()` writes `display`, `position` and `width` as inline styles.
+- **Idea**: default styles that author CSS can override, and a warning when the stage still has zero width once the page has loaded.
+
+## 34. String Literals in Expressions
+- **Status**: 🟡 **Proposed** (2026-11-02; code drafted and checked in Node, implementation postponed)
+- **Reference**: `design/2026-11-02_string_literals_in_expressions_plan.md`
+- **Problem**: the compiler's regexes also match inside quoted text. `'Press return: ' + ref.score.value` renders nothing (the word "return" stops the auto `return`), `` `ref.angle.value = ${ref.angle.value}` `` shows `ref.angle?.value`, a lone `t` in text makes it animated, and `radial(0.8, ['hsla(280, 80%, 30%, 0.06)', 'transparent'])` fails with a SyntaxError (the CSS `%` sanitizer quotes `80%` inside the string; confirmed 2026-11-05). Escaped quotes (`'It\'s'`) aren't read.
+- **Idea**: `pxl.splitStringLiterals` splits an expression into code and literals once at compile time; rewrites and checks only read the code parts. No per-frame cost.
+- **Open**: plan §7 (scope of the fix, a `docs/text.html` section on quoting, a snippet convention in DOCS_STANDARDS.md).
+- **Related**: `pxl.trackInteractiveRefs` (`js/interaction.js`) also scans the raw string, so `ref.btn.isHovered` inside quoted text registers the shape (an accepted false positive); the splitter could fix that too. §25 could reuse it for a quote-aware `points` parser.
+
+## 35. Log-P-H Diagram & Scale Interface (`mapX` / `mapY`)
+- **Status**: 💬 **Discussion** (spec 2026-07-19, never built)
+- **Reference**: `design/kilopixel_logph_diagram_spec.md`
+- **Idea**: a thermodynamic pressure-enthalpy diagram as a Kilopixel shape, and a general scale interface: `mapX(value)` / `mapY(value)` turn a domain value into a stage coordinate, so other shapes can place markers on data shapes. Related to `<pxl-plot>` (§7).

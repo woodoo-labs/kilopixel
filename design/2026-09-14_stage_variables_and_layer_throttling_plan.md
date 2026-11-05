@@ -1,7 +1,7 @@
 # Technical Implementation Plan: Stage-Level Variables & Layer-Level FPS Throttling
 
 **Date**: 2026-09-14  
-**Status**: Proposed Architecture & Design Specification  
+**Status**: 🟡 **Proposed** (2026-09-14; the `maxfps` part overlaps `design/2026-09-14-layer-throttling.md`, TODO §8)  
 **Target Files**:
 - `js/elements/stage.js` (Root variable registration, master variable loop, performance metrics)
 - `js/elements/layer.js` (`maxfps` attribute parsing, interval gate, loop keep-alive, layer-level metrics)

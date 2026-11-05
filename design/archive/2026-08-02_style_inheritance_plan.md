@@ -1,7 +1,7 @@
 # Style Inheritance (Group & Layer Attribute Cascading)
 
 **Date:** 2026-08-02  
-**Status:** Design Proposal & Implementation Plan  
+**Status**: ⚪ **Dropped** (groups don't pass styles on to their children: `design/archive/2026-08-04_group_pure_transform_architecture_plan.md`)  
 
 ---
 

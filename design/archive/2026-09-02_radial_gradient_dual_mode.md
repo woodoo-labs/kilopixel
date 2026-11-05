@@ -1,5 +1,7 @@
 # Architectural Design: Dual-Mode Radial Gradients
 
+- **Status**: ⚪ **Superseded by** `design/archive/2026-09-07_radial_gradient_unified_mode.md`
+
 ### 1. The Core Problem: The DX Paradox
 In declarative graphics frameworks, developers generally want radial gradients to behave in one of two completely different ways:
 

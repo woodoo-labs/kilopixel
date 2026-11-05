@@ -1,8 +1,8 @@
 # Polyline Optimization: Points Parser, Point Storage & Edge Cases
 
-- **Status**: ⚪ **Backlog** (2026-10-19: measured gains are small, §2.3; the `ref.<id>.pN` fix is implemented, §2.3.4; priorities below)
+- **Status**: 🟡 **Proposed** (low priority; 2026-10-19: measured gains are small, §2.3; the `ref.<id>.pN` fix is implemented, §2.3.4; priorities below)
 - **Date**: 2026-10-18
-- **Related**: `design/performance-analysis.md` (Issue #6, point key lookup), `design/2026-10-17_shape_authoring_plan.md` (Polyline `points: ''`, class fields, `draw(ctx, u)`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A), `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming), `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` (TODO §13), `.agents/TODO.md` §15 (spline quality)
+- **Related**: `design/archive/performance-analysis.md` (Issue #6, point key lookup), `design/2026-10-17_shape_authoring_plan.md` (Polyline `points: ''`, class fields, `draw(ctx, u)`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A), `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming), `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` (TODO §13), `.agents/TODO.md` §15 (spline quality)
 - **Target Implementation**: `js/graphics.js` (parser), `js/elements/shapes/polyline.js`, `.agents/KILOPIXEL.md`
 - **Test Scripts** (local): `scratch/points_parser_cases.js` (today's parser), `scratch/points_parser_sketch.js` (§3.3 sketch)
 
@@ -387,6 +387,6 @@ Build the path once per (`u`, points, `smooth`, `closed`, arrows) and reuse it. 
 1. **Phase 1**: `js/graphics.js` — new `parsePointsIntoArray` (returns clean / not clean). `polyline.js` — warn once per change. Test cases 1–2. `node build.js`.
 2. **Phase 2**: `js/elements/shapes/polyline.js` — fields (§4.1), `setPoints`, `attributeChangedCallback` (points, `isAnimated` re-apply), `evaluateAnimations`, `variableChangedCallback`, `evaluatePointsForVariable`, `connectedCallback`, `updateGeometry` (passes A / B), `getBoundingBox` from the cache, finite guard, `smooth="0"` as straight, degenerate end segments for arrows. Remove `clearPoints` and `pointKeys`. `node build.js`.
 3. Tests 3–15. Record performance numbers in §7.
-4. `.agents/KILOPIXEL.md` — Polyline section (points syntax rules, no `p0…pN`, geometry cache, edge cases), parser line (parentheses-aware, warns on malformed points), Shape defaults list. `design/performance-analysis.md` — mark Issue #6 resolved.
+4. `.agents/KILOPIXEL.md` — Polyline section (points syntax rules, no `p0…pN`, geometry cache, edge cases), parser line (parentheses-aware, warns on malformed points), Shape defaults list. `design/archive/performance-analysis.md` — mark Issue #6 resolved.
 5. Later: the polyline docs page documents the points syntax (expressions, ternaries, `;` and `,`), `closed` without repeating the first point, and duplicate points with `smooth`.
 6. Coordinate with the shape-authoring plan: `points: ''` is already in `defaults` here; constructor fields become class fields when that plan lands.

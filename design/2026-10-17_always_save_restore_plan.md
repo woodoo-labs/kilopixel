@@ -1,6 +1,6 @@
 # Always `save()` / `restore()` per Shape
 
-- **Status**: 🟢 **Decided 2026-10-17: adopt** (implementation pending; reasoning and revised criterion in §5.4)
+- **Status**: 🟢 **Decided** (2026-10-17: adopt; implementation pending; reasoning and revised criterion in §5.4)
 - **Date**: 2026-10-17
 - **Related**: `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, implemented; this plan was split off from its former §3), `design/2026-10-17_shape_authoring_plan.md` (custom shapes), `.agents/TODO.md` §19, `design/2026-11-01_isolated_shape_compositing_plan.md` (builds on this one: same `Shape.render()`, order in its §9)
 - **Target Implementation**: `js/elements/shape.js` (`render`, `drawArrows`), `js/elements/shapes/grid.js`

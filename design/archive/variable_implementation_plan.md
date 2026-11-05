@@ -1,7 +1,7 @@
 # Explicit `ref.*` Architecture Overhaul
 
 **Date:** June 2026
-**Status:** Approved for Execution
+**Status**: ✅ **Implemented** (current behavior: `.agents/KILOPIXEL.md`)
 
 ## Architectural Philosophy
 We are completely eliminating all "magic" context (`v.*`, `s.*`, `sys.*`, `stage.*`). The framework will use a 100% explicit, zero-DOM-traversal, flat ID namespace.
