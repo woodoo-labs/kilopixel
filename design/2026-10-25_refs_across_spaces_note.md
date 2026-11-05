@@ -13,8 +13,8 @@ All documents on this topic, oldest first. Older plans are kept unchanged as his
 |---|---|---|---|
 | `design/archive/reference_implementation_plan.md` | 2026-07 | The `ref.*` registry (`pxl.nodes`, broadcast) | ✅ Implemented (history) |
 | `design/archive/variable_implementation_plan.md` | 2026-07 | Explicit `ref.*` everywhere, `<pxl-var>`, flat ID namespace | ✅ Implemented (history) |
-| `design/archive/local_coordinates_implementation_plan.md` | 2026-07 | Map **raw** global points (e.g. the mouse) into a group: `toLocal(ref.main.mouseX, ref.main.mouseY, 'x')` | ⚪ **Never implemented**: an open idea, related to the point form (§5.1) |
-| `design/archive/coordinate_mapping_implementation_plan.md` | 2026-07 | The original `toLocal` (`x`, `y`, `dx`, `dy`, `tx`, `ty`, `rotate`, `scale*`), `ref.<id>.tx` / `ty` getters, lowercase attribute names | ✅ Implemented |
+| `design/archive/local_coordinates_implementation_plan.md` | 2026-07 | Map **raw** global points (e.g. the mouse) into a group: `toLocal(ref.main.mouseX, ref.main.mouseY, 'x')` | ⚪ Superseded by this note (never implemented; the idea continues as the point form, §5.1) |
+| `design/archive/coordinate_mapping_implementation_plan.md` | 2026-07 | The original `toLocal` (`x`, `y`, `dx`, `dy`, `tx`, `ty`, `rotate`, `scale*`), `ref.<id>.tx` / `ty` getters, lowercase attribute names | ⚪ Superseded by the `toLocal` fix and decomposition plans below (implemented as the original `toLocal`) |
 | `design/2026-10-18_polyline_optimization_plan.md` §2.3.4 | 2026-10-18 | `ref.<id>.pN` readers update when `points` is replaced | ✅ Implemented |
 | **This note** | 2026-10-25 | Refs are values, not positions; patterns that work today; possible additions | ⚪ Open ideas |
 | `design/2026-10-26_tolocal_fix_plan.md` | 2026-10-26 | Readers update when their **own** space moves | ✅ Implemented |

@@ -283,7 +283,7 @@ Update the "Common Pitfalls" section. Remove the pitfall about `%` in gradient a
 
 Update the Colors & Gradients rules to note that `%` is now safe in all contexts.
 
-### `design/performance-analysis.md`
+### `design/archive/performance-analysis.md`
 
 No change needed (this fix doesn't affect the 60fps hot loop — it's compile-time only).
 

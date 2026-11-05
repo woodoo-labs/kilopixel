@@ -2,7 +2,7 @@
 
 - **Status**: ✅ **Implemented** (2026-10-24; deviation from §4.3: one shared `loadSegment()` per segment instead of an inline rolling loop, §4.3.3). **The seam rule (§4.2) was implemented and removed again the same day**: round or sharp is decided by the points alone, `closed` only adds the closing segment (§4.2).
 - **Date**: 2026-10-23
-- **Related**: `.agents/TODO.md` §15 (spline quality), `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming on smooth polylines, §4.3), `design/2026-10-18_polyline_optimization_plan.md` (§5 edge cases #8, #9, #11, #12; §6.2 smooth loop), `design/2026-09-07_plot_element_plan.md` and `design/2026-09-30_path_element_plan.md` (both reuse the polyline spline)
+- **Related**: `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming on smooth polylines, §4.3), `design/2026-10-18_polyline_optimization_plan.md` (§5 edge cases #8, #9, #11, #12; §6.2 smooth loop), `design/2026-09-07_plot_element_plan.md` and `design/2026-09-30_path_element_plan.md` (both reuse the polyline spline)
 - **Target Implementation**: `js/elements/shapes/polyline.js`, `js/elements/shapes/circle.js` and `ellipse.js` (arrow trim, §5.4), `.agents/KILOPIXEL.md` (Smoothing, Arrowheads), `docs/polyline.html` (section 2)
 - **Test Pages** (local, scratch is git-ignored): `scratch/polyline_shapes/smooth_ends.html` (17 cases × 6 variants A–F, opens directly from the file system; `?v=AF` shows only some variants), `smooth_bench.html` (loop benchmark, §4.3.1), `arrow_trim.html` (polyline arrow trimming, §5.2), `ellipse_arrows.html` (ellipse arrows, real engine, §5.4; needs the dev server)
 
@@ -25,7 +25,7 @@ Uniform Catmull-Rom with clamped ends (the missing neighbour of an end point is 
 cp1 = P1 + (P2 − P0) · k/6        cp2 = P2 − (P3 − P1) · k/6        k = smooth
 ```
 
-Known problems (TODO §15, plan 2026-10-18 §5):
+Known problems (`design/2026-10-18_polyline_optimization_plan.md` §5):
 
 | # | Input | Today |
 |---|---|---|
@@ -292,6 +292,6 @@ Every smooth polyline with free ends or uneven spacing changes shape near those 
 4. `.agents/KILOPIXEL.md` → Smoothing: centripetal Catmull-Rom (D3 `curveCatmullRom`), handle formula, free ends, duplicate points as corners, seam rule, `smooth` as handle multiplier. Arrowheads: distance trim.
 5. `design/archive/arrow_implementation_plan.md`: the end tangent is no longer the chord. `design/2026-10-14_unified_arrowhead_geometry_plan.md`: §4.3 chord estimate replaced by the distance trim; §4.4 circle trim angle is the straight distance (`asin`), not the arc length; ellipse trim by bisection; one trim definition for all shapes (§5.4 here). `design/2026-10-18_polyline_optimization_plan.md` §5: #7, #8 and #9 fixed by this plan.
 6. Docs: `polyline.html` section 2 (and the later sections: a repeated point makes a corner; a path that ends on its first point is smoothed across it); review the pages in §6.
-7. TODO §15 → implemented; TODO §22: remove the arrowhead "small fix" (done here).
+7. `.agents/TODO.md`: remove the spline item, and the arrowhead "small fix" from §22 (both done here).
 
 Estimate: `polyline.js` about +60 / −30 lines (spline +40 / −25, distance trim +15 / −4, walking inward ≈ +6); `circle.js` 1 line; `ellipse.js` ±10 lines.

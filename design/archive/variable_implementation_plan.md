@@ -1,6 +1,6 @@
 # Explicit `ref.*` Architecture Overhaul
 
-**Date:** June 2026
+**Date:** June 2026  
 **Status**: ✅ **Implemented** (current behavior: `.agents/KILOPIXEL.md`)
 
 ## Architectural Philosophy

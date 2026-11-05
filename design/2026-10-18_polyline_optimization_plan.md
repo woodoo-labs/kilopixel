@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (low priority; 2026-10-19: measured gains are small, §2.3; the `ref.<id>.pN` fix is implemented, §2.3.4; priorities below)
 - **Date**: 2026-10-18
-- **Related**: `design/archive/performance-analysis.md` (Issue #6, point key lookup), `design/2026-10-17_shape_authoring_plan.md` (Polyline `points: ''`, class fields, `draw(ctx, u)`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A), `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming), `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` (TODO §13), `.agents/TODO.md` §15 (spline quality)
+- **Related**: `design/archive/performance-analysis.md` (Issue #6, point key lookup), `design/2026-10-17_shape_authoring_plan.md` (Polyline `points: ''`, class fields, `draw(ctx, u)`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A), `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming), `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` (TODO §13), `design/2026-10-23_smooth_polyline_spline_plan.md` (spline quality)
 - **Target Implementation**: `js/graphics.js` (parser), `js/elements/shapes/polyline.js`, `.agents/KILOPIXEL.md`
 - **Test Scripts** (local): `scratch/points_parser_cases.js` (today's parser), `scratch/points_parser_sketch.js` (§3.3 sketch)
 

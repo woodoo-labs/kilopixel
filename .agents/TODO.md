@@ -219,7 +219,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Related**: build after §19 (always save / restore) and before §14 (`paintorder`); plan §9.
 
 ## 32. Docs: "Zoom & Scale" and "Rotate & Skew" Pages
-- **Status**: 🟢 **Decided** (sidebar entries added with the `zoom` attribute, 2026-10-30)
+- **Status**: 🟢 **Decided** (sidebar entries: "Rotate & Skew" since 2026-10-09, "Zoom & Scale" since the `zoom` attribute, 2026-10-30)
 - **Problem**: the sidebar (`docs/js/layout.js`) links `scale.html` ("Zoom & Scale") and `transform.html` ("Rotate & Skew"), but neither page exists: both links give a 404 on the live site.
 - **Content**: `zoom` multiplies `scalex` / `scaley` (`design/2026-10-29_tolocal_decomposition_plan.md` §5); `rotate`, `skewx` / `skewy` and the transform order (KILOPIXEL.md "Transform Pipeline Order").
 - **Until then**: hide the two links, or write the pages first.

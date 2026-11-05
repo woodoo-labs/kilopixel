@@ -2,7 +2,7 @@
 
 - **Status**: ⚪ **Superseded by** `design/2026-10-14_unified_arrowhead_geometry_plan.md` (kept as history)
 - **Date**: 2026-10-13
-- **Related Plans**: `design/2026-10-12_centralized_arrowhead_geometry_plan.md`, `design/2026-10-13_simplified_arrowhead_geometry_plan.md`
+- **Related Plans**: `design/archive/2026-10-12_centralized_arrowhead_geometry_plan.md`, `design/archive/2026-10-13_simplified_arrowhead_geometry_plan.md`
 - **Target Implementation**: `js/elements/shapes/polyline.js`, `js/elements/shapes/line.js`
 - **Validation Pages**: `examples/test24.html`, `docs/arrows.html`
 

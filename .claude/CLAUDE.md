@@ -34,7 +34,7 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
   - ⚪ **Superseded by** `<file>`
   - ⚪ **Dropped**: decided not to do it. Never use it for "not built yet" (that is 🟡 or 🟢).
 
-  `.agents/TODO.md` lists open work only (💬 🟡 🟢), each item linked to its plan. Change a plan's status and TODO.md in the same change: implemented → ✅ in the plan and the TODO item removed (its number stays free; new items take the next number). Superseded, dropped, or implemented but no longer describing the current code → the plan moves to `design/archive/` (fix the links to it). Implemented plans that still explain the current code stay in `design/`.
+  `.agents/TODO.md` lists open work only (💬 🟡 🟢), each item linked to its plan. Change a plan's status and TODO.md in the same change: implemented → ✅ in the plan and the TODO item removed (its number stays free; new items take the next number). When removing a TODO item, also remove references to its number (plans link the plan instead). Superseded, dropped, or implemented but no longer describing the current code → the plan moves to `design/archive/` (fix the links to it). Implemented plans that still explain the current code stay in `design/`.
 - **Verify in the browser:** the dev server is `node tools/serve.js` (launch config `kilopixel`, http://localhost:8124, `/` redirects to `/docs/`). Check docs pages and `examples/` there, including the console.
 - **Engine tests:** after every engine change and build, open `tests/index.html`; all tests must pass. Every engine fix gets a test there (committed, unlike `scratch/`).
 - **Line endings:** LF everywhere, set by `.gitattributes`. Don't change it per file.

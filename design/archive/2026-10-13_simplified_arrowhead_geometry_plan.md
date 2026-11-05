@@ -2,7 +2,7 @@
 
 - **Status**: ⚪ **Superseded by** `design/2026-10-14_unified_arrowhead_geometry_plan.md` (kept as history)
 - **Date**: 2026-10-13
-- **Supersedes**: `design/2026-10-12_centralized_arrowhead_geometry_plan.md`, `design/2026-10-13_arrowhead_linecap_alignment_and_spline_integrity_plan.md`
+- **Supersedes**: `design/archive/2026-10-12_centralized_arrowhead_geometry_plan.md`, `design/archive/2026-10-13_arrowhead_linecap_alignment_and_spline_integrity_plan.md`
 - **Target Implementation**: `js/elements/shapes/polyline.js`, `js/elements/shapes/line.js`
 - **Validation Pages**: `examples/test24.html` (Section 1), `docs/arrows.html` (Section 1)
 
@@ -250,7 +250,7 @@ Both visual proofs are confirmed and saved in [`scratch/`](file:///c:/Users/mich
 
 ## 6. Implementation Checklist
 
-- [x] Write simplified design plan to `design/2026-10-13_simplified_arrowhead_geometry_plan.md`.
+- [x] Write simplified design plan to `design/archive/2026-10-13_simplified_arrowhead_geometry_plan.md`.
 - [x] Apply changes to `js/elements/shapes/polyline.js`.
 - [x] Apply changes to `js/elements/shapes/line.js`.
 - [x] Run `node build.js` to compile `dist/pxl.js` and `docs/js/pxl.min.js`.

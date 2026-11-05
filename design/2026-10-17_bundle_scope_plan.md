@@ -2,7 +2,7 @@
 
 - **Status**: ✅ **Implemented** (2026-10-18; pure namespace pattern, §3; plan tests 1–6 pass; Rule A unit tests 20 / 20; regression against the previous bundle identical on 76 pages apart from timing telemetry)
 - **Date**: 2026-10-17 (revised 2026-10-18)
-- **Related**: `design/2026-10-17_shape_authoring_plan.md` (custom shapes extend `pxl.Shape`), `.agents/TODO.md` §21
+- **Related**: `design/2026-10-17_shape_authoring_plan.md` (custom shapes extend `pxl.Shape`)
 - **Target Implementation**: `build.js`, `js/elements/node.js`, `js/elements/stage.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/variable.js`, `js/elements/shape.js`, `js/elements/shapes/*.js`
 
 ---
