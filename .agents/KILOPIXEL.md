@@ -507,9 +507,15 @@ All gradient functions accept two color stop formats:
 [0, 'red', 0.5, 'green', 1, 'blue'] // Offset-mapped — explicit positions
 ```
 
+Offsets are clamped to 0–1 when the gradient is created (`addColorStop` throws outside that range): an animated stop that overshoots parks at the end, and `NaN` (e.g. a `ref` that isn't connected yet) becomes `0`.
+
+#### Gradient Area (Stroke vs. Fill)
+
+Gradient positions and keyword radii are relative to the shape's bounding box (`getBoundingBox()`, the path geometry without the stroke). For the **stroke** gradient, `createGradient` makes each side at least `strokewidth`, centered on the box: a line or flat polyline has a box side of `0`, and a gradient across it would have zero length and paint nothing (the canvas paints nothing for equal end points); a thin rect would squeeze the gradient into its path while the stroke is wider. Where a side is at least `strokewidth`, the area is the box itself. Fill gradients always use the box. Design: `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`.
+
 #### Gradient Caching
 
-The Shape base class maintains a **dual-slot gradient cache** (`_gradCache[0]` for fill, `_gradCache[1]` for stroke). Each slot tracks the descriptor object reference, responsive unit `u`, and all four bounding box values (`left`, `top`, `right`, `bottom`). If all values match, the cached `CanvasGradient` is reused. This ensures gradients update correctly when a shape's geometry animates (e.g., changing radius or width), while avoiding unnecessary recreation for static shapes.
+The Shape base class maintains a **dual-slot gradient cache** (`_gradCache[0]` for fill, `_gradCache[1]` for stroke). Each slot tracks the descriptor object reference, responsive unit `u`, all four bounding box values (`left`, `top`, `right`, `bottom`) and `strokewidth` (`sw`, which sizes the stroke gradient's area). If all values match, the cached `CanvasGradient` is reused. This ensures gradients update correctly when a shape's geometry or stroke width animates (e.g., changing radius or width), while avoiding unnecessary recreation for static shapes. An animated gradient expression returns a new descriptor every frame, so it creates a new `CanvasGradient` every frame (≈ 0.8 µs).
 
 ---
 
@@ -956,7 +962,7 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `sca
 
 **`applyStrokeState(ctx, u)`**: Sets all stroke-related context state in one place: `strokeStyle` (gradient-resolved via slot `1`), `lineWidth = strokewidth * u`, `lineCap`, `lineJoin`, `miterLimit`, and line dash via `this.applyLineDash(ctx, u)`. Used by `applyStyle` for path-based shapes and directly by `<pxl-text>` (which cannot use paths because `strokeText()` paints glyphs directly). Convention: stroke state is always **set before stroking** and never reset afterwards — every stroke call site goes through this method, so leaked state from a previous shape is always overwritten.
 
-**`createGradient(ctx, u, styleValue, slotIndex)`**: If the value is a gradient descriptor (has `isGradient: true`), creates a `CanvasGradient` from the shape's bounding box. Uses `_gradCache` dual-slot cache to avoid recreation.
+**`createGradient(ctx, u, styleValue, slotIndex)`**: If the value is a gradient descriptor (has `isGradient: true`), creates a `CanvasGradient` from the shape's bounding box (for the stroke, each side at least `strokewidth`, see [Gradient Area](#gradient-area-stroke-vs-fill)) and clamps stop offsets to 0–1. Uses `_gradCache` dual-slot cache to avoid recreation.
 
 **Arrowhead methods** (used by Line, Polyline, Circle, Ellipse; see [Arrowhead System](#arrowhead-system)):
 - **`resolveArrow(rec, attrValue, u)`**: Resolves one arrow end (`arrowstart`/`arrowend` value) into `size`, `len`, `tipAdvance` and `inset` (context units), written into the pre-allocated `rec`. Returns `true` if this end has a head.
@@ -1075,7 +1081,7 @@ Like Circle but uses `ctx.ellipse()` with independent `rx`/`ry` radii. Arrowhead
 | `w` | number | Width |
 | `h` | number | Height |
 | `r` | number | Universal corner radius (all 4 corners) |
-| `r1`-`r4` | number | Per-corner radius overrides (top-left, top-right, bottom-right, bottom-left). Falls back to `r`. |
+| `r1`-`r4` | number | Per-corner radius overrides (top-left, top-right, bottom-right, bottom-left). Falls back to `r`. Negative values count as `0`. |
 | `anchor` | string | Position anchor. One of 9 positions. |
 
 ### Anchor System
@@ -1099,7 +1105,7 @@ Internally uses lookup tables: `pxl.anchorX` and `pxl.anchorY` mapping names to 
 ### Drawing Logic
 
 - Calculates `startX = -w * anchorX * u`, `startY = -h * anchorY * u`
-- If any corner radius > 0: uses `ctx.roundRect()` (supported by every browser that has `createConicGradient`, which the engine needs anyway), otherwise `ctx.rect()`
+- If any corner radius > 0: uses `ctx.roundRect()` (supported by every browser that has `createConicGradient`, which the engine needs anyway), otherwise `ctx.rect()`. Negative radii count as `0` there (`roundRect` throws on them; an animated radius can dip below 0)
 - Pre-allocated `_radii = [0,0,0,0]` array, reused every frame
 - An unknown `anchor` name is not replaced by `center`: the rect is not drawn (NaN coordinates)
 

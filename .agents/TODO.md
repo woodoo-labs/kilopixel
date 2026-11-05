@@ -91,23 +91,11 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Reference**: `design/2026-10-14_unified_arrowhead_geometry_plan.md` (geometry); `design/2026-10-15_arrowcap_arrowjoin_plan.md` (💬, arrowhead look)
 - **Location**: Sidebar / Navigation category **"Line Styles"** in `docs/js/layout.js`.
 - **Motivation**: Arrowheads (`arrowstyle`, `arrowstart`, `arrowend`) are supported across multiple shapes (`<pxl-line>`, `<pxl-polyline>`, `<pxl-circle>`, and `<pxl-ellipse>`). Individual shape pages feature practical, contextual examples, while a centralized hub page (`docs/arrows.html`) under Line Styles will provide the comprehensive reference for arrow geometry, scaling formulas, custom arrow styles, and styling.
-- **Done**: Navigation entry, sections 1. Sizing, 2. Styles, 3. Line Caps, 4. Line Joins; cross-links from `line.html`, `circle.html`, `ellipse.html` (identical "More on Arrowheads" callout).
+- **Done**: Navigation entry, sections 1. Sizing, 2. Styles, 3. Line Caps, 4. Line Joins; cross-links from `line.html`, `polyline.html`, `circle.html`, `ellipse.html` (identical "More on Arrowheads" callout).
 - **Open**:
   - **Design question:** should `filled` arrowheads also follow `linejoin` (rounded/bevelled triangle corners, radius = `strokewidth / 2`), or a future `arrowjoin` that applies to both styles? Today chevrons follow `linejoin`, filled heads are always sharp. Testable in section 4 by switching Arrow Style. Discussed in `design/2026-10-15_arrowcap_arrowjoin_plan.md`.
   - "Rules & Edge Cases" section: small arrowheads (narrower than stroke), open paths only (`pie` / `closed` / rings / closed polylines ignore arrows), no `stroke` → no arrowheads, path shorter than both heads.
   - Dashed arrows (chevrons stay solid) and animated dashes / arrowheads.
-  - Cross-link `polyline.html` (the page exists now; `arrows.html` doesn't link it yet).
-
-## 13. Fix Stroke Gradient Zero-Dimension Collapse & Degeneracy
-- **Status**: 🟢 **Decided** (2026-10-11, not implemented yet; the bug is still in `createGradient`)
-- **Reference**: `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`
-- **Problem Solved**:
-  - When linear gradients are applied to the `stroke` of shapes with zero geometric width or height (e.g. horizontal/vertical lines, flat polylines), Canvas 2D linear gradient endpoints collapse to identical coordinates at perpendicular angles ($90^\circ$ and $270^\circ$ for horizontal lines; $0^\circ$ and $180^\circ$ for vertical lines).
-  - W3C Canvas 2D spec mandates that zero-length gradients paint nothing, causing the stroked shape to completely disappear.
-- **Solution Summary**:
-  - Update `Shape.prototype.createGradient` in `js/elements/shape.js` to resolve stroke dimensions against `strokewidth` when `slot === 1` or when raw dimensions are zero.
-  - Clamp projection distance to a minimum of $0.001$ with coordinate separation fallback.
-  - Update `_gradCache` to track `strokewidth` (`sw`) so slider adjustments properly invalidate cached stroke gradients.
 
 ## 14. Shape-Level Paint Order (`paintorder`)
 - **Status**: 💬 **Discussion** (decided 2026-10-13: keep current behavior until implemented properly; no plan yet)
@@ -220,12 +208,6 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Docs**: afterwards `mask.html` shapes get fill + stroke and the standard ghosts; the "Ghosts of fill-only shapes" note in DOCS_STANDARDS.md goes.
 - **Related**: build after §19 (always save / restore) and before §14 (`paintorder`); plan §9.
 
-## 32. Docs: "Zoom & Scale" and "Rotate & Skew" Pages
-- **Status**: 🟢 **Decided** (sidebar entries: "Rotate & Skew" since 2026-10-09, "Zoom & Scale" since the `zoom` attribute, 2026-10-30)
-- **Problem**: the sidebar (`docs/js/layout.js`) links `scale.html` ("Zoom & Scale") and `transform.html` ("Rotate & Skew"), but neither page exists: both links give a 404 on the live site.
-- **Content**: `zoom` multiplies `scalex` / `scaley` (`design/2026-10-29_tolocal_decomposition_plan.md` §5); `rotate`, `skewx` / `skewy` and the transform order (KILOPIXEL.md "Transform Pipeline Order").
-- **Until then**: hide the two links, or write the pages first.
-
 ## 33. Stage Sizing: Overridable Defaults and a Zero-Width Warning
 - **Status**: 🟡 **Proposed** (2026-11-04, no code changes yet)
 - **Reference**: `design/2026-11-04_stage_sizing_plan.md`
@@ -246,9 +228,9 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Idea**: a thermodynamic pressure-enthalpy diagram as a Kilopixel shape, and a general scale interface: `mapX(value)` / `mapY(value)` turn a domain value into a stage coordinate, so other shapes can place markers on data shapes. Related to `<pxl-plot>` (§7).
 
 ## 36. Draw Errors: One Bad Value Must Not Break the Layer
-- **Status**: 🟡 **Proposed** (2026-11-05, no code changes yet)
+- **Status**: 🟡 **Proposed** (Part 2; Part 1 implemented 2026-11-05: stop offsets clamped to 0–1, rect corner radii ≥ 0)
 - **Reference**: `design/2026-11-05_draw_errors_plan.md`; prototypes `scratch/gradient_stops/overshoot.html`, `scratch/gradient_stops/try_finally_bench.html` (local only)
-- **Problem**: canvas calls that throw (stop offset outside 0–1 or `NaN`, a typo in a gradient color, a gradient on a `NaN` bounding box, a negative corner radius, an expression failing at runtime, a buggy custom shape) abort the whole frame: later layers and hit testing are skipped. The `ctx.save()` before the shape is never restored, so the layer stays shifted, even after the value is valid again. Hit testing breaks the same way on `pxl.dummyCtx`.
-- **Idea**: Part 1 clamps what animations produce (stop offsets to 0–1, rect corner radii ≥ 0). Part 2 skips a failing element for that frame with one warning per distinct message and always restores the canvas (`try / catch / finally` in `Shape.render()`, evaluation of groups, layers and variables, and the hit-test draw).
+- **Problem (left after Part 1)**: canvas calls that still throw (a typo in a gradient color, a gradient on a `NaN` bounding box, an expression failing at runtime, a buggy custom shape) abort the whole frame: later layers and hit testing are skipped. The `ctx.save()` before the shape is never restored, so the layer stays shifted, even after the value is valid again. Hit testing breaks the same way on `pxl.dummyCtx`.
+- **Idea (Part 2)**: skip a failing element for that frame with one warning per distinct message and always restore the canvas (`try / catch / finally` in `Shape.render()`, evaluation of groups, layers and variables, and the hit-test draw).
 - **Measured**: `try / finally` ≈ 6.5 ns per shape (0.1 % of the frame budget for 2,300 shapes); in the engine within noise.
 - **Open**: plan §8 (build Part 2 together with §19, warning frequency, invalid stop color, docs).

@@ -27,8 +27,8 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
     // Gradient cache per slot: [0] = fill, [1] = stroke (createGradient)
     this._gradCache = [
-      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, grad: null },
-      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, grad: null }
+      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null },
+      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null }
     ];
 
     // Scaled dash pattern, cached per (linedash, u) by applyLineDash()
@@ -133,16 +133,24 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
     const box = this.getBoundingBox();
     const c = this._gradCache[slot];
+    const sw = this.attributeValues.strokewidth;
 
-    // Reuse while the descriptor, the unit and the bounding box are unchanged
+    // Reuse while the descriptor, the unit, the bounding box and the stroke width are unchanged
     if (c.config === styleValue && c.u === u &&
         c.bl === box.left && c.bt === box.top &&
-        c.br === box.right && c.bb === box.bottom) {
+        c.br === box.right && c.bb === box.bottom && c.sw === sw) {
       return c.grad;
     }
 
-    const width = box.right - box.left;
-    const height = box.bottom - box.top;
+    // A stroke is at least strokewidth thick: a line's box has a zero side, and a gradient across it would
+    // have zero length and paint nothing. For the stroke, each side spans at least strokewidth around the center.
+    // (design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md)
+    const width = slot === 1 ? Math.max(box.right - box.left, sw) : box.right - box.left;
+    const height = slot === 1 ? Math.max(box.bottom - box.top, sw) : box.bottom - box.top;
+    const cx = (box.left + box.right) / 2;
+    const cy = (box.top + box.bottom) / 2;
+    const left = cx - width / 2;
+    const top = cy - height / 2;
 
     let grad;
 
@@ -150,30 +158,28 @@ pxl.Shape = class Shape extends pxl.PxlNode {
       let gx1, gy1, gx2, gy2;
 
       if (styleValue.angle !== undefined) {
-        const bx = (box.left + box.right) / 2;
-        const by = (box.top + box.bottom) / 2;
         const rad = styleValue.angle * Math.PI / 180;
         const cosRad = Math.cos(rad);
         const sinRad = Math.sin(rad);
         const distance = Math.abs((width / 2) * cosRad) + Math.abs((height / 2) * sinRad);
-        gx1 = (bx - distance * cosRad) * u;
-        gy1 = (by - distance * sinRad) * u;
-        gx2 = (bx + distance * cosRad) * u;
-        gy2 = (by + distance * sinRad) * u;
+        gx1 = (cx - distance * cosRad) * u;
+        gy1 = (cy - distance * sinRad) * u;
+        gx2 = (cx + distance * cosRad) * u;
+        gy2 = (cy + distance * sinRad) * u;
       } else {
-        gx1 = (box.left + width * styleValue.x1) * u;
-        gy1 = (box.top + height * styleValue.y1) * u;
-        gx2 = (box.left + width * styleValue.x2) * u;
-        gy2 = (box.top + height * styleValue.y2) * u;
+        gx1 = (left + width * styleValue.x1) * u;
+        gy1 = (top + height * styleValue.y1) * u;
+        gx2 = (left + width * styleValue.x2) * u;
+        gy2 = (top + height * styleValue.y2) * u;
       }
 
       grad = ctx.createLinearGradient(gx1, gy1, gx2, gy2);
 
     } else if (styleValue.type === 'radial') {
-      const px0 = (box.left + width * styleValue.x0) * u;
-      const py0 = (box.top + height * styleValue.y0) * u;
-      const px1 = (box.left + width * styleValue.x1) * u;
-      const py1 = (box.top + height * styleValue.y1) * u;
+      const px0 = (left + width * styleValue.x0) * u;
+      const py0 = (top + height * styleValue.y0) * u;
+      const px1 = (left + width * styleValue.x1) * u;
+      const py1 = (top + height * styleValue.y1) * u;
 
       const pr0 = pxl.resolveRadius(styleValue.r0, styleValue.x0, styleValue.y0, width, height, u);
       const pr1 = pxl.resolveRadius(styleValue.r1, styleValue.x1, styleValue.y1, width, height, u);
@@ -182,14 +188,17 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
     } else {
       // conic (descriptors only come from linear(), radial() and conic())
-      const gcx = (box.left + width * styleValue.cx) * u;
-      const gcy = (box.top + height * styleValue.cy) * u;
+      const gcx = (left + width * styleValue.cx) * u;
+      const gcy = (top + height * styleValue.cy) * u;
       grad = ctx.createConicGradient(styleValue.startAngle * Math.PI / 180, gcx, gcy);
     }
 
+    // Offsets outside 0–1 throw in addColorStop; an animated stop may overshoot, so it parks at the end.
+    // NaN (a ref that isn't connected yet) fails both comparisons and becomes 0.
     const stops = styleValue.stops;
     for (let i = 0; i < stops.length; i++) {
-      grad.addColorStop(stops[i].offset, stops[i].color);
+      const offset = stops[i].offset;
+      grad.addColorStop(offset > 0 ? (offset < 1 ? offset : 1) : 0, stops[i].color);
     }
 
     c.config = styleValue;
@@ -198,6 +207,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     c.bt = box.top;
     c.br = box.right;
     c.bb = box.bottom;
+    c.sw = sw;
     c.grad = grad;
     return grad;
   }

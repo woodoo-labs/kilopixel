@@ -148,6 +148,39 @@
           </pxl-layer>
         </pxl-stage>
 
+        <!-- Stroke gradients on thin shapes, stop offsets, corner radii
+             (design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md, design/2026-11-05_draw_errors_plan.md §3.1) -->
+        <pxl-stage id="gsStage" ratio="5 / 3" alwaysrender>
+          <pxl-layer id="gsLayer">
+            <!-- The line from docs/line.html section 2 -->
+            <pxl-line id="gsLine" x1="550" y1="300" x2="850" y2="300" strokewidth="30" linecap="round"
+              stroke="linear(0, ['#3b82f6', '#ec4899'])"></pxl-line>
+            <pxl-line id="gsVertical" x1="950" y1="50" x2="950" y2="250" strokewidth="30"
+              stroke="linear(0, ['#3b82f6', '#ec4899'])"></pxl-line>
+            <pxl-polyline id="gsFlat" points="300,450; 400,450; 500,450" strokewidth="30"
+              stroke="linear(90, ['#3b82f6', '#ec4899'])"></pxl-polyline>
+            <pxl-line id="gsRadial" x1="550" y1="520" x2="850" y2="520" strokewidth="30"
+              stroke="radial(['farthest-side'], ['#3b82f6', '#ec4899'])"></pxl-line>
+          </pxl-layer>
+        </pxl-stage>
+
+        <!-- Stop offsets outside 0–1 (own stage: before the fix, the error broke every shape drawn after it) -->
+        <pxl-stage id="gsStopsStage" ratio="5 / 3" alwaysrender>
+          <pxl-layer id="gsStopsLayer">
+            <pxl-rect id="gsStops" x="300" y="300" w="300" h="200" fill="linear(0, [0, '#3b82f6', 1, '#ec4899'])"></pxl-rect>
+          </pxl-layer>
+          <pxl-layer id="gsLateLayer">
+            <pxl-rect id="gsLate" x="750" y="300" w="200" h="200" fill="#000000"></pxl-rect>
+          </pxl-layer>
+        </pxl-stage>
+
+        <!-- Negative corner radius (own stage, same reason) -->
+        <pxl-stage id="gsCornersStage" ratio="5 / 3" alwaysrender>
+          <pxl-layer id="gsCornersLayer">
+            <pxl-rect id="gsCorners" x="500" y="300" w="400" h="300" r="-5" r2="10" fill="#22c55e"></pxl-rect>
+          </pxl-layer>
+        </pxl-stage>
+
       </div>
     </div>
   </main>
@@ -395,6 +428,94 @@
       if (shadow !== 'drop-shadow(5px -2px 10px #000)') throw new Error(`drop-shadow gives '${shadow}'`);
       const backtick = pxl.scaleResponsiveFilter(`blur(${0.5 * 10}px) hue-rotate(90deg)`, 0.5);
       if (backtick !== 'blur(2.5px) hue-rotate(90deg)') throw new Error(`backtick blur gives '${backtick}'`);
+    });
+
+    // ===================================================================
+    // Stroke gradients on thin shapes (design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md)
+    // and stop offsets / corner radii (design/2026-11-05_draw_errors_plan.md §3.1)
+    // ===================================================================
+
+    // Pixel [r, g, b, a] of a layer canvas at a stage position. Draws the stage first: resize() renders now
+    // (the ResizeObserver doesn't fire in a hidden tab).
+    function pixelAt(layerId, x, y) {
+      const layer = el(layerId);
+      const stage = layer.stage;
+      const k = stage.unit * layer._canvas.width / stage.clientWidth;
+      return [...layer._ctx.getImageData(Math.round(x * k), Math.round(y * k), 1, 1).data];
+    }
+    const isBlueish = ([r, , b]) => b > r;
+    const isPinkish = ([r, , b]) => r > b;
+    const rgba = (p) => `rgba(${p.join(', ')})`;
+
+    test('stroke gradient: the docs line (line.html §2) stays visible at every angle, 0–360° in steps of 15', () => {
+      const line = el('gsLine');
+      const hidden = [];
+      for (let angle = 0; angle <= 360; angle += 15) {
+        line.setAttribute('stroke', `linear(${angle}, ['#3b82f6', '#ec4899'])`);
+        el('gsStage').resize();
+        const center = pixelAt('gsLayer', 700, 300);
+        if (center[3] === 0) hidden.push(`${angle}°`);
+      }
+      if (hidden.length) throw new Error(`line invisible at ${hidden.join(', ')}`);
+
+      // 90°: blue at the top edge of the 30-unit stroke, pink at the bottom; 270° the other way round
+      for (const [angle, top, bottom] of [[90, isBlueish, isPinkish], [270, isPinkish, isBlueish]]) {
+        line.setAttribute('stroke', `linear(${angle}, ['#3b82f6', '#ec4899'])`);
+        el('gsStage').resize();
+        const above = pixelAt('gsLayer', 700, 289), below = pixelAt('gsLayer', 700, 311);
+        if (!top(above) || !bottom(below)) throw new Error(`${angle}°: above ${rgba(above)}, below ${rgba(below)}`);
+      }
+      line.setAttribute('stroke', "linear(0, ['#3b82f6', '#ec4899'])");
+    });
+
+    test('stroke gradient: vertical line at 0° and flat polyline at 90° run across the stroke', () => {
+      el('gsStage').resize();
+      const checks = [
+        ['vertical line', pixelAt('gsLayer', 950, 150), pixelAt('gsLayer', 939, 150), pixelAt('gsLayer', 961, 150)],
+        ['flat polyline', pixelAt('gsLayer', 400, 450), pixelAt('gsLayer', 400, 439), pixelAt('gsLayer', 400, 461)]
+      ];
+      for (const [name, center, start, end] of checks) {
+        if (center[3] === 0) throw new Error(`${name} is invisible`);
+        if (!isBlueish(start) || !isPinkish(end)) throw new Error(`${name}: start ${rgba(start)}, end ${rgba(end)}`);
+      }
+    });
+
+    test('stroke gradient: a radial gradient on a horizontal line keeps its center on the line', () => {
+      el('gsStage').resize();
+      const [r, g, b] = pixelAt('gsLayer', 700, 520);
+      // The center has the first stop's color (#3b82f6 = 59, 130, 246)
+      if (Math.abs(r - 59) > 12 || Math.abs(g - 130) > 12 || Math.abs(b - 246) > 12) throw new Error(`center is rgb(${r}, ${g}, ${b})`);
+    });
+
+    test('stroke gradient: changing strokewidth rebuilds the stroke gradient', () => {
+      const line = el('gsVertical');
+      line.setAttribute('strokewidth', '20');
+      el('gsStage').resize();
+      const sw = line._gradCache[1].sw;
+      line.setAttribute('strokewidth', '30');
+      el('gsStage').resize();
+      if (sw !== 20) throw new Error(`cached strokewidth is ${sw}, expected 20`);
+    });
+
+    test('gradient stops: offsets outside 0–1 and NaN are clamped; the frame finishes and later layers update', () => {
+      const colors = ['#ff0000', '#00ff00', '#0000ff'];
+      ['-0.2', '1.3', 'NaN'].forEach((offset, i) => {
+        el('gsStops').setAttribute('fill', `linear(0, [${offset}, '#3b82f6', 1, '#ec4899'])`);
+        el('gsLate').setAttribute('fill', colors[i]);
+        el('gsStopsStage').resize(); // throws if addColorStop gets the raw offset
+        const late = pixelAt('gsLateLayer', 750, 300);
+        const expected = [[255, 0, 0], [0, 255, 0], [0, 0, 255]][i];
+        if (late[0] !== expected[0] || late[1] !== expected[1] || late[2] !== expected[2]) {
+          throw new Error(`offset ${offset}: the later layer shows ${rgba(late)}, expected ${colors[i]}`);
+        }
+      });
+      el('gsStops').setAttribute('fill', "linear(0, [0, '#3b82f6', 1, '#ec4899'])");
+    });
+
+    test('rect: a negative corner radius next to a positive one counts as 0 (roundRect would throw)', () => {
+      el('gsCornersStage').resize(); // throws if roundRect gets the negative radius
+      const center = pixelAt('gsCornersLayer', 500, 300);
+      if (center[1] < 150 || center[3] === 0) throw new Error(`rect not drawn: ${rgba(center)}`);
     });
 
     // --- Run all tests in order ---

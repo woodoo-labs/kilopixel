@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (low priority; 2026-10-19: measured gains are small, §2.3; the `ref.<id>.pN` fix is implemented, §2.3.4; priorities below)
 - **Date**: 2026-10-18
-- **Related**: `design/archive/performance-analysis.md` (Issue #6, point key lookup), `design/2026-10-17_shape_authoring_plan.md` (Polyline `points: ''`, class fields, `draw(ctx, u)`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A), `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming), `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` (TODO §13), `design/2026-10-23_smooth_polyline_spline_plan.md` (spline quality)
+- **Related**: `design/archive/performance-analysis.md` (Issue #6, point key lookup), `design/2026-10-17_shape_authoring_plan.md` (Polyline `points: ''`, class fields, `draw(ctx, u)`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A), `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming), `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` (stroke gradients on flat shapes, implemented), `design/2026-10-23_smooth_polyline_spline_plan.md` (spline quality)
 - **Target Implementation**: `js/graphics.js` (parser), `js/elements/shapes/polyline.js`, `.agents/KILOPIXEL.md`
 - **Test Scripts** (local): `scratch/points_parser_cases.js` (today's parser), `scratch/points_parser_sketch.js` (§3.3 sketch)
 
@@ -299,7 +299,7 @@ Behavior spec for phase 1 + 2. "Today" is verified in code or with the test scri
 | 14 | `mode="relative"` + `closed` | closes to the first (absolute) point | same; document |
 | 15 | Arrowheads on `closed` | ignored | same |
 | 16 | Arrow inset longer than the first/last segment (> 2 points) | inset clamped to that segment; head may overlap the next segment | same (documented in arrows plan) |
-| 17 | All points identical / flat polyline + linear gradient at 90° | zero-size gradient paints nothing | unchanged, TODO §13 |
+| 17 | All points identical / flat polyline + linear gradient at 90° | zero-size gradient paints nothing | fixed 2026-11-05: the stroke gradient spans at least `strokewidth` (`design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`) |
 | 18 | `points` changed every frame by JavaScript | reparse + recompile + reallocate + `delete` (dictionary mode) | reparse + recompile; buffers reused if the count is unchanged; no `delete` |
 | 19 | Many distinct expression strings over time (streamed `points` with embedded numbers) | `pxl.staticCache` / `pxl.animationCache` grow without limit | unchanged — engine-wide compiler cache issue, out of scope; plain numbers never reach the cache |
 | 20 | `points` set before the element connects; polyline moved to another layer | works via `compileAttribute` / `restoreVariableSubscriptions` | works via `setPoints` / `connectedCallback` override (§4.3) |

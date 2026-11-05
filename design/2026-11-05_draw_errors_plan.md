@@ -1,6 +1,6 @@
 # Draw Errors: One Bad Value Must Not Break the Layer
 
-- **Status**: 🟡 **Proposed** (2026-11-05, no code changes yet)
+- **Status**: 🟡 **Proposed** (Part 2; Part 1 implemented 2026-11-05 together with `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`: stop offsets clamped, rect radii clamped in the `roundRect` branch, 2 tests)
 - **Date**: 2026-11-05
 - **Supersedes**: `design/archive/2026-08-25_gradient_optimization_plan.md` (stop clamping, never built; its allocation part is dropped, §7)
 - **Related**: `design/2026-10-17_always_save_restore_plan.md` (TODO §19, same lines in `Shape.render()`), `design/2026-10-18_polyline_optimization_plan.md` (small fix "non-finite points + gradient")
@@ -68,15 +68,18 @@ Two parts. Part 1 makes values that animations legitimately produce draw sensibl
     }
 ```
 
-**Rect corner radii** (`rect.js`): negative radii become `0`, like circle and ellipse. `NaN` stays `NaN` (`roundRect` ignores it silently).
+**Rect corner radii** (`rect.js`): negative radii become `0`, like circle and ellipse. `NaN` stays `NaN` (`roundRect` ignores it silently). Clamped only inside the `roundRect` branch, so rects without rounded corners (most of them) don't pay for it; the branch condition `rad1 > 0 || …` already treats a negative radius like 0 (performance review 2026-11-05).
 
 ```js
-    // roundRect throws on a negative radius (an animated radius can dip below 0); like circle and ellipse, it becomes 0
-    const rad1 = Math.max(0, r1 ?? baseR);
-    // … rad2–rad4 the same
+    if (rad1 > 0 || rad2 > 0 || rad3 > 0 || rad4 > 0) {
+      // roundRect throws on a negative radius (an animated radius can dip below 0); like circle and ellipse, it becomes 0
+      this._radii[0] = Math.max(0, rad1) * u;
+      // … _radii[1]–[3] the same
+      ctx.roundRect(startX, startY, w * u, h * u, this._radii);
+    }
 ```
 
-Cost: one or two comparisons per stop / corner. Measured: clamping 3 offsets 0.03 µs; creating the gradient itself 0.9 µs (`overshoot.html` session, 2026-11-05).
+Cost: one or two comparisons per stop (only when a gradient is created, not on a cache hit) and per rounded corner. Measured: clamping 3 offsets 0.03 µs; creating the gradient itself 0.9 µs (`overshoot.html` session, 2026-11-05). The full `createGradient` with this clamp and the stroke-gradient change: within noise of today's on all three paths (`design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` §6).
 
 ### 3.2 Part 2: Skip the Element, Warn Once, Always Restore
 
@@ -202,7 +205,7 @@ Then all tests pass, and the docs pages and `examples/` show no new console warn
 
 ## 9. Steps
 
-1. Part 1: clamp in `createGradient` and `rect.js`; tests "overshooting offset", "`NaN` offset", "negative corner radius". `node build.js`, `tests/index.html`.
+1. ✅ (2026-11-05) Part 1: clamp in `createGradient` and `rect.js`; tests "overshooting offset", "`NaN` offset", "negative corner radius". `node build.js`, `tests/index.html`.
 2. Part 2 (with §19 if decided so): `reportError`, `Shape.render`, `Group` / `Layer` / `Variable` evaluation, `InteractionEngine.process`; the remaining tests.
 3. Confirm the benchmark with the pane visible (§4).
 4. KILOPIXEL.md and docs (§6), sizes after the build.

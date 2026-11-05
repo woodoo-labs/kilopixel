@@ -23,10 +23,11 @@ pxl.Rect = class Rect extends pxl.Shape {
 
     ctx.beginPath();
     if (rad1 > 0 || rad2 > 0 || rad3 > 0 || rad4 > 0) {
-      this._radii[0] = rad1 * u;
-      this._radii[1] = rad2 * u;
-      this._radii[2] = rad3 * u;
-      this._radii[3] = rad4 * u;
+      // roundRect throws on a negative radius (an animated radius can dip below 0); like circle and ellipse, it becomes 0
+      this._radii[0] = Math.max(0, rad1) * u;
+      this._radii[1] = Math.max(0, rad2) * u;
+      this._radii[2] = Math.max(0, rad3) * u;
+      this._radii[3] = Math.max(0, rad4) * u;
       ctx.roundRect(startX, startY, w * u, h * u, this._radii);
     } else {
       ctx.rect(startX, startY, w * u, h * u);
