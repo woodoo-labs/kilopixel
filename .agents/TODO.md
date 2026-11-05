@@ -3,7 +3,7 @@
 Open work only. Done items are removed: the plan's status line, `.agents/KILOPIXEL.md` and git history keep the record.
 
 - **Status words** (same as in the plans): 💬 **Discussion** (ideas, nothing decided) · 🟡 **Proposed** (complete plan, waiting for a decision) · 🟢 **Decided** (agreed, not built yet). Plans also use ✅ **Implemented**, ⚪ **Superseded by** `<file>` and ⚪ **Dropped** (decided not to do it); those have no TODO item.
-- **Numbers are stable:** other files refer to items as "TODO §29". A removed item leaves a gap; a new item gets the next free number (next: §36).
+- **Numbers are stable:** other files refer to items as "TODO §29". A removed item leaves a gap; a new item gets the next free number (next: §37).
 - **Plans:** `design/`; superseded, dropped and outdated plans are in `design/archive/`. Workflow: `.claude/CLAUDE.md` → "Plans and TODO".
 
 ## 1. Native SVG Path2D & Vector Sprites (`<pxl-path>`)
@@ -142,7 +142,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Idea**: wrap every shape in `ctx.save()` / `ctx.restore()`, not only shapes with transforms or compositing, so no code path can leak canvas state into the next shape. Simplifies `Shape.render()`, `drawArrows` and `Grid.draw`.
 - **Measured**: real pages within noise; worst case 2,000 bare animated lines +1.3 ms per frame (+42%), still 60 fps. A careless custom shape (e.g. `globalAlpha` not reset) fades the whole layer today; always save contains it.
 - **Reasoning**: simpler engine code (no `hasStateChanges` list to keep in sync with `applyContextState`), safety for custom shapes, cost only outside the target use. Criterion revised from "worst case < 5%" to "real pages within noise, worst case still 60 fps".
-- **Related**: build before §31 (isolated compositing builds on the single save → transform → draw → restore path) and §14 `paintorder`; order in `design/2026-11-01_isolated_shape_compositing_plan.md` §9. §20 needs it before a "Custom Shapes" docs page.
+- **Related**: build before §31 (isolated compositing builds on the single save → transform → draw → restore path) and §14 `paintorder`; order in `design/2026-11-01_isolated_shape_compositing_plan.md` §9. §20 needs it before a "Custom Shapes" docs page. §36 (draw errors) rewrites the same `Shape.render()` and could be built together with it.
 
 ## 20. Shape Authoring (Derived Attributes, Class Fields, Custom Animation)
 - **Status**: 🟡 **Proposed** (2026-10-17, no code changes yet)
@@ -155,7 +155,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 ## 22. Polyline Optimization (Parser, Point Storage, Edge Cases)
 - **Status**: 🟡 **Proposed** (low priority; measured gains are small)
 - **Reference**: `design/2026-10-18_polyline_optimization_plan.md` (priority table at the top)
-- **Small fixes, do when touched**: all X (or all Y) non-finite + gradient throws in `createGradient`; warnings for typos in `points` (missing / extra values, unbalanced parentheses).
+- **Small fixes, do when touched**: all X (or all Y) non-finite + gradient throws in `createGradient` (covered by §36); warnings for typos in `points` (missing / extra values, unbalanced parentheses).
 - **Deferred**: point storage in numeric arrays (measured ≈ 8 µs per frame for 500 points, a micro-optimization) and the measurement-gated phase 3 items.
 - **Note**: `ref.<id>.pN` is internal (`.agents/KILOPIXEL.md`); the public docs recommend a `<pxl-var>` read by both shapes.
 
@@ -243,3 +243,11 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Status**: 💬 **Discussion** (spec 2026-07-19, never built)
 - **Reference**: `design/kilopixel_logph_diagram_spec.md`
 - **Idea**: a thermodynamic pressure-enthalpy diagram as a Kilopixel shape, and a general scale interface: `mapX(value)` / `mapY(value)` turn a domain value into a stage coordinate, so other shapes can place markers on data shapes. Related to `<pxl-plot>` (§7).
+
+## 36. Draw Errors: One Bad Value Must Not Break the Layer
+- **Status**: 🟡 **Proposed** (2026-11-05, no code changes yet)
+- **Reference**: `design/2026-11-05_draw_errors_plan.md`; prototypes `scratch/gradient_stops/overshoot.html`, `scratch/gradient_stops/try_finally_bench.html` (local only)
+- **Problem**: canvas calls that throw (stop offset outside 0–1 or `NaN`, a typo in a gradient color, a gradient on a `NaN` bounding box, a negative corner radius, an expression failing at runtime, a buggy custom shape) abort the whole frame: later layers and hit testing are skipped. The `ctx.save()` before the shape is never restored, so the layer stays shifted, even after the value is valid again. Hit testing breaks the same way on `pxl.dummyCtx`.
+- **Idea**: Part 1 clamps what animations produce (stop offsets to 0–1, rect corner radii ≥ 0). Part 2 skips a failing element for that frame with one warning per distinct message and always restores the canvas (`try / catch / finally` in `Shape.render()`, evaluation of groups, layers and variables, and the hit-test draw).
+- **Measured**: `try / finally` ≈ 6.5 ns per shape (0.1 % of the frame budget for 2,300 shapes); in the engine within noise.
+- **Open**: plan §8 (build Part 2 together with §19, warning frequency, invalid stop color, docs).

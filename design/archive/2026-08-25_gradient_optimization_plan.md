@@ -1,5 +1,6 @@
 # Gradient Safety and Optimization Plan
-**Date:** 2026-08-25
+**Date:** 2026-08-25  
+**Status**: ⚪ **Superseded by** `design/2026-11-05_draw_errors_plan.md` (stop clamping was never built; the allocation part was dropped there, §7)
 
 ## 1. Goal Description
 The current gradient system suffers from two core issues related to how color stops are processed:

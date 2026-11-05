@@ -139,7 +139,7 @@ Fix: declare every field in the constructor (stable hidden classes, one place to
 
 ## 4. Outside This Cleanup (Noted, Not Style)
 
-- **Animated gradients** allocate a descriptor and stops array per evaluation and miss the gradient cache (keyed by reference), so `fill="linear(t * 30, …)"` creates a `CanvasGradient` every frame. Compare with `design/2026-08-25_gradient_optimization_plan.md` before touching.
+- **Animated gradients** allocate a descriptor and stops array per evaluation and miss the gradient cache (keyed by reference), so `fill="linear(t * 30, …)"` creates a `CanvasGradient` every frame. Compare with `design/archive/2026-08-25_gradient_optimization_plan.md` before touching.
 - **`ref.<id>.tx` / `ty`** read the local matrix as Float32 (fixed 2026-10-27, precision note in KILOPIXEL.md).
 - **`docs/js/*`** (docs, layout, api-tabs) have their own style; a later, separate pass.
 
