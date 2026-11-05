@@ -15,17 +15,17 @@ Instead of making `mapX` and `mapY` a "hack" exclusive to the thermodynamic diag
 ### Application A: Data Shapes (e.g., `<pxl-logph>`)
 For data-driven shapes, the domain is the dataset (e.g., thermodynamic state points).
 ```html
-<pxl-logph id="diagram" x="500" width="800" h-min="200" h-max="600" />
+<pxl-logph id="diagram" x="500" width="800" h-min="200" h-max="600"></pxl-logph>
 <!-- Maps enthalpy 400 to the correct physical coordinate -->
-<pxl-circle x="ref.diagram.mapX(400)" />
+<pxl-circle x="ref.diagram.mapX(400)"></pxl-circle>
 ```
 
 ### Application B: Geometric Shapes (e.g., `<pxl-rect>`)
 For standard shapes that don't have a data domain, the implicit domain is the **Normalized Unit Range (0.0 to 1.0)** across their physical bounding box. This unlocks declarative relative positioning:
 ```html
-<pxl-rect id="menuBar" x="500" width="800" />
+<pxl-rect id="menuBar" x="500" w="800"></pxl-rect>
 <!-- Places avatar exactly at the 90% mark of the menu bar's width -->
-<pxl-circle x="ref.menuBar.mapX(0.9)" />
+<pxl-circle x="ref.menuBar.mapX(0.9)"></pxl-circle>
 ```
 
 ### The Coordinate Space Trap (CRITICAL)

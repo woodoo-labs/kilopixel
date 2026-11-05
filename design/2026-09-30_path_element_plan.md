@@ -1,7 +1,7 @@
 # Design Plan: `<pxl-path>` — Native SVG Path2D Element & Vector Sprites
 
 **Date**: 2026-09-30  
-**Status**: 🟡 **Proposed** (2026-09-30; written before `scale` became `zoom`: update before implementing)  
+**Status**: 🟡 **Proposed** (2026-09-30)  
 **Files affected**: `js/elements/shapes/path.js` (new), `js/elements/shape.js`, `js/interaction.js`, `build.js`
 
 ---
@@ -15,7 +15,7 @@ Modern web browsers support the native HTML5 Canvas `Path2D` interface, which ac
 Implementing `<pxl-path>` unlocks:
 1. **Instant Access to Vector Asset Libraries**: Millions of icons from Figma, Lucide, Heroicons, Material, and FontAwesome can be pasted directly into Kilopixel.
 2. **Sub-1 KB Bundle Cost**: Zero client-side SVG parsing or bezier math; the browser's native engine handles all path tessellation.
-3. **Zero-GC 60 FPS Rendering**: Path geometry is parsed once into native memory, while transforms (`x`, `y`, `w`, `h`, `rotate`, `scale`) run at 60 FPS without allocations.
+3. **Zero-GC 60 FPS Rendering**: Path geometry is parsed once into native memory, while transforms (`x`, `y`, `w`, `h`, `rotate`, `zoom`) run at 60 FPS without allocations.
 4. **Vector Sprite-Sheet Animation**: Leveraging reactive JavaScript array syntax on `viewbox` allows single compound SVG paths to function as multi-frame vector sprite sheets.
 
 ---
@@ -344,7 +344,7 @@ const files = [
 * **Expectation**: Engine derives `h = 60` automatically without visual stretching.
 
 ### Test Case 4: Non-Scaling Stroke Verification
-* **Setup**: Path with `strokewidth="2"` animated with `scale="wave(1) * 2 + 1"`.
+* **Setup**: Path with `strokewidth="2"` animated with `zoom="wave(1) * 2 + 1"`.
 * **Expectation**: Border remains a steady 2 units thick on screen, without ballooning when the shape scales up.
 
 ### Test Case 5: 9-Point Anchor Pivot

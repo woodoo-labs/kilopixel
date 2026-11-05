@@ -1293,7 +1293,7 @@ Glyphs drawn with `fillText` / `strokeText` produce no path, so `<pxl-text>` imp
 - **No hit when nothing is visible** (`_hasInk` is false): empty text, `reveal` hiding all characters, or neither fill nor stroke.
 - Partially revealed text keeps the full box.
 - Transforms (own and ancestors') apply automatically, so rotated, scaled and skewed text works.
-- Known limitations (see `.agents/TODO.md`): web fonts loading after the first measurement keep the fallback font's box until the text changes; `maxwidth` compression is not reflected in the box.
+- Known limitations (see `.agents/TODO.md` §16): web fonts loading after the first measurement keep the fallback font's box until the text changes; `maxwidth` compression is not reflected in the box.
 
 ---
 

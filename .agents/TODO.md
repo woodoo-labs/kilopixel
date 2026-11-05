@@ -4,10 +4,10 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 
 - **Status words** (same as in the plans): 💬 **Discussion** (ideas, nothing decided) · 🟡 **Proposed** (complete plan, waiting for a decision) · 🟢 **Decided** (agreed, not built yet). Plans also use ✅ **Implemented**, ⚪ **Superseded by** `<file>` and ⚪ **Dropped** (decided not to do it); those have no TODO item.
 - **Numbers are stable:** other files refer to items as "TODO §29". A removed item leaves a gap; a new item gets the next free number (next: §37).
-- **Plans:** `design/`; superseded, dropped and outdated plans are in `design/archive/`. Workflow: `.claude/CLAUDE.md` → "Plans and TODO".
+- **Plans:** `design/`; superseded, dropped and outdated plans are in `design/archive/`. Workflow: `.claude/CLAUDE.md` → "Plans and TODO". Check: `node tools/check_plans.js`.
 
 ## 1. Native SVG Path2D & Vector Sprites (`<pxl-path>`)
-- **Status**: 🟡 **Proposed** (2026-09-30; written before `scale` became `zoom`: update the plan before implementing)
+- **Status**: 🟡 **Proposed** (2026-09-30)
 - **Reference**: `design/2026-09-30_path_element_plan.md`
 - **Core Features**:
   - Direct integration with native browser `Path2D` API for sub-1 KB bundle footprint.
@@ -51,15 +51,16 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Core Features**:
   - Dedicated shape element for high-performance plotting of functions ($y = f(x)$) and parametric curves ($x = f(v), y = g(v)$).
   - Upward $+Y$ mathematical orientation, 1:1 isotropic scaling, decoupled domain intervals, and pre-allocated `Float32Array` vertex caching.
+- **Open**: the plan names the plot's own magnification (pixels per math unit) `scale`. Since 2026-10-30 every element has `zoom`, `scalex` and `scaley`, so a plot attribute `scale` beside them would be confusing; find another name before implementing.
 
 ## 8. Layer FPS Throttling (`maxfps`), Stage-Level `<pxl-var>` & Performance Monitor
 - **Status**: 🟡 **Proposed** — needs a dedicated, in-depth session
 - **References** (two overlapping plans, to be merged in that session):
   - `design/2026-09-14_stage_variables_and_layer_throttling_plan.md` — stage-level `<pxl-var>` **and** `maxfps`, per-layer metrics.
-  - `design/2026-09-14-layer-throttling.md` (revised 2026-09-15) — `maxfps` only, more detailed (stage gate, baton relay, keep-alive timer, cross-layer variables, frame counting).
+  - `design/2026-09-14_layer_throttling_plan.md` (revised 2026-09-15) — `maxfps` only, more detailed (stage gate, baton relay, keep-alive timer, cross-layer variables, frame counting).
 - **Layer throttling**: a `maxfps` attribute on `<pxl-layer>` throttles secondary layers (e.g. background effects to 24 FPS, clocks to 1 FPS); per-layer profiling telemetry (`layer.fps`, `layer.renderAvg`).
 - **Stage-level `<pxl-var>`**: a `<pxl-var>` directly under `<pxl-stage>` is never evaluated today (only layers render their children). The stage would register its direct `<pxl-var>` children and evaluate animated ones before the layer loop, so no empty `<pxl-layer>` (and canvas) is needed just to hold variables. Could be split off as its own topic.
-- **Performance monitor** (found 2026-10-15, confirmed in the code 2026-11-05): values freeze on idle pages instead of dropping to `0`, because `pxl.perf.publish()` only runs inside `stage.render()`; and `fps` counts "frames since the last publish" rather than per second. Details and a possible fix in `design/2026-09-14-layer-throttling.md` → Performance Metrics → "Known Issue: Monitor Freezes When Idle".
+- **Performance monitor** (found 2026-10-15, confirmed in the code 2026-11-05): values freeze on idle pages instead of dropping to `0`, because `pxl.perf.publish()` only runs inside `stage.render()`; and `fps` counts "frames since the last publish" rather than per second. Details and a possible fix in `design/2026-09-14_layer_throttling_plan.md` → Performance Metrics → "Known Issue: Monitor Freezes When Idle".
 
 ## 9. Raster Bitmaps & Complex SVG Graphics (`<pxl-image>`)
 - **Status**: 💬 **Discussion** (no plan yet)
@@ -241,7 +242,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 
 ## 35. Log-P-H Diagram & Scale Interface (`mapX` / `mapY`)
 - **Status**: 💬 **Discussion** (spec 2026-07-19, never built)
-- **Reference**: `design/kilopixel_logph_diagram_spec.md`
+- **Reference**: `design/2026-07-19_logph_diagram_note.md`
 - **Idea**: a thermodynamic pressure-enthalpy diagram as a Kilopixel shape, and a general scale interface: `mapX(value)` / `mapY(value)` turn a domain value into a stage coordinate, so other shapes can place markers on data shapes. Related to `<pxl-plot>` (§7).
 
 ## 36. Draw Errors: One Bad Value Must Not Break the Layer

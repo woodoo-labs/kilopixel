@@ -27,7 +27,7 @@ Every `ref.<id>.<name>` returns the value as the element holds it, in the **elem
 
 - `ref.v.value` (variable): a plain number. It has no space; a reader uses it in the reader's own parent space.
 - `ref.box.x`: the box's `x` attribute, in the box's parent space.
-- `ref.line.x2`: the line's end, measured from the line's center (`x`, `y`) and before its `rotate` / `scale`.
+- `ref.line.x2`: the line's end, measured from the line's center (`x`, `y`) and before its `rotate` / `zoom`.
 - `ref.zig.pN` (internal): a polyline coordinate as written. Point *k* is `p(2k)` (x) and `p(2k+1)` (y). Before relative-mode accumulation and before the polyline's transform.
 
 So a raw ref is only a correct *position* when the reader sits in the same space and the source has no transform (and, for polylines, no relative mode). The `<pxl-var>` pattern taught in the docs has the same limit; it works on our doc stages because the shape and its dots share one untransformed space.
@@ -75,7 +75,7 @@ Per-attribute entries like `toLocal(ref.c, 'r')` were rejected: a per-shape tabl
    - A visible dot that is drawn anyway (like the point dots on the doc stages) is a free anchor.
    - Keep the transform on a parent group shared by shape and anchor, not on the shape itself.
    - With `ref.zig.pN` the anchor even follows inline animated points; docs would use a shared variable while `pN` is internal. Relative mode needs the sum of offsets.
-4. **Phantom elements as "spatial variables"**: a `pxl-group` bundles `x`, `y`, `rotate`, `scale` with a place, so `toLocal` can read them from anywhere. Rule of thumb:
+4. **Phantom elements as "spatial variables"**: a `pxl-group` bundles `x`, `y`, `rotate`, `zoom` with a place, so `toLocal` can read them from anywhere. Rule of thumb:
 
    | Value | Use |
    |---|---|

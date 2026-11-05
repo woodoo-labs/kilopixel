@@ -170,7 +170,7 @@ Layer isolation is a structural guarantee of the browser canvas API, not a Kilop
 
 `<pxl-clip>` supports the same spatial transform attributes as `<pxl-group>`:
 
-`x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`, `hidden`
+`x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `scalex`, `scaley`, `skewx`, `skewy`, `hidden`
 
 Plus one new attribute:
 

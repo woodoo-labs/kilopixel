@@ -1,7 +1,7 @@
 # Technical Implementation Plan: Stage-Level Variables & Layer-Level FPS Throttling
 
 **Date**: 2026-09-14  
-**Status**: 🟡 **Proposed** (2026-09-14; the `maxfps` part overlaps `design/2026-09-14-layer-throttling.md`, TODO §8)  
+**Status**: 🟡 **Proposed** (2026-09-14; the `maxfps` part overlaps `design/2026-09-14_layer_throttling_plan.md`, TODO §8)  
 **Target Files**:
 - `js/elements/stage.js` (Root variable registration, master variable loop, performance metrics)
 - `js/elements/layer.js` (`maxfps` attribute parsing, interval gate, loop keep-alive, layer-level metrics)
@@ -183,7 +183,7 @@ Currently, performance metrics (`fps`, `renderAvg`, `renderMax`) exist exclusive
 
 ### Example A: Global Shared State Without Empty Layers
 ```html
-<pxl-stage width="800" height="600">
+<pxl-stage ratio="4 / 3">
   <!-- Global Shared State at Stage Root: NO Canvas Buffer Allocated! -->
   <pxl-var id="globalHue" value="loop(10) * 360"></pxl-var>
   <pxl-var id="cameraX" value="wave(4) * 50"></pxl-var>
@@ -204,7 +204,7 @@ Currently, performance metrics (`fps`, `renderAvg`, `renderMax`) exist exclusive
 
 ### Example B: Throttling a Heavy Background Layer
 ```html
-<pxl-stage width="1000" height="600">
+<pxl-stage ratio="5 / 3">
   <!-- Heavy background throttled to 12 FPS: Saves ~80% GPU/CPU -->
   <pxl-layer id="starfield" maxfps="12">
     <!-- Hundreds of rotating, pulsing stars -->

@@ -30,23 +30,23 @@ tween(from, to, duration, [ease = 'ease'], [delay = 0])
 Consistent with all other Kilopixel time drivers ([`loop()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L123), [`wave()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L125), [`yoyo()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L124)), this form produces a normalized progress value that clamps at `1.0` upon completion:
 ```html
 <!-- Opacity fade-in over 0.8s -->
-<pxl-circle alpha="tween(0.8)" radius="40" fill="coral" />
+<pxl-circle alpha="tween(0.8)" r="40" fill="coral"></pxl-circle>
 
 <!-- Rotation: 0° -> 360° over 1s, then stops -->
-<pxl-rect rotate="tween(1) * 360" width="60" height="60" fill="violet" />
+<pxl-rect rotate="tween(1) * 360" w="60" h="60" fill="violet"></pxl-rect>
 
 <!-- Elastic scale entrance -->
-<pxl-circle scale="1 + tween(0.5, 'elastic', 0.2) * 0.5" radius="30" fill="gold" />
+<pxl-circle zoom="1 + tween(0.5, 'elastic', 0.2) * 0.5" r="30" fill="gold"></pxl-circle>
 ```
 
 ### Overload 2: Direct Value Form (`from -> to`)
 Provides zero-boilerplate convenience for spatial movement, avoiding forced `lerp(...)` wrappers for standard coordinates:
 ```html
 <!-- Direct slide from -200 to 500 over 1.5s with back overshoot -->
-<pxl-rect x="tween(-200, 500, 1.5, 'back')" width="80" height="80" fill="teal" />
+<pxl-rect x="tween(-200, 500, 1.5, 'back')" w="80" h="80" fill="teal"></pxl-rect>
 
 <!-- Direct stroke width transition -->
-<pxl-circle strokewidth="tween(1, 10, 0.6, 'out')" radius="50" stroke="white" />
+<pxl-circle strokewidth="tween(1, 10, 0.6, 'out')" r="50" stroke="white"></pxl-circle>
 ```
 
 > [!TIP]
@@ -60,10 +60,10 @@ Tween drivers compose cleanly with continuous time drivers (`wave`, `loop`, `pul
 
 ```html
 <!-- Moves to 500 over 2s, then oscillates continuously forever -->
-<pxl-circle x="tween(0, 500, 2) + wave(2) * 30" radius="25" fill="cyan" />
+<pxl-circle x="tween(0, 500, 2) + wave(2) * 30" r="25" fill="cyan"></pxl-circle>
 
 <!-- Ramps wave amplitude from 0 to 50 over 2s (attack envelope), then oscillates forever -->
-<pxl-circle x="tween(2) * wave(1) * 50" radius="25" fill="lime" />
+<pxl-circle x="tween(2) * wave(1) * 50" r="25" fill="lime"></pxl-circle>
 ```
 
 **The Quiescence Rule**:
@@ -383,9 +383,9 @@ The stage and layer automatically awaken on:
 ## 9. Verification & Acceptance Criteria
 
 1. **Overload Equivalence**:
-   Verify `<pxl-circle x="tween(0, 500, 1.5)" />` and `<pxl-circle x="lerp(0, 500, tween(1.5))" />` animate identically.
+   Verify `<pxl-circle x="tween(0, 500, 1.5)"></pxl-circle>` and `<pxl-circle x="lerp(0, 500, tween(1.5))"></pxl-circle>` animate identically.
 2. **Multi-Element Cache Independence**:
-   Mount 5 elements with `<pxl-rect alpha="tween(0.8)" />` at staggered intervals (e.g. 0s, 2s, 4s). Verify all 5 elements execute complete fade-ins independently without skipping.
+   Mount 5 elements with `<pxl-rect alpha="tween(0.8)"></pxl-rect>` at staggered intervals (e.g. 0s, 2s, 4s). Verify all 5 elements execute complete fade-ins independently without skipping.
 3. **Quiescence / CPU Drop**:
    Mount a stage with a 1-second tween. Verify that after $t = 1.05\text{s}$, `stage.render()` stops firing and browser CPU drops to 0%.
 4. **Reactive Wake-Up**:
