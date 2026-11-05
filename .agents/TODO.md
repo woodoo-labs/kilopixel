@@ -83,7 +83,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Trade-offs & Considerations**:
   - **Docs and examples**: Many text shapes rely on `start` / `alphabetic` without setting them. Labels positioned with hand-tuned `y` coordinates would shift by ~14px with `middle` and need explicit attributes or new values.
   - **Divergence from Native Canvas**: It would diverge from standard `CanvasRenderingContext2D` defaults (`textAlign = 'start'`, `textBaseline = 'alphabetic'`).
-- **Timing**: Kilopixel is pre-release, so no backwards compatibility is needed (`.claude/CLAUDE.md`). If the defaults change, now is the cheapest time; afterwards it would be a breaking change.
+- **Current decision**: keep `align="start"` and `baseline="alphabetic"` until we decide otherwise. Kilopixel is pre-release, so no backwards compatibility is needed (`.claude/CLAUDE.md`); if the defaults change, before the first release is the cheapest time, afterwards it would be a breaking change.
 
 ## 12. Dedicated Arrowheads Documentation Page (`arrows.html`)
 - **Status**: 🟢 **Decided** (page in progress, updated 2026-10-15)
@@ -213,6 +213,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Problem**: a shape that draws more than once (fill + stroke, arrowheads, multi-line text, grid major lines or labels) composites each draw call separately. With `mask` 7 of 9 modes are wrong (`source-in` erases the fill, `xor` cuts the stroke into the fill); with `shadowcolor` the stroke casts a shadow onto the shape's own fill (visible in `shadow.html` §1); `filter` and `blend` are affected too.
 - **Shadows on arrowheads** (noted 2026-10-15): the shaft (`stroke()`) and the heads (`drawArrows`) are separate calls, so a dark band shows where the shaft enters the head. Overlaps within one path (polyline corners) cast one shadow and are fine. Workaround today: `filter="dropShadow(...)"` on the `<pxl-layer>` instead of `shadowcolor` on the shape (one shadow of the combined silhouette).
 - **Idea**: draw such a shape normally into one shared scratch canvas, then composite it onto the layer once with its alpha / mask / blend / filter / shadow. Single-draw shapes keep the direct path.
+- **Alternative for shadows only** (noted 2026-10-15): two passes only when a shadow is set: draw all parts with the shadow, then draw them again without the shadow on top, so the shadows end up underneath everything. Doubles the draw calls, but only for shapes with a shadow; doesn't help `mask`, `blend` or `filter`.
 - **Measured**: 0.75–0.9 ms per isolated shape with the full scratch canvas, 0.35 ms with the bounding box (DPR 2); direct 0.01 ms.
 - **Open**: `alpha` (recommended: not isolated for now), bounding box in step 1 or 2 (recommended: step 2), transform copy without `getTransform()` allocation.
 - **Docs**: afterwards `mask.html` shapes get fill + stroke and the standard ghosts; the "Ghosts of fill-only shapes" note in DOCS_STANDARDS.md goes.
