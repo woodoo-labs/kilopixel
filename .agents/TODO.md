@@ -191,7 +191,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Status**: 🟡 **Proposed** (2026-10-30)
 - **Reference**: `design/2026-10-30_framework_compatibility_plan.md`; prototypes `scratch/frameworks/` (React 19, Vue 3.5; local only)
 - **Idea**: target the DOM contract frameworks use (attributes, properties, events, insert / move / remove, style, hydration), not the frameworks. Conformance test page `tests/frameworks.html` without any framework.
-- **Phase 1**: observe `id`; DOM events on shapes (`click`, `pointer*`) + `interactive` for delegating frameworks; rename the `on*` handlers (collide with native `onclick` and framework `on*` rules; proposed `pxl-click` …); layer canvas in a shadow root and default styles in a stylesheet; bounded expression caches.
+- **Phase 1**: observe `id`; DOM events on shapes (`click`, `pointer*`) + `interactive` for delegating frameworks; rename the `on*` handlers (collide with native `onclick` and framework `on*` rules; proposed `pxl-click` …); layer canvas in a shadow root (today `layer.innerHTML = …` silently removes the canvas: nothing is drawn, nothing is logged; confirmed 2026-11-05) and default styles in a stylesheet; bounded expression caches.
 - **Phase 2**: attribute properties (numbers without compiling, values set before upgrade). **Phase 3**: `docs/frameworks.html`, optional TypeScript typings.
 - **Open**: handler names, scoped names instead of global ids, native vs. synthetic `click` on the stage, cursor for delegated listeners.
 - **Related**: §33 (stage sizing) also moves the stage's default styles out of inline styles.
