@@ -155,13 +155,6 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Open decisions** (plan §7): name of the star amount (`indent` proposed; not `star`, which reads like a switch), element name, default `start` (`-90` = first corner up), default `sides`.
 - **Sidebar**: the "Polygon" placeholder link was removed (2026-10-19); it comes back with `docs/polygon.html`.
 
-## 24. Docs: Migrate `radial.html` Variables to the `Var` Naming Rule
-- **Status**: 🟢 **Decided** (rule decided 2026-10-21; `radial.html` still open)
-- **Rule**: `docs/DOCS_STANDARDS.md` §5 "Variables": entity is always `Var`; input variables set by a control are numbered (`sec1Var1`, controls `sec1Var1Input` / `sec1Var1Val`, meaning in an HTML comment); computed variables are named (`sec3ex1VarTargetX1`). Code marks keep naming the shape attribute. Snippet variables keep short descriptive names.
-- **Done (2026-10-21)**: polyline, blend, text, conic, walkthrough, linear (75 variables). Migrated with `scratch/var_migration/migrate.js`, verified with `scratch/var_migration/verify.html` (old vs. new page: same control sequence, all values identical, no errors, no missing IDs).
-- **Open: `radial.html`** (45 variables, 178 `ref.*` uses). Its bottom script builds IDs from parts (`${sec}DirX${radiusKey}`, `${sec}${radiusKey}`, `${sec}Grad${radiusKey}Input`), so a text replacement would break it: the script has to be rewritten to use the new names (e.g. a lookup table per section). Sliders there are also named differently from their variables (`sec1ex1GradR1Input` sets `sec1ex1R1`).
-- **Then**: run `migrate.js` (dry run first) and `verify.html` with `radial.html` added to the page list.
-
 ## 25. Refs Across Coordinate Spaces (`toLocal` Point Form, `ref.<id>.points`)
 - **Status**: 💬 **Discussion** (2026-10-25, ideas added 2026-10-26; no code changes decided, "keep everything as it is for now")
 - **Reference**: `design/2026-10-25_refs_across_spaces_note.md` (hub: index of all related documents in §0, ideas in §7)

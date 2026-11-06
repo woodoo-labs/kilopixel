@@ -108,19 +108,19 @@
                   <div class="control-group">
                     <label><span>Radius Mode <span class="indicator-dot"></span></span></label>
                     <div class="toggle-group">
-                      <button type="button" class="toggle-btn" id="sec1ex1ModeNumericBtn" onclick="sec1ex1SetType('numeric')" data-mark="sec1ex1GradR1Code">Numeric</button>
-                      <button type="button" class="toggle-btn active" id="sec1ex1ModeKeywordBtn" onclick="sec1ex1SetType('keyword')" data-mark="sec1ex1GradR1Code">Keyword</button>
+                      <button type="button" class="toggle-btn" id="sec1ex1ModeNumericBtn" onclick="setRadialType('sec1ex1', 'R1', 'numeric')" data-mark="sec1ex1GradR1Code">Numeric</button>
+                      <button type="button" class="toggle-btn active" id="sec1ex1ModeKeywordBtn" onclick="setRadialType('sec1ex1', 'R1', 'keyword')" data-mark="sec1ex1GradR1Code">Keyword</button>
                     </div>
                   </div>
                   <div class="control-group" id="sec1ex1SliderGroup" style="display: none;">
-                    <label><span>Radius (r1)</span> <span id="sec1ex1GradR1Val">200</span></label>
-                    <input type="range" id="sec1ex1GradR1Input" min="20" max="500" step="10" value="200" autocomplete="off"
+                    <label><span>Radius (r1)</span> <span id="sec1ex1Var1Val">200</span></label>
+                    <input type="range" id="sec1ex1Var1Input" min="20" max="500" step="10" value="200" autocomplete="off"
                       data-mark="sec1ex1GradR1Code"
-                      oninput="document.getElementById('sec1ex1R1').setAttribute('value', this.value); document.getElementById('sec1ex1GradR1Val').innerText = this.value; document.getElementById('sec1ex1GradR1Code').innerText = this.value;">
+                      oninput="document.getElementById('sec1ex1Var1').setAttribute('value', this.value); document.getElementById('sec1ex1Var1Val').innerText = this.value; document.getElementById('sec1ex1GradR1Code').innerText = this.value;">
                   </div>
                   <div class="control-group" id="sec1ex1KeywordGroup">
                     <label><span>Keyword (r1)</span></label>
-                    <select id="sec1ex1KeywordSelect" autocomplete="off" onchange="setRadialRadiusMode('sec1ex1', 'R1', this.value)" data-mark="sec1ex1GradR1Code">
+                    <select id="sec1ex1Var1Select" autocomplete="off" onchange="setRadialRadiusMode('sec1ex1', 'R1', this.value)" data-mark="sec1ex1GradR1Code">
                       <optgroup label="Side Edges">
                         <option value="top">top</option>
                         <option value="right">right</option>
@@ -152,20 +152,21 @@
             <pxl-stage id="sec1ex1Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
                 <!-- State Variables -->
-                <pxl-var id="sec1ex1R1" value="'top-right'"></pxl-var>
-                <pxl-var id="sec1ex1DirX" value="0.5"></pxl-var>
-                <pxl-var id="sec1ex1DirY" value="-0.5"></pxl-var>
-                <pxl-var id="sec1ex1TargetX" value="ref.sec1ex1DirY.value === 0 && ref.sec1ex1DirX.value === 1 ? ref.sec1ex1R1.value : ref.sec1ex1DirX.value * ref.sec1ex1Rect.w"></pxl-var>
-                <pxl-var id="sec1ex1TargetY" value="ref.sec1ex1DirY.value * ref.sec1ex1Rect.h"></pxl-var>
-                <pxl-var id="sec1ex1Radius" value="sqrt(ref.sec1ex1TargetX.value * ref.sec1ex1TargetX.value + ref.sec1ex1TargetY.value * ref.sec1ex1TargetY.value)"></pxl-var>
+                <!-- Var1: R1 -->
+                <pxl-var id="sec1ex1Var1" value="'top-right'"></pxl-var>
+                <pxl-var id="sec1ex1VarDirX" value="0.5"></pxl-var>
+                <pxl-var id="sec1ex1VarDirY" value="-0.5"></pxl-var>
+                <pxl-var id="sec1ex1VarTargetX" value="ref.sec1ex1VarDirY.value === 0 && ref.sec1ex1VarDirX.value === 1 ? ref.sec1ex1Var1.value : ref.sec1ex1VarDirX.value * ref.sec1ex1Rect.w"></pxl-var>
+                <pxl-var id="sec1ex1VarTargetY" value="ref.sec1ex1VarDirY.value * ref.sec1ex1Rect.h"></pxl-var>
+                <pxl-var id="sec1ex1VarRadius" value="sqrt(ref.sec1ex1VarTargetX.value * ref.sec1ex1VarTargetX.value + ref.sec1ex1VarTargetY.value * ref.sec1ex1VarTargetY.value)"></pxl-var>
 
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
                 <!-- Top-Left HUD Info -->
                 <pxl-text x="30" y="30" text="'Center = (0.5, 0.5)'" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
-                <pxl-text x="30" y="65" text="'r1 = ' + (typeof ref.sec1ex1R1.value === 'string' ? '\'' + ref.sec1ex1R1.value + '\'' : ref.sec1ex1R1.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="65" text="'r1 = ' + (typeof ref.sec1ex1Var1.value === 'string' ? '\'' + ref.sec1ex1Var1.value + '\'' : ref.sec1ex1Var1.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 
-                <pxl-rect id="sec1ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="radial([ref.sec1ex1R1.value], ['#f8fafc', '#475569'])"></pxl-rect>
+                <pxl-rect id="sec1ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="radial([ref.sec1ex1Var1.value], ['#f8fafc', '#475569'])"></pxl-rect>
                 
                 <pxl-group x="ref.sec1ex1Rect.x" y="ref.sec1ex1Rect.y" rotate="ref.sec1ex1Rect.rotate">
                   <!-- Solid blue bounding box -->
@@ -183,23 +184,23 @@
                   <pxl-text x="0" y="20" text="'Center'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
                   
                   <!-- Pink Radius Circle -->
-                  <pxl-circle x="0" y="0" r="ref.sec1ex1Radius.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec1ex1Radius.value > 0 ? 1 : 0"></pxl-circle>
+                  <pxl-circle x="0" y="0" r="ref.sec1ex1VarRadius.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec1ex1VarRadius.value > 0 ? 1 : 0"></pxl-circle>
                   
                   <!-- Pink Gradient Radius Arrow -->
                   <pxl-line 
                     x1="0" 
                     y1="0" 
-                    x2="ref.sec1ex1TargetX.value" 
-                    y2="ref.sec1ex1TargetY.value" 
-                    stroke="#ec4899" strokewidth="4" arrowend="ref.sec1ex1Radius.value > 0 ? 25 : 0"
-                    alpha="ref.sec1ex1Radius.value > 0 ? 1 : 0"></pxl-line>
+                    x2="ref.sec1ex1VarTargetX.value" 
+                    y2="ref.sec1ex1VarTargetY.value" 
+                    stroke="#ec4899" strokewidth="4" arrowend="ref.sec1ex1VarRadius.value > 0 ? 25 : 0"
+                    alpha="ref.sec1ex1VarRadius.value > 0 ? 1 : 0"></pxl-line>
 
                   <!-- Pink radius label -->
                   <pxl-text 
-                    x="ref.sec1ex1TargetX.value / 2 + (ref.sec1ex1Radius.value === 0 ? 0 : (ref.sec1ex1TargetY.value / ref.sec1ex1Radius.value) * 22)" 
-                    y="ref.sec1ex1TargetY.value / 2 - (ref.sec1ex1Radius.value === 0 ? 0 : (ref.sec1ex1TargetX.value / ref.sec1ex1Radius.value) * 22)" 
+                    x="ref.sec1ex1VarTargetX.value / 2 + (ref.sec1ex1VarRadius.value === 0 ? 0 : (ref.sec1ex1VarTargetY.value / ref.sec1ex1VarRadius.value) * 22)" 
+                    y="ref.sec1ex1VarTargetY.value / 2 - (ref.sec1ex1VarRadius.value === 0 ? 0 : (ref.sec1ex1VarTargetX.value / ref.sec1ex1VarRadius.value) * 22)" 
                     text="'r1'" 
-                    alpha="ref.sec1ex1Radius.value > 0 ? 1 : 0"
+                    alpha="ref.sec1ex1VarRadius.value > 0 ? 1 : 0"
                     fill="#ec4899" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
 
                 </pxl-group>
@@ -277,33 +278,33 @@
               <div class="tab-content active" id="sec2ex1GradTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Center X0 <span class="indicator-dot"></span></span> <span id="sec2ex1GradX0Val">0.3</span></label>
-                    <input type="range" id="sec2ex1GradX0Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
+                    <label><span>Center X0 <span class="indicator-dot"></span></span> <span id="sec2ex1Var1Val">0.3</span></label>
+                    <input type="range" id="sec2ex1Var1Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
                       data-mark="sec2ex1GradX0Code"
-                      oninput="sec2ex1UpdateCenter('X0', this.value);">
+                      oninput="document.getElementById('sec2ex1Var1').setAttribute('value', this.value); document.getElementById('sec2ex1Var1Val').innerText = this.value; document.getElementById('sec2ex1GradX0Code').innerText = this.value; refreshRadialKeywords('sec2ex1', 'R1');">
                   </div>
                   <div class="control-group">
-                    <label><span>Center Y0</span> <span id="sec2ex1GradY0Val">0.3</span></label>
-                    <input type="range" id="sec2ex1GradY0Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
+                    <label><span>Center Y0</span> <span id="sec2ex1Var2Val">0.3</span></label>
+                    <input type="range" id="sec2ex1Var2Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
                       data-mark="sec2ex1GradY0Code"
-                      oninput="sec2ex1UpdateCenter('Y0', this.value);">
+                      oninput="document.getElementById('sec2ex1Var2').setAttribute('value', this.value); document.getElementById('sec2ex1Var2Val').innerText = this.value; document.getElementById('sec2ex1GradY0Code').innerText = this.value; refreshRadialKeywords('sec2ex1', 'R1');">
                   </div>
                   <div class="control-group">
                     <label><span>Radius Mode</span></label>
                     <div class="toggle-group">
-                      <button type="button" class="toggle-btn" id="sec2ex1ModeNumericBtn" onclick="sec2ex1SetType('numeric')" data-mark="sec2ex1GradR1Code">Numeric</button>
-                      <button type="button" class="toggle-btn active" id="sec2ex1ModeKeywordBtn" onclick="sec2ex1SetType('keyword')" data-mark="sec2ex1GradR1Code">Keyword</button>
+                      <button type="button" class="toggle-btn" id="sec2ex1ModeNumericBtn" onclick="setRadialType('sec2ex1', 'R1', 'numeric')" data-mark="sec2ex1GradR1Code">Numeric</button>
+                      <button type="button" class="toggle-btn active" id="sec2ex1ModeKeywordBtn" onclick="setRadialType('sec2ex1', 'R1', 'keyword')" data-mark="sec2ex1GradR1Code">Keyword</button>
                     </div>
                   </div>
                   <div class="control-group" id="sec2ex1SliderGroup" style="display: none;">
-                    <label><span>Radius (r1)</span> <span id="sec2ex1GradR1Val">200</span></label>
-                    <input type="range" id="sec2ex1GradR1Input" min="20" max="500" step="10" value="200" autocomplete="off"
+                    <label><span>Radius (r1)</span> <span id="sec2ex1Var3Val">200</span></label>
+                    <input type="range" id="sec2ex1Var3Input" min="20" max="500" step="10" value="200" autocomplete="off"
                       data-mark="sec2ex1GradR1Code"
-                      oninput="document.getElementById('sec2ex1R1').setAttribute('value', this.value); document.getElementById('sec2ex1GradR1Val').innerText = this.value; document.getElementById('sec2ex1GradR1Code').innerText = this.value;">
+                      oninput="document.getElementById('sec2ex1Var3').setAttribute('value', this.value); document.getElementById('sec2ex1Var3Val').innerText = this.value; document.getElementById('sec2ex1GradR1Code').innerText = this.value;">
                   </div>
                   <div class="control-group" id="sec2ex1KeywordGroup">
                     <label><span>Keyword (r1)</span></label>
-                    <select id="sec2ex1KeywordSelect" autocomplete="off" onchange="setRadialRadiusMode('sec2ex1', 'R1', this.value)" data-mark="sec2ex1GradR1Code">
+                    <select id="sec2ex1Var3Select" autocomplete="off" onchange="setRadialRadiusMode('sec2ex1', 'R1', this.value)" data-mark="sec2ex1GradR1Code">
                       <optgroup label="Side Edges">
                         <option value="top">top</option>
                         <option value="right">right</option>
@@ -335,29 +336,30 @@
             <pxl-stage id="sec2ex1Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
                 <!-- State Variables -->
-                <pxl-var id="sec2ex1X0" value="0.3"></pxl-var>
-                <pxl-var id="sec2ex1Y0" value="0.3"></pxl-var>
-                <pxl-var id="sec2ex1R1" value="'top-right'"></pxl-var>
-                <pxl-var id="sec2ex1IsNumeric" value="0"></pxl-var>
-                <pxl-var id="sec2ex1TargetAx" value="1"></pxl-var>
-                <pxl-var id="sec2ex1TargetAy" value="0"></pxl-var>
+                <!-- Var1: X0; Var2: Y0; Var3: R1 -->
+                <pxl-var id="sec2ex1Var1" value="0.3"></pxl-var>
+                <pxl-var id="sec2ex1Var2" value="0.3"></pxl-var>
+                <pxl-var id="sec2ex1Var3" value="'top-right'"></pxl-var>
+                <pxl-var id="sec2ex1VarIsNumeric" value="0"></pxl-var>
+                <pxl-var id="sec2ex1VarTargetAx" value="1"></pxl-var>
+                <pxl-var id="sec2ex1VarTargetAy" value="0"></pxl-var>
 
                 <!-- Math Variables for Geometric Projection -->
-                <pxl-var id="sec2ex1Pcx0" value="(ref.sec2ex1X0.value - 0.5) * ref.sec2ex1Rect.w"></pxl-var>
-                <pxl-var id="sec2ex1Pcy0" value="(ref.sec2ex1Y0.value - 0.5) * ref.sec2ex1Rect.h"></pxl-var>
-                <pxl-var id="sec2ex1TargetX" value="ref.sec2ex1IsNumeric.value === 1 ? ref.sec2ex1Pcx0.value + ref.sec2ex1R1.value : (ref.sec2ex1TargetAx.value - 0.5) * ref.sec2ex1Rect.w"></pxl-var>
-                <pxl-var id="sec2ex1TargetY" value="ref.sec2ex1IsNumeric.value === 1 ? ref.sec2ex1Pcy0.value : (ref.sec2ex1TargetAy.value - 0.5) * ref.sec2ex1Rect.h"></pxl-var>
-                <pxl-var id="sec2ex1Dx" value="ref.sec2ex1TargetX.value - ref.sec2ex1Pcx0.value"></pxl-var>
-                <pxl-var id="sec2ex1Dy" value="ref.sec2ex1TargetY.value - ref.sec2ex1Pcy0.value"></pxl-var>
-                <pxl-var id="sec2ex1Radius" value="sqrt(ref.sec2ex1Dx.value * ref.sec2ex1Dx.value + ref.sec2ex1Dy.value * ref.sec2ex1Dy.value)"></pxl-var>
+                <pxl-var id="sec2ex1VarPcx0" value="(ref.sec2ex1Var1.value - 0.5) * ref.sec2ex1Rect.w"></pxl-var>
+                <pxl-var id="sec2ex1VarPcy0" value="(ref.sec2ex1Var2.value - 0.5) * ref.sec2ex1Rect.h"></pxl-var>
+                <pxl-var id="sec2ex1VarTargetX" value="ref.sec2ex1VarIsNumeric.value === 1 ? ref.sec2ex1VarPcx0.value + ref.sec2ex1Var3.value : (ref.sec2ex1VarTargetAx.value - 0.5) * ref.sec2ex1Rect.w"></pxl-var>
+                <pxl-var id="sec2ex1VarTargetY" value="ref.sec2ex1VarIsNumeric.value === 1 ? ref.sec2ex1VarPcy0.value : (ref.sec2ex1VarTargetAy.value - 0.5) * ref.sec2ex1Rect.h"></pxl-var>
+                <pxl-var id="sec2ex1VarDx" value="ref.sec2ex1VarTargetX.value - ref.sec2ex1VarPcx0.value"></pxl-var>
+                <pxl-var id="sec2ex1VarDy" value="ref.sec2ex1VarTargetY.value - ref.sec2ex1VarPcy0.value"></pxl-var>
+                <pxl-var id="sec2ex1VarRadius" value="sqrt(ref.sec2ex1VarDx.value * ref.sec2ex1VarDx.value + ref.sec2ex1VarDy.value * ref.sec2ex1VarDy.value)"></pxl-var>
 
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
                 <!-- Top-Left HUD Info -->
-                <pxl-text x="30" y="30" text="'Center = (' + ref.sec2ex1X0.value + ', ' + ref.sec2ex1Y0.value + ')'" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
-                <pxl-text x="30" y="65" text="'r1 = ' + (typeof ref.sec2ex1R1.value === 'string' ? '\'' + ref.sec2ex1R1.value + '\'' : ref.sec2ex1R1.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="30" text="'Center = (' + ref.sec2ex1Var1.value + ', ' + ref.sec2ex1Var2.value + ')'" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="65" text="'r1 = ' + (typeof ref.sec2ex1Var3.value === 'string' ? '\'' + ref.sec2ex1Var3.value + '\'' : ref.sec2ex1Var3.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 
-                <pxl-rect id="sec2ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="radial([ref.sec2ex1X0.value, ref.sec2ex1Y0.value, ref.sec2ex1R1.value], ['#f8fafc', '#475569'])"></pxl-rect>
+                <pxl-rect id="sec2ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="radial([ref.sec2ex1Var1.value, ref.sec2ex1Var2.value, ref.sec2ex1Var3.value], ['#f8fafc', '#475569'])"></pxl-rect>
                 
                 <pxl-group x="ref.sec2ex1Rect.x" y="ref.sec2ex1Rect.y" rotate="ref.sec2ex1Rect.rotate">
                   <!-- Solid blue bounding box -->
@@ -371,27 +373,27 @@
                   <pxl-text x="ref.sec2ex1Rect.w/2" y="ref.sec2ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="top"></pxl-text>
 
                   <!-- Pink center coordinate -->
-                  <pxl-circle x="ref.sec2ex1Pcx0.value" y="ref.sec2ex1Pcy0.value" r="8" fill="#f472b6"></pxl-circle>
-                  <pxl-text x="ref.sec2ex1Pcx0.value" y="ref.sec2ex1Pcy0.value + 20" text="'Center'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <pxl-circle x="ref.sec2ex1VarPcx0.value" y="ref.sec2ex1VarPcy0.value" r="8" fill="#f472b6"></pxl-circle>
+                  <pxl-text x="ref.sec2ex1VarPcx0.value" y="ref.sec2ex1VarPcy0.value + 20" text="'Center'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
                   
                   <!-- Pink Radius Circle -->
-                  <pxl-circle x="ref.sec2ex1Pcx0.value" y="ref.sec2ex1Pcy0.value" r="ref.sec2ex1Radius.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec2ex1Radius.value > 0 ? 1 : 0"></pxl-circle>
+                  <pxl-circle x="ref.sec2ex1VarPcx0.value" y="ref.sec2ex1VarPcy0.value" r="ref.sec2ex1VarRadius.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec2ex1VarRadius.value > 0 ? 1 : 0"></pxl-circle>
                   
                   <!-- Pink Gradient Radius Arrow -->
                   <pxl-line 
-                    x1="ref.sec2ex1Pcx0.value" 
-                    y1="ref.sec2ex1Pcy0.value" 
-                    x2="ref.sec2ex1TargetX.value" 
-                    y2="ref.sec2ex1TargetY.value" 
-                    stroke="#ec4899" strokewidth="4" arrowend="ref.sec2ex1Radius.value > 0 ? 25 : 0"
-                    alpha="ref.sec2ex1Radius.value > 0 ? 1 : 0"></pxl-line>
+                    x1="ref.sec2ex1VarPcx0.value" 
+                    y1="ref.sec2ex1VarPcy0.value" 
+                    x2="ref.sec2ex1VarTargetX.value" 
+                    y2="ref.sec2ex1VarTargetY.value" 
+                    stroke="#ec4899" strokewidth="4" arrowend="ref.sec2ex1VarRadius.value > 0 ? 25 : 0"
+                    alpha="ref.sec2ex1VarRadius.value > 0 ? 1 : 0"></pxl-line>
 
                   <!-- Pink radius label -->
                   <pxl-text 
-                    x="ref.sec2ex1Pcx0.value + ref.sec2ex1Dx.value / 2 + (ref.sec2ex1Radius.value === 0 ? 0 : (ref.sec2ex1Dy.value / ref.sec2ex1Radius.value) * 22)" 
-                    y="ref.sec2ex1Pcy0.value + ref.sec2ex1Dy.value / 2 - (ref.sec2ex1Radius.value === 0 ? 0 : (ref.sec2ex1Dx.value / ref.sec2ex1Radius.value) * 22)" 
+                    x="ref.sec2ex1VarPcx0.value + ref.sec2ex1VarDx.value / 2 + (ref.sec2ex1VarRadius.value === 0 ? 0 : (ref.sec2ex1VarDy.value / ref.sec2ex1VarRadius.value) * 22)" 
+                    y="ref.sec2ex1VarPcy0.value + ref.sec2ex1VarDy.value / 2 - (ref.sec2ex1VarRadius.value === 0 ? 0 : (ref.sec2ex1VarDx.value / ref.sec2ex1VarRadius.value) * 22)" 
                     text="'r1'" 
-                    alpha="ref.sec2ex1Radius.value > 0 ? 1 : 0"
+                    alpha="ref.sec2ex1VarRadius.value > 0 ? 1 : 0"
                     fill="#ec4899" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
 
                 </pxl-group>
@@ -464,33 +466,33 @@
               <div class="tab-content active" id="sec3ex1StartTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Center X0 <span class="indicator-dot"></span></span> <span id="sec3ex1GradX0Val">0.3</span></label>
-                    <input type="range" id="sec3ex1GradX0Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
+                    <label><span>Center X0 <span class="indicator-dot"></span></span> <span id="sec3ex1Var1Val">0.3</span></label>
+                    <input type="range" id="sec3ex1Var1Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
                       data-mark="sec3ex1GradX0Code"
-                      oninput="sec3ex1UpdateCenter('0', 'X', this.value);">
+                      oninput="document.getElementById('sec3ex1Var1').setAttribute('value', this.value); document.getElementById('sec3ex1Var1Val').innerText = this.value; document.getElementById('sec3ex1GradX0Code').innerText = this.value; refreshRadialKeywords('sec3ex1', 'R0');">
                   </div>
                   <div class="control-group">
-                    <label><span>Center Y0</span> <span id="sec3ex1GradY0Val">0.3</span></label>
-                    <input type="range" id="sec3ex1GradY0Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
+                    <label><span>Center Y0</span> <span id="sec3ex1Var2Val">0.3</span></label>
+                    <input type="range" id="sec3ex1Var2Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
                       data-mark="sec3ex1GradY0Code"
-                      oninput="sec3ex1UpdateCenter('0', 'Y', this.value);">
+                      oninput="document.getElementById('sec3ex1Var2').setAttribute('value', this.value); document.getElementById('sec3ex1Var2Val').innerText = this.value; document.getElementById('sec3ex1GradY0Code').innerText = this.value; refreshRadialKeywords('sec3ex1', 'R0');">
                   </div>
                   <div class="control-group">
                     <label><span>Radius Mode</span></label>
                     <div class="toggle-group">
-                      <button type="button" class="toggle-btn active" id="sec3ex1R0ModeNumericBtn" onclick="sec3ex1SetType('R0', 'numeric')" data-mark="sec3ex1GradR0Code">Numeric</button>
-                      <button type="button" class="toggle-btn" id="sec3ex1R0ModeKeywordBtn" onclick="sec3ex1SetType('R0', 'keyword')" data-mark="sec3ex1GradR0Code">Keyword</button>
+                      <button type="button" class="toggle-btn active" id="sec3ex1R0ModeNumericBtn" onclick="setRadialType('sec3ex1', 'R0', 'numeric')" data-mark="sec3ex1GradR0Code">Numeric</button>
+                      <button type="button" class="toggle-btn" id="sec3ex1R0ModeKeywordBtn" onclick="setRadialType('sec3ex1', 'R0', 'keyword')" data-mark="sec3ex1GradR0Code">Keyword</button>
                     </div>
                   </div>
                   <div class="control-group" id="sec3ex1R0SliderGroup">
-                    <label><span>Radius (r0)</span> <span id="sec3ex1GradR0Val">40</span></label>
-                    <input type="range" id="sec3ex1GradR0Input" min="0" max="300" step="5" value="40" autocomplete="off"
+                    <label><span>Radius (r0)</span> <span id="sec3ex1Var3Val">40</span></label>
+                    <input type="range" id="sec3ex1Var3Input" min="0" max="300" step="5" value="40" autocomplete="off"
                       data-mark="sec3ex1GradR0Code"
-                      oninput="document.getElementById('sec3ex1R0').setAttribute('value', this.value); document.getElementById('sec3ex1GradR0Val').innerText = this.value; document.getElementById('sec3ex1GradR0Code').innerText = this.value;">
+                      oninput="document.getElementById('sec3ex1Var3').setAttribute('value', this.value); document.getElementById('sec3ex1Var3Val').innerText = this.value; document.getElementById('sec3ex1GradR0Code').innerText = this.value;">
                   </div>
                   <div class="control-group" id="sec3ex1R0KeywordGroup" style="display: none;">
                     <label><span>Keyword (r0)</span></label>
-                    <select id="sec3ex1R0KeywordSelect" autocomplete="off" onchange="setRadialRadiusMode('sec3ex1', 'R0', this.value)" data-mark="sec3ex1GradR0Code">
+                    <select id="sec3ex1Var3Select" autocomplete="off" onchange="setRadialRadiusMode('sec3ex1', 'R0', this.value)" data-mark="sec3ex1GradR0Code">
                       <optgroup label="Side Edges">
                         <option value="top">top</option>
                         <option value="right">right</option>
@@ -522,33 +524,33 @@
               <div class="tab-content" id="sec3ex1EndTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Center X1 <span class="indicator-dot"></span></span> <span id="sec3ex1GradX1Val">0.6</span></label>
-                    <input type="range" id="sec3ex1GradX1Input" min="0" max="1" step="0.05" value="0.6" autocomplete="off"
+                    <label><span>Center X1 <span class="indicator-dot"></span></span> <span id="sec3ex1Var4Val">0.6</span></label>
+                    <input type="range" id="sec3ex1Var4Input" min="0" max="1" step="0.05" value="0.6" autocomplete="off"
                       data-mark="sec3ex1GradX1Code"
-                      oninput="sec3ex1UpdateCenter('1', 'X', this.value);">
+                      oninput="document.getElementById('sec3ex1Var4').setAttribute('value', this.value); document.getElementById('sec3ex1Var4Val').innerText = this.value; document.getElementById('sec3ex1GradX1Code').innerText = this.value; refreshRadialKeywords('sec3ex1', 'R1');">
                   </div>
                   <div class="control-group">
-                    <label><span>Center Y1</span> <span id="sec3ex1GradY1Val">0.6</span></label>
-                    <input type="range" id="sec3ex1GradY1Input" min="0" max="1" step="0.05" value="0.6" autocomplete="off"
+                    <label><span>Center Y1</span> <span id="sec3ex1Var5Val">0.6</span></label>
+                    <input type="range" id="sec3ex1Var5Input" min="0" max="1" step="0.05" value="0.6" autocomplete="off"
                       data-mark="sec3ex1GradY1Code"
-                      oninput="sec3ex1UpdateCenter('1', 'Y', this.value);">
+                      oninput="document.getElementById('sec3ex1Var5').setAttribute('value', this.value); document.getElementById('sec3ex1Var5Val').innerText = this.value; document.getElementById('sec3ex1GradY1Code').innerText = this.value; refreshRadialKeywords('sec3ex1', 'R1');">
                   </div>
                   <div class="control-group">
                     <label><span>Radius Mode</span></label>
                     <div class="toggle-group">
-                      <button type="button" class="toggle-btn active" id="sec3ex1R1ModeNumericBtn" onclick="sec3ex1SetType('R1', 'numeric')" data-mark="sec3ex1GradR1Code">Numeric</button>
-                      <button type="button" class="toggle-btn" id="sec3ex1R1ModeKeywordBtn" onclick="sec3ex1SetType('R1', 'keyword')" data-mark="sec3ex1GradR1Code">Keyword</button>
+                      <button type="button" class="toggle-btn active" id="sec3ex1R1ModeNumericBtn" onclick="setRadialType('sec3ex1', 'R1', 'numeric')" data-mark="sec3ex1GradR1Code">Numeric</button>
+                      <button type="button" class="toggle-btn" id="sec3ex1R1ModeKeywordBtn" onclick="setRadialType('sec3ex1', 'R1', 'keyword')" data-mark="sec3ex1GradR1Code">Keyword</button>
                     </div>
                   </div>
                   <div class="control-group" id="sec3ex1R1SliderGroup">
-                    <label><span>Radius (r1)</span> <span id="sec3ex1GradR1Val">200</span></label>
-                    <input type="range" id="sec3ex1GradR1Input" min="20" max="500" step="10" value="200" autocomplete="off"
+                    <label><span>Radius (r1)</span> <span id="sec3ex1Var6Val">200</span></label>
+                    <input type="range" id="sec3ex1Var6Input" min="20" max="500" step="10" value="200" autocomplete="off"
                       data-mark="sec3ex1GradR1Code"
-                      oninput="document.getElementById('sec3ex1R1').setAttribute('value', this.value); document.getElementById('sec3ex1GradR1Val').innerText = this.value; document.getElementById('sec3ex1GradR1Code').innerText = this.value;">
+                      oninput="document.getElementById('sec3ex1Var6').setAttribute('value', this.value); document.getElementById('sec3ex1Var6Val').innerText = this.value; document.getElementById('sec3ex1GradR1Code').innerText = this.value;">
                   </div>
                   <div class="control-group" id="sec3ex1R1KeywordGroup" style="display: none;">
                     <label><span>Keyword (r1)</span></label>
-                    <select id="sec3ex1R1KeywordSelect" autocomplete="off" onchange="setRadialRadiusMode('sec3ex1', 'R1', this.value)" data-mark="sec3ex1GradR1Code">
+                    <select id="sec3ex1Var6Select" autocomplete="off" onchange="setRadialRadiusMode('sec3ex1', 'R1', this.value)" data-mark="sec3ex1GradR1Code">
                       <optgroup label="Side Edges">
                         <option value="top">top</option>
                         <option value="right">right</option>
@@ -580,45 +582,46 @@
             <pxl-stage id="sec3ex1Stage" ratio="5 / 3" class="demo-stage">
               <pxl-layer>
                 <!-- State Variables -->
-                <pxl-var id="sec3ex1X0" value="0.3"></pxl-var>
-                <pxl-var id="sec3ex1Y0" value="0.3"></pxl-var>
-                <pxl-var id="sec3ex1R0" value="40"></pxl-var>
-                <pxl-var id="sec3ex1IsNumericR0" value="1"></pxl-var>
-                <pxl-var id="sec3ex1TargetAxR0" value="0.3"></pxl-var>
-                <pxl-var id="sec3ex1TargetAyR0" value="0.3"></pxl-var>
+                <!-- Var1: X0; Var2: Y0; Var3: R0; Var4: X1; Var5: Y1; Var6: R1 -->
+                <pxl-var id="sec3ex1Var1" value="0.3"></pxl-var>
+                <pxl-var id="sec3ex1Var2" value="0.3"></pxl-var>
+                <pxl-var id="sec3ex1Var3" value="40"></pxl-var>
+                <pxl-var id="sec3ex1VarIsNumericR0" value="1"></pxl-var>
+                <pxl-var id="sec3ex1VarTargetAxR0" value="0.3"></pxl-var>
+                <pxl-var id="sec3ex1VarTargetAyR0" value="0.3"></pxl-var>
 
-                <pxl-var id="sec3ex1X1" value="0.6"></pxl-var>
-                <pxl-var id="sec3ex1Y1" value="0.6"></pxl-var>
-                <pxl-var id="sec3ex1R1" value="200"></pxl-var>
-                <pxl-var id="sec3ex1IsNumericR1" value="1"></pxl-var>
-                <pxl-var id="sec3ex1TargetAxR1" value="0.6"></pxl-var>
-                <pxl-var id="sec3ex1TargetAyR1" value="0.6"></pxl-var>
+                <pxl-var id="sec3ex1Var4" value="0.6"></pxl-var>
+                <pxl-var id="sec3ex1Var5" value="0.6"></pxl-var>
+                <pxl-var id="sec3ex1Var6" value="200"></pxl-var>
+                <pxl-var id="sec3ex1VarIsNumericR1" value="1"></pxl-var>
+                <pxl-var id="sec3ex1VarTargetAxR1" value="0.6"></pxl-var>
+                <pxl-var id="sec3ex1VarTargetAyR1" value="0.6"></pxl-var>
 
                 <!-- Math Variables for Geometric Projection: Start Circle -->
-                <pxl-var id="sec3ex1Pcx0" value="(ref.sec3ex1X0.value - 0.5) * ref.sec3ex1Rect.w"></pxl-var>
-                <pxl-var id="sec3ex1Pcy0" value="(ref.sec3ex1Y0.value - 0.5) * ref.sec3ex1Rect.h"></pxl-var>
-                <pxl-var id="sec3ex1TargetX0" value="ref.sec3ex1IsNumericR0.value === 1 ? ref.sec3ex1Pcx0.value + ref.sec3ex1R0.value : (ref.sec3ex1TargetAxR0.value - 0.5) * ref.sec3ex1Rect.w"></pxl-var>
-                <pxl-var id="sec3ex1TargetY0" value="ref.sec3ex1IsNumericR0.value === 1 ? ref.sec3ex1Pcy0.value : (ref.sec3ex1TargetAyR0.value - 0.5) * ref.sec3ex1Rect.h"></pxl-var>
-                <pxl-var id="sec3ex1Dx0" value="ref.sec3ex1TargetX0.value - ref.sec3ex1Pcx0.value"></pxl-var>
-                <pxl-var id="sec3ex1Dy0" value="ref.sec3ex1TargetY0.value - ref.sec3ex1Pcy0.value"></pxl-var>
-                <pxl-var id="sec3ex1Radius0" value="sqrt(ref.sec3ex1Dx0.value * ref.sec3ex1Dx0.value + ref.sec3ex1Dy0.value * ref.sec3ex1Dy0.value)"></pxl-var>
+                <pxl-var id="sec3ex1VarPcx0" value="(ref.sec3ex1Var1.value - 0.5) * ref.sec3ex1Rect.w"></pxl-var>
+                <pxl-var id="sec3ex1VarPcy0" value="(ref.sec3ex1Var2.value - 0.5) * ref.sec3ex1Rect.h"></pxl-var>
+                <pxl-var id="sec3ex1VarTargetX0" value="ref.sec3ex1VarIsNumericR0.value === 1 ? ref.sec3ex1VarPcx0.value + ref.sec3ex1Var3.value : (ref.sec3ex1VarTargetAxR0.value - 0.5) * ref.sec3ex1Rect.w"></pxl-var>
+                <pxl-var id="sec3ex1VarTargetY0" value="ref.sec3ex1VarIsNumericR0.value === 1 ? ref.sec3ex1VarPcy0.value : (ref.sec3ex1VarTargetAyR0.value - 0.5) * ref.sec3ex1Rect.h"></pxl-var>
+                <pxl-var id="sec3ex1VarDx0" value="ref.sec3ex1VarTargetX0.value - ref.sec3ex1VarPcx0.value"></pxl-var>
+                <pxl-var id="sec3ex1VarDy0" value="ref.sec3ex1VarTargetY0.value - ref.sec3ex1VarPcy0.value"></pxl-var>
+                <pxl-var id="sec3ex1VarRadius0" value="sqrt(ref.sec3ex1VarDx0.value * ref.sec3ex1VarDx0.value + ref.sec3ex1VarDy0.value * ref.sec3ex1VarDy0.value)"></pxl-var>
 
                 <!-- Math Variables for Geometric Projection: End Circle -->
-                <pxl-var id="sec3ex1Pcx1" value="(ref.sec3ex1X1.value - 0.5) * ref.sec3ex1Rect.w"></pxl-var>
-                <pxl-var id="sec3ex1Pcy1" value="(ref.sec3ex1Y1.value - 0.5) * ref.sec3ex1Rect.h"></pxl-var>
-                <pxl-var id="sec3ex1TargetX1" value="ref.sec3ex1IsNumericR1.value === 1 ? ref.sec3ex1Pcx1.value + ref.sec3ex1R1.value : (ref.sec3ex1TargetAxR1.value - 0.5) * ref.sec3ex1Rect.w"></pxl-var>
-                <pxl-var id="sec3ex1TargetY1" value="ref.sec3ex1IsNumericR1.value === 1 ? ref.sec3ex1Pcy1.value : (ref.sec3ex1TargetAyR1.value - 0.5) * ref.sec3ex1Rect.h"></pxl-var>
-                <pxl-var id="sec3ex1Dx1" value="ref.sec3ex1TargetX1.value - ref.sec3ex1Pcx1.value"></pxl-var>
-                <pxl-var id="sec3ex1Dy1" value="ref.sec3ex1TargetY1.value - ref.sec3ex1Pcy1.value"></pxl-var>
-                <pxl-var id="sec3ex1Radius1" value="sqrt(ref.sec3ex1Dx1.value * ref.sec3ex1Dx1.value + ref.sec3ex1Dy1.value * ref.sec3ex1Dy1.value)"></pxl-var>
+                <pxl-var id="sec3ex1VarPcx1" value="(ref.sec3ex1Var4.value - 0.5) * ref.sec3ex1Rect.w"></pxl-var>
+                <pxl-var id="sec3ex1VarPcy1" value="(ref.sec3ex1Var5.value - 0.5) * ref.sec3ex1Rect.h"></pxl-var>
+                <pxl-var id="sec3ex1VarTargetX1" value="ref.sec3ex1VarIsNumericR1.value === 1 ? ref.sec3ex1VarPcx1.value + ref.sec3ex1Var6.value : (ref.sec3ex1VarTargetAxR1.value - 0.5) * ref.sec3ex1Rect.w"></pxl-var>
+                <pxl-var id="sec3ex1VarTargetY1" value="ref.sec3ex1VarIsNumericR1.value === 1 ? ref.sec3ex1VarPcy1.value : (ref.sec3ex1VarTargetAyR1.value - 0.5) * ref.sec3ex1Rect.h"></pxl-var>
+                <pxl-var id="sec3ex1VarDx1" value="ref.sec3ex1VarTargetX1.value - ref.sec3ex1VarPcx1.value"></pxl-var>
+                <pxl-var id="sec3ex1VarDy1" value="ref.sec3ex1VarTargetY1.value - ref.sec3ex1VarPcy1.value"></pxl-var>
+                <pxl-var id="sec3ex1VarRadius1" value="sqrt(ref.sec3ex1VarDx1.value * ref.sec3ex1VarDx1.value + ref.sec3ex1VarDy1.value * ref.sec3ex1VarDy1.value)"></pxl-var>
 
                 <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
                 <!-- Top-Left HUD Info -->
-                <pxl-text x="30" y="30" text="'Start: (' + ref.sec3ex1X0.value + ', ' + ref.sec3ex1Y0.value + ') | r0 = ' + (typeof ref.sec3ex1R0.value === 'string' ? '\'' + ref.sec3ex1R0.value + '\'' : ref.sec3ex1R0.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
-                <pxl-text x="30" y="65" text="'End:   (' + ref.sec3ex1X1.value + ', ' + ref.sec3ex1Y1.value + ') | r1 = ' + (typeof ref.sec3ex1R1.value === 'string' ? '\'' + ref.sec3ex1R1.value + '\'' : ref.sec3ex1R1.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="30" text="'Start: (' + ref.sec3ex1Var1.value + ', ' + ref.sec3ex1Var2.value + ') | r0 = ' + (typeof ref.sec3ex1Var3.value === 'string' ? '\'' + ref.sec3ex1Var3.value + '\'' : ref.sec3ex1Var3.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+                <pxl-text x="30" y="65" text="'End:   (' + ref.sec3ex1Var4.value + ', ' + ref.sec3ex1Var5.value + ') | r1 = ' + (typeof ref.sec3ex1Var6.value === 'string' ? '\'' + ref.sec3ex1Var6.value + '\'' : ref.sec3ex1Var6.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
                 
-                <pxl-rect id="sec3ex1Rect" x="500" y="300" w="400" h="300" rotate="0" fill="radial([ref.sec3ex1X0.value, ref.sec3ex1Y0.value, ref.sec3ex1R0.value, ref.sec3ex1X1.value, ref.sec3ex1Y1.value, ref.sec3ex1R1.value], ['#f8fafc', '#475569'])"></pxl-rect>
+                <pxl-rect id="sec3ex1Rect" x="500" y="300" w="400" h="300" rotate="0" fill="radial([ref.sec3ex1Var1.value, ref.sec3ex1Var2.value, ref.sec3ex1Var3.value, ref.sec3ex1Var4.value, ref.sec3ex1Var5.value, ref.sec3ex1Var6.value], ['#f8fafc', '#475569'])"></pxl-rect>
                 
                 <pxl-group x="ref.sec3ex1Rect.x" y="ref.sec3ex1Rect.y" rotate="ref.sec3ex1Rect.rotate">
                   <!-- Solid blue bounding box -->
@@ -632,39 +635,39 @@
                   <pxl-text x="ref.sec3ex1Rect.w/2" y="ref.sec3ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="top"></pxl-text>
 
                   <!-- Pink Start Circle (Center 0 + Radius 0) -->
-                  <pxl-circle x="ref.sec3ex1Pcx0.value" y="ref.sec3ex1Pcy0.value" r="8" fill="#f472b6"></pxl-circle>
-                  <pxl-text x="ref.sec3ex1Pcx0.value" y="ref.sec3ex1Pcy0.value + 20" text="'Center 0'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
-                  <pxl-circle x="ref.sec3ex1Pcx0.value" y="ref.sec3ex1Pcy0.value" r="ref.sec3ex1Radius0.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec3ex1Radius0.value > 0 ? 1 : 0"></pxl-circle>
+                  <pxl-circle x="ref.sec3ex1VarPcx0.value" y="ref.sec3ex1VarPcy0.value" r="8" fill="#f472b6"></pxl-circle>
+                  <pxl-text x="ref.sec3ex1VarPcx0.value" y="ref.sec3ex1VarPcy0.value + 20" text="'Center 0'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <pxl-circle x="ref.sec3ex1VarPcx0.value" y="ref.sec3ex1VarPcy0.value" r="ref.sec3ex1VarRadius0.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec3ex1VarRadius0.value > 0 ? 1 : 0"></pxl-circle>
                   <pxl-line 
-                    x1="ref.sec3ex1Pcx0.value" 
-                    y1="ref.sec3ex1Pcy0.value" 
-                    x2="ref.sec3ex1TargetX0.value" 
-                    y2="ref.sec3ex1TargetY0.value" 
-                    stroke="#ec4899" strokewidth="4" arrowend="ref.sec3ex1Radius0.value > 0 ? 25 : 0"
-                    alpha="ref.sec3ex1Radius0.value > 0 ? 1 : 0"></pxl-line>
+                    x1="ref.sec3ex1VarPcx0.value" 
+                    y1="ref.sec3ex1VarPcy0.value" 
+                    x2="ref.sec3ex1VarTargetX0.value" 
+                    y2="ref.sec3ex1VarTargetY0.value" 
+                    stroke="#ec4899" strokewidth="4" arrowend="ref.sec3ex1VarRadius0.value > 0 ? 25 : 0"
+                    alpha="ref.sec3ex1VarRadius0.value > 0 ? 1 : 0"></pxl-line>
                   <pxl-text 
-                    x="ref.sec3ex1Pcx0.value + ref.sec3ex1Dx0.value / 2 + (ref.sec3ex1Radius0.value === 0 ? 0 : (ref.sec3ex1Dy0.value / ref.sec3ex1Radius0.value) * 22)" 
-                    y="ref.sec3ex1Pcy0.value + ref.sec3ex1Dy0.value / 2 - (ref.sec3ex1Radius0.value === 0 ? 0 : (ref.sec3ex1Dx0.value / ref.sec3ex1Radius0.value) * 22)" 
+                    x="ref.sec3ex1VarPcx0.value + ref.sec3ex1VarDx0.value / 2 + (ref.sec3ex1VarRadius0.value === 0 ? 0 : (ref.sec3ex1VarDy0.value / ref.sec3ex1VarRadius0.value) * 22)" 
+                    y="ref.sec3ex1VarPcy0.value + ref.sec3ex1VarDy0.value / 2 - (ref.sec3ex1VarRadius0.value === 0 ? 0 : (ref.sec3ex1VarDx0.value / ref.sec3ex1VarRadius0.value) * 22)" 
                     text="'r0'" 
-                    alpha="ref.sec3ex1Radius0.value > 0 ? 1 : 0"
+                    alpha="ref.sec3ex1VarRadius0.value > 0 ? 1 : 0"
                     fill="#ec4899" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
 
                   <!-- Pink End Circle (Center 1 + Radius 1) -->
-                  <pxl-circle x="ref.sec3ex1Pcx1.value" y="ref.sec3ex1Pcy1.value" r="8" fill="#f472b6"></pxl-circle>
-                  <pxl-text x="ref.sec3ex1Pcx1.value" y="ref.sec3ex1Pcy1.value + 20" text="'Center 1'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
-                  <pxl-circle x="ref.sec3ex1Pcx1.value" y="ref.sec3ex1Pcy1.value" r="ref.sec3ex1Radius1.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec3ex1Radius1.value > 0 ? 1 : 0"></pxl-circle>
+                  <pxl-circle x="ref.sec3ex1VarPcx1.value" y="ref.sec3ex1VarPcy1.value" r="8" fill="#f472b6"></pxl-circle>
+                  <pxl-text x="ref.sec3ex1VarPcx1.value" y="ref.sec3ex1VarPcy1.value + 20" text="'Center 1'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                  <pxl-circle x="ref.sec3ex1VarPcx1.value" y="ref.sec3ex1VarPcy1.value" r="ref.sec3ex1VarRadius1.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec3ex1VarRadius1.value > 0 ? 1 : 0"></pxl-circle>
                   <pxl-line 
-                    x1="ref.sec3ex1Pcx1.value" 
-                    y1="ref.sec3ex1Pcy1.value" 
-                    x2="ref.sec3ex1TargetX1.value" 
-                    y2="ref.sec3ex1TargetY1.value" 
-                    stroke="#ec4899" strokewidth="4" arrowend="ref.sec3ex1Radius1.value > 0 ? 25 : 0"
-                    alpha="ref.sec3ex1Radius1.value > 0 ? 1 : 0"></pxl-line>
+                    x1="ref.sec3ex1VarPcx1.value" 
+                    y1="ref.sec3ex1VarPcy1.value" 
+                    x2="ref.sec3ex1VarTargetX1.value" 
+                    y2="ref.sec3ex1VarTargetY1.value" 
+                    stroke="#ec4899" strokewidth="4" arrowend="ref.sec3ex1VarRadius1.value > 0 ? 25 : 0"
+                    alpha="ref.sec3ex1VarRadius1.value > 0 ? 1 : 0"></pxl-line>
                   <pxl-text 
-                    x="ref.sec3ex1Pcx1.value + ref.sec3ex1Dx1.value / 2 + (ref.sec3ex1Radius1.value === 0 ? 0 : (ref.sec3ex1Dy1.value / ref.sec3ex1Radius1.value) * 22)" 
-                    y="ref.sec3ex1Pcy1.value + ref.sec3ex1Dy1.value / 2 - (ref.sec3ex1Radius1.value === 0 ? 0 : (ref.sec3ex1Dx1.value / ref.sec3ex1Radius1.value) * 22)" 
+                    x="ref.sec3ex1VarPcx1.value + ref.sec3ex1VarDx1.value / 2 + (ref.sec3ex1VarRadius1.value === 0 ? 0 : (ref.sec3ex1VarDy1.value / ref.sec3ex1VarRadius1.value) * 22)" 
+                    y="ref.sec3ex1VarPcy1.value + ref.sec3ex1VarDy1.value / 2 - (ref.sec3ex1VarRadius1.value === 0 ? 0 : (ref.sec3ex1VarDx1.value / ref.sec3ex1VarRadius1.value) * 22)" 
                     text="'r1'" 
-                    alpha="ref.sec3ex1Radius1.value > 0 ? 1 : 0"
+                    alpha="ref.sec3ex1VarRadius1.value > 0 ? 1 : 0"
                     fill="#ec4899" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
 
                 </pxl-group>
@@ -742,119 +745,66 @@
       return [1, 0];
     }
 
+    // One entry per radius control. Its slider, dropdown and readout follow the radius variable (`${radius}Input`),
+    // its mode buttons and control groups share the prefix `ui`. Section 1 has a fixed center and direction variables,
+    // sections 2 and 3 have center sliders and anchor variables.
+    const RADIAL_RADII = {
+      sec1ex1: {
+        R1: { radius: 'sec1ex1Var1', code: 'sec1ex1GradR1Code', ui: 'sec1ex1', dirX: 'sec1ex1VarDirX', dirY: 'sec1ex1VarDirY' }
+      },
+      sec2ex1: {
+        R1: { radius: 'sec2ex1Var3', code: 'sec2ex1GradR1Code', ui: 'sec2ex1', x0: 'sec2ex1Var1', y0: 'sec2ex1Var2', isNumeric: 'sec2ex1VarIsNumeric', targetAx: 'sec2ex1VarTargetAx', targetAy: 'sec2ex1VarTargetAy' }
+      },
+      sec3ex1: {
+        R0: { radius: 'sec3ex1Var3', code: 'sec3ex1GradR0Code', ui: 'sec3ex1R0', x0: 'sec3ex1Var1', y0: 'sec3ex1Var2', isNumeric: 'sec3ex1VarIsNumericR0', targetAx: 'sec3ex1VarTargetAxR0', targetAy: 'sec3ex1VarTargetAyR0' },
+        R1: { radius: 'sec3ex1Var6', code: 'sec3ex1GradR1Code', ui: 'sec3ex1R1', x0: 'sec3ex1Var4', y0: 'sec3ex1Var5', isNumeric: 'sec3ex1VarIsNumericR1', targetAx: 'sec3ex1VarTargetAxR1', targetAy: 'sec3ex1VarTargetAyR1' }
+      }
+    };
+
     function setRadialRadiusMode(sec, radiusKey, mode) {
-      const slider = document.getElementById(`${sec}Grad${radiusKey}Input`);
+      const ids = RADIAL_RADII[sec][radiusKey];
+      const byId = id => document.getElementById(id);
       const isSlider = mode === 'slider';
 
-      const rect = document.getElementById(`${sec}Rect`);
-      const w = rect ? (parseFloat(rect.getAttribute('w')) || 400) : 400;
-      const h = rect ? (parseFloat(rect.getAttribute('h')) || 250) : 250;
+      const rect = byId(`${sec}Rect`);
+      const w = parseFloat(rect.getAttribute('w'));
+      const h = parseFloat(rect.getAttribute('h'));
 
-      const circleIdx = (sec === 'sec3ex1' && radiusKey === 'R1') ? '1' : '0';
-      const x0Input = document.getElementById(`${sec}GradX${circleIdx}Input`) || document.getElementById(`${sec}GradX0Input`);
-      const y0Input = document.getElementById(`${sec}GradY${circleIdx}Input`) || document.getElementById(`${sec}GradY0Input`);
-      const x0 = x0Input ? parseFloat(x0Input.value) : 0.5;
-      const y0 = y0Input ? parseFloat(y0Input.value) : 0.5;
-
+      const x0 = ids.x0 ? parseFloat(byId(`${ids.x0}Input`).value) : 0.5;
+      const y0 = ids.y0 ? parseFloat(byId(`${ids.y0}Input`).value) : 0.5;
       const anchor = resolveRadialAnchor(mode, x0, y0, w, h);
-      const dirs = isSlider ? [1, 0] : [anchor[0] - x0, anchor[1] - y0];
 
-      const dirX = document.getElementById(`${sec}DirX${radiusKey}`) || document.getElementById(`${sec}DirX`);
-      const dirY = document.getElementById(`${sec}DirY${radiusKey}`) || document.getElementById(`${sec}DirY`);
-      if (dirX) dirX.setAttribute('value', dirs[0]);
-      if (dirY) dirY.setAttribute('value', dirs[1]);
+      if (ids.dirX) {
+        byId(ids.dirX).setAttribute('value', isSlider ? 1 : anchor[0] - x0);
+        byId(ids.dirY).setAttribute('value', isSlider ? 0 : anchor[1] - y0);
+      } else {
+        byId(ids.targetAx).setAttribute('value', anchor[0]);
+        byId(ids.targetAy).setAttribute('value', anchor[1]);
+        byId(ids.isNumeric).setAttribute('value', isSlider ? 1 : 0);
+      }
 
-      const targetAx = document.getElementById(`${sec}TargetAx${radiusKey}`) || document.getElementById(`${sec}TargetAx`);
-      const targetAy = document.getElementById(`${sec}TargetAy${radiusKey}`) || document.getElementById(`${sec}TargetAy`);
-      if (targetAx) targetAx.setAttribute('value', anchor[0]);
-      if (targetAy) targetAy.setAttribute('value', anchor[1]);
-
-      const isNumVar = document.getElementById(`${sec}IsNumeric${radiusKey}`) || document.getElementById(`${sec}IsNumeric`);
-      if (isNumVar) isNumVar.setAttribute('value', isSlider ? 1 : 0);
-
-      const val = isSlider ? (slider ? slider.value : '200') : `'${mode}'`;
-      const varEl = document.getElementById(`${sec}${radiusKey}`);
-      if (varEl) varEl.setAttribute('value', val);
-
-      const codeEl = document.getElementById(`${sec}Grad${radiusKey}Code`);
-      if (codeEl) codeEl.innerText = val;
-
-      const valEl = document.getElementById(`${sec}Grad${radiusKey}Val`);
-      if (valEl) valEl.innerText = isSlider ? val : mode;
+      const val = isSlider ? byId(`${ids.radius}Input`).value : `'${mode}'`;
+      byId(ids.radius).setAttribute('value', val);
+      byId(ids.code).innerText = val;
+      byId(`${ids.radius}Val`).innerText = isSlider ? val : mode;
     }
 
     function setRadialType(sec, radiusKey, type) {
+      const ids = RADIAL_RADII[sec][radiusKey];
       const isNum = type === 'numeric';
-      const numBtn = document.getElementById(`${sec}${radiusKey}ModeNumericBtn`) || document.getElementById(`${sec}ModeNumericBtn`);
-      const kwBtn = document.getElementById(`${sec}${radiusKey}ModeKeywordBtn`) || document.getElementById(`${sec}ModeKeywordBtn`);
-      if (numBtn) numBtn.classList.toggle('active', isNum);
-      if (kwBtn) kwBtn.classList.toggle('active', !isNum);
+      document.getElementById(`${ids.ui}ModeNumericBtn`).classList.toggle('active', isNum);
+      document.getElementById(`${ids.ui}ModeKeywordBtn`).classList.toggle('active', !isNum);
+      document.getElementById(`${ids.ui}SliderGroup`).style.display = isNum ? 'flex' : 'none';
+      document.getElementById(`${ids.ui}KeywordGroup`).style.display = isNum ? 'none' : 'flex';
 
-      const sliderGroup = document.getElementById(`${sec}${radiusKey}SliderGroup`) || document.getElementById(`${sec}SliderGroup`);
-      const kwGroup = document.getElementById(`${sec}${radiusKey}KeywordGroup`) || document.getElementById(`${sec}KeywordGroup`);
-      if (sliderGroup) sliderGroup.style.display = isNum ? 'flex' : 'none';
-      if (kwGroup) kwGroup.style.display = isNum ? 'none' : 'flex';
-
-      if (isNum) {
-        setRadialRadiusMode(sec, radiusKey, 'slider');
-      } else {
-        const kwSelect = document.getElementById(`${sec}${radiusKey}KeywordSelect`) || document.getElementById(`${sec}KeywordSelect`) || document.getElementById(`${sec}Grad${radiusKey}Select`);
-        const kw = kwSelect ? kwSelect.value : 'top-right';
-        setRadialRadiusMode(sec, radiusKey, kw);
-      }
+      setRadialRadiusMode(sec, radiusKey, isNum ? 'slider' : document.getElementById(`${ids.radius}Select`).value);
     }
 
+    // A keyword radius depends on the rect and the center, so it is resolved again when they change
     function refreshRadialKeywords(sec, radiusKey = 'R1') {
-      const kwGroup = document.getElementById(`${sec}${radiusKey}KeywordGroup`) || document.getElementById(`${sec}KeywordGroup`);
-      const kwSelect = document.getElementById(`${sec}${radiusKey}KeywordSelect`) || document.getElementById(`${sec}KeywordSelect`) || document.getElementById(`${sec}Grad${radiusKey}Select`);
-      if (kwGroup && kwGroup.style.display !== 'none' && kwSelect) {
-        setRadialRadiusMode(sec, radiusKey, kwSelect.value);
-      }
-    }
-
-    // Section 1
-    function sec1ex1SetType(type) {
-      setRadialType('sec1ex1', 'R1', type);
-    }
-
-    // Section 2
-    function sec2ex1SetType(type) {
-      setRadialType('sec2ex1', 'R1', type);
-    }
-
-    function sec2ex1UpdateCenter(axis, val) {
-      const varEl = document.getElementById(`sec2ex1${axis}`);
-      if (varEl) varEl.setAttribute('value', val);
-      const valEl = document.getElementById(`sec2ex1Grad${axis}Val`);
-      if (valEl) valEl.innerText = val;
-      const codeEl = document.getElementById(`sec2ex1Grad${axis}Code`);
-      if (codeEl) codeEl.innerText = val;
-
-      const isNum = document.getElementById('sec2ex1ModeNumericBtn').classList.contains('active');
-      if (!isNum) {
-        const kw = document.getElementById('sec2ex1KeywordSelect').value;
-        setRadialRadiusMode('sec2ex1', 'R1', kw);
-      }
-    }
-
-    // Section 3
-    function sec3ex1SetType(radiusKey, type) {
-      setRadialType('sec3ex1', radiusKey, type);
-    }
-
-    function sec3ex1UpdateCenter(circleIdx, axis, val) {
-      const varEl = document.getElementById(`sec3ex1${axis}${circleIdx}`);
-      if (varEl) varEl.setAttribute('value', val);
-      const valEl = document.getElementById(`sec3ex1Grad${axis}${circleIdx}Val`);
-      if (valEl) valEl.innerText = val;
-      const codeEl = document.getElementById(`sec3ex1Grad${axis}${circleIdx}Code`);
-      if (codeEl) codeEl.innerText = val;
-
-      const radiusKey = `R${circleIdx}`;
-      const isNum = document.getElementById(`sec3ex1${radiusKey}ModeNumericBtn`).classList.contains('active');
-      if (!isNum) {
-        const kw = document.getElementById(`sec3ex1${radiusKey}KeywordSelect`).value;
-        setRadialRadiusMode('sec3ex1', radiusKey, kw);
+      const ids = RADIAL_RADII[sec][radiusKey];
+      if (document.getElementById(`${ids.ui}KeywordGroup`).style.display !== 'none') {
+        setRadialRadiusMode(sec, radiusKey, document.getElementById(`${ids.radius}Select`).value);
       }
     }
   </script>

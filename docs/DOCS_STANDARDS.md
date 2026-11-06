@@ -303,7 +303,7 @@ To ensure perfect consistency across all documentation playgrounds and guides, 1
   * UI Numeric Label Spans (`[Role]` = `Val`): `sec2CircleXVal`, `sec4LayerRotVal`, `sec4EllipseRxVal`, `sec3ex1RingIRVal`
   * Code Snippet Marks (`[Role]` = `Code`): `sec2CircleXCode`, `sec4LayerRotCode`, `sec4EllipseRxCode`, `sec3ex1RingIRCode`
   * Slider Inputs (`[Role]` = `Input`): `sec2CircleXInput`, `sec4LayerRotInput`
-  * Dropdown Selects (`[Role]` = `Select`): `sec1ex1KeywordSelect`, `sec3ex1R1KeywordSelect`
+  * Dropdown Selects (`[Role]` = `Select`): `sec1ex1Var1Select`, `sec3ex1Var6Select`
   * Toggle & Mode Buttons (`[Role]` = `Btn`): `sec1ex1ModeNumericBtn`, `sec1ex1ModeKeywordBtn`
   * Conditional Control Groups (`[Role]` = `Group`): `sec1ex1SliderGroup`, `sec1ex1KeywordGroup`
   * Input Variables (`[Entity]` = `Var`, numbered): `sec1Var1`, `sec1Var1Input`, `sec1Var1Val`, `sec2ex1Var3`
