@@ -66,15 +66,6 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Status**: 💬 **Discussion** (no plan yet)
 - **Motivation**: Complete the visual asset suite by allowing developers to load raster images (PNG, JPEG, WebP) and complex multi-color SVGs directly into the canvas via native `ctx.drawImage()`, with aspect-ratio fitting (`contain` / `cover`) and anchor transforms.
 
-## 10. Evaluate `map()` Utility Retention vs. API Pruning
-- **Status**: 💬 **Discussion**
-- **Background**:
-  - `pxl.scope.map(v, inMin, inMax, outMin, outMax)` provides linear range remapping (familiar from Processing/p5.js).
-  - It is currently only used in `examples/test31.html` for distance-to-style mapping, but all such calculations can be written using `lerp(a, b, t)` with normalized progress or raw arithmetic.
-- **Options to Investigate**:
-  - **Option A (Prune `map()`)**: Remove `map()` from `pxl.scope` to minimize the standard library footprint, eliminate redundant ways of interpolating values alongside `lerp()`, and prevent naming confusion with `Array.prototype.map` or coordinate mapping. Migrate `examples/test31.html` to `lerp()`.
-  - **Option B (Retain `map()`)**: Keep `map()` as a convenient 1-line helper for creative coders who want to avoid manual `/ (inMax - inMin)` normalization algebra inside HTML attribute strings.
-
 ## 11. Evaluate Default Text Alignment (`align` & `baseline`)
 - **Status**: 💬 **Discussion**
 - **Background**:
