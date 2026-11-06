@@ -51,7 +51,7 @@
 
         <div class="callout-info">
           <p class="callout-title">System Fonts vs. Web Fonts</p>
-          <p class="callout-body">Standard system fonts like <code>sans-serif</code>, <code>serif</code>, <code>monospace</code>, and <code>cursive</code> draw immediately with zero network latency. However, not all fonts support the full range of numeric weights: system fallbacks typically provide only regular (<code>400</code>) and bold (<code>700</code>), automatically snapping intermediate values to the nearest available cut. External web fonts like &lsquo;Inter&rsquo; must be preloaded in the DOM so Canvas can render all nine weights (<code>100&ndash;900</code>) without layout shifts.</p>
+          <p class="callout-body">Standard system fonts like <code>sans-serif</code>, <code>serif</code>, <code>monospace</code>, and <code>cursive</code> draw immediately with zero network latency. However, not all fonts support the full range of numeric weights: system fallbacks typically provide only regular (<code>400</code>) and bold (<code>700</code>), automatically snapping intermediate values to the nearest available cut. External web fonts like &lsquo;Inter&rsquo; load lazily: each font and each weight is downloaded the first time text is drawn with it. Until it arrives, the text uses a fallback font, and Kilopixel redraws it automatically.</p>
         </div>
 
         <!-- Declarative HTML markup above stage -->
@@ -1320,26 +1320,6 @@
     </main>
 
   </div>
-
-  <!-- 
-    FONT PRELOADER FOR CANVAS:
-    The HTML5 Canvas API (ctx.font) does not immediately download web fonts unless they are used in the HTML DOM first.
-    This invisible div renders all 9 weights of 'Inter' to force the browser to download and cache them on page load.
-    This guarantees that when the user drags the Kilopixel Font Weight slider (100-900), the Canvas draws them instantly without any delayed network "pop-in".
-  -->
-  <div aria-hidden="true" style="opacity: 0; pointer-events: none; position: absolute; width: 0; height: 0; overflow: hidden; font-family: 'Inter', sans-serif;">
-    <span style="font-weight: 100;">pxl</span><span style="font-weight: 200;">pxl</span><span style="font-weight: 300;">pxl</span>
-    <span style="font-weight: 400;">pxl</span><span style="font-weight: 500;">pxl</span><span style="font-weight: 600;">pxl</span>
-    <span style="font-weight: 700;">pxl</span><span style="font-weight: 800;">pxl</span><span style="font-weight: 900;">pxl</span>
-  </div>
-
-  <script>
-    if (document.fonts) {
-      document.fonts.ready.then(() => {
-        document.querySelectorAll('pxl-layer').forEach(layer => layer.invalidate());
-      });
-    }
-  </script>
 
   <!-- Prism Syntax Highlighting -->
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>

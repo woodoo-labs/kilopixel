@@ -1,6 +1,6 @@
 # Kilopixel Framework — Complete Technical Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~53KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~54KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes using custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, etc.) and the framework compiles, evaluates, and renders everything at 60fps automatically.
 
@@ -1259,16 +1259,20 @@ Iterates all point values (handling relative mode accumulation) to find min/max 
 
 ### 3-Tier Caching System
 
-**Tier 1 — Font State Cache**: Rebuilds the font string (`"normal normal 16px sans-serif"`) only when size, font, weight, fontstyle, or letterspacing change. Tracks `_lastSize`, `_lastFont`, `_lastWeight`, `_lastStyle`, `_lastLetterspacing`, `_lastU`.
+**Tier 1 — Font State Cache**: Rebuilds the font string (`"normal normal 16px sans-serif"`) only when size, font, weight, fontstyle, or letterspacing change, or when web fonts arrive. Tracks `_lastSize`, `_lastFont`, `_lastWeight`, `_lastStyle`, `_lastLetterspacing`, `_lastU`, `_lastFontGeneration`.
 
 **Tier 2 — Text Layout Cache**: The auto word-wrap algorithm runs only when Tier 1 is dirty OR `text`/`width` change.
 - If `width > 0`: splits text into words, measures each line, wraps when exceeding `width`
 - Handles explicit `\n` newlines within text
 - Caches result in `_lines[]` and `_totalChars`
 
-**Tier 3 — Bounding Box & Alignment Cache**: Recomputes metrics only when Tier 2 is dirty OR `align`/`baseline`/`lineheight`/`direction` change.
+**Tier 3 — Bounding Box & Alignment Cache**: Recomputes metrics only when Tier 2 is dirty OR `align`/`baseline`/`lineheight`/`direction`/`maxwidth` change.
 - Uses `ctx.measureText()` for pixel-accurate metrics
+- `measureText()` ignores `maxWidth`, so a line wider than `maxwidth` has both sides of its box scaled by `maxwidth * u / metrics.width` (canvas squeezes around the anchor)
 - Calculates `_startY` offset based on baseline
+- An animated `maxwidth` therefore calls `measureText()` once per line per frame. Accepted as a rare case; cached line metrics would avoid it (`design/2026-11-06_text_box_accuracy_plan.md` §10)
+
+**Late web fonts**: when a web font arrives, the font string doesn't change, so no tier would notice. The `loadingdone` listener of `document.fonts` (in `text.js`) raises `pxl._fontGeneration` and calls `stage.invalidateLayers()` on every stage in `pxl.perf.stages`. Each text compares the number in Tier 1 on its next draw, so glyphs, wrapping and box all follow; hidden or off-screen stages catch up when they next render. Pages need no handler. `loadingdone` only fires when the whole font batch has finished, so a hanging font delays the correction for the other fonts of its batch. Until then, text stays in its fallback font.
 
 ### Reveal Effect
 
@@ -1280,7 +1284,7 @@ When `reveal` is set (0 to 1):
 
 ### Bounding Box
 
-Computed dynamically in Tier 3 cache using `ctx.measureText()` metrics (ascent/descent). Accounts for multi-line layout, alignment, and baseline.
+Computed dynamically in Tier 3 cache using `ctx.measureText()` metrics (ascent/descent). Accounts for multi-line layout, alignment, baseline and `maxwidth`.
 
 ### Text Rendering
 
@@ -1299,7 +1303,6 @@ Glyphs drawn with `fillText` / `strokeText` produce no path, so `<pxl-text>` imp
 - **No hit when nothing is visible** (`_hasInk` is false): empty text, `reveal` hiding all characters, or neither fill nor stroke.
 - Partially revealed text keeps the full box.
 - Transforms (own and ancestors') apply automatically, so rotated, scaled and skewed text works.
-- Known limitations (see `.agents/TODO.md` §16): web fonts loading after the first measurement keep the fallback font's box until the text changes; `maxwidth` compression is not reflected in the box.
 
 ---
 

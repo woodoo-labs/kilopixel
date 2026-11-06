@@ -1,3 +1,6 @@
+// Raised when web fonts arrive. The font string doesn't change then, so each text compares this number instead.
+pxl._fontGeneration = 0;
+
 pxl.Text = class Text extends pxl.Shape {
   static get observedAttributes() {
     return [
@@ -30,6 +33,8 @@ pxl.Text = class Text extends pxl.Shape {
     this._lastLineheight = 0;
     this._lastLetterspacing = 0;
     this._lastDirection = null;
+    this._lastMaxwidth = 0;
+    this._lastFontGeneration = 0;
     this._cachedLetterSpacingString = '0px';
     this._lines = [];
     this._totalChars = 0;
@@ -57,7 +62,8 @@ pxl.Text = class Text extends pxl.Shape {
       this._lastFont !== font ||
       this._lastWeight !== weight ||
       this._lastStyle !== fontstyle ||
-      this._lastLetterspacing !== letterspacing
+      this._lastLetterspacing !== letterspacing ||
+      this._lastFontGeneration !== pxl._fontGeneration
     ) {
       tier1Dirty = true;
       this._cachedFontString = `${fontstyle} ${weight} ${size * u}px ${font}`;
@@ -69,6 +75,7 @@ pxl.Text = class Text extends pxl.Shape {
       this._lastWeight = weight;
       this._lastStyle = fontstyle;
       this._lastLetterspacing = letterspacing;
+      this._lastFontGeneration = pxl._fontGeneration;
     }
 
     // Context state is set every time: measuring and drawing both depend on it
@@ -116,7 +123,8 @@ pxl.Text = class Text extends pxl.Shape {
 
     // --- 3. Bounding box and first baseline ---
     if (tier2Dirty || this._lastAlign !== align || this._lastBaseline !== baseline ||
-        this._lastLineheight !== lineheight || this._lastDirection !== direction) {
+        this._lastLineheight !== lineheight || this._lastDirection !== direction ||
+        this._lastMaxwidth !== maxwidth) {
       let maxLeft = 0;
       let maxRight = 0;
       let maxAscent = 0;
@@ -124,8 +132,12 @@ pxl.Text = class Text extends pxl.Shape {
 
       for (let i = 0; i < this._lines.length; i++) {
         const metrics = ctx.measureText(this._lines[i]);
-        if (metrics.actualBoundingBoxLeft > maxLeft) maxLeft = metrics.actualBoundingBoxLeft;
-        if (metrics.actualBoundingBoxRight > maxRight) maxRight = metrics.actualBoundingBoxRight;
+        // measureText() ignores maxWidth: a line wider than maxwidth is squeezed around its anchor, so both sides scale
+        const squeeze = maxwidth > 0 ? Math.min(1, maxwidth * u / metrics.width) : 1;
+        const left = metrics.actualBoundingBoxLeft * squeeze;
+        const right = metrics.actualBoundingBoxRight * squeeze;
+        if (left > maxLeft) maxLeft = left;
+        if (right > maxRight) maxRight = right;
         if (i === 0) maxAscent = metrics.actualBoundingBoxAscent;
         if (i === this._lines.length - 1) maxDescent = metrics.actualBoundingBoxDescent;
       }
@@ -150,6 +162,7 @@ pxl.Text = class Text extends pxl.Shape {
       this._lastBaseline = baseline;
       this._lastLineheight = lineheight;
       this._lastDirection = direction;
+      this._lastMaxwidth = maxwidth;
     }
 
     // --- Drawing ---
@@ -210,3 +223,9 @@ pxl.Text = class Text extends pxl.Shape {
   }
 };
 customElements.define('pxl-text', pxl.Text);
+
+// All layers, because a custom shape can draw text too. Hidden or off-screen stages catch up when they next render.
+document.fonts.addEventListener('loadingdone', () => {
+  pxl._fontGeneration++;
+  for (let i = 0; i < pxl.perf.stages.length; i++) pxl.perf.stages[i].invalidateLayers();
+});

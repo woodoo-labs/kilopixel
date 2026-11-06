@@ -181,6 +181,25 @@
           </pxl-layer>
         </pxl-stage>
 
+        <!-- Text box: maxwidth and late web fonts (design/2026-11-06_text_box_accuracy_plan.md) -->
+        <pxl-stage id="tbStage" ratio="5 / 3" alwaysrender>
+          <pxl-layer id="tbLayer">
+            <pxl-text id="tbText" x="500" y="150" size="48" font="Arial" fill="#0f172a" align="center" baseline="middle"
+              text="KILOPIXEL DECLARATIVE CANVAS"></pxl-text>
+            <pxl-text id="tbChain" x="500" y="300" size="48" font="Arial" fill="#0f172a" text="KILOPIXEL DECLARATIVE CANVAS"></pxl-text>
+            <pxl-text id="tbGradient" x="500" y="450" size="48" font="Arial" align="center" fill="linear(0, ['#3b82f6', '#ec4899'])"
+              text="KILOPIXEL DECLARATIVE CANVAS"></pxl-text>
+            <pxl-text id="tbWrap" x="500" y="520" size="30" font="Arial" fill="#0f172a" align="center" width="800"
+              text="Kilopixel draws declarative canvas shapes"></pxl-text>
+          </pxl-layer>
+        </pxl-stage>
+        <pxl-stage id="tbMovingStage" ratio="5 / 3" alwaysrender>
+          <pxl-layer id="tbMovingLayer">
+            <pxl-text id="tbMoving" x="500" y="300" dx="sin(t * 3) * 40" size="48" font="Arial" fill="#0f172a" align="center" maxwidth="300"
+              text="KILOPIXEL DECLARATIVE CANVAS"></pxl-text>
+          </pxl-layer>
+        </pxl-stage>
+
       </div>
     </div>
   </main>
@@ -516,6 +535,162 @@
       el('gsCornersStage').resize(); // throws if roundRect gets the negative radius
       const center = pixelAt('gsCornersLayer', 500, 300);
       if (center[1] < 150 || center[3] === 0) throw new Error(`rect not drawn: ${rgba(center)}`);
+    });
+
+    // ===================================================================
+    // Text box: maxwidth and late web fonts (design/2026-11-06_text_box_accuracy_plan.md)
+    // ===================================================================
+
+    // resize() also works in a background tab, where the stage may not have a size yet
+    const drawTextStage = () => el('tbStage').resize();
+
+    // Draws the text stage with the given attributes on tbText and returns a copy of its box
+    const textBox = (attributes, id = 'tbText') => {
+      for (const [name, value] of Object.entries(attributes)) el(id).setAttribute(name, value);
+      drawTextStage();
+      return { ...el(id).boundingBox };
+    };
+
+    // Number of measureText() calls while fn runs
+    function countMeasureText(fn) {
+      const proto = CanvasRenderingContext2D.prototype, original = proto.measureText;
+      let calls = 0;
+      proto.measureText = function(text) { calls++; return original.call(this, text); };
+      try { fn(); } finally { proto.measureText = original; }
+      return calls;
+    }
+
+    test('text box: a squeezed line scales both sides of the box by the same factor', () => {
+      const full = textBox({ maxwidth: '0', text: 'KILOPIXEL DECLARATIVE CANVAS' });
+      const squeezed = textBox({ maxwidth: '200' });
+      const width = squeezed.right - squeezed.left;
+      if (width > 202) throw new Error(`box is ${round(width)} wide with maxwidth 200`);
+      const leftFactor = squeezed.left / full.left, rightFactor = squeezed.right / full.right;
+      if (Math.abs(leftFactor - rightFactor) > 0.001) throw new Error(`left ×${leftFactor}, right ×${rightFactor}`);
+    });
+
+    test('text box: maxwidth larger than the line leaves the box unchanged', () => {
+      const full = textBox({ maxwidth: '0', text: 'KILOPIXEL DECLARATIVE CANVAS' });
+      const wide = textBox({ maxwidth: '5000' });
+      if (wide.left !== full.left || wide.right !== full.right) throw new Error(`${wide.left}, ${wide.right} instead of ${full.left}, ${full.right}`);
+    });
+
+    test('text box: each line has its own squeeze factor, whatever the line order', () => {
+      const long = 'A much longer line that has to be squeezed', short = 'Short line';
+      const alone = textBox({ maxwidth: '300', text: long });
+      const shortFirst = textBox({ text: `${short}\\n${long}` });
+      const longFirst = textBox({ text: `${long}\\n${short}` });
+      for (const box of [shortFirst, longFirst]) {
+        if (Math.abs(box.right - alone.right) > 0.01 || Math.abs(box.left - alone.left) > 0.01) {
+          throw new Error(`box ${round(box.left)}, ${round(box.right)} instead of ${round(alone.left)}, ${round(alone.right)}`);
+        }
+      }
+    });
+
+    test('text box: changing maxwidth measures each line once, and not again on the next frame', () => {
+      const before = textBox({ maxwidth: '400', text: 'Line one is long enough\\nLine two is long enough too\\nLine three is the longest line of them' });
+      let after;
+      const calls = countMeasureText(() => { after = textBox({ maxwidth: '200' }); });
+      if (calls !== 3) throw new Error(`${calls} measureText calls for 3 lines`);
+      if (after.right >= before.right) throw new Error('the box did not follow maxwidth');
+      const nextFrame = countMeasureText(drawTextStage);
+      if (nextFrame !== 0) throw new Error(`${nextFrame} measureText calls on the next frame`);
+    });
+
+    test('text box: moving text with a static maxwidth never measures', () => {
+      const stage = el('tbMovingStage'), text = el('tbMoving');
+      const first = text.attributeValues.dx;
+      let moved = false, t = 1;
+      stage.resize();
+      stage.render(t);
+      const calls = countMeasureText(() => {
+        for (let i = 0; i < 10; i++) {
+          stage.render(t += 0.1);
+          if (text.attributeValues.dx !== first) moved = true;
+        }
+      });
+      if (!moved) throw new Error('the text did not move');
+      if (calls !== 0) throw new Error(`${calls} measureText calls in 10 frames`);
+    });
+
+    test('text box: after any chain of attribute changes, the box equals that of a new text', () => {
+      const chain = [
+        ['maxwidth', '200'], ['maxwidth', '100'], ['align', 'right'], ['maxwidth', '0'], ['maxwidth', '150'], ['baseline', 'top'],
+        ['lineheight', '2'], ['maxwidth', '80'], ['text', 'A much longer text for a second round of checks'], ['maxwidth', '300'],
+        ['text', 'Line one is long enough\\nTwo\\nLine three is longer than line one'], ['maxwidth', '120'], ['width', '300'], ['size', '30'],
+        ['maxwidth', '90'], ['font', 'Georgia'], ['weight', '700'], ['letterspacing', '4'], ['maxwidth', '0'], ['maxwidth', '500'], ['direction', 'rtl'],
+        ['maxwidth', '60'], ['direction', 'ltr'], ['align', 'center'], ['baseline', 'middle'], ['width', '0'], ['lineheight', '1'], ['maxwidth', '1000']
+      ];
+      const live = el('tbChain');
+      const boxOf = (text) => ['left', 'right', 'top', 'bottom'].map((k) => text.boundingBox[k].toFixed(4)).join(', ');
+      for (const [name, value] of chain) {
+        live.setAttribute(name, value);
+        drawTextStage();
+        const fresh = document.createElement('pxl-text');
+        for (const attribute of live.attributes) {
+          if (attribute.name !== 'id') fresh.setAttribute(attribute.name, attribute.value);
+        }
+        el('tbLayer').appendChild(fresh);
+        drawTextStage();
+        const liveBox = boxOf(live), freshBox = boxOf(fresh);
+        fresh.remove();
+        if (liveBox !== freshBox) throw new Error(`after ${name}=${value}: ${liveBox} instead of ${freshBox}`);
+      }
+    });
+
+    test('text box: the gradient follows the box when maxwidth changes', () => {
+      const text = el('tbGradient');
+      textBox({ maxwidth: '0' }, 'tbGradient');
+      const full = text._gradCache[0].br;
+      const box = textBox({ maxwidth: '200' }, 'tbGradient');
+      const squeezed = text._gradCache[0].br;
+      if (squeezed !== box.right) throw new Error(`gradient uses ${squeezed}, box is ${box.right}`);
+      if (squeezed >= full) throw new Error('the gradient box did not shrink');
+    });
+
+    test('late font: loadingdone raises the generation, invalidates every layer and measures again', () => {
+      const lines = el('tbWrap')._lines.length + el('tbText')._lines.length + el('tbChain')._lines.length + el('tbGradient')._lines.length;
+      drawTextStage();
+      const before = pxl._fontGeneration;
+      document.querySelectorAll('pxl-layer').forEach((layer) => { layer.isDirty = false; });
+      document.fonts.dispatchEvent(new Event('loadingdone'));
+      if (pxl._fontGeneration !== before + 1) throw new Error(`generation ${pxl._fontGeneration}, expected ${before + 1}`);
+      const clean = [...document.querySelectorAll('pxl-layer')].filter((layer) => !layer.isDirty);
+      if (clean.length) throw new Error(`${clean.length} layers are not dirty`);
+      const calls = countMeasureText(drawTextStage);
+      if (calls < lines) throw new Error(`${calls} measureText calls for ${lines} lines`);
+    });
+
+    test('late font: wrapping and box follow when the arriving font has other metrics', () => {
+      const text = el('tbWrap');
+      drawTextStage();
+      const linesBefore = text._lines.length, rightBefore = text.boundingBox.right;
+
+      // Stands in for a wider font: the font string stays the same and only the measured values change
+      const proto = CanvasRenderingContext2D.prototype, original = proto.measureText;
+      proto.measureText = function(value) {
+        const m = original.call(this, value);
+        return {
+          width: m.width * 2, actualBoundingBoxLeft: m.actualBoundingBoxLeft * 2, actualBoundingBoxRight: m.actualBoundingBoxRight * 2,
+          actualBoundingBoxAscent: m.actualBoundingBoxAscent, actualBoundingBoxDescent: m.actualBoundingBoxDescent
+        };
+      };
+      let linesNoEvent, linesAfter;
+      try {
+        drawTextStage();
+        linesNoEvent = text._lines.length;
+        document.fonts.dispatchEvent(new Event('loadingdone'));
+        drawTextStage();
+        linesAfter = text._lines.length;
+      } finally {
+        proto.measureText = original;
+      }
+      if (linesNoEvent !== linesBefore) throw new Error('the text measured again without an event');
+      if (linesAfter <= linesBefore) throw new Error(`still ${linesAfter} lines after the font change`);
+
+      document.fonts.dispatchEvent(new Event('loadingdone'));
+      drawTextStage();
+      if (text._lines.length !== linesBefore || text.boundingBox.right !== rightBefore) throw new Error('did not return to the first layout');
     });
 
     // --- Run all tests in order ---

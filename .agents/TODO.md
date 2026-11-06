@@ -65,6 +65,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 ## 9. Raster Bitmaps & Complex SVG Graphics (`<pxl-image>`)
 - **Status**: 💬 **Discussion** (no plan yet)
 - **Motivation**: Complete the visual asset suite by allowing developers to load raster images (PNG, JPEG, WebP) and complex multi-color SVGs directly into the canvas via native `ctx.drawImage()`, with aspect-ratio fitting (`contain` / `cover`) and anchor transforms.
+- **Images arrive late**: first thoughts for the plan are in `design/2026-11-06_text_box_accuracy_plan.md` §7 (what to draw before loading, the box before the size is known, a shared image per `src`, natural size through `ref.*`, failed loads). Unlike fonts, an image reports its own arrival, so it invalidates only its own layer and doesn't use `pxl._fontGeneration`.
 
 ## 11. Evaluate Default Text Alignment (`align` & `baseline`)
 - **Status**: 💬 **Discussion**
@@ -106,15 +107,6 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
   - Arrowheads (`drawArrows`) use the stroke style; check how they should behave with `paintorder="stroke"`.
   - Add a docs section/example following `docs/DOCS_STANDARDS.md`.
 - **Related**: build after §19 and §31 (`design/2026-11-01_isolated_shape_compositing_plan.md` §9). Without isolation, `paintorder="stroke"` has the same compositing bug as §31 (with a shadow, the fill's shadow falls onto the stroke drawn before it); with isolation it only swaps two draw calls.
-
-## 16. Text Measurement Accuracy (`<pxl-text>` Bounding Box)
-- **Status**: 💬 **Discussion** (known limitations, split off from `design/2026-10-13_text_hit_testing_plan.md` on 2026-10-15)
-- **Background**: The text bounding box (Tier 3 of `Text.draw()`, via `ctx.measureText()`) is used for gradient placement and, since text hit testing, as the hit area.
-- **Issues**:
-  - **Late web fonts**: the box is measured with whatever font is available at that moment. If a web font finishes loading later, the font string is unchanged, Tier 1 is not dirty, and the box keeps the **fallback font metrics** until the text changes. Docs pages invalidate layers on `document.fonts.ready`, but that does not reset the text caches.
-    - Possible fix: a global font generation counter, raised on `document.fonts` `loadingdone` and compared in Tier 1 (one integer check, no per-frame cost). Open question: the global side effect (listener + invalidating all layers) and how it relates to the docs pages' own `document.fonts.ready` handler.
-  - **`maxwidth` squeezing**: `measureText()` ignores the `maxWidth` argument of `fillText()`, so a horizontally compressed line gets a box that is too wide (hit area and gradients).
-    - Possible fix (Tier 3): per line, scale `actualBoundingBoxLeft/Right` by `min(1, maxwidth * u / metrics.width)`.
 
 ## 19. Always `save()` / `restore()` per Shape
 - **Status**: 🟢 **Decided** (2026-10-17: adopt; implementation pending, plan §6)

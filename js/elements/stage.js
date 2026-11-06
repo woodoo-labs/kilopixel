@@ -145,6 +145,10 @@ pxl.Stage = class Stage extends HTMLElement {
     this.render(performance.now() / 1000);
   }
 
+  invalidateLayers() {
+    for (let i = 0; i < this._layers.length; i++) this._layers[i].invalidate();
+  }
+
   requestRender() {
     if (!this._isVisible || this._isSizePending || this._isUpdatePending) return;
     this._isUpdatePending = true;

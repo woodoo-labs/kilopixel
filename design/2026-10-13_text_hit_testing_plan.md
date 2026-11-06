@@ -120,7 +120,7 @@ hitTest(ctx, u) {
 - `this.boundingBox` is computed in **Tier 3** of `Text.draw()` using `ctx.measureText()` (`actualBoundingBoxLeft/Right/Ascent/Descent`), in logical units relative to the text anchor (respects `align`, `baseline`, multi-line `lineheight`, word-wrap `width`, `letterspacing`, `direction`).
 - `interaction.process()` runs at the **end of `stage.render()`**, i.e. after the text has been drawn in the same frame → the box and `_hasInk` are fresh.
 - Hidden elements (`hidden` on the element or any ancestor) are already skipped by the engine before the hook is called.
-- Known limitation (out of scope): web fonts loading after the first measurement keep the fallback font metrics until the text changes; tracked in `.agents/TODO.md`.
+- Known limitation (out of scope): web fonts loading after the first measurement keep the fallback font metrics until the text changes; see `design/2026-11-06_text_box_accuracy_plan.md`.
 
 ### 3.5 Performance & GC
 
@@ -179,9 +179,7 @@ With `linejoin="miter"`, glyph corners can extend slightly further than `strokew
 
 **Problem:** `measureText()` ignores the `maxWidth` argument of `fillText()`. When a line is horizontally compressed by `maxwidth`, the computed box is wider than the drawn text. This affects hit testing **and** gradient placement (pre-existing).
 
-**Possible fix (Tier 3):** per line, scale `actualBoundingBoxLeft/Right` by `min(1, maxwidth * u / metrics.width)` (canvas compresses horizontally around the anchor point).
-
-**Recommendation:** track separately — it is a bounding-box accuracy issue, not a hit-testing issue.
+**Tracked separately** (a bounding-box accuracy issue, not a hit-testing issue): `design/2026-11-06_text_box_accuracy_plan.md`.
 
 ---
 
