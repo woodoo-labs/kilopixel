@@ -635,26 +635,31 @@
           <p class="callout-body">When creating hollow outlines with <code>fill="none"</code>, static system fonts like <code>sans-serif</code> are recommended. Modern variable fonts (such as Inter) often construct glyphs using overlapping component contours for weight interpolation, which the browser&rsquo;s <code>strokeText()</code> renders as internal seams. Static fonts provide merged vector paths for clean, hollow borders.</p>
         </div>
 
+        <div class="callout-info">
+          <p class="callout-title">Corner Joins and End Caps</p>
+          <p class="callout-body">Text outlines use the same stroke settings as other shapes. Corner joins (<code>linejoin</code>) shape the letter corners: the default <code>miter</code> keeps them sharp, but on thick outlines it draws pointed spikes at letters such as A, V or W. <code>round</code> and <code>bevel</code> avoid them, and so does a low <code>miterlimit</code>. The examples in this section use <code>linejoin="round"</code>. End caps (<code>linecap</code>) only change dashed outlines, where every dash has two ends: letter outlines are closed paths, so a solid outline has no caps. See <a href="caps.html">Caps &amp; Joins</a> for all options.</p>
+        </div>
+
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Lower Left: Solid Outline (Orange Scheme) --&gt;
     &lt;pxl-text x="240" y="420" font="sans-serif" stroke="#f97316" align="center" baseline="middle"
-      text="SOLID"
+      text="SOLID" linejoin="round"
       size="<mark id="sec7Text1SizeCode">80</mark>" weight="<mark id="sec7Text1WeightCode">800</mark>"
       strokewidth="<mark id="sec7Text1StrokewidthCode">4</mark>" fill="<mark id="sec7Text1FillCode">none</mark>"&gt;
     &lt;/pxl-text&gt;
 
     &lt;!-- Upper Center: Dashed Outline (Blue Scheme) --&gt;
     &lt;pxl-text x="500" y="160" font="sans-serif" stroke="#3b82f6" fill="none" align="center" baseline="middle"
-      text="DASHED"
+      text="DASHED" linejoin="round"
       size="<mark id="sec7Text2SizeCode">80</mark>" weight="<mark id="sec7Text2WeightCode">800</mark>"
       strokewidth="<mark id="sec7Text2StrokewidthCode">2</mark>" linedash="[<mark id="sec7Text2DashCode">10</mark>, 6]"&gt;
     &lt;/pxl-text&gt;
 
     &lt;!-- Lower Right: Gradient Outline (Multi-Stop Linear) --&gt;
     &lt;pxl-text x="760" y="420" font="sans-serif" fill="none" align="center" baseline="middle"
-      text="GRADIENT"
+      text="GRADIENT" linejoin="round"
       size="<mark id="sec7Text3SizeCode">80</mark>" weight="<mark id="sec7Text3WeightCode">800</mark>"
       strokewidth="<mark id="sec7Text3StrokewidthCode">4</mark>" stroke="linear(<mark id="sec7AngleCode">90</mark>, ['#f97316', '#ec4899', '#3b82f6'])"&gt;
     &lt;/pxl-text&gt;
@@ -775,7 +780,7 @@
               <!-- Lower Left: Solid Outline Text (Orange Scheme) -->
               <pxl-text id="sec7Text1" x="240" y="420"
                 font="sans-serif" fill="none"
-                stroke="#f97316" strokewidth="4"
+                stroke="#f97316" strokewidth="4" linejoin="round"
                 size="80" weight="800"
                 align="center" baseline="middle"
                 text="SOLID"></pxl-text>
@@ -789,7 +794,7 @@
               <!-- Upper Center: Dashed Outline Text (Blue Scheme) -->
               <pxl-text id="sec7Text2" x="500" y="160"
                 font="sans-serif" fill="none"
-                stroke="#3b82f6" strokewidth="2"
+                stroke="#3b82f6" strokewidth="2" linejoin="round"
                 linedash="[10, 6]"
                 size="80" weight="800"
                 align="center" baseline="middle"
@@ -804,7 +809,7 @@
               <!-- Lower Right: Linear Gradient Outline Text (Rainbow Gradient) -->
               <pxl-text id="sec7Text3" x="760" y="420"
                 font="sans-serif" fill="none"
-                stroke="linear(ref.sec7Var1.value, ['#f97316', '#ec4899', '#3b82f6'])" strokewidth="4"
+                stroke="linear(ref.sec7Var1.value, ['#f97316', '#ec4899', '#3b82f6'])" strokewidth="4" linejoin="round"
                 size="80" weight="800"
                 align="center" baseline="middle"
                 text="GRADIENT"></pxl-text>

@@ -84,16 +84,16 @@ Elements within a `<pxl-layer>` are drawn in strict DOM order (back-to-front). A
   * **Structural HTML Comments:** HTML comments inside code blocks that act as structural titles or headers (e.g., `<!-- Hero Sandbox Stage -->`, `<!-- Left: Animated Pac-Man -->`) may use Title Case. They are treated as document headers rather than conversational prose.
   * **Inline Callout/List Headers:** Bold prefixes at the beginning of paragraphs, bulleted lists, or callout bodies (e.g., `<li><strong>Concept Name:</strong> ...</li>`) MUST use plain English in Title Case with the colon placed *inside* the `<strong>` tag. NEVER wrap `<code>` tags inside the bold lead-in; weave technical attribute or keyword names naturally into the body sentence immediately following the title.
   * **Unitless Coordinates (No `u` or `px`):** The public documentation must treat the 1000-width canvas as a pure mathematical space. NEVER append units (like `px`, `em`, or `%`) to declarative attribute values in text, NEVER refer to the internal scale factor variable `u`, and NEVER use phrases like "logical units" or "coordinate units". Always use pure bare numbers or refer to a "1000-width logical canvas".
-  * **Parenthetical Attribute Mapping (`Concept (attribute)`):**
-    When introducing features in explanatory paragraphs or bullet lists, always map the plain English conceptual term directly to its declarative HTML attribute using parentheses:
-    * **Canonical Formula:** `[English Concept] (<code>[attribute]</code>)`
-    * **Canonical Examples:**
+  * **Attributes and Values in Prose (`concept (attribute)`):**
+    * **Code:** Attribute names and keyword values are code: `<code>strokewidth</code>`, `<code>round</code>`.
+    * **Introducing a Feature:** When the attribute name is short or technical, give the plain lowercase concept first, then the attribute in parentheses. Do this once, where the feature is introduced; after that, use the attribute alone.
       * Dimensions: `width (<code>w</code>)`, `height (<code>h</code>)`, `thickness (<code>strokewidth</code>)`
       * Radii: `outer radius (<code>r</code>)`, `inner radius (<code>ir</code>)`, `corner radius (<code>r</code>)`
       * Transforms: `rotation (<code>rotate</code>)`, `uniform scale (<code>zoom</code>)`, `scaling (<code>zoom</code>, <code>scalex</code>, <code>scaley</code>)`
-      * Line Styles: `end caps (<code>linecap</code>)`, `dash patterns (<code>linedash</code>)`
+      * Line Styles: `corner joins (<code>linejoin</code>)`, `end caps (<code>linecap</code>)`, `dash patterns (<code>linedash</code>)`
       * Arrowheads: `start (<code>arrowstart</code>) and end (<code>arrowend</code>) arrowheads`
-    * **Consistency Rule:** Always place the plain lowercase English concept first, immediately followed by the exact `<code>` attribute tag enclosed in parentheses. This establishes a predictable, effortless visual bridge between conceptual design terms and concrete Kilopixel HTML markup.
+    * **No Pair When the Name Already Says It:** If the concept would only repeat the attribute name (`fill`, `stroke`, `mask`, `miterlimit`, `size`, `font`), write the attribute alone: *"a low `<code>miterlimit</code>`"*, not *"a low miter limit (`<code>miterlimit</code>`)"*.
+    * **Values:** Write a keyword value as bare code (*"the default `<code>miter</code>`"*). Use `attr="value"` when the attribute isn't clear from the sentence, or when the reader should copy it (*"The examples use `<code>linejoin="round"</code>`"*).
 
 ## 4. UI Controls & Architecture
 Interactive playgrounds must follow a standardized DOM architecture to maintain visual parity across the site.
