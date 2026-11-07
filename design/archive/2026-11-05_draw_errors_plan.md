@@ -1,9 +1,9 @@
 # Draw Errors: One Bad Value Must Not Break the Layer
 
-- **Status**: 🟡 **Proposed** (Part 2; Part 1 implemented 2026-11-05 together with `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`: stop offsets clamped, rect radii clamped in the `roundRect` branch, 2 tests)
+- **Status**: ⚪ **Superseded by** `design/2026-11-07_safe_shape_render_plan.md` (2026-11-07: Part 2 moved there; Part 1 implemented 2026-11-05 together with `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`: stop offsets clamped, rect radii clamped in the `roundRect` branch, 2 tests)
 - **Date**: 2026-11-05
 - **Supersedes**: `design/archive/2026-08-25_gradient_optimization_plan.md` (stop clamping, never built; its allocation part is dropped, §7)
-- **Related**: `design/2026-10-17_always_save_restore_plan.md` (TODO §19, same lines in `Shape.render()`), `design/2026-10-18_polyline_optimization_plan.md` (small fix "non-finite points + gradient")
+- **Related**: `design/archive/2026-10-17_always_save_restore_plan.md` (same lines in `Shape.render()`), `design/2026-10-18_polyline_optimization_plan.md` (small fix "non-finite points + gradient")
 - **Target Implementation**: `js/elements/shape.js` (`createGradient`, `render`), `js/elements/shapes/rect.js`, `js/elements/node.js` (`reportError`), `js/elements/group.js`, `js/elements/layer.js`, `js/elements/variable.js`, `js/interaction.js` (`process`), `tests/index.html`, `.agents/KILOPIXEL.md`
 - **Prototypes** (local, scratch is git-ignored): `scratch/gradient_stops/overshoot.html` (stop offset leaves 0–1), `scratch/gradient_stops/try_finally_bench.html` (cost of `try` per shape)
 
@@ -98,7 +98,7 @@ A new `PxlNode` method reports an error once per distinct message, so an error t
 
 `this._lastErrorMessage = null` in the `PxlNode` constructor (only `node.js` reads and writes it).
 
-**`Shape.render()`**, written together with always save / restore (§19):
+**`Shape.render()`**, written together with always save / restore:
 
 ```js
   render(ctx, u, t) {
@@ -145,7 +145,7 @@ Measured on 2026-11-05 (`try_finally_bench.html`, Chrome, Browser pane hidden, s
 | Per frame, 2,000 animated lines + 300 rects with an animated gradient | Run 1 | Run 2 |
 |---|---|---|
 | A: today's `Shape.render()` | 6.45 ms | 6.67 ms |
-| B: always `save()` / `restore()` (§19) | 6.95 ms | 6.96 ms |
+| B: always `save()` / `restore()` | 6.95 ms | 6.96 ms |
 | C: B plus `try / finally` | 6.54 ms | 6.82 ms |
 
 - C against B is within noise (C was faster in both runs).
@@ -196,7 +196,7 @@ Then all tests pass, and the docs pages and `examples/` show no new console warn
 
 ## 8. Open Decisions
 
-1. **Order:** Part 2 together with always save / restore (§19), since both rewrite `Shape.render()` (recommended), or Part 2 first with today's conditional `save()`? Part 1 is independent and can go first.
+1. **Order:** Part 2 together with always save / restore, since both rewrite `Shape.render()` (recommended), or Part 2 first with today's conditional `save()`? Part 1 is independent and can go first.
 2. **Warning frequency:** once per distinct message per element (recommended), or once per element for the page's lifetime?
 3. **Invalid stop color:** skip the whole shape and warn (recommended: a typo should be visible), or skip only that stop (needs a `try` per `addColorStop`)?
 4. **Docs:** mention the clamping on the gradient pages, or only in KILOPIXEL.md?
@@ -206,7 +206,7 @@ Then all tests pass, and the docs pages and `examples/` show no new console warn
 ## 9. Steps
 
 1. ✅ (2026-11-05) Part 1: clamp in `createGradient` and `rect.js`; tests "overshooting offset", "`NaN` offset", "negative corner radius". `node build.js`, `tests/index.html`.
-2. Part 2 (with §19 if decided so): `reportError`, `Shape.render`, `Group` / `Layer` / `Variable` evaluation, `InteractionEngine.process`; the remaining tests.
+2. Part 2 (with always save / restore if decided so): `reportError`, `Shape.render`, `Group` / `Layer` / `Variable` evaluation, `InteractionEngine.process`; the remaining tests.
 3. Confirm the benchmark with the pane visible (§4).
 4. KILOPIXEL.md and docs (§6), sizes after the build.
 5. Plan status → ✅, TODO item removed; remove the "non-finite points + gradient" small fix from `design/2026-10-18_polyline_optimization_plan.md` and TODO §22.

@@ -1,6 +1,6 @@
 # Attribute Defaults & Canvas State Isolation
 
-- **Status**: ✅ **Implemented** (Rule A, 2026-10-17; 20/20 unit tests in `scratch/rule_a/unit.html`; regression: 76 docs / examples pages, 3,682 elements, identical static values old vs. new bundle, no new console errors). Always save / restore was split off into `design/2026-10-17_always_save_restore_plan.md`.
+- **Status**: ✅ **Implemented** (Rule A, 2026-10-17; 20/20 unit tests in `scratch/rule_a/unit.html`; regression: 76 docs / examples pages, 3,682 elements, identical static values old vs. new bundle, no new console errors). Always save / restore was split off into `design/archive/2026-10-17_always_save_restore_plan.md`, now part of `design/2026-11-07_safe_shape_render_plan.md`.
 - **Date**: 2026-10-17 (reviewed 2026-10-17: hot loop / GC, edge cases)
 - **Related**: `design/2026-10-15_interactive_state_auto_registration_plan.md` (lazy unregister)
 - **Target Implementation**: `js/engine.js` (`pxl.compileAttribute`), `js/elements/node.js`, `js/elements/shape.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/variable.js`, `js/elements/stage.js`, `js/elements/shapes/*.js`
@@ -165,7 +165,7 @@ Polyline `closed` becomes `closed === true`, like circle and ellipse. All pages 
 
 ## 3. Always `save()` / `restore()` (Split Off)
 
-Wrapping every shape in `save()` / `restore()` (formerly "Option B") is not part of this plan. Rule A is required either way and already prevents the known leaks; always-save is a separate robustness / simplicity decision. Measurements, trade-offs and the next step: `design/2026-10-17_always_save_restore_plan.md` (TODO §19).
+Wrapping every shape in `save()` / `restore()` (formerly "Option B") is not part of this plan. Rule A is required either way and already prevents the known leaks; always-save is a separate robustness / simplicity decision. Measurements, trade-offs and the next step: `design/archive/2026-10-17_always_save_restore_plan.md`, built as part of `design/2026-11-07_safe_shape_render_plan.md`.
 
 ---
 

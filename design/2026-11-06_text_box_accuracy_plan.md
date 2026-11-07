@@ -297,7 +297,7 @@ Both end with `layer.invalidate()`, which exists, and a full redraw: besides the
 - If the user sets only one dimension, or uses `contain` / `cover`, the box isn't known until the image arrives.
 - The same `src` on several shapes: one shared image; each shape invalidates its own layer.
 - Natural size through `ref.*`: shapes in other layers then depend on the image, so invalidating one layer isn't enough. This is the one point that needs more thought.
-- Failed loads: connect to `design/2026-11-05_draw_errors_plan.md` if that plan fits.
+- Failed loads: connect to `design/2026-11-07_safe_shape_render_plan.md` (`reportError()`) if that plan fits.
 
 ---
 

@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (2026-10-30, no code changes yet)
 - **Date**: 2026-10-30
-- **Related**: `design/2026-10-29_tolocal_decomposition_plan.md` (§7 "Later idea", the clone rule this replaces for exact copies), `design/2026-10-25_refs_across_spaces_note.md` (hub for refs across spaces; §4 anchors), `design/2026-10-26_tolocal_fix_plan.md` (reactivity walk), `design/2026-10-17_always_save_restore_plan.md` (same render path, §10)
+- **Related**: `design/2026-10-29_tolocal_decomposition_plan.md` (§7 "Later idea", the clone rule this replaces for exact copies), `design/2026-10-25_refs_across_spaces_note.md` (hub for refs across spaces; §4 anchors), `design/2026-10-26_tolocal_fix_plan.md` (reactivity walk), `design/2026-11-07_safe_shape_render_plan.md` (same render path, §10)
 - **Target Implementation**: `js/elements/node.js` (`getParentMatrix`, `getGlobalMatrix`, space resolution), `js/graphics.js` (`applyTransformState`), `js/matrix.js` (`pxl.toLocal` uses the parent matrix), `js/elements/shape.js` and `group.js` (attribute, state check), `js/engine.js` (spatial key, reactivity); hit testing in `js/interaction.js` needs no change (§3.2)
 - **Demo**: `examples/test53.html` (the corner helpers become one attribute each)
 
@@ -227,7 +227,7 @@ No change in the hot path for pages that don't use `space`.
 ## 10. Steps
 
 1. Agree on this plan and the open decisions (§9).
-   - **Implementation order:** implement `design/2026-10-17_always_save_restore_plan.md` (decided, TODO §19) first if possible. It removes the `hasStateChanges` check from `Shape.render()`, so `space` needs no new term there; the shape is always inside `save()` / `restore()`, and `space` only adds its extra transform in `applyTransformState` (§3.2). If `space` comes first, add `spaceNode !== null` to `hasStateChanges` in `shape.js` and `group.js`; always save / restore later removes it again from `shape.js`.
+   - **Implementation order:** implement always save / restore (`design/2026-11-07_safe_shape_render_plan.md`, TODO §37) first if possible. It removes the `hasStateChanges` check from `Shape.render()`, so `space` needs no new term there; the shape is always inside `save()` / `restore()`, and `space` only adds its extra transform in `applyTransformState` (§3.2). If `space` comes first, add `spaceNode !== null` to `hasStateChanges` in `shape.js` and `group.js`; always save / restore later removes it again from `shape.js`.
 2. Implement §3 (node.js, graphics.js, matrix.js, shape.js / group.js, engine.js), `node build.js`, update the `pxl.min.js` size if it changes.
 3. Add the tests (§7); all pass, console clean.
 4. Simplify the test53 corner helpers; update the docs (§8).

@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (2026-10-30, no code changes yet)
 - **Date**: 2026-10-30
-- **Related**: `scratch/frameworks/` (React 19 and Vue 3.5 prototypes, `FINDINGS.md`; local only), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-10-17_always_save_restore_plan.md`, `design/2026-10-30_space_attribute_plan.md`
+- **Related**: `scratch/frameworks/` (React 19 and Vue 3.5 prototypes, `FINDINGS.md`; local only), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
 
 ---
@@ -357,7 +357,7 @@ Every engine step: `node build.js`, update the `pxl.min.js` size, `tests/index.h
 
 ## 15. Interplay with Other Plans
 
-- **Always save / restore** (`2026-10-17_always_save_restore_plan.md`, decided): independent; both touch `Shape.render()` only lightly (W1 doesn't change rendering).
+- **Always save / restore** (`2026-11-07_safe_shape_render_plan.md`, TODO §37): independent; both touch `Shape.render()` only lightly (W1 doesn't change rendering).
 - **`space` attribute** (`2026-10-30_space_attribute_plan.md`): hit testing of space elements is unchanged; DOM events work the same for them. W3 accessors would include `space` (its value is a ref object, set as a property it could be the element itself: `el.space = otherEl` is a natural framework API; note for that plan).
 - **Two-phase frame** (TODO §29): event dispatch at the end of `process()` fits both the current single pass and a later update / draw split.
 - **Interactive state auto-registration** (`2026-10-15_…_plan.md`): extended by §4.2 (listener counts, `interactive`); `releaseIfUnused()` must also check listener counts and `interactive`.

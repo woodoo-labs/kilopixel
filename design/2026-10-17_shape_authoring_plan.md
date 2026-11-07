@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (no code changes yet)
 - **Date**: 2026-10-17
-- **Related**: `design/2026-10-17_bundle_scope_plan.md` (`pxl.Shape`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, introduced `static defaults`), `design/2026-10-17_always_save_restore_plan.md` (state isolation for foreign code), `.agents/TODO.md` §20
+- **Related**: `design/2026-10-17_bundle_scope_plan.md` (`pxl.Shape`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, introduced `static defaults`), `design/2026-11-07_safe_shape_render_plan.md` (state isolation and error handling for foreign code), `.agents/TODO.md` §20
 - **Target Implementation**: `js/elements/node.js`, `js/elements/shape.js`, `js/elements/shapes/*.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/interaction.js`
 - **Prototype** (local only, scratch is git-ignored): `scratch/custom_shape/star.js`, `scratch/custom_shape/test.html`
 

@@ -3,7 +3,7 @@
 **Date:** 2026-10-11 (revised 2026-11-05)  
 **Status**: ✅ **Implemented** (2026-11-05, revised approach of §3–4; 6 tests in `tests/index.html` fail on the old build and pass on the new one; 160 docs canvases pixel-identical before and after)  
 **Target Component:** `js/elements/shape.js` (`Shape.prototype.createGradient`, `this._gradCache`)  
-**Related:** `design/2026-11-05_draw_errors_plan.md` §3.1 (stop offset clamping in the same function; built together, §7)  
+**Related:** `design/archive/2026-11-05_draw_errors_plan.md` §3.1 (stop offset clamping in the same function; built together, §7)  
 **Prototype** (local, scratch is git-ignored): `scratch/gradient_stops/stroke_gradient_zero.html` (9 cases, before / after)
 
 ---
@@ -236,7 +236,7 @@ All differences are within noise (path A runs identical code in both versions). 
 
 ## 7. Implementation & Verification
 
-Built together with `design/2026-11-05_draw_errors_plan.md` §3.1 (stop offset and corner radius clamping): same function, one build, one test round.
+Built together with `design/archive/2026-11-05_draw_errors_plan.md` §3.1 (stop offset and corner radius clamping): same function, one build, one test round.
 
 1. **Code:** `js/elements/shape.js` (§4.1–4.4, plus the offset clamp from the draw-errors plan), `js/elements/shapes/rect.js` (corner radius clamp).
 2. **Build:** `node build.js`; update the `~NNKB` sizes in `docs/installation.html` and the `.agents/KILOPIXEL.md` header.
