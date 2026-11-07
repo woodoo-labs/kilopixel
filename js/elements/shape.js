@@ -25,10 +25,10 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     // Reused by getBoundingBox() every frame
     this.boundingBox = { left: 0, right: 0, top: 0, bottom: 0 };
 
-    // Gradient cache per slot: [0] = fill, [1] = stroke (createGradient)
+    // Gradient cache per slot: [0] = fill, [1] = stroke (createGradient). error: kept when building failed
     this._gradCache = [
-      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null },
-      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null }
+      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null, error: null },
+      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null, error: null }
     ];
 
     // Scaled dash pattern, cached per (linedash, u) by applyLineDash()
@@ -93,26 +93,21 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     this.stage?.interaction.unregisterElement(this);
   }
 
+  // Every shape draws in its own canvas state: whatever it changes or throws, the next shape starts clean.
+  // A hidden shape still evaluates, so ref.* to it stays current; it only skips the save and the drawing.
   render(ctx, u, t) {
-    this.evaluateAnimations(t);
-
-    if (this.attributeValues.hidden) return;
-
-    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy, alpha, blend, mask, filter, shadowcolor } = this.attributeValues;
-    const hasStateChanges = x || y || dx || dy || rotate ||
-                            zoom !== 1 || scalex !== 1 || scaley !== 1 ||
-                            skewx || skewy ||
-                            alpha !== 1 || blend !== 'source-over' || mask !== 'none' || filter !== 'none' ||
-                            shadowcolor;
-
-    // save / restore only when the shape changes the context state
-    if (hasStateChanges) {
+    try {
+      this.evaluateAnimations(t);
+      if (this.attributeValues.hidden) return;
       ctx.save();
-      pxl.applyContextState(ctx, u, this.attributeValues, this);
-      this.draw(ctx, u, t);
-      ctx.restore();
-    } else {
-      this.draw(ctx, u, t);
+      try {
+        pxl.applyContextState(ctx, u, this.attributeValues, this);
+        this.draw(ctx, u, t);
+      } finally {
+        ctx.restore();
+      }
+    } catch (error) {
+      this.reportError(error);
     }
   }
 
@@ -139,9 +134,32 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     if (c.config === styleValue && c.u === u &&
         c.bl === box.left && c.bt === box.top &&
         c.br === box.right && c.bb === box.bottom && c.sw === sw) {
+      if (c.error) throw c.error;
       return c.grad;
     }
 
+    c.config = styleValue;
+    c.u = u;
+    c.bl = box.left;
+    c.bt = box.top;
+    c.br = box.right;
+    c.bb = box.bottom;
+    c.sw = sw;
+    c.grad = null;
+    c.error = null;
+    try {
+      c.grad = this.buildGradient(ctx, u, styleValue, slot, box, sw);
+    } catch (error) {
+      // A gradient that fails with these values (a typo in a stop color) fails again: keep the error, so later
+      // frames throw the same object instead of building a new one (render() catches it, reportError() stays quiet)
+      c.error = error;
+      throw error;
+    }
+    return c.grad;
+  }
+
+  // The canvas gradient for a descriptor in the shape's box; createGradient() caches it
+  buildGradient(ctx, u, styleValue, slot, box, sw) {
     // A stroke is at least strokewidth thick: a line's box has a zero side, and a gradient across it would
     // have zero length and paint nothing. For the stroke, each side spans at least strokewidth around the center.
     // (design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md)
@@ -200,15 +218,6 @@ pxl.Shape = class Shape extends pxl.PxlNode {
       const offset = stops[i].offset;
       grad.addColorStop(offset > 0 ? (offset < 1 ? offset : 1) : 0, stops[i].color);
     }
-
-    c.config = styleValue;
-    c.u = u;
-    c.bl = box.left;
-    c.bt = box.top;
-    c.br = box.right;
-    c.bb = box.bottom;
-    c.sw = sw;
-    c.grad = grad;
     return grad;
   }
 
@@ -333,6 +342,8 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   // Draws both arrowheads in one path. Expects stroke state to be applied already.
+  // Always the last call of a shape's draw(): it changes the miter limit, the dash and fillStyle without
+  // resetting them, and render() restores the state afterwards.
   drawArrows(ctx, u, recA, recB) {
     const isLine = this.attributeValues.arrowstyle === 'line';
 
@@ -342,19 +353,15 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
     if (isLine) {
       // A 60° miter needs a limit of 2 (1 / sin 30°); a lower path miterlimit must not blunt the tip.
-      // 4 leaves headroom for float rounding. Not restored: stroke state is always set before stroking.
+      // 4 leaves headroom for float rounding.
       if (ctx.miterLimit < 4) ctx.miterLimit = 4;
 
       // Chevrons are always solid
-      const hasDash = pxl.hasLineDash(this.attributeValues.linedash);
-      if (hasDash) ctx.setLineDash(pxl._emptyDash);
+      if (pxl.hasLineDash(this.attributeValues.linedash)) ctx.setLineDash(pxl._emptyDash);
       ctx.stroke();
-      if (hasDash) this.applyLineDash(ctx, u);
     } else {
-      const originalFill = ctx.fillStyle;
       ctx.fillStyle = ctx.strokeStyle;
       ctx.fill();
-      ctx.fillStyle = originalFill;
     }
   }
 

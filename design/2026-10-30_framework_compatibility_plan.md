@@ -357,7 +357,7 @@ Every engine step: `node build.js`, update the `pxl.min.js` size, `tests/index.h
 
 ## 15. Interplay with Other Plans
 
-- **Always save / restore** (`2026-11-07_safe_shape_render_plan.md`, TODO §37): independent; both touch `Shape.render()` only lightly (W1 doesn't change rendering).
+- **Always save / restore** (`2026-11-07_safe_shape_render_plan.md`, built 2026-11-07): independent; both touch `Shape.render()` only lightly (W1 doesn't change rendering).
 - **`space` attribute** (`2026-10-30_space_attribute_plan.md`): hit testing of space elements is unchanged; DOM events work the same for them. W3 accessors would include `space` (its value is a ref object, set as a property it could be the element itself: `el.space = otherEl` is a natural framework API; note for that plan).
 - **Two-phase frame** (TODO §29): event dispatch at the end of `process()` fits both the current single pass and a later update / draw split.
 - **Interactive state auto-registration** (`2026-10-15_…_plan.md`): extended by §4.2 (listener counts, `interactive`); `releaseIfUnused()` must also check listener counts and `interactive`.

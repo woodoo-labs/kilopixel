@@ -1,6 +1,6 @@
 # Safe Shape Render: Always `save()` / `restore()` and Draw Errors
 
-- **Status**: 🟢 **Decided** (2026-11-07, all decisions in §7; not built yet. Merges two plans; the always save / restore part was decided on 2026-10-17)
+- **Status**: ✅ **Implemented** (2026-11-07; 12 engine tests, 54/54 pass; 79 docs and example pages pixel-identical with the previous engine, except 3 layers that also differ between two runs of the same engine; results in §4.6)
 - **Date**: 2026-11-07
 - **Supersedes**: `design/archive/2026-10-17_always_save_restore_plan.md` (decided, not built) and Part 2 of `design/archive/2026-11-05_draw_errors_plan.md` (its Part 1, the clamping of stop offsets and corner radii, was built on 2026-11-05 and stays)
 - **Related**: `design/2026-11-01_isolated_shape_compositing_plan.md` (builds on this one: same `Shape.render()`, order in its §9), `design/2026-10-17_shape_authoring_plan.md` (custom shapes need this before a docs page), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, implemented), `design/2026-10-18_polyline_optimization_plan.md` (small fix "non-finite points + gradient", covered here)
@@ -343,6 +343,24 @@ Reader updates per animation frame on real pages, counted with a wrapper around 
 - The cap of §3.2 runs only inside `reportError()`, so it costs nothing without errors.
 - Size, estimated: about +15 engine lines and +35 test lines for §3.2's cap and §3.8.
 
+### 4.6 After the Build (2026-11-07)
+
+`scratch/safe_render/engine_bench.html`: the engine of the previous commit against the new build, each in its own iframe, page visible, 60 frames per variant, 7 interleaved rounds, median, three runs. A first run with the page hidden (throttled) gave about twice the cost on bare lines and is not counted.
+
+| Per frame | Previous engine | New engine | Difference (median) |
+|---|---|---|---|
+| 2,300 rotated lines and gradient rects | 6.94 to 7.02 ms | 6.96 to 7.24 ms | within noise |
+| 2,000 bare animated lines (worst case) | 2.28 to 3.21 ms | 3.81 to 5.59 ms | +1.6 ms, as in §4.1 |
+| 2,000 bare lines, a quarter hidden | 2.03 to 2.32 ms | 3.11 to 3.54 ms | +1.2 ms: hidden shapes skip the save |
+| 1,000 texts without their own transform | 4.23 to 4.33 ms | 6.29 to 6.48 ms | +2.0 ms |
+| 2,000 bare lines + 100 static typo rects | (breaks the frame) | 4.45 to 4.66 ms | close to bare lines alone: the kept error works |
+
+- **Texts** cost about 2 µs each in the build, about twice the 1 µs of the prototype (§4.4). Only texts without their own `x` / `y` pay it (texts with a transform saved before already), and 1,000 of them still take 6.3 ms. Accepted.
+- **Regression** (`scratch/safe_render/regress.html`): 79 pages (23 docs, 56 examples), 306 layers, 303 pixel-identical; no new warnings, errors or exceptions. The other 3 also differ between two runs of the same engine: `docs/mapping.html` sec7 (a `toLocal` ring on an animated planet), `docs/text.html` sec9 (scrolling text with `loop()`), `examples/test50.html` (a live FPS readout).
+- **Tests on the previous engine:** 11 of the 12 new tests fail there; the hidden-shape test passes (the previous engine didn't save for hidden shapes either) and guards the behavior.
+- **Size:** minified 54.29 KB (was 53.74 KB), gzipped 16.16 KB (was 15.97 KB); the rounded sizes in the docs stay ~54KB and ~16KB.
+- **Implementation detail:** the gradient building moved into its own method, `buildGradient()`, so `createGradient()` only handles the cache and the kept error and the build code didn't need a new indentation level.
+
 ---
 
 ## 5. Behavior and Edge Cases
@@ -412,6 +430,8 @@ A hidden shape evaluates before it checks `hidden`; a hidden group or layer skip
 ## 8. Tests (`tests/index.html`)
 
 Each with a short comment linking this plan. Pixel checks read the layer canvas, as the existing gradient tests do.
+
+Built as 12 tests ("safe render: …"): #1 leak; #2–#4 in one probe test (a test shape records the canvas state it starts with after arrowheads, a dashed chevron and a grid); #5, #6 and #13 in one typo test; #7 and #8 in one group test; #9, #10, #11, #14, #15, #16, #17 and #18 each on their own; #12 is the regression run of §4.6.
 
 | # | Case | Expected |
 |---|---|---|

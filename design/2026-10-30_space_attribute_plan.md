@@ -227,7 +227,7 @@ No change in the hot path for pages that don't use `space`.
 ## 10. Steps
 
 1. Agree on this plan and the open decisions (§9).
-   - **Implementation order:** implement always save / restore (`design/2026-11-07_safe_shape_render_plan.md`, TODO §37) first if possible. It removes the `hasStateChanges` check from `Shape.render()`, so `space` needs no new term there; the shape is always inside `save()` / `restore()`, and `space` only adds its extra transform in `applyTransformState` (§3.2). If `space` comes first, add `spaceNode !== null` to `hasStateChanges` in `shape.js` and `group.js`; always save / restore later removes it again from `shape.js`.
+   - **Implementation order:** implement always save / restore (`design/2026-11-07_safe_shape_render_plan.md`, built 2026-11-07) first if possible. It removes the `hasStateChanges` check from `Shape.render()`, so `space` needs no new term there; the shape is always inside `save()` / `restore()`, and `space` only adds its extra transform in `applyTransformState` (§3.2). If `space` comes first, add `spaceNode !== null` to `hasStateChanges` in `shape.js` and `group.js`; always save / restore later removes it again from `shape.js`.
 2. Implement §3 (node.js, graphics.js, matrix.js, shape.js / group.js, engine.js), `node build.js`, update the `pxl.min.js` size if it changes.
 3. Add the tests (§7); all pass, console clean.
 4. Simplify the test53 corner helpers; update the docs (§8).

@@ -87,7 +87,14 @@ pxl.Layer = class Layer extends pxl.PxlNode {
       this._isOrderDirty = false;
     }
 
-    this.evaluateAnimations(t);
+    // A failing expression skips the layer with its children for this frame. It keeps its previous pixels,
+    // because clearRect comes later; reportError() keeps an animated layer asking for frames.
+    try {
+      this.evaluateAnimations(t);
+    } catch (error) {
+      this.reportError(error);
+      return;
+    }
 
     const { alpha, blend, filter, hidden } = this.attributeValues;
 

@@ -173,10 +173,16 @@ pxl.InteractionEngine = class InteractionEngine {
 
         pxl._hitResult = false;
         ctx.beginPath();
-        // Shapes that can't express their hit area as a path (e.g. text) provide hitTest()
-        if (el.hitTest) el.hitTest(ctx, this.stage.unit);
-        else el.draw(ctx, this.stage.unit, 0);
-        ctx.restore();
+        // Shapes that can't express their hit area as a path (e.g. text) provide hitTest().
+        // A shape that throws here is not hit; the dummy context is restored either way, so later tests aren't offset.
+        try {
+          if (el.hitTest) el.hitTest(ctx, this.stage.unit);
+          else el.draw(ctx, this.stage.unit, 0);
+        } catch (error) {
+          el.reportError(error);
+        } finally {
+          ctx.restore();
+        }
 
         if (pxl._hitResult) {
           hitEl = el;

@@ -200,6 +200,12 @@
           </pxl-layer>
         </pxl-stage>
 
+        <!-- Safe shape render: each test adds its elements and removes them (design/2026-11-07_safe_shape_render_plan.md) -->
+        <pxl-stage id="srStage" ratio="5 / 3" alwaysrender>
+          <pxl-layer id="srLayerA"></pxl-layer>
+          <pxl-layer id="srLayerB"></pxl-layer>
+        </pxl-stage>
+
       </div>
     </div>
   </main>
@@ -691,6 +697,240 @@
       document.fonts.dispatchEvent(new Event('loadingdone'));
       drawTextStage();
       if (text._lines.length !== linesBefore || text.boundingBox.right !== rightBefore) throw new Error('did not return to the first layout');
+    });
+
+    // ===================================================================
+    // Safe shape render: always save / restore, draw errors (design/2026-11-07_safe_shape_render_plan.md)
+    // ===================================================================
+
+    // Test shapes, the way a custom shape would be written
+    customElements.define('test-leak-shape', class extends pxl.Shape {
+      draw(ctx) { ctx.globalAlpha = 0.2; }   // changes state and never resets it
+    });
+    customElements.define('test-probe-shape', class extends pxl.Shape {
+      draw(ctx) {
+        this.seen = { alpha: ctx.globalAlpha, miter: ctx.miterLimit, lineWidth: ctx.lineWidth, fill: ctx.fillStyle, dash: ctx.getLineDash().length };
+      }
+    });
+    customElements.define('test-throw-shape', class extends pxl.Shape {
+      draw() { throw new Error('test shape failed'); }
+    });
+    customElements.define('test-noisy-shape', class extends pxl.Shape {
+      draw() { this.calls = (this.calls || 0) + 1; throw new RangeError(`value ${this.calls} is invalid`); }
+    });
+
+    // Renders the test stage at time t; resize() first, so it also works in a background tab
+    function srRender(t) {
+      const stage = el('srStage');
+      if (stage.unit === 0) stage.resize();
+      stage.querySelectorAll('pxl-layer').forEach((layer) => { layer.isDirty = true; });
+      stage.render(t);
+    }
+    const srAdd = (layerId, html) => el(layerId).insertAdjacentHTML('beforeend', html);
+    function srClear() {
+      for (const id of ['srLayerA', 'srLayerB']) el(id).querySelectorAll(':scope > :not(canvas)').forEach((n) => n.remove());
+      document.querySelectorAll('#srStage > pxl-layer:not(#srLayerA):not(#srLayerB)').forEach((n) => n.remove());
+    }
+    // console.warn calls while fn runs
+    function captureWarnings(fn) {
+      const original = console.warn, out = [];
+      console.warn = (...args) => out.push(args.join(' '));
+      try { fn(); } finally { console.warn = original; }
+      return out;
+    }
+    const layerTransform = (id) => el(id)._ctx.getTransform().toString();
+
+    test('safe render: a custom shape that changes globalAlpha affects only itself, not shapes before or after it', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-rect x="100" y="100" w="80" h="80" fill="#ff0000"></pxl-rect>
+        <test-leak-shape></test-leak-shape>
+        <pxl-rect x="300" y="100" w="80" h="80" fill="#ff0000"></pxl-rect>`);
+      srRender(1);
+      srRender(2);   // the second frame shows leaks into shapes drawn before the careless one
+      for (const x of [100, 300]) {
+        const p = pixelAt('srLayerA', x, 100);
+        if (p[3] !== 255) throw new Error(`rect at x = ${x} has alpha ${p[3]}`);
+      }
+      srClear();
+    });
+
+    test('safe render: after arrowheads, a dashed chevron and a grid, the next shape starts with a clean canvas state', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-line x1="50" y1="300" x2="200" y2="300" stroke="#0000ff" strokewidth="4" arrowend="20" arrowstyle="line" miterlimit="1" linedash="[5, 5]"></pxl-line>
+        <test-probe-shape id="srProbe1"></test-probe-shape>
+        <pxl-line x1="50" y1="400" x2="200" y2="400" stroke="#0000ff" strokewidth="4" arrowend="20"></pxl-line>
+        <test-probe-shape id="srProbe2"></test-probe-shape>
+        <pxl-grid step="50" major="2" stroke="#cccccc" strokewidth="1"></pxl-grid>
+        <test-probe-shape id="srProbe3"></test-probe-shape>`);
+      srRender(1);
+      const clean = { alpha: 1, miter: 10, lineWidth: 1, fill: '#000000', dash: 0 };
+      for (const id of ['srProbe1', 'srProbe2', 'srProbe3']) {
+        const seen = el(id).seen;
+        for (const key of Object.keys(clean)) {
+          if (seen[key] !== clean[key]) throw new Error(`${id}: ${key} is ${seen[key]}, expected ${clean[key]}`);
+        }
+      }
+      srClear();
+    });
+
+    test('safe render: a typo in a stop color skips only that shape, warns once and throws the kept error again', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-rect id="srTypo" x="100" y="100" w="60" h="60" fill="linear(0, ['red', 'blu'])"></pxl-rect>
+        <pxl-rect x="300" y="100" w="60" h="60" fill="#00ff00"></pxl-rect>`);
+      srAdd('srLayerB', `<pxl-rect x="500" y="100" w="60" h="60" fill="#0000ff"></pxl-rect>`);
+      const typo = el('srTypo'), seen = [];
+      typo.reportError = function(error) { seen.push(error); return pxl.PxlNode.prototype.reportError.call(this, error); };
+      const before = layerTransform('srLayerA');
+      const warnings = captureWarnings(() => { for (let i = 0; i < 10; i++) srRender(1 + i * 0.1); });
+      delete typo.reportError;
+      if (warnings.length !== 1 || !warnings[0].includes('id="srTypo"') || !warnings[0].includes('SyntaxError')) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      if (seen.length < 10 || seen.some((e) => e !== seen[0])) throw new Error(`${seen.length} errors, not all the same object`);
+      if (layerTransform('srLayerA') !== before) throw new Error('the layer transform changed');
+      const sibling = pixelAt('srLayerA', 300, 100), later = pixelAt('srLayerB', 500, 100);
+      if (sibling[1] !== 255 || later[2] !== 255) throw new Error(`sibling ${rgba(sibling)}, later layer ${rgba(later)}`);
+      srClear();
+    });
+
+    test('safe render: a failing expression and a throwing custom shape in a group leave the transforms unchanged', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-group x="100" y="50">
+          <pxl-circle id="srBroken" x="t * missingFunction()" r="10" fill="#ff0000"></pxl-circle>
+          <test-throw-shape id="srThrowing"></test-throw-shape>
+          <pxl-rect x="200" y="100" w="40" h="40" fill="#00ff00"></pxl-rect>
+        </pxl-group>`);
+      const before = layerTransform('srLayerA');
+      const warnings = captureWarnings(() => srRender(1));
+      if (layerTransform('srLayerA') !== before) throw new Error('the layer transform changed');
+      for (const id of ['srBroken', 'srThrowing']) {
+        if (!warnings.some((w) => w.includes(`id="${id}"`))) throw new Error(`no warning for ${id}: ${JSON.stringify(warnings)}`);
+      }
+      const sibling = pixelAt('srLayerA', 300, 150);
+      if (sibling[1] !== 255) throw new Error(`the sibling in the group is ${rgba(sibling)}`);
+      srClear();
+    });
+
+    test('safe render: an animated shape keeps its layer running while it fails, and draws once the value is valid', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-circle id="srLate" x="t < 2 ? missingFunction() : 300" y="300" r="20" fill="#0000ff"></pxl-circle>`);
+      captureWarnings(() => srRender(1));
+      if (!el('srLayerA').isDirty) throw new Error('the layer stopped asking for frames');
+      srRender(3);
+      if (el('srLate').attributeValues.x !== 300) throw new Error(`x is ${el('srLate').attributeValues.x}`);
+      const p = pixelAt('srLayerA', 300, 300);
+      if (p[2] !== 255) throw new Error(`the circle is ${rgba(p)}`);
+      srClear();
+    });
+
+    test('safe render: a layer whose own expression fails keeps its pixels; other layers draw', () => {
+      srClear();
+      el('srStage').insertAdjacentHTML('beforeend', `<pxl-layer id="srBadLayer" rotate="0"><pxl-rect x="700" y="300" w="60" h="60" fill="#00ff00"></pxl-rect></pxl-layer>`);
+      srAdd('srLayerB', `<pxl-rect x="500" y="100" w="60" h="60" fill="#0000ff"></pxl-rect>`);
+      srRender(1);
+      el('srBadLayer').setAttribute('rotate', 't * missingFunction()');
+      const warnings = captureWarnings(() => { srRender(2); srRender(3); });
+      if (warnings.length !== 1 || !warnings[0].includes('id="srBadLayer"')) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      const kept = pixelAt('srBadLayer', 700, 300), other = pixelAt('srLayerB', 500, 100);
+      if (kept[1] !== 255 || other[2] !== 255) throw new Error(`failing layer ${rgba(kept)}, other layer ${rgba(other)}`);
+      srClear();
+    });
+
+    test('safe render: hit testing a shape that throws leaves the hit-test context unshifted', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-rect id="srHitTypo" x="100" y="100" w="60" h="60" fill="linear(0, ['red', 'blu'])" onclick="0"></pxl-rect>
+        <pxl-rect id="srHitOk" x="300" y="100" w="60" h="60" fill="#00ff00" onclick="0"></pxl-rect>`);
+      const stage = el('srStage'), values = stage.attributeValues;
+      captureWarnings(() => {
+        srRender(1);
+        values.isHovered = true;
+        values.mouseX = 100; values.mouseY = 100;
+        stage.interaction.process();
+      });
+      const identity = new DOMMatrix().toString();
+      if (pxl.dummyCtx.getTransform().toString() !== identity) throw new Error(`hit-test context left at ${pxl.dummyCtx.getTransform()}`);
+      values.mouseX = 300;
+      stage.interaction.process();
+      const hovered = el('srHitOk').attributeValues.isHovered;
+      values.isHovered = false;
+      stage.interaction.process();
+      if (!hovered) throw new Error('the working shape was not hovered');
+      srClear();
+    });
+
+    test('safe render: a gradient on a NaN box draws once the box is valid (the kept error doesn\'t stick)', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-rect id="srNaNBox" x="100" y="400" w="NaN" h="60" fill="linear(0, ['#ff0000', '#0000ff'])"></pxl-rect>`);
+      const warnings = captureWarnings(() => srRender(1));
+      if (warnings.length !== 1) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      el('srNaNBox').setAttribute('w', '60');
+      srRender(2);
+      const p = pixelAt('srLayerA', 100, 400);
+      if (p[3] === 0) throw new Error('the rect is not drawn');
+      srClear();
+    });
+
+    test('safe render: a hidden shape is not saved but still evaluated, so ref.* to it stays current', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-circle id="srHidden" hidden="true" x="t * 100" r="5"></pxl-circle>`);
+      srAdd('srLayerB', `<pxl-text id="srHiddenReader" text="ref.srHidden.x"></pxl-text>`);
+      const ctx = el('srLayerA')._ctx, save = ctx.save;
+      let saves = 0;
+      ctx.save = function() { saves++; return save.call(this); };
+      try { srRender(2); } finally { delete ctx.save; }
+      if (saves !== 0) throw new Error(`${saves} save() calls for a hidden shape`);
+      if (el('srHiddenReader').attributeValues.text !== 200) throw new Error(`reader shows ${el('srHiddenReader').attributeValues.text}`);
+      srClear();
+    });
+
+    test('safe render: a reader that fails during a broadcast is blamed itself; the variable and other readers update', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-var id="srClock" value="t"></pxl-var>
+        <pxl-circle id="srBadReader" x="ref.srClock.value > 0.5 ? missingFunction() : 100" r="5"></pxl-circle>
+        <pxl-circle id="srGoodReader" x="ref.srClock.value * 10" r="5"></pxl-circle>`);
+      const warnings = captureWarnings(() => srRender(1));
+      if (el('srClock').attributeValues.value !== 1) throw new Error(`the variable is ${el('srClock').attributeValues.value}`);
+      if (el('srGoodReader').attributeValues.x !== 10) throw new Error(`the other reader is at ${el('srGoodReader').attributeValues.x}`);
+      if (warnings.some((w) => w.includes('id="srClock"')) || !warnings.some((w) => w.includes('id="srBadReader"'))) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      srClear();
+    });
+
+    test('safe render: a toLocal reader that fails when its group moves is blamed itself; the group draws', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-circle id="srTlTarget" x="40" y="40" r="5"></pxl-circle>
+        <pxl-group id="srTlGroup" x="t * 100">
+          <pxl-circle id="srTlReader" x="toLocal(ref.srTlTarget, 'x') < 0 ? missingFunction() : 0" r="5"></pxl-circle>
+          <pxl-rect x="0" y="300" w="40" h="40" fill="#00ff00"></pxl-rect>
+        </pxl-group>`);
+      const warnings = captureWarnings(() => srRender(1));
+      if (warnings.some((w) => w.includes('id="srTlGroup"')) || !warnings.some((w) => w.includes('id="srTlReader"'))) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      const sibling = pixelAt('srLayerA', 100, 300);
+      if (sibling[1] !== 255) throw new Error(`the group's rect is ${rgba(sibling)}`);
+      srClear();
+    });
+
+    test('safe render: an element warns at most 3 times, the third says that more are hidden', () => {
+      srClear();
+      srAdd('srLayerA', `<test-noisy-shape id="srNoisy"></test-noisy-shape>`);
+      const warnings = captureWarnings(() => { for (let i = 0; i < 6; i++) srRender(1 + i); });
+      if (warnings.length !== 3 || !warnings[2].includes('further errors')) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      srClear();
+    });
+
+    test('polyline: an invalid coordinate draws nothing (no dropped vertex, no gradient error), then draws once valid', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-polyline id="srPolyNaN" points="100, 300; ref.srPolyX.value, 300; 300, 400" stroke="linear(0, ['#ff0000', '#0000ff'])" strokewidth="10"></pxl-polyline>
+        <pxl-polyline id="srPolyAllNaN" points="ref.srPolyX.value, 100; ref.srPolyX.value, 200" stroke="linear(0, ['#ff0000', '#0000ff'])" strokewidth="10"></pxl-polyline>`);
+      const warnings = captureWarnings(() => srRender(1));
+      if (warnings.length) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      if (pixelAt('srLayerA', 100, 300)[3] !== 0) throw new Error('drawn although one coordinate is undefined');
+      // Hit testing uses draw(): not hittable either
+      const ctx = pxl.dummyCtx;
+      pxl._hitX = 100 * el('srStage').unit; pxl._hitY = 300 * el('srStage').unit; pxl._hitResult = false;
+      ctx.save(); ctx.beginPath(); el('srPolyNaN').draw(ctx, el('srStage').unit, 0); ctx.restore();
+      if (pxl._hitResult) throw new Error('hittable although one coordinate is undefined');
+      srAdd('srLayerB', `<pxl-var id="srPolyX" value="200"></pxl-var>`);
+      srRender(2);
+      if (pixelAt('srLayerA', 150, 300)[3] === 0) throw new Error('not drawn after the coordinate became valid');
+      srClear();
     });
 
     // --- Run all tests in order ---

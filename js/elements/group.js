@@ -31,7 +31,13 @@ pxl.Group = class Group extends pxl.PxlNode {
       this._isOrderDirty = false;
     }
 
-    this.evaluateAnimations(t);
+    // A failing expression skips the group with its children for this frame; nothing is saved yet, so nothing to restore
+    try {
+      this.evaluateAnimations(t);
+    } catch (error) {
+      this.reportError(error);
+      return;
+    }
 
     if (this.attributeValues.hidden) return;
 

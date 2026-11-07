@@ -688,7 +688,7 @@ The framework uses a **dummy canvas context** (`pxl.dummyCtx`) with intercepted 
    - Iterates interactive elements in **reverse DOM order** (front-to-back)
    - Walks the parent chain to build the transform stack
    - Applies the **spatial transforms only** (`pxl.applyTransformState`) to the dummy context — alpha, blend, mask, filter and shadows don't affect `isPointInPath`, so they are skipped
-   - Calls the shape's optional **`hitTest(ctx, u)`** hook if it has one, otherwise its `draw()` method, on the dummy context
+   - Calls the shape's optional **`hitTest(ctx, u)`** hook if it has one, otherwise its `draw()` method, on the dummy context, inside `try / catch / finally`: a shape that throws counts as not hit, reports its error, and the dummy context is always restored
    - The intercepted fill/stroke methods check if the mouse point is inside
    - First hit wins (topmost element)
 
@@ -952,7 +952,7 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `sca
 
 ### Key Methods
 
-**`render(ctx, u, t)`**: Evaluates animations, checks hidden, applies transform pipeline (save/restore only if needed), calls `this.draw(ctx, u, t)`.
+**`render(ctx, u, t)`**: Evaluates animations, stops if hidden (a hidden shape is still evaluated, so `ref.*` to it stays current), then draws inside `ctx.save()` / `ctx.restore()`: `applyContextState()` and `this.draw(ctx, u, t)`. Every shape draws in its own canvas state, so whatever a shape (also a custom one) changes, the next shape starts clean. Errors are caught and reported ([Errors While Rendering](#errors-while-rendering)).
 
 **`applyStyle(ctx, u)`**: After a path is built:
 1. If `fill` is set (not `none`/`transparent`): resolve gradient, `ctx.fill()`
@@ -962,12 +962,12 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `sca
 
 **`applyStrokeState(ctx, u)`**: Sets all stroke-related context state in one place: `strokeStyle` (gradient-resolved via slot `1`), `lineWidth = strokewidth * u`, `lineCap`, `lineJoin`, `miterLimit`, and line dash via `this.applyLineDash(ctx, u)`. Used by `applyStyle` for path-based shapes and directly by `<pxl-text>` (which cannot use paths because `strokeText()` paints glyphs directly). Convention: stroke state is always **set before stroking** and never reset afterwards — every stroke call site goes through this method, so leaked state from a previous shape is always overwritten.
 
-**`createGradient(ctx, u, styleValue, slotIndex)`**: If the value is a gradient descriptor (has `isGradient: true`), creates a `CanvasGradient` from the shape's bounding box (for the stroke, each side at least `strokewidth`, see [Gradient Area](#gradient-area-stroke-vs-fill)) and clamps stop offsets to 0–1. Uses `_gradCache` dual-slot cache to avoid recreation.
+**`createGradient(ctx, u, styleValue, slotIndex)`**: If the value is a gradient descriptor (has `isGradient: true`), creates a `CanvasGradient` from the shape's bounding box (for the stroke, each side at least `strokewidth`, see [Gradient Area](#gradient-area-stroke-vs-fill)) and clamps stop offsets to 0–1. Uses `_gradCache` dual-slot cache to avoid recreation. The building itself is `buildGradient()`. If it throws (a typo in a stop color, a `NaN` box), the cache keeps the error with the same keys and throws the same object again on later hits, so a repeated error costs about 1 µs instead of a new exception (about 6 µs) and allocates nothing; when an input changes, the gradient is built again.
 
 **Arrowhead methods** (used by Line, Polyline, Circle, Ellipse; see [Arrowhead System](#arrowhead-system)):
 - **`resolveArrow(rec, attrValue, u)`**: Resolves one arrow end (`arrowstart`/`arrowend` value) into `size`, `len`, `tipAdvance` and `inset` (context units), written into the pre-allocated `rec`. Returns `true` if this end has a head.
 - **`aimArrow(rec, px, py, vx, vy)`**: Sets the unit direction from the vector `(vx, vy)` (pointing out of the path) and places the tip at `P + tipAdvance · dir`. Returns the vector's length.
-- **`drawArrows(ctx, u, recStart, recEnd)`**: Draws both heads in one path: one `fill()` (filled, using `strokeStyle`) or one `stroke()` (line chevrons: dashes temporarily off, miter limit raised to at least 4 so the tip stays sharp). Expects stroke state to be applied already.
+- **`drawArrows(ctx, u, recStart, recEnd)`**: Draws both heads in one path: one `fill()` (filled, using `strokeStyle`) or one `stroke()` (line chevrons: dashes off, miter limit raised to at least 4 so the tip stays sharp). Expects stroke state to be applied already. **Always the last call of a shape's `draw()`**: it changes `fillStyle`, the dash and the miter limit without resetting them, and `render()` restores the state afterwards.
 - **`traceArrow(ctx, rec, isLine)`**: Adds one head (triangle or chevron) to the current path.
 
 ### Event Handling
@@ -1209,6 +1209,7 @@ When `smooth` is not false:
 
 - Minimum 4 values (2 points) required
 - Fills `_flatCache` Float32Array with scaled values
+- **Invalid coordinate:** if any coordinate is not a finite number (a `ref` that isn't connected yet, `NaN`, a division by zero), the polyline draws nothing and isn't hittable until all are valid. The canvas would otherwise drop that vertex or bend a smooth curve. Checked in the same loop (`probe += value * 0`), no warning; it also keeps a gradient from being built on a `NaN` box
 - Draws path: simple `lineTo` or smooth `bezierCurveTo` (2-point polylines are always straight)
 - `closed` is strict (`closed === true`, like circle and ellipse): bare or `"true"` closes, `"1"` does not
 - Arrowheads (open polylines only; see [Arrowhead System](#arrowhead-system)): `_flatCache` is never mutated. Straight: the first/last segment is trimmed by `inset` (clamped to the segment length). Smooth: the first/last Bézier segment is split with de Casteljau at the parameter where the curve is `inset` away from the end in a straight line (`trimParameter`, 12 bisection steps), so the curve stays identical, only shorter.
@@ -1445,7 +1446,7 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
    │       ├─ For each child:
    │       │   └─ child.render(ctx, u, t)  ← group or shape
    │       │       ├─ group: evaluateAnimations → recurse children
-   │       │       └─ shape: evaluateAnimations → apply transforms → draw() → applyStyle()
+   │       │       └─ shape: evaluateAnimations → (hidden: stop) → save → applyContextState → draw() → restore
    │       └─ if has transforms: ctx.restore()
    ├─ Record performance: ms = performance.now() - start
    ├─ interaction.process()  ← hit testing and event dispatch
@@ -1465,6 +1466,16 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 - A hidden **group** or **layer** skips its children entirely: their values that follow `t` (also in a `<pxl-var>`) stay frozen while it is hidden. When it is shown again they are correct in the next frame, because expressions depend only on `t`. Readers outside see the frozen value meanwhile.
 - Values that follow other `ref.*` keep updating inside hidden groups and layers, because broadcasts don't go through drawing.
 - Measured 2026-11-07 (`design/2026-11-07_safe_shape_render_plan.md` §5.1). Whether a two-phase frame should evaluate hidden subtrees: TODO §29.
+
+### Errors While Rendering
+
+A canvas call or an expression that throws must not break the frame (`design/2026-11-07_safe_shape_render_plan.md`):
+
+- **Shape:** `render()` catches errors from its evaluation and its drawing. The shape is skipped for that frame, the canvas state is restored (no shifted layer), and the rest of the layer, later layers and hit testing keep working.
+- **Group, layer, variable:** a failing evaluation skips the element (with its children) for that frame. A layer keeps its previous pixels; a variable keeps its previous value.
+- **Readers:** a reader evaluated by a broadcast (`variableChangedCallback`) or by a `toLocal` walk (`broadcastGlobalMatrixChange`) catches its own error. The element that changed isn't blamed or skipped, the other readers still update, and the failing reader keeps its previous values and stays subscribed. This also holds for broadcasts outside frames (`setAttribute()`, pointer events, the performance monitor).
+- **`PxlNode.reportError(error)`** (`node.js`): warns once per distinct message and at most 3 times per element (the third warning says that more are hidden; some browser messages contain the bad value, e.g. a negative `arc()` radius). The same error object again returns early, so a repeated gradient error (kept by `createGradient`) allocates nothing. An animated element keeps invalidating its layer, so an error that depends on `t` recovers on its own.
+- **Not covered:** an expression that fails immediately in `setAttribute()` is reported by the browser as an uncaught error in a custom element reaction (the element keeps its old value); errors in `on*` handlers behave like DOM event handler errors.
 
 ---
 

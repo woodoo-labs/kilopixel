@@ -38,6 +38,11 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this._lastFilterRaw = null;
     this._lastFilterU = 0;
     this._cachedFilterScaled = 'none';
+
+    // Errors already reported by reportError()
+    this._lastError = null;
+    this._lastErrorMessage = null;
+    this._errorCount = 0;
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -91,7 +96,15 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   }
 
   variableChangedCallback(varName) {
-    const result = pxl.evaluateAttributesForVariable(this, varName);
+    let result;
+    try {
+      result = pxl.evaluateAttributesForVariable(this, varName);
+    } catch (error) {
+      // The reader's own error, reported here: the element whose broadcast called this isn't blamed or skipped,
+      // and the other readers of that broadcast still update
+      this.reportError(error);
+      return;
+    }
 
     if ((result & 1) === 0) pxl.unsubscribeFromVariable(varName, this);
     if ((result & 2) !== 0) {
@@ -125,6 +138,26 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     return animatedValuesChanged;
   }
 
+  // --- Errors ---
+
+  // An element that throws while evaluating or drawing is skipped for this frame instead of breaking the frame.
+  // Warns once per distinct message and at most 3 times per element: a message that contains a changing value
+  // (an animated negative radius in a custom shape's arc()) would otherwise warn in every frame.
+  // An animated element keeps asking for frames: evaluateAnimations() does that at its end, which the error may
+  // have skipped, and an error that depends on t can then recover.
+  reportError(error) {
+    if (this.isAnimated) this.parentLayer?.invalidate();
+    // The same error object again (a gradient that failed before): nothing new to report or allocate
+    if (error === this._lastError) return;
+    this._lastError = error;
+    const message = String(error);
+    if (message === this._lastErrorMessage || this._errorCount === 3) return;
+    this._lastErrorMessage = message;
+    this._errorCount++;
+    const more = this._errorCount === 3 ? ' (further errors of this element are not shown)' : '';
+    console.warn(`[pxl] <${this.localName}${this.id ? ` id="${this.id}"` : ''}> skipped: ${message}${more}`);
+  }
+
   // Filter string with the helpers' px values scaled by u (layers: CSS filter, shapes: ctx.filter)
   resolveFilter(filter, u) {
     const filterStr = Array.isArray(filter) ? filter.join(' ') : filter;
@@ -154,7 +187,12 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
         // If re-evaluating moves the child, setLocalMatrixDirty() has already walked its subtree.
         let walked = false;
         if (child.toLocalAttributeKeys.length > 0) {
-          walked = (pxl.evaluateToLocalAttributes(child) & 2) !== 0;
+          try {
+            walked = (pxl.evaluateToLocalAttributes(child) & 2) !== 0;
+          } catch (error) {
+            // The reader's own error: the element that moved isn't blamed, and the walk goes on
+            child.reportError(error);
+          }
         }
 
         // Broadcast the child if someone is explicitly tracking its global matrix

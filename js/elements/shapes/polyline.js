@@ -78,9 +78,14 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     const pts = this._flatCache;
     const len = this._pointCount / 2;
 
+    // A coordinate that isn't a finite number (a ref that isn't connected yet, a division by zero) would make
+    // the canvas drop that vertex, or bend a smooth curve: draw nothing until all coordinates are valid
+    let probe = 0;
     for (let i = 0; i < this._pointCount; i++) {
       pts[i] = this.attributeValues[this._pointKeys[i]] * u;
+      probe += pts[i] * 0;   // 0 for a finite value, NaN for NaN or ±Infinity
     }
+    if (probe !== 0) return;
 
     if (this.attributeValues.mode === 'relative') {
       for (let i = 2; i < this._pointCount; i++) {

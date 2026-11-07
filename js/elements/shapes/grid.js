@@ -61,10 +61,9 @@ pxl.Grid = class Grid extends pxl.Shape {
         ctx.lineTo(endX * u, y * u);
       }
 
-      const originalLineWidth = ctx.lineWidth;
+      // Not reset: the labels below only fill, and render() restores the state
       ctx.lineWidth = (strokewidth * 2) * u;
       ctx.stroke();
-      ctx.lineWidth = originalLineWidth;
     }
 
     // Coordinates at the major intersections, in the fill color (or the stroke color without fill)

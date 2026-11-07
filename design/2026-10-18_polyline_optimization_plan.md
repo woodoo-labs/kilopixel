@@ -28,7 +28,8 @@ All existing docs and examples work. Nothing here blocks the polyline docs page.
 |---|---|---|---|
 | `setAttribute('points', …)` updates `ref.<id>.pN` readers | ✅ | 1 line + key handling | ✅ **done** (2026-10-19) |
 | Arrowhead points right when the first or last two points are identical (§5 #7) | ✅ visual, rare input | ~10 lines | ✅ **done** (2026-10-24, smooth spline plan §5.3) |
-| All X (or all Y) non-finite + gradient → exception in `createGradient` (§5 #5) | ✅ very rare | ~3 lines guard | low: fix when touched |
+| All X (or all Y) non-finite + gradient → exception in `createGradient` (§5 #5) | ✅ very rare | — | ✅ **done** (2026-11-07, `design/2026-11-07_safe_shape_render_plan.md`: the polyline is skipped with one warning, the frame goes on); since the next row it can't happen any more |
+| Non-finite coordinate → polyline not drawn (§5 #4), taken out of phase 2 | ✅ visual (dropped vertex, broken smooth curve) | 4 lines | ✅ **done** (2026-11-07): checked in the existing flattening loop in `draw()`, one test |
 | Phase 1: warnings for typos in `points` (§3) | no, developer experience | ~30 lines | low |
 | Phase 2: point storage (§4) | no | large, touches reactivity | deferred: ≈ 8 µs per frame for 500 points |
 | Phase 3 (§6) | no | large | deferred |
@@ -286,8 +287,8 @@ Behavior spec for phase 1 + 2. "Today" is verified in code or with the test scri
 | 1 | Fewer than 2 points (0 or 1) | nothing drawn, box 0 | same |
 | 2 | `points` removed or bare | works by accident (`"null;"` has no comma) | explicit: no points, `ref.poly.points === ''` |
 | 3 | Malformed string (§2.4) | silent loss or wrong points | §3.1: rejected or point skipped, one warning |
-| 4 | Non-finite coordinate: failed compile, non-numeric string, `ref.x.value` before `x` connects (`undefined`), division by zero | canvas silently drops that vertex; smooth: neighbouring segments vanish | **polyline not drawn and not hittable** until all coordinates are finite; no warning per frame. The `ref` case is transient (fixed when the element connects) |
-| 5 | All X (or all Y) non-finite **and** a gradient fill/stroke | bounding box `±Infinity` → gradient arguments `NaN` → `createLinearGradient` etc. **throw** (WebIDL `double`). The exception leaves `stage.render()`: later shapes in the layer, later layers, hit testing and perf telemetry stop updating | can't happen: `draw()` returns before `applyStyle` |
+| 4 | Non-finite coordinate: failed compile, non-numeric string, `ref.x.value` before `x` connects (`undefined`), division by zero | ✅ 2026-11-07: **polyline not drawn and not hittable** until all coordinates are finite; no warning. Checked with `probe += value * 0` in the flattening loop of `draw()`. Before: the canvas silently dropped that vertex; smooth: neighbouring segments vanished | same; phase 2 moves the check into its geometry cache (`_isFinite`, §4.2) |
+| 5 | All X (or all Y) non-finite **and** a gradient fill/stroke | bounding box `±Infinity` → gradient arguments `NaN` → `createLinearGradient` etc. **throw** (WebIDL `double`). Since 2026-11-07 it can't happen: `draw()` returns before `applyStyle` (#4). Any other gradient error is caught by `design/2026-11-07_safe_shape_render_plan.md`; before, the exception left `stage.render()` | same |
 | 6 | Expression that throws at runtime (`ref.a.value.b` with `value` undefined) | exception in `evaluateAnimations` | unchanged — engine-wide issue for all attributes, out of scope |
 | 7 | Two identical consecutive end points + arrowhead | straight: `aimArrow` gets a zero vector → falls back to direction `(1, 0)`, head points right; smooth: chord 0 → `len / chord = Infinity` → whole first segment trimmed, same wrong direction | straight: walk inward to the first distinct point for the direction; if all points are identical, no arrowheads. Smooth: direction from the first distinct point, no trim on a zero-length end segment. Verify visually |
 | 8 | Duplicate points inside a **smooth** polyline | Catmull-Rom makes a cusp / small loop | ✅ 2026-10-24: a duplicate point makes a corner (smooth spline plan §4.1); document it as a feature |

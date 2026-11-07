@@ -106,7 +106,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
   - Semi-transparent fills will show the stroke underneath (expected, same as SVG).
   - Arrowheads (`drawArrows`) use the stroke style; check how they should behave with `paintorder="stroke"`.
   - Add a docs section/example following `docs/DOCS_STANDARDS.md`.
-- **Related**: build after §37 and §31 (`design/2026-11-01_isolated_shape_compositing_plan.md` §9). Without isolation, `paintorder="stroke"` has the same compositing bug as §31 (with a shadow, the fill's shadow falls onto the stroke drawn before it); with isolation it only swaps two draw calls.
+- **Related**: build after §31 (`design/2026-11-01_isolated_shape_compositing_plan.md` §9). Without isolation, `paintorder="stroke"` has the same compositing bug as §31 (with a shadow, the fill's shadow falls onto the stroke drawn before it); with isolation it only swaps two draw calls.
 
 ## 20. Shape Authoring (Derived Attributes, Class Fields, Custom Animation)
 - **Status**: 🟡 **Proposed** (2026-10-17, no code changes yet)
@@ -114,12 +114,12 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Goal**: writing a shape (built-in or user-made, e.g. a separate `star.js` with `class Star extends Shape`) needs only `static defaults`, `draw(ctx, u)` and `getBoundingBox()`. A prototype Star already works with today's engine.
 - **Changes**: derive `observedAttributes` from `static defaults` (event handlers appended by `Shape`, `isHovered` / `isPressed` moved out of defaults, Polyline `points: ''`, lowercase-key warning); class fields instead of constructors (except Layer); `draw(ctx, u)` without `t` (hit testing calls `draw()` with `t = 0`).
 - **Custom animation (note)**: time belongs in attribute expressions. Pattern A: `spin="t * 180"` in the HTML. Pattern B: internal animated value via `pxl.compileAttribute` (internal API, a public helper like `this.animate()` later).
-- **Depends on**: §37 (always save / restore) before publishing a "Custom Shapes" docs page — one careless user shape fades the whole layer until always save is implemented.
+- **Ready for custom shapes** (2026-11-07, `design/2026-11-07_safe_shape_render_plan.md`): every shape draws in its own canvas state and errors are caught, so a careless or failing custom shape can't fade or break the rest of the layer. A custom shape that draws arrowheads must call `drawArrows()` last.
 
 ## 22. Polyline Optimization (Parser, Point Storage, Edge Cases)
 - **Status**: 🟡 **Proposed** (low priority; measured gains are small)
 - **Reference**: `design/2026-10-18_polyline_optimization_plan.md` (priority table at the top)
-- **Small fixes, do when touched**: all X (or all Y) non-finite + gradient throws in `createGradient` (covered by §37); warnings for typos in `points` (missing / extra values, unbalanced parentheses).
+- **Small fixes, do when touched**: warnings for typos in `points` (missing / extra values, unbalanced parentheses).
 - **Deferred**: point storage in numeric arrays (measured ≈ 8 µs per frame for 500 points, a micro-optimization) and the measurement-gated phase 3 items.
 - **Note**: `ref.<id>.pN` is internal (`.agents/KILOPIXEL.md`); the public docs recommend a `<pxl-var>` read by both shapes.
 
@@ -154,7 +154,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Chains of readers** (tested 2026-11-02, `scratch/draw_order_chain_check.html`): reactive readers (`ref.*` / toLocal without `t`) settle through broadcasts, so the update phase fixes chains of any length in any order. Readers whose expression also uses `t` don't subscribe to refs (`pxl.compileAttribute`, `js/engine.js`); they read their source only at their turn in the update phase, so each one before its source in the DOM still adds one frame (today: C reads B reads A in the order C, B, A lags 2 frames). Options: let time-dependent expressions with refs subscribe as well (re-evaluated on the broadcast, a second evaluation for those few), or sort by dependencies before the update phase (needs a rule for cycles).
 - **Hidden subtrees** (measured 2026-11-07, `design/2026-11-07_safe_shape_render_plan.md` §5.1): a hidden shape is still evaluated, so `ref.*` to it stays current. Inside a hidden group or layer, values that follow `t` freeze (a `<pxl-var>` too); values that follow other refs keep updating through broadcasts. Should the update phase evaluate hidden subtrees? Doing it every frame would keep a page with a hidden animated panel running at 60 fps for values nobody sees. Middle way: evaluate a hidden subtree only when something outside reads it (`pxl._subscriptions` already knows the readers).
 - **Docs when solved**: delete section 7 "Draw Order" of `docs/mapping.html` (and renumber the sections after it), and drop the draw-order rule from KILOPIXEL.md Coordinate Mapping and the AI guide.
-- **Related**: not fixed by always save / restore (§37), which isolates canvas *state*, not *values*; the same render path, though. `design/2026-10-30_space_attribute_plan.md` §3.5, KILOPIXEL.md Coordinate Mapping, "Draw order (one-frame lag)".
+- **Related**: not fixed by always save / restore (`design/2026-11-07_safe_shape_render_plan.md`), which isolates canvas *state*, not *values*; the same render path, though. `design/2026-10-30_space_attribute_plan.md` §3.5, KILOPIXEL.md Coordinate Mapping, "Draw order (one-frame lag)".
 
 ## 30. Framework Compatibility (DOM Contract)
 - **Status**: 🟡 **Proposed** (2026-10-30)
@@ -175,7 +175,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Measured**: 0.75–0.9 ms per isolated shape with the full scratch canvas, 0.35 ms with the bounding box (DPR 2); direct 0.01 ms.
 - **Open**: `alpha` (recommended: not isolated for now), bounding box in step 1 or 2 (recommended: step 2), transform copy without `getTransform()` allocation.
 - **Docs**: afterwards `mask.html` shapes get fill + stroke and the standard ghosts; the "Ghosts of fill-only shapes" note in DOCS_STANDARDS.md goes.
-- **Related**: build after §37 (always save / restore) and before §14 (`paintorder`); plan §9.
+- **Related**: builds on always save / restore (`design/2026-11-07_safe_shape_render_plan.md`, built 2026-11-07); build before §14 (`paintorder`); plan §9.
 
 ## 33. Stage Sizing: Overridable Defaults and a Zero-Width Warning
 - **Status**: 🟡 **Proposed** (2026-11-04, no code changes yet)
@@ -195,12 +195,3 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Status**: 💬 **Discussion** (spec 2026-07-19, never built)
 - **Reference**: `design/2026-07-19_logph_diagram_note.md`
 - **Idea**: a thermodynamic pressure-enthalpy diagram as a Kilopixel shape, and a general scale interface: `mapX(value)` / `mapY(value)` turn a domain value into a stage coordinate, so other shapes can place markers on data shapes. Related to `<pxl-plot>` (§7).
-
-## 37. Safe Shape Render: Always `save()` / `restore()` and Draw Errors
-- **Status**: 🟢 **Decided** (2026-11-07, all decisions in plan §7; not built yet. Merges the former always save / restore and draw errors items)
-- **Reference**: `design/2026-11-07_safe_shape_render_plan.md`; prototypes `scratch/gradient_stops/try_finally_bench.html`, `scratch/save_restore/`, `scratch/custom_shape/test.html` (local only)
-- **Problem**: a shape that changes canvas state without resetting it (a careless custom shape) fades or restyles every shape in the layer. A canvas call that throws (a typo in a gradient color, a gradient on a `NaN` box, an expression failing at runtime) aborts the whole frame and leaves the layer shifted until the page reloads; hit testing breaks the same way.
-- **Idea**: every shape draws inside `save()` / `restore()` with `try / catch / finally`; a failing element is skipped for that frame with one warning per distinct message (at most 3 per element), and an animated one keeps asking for frames. Groups, layers, variables and the hit-test draw catch their own errors too, and readers evaluated by a broadcast or a toLocal walk report their own errors instead of breaking the element they read.
-- **Measured** (2026-11-07, page visible): real pages within noise; worst case 2,000 bare animated lines 3.5 → 5.1 ms per frame (+46 %, all from save / restore); `try / catch` not measurable in the engine. A static typo that throws in every frame costs about 16 µs per shape; keeping the failed gradient's error brings 1,000 such shapes from 20.1 to 9.2 ms and removes their garbage (plan §3.5, §4.4).
-- **Decided**: one warning per distinct message per element; an invalid stop color skips the whole shape; `docs/linear.html` notes the offset clamping; animated elements keep running after an error, and the error is reported (plan §7).
-- **Related**: build before §31 (isolated compositing builds on the single save → draw → restore path) and §14 `paintorder`; §20 needs it before a "Custom Shapes" docs page.

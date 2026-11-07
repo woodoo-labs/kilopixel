@@ -8,8 +8,13 @@ pxl.Variable = class Variable extends pxl.PxlNode {
     super.connectedCallback();
   }
 
+  // A failing expression keeps the previous value for this frame
   render(ctx, u, t) {
-    this.evaluateAnimations(t);
+    try {
+      this.evaluateAnimations(t);
+    } catch (error) {
+      this.reportError(error);
+    }
   }
 };
 customElements.define('pxl-var', pxl.Variable);

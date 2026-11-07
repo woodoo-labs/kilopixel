@@ -780,10 +780,16 @@ pxl.InteractionEngine = class InteractionEngine {
 
         pxl._hitResult = false;
         ctx.beginPath();
-        // Shapes that can't express their hit area as a path (e.g. text) provide hitTest()
-        if (el.hitTest) el.hitTest(ctx, this.stage.unit);
-        else el.draw(ctx, this.stage.unit, 0);
-        ctx.restore();
+        // Shapes that can't express their hit area as a path (e.g. text) provide hitTest().
+        // A shape that throws here is not hit; the dummy context is restored either way, so later tests aren't offset.
+        try {
+          if (el.hitTest) el.hitTest(ctx, this.stage.unit);
+          else el.draw(ctx, this.stage.unit, 0);
+        } catch (error) {
+          el.reportError(error);
+        } finally {
+          ctx.restore();
+        }
 
         if (pxl._hitResult) {
           hitEl = el;
@@ -1294,6 +1300,11 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this._lastFilterRaw = null;
     this._lastFilterU = 0;
     this._cachedFilterScaled = 'none';
+
+    // Errors already reported by reportError()
+    this._lastError = null;
+    this._lastErrorMessage = null;
+    this._errorCount = 0;
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -1347,7 +1358,15 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   }
 
   variableChangedCallback(varName) {
-    const result = pxl.evaluateAttributesForVariable(this, varName);
+    let result;
+    try {
+      result = pxl.evaluateAttributesForVariable(this, varName);
+    } catch (error) {
+      // The reader's own error, reported here: the element whose broadcast called this isn't blamed or skipped,
+      // and the other readers of that broadcast still update
+      this.reportError(error);
+      return;
+    }
 
     if ((result & 1) === 0) pxl.unsubscribeFromVariable(varName, this);
     if ((result & 2) !== 0) {
@@ -1381,6 +1400,26 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     return animatedValuesChanged;
   }
 
+  // --- Errors ---
+
+  // An element that throws while evaluating or drawing is skipped for this frame instead of breaking the frame.
+  // Warns once per distinct message and at most 3 times per element: a message that contains a changing value
+  // (an animated negative radius in a custom shape's arc()) would otherwise warn in every frame.
+  // An animated element keeps asking for frames: evaluateAnimations() does that at its end, which the error may
+  // have skipped, and an error that depends on t can then recover.
+  reportError(error) {
+    if (this.isAnimated) this.parentLayer?.invalidate();
+    // The same error object again (a gradient that failed before): nothing new to report or allocate
+    if (error === this._lastError) return;
+    this._lastError = error;
+    const message = String(error);
+    if (message === this._lastErrorMessage || this._errorCount === 3) return;
+    this._lastErrorMessage = message;
+    this._errorCount++;
+    const more = this._errorCount === 3 ? ' (further errors of this element are not shown)' : '';
+    console.warn(`[pxl] <${this.localName}${this.id ? ` id="${this.id}"` : ''}> skipped: ${message}${more}`);
+  }
+
   // Filter string with the helpers' px values scaled by u (layers: CSS filter, shapes: ctx.filter)
   resolveFilter(filter, u) {
     const filterStr = Array.isArray(filter) ? filter.join(' ') : filter;
@@ -1410,7 +1449,12 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
         // If re-evaluating moves the child, setLocalMatrixDirty() has already walked its subtree.
         let walked = false;
         if (child.toLocalAttributeKeys.length > 0) {
-          walked = (pxl.evaluateToLocalAttributes(child) & 2) !== 0;
+          try {
+            walked = (pxl.evaluateToLocalAttributes(child) & 2) !== 0;
+          } catch (error) {
+            // The reader's own error: the element that moved isn't blamed, and the walk goes on
+            child.reportError(error);
+          }
         }
 
         // Broadcast the child if someone is explicitly tracking its global matrix
@@ -1550,7 +1594,14 @@ pxl.Layer = class Layer extends pxl.PxlNode {
       this._isOrderDirty = false;
     }
 
-    this.evaluateAnimations(t);
+    // A failing expression skips the layer with its children for this frame. It keeps its previous pixels,
+    // because clearRect comes later; reportError() keeps an animated layer asking for frames.
+    try {
+      this.evaluateAnimations(t);
+    } catch (error) {
+      this.reportError(error);
+      return;
+    }
 
     const { alpha, blend, filter, hidden } = this.attributeValues;
 
@@ -1649,7 +1700,13 @@ pxl.Group = class Group extends pxl.PxlNode {
       this._isOrderDirty = false;
     }
 
-    this.evaluateAnimations(t);
+    // A failing expression skips the group with its children for this frame; nothing is saved yet, so nothing to restore
+    try {
+      this.evaluateAnimations(t);
+    } catch (error) {
+      this.reportError(error);
+      return;
+    }
 
     if (this.attributeValues.hidden) return;
 
@@ -1697,10 +1754,10 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     // Reused by getBoundingBox() every frame
     this.boundingBox = { left: 0, right: 0, top: 0, bottom: 0 };
 
-    // Gradient cache per slot: [0] = fill, [1] = stroke (createGradient)
+    // Gradient cache per slot: [0] = fill, [1] = stroke (createGradient). error: kept when building failed
     this._gradCache = [
-      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null },
-      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null }
+      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null, error: null },
+      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null, error: null }
     ];
 
     // Scaled dash pattern, cached per (linedash, u) by applyLineDash()
@@ -1765,26 +1822,21 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     this.stage?.interaction.unregisterElement(this);
   }
 
+  // Every shape draws in its own canvas state: whatever it changes or throws, the next shape starts clean.
+  // A hidden shape still evaluates, so ref.* to it stays current; it only skips the save and the drawing.
   render(ctx, u, t) {
-    this.evaluateAnimations(t);
-
-    if (this.attributeValues.hidden) return;
-
-    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy, alpha, blend, mask, filter, shadowcolor } = this.attributeValues;
-    const hasStateChanges = x || y || dx || dy || rotate ||
-                            zoom !== 1 || scalex !== 1 || scaley !== 1 ||
-                            skewx || skewy ||
-                            alpha !== 1 || blend !== 'source-over' || mask !== 'none' || filter !== 'none' ||
-                            shadowcolor;
-
-    // save / restore only when the shape changes the context state
-    if (hasStateChanges) {
+    try {
+      this.evaluateAnimations(t);
+      if (this.attributeValues.hidden) return;
       ctx.save();
-      pxl.applyContextState(ctx, u, this.attributeValues, this);
-      this.draw(ctx, u, t);
-      ctx.restore();
-    } else {
-      this.draw(ctx, u, t);
+      try {
+        pxl.applyContextState(ctx, u, this.attributeValues, this);
+        this.draw(ctx, u, t);
+      } finally {
+        ctx.restore();
+      }
+    } catch (error) {
+      this.reportError(error);
     }
   }
 
@@ -1811,9 +1863,32 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     if (c.config === styleValue && c.u === u &&
         c.bl === box.left && c.bt === box.top &&
         c.br === box.right && c.bb === box.bottom && c.sw === sw) {
+      if (c.error) throw c.error;
       return c.grad;
     }
 
+    c.config = styleValue;
+    c.u = u;
+    c.bl = box.left;
+    c.bt = box.top;
+    c.br = box.right;
+    c.bb = box.bottom;
+    c.sw = sw;
+    c.grad = null;
+    c.error = null;
+    try {
+      c.grad = this.buildGradient(ctx, u, styleValue, slot, box, sw);
+    } catch (error) {
+      // A gradient that fails with these values (a typo in a stop color) fails again: keep the error, so later
+      // frames throw the same object instead of building a new one (render() catches it, reportError() stays quiet)
+      c.error = error;
+      throw error;
+    }
+    return c.grad;
+  }
+
+  // The canvas gradient for a descriptor in the shape's box; createGradient() caches it
+  buildGradient(ctx, u, styleValue, slot, box, sw) {
     // A stroke is at least strokewidth thick: a line's box has a zero side, and a gradient across it would
     // have zero length and paint nothing. For the stroke, each side spans at least strokewidth around the center.
     // (design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md)
@@ -1872,15 +1947,6 @@ pxl.Shape = class Shape extends pxl.PxlNode {
       const offset = stops[i].offset;
       grad.addColorStop(offset > 0 ? (offset < 1 ? offset : 1) : 0, stops[i].color);
     }
-
-    c.config = styleValue;
-    c.u = u;
-    c.bl = box.left;
-    c.bt = box.top;
-    c.br = box.right;
-    c.bb = box.bottom;
-    c.sw = sw;
-    c.grad = grad;
     return grad;
   }
 
@@ -2005,6 +2071,8 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   // Draws both arrowheads in one path. Expects stroke state to be applied already.
+  // Always the last call of a shape's draw(): it changes the miter limit, the dash and fillStyle without
+  // resetting them, and render() restores the state afterwards.
   drawArrows(ctx, u, recA, recB) {
     const isLine = this.attributeValues.arrowstyle === 'line';
 
@@ -2014,19 +2082,15 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
     if (isLine) {
       // A 60° miter needs a limit of 2 (1 / sin 30°); a lower path miterlimit must not blunt the tip.
-      // 4 leaves headroom for float rounding. Not restored: stroke state is always set before stroking.
+      // 4 leaves headroom for float rounding.
       if (ctx.miterLimit < 4) ctx.miterLimit = 4;
 
       // Chevrons are always solid
-      const hasDash = pxl.hasLineDash(this.attributeValues.linedash);
-      if (hasDash) ctx.setLineDash(pxl._emptyDash);
+      if (pxl.hasLineDash(this.attributeValues.linedash)) ctx.setLineDash(pxl._emptyDash);
       ctx.stroke();
-      if (hasDash) this.applyLineDash(ctx, u);
     } else {
-      const originalFill = ctx.fillStyle;
       ctx.fillStyle = ctx.strokeStyle;
       ctx.fill();
-      ctx.fillStyle = originalFill;
     }
   }
 
@@ -2481,9 +2545,14 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     const pts = this._flatCache;
     const len = this._pointCount / 2;
 
+    // A coordinate that isn't a finite number (a ref that isn't connected yet, a division by zero) would make
+    // the canvas drop that vertex, or bend a smooth curve: draw nothing until all coordinates are valid
+    let probe = 0;
     for (let i = 0; i < this._pointCount; i++) {
       pts[i] = this.attributeValues[this._pointKeys[i]] * u;
+      probe += pts[i] * 0;   // 0 for a finite value, NaN for NaN or ±Infinity
     }
+    if (probe !== 0) return;
 
     if (this.attributeValues.mode === 'relative') {
       for (let i = 2; i < this._pointCount; i++) {
@@ -3016,10 +3085,9 @@ pxl.Grid = class Grid extends pxl.Shape {
         ctx.lineTo(endX * u, y * u);
       }
 
-      const originalLineWidth = ctx.lineWidth;
+      // Not reset: the labels below only fill, and render() restores the state
       ctx.lineWidth = (strokewidth * 2) * u;
       ctx.stroke();
-      ctx.lineWidth = originalLineWidth;
     }
 
     // Coordinates at the major intersections, in the fill color (or the stroke color without fill)
@@ -3061,8 +3129,13 @@ pxl.Variable = class Variable extends pxl.PxlNode {
     super.connectedCallback();
   }
 
+  // A failing expression keeps the previous value for this frame
   render(ctx, u, t) {
-    this.evaluateAnimations(t);
+    try {
+      this.evaluateAnimations(t);
+    } catch (error) {
+      this.reportError(error);
+    }
   }
 };
 customElements.define('pxl-var', pxl.Variable);
