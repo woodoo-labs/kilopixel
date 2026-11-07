@@ -114,6 +114,8 @@ Every documentation example must follow a standardized 3-part layout:
 2. **Interactive Controls (`<div class="demo-controls">`)**: Placed **above** `<pxl-stage>` inside `<div class="demo-container">`. Every example must feature interactive controls (sliders or toggle buttons). The header title must be simply `Controls` without redundant prefixes.
 3. **Reactive Stage (`<pxl-stage class="demo-stage" ratio="5 / 3">`)**: Placed at the bottom inside `<div class="demo-container">`. The container's CSS flex gap automatically spaces the stage away from the controls. All documentation examples MUST use `ratio="5 / 3"` (logical width 1000, height 600) unless explicitly demonstrating another aspect ratio. Showcase sections are square (`ratio="1 / 1"`, see §11).
 
+* **Exception: Introduction:** The introduction (`index.html`) shows short examples without controls: a code snippet followed by a `<pxl-stage class="demo-stage">`, without a `demo-container`. Its examples show how markup becomes a picture rather than teaching one attribute, so controls would distract. All snippet rules still apply. Every other page keeps the 3-part layout.
+
 ```html
 <!-- 1. Declarative Code Block Above Container -->
 <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
@@ -149,11 +151,11 @@ Every documentation example must follow a standardized 3-part layout:
 </div>
 ```
 * **Script Architecture & Placement (Head vs. Bottom):**
-  * **`<head>` Imports (Engine & Structure):** Every documentation page must load its structural Web Component definitions and core interactive engine in `<head>`: `<script src="js/layout.js"></script>`, `<script src="js/docs.js"></script>`, `<script src="js/api-tabs.js"></script>`, and `<script src="js/pxl.min.js"></script>`. Defining custom elements in `<head>` ensures they are upgraded synchronously during DOM parsing, eliminating Flash of Unstyled Content (FOUC) and Cumulative Layout Shift (CLS), while guaranteeing that `window.pxlDocs` is ready for any inline event handlers (`onclick`, `oninput`).
+  * **`<head>` Imports (Engine & Structure):** Every documentation page must load its structural Web Component definitions and core interactive engine in `<head>`: `<script src="js/layout.js"></script>`, `<script src="js/docs.js"></script>` and `<script src="js/pxl.min.js"></script>`. Pages with an API reference table also load `<script src="js/api-tabs.js"></script>`. Defining custom elements in `<head>` ensures they are upgraded synchronously during DOM parsing, eliminating Flash of Unstyled Content (FOUC) and Cumulative Layout Shift (CLS), while guaranteeing that `window.pxlDocs` is ready for any inline event handlers (`onclick`, `oninput`).
   * **Bottom of `<body>` Imports (Syntax Highlighting):** Every documentation page that uses Prism syntax highlighting MUST load its highlighter scripts at the very bottom of `<body>` directly preceding `</body>`:
     ```html
     <!-- Prism Syntax Highlighting -->
-    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
     ```
     Placing Prism at the bottom guarantees that all DOM nodes, code snippets, and dynamic Web Component templates are constructed before Prism executes its syntax highlighting pass.
