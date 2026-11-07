@@ -1459,6 +1459,13 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 - The heartbeat pattern: animated layers call `invalidate()` during render, which sets `isDirty = true` and schedules another rAF — but only if they have animated attributes
 - Hidden + empty canvas: if a layer is `hidden` and its canvas was already cleared, `invalidate()` returns early without scheduling rAF
 
+### Hidden Elements and Evaluation
+
+- A hidden **shape** still evaluates its animated values and only skips drawing, so `ref.*` to it stays current.
+- A hidden **group** or **layer** skips its children entirely: their values that follow `t` (also in a `<pxl-var>`) stay frozen while it is hidden. When it is shown again they are correct in the next frame, because expressions depend only on `t`. Readers outside see the frozen value meanwhile.
+- Values that follow other `ref.*` keep updating inside hidden groups and layers, because broadcasts don't go through drawing.
+- Measured 2026-11-07 (`design/2026-11-07_safe_shape_render_plan.md` §5.1). Whether a two-phase frame should evaluate hidden subtrees: TODO §29.
+
 ---
 
 ## Performance Monitor
