@@ -188,9 +188,7 @@
         <h2>2. RGB &amp; RGBA</h2>
         <p>The <code>rgb()</code> and <code>rgba()</code> formats break colors down into their core numeric channels: <strong>R</strong>ed, <strong>G</strong>reen, and <strong>B</strong>lue (0-255). The <code>rgba()</code> variant adds a fourth <strong>A</strong>lpha channel (0.0 - 1.0) to control transparency, allowing overlapping shapes to blend together.</p>
 
-        <div>
-          <div>
-            <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Circle 1 (Red) --&gt;
     &lt;pxl-circle fill="rgba(<mark id="sec2Circle1RedCode">255</mark>, <mark id="sec2Circle1GreenCode">0</mark>, <mark id="sec2Circle1BlueCode">0</mark>, <mark id="sec2Circle1AlphaCode">0.7</mark>)" x="500" y="230" r="140"&gt;&lt;/pxl-circle&gt;
@@ -202,108 +200,106 @@
     &lt;pxl-circle fill="rgba(<mark id="sec2Circle3RedCode">0</mark>, <mark id="sec2Circle3GreenCode">0</mark>, <mark id="sec2Circle3BlueCode">255</mark>, <mark id="sec2Circle3AlphaCode">0.7</mark>)" x="580" y="370" r="140"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
-          </div>
 
-          <div class="demo-container">
-            <pxl-stage id="sec2Stage" ratio="5 / 3" class="demo-stage">
-              <pxl-layer>
-                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-                <pxl-circle id="sec2Circle1" x="500" y="230" r="140" fill="rgba(255, 0, 0, 0.7)"></pxl-circle>
-                <pxl-circle id="sec2Circle2" x="420" y="370" r="140" fill="rgba(0, 255, 0, 0.7)"></pxl-circle>
-                <pxl-circle id="sec2Circle3" x="580" y="370" r="140" fill="rgba(0, 0, 255, 0.7)"></pxl-circle>
-              </pxl-layer>
-            </pxl-stage>
-
-            <div class="demo-controls">
-              <div class="demo-controls-header">
-                <h3 class="demo-controls-title">Controls</h3>
-                <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2Circle1Tab')">Circle 1</button>
-                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2Circle2Tab')">Circle 2</button>
-                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2Circle3Tab')">Circle 3</button>
-                </div>
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec2Circle1Tab')">Circle 1</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2Circle2Tab')">Circle 2</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec2Circle3Tab')">Circle 3</button>
               </div>
-
-              <!-- RGBA Circle 1 Tab -->
-              <div class="tab-content active" id="sec2Circle1Tab">
-                <div class="playground-sliders">
-                  <div class="control-group">
-                    <label><span>Red</span> <span id="sec2Circle1RedVal">255</span></label>
-                    <input type="range" min="0" max="255" step="1" value="255" autocomplete="off"
-                      oninput="document.getElementById('sec2Circle1').setAttribute('fill', `rgba(${this.value}, ${document.getElementById('sec2Circle1GreenVal').innerText}, ${document.getElementById('sec2Circle1BlueVal').innerText}, ${document.getElementById('sec2Circle1AlphaVal').innerText})`); document.getElementById('sec2Circle1RedVal').innerText = this.value; document.getElementById('sec2Circle1RedCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Green</span> <span id="sec2Circle1GreenVal">0</span></label>
-                    <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
-                      oninput="document.getElementById('sec2Circle1').setAttribute('fill', `rgba(${document.getElementById('sec2Circle1RedVal').innerText}, ${this.value}, ${document.getElementById('sec2Circle1BlueVal').innerText}, ${document.getElementById('sec2Circle1AlphaVal').innerText})`); document.getElementById('sec2Circle1GreenVal').innerText = this.value; document.getElementById('sec2Circle1GreenCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Blue</span> <span id="sec2Circle1BlueVal">0</span></label>
-                    <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
-                      oninput="document.getElementById('sec2Circle1').setAttribute('fill', `rgba(${document.getElementById('sec2Circle1RedVal').innerText}, ${document.getElementById('sec2Circle1GreenVal').innerText}, ${this.value}, ${document.getElementById('sec2Circle1AlphaVal').innerText})`); document.getElementById('sec2Circle1BlueVal').innerText = this.value; document.getElementById('sec2Circle1BlueCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Alpha</span> <span id="sec2Circle1AlphaVal">0.7</span></label>
-                    <input type="range" min="0" max="1" step="0.05" value="0.7" autocomplete="off"
-                      oninput="document.getElementById('sec2Circle1').setAttribute('fill', `rgba(${document.getElementById('sec2Circle1RedVal').innerText}, ${document.getElementById('sec2Circle1GreenVal').innerText}, ${document.getElementById('sec2Circle1BlueVal').innerText}, ${this.value})`); document.getElementById('sec2Circle1AlphaVal').innerText = this.value; document.getElementById('sec2Circle1AlphaCode').innerText = this.value;">
-                  </div>
-                </div>
-              </div>
-
-              <!-- RGBA Circle 2 Tab -->
-              <div class="tab-content" id="sec2Circle2Tab">
-                <div class="playground-sliders">
-                  <div class="control-group">
-                    <label><span>Red</span> <span id="sec2Circle2RedVal">0</span></label>
-                    <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
-                      oninput="document.getElementById('sec2Circle2').setAttribute('fill', `rgba(${this.value}, ${document.getElementById('sec2Circle2GreenVal').innerText}, ${document.getElementById('sec2Circle2BlueVal').innerText}, ${document.getElementById('sec2Circle2AlphaVal').innerText})`); document.getElementById('sec2Circle2RedVal').innerText = this.value; document.getElementById('sec2Circle2RedCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Green</span> <span id="sec2Circle2GreenVal">255</span></label>
-                    <input type="range" min="0" max="255" step="1" value="255" autocomplete="off"
-                      oninput="document.getElementById('sec2Circle2').setAttribute('fill', `rgba(${document.getElementById('sec2Circle2RedVal').innerText}, ${this.value}, ${document.getElementById('sec2Circle2BlueVal').innerText}, ${document.getElementById('sec2Circle2AlphaVal').innerText})`); document.getElementById('sec2Circle2GreenVal').innerText = this.value; document.getElementById('sec2Circle2GreenCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Blue</span> <span id="sec2Circle2BlueVal">0</span></label>
-                    <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
-                      oninput="document.getElementById('sec2Circle2').setAttribute('fill', `rgba(${document.getElementById('sec2Circle2RedVal').innerText}, ${document.getElementById('sec2Circle2GreenVal').innerText}, ${this.value}, ${document.getElementById('sec2Circle2AlphaVal').innerText})`); document.getElementById('sec2Circle2BlueVal').innerText = this.value; document.getElementById('sec2Circle2BlueCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Alpha</span> <span id="sec2Circle2AlphaVal">0.7</span></label>
-                    <input type="range" min="0" max="1" step="0.05" value="0.7" autocomplete="off"
-                      oninput="document.getElementById('sec2Circle2').setAttribute('fill', `rgba(${document.getElementById('sec2Circle2RedVal').innerText}, ${document.getElementById('sec2Circle2GreenVal').innerText}, ${document.getElementById('sec2Circle2BlueVal').innerText}, ${this.value})`); document.getElementById('sec2Circle2AlphaVal').innerText = this.value; document.getElementById('sec2Circle2AlphaCode').innerText = this.value;">
-                  </div>
-                </div>
-              </div>
-
-              <!-- RGBA Circle 3 Tab -->
-              <div class="tab-content" id="sec2Circle3Tab">
-                <div class="playground-sliders">
-                  <div class="control-group">
-                    <label><span>Red</span> <span id="sec2Circle3RedVal">0</span></label>
-                    <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
-                      oninput="document.getElementById('sec2Circle3').setAttribute('fill', `rgba(${this.value}, ${document.getElementById('sec2Circle3GreenVal').innerText}, ${document.getElementById('sec2Circle3BlueVal').innerText}, ${document.getElementById('sec2Circle3AlphaVal').innerText})`); document.getElementById('sec2Circle3RedVal').innerText = this.value; document.getElementById('sec2Circle3RedCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Green</span> <span id="sec2Circle3GreenVal">0</span></label>
-                    <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
-                      oninput="document.getElementById('sec2Circle3').setAttribute('fill', `rgba(${document.getElementById('sec2Circle3RedVal').innerText}, ${this.value}, ${document.getElementById('sec2Circle3BlueVal').innerText}, ${document.getElementById('sec2Circle3AlphaVal').innerText})`); document.getElementById('sec2Circle3GreenVal').innerText = this.value; document.getElementById('sec2Circle3GreenCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Blue</span> <span id="sec2Circle3BlueVal">255</span></label>
-                    <input type="range" min="0" max="255" step="1" value="255" autocomplete="off"
-                      oninput="document.getElementById('sec2Circle3').setAttribute('fill', `rgba(${document.getElementById('sec2Circle3RedVal').innerText}, ${document.getElementById('sec2Circle3GreenVal').innerText}, ${this.value}, ${document.getElementById('sec2Circle3AlphaVal').innerText})`); document.getElementById('sec2Circle3BlueVal').innerText = this.value; document.getElementById('sec2Circle3BlueCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Alpha</span> <span id="sec2Circle3AlphaVal">0.7</span></label>
-                    <input type="range" min="0" max="1" step="0.05" value="0.7" autocomplete="off"
-                      oninput="document.getElementById('sec2Circle3').setAttribute('fill', `rgba(${document.getElementById('sec2Circle3RedVal').innerText}, ${document.getElementById('sec2Circle3GreenVal').innerText}, ${document.getElementById('sec2Circle3BlueVal').innerText}, ${this.value})`); document.getElementById('sec2Circle3AlphaVal').innerText = this.value; document.getElementById('sec2Circle3AlphaCode').innerText = this.value;">
-                  </div>
-                </div>
-              </div>
-
             </div>
+
+            <!-- RGBA Circle 1 Tab -->
+            <div class="tab-content active" id="sec2Circle1Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Red</span> <span id="sec2Circle1RedVal">255</span></label>
+                  <input type="range" min="0" max="255" step="1" value="255" autocomplete="off"
+                    oninput="document.getElementById('sec2Circle1').setAttribute('fill', `rgba(${this.value}, ${document.getElementById('sec2Circle1GreenVal').innerText}, ${document.getElementById('sec2Circle1BlueVal').innerText}, ${document.getElementById('sec2Circle1AlphaVal').innerText})`); document.getElementById('sec2Circle1RedVal').innerText = this.value; document.getElementById('sec2Circle1RedCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Green</span> <span id="sec2Circle1GreenVal">0</span></label>
+                  <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec2Circle1').setAttribute('fill', `rgba(${document.getElementById('sec2Circle1RedVal').innerText}, ${this.value}, ${document.getElementById('sec2Circle1BlueVal').innerText}, ${document.getElementById('sec2Circle1AlphaVal').innerText})`); document.getElementById('sec2Circle1GreenVal').innerText = this.value; document.getElementById('sec2Circle1GreenCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Blue</span> <span id="sec2Circle1BlueVal">0</span></label>
+                  <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec2Circle1').setAttribute('fill', `rgba(${document.getElementById('sec2Circle1RedVal').innerText}, ${document.getElementById('sec2Circle1GreenVal').innerText}, ${this.value}, ${document.getElementById('sec2Circle1AlphaVal').innerText})`); document.getElementById('sec2Circle1BlueVal').innerText = this.value; document.getElementById('sec2Circle1BlueCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Alpha</span> <span id="sec2Circle1AlphaVal">0.7</span></label>
+                  <input type="range" min="0" max="1" step="0.05" value="0.7" autocomplete="off"
+                    oninput="document.getElementById('sec2Circle1').setAttribute('fill', `rgba(${document.getElementById('sec2Circle1RedVal').innerText}, ${document.getElementById('sec2Circle1GreenVal').innerText}, ${document.getElementById('sec2Circle1BlueVal').innerText}, ${this.value})`); document.getElementById('sec2Circle1AlphaVal').innerText = this.value; document.getElementById('sec2Circle1AlphaCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+
+            <!-- RGBA Circle 2 Tab -->
+            <div class="tab-content" id="sec2Circle2Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Red</span> <span id="sec2Circle2RedVal">0</span></label>
+                  <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec2Circle2').setAttribute('fill', `rgba(${this.value}, ${document.getElementById('sec2Circle2GreenVal').innerText}, ${document.getElementById('sec2Circle2BlueVal').innerText}, ${document.getElementById('sec2Circle2AlphaVal').innerText})`); document.getElementById('sec2Circle2RedVal').innerText = this.value; document.getElementById('sec2Circle2RedCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Green</span> <span id="sec2Circle2GreenVal">255</span></label>
+                  <input type="range" min="0" max="255" step="1" value="255" autocomplete="off"
+                    oninput="document.getElementById('sec2Circle2').setAttribute('fill', `rgba(${document.getElementById('sec2Circle2RedVal').innerText}, ${this.value}, ${document.getElementById('sec2Circle2BlueVal').innerText}, ${document.getElementById('sec2Circle2AlphaVal').innerText})`); document.getElementById('sec2Circle2GreenVal').innerText = this.value; document.getElementById('sec2Circle2GreenCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Blue</span> <span id="sec2Circle2BlueVal">0</span></label>
+                  <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec2Circle2').setAttribute('fill', `rgba(${document.getElementById('sec2Circle2RedVal').innerText}, ${document.getElementById('sec2Circle2GreenVal').innerText}, ${this.value}, ${document.getElementById('sec2Circle2AlphaVal').innerText})`); document.getElementById('sec2Circle2BlueVal').innerText = this.value; document.getElementById('sec2Circle2BlueCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Alpha</span> <span id="sec2Circle2AlphaVal">0.7</span></label>
+                  <input type="range" min="0" max="1" step="0.05" value="0.7" autocomplete="off"
+                    oninput="document.getElementById('sec2Circle2').setAttribute('fill', `rgba(${document.getElementById('sec2Circle2RedVal').innerText}, ${document.getElementById('sec2Circle2GreenVal').innerText}, ${document.getElementById('sec2Circle2BlueVal').innerText}, ${this.value})`); document.getElementById('sec2Circle2AlphaVal').innerText = this.value; document.getElementById('sec2Circle2AlphaCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+
+            <!-- RGBA Circle 3 Tab -->
+            <div class="tab-content" id="sec2Circle3Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Red</span> <span id="sec2Circle3RedVal">0</span></label>
+                  <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec2Circle3').setAttribute('fill', `rgba(${this.value}, ${document.getElementById('sec2Circle3GreenVal').innerText}, ${document.getElementById('sec2Circle3BlueVal').innerText}, ${document.getElementById('sec2Circle3AlphaVal').innerText})`); document.getElementById('sec2Circle3RedVal').innerText = this.value; document.getElementById('sec2Circle3RedCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Green</span> <span id="sec2Circle3GreenVal">0</span></label>
+                  <input type="range" min="0" max="255" step="1" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec2Circle3').setAttribute('fill', `rgba(${document.getElementById('sec2Circle3RedVal').innerText}, ${this.value}, ${document.getElementById('sec2Circle3BlueVal').innerText}, ${document.getElementById('sec2Circle3AlphaVal').innerText})`); document.getElementById('sec2Circle3GreenVal').innerText = this.value; document.getElementById('sec2Circle3GreenCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Blue</span> <span id="sec2Circle3BlueVal">255</span></label>
+                  <input type="range" min="0" max="255" step="1" value="255" autocomplete="off"
+                    oninput="document.getElementById('sec2Circle3').setAttribute('fill', `rgba(${document.getElementById('sec2Circle3RedVal').innerText}, ${document.getElementById('sec2Circle3GreenVal').innerText}, ${this.value}, ${document.getElementById('sec2Circle3AlphaVal').innerText})`); document.getElementById('sec2Circle3BlueVal').innerText = this.value; document.getElementById('sec2Circle3BlueCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Alpha</span> <span id="sec2Circle3AlphaVal">0.7</span></label>
+                  <input type="range" min="0" max="1" step="0.05" value="0.7" autocomplete="off"
+                    oninput="document.getElementById('sec2Circle3').setAttribute('fill', `rgba(${document.getElementById('sec2Circle3RedVal').innerText}, ${document.getElementById('sec2Circle3GreenVal').innerText}, ${document.getElementById('sec2Circle3BlueVal').innerText}, ${this.value})`); document.getElementById('sec2Circle3AlphaVal').innerText = this.value; document.getElementById('sec2Circle3AlphaCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+
           </div>
+
+          <pxl-stage id="sec2Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              <pxl-circle id="sec2Circle1" x="500" y="230" r="140" fill="rgba(255, 0, 0, 0.7)"></pxl-circle>
+              <pxl-circle id="sec2Circle2" x="420" y="370" r="140" fill="rgba(0, 255, 0, 0.7)"></pxl-circle>
+              <pxl-circle id="sec2Circle3" x="580" y="370" r="140" fill="rgba(0, 0, 255, 0.7)"></pxl-circle>
+            </pxl-layer>
+          </pxl-stage>
         </div>
 
         <!-- ================================================================= -->
@@ -318,9 +314,7 @@
           <p class="callout-body"><strong>Exception:</strong> If you choose to use JavaScript <strong>backticks</strong> (template literals) for string interpolation (e.g., <code>fill="`hsl(${t*90}, 100%, 50%)`"</code>), your math and time variables are evaluated natively by JavaScript. Because this bypasses Kilopixel's formatting helpers, you <strong>must</strong> include the <code>%</code> signs manually so the final generated string is valid CSS.</p>
         </div>
 
-        <div>
-          <div>
-            <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Circle 1 (Static HSL) --&gt;
     &lt;pxl-circle fill="hsl(<mark id="sec3Circle1HueCode">0</mark>, <mark id="sec3Circle1SatCode">100</mark>, <mark id="sec3Circle1LitCode">50</mark>)" x="500" y="230" r="140"&gt;&lt;/pxl-circle&gt;
@@ -332,89 +326,87 @@
     &lt;pxl-circle fill="hsl(t * <mark id="sec3Circle3SpeedCode">90</mark>, 100, 50)" x="580" y="370" r="140"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
-          </div>
 
-          <div class="demo-container">
-            <pxl-stage id="sec3Stage" ratio="5 / 3" class="demo-stage">
-              <pxl-layer>
-                <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-                <pxl-circle id="sec3Circle1" x="500" y="230" r="140" fill="hsl(0, 100, 50)"></pxl-circle>
-                <pxl-circle id="sec3Circle2" x="420" y="370" r="140" fill="hsla(120, 100, 50, 0.7)"></pxl-circle>
-                <pxl-circle id="sec3Circle3" x="580" y="370" r="140" fill="hsl(t * 90, 100, 50)"></pxl-circle>
-              </pxl-layer>
-            </pxl-stage>
-
-            <div class="demo-controls">
-              <div class="demo-controls-header">
-                <h3 class="demo-controls-title">Controls</h3>
-                <div class="demo-tabs">
-                  <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3Circle1Tab')">Circle 1</button>
-                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3Circle2Tab')">Circle 2</button>
-                  <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3Circle3Tab')">Circle 3</button>
-                </div>
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+              <div class="demo-tabs">
+                <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec3Circle1Tab')">Circle 1</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3Circle2Tab')">Circle 2</button>
+                <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec3Circle3Tab')">Circle 3</button>
               </div>
-
-              <!-- HSL Circle 1 Tab -->
-              <div class="tab-content active" id="sec3Circle1Tab">
-                <div class="playground-sliders">
-                  <div class="control-group">
-                    <label><span>Hue (0-360)</span> <span id="sec3Circle1HueVal">0</span></label>
-                    <input type="range" min="0" max="360" step="1" value="0" autocomplete="off"
-                      oninput="document.getElementById('sec3Circle1').setAttribute('fill', `hsl(${this.value}, ${document.getElementById('sec3Circle1SatVal').innerText}, ${document.getElementById('sec3Circle1LitVal').innerText})`); document.getElementById('sec3Circle1HueVal').innerText = this.value; document.getElementById('sec3Circle1HueCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Saturation</span> <span id="sec3Circle1SatVal">100</span></label>
-                    <input type="range" min="0" max="100" step="1" value="100" autocomplete="off"
-                      oninput="document.getElementById('sec3Circle1').setAttribute('fill', `hsl(${document.getElementById('sec3Circle1HueVal').innerText}, ${this.value}, ${document.getElementById('sec3Circle1LitVal').innerText})`); document.getElementById('sec3Circle1SatVal').innerText = this.value; document.getElementById('sec3Circle1SatCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Lightness</span> <span id="sec3Circle1LitVal">50</span></label>
-                    <input type="range" min="0" max="100" step="1" value="50" autocomplete="off"
-                      oninput="document.getElementById('sec3Circle1').setAttribute('fill', `hsl(${document.getElementById('sec3Circle1HueVal').innerText}, ${document.getElementById('sec3Circle1SatVal').innerText}, ${this.value})`); document.getElementById('sec3Circle1LitVal').innerText = this.value; document.getElementById('sec3Circle1LitCode').innerText = this.value;">
-                  </div>
-                </div>
-              </div>
-
-              <!-- HSLA Circle 2 Tab -->
-              <div class="tab-content" id="sec3Circle2Tab">
-                <div class="playground-sliders">
-                  <div class="control-group">
-                    <label><span>Hue (0-360)</span> <span id="sec3Circle2HueVal">120</span></label>
-                    <input type="range" min="0" max="360" step="1" value="120" autocomplete="off"
-                      oninput="document.getElementById('sec3Circle2').setAttribute('fill', `hsla(${this.value}, ${document.getElementById('sec3Circle2SatVal').innerText}, ${document.getElementById('sec3Circle2LitVal').innerText}, ${document.getElementById('sec3Circle2AlphaVal').innerText})`); document.getElementById('sec3Circle2HueVal').innerText = this.value; document.getElementById('sec3Circle2HueCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Saturation</span> <span id="sec3Circle2SatVal">100</span></label>
-                    <input type="range" min="0" max="100" step="1" value="100" autocomplete="off"
-                      oninput="document.getElementById('sec3Circle2').setAttribute('fill', `hsla(${document.getElementById('sec3Circle2HueVal').innerText}, ${this.value}, ${document.getElementById('sec3Circle2LitVal').innerText}, ${document.getElementById('sec3Circle2AlphaVal').innerText})`); document.getElementById('sec3Circle2SatVal').innerText = this.value; document.getElementById('sec3Circle2SatCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Lightness</span> <span id="sec3Circle2LitVal">50</span></label>
-                    <input type="range" min="0" max="100" step="1" value="50" autocomplete="off"
-                      oninput="document.getElementById('sec3Circle2').setAttribute('fill', `hsla(${document.getElementById('sec3Circle2HueVal').innerText}, ${document.getElementById('sec3Circle2SatVal').innerText}, ${this.value}, ${document.getElementById('sec3Circle2AlphaVal').innerText})`); document.getElementById('sec3Circle2LitVal').innerText = this.value; document.getElementById('sec3Circle2LitCode').innerText = this.value;">
-                  </div>
-                  <div class="control-group">
-                    <label><span>Alpha</span> <span id="sec3Circle2AlphaVal">0.7</span></label>
-                    <input type="range" min="0" max="1" step="0.05" value="0.7" autocomplete="off"
-                      oninput="document.getElementById('sec3Circle2').setAttribute('fill', `hsla(${document.getElementById('sec3Circle2HueVal').innerText}, ${document.getElementById('sec3Circle2SatVal').innerText}, ${document.getElementById('sec3Circle2LitVal').innerText}, ${this.value})`); document.getElementById('sec3Circle2AlphaVal').innerText = this.value; document.getElementById('sec3Circle2AlphaCode').innerText = this.value;">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Animated Circle 3 Tab -->
-              <div class="tab-content" id="sec3Circle3Tab">
-                <div class="playground-sliders">
-                  <div class="control-group">
-                    <label><span>Animation Speed</span> <span id="sec3Circle3SpeedVal">90</span></label>
-                    <input type="range" min="0" max="360" step="10" value="90" autocomplete="off"
-                      oninput="document.getElementById('sec3Circle3').setAttribute('fill', `hsl(t * ${this.value}, 100, 50)`); document.getElementById('sec3Circle3SpeedVal').innerText = this.value; document.getElementById('sec3Circle3SpeedCode').innerText = this.value;">
-                  </div>
-                  <p class="tab-note">This circle's Hue is driven by the time variable <code>t</code>. Adjusting the slider changes the multiplier, affecting how fast the colors cycle.</p>
-                </div>
-              </div>
-
             </div>
+
+            <!-- HSL Circle 1 Tab -->
+            <div class="tab-content active" id="sec3Circle1Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Hue (0-360)</span> <span id="sec3Circle1HueVal">0</span></label>
+                  <input type="range" min="0" max="360" step="1" value="0" autocomplete="off"
+                    oninput="document.getElementById('sec3Circle1').setAttribute('fill', `hsl(${this.value}, ${document.getElementById('sec3Circle1SatVal').innerText}, ${document.getElementById('sec3Circle1LitVal').innerText})`); document.getElementById('sec3Circle1HueVal').innerText = this.value; document.getElementById('sec3Circle1HueCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Saturation</span> <span id="sec3Circle1SatVal">100</span></label>
+                  <input type="range" min="0" max="100" step="1" value="100" autocomplete="off"
+                    oninput="document.getElementById('sec3Circle1').setAttribute('fill', `hsl(${document.getElementById('sec3Circle1HueVal').innerText}, ${this.value}, ${document.getElementById('sec3Circle1LitVal').innerText})`); document.getElementById('sec3Circle1SatVal').innerText = this.value; document.getElementById('sec3Circle1SatCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Lightness</span> <span id="sec3Circle1LitVal">50</span></label>
+                  <input type="range" min="0" max="100" step="1" value="50" autocomplete="off"
+                    oninput="document.getElementById('sec3Circle1').setAttribute('fill', `hsl(${document.getElementById('sec3Circle1HueVal').innerText}, ${document.getElementById('sec3Circle1SatVal').innerText}, ${this.value})`); document.getElementById('sec3Circle1LitVal').innerText = this.value; document.getElementById('sec3Circle1LitCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+
+            <!-- HSLA Circle 2 Tab -->
+            <div class="tab-content" id="sec3Circle2Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Hue (0-360)</span> <span id="sec3Circle2HueVal">120</span></label>
+                  <input type="range" min="0" max="360" step="1" value="120" autocomplete="off"
+                    oninput="document.getElementById('sec3Circle2').setAttribute('fill', `hsla(${this.value}, ${document.getElementById('sec3Circle2SatVal').innerText}, ${document.getElementById('sec3Circle2LitVal').innerText}, ${document.getElementById('sec3Circle2AlphaVal').innerText})`); document.getElementById('sec3Circle2HueVal').innerText = this.value; document.getElementById('sec3Circle2HueCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Saturation</span> <span id="sec3Circle2SatVal">100</span></label>
+                  <input type="range" min="0" max="100" step="1" value="100" autocomplete="off"
+                    oninput="document.getElementById('sec3Circle2').setAttribute('fill', `hsla(${document.getElementById('sec3Circle2HueVal').innerText}, ${this.value}, ${document.getElementById('sec3Circle2LitVal').innerText}, ${document.getElementById('sec3Circle2AlphaVal').innerText})`); document.getElementById('sec3Circle2SatVal').innerText = this.value; document.getElementById('sec3Circle2SatCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Lightness</span> <span id="sec3Circle2LitVal">50</span></label>
+                  <input type="range" min="0" max="100" step="1" value="50" autocomplete="off"
+                    oninput="document.getElementById('sec3Circle2').setAttribute('fill', `hsla(${document.getElementById('sec3Circle2HueVal').innerText}, ${document.getElementById('sec3Circle2SatVal').innerText}, ${this.value}, ${document.getElementById('sec3Circle2AlphaVal').innerText})`); document.getElementById('sec3Circle2LitVal').innerText = this.value; document.getElementById('sec3Circle2LitCode').innerText = this.value;">
+                </div>
+                <div class="control-group">
+                  <label><span>Alpha</span> <span id="sec3Circle2AlphaVal">0.7</span></label>
+                  <input type="range" min="0" max="1" step="0.05" value="0.7" autocomplete="off"
+                    oninput="document.getElementById('sec3Circle2').setAttribute('fill', `hsla(${document.getElementById('sec3Circle2HueVal').innerText}, ${document.getElementById('sec3Circle2SatVal').innerText}, ${document.getElementById('sec3Circle2LitVal').innerText}, ${this.value})`); document.getElementById('sec3Circle2AlphaVal').innerText = this.value; document.getElementById('sec3Circle2AlphaCode').innerText = this.value;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Animated Circle 3 Tab -->
+            <div class="tab-content" id="sec3Circle3Tab">
+              <div class="playground-sliders">
+                <div class="control-group">
+                  <label><span>Animation Speed</span> <span id="sec3Circle3SpeedVal">90</span></label>
+                  <input type="range" min="0" max="360" step="10" value="90" autocomplete="off"
+                    oninput="document.getElementById('sec3Circle3').setAttribute('fill', `hsl(t * ${this.value}, 100, 50)`); document.getElementById('sec3Circle3SpeedVal').innerText = this.value; document.getElementById('sec3Circle3SpeedCode').innerText = this.value;">
+                </div>
+                <p class="tab-note">This circle's Hue is driven by the time variable <code>t</code>. Adjusting the slider changes the multiplier, affecting how fast the colors cycle.</p>
+              </div>
+            </div>
+
           </div>
+
+          <pxl-stage id="sec3Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+              <pxl-circle id="sec3Circle1" x="500" y="230" r="140" fill="hsl(0, 100, 50)"></pxl-circle>
+              <pxl-circle id="sec3Circle2" x="420" y="370" r="140" fill="hsla(120, 100, 50, 0.7)"></pxl-circle>
+              <pxl-circle id="sec3Circle3" x="580" y="370" r="140" fill="hsl(t * 90, 100, 50)"></pxl-circle>
+            </pxl-layer>
+          </pxl-stage>
         </div>
 
         <!-- ================================================================= -->
