@@ -113,13 +113,13 @@
                     </div>
                   </div>
                   <div class="control-group" id="sec1ex1SliderGroup" style="display: none;">
-                    <label><span>Radius (r1)</span> <span id="sec1ex1Var1Val">200</span></label>
+                    <label><span>Gradient r1</span> <span id="sec1ex1Var1Val">200</span></label>
                     <input type="range" id="sec1ex1Var1Input" min="20" max="500" step="10" value="200" autocomplete="off"
                       data-mark="sec1ex1GradR1Code"
                       oninput="document.getElementById('sec1ex1Var1').setAttribute('value', this.value); document.getElementById('sec1ex1Var1Val').innerText = this.value; document.getElementById('sec1ex1GradR1Code').innerText = this.value;">
                   </div>
                   <div class="control-group" id="sec1ex1KeywordGroup">
-                    <label><span>Keyword (r1)</span></label>
+                    <label><span>Gradient r1</span></label>
                     <select id="sec1ex1Var1Select" autocomplete="off" onchange="setRadialRadiusMode('sec1ex1', 'R1', this.value)" data-mark="sec1ex1GradR1Code">
                       <optgroup label="Side Edges">
                         <option value="top">top</option>
@@ -227,7 +227,7 @@
           <li><strong>Keyword Radius:</strong> A responsive boundary that dynamically calculates distance from <code>(x0, y0)</code> and snaps to the shape's edges or corners (e.g., <code>r1 = 'top-right'</code>).</li>
         </ul>
 
-        <p>In this example, adjust the gradient origin with the Center X0 and Center Y0 sliders, and select a keyword anchor or switch to numeric mode to see how the gradient radiates outward from the custom center point. The dashed pink circle represents the calculated radius boundary.</p>
+        <p>In this example, move the gradient center with the Gradient x0 and Gradient y0 sliders, and select a keyword anchor or switch to numeric mode to see how the gradient radiates outward from the custom center point. The dashed pink circle represents the calculated radius boundary.</p>
 
         <div>
           <div>
@@ -278,13 +278,13 @@
               <div class="tab-content active" id="sec2ex1GradTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Center X0 <span class="indicator-dot"></span></span> <span id="sec2ex1Var1Val">0.3</span></label>
+                    <label><span>Gradient x0 <span class="indicator-dot"></span></span> <span id="sec2ex1Var1Val">0.3</span></label>
                     <input type="range" id="sec2ex1Var1Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
                       data-mark="sec2ex1GradX0Code"
                       oninput="document.getElementById('sec2ex1Var1').setAttribute('value', this.value); document.getElementById('sec2ex1Var1Val').innerText = this.value; document.getElementById('sec2ex1GradX0Code').innerText = this.value; refreshRadialKeywords('sec2ex1', 'R1');">
                   </div>
                   <div class="control-group">
-                    <label><span>Center Y0</span> <span id="sec2ex1Var2Val">0.3</span></label>
+                    <label><span>Gradient y0</span> <span id="sec2ex1Var2Val">0.3</span></label>
                     <input type="range" id="sec2ex1Var2Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
                       data-mark="sec2ex1GradY0Code"
                       oninput="document.getElementById('sec2ex1Var2').setAttribute('value', this.value); document.getElementById('sec2ex1Var2Val').innerText = this.value; document.getElementById('sec2ex1GradY0Code').innerText = this.value; refreshRadialKeywords('sec2ex1', 'R1');">
@@ -297,13 +297,13 @@
                     </div>
                   </div>
                   <div class="control-group" id="sec2ex1SliderGroup" style="display: none;">
-                    <label><span>Radius (r1)</span> <span id="sec2ex1Var3Val">200</span></label>
+                    <label><span>Gradient r1</span> <span id="sec2ex1Var3Val">200</span></label>
                     <input type="range" id="sec2ex1Var3Input" min="20" max="500" step="10" value="200" autocomplete="off"
                       data-mark="sec2ex1GradR1Code"
                       oninput="document.getElementById('sec2ex1Var3').setAttribute('value', this.value); document.getElementById('sec2ex1Var3Val').innerText = this.value; document.getElementById('sec2ex1GradR1Code').innerText = this.value;">
                   </div>
                   <div class="control-group" id="sec2ex1KeywordGroup">
-                    <label><span>Keyword (r1)</span></label>
+                    <label><span>Gradient r1</span></label>
                     <select id="sec2ex1Var3Select" autocomplete="off" onchange="setRadialRadiusMode('sec2ex1', 'R1', this.value)" data-mark="sec2ex1GradR1Code">
                       <optgroup label="Side Edges">
                         <option value="top">top</option>
@@ -466,13 +466,13 @@
               <div class="tab-content active" id="sec3ex1StartTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Center X0 <span class="indicator-dot"></span></span> <span id="sec3ex1Var1Val">0.3</span></label>
+                    <label><span>Gradient x0 <span class="indicator-dot"></span></span> <span id="sec3ex1Var1Val">0.3</span></label>
                     <input type="range" id="sec3ex1Var1Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
                       data-mark="sec3ex1GradX0Code"
                       oninput="document.getElementById('sec3ex1Var1').setAttribute('value', this.value); document.getElementById('sec3ex1Var1Val').innerText = this.value; document.getElementById('sec3ex1GradX0Code').innerText = this.value; refreshRadialKeywords('sec3ex1', 'R0');">
                   </div>
                   <div class="control-group">
-                    <label><span>Center Y0</span> <span id="sec3ex1Var2Val">0.3</span></label>
+                    <label><span>Gradient y0</span> <span id="sec3ex1Var2Val">0.3</span></label>
                     <input type="range" id="sec3ex1Var2Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
                       data-mark="sec3ex1GradY0Code"
                       oninput="document.getElementById('sec3ex1Var2').setAttribute('value', this.value); document.getElementById('sec3ex1Var2Val').innerText = this.value; document.getElementById('sec3ex1GradY0Code').innerText = this.value; refreshRadialKeywords('sec3ex1', 'R0');">
@@ -485,13 +485,13 @@
                     </div>
                   </div>
                   <div class="control-group" id="sec3ex1R0SliderGroup">
-                    <label><span>Radius (r0)</span> <span id="sec3ex1Var3Val">40</span></label>
+                    <label><span>Gradient r0</span> <span id="sec3ex1Var3Val">40</span></label>
                     <input type="range" id="sec3ex1Var3Input" min="0" max="300" step="5" value="40" autocomplete="off"
                       data-mark="sec3ex1GradR0Code"
                       oninput="document.getElementById('sec3ex1Var3').setAttribute('value', this.value); document.getElementById('sec3ex1Var3Val').innerText = this.value; document.getElementById('sec3ex1GradR0Code').innerText = this.value;">
                   </div>
                   <div class="control-group" id="sec3ex1R0KeywordGroup" style="display: none;">
-                    <label><span>Keyword (r0)</span></label>
+                    <label><span>Gradient r0</span></label>
                     <select id="sec3ex1Var3Select" autocomplete="off" onchange="setRadialRadiusMode('sec3ex1', 'R0', this.value)" data-mark="sec3ex1GradR0Code">
                       <optgroup label="Side Edges">
                         <option value="top">top</option>
@@ -524,13 +524,13 @@
               <div class="tab-content" id="sec3ex1EndTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Center X1 <span class="indicator-dot"></span></span> <span id="sec3ex1Var4Val">0.6</span></label>
+                    <label><span>Gradient x1 <span class="indicator-dot"></span></span> <span id="sec3ex1Var4Val">0.6</span></label>
                     <input type="range" id="sec3ex1Var4Input" min="0" max="1" step="0.05" value="0.6" autocomplete="off"
                       data-mark="sec3ex1GradX1Code"
                       oninput="document.getElementById('sec3ex1Var4').setAttribute('value', this.value); document.getElementById('sec3ex1Var4Val').innerText = this.value; document.getElementById('sec3ex1GradX1Code').innerText = this.value; refreshRadialKeywords('sec3ex1', 'R1');">
                   </div>
                   <div class="control-group">
-                    <label><span>Center Y1</span> <span id="sec3ex1Var5Val">0.6</span></label>
+                    <label><span>Gradient y1</span> <span id="sec3ex1Var5Val">0.6</span></label>
                     <input type="range" id="sec3ex1Var5Input" min="0" max="1" step="0.05" value="0.6" autocomplete="off"
                       data-mark="sec3ex1GradY1Code"
                       oninput="document.getElementById('sec3ex1Var5').setAttribute('value', this.value); document.getElementById('sec3ex1Var5Val').innerText = this.value; document.getElementById('sec3ex1GradY1Code').innerText = this.value; refreshRadialKeywords('sec3ex1', 'R1');">
@@ -543,13 +543,13 @@
                     </div>
                   </div>
                   <div class="control-group" id="sec3ex1R1SliderGroup">
-                    <label><span>Radius (r1)</span> <span id="sec3ex1Var6Val">200</span></label>
+                    <label><span>Gradient r1</span> <span id="sec3ex1Var6Val">200</span></label>
                     <input type="range" id="sec3ex1Var6Input" min="20" max="500" step="10" value="200" autocomplete="off"
                       data-mark="sec3ex1GradR1Code"
                       oninput="document.getElementById('sec3ex1Var6').setAttribute('value', this.value); document.getElementById('sec3ex1Var6Val').innerText = this.value; document.getElementById('sec3ex1GradR1Code').innerText = this.value;">
                   </div>
                   <div class="control-group" id="sec3ex1R1KeywordGroup" style="display: none;">
-                    <label><span>Keyword (r1)</span></label>
+                    <label><span>Gradient r1</span></label>
                     <select id="sec3ex1Var6Select" autocomplete="off" onchange="setRadialRadiusMode('sec3ex1', 'R1', this.value)" data-mark="sec3ex1GradR1Code">
                       <optgroup label="Side Edges">
                         <option value="top">top</option>

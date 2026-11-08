@@ -51,7 +51,7 @@
 
         <p>The parameter <code>startAngle</code> defines the starting angle in degrees (0°–360°). The gradient sweeps clockwise around the center, where <strong>0°</strong> points directly right along the +X axis (3 o'clock).</p>
 
-        <p>In this example, drag the Start Angle slider to rotate the gradient sweep around the center <code>(0.5, 0.5)</code>. The pink arrow indicates the exact angle where the gradient begins (offset 0) and completes its 360° revolution.</p>
+        <p>In this example, drag the Gradient Start Angle slider to rotate the gradient sweep around the center <code>(0.5, 0.5)</code>. The pink arrow indicates the exact angle where the gradient begins (offset 0) and completes its 360° revolution.</p>
 
         <div>
           <div>
@@ -102,7 +102,7 @@
               <div class="tab-content active" id="sec1ex1GradTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Start Angle <span class="indicator-dot"></span></span> <span id="sec1ex1Var1Val">0°</span></label>
+                    <label><span>Gradient Start Angle <span class="indicator-dot"></span></span> <span id="sec1ex1Var1Val">0°</span></label>
                     <input type="range" id="sec1ex1Var1Input" min="0" max="360" step="5" value="0" autocomplete="off"
                       data-mark="sec1ex1GradAngleCode"
                       oninput="document.getElementById('sec1ex1Var1').setAttribute('value', this.value); document.getElementById('sec1ex1Var1Val').innerText = this.value + '°'; document.getElementById('sec1ex1GradAngleCode').innerText = this.value;">
@@ -175,7 +175,7 @@
 
         <p>The parameters <code>cx</code> and <code>cy</code> define the origin using normalized bounding box coordinates (from <code>0</code> to <code>1</code>). A center of <code>[0.5, 0.5]</code> is the geometric center of the shape, while <code>[0, 0]</code> is the top-left corner and <code>[1, 1]</code> is the bottom-right corner.</p>
 
-        <p>In this example, adjust the Center X0 and Center Y0 sliders to shift the center of rotation, and drag the Start Angle slider to orient the sweep. The pink dot marks the center of rotation, and the pink arrow indicates the starting ray.</p>
+        <p>In this example, adjust the Gradient cx and Gradient cy sliders to shift the center of rotation, and drag the Gradient Start Angle slider to orient the sweep. The pink dot marks the center of rotation, and the pink arrow indicates the starting ray.</p>
 
         <div>
           <div>
@@ -226,19 +226,19 @@
               <div class="tab-content active" id="sec2ex1GradTab">
                 <div class="playground-sliders">
                   <div class="control-group">
-                    <label><span>Center X0 <span class="indicator-dot"></span></span> <span id="sec2ex1Var2Val">0.3</span></label>
+                    <label><span>Gradient cx <span class="indicator-dot"></span></span> <span id="sec2ex1Var2Val">0.3</span></label>
                     <input type="range" id="sec2ex1Var2Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
                       data-mark="sec2ex1GradCxCode"
                       oninput="document.getElementById('sec2ex1Var2').setAttribute('value', this.value); document.getElementById('sec2ex1Var2Val').innerText = this.value; document.getElementById('sec2ex1GradCxCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Center Y0</span> <span id="sec2ex1Var3Val">0.3</span></label>
+                    <label><span>Gradient cy</span> <span id="sec2ex1Var3Val">0.3</span></label>
                     <input type="range" id="sec2ex1Var3Input" min="0" max="1" step="0.05" value="0.3" autocomplete="off"
                       data-mark="sec2ex1GradCyCode"
                       oninput="document.getElementById('sec2ex1Var3').setAttribute('value', this.value); document.getElementById('sec2ex1Var3Val').innerText = this.value; document.getElementById('sec2ex1GradCyCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Start Angle <span class="indicator-dot"></span></span> <span id="sec2ex1Var1Val">45°</span></label>
+                    <label><span>Gradient Start Angle <span class="indicator-dot"></span></span> <span id="sec2ex1Var1Val">45°</span></label>
                     <input type="range" id="sec2ex1Var1Input" min="0" max="360" step="5" value="45" autocomplete="off"
                       data-mark="sec2ex1GradAngleCode"
                       oninput="document.getElementById('sec2ex1Var1').setAttribute('value', this.value); document.getElementById('sec2ex1Var1Val').innerText = this.value + '°'; document.getElementById('sec2ex1GradAngleCode').innerText = this.value;">
