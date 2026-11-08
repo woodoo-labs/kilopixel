@@ -221,7 +221,7 @@
         <!-- SECTION 3: OPEN & CLOSED CHORDS -->
         <!-- ================================================================= -->
         <h2>3. Chords</h2>
-        <p>By default, sweeping a partial circle creates an <strong>Open Chord</strong>: the interior is filled, but the stroke only follows the curved perimeter. Setting <code>closed="true"</code> explicitly connects the endpoints, forming a <strong>Closed Chord</strong> (a circular segment) where the stroke fully wraps around the straight edge.</p>
+        <p>By default, sweeping a partial circle creates an <strong>open chord</strong>: the interior is filled, but the stroke only follows the curved perimeter. Setting <code>closed="true"</code> connects the endpoints, forming a <strong>closed chord</strong> (a circular segment) where the stroke fully wraps around the straight edge.</p>
 
         <!-- Declarative HTML markup above stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
@@ -305,7 +305,7 @@
         <!-- SECTION 4: SIMPLE ARCS -->
         <!-- ================================================================= -->
         <h2>4. Arcs</h2>
-        <p>By simply omitting the <code>fill</code> attribute, you can use circles to draw un-filled, stroked curved lines. The base Shape class also supports <code>linedash</code>, allowing you to easily create dashed dials and technical gauges.</p>
+        <p>Without a <code>fill</code>, a circle draws only its stroke, so an open arc becomes a curved line. Like every shape, it supports dash patterns (<code>linedash</code>), for example for dashed dials and gauges.</p>
 
         <!-- Declarative HTML markup above stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;

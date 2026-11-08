@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Create dashed strokes, alternating gap patterns, and 60fps marching ants animations using linedash and dashoffset in Kilopixel.">
+  <meta name="description" content="Create dashed strokes, dash-and-gap patterns and marching ants animations with linedash and dashoffset in Kilopixel.">
   <title>Dashes | Kilopixel</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/docs.css">
@@ -45,7 +45,7 @@
         <h2>1. Dashed Strokes &amp; Offset</h2>
         <p>The <code>linedash</code> and <code>dashoffset</code> attributes allow you to create patterned, dashed outlines across any Kilopixel shape. Rather than drawing a continuous path, the stroke alternates between drawn dash segments and empty gaps.</p>
         <ul>
-          <li><strong>Dash Pattern:</strong> The <code>linedash</code> attribute accepts a JavaScript array of numbers defining alternating dash and gap lengths (e.g., <code>linedash="[24, 16]"</code>). As a fast-path, a single number without brackets (e.g., <code>linedash="24"</code>) is also supported to create an equal repeating dash and gap.</li>
+          <li><strong>Dash Pattern:</strong> The <code>linedash</code> attribute accepts a JavaScript array of numbers defining alternating dash and gap lengths (e.g., <code>linedash="[24, 16]"</code>). A single number without brackets (e.g., <code>linedash="24"</code>) draws dashes and gaps of equal length.</li>
           <li><strong>Phase Shift:</strong> The <code>dashoffset</code> attribute shifts where the pattern begins along the path perimeter, enabling precise alignment or manual sliding.</li>
         </ul>
 
@@ -174,7 +174,7 @@
         <!-- SECTION 2: MARCHING ANTS & ANIMATED STROKES -->
         <!-- ================================================================= -->
         <h2>2. Marching Ants &amp; Continuous Animation</h2>
-        <p>Combining <code>linedash</code> with a dynamic <code>dashoffset</code> expression produces continuous stroke animation &mdash; commonly known as <strong>marching ants</strong>. By multiplying the framework's time driver <code>t</code> by a velocity coefficient (e.g. <code>dashoffset="-t * 40"</code>), the dash pattern advances smoothly along the path perimeter at 60fps.</p>
+        <p>Combining <code>linedash</code> with a dynamic <code>dashoffset</code> expression produces continuous stroke animation &mdash; commonly known as <strong>marching ants</strong>. By multiplying the framework's time driver <code>t</code> by a velocity coefficient (e.g. <code>dashoffset="-t * 40"</code>), the dash pattern moves steadily along the path.</p>
 
         <div class="callout-info">
           <p class="callout-title">Directionality &amp; Flow</p>

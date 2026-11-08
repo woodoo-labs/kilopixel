@@ -31,7 +31,7 @@
     <main class="docs-content">
       <div class="docs-inner">
         <h1>Rectangle</h1>
-        <p class="lead">The rectangle shape renders boxes, cards, and buttons. It features a 9-position anchor system for intuitive positioning and independent per-corner rounded radii.</p>
+        <p class="lead">The rectangle shape renders boxes, cards, and buttons. It can be placed by any of 9 anchor points and has its own radius for each corner.</p>
 
         <!-- ================================================================= -->
         <!-- SECTION 1: DIMENSIONS                                             -->
@@ -135,7 +135,7 @@
 
         <div class="callout-info">
           <p class="callout-title">Automatic Radius Clamping</p>
-          <p class="callout-body">The canvas engine automatically clamps the effective corner radius to half of the shortest side (<code>min(w, h) / 2</code>). Setting <code>r="100"</code> on a rectangle with a height of <code>120</code> will safely clamp the radius to <code>60</code>, creating a seamless pill shape without distortion.</p>
+          <p class="callout-body">The canvas engine automatically clamps the effective corner radius to half of the shortest side (<code>min(w, h) / 2</code>). Setting <code>r="100"</code> on a rectangle with a height of <code>120</code> draws a radius of <code>60</code>, so the rectangle becomes a pill shape.</p>
         </div>
 
         <!-- Declarative HTML markup above stage -->

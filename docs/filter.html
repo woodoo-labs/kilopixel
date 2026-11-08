@@ -35,7 +35,7 @@
 
         <div class="callout-info">
           <p class="callout-title">Never Use Units!</p>
-          <p class="callout-body">By sticking to pure numbers (e.g., <code>filter="blur(15)"</code> or <code>contrast(130)</code>), you can seamlessly animate filters using math and time variables. The engine handles all the CSS units (<code>px</code>, <code>%</code>, <code>deg</code>) behind the scenes and automatically scales spatial filters with the stage.</p>
+          <p class="callout-body">By sticking to pure numbers (e.g., <code>filter="blur(15)"</code> or <code>contrast(130)</code>), you can animate filters with math and time variables. The engine handles all the CSS units (<code>px</code>, <code>%</code>, <code>deg</code>) behind the scenes and automatically scales spatial filters with the stage.</p>
           <p class="callout-body"><strong>Exception:</strong> With JavaScript <strong>backticks</strong> (template literals), e.g. <code>filter="`blur(${t * 10}px)`"</code>, JavaScript builds the string, so you write the units (<code>px</code>, <code>%</code>, <code>deg</code>) yourself. <code>px</code> values still scale with the stage, like the helpers' values: <code>px</code> means stage units here, not screen pixels.</p>
         </div>
 
@@ -43,9 +43,9 @@
         <!-- SECTION 1: FILTER PLAYGROUND -->
         <!-- ================================================================= -->
         <h2>1. Filter Playground</h2>
-        <p>Kilopixel allows you to apply filters at two different architectural levels:</p>
+        <p>Filters work on two levels:</p>
         <ul>
-          <li><strong>Layer Level:</strong> Applied to the layer canvas via CSS (<code>canvas.style.filter</code>). The entire composition is flattened and filtered together, producing unified drop shadows and group blurs across all shapes. Supported across 100% of desktop and mobile browsers.</li>
+          <li><strong>Layer Level:</strong> Applied to the layer canvas via CSS (<code>canvas.style.filter</code>). The entire composition is flattened and filtered together, producing one drop shadow or blur for all shapes together. Supported in every current desktop and mobile browser.</li>
           <li><strong>Shape Level:</strong> Applied directly to the Canvas 2D context (<code>ctx.filter</code>) during the shape's draw pass. This filters only that specific shape, leaving other shapes crisp and unfiltered. Supported out of the box in Chrome, Firefox, and Edge. To enable shape-level filters in Safari, activate the <em>Canvas Filters</em> feature flag in Safari's settings (under Feature Flags).</li>
         </ul>
         <p>To combine two or more filters, wrap them in a standard JavaScript array: <code>filter="[blur(10), contrast(150)]"</code>. Single filters do not require an array (e.g., <code>filter="blur(10)"</code>). The engine automatically separates array items with spaces in the generated CSS.</p>
@@ -293,7 +293,7 @@
               </div>
             </div>
             <div class="api-item-desc">
-              Rotates colors around the color wheel in degrees. Perfect for continuous hue animations with <code>t</code> or <code>loop()</code>.
+              Rotates colors around the color wheel in degrees. With <code>t</code> or <code>loop()</code>, the hue changes continuously (e.g. <code>hueRotate(t * 45)</code>).
             </div>
           </div>
 
@@ -307,7 +307,7 @@
               </div>
             </div>
             <div class="api-item-desc">
-              Adjusts color saturation. <code>100</code> is normal, <code>0</code> is completely desaturated, and values above <code>100</code> create super-vivid colors.
+              Adjusts color saturation. <code>100</code> is normal, <code>0</code> is completely desaturated, and values above <code>100</code> make colors more intense.
             </div>
           </div>
 
@@ -335,7 +335,7 @@
               </div>
             </div>
             <div class="api-item-desc">
-              Inverts colors. <code>0</code> is normal, and <code>100</code> creates a complete photographic negative effect.
+              Inverts colors. <code>0</code> is normal, and <code>100</code> inverts the colors completely, like a photographic negative.
             </div>
           </div>
 

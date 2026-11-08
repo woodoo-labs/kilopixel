@@ -33,7 +33,7 @@
         <h1>Linear Gradient</h1>
         <p class="lead">Linear gradients (<code>linear()</code>) blend colors along a straight line across a shape. The direction is set either by an angle or by a start and end point.</p>
 
-        <p>All three gradient types (<code>linear()</code>, <code>radial()</code>, and <code>conic()</code>) build on two concepts: the <strong>Bounding Box</strong> and the <strong>colorsArray</strong>.</p>
+        <p>All three gradient types (<code>linear()</code>, <code>radial()</code>, and <code>conic()</code>) build on two concepts: the bounding box and the <code>colorsArray</code>.</p>
 
         <div class="callout-info" id="secBoundingBox">
           <p class="callout-body"><strong>Bounding Box:</strong> In Kilopixel, all gradients are mapped to an element's invisible bounding box. The top-left corner of any shape is always exactly <code>(0, 0)</code>, and the bottom-right is <code>(1, 1)</code>. This guarantees that if you move, scale, or stretch your shape, the gradient stretches with it.</p>
@@ -83,8 +83,8 @@
         <!-- SECTION 1: LINEAR GRADIENTS (ANGLE MODE) -->
         <!-- ================================================================= -->
         <h2>1. Linear Gradient (Angle Mode)</h2>
-        <p>In Angle Mode, you provide a single number representing the angle in degrees (0 to 360). Kilopixel projects a geometrically perfect angle from the center of the shape and calculates the exact distance needed to cover the farthest corners.</p>
-        <p>This means the gradient is always drawn at a strict, perfect angle on the screen, even if the bounding box of the shape is a very wide rectangle.</p>
+        <p>In Angle Mode, you provide a single number representing the angle in degrees (0 to 360). Kilopixel draws the gradient at that angle through the center of the shape and makes it just long enough to reach the farthest corners.</p>
+        <p>The angle on the screen stays the same, even if the bounding box of the shape is a very wide rectangle.</p>
 
         <div class="callout-info">
           <p class="callout-title">Angle Mode Syntax</p>
@@ -226,7 +226,7 @@
 
         <!-- 1.2 The Gallery -->
         <h3>Example 2: The Gallery</h3>
-        <p>Because the angle projection is purely geometric, it works perfectly on every shape and doesn't distort when shapes are rotated or resized. Try adjusting the size and rotation of the shapes below to see how the gradients remain locked to their absolute angles.</p>
+        <p>The angle mode works the same way on every shape. Change the size and rotation of the shapes below: each gradient keeps its angle relative to the shape.</p>
 
         <div>
           <div>
@@ -500,7 +500,7 @@
 
         <!-- 2.2 The Gallery -->
         <h3>Example 2: The Gallery</h3>
-        <p>Because the Vector Mode operates in normalized coordinates, it seamlessly adapts to different shape dimensions. Try adjusting the size and rotation of the shapes below to see how the vector anchors stretch and rotate with the shape's bounding box.</p>
+        <p>Because vector mode uses coordinates from 0 to 1, it adapts to any shape size. Change the size and rotation of the shapes below: the start and end points stretch and rotate with the shape's bounding box.</p>
 
         <div>
           <div>

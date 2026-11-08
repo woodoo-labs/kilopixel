@@ -45,7 +45,7 @@
         <!-- ================================================================= -->
         <h2>1. Named Colors &amp; Hex Codes</h2>
         <p>In Kilopixel, you can use any valid CSS color keyword (like <code>dodgerblue</code> or <code>transparent</code>) or hexadecimal code (like <code>#ef4444</code>) for the <code>fill</code> and <code>stroke</code> attributes.</p>
-        <p>In addition to standard 6-digit hex codes and 3-digit shorthand (<code>#f00</code>), Kilopixel fully supports 8-digit hexadecimal colors (<code>#rrggbbaa</code>). The final two digits represent the alpha channel (e.g. <code>#fbbf24aa</code>), creating translucent fills that blend with underlying shapes.</p>
+        <p>In addition to standard 6-digit hex codes and 3-digit shorthand (<code>#f00</code>), Kilopixel also accepts 8-digit hexadecimal colors (<code>#rrggbbaa</code>). The final two digits represent the alpha channel (e.g. <code>#fbbf24aa</code>), creating translucent fills that blend with underlying shapes.</p>
         
         <div class="callout-info">
           <p class="callout-body"><strong>Stacking Order (Z-Index):</strong> Elements are drawn strictly in the order they appear in the HTML. The last element in the markup is drawn on top of the others.</p>
@@ -310,11 +310,11 @@
         <!-- SECTION 3: HSL & HSLA -->
         <!-- ================================================================= -->
         <h2>3. HSL &amp; HSLA</h2>
-        <p>The <code>hsl()</code> and <code>hsla()</code> formats use <strong>H</strong>ue (0-360), <strong>S</strong>aturation (0-100), and <strong>L</strong>ightness (0-100). HSL is especially powerful for generative graphics because you can easily animate the Hue channel over time using the <code>t</code> variable.</p>
+        <p>The <code>hsl()</code> and <code>hsla()</code> formats use <strong>H</strong>ue (0-360), <strong>S</strong>aturation (0-100), and <strong>L</strong>ightness (0-100). HSL suits animation: changing only the hue, for example with the time <code>t</code>, runs through all colors.</p>
 
         <div class="callout-info">
           <p class="callout-title">Never Use % Signs!</p>
-          <p class="callout-body">By sticking to pure numbers (e.g., <code>fill="hsl(120, 100, 50)"</code>), you can seamlessly animate colors using math and time variables. The engine handles all the CSS units behind the scenes.</p>
+          <p class="callout-body">By sticking to pure numbers (e.g., <code>fill="hsl(120, 100, 50)"</code>), you can animate colors with math and time variables. The engine handles all the CSS units behind the scenes.</p>
           <p class="callout-body"><strong>Exception:</strong> If you choose to use JavaScript <strong>backticks</strong> (template literals) for string interpolation (e.g., <code>fill="`hsl(${t*90}, 100%, 50%)`"</code>), your math and time variables are evaluated natively by JavaScript. Because this bypasses Kilopixel's formatting helpers, you <strong>must</strong> include the <code>%</code> signs manually so the final generated string is valid CSS.</p>
         </div>
 
@@ -421,7 +421,7 @@
         <!-- SECTION 4: GRADIENTS -->
         <!-- ================================================================= -->
         <h2>4. Gradients</h2>
-        <p>The <code>fill</code> attribute also accepts dynamic gradient shaders: <code>linear()</code>, <code>radial()</code>, and <code>conic()</code>. Gradients scale smoothly with the logical canvas and adapt geometrically when shapes are rotated or resized.</p>
+        <p>The <code>fill</code> attribute also accepts dynamic gradient shaders: <code>linear()</code>, <code>radial()</code>, and <code>conic()</code>. Gradients scale with the stage and follow the shape when it is rotated or resized.</p>
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;

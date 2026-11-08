@@ -255,7 +255,7 @@
         <!-- SECTION 3: OPEN & CLOSED CHORDS -->
         <!-- ================================================================= -->
         <h2>3. Chords</h2>
-        <p>By default, sweeping a partial ellipse creates an <strong>Open Chord</strong>: the interior is filled, but the stroke only follows the curved perimeter. Setting <code>closed="true"</code> explicitly connects the endpoints with a straight chord, forming a <strong>Closed Chord</strong> (an elliptical segment or lens cap) where the stroke fully wraps around the straight edge.</p>
+        <p>By default, sweeping a partial ellipse creates an <strong>open chord</strong>: the interior is filled, but the stroke only follows the curved perimeter. Setting <code>closed="true"</code> connects the endpoints with a straight chord, forming a <strong>closed chord</strong> (an elliptical segment or lens cap) where the stroke fully wraps around the straight edge.</p>
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
@@ -350,7 +350,7 @@
         <!-- SECTION 4: SIMPLE ARCS -->
         <!-- ================================================================= -->
         <h2>4. Arcs</h2>
-        <p>By simply omitting the <code>fill</code> attribute, you can use ellipses to draw un-filled, stroked curved lines &mdash; perfect for orbits and perspective trajectory paths. The base Shape class also supports <code>linedash</code>, allowing you to easily create dashed orbital tracks and technical indicators.</p>
+        <p>Without a <code>fill</code>, an ellipse draws only its stroke, so an open arc becomes a curved line, for example an orbit. Like every shape, it supports dash patterns (<code>linedash</code>), for example for dashed tracks.</p>
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;

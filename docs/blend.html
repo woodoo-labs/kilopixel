@@ -37,7 +37,7 @@
         <!-- SECTION 1: ALPHA (OPACITY) -->
         <!-- ================================================================= -->
         <h2>1. Alpha (Opacity)</h2>
-        <p>Kilopixel allows you to apply transparency at two different architectural levels:</p>
+        <p>Transparency works on two levels:</p>
         <ul>
           <li><strong>Layer Level:</strong> When <code>alpha</code> is applied to a <code>&lt;pxl-layer&gt;</code>, the shapes inside are drawn normally (blocking each other opaquely). Then, the entire flattened canvas element is made translucent via the CSS <code>opacity</code> property.</li>
           <li><strong>Shape Level:</strong> When <code>alpha</code> is applied directly to a <code>&lt;pxl-circle&gt;</code>, it maps to the Canvas <code>globalAlpha</code> property. The shapes become translucent during the draw loop, causing them to bleed through each other where they overlap.</li>

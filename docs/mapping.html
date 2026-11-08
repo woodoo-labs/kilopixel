@@ -317,7 +317,7 @@
         <!-- SECTION 3: CENTER, OFFSET AND TOTAL POSITION                      -->
         <!-- ================================================================= -->
         <h2>3. Center, Offset and Total Position</h2>
-        <p>A shape's <code>x</code> and <code>y</code> are its center (the pivot): <code>rotate</code> and <code>zoom</code> turn and scale the shape around this point. <code>dx</code> and <code>dy</code> then move the drawn shape away from the center. The planet below has <code>dx="200"</code>, so it is drawn 200 units from its center, and its <code>rotate</code> moves it around the center like an orbit.</p>
+        <p>A shape's <code>x</code> and <code>y</code> are its center (the pivot): <code>rotate</code> and <code>zoom</code> turn and scale the shape around this point. <code>dx</code> and <code>dy</code> then move the drawn shape away from the center. The planet below has <code>dx="200"</code>, so it is drawn at a distance of 200 from its center, and its <code>rotate</code> moves it around the center like an orbit.</p>
         <p><code>toLocal()</code> can read both points. Its second argument chooses which one:</p>
         <ul>
           <li><strong>Center:</strong> <code>toLocal(ref.planet, 'x')</code> and <code>toLocal(ref.planet, 'y')</code> return the center. Use them for rings and orbits around the shape.</li>
@@ -327,7 +327,7 @@
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;!-- Planet: center at (100, 0), drawn 200 units away --&gt;
+  &lt;!-- Planet: center at (100, 0), drawn at a distance of 200 --&gt;
   &lt;pxl-layer x="<mark id="sec3LayerXCode">400</mark>" y="<mark id="sec3LayerYCode">300</mark>" rotate="<mark id="sec3LayerRotCode">0</mark>"&gt;
     &lt;pxl-circle id="planet" x="100" y="0" r="40"
       fill="#ffedd566" stroke="#f97316" strokewidth="4"

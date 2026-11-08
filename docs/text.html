@@ -51,7 +51,7 @@
 
         <div class="callout-info">
           <p class="callout-title">System Fonts vs. Web Fonts</p>
-          <p class="callout-body">Standard system fonts like <code>sans-serif</code>, <code>serif</code>, <code>monospace</code>, and <code>cursive</code> draw immediately with zero network latency. However, not all fonts support the full range of numeric weights: system fallbacks typically provide only regular (<code>400</code>) and bold (<code>700</code>), automatically snapping intermediate values to the nearest available cut. External web fonts like &lsquo;Inter&rsquo; load lazily: each font and each weight is downloaded the first time text is drawn with it. Until it arrives, the text uses a fallback font, and Kilopixel redraws it automatically.</p>
+          <p class="callout-body">Standard system fonts like <code>sans-serif</code>, <code>serif</code>, <code>monospace</code>, and <code>cursive</code> draw immediately. However, not all fonts support the full range of numeric weights: system fallbacks typically provide only regular (<code>400</code>) and bold (<code>700</code>), automatically snapping intermediate values to the nearest available cut. External web fonts like &lsquo;Inter&rsquo; load lazily: each font and each weight is downloaded the first time text is drawn with it. Until it arrives, the text uses a fallback font, and Kilopixel redraws it automatically.</p>
         </div>
 
         <!-- Declarative HTML markup above stage -->
@@ -413,7 +413,7 @@
         <!-- SECTION 5: MAX WIDTH -->
         <!-- ================================================================= -->
         <h2>5. Max Width</h2>
-        <p>The <code>maxwidth</code> attribute enforces a strict horizontal boundary by compressing and condensing glyphs rather than wrapping words into multiple lines. This is ideal for fixed-width badges, table headers, and constrained UI labels.</p>
+        <p>The <code>maxwidth</code> attribute enforces a strict horizontal boundary by compressing and condensing glyphs rather than wrapping words into multiple lines. This keeps labels such as badges and table headers inside a fixed width.</p>
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
@@ -493,11 +493,11 @@
         <!-- SECTION 6: REVEAL -->
         <!-- ================================================================= -->
         <h2>6. Reveal</h2>
-        <p>The <code>reveal</code> attribute controls progressive character display using a normalized percentage from <code>0.0</code> (completely hidden) to <code>1.0</code> (fully displayed). This makes typewriter animations, narrative dialogue, and telemetry readouts effortless.</p>
+        <p>The <code>reveal</code> attribute controls progressive character display using a normalized percentage from <code>0.0</code> (completely hidden) to <code>1.0</code> (fully displayed). Animating it gives a typewriter effect.</p>
 
         <div class="callout-info">
-          <p class="callout-title">Autonomous Typing Animations</p>
-          <p class="callout-body">While the slider below allows manual scrubbing through characters, you can animate the reveal autonomously in declarative HTML using Kilopixel&rsquo;s built-in time drivers &mdash; such as <code>reveal="loop(4)"</code> to repeat every 4 seconds, or <code>reveal="clamp(loop(5) * 1.3, 0, 1)"</code> to hold on the completed message before looping.</p>
+          <p class="callout-title">Animated Reveal</p>
+          <p class="callout-body">The sliders below set <code>reveal</code> by hand. With a time driver it animates on its own: <code>reveal="loop(4)"</code> repeats every 4 seconds, and <code>reveal="clamp(loop(5) * 1.3, 0, 1)"</code> holds the full text for a moment before it starts again.</p>
         </div>
 
         <!-- Declarative HTML markup above stage -->
@@ -512,7 +512,7 @@
 
     &lt;!-- Right: Multi-Line Wrapped Paragraph (Blue Scheme) --&gt;
     &lt;pxl-text x="550" y="150" font="Inter" fill="#3b82f6" align="start" baseline="top"
-      text="Kilopixel compiles declarative canvas graphics into 60fps animations. Progressive character reveal makes storytelling and narrative dialogue completely effortless."
+      text="Reveal shows a text one character at a time, in reading order across all lines. Here the text wraps at a width of 400, so the reveal runs from line to line."
       size="<mark id="sec6Text2SizeCode">30</mark>" lineheight="<mark id="sec6Text2LineheightCode">1.4</mark>"
       reveal="<mark id="sec6Text2RevealCode">0.55</mark>" width="<mark id="sec6Text2WidthCode">400</mark>"&gt;
     &lt;/pxl-text&gt;
@@ -613,7 +613,7 @@
                 reveal="0.55" width="400"
                 size="30" lineheight="1.4"
                 align="start" baseline="top"
-                text="Kilopixel compiles declarative canvas graphics into 60fps animations. Progressive character reveal makes storytelling and narrative dialogue completely effortless."></pxl-text>
+                text="Reveal shows a text one character at a time, in reading order across all lines. Here the text wraps at a width of 400, so the reveal runs from line to line."></pxl-text>
 
               <!-- Right: Live Paragraph Readout (Blue Scheme) -->
               <pxl-text x="750" y="500"
@@ -628,7 +628,7 @@
         <!-- SECTION 7: OUTLINE -->
         <!-- ================================================================= -->
         <h2>7. Outline</h2>
-        <p>Text elements can be rendered in hollow outline mode by setting <code>fill="none"</code> alongside <code>stroke</code> and <code>strokewidth</code>. Outlines support solid colors, custom dash patterns via <code>linedash</code>, and dynamic directional gradients computed across the text&rsquo;s bounding box.</p>
+        <p>Text shapes are drawn as hollow outlines with <code>fill="none"</code> and a <code>stroke</code> and <code>strokewidth</code>. Outlines can use solid colors, dash patterns (<code>linedash</code>) and gradients, which span the text&rsquo;s bounding box.</p>
 
         <div class="callout-info">
           <p class="callout-title">Static Fonts for Hollow Outlines</p>
@@ -1166,7 +1166,7 @@
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Font size in logical canvas coordinates.
+                  Font size. Like all sizes, it scales with the stage.
                 </div>
               </div>
 
@@ -1246,7 +1246,7 @@
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Target container width for automatic word-wrapping in logical coordinates. Words exceeding this width wrap onto subsequent lines. Set to <code>0</code> to disable wrapping.
+                  Width for automatic word wrapping. Words that don't fit on a line move to the next line. Set to <code>0</code> to disable wrapping.
                 </div>
               </div>
 
@@ -1285,7 +1285,7 @@
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Additional horizontal spacing between consecutive characters in logical coordinates. Positive values expand tracking; negative values condense tracking.
+                  Extra space between characters. Positive values spread the letters apart; negative values move them closer together.
                 </div>
               </div>
 
@@ -1299,7 +1299,7 @@
                   </div>
                 </div>
                 <div class="api-item-desc">
-                  Typewriter reveal effect. A normalized ratio from <code>0</code> (completely hidden) to <code>1</code> (fully revealed). Progressively uncovers characters in reading order across lines with high-performance fast-path rendering.
+                  Typewriter reveal effect. A normalized ratio from <code>0</code> (completely hidden) to <code>1</code> (fully revealed). Uncovers the characters in reading order across all lines.
                 </div>
               </div>
             </div>

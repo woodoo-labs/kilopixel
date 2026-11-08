@@ -35,7 +35,7 @@
 
         <div class="callout-info">
           <p class="callout-title">Bounding Box &amp; colorsArray</p>
-          <p class="callout-body">Radial gradients map directly to the shape's <strong>Bounding Box</strong> (where top-left is <code>(0, 0)</code> and bottom-right is <code>(1, 1)</code>) and share the universal <code>colorsArray</code> parameter. If you are new to Kilopixel gradients, review the visual diagram in <a href="linear.html">Linear Gradient</a> first.</p>
+          <p class="callout-body">Radial gradients map to the shape's bounding box (where top-left is <code>(0, 0)</code> and bottom-right is <code>(1, 1)</code>) and share the universal <code>colorsArray</code> parameter. If you are new to Kilopixel gradients, review the visual diagram in <a href="linear.html">Linear Gradient</a> first.</p>
         </div>
 
         <!-- ================================================================= -->
@@ -406,8 +406,8 @@
         <!-- SECTION 3: RADIAL GRADIENT (6-VALUE MODE) -->
         <!-- ================================================================= -->
         <h2>3. Radial Gradient (6-Value Mode)</h2>
-        <p>The 6-value mode unlocks the full power of the native HTML5 Canvas radial gradient. In this mode, you define two completely independent circles: a <strong>Start Circle</strong> <code>(x0, y0, r0)</code> and an <strong>End Circle</strong> <code>(x1, y1, r1)</code>.</p>
-        <p>This allows you to give the inner circle (Start Circle) a physical volume. The space inside the Start Circle is filled with the 0% color stop, and the gradient smoothly interpolates through the space between the two circles. This is perfect for spotlights, glowing cones, spherical lighting, or crescent effects.</p>
+        <p>The 6-value mode is the full form of the canvas radial gradient: two independent circles, a <strong>Start Circle</strong> <code>(x0, y0, r0)</code> and an <strong>End Circle</strong> <code>(x1, y1, r1)</code>.</p>
+        <p>Inside the start circle, the shape is filled with the first color; between the two circles, the colors blend from the first to the last. Moving the circles apart gives spotlights, cones, spherical shading and crescents.</p>
 
         <div class="callout-info">
           <p class="callout-title">6-Value Mode Syntax</p>
