@@ -54,13 +54,13 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Circle 1 (Hex Code) --&gt;
-    &lt;pxl-circle fill="<mark id="sec1Circle1FillCode">#ef4444</mark>" stroke="#991b1b" x="<mark id="sec1Circle1XCode">500</mark>" y="<mark id="sec1Circle1YCode">230</mark>" r="<mark id="sec1Circle1RCode">140</mark>" strokewidth="4"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="<mark id="sec1Circle1FillCode">#ef4444</mark>" stroke="#991b1b" x="<mark id="sec1Circle1XCode">500</mark>" y="<mark id="sec1Circle1YCode">230</mark>" r="<mark id="sec1Circle1RCode">140</mark>" strokewidth="10"&gt;&lt;/pxl-circle&gt;
       
     &lt;!-- Circle 2 (Named CSS Color) --&gt;
-    &lt;pxl-circle fill="<mark id="sec1Circle2FillCode">dodgerblue</mark>" stroke="royalblue" x="<mark id="sec1Circle2XCode">420</mark>" y="<mark id="sec1Circle2YCode">370</mark>" r="<mark id="sec1Circle2RCode">140</mark>" strokewidth="4"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="<mark id="sec1Circle2FillCode">dodgerblue</mark>" stroke="royalblue" x="<mark id="sec1Circle2XCode">420</mark>" y="<mark id="sec1Circle2YCode">370</mark>" r="<mark id="sec1Circle2RCode">140</mark>" strokewidth="10"&gt;&lt;/pxl-circle&gt;
       
     &lt;!-- Circle 3 (8-Digit Hex with Alpha) --&gt;
-    &lt;pxl-circle fill="<mark id="sec1Circle3FillCode">#fbbf24aa</mark>" stroke="#b45309" x="<mark id="sec1Circle3XCode">580</mark>" y="<mark id="sec1Circle3YCode">370</mark>" r="<mark id="sec1Circle3RCode">140</mark>" strokewidth="4"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="<mark id="sec1Circle3FillCode">#fbbf24aa</mark>" stroke="#b45309" x="<mark id="sec1Circle3XCode">580</mark>" y="<mark id="sec1Circle3YCode">370</mark>" r="<mark id="sec1Circle3RCode">140</mark>" strokewidth="10"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -315,7 +315,7 @@
         <div class="callout-info">
           <p class="callout-title">Never Use % Signs!</p>
           <p class="callout-body">By sticking to pure numbers (e.g., <code>fill="hsl(120, 100, 50)"</code>), you can seamlessly animate colors using math and time variables. The engine handles all the CSS units behind the scenes.</p>
-          <p class="callout-body"><strong>Exception:</strong> If you choose to use Javascript <strong>backticks</strong> (template literals) for string interpolation (e.g., <code>fill="`hsl(${t*90}, 100%, 50%)`"</code>), your math and time variables are evaluated natively by JavaScript. Because this bypasses Kilopixel's formatting helpers, you <strong>must</strong> include the <code>%</code> signs manually so the final generated string is valid CSS.</p>
+          <p class="callout-body"><strong>Exception:</strong> If you choose to use JavaScript <strong>backticks</strong> (template literals) for string interpolation (e.g., <code>fill="`hsl(${t*90}, 100%, 50%)`"</code>), your math and time variables are evaluated natively by JavaScript. Because this bypasses Kilopixel's formatting helpers, you <strong>must</strong> include the <code>%</code> signs manually so the final generated string is valid CSS.</p>
         </div>
 
         <div>
@@ -644,7 +644,7 @@
                 <!-- TIER 3 & 4: DEEP LOWER-THIRD BALANCED CASCADE (y = 440 - 900) -->
                 <!-- =========================================================== -->
                 <!-- Central suspension rod connecting seamlessly from root -->
-                <pxl-line x1="0" y1="0" x2="0" y2="340" stroke="rgba(255, 255, 255, 0.22)" stroke-width="1.5"></pxl-line>
+                <pxl-line x1="0" y1="0" x2="0" y2="340" stroke="rgba(255, 255, 255, 0.22)" strokewidth="1.5"></pxl-line>
 
                 <!-- Mid Joint (Stage y ≈ 440): Sculptural Linear Duo-Tone Split Disc -->
                 <pxl-group x="0" y="340" rotate="sin(t * 0.5) * 14">
