@@ -334,7 +334,7 @@ To maintain a cohesive, highly professional editorial presentation across all do
 ## 8. CSS & Styling Rules
 * **Strictly No Inline Styles**: You MUST NOT use the `style="..."` attribute anywhere in the documentation HTML. If you need a margin, layout adjustment, typography tweak, or color, you must search `docs/css/docs.css` for an existing utility class or standard component layout.
 * **Permission Required**: If you believe a completely unique inline style or a new global CSS rule is necessary, you MUST stop and ask the user for explicit permission before modifying any CSS or writing the inline style.
-* **Exceptions**: The only exceptions to the inline style ban are functional JavaScript targets (e.g., dynamically controlled `width` or `transform` properties explicitly driven by a slider's Javascript), or `style="display: none;"` for initially inactive/hidden dual-mode control group containers.
+* **Exceptions**: The only exceptions to the inline style ban are functional JavaScript targets (e.g., dynamically controlled `width` or `transform` properties explicitly driven by a slider's JavaScript, together with the styles that only support that change, such as `margin: 0 auto` to keep it centered or a `transition` to smooth it), or `style="display: none;"` for initially inactive/hidden dual-mode control group containers.
 
 ## 9. Canvas Typography & Web Fonts
 * **Lazy Loading**: Each web font and weight is downloaded the first time text is drawn with it. Until then, the text uses a fallback font; the engine redraws and measures it again when the font arrives. Pages need neither a preloader nor a handler.

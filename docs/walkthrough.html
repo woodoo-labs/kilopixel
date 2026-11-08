@@ -29,7 +29,7 @@
     <main class="docs-content">
       <div class="docs-inner">
       <h1>Walkthrough</h1>
-      <p class="lead">Understanding the coordinate system is the key to mastering Kilopixel. Unlike standard Canvas APIs which use physical pixels, Kilopixel uses a responsive, logic-based coordinate space designed for declarative markup.</p>
+      <p class="lead">The walkthrough explains Kilopixel's coordinate system step by step: the stage, layers and shapes, rotation and offsets, then references, variables, coordinate mapping and animation. Positions and sizes are measured on a stage that is always 1000 wide, not in screen pixels, so a drawing keeps its proportions at every size.</p>
       
       <h2>1. Stage <code>&lt;pxl-stage&gt;</code></h2>
       <p>To ensure graphics are fully responsive across all screen sizes, every Kilopixel <code>&lt;pxl-stage&gt;</code> has a fixed <strong>logical width of 1000</strong>. The height is dynamically computed based on the <code>ratio</code> attribute.</p>
@@ -41,7 +41,7 @@
         <p class="callout-body"><strong>Unitless Values:</strong> Because Kilopixel uses a logical coordinate space, all spatial attributes (<code>x</code>, <code>y</code>, <code>w</code>, <code>r</code>, <code>strokewidth</code>, etc.) accept pure, unitless numbers. You should never append <code>px</code>, <code>em</code>, or <code>%</code> to your values (e.g., write <code>x="500"</code>, not <code>x="500px"</code>).</p>
       </div>
 
-      <p>A <code>&lt;pxl-stage&gt;</code> has a CSS <code>width</code> of <code>100%</code>, meaning it will always automatically adapt to horizontally fill its parent element. To control the physical stage width, you simply adjust the width of its parent container.</p>
+      <p>A <code>&lt;pxl-stage&gt;</code> has a CSS <code>width</code> of <code>100%</code>, so it fills the width of its parent element. To change the size of the stage on the page, change the width of its parent.</p>
 
       <p>In the example below, try moving the ratio slider to see how the coordinate system adapts: the logical width remains <strong>fixed at 1000</strong> across all formats, while the height is dynamically computed from the <code>ratio</code> attribute.</p>
 
@@ -71,7 +71,7 @@
                   data-mark="sec1RatioCode" oninput="updateSec1Ratio(this.value)">
               </div>
               <div class="control-group">
-                <label>Parent Width <span id="sec1WidthVal">100%</span></label>
+                <label><span>Parent Width</span> <span id="sec1WidthVal">100%</span></label>
                 <input type="range" min="30" max="100" step="5" value="100" autocomplete="off"
                   data-mark="sec1WidthCode" oninput="updateSec1Width(this.value)">
               </div>
@@ -107,7 +107,7 @@
       </div>
       
       <h2>2. Layer <code>&lt;pxl-layer&gt;</code></h2>
-      <p>Working directly in global stage coordinates can become rigid. Instead, a <code>&lt;pxl-layer&gt;</code> allows you to create an independent, movable local coordinate space:</p>
+      <p>A <code>&lt;pxl-layer&gt;</code> has its own coordinate space, which can be moved across the stage:</p>
       <ul>
         <li><strong>Global Positioning:</strong> The <code>&lt;pxl-layer&gt;</code> itself is positioned relative to the stage's top-left origin.</li>
         <li><strong>Layer Center:</strong> The layer's <code>x</code> and <code>y</code> attributes define its own internal <code>(0, 0)</code> layer center.</li>
@@ -136,7 +136,7 @@
           <div class="tab-content" id="sec2StageTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Ratio <span id="sec2RatioVal">5 / 3</span></label>
+                <label><span>Ratio</span> <span id="sec2RatioVal">5 / 3</span></label>
                 <input type="range" min="0" max="14" step="1" value="10" autocomplete="off"
                   data-mark="sec2RatioCode" oninput="updateSec2Ratio(this.value)">
               </div>
@@ -197,7 +197,7 @@
       
       <h2>3. Shape, e.g. <code>&lt;pxl-circle&gt;</code></h2>
       <p>In Kilopixel, the <code>x</code> and <code>y</code> attributes of any shape define its <strong>center</strong> relative to its parent layer or group.</p>
-      <p>Because shapes are nested inside layers, their final screen position is compounded. In the example below, the circle is placed at local <code>(350, 150)</code>. But because its parent layer is also shifted to <code>(400, 200)</code>, you can see how the shape's final visual position on the stage is perfectly offset from both reference points!</p>
+      <p>Because the circle sits inside a layer, both positions add up. In the example below, the circle is placed at <code>(350, 150)</code> in the layer, and the layer's center is at <code>(400, 200)</code> on the stage, so the circle's center appears at <code>(750, 350)</code>.</p>
       
       <pre><code class="language-html">&lt;!-- Placing a shape whose center is at (350, 150) --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
@@ -227,7 +227,7 @@
                   oninput="document.getElementById('sec3Layer').setAttribute('x', this.value); document.getElementById('sec3LayerXVal').innerText = this.value; document.getElementById('sec3LayerXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec3LayerYVal">200</span></label>
+                <label><span>Center Y</span> <span id="sec3LayerYVal">200</span></label>
                 <input type="range" min="-300" max="600" step="10" value="200" autocomplete="off"
                   oninput="document.getElementById('sec3Layer').setAttribute('y', this.value); document.getElementById('sec3LayerYVal').innerText = this.value; document.getElementById('sec3LayerYCode').innerText = this.value;">
               </div>
@@ -309,15 +309,15 @@
       </div>
 
       <h2>4. Rotation <code>rotate</code></h2>
-      <p>In Kilopixel, applying rotation is incredibly simple. When you rotate a shape, it spins around its <code>x</code> and <code>y</code> <strong>center</strong> by default.</p>
-      <p>However, it is important to understand the difference between <strong>layer</strong> and <strong>shape</strong> rotation:</p>
+      <p>A rotation (<code>rotate</code>) turns a shape around its <strong>center</strong>, the point set by <code>x</code> and <code>y</code>.</p>
+      <p>Layers can be rotated too, with a different effect:</p>
       <ul>
         <li><strong>Layer Rotation:</strong> Rotating a <code>&lt;pxl-layer&gt;</code> spins the entire coordinate space inside that layer around the layer center. The shape's relative coordinates do not change, but the local space it lives in spins together with the layer.</li>
         <li><strong>Shape Rotation:</strong> Rotating a shape (such as a <code>&lt;pxl-ellipse&gt;</code>) only spins that specific shape around its own center, leaving the rest of the layer untouched.</li>
       </ul>
-      <p>Look for the pulsing orange indicator dot <span class="indicator-dot indicator-dot-inline"></span> on the controls below &mdash; try spinning the layer and ellipse sliders to see this difference in real time!</p>
-      
-      <pre><code class="language-html">&lt;!-- An ellipse spinning perfectly around its center --&gt;
+      <p>The controls marked with a pulsing dot <span class="indicator-dot indicator-dot-inline"></span> rotate the layer and the ellipse, so both effects can be compared.</p>
+
+      <pre><code class="language-html">&lt;!-- An ellipse rotated around its center --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec4LayerXCode">500</mark>" y="<mark id="sec4LayerYCode">300</mark>" rotate="<mark id="sec4LayerRotCode">0</mark>"&gt;
     &lt;pxl-ellipse 
@@ -344,12 +344,12 @@
           <div class="tab-content" id="sec4LayerTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec4LayerXVal">500</span></label>
+                <label><span>Center X</span> <span id="sec4LayerXVal">500</span></label>
                 <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
                   oninput="document.getElementById('sec4Layer').setAttribute('x', this.value); document.getElementById('sec4LayerXVal').innerText = this.value; document.getElementById('sec4LayerXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec4LayerYVal">300</span></label>
+                <label><span>Center Y</span> <span id="sec4LayerYVal">300</span></label>
                 <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
                   oninput="document.getElementById('sec4Layer').setAttribute('y', this.value); document.getElementById('sec4LayerYVal').innerText = this.value; document.getElementById('sec4LayerYCode').innerText = this.value;">
               </div>
@@ -365,22 +365,22 @@
           <div class="tab-content active" id="sec4EllipseTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec4EllipseXVal">200</span></label>
+                <label><span>Center X</span> <span id="sec4EllipseXVal">200</span></label>
                 <input type="range" min="-500" max="500" step="10" value="200" autocomplete="off"
                   oninput="document.getElementById('sec4Ellipse').setAttribute('x', this.value); document.getElementById('sec4EllipseXVal').innerText = this.value; document.getElementById('sec4EllipseXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec4EllipseYVal">150</span></label>
+                <label><span>Center Y</span> <span id="sec4EllipseYVal">150</span></label>
                 <input type="range" min="-300" max="300" step="10" value="150" autocomplete="off"
                   oninput="document.getElementById('sec4Ellipse').setAttribute('y', this.value); document.getElementById('sec4EllipseYVal').innerText = this.value; document.getElementById('sec4EllipseYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius X <span id="sec4EllipseRxVal">250</span></label>
+                <label><span>Radius X</span> <span id="sec4EllipseRxVal">250</span></label>
                 <input type="range" min="10" max="500" step="10" value="250" autocomplete="off"
                   oninput="document.getElementById('sec4Ellipse').setAttribute('rx', this.value); document.getElementById('sec4EllipseRxVal').innerText = this.value; document.getElementById('sec4EllipseRxCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius Y <span id="sec4EllipseRyVal">100</span></label>
+                <label><span>Radius Y</span> <span id="sec4EllipseRyVal">100</span></label>
                 <input type="range" min="10" max="500" step="10" value="100" autocomplete="off"
                   oninput="document.getElementById('sec4Ellipse').setAttribute('ry', this.value); document.getElementById('sec4EllipseRyVal').innerText = this.value; document.getElementById('sec4EllipseRyCode').innerText = this.value;">
               </div>
@@ -449,7 +449,7 @@
       </div>
 
       <h2>5. Offset <code>dx</code> and <code>dy</code></h2>
-      <p>This is where Kilopixel's coordinate system becomes incredibly powerful. The <code>dx</code> and <code>dy</code> attributes (where "d" stands for delta) offset the shape from its <code>x</code> and <code>y</code> center.</p>
+      <p>The offset attributes <code>dx</code> and <code>dy</code> ("d" stands for delta) move the drawn shape away from its center (<code>x</code>, <code>y</code>).</p>
       <p>Because this offset happens <em>inside</em> the shape's local coordinate system, any rotation applied will cause the shape to <strong>orbit</strong> the center instead of just spinning in place.</p>
       
       <pre><code class="language-html">&lt;!-- A rectangle orbiting its pivot point --&gt;
@@ -479,17 +479,17 @@
           <div class="tab-content" id="sec5LayerTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec5LayerXVal">200</span></label>
+                <label><span>Center X</span> <span id="sec5LayerXVal">200</span></label>
                 <input type="range" min="0" max="1000" step="10" value="200" autocomplete="off"
                   oninput="document.getElementById('sec5Layer').setAttribute('x', this.value); document.getElementById('sec5LayerXVal').innerText = this.value; document.getElementById('sec5LayerXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec5LayerYVal">150</span></label>
+                <label><span>Center Y</span> <span id="sec5LayerYVal">150</span></label>
                 <input type="range" min="0" max="600" step="10" value="150" autocomplete="off"
                   oninput="document.getElementById('sec5Layer').setAttribute('y', this.value); document.getElementById('sec5LayerYVal').innerText = this.value; document.getElementById('sec5LayerYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Rotation <span id="sec5LayerRotVal">0°</span></label>
+                <label><span>Rotation</span> <span id="sec5LayerRotVal">0°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
                   oninput="document.getElementById('sec5Layer').setAttribute('rotate', this.value); document.getElementById('sec5LayerRotVal').innerText = this.value + '°'; document.getElementById('sec5LayerRotCode').innerText = this.value;">
               </div>
@@ -499,12 +499,12 @@
           <div class="tab-content active" id="sec5RectTab">
             <div class="playground-sliders">
                <div class="control-group">
-                <label>Center X <span id="sec5RectXVal">300</span></label>
+                <label><span>Center X</span> <span id="sec5RectXVal">300</span></label>
                 <input type="range" min="-500" max="500" step="10" value="300" autocomplete="off"
                   oninput="document.getElementById('sec5Rect').setAttribute('x', this.value); document.getElementById('sec5RectXVal').innerText = this.value; document.getElementById('sec5RectXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec5RectYVal">150</span></label>
+                <label><span>Center Y</span> <span id="sec5RectYVal">150</span></label>
                 <input type="range" min="-300" max="300" step="10" value="150" autocomplete="off"
                   oninput="document.getElementById('sec5Rect').setAttribute('y', this.value); document.getElementById('sec5RectYVal').innerText = this.value; document.getElementById('sec5RectYCode').innerText = this.value;">
               </div>
@@ -514,7 +514,7 @@
                   oninput="document.getElementById('sec5Rect').setAttribute('dx', this.value); document.getElementById('sec5RectDxVal').innerText = this.value; document.getElementById('sec5RectDxCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Offset Y <span id="sec5RectDyVal">150</span></label>
+                <label><span>Offset Y</span> <span id="sec5RectDyVal">150</span></label>
                 <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off"
                   oninput="document.getElementById('sec5Rect').setAttribute('dy', this.value); document.getElementById('sec5RectDyVal').innerText = this.value; document.getElementById('sec5RectDyCode').innerText = this.value;">
               </div>
@@ -618,8 +618,8 @@
       </div>
 
       <h2>6. Reference <code>ref.*</code></h2>
-      <p>Any element with an <code>id</code> can be instantly referenced by other shapes. You can declaratively link to its attributes using the <code>ref.*</code> prefix, and Kilopixel will automatically keep them perfectly in sync.</p>
-      <p>This allows for true <strong>cross-attribute linking</strong>. In this example, if you change the <strong>Master</strong> shape, the others react instantly. The <strong>Mirror</strong> perfectly mirrors its X position (<code>1000 - ref.master.x</code>), while the <strong>Reactor</strong> links its size and rotation to the Master's position!</p>
+      <p>Other shapes can read the attributes of any element with an <code>id</code>: <code>ref.master.x</code> is the current <code>x</code> of the element with <code>id="master"</code>. When that value changes, every attribute that reads it updates.</p>
+      <p>In this example, two shapes follow the <strong>Master</strong>: the <strong>Mirror</strong> takes the mirrored x position (<code>1000 - ref.master.x</code>), and the <strong>Reactor</strong> takes its size and rotation from the Master's x position.</p>
       
       <pre><code class="language-html">&lt;!-- Linking attributes across different shapes --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
@@ -664,17 +664,17 @@
           <div class="tab-content" id="sec6LayerTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec6LayerXVal">0</span></label>
+                <label><span>Center X</span> <span id="sec6LayerXVal">0</span></label>
                 <input type="range" min="0" max="1000" step="10" value="0" autocomplete="off"
                   oninput="document.getElementById('sec6Layer').setAttribute('x', this.value); document.getElementById('sec6LayerXVal').innerText = this.value; document.getElementById('sec6LayerXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec6LayerYVal">0</span></label>
+                <label><span>Center Y</span> <span id="sec6LayerYVal">0</span></label>
                 <input type="range" min="0" max="600" step="10" value="0" autocomplete="off"
                   oninput="document.getElementById('sec6Layer').setAttribute('y', this.value); document.getElementById('sec6LayerYVal').innerText = this.value; document.getElementById('sec6LayerYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Rotation <span id="sec6LayerRotVal">0°</span></label>
+                <label><span>Rotation</span> <span id="sec6LayerRotVal">0°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
                   oninput="document.getElementById('sec6Layer').setAttribute('rotate', this.value); document.getElementById('sec6LayerRotVal').innerText = this.value + '°'; document.getElementById('sec6LayerRotCode').innerText = this.value;">
               </div>
@@ -689,7 +689,7 @@
                   oninput="document.getElementById('sec6Master').setAttribute('x', this.value); document.getElementById('sec6MasterXVal').innerText = this.value; document.getElementById('sec6MasterXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec6MasterYVal">200</span></label>
+                <label><span>Center Y</span> <span id="sec6MasterYVal">200</span></label>
                 <input type="range" min="0" max="600" step="10" value="200" autocomplete="off" data-mark="sec6MasterYCode, sec6MirrorRefYCode"
                   oninput="document.getElementById('sec6Master').setAttribute('y', this.value); document.getElementById('sec6MasterYVal').innerText = this.value; document.getElementById('sec6MasterYCode').innerText = this.value;">
               </div>
@@ -703,14 +703,14 @@
 
           <div class="tab-content" id="sec6MirrorTab">
             <div class="playground-sliders">
-              <p class="tab-note">Note: Center X, Y, and Rotation are mathematically bound to the Master Shape.</p>
+              <p class="tab-note">Note: Center X, Center Y and Rotation follow the Master.</p>
               <div class="control-group">
-                <label>Width <span id="sec6MirrorWVal">100</span></label>
+                <label><span>Width</span> <span id="sec6MirrorWVal">100</span></label>
                 <input type="range" min="10" max="500" step="10" value="100" autocomplete="off"
                   oninput="document.getElementById('sec6Mirror').setAttribute('w', this.value); document.getElementById('sec6MirrorWVal').innerText = this.value; document.getElementById('sec6MirrorWCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Height <span id="sec6MirrorHVal">100</span></label>
+                <label><span>Height</span> <span id="sec6MirrorHVal">100</span></label>
                 <input type="range" min="10" max="500" step="10" value="100" autocomplete="off"
                   oninput="document.getElementById('sec6Mirror').setAttribute('h', this.value); document.getElementById('sec6MirrorHVal').innerText = this.value; document.getElementById('sec6MirrorHCode').innerText = this.value;">
               </div>
@@ -719,14 +719,14 @@
 
           <div class="tab-content" id="sec6ReactorTab">
             <div class="playground-sliders">
-              <p class="tab-note">Note: Size and Rotation are mathematically bound to the Master Shape.</p>
+              <p class="tab-note">Note: Size and Rotation follow the Master.</p>
               <div class="control-group">
-                <label>Center X <span id="sec6ReactorXVal">500</span></label>
+                <label><span>Center X</span> <span id="sec6ReactorXVal">500</span></label>
                 <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
                   oninput="document.getElementById('sec6Reactor').setAttribute('x', this.value); document.getElementById('sec6ReactorXVal').innerText = this.value; document.getElementById('sec6ReactorXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec6ReactorYVal">450</span></label>
+                <label><span>Center Y</span> <span id="sec6ReactorYVal">450</span></label>
                 <input type="range" min="0" max="600" step="10" value="450" autocomplete="off"
                   oninput="document.getElementById('sec6Reactor').setAttribute('y', this.value); document.getElementById('sec6ReactorYVal').innerText = this.value; document.getElementById('sec6ReactorYCode').innerText = this.value;">
               </div>
@@ -779,8 +779,8 @@
       </div>
       
       <h2>7. Variables <code>&lt;pxl-var&gt;</code></h2>
-      <p>Sometimes you don't want to bind to a visual shape. You want a "headless" state variable that controls multiple elements at once, much like state management in React or Vue.</p>
-      <p>The <code>&lt;pxl-var&gt;</code> element is invisible, but any shape can reactively reference its <code>value</code>. In this example, three variables control the entire geometric composition:</p>
+      <p>A value that several shapes share doesn't have to belong to one of them. A <code>&lt;pxl-var&gt;</code> holds a value and draws nothing.</p>
+      <p>Shapes read it with <code>ref.&lt;id&gt;.value</code>, and they update when it changes. In this example, three variables set the color, spread and size of all three circles:</p>
       
       <pre><code class="language-html">&lt;!-- Variables act as global state for the canvas --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
@@ -822,7 +822,7 @@
                   oninput="document.getElementById('sec7Var2').setAttribute('value', this.value); document.getElementById('sec7Var2Val').innerText = this.value; document.getElementById('sec7SpreadCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Size <span id="sec7Var3Val">150</span></label>
+                <label><span>Size</span> <span id="sec7Var3Val">150</span></label>
                 <input type="range" min="10" max="250" step="10" value="150" autocomplete="off" data-mark="sec7SizeCode, sec7Circ1SizeCode, sec7Circ2SizeCode, sec7Circ3SizeCode"
                   oninput="document.getElementById('sec7Var3').setAttribute('value', this.value); document.getElementById('sec7Var3Val').innerText = this.value; document.getElementById('sec7SizeCode').innerText = this.value;">
               </div>
@@ -832,17 +832,17 @@
           <div class="tab-content" id="sec7LayerTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec7LayerXVal">500</span></label>
+                <label><span>Center X</span> <span id="sec7LayerXVal">500</span></label>
                 <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off" data-mark="sec7LayerXCode"
                   oninput="document.getElementById('sec7Layer').setAttribute('x', this.value); document.getElementById('sec7LayerXVal').innerText = this.value; document.getElementById('sec7LayerXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec7LayerYVal">300</span></label>
+                <label><span>Center Y</span> <span id="sec7LayerYVal">300</span></label>
                 <input type="range" min="0" max="600" step="10" value="300" autocomplete="off" data-mark="sec7LayerYCode"
                   oninput="document.getElementById('sec7Layer').setAttribute('y', this.value); document.getElementById('sec7LayerYVal').innerText = this.value; document.getElementById('sec7LayerYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Rotation <span id="sec7LayerRotVal">0°</span></label>
+                <label><span>Rotation</span> <span id="sec7LayerRotVal">0°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec7LayerRotCode"
                   oninput="document.getElementById('sec7Layer').setAttribute('rotate', this.value); document.getElementById('sec7LayerRotVal').innerText = this.value + '°'; document.getElementById('sec7LayerRotCode').innerText = this.value;">
               </div>
@@ -871,12 +871,13 @@
       </div>
       
       <h2>8. Cross-Space Projection <code>toLocal()</code></h2>
-      <p>The true power of <code>toLocal()</code> is cross-space affine projection. It allows you to perfectly track an element nested deep inside rotating or scaled layers, without writing any trigonometry.</p>
+      <p><code>toLocal()</code> maps a position from one coordinate space into another. A shape can follow a shape in a different layer, however that layer is moved, rotated or zoomed, without any trigonometry.</p>
       <ul>
-        <li><strong>Layer Independence:</strong> You can place shapes inside completely different, independently transforming layers.</li>
-        <li><strong>The Link:</strong> By using <code>toLocal(ref.target, 'x')</code>, Kilopixel calculates the target's global position and automatically translates it into your <em>current</em> coordinate space. It returns exactly the <code>x</code> and <code>y</code> values your shape needs to align perfectly.</li>
-        <li><strong>The Magic:</strong> Kilopixel's spatial reactivity engine automatically tracks matrix changes. If a layer rotates or moves, it instantly alerts any element tracking its children to update!</li>
+        <li><strong>Separate Layers:</strong> The shapes can sit in different layers that move and rotate independently.</li>
+        <li><strong>Mapped Position:</strong> <code>toLocal(ref.target, 'x')</code> and <code>toLocal(ref.target, 'y')</code> return the target's position in the space of the shape that reads it, so the result can be used directly as its <code>x</code> and <code>y</code>.</li>
+        <li><strong>Automatic Updates:</strong> When a layer moves or rotates, every shape that reads a position inside it with <code>toLocal()</code> updates.</li>
       </ul>
+      <p>The <a href="mapping.html">Coordinate Mapping</a> page also maps direction and size, and copies a whole frame.</p>
       
       <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;!-- Two independent rotating layers with their own shapes --&gt;
@@ -888,7 +889,7 @@
     &lt;pxl-circle id="circle2" x="<mark id="sec8Circle2XCode">150</mark>" y="<mark id="sec8Circle2YCode">150</mark>" r="<mark id="sec8Circle2RCode">100</mark>" stroke="#3b82f6"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
-  &lt;!-- A line perfectly tracking two shapes inside different rotating layers --&gt;
+  &lt;!-- A line connecting two shapes in different rotating layers --&gt;
   &lt;pxl-layer&gt;
     &lt;pxl-line 
       x1="toLocal(<mark id="sec8LineRefCirc1X" class="highlight-reactive">ref.circle1, 'x'</mark>)" y1="toLocal(<mark id="sec8LineRefCirc1Y" class="highlight-reactive">ref.circle1, 'y'</mark>)" 
@@ -940,12 +941,12 @@
                   oninput="document.getElementById('sec8Var7').setAttribute('value', this.value); document.getElementById('sec8Var7Val').innerText = this.value; document.getElementById('sec8Circle1XCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec8Var8Val">-150</span></label>
+                <label><span>Center Y</span> <span id="sec8Var8Val">-150</span></label>
                 <input type="range" min="-500" max="500" step="10" value="-150" autocomplete="off" data-mark="sec8Circle1YCode, sec8LineRefCirc1Y"
                   oninput="document.getElementById('sec8Var8').setAttribute('value', this.value); document.getElementById('sec8Var8Val').innerText = this.value; document.getElementById('sec8Circle1YCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius <span id="sec8Var9Val">100</span></label>
+                <label><span>Radius</span> <span id="sec8Var9Val">100</span></label>
                 <input type="range" min="0" max="200" step="5" value="100" autocomplete="off" data-mark="sec8Circle1RCode"
                   oninput="document.getElementById('sec8Var9').setAttribute('value', this.value); document.getElementById('sec8Var9Val').innerText = this.value; document.getElementById('sec8Circle1RCode').innerText = this.value;">
               </div>
@@ -955,12 +956,12 @@
           <div class="tab-content" id="sec8Layer2Tab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec8Var4Val">650</span></label>
+                <label><span>Center X</span> <span id="sec8Var4Val">650</span></label>
                 <input type="range" min="0" max="1000" step="10" value="650" autocomplete="off" data-mark="sec8Layer2XCode, sec8LineRefCirc2X"
                   oninput="document.getElementById('sec8Var4').setAttribute('value', this.value); document.getElementById('sec8Var4Val').innerText = this.value; document.getElementById('sec8Layer2XCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec8Var5Val">350</span></label>
+                <label><span>Center Y</span> <span id="sec8Var5Val">350</span></label>
                 <input type="range" min="0" max="600" step="10" value="350" autocomplete="off" data-mark="sec8Layer2YCode, sec8LineRefCirc2Y"
                   oninput="document.getElementById('sec8Var5').setAttribute('value', this.value); document.getElementById('sec8Var5Val').innerText = this.value; document.getElementById('sec8Layer2YCode').innerText = this.value;">
               </div>
@@ -975,7 +976,7 @@
           <div class="tab-content" id="sec8Circle2Tab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec8Var10Val">150</span></label>
+                <label><span>Center X</span> <span id="sec8Var10Val">150</span></label>
                 <input type="range" min="-500" max="500" step="10" value="150" autocomplete="off" data-mark="sec8Circle2XCode, sec8LineRefCirc2X"
                   oninput="document.getElementById('sec8Var10').setAttribute('value', this.value); document.getElementById('sec8Var10Val').innerText = this.value; document.getElementById('sec8Circle2XCode').innerText = this.value;">
               </div>
@@ -985,7 +986,7 @@
                   oninput="document.getElementById('sec8Var11').setAttribute('value', this.value); document.getElementById('sec8Var11Val').innerText = this.value; document.getElementById('sec8Circle2YCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius <span id="sec8Var12Val">100</span></label>
+                <label><span>Radius</span> <span id="sec8Var12Val">100</span></label>
                 <input type="range" min="0" max="200" step="5" value="100" autocomplete="off" data-mark="sec8Circle2RCode"
                   oninput="document.getElementById('sec8Var12').setAttribute('value', this.value); document.getElementById('sec8Var12Val').innerText = this.value; document.getElementById('sec8Circle2RCode').innerText = this.value;">
               </div>
@@ -1052,9 +1053,9 @@
         </pxl-stage>
       </div>
       <h2>9. Animations (Time <code>t</code>, Math &amp; Time Drivers)</h2>
-      <p>Kilopixel has a native animation loop that evaluates all variable expressions at 60 FPS. By using the built-in <code>t</code> variable (time in seconds), injected math functions (like <code>sin</code> and <code>cos</code>), and normalized <strong>time drivers</strong> (like <code>loop(d)</code>), you can create incredibly complex, smooth animations declaratively.</p>
-      
-      <p>In this example, we use <code>sin(t)</code> and <code>cos(t)</code> with independent X and Y frequencies to draw a Lissajous curve. We also use the native <code>hsl()</code> scope function combined with the <code>loop(d)</code> time driver to elegantly cycle the orb's color across the color wheel exactly once every 10 seconds!</p>
+      <p>Any attribute can change over time. Expressions can use <code>t</code>, the time in seconds, math functions such as <code>sin</code> and <code>cos</code>, and <strong>time drivers</strong> such as <code>loop(d)</code>, which go from 0 to 1 every <code>d</code> seconds. Kilopixel evaluates these expressions once per frame.</p>
+
+      <p>In this example, <code>sin()</code> and <code>cos()</code> with different x and y frequencies move the circle along a Lissajous curve, and <code>hsl()</code> with <code>loop(10)</code> turns its color once around the color wheel every 10 seconds.</p>
       
       <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec9LayerXCode">500</mark>" y="<mark id="sec9LayerYCode">300</mark>" rotate="<mark id="sec9LayerRotCode">0</mark>"&gt;
@@ -1062,8 +1063,8 @@
     &lt;pxl-var id="hue" value="loop(10) * 360"&gt;&lt;/pxl-var&gt;
     &lt;!-- Note: shadowcolor safely self-references its own stroke --&gt;
     &lt;pxl-circle id="oscillator"
-      x="sin(t * <mark id="sec9FreqXCode">2</mark>) * 300" 
-      y="cos(t * <mark id="sec9FreqYCode">3</mark>) * 150" 
+      x="sin(t * <mark id="sec9FreqXCode">2</mark>) * 450"
+      y="cos(t * <mark id="sec9FreqYCode">3</mark>) * 250"
       r="<mark id="sec9RadiusCode">40</mark>" 
       fill="hsla(ref.hue.value, 100, 60, 0.4)" 
       stroke="hsl(ref.hue.value, 100, 60)" 
@@ -1089,12 +1090,12 @@
           <div class="tab-content" id="sec9LayerTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec9LayerXVal">500</span></label>
+                <label><span>Center X</span> <span id="sec9LayerXVal">500</span></label>
                 <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
                   oninput="document.getElementById('sec9Layer').setAttribute('x', this.value); document.getElementById('sec9BgLayer').setAttribute('x', this.value); document.getElementById('sec9LayerXVal').innerText = this.value; document.getElementById('sec9LayerXCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec9LayerYVal">300</span></label>
+                <label><span>Center Y</span> <span id="sec9LayerYVal">300</span></label>
                 <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
                   oninput="document.getElementById('sec9Layer').setAttribute('y', this.value); document.getElementById('sec9BgLayer').setAttribute('y', this.value); document.getElementById('sec9LayerYVal').innerText = this.value; document.getElementById('sec9LayerYCode').innerText = this.value;">
               </div>
@@ -1119,7 +1120,7 @@
                   oninput="document.getElementById('sec9Var2').setAttribute('value', this.value); document.getElementById('sec9Var2Val').innerText = this.value; document.getElementById('sec9FreqYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Radius <span id="sec9Var3Val">40</span></label>
+                <label><span>Radius</span> <span id="sec9Var3Val">40</span></label>
                 <input type="range" min="10" max="150" step="5" value="40" autocomplete="off"
                   oninput="document.getElementById('sec9Var3').setAttribute('value', this.value); document.getElementById('sec9Var3Val').innerText = this.value; document.getElementById('sec9RadiusCode').innerText = this.value;">
               </div>
