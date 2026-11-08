@@ -319,7 +319,7 @@
         <!-- SECTION 3: SHOWCASE                                               -->
         <!-- ================================================================= -->
         <h2>3. Showcase</h2>
-        <p>A generative composition demonstrating dynamic stroke styling, organic path topologies, marching dashes, and fluid math drivers running at 60 frames per second.</p>
+        <p>A composition made only of strokes: rays and rings whose <code>dashoffset</code> follows <code>t</code>, so their dashes march along each path. The rings combine dash patterns with round and square caps and with miter, round and bevel joins, while <code>wave()</code> moves their points.</p>
 
         <div class="showcase-container">
           <pxl-stage id="sec3Stage" ratio="1 / 1" class="showcase-stage">
@@ -352,9 +352,6 @@
 
             <!-- Foreground: Concentric Organic Topology (All Stroke Features) -->
             <pxl-layer>
-              <!-- Performance Monitor (Temporary) -->
-              <pxl-text x="24" y="36" text="ref.sec3Stage.fps + ' FPS | AVG: ' + ref.sec3Stage.renderAvg + 'ms | MAX: ' + ref.sec3Stage.renderMax + 'ms'" font="monospace" size="18" fill="#0f0"></pxl-text>
-
               <pxl-group x="500" y="500">
                 <!-- 1. Outer Beaded Pearl Necklace: Demonstrates linecap="round" with static spacing, hue shift & dynamic bead diameter -->
                 <pxl-circle r="380" stroke="hsl(180 + sin(t * 0.8) * 35, 100, 65)" strokewidth="4 + wave(3) * 8" linecap="round" linedash="[1, 28]" dashoffset="t * -40" fill="none"></pxl-circle>

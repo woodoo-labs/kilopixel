@@ -589,7 +589,7 @@
         <!-- SECTION 6: SHOWCASE -->
         <!-- ================================================================= -->
         <h2>6. Showcase</h2>
-        <p>An astronomical observatory and celestial gyroscope built with nested, rotating ellipses. By separating the static nebula rings into a background <code>&lt;pxl-layer&gt;</code> and driving the animated orbital tracks in a foreground layer, the engine caches static canvas paths automatically &mdash; delivering a locked 60fps even with multiple concurrent rotational transforms.</p>
+        <p>A celestial gyroscope built from ellipses: four tilted orbits rotate at different speeds, each carrying a short arc with an arrowhead (<code>sweep</code>, <code>arrowend</code>). The faint rings behind them sit in a background <code>&lt;pxl-layer&gt;</code> that is drawn once.</p>
 
         <div class="showcase-container">
           <pxl-stage id="sec6Stage" ratio="1 / 1" class="showcase-stage">

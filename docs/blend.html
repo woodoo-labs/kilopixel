@@ -272,7 +272,7 @@
         <!-- SECTION 3: SHOWCASE                                               -->
         <!-- ================================================================= -->
         <h2>3. Showcase</h2>
-        <p class="lead">An homage to Olafur Eliasson’s <em>Colour experiment</em> series &mdash; exploring subtractive color mixing, geometric harmony, and GPU-accelerated spectral rotation running at 60 frames per second.</p>
+        <p>An homage to Olafur Eliasson’s <em>Colour experiment</em> series: 36 translucent discs, each turned 10° further, overlap with <code>blend="multiply"</code>, so their colors mix where they cross. A <code>hueRotate()</code> filter on the layer turns all colors slowly around the color wheel.</p>
 
         <div class="showcase-container">
           <pxl-stage id="sec3Stage" ratio="1 / 1" class="showcase-stage">
@@ -281,7 +281,7 @@
               <pxl-circle x="500" y="500" r="480" fill="radial([480], ['rgba(255, 255, 255, 0.07)', 'rgba(56, 189, 248, 0.03)', 'transparent'])"></pxl-circle>
             </pxl-layer>
 
-            <!-- Layer 2: The Eliasson Rotating Disc (CSS Fast-Path GPU Hue Rotation) -->
+            <!-- Layer 2: The Eliasson Rotating Disc (hue rotation as a layer filter) -->
             <pxl-layer x="500" y="500" filter="hueRotate(t * 45)">
               <!-- 36 Multiply-Blended Spectral Discs (hsla 0° to 350°) -->
               <pxl-circle rotate="0" dx="140" r="280" fill="hsla(0, 100, 65, 0.18)" blend="multiply"></pxl-circle>
@@ -320,11 +320,6 @@
               <pxl-circle rotate="330" dx="140" r="280" fill="hsla(330, 100, 65, 0.18)" blend="multiply"></pxl-circle>
               <pxl-circle rotate="340" dx="140" r="280" fill="hsla(340, 100, 65, 0.18)" blend="multiply"></pxl-circle>
               <pxl-circle rotate="350" dx="140" r="280" fill="hsla(350, 100, 65, 0.18)" blend="multiply"></pxl-circle>
-            </pxl-layer>
-
-            <!-- Layer 3: Foreground Telemetry HUD -->
-            <pxl-layer>
-              <pxl-text x="24" y="36" text="ref.sec3Stage.fps + ' FPS | AVG: ' + ref.sec3Stage.renderAvg + 'ms | MAX: ' + ref.sec3Stage.renderMax + 'ms'" font="monospace" size="18" fill="#64748b"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>

@@ -1028,7 +1028,7 @@
         <!-- SECTION 9: SHOWCASE                                               -->
         <!-- ================================================================= -->
         <h2>9. Showcase</h2>
-        <p class="lead">An homage to Jenny Holzer's monumental electronic LED installations &mdash; exploring counter-streaming horizontal tickers, breathing typewriter reveals, hollow neon outlines, and luminescent typographic signboards running at a locked 60 frames per second.</p>
+        <p>An homage to Jenny Holzer's electronic LED signs: tickers scroll in opposite directions (<code>x</code> follows <code>loop()</code>), headlines type themselves out with <code>reveal</code>, and one headline is drawn as a hollow outline (<code>fill="none"</code> with a <code>stroke</code>).</p>
 
         <div class="showcase-container">
           <pxl-stage id="sec9Stage" ratio="1 / 1" class="showcase-stage">
@@ -1057,7 +1057,7 @@
             </pxl-layer>
 
             <!-- ============================================================= -->
-            <!-- LAYER 2: LUMINESCENT KINETIC TYPOGRAPHY (60 FPS)              -->
+            <!-- LAYER 2: LUMINESCENT KINETIC TYPOGRAPHY (ANIMATED)            -->
             <!-- ============================================================= -->
             <pxl-layer>
               <!-- Tier 1: Upper Fast Stream Ticker (Amber Scheme) -->
@@ -1107,7 +1107,6 @@
 
               <!-- Tier 8: Architectural Telemetry & Museum Registry -->
               <pxl-text x="60" y="915" text="'TRUISMS (1977-1979) // SURVIVAL (1983-1985)'" font="monospace" size="14" fill="#64748b" weight="600" letterspacing="2"></pxl-text>
-              <pxl-text x="940" y="915" text="ref.sec9Stage.fps + ' FPS | ' + ref.sec9Stage.renderAvg + 'ms'" font="monospace" size="14" fill="#0ea5e9" align="right" weight="600" letterspacing="2"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
