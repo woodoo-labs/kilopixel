@@ -202,7 +202,9 @@
       <pre><code class="language-html">&lt;!-- Placing a shape whose center is at (350, 150) --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec3LayerXCode">400</mark>" y="<mark id="sec3LayerYCode">200</mark>"&gt;
-    &lt;pxl-circle x="<mark id="sec3CircleXCode">350</mark>" y="<mark id="sec3CircleYCode">150</mark>" r="<mark id="sec3CircleRCode">250</mark>" stroke="#f97316"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="<mark id="sec3CircleXCode">350</mark>" y="<mark id="sec3CircleYCode">150</mark>" r="<mark id="sec3CircleRCode">250</mark>"
+      fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;
+    &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -320,10 +322,9 @@
       <pre><code class="language-html">&lt;!-- An ellipse rotated around its center --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec4LayerXCode">500</mark>" y="<mark id="sec4LayerYCode">300</mark>" rotate="<mark id="sec4LayerRotCode">0</mark>"&gt;
-    &lt;pxl-ellipse 
-      x="<mark id="sec4EllipseXCode">200</mark>" y="<mark id="sec4EllipseYCode">150</mark>" 
-      rx="<mark id="sec4EllipseRxCode">250</mark>" ry="<mark id="sec4EllipseRyCode">100</mark>" 
-      rotate="<mark id="sec4EllipseRotCode">20</mark>" stroke="#f97316"&gt;
+    &lt;pxl-ellipse x="<mark id="sec4EllipseXCode">200</mark>" y="<mark id="sec4EllipseYCode">150</mark>"
+      rx="<mark id="sec4EllipseRxCode">250</mark>" ry="<mark id="sec4EllipseRyCode">100</mark>" rotate="<mark id="sec4EllipseRotCode">20</mark>"
+      fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;
     &lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -455,11 +456,9 @@
       <pre><code class="language-html">&lt;!-- A rectangle orbiting its pivot point --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec5LayerXCode">200</mark>" y="<mark id="sec5LayerYCode">150</mark>" rotate="<mark id="sec5LayerRotCode">0</mark>"&gt;
-    &lt;pxl-rect 
-      x="<mark id="sec5RectXCode">300</mark>" y="<mark id="sec5RectYCode">150</mark>" 
-      dx="<mark id="sec5RectDxCode">150</mark>" dy="<mark id="sec5RectDyCode">150</mark>" 
-      rotate="<mark id="sec5RectRotCode">0</mark>" 
-      w="100" h="100" stroke="#f97316"&gt;
+    &lt;pxl-rect x="<mark id="sec5RectXCode">300</mark>" y="<mark id="sec5RectYCode">150</mark>" w="100" h="100"
+      fill="#ffedd566" stroke="#f97316" strokewidth="4"
+      dx="<mark id="sec5RectDxCode">150</mark>" dy="<mark id="sec5RectDyCode">150</mark>" rotate="<mark id="sec5RectRotCode">0</mark>"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -625,7 +624,10 @@
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec6LayerXCode">0</mark>" y="<mark id="sec6LayerYCode">0</mark>" rotate="<mark id="sec6LayerRotCode">0</mark>"&gt;
     &lt;!-- 1. Master Shape (You control this) --&gt;
-    &lt;pxl-rect id="master" x="<mark id="sec6MasterXCode">250</mark>" y="<mark id="sec6MasterYCode">200</mark>" w="100" h="100" rotate="<mark id="sec6MasterRotCode">0</mark>" stroke="#f97316"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect id="master" x="<mark id="sec6MasterXCode">250</mark>" y="<mark id="sec6MasterYCode">200</mark>" w="100" h="100"
+      fill="#ffedd566" stroke="#f97316" strokewidth="4"
+      rotate="<mark id="sec6MasterRotCode">0</mark>"&gt;
+    &lt;/pxl-rect&gt;
 
     &lt;!-- 2. Mirror Shape (Moves in reverse) --&gt;
     &lt;pxl-rect id="mirror" 
@@ -633,7 +635,7 @@
       y="<mark id="sec6MirrorRefYCode" class="highlight-reactive">ref.master.y</mark>" 
       w="<mark id="sec6MirrorWCode">100</mark>" h="<mark id="sec6MirrorHCode">100</mark>" 
       rotate="<mark id="sec6MirrorRefRotCode" class="highlight-reactive">-ref.master.rotate</mark>" 
-      stroke="#3b82f6"&gt;
+      fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"&gt;
     &lt;/pxl-rect&gt;
 
     &lt;!-- 3. Reactor Shape (Spins and scales) --&gt;
@@ -642,7 +644,7 @@
       w="<mark id="sec6ReactorRefWCode" class="highlight-reactive">ref.master.x</mark> / 5" 
       h="<mark id="sec6ReactorRefHCode" class="highlight-reactive">ref.master.x</mark> / 5" 
       rotate="<mark id="sec6ReactorRefRotCode" class="highlight-reactive">ref.master.x</mark>" 
-      stroke="#22c55e"&gt;
+      fill="#dcfce766" stroke="#22c55e" strokewidth="4"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -852,8 +854,8 @@
         <pxl-stage ratio="5 / 3" class="demo-stage">
           <pxl-layer id="sec7Layer" x="500" y="300" rotate="0">
             <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
-            <pxl-line x1="-500" y1="0" x2="500" y2="0" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
-            <pxl-line x1="0" y1="-300" x2="0" y2="300" stroke="#cbd5e1" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="-500" y1="0" x2="500" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-line x1="0" y1="-300" x2="0" y2="300" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
             
             <!-- Global State -->
             <!-- Var1: hue; Var2: spread (offset); Var3: size (radius) -->
@@ -882,11 +884,15 @@
       <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;!-- Two independent rotating layers with their own shapes --&gt;
   &lt;pxl-layer id="layer1" x="<mark id="sec8Layer1XCode">350</mark>" y="<mark id="sec8Layer1YCode">250</mark>" rotate="<mark id="sec8Layer1RotCode">0</mark>"&gt;
-    &lt;pxl-circle id="circle1" x="<mark id="sec8Circle1XCode">-150</mark>" y="<mark id="sec8Circle1YCode">-150</mark>" r="<mark id="sec8Circle1RCode">100</mark>" stroke="#f97316"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle id="circle1" x="<mark id="sec8Circle1XCode">-150</mark>" y="<mark id="sec8Circle1YCode">-150</mark>" r="<mark id="sec8Circle1RCode">100</mark>"
+      fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;
+    &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
   &lt;pxl-layer id="layer2" x="<mark id="sec8Layer2XCode">650</mark>" y="<mark id="sec8Layer2YCode">350</mark>" rotate="<mark id="sec8Layer2RotCode">0</mark>"&gt;
-    &lt;pxl-circle id="circle2" x="<mark id="sec8Circle2XCode">150</mark>" y="<mark id="sec8Circle2YCode">150</mark>" r="<mark id="sec8Circle2RCode">100</mark>" stroke="#3b82f6"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle id="circle2" x="<mark id="sec8Circle2XCode">150</mark>" y="<mark id="sec8Circle2YCode">150</mark>" r="<mark id="sec8Circle2RCode">100</mark>"
+      fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"&gt;
+    &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
   &lt;!-- A line connecting two shapes in different rotating layers --&gt;
@@ -894,7 +900,7 @@
     &lt;pxl-line 
       x1="toLocal(<mark id="sec8LineRefCirc1X" class="highlight-reactive">ref.circle1, 'x'</mark>)" y1="toLocal(<mark id="sec8LineRefCirc1Y" class="highlight-reactive">ref.circle1, 'y'</mark>)" 
       x2="toLocal(<mark id="sec8LineRefCirc2X" class="highlight-reactive">ref.circle2, 'x'</mark>)" y2="toLocal(<mark id="sec8LineRefCirc2Y" class="highlight-reactive">ref.circle2, 'y'</mark>)" 
-      stroke="#ec4899"&gt;
+      stroke="#ec4899" strokewidth="4"&gt;
     &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -1021,11 +1027,11 @@
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#fed7aa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#fed7aa" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#fdba74"></pxl-circle>
-            <pxl-text x="15" y="-15" text="Layer 1 Center" size="27" fill="#fdba74"></pxl-text>
+            <pxl-text x="15" y="-15" text="Layer 1 Center" size="27" fill="#fdba74" font="monospace"></pxl-text>
             
             <pxl-circle id="sec8Circle1" x="ref.sec8Var7.value" y="ref.sec8Var8.value" r="ref.sec8Var9.value" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
             <pxl-circle x="ref.sec8Var7.value" y="ref.sec8Var8.value" r="5" fill="#fb923c"></pxl-circle>
-            <pxl-text x="ref.sec8Var7.value + 15" y="ref.sec8Var8.value - 15" text="Circle 1 Center" size="27" fill="#fb923c"></pxl-text>
+            <pxl-text x="ref.sec8Var7.value + 15" y="ref.sec8Var8.value - 15" text="Circle 1 Center" size="27" fill="#fb923c" font="monospace"></pxl-text>
           </pxl-layer>
 
           <!-- Layer 2 -->
@@ -1033,11 +1039,11 @@
             <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#bfdbfe" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#bfdbfe" strokewidth="2" linedash="[5, 5]"></pxl-line>
             <pxl-circle x="0" y="0" r="5" fill="#93c5fd"></pxl-circle>
-            <pxl-text x="15" y="-15" text="Layer 2 Center" size="27" fill="#93c5fd"></pxl-text>
+            <pxl-text x="15" y="-15" text="Layer 2 Center" size="27" fill="#93c5fd" font="monospace"></pxl-text>
             
             <pxl-circle id="sec8Circle2" x="ref.sec8Var10.value" y="ref.sec8Var11.value" r="ref.sec8Var12.value" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-circle>
             <pxl-circle x="ref.sec8Var10.value" y="ref.sec8Var11.value" r="5" fill="#60a5fa"></pxl-circle>
-            <pxl-text x="ref.sec8Var10.value + 15" y="ref.sec8Var11.value - 15" text="Circle 2 Center" size="27" fill="#60a5fa"></pxl-text>
+            <pxl-text x="ref.sec8Var10.value + 15" y="ref.sec8Var11.value - 15" text="Circle 2 Center" size="27" fill="#60a5fa" font="monospace"></pxl-text>
           </pxl-layer>
 
           <!-- Cross-Space Connecting Line -->
@@ -1264,11 +1270,11 @@
 
             <!-- Central Anchor Shape (Orange Scheme) -->
             <pxl-circle r="5" fill="#fb923c"></pxl-circle>
-            <pxl-text x="25" y="-20" text="'Anchor'" size="27" fill="#fb923c"></pxl-text>
+            <pxl-text x="25" y="-20" text="'Anchor'" size="27" fill="#fb923c" font="monospace"></pxl-text>
 
             <!-- Flying Orb -->
             <pxl-circle id="sec9FlyingOrb" x="ref.sec9VarOrbX.value" y="ref.sec9VarOrbY.value" r="ref.sec9Var3.value" fill="hsla(ref.sec9VarOrbHue.value, 100, 60, 0.4)" stroke="hsl(ref.sec9VarOrbHue.value, 100, 60)" strokewidth="4" shadowcolor="ref.sec9FlyingOrb.stroke" shadowblur="20"></pxl-circle>
-            <pxl-text x="ref.sec9VarOrbX.value + 50" y="ref.sec9VarOrbY.value - 20" text="'Oscillator'" size="27" fill="ref.sec9FlyingOrb.stroke"></pxl-text>
+            <pxl-text x="ref.sec9VarOrbX.value + 50" y="ref.sec9VarOrbY.value - 20" text="'Oscillator'" size="27" fill="ref.sec9FlyingOrb.stroke" font="monospace"></pxl-text>
           </pxl-layer>
         </pxl-stage>
       </div>

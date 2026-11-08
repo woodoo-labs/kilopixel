@@ -959,7 +959,7 @@
   &lt;!-- Left: the ring's layer comes before the planet's layer --&gt;
   &lt;pxl-layer&gt;
     &lt;pxl-circle r="45" stroke="#3b82f6" strokewidth="4"
-      x="<mark class="highlight-reactive">toLocal(ref.leftPlanet, 'x')</mark>" y="<mark class="highlight-reactive">toLocal(ref.leftPlanet, 'y')</mark>"&gt;
+      x="<mark id="sec7LeftRingXCode" class="highlight-reactive">toLocal(ref.leftPlanet, 'x')</mark>" y="<mark id="sec7LeftRingYCode" class="highlight-reactive">toLocal(ref.leftPlanet, 'y')</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
   &lt;pxl-layer x="250" y="330" rotate="t * <mark id="sec7LeftSpeedCode">180</mark>"&gt;
@@ -972,7 +972,7 @@
   &lt;/pxl-layer&gt;
   &lt;pxl-layer&gt;
     &lt;pxl-circle r="45" stroke="#3b82f6" strokewidth="4"
-      x="<mark class="highlight-reactive">toLocal(ref.rightPlanet, 'x')</mark>" y="<mark class="highlight-reactive">toLocal(ref.rightPlanet, 'y')</mark>"&gt;
+      x="<mark id="sec7RightRingXCode" class="highlight-reactive">toLocal(ref.rightPlanet, 'x')</mark>" y="<mark id="sec7RightRingYCode" class="highlight-reactive">toLocal(ref.rightPlanet, 'y')</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -992,7 +992,7 @@
                 <div class="control-group">
                   <label><span>Speed <span class="indicator-dot"></span></span> <span id="sec7SpeedVal">180°/s</span></label>
                   <input type="range" min="0" max="360" step="30" value="180" autocomplete="off" id="sec7SpeedInput"
-                    oninput="document.getElementById('sec7LeftOrbit').setAttribute('rotate', 't * ' + this.value); document.getElementById('sec7RightOrbit').setAttribute('rotate', 't * ' + this.value); document.getElementById('sec7SpeedVal').innerText = this.value + '°/s'; document.getElementById('sec7LeftSpeedCode').innerText = this.value; document.getElementById('sec7RightSpeedCode').innerText = this.value;" data-mark="sec7LeftSpeedCode, sec7RightSpeedCode">
+                    oninput="document.getElementById('sec7LeftOrbit').setAttribute('rotate', 't * ' + this.value); document.getElementById('sec7RightOrbit').setAttribute('rotate', 't * ' + this.value); document.getElementById('sec7SpeedVal').innerText = this.value + '°/s'; document.getElementById('sec7LeftSpeedCode').innerText = this.value; document.getElementById('sec7RightSpeedCode').innerText = this.value;" data-mark="sec7LeftSpeedCode, sec7RightSpeedCode, sec7LeftRingXCode, sec7LeftRingYCode, sec7RightRingXCode, sec7RightRingYCode">
                 </div>
               </div>
             </div>
@@ -1011,16 +1011,16 @@
               <pxl-circle id="sec7LeftRing" r="45" x="toLocal(ref.sec7LeftPlanet, 'x')" y="toLocal(ref.sec7LeftPlanet, 'y')" stroke="#3b82f6" strokewidth="4"></pxl-circle>
             </pxl-layer>
             <pxl-layer id="sec7LeftOrbit" x="250" y="330" rotate="t * 180">
-              <!-- Layer center (violet 400) and the orbit at the planet's distance (center helper 300) -->
+              <!-- Layer center (orange 300: two layers take the hue of their shapes) and the orbit at the planet's distance (center helper 300) -->
               <pxl-circle r="170" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-circle>
-              <pxl-circle r="5" fill="#a78bfa"></pxl-circle>
+              <pxl-circle r="5" fill="#fdba74"></pxl-circle>
               <pxl-circle id="sec7LeftPlanet" x="170" r="30" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
             </pxl-layer>
 
             <!-- Right: the ring's layer after the planet's layer -->
             <pxl-layer id="sec7RightOrbit" x="750" y="330" rotate="t * 180">
               <pxl-circle r="170" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-circle>
-              <pxl-circle r="5" fill="#a78bfa"></pxl-circle>
+              <pxl-circle r="5" fill="#fdba74"></pxl-circle>
               <pxl-circle id="sec7RightPlanet" x="170" r="30" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
             </pxl-layer>
             <pxl-layer>
