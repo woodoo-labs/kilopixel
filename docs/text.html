@@ -1028,7 +1028,7 @@
         <!-- SECTION 9: SHOWCASE                                               -->
         <!-- ================================================================= -->
         <h2>9. Showcase</h2>
-        <p>An homage to Jenny Holzer's electronic LED signs: tickers scroll in opposite directions (<code>x</code> follows <code>loop()</code>), headlines type themselves out with <code>reveal</code>, and one headline is drawn as a hollow outline (<code>fill="none"</code> with a <code>stroke</code>).</p>
+        <p>An homage to Jenny Holzer's electronic LED signs: tickers scroll in opposite directions (<code>x</code> follows <code>loop()</code>), headlines type themselves out with <code>reveal</code> and pan slowly from side to side, and one headline is drawn as a hollow outline (<code>fill="none"</code> with a <code>stroke</code>).</p>
 
         <div class="showcase-container">
           <pxl-stage id="sec9Stage" ratio="1 / 1" class="showcase-stage">
@@ -1073,27 +1073,27 @@
                 fill="#38bdf8"></pxl-text>
 
               <!-- Tier 3: Monumental Headline 1 — Electric Rose (Breathing Wave Reveal) -->
-              <pxl-text x="500" y="340" align="center" baseline="middle"
+              <pxl-text x="500 + (0.5 - wave(12)) * 210" y="340" align="center" baseline="middle"
                 text="PROTECT ME FROM WHAT I WANT"
                 font="Inter" size="56" weight="900" letterspacing="6"
                 fill="#f43f5e"
                 reveal="0.2 + wave(5) * 0.8"></pxl-text>
 
               <!-- Tier 4: Monumental Headline 2 — Hollow Amber Outline (Section 7 Technique) -->
-              <pxl-text x="500" y="455" align="center" baseline="middle"
+              <pxl-text x="500 + (0.5 - wave(15)) * 250" y="455" align="center" baseline="middle"
                 text="ABUSE OF POWER COMES AS NO SURPRISE"
                 font="sans-serif" size="42" weight="800" letterspacing="4"
                 fill="none" stroke="#f59e0b" strokewidth="2.5"></pxl-text>
 
               <!-- Tier 5: Monumental Headline 3 — Luminous White (Typewriter Loop Reveal) -->
-              <pxl-text x="500" y="570" align="center" baseline="middle"
+              <pxl-text x="500 + (0.5 - wave(13)) * 140" y="570" align="center" baseline="middle"
                 text="A SINCERE EFFORT IS ALL YOU CAN PROMISE"
                 font="Inter" size="38" weight="800" letterspacing="5"
                 fill="#ffffff"
                 reveal="loop(7)"></pxl-text>
 
               <!-- Tier 6: Monumental Headline 4 — Emerald Pulse -->
-              <pxl-text x="500" y="680" align="center" baseline="middle"
+              <pxl-text x="500 + (0.5 - wave(14)) * 130" y="680" align="center" baseline="middle"
                 text="ACTION CAUSES MORE TROUBLE THAN THOUGHT"
                 font="Inter" size="34" weight="700" letterspacing="5"
                 fill="#10b981"
