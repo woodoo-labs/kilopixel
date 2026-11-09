@@ -82,22 +82,21 @@ A snippet shows the markup behind the demo, as short and easy to scan as possibl
 * **Only the topic:** leave out the grid, axes, dimension arrows, annotations, decorative shapes and tracking dots.
 * **Short IDs:** `id="circle"`, `id="master"`, `id="line1"`, `id="angle"` instead of page IDs (`sec5Circle1`); `ref.*` expressions use the same names (`ref.master.x`, `ref.angle.value`).
 * **Marks:** wrap every value a control changes in `<mark id="sec[N][exM][Entity][Target]Code">` (§5). A value a slider, dropdown or toggle sets directly gets a plain `<mark>`; it flashes yellow-orange when the control changes it. A value that is an expression depending on a control (`x="-ref.master.rotate"`) gets `<mark class="highlight-reactive">`; it looks like normal code until its source changes, then flashes a softer orange.
-* **Line length:** a code block shows 84 characters, counting indentation. A line with a mark stays within 84 characters, so changing values are always visible. A line with only fixed values may run up to 100 characters when that saves a line.
+* **Line length:** a code block shows 84 characters, counting indentation. A line with a mark stays within 84 characters, so changing values are always visible; only a single long value (a gradient) may exceed it. A line with only fixed values may run up to 100 characters when that saves a line.
 * **Lines per element:** an element that fits these limits, closing tag included, stays on one line. Otherwise it gets 2 to 4 attribute lines, never one attribute per line, and the closing tag goes on its own line at the indentation of the opening tag (custom elements can't self-close).
 * **Attribute order:** fixed values first, then the values controls change. Expressions (`ref.circle.x`, `t * 45`) count as fixed.
   * **Line 1:** `id`, the fixed position (`x y` or `x1 y1 x2 y2`), then the paint of the shape family: lines (`<pxl-line>`, `<pxl-polyline>`) `stroke strokewidth fill`; text: font (`font size weight`), then paint (`fill stroke strokewidth`), then layout (`align baseline`); other shapes `fill stroke strokewidth`. If a control changes the position, a fixed size takes its place.
   * **Next:** other fixed values (size, angles). `points` and `text` get a line of their own.
   * **Then:** controlled values in the top-to-bottom order of the controls, dropdown and toggle values on the last line.
-  * **One line:** a fixed size comes right after position (`x y r fill`).
+  * **Single-line elements:** a fixed size comes right after position (`x y r fill`).
   * **`strokewidth`** is shown whenever the stage sets it, so the snippet matches the drawing.
 * **Pairs stay on one line:** `x y`, `x1 y1`, `x2 y2`, `w h`, `rx ry`, `r ir`, `irx iry`, `start sweep`, `start end`, `arrowstart arrowend`, `linecap linejoin`. A pair with one controlled value goes where the controlled value goes. Paint, font and layout values follow the line 1 order instead: a slider-driven `strokewidth` or `size` moves alone.
-* **Taught attributes:** a fixed attribute that is the topic of the example (`closed="true"`, `pie="true"`, `anchor="top-left"`, `direction="rtl"`, `toLocal()` positions on the mapping pages) goes on a feature line, not on line 1.
-* **Comments and blank lines:** when a snippet has two or more shapes, each gets a comment on the line above: `<!-- Position: Name, what it shows -->`.
+* **Taught attributes:** a fixed attribute that is the topic of the example (`closed="true"`, `pie="true"`, `anchor="top-left"`, `direction="rtl"`, `toLocal()` positions where mapping is the topic) goes on a feature line, not on line 1.
+* **Comments and blank lines:** when a snippet has two or more shapes, each shape, or the layer, group or unit that holds it, gets a comment on the line above: `<!-- Position: Name, what it shows -->`.
   * **Position:** where the shape is on the stage (`Left`, `Right`, `Top`, `Middle`, `Bottom`, or combined like `Top Left`). Overlapping shapes get no position.
   * **Name:** its tab name, so the reader can match the snippet to the controls, or a short name when the tabs aren't per shape (`Layer Filter`).
   * **What it shows:** a few lowercase words, not a sentence (`Right: Pill, radius is half the height`). Left out when the name already says it (`Left: Center Spin`).
   * No color schemes, notes or explanations: the stage shows the colors, and explanations belong in the text.
-  * A layer or group gets the comment for the shapes inside it, whether it holds one shape or several. Shapes that form one unit (a wire and its pulse) share one comment.
   * One blank line between commented blocks, none between a comment and its element. A snippet with one shape has no comment.
   * The walkthrough also comments its layers and single shapes, because it introduces the stage, layer and shape one step at a time.
 
