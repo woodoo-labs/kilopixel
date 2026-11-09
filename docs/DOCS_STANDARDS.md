@@ -92,18 +92,25 @@ A snippet shows the markup behind the demo, as short and easy to scan as possibl
   * **`strokewidth`** is shown whenever the stage sets it, so the snippet matches the drawing.
 * **Pairs stay on one line:** `x y`, `x1 y1`, `x2 y2`, `w h`, `rx ry`, `r ir`, `start sweep`, `start end`, `arrowstart arrowend`, `stroke strokewidth`, `linecap linejoin`, `font size weight`, `align baseline`. A pair with one controlled value goes where the controlled value goes.
 * **Taught attributes:** a fixed attribute that is the topic of the example (`closed="true"`, `pie="true"`, `anchor="top-left"`, `direction="rtl"`) goes on a feature line, not on line 1.
+* **Comments and blank lines:** when a snippet has two or more shapes, each gets a comment on the line above: `<!-- Position: Name, what it shows -->`.
+  * **Position:** where the shape is on the stage (`Left`, `Right`, `Top`, `Middle`, `Bottom`, or combined like `Top Left`). Overlapping shapes get no position.
+  * **Name:** its tab name, so the reader can match the snippet to the controls.
+  * **What it shows:** a few lowercase words, not a sentence (`Right: Pill, radius is half the height`). Left out when the name already says it (`Left: Center Spin`).
+  * No color schemes, notes or explanations: the stage shows the colors, and explanations belong in the text.
+  * When each shape sits in its own layer or group, the comment goes above that layer or group.
+  * One blank line between commented blocks, none between a comment and its element. A snippet with one shape has no comment.
 
 ```html
 <pxl-stage ratio="5 / 3">
   <pxl-layer>
-    <!-- Left: Filled Arrows -->
+    <!-- Left: Arc, filled arrowheads -->
     <pxl-circle x="300" y="300" stroke="#f97316" strokewidth="4"
       arrowstart="<mark id="sec5Circle1ArrowstartCode">25</mark>" arrowend="<mark id="sec5Circle1ArrowendCode">25</mark>"
       start="-45" sweep="<mark id="sec5Circle1SweepCode">270</mark>"
       arrowstyle="filled">
     </pxl-circle>
 
-    <!-- Right: Disc (fixed values only, one line) -->
+    <!-- Right: Disc, fixed values on one line -->
     <pxl-circle x="700" y="300" r="120" fill="#dbeafe66"></pxl-circle>
   </pxl-layer>
 </pxl-stage>
@@ -144,7 +151,7 @@ Examples: `sec2CircleTab`, `sec2CircleXVal`, `sec2CircleXCode`, `sec2CircleXInpu
 * **Tone:** like engineering docs (MDN, Tailwind, Stripe), not marketing. No buzzwords, drama or performance claims. Avoid "A multi-mode radial primitive that renders…", "Backed by an intelligent 3-tier layout cache…", "All from a single declarative tag." Prefer "The circle shape renders discs, hollow rings, pie slices…"
 * **Lead paragraph** (`<p class="lead">`): what the shape or feature does and its 2–3 main capabilities.
 * **"Shape", not "element",** for drawing primitives (`<pxl-circle>`, `<pxl-text>`): they draw on the canvas, they aren't HTML boxes. "Element" or "container" is for `<pxl-stage>` and `<pxl-layer>`.
-* **Concepts lowercase, API names as code:** "a shape nested inside a rotating layer"; "nest the `<code>&lt;pxl-circle&gt;</code>`". Title Case only for canvas labels and for structural HTML comments in snippets (`<!-- Left: Filled Arrows -->`).
+* **Concepts lowercase, API names as code:** "a shape nested inside a rotating layer"; "nest the `<code>&lt;pxl-circle&gt;</code>`". Title Case only for canvas labels and for the name in snippet comments (`<!-- Left: Arc, filled arrowheads -->`).
 * **Attributes and values:** names and keywords are code (`<code>strokewidth</code>`, `<code>round</code>`). Introduce a short or technical attribute once with its concept first: `width (<code>w</code>)`, `height (<code>h</code>)`, `thickness (<code>strokewidth</code>)`, `outer radius (<code>r</code>)`, `inner radius (<code>ir</code>)`, `corner radius (<code>r</code>)`, `rotation (<code>rotate</code>)`, `uniform scale (<code>zoom</code>)`, `scaling (<code>zoom</code>, <code>scalex</code>, <code>scaley</code>)`, `start (<code>arrowstart</code>) and end (<code>arrowend</code>) arrowheads`, `end caps (<code>linecap</code>)`, `corner joins (<code>linejoin</code>)`, `dash patterns (<code>linedash</code>)`. No pair when the concept repeats the name (`fill`, `stroke`, `mask`, `miterlimit`, `size`, `font`). Write `attr="value"` only when the attribute isn't clear from the sentence or the reader should copy it.
 * **Coordinates:** a point is a bare tuple (*"moves to `(350, 150)`"*, not "coordinate (350, 150)"); attributes are joined by *and* (*"Set `x="350"` and `y="150"`"*).
 * **No units:** no `px`, `em` or `%` after attribute values in prose, no scale factor `u`, no "logical units" or "coordinate units". Bare numbers, or "the 1000-width logical canvas".
