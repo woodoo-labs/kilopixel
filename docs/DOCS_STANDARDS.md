@@ -70,6 +70,7 @@ Elements within a `<pxl-layer>` are drawn in DOM order, back to front. All examp
 
 ## 3. Typography & Coordinate Labels
 * **Standard Font Size (`size="27"`):** Within the 1000-width logical canvas, all `<pxl-text>` annotations, coordinate labels, shape titles, and axis guides use `size="27"`. It reads well on desktop and phone screens without cluttering the canvas.
+* **Web Fonts:** Pages use web fonts in `font` without a preloader or load handler. Each font and weight is downloaded the first time text is drawn with it; until then the text uses a fallback font, and the engine redraws and measures it again when the font arrives.
 * **Center Point Labels (Canvas):** Center point labels (e.g., the colored dots at the center of layers or shapes) use descriptive text like `'Layer Center'` or `'Circle Center'`, without coordinates `(x, y)`: the dashed helper lines around them already show the coordinates.
   * **Exception for Absolute Stage Bounds:** The Stage origin and corners are the only points that use absolute tuple syntax in labels: `'Stage Origin (0, 0)'` or `'(1000, 0)'`.
 * **Coordinate Syntax in Text (Prose):**
@@ -111,7 +112,7 @@ For notes and important caveats, use the callout classes, not inline styles.
 Every example has three parts:
 1. **Visible Declarative Code Block (`<pre><code class="language-html">`)**: Placed **above** the demo container so developers see the declarative syntax immediately. Use `<mark id="sec[N]…Code">` around dynamic values (see §5).
 2. **Interactive Controls (`<div class="demo-controls">`)**: Placed **above** `<pxl-stage>` inside `<div class="demo-container">`. Every example must feature interactive controls (sliders, dropdowns or toggle buttons). The header title is just `Controls`.
-3. **Reactive Stage (`<pxl-stage class="demo-stage" ratio="5 / 3">`)**: Placed at the bottom inside `<div class="demo-container">`. The container's CSS flex gap automatically spaces the stage away from the controls. Examples use `ratio="5 / 3"` (logical width 1000, height 600) unless the example is about another aspect ratio. Showcase sections are square (`ratio="1 / 1"`, see §11).
+3. **Reactive Stage (`<pxl-stage class="demo-stage" ratio="5 / 3">`)**: Placed at the bottom inside `<div class="demo-container">`. The container's CSS flex gap automatically spaces the stage away from the controls. Examples use `ratio="5 / 3"` (logical width 1000, height 600) unless the example is about another aspect ratio. Showcase sections are square (`ratio="1 / 1"`, see §10).
 
 * **Exception: Introduction:** The introduction (`index.html`) shows short examples without controls: a code snippet followed by a `<pxl-stage class="demo-stage">`, without a `demo-container`. Its examples show how markup becomes a picture rather than teaching one attribute, so controls would distract. All snippet rules still apply. Every other page keeps the 3-part layout.
 
@@ -337,10 +338,7 @@ All docs pages use these characters:
 * **Permission Required**: If a new CSS rule or an inline style seems necessary, ask the user before adding it.
 * **Exceptions**: The only exceptions to the inline style ban are functional JavaScript targets (e.g., dynamically controlled `width` or `transform` properties explicitly driven by a slider's JavaScript, together with the styles that only support that change, such as `margin: 0 auto` to keep it centered or a `transition` to smooth it), or `style="display: none;"` for initially inactive/hidden dual-mode control group containers.
 
-## 9. Canvas Typography & Web Fonts
-* **Lazy Loading**: Each web font and weight is downloaded the first time text is drawn with it. Until then, the text uses a fallback font; the engine redraws and measures it again when the font arrives. Pages need neither a preloader nor a handler.
-
-## 10. Editorial Voice & Neutral Tone
+## 9. Editorial Voice & Neutral Tone
 
 Docs text is plain and factual:
 
@@ -353,7 +351,7 @@ Docs text is plain and factual:
 * **Use "Shape" Instead of "Element" for Canvas Primitives**:
   When introducing visual primitives (`<pxl-circle>`, `<pxl-rect>`, `<pxl-ellipse>`, `<pxl-text>`, etc.), refer to them as "shapes" rather than "elements" (e.g., *"The circle shape renders..."*). They draw on the canvas; they are not HTML boxes. (Reserve "element" or "container" for structural nodes like `<pxl-stage>` and `<pxl-layer>`).
 
-## 11. Showcase Sections
+## 10. Showcase Sections
 A showcase is one artistic, animated composition near the end of a feature page. It shows what the page's feature can do when used freely, after the sections have taught it step by step.
 
 * **Optional:** Not every page needs a showcase. Technical topics (e.g. `caps.html`) can do without one.
@@ -363,6 +361,6 @@ A showcase is one artistic, animated composition near the end of a feature page.
 * **Built From the Page's Feature:** The composition is made mainly from the shape or feature the page teaches (e.g. only `<pxl-rect>` on `rect.html`). Other shapes may support it but not dominate.
 * **Static and Animated Layers:** Put shapes that never change into a background `<pxl-layer>` and animated shapes into a foreground layer, so the static layer is not redrawn every frame.
 * **Free Colors and Sizes:** The color semantics (§1), the stroke width hierarchy and the `size="27"` font rule do not apply. Showcases use their own palette.
-* **One Paragraph:** A single `<p>` directly below the heading says what the composition shows (an homage to an artist or work, if there is one) and which technique of the page it uses. It follows §10: neutral tone, no performance claims such as "60fps" or "GPU-accelerated".
+* **One Paragraph:** A single `<p>` directly below the heading says what the composition shows (an homage to an artist or work, if there is one) and which technique of the page it uses. It follows §9: neutral tone, no performance claims such as "60fps" or "GPU-accelerated".
 
 
