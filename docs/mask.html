@@ -51,11 +51,16 @@
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- The Destination Shapes --&gt;
-    &lt;pxl-rect x="<mark id="sec1RectXCode">350</mark>" y="<mark id="sec1RectYCode">300</mark>" alpha="<mark id="sec1RectAlphaCode">1</mark>" rotate="<mark id="sec1RectRotCode">0</mark>" w="400" h="300" fill="darkorange"&gt;&lt;/pxl-rect&gt;
+    &lt;!-- Left: Rect, the destination --&gt;
+    &lt;pxl-rect w="400" h="300" fill="darkorange"
+      x="<mark id="sec1RectXCode">350</mark>" y="<mark id="sec1RectYCode">300</mark>" rotate="<mark id="sec1RectRotateCode">0</mark>" alpha="<mark id="sec1RectAlphaCode">1</mark>"&gt;
+    &lt;/pxl-rect&gt;
 
-    &lt;!-- The Source Shape --&gt;
-    &lt;pxl-ellipse x="<mark id="sec1EllipseXCode">650</mark>" y="<mark id="sec1EllipseYCode">300</mark>" alpha="<mark id="sec1EllipseAlphaCode">1</mark>" mask="<mark id="sec1MaskCode">xor</mark>" rotate="<mark id="sec1EllipseRotCode">0</mark>" rx="200" ry="150" fill="dodgerblue"&gt;&lt;/pxl-ellipse&gt;
+    &lt;!-- Right: Ellipse, the source with the mask --&gt;
+    &lt;pxl-ellipse rx="200" ry="150" fill="dodgerblue"
+      x="<mark id="sec1EllipseXCode">650</mark>" y="<mark id="sec1EllipseYCode">300</mark>" rotate="<mark id="sec1EllipseRotateCode">0</mark>" alpha="<mark id="sec1EllipseAlphaCode">1</mark>"
+      mask="<mark id="sec1MaskCode">xor</mark>"&gt;
+    &lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -82,8 +87,8 @@
                   <input type="range" min="100" max="500" step="10" value="300" autocomplete="off" oninput="document.getElementById('sec1Rect').setAttribute('y', this.value); document.getElementById('sec1RectYVal').innerText = this.value; document.getElementById('sec1RectYCode').innerText = this.value;" data-mark="sec1RectYCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec1RectRotVal">0</span></label>
-                  <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off" oninput="document.getElementById('sec1Rect').setAttribute('rotate', this.value); document.getElementById('sec1RectRotVal').innerText = this.value; document.getElementById('sec1RectRotCode').innerText = this.value;" data-mark="sec1RectRotCode">
+                  <label><span>Rotation</span> <span id="sec1RectRotateVal">0</span></label>
+                  <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off" oninput="document.getElementById('sec1Rect').setAttribute('rotate', this.value); document.getElementById('sec1RectRotateVal').innerText = this.value; document.getElementById('sec1RectRotateCode').innerText = this.value;" data-mark="sec1RectRotateCode">
                 </div>
                 <div class="control-group">
                   <label><span>Alpha</span> <span id="sec1RectAlphaVal">1</span></label>
@@ -104,8 +109,8 @@
                   <input type="range" min="100" max="500" step="10" value="300" autocomplete="off" oninput="document.getElementById('sec1Ellipse').setAttribute('y', this.value); document.getElementById('sec1EllipseYVal').innerText = this.value; document.getElementById('sec1EllipseYCode').innerText = this.value;" data-mark="sec1EllipseYCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec1EllipseRotVal">0</span></label>
-                  <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off" oninput="document.getElementById('sec1Ellipse').setAttribute('rotate', this.value); document.getElementById('sec1EllipseRotVal').innerText = this.value; document.getElementById('sec1EllipseRotCode').innerText = this.value;" data-mark="sec1EllipseRotCode">
+                  <label><span>Rotation</span> <span id="sec1EllipseRotateVal">0</span></label>
+                  <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off" oninput="document.getElementById('sec1Ellipse').setAttribute('rotate', this.value); document.getElementById('sec1EllipseRotateVal').innerText = this.value; document.getElementById('sec1EllipseRotateCode').innerText = this.value;" data-mark="sec1EllipseRotateCode">
                 </div>
                 <div class="control-group">
                   <label><span>Alpha</span> <span id="sec1EllipseAlphaVal">1</span></label>

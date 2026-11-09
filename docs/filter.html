@@ -52,20 +52,19 @@
 
         <!-- Declarative Code Block Above Container -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;!-- 1. LAYER LEVEL: Entire layer is filtered together --&gt;
+  &lt;!-- Left: Layer Filter, all shapes filtered together --&gt;
   &lt;pxl-layer filter="<span id="sec1FilterAttr">[hueRotate(<mark id="sec1Filter1Code">0</mark>), saturate(<mark id="sec1Filter2Code">100</mark>), grayscale(<mark id="sec1Filter3Code">0</mark>)]</span>"&gt;
-    &lt;!-- Shapes --&gt;
-    &lt;pxl-rect x="250" y="300" w="240" h="240" r="36"fill="#3b82f6"&gt;&lt;/pxl-rect&gt;
+    &lt;pxl-rect x="250" y="300" w="240" h="240" r="36" fill="#3b82f6"&gt;&lt;/pxl-rect&gt;
     &lt;pxl-circle x="175" y="225" r="70" fill="#f97316" stroke="#ea580c" strokewidth="4"&gt;&lt;/pxl-circle&gt;
     &lt;pxl-circle x="310" y="360" r="45" fill="#22c55e" stroke="#16a34a" strokewidth="4"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
-  &lt;!-- 2. SHAPE LEVEL: Only the blue rect is filtered --&gt;
+  &lt;!-- Right: Shape Filter, only the rect is filtered --&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Blue Rect --&gt;
-    &lt;pxl-rect filter="<span id="sec1ShapeFilterAttr">[hueRotate(<mark id="sec1Filter1bCode">0</mark>), saturate(<mark id="sec1Filter2bCode">100</mark>), grayscale(<mark id="sec1Filter3bCode">0</mark>)]</span>"
-      x="750" y="300" w="240" h="240" r="36"fill="#3b82f6"&gt;&lt;/pxl-rect&gt;
-    &lt;!-- Circles (Unfiltered) --&gt;
+    &lt;pxl-rect x="750" y="300" fill="#3b82f6"
+      w="240" h="240" r="36"
+      filter="<span id="sec1ShapeFilterAttr">[hueRotate(<mark id="sec1Filter1bCode">0</mark>), saturate(<mark id="sec1Filter2bCode">100</mark>), grayscale(<mark id="sec1Filter3bCode">0</mark>)]</span>"&gt;
+    &lt;/pxl-rect&gt;
     &lt;pxl-circle x="675" y="225" r="70" fill="#f97316" stroke="#ea580c" strokewidth="4"&gt;&lt;/pxl-circle&gt;
     &lt;pxl-circle x="810" y="360" r="45" fill="#22c55e" stroke="#16a34a" strokewidth="4"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;

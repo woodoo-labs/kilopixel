@@ -53,14 +53,23 @@
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Circle 1 (Hex Code) --&gt;
-    &lt;pxl-circle fill="<mark id="sec1Circle1FillCode">#ef4444</mark>" stroke="#991b1b" x="<mark id="sec1Circle1XCode">500</mark>" y="<mark id="sec1Circle1YCode">230</mark>" r="<mark id="sec1Circle1RCode">140</mark>" strokewidth="10"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Circle 1, hex code --&gt;
+    &lt;pxl-circle stroke="#991b1b" strokewidth="10"
+      x="<mark id="sec1Circle1XCode">500</mark>" y="<mark id="sec1Circle1YCode">230</mark>" r="<mark id="sec1Circle1RCode">140</mark>"
+      fill="<mark id="sec1Circle1FillCode">#ef4444</mark>"&gt;
+    &lt;/pxl-circle&gt;
       
-    &lt;!-- Circle 2 (Named CSS Color) --&gt;
-    &lt;pxl-circle fill="<mark id="sec1Circle2FillCode">dodgerblue</mark>" stroke="royalblue" x="<mark id="sec1Circle2XCode">420</mark>" y="<mark id="sec1Circle2YCode">370</mark>" r="<mark id="sec1Circle2RCode">140</mark>" strokewidth="10"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Circle 2, named color --&gt;
+    &lt;pxl-circle stroke="royalblue" strokewidth="10"
+      x="<mark id="sec1Circle2XCode">420</mark>" y="<mark id="sec1Circle2YCode">370</mark>" r="<mark id="sec1Circle2RCode">140</mark>"
+      fill="<mark id="sec1Circle2FillCode">dodgerblue</mark>"&gt;
+    &lt;/pxl-circle&gt;
       
-    &lt;!-- Circle 3 (8-Digit Hex with Alpha) --&gt;
-    &lt;pxl-circle fill="<mark id="sec1Circle3FillCode">#fbbf24aa</mark>" stroke="#b45309" x="<mark id="sec1Circle3XCode">580</mark>" y="<mark id="sec1Circle3YCode">370</mark>" r="<mark id="sec1Circle3RCode">140</mark>" strokewidth="10"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Circle 3, 8-digit hex with alpha --&gt;
+    &lt;pxl-circle stroke="#b45309" strokewidth="10"
+      x="<mark id="sec1Circle3XCode">580</mark>" y="<mark id="sec1Circle3YCode">370</mark>" r="<mark id="sec1Circle3RCode">140</mark>"
+      fill="<mark id="sec1Circle3FillCode">#fbbf24aa</mark>"&gt;
+    &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -190,14 +199,14 @@
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Circle 1 (Red) --&gt;
-    &lt;pxl-circle fill="rgba(<mark id="sec2Circle1RedCode">255</mark>, <mark id="sec2Circle1GreenCode">0</mark>, <mark id="sec2Circle1BlueCode">0</mark>, <mark id="sec2Circle1AlphaCode">0.7</mark>)" x="500" y="230" r="140"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Circle 1, red --&gt;
+    &lt;pxl-circle x="500" y="230" r="140" fill="rgba(<mark id="sec2Circle1RedCode">255</mark>, <mark id="sec2Circle1GreenCode">0</mark>, <mark id="sec2Circle1BlueCode">0</mark>, <mark id="sec2Circle1AlphaCode">0.7</mark>)"&gt;&lt;/pxl-circle&gt;
       
-    &lt;!-- Circle 2 (Green) --&gt;
-    &lt;pxl-circle fill="rgba(<mark id="sec2Circle2RedCode">0</mark>, <mark id="sec2Circle2GreenCode">255</mark>, <mark id="sec2Circle2BlueCode">0</mark>, <mark id="sec2Circle2AlphaCode">0.7</mark>)" x="420" y="370" r="140"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Circle 2, green --&gt;
+    &lt;pxl-circle x="420" y="370" r="140" fill="rgba(<mark id="sec2Circle2RedCode">0</mark>, <mark id="sec2Circle2GreenCode">255</mark>, <mark id="sec2Circle2BlueCode">0</mark>, <mark id="sec2Circle2AlphaCode">0.7</mark>)"&gt;&lt;/pxl-circle&gt;
       
-    &lt;!-- Circle 3 (Blue) --&gt;
-    &lt;pxl-circle fill="rgba(<mark id="sec2Circle3RedCode">0</mark>, <mark id="sec2Circle3GreenCode">0</mark>, <mark id="sec2Circle3BlueCode">255</mark>, <mark id="sec2Circle3AlphaCode">0.7</mark>)" x="580" y="370" r="140"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Circle 3, blue --&gt;
+    &lt;pxl-circle x="580" y="370" r="140" fill="rgba(<mark id="sec2Circle3RedCode">0</mark>, <mark id="sec2Circle3GreenCode">0</mark>, <mark id="sec2Circle3BlueCode">255</mark>, <mark id="sec2Circle3AlphaCode">0.7</mark>)"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -316,14 +325,14 @@
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Circle 1 (Static HSL) --&gt;
-    &lt;pxl-circle fill="hsl(<mark id="sec3Circle1HueCode">0</mark>, <mark id="sec3Circle1SatCode">100</mark>, <mark id="sec3Circle1LitCode">50</mark>)" x="500" y="230" r="140"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Circle 1, fixed hue --&gt;
+    &lt;pxl-circle x="500" y="230" r="140" fill="hsl(<mark id="sec3Circle1HueCode">0</mark>, <mark id="sec3Circle1SatCode">100</mark>, <mark id="sec3Circle1LitCode">50</mark>)"&gt;&lt;/pxl-circle&gt;
       
-    &lt;!-- Circle 2 (HSLA with Alpha) --&gt;
-    &lt;pxl-circle fill="hsla(<mark id="sec3Circle2HueCode">120</mark>, <mark id="sec3Circle2SatCode">100</mark>, <mark id="sec3Circle2LitCode">50</mark>, <mark id="sec3Circle2AlphaCode">0.7</mark>)" x="420" y="370" r="140"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Circle 2, with alpha --&gt;
+    &lt;pxl-circle x="420" y="370" r="140" fill="hsla(<mark id="sec3Circle2HueCode">120</mark>, <mark id="sec3Circle2SatCode">100</mark>, <mark id="sec3Circle2LitCode">50</mark>, <mark id="sec3Circle2AlphaCode">0.7</mark>)"&gt;&lt;/pxl-circle&gt;
       
-    &lt;!-- Circle 3 (Animated Hue) --&gt;
-    &lt;pxl-circle fill="hsl(t * <mark id="sec3Circle3SpeedCode">90</mark>, 100, 50)" x="580" y="370" r="140"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Circle 3, animated hue --&gt;
+    &lt;pxl-circle x="580" y="370" r="140" fill="hsl(t * <mark id="sec3Circle3SpeedCode">90</mark>, 100, 50)"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -417,14 +426,25 @@
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- 1. Ellipse --&gt;
-    &lt;pxl-ellipse fill="linear(<mark id="sec4EllipseAngleCode">45</mark>, ['darkorange', 'gold', 'crimson'])" rx="<mark id="sec4EllipseRxCode">100</mark>" ry="<mark id="sec4EllipseRyCode">200</mark>" rotate="<mark id="sec4EllipseRotCode">0</mark>" x="150" y="300"&gt;&lt;/pxl-ellipse&gt;
+    &lt;!-- Left: Ellipse, three colors --&gt;
+    &lt;pxl-ellipse x="150" y="300"
+      rx="<mark id="sec4EllipseRxCode">100</mark>" ry="<mark id="sec4EllipseRyCode">200</mark>" rotate="<mark id="sec4EllipseRotateCode">0</mark>"
+      fill="linear(<mark id="sec4EllipseAngleCode">45</mark>, ['darkorange', 'gold', 'crimson'])"&gt;
+    &lt;/pxl-ellipse&gt;
       
-    &lt;!-- 2. Hard Split Rounded Rect --&gt;
-    &lt;pxl-rect fill="linear(<mark id="sec4RectAngleCode">135</mark>, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])" w="<mark id="sec4RectWidthCode">300</mark>" h="<mark id="sec4RectHeightCode">200</mark>" r="20" rotate="<mark id="sec4RectRotCode">0</mark>" x="500" y="300"&gt;&lt;/pxl-rect&gt;
+    &lt;!-- Middle: Rectangle, hard color split --&gt;
+    &lt;pxl-rect x="500" y="300"
+      r="20"
+      w="<mark id="sec4RectWCode">300</mark>" h="<mark id="sec4RectHCode">200</mark>" rotate="<mark id="sec4RectRotateCode">0</mark>"
+      fill="linear(<mark id="sec4RectAngleCode">135</mark>, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])"&gt;
+    &lt;/pxl-rect&gt;
 
-    &lt;!-- 3. Gradient Text --&gt;
-    &lt;pxl-text fill="linear(<mark id="sec4TextAngleCode">45</mark>, ['#8b5cf6', '#ec4899', '#f59e0b'])" size="<mark id="sec4TextSizeCode">150</mark>" weight="<mark id="sec4TextWeightCode">800</mark>" rotate="<mark id="sec4TextRotCode">0</mark>" x="850" y="300" font="Inter" text="'pxl'" align="center" baseline="middle"&gt;&lt;/pxl-text&gt;
+    &lt;!-- Right: Text, gradient on text --&gt;
+    &lt;pxl-text x="850" y="300" font="Inter" align="center" baseline="middle"
+      text="'pxl'"
+      size="<mark id="sec4TextSizeCode">150</mark>" weight="<mark id="sec4TextWeightCode">800</mark>" rotate="<mark id="sec4TextRotateCode">0</mark>"
+      fill="linear(<mark id="sec4TextAngleCode">45</mark>, ['#8b5cf6', '#ec4899', '#f59e0b'])"&gt;
+    &lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -453,9 +473,9 @@
                     oninput="document.getElementById('sec4Ellipse').setAttribute('ry', this.value); document.getElementById('sec4EllipseRyVal').innerText = this.value; document.getElementById('sec4EllipseRyCode').innerText = this.value;" data-mark="sec4EllipseRyCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec4EllipseRotVal">0°</span></label>
+                  <label><span>Rotation</span> <span id="sec4EllipseRotateVal">0°</span></label>
                   <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec4Ellipse').setAttribute('rotate', this.value); document.getElementById('sec4EllipseRotVal').innerText = this.value + '°'; document.getElementById('sec4EllipseRotCode').innerText = this.value;" data-mark="sec4EllipseRotCode">
+                    oninput="document.getElementById('sec4Ellipse').setAttribute('rotate', this.value); document.getElementById('sec4EllipseRotateVal').innerText = this.value + '°'; document.getElementById('sec4EllipseRotateCode').innerText = this.value;" data-mark="sec4EllipseRotateCode">
                 </div>
                 <div class="control-group">
                   <label><span>Gradient Angle</span> <span id="sec4EllipseAngleVal">45°</span></label>
@@ -469,19 +489,19 @@
             <div class="tab-content" id="sec4RectTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Width</span> <span id="sec4RectWidthVal">300</span></label>
+                  <label><span>Width</span> <span id="sec4RectWVal">300</span></label>
                   <input type="range" min="50" max="500" step="10" value="300" autocomplete="off"
-                    oninput="document.getElementById('sec4Rect').setAttribute('w', this.value); document.getElementById('sec4RectWidthVal').innerText = this.value; document.getElementById('sec4RectWidthCode').innerText = this.value;" data-mark="sec4RectWidthCode">
+                    oninput="document.getElementById('sec4Rect').setAttribute('w', this.value); document.getElementById('sec4RectWVal').innerText = this.value; document.getElementById('sec4RectWCode').innerText = this.value;" data-mark="sec4RectWCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Height</span> <span id="sec4RectHeightVal">200</span></label>
+                  <label><span>Height</span> <span id="sec4RectHVal">200</span></label>
                   <input type="range" min="50" max="500" step="10" value="200" autocomplete="off"
-                    oninput="document.getElementById('sec4Rect').setAttribute('h', this.value); document.getElementById('sec4RectHeightVal').innerText = this.value; document.getElementById('sec4RectHeightCode').innerText = this.value;" data-mark="sec4RectHeightCode">
+                    oninput="document.getElementById('sec4Rect').setAttribute('h', this.value); document.getElementById('sec4RectHVal').innerText = this.value; document.getElementById('sec4RectHCode').innerText = this.value;" data-mark="sec4RectHCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec4RectRotVal">0°</span></label>
+                  <label><span>Rotation</span> <span id="sec4RectRotateVal">0°</span></label>
                   <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec4Rect').setAttribute('rotate', this.value); document.getElementById('sec4RectRotVal').innerText = this.value + '°'; document.getElementById('sec4RectRotCode').innerText = this.value;" data-mark="sec4RectRotCode">
+                    oninput="document.getElementById('sec4Rect').setAttribute('rotate', this.value); document.getElementById('sec4RectRotateVal').innerText = this.value + '°'; document.getElementById('sec4RectRotateCode').innerText = this.value;" data-mark="sec4RectRotateCode">
                 </div>
                 <div class="control-group">
                   <label><span>Gradient Angle</span> <span id="sec4RectAngleVal">135°</span></label>
@@ -505,9 +525,9 @@
                     oninput="document.getElementById('sec4Text').setAttribute('weight', this.value); document.getElementById('sec4TextWeightVal').innerText = this.value; document.getElementById('sec4TextWeightCode').innerText = this.value;" data-mark="sec4TextWeightCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec4TextRotVal">0°</span></label>
+                  <label><span>Rotation</span> <span id="sec4TextRotateVal">0°</span></label>
                   <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec4Text').setAttribute('rotate', this.value); document.getElementById('sec4TextRotVal').innerText = this.value + '°'; document.getElementById('sec4TextRotCode').innerText = this.value;" data-mark="sec4TextRotCode">
+                    oninput="document.getElementById('sec4Text').setAttribute('rotate', this.value); document.getElementById('sec4TextRotateVal').innerText = this.value + '°'; document.getElementById('sec4TextRotateCode').innerText = this.value;" data-mark="sec4TextRotateCode">
                 </div>
                 <div class="control-group">
                   <label><span>Gradient Angle</span> <span id="sec4TextAngleVal">45°</span></label>

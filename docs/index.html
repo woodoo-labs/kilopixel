@@ -44,15 +44,18 @@
       <p>A rect, a circle and a line. Every attribute is a plain number.</p>
       <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-rect x="200" y="300" w="200" h="200"
-      fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"&gt;
+    &lt;!-- Left: Square --&gt;
+    &lt;pxl-rect x="200" y="300" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
+      w="200" h="200"&gt;
     &lt;/pxl-rect&gt;
-    &lt;pxl-circle x="500" y="300" r="100"
-      fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;
+
+    &lt;!-- Middle: Circle --&gt;
+    &lt;pxl-circle x="500" y="300" fill="#ffedd566" stroke="#f97316" strokewidth="4"
+      r="100"&gt;
     &lt;/pxl-circle&gt;
-    &lt;pxl-line x1="700" y1="200" x2="850" y2="400"
-      stroke="#22c55e" strokewidth="4"&gt;
-    &lt;/pxl-line&gt;
+
+    &lt;!-- Right: Line --&gt;
+    &lt;pxl-line x1="700" y1="200" x2="850" y2="400" stroke="#22c55e" strokewidth="4"&gt;&lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -75,17 +78,19 @@
       <p>The same three shapes, with expressions instead of numbers. Move the pointer over the stage.</p>
       <pre><code class="language-html">&lt;pxl-stage id="main" ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-rect x="200" y="300" w="200" h="200"
-      fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
-      rotate="t * 45"&gt;
+    &lt;!-- Left: Square, rotates over time --&gt;
+    &lt;pxl-rect x="200" y="300" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
+      w="200" h="200" rotate="t * 45"&gt;
     &lt;/pxl-rect&gt;
-    &lt;pxl-circle id="ball" x="500" y="300"
-      fill="#ffedd566" stroke="#f97316" strokewidth="4"
+
+    &lt;!-- Middle: Ball, grows and shrinks --&gt;
+    &lt;pxl-circle id="ball" x="500" y="300" fill="#ffedd566" stroke="#f97316" strokewidth="4"
       r="60 + wave(2) * 40"&gt;
     &lt;/pxl-circle&gt;
-    &lt;pxl-line stroke="#22c55e" strokewidth="4"
-      x1="ref.ball.x + ref.ball.r" y1="300"
-      x2="ref.main.mouseX" y2="ref.main.mouseY"&gt;
+
+    &lt;!-- Right: Line, from the ball to the mouse --&gt;
+    &lt;pxl-line x1="ref.ball.x + ref.ball.r" y1="300" x2="ref.main.mouseX" y2="ref.main.mouseY"
+      stroke="#22c55e" strokewidth="4"&gt;
     &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>

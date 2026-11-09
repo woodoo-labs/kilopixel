@@ -48,13 +48,13 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Horizontal Line --&gt;
+    &lt;!-- Left: Horizontal --&gt;
     &lt;pxl-line stroke="#f97316" strokewidth="20"
       x1="<mark id="sec1Line1X1Code">150</mark>" y1="<mark id="sec1Line1Y1Code">300</mark>"
       x2="<mark id="sec1Line1X2Code">450</mark>" y2="<mark id="sec1Line1Y2Code">300</mark>"&gt;
     &lt;/pxl-line&gt;
 
-    &lt;!-- Right: Diagonal Line --&gt;
+    &lt;!-- Right: Diagonal --&gt;
     &lt;pxl-line stroke="#3b82f6" strokewidth="4"
       x1="<mark id="sec1Line2X1Code">550</mark>" y1="<mark id="sec1Line2Y1Code">450</mark>"
       x2="<mark id="sec1Line2X2Code">850</mark>" y2="<mark id="sec1Line2Y2Code">150</mark>"&gt;
@@ -155,16 +155,17 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Dashed Line with Round Caps --&gt;
+    &lt;!-- Left: Dashed, round caps on each dash --&gt;
     &lt;pxl-line x1="150" y1="300" x2="450" y2="300" stroke="#f97316"
-      linedash="<mark id="sec2Line1DashCode">20</mark>" strokewidth="<mark id="sec2Line1StrokeWidthCode">6</mark>"
+      linedash="<mark id="sec2Line1LinedashCode">20</mark>" strokewidth="<mark id="sec2Line1StrokewidthCode">6</mark>"
       linecap="<mark id="sec2Line1LinecapCode">round</mark>"&gt;
     &lt;/pxl-line&gt;
 
-    &lt;!-- Right: Gradient Stroke Line --&gt;
+    &lt;!-- Right: Gradient, gradient stroke --&gt;
     &lt;pxl-line x1="550" y1="300" x2="850" y2="300"
       stroke="linear(<mark id="sec2Line2AngleCode">0</mark>, ['#3b82f6', '#ec4899'])"
-      strokewidth="<mark id="sec2Line2StrokeWidthCode">30</mark>" linecap="<mark id="sec2Line2LinecapCode">round</mark>"&gt;
+      strokewidth="<mark id="sec2Line2StrokewidthCode">30</mark>"
+      linecap="<mark id="sec2Line2LinecapCode">round</mark>"&gt;
     &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -183,14 +184,14 @@
             <div class="tab-content active" id="sec2Line1Tab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Line Dash <span class="indicator-dot"></span></span> <span id="sec2Line1DashVal">20</span></label>
-                  <input type="range" min="5" max="40" step="5" value="20" autocomplete="off" id="sec2Line1DashInput"
-                    oninput="document.getElementById('sec2Line1').setAttribute('linedash', this.value); document.getElementById('sec2Line1DashVal').innerText = this.value; document.getElementById('sec2Line1DashCode').innerText = this.value;" data-mark="sec2Line1DashCode">
+                  <label><span>Line Dash <span class="indicator-dot"></span></span> <span id="sec2Line1LinedashVal">20</span></label>
+                  <input type="range" min="5" max="40" step="5" value="20" autocomplete="off" id="sec2Line1LinedashInput"
+                    oninput="document.getElementById('sec2Line1').setAttribute('linedash', this.value); document.getElementById('sec2Line1LinedashVal').innerText = this.value; document.getElementById('sec2Line1LinedashCode').innerText = this.value;" data-mark="sec2Line1LinedashCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec2Line1StrokeWidthVal">6</span></label>
-                  <input type="range" min="2" max="30" step="1" value="6" autocomplete="off" id="sec2Line1StrokeWidthInput"
-                    oninput="document.getElementById('sec2Line1').setAttribute('strokewidth', this.value); document.getElementById('sec2Line1StrokeWidthVal').innerText = this.value; document.getElementById('sec2Line1StrokeWidthCode').innerText = this.value;" data-mark="sec2Line1StrokeWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec2Line1StrokewidthVal">6</span></label>
+                  <input type="range" min="2" max="30" step="1" value="6" autocomplete="off" id="sec2Line1StrokewidthInput"
+                    oninput="document.getElementById('sec2Line1').setAttribute('strokewidth', this.value); document.getElementById('sec2Line1StrokewidthVal').innerText = this.value; document.getElementById('sec2Line1StrokewidthCode').innerText = this.value;" data-mark="sec2Line1StrokewidthCode">
                 </div>
                 <div class="control-group">
                   <label><span>Line Cap</span></label>
@@ -213,9 +214,9 @@
                     oninput="document.getElementById('sec2Line2').setAttribute('stroke', 'linear(' + this.value + ', [\'#3b82f6\', \'#ec4899\'])'); document.getElementById('sec2Line2AngleVal').innerText = this.value + '°'; document.getElementById('sec2Line2AngleCode').innerText = this.value;" data-mark="sec2Line2AngleCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec2Line2StrokeWidthVal">30</span></label>
-                  <input type="range" min="2" max="40" step="1" value="30" autocomplete="off" id="sec2Line2StrokeWidthInput"
-                    oninput="document.getElementById('sec2Line2').setAttribute('strokewidth', this.value); document.getElementById('sec2Line2StrokeWidthVal').innerText = this.value; document.getElementById('sec2Line2StrokeWidthCode').innerText = this.value;" data-mark="sec2Line2StrokeWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec2Line2StrokewidthVal">30</span></label>
+                  <input type="range" min="2" max="40" step="1" value="30" autocomplete="off" id="sec2Line2StrokewidthInput"
+                    oninput="document.getElementById('sec2Line2').setAttribute('strokewidth', this.value); document.getElementById('sec2Line2StrokewidthVal').innerText = this.value; document.getElementById('sec2Line2StrokewidthCode').innerText = this.value;" data-mark="sec2Line2StrokewidthCode">
                 </div>
                 <div class="control-group">
                   <label><span>Line Cap</span></label>
@@ -260,16 +261,18 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Auto-Sized Arrowheads --&gt;
+    &lt;!-- Left: Auto, arrowheads sized from the stroke --&gt;
     &lt;pxl-line x1="150" y1="300" x2="450" y2="300" stroke="#f97316"
       arrowstart="auto" arrowend="auto"
-      strokewidth="<mark id="sec3Line1StrokeWidthCode">10</mark>" arrowstyle="<mark id="sec3Line1StyleCode">filled</mark>"&gt;
+      strokewidth="<mark id="sec3Line1StrokewidthCode">10</mark>"
+      arrowstyle="<mark id="sec3Line1ArrowstyleCode">filled</mark>"&gt;
     &lt;/pxl-line&gt;
 
-    &lt;!-- Right: Custom-Sized Arrowheads --&gt;
+    &lt;!-- Right: Custom, set arrowhead sizes --&gt;
     &lt;pxl-line x1="550" y1="300" x2="850" y2="300" stroke="#3b82f6"
-      arrowstart="<mark id="sec3Line2ArrowStartCode">0</mark>" arrowend="<mark id="sec3Line2ArrowEndCode">35</mark>"
-      strokewidth="<mark id="sec3Line2StrokeWidthCode">6</mark>" arrowstyle="<mark id="sec3Line2StyleCode">line</mark>"&gt;
+      arrowstart="<mark id="sec3Line2ArrowstartCode">0</mark>" arrowend="<mark id="sec3Line2ArrowendCode">35</mark>"
+      strokewidth="<mark id="sec3Line2StrokewidthCode">6</mark>"
+      arrowstyle="<mark id="sec3Line2ArrowstyleCode">line</mark>"&gt;
     &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -289,15 +292,15 @@
               <div class="playground-sliders">
                 <!-- Row 1: Stroke Width & Arrow Style -->
                 <div class="control-group">
-                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec3Line1StrokeWidthVal">10</span></label>
-                  <input type="range" min="2" max="40" step="1" value="10" autocomplete="off" id="sec3Line1StrokeWidthInput"
-                    oninput="document.getElementById('sec3Line1').setAttribute('strokewidth', this.value); document.getElementById('sec3Line1StrokeWidthVal').innerText = this.value; document.getElementById('sec3Line1StrokeWidthCode').innerText = this.value;" data-mark="sec3Line1StrokeWidthCode">
+                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec3Line1StrokewidthVal">10</span></label>
+                  <input type="range" min="2" max="40" step="1" value="10" autocomplete="off" id="sec3Line1StrokewidthInput"
+                    oninput="document.getElementById('sec3Line1').setAttribute('strokewidth', this.value); document.getElementById('sec3Line1StrokewidthVal').innerText = this.value; document.getElementById('sec3Line1StrokewidthCode').innerText = this.value;" data-mark="sec3Line1StrokewidthCode">
                 </div>
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line1').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec3Line1StyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn" onclick="document.getElementById('sec3Line1').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec3Line1StyleCode', 'line');">line</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line1').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec3Line1ArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line1').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec3Line1ArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
               </div>
@@ -308,27 +311,27 @@
               <div class="playground-sliders">
                 <!-- Row 1: Start Arrow & End Arrow -->
                 <div class="control-group">
-                  <label><span>Start Arrow</span> <span id="sec3Line2ArrowStartVal">0</span></label>
-                  <input type="range" min="0" max="150" step="5" value="0" autocomplete="off" id="sec3Line2ArrowStartInput"
-                    oninput="document.getElementById('sec3Line2').setAttribute('arrowstart', this.value); document.getElementById('sec3Line2ArrowStartVal').innerText = this.value; document.getElementById('sec3Line2ArrowStartCode').innerText = this.value;" data-mark="sec3Line2ArrowStartCode">
+                  <label><span>Start Arrow</span> <span id="sec3Line2ArrowstartVal">0</span></label>
+                  <input type="range" min="0" max="150" step="5" value="0" autocomplete="off" id="sec3Line2ArrowstartInput"
+                    oninput="document.getElementById('sec3Line2').setAttribute('arrowstart', this.value); document.getElementById('sec3Line2ArrowstartVal').innerText = this.value; document.getElementById('sec3Line2ArrowstartCode').innerText = this.value;" data-mark="sec3Line2ArrowstartCode">
                 </div>
                 <div class="control-group">
-                  <label><span>End Arrow <span class="indicator-dot"></span></span> <span id="sec3Line2ArrowEndVal">35</span></label>
-                  <input type="range" min="0" max="150" step="5" value="35" autocomplete="off" id="sec3Line2ArrowEndInput"
-                    oninput="document.getElementById('sec3Line2').setAttribute('arrowend', this.value); document.getElementById('sec3Line2ArrowEndVal').innerText = this.value; document.getElementById('sec3Line2ArrowEndCode').innerText = this.value;" data-mark="sec3Line2ArrowEndCode">
+                  <label><span>End Arrow <span class="indicator-dot"></span></span> <span id="sec3Line2ArrowendVal">35</span></label>
+                  <input type="range" min="0" max="150" step="5" value="35" autocomplete="off" id="sec3Line2ArrowendInput"
+                    oninput="document.getElementById('sec3Line2').setAttribute('arrowend', this.value); document.getElementById('sec3Line2ArrowendVal').innerText = this.value; document.getElementById('sec3Line2ArrowendCode').innerText = this.value;" data-mark="sec3Line2ArrowendCode">
                 </div>
 
                 <!-- Row 2: Stroke Width & Arrow Style -->
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec3Line2StrokeWidthVal">6</span></label>
-                  <input type="range" min="2" max="24" step="1" value="6" autocomplete="off" id="sec3Line2StrokeWidthInput"
-                    oninput="document.getElementById('sec3Line2').setAttribute('strokewidth', this.value); document.getElementById('sec3Line2StrokeWidthVal').innerText = this.value; document.getElementById('sec3Line2StrokeWidthCode').innerText = this.value;" data-mark="sec3Line2StrokeWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec3Line2StrokewidthVal">6</span></label>
+                  <input type="range" min="2" max="24" step="1" value="6" autocomplete="off" id="sec3Line2StrokewidthInput"
+                    oninput="document.getElementById('sec3Line2').setAttribute('strokewidth', this.value); document.getElementById('sec3Line2StrokewidthVal').innerText = this.value; document.getElementById('sec3Line2StrokewidthCode').innerText = this.value;" data-mark="sec3Line2StrokewidthCode">
                 </div>
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn" onclick="document.getElementById('sec3Line2').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec3Line2StyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line2').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec3Line2StyleCode', 'line');">line</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line2').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec3Line2ArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line2').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec3Line2ArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
               </div>
@@ -375,19 +378,19 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Top: Center at Start Point --&gt;
+    &lt;!-- Top, center at the start point --&gt;
     &lt;pxl-line x2="400" stroke="#f97316" strokewidth="4"
-      x="<mark id="sec4TopXCode">300</mark>" y="<mark id="sec4TopYCode">150</mark>" rotate="<mark id="sec4TopRotCode">0</mark>"&gt;
+      x="<mark id="sec4TopXCode">300</mark>" y="<mark id="sec4TopYCode">150</mark>" rotate="<mark id="sec4TopRotateCode">0</mark>"&gt;
     &lt;/pxl-line&gt;
 
-    &lt;!-- Middle: Center at Midpoint --&gt;
+    &lt;!-- Middle, center at the midpoint --&gt;
     &lt;pxl-line x1="-200" x2="200" stroke="#3b82f6" strokewidth="4"
-      x="<mark id="sec4MiddleXCode">500</mark>" y="<mark id="sec4MiddleYCode">300</mark>" rotate="<mark id="sec4MiddleRotCode">0</mark>"&gt;
+      x="<mark id="sec4MiddleXCode">500</mark>" y="<mark id="sec4MiddleYCode">300</mark>" rotate="<mark id="sec4MiddleRotateCode">0</mark>"&gt;
     &lt;/pxl-line&gt;
 
-    &lt;!-- Bottom: Center at End Point --&gt;
+    &lt;!-- Bottom, center at the end point --&gt;
     &lt;pxl-line x1="-400" stroke="#22c55e" strokewidth="4"
-      x="<mark id="sec4BottomXCode">700</mark>" y="<mark id="sec4BottomYCode">450</mark>" rotate="<mark id="sec4BottomRotCode">0</mark>"&gt;
+      x="<mark id="sec4BottomXCode">700</mark>" y="<mark id="sec4BottomYCode">450</mark>" rotate="<mark id="sec4BottomRotateCode">0</mark>"&gt;
     &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -417,9 +420,9 @@
                     oninput="document.getElementById('sec4Var2').setAttribute('value', this.value); document.getElementById('sec4Var2Val').innerText = this.value; document.getElementById('sec4TopYCode').innerText = this.value;" data-mark="sec4TopYCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec4TopRotVal">0°</span></label>
-                  <input type="range" min="-90" max="90" step="5" value="0" autocomplete="off" id="sec4TopRotInput"
-                    oninput="document.getElementById('sec4Top').setAttribute('rotate', this.value); document.getElementById('sec4TopRotVal').innerText = this.value + '°'; document.getElementById('sec4TopRotCode').innerText = this.value;" data-mark="sec4TopRotCode">
+                  <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec4TopRotateVal">0°</span></label>
+                  <input type="range" min="-90" max="90" step="5" value="0" autocomplete="off" id="sec4TopRotateInput"
+                    oninput="document.getElementById('sec4Top').setAttribute('rotate', this.value); document.getElementById('sec4TopRotateVal').innerText = this.value + '°'; document.getElementById('sec4TopRotateCode').innerText = this.value;" data-mark="sec4TopRotateCode">
                 </div>
               </div>
             </div>
@@ -438,9 +441,9 @@
                     oninput="document.getElementById('sec4Var4').setAttribute('value', this.value); document.getElementById('sec4Var4Val').innerText = this.value; document.getElementById('sec4MiddleYCode').innerText = this.value;" data-mark="sec4MiddleYCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec4MiddleRotVal">0°</span></label>
-                  <input type="range" min="-90" max="90" step="5" value="0" autocomplete="off" id="sec4MiddleRotInput"
-                    oninput="document.getElementById('sec4Middle').setAttribute('rotate', this.value); document.getElementById('sec4MiddleRotVal').innerText = this.value + '°'; document.getElementById('sec4MiddleRotCode').innerText = this.value;" data-mark="sec4MiddleRotCode">
+                  <label><span>Rotation</span> <span id="sec4MiddleRotateVal">0°</span></label>
+                  <input type="range" min="-90" max="90" step="5" value="0" autocomplete="off" id="sec4MiddleRotateInput"
+                    oninput="document.getElementById('sec4Middle').setAttribute('rotate', this.value); document.getElementById('sec4MiddleRotateVal').innerText = this.value + '°'; document.getElementById('sec4MiddleRotateCode').innerText = this.value;" data-mark="sec4MiddleRotateCode">
                 </div>
               </div>
             </div>
@@ -459,9 +462,9 @@
                     oninput="document.getElementById('sec4Var6').setAttribute('value', this.value); document.getElementById('sec4Var6Val').innerText = this.value; document.getElementById('sec4BottomYCode').innerText = this.value;" data-mark="sec4BottomYCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec4BottomRotVal">0°</span></label>
-                  <input type="range" min="-90" max="90" step="5" value="0" autocomplete="off" id="sec4BottomRotInput"
-                    oninput="document.getElementById('sec4Bottom').setAttribute('rotate', this.value); document.getElementById('sec4BottomRotVal').innerText = this.value + '°'; document.getElementById('sec4BottomRotCode').innerText = this.value;" data-mark="sec4BottomRotCode">
+                  <label><span>Rotation</span> <span id="sec4BottomRotateVal">0°</span></label>
+                  <input type="range" min="-90" max="90" step="5" value="0" autocomplete="off" id="sec4BottomRotateInput"
+                    oninput="document.getElementById('sec4Bottom').setAttribute('rotate', this.value); document.getElementById('sec4BottomRotateVal').innerText = this.value + '°'; document.getElementById('sec4BottomRotateCode').innerText = this.value;" data-mark="sec4BottomRotateCode">
                 </div>
               </div>
             </div>

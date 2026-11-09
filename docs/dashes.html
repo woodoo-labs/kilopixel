@@ -52,16 +52,18 @@
         <!-- Declarative Code Block Above Container -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- 1. Circle with Dash &amp; Gap Spacing --&gt;
-    &lt;pxl-circle x="300" y="300" r="140" stroke="#f97316" strokewidth="<mark id="sec1CircleWidthCode">20</mark>" linecap="<mark id="sec1CircleCapCode">butt</mark>" fill="none"
-      linedash="[<mark id="sec1CircleDashCode">24</mark>, <mark id="sec1CircleGapCode">28</mark>]"
-      dashoffset="<mark id="sec1CircleOffsetCode">0</mark>"&gt;
+    &lt;!-- Left: Circle, dash and gap lengths --&gt;
+    &lt;pxl-circle x="300" y="300" fill="none" stroke="#f97316"
+      r="140"
+      linedash="[<mark id="sec1CircleLinedashCode">24</mark>, <mark id="sec1CircleGapCode">28</mark>]" dashoffset="<mark id="sec1CircleDashoffsetCode">0</mark>" strokewidth="<mark id="sec1CircleStrokewidthCode">20</mark>"
+      linecap="<mark id="sec1CircleLinecapCode">butt</mark>"&gt;
     &lt;/pxl-circle&gt;
 
-    &lt;!-- 2. Polyline with Pattern Presets --&gt;
-    &lt;pxl-polyline points="520,300; 640,180; 760,420; 880,300" smooth="1" stroke="#3b82f6" strokewidth="<mark id="sec1PolyWidthCode">12</mark>" linecap="<mark id="sec1PolyCapCode">round</mark>" fill="none"
-      linedash="<mark id="sec1PolyDashCode">[44, 28, 10, 28, 10, 28]</mark>"
-      dashoffset="<mark id="sec1PolyOffsetCode">0</mark>"&gt;
+    &lt;!-- Right: Polyline, pattern presets --&gt;
+    &lt;pxl-polyline stroke="#3b82f6" fill="none"
+      smooth="1" points="520,300; 640,180; 760,420; 880,300"
+      strokewidth="<mark id="sec1PolyStrokewidthCode">12</mark>" dashoffset="<mark id="sec1PolyDashoffsetCode">0</mark>"
+      linedash="<mark id="sec1PolyLinedashCode">[44, 28, 10, 28, 10, 28]</mark>" linecap="<mark id="sec1PolyLinecapCode">round</mark>"&gt;
     &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -80,29 +82,29 @@
             <div class="tab-content active" id="sec1CircleTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Dash Length <span class="indicator-dot"></span></span> <span id="sec1CircleDashVal">24</span></label>
-                  <input type="range" min="0" max="80" step="2" value="24" autocomplete="off" id="sec1CircleDashInput"
-                    oninput="const d = this.value; const g = document.getElementById('sec1CircleGapInput').value; document.getElementById('sec1Circle').setAttribute('linedash', '[' + d + ', ' + g + ']'); document.getElementById('sec1CircleDashVal').innerText = d; document.getElementById('sec1CircleDashCode').innerText = d;" data-mark="sec1CircleDashCode">
+                  <label><span>Dash Length <span class="indicator-dot"></span></span> <span id="sec1CircleLinedashVal">24</span></label>
+                  <input type="range" min="0" max="80" step="2" value="24" autocomplete="off" id="sec1CircleLinedashInput"
+                    oninput="const d = this.value; const g = document.getElementById('sec1CircleGapInput').value; document.getElementById('sec1Circle').setAttribute('linedash', '[' + d + ', ' + g + ']'); document.getElementById('sec1CircleLinedashVal').innerText = d; document.getElementById('sec1CircleLinedashCode').innerText = d;" data-mark="sec1CircleLinedashCode">
                 </div>
                 <div class="control-group">
                   <label><span>Gap Length</span> <span id="sec1CircleGapVal">28</span></label>
                   <input type="range" min="4" max="80" step="2" value="28" autocomplete="off" id="sec1CircleGapInput"
-                    oninput="const g = this.value; const d = document.getElementById('sec1CircleDashInput').value; document.getElementById('sec1Circle').setAttribute('linedash', '[' + d + ', ' + g + ']'); document.getElementById('sec1CircleGapVal').innerText = g; document.getElementById('sec1CircleGapCode').innerText = g;" data-mark="sec1CircleGapCode">
+                    oninput="const g = this.value; const d = document.getElementById('sec1CircleLinedashInput').value; document.getElementById('sec1Circle').setAttribute('linedash', '[' + d + ', ' + g + ']'); document.getElementById('sec1CircleGapVal').innerText = g; document.getElementById('sec1CircleGapCode').innerText = g;" data-mark="sec1CircleGapCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Dash Offset</span> <span id="sec1CircleOffsetVal">0</span></label>
-                  <input type="range" min="0" max="100" step="2" value="0" autocomplete="off" id="sec1CircleOffsetInput"
-                    oninput="document.getElementById('sec1Circle').setAttribute('dashoffset', this.value); document.getElementById('sec1CircleOffsetVal').innerText = this.value; document.getElementById('sec1CircleOffsetCode').innerText = this.value;" data-mark="sec1CircleOffsetCode">
+                  <label><span>Dash Offset</span> <span id="sec1CircleDashoffsetVal">0</span></label>
+                  <input type="range" min="0" max="100" step="2" value="0" autocomplete="off" id="sec1CircleDashoffsetInput"
+                    oninput="document.getElementById('sec1Circle').setAttribute('dashoffset', this.value); document.getElementById('sec1CircleDashoffsetVal').innerText = this.value; document.getElementById('sec1CircleDashoffsetCode').innerText = this.value;" data-mark="sec1CircleDashoffsetCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec1CircleWidthVal">20</span></label>
-                  <input type="range" min="4" max="50" step="2" value="20" autocomplete="off" id="sec1CircleWidthInput"
-                    oninput="const w = this.value; document.getElementById('sec1Circle').setAttribute('strokewidth', w); document.getElementById('sec1CircleWidthVal').innerText = w; document.getElementById('sec1CircleWidthCode').innerText = w;" data-mark="sec1CircleWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec1CircleStrokewidthVal">20</span></label>
+                  <input type="range" min="4" max="50" step="2" value="20" autocomplete="off" id="sec1CircleStrokewidthInput"
+                    oninput="const w = this.value; document.getElementById('sec1Circle').setAttribute('strokewidth', w); document.getElementById('sec1CircleStrokewidthVal').innerText = w; document.getElementById('sec1CircleStrokewidthCode').innerText = w;" data-mark="sec1CircleStrokewidthCode">
                 </div>
                 <div class="control-group">
                   <label><span>Line Cap</span></label>
-                  <select id="sec1CircleCapSelect" autocomplete="off"
-                    onchange="document.getElementById('sec1Circle').setAttribute('linecap', this.value); document.getElementById('sec1CircleCapCode').innerText = this.value;" data-mark="sec1CircleCapCode">
+                  <select id="sec1CircleLinecapSelect" autocomplete="off"
+                    onchange="document.getElementById('sec1Circle').setAttribute('linecap', this.value); document.getElementById('sec1CircleLinecapCode').innerText = this.value;" data-mark="sec1CircleLinecapCode">
                     <option value="butt" selected>butt (default)</option>
                     <option value="round">round</option>
                     <option value="square">square</option>
@@ -115,19 +117,19 @@
             <div class="tab-content" id="sec1PolyTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec1PolyWidthVal">12</span></label>
-                  <input type="range" min="4" max="50" step="2" value="12" autocomplete="off" id="sec1PolyWidthInput"
-                    oninput="const w = this.value; document.getElementById('sec1Polyline').setAttribute('strokewidth', w); document.getElementById('sec1PolyWidthVal').innerText = w; document.getElementById('sec1PolyWidthCode').innerText = w;" data-mark="sec1PolyWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec1PolyStrokewidthVal">12</span></label>
+                  <input type="range" min="4" max="50" step="2" value="12" autocomplete="off" id="sec1PolyStrokewidthInput"
+                    oninput="const w = this.value; document.getElementById('sec1Polyline').setAttribute('strokewidth', w); document.getElementById('sec1PolyStrokewidthVal').innerText = w; document.getElementById('sec1PolyStrokewidthCode').innerText = w;" data-mark="sec1PolyStrokewidthCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Dash Offset</span> <span id="sec1PolyOffsetVal">0</span></label>
-                  <input type="range" min="0" max="100" step="2" value="0" autocomplete="off" id="sec1PolyOffsetInput"
-                    oninput="document.getElementById('sec1Polyline').setAttribute('dashoffset', this.value); document.getElementById('sec1PolyOffsetVal').innerText = this.value; document.getElementById('sec1PolyOffsetCode').innerText = this.value;" data-mark="sec1PolyOffsetCode">
+                  <label><span>Dash Offset</span> <span id="sec1PolyDashoffsetVal">0</span></label>
+                  <input type="range" min="0" max="100" step="2" value="0" autocomplete="off" id="sec1PolyDashoffsetInput"
+                    oninput="document.getElementById('sec1Polyline').setAttribute('dashoffset', this.value); document.getElementById('sec1PolyDashoffsetVal').innerText = this.value; document.getElementById('sec1PolyDashoffsetCode').innerText = this.value;" data-mark="sec1PolyDashoffsetCode">
                 </div>
                 <div class="control-group">
                   <label><span>Pattern Preset</span></label>
                   <select id="sec1PolyPresetSelect" autocomplete="off"
-                    onchange="document.getElementById('sec1Polyline').setAttribute('linedash', this.value); document.getElementById('sec1PolyDashCode').innerText = this.value;" data-mark="sec1PolyDashCode">
+                    onchange="document.getElementById('sec1Polyline').setAttribute('linedash', this.value); document.getElementById('sec1PolyLinedashCode').innerText = this.value;" data-mark="sec1PolyLinedashCode">
                     <option value="[40, 28, 10, 28]">Dash-Dot: [40, 28, 10, 28]</option>
                     <option value="[30, 28]">Standard Dash: [30, 28]</option>
                     <option value="[12, 28]">Dense Dash: [12, 28]</option>
@@ -136,8 +138,8 @@
                 </div>
                 <div class="control-group">
                   <label><span>Line Cap</span></label>
-                  <select id="sec1PolyCapSelect" autocomplete="off"
-                    onchange="document.getElementById('sec1Polyline').setAttribute('linecap', this.value); document.getElementById('sec1PolyCapCode').innerText = this.value;" data-mark="sec1PolyCapCode">
+                  <select id="sec1PolyLinecapSelect" autocomplete="off"
+                    onchange="document.getElementById('sec1Polyline').setAttribute('linecap', this.value); document.getElementById('sec1PolyLinecapCode').innerText = this.value;" data-mark="sec1PolyLinecapCode">
                     <option value="butt">butt (default)</option>
                     <option value="round" selected>round</option>
                     <option value="square">square</option>
@@ -184,21 +186,23 @@
         <!-- Declarative Code Block Above Container -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- 1. Selection Marquee (Closed Rect) --&gt;
-    &lt;pxl-rect x="300" y="300" w="280" h="280"
-      stroke="#f97316" strokewidth="<mark id="sec2MarqueeWidthCode">4</mark>" fill="#ffedd522"
-      linedash="<mark id="sec2MarqueeDashCode">[12, 12]</mark>"
-      dashoffset="-t * <mark id="sec2MarqueeSpeedCode">40</mark>"&gt;
+    &lt;!-- Left: Marquee, marching ants --&gt;
+    &lt;pxl-rect x="300" y="300" fill="#ffedd522" stroke="#f97316"
+      w="280" h="280"
+      dashoffset="-t * <mark id="sec2MarqueeSpeedCode">40</mark>" linedash="<mark id="sec2MarqueeLinedashCode">[12, 12]</mark>"
+      strokewidth="<mark id="sec2MarqueeStrokewidthCode">4</mark>"&gt;
     &lt;/pxl-rect&gt;
 
-    &lt;!-- 2. Signal Conduit (Dormant Wire + Animated Pulse Runner) --&gt;
-    &lt;pxl-polyline points="520,300; 640,180; 760,420; 880,300" smooth="1"
-      stroke="#1e3a8a33" strokewidth="<mark id="sec2FlowWidthCode">20</mark>" linecap="round" fill="none"&gt;
+    &lt;!-- Right: Signal Flow, a pulse runs along a wire --&gt;
+    &lt;pxl-polyline stroke="#1e3a8a33" fill="none"
+      smooth="1" linecap="round"
+      points="520,300; 640,180; 760,420; 880,300"
+      strokewidth="<mark id="sec2FlowStrokewidthCode">20</mark>"&gt;
     &lt;/pxl-polyline&gt;
-    &lt;pxl-polyline points="520,300; 640,180; 760,420; 880,300" smooth="1"
-      stroke="#3b82f6" strokewidth="<mark id="sec2FlowWidthCode2">20</mark>" linecap="round" fill="none"
-      linedash="<mark id="sec2FlowDashCode">[40, 80]</mark>"
-      dashoffset="-t * <mark id="sec2FlowSpeedCode">60</mark>"&gt;
+    &lt;pxl-polyline stroke="#3b82f6" fill="none"
+      smooth="1" linecap="round"
+      points="520,300; 640,180; 760,420; 880,300"
+      dashoffset="-t * <mark id="sec2FlowSpeedCode">60</mark>" linedash="<mark id="sec2FlowLinedashCode">[40, 80]</mark>" strokewidth="<mark id="sec2FlowStrokewidthCode2">20</mark>"&gt;
     &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -222,19 +226,19 @@
                     oninput="const s = this.value; document.getElementById('sec2Marquee').setAttribute('dashoffset', '-t * ' + s); document.getElementById('sec2MarqueeSpeedVal').innerText = s; document.getElementById('sec2MarqueeSpeedCode').innerText = s;" data-mark="sec2MarqueeSpeedCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Dash Length</span> <span id="sec2MarqueeDashVal">12</span></label>
-                  <input type="range" min="4" max="40" step="2" value="12" autocomplete="off" id="sec2MarqueeDashInput"
-                    oninput="const d = this.value; document.getElementById('sec2Marquee').setAttribute('linedash', '[' + d + ', ' + d + ']'); document.getElementById('sec2MarqueeDashVal').innerText = d; document.getElementById('sec2MarqueeDashCode').innerText = '[' + d + ', ' + d + ']';" data-mark="sec2MarqueeDashCode">
+                  <label><span>Dash Length</span> <span id="sec2MarqueeLinedashVal">12</span></label>
+                  <input type="range" min="4" max="40" step="2" value="12" autocomplete="off" id="sec2MarqueeLinedashInput"
+                    oninput="const d = this.value; document.getElementById('sec2Marquee').setAttribute('linedash', '[' + d + ', ' + d + ']'); document.getElementById('sec2MarqueeLinedashVal').innerText = d; document.getElementById('sec2MarqueeLinedashCode').innerText = '[' + d + ', ' + d + ']';" data-mark="sec2MarqueeLinedashCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec2MarqueeWidthVal">4</span></label>
-                  <input type="range" min="2" max="16" step="2" value="4" autocomplete="off" id="sec2MarqueeWidthInput"
-                    oninput="const w = this.value; document.getElementById('sec2Marquee').setAttribute('strokewidth', w); document.getElementById('sec2MarqueeWidthVal').innerText = w; document.getElementById('sec2MarqueeWidthCode').innerText = w;" data-mark="sec2MarqueeWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec2MarqueeStrokewidthVal">4</span></label>
+                  <input type="range" min="2" max="16" step="2" value="4" autocomplete="off" id="sec2MarqueeStrokewidthInput"
+                    oninput="const w = this.value; document.getElementById('sec2Marquee').setAttribute('strokewidth', w); document.getElementById('sec2MarqueeStrokewidthVal').innerText = w; document.getElementById('sec2MarqueeStrokewidthCode').innerText = w;" data-mark="sec2MarqueeStrokewidthCode">
                 </div>
                 <div class="control-group">
                   <label><span>Pattern Preset</span></label>
                   <select id="sec2MarqueePresetSelect" autocomplete="off"
-                    onchange="const v = this.value; document.getElementById('sec2Marquee').setAttribute('linedash', v); document.getElementById('sec2MarqueeDashCode').innerText = v; const firstVal = v.replace('[','').split(',')[0].trim(); document.getElementById('sec2MarqueeDashInput').value = firstVal; document.getElementById('sec2MarqueeDashVal').innerText = firstVal;" data-mark="sec2MarqueeDashCode">
+                    onchange="const v = this.value; document.getElementById('sec2Marquee').setAttribute('linedash', v); document.getElementById('sec2MarqueeLinedashCode').innerText = v; const firstVal = v.replace('[','').split(',')[0].trim(); document.getElementById('sec2MarqueeLinedashInput').value = firstVal; document.getElementById('sec2MarqueeLinedashVal').innerText = firstVal;" data-mark="sec2MarqueeLinedashCode">
                     <option value="[12, 12]" selected>Classic: [12, 12]</option>
                     <option value="[6, 6]">Dense: [6, 6]</option>
                     <option value="[20, 20]">Long Dash: [20, 20]</option>
@@ -255,17 +259,17 @@
                 <div class="control-group">
                   <label><span>Pulse Gap</span> <span id="sec2FlowGapVal">80</span></label>
                   <input type="range" min="20" max="700" step="20" value="80" autocomplete="off" id="sec2FlowGapInput"
-                    oninput="const g = this.value; const d = 40; document.getElementById('sec2Flow').setAttribute('linedash', '[' + d + ', ' + g + ']'); document.getElementById('sec2FlowGapVal').innerText = g; document.getElementById('sec2FlowDashCode').innerText = '[' + d + ', ' + g + ']';" data-mark="sec2FlowDashCode">
+                    oninput="const g = this.value; const d = 40; document.getElementById('sec2Flow').setAttribute('linedash', '[' + d + ', ' + g + ']'); document.getElementById('sec2FlowGapVal').innerText = g; document.getElementById('sec2FlowLinedashCode').innerText = '[' + d + ', ' + g + ']';" data-mark="sec2FlowLinedashCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec2FlowWidthVal">20</span></label>
-                  <input type="range" min="4" max="50" step="2" value="20" autocomplete="off" id="sec2FlowWidthInput"
-                    oninput="const w = this.value; document.getElementById('sec2Wire').setAttribute('strokewidth', w); document.getElementById('sec2Flow').setAttribute('strokewidth', w); document.getElementById('sec2FlowWidthVal').innerText = w; document.getElementById('sec2FlowWidthCode').innerText = w; document.getElementById('sec2FlowWidthCode2').innerText = w;" data-mark="sec2FlowWidthCode, sec2FlowWidthCode2">
+                  <label><span>Stroke Width</span> <span id="sec2FlowStrokewidthVal">20</span></label>
+                  <input type="range" min="4" max="50" step="2" value="20" autocomplete="off" id="sec2FlowStrokewidthInput"
+                    oninput="const w = this.value; document.getElementById('sec2Wire').setAttribute('strokewidth', w); document.getElementById('sec2Flow').setAttribute('strokewidth', w); document.getElementById('sec2FlowStrokewidthVal').innerText = w; document.getElementById('sec2FlowStrokewidthCode').innerText = w; document.getElementById('sec2FlowStrokewidthCode2').innerText = w;" data-mark="sec2FlowStrokewidthCode, sec2FlowStrokewidthCode2">
                 </div>
                 <div class="control-group">
                   <label><span>Signal Preset</span></label>
                   <select id="sec2FlowPresetSelect" autocomplete="off"
-                    onchange="const v = this.value; document.getElementById('sec2Flow').setAttribute('linedash', v); document.getElementById('sec2FlowDashCode').innerText = v; const gapVal = v.replace(']','').split(',')[1] ? v.replace(']','').split(',')[1].trim() : 80; document.getElementById('sec2FlowGapInput').value = gapVal; document.getElementById('sec2FlowGapVal').innerText = gapVal;" data-mark="sec2FlowDashCode">
+                    onchange="const v = this.value; document.getElementById('sec2Flow').setAttribute('linedash', v); document.getElementById('sec2FlowLinedashCode').innerText = v; const gapVal = v.replace(']','').split(',')[1] ? v.replace(']','').split(',')[1].trim() : 80; document.getElementById('sec2FlowGapInput').value = gapVal; document.getElementById('sec2FlowGapVal').innerText = gapVal;" data-mark="sec2FlowLinedashCode">
                     <option value="[40, 80]" selected>Data Packets: [40, 80]</option>
                     <option value="[80, 600]">Single Beacon: [80, 600]</option>
                     <option value="[16, 32]">High Frequency: [16, 32]</option>

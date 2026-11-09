@@ -47,16 +47,16 @@
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Bottom Shape --&gt;
-    &lt;pxl-rect x="350" y="300" w="400" h="300"
-      fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;
+    &lt;!-- Left: Rect, below the shadow --&gt;
+    &lt;pxl-rect x="350" y="300" fill="#ffedd566" stroke="#f97316" strokewidth="4"
+      w="400" h="300"&gt;
     &lt;/pxl-rect&gt;
 
-    &lt;!-- Top Shape casting a shadow --&gt;
-    &lt;pxl-circle x="650" y="300" r="150"
-      fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
-      shadowcolor="hsla(<mark id="sec1HueCode">220</mark>, 100, 15, 0.7)" shadowblur="<mark id="sec1BlurCode">15</mark>"
-      shadowx="<mark id="sec1OffsetXCode">-30</mark>" shadowy="<mark id="sec1OffsetYCode">20</mark>"&gt;
+    &lt;!-- Right: Circle, casts the shadow --&gt;
+    &lt;pxl-circle x="650" y="300" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
+      r="150"
+      shadowcolor="hsla(<mark id="sec1HueCode">220</mark>, 100, 15, 0.7)" shadowblur="<mark id="sec1ShadowblurCode">15</mark>"
+      shadowx="<mark id="sec1OffsetShadowxCode">-30</mark>" shadowy="<mark id="sec1OffsetShadowyCode">20</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -77,16 +77,16 @@
                   <input type="range" min="0" max="360" step="1" value="220" autocomplete="off" oninput="document.getElementById('sec1Circle').setAttribute('shadowcolor', 'hsla(' + this.value + ', 100, 15, 0.7)'); document.getElementById('sec1HueVal').innerText = this.value; document.getElementById('sec1HueCode').innerText = this.value;" data-mark="sec1HueCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Shadow Blur</span> <span id="sec1BlurVal">15</span></label>
-                  <input type="range" min="0" max="100" step="1" value="15" autocomplete="off" oninput="document.getElementById('sec1Circle').setAttribute('shadowblur', this.value); document.getElementById('sec1BlurVal').innerText = this.value; document.getElementById('sec1BlurCode').innerText = this.value;" data-mark="sec1BlurCode">
+                  <label><span>Shadow Blur</span> <span id="sec1ShadowblurVal">15</span></label>
+                  <input type="range" min="0" max="100" step="1" value="15" autocomplete="off" oninput="document.getElementById('sec1Circle').setAttribute('shadowblur', this.value); document.getElementById('sec1ShadowblurVal').innerText = this.value; document.getElementById('sec1ShadowblurCode').innerText = this.value;" data-mark="sec1ShadowblurCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Shadow X</span> <span id="sec1OffsetXVal">-30</span></label>
-                  <input type="range" min="-100" max="100" step="1" value="-30" autocomplete="off" oninput="document.getElementById('sec1Circle').setAttribute('shadowx', this.value); document.getElementById('sec1OffsetXVal').innerText = this.value; document.getElementById('sec1OffsetXCode').innerText = this.value;" data-mark="sec1OffsetXCode">
+                  <label><span>Shadow X</span> <span id="sec1OffsetShadowxVal">-30</span></label>
+                  <input type="range" min="-100" max="100" step="1" value="-30" autocomplete="off" oninput="document.getElementById('sec1Circle').setAttribute('shadowx', this.value); document.getElementById('sec1OffsetShadowxVal').innerText = this.value; document.getElementById('sec1OffsetShadowxCode').innerText = this.value;" data-mark="sec1OffsetShadowxCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Shadow Y</span> <span id="sec1OffsetYVal">20</span></label>
-                  <input type="range" min="-100" max="100" step="1" value="20" autocomplete="off" oninput="document.getElementById('sec1Circle').setAttribute('shadowy', this.value); document.getElementById('sec1OffsetYVal').innerText = this.value; document.getElementById('sec1OffsetYCode').innerText = this.value;" data-mark="sec1OffsetYCode">
+                  <label><span>Shadow Y</span> <span id="sec1OffsetShadowyVal">20</span></label>
+                  <input type="range" min="-100" max="100" step="1" value="20" autocomplete="off" oninput="document.getElementById('sec1Circle').setAttribute('shadowy', this.value); document.getElementById('sec1OffsetShadowyVal').innerText = this.value; document.getElementById('sec1OffsetShadowyCode').innerText = this.value;" data-mark="sec1OffsetShadowyCode">
                 </div>
               </div>
             </div>

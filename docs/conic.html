@@ -55,10 +55,9 @@
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-rect 
-      x="500" y="300"
-      w="<mark id="sec1ex1RectWCode">400</mark>" h="<mark id="sec1ex1RectHCode">250</mark>" 
-      rotate="<mark id="sec1ex1RectRotCode">0</mark>"
+    &lt;pxl-rect x="500" y="300"
+      w="<mark id="sec1ex1RectWCode">400</mark>" h="<mark id="sec1ex1RectHCode">250</mark>"
+      rotate="<mark id="sec1ex1RectRotateCode">0</mark>"
       fill="conic(<mark id="sec1ex1GradAngleCode">0</mark>, ['#f8fafc', '#475569'])"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
@@ -88,9 +87,9 @@
                     oninput="document.getElementById('sec1ex1Rect').setAttribute('h', this.value); document.getElementById('sec1ex1RectHVal').innerText = this.value; document.getElementById('sec1ex1RectHCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec1ex1RectRotVal">0°</span></label>
+                  <label><span>Rotation</span> <span id="sec1ex1RectRotateVal">0°</span></label>
                   <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec1ex1Rect').setAttribute('rotate', this.value); document.getElementById('sec1ex1RectRotVal').innerText = this.value + '°'; document.getElementById('sec1ex1RectRotCode').innerText = this.value;">
+                    oninput="document.getElementById('sec1ex1Rect').setAttribute('rotate', this.value); document.getElementById('sec1ex1RectRotateVal').innerText = this.value + '°'; document.getElementById('sec1ex1RectRotateCode').innerText = this.value;">
                 </div>
               </div>
             </div>
@@ -175,10 +174,9 @@
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-rect 
-      x="500" y="300" 
-      w="<mark id="sec2ex1RectWCode">400</mark>" h="<mark id="sec2ex1RectHCode">250</mark>" 
-      rotate="<mark id="sec2ex1RectRotCode">0</mark>"
+    &lt;pxl-rect x="500" y="300"
+      w="<mark id="sec2ex1RectWCode">400</mark>" h="<mark id="sec2ex1RectHCode">250</mark>"
+      rotate="<mark id="sec2ex1RectRotateCode">0</mark>"
       fill="conic([<mark id="sec2ex1GradAngleCode">45</mark>, <mark id="sec2ex1GradCxCode">0.3</mark>, <mark id="sec2ex1GradCyCode">0.3</mark>], ['#f8fafc', '#475569'])"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
@@ -208,9 +206,9 @@
                     oninput="document.getElementById('sec2ex1Rect').setAttribute('h', this.value); document.getElementById('sec2ex1RectHVal').innerText = this.value; document.getElementById('sec2ex1RectHCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec2ex1RectRotVal">0°</span></label>
+                  <label><span>Rotation</span> <span id="sec2ex1RectRotateVal">0°</span></label>
                   <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec2ex1Rect').setAttribute('rotate', this.value); document.getElementById('sec2ex1RectRotVal').innerText = this.value + '°'; document.getElementById('sec2ex1RectRotCode').innerText = this.value;">
+                    oninput="document.getElementById('sec2ex1Rect').setAttribute('rotate', this.value); document.getElementById('sec2ex1RectRotateVal').innerText = this.value + '°'; document.getElementById('sec2ex1RectRotateCode').innerText = this.value;">
                 </div>
               </div>
             </div>

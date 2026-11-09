@@ -44,16 +44,16 @@
         </ul>
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;!-- LEFT: Alpha applied to the Layer --&gt;
+  &lt;!-- Left: Layer Alpha, the circles fade as one --&gt;
   &lt;pxl-layer alpha="<mark id="sec1LayerAlphaCode">0.5</mark>"&gt;
     &lt;pxl-circle x="180" y="300" r="140" fill="darkorange"&gt;&lt;/pxl-circle&gt;
     &lt;pxl-circle x="320" y="300" r="140" fill="dodgerblue"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
-  &lt;!-- RIGHT: Alpha applied directly to Shapes --&gt;
+  &lt;!-- Right: Shape Alpha, each circle fades on its own --&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-circle x="680" y="300" r="140" alpha="<mark id="sec1Shape1AlphaCode">0.5</mark>" fill="darkorange"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle x="820" y="300" r="140" alpha="<mark id="sec1Shape2AlphaCode">0.5</mark>" fill="dodgerblue"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="680" y="300" r="140" fill="darkorange" alpha="<mark id="sec1Shape1AlphaCode">0.5</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle x="820" y="300" r="140" fill="dodgerblue" alpha="<mark id="sec1Shape2AlphaCode">0.5</mark>"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -134,23 +134,27 @@
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;!-- Base Background Layer --&gt;
+  &lt;!-- Background, gradient behind the circles --&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-rect fill="linear(90, [<mark id="sec2BgC1Code">0.4</mark>, '#f9a8d4', 0.5, '#fde047', <mark id="sec2BgC3Code">0.6</mark>, '#67e8f9'])"
-      x="0" y="0" w="1000" h="600" anchor="top-left"&gt;
+    &lt;pxl-rect x="0" y="0"
+      w="1000" h="600" anchor="top-left"
+      fill="linear(90, [<mark id="sec2BgC1Code">0.4</mark>, '#f9a8d4', 0.5, '#fde047', <mark id="sec2BgC3Code">0.6</mark>, '#67e8f9'])"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 
-  &lt;!-- Layer Level: Blends with background --&gt;
+  &lt;!-- Left: Layer Blend, mixes with the background --&gt;
   &lt;pxl-layer blend="<mark id="sec2LayerBlendCode">multiply</mark>"&gt;
     &lt;pxl-circle fill="darkorange" x="180" y="<mark id="sec2CircleYL1Code">300</mark>" r="<mark id="sec2CircleRL1Code">140</mark>"&gt;&lt;/pxl-circle&gt;
     &lt;pxl-circle fill="dodgerblue" x="320" y="<mark id="sec2CircleYL2Code">300</mark>" r="<mark id="sec2CircleRL2Code">140</mark>"&gt;&lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
-  &lt;!-- Shape Level: Blends only with shapes on the same layer --&gt;
+  &lt;!-- Right: Shape Blend, mixes only within its layer --&gt;
   &lt;pxl-layer&gt;
     &lt;pxl-circle fill="darkorange" x="680" y="<mark id="sec2CircleYR1Code">300</mark>" r="<mark id="sec2CircleRR1Code">140</mark>"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle fill="dodgerblue" blend="<mark id="sec2ShapeBlendCode">multiply</mark>" x="820" y="<mark id="sec2CircleYR2Code">300</mark>" r="<mark id="sec2CircleRR2Code">140</mark>"&gt;&lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="dodgerblue"
+      x="820" y="<mark id="sec2CircleYR2Code">300</mark>" r="<mark id="sec2CircleRR2Code">140</mark>"
+      blend="<mark id="sec2ShapeBlendCode">multiply</mark>"&gt;
+    &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 

@@ -48,17 +48,17 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Auto-Sized Circular Arc --&gt;
-    &lt;pxl-circle x="300" y="300" r="120" start="135" sweep="270"
-      stroke="#f97316" fill="none"
-      arrowstart="auto" arrowend="auto"
-      strokewidth="<mark id="sec1ArcStrokeWidthCode">10</mark>"&gt;
+    &lt;!-- Left: Auto, arc with auto-sized arrowheads --&gt;
+    &lt;pxl-circle x="300" y="300" fill="none" stroke="#f97316"
+      r="120" start="135" sweep="270" arrowstart="auto" arrowend="auto"
+      strokewidth="<mark id="sec1ArcStrokewidthCode">10</mark>"&gt;
     &lt;/pxl-circle&gt;
 
-    &lt;!-- Right: Custom-Sized Sine Wave --&gt;
-    &lt;pxl-polyline points="550,300; 650,220; 750,380; 850,300" smooth="1" stroke="#3b82f6"
-      arrowstart="<mark id="sec1PolyArrowStartCode">0</mark>" arrowend="<mark id="sec1PolyEndArrowCode">35</mark>"
-      strokewidth="<mark id="sec1PolyStrokeWidthCode">6</mark>"&gt;
+    &lt;!-- Right: Custom, wave with set arrowhead sizes --&gt;
+    &lt;pxl-polyline stroke="#3b82f6"
+      smooth="1"
+      points="550,300; 650,220; 750,380; 850,300"
+      arrowstart="<mark id="sec1PolyArrowstartCode">0</mark>" arrowend="<mark id="sec1PolyArrowendCode">35</mark>" strokewidth="<mark id="sec1PolyStrokewidthCode">6</mark>"&gt;
     &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -77,9 +77,9 @@
             <div class="tab-content active" id="sec1ArcTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec1ArcStrokeWidthVal">10</span></label>
-                  <input type="range" min="2" max="40" step="1" value="10" autocomplete="off" id="sec1ArcStrokeWidthInput"
-                    oninput="document.getElementById('sec1Arc').setAttribute('strokewidth', this.value); document.getElementById('sec1ArcStrokeWidthVal').innerText = this.value; document.getElementById('sec1ArcStrokeWidthCode').innerText = this.value;" data-mark="sec1ArcStrokeWidthCode">
+                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec1ArcStrokewidthVal">10</span></label>
+                  <input type="range" min="2" max="40" step="1" value="10" autocomplete="off" id="sec1ArcStrokewidthInput"
+                    oninput="document.getElementById('sec1Arc').setAttribute('strokewidth', this.value); document.getElementById('sec1ArcStrokewidthVal').innerText = this.value; document.getElementById('sec1ArcStrokewidthCode').innerText = this.value;" data-mark="sec1ArcStrokewidthCode">
                 </div>
               </div>
             </div>
@@ -89,21 +89,21 @@
               <div class="playground-sliders">
                 <!-- Row 1: Arrow Start & Arrow End -->
                 <div class="control-group">
-                  <label><span>Arrow Start</span> <span id="sec1PolyArrowStartVal">0</span></label>
-                  <input type="range" min="0" max="100" step="5" value="0" autocomplete="off" id="sec1PolyArrowStartInput"
-                    oninput="document.getElementById('sec1Poly').setAttribute('arrowstart', this.value); document.getElementById('sec1PolyArrowStartVal').innerText = this.value; document.getElementById('sec1PolyArrowStartCode').innerText = this.value;" data-mark="sec1PolyArrowStartCode">
+                  <label><span>Arrow Start</span> <span id="sec1PolyArrowstartVal">0</span></label>
+                  <input type="range" min="0" max="100" step="5" value="0" autocomplete="off" id="sec1PolyArrowstartInput"
+                    oninput="document.getElementById('sec1Poly').setAttribute('arrowstart', this.value); document.getElementById('sec1PolyArrowstartVal').innerText = this.value; document.getElementById('sec1PolyArrowstartCode').innerText = this.value;" data-mark="sec1PolyArrowstartCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Arrow End <span class="indicator-dot"></span></span> <span id="sec1PolyEndArrowVal">35</span></label>
-                  <input type="range" min="0" max="100" step="5" value="35" autocomplete="off" id="sec1PolyEndArrowInput"
-                    oninput="document.getElementById('sec1Poly').setAttribute('arrowend', this.value); document.getElementById('sec1PolyEndArrowVal').innerText = this.value; document.getElementById('sec1PolyEndArrowCode').innerText = this.value;" data-mark="sec1PolyEndArrowCode">
+                  <label><span>Arrow End <span class="indicator-dot"></span></span> <span id="sec1PolyArrowendVal">35</span></label>
+                  <input type="range" min="0" max="100" step="5" value="35" autocomplete="off" id="sec1PolyArrowendInput"
+                    oninput="document.getElementById('sec1Poly').setAttribute('arrowend', this.value); document.getElementById('sec1PolyArrowendVal').innerText = this.value; document.getElementById('sec1PolyArrowendCode').innerText = this.value;" data-mark="sec1PolyArrowendCode">
                 </div>
 
                 <!-- Row 2: Stroke Width -->
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec1PolyStrokeWidthVal">6</span></label>
-                  <input type="range" min="2" max="24" step="1" value="6" autocomplete="off" id="sec1PolyStrokeWidthInput"
-                    oninput="document.getElementById('sec1Poly').setAttribute('strokewidth', this.value); document.getElementById('sec1PolyStrokeWidthVal').innerText = this.value; document.getElementById('sec1PolyStrokeWidthCode').innerText = this.value;" data-mark="sec1PolyStrokeWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec1PolyStrokewidthVal">6</span></label>
+                  <input type="range" min="2" max="24" step="1" value="6" autocomplete="off" id="sec1PolyStrokewidthInput"
+                    oninput="document.getElementById('sec1Poly').setAttribute('strokewidth', this.value); document.getElementById('sec1PolyStrokewidthVal').innerText = this.value; document.getElementById('sec1PolyStrokewidthCode').innerText = this.value;" data-mark="sec1PolyStrokewidthCode">
                 </div>
               </div>
             </div>
@@ -140,16 +140,16 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Solid Triangle (Filled) --&gt;
+    &lt;!-- Left: Filled, solid triangle heads --&gt;
     &lt;pxl-line x1="150" y1="300" x2="450" y2="300" stroke="#f97316"
-      arrowend="<mark id="sec2Line1ArrowCode">40</mark>" strokewidth="<mark id="sec2Line1StrokeWidthCode">10</mark>"
-      arrowstyle="<mark id="sec2Line1StyleCode">filled</mark>"&gt;
+      arrowend="<mark id="sec2Line1ArrowendCode">40</mark>" strokewidth="<mark id="sec2Line1StrokewidthCode">10</mark>"
+      arrowstyle="<mark id="sec2Line1ArrowstyleCode">filled</mark>"&gt;
     &lt;/pxl-line&gt;
 
-    &lt;!-- Right: Open Chevron (Line) --&gt;
+    &lt;!-- Right: Line, open chevron heads --&gt;
     &lt;pxl-line x1="550" y1="300" x2="850" y2="300" stroke="#3b82f6"
-      arrowend="<mark id="sec2Line2ArrowCode">40</mark>" strokewidth="<mark id="sec2Line2StrokeWidthCode">10</mark>"
-      arrowstyle="<mark id="sec2Line2StyleCode">line</mark>"&gt;
+      arrowend="<mark id="sec2Line2ArrowendCode">40</mark>" strokewidth="<mark id="sec2Line2StrokewidthCode">10</mark>"
+      arrowstyle="<mark id="sec2Line2ArrowstyleCode">line</mark>"&gt;
     &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -169,22 +169,22 @@
               <div class="playground-sliders">
                 <!-- Row 1: Arrow End & Stroke Width -->
                 <div class="control-group">
-                  <label><span>Arrow End <span class="indicator-dot"></span></span> <span id="sec2Line1ArrowVal">40</span></label>
-                  <input type="range" min="0" max="100" step="5" value="40" autocomplete="off" id="sec2Line1ArrowInput"
-                    oninput="document.getElementById('sec2Line1').setAttribute('arrowend', this.value); document.getElementById('sec2Line1ArrowVal').innerText = this.value; document.getElementById('sec2Line1ArrowCode').innerText = this.value;" data-mark="sec2Line1ArrowCode">
+                  <label><span>Arrow End <span class="indicator-dot"></span></span> <span id="sec2Line1ArrowendVal">40</span></label>
+                  <input type="range" min="0" max="100" step="5" value="40" autocomplete="off" id="sec2Line1ArrowendInput"
+                    oninput="document.getElementById('sec2Line1').setAttribute('arrowend', this.value); document.getElementById('sec2Line1ArrowendVal').innerText = this.value; document.getElementById('sec2Line1ArrowendCode').innerText = this.value;" data-mark="sec2Line1ArrowendCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec2Line1StrokeWidthVal">10</span></label>
-                  <input type="range" min="2" max="30" step="1" value="10" autocomplete="off" id="sec2Line1StrokeWidthInput"
-                    oninput="document.getElementById('sec2Line1').setAttribute('strokewidth', this.value); document.getElementById('sec2Line1StrokeWidthVal').innerText = this.value; document.getElementById('sec2Line1StrokeWidthCode').innerText = this.value;" data-mark="sec2Line1StrokeWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec2Line1StrokewidthVal">10</span></label>
+                  <input type="range" min="2" max="30" step="1" value="10" autocomplete="off" id="sec2Line1StrokewidthInput"
+                    oninput="document.getElementById('sec2Line1').setAttribute('strokewidth', this.value); document.getElementById('sec2Line1StrokewidthVal').innerText = this.value; document.getElementById('sec2Line1StrokewidthCode').innerText = this.value;" data-mark="sec2Line1StrokewidthCode">
                 </div>
 
                 <!-- Row 2: Arrow Style -->
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn active" onclick="document.getElementById('sec2Line1').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec2Line1StyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn" onclick="document.getElementById('sec2Line1').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec2Line1StyleCode', 'line');">line</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec2Line1').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec2Line1ArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec2Line1').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec2Line1ArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
               </div>
@@ -195,22 +195,22 @@
               <div class="playground-sliders">
                 <!-- Row 1: Arrow End & Stroke Width -->
                 <div class="control-group">
-                  <label><span>Arrow End</span> <span id="sec2Line2ArrowVal">40</span></label>
-                  <input type="range" min="0" max="100" step="5" value="40" autocomplete="off" id="sec2Line2ArrowInput"
-                    oninput="document.getElementById('sec2Line2').setAttribute('arrowend', this.value); document.getElementById('sec2Line2ArrowVal').innerText = this.value; document.getElementById('sec2Line2ArrowCode').innerText = this.value;" data-mark="sec2Line2ArrowCode">
+                  <label><span>Arrow End</span> <span id="sec2Line2ArrowendVal">40</span></label>
+                  <input type="range" min="0" max="100" step="5" value="40" autocomplete="off" id="sec2Line2ArrowendInput"
+                    oninput="document.getElementById('sec2Line2').setAttribute('arrowend', this.value); document.getElementById('sec2Line2ArrowendVal').innerText = this.value; document.getElementById('sec2Line2ArrowendCode').innerText = this.value;" data-mark="sec2Line2ArrowendCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec2Line2StrokeWidthVal">10</span></label>
-                  <input type="range" min="2" max="30" step="1" value="10" autocomplete="off" id="sec2Line2StrokeWidthInput"
-                    oninput="document.getElementById('sec2Line2').setAttribute('strokewidth', this.value); document.getElementById('sec2Line2StrokeWidthVal').innerText = this.value; document.getElementById('sec2Line2StrokeWidthCode').innerText = this.value;" data-mark="sec2Line2StrokeWidthCode">
+                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec2Line2StrokewidthVal">10</span></label>
+                  <input type="range" min="2" max="30" step="1" value="10" autocomplete="off" id="sec2Line2StrokewidthInput"
+                    oninput="document.getElementById('sec2Line2').setAttribute('strokewidth', this.value); document.getElementById('sec2Line2StrokewidthVal').innerText = this.value; document.getElementById('sec2Line2StrokewidthCode').innerText = this.value;" data-mark="sec2Line2StrokewidthCode">
                 </div>
 
                 <!-- Row 2: Arrow Style -->
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn" onclick="document.getElementById('sec2Line2').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec2Line2StyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn active" onclick="document.getElementById('sec2Line2').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec2Line2StyleCode', 'line');">line</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec2Line2').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec2Line2ArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec2Line2').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec2Line2ArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
               </div>
@@ -253,20 +253,22 @@
   &lt;pxl-layer&gt;
     &lt;!-- Top: Line --&gt;
     &lt;pxl-line x1="350" y1="150" x2="750" y2="150" stroke="#f97316"
-      arrowend="<mark id="sec3LineArrowCode">75</mark>" strokewidth="<mark id="sec3LineStrokeWidthCode">20</mark>"
-      arrowstyle="<mark id="sec3LineStyleCode">filled</mark>" linecap="<mark id="sec3LineCapCode">butt</mark>"&gt;
+      arrowend="<mark id="sec3LineArrowendCode">75</mark>" strokewidth="<mark id="sec3LineStrokewidthCode">20</mark>"
+      arrowstyle="<mark id="sec3LineArrowstyleCode">filled</mark>" linecap="<mark id="sec3LinecapCode">butt</mark>"&gt;
     &lt;/pxl-line&gt;
 
     &lt;!-- Middle: Polyline --&gt;
-    &lt;pxl-polyline points="350,300; 450,250; 550,350; 650,300; 750,300" stroke="#3b82f6"
-      arrowend="<mark id="sec3PolylineArrowCode">75</mark>" strokewidth="<mark id="sec3PolylineStrokeWidthCode">20</mark>"
-      arrowstyle="<mark id="sec3PolylineStyleCode">filled</mark>" linecap="<mark id="sec3PolylineCapCode">square</mark>"&gt;
+    &lt;pxl-polyline stroke="#3b82f6"
+      points="350,300; 450,250; 550,350; 650,300; 750,300"
+      arrowend="<mark id="sec3PolylineArrowendCode">75</mark>" strokewidth="<mark id="sec3PolylineStrokewidthCode">20</mark>"
+      arrowstyle="<mark id="sec3PolylineArrowstyleCode">filled</mark>" linecap="<mark id="sec3PolylineLinecapCode">square</mark>"&gt;
     &lt;/pxl-polyline&gt;
 
-    &lt;!-- Bottom: Elliptical Arc --&gt;
-    &lt;pxl-ellipse x="750" y="580" rx="400" ry="130" start="180" sweep="90" stroke="#22c55e"
-      arrowend="<mark id="sec3EllipseArrowCode">75</mark>" strokewidth="<mark id="sec3EllipseStrokeWidthCode">20</mark>"
-      arrowstyle="<mark id="sec3EllipseStyleCode">line</mark>" linecap="<mark id="sec3EllipseCapCode">round</mark>"&gt;
+    &lt;!-- Bottom: Ellipse, elliptical arc --&gt;
+    &lt;pxl-ellipse x="750" y="580" stroke="#22c55e"
+      rx="400" ry="130" start="180" sweep="90"
+      arrowend="<mark id="sec3EllipseArrowendCode">75</mark>" strokewidth="<mark id="sec3EllipseStrokewidthCode">20</mark>"
+      arrowstyle="<mark id="sec3EllipseArrowstyleCode">line</mark>" linecap="<mark id="sec3EllipseLinecapCode">round</mark>"&gt;
     &lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -287,30 +289,30 @@
               <div class="playground-sliders">
                 <!-- Row 1: Arrow End & Stroke Width -->
                 <div class="control-group">
-                  <label><span>Arrow End</span> <span id="sec3LineArrowVal">75</span></label>
-                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec3LineArrowInput"
-                    oninput="document.getElementById('sec3Line').setAttribute('arrowend', this.value); document.getElementById('sec3LineArrowVal').innerText = this.value; document.getElementById('sec3LineArrowCode').innerText = this.value;" data-mark="sec3LineArrowCode">
+                  <label><span>Arrow End</span> <span id="sec3LineArrowendVal">75</span></label>
+                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec3LineArrowendInput"
+                    oninput="document.getElementById('sec3Line').setAttribute('arrowend', this.value); document.getElementById('sec3LineArrowendVal').innerText = this.value; document.getElementById('sec3LineArrowendCode').innerText = this.value;" data-mark="sec3LineArrowendCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec3LineStrokeWidthVal">20</span></label>
-                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec3LineStrokeWidthInput"
-                    oninput="document.getElementById('sec3Line').setAttribute('strokewidth', this.value); document.getElementById('sec3LineStrokeWidthVal').innerText = this.value; document.getElementById('sec3LineStrokeWidthCode').innerText = this.value;" data-mark="sec3LineStrokeWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec3LineStrokewidthVal">20</span></label>
+                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec3LineStrokewidthInput"
+                    oninput="document.getElementById('sec3Line').setAttribute('strokewidth', this.value); document.getElementById('sec3LineStrokewidthVal').innerText = this.value; document.getElementById('sec3LineStrokewidthCode').innerText = this.value;" data-mark="sec3LineStrokewidthCode">
                 </div>
 
                 <!-- Row 2: Arrow Style & Line Cap -->
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec3LineStyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn" onclick="document.getElementById('sec3Line').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec3LineStyleCode', 'line');">line</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec3LineArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec3LineArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
                 <div class="control-group">
                   <label>Line Cap</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line').setAttribute('linecap', 'butt'); pxlDocs.updateToggle(this, null, 'sec3LineCapCode', 'butt');">butt</button>
-                    <button class="toggle-btn" onclick="document.getElementById('sec3Line').setAttribute('linecap', 'square'); pxlDocs.updateToggle(this, null, 'sec3LineCapCode', 'square');">square</button>
-                    <button class="toggle-btn" onclick="document.getElementById('sec3Line').setAttribute('linecap', 'round'); pxlDocs.updateToggle(this, null, 'sec3LineCapCode', 'round');">round</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Line').setAttribute('linecap', 'butt'); pxlDocs.updateToggle(this, null, 'sec3LinecapCode', 'butt');">butt</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line').setAttribute('linecap', 'square'); pxlDocs.updateToggle(this, null, 'sec3LinecapCode', 'square');">square</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Line').setAttribute('linecap', 'round'); pxlDocs.updateToggle(this, null, 'sec3LinecapCode', 'round');">round</button>
                   </div>
                 </div>
               </div>
@@ -321,30 +323,30 @@
               <div class="playground-sliders">
                 <!-- Row 1: Arrow End & Stroke Width -->
                 <div class="control-group">
-                  <label><span>Arrow End</span> <span id="sec3PolylineArrowVal">75</span></label>
-                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec3PolylineArrowInput"
-                    oninput="document.getElementById('sec3Polyline').setAttribute('arrowend', this.value); document.getElementById('sec3PolylineArrowVal').innerText = this.value; document.getElementById('sec3PolylineArrowCode').innerText = this.value;" data-mark="sec3PolylineArrowCode">
+                  <label><span>Arrow End</span> <span id="sec3PolylineArrowendVal">75</span></label>
+                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec3PolylineArrowendInput"
+                    oninput="document.getElementById('sec3Polyline').setAttribute('arrowend', this.value); document.getElementById('sec3PolylineArrowendVal').innerText = this.value; document.getElementById('sec3PolylineArrowendCode').innerText = this.value;" data-mark="sec3PolylineArrowendCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec3PolylineStrokeWidthVal">20</span></label>
-                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec3PolylineStrokeWidthInput"
-                    oninput="document.getElementById('sec3Polyline').setAttribute('strokewidth', this.value); document.getElementById('sec3PolylineStrokeWidthVal').innerText = this.value; document.getElementById('sec3PolylineStrokeWidthCode').innerText = this.value;" data-mark="sec3PolylineStrokeWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec3PolylineStrokewidthVal">20</span></label>
+                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec3PolylineStrokewidthInput"
+                    oninput="document.getElementById('sec3Polyline').setAttribute('strokewidth', this.value); document.getElementById('sec3PolylineStrokewidthVal').innerText = this.value; document.getElementById('sec3PolylineStrokewidthCode').innerText = this.value;" data-mark="sec3PolylineStrokewidthCode">
                 </div>
 
                 <!-- Row 2: Arrow Style & Line Cap -->
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn active" onclick="document.getElementById('sec3Polyline').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec3PolylineStyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn" onclick="document.getElementById('sec3Polyline').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec3PolylineStyleCode', 'line');">line</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Polyline').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec3PolylineArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Polyline').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec3PolylineArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
                 <div class="control-group">
                   <label>Line Cap</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn" onclick="document.getElementById('sec3Polyline').setAttribute('linecap', 'butt'); pxlDocs.updateToggle(this, null, 'sec3PolylineCapCode', 'butt');">butt</button>
-                    <button class="toggle-btn active" onclick="document.getElementById('sec3Polyline').setAttribute('linecap', 'square'); pxlDocs.updateToggle(this, null, 'sec3PolylineCapCode', 'square');">square</button>
-                    <button class="toggle-btn" onclick="document.getElementById('sec3Polyline').setAttribute('linecap', 'round'); pxlDocs.updateToggle(this, null, 'sec3PolylineCapCode', 'round');">round</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Polyline').setAttribute('linecap', 'butt'); pxlDocs.updateToggle(this, null, 'sec3PolylineLinecapCode', 'butt');">butt</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Polyline').setAttribute('linecap', 'square'); pxlDocs.updateToggle(this, null, 'sec3PolylineLinecapCode', 'square');">square</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Polyline').setAttribute('linecap', 'round'); pxlDocs.updateToggle(this, null, 'sec3PolylineLinecapCode', 'round');">round</button>
                   </div>
                 </div>
               </div>
@@ -355,30 +357,30 @@
               <div class="playground-sliders">
                 <!-- Row 1: Arrow End & Stroke Width -->
                 <div class="control-group">
-                  <label><span>Arrow End</span> <span id="sec3EllipseArrowVal">75</span></label>
-                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec3EllipseArrowInput"
-                    oninput="document.getElementById('sec3Ellipse').setAttribute('arrowend', this.value); document.getElementById('sec3EllipseArrowVal').innerText = this.value; document.getElementById('sec3EllipseArrowCode').innerText = this.value;" data-mark="sec3EllipseArrowCode">
+                  <label><span>Arrow End</span> <span id="sec3EllipseArrowendVal">75</span></label>
+                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec3EllipseArrowendInput"
+                    oninput="document.getElementById('sec3Ellipse').setAttribute('arrowend', this.value); document.getElementById('sec3EllipseArrowendVal').innerText = this.value; document.getElementById('sec3EllipseArrowendCode').innerText = this.value;" data-mark="sec3EllipseArrowendCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec3EllipseStrokeWidthVal">20</span></label>
-                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec3EllipseStrokeWidthInput"
-                    oninput="document.getElementById('sec3Ellipse').setAttribute('strokewidth', this.value); document.getElementById('sec3EllipseStrokeWidthVal').innerText = this.value; document.getElementById('sec3EllipseStrokeWidthCode').innerText = this.value;" data-mark="sec3EllipseStrokeWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec3EllipseStrokewidthVal">20</span></label>
+                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec3EllipseStrokewidthInput"
+                    oninput="document.getElementById('sec3Ellipse').setAttribute('strokewidth', this.value); document.getElementById('sec3EllipseStrokewidthVal').innerText = this.value; document.getElementById('sec3EllipseStrokewidthCode').innerText = this.value;" data-mark="sec3EllipseStrokewidthCode">
                 </div>
 
                 <!-- Row 2: Arrow Style & Line Cap -->
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn" onclick="document.getElementById('sec3Ellipse').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec3EllipseStyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn active" onclick="document.getElementById('sec3Ellipse').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec3EllipseStyleCode', 'line');">line</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Ellipse').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec3EllipseArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Ellipse').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec3EllipseArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
                 <div class="control-group">
                   <label>Line Cap</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn" onclick="document.getElementById('sec3Ellipse').setAttribute('linecap', 'butt'); pxlDocs.updateToggle(this, null, 'sec3EllipseCapCode', 'butt');">butt</button>
-                    <button class="toggle-btn" onclick="document.getElementById('sec3Ellipse').setAttribute('linecap', 'square'); pxlDocs.updateToggle(this, null, 'sec3EllipseCapCode', 'square');">square</button>
-                    <button class="toggle-btn active" onclick="document.getElementById('sec3Ellipse').setAttribute('linecap', 'round'); pxlDocs.updateToggle(this, null, 'sec3EllipseCapCode', 'round');">round</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Ellipse').setAttribute('linecap', 'butt'); pxlDocs.updateToggle(this, null, 'sec3EllipseLinecapCode', 'butt');">butt</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec3Ellipse').setAttribute('linecap', 'square'); pxlDocs.updateToggle(this, null, 'sec3EllipseLinecapCode', 'square');">square</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec3Ellipse').setAttribute('linecap', 'round'); pxlDocs.updateToggle(this, null, 'sec3EllipseLinecapCode', 'round');">round</button>
                   </div>
                 </div>
               </div>
@@ -435,23 +437,25 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Top: Miter Join --&gt;
-    &lt;pxl-polyline points="350,185; 390,115; 430,185; 470,115; 510,185; 750,150" stroke="#f97316"
-      arrowend="<mark id="sec4MiterArrowCode">75</mark>" strokewidth="<mark id="sec4MiterStrokeWidthCode">20</mark>"
-      miterlimit="<mark id="sec4MiterLimitCode">10</mark>"
-      arrowstyle="<mark id="sec4MiterStyleCode">line</mark>" linejoin="miter"&gt;
+    &lt;!-- Top: Miter, sharp corners --&gt;
+    &lt;pxl-polyline stroke="#f97316"
+      points="350,185; 390,115; 430,185; 470,115; 510,185; 750,150"
+      arrowend="<mark id="sec4MiterArrowendCode">75</mark>" strokewidth="<mark id="sec4MiterStrokewidthCode">20</mark>" miterlimit="<mark id="sec4MiterlimitCode">10</mark>"
+      arrowstyle="<mark id="sec4MiterArrowstyleCode">line</mark>" linejoin="miter"&gt;
     &lt;/pxl-polyline&gt;
 
-    &lt;!-- Middle: Bevel Join --&gt;
-    &lt;pxl-polyline points="350,335; 390,265; 430,335; 470,265; 510,335; 750,300" stroke="#3b82f6"
-      arrowend="<mark id="sec4BevelArrowCode">75</mark>" strokewidth="<mark id="sec4BevelStrokeWidthCode">20</mark>"
-      arrowstyle="<mark id="sec4BevelStyleCode">line</mark>" linejoin="bevel"&gt;
+    &lt;!-- Middle: Bevel, cut corners --&gt;
+    &lt;pxl-polyline stroke="#3b82f6"
+      points="350,335; 390,265; 430,335; 470,265; 510,335; 750,300"
+      arrowend="<mark id="sec4BevelArrowendCode">75</mark>" strokewidth="<mark id="sec4BevelStrokewidthCode">20</mark>"
+      arrowstyle="<mark id="sec4BevelArrowstyleCode">line</mark>" linejoin="bevel"&gt;
     &lt;/pxl-polyline&gt;
 
-    &lt;!-- Bottom: Round Join --&gt;
-    &lt;pxl-polyline points="350,485; 390,415; 430,485; 470,415; 510,485; 750,450" stroke="#22c55e"
-      arrowend="<mark id="sec4RoundArrowCode">75</mark>" strokewidth="<mark id="sec4RoundStrokeWidthCode">20</mark>"
-      arrowstyle="<mark id="sec4RoundStyleCode">line</mark>" linejoin="round"&gt;
+    &lt;!-- Bottom: Round, rounded corners --&gt;
+    &lt;pxl-polyline stroke="#22c55e"
+      points="350,485; 390,415; 430,485; 470,415; 510,485; 750,450"
+      arrowend="<mark id="sec4RoundArrowendCode">75</mark>" strokewidth="<mark id="sec4RoundStrokewidthCode">20</mark>"
+      arrowstyle="<mark id="sec4RoundArrowstyleCode">line</mark>" linejoin="round"&gt;
     &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -472,29 +476,29 @@
               <div class="playground-sliders">
                 <!-- Row 1: Arrow End & Stroke Width -->
                 <div class="control-group">
-                  <label><span>Arrow End</span> <span id="sec4MiterArrowVal">75</span></label>
-                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec4MiterArrowInput"
-                    oninput="document.getElementById('sec4Miter').setAttribute('arrowend', this.value); document.getElementById('sec4MiterArrowVal').innerText = this.value; document.getElementById('sec4MiterArrowCode').innerText = this.value;" data-mark="sec4MiterArrowCode">
+                  <label><span>Arrow End</span> <span id="sec4MiterArrowendVal">75</span></label>
+                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec4MiterArrowendInput"
+                    oninput="document.getElementById('sec4Miter').setAttribute('arrowend', this.value); document.getElementById('sec4MiterArrowendVal').innerText = this.value; document.getElementById('sec4MiterArrowendCode').innerText = this.value;" data-mark="sec4MiterArrowendCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec4MiterStrokeWidthVal">20</span></label>
-                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec4MiterStrokeWidthInput"
-                    oninput="document.getElementById('sec4Miter').setAttribute('strokewidth', this.value); document.getElementById('sec4MiterStrokeWidthVal').innerText = this.value; document.getElementById('sec4MiterStrokeWidthCode').innerText = this.value;" data-mark="sec4MiterStrokeWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec4MiterStrokewidthVal">20</span></label>
+                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec4MiterStrokewidthInput"
+                    oninput="document.getElementById('sec4Miter').setAttribute('strokewidth', this.value); document.getElementById('sec4MiterStrokewidthVal').innerText = this.value; document.getElementById('sec4MiterStrokewidthCode').innerText = this.value;" data-mark="sec4MiterStrokewidthCode">
                 </div>
 
                 <!-- Row 2: Miter Limit -->
                 <div class="control-group">
-                  <label><span>Miter Limit <span class="indicator-dot"></span></span> <span id="sec4MiterLimitVal">10</span></label>
-                  <input type="range" min="1" max="10" step="0.5" value="10" autocomplete="off" id="sec4MiterLimitInput"
-                    oninput="document.getElementById('sec4Miter').setAttribute('miterlimit', this.value); document.getElementById('sec4MiterLimitVal').innerText = this.value; document.getElementById('sec4MiterLimitCode').innerText = this.value;" data-mark="sec4MiterLimitCode">
+                  <label><span>Miter Limit <span class="indicator-dot"></span></span> <span id="sec4MiterlimitVal">10</span></label>
+                  <input type="range" min="1" max="10" step="0.5" value="10" autocomplete="off" id="sec4MiterlimitInput"
+                    oninput="document.getElementById('sec4Miter').setAttribute('miterlimit', this.value); document.getElementById('sec4MiterlimitVal').innerText = this.value; document.getElementById('sec4MiterlimitCode').innerText = this.value;" data-mark="sec4MiterlimitCode">
                 </div>
 
                 <!-- Row 3: Arrow Style -->
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn" onclick="document.getElementById('sec4Miter').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec4MiterStyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn active" onclick="document.getElementById('sec4Miter').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec4MiterStyleCode', 'line');">line</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec4Miter').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec4MiterArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec4Miter').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec4MiterArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
               </div>
@@ -505,22 +509,22 @@
               <div class="playground-sliders">
                 <!-- Row 1: Arrow End & Stroke Width -->
                 <div class="control-group">
-                  <label><span>Arrow End</span> <span id="sec4BevelArrowVal">75</span></label>
-                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec4BevelArrowInput"
-                    oninput="document.getElementById('sec4Bevel').setAttribute('arrowend', this.value); document.getElementById('sec4BevelArrowVal').innerText = this.value; document.getElementById('sec4BevelArrowCode').innerText = this.value;" data-mark="sec4BevelArrowCode">
+                  <label><span>Arrow End</span> <span id="sec4BevelArrowendVal">75</span></label>
+                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec4BevelArrowendInput"
+                    oninput="document.getElementById('sec4Bevel').setAttribute('arrowend', this.value); document.getElementById('sec4BevelArrowendVal').innerText = this.value; document.getElementById('sec4BevelArrowendCode').innerText = this.value;" data-mark="sec4BevelArrowendCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec4BevelStrokeWidthVal">20</span></label>
-                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec4BevelStrokeWidthInput"
-                    oninput="document.getElementById('sec4Bevel').setAttribute('strokewidth', this.value); document.getElementById('sec4BevelStrokeWidthVal').innerText = this.value; document.getElementById('sec4BevelStrokeWidthCode').innerText = this.value;" data-mark="sec4BevelStrokeWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec4BevelStrokewidthVal">20</span></label>
+                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec4BevelStrokewidthInput"
+                    oninput="document.getElementById('sec4Bevel').setAttribute('strokewidth', this.value); document.getElementById('sec4BevelStrokewidthVal').innerText = this.value; document.getElementById('sec4BevelStrokewidthCode').innerText = this.value;" data-mark="sec4BevelStrokewidthCode">
                 </div>
 
                 <!-- Row 2: Arrow Style -->
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn" onclick="document.getElementById('sec4Bevel').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec4BevelStyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn active" onclick="document.getElementById('sec4Bevel').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec4BevelStyleCode', 'line');">line</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec4Bevel').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec4BevelArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec4Bevel').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec4BevelArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
               </div>
@@ -531,22 +535,22 @@
               <div class="playground-sliders">
                 <!-- Row 1: Arrow End & Stroke Width -->
                 <div class="control-group">
-                  <label><span>Arrow End</span> <span id="sec4RoundArrowVal">75</span></label>
-                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec4RoundArrowInput"
-                    oninput="document.getElementById('sec4Round').setAttribute('arrowend', this.value); document.getElementById('sec4RoundArrowVal').innerText = this.value; document.getElementById('sec4RoundArrowCode').innerText = this.value;" data-mark="sec4RoundArrowCode">
+                  <label><span>Arrow End</span> <span id="sec4RoundArrowendVal">75</span></label>
+                  <input type="range" min="0" max="100" step="5" value="75" autocomplete="off" id="sec4RoundArrowendInput"
+                    oninput="document.getElementById('sec4Round').setAttribute('arrowend', this.value); document.getElementById('sec4RoundArrowendVal').innerText = this.value; document.getElementById('sec4RoundArrowendCode').innerText = this.value;" data-mark="sec4RoundArrowendCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec4RoundStrokeWidthVal">20</span></label>
-                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec4RoundStrokeWidthInput"
-                    oninput="document.getElementById('sec4Round').setAttribute('strokewidth', this.value); document.getElementById('sec4RoundStrokeWidthVal').innerText = this.value; document.getElementById('sec4RoundStrokeWidthCode').innerText = this.value;" data-mark="sec4RoundStrokeWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec4RoundStrokewidthVal">20</span></label>
+                  <input type="range" min="4" max="40" step="2" value="20" autocomplete="off" id="sec4RoundStrokewidthInput"
+                    oninput="document.getElementById('sec4Round').setAttribute('strokewidth', this.value); document.getElementById('sec4RoundStrokewidthVal').innerText = this.value; document.getElementById('sec4RoundStrokewidthCode').innerText = this.value;" data-mark="sec4RoundStrokewidthCode">
                 </div>
 
                 <!-- Row 2: Arrow Style -->
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn" onclick="document.getElementById('sec4Round').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec4RoundStyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn active" onclick="document.getElementById('sec4Round').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec4RoundStyleCode', 'line');">line</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec4Round').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec4RoundArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec4Round').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec4RoundArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
               </div>

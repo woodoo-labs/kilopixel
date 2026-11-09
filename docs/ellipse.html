@@ -42,12 +42,12 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Solid Disc --&gt;
+    &lt;!-- Left: Disc, filled ellipse --&gt;
     &lt;pxl-ellipse x="300" y="300" fill="#ffedd566" stroke="#f97316" strokewidth="4"
       rx="<mark id="sec1Ellipse1RxCode">180</mark>" ry="<mark id="sec1Ellipse1RyCode">110</mark>"&gt;
     &lt;/pxl-ellipse&gt;
 
-    &lt;!-- Right: Hollow Ring --&gt;
+    &lt;!-- Right: Ring, hollow center --&gt;
     &lt;pxl-ellipse x="700" y="300" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
       rx="<mark id="sec1Ellipse2RxCode">180</mark>" ry="<mark id="sec1Ellipse2RyCode">110</mark>"
       irx="<mark id="sec1Ellipse2IrxCode">90</mark>" iry="<mark id="sec1Ellipse2IryCode">55</mark>"&gt;
@@ -138,13 +138,13 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Pie Slice (Sweep Mode) --&gt;
+    &lt;!-- Left: Pie, slice by sweep --&gt;
     &lt;pxl-ellipse x="300" y="300" fill="#ffedd566" stroke="#f97316"
-      pie="true" rx="<mark id="sec2Ellipse1RxCode">180</mark>" ry="<mark id="sec2Ellipse1RyCode">110</mark>" strokewidth="<mark id="sec2Ellipse1WidthCode">10</mark>"
+      pie="true" rx="<mark id="sec2Ellipse1RxCode">180</mark>" ry="<mark id="sec2Ellipse1RyCode">110</mark>" strokewidth="<mark id="sec2Ellipse1StrokewidthCode">10</mark>"
       start="<mark id="sec2Ellipse1StartCode">0</mark>" sweep="<mark id="sec2Ellipse1SweepCode">270</mark>"&gt;
     &lt;/pxl-ellipse&gt;
 
-    &lt;!-- Right: Donut Wedge (End Angle Mode) --&gt;
+    &lt;!-- Right: Donut, wedge by end angle --&gt;
     &lt;pxl-ellipse x="700" y="300" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
       pie="true" rx="<mark id="sec2Ellipse2RxCode">180</mark>" ry="<mark id="sec2Ellipse2RyCode">110</mark>"
       irx="<mark id="sec2Ellipse2IrxCode">90</mark>" iry="<mark id="sec2Ellipse2IryCode">55</mark>"
@@ -177,9 +177,9 @@
                     oninput="document.getElementById('sec2Ellipse1').setAttribute('ry', this.value); document.getElementById('sec2Ellipse1RyVal').innerText = this.value; document.getElementById('sec2Ellipse1RyCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec2Ellipse1WidthVal">10</span></label>
+                  <label><span>Stroke Width</span> <span id="sec2Ellipse1StrokewidthVal">10</span></label>
                   <input type="range" min="2" max="40" step="2" value="10" autocomplete="off"
-                    oninput="document.getElementById('sec2Ellipse1').setAttribute('strokewidth', this.value); document.getElementById('sec2Ellipse1WidthVal').innerText = this.value; document.getElementById('sec2Ellipse1WidthCode').innerText = this.value;">
+                    oninput="document.getElementById('sec2Ellipse1').setAttribute('strokewidth', this.value); document.getElementById('sec2Ellipse1StrokewidthVal').innerText = this.value; document.getElementById('sec2Ellipse1StrokewidthCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
                   <label><span>Start Angle</span> <span id="sec2Ellipse1StartVal">0°</span></label>
@@ -260,17 +260,17 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Open Chord (Default) --&gt;
-    &lt;pxl-ellipse x="300" y="300" strokewidth="10" fill="#ffedd566" stroke="#f97316"
+    &lt;!-- Left: Open Chord, ends not joined --&gt;
+    &lt;pxl-ellipse x="300" y="300" fill="#ffedd566" stroke="#f97316" strokewidth="10"
       rx="<mark id="sec3Ellipse1RxCode">180</mark>" ry="<mark id="sec3Ellipse1RyCode">110</mark>"
       sweep="<mark id="sec3Ellipse1SweepCode">270</mark>"&gt;
     &lt;/pxl-ellipse&gt;
 
-    &lt;!-- Right: Closed Chord (closed="true") --&gt;
-    &lt;pxl-ellipse x="700" y="300" strokewidth="10" fill="#dbeafe66" stroke="#3b82f6"
-      closed="true"
+    &lt;!-- Right: Closed Chord, ends joined by a line --&gt;
+    &lt;pxl-ellipse x="700" y="300" fill="#dbeafe66" stroke="#3b82f6" strokewidth="10"
       rx="<mark id="sec3Ellipse2RxCode">180</mark>" ry="<mark id="sec3Ellipse2RyCode">110</mark>"
-      sweep="<mark id="sec3Ellipse2SweepCode">180</mark>"&gt;
+      sweep="<mark id="sec3Ellipse2SweepCode">180</mark>"
+      closed="true"&gt;
     &lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -355,18 +355,18 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Simple Arc (Sweep Mode) --&gt;
+    &lt;!-- Left: Simple Arc, sweep from the start --&gt;
     &lt;pxl-ellipse x="300" y="300" stroke="#f97316"
       rx="<mark id="sec4Ellipse1RxCode">180</mark>" ry="<mark id="sec4Ellipse1RyCode">110</mark>"
       start="<mark id="sec4Ellipse1StartCode">0</mark>" sweep="<mark id="sec4Ellipse1SweepCode">180</mark>"
-      strokewidth="<mark id="sec4Ellipse1WidthCode">10</mark>"&gt;
+      strokewidth="<mark id="sec4Ellipse1StrokewidthCode">10</mark>"&gt;
     &lt;/pxl-ellipse&gt;
 
-    &lt;!-- Right: Dashed Arc (End Angle Mode) --&gt;
+    &lt;!-- Right: Dashed Arc, start to end angle --&gt;
     &lt;pxl-ellipse x="700" y="300" stroke="#3b82f6" strokewidth="4"
       rx="<mark id="sec4Ellipse2RxCode">180</mark>" ry="<mark id="sec4Ellipse2RyCode">110</mark>"
       start="<mark id="sec4Ellipse2StartCode">0</mark>" end="<mark id="sec4Ellipse2EndCode">270</mark>"
-      linedash="<mark id="sec4Ellipse2DashCode">15</mark>"&gt;
+      linedash="<mark id="sec4Ellipse2LinedashCode">15</mark>"&gt;
     &lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -405,9 +405,9 @@
                     oninput="document.getElementById('sec4Ellipse1').setAttribute('sweep', this.value); document.getElementById('sec4Ellipse1SweepVal').innerText = this.value + '°'; document.getElementById('sec4Ellipse1SweepCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec4Ellipse1WidthVal">10</span></label>
+                  <label><span>Stroke Width</span> <span id="sec4Ellipse1StrokewidthVal">10</span></label>
                   <input type="range" min="2" max="40" step="2" value="10" autocomplete="off"
-                    oninput="document.getElementById('sec4Ellipse1').setAttribute('strokewidth', this.value); document.getElementById('sec4Ellipse1WidthVal').innerText = this.value; document.getElementById('sec4Ellipse1WidthCode').innerText = this.value;">
+                    oninput="document.getElementById('sec4Ellipse1').setAttribute('strokewidth', this.value); document.getElementById('sec4Ellipse1StrokewidthVal').innerText = this.value; document.getElementById('sec4Ellipse1StrokewidthCode').innerText = this.value;">
                 </div>
               </div>
             </div>
@@ -436,9 +436,9 @@
                     oninput="document.getElementById('sec4Ellipse2').setAttribute('end', this.value); document.getElementById('sec4Ellipse2EndVal').innerText = this.value + '°'; document.getElementById('sec4Ellipse2EndCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Line Dash</span> <span id="sec4Ellipse2DashVal">15</span></label>
+                  <label><span>Line Dash</span> <span id="sec4Ellipse2LinedashVal">15</span></label>
                   <input type="range" min="0" max="40" step="5" value="15" autocomplete="off"
-                    oninput="document.getElementById('sec4Ellipse2').setAttribute('linedash', this.value); document.getElementById('sec4Ellipse2DashVal').innerText = this.value; document.getElementById('sec4Ellipse2DashCode').innerText = this.value;">
+                    oninput="document.getElementById('sec4Ellipse2').setAttribute('linedash', this.value); document.getElementById('sec4Ellipse2LinedashVal').innerText = this.value; document.getElementById('sec4Ellipse2LinedashCode').innerText = this.value;">
                 </div>
               </div>
             </div>
@@ -476,17 +476,18 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Auto-Sized Arrowheads --&gt;
-    &lt;pxl-ellipse x="300" y="300" rx="180" ry="110" start="-45"
-      sweep="<mark id="sec5Ellipse1SweepCode">270</mark>" stroke="#f97316"
-      arrowstart="auto" arrowend="auto"
-      strokewidth="<mark id="sec5Ellipse1StrokeWidthCode">10</mark>" arrowstyle="<mark id="sec5Ellipse1StyleCode">filled</mark>"&gt;
+    &lt;!-- Left: Auto, arrowheads sized from the stroke --&gt;
+    &lt;pxl-ellipse x="300" y="300" stroke="#f97316"
+      rx="180" ry="110" arrowstart="auto" arrowend="auto"
+      strokewidth="<mark id="sec5Ellipse1StrokewidthCode">10</mark>" start="-45" sweep="<mark id="sec5Ellipse1SweepCode">270</mark>"
+      arrowstyle="<mark id="sec5Ellipse1ArrowstyleCode">filled</mark>"&gt;
     &lt;/pxl-ellipse&gt;
 
-    &lt;!-- Right: Custom-Sized Arrowheads --&gt;
-    &lt;pxl-ellipse x="700" y="300" rx="180" ry="110" start="-45" sweep="270" stroke="#3b82f6"
-      arrowstart="<mark id="sec5Ellipse2ArrowStartCode">0</mark>" arrowend="<mark id="sec5Ellipse2ArrowEndCode">35</mark>"
-      strokewidth="<mark id="sec5Ellipse2StrokeWidthCode">6</mark>" arrowstyle="<mark id="sec5Ellipse2StyleCode">line</mark>"&gt;
+    &lt;!-- Right: Custom, set arrowhead sizes --&gt;
+    &lt;pxl-ellipse x="700" y="300" stroke="#3b82f6"
+      rx="180" ry="110" start="-45" sweep="270"
+      arrowstart="<mark id="sec5Ellipse2ArrowstartCode">0</mark>" arrowend="<mark id="sec5Ellipse2ArrowendCode">35</mark>" strokewidth="<mark id="sec5Ellipse2StrokewidthCode">6</mark>"
+      arrowstyle="<mark id="sec5Ellipse2ArrowstyleCode">line</mark>"&gt;
     &lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -506,15 +507,15 @@
               <div class="playground-sliders">
                 <!-- Row 1: Stroke Width & Arrow Style -->
                 <div class="control-group">
-                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec5Ellipse1StrokeWidthVal">10</span></label>
-                  <input type="range" min="2" max="40" step="1" value="10" autocomplete="off" id="sec5Ellipse1StrokeWidthInput"
-                    oninput="document.getElementById('sec5Ellipse1').setAttribute('strokewidth', this.value); document.getElementById('sec5Ellipse1StrokeWidthVal').innerText = this.value; document.getElementById('sec5Ellipse1StrokeWidthCode').innerText = this.value;" data-mark="sec5Ellipse1StrokeWidthCode">
+                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec5Ellipse1StrokewidthVal">10</span></label>
+                  <input type="range" min="2" max="40" step="1" value="10" autocomplete="off" id="sec5Ellipse1StrokewidthInput"
+                    oninput="document.getElementById('sec5Ellipse1').setAttribute('strokewidth', this.value); document.getElementById('sec5Ellipse1StrokewidthVal').innerText = this.value; document.getElementById('sec5Ellipse1StrokewidthCode').innerText = this.value;" data-mark="sec5Ellipse1StrokewidthCode">
                 </div>
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn active" onclick="document.getElementById('sec5Ellipse1').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec5Ellipse1StyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn" onclick="document.getElementById('sec5Ellipse1').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec5Ellipse1StyleCode', 'line');">line</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec5Ellipse1').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec5Ellipse1ArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec5Ellipse1').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec5Ellipse1ArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
 
@@ -532,27 +533,27 @@
               <div class="playground-sliders">
                 <!-- Row 1: Start Arrow & End Arrow -->
                 <div class="control-group">
-                  <label><span>Start Arrow</span> <span id="sec5Ellipse2ArrowStartVal">0</span></label>
-                  <input type="range" min="0" max="150" step="5" value="0" autocomplete="off" id="sec5Ellipse2ArrowStartInput"
-                    oninput="document.getElementById('sec5Ellipse2').setAttribute('arrowstart', this.value); document.getElementById('sec5Ellipse2ArrowStartVal').innerText = this.value; document.getElementById('sec5Ellipse2ArrowStartCode').innerText = this.value;" data-mark="sec5Ellipse2ArrowStartCode">
+                  <label><span>Start Arrow</span> <span id="sec5Ellipse2ArrowstartVal">0</span></label>
+                  <input type="range" min="0" max="150" step="5" value="0" autocomplete="off" id="sec5Ellipse2ArrowstartInput"
+                    oninput="document.getElementById('sec5Ellipse2').setAttribute('arrowstart', this.value); document.getElementById('sec5Ellipse2ArrowstartVal').innerText = this.value; document.getElementById('sec5Ellipse2ArrowstartCode').innerText = this.value;" data-mark="sec5Ellipse2ArrowstartCode">
                 </div>
                 <div class="control-group">
-                  <label><span>End Arrow <span class="indicator-dot"></span></span> <span id="sec5Ellipse2ArrowEndVal">35</span></label>
-                  <input type="range" min="0" max="150" step="5" value="35" autocomplete="off" id="sec5Ellipse2ArrowEndInput"
-                    oninput="document.getElementById('sec5Ellipse2').setAttribute('arrowend', this.value); document.getElementById('sec5Ellipse2ArrowEndVal').innerText = this.value; document.getElementById('sec5Ellipse2ArrowEndCode').innerText = this.value;" data-mark="sec5Ellipse2ArrowEndCode">
+                  <label><span>End Arrow <span class="indicator-dot"></span></span> <span id="sec5Ellipse2ArrowendVal">35</span></label>
+                  <input type="range" min="0" max="150" step="5" value="35" autocomplete="off" id="sec5Ellipse2ArrowendInput"
+                    oninput="document.getElementById('sec5Ellipse2').setAttribute('arrowend', this.value); document.getElementById('sec5Ellipse2ArrowendVal').innerText = this.value; document.getElementById('sec5Ellipse2ArrowendCode').innerText = this.value;" data-mark="sec5Ellipse2ArrowendCode">
                 </div>
 
                 <!-- Row 2: Stroke Width & Arrow Style -->
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec5Ellipse2StrokeWidthVal">6</span></label>
-                  <input type="range" min="2" max="24" step="1" value="6" autocomplete="off" id="sec5Ellipse2StrokeWidthInput"
-                    oninput="document.getElementById('sec5Ellipse2').setAttribute('strokewidth', this.value); document.getElementById('sec5Ellipse2StrokeWidthVal').innerText = this.value; document.getElementById('sec5Ellipse2StrokeWidthCode').innerText = this.value;" data-mark="sec5Ellipse2StrokeWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec5Ellipse2StrokewidthVal">6</span></label>
+                  <input type="range" min="2" max="24" step="1" value="6" autocomplete="off" id="sec5Ellipse2StrokewidthInput"
+                    oninput="document.getElementById('sec5Ellipse2').setAttribute('strokewidth', this.value); document.getElementById('sec5Ellipse2StrokewidthVal').innerText = this.value; document.getElementById('sec5Ellipse2StrokewidthCode').innerText = this.value;" data-mark="sec5Ellipse2StrokewidthCode">
                 </div>
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn" onclick="document.getElementById('sec5Ellipse2').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec5Ellipse2StyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn active" onclick="document.getElementById('sec5Ellipse2').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec5Ellipse2StyleCode', 'line');">line</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec5Ellipse2').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec5Ellipse2ArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec5Ellipse2').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec5Ellipse2ArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
               </div>

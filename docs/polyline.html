@@ -604,15 +604,15 @@
     &lt;!-- Left: Zig-Zag --&gt;
     &lt;pxl-polyline stroke="#f97316" strokewidth="6"
       points="50,300; 150,200; 350,400; 450,300"
-      smooth="<mark id="sec6Polyline1SmoothCode">1</mark>" arrowend="<mark id="sec6Polyline1ArrowEndCode">40</mark>"
-      arrowstyle="<mark id="sec6Polyline1StyleCode">filled</mark>"&gt;
+      smooth="<mark id="sec6Polyline1SmoothCode">1</mark>" arrowend="<mark id="sec6Polyline1ArrowendCode">40</mark>"
+      arrowstyle="<mark id="sec6Polyline1ArrowstyleCode">filled</mark>"&gt;
     &lt;/pxl-polyline&gt;
 
     &lt;!-- Right: U-Turn --&gt;
     &lt;pxl-polyline stroke="#3b82f6" strokewidth="6"
       points="600,200; 800,200; 900,300; 800,400; 650,400"
-      arrowstart="<mark id="sec6Polyline2ArrowStartCode">0</mark>" arrowend="<mark id="sec6Polyline2ArrowEndCode">40</mark>" smooth="<mark id="sec6Polyline2SmoothCode">1</mark>"
-      arrowstyle="<mark id="sec6Polyline2StyleCode">line</mark>"&gt;
+      arrowstart="<mark id="sec6Polyline2ArrowstartCode">0</mark>" arrowend="<mark id="sec6Polyline2ArrowendCode">40</mark>" smooth="<mark id="sec6Polyline2SmoothCode">1</mark>"
+      arrowstyle="<mark id="sec6Polyline2ArrowstyleCode">line</mark>"&gt;
     &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -637,17 +637,17 @@
                     oninput="document.getElementById('sec6Polyline1').setAttribute('smooth', this.value); document.getElementById('sec6Polyline1SmoothVal').innerText = this.value; document.getElementById('sec6Polyline1SmoothCode').innerText = this.value;" data-mark="sec6Polyline1SmoothCode">
                 </div>
                 <div class="control-group">
-                  <label><span>End Arrow <span class="indicator-dot"></span></span> <span id="sec6Polyline1ArrowEndVal">40</span></label>
-                  <input type="range" min="0" max="100" step="5" value="40" autocomplete="off" id="sec6Polyline1ArrowEndInput"
-                    oninput="document.getElementById('sec6Polyline1').setAttribute('arrowend', this.value); document.getElementById('sec6Polyline1ArrowEndVal').innerText = this.value; document.getElementById('sec6Polyline1ArrowEndCode').innerText = this.value;" data-mark="sec6Polyline1ArrowEndCode">
+                  <label><span>End Arrow <span class="indicator-dot"></span></span> <span id="sec6Polyline1ArrowendVal">40</span></label>
+                  <input type="range" min="0" max="100" step="5" value="40" autocomplete="off" id="sec6Polyline1ArrowendInput"
+                    oninput="document.getElementById('sec6Polyline1').setAttribute('arrowend', this.value); document.getElementById('sec6Polyline1ArrowendVal').innerText = this.value; document.getElementById('sec6Polyline1ArrowendCode').innerText = this.value;" data-mark="sec6Polyline1ArrowendCode">
                 </div>
 
                 <!-- Row 2: Arrow Style -->
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn active" onclick="document.getElementById('sec6Polyline1').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec6Polyline1StyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn" onclick="document.getElementById('sec6Polyline1').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec6Polyline1StyleCode', 'line');">line</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec6Polyline1').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec6Polyline1ArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec6Polyline1').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec6Polyline1ArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
               </div>
@@ -658,14 +658,14 @@
               <div class="playground-sliders">
                 <!-- Row 1: Start Arrow & End Arrow -->
                 <div class="control-group">
-                  <label><span>Start Arrow <span class="indicator-dot"></span></span> <span id="sec6Polyline2ArrowStartVal">0</span></label>
-                  <input type="range" min="0" max="100" step="5" value="0" autocomplete="off" id="sec6Polyline2ArrowStartInput"
-                    oninput="document.getElementById('sec6Polyline2').setAttribute('arrowstart', this.value); document.getElementById('sec6Polyline2ArrowStartVal').innerText = this.value; document.getElementById('sec6Polyline2ArrowStartCode').innerText = this.value;" data-mark="sec6Polyline2ArrowStartCode">
+                  <label><span>Start Arrow <span class="indicator-dot"></span></span> <span id="sec6Polyline2ArrowstartVal">0</span></label>
+                  <input type="range" min="0" max="100" step="5" value="0" autocomplete="off" id="sec6Polyline2ArrowstartInput"
+                    oninput="document.getElementById('sec6Polyline2').setAttribute('arrowstart', this.value); document.getElementById('sec6Polyline2ArrowstartVal').innerText = this.value; document.getElementById('sec6Polyline2ArrowstartCode').innerText = this.value;" data-mark="sec6Polyline2ArrowstartCode">
                 </div>
                 <div class="control-group">
-                  <label><span>End Arrow</span> <span id="sec6Polyline2ArrowEndVal">40</span></label>
-                  <input type="range" min="0" max="100" step="5" value="40" autocomplete="off" id="sec6Polyline2ArrowEndInput"
-                    oninput="document.getElementById('sec6Polyline2').setAttribute('arrowend', this.value); document.getElementById('sec6Polyline2ArrowEndVal').innerText = this.value; document.getElementById('sec6Polyline2ArrowEndCode').innerText = this.value;" data-mark="sec6Polyline2ArrowEndCode">
+                  <label><span>End Arrow</span> <span id="sec6Polyline2ArrowendVal">40</span></label>
+                  <input type="range" min="0" max="100" step="5" value="40" autocomplete="off" id="sec6Polyline2ArrowendInput"
+                    oninput="document.getElementById('sec6Polyline2').setAttribute('arrowend', this.value); document.getElementById('sec6Polyline2ArrowendVal').innerText = this.value; document.getElementById('sec6Polyline2ArrowendCode').innerText = this.value;" data-mark="sec6Polyline2ArrowendCode">
                 </div>
 
                 <!-- Row 2: Smooth & Arrow Style -->
@@ -677,8 +677,8 @@
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn" onclick="document.getElementById('sec6Polyline2').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec6Polyline2StyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn active" onclick="document.getElementById('sec6Polyline2').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec6Polyline2StyleCode', 'line');">line</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec6Polyline2').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec6Polyline2ArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec6Polyline2').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec6Polyline2ArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
               </div>
@@ -716,22 +716,22 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Top: Center at First Point --&gt;
+    &lt;!-- Top, center at the first point --&gt;
     &lt;pxl-polyline stroke="#f97316" strokewidth="4"
       points="0,0; 100,-50; 300,50; 400,0"
-      x="<mark id="sec7Polyline1XCode">300</mark>" y="<mark id="sec7Polyline1YCode">150</mark>" rotate="<mark id="sec7Polyline1RotCode">0</mark>"&gt;
+      x="<mark id="sec7Polyline1XCode">300</mark>" y="<mark id="sec7Polyline1YCode">150</mark>" rotate="<mark id="sec7Polyline1RotateCode">0</mark>"&gt;
     &lt;/pxl-polyline&gt;
 
-    &lt;!-- Middle: Center at Midpoint --&gt;
+    &lt;!-- Middle, center at the midpoint --&gt;
     &lt;pxl-polyline stroke="#3b82f6" strokewidth="4"
       points="-200,0; -100,-50; 100,50; 200,0"
-      x="<mark id="sec7Polyline2XCode">500</mark>" y="<mark id="sec7Polyline2YCode">300</mark>" rotate="<mark id="sec7Polyline2RotCode">0</mark>"&gt;
+      x="<mark id="sec7Polyline2XCode">500</mark>" y="<mark id="sec7Polyline2YCode">300</mark>" rotate="<mark id="sec7Polyline2RotateCode">0</mark>"&gt;
     &lt;/pxl-polyline&gt;
 
-    &lt;!-- Bottom: Center at Last Point --&gt;
+    &lt;!-- Bottom, center at the last point --&gt;
     &lt;pxl-polyline stroke="#22c55e" strokewidth="4"
       points="-400,0; -300,-50; -100,50; 0,0"
-      x="<mark id="sec7Polyline3XCode">700</mark>" y="<mark id="sec7Polyline3YCode">450</mark>" rotate="<mark id="sec7Polyline3RotCode">0</mark>"&gt;
+      x="<mark id="sec7Polyline3XCode">700</mark>" y="<mark id="sec7Polyline3YCode">450</mark>" rotate="<mark id="sec7Polyline3RotateCode">0</mark>"&gt;
     &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -761,9 +761,9 @@
                     oninput="document.getElementById('sec7Var2').setAttribute('value', this.value); document.getElementById('sec7Var2Val').innerText = this.value; document.getElementById('sec7Polyline1YCode').innerText = this.value;" data-mark="sec7Polyline1YCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec7Polyline1RotVal">0°</span></label>
-                  <input type="range" min="-90" max="90" step="5" value="0" autocomplete="off" id="sec7Polyline1RotInput"
-                    oninput="document.getElementById('sec7Polyline1').setAttribute('rotate', this.value); document.getElementById('sec7Polyline1RotVal').innerText = this.value + '°'; document.getElementById('sec7Polyline1RotCode').innerText = this.value;" data-mark="sec7Polyline1RotCode">
+                  <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec7Polyline1RotateVal">0°</span></label>
+                  <input type="range" min="-90" max="90" step="5" value="0" autocomplete="off" id="sec7Polyline1RotateInput"
+                    oninput="document.getElementById('sec7Polyline1').setAttribute('rotate', this.value); document.getElementById('sec7Polyline1RotateVal').innerText = this.value + '°'; document.getElementById('sec7Polyline1RotateCode').innerText = this.value;" data-mark="sec7Polyline1RotateCode">
                 </div>
               </div>
             </div>
@@ -782,9 +782,9 @@
                     oninput="document.getElementById('sec7Var4').setAttribute('value', this.value); document.getElementById('sec7Var4Val').innerText = this.value; document.getElementById('sec7Polyline2YCode').innerText = this.value;" data-mark="sec7Polyline2YCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec7Polyline2RotVal">0°</span></label>
-                  <input type="range" min="-90" max="90" step="5" value="0" autocomplete="off" id="sec7Polyline2RotInput"
-                    oninput="document.getElementById('sec7Polyline2').setAttribute('rotate', this.value); document.getElementById('sec7Polyline2RotVal').innerText = this.value + '°'; document.getElementById('sec7Polyline2RotCode').innerText = this.value;" data-mark="sec7Polyline2RotCode">
+                  <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec7Polyline2RotateVal">0°</span></label>
+                  <input type="range" min="-90" max="90" step="5" value="0" autocomplete="off" id="sec7Polyline2RotateInput"
+                    oninput="document.getElementById('sec7Polyline2').setAttribute('rotate', this.value); document.getElementById('sec7Polyline2RotateVal').innerText = this.value + '°'; document.getElementById('sec7Polyline2RotateCode').innerText = this.value;" data-mark="sec7Polyline2RotateCode">
                 </div>
               </div>
             </div>
@@ -803,9 +803,9 @@
                     oninput="document.getElementById('sec7Var6').setAttribute('value', this.value); document.getElementById('sec7Var6Val').innerText = this.value; document.getElementById('sec7Polyline3YCode').innerText = this.value;" data-mark="sec7Polyline3YCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec7Polyline3RotVal">0°</span></label>
-                  <input type="range" min="-90" max="90" step="5" value="0" autocomplete="off" id="sec7Polyline3RotInput"
-                    oninput="document.getElementById('sec7Polyline3').setAttribute('rotate', this.value); document.getElementById('sec7Polyline3RotVal').innerText = this.value + '°'; document.getElementById('sec7Polyline3RotCode').innerText = this.value;" data-mark="sec7Polyline3RotCode">
+                  <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec7Polyline3RotateVal">0°</span></label>
+                  <input type="range" min="-90" max="90" step="5" value="0" autocomplete="off" id="sec7Polyline3RotateInput"
+                    oninput="document.getElementById('sec7Polyline3').setAttribute('rotate', this.value); document.getElementById('sec7Polyline3RotateVal').innerText = this.value + '°'; document.getElementById('sec7Polyline3RotateCode').innerText = this.value;" data-mark="sec7Polyline3RotateCode">
                 </div>
               </div>
             </div>

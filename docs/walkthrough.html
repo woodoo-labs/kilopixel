@@ -202,8 +202,8 @@
       <pre><code class="language-html">&lt;!-- Placing a shape whose center is at (350, 150) --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer x="<mark id="sec3LayerXCode">400</mark>" y="<mark id="sec3LayerYCode">200</mark>"&gt;
-    &lt;pxl-circle x="<mark id="sec3CircleXCode">350</mark>" y="<mark id="sec3CircleYCode">150</mark>" r="<mark id="sec3CircleRCode">250</mark>"
-      fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;
+    &lt;pxl-circle fill="#ffedd566" stroke="#f97316" strokewidth="4"
+      x="<mark id="sec3CircleXCode">350</mark>" y="<mark id="sec3CircleYCode">150</mark>" r="<mark id="sec3CircleRCode">250</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -321,10 +321,10 @@
 
       <pre><code class="language-html">&lt;!-- An ellipse rotated around its center --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;pxl-layer x="<mark id="sec4LayerXCode">500</mark>" y="<mark id="sec4LayerYCode">300</mark>" rotate="<mark id="sec4LayerRotCode">0</mark>"&gt;
-    &lt;pxl-ellipse x="<mark id="sec4EllipseXCode">200</mark>" y="<mark id="sec4EllipseYCode">150</mark>"
-      rx="<mark id="sec4EllipseRxCode">250</mark>" ry="<mark id="sec4EllipseRyCode">100</mark>" rotate="<mark id="sec4EllipseRotCode">20</mark>"
-      fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;
+  &lt;pxl-layer x="<mark id="sec4LayerXCode">500</mark>" y="<mark id="sec4LayerYCode">300</mark>" rotate="<mark id="sec4LayerRotateCode">0</mark>"&gt;
+    &lt;pxl-ellipse fill="#ffedd566" stroke="#f97316" strokewidth="4"
+      x="<mark id="sec4EllipseXCode">200</mark>" y="<mark id="sec4EllipseYCode">150</mark>"
+      rx="<mark id="sec4EllipseRxCode">250</mark>" ry="<mark id="sec4EllipseRyCode">100</mark>" rotate="<mark id="sec4EllipseRotateCode">20</mark>"&gt;
     &lt;/pxl-ellipse&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -355,9 +355,9 @@
                   oninput="document.getElementById('sec4Layer').setAttribute('y', this.value); document.getElementById('sec4LayerYVal').innerText = this.value; document.getElementById('sec4LayerYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec4LayerRotVal">0°</span></label>
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec4LayerRotateVal">0°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
-                  oninput="document.getElementById('sec4Layer').setAttribute('rotate', this.value); document.getElementById('sec4LayerRotVal').innerText = this.value + '°'; document.getElementById('sec4LayerRotCode').innerText = this.value;">
+                  oninput="document.getElementById('sec4Layer').setAttribute('rotate', this.value); document.getElementById('sec4LayerRotateVal').innerText = this.value + '°'; document.getElementById('sec4LayerRotateCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -386,9 +386,9 @@
                   oninput="document.getElementById('sec4Ellipse').setAttribute('ry', this.value); document.getElementById('sec4EllipseRyVal').innerText = this.value; document.getElementById('sec4EllipseRyCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec4EllipseRotVal">20°</span></label>
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec4EllipseRotateVal">20°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="20" autocomplete="off"
-                  oninput="document.getElementById('sec4Ellipse').setAttribute('rotate', this.value); document.getElementById('sec4EllipseRotVal').innerText = this.value + '°'; document.getElementById('sec4EllipseRotCode').innerText = this.value;">
+                  oninput="document.getElementById('sec4Ellipse').setAttribute('rotate', this.value); document.getElementById('sec4EllipseRotateVal').innerText = this.value + '°'; document.getElementById('sec4EllipseRotateCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -455,10 +455,10 @@
       
       <pre><code class="language-html">&lt;!-- A rectangle orbiting its pivot point --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;pxl-layer x="<mark id="sec5LayerXCode">200</mark>" y="<mark id="sec5LayerYCode">150</mark>" rotate="<mark id="sec5LayerRotCode">0</mark>"&gt;
-    &lt;pxl-rect x="<mark id="sec5RectXCode">300</mark>" y="<mark id="sec5RectYCode">150</mark>" w="100" h="100"
-      fill="#ffedd566" stroke="#f97316" strokewidth="4"
-      dx="<mark id="sec5RectDxCode">150</mark>" dy="<mark id="sec5RectDyCode">150</mark>" rotate="<mark id="sec5RectRotCode">0</mark>"&gt;
+  &lt;pxl-layer x="<mark id="sec5LayerXCode">200</mark>" y="<mark id="sec5LayerYCode">150</mark>" rotate="<mark id="sec5LayerRotateCode">0</mark>"&gt;
+    &lt;pxl-rect w="100" h="100" fill="#ffedd566" stroke="#f97316" strokewidth="4"
+      x="<mark id="sec5RectXCode">300</mark>" y="<mark id="sec5RectYCode">150</mark>"
+      dx="<mark id="sec5RectDxCode">150</mark>" dy="<mark id="sec5RectDyCode">150</mark>" rotate="<mark id="sec5RectRotateCode">0</mark>"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -488,9 +488,9 @@
                   oninput="document.getElementById('sec5Layer').setAttribute('y', this.value); document.getElementById('sec5LayerYVal').innerText = this.value; document.getElementById('sec5LayerYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label><span>Rotation</span> <span id="sec5LayerRotVal">0°</span></label>
+                <label><span>Rotation</span> <span id="sec5LayerRotateVal">0°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
-                  oninput="document.getElementById('sec5Layer').setAttribute('rotate', this.value); document.getElementById('sec5LayerRotVal').innerText = this.value + '°'; document.getElementById('sec5LayerRotCode').innerText = this.value;">
+                  oninput="document.getElementById('sec5Layer').setAttribute('rotate', this.value); document.getElementById('sec5LayerRotateVal').innerText = this.value + '°'; document.getElementById('sec5LayerRotateCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -518,9 +518,9 @@
                   oninput="document.getElementById('sec5Rect').setAttribute('dy', this.value); document.getElementById('sec5RectDyVal').innerText = this.value; document.getElementById('sec5RectDyCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec5RectRotVal">0°</span></label>
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec5RectRotateVal">0°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
-                  oninput="document.getElementById('sec5Rect').setAttribute('rotate', this.value); document.getElementById('sec5RectRotVal').innerText = this.value + '°'; document.getElementById('sec5RectRotCode').innerText = this.value;">
+                  oninput="document.getElementById('sec5Rect').setAttribute('rotate', this.value); document.getElementById('sec5RectRotateVal').innerText = this.value + '°'; document.getElementById('sec5RectRotateCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -622,29 +622,25 @@
       
       <pre><code class="language-html">&lt;!-- Linking attributes across different shapes --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;pxl-layer x="<mark id="sec6LayerXCode">0</mark>" y="<mark id="sec6LayerYCode">0</mark>" rotate="<mark id="sec6LayerRotCode">0</mark>"&gt;
-    &lt;!-- 1. Master Shape (You control this) --&gt;
-    &lt;pxl-rect id="master" x="<mark id="sec6MasterXCode">250</mark>" y="<mark id="sec6MasterYCode">200</mark>" w="100" h="100"
-      fill="#ffedd566" stroke="#f97316" strokewidth="4"
-      rotate="<mark id="sec6MasterRotCode">0</mark>"&gt;
+  &lt;pxl-layer x="<mark id="sec6LayerXCode">0</mark>" y="<mark id="sec6LayerYCode">0</mark>" rotate="<mark id="sec6LayerRotateCode">0</mark>"&gt;
+    &lt;!-- Left: Master, the shape you move --&gt;
+    &lt;pxl-rect id="master" w="100" h="100" fill="#ffedd566" stroke="#f97316" strokewidth="4"
+      x="<mark id="sec6MasterXCode">250</mark>" y="<mark id="sec6MasterYCode">200</mark>"
+      rotate="<mark id="sec6MasterRotateCode">0</mark>"&gt;
     &lt;/pxl-rect&gt;
 
-    &lt;!-- 2. Mirror Shape (Moves in reverse) --&gt;
-    &lt;pxl-rect id="mirror" 
-      x="1000 - <mark id="sec6MirrorRefXCode" class="highlight-reactive">ref.master.x</mark>" 
-      y="<mark id="sec6MirrorRefYCode" class="highlight-reactive">ref.master.y</mark>" 
-      w="<mark id="sec6MirrorWCode">100</mark>" h="<mark id="sec6MirrorHCode">100</mark>" 
-      rotate="<mark id="sec6MirrorRefRotCode" class="highlight-reactive">-ref.master.rotate</mark>" 
-      fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"&gt;
+    &lt;!-- Right: Mirror, moves in reverse --&gt;
+    &lt;pxl-rect id="mirror" x="1000 - <mark id="sec6MirrorRefXCode" class="highlight-reactive">ref.master.x</mark>" y="<mark id="sec6MirrorRefYCode" class="highlight-reactive">ref.master.y</mark>"
+      fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
+      rotate="<mark id="sec6MirrorRefRotCode" class="highlight-reactive">-ref.master.rotate</mark>"
+      w="<mark id="sec6MirrorWCode">100</mark>" h="<mark id="sec6MirrorHCode">100</mark>"&gt;
     &lt;/pxl-rect&gt;
 
-    &lt;!-- 3. Reactor Shape (Spins and scales) --&gt;
-    &lt;pxl-rect id="reactor" 
-      x="<mark id="sec6ReactorXCode">500</mark>" y="<mark id="sec6ReactorYCode">450</mark>" 
-      w="<mark id="sec6ReactorRefWCode" class="highlight-reactive">ref.master.x</mark> / 5" 
-      h="<mark id="sec6ReactorRefHCode" class="highlight-reactive">ref.master.x</mark> / 5" 
-      rotate="<mark id="sec6ReactorRefRotCode" class="highlight-reactive">ref.master.x</mark>" 
-      fill="#dcfce766" stroke="#22c55e" strokewidth="4"&gt;
+    &lt;!-- Bottom: Reactor, spins and grows with the master --&gt;
+    &lt;pxl-rect id="reactor" w="<mark id="sec6ReactorRefWCode" class="highlight-reactive">ref.master.x</mark> / 5" h="<mark id="sec6ReactorRefHCode" class="highlight-reactive">ref.master.x</mark> / 5"
+      fill="#dcfce766" stroke="#22c55e" strokewidth="4"
+      rotate="<mark id="sec6ReactorRefRotCode" class="highlight-reactive">ref.master.x</mark>"
+      x="<mark id="sec6ReactorXCode">500</mark>" y="<mark id="sec6ReactorYCode">450</mark>"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -676,9 +672,9 @@
                   oninput="document.getElementById('sec6Layer').setAttribute('y', this.value); document.getElementById('sec6LayerYVal').innerText = this.value; document.getElementById('sec6LayerYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label><span>Rotation</span> <span id="sec6LayerRotVal">0°</span></label>
+                <label><span>Rotation</span> <span id="sec6LayerRotateVal">0°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
-                  oninput="document.getElementById('sec6Layer').setAttribute('rotate', this.value); document.getElementById('sec6LayerRotVal').innerText = this.value + '°'; document.getElementById('sec6LayerRotCode').innerText = this.value;">
+                  oninput="document.getElementById('sec6Layer').setAttribute('rotate', this.value); document.getElementById('sec6LayerRotateVal').innerText = this.value + '°'; document.getElementById('sec6LayerRotateCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -696,9 +692,9 @@
                   oninput="document.getElementById('sec6Master').setAttribute('y', this.value); document.getElementById('sec6MasterYVal').innerText = this.value; document.getElementById('sec6MasterYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec6MasterRotVal">0°</span></label>
-                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec6MasterRotCode, sec6MirrorRefRotCode"
-                  oninput="document.getElementById('sec6Master').setAttribute('rotate', this.value); document.getElementById('sec6MasterRotVal').innerText = this.value + '°'; document.getElementById('sec6MasterRotCode').innerText = this.value;">
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec6MasterRotateVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec6MasterRotateCode, sec6MirrorRefRotCode"
+                  oninput="document.getElementById('sec6Master').setAttribute('rotate', this.value); document.getElementById('sec6MasterRotateVal').innerText = this.value + '°'; document.getElementById('sec6MasterRotateCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -786,16 +782,22 @@
       
       <pre><code class="language-html">&lt;!-- Variables act as global state for the canvas --&gt;
 &lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;pxl-layer x="<mark id="sec7LayerXCode">500</mark>" y="<mark id="sec7LayerYCode">300</mark>" rotate="<mark id="sec7LayerRotCode">0</mark>"&gt;
-    &lt;!-- Global State --&gt;
+  &lt;pxl-layer x="<mark id="sec7LayerXCode">500</mark>" y="<mark id="sec7LayerYCode">300</mark>" rotate="<mark id="sec7LayerRotateCode">0</mark>"&gt;
+    &lt;!-- Variables, set by the sliders --&gt;
     &lt;pxl-var id="hue" value="<mark id="sec7HueCode">250</mark>"&gt;&lt;/pxl-var&gt;
     &lt;pxl-var id="spread" value="<mark id="sec7SpreadCode">120</mark>"&gt;&lt;/pxl-var&gt;
     &lt;pxl-var id="size" value="<mark id="sec7SizeCode">150</mark>"&gt;&lt;/pxl-var&gt;
 
-    &lt;!-- Shapes bound to state --&gt;
-    &lt;pxl-circle dx="<mark id="sec7Circ1SpreadCode" class="highlight-reactive">ref.spread.value</mark>" r="<mark id="sec7Circ1SizeCode" class="highlight-reactive">ref.size.value</mark>" fill="hsla(<mark id="sec7Circ1HueCode" class="highlight-reactive">ref.hue.value</mark> + 25, 80, 60, 0.6)" rotate="0"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle dx="<mark id="sec7Circ2SpreadCode" class="highlight-reactive">ref.spread.value</mark>" r="<mark id="sec7Circ2SizeCode" class="highlight-reactive">ref.size.value</mark>" fill="hsla(<mark id="sec7Circ2HueCode" class="highlight-reactive">ref.hue.value</mark> + 142, 80, 60, 0.6)" rotate="120"&gt;&lt;/pxl-circle&gt;
-    &lt;pxl-circle dx="<mark id="sec7Circ3SpreadCode" class="highlight-reactive">ref.spread.value</mark>" r="<mark id="sec7Circ3SizeCode" class="highlight-reactive">ref.size.value</mark>" fill="hsla(<mark id="sec7Circ3HueCode" class="highlight-reactive">ref.hue.value</mark> + 217, 80, 60, 0.6)" rotate="240"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Circles, bound to the variables --&gt;
+    &lt;pxl-circle fill="hsla(<mark id="sec7Circ1HueCode" class="highlight-reactive">ref.hue.value</mark> + 25, 80, 60, 0.6)"
+      dx="<mark id="sec7Circ1SpreadCode" class="highlight-reactive">ref.spread.value</mark>" r="<mark id="sec7Circ1SizeCode" class="highlight-reactive">ref.size.value</mark>" rotate="0"&gt;
+    &lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="hsla(<mark id="sec7Circ2HueCode" class="highlight-reactive">ref.hue.value</mark> + 142, 80, 60, 0.6)"
+      dx="<mark id="sec7Circ2SpreadCode" class="highlight-reactive">ref.spread.value</mark>" r="<mark id="sec7Circ2SizeCode" class="highlight-reactive">ref.size.value</mark>" rotate="120"&gt;
+    &lt;/pxl-circle&gt;
+    &lt;pxl-circle fill="hsla(<mark id="sec7Circ3HueCode" class="highlight-reactive">ref.hue.value</mark> + 217, 80, 60, 0.6)"
+      dx="<mark id="sec7Circ3SpreadCode" class="highlight-reactive">ref.spread.value</mark>" r="<mark id="sec7Circ3SizeCode" class="highlight-reactive">ref.size.value</mark>" rotate="240"&gt;
+    &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -844,9 +846,9 @@
                   oninput="document.getElementById('sec7Layer').setAttribute('y', this.value); document.getElementById('sec7LayerYVal').innerText = this.value; document.getElementById('sec7LayerYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label><span>Rotation</span> <span id="sec7LayerRotVal">0°</span></label>
-                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec7LayerRotCode"
-                  oninput="document.getElementById('sec7Layer').setAttribute('rotate', this.value); document.getElementById('sec7LayerRotVal').innerText = this.value + '°'; document.getElementById('sec7LayerRotCode').innerText = this.value;">
+                <label><span>Rotation</span> <span id="sec7LayerRotateVal">0°</span></label>
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec7LayerRotateCode"
+                  oninput="document.getElementById('sec7Layer').setAttribute('rotate', this.value); document.getElementById('sec7LayerRotateVal').innerText = this.value + '°'; document.getElementById('sec7LayerRotateCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -882,25 +884,25 @@
       <p>The <a href="mapping.html">Coordinate Mapping</a> page also maps direction and size, and copies a whole frame.</p>
       
       <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;!-- Two independent rotating layers with their own shapes --&gt;
+  &lt;!-- Left: Layer 1, rotates with its circle --&gt;
   &lt;pxl-layer id="layer1" x="<mark id="sec8Layer1XCode">350</mark>" y="<mark id="sec8Layer1YCode">250</mark>" rotate="<mark id="sec8Layer1RotCode">0</mark>"&gt;
-    &lt;pxl-circle id="circle1" x="<mark id="sec8Circle1XCode">-150</mark>" y="<mark id="sec8Circle1YCode">-150</mark>" r="<mark id="sec8Circle1RCode">100</mark>"
-      fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;
+    &lt;pxl-circle id="circle1" fill="#ffedd566" stroke="#f97316" strokewidth="4"
+      x="<mark id="sec8Circle1XCode">-150</mark>" y="<mark id="sec8Circle1YCode">-150</mark>" r="<mark id="sec8Circle1RCode">100</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
+  &lt;!-- Right: Layer 2, rotates with its circle --&gt;
   &lt;pxl-layer id="layer2" x="<mark id="sec8Layer2XCode">650</mark>" y="<mark id="sec8Layer2YCode">350</mark>" rotate="<mark id="sec8Layer2RotCode">0</mark>"&gt;
-    &lt;pxl-circle id="circle2" x="<mark id="sec8Circle2XCode">150</mark>" y="<mark id="sec8Circle2YCode">150</mark>" r="<mark id="sec8Circle2RCode">100</mark>"
-      fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"&gt;
+    &lt;pxl-circle id="circle2" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
+      x="<mark id="sec8Circle2XCode">150</mark>" y="<mark id="sec8Circle2YCode">150</mark>" r="<mark id="sec8Circle2RCode">100</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
-  &lt;!-- A line connecting two shapes in different rotating layers --&gt;
+  &lt;!-- Line, connects the two circles --&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-line 
-      x1="toLocal(<mark id="sec8LineRefCirc1X" class="highlight-reactive">ref.circle1, 'x'</mark>)" y1="toLocal(<mark id="sec8LineRefCirc1Y" class="highlight-reactive">ref.circle1, 'y'</mark>)" 
-      x2="toLocal(<mark id="sec8LineRefCirc2X" class="highlight-reactive">ref.circle2, 'x'</mark>)" y2="toLocal(<mark id="sec8LineRefCirc2Y" class="highlight-reactive">ref.circle2, 'y'</mark>)" 
-      stroke="#ec4899" strokewidth="4"&gt;
+    &lt;pxl-line stroke="#ec4899" strokewidth="4"
+      x1="toLocal(<mark id="sec8LineRefCirc1X" class="highlight-reactive">ref.circle1, 'x'</mark>)" y1="toLocal(<mark id="sec8LineRefCirc1Y" class="highlight-reactive">ref.circle1, 'y'</mark>)"
+      x2="toLocal(<mark id="sec8LineRefCirc2X" class="highlight-reactive">ref.circle2, 'x'</mark>)" y2="toLocal(<mark id="sec8LineRefCirc2Y" class="highlight-reactive">ref.circle2, 'y'</mark>)"&gt;
     &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -1064,19 +1066,12 @@
       <p>In this example, <code>sin()</code> and <code>cos()</code> with different x and y frequencies move the circle along a Lissajous curve, and <code>hsl()</code> with <code>loop(10)</code> turns its color once around the color wheel every 10 seconds.</p>
       
       <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;pxl-layer x="<mark id="sec9LayerXCode">500</mark>" y="<mark id="sec9LayerYCode">300</mark>" rotate="<mark id="sec9LayerRotCode">0</mark>"&gt;
-    &lt;!-- Pure Math: Lissajous curve using sine waves --&gt;
+  &lt;pxl-layer x="<mark id="sec9LayerXCode">500</mark>" y="<mark id="sec9LayerYCode">300</mark>" rotate="<mark id="sec9LayerRotateCode">0</mark>"&gt;
     &lt;pxl-var id="hue" value="loop(10) * 360"&gt;&lt;/pxl-var&gt;
-    &lt;!-- Note: shadowcolor safely self-references its own stroke --&gt;
     &lt;pxl-circle id="oscillator"
-      x="sin(t * <mark id="sec9FreqXCode">2</mark>) * 450"
-      y="cos(t * <mark id="sec9FreqYCode">3</mark>) * 250"
-      r="<mark id="sec9RadiusCode">40</mark>" 
-      fill="hsla(ref.hue.value, 100, 60, 0.4)" 
-      stroke="hsl(ref.hue.value, 100, 60)" 
-      strokewidth="4"
-      shadowcolor="ref.oscillator.stroke" 
-      shadowblur="20"&gt;
+      fill="hsla(ref.hue.value, 100, 60, 0.4)" stroke="hsl(ref.hue.value, 100, 60)" strokewidth="4"
+      shadowcolor="ref.oscillator.stroke" shadowblur="20"
+      x="sin(t * <mark id="sec9FreqXCode">2</mark>) * 450" y="cos(t * <mark id="sec9FreqYCode">3</mark>) * 250" r="<mark id="sec9RadiusCode">40</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -1106,9 +1101,9 @@
                   oninput="document.getElementById('sec9Layer').setAttribute('y', this.value); document.getElementById('sec9BgLayer').setAttribute('y', this.value); document.getElementById('sec9LayerYVal').innerText = this.value; document.getElementById('sec9LayerYCode').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec9LayerRotVal">0°</span></label>
+                <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec9LayerRotateVal">0°</span></label>
                 <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
-                  oninput="document.getElementById('sec9Layer').setAttribute('rotate', this.value); document.getElementById('sec9BgLayer').setAttribute('rotate', this.value); document.getElementById('sec9LayerRotVal').innerText = this.value + '°'; document.getElementById('sec9LayerRotCode').innerText = this.value;">
+                  oninput="document.getElementById('sec9Layer').setAttribute('rotate', this.value); document.getElementById('sec9BgLayer').setAttribute('rotate', this.value); document.getElementById('sec9LayerRotateVal').innerText = this.value + '°'; document.getElementById('sec9LayerRotateCode').innerText = this.value;">
               </div>
             </div>
           </div>

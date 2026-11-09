@@ -93,10 +93,9 @@
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-rect 
-      x="500" y="300" 
-      w="<mark id="sec1ex1RectWCode">500</mark>" h="<mark id="sec1ex1RectHCode">200</mark>" 
-      rotate="<mark id="sec1ex1RectRotCode">0</mark>" 
+    &lt;pxl-rect x="500" y="300"
+      w="<mark id="sec1ex1RectWCode">500</mark>" h="<mark id="sec1ex1RectHCode">200</mark>"
+      rotate="<mark id="sec1ex1RectRotateCode">0</mark>"
       fill="linear(<mark id="sec1ex1GradAngleCode">45</mark>, [<mark id="sec1ex1GradStartCode">0.4</mark>, '#f8fafc', <mark id="sec1ex1GradEndCode">0.6</mark>, '#475569'])"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
@@ -127,9 +126,9 @@
                     oninput="document.getElementById('sec1ex1Rect').setAttribute('h', this.value); document.getElementById('sec1ex1RectHVal').innerText = this.value; document.getElementById('sec1ex1RectHCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec1ex1RectRotVal">0°</span></label>
+                  <label><span>Rotation</span> <span id="sec1ex1RectRotateVal">0°</span></label>
                   <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec1ex1Rect').setAttribute('rotate', this.value); document.getElementById('sec1ex1RectRotVal').innerText = this.value + '°'; document.getElementById('sec1ex1RectRotCode').innerText = this.value;">
+                    oninput="document.getElementById('sec1ex1Rect').setAttribute('rotate', this.value); document.getElementById('sec1ex1RectRotateVal').innerText = this.value + '°'; document.getElementById('sec1ex1RectRotateCode').innerText = this.value;">
                 </div>
               </div>
             </div>
@@ -226,17 +225,25 @@
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- 1. Ellipse --&gt;
-    &lt;pxl-ellipse x="150" y="300" rx="<mark id="sec1ex2EllipseRxCode">100</mark>" ry="<mark id="sec1ex2EllipseRyCode">200</mark>" rotate="<mark id="sec1ex2EllipseRotCode">0</mark>" 
-      fill="linear(<mark id="sec1ex2EllipseAngleCode">45</mark>, ['darkorange', 'gold', 'crimson'])"&gt;&lt;/pxl-ellipse&gt;
+    &lt;!-- Left: Ellipse, three colors --&gt;
+    &lt;pxl-ellipse x="150" y="300"
+      rx="<mark id="sec1ex2EllipseRxCode">100</mark>" ry="<mark id="sec1ex2EllipseRyCode">200</mark>" rotate="<mark id="sec1ex2EllipseRotateCode">0</mark>"
+      fill="linear(<mark id="sec1ex2EllipseAngleCode">45</mark>, ['darkorange', 'gold', 'crimson'])"&gt;
+    &lt;/pxl-ellipse&gt;
       
-    &lt;!-- 2. Hard Split Rounded Rect --&gt;
-    &lt;pxl-rect x="500" y="300" w="<mark id="sec1ex2RectWidthCode">300</mark>" h="<mark id="sec1ex2RectHeightCode">200</mark>" r="20" rotate="<mark id="sec1ex2RectRotCode">0</mark>" 
-      fill="linear(<mark id="sec1ex2RectAngleCode">135</mark>, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])"&gt;&lt;/pxl-rect&gt;
+    &lt;!-- Middle: Rect, hard color split --&gt;
+    &lt;pxl-rect x="500" y="300"
+      r="20"
+      w="<mark id="sec1ex2RectWCode">300</mark>" h="<mark id="sec1ex2RectHCode">200</mark>" rotate="<mark id="sec1ex2RectRotateCode">0</mark>"
+      fill="linear(<mark id="sec1ex2RectAngleCode">135</mark>, [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])"&gt;
+    &lt;/pxl-rect&gt;
 
-    &lt;!-- 3. Gradient Text --&gt;
-    &lt;pxl-text x="850" y="300" size="<mark id="sec1ex2TextSizeCode">150</mark>" weight="<mark id="sec1ex2TextWeightCode">800</mark>" font="Inter" rotate="<mark id="sec1ex2TextRotCode">0</mark>" text="'pxl'" align="center" baseline="middle"
-      fill="linear(<mark id="sec1ex2TextAngleCode">45</mark>, ['#8b5cf6', '#ec4899', '#f59e0b'])"&gt;&lt;/pxl-text&gt;
+    &lt;!-- Right: Text, gradient on text --&gt;
+    &lt;pxl-text x="850" y="300" font="Inter" align="center" baseline="middle"
+      text="'pxl'"
+      size="<mark id="sec1ex2TextSizeCode">150</mark>" weight="<mark id="sec1ex2TextWeightCode">800</mark>" rotate="<mark id="sec1ex2TextRotateCode">0</mark>"
+      fill="linear(<mark id="sec1ex2TextAngleCode">45</mark>, ['#8b5cf6', '#ec4899', '#f59e0b'])"&gt;
+    &lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -265,9 +272,9 @@
                     oninput="document.getElementById('sec1ex2Ellipse').setAttribute('ry', this.value); document.getElementById('sec1ex2EllipseRyVal').innerText = this.value; document.getElementById('sec1ex2EllipseRyCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec1ex2EllipseRotVal">0°</span></label>
+                  <label><span>Rotation</span> <span id="sec1ex2EllipseRotateVal">0°</span></label>
                   <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec1ex2Ellipse').setAttribute('rotate', this.value); document.getElementById('sec1ex2EllipseRotVal').innerText = this.value + '°'; document.getElementById('sec1ex2EllipseRotCode').innerText = this.value;">
+                    oninput="document.getElementById('sec1ex2Ellipse').setAttribute('rotate', this.value); document.getElementById('sec1ex2EllipseRotateVal').innerText = this.value + '°'; document.getElementById('sec1ex2EllipseRotateCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
                   <label><span>Gradient Angle</span> <span id="sec1ex2EllipseAngleVal">45°</span></label>
@@ -281,19 +288,19 @@
             <div class="tab-content" id="sec1ex2RectTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Width</span> <span id="sec1ex2RectWidthVal">300</span></label>
+                  <label><span>Width</span> <span id="sec1ex2RectWVal">300</span></label>
                   <input type="range" min="50" max="500" step="10" value="300" autocomplete="off"
-                    oninput="document.getElementById('sec1ex2Rect').setAttribute('w', this.value); document.getElementById('sec1ex2RectWidthVal').innerText = this.value; document.getElementById('sec1ex2RectWidthCode').innerText = this.value;">
+                    oninput="document.getElementById('sec1ex2Rect').setAttribute('w', this.value); document.getElementById('sec1ex2RectWVal').innerText = this.value; document.getElementById('sec1ex2RectWCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Height</span> <span id="sec1ex2RectHeightVal">200</span></label>
+                  <label><span>Height</span> <span id="sec1ex2RectHVal">200</span></label>
                   <input type="range" min="50" max="500" step="10" value="200" autocomplete="off"
-                    oninput="document.getElementById('sec1ex2Rect').setAttribute('h', this.value); document.getElementById('sec1ex2RectHeightVal').innerText = this.value; document.getElementById('sec1ex2RectHeightCode').innerText = this.value;">
+                    oninput="document.getElementById('sec1ex2Rect').setAttribute('h', this.value); document.getElementById('sec1ex2RectHVal').innerText = this.value; document.getElementById('sec1ex2RectHCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec1ex2RectRotVal">0°</span></label>
+                  <label><span>Rotation</span> <span id="sec1ex2RectRotateVal">0°</span></label>
                   <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec1ex2Rect').setAttribute('rotate', this.value); document.getElementById('sec1ex2RectRotVal').innerText = this.value + '°'; document.getElementById('sec1ex2RectRotCode').innerText = this.value;">
+                    oninput="document.getElementById('sec1ex2Rect').setAttribute('rotate', this.value); document.getElementById('sec1ex2RectRotateVal').innerText = this.value + '°'; document.getElementById('sec1ex2RectRotateCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
                   <label><span>Gradient Angle</span> <span id="sec1ex2RectAngleVal">135°</span></label>
@@ -317,9 +324,9 @@
                     oninput="document.getElementById('sec1ex2Text').setAttribute('weight', this.value); document.getElementById('sec1ex2TextWeightVal').innerText = this.value; document.getElementById('sec1ex2TextWeightCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec1ex2TextRotVal">0°</span></label>
+                  <label><span>Rotation</span> <span id="sec1ex2TextRotateVal">0°</span></label>
                   <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec1ex2Text').setAttribute('rotate', this.value); document.getElementById('sec1ex2TextRotVal').innerText = this.value + '°'; document.getElementById('sec1ex2TextRotCode').innerText = this.value;">
+                    oninput="document.getElementById('sec1ex2Text').setAttribute('rotate', this.value); document.getElementById('sec1ex2TextRotateVal').innerText = this.value + '°'; document.getElementById('sec1ex2TextRotateCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
                   <label><span>Gradient Angle</span> <span id="sec1ex2TextAngleVal">45°</span></label>
@@ -355,10 +362,9 @@
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-rect 
-      x="500" y="300"
-      w="<mark id="sec2ex1RectWCode">500</mark>" h="<mark id="sec2ex1RectHCode">200</mark>" 
-      rotate="<mark id="sec2ex1RectRotCode">0</mark>" 
+    &lt;pxl-rect x="500" y="300"
+      w="<mark id="sec2ex1RectWCode">500</mark>" h="<mark id="sec2ex1RectHCode">200</mark>"
+      rotate="<mark id="sec2ex1RectRotateCode">0</mark>"
       fill="linear([<mark id="sec2ex1X0Code">0</mark>, <mark id="sec2ex1Y0Code">0</mark>, <mark id="sec2ex1X1Code">1</mark>, <mark id="sec2ex1Y1Code">1</mark>], ['#f8fafc', '#475569'])"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
@@ -388,9 +394,9 @@
                     oninput="document.getElementById('sec2ex1Rect').setAttribute('h', this.value); document.getElementById('sec2ex1RectHVal').innerText = this.value; document.getElementById('sec2ex1RectHCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec2ex1RectRotVal">0°</span></label>
+                  <label><span>Rotation</span> <span id="sec2ex1RectRotateVal">0°</span></label>
                   <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec2ex1Rect').setAttribute('rotate', this.value); document.getElementById('sec2ex1RectRotVal').innerText = this.value + '°'; document.getElementById('sec2ex1RectRotCode').innerText = this.value;">
+                    oninput="document.getElementById('sec2ex1Rect').setAttribute('rotate', this.value); document.getElementById('sec2ex1RectRotateVal').innerText = this.value + '°'; document.getElementById('sec2ex1RectRotateCode').innerText = this.value;">
                 </div>
               </div>
             </div>
@@ -492,17 +498,26 @@
 
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- 1. Ellipse --&gt;
-    &lt;pxl-ellipse x="150" y="300" rx="<mark id="sec2ex2EllipseRxCode">100</mark>" ry="<mark id="sec2ex2EllipseRyCode">200</mark>" rotate="<mark id="sec2ex2EllipseRotCode">0</mark>" 
-      fill="linear([<mark id="sec2ex2EllipseX0Code">0.25</mark>, <mark id="sec2ex2EllipseY0Code">0.25</mark>, <mark id="sec2ex2EllipseX1Code">0.75</mark>, <mark id="sec2ex2EllipseY1Code">0.75</mark>], ['darkorange', 'gold', 'crimson'])"&gt;&lt;/pxl-ellipse&gt;
+    &lt;!-- Left: Ellipse, three colors --&gt;
+    &lt;pxl-ellipse x="150" y="300"
+      rx="<mark id="sec2ex2EllipseRxCode">100</mark>" ry="<mark id="sec2ex2EllipseRyCode">200</mark>"
+      fill="linear([<mark id="sec2ex2EllipseX0Code">0.25</mark>, <mark id="sec2ex2EllipseY0Code">0.25</mark>, <mark id="sec2ex2EllipseX1Code">0.75</mark>, <mark id="sec2ex2EllipseY1Code">0.75</mark>], ['darkorange', 'gold', 'crimson'])"
+      rotate="<mark id="sec2ex2EllipseRotateCode">0</mark>"&gt;
+    &lt;/pxl-ellipse&gt;
       
-    &lt;!-- 2. Hard Split Rounded Rect --&gt;
-    &lt;pxl-rect x="500" y="300" w="<mark id="sec2ex2RectWidthCode">300</mark>" h="<mark id="sec2ex2RectHeightCode">200</mark>" r="20" rotate="<mark id="sec2ex2RectRotCode">0</mark>" 
-      fill="linear([<mark id="sec2ex2RectX0Code">0</mark>, <mark id="sec2ex2RectY0Code">0.5</mark>, <mark id="sec2ex2RectX1Code">0.5</mark>, <mark id="sec2ex2RectY1Code">0.5</mark>], [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])"&gt;&lt;/pxl-rect&gt;
+    &lt;!-- Middle: Rect, hard color split --&gt;
+    &lt;pxl-rect x="500" y="300"
+      r="20" w="<mark id="sec2ex2RectWCode">300</mark>" h="<mark id="sec2ex2RectHCode">200</mark>"
+      fill="linear([<mark id="sec2ex2RectX0Code">0</mark>, <mark id="sec2ex2RectY0Code">0.5</mark>, <mark id="sec2ex2RectX1Code">0.5</mark>, <mark id="sec2ex2RectY1Code">0.5</mark>], [0, '#3b82f6', 0.5, '#3b82f6', 0.501, '#93c5fd', 1, '#93c5fd'])"
+      rotate="<mark id="sec2ex2RectRotateCode">0</mark>"&gt;
+    &lt;/pxl-rect&gt;
 
-    &lt;!-- 3. Gradient Text --&gt;
-    &lt;pxl-text x="850" y="300" size="<mark id="sec2ex2TextSizeCode">150</mark>" weight="<mark id="sec2ex2TextWeightCode">800</mark>" font="Inter" rotate="<mark id="sec2ex2TextRotCode">0</mark>" text="'pxl'" align="center" baseline="middle"
-      fill="linear([<mark id="sec2ex2TextX0Code">0</mark>, <mark id="sec2ex2TextY0Code">0.4</mark>, <mark id="sec2ex2TextX1Code">0</mark>, <mark id="sec2ex2TextY1Code">0.6</mark>], ['#8b5cf6', '#ec4899', '#f59e0b'])"&gt;&lt;/pxl-text&gt;
+    &lt;!-- Right: Text, gradient on text --&gt;
+    &lt;pxl-text x="850" y="300" font="Inter" align="center" baseline="middle"
+      text="'pxl'"
+      size="<mark id="sec2ex2TextSizeCode">150</mark>" weight="<mark id="sec2ex2TextWeightCode">800</mark>"
+      fill="linear([<mark id="sec2ex2TextX0Code">0</mark>, <mark id="sec2ex2TextY0Code">0.4</mark>, <mark id="sec2ex2TextX1Code">0</mark>, <mark id="sec2ex2TextY1Code">0.6</mark>], ['#8b5cf6', '#ec4899', '#f59e0b'])" rotate="<mark id="sec2ex2TextRotateCode">0</mark>"&gt;
+    &lt;/pxl-text&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -552,9 +567,9 @@
                     oninput="document.getElementById('sec2ex2Var4').setAttribute('value', this.value); document.getElementById('sec2ex2Var4Val').innerText = this.value; document.getElementById('sec2ex2EllipseY1Code').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec2ex2EllipseRotVal">0°</span></label>
+                  <label><span>Rotation</span> <span id="sec2ex2EllipseRotateVal">0°</span></label>
                   <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec2ex2Ellipse').setAttribute('rotate', this.value); document.getElementById('sec2ex2EllipseRotVal').innerText = this.value + '°'; document.getElementById('sec2ex2EllipseRotCode').innerText = this.value;">
+                    oninput="document.getElementById('sec2ex2Ellipse').setAttribute('rotate', this.value); document.getElementById('sec2ex2EllipseRotateVal').innerText = this.value + '°'; document.getElementById('sec2ex2EllipseRotateCode').innerText = this.value;">
                 </div>
               </div>
             </div>
@@ -563,14 +578,14 @@
             <div class="tab-content" id="sec2ex2RectTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Width</span> <span id="sec2ex2RectWidthVal">300</span></label>
+                  <label><span>Width</span> <span id="sec2ex2RectWVal">300</span></label>
                   <input type="range" min="50" max="500" step="10" value="300" autocomplete="off"
-                    oninput="document.getElementById('sec2ex2Rect').setAttribute('w', this.value); document.getElementById('sec2ex2RectWidthVal').innerText = this.value; document.getElementById('sec2ex2RectWidthCode').innerText = this.value;">
+                    oninput="document.getElementById('sec2ex2Rect').setAttribute('w', this.value); document.getElementById('sec2ex2RectWVal').innerText = this.value; document.getElementById('sec2ex2RectWCode').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Height</span> <span id="sec2ex2RectHeightVal">200</span></label>
+                  <label><span>Height</span> <span id="sec2ex2RectHVal">200</span></label>
                   <input type="range" min="50" max="500" step="10" value="200" autocomplete="off"
-                    oninput="document.getElementById('sec2ex2Rect').setAttribute('h', this.value); document.getElementById('sec2ex2RectHeightVal').innerText = this.value; document.getElementById('sec2ex2RectHeightCode').innerText = this.value;">
+                    oninput="document.getElementById('sec2ex2Rect').setAttribute('h', this.value); document.getElementById('sec2ex2RectHVal').innerText = this.value; document.getElementById('sec2ex2RectHCode').innerText = this.value;">
                 </div>
                 
                 <div class="control-group">
@@ -594,9 +609,9 @@
                     oninput="document.getElementById('sec2ex2Var8').setAttribute('value', this.value); document.getElementById('sec2ex2Var8Val').innerText = this.value; document.getElementById('sec2ex2RectY1Code').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec2ex2RectRotVal">0°</span></label>
+                  <label><span>Rotation</span> <span id="sec2ex2RectRotateVal">0°</span></label>
                   <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec2ex2Rect').setAttribute('rotate', this.value); document.getElementById('sec2ex2RectRotVal').innerText = this.value + '°'; document.getElementById('sec2ex2RectRotCode').innerText = this.value;">
+                    oninput="document.getElementById('sec2ex2Rect').setAttribute('rotate', this.value); document.getElementById('sec2ex2RectRotateVal').innerText = this.value + '°'; document.getElementById('sec2ex2RectRotateCode').innerText = this.value;">
                 </div>
               </div>
             </div>
@@ -636,9 +651,9 @@
                     oninput="document.getElementById('sec2ex2Var12').setAttribute('value', this.value); document.getElementById('sec2ex2Var12Val').innerText = this.value; document.getElementById('sec2ex2TextY1Code').innerText = this.value;">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec2ex2TextRotVal">0°</span></label>
+                  <label><span>Rotation</span> <span id="sec2ex2TextRotateVal">0°</span></label>
                   <input type="range" min="0" max="360" step="5" value="0" autocomplete="off"
-                    oninput="document.getElementById('sec2ex2Text').setAttribute('rotate', this.value); document.getElementById('sec2ex2TextRotVal').innerText = this.value + '°'; document.getElementById('sec2ex2TextRotCode').innerText = this.value;">
+                    oninput="document.getElementById('sec2ex2Text').setAttribute('rotate', this.value); document.getElementById('sec2ex2TextRotateVal').innerText = this.value + '°'; document.getElementById('sec2ex2TextRotateCode').innerText = this.value;">
                 </div>
               </div>
             </div>

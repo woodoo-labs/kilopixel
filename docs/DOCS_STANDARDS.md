@@ -90,7 +90,7 @@ A snippet shows the markup behind the demo, as short and easy to scan as possibl
   * **Then:** controlled values in the top-to-bottom order of the controls, dropdown and toggle values on the last line.
   * **One line:** a fixed size comes right after position (`x y r fill`).
   * **`strokewidth`** is shown whenever the stage sets it, so the snippet matches the drawing.
-* **Pairs stay on one line:** `x y`, `x1 y1`, `x2 y2`, `w h`, `rx ry`, `r ir`, `start sweep`, `start end`, `arrowstart arrowend`, `stroke strokewidth`, `linecap linejoin`, `font size weight`, `align baseline`. A pair with one controlled value goes where the controlled value goes.
+* **Pairs stay on one line:** `x y`, `x1 y1`, `x2 y2`, `w h`, `rx ry`, `r ir`, `irx iry`, `start sweep`, `start end`, `arrowstart arrowend`, `linecap linejoin`. A pair with one controlled value goes where the controlled value goes. Paint, font and layout values follow the line 1 order instead: a slider-driven `strokewidth` or `size` moves alone.
 * **Taught attributes:** a fixed attribute that is the topic of the example (`closed="true"`, `pie="true"`, `anchor="top-left"`, `direction="rtl"`) goes on a feature line, not on line 1.
 * **Comments and blank lines:** when a snippet has two or more shapes, each gets a comment on the line above: `<!-- Position: Name, what it shows -->`.
   * **Position:** where the shape is on the stage (`Left`, `Right`, `Top`, `Middle`, `Bottom`, or combined like `Top Left`). Overlapping shapes get no position.

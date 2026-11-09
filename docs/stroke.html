@@ -57,11 +57,18 @@
         <!-- Declarative Code Block Above Container -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Circle with configurable stroke --&gt;
-    &lt;pxl-circle stroke="<mark id="sec1CircleStrokeCode">#f97316</mark>" strokewidth="<mark id="sec1CircleWidthCode">40</mark>" r="<mark id="sec1CircleRCode">150</mark>" x="300" y="300" fill="#ffedd566"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Left: Circle --&gt;
+    &lt;pxl-circle x="300" y="300" fill="#ffedd566"
+      strokewidth="<mark id="sec1CircleStrokewidthCode">40</mark>" r="<mark id="sec1CircleRCode">150</mark>"
+      stroke="<mark id="sec1CircleStrokeCode">#f97316</mark>"&gt;
+    &lt;/pxl-circle&gt;
 
-    &lt;!-- Rounded rectangle with configurable stroke --&gt;
-    &lt;pxl-rect stroke="<mark id="sec1RectStrokeCode">#3b82f6</mark>" strokewidth="<mark id="sec1RectWidthCode">8</mark>" r="<mark id="sec1RectRCode">50</mark>" x="700" y="300" w="300" h="300" fill="#dbeafe66"&gt;&lt;/pxl-rect&gt;
+    &lt;!-- Right: Rectangle, rounded corners --&gt;
+    &lt;pxl-rect x="700" y="300" fill="#dbeafe66"
+      w="300" h="300"
+      strokewidth="<mark id="sec1RectStrokewidthCode">8</mark>" r="<mark id="sec1RectRCode">50</mark>"
+      stroke="<mark id="sec1RectStrokeCode">#3b82f6</mark>"&gt;
+    &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -79,9 +86,9 @@
             <div class="tab-content active" id="sec1CircleTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec1CircleWidthVal">40</span></label>
-                  <input type="range" min="0" max="100" step="1" value="40" autocomplete="off" id="sec1CircleWidthInput"
-                    oninput="document.getElementById('sec1Circle').setAttribute('strokewidth', this.value); document.getElementById('sec1CircleWidthVal').innerText = this.value; document.getElementById('sec1CircleWidthCode').innerText = this.value;" data-mark="sec1CircleWidthCode">
+                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec1CircleStrokewidthVal">40</span></label>
+                  <input type="range" min="0" max="100" step="1" value="40" autocomplete="off" id="sec1CircleStrokewidthInput"
+                    oninput="document.getElementById('sec1Circle').setAttribute('strokewidth', this.value); document.getElementById('sec1CircleStrokewidthVal').innerText = this.value; document.getElementById('sec1CircleStrokewidthCode').innerText = this.value;" data-mark="sec1CircleStrokewidthCode">
                 </div>
                 <div class="control-group">
                   <label><span>Radius</span> <span id="sec1CircleRVal">150</span></label>
@@ -119,9 +126,9 @@
             <div class="tab-content" id="sec1RectTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec1RectWidthVal">8</span></label>
-                  <input type="range" min="0" max="100" step="1" value="8" autocomplete="off" id="sec1RectWidthInput"
-                    oninput="document.getElementById('sec1Rect').setAttribute('strokewidth', this.value); document.getElementById('sec1RectWidthVal').innerText = this.value; document.getElementById('sec1RectWidthCode').innerText = this.value;" data-mark="sec1RectWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec1RectStrokewidthVal">8</span></label>
+                  <input type="range" min="0" max="100" step="1" value="8" autocomplete="off" id="sec1RectStrokewidthInput"
+                    oninput="document.getElementById('sec1Rect').setAttribute('strokewidth', this.value); document.getElementById('sec1RectStrokewidthVal').innerText = this.value; document.getElementById('sec1RectStrokewidthCode').innerText = this.value;" data-mark="sec1RectStrokewidthCode">
                 </div>
                 <div class="control-group">
                   <label><span>Corner Radius</span> <span id="sec1RectRVal">50</span></label>

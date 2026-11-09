@@ -42,14 +42,14 @@
         <!-- Declarative HTML markup above stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Solid Disc --&gt;
+    &lt;!-- Left: Disk, filled circle --&gt;
     &lt;pxl-circle x="300" y="300" fill="#ffedd566" stroke="#f97316" strokewidth="4"
       r="<mark id="sec1Circle1RCode">150</mark>"&gt;
     &lt;/pxl-circle&gt;
 
-    &lt;!-- Right: Hollow Ring --&gt;
+    &lt;!-- Right: Ring, hollow center --&gt;
     &lt;pxl-circle x="700" y="300" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
-      r="<mark id="sec1Circle2RCode">150</mark>" ir="<mark id="sec1Circle2IRCode">50</mark>"&gt;
+      r="<mark id="sec1Circle2RCode">150</mark>" ir="<mark id="sec1Circle2IrCode">50</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -84,9 +84,9 @@
                       oninput="document.getElementById('sec1Circle2').setAttribute('r', this.value); document.getElementById('sec1Circle2RVal').innerText = this.value; document.getElementById('sec1Circle2RCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Inner Radius</span> <span id="sec1Circle2IRVal">50</span></label>
+                    <label><span>Inner Radius</span> <span id="sec1Circle2IrVal">50</span></label>
                     <input type="range" min="0" max="135" step="5" value="50" autocomplete="off"
-                      oninput="document.getElementById('sec1Circle2').setAttribute('ir', this.value); document.getElementById('sec1Circle2IRVal').innerText = this.value; document.getElementById('sec1Circle2IRCode').innerText = this.value;">
+                      oninput="document.getElementById('sec1Circle2').setAttribute('ir', this.value); document.getElementById('sec1Circle2IrVal').innerText = this.value; document.getElementById('sec1Circle2IrCode').innerText = this.value;">
                   </div>
                 </div>
               </div>
@@ -122,16 +122,16 @@
         <!-- Declarative HTML markup above stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Pie Slice (Sweep Mode) --&gt;
+    &lt;!-- Left: Pie, slice by sweep --&gt;
     &lt;pxl-circle x="300" y="300" fill="#ffedd566" stroke="#f97316"
-      pie="true" r="<mark id="sec2Circle1RCode">150</mark>" strokewidth="<mark id="sec2Circle1WidthCode">10</mark>"
-      start="<mark id="sec2Circle1StartCode">0</mark>" sweep="<mark id="sec2Circle1SweepCode">270</mark>">
+      pie="true" r="<mark id="sec2Circle1RCode">150</mark>" strokewidth="<mark id="sec2Circle1StrokewidthCode">10</mark>"
+      start="<mark id="sec2Circle1StartCode">0</mark>" sweep="<mark id="sec2Circle1SweepCode">270</mark>"&gt;
     &lt;/pxl-circle&gt;
 
-    &lt;!-- Right: Donut Wedge (End Angle Mode) --&gt;
+    &lt;!-- Right: Donut, wedge by end angle --&gt;
     &lt;pxl-circle x="700" y="300" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
-      pie="true" r="<mark id="sec2Circle2RCode">150</mark>" ir="<mark id="sec2Circle2IRCode">80</mark>"
-      start="<mark id="sec2Circle2StartCode">0</mark>" end="<mark id="sec2Circle2EndCode">270</mark>">
+      pie="true" r="<mark id="sec2Circle2RCode">150</mark>" ir="<mark id="sec2Circle2IrCode">80</mark>"
+      start="<mark id="sec2Circle2StartCode">0</mark>" end="<mark id="sec2Circle2EndCode">270</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -155,9 +155,9 @@
                       oninput="document.getElementById('sec2Circle1').setAttribute('r', this.value); document.getElementById('sec2Circle1RVal').innerText = this.value; document.getElementById('sec2Circle1RCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Stroke Width</span> <span id="sec2Circle1WidthVal">10</span></label>
+                    <label><span>Stroke Width</span> <span id="sec2Circle1StrokewidthVal">10</span></label>
                     <input type="range" min="0" max="24" step="1" value="10" autocomplete="off"
-                      oninput="document.getElementById('sec2Circle1').setAttribute('strokewidth', this.value); document.getElementById('sec2Circle1WidthVal').innerText = this.value; document.getElementById('sec2Circle1WidthCode').innerText = this.value;">
+                      oninput="document.getElementById('sec2Circle1').setAttribute('strokewidth', this.value); document.getElementById('sec2Circle1StrokewidthVal').innerText = this.value; document.getElementById('sec2Circle1StrokewidthCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
                     <label><span>Start Angle</span> <span id="sec2Circle1StartVal">0°</span></label>
@@ -181,9 +181,9 @@
                       oninput="document.getElementById('sec2Circle2').setAttribute('r', this.value); document.getElementById('sec2Circle2RVal').innerText = this.value; document.getElementById('sec2Circle2RCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Inner Radius</span> <span id="sec2Circle2IRVal">80</span></label>
+                    <label><span>Inner Radius</span> <span id="sec2Circle2IrVal">80</span></label>
                     <input type="range" min="0" max="130" step="5" value="80" autocomplete="off"
-                      oninput="document.getElementById('sec2Circle2').setAttribute('ir', this.value); document.getElementById('sec2Circle2IRVal').innerText = this.value; document.getElementById('sec2Circle2IRCode').innerText = this.value;">
+                      oninput="document.getElementById('sec2Circle2').setAttribute('ir', this.value); document.getElementById('sec2Circle2IrVal').innerText = this.value; document.getElementById('sec2Circle2IrCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
                     <label><span>Start Angle</span> <span id="sec2Circle2StartVal">0°</span></label>
@@ -226,15 +226,15 @@
         <!-- Declarative HTML markup above stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Open Chord (Default) --&gt;
-    &lt;pxl-circle x="300" y="300" strokewidth="10" fill="#ffedd566" stroke="#f97316"
-      r="<mark id="sec3Circle1RCode">150</mark>" sweep="<mark id="sec3Circle1SweepCode">270</mark>">
+    &lt;!-- Left: Open Chord, ends not joined --&gt;
+    &lt;pxl-circle x="300" y="300" fill="#ffedd566" stroke="#f97316" strokewidth="10"
+      r="<mark id="sec3Circle1RCode">150</mark>" sweep="<mark id="sec3Circle1SweepCode">270</mark>"&gt;
     &lt;/pxl-circle&gt;
 
-    &lt;!-- Right: Closed Chord (closed="true") --&gt;
-    &lt;pxl-circle x="700" y="300" strokewidth="10" fill="#dbeafe66" stroke="#3b82f6"
-      closed="true"
-      r="<mark id="sec3Circle2RCode">150</mark>" sweep="<mark id="sec3Circle2SweepCode">180</mark>">
+    &lt;!-- Right: Closed Chord, ends joined by a line --&gt;
+    &lt;pxl-circle x="700" y="300" fill="#dbeafe66" stroke="#3b82f6" strokewidth="10"
+      r="<mark id="sec3Circle2RCode">150</mark>" sweep="<mark id="sec3Circle2SweepCode">180</mark>"
+      closed="true"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -310,15 +310,15 @@
         <!-- Declarative HTML markup above stage -->
           <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Simple Arc (Sweep Mode) --&gt;
+    &lt;!-- Left: Simple Arc, sweep from the start --&gt;
     &lt;pxl-circle x="300" y="300" stroke="#f97316"
-      r="<mark id="sec4Circle1RCode">150</mark>" strokewidth="<mark id="sec4Circle1WidthCode">10</mark>"
+      r="<mark id="sec4Circle1RCode">150</mark>" strokewidth="<mark id="sec4Circle1StrokewidthCode">10</mark>"
       start="<mark id="sec4Circle1StartCode">0</mark>" sweep="<mark id="sec4Circle1SweepCode">180</mark>"&gt;
     &lt;/pxl-circle&gt;
 
-    &lt;!-- Right: Dashed Arc (End Angle Mode) --&gt;
+    &lt;!-- Right: Dashed Arc, start to end angle --&gt;
     &lt;pxl-circle x="700" y="300" stroke="#3b82f6" strokewidth="4"
-      r="<mark id="sec4Circle2RCode">150</mark>" linedash="<mark id="sec4Circle2DashCode">15</mark>"
+      r="<mark id="sec4Circle2RCode">150</mark>" linedash="<mark id="sec4Circle2LinedashCode">15</mark>"
       start="<mark id="sec4Circle2StartCode">0</mark>" end="<mark id="sec4Circle2EndCode">270</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
@@ -343,9 +343,9 @@
                       oninput="document.getElementById('sec4Circle1').setAttribute('r', this.value); document.getElementById('sec4Circle1RVal').innerText = this.value; document.getElementById('sec4Circle1RCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Stroke Width</span> <span id="sec4Circle1WidthVal">10</span></label>
+                    <label><span>Stroke Width</span> <span id="sec4Circle1StrokewidthVal">10</span></label>
                     <input type="range" min="2" max="40" step="2" value="10" autocomplete="off"
-                      oninput="document.getElementById('sec4Circle1').setAttribute('strokewidth', this.value); document.getElementById('sec4Circle1WidthVal').innerText = this.value; document.getElementById('sec4Circle1WidthCode').innerText = this.value;">
+                      oninput="document.getElementById('sec4Circle1').setAttribute('strokewidth', this.value); document.getElementById('sec4Circle1StrokewidthVal').innerText = this.value; document.getElementById('sec4Circle1StrokewidthCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
                     <label><span>Start Angle</span> <span id="sec4Circle1StartVal">0°</span></label>
@@ -369,9 +369,9 @@
                       oninput="document.getElementById('sec4Circle2').setAttribute('r', this.value); document.getElementById('sec4Circle2RVal').innerText = this.value; document.getElementById('sec4Circle2RCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
-                    <label><span>Line Dash</span> <span id="sec4Circle2DashVal">15</span></label>
+                    <label><span>Line Dash</span> <span id="sec4Circle2LinedashVal">15</span></label>
                     <input type="range" min="0" max="40" step="5" value="15" autocomplete="off"
-                      oninput="document.getElementById('sec4Circle2').setAttribute('linedash', this.value); document.getElementById('sec4Circle2DashVal').innerText = this.value; document.getElementById('sec4Circle2DashCode').innerText = this.value;">
+                      oninput="document.getElementById('sec4Circle2').setAttribute('linedash', this.value); document.getElementById('sec4Circle2LinedashVal').innerText = this.value; document.getElementById('sec4Circle2LinedashCode').innerText = this.value;">
                   </div>
                   <div class="control-group">
                     <label><span>Start Angle</span> <span id="sec4Circle2StartVal">0°</span></label>
@@ -419,17 +419,18 @@
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- Left: Auto-Sized Arrowheads --&gt;
-    &lt;pxl-circle x="300" y="300" r="140" start="-45"
-      sweep="<mark id="sec5Circle1SweepCode">270</mark>" stroke="#f97316"
-      arrowstart="auto" arrowend="auto"
-      strokewidth="<mark id="sec5Circle1StrokeWidthCode">10</mark>" arrowstyle="<mark id="sec5Circle1StyleCode">filled</mark>"&gt;
+    &lt;!-- Left: Auto, arrowheads sized from the stroke --&gt;
+    &lt;pxl-circle x="300" y="300" stroke="#f97316"
+      r="140" arrowstart="auto" arrowend="auto"
+      strokewidth="<mark id="sec5Circle1StrokewidthCode">10</mark>" start="-45" sweep="<mark id="sec5Circle1SweepCode">270</mark>"
+      arrowstyle="<mark id="sec5Circle1ArrowstyleCode">filled</mark>"&gt;
     &lt;/pxl-circle&gt;
 
-    &lt;!-- Right: Custom-Sized Arrowheads --&gt;
-    &lt;pxl-circle x="700" y="300" r="140" start="-45" sweep="270" stroke="#3b82f6"
-      arrowstart="<mark id="sec5Circle2ArrowStartCode">0</mark>" arrowend="<mark id="sec5Circle2ArrowEndCode">35</mark>"
-      strokewidth="<mark id="sec5Circle2StrokeWidthCode">6</mark>" arrowstyle="<mark id="sec5Circle2StyleCode">line</mark>"&gt;
+    &lt;!-- Right: Custom, set arrowhead sizes --&gt;
+    &lt;pxl-circle x="700" y="300" stroke="#3b82f6"
+      r="140" start="-45" sweep="270"
+      arrowstart="<mark id="sec5Circle2ArrowstartCode">0</mark>" arrowend="<mark id="sec5Circle2ArrowendCode">35</mark>" strokewidth="<mark id="sec5Circle2StrokewidthCode">6</mark>"
+      arrowstyle="<mark id="sec5Circle2ArrowstyleCode">line</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -449,15 +450,15 @@
               <div class="playground-sliders">
                 <!-- Row 1: Stroke Width & Arrow Style -->
                 <div class="control-group">
-                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec5Circle1StrokeWidthVal">10</span></label>
-                  <input type="range" min="2" max="40" step="1" value="10" autocomplete="off" id="sec5Circle1StrokeWidthInput"
-                    oninput="document.getElementById('sec5Circle1').setAttribute('strokewidth', this.value); document.getElementById('sec5Circle1StrokeWidthVal').innerText = this.value; document.getElementById('sec5Circle1StrokeWidthCode').innerText = this.value;" data-mark="sec5Circle1StrokeWidthCode">
+                  <label><span>Stroke Width <span class="indicator-dot"></span></span> <span id="sec5Circle1StrokewidthVal">10</span></label>
+                  <input type="range" min="2" max="40" step="1" value="10" autocomplete="off" id="sec5Circle1StrokewidthInput"
+                    oninput="document.getElementById('sec5Circle1').setAttribute('strokewidth', this.value); document.getElementById('sec5Circle1StrokewidthVal').innerText = this.value; document.getElementById('sec5Circle1StrokewidthCode').innerText = this.value;" data-mark="sec5Circle1StrokewidthCode">
                 </div>
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn active" onclick="document.getElementById('sec5Circle1').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec5Circle1StyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn" onclick="document.getElementById('sec5Circle1').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec5Circle1StyleCode', 'line');">line</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec5Circle1').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec5Circle1ArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec5Circle1').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec5Circle1ArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
 
@@ -475,27 +476,27 @@
               <div class="playground-sliders">
                 <!-- Row 1: Start Arrow & End Arrow -->
                 <div class="control-group">
-                  <label><span>Start Arrow</span> <span id="sec5Circle2ArrowStartVal">0</span></label>
-                  <input type="range" min="0" max="150" step="5" value="0" autocomplete="off" id="sec5Circle2ArrowStartInput"
-                    oninput="document.getElementById('sec5Circle2').setAttribute('arrowstart', this.value); document.getElementById('sec5Circle2ArrowStartVal').innerText = this.value; document.getElementById('sec5Circle2ArrowStartCode').innerText = this.value;" data-mark="sec5Circle2ArrowStartCode">
+                  <label><span>Start Arrow</span> <span id="sec5Circle2ArrowstartVal">0</span></label>
+                  <input type="range" min="0" max="150" step="5" value="0" autocomplete="off" id="sec5Circle2ArrowstartInput"
+                    oninput="document.getElementById('sec5Circle2').setAttribute('arrowstart', this.value); document.getElementById('sec5Circle2ArrowstartVal').innerText = this.value; document.getElementById('sec5Circle2ArrowstartCode').innerText = this.value;" data-mark="sec5Circle2ArrowstartCode">
                 </div>
                 <div class="control-group">
-                  <label><span>End Arrow <span class="indicator-dot"></span></span> <span id="sec5Circle2ArrowEndVal">35</span></label>
-                  <input type="range" min="0" max="150" step="5" value="35" autocomplete="off" id="sec5Circle2ArrowEndInput"
-                    oninput="document.getElementById('sec5Circle2').setAttribute('arrowend', this.value); document.getElementById('sec5Circle2ArrowEndVal').innerText = this.value; document.getElementById('sec5Circle2ArrowEndCode').innerText = this.value;" data-mark="sec5Circle2ArrowEndCode">
+                  <label><span>End Arrow <span class="indicator-dot"></span></span> <span id="sec5Circle2ArrowendVal">35</span></label>
+                  <input type="range" min="0" max="150" step="5" value="35" autocomplete="off" id="sec5Circle2ArrowendInput"
+                    oninput="document.getElementById('sec5Circle2').setAttribute('arrowend', this.value); document.getElementById('sec5Circle2ArrowendVal').innerText = this.value; document.getElementById('sec5Circle2ArrowendCode').innerText = this.value;" data-mark="sec5Circle2ArrowendCode">
                 </div>
 
                 <!-- Row 2: Stroke Width & Arrow Style -->
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec5Circle2StrokeWidthVal">6</span></label>
-                  <input type="range" min="2" max="24" step="1" value="6" autocomplete="off" id="sec5Circle2StrokeWidthInput"
-                    oninput="document.getElementById('sec5Circle2').setAttribute('strokewidth', this.value); document.getElementById('sec5Circle2StrokeWidthVal').innerText = this.value; document.getElementById('sec5Circle2StrokeWidthCode').innerText = this.value;" data-mark="sec5Circle2StrokeWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec5Circle2StrokewidthVal">6</span></label>
+                  <input type="range" min="2" max="24" step="1" value="6" autocomplete="off" id="sec5Circle2StrokewidthInput"
+                    oninput="document.getElementById('sec5Circle2').setAttribute('strokewidth', this.value); document.getElementById('sec5Circle2StrokewidthVal').innerText = this.value; document.getElementById('sec5Circle2StrokewidthCode').innerText = this.value;" data-mark="sec5Circle2StrokewidthCode">
                 </div>
                 <div class="control-group">
                   <label>Arrow Style</label>
                   <div class="toggle-group">
-                    <button class="toggle-btn" onclick="document.getElementById('sec5Circle2').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec5Circle2StyleCode', 'filled');">filled</button>
-                    <button class="toggle-btn active" onclick="document.getElementById('sec5Circle2').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec5Circle2StyleCode', 'line');">line</button>
+                    <button class="toggle-btn" onclick="document.getElementById('sec5Circle2').setAttribute('arrowstyle', 'filled'); pxlDocs.updateToggle(this, null, 'sec5Circle2ArrowstyleCode', 'filled');">filled</button>
+                    <button class="toggle-btn active" onclick="document.getElementById('sec5Circle2').setAttribute('arrowstyle', 'line'); pxlDocs.updateToggle(this, null, 'sec5Circle2ArrowstyleCode', 'line');">line</button>
                   </div>
                 </div>
               </div>

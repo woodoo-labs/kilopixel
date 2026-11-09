@@ -58,11 +58,18 @@
         <!-- Declarative Code Block Above Container -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- 1. Straight Line --&gt;
-    &lt;pxl-line linecap="<mark id="sec1LineCapCode">butt</mark>" strokewidth="<mark id="sec1LineWidthCode">40</mark>" rotate="<mark id="sec1LineRotCode">0</mark>" x="300" y="300" x1="-150" y1="0" x2="150" y2="0" stroke="#f97316"&gt;&lt;/pxl-line&gt;
+    &lt;!-- Left: Line, caps on a straight stroke --&gt;
+    &lt;pxl-line x="300" y="300" x1="-150" y1="0" x2="150" y2="0" stroke="#f97316"
+      strokewidth="<mark id="sec1LineStrokewidthCode">40</mark>" rotate="<mark id="sec1LineRotateCode">0</mark>"
+      linecap="<mark id="sec1LinecapCode">butt</mark>"&gt;
+    &lt;/pxl-line&gt;
 
-    &lt;!-- 2. Circular Arc --&gt;
-    &lt;pxl-circle linecap="<mark id="sec1ArcCapCode">butt</mark>" strokewidth="<mark id="sec1ArcWidthCode">40</mark>" sweep="<mark id="sec1ArcSweepCode">270</mark>" r="150" start="135" x="700" y="300" stroke="#3b82f6" fill="none"&gt;&lt;/pxl-circle&gt;
+    &lt;!-- Right: Arc, caps on a curved stroke --&gt;
+    &lt;pxl-circle x="700" y="300" fill="none" stroke="#3b82f6"
+      r="150"
+      strokewidth="<mark id="sec1ArcStrokewidthCode">40</mark>" start="135" sweep="<mark id="sec1ArcSweepCode">270</mark>"
+      linecap="<mark id="sec1ArcLinecapCode">butt</mark>"&gt;
+    &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -80,19 +87,19 @@
             <div class="tab-content active" id="sec1LineTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec1LineWidthVal">40</span></label>
-                  <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec1LineWidthInput"
-                    oninput="document.getElementById('sec1Line').setAttribute('strokewidth', this.value); document.getElementById('sec1LineWidthVal').innerText = this.value; document.getElementById('sec1LineWidthCode').innerText = this.value;" data-mark="sec1LineWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec1LineStrokewidthVal">40</span></label>
+                  <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec1LineStrokewidthInput"
+                    oninput="document.getElementById('sec1Line').setAttribute('strokewidth', this.value); document.getElementById('sec1LineStrokewidthVal').innerText = this.value; document.getElementById('sec1LineStrokewidthCode').innerText = this.value;" data-mark="sec1LineStrokewidthCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Rotation</span> <span id="sec1LineRotVal">0°</span></label>
-                  <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off" id="sec1LineRotInput"
-                    oninput="const rot = this.value; document.getElementById('sec1Line').setAttribute('rotate', rot); document.getElementById('sec1LineGuideGroup').setAttribute('rotate', rot); document.getElementById('sec1LineGhostGroup').setAttribute('rotate', rot); document.getElementById('sec1LineRotVal').innerText = rot + '°'; document.getElementById('sec1LineRotCode').innerText = rot;" data-mark="sec1LineRotCode">
+                  <label><span>Rotation</span> <span id="sec1LineRotateVal">0°</span></label>
+                  <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off" id="sec1LineRotateInput"
+                    oninput="const rot = this.value; document.getElementById('sec1Line').setAttribute('rotate', rot); document.getElementById('sec1LineGuideGroup').setAttribute('rotate', rot); document.getElementById('sec1LineGhostGroup').setAttribute('rotate', rot); document.getElementById('sec1LineRotateVal').innerText = rot + '°'; document.getElementById('sec1LineRotateCode').innerText = rot;" data-mark="sec1LineRotateCode">
                 </div>
                 <div class="control-group">
                   <label><span>Line Cap <span class="indicator-dot"></span></span></label>
-                  <select id="sec1LineCapSelect" autocomplete="off"
-                    onchange="document.getElementById('sec1Line').setAttribute('linecap', this.value); document.getElementById('sec1LineCapCode').innerText = this.value;" data-mark="sec1LineCapCode">
+                  <select id="sec1LinecapSelect" autocomplete="off"
+                    onchange="document.getElementById('sec1Line').setAttribute('linecap', this.value); document.getElementById('sec1LinecapCode').innerText = this.value;" data-mark="sec1LinecapCode">
                     <option value="butt" selected>butt (default)</option>
                     <option value="round">round</option>
                     <option value="square">square</option>
@@ -105,9 +112,9 @@
             <div class="tab-content" id="sec1ArcTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec1ArcWidthVal">40</span></label>
-                  <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec1ArcWidthInput"
-                    oninput="document.getElementById('sec1Arc').setAttribute('strokewidth', this.value); document.getElementById('sec1ArcWidthVal').innerText = this.value; document.getElementById('sec1ArcWidthCode').innerText = this.value;" data-mark="sec1ArcWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec1ArcStrokewidthVal">40</span></label>
+                  <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec1ArcStrokewidthInput"
+                    oninput="document.getElementById('sec1Arc').setAttribute('strokewidth', this.value); document.getElementById('sec1ArcStrokewidthVal').innerText = this.value; document.getElementById('sec1ArcStrokewidthCode').innerText = this.value;" data-mark="sec1ArcStrokewidthCode">
                 </div>
                 <div class="control-group">
                   <label><span>Sweep Angle</span> <span id="sec1ArcSweepVal">270°</span></label>
@@ -116,8 +123,8 @@
                 </div>
                 <div class="control-group">
                   <label><span>Line Cap</span></label>
-                  <select id="sec1ArcCapSelect" autocomplete="off"
-                    onchange="document.getElementById('sec1Arc').setAttribute('linecap', this.value); document.getElementById('sec1ArcCapCode').innerText = this.value;" data-mark="sec1ArcCapCode">
+                  <select id="sec1ArcLinecapSelect" autocomplete="off"
+                    onchange="document.getElementById('sec1Arc').setAttribute('linecap', this.value); document.getElementById('sec1ArcLinecapCode').innerText = this.value;" data-mark="sec1ArcLinecapCode">
                     <option value="butt" selected>butt (default)</option>
                     <option value="round">round</option>
                     <option value="square">square</option>
@@ -200,11 +207,18 @@
         <!-- Declarative Code Block Above Container -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- 1. Open Chevron Corner --&gt;
-    &lt;pxl-polyline linejoin="<mark id="sec2JoinCode">miter</mark>" strokewidth="<mark id="sec2WidthCode">70</mark>" points="150,450; 300,<mark id="sec2PeakYCode">150</mark>; 450,450" stroke="#f97316" fill="none"&gt;&lt;/pxl-polyline&gt;
+    &lt;!-- Left: Chevron, open corner --&gt;
+    &lt;pxl-polyline stroke="#f97316" fill="none"
+      strokewidth="<mark id="sec2StrokewidthCode">70</mark>" points="150,450; 300,<mark id="sec2PeakYCode">150</mark>; 450,450"
+      linejoin="<mark id="sec2LinejoinCode">miter</mark>"&gt;
+    &lt;/pxl-polyline&gt;
 
-    &lt;!-- 2. Closed Polygon Corner --&gt;
-    &lt;pxl-polyline linejoin="<mark id="sec2PolyJoinCode">round</mark>" strokewidth="<mark id="sec2PolyWidthCode">40</mark>" points="550,450; 700,<mark id="sec2PolyPeakYCode">150</mark>; 850,450" closed="true" stroke="#3b82f6" fill="#dbeafe66"&gt;&lt;/pxl-polyline&gt;
+    &lt;!-- Right: Polygon, closed corners --&gt;
+    &lt;pxl-polyline stroke="#3b82f6" fill="#dbeafe66"
+      closed="true"
+      strokewidth="<mark id="sec2PolyStrokewidthCode">40</mark>" points="550,450; 700,<mark id="sec2PolyPeakYCode">150</mark>; 850,450"
+      linejoin="<mark id="sec2PolyLinejoinCode">round</mark>"&gt;
+    &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -222,9 +236,9 @@
             <div class="tab-content active" id="sec2ChevronTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec2WidthVal">70</span></label>
-                  <input type="range" min="10" max="100" step="2" value="70" autocomplete="off" id="sec2WidthInput"
-                    oninput="document.getElementById('sec2Chevron').setAttribute('strokewidth', this.value); document.getElementById('sec2WidthVal').innerText = this.value; document.getElementById('sec2WidthCode').innerText = this.value;" data-mark="sec2WidthCode">
+                  <label><span>Stroke Width</span> <span id="sec2StrokewidthVal">70</span></label>
+                  <input type="range" min="10" max="100" step="2" value="70" autocomplete="off" id="sec2StrokewidthInput"
+                    oninput="document.getElementById('sec2Chevron').setAttribute('strokewidth', this.value); document.getElementById('sec2StrokewidthVal').innerText = this.value; document.getElementById('sec2StrokewidthCode').innerText = this.value;" data-mark="sec2StrokewidthCode">
                 </div>
                 <div class="control-group">
                   <label><span>Corner Peak Y</span> <span id="sec2PeakYVal">150</span></label>
@@ -234,7 +248,7 @@
                 <div class="control-group">
                   <label><span>Line Join <span class="indicator-dot"></span></span></label>
                   <select id="sec2ChevronJoinSelect" autocomplete="off"
-                    onchange="document.getElementById('sec2Chevron').setAttribute('linejoin', this.value); document.getElementById('sec2JoinCode').innerText = this.value;" data-mark="sec2JoinCode">
+                    onchange="document.getElementById('sec2Chevron').setAttribute('linejoin', this.value); document.getElementById('sec2LinejoinCode').innerText = this.value;" data-mark="sec2LinejoinCode">
                     <option value="miter" selected>miter (default)</option>
                     <option value="round">round</option>
                     <option value="bevel">bevel</option>
@@ -247,9 +261,9 @@
             <div class="tab-content" id="sec2PolygonTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec2PolyWidthVal">40</span></label>
-                  <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec2PolyWidthInput"
-                    oninput="document.getElementById('sec2Polygon').setAttribute('strokewidth', this.value); document.getElementById('sec2PolyWidthVal').innerText = this.value; document.getElementById('sec2PolyWidthCode').innerText = this.value;" data-mark="sec2PolyWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec2PolyStrokewidthVal">40</span></label>
+                  <input type="range" min="10" max="100" step="2" value="40" autocomplete="off" id="sec2PolyStrokewidthInput"
+                    oninput="document.getElementById('sec2Polygon').setAttribute('strokewidth', this.value); document.getElementById('sec2PolyStrokewidthVal').innerText = this.value; document.getElementById('sec2PolyStrokewidthCode').innerText = this.value;" data-mark="sec2PolyStrokewidthCode">
                 </div>
                 <div class="control-group">
                   <label><span>Corner Peak Y</span> <span id="sec2PolyPeakYVal">150</span></label>
@@ -258,8 +272,8 @@
                 </div>
                 <div class="control-group">
                   <label><span>Line Join</span></label>
-                  <select id="sec2PolyJoinSelect" autocomplete="off"
-                    onchange="document.getElementById('sec2Polygon').setAttribute('linejoin', this.value); document.getElementById('sec2PolyJoinCode').innerText = this.value;" data-mark="sec2PolyJoinCode">
+                  <select id="sec2PolyLinejoinSelect" autocomplete="off"
+                    onchange="document.getElementById('sec2Polygon').setAttribute('linejoin', this.value); document.getElementById('sec2PolyLinejoinCode').innerText = this.value;" data-mark="sec2PolyLinejoinCode">
                     <option value="miter">miter (default)</option>
                     <option value="round" selected>round</option>
                     <option value="bevel">bevel</option>
@@ -323,11 +337,17 @@
         <!-- Declarative Code Block Above Container -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
-    &lt;!-- 1. Open Chevron Corner --&gt;
-    &lt;pxl-polyline miterlimit="<mark id="sec3ChevronLimitCode">10</mark>" linejoin="miter" strokewidth="<mark id="sec3ChevronWidthCode">40</mark>" points="<mark id="sec3ChevronPtsCode">220,450; 300,150; 380,450</mark>" stroke="#f97316" fill="none"&gt;&lt;/pxl-polyline&gt;
+    &lt;!-- Left: Chevron, open corner --&gt;
+    &lt;pxl-polyline stroke="#f97316" fill="none"
+      linejoin="miter"
+      points="<mark id="sec3ChevronPtsCode">220,450; 300,150; 380,450</mark>" miterlimit="<mark id="sec3ChevronMiterlimitCode">10</mark>" strokewidth="<mark id="sec3ChevronStrokewidthCode">40</mark>"&gt;
+    &lt;/pxl-polyline&gt;
 
-    &lt;!-- 2. Closed Diamond Corner --&gt;
-    &lt;pxl-polyline miterlimit="<mark id="sec3DiamondLimitCode">10</mark>" linejoin="miter" strokewidth="<mark id="sec3DiamondWidthCode">40</mark>" points="<mark id="sec3DiamondPtsCode">700,150; 762,300; 700,450; 638,300</mark>" closed="true" stroke="#3b82f6" fill="#dbeafe66"&gt;&lt;/pxl-polyline&gt;
+    &lt;!-- Right: Diamond, closed sharp corners --&gt;
+    &lt;pxl-polyline stroke="#3b82f6" fill="#dbeafe66"
+      linejoin="miter" closed="true"
+      points="<mark id="sec3DiamondPtsCode">700,150; 762,300; 700,450; 638,300</mark>" miterlimit="<mark id="sec3DiamondMiterlimitCode">10</mark>" strokewidth="<mark id="sec3DiamondStrokewidthCode">40</mark>"&gt;
+    &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
 
@@ -350,14 +370,14 @@
                     oninput="const ang = Number(this.value); const hw = Math.round(300 * Math.tan((ang / 2) * Math.PI / 180)); const pts = (300 - hw) + ',450; 300,150; ' + (300 + hw) + ',450'; document.getElementById('sec3Chevron').setAttribute('points', pts); document.getElementById('sec3ChevronGhost').setAttribute('points', pts); document.getElementById('sec3ChevronLeftDot').setAttribute('x', 300 - hw); document.getElementById('sec3ChevronRightDot').setAttribute('x', 300 + hw); document.getElementById('sec3ChevronAngleVal').innerText = ang + '°'; document.getElementById('sec3ChevronPtsCode').innerText = pts;" data-mark="sec3ChevronPtsCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Miter Limit <span class="indicator-dot"></span></span> <span id="sec3ChevronLimitVal">10</span></label>
-                  <input type="range" min="1" max="15" step="0.5" value="10" autocomplete="off" id="sec3ChevronLimitInput"
-                    oninput="document.getElementById('sec3Chevron').setAttribute('miterlimit', this.value); document.getElementById('sec3ChevronLimitVal').innerText = this.value; document.getElementById('sec3ChevronLimitCode').innerText = this.value;" data-mark="sec3ChevronLimitCode">
+                  <label><span>Miter Limit <span class="indicator-dot"></span></span> <span id="sec3ChevronMiterlimitVal">10</span></label>
+                  <input type="range" min="1" max="15" step="0.5" value="10" autocomplete="off" id="sec3ChevronMiterlimitInput"
+                    oninput="document.getElementById('sec3Chevron').setAttribute('miterlimit', this.value); document.getElementById('sec3ChevronMiterlimitVal').innerText = this.value; document.getElementById('sec3ChevronMiterlimitCode').innerText = this.value;" data-mark="sec3ChevronMiterlimitCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec3ChevronWidthVal">40</span></label>
-                  <input type="range" min="10" max="80" step="2" value="40" autocomplete="off" id="sec3ChevronWidthInput"
-                    oninput="document.getElementById('sec3Chevron').setAttribute('strokewidth', this.value); document.getElementById('sec3ChevronWidthVal').innerText = this.value; document.getElementById('sec3ChevronWidthCode').innerText = this.value;" data-mark="sec3ChevronWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec3ChevronStrokewidthVal">40</span></label>
+                  <input type="range" min="10" max="80" step="2" value="40" autocomplete="off" id="sec3ChevronStrokewidthInput"
+                    oninput="document.getElementById('sec3Chevron').setAttribute('strokewidth', this.value); document.getElementById('sec3ChevronStrokewidthVal').innerText = this.value; document.getElementById('sec3ChevronStrokewidthCode').innerText = this.value;" data-mark="sec3ChevronStrokewidthCode">
                 </div>
               </div>
             </div>
@@ -371,14 +391,14 @@
                     oninput="const ang = Number(this.value); const hw = Math.round(150 * Math.tan((ang / 2) * Math.PI / 180)); const pts = '700,150; ' + (700 + hw) + ',300; 700,450; ' + (700 - hw) + ',300'; document.getElementById('sec3Diamond').setAttribute('points', pts); document.getElementById('sec3DiamondGhost').setAttribute('points', pts); document.getElementById('sec3DiamondRightDot').setAttribute('x', 700 + hw); document.getElementById('sec3DiamondLeftDot').setAttribute('x', 700 - hw); document.getElementById('sec3DiamondAngleVal').innerText = ang + '°'; document.getElementById('sec3DiamondPtsCode').innerText = pts;" data-mark="sec3DiamondPtsCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Miter Limit</span> <span id="sec3DiamondLimitVal">10</span></label>
-                  <input type="range" min="1" max="15" step="0.5" value="10" autocomplete="off" id="sec3DiamondLimitInput"
-                    oninput="document.getElementById('sec3Diamond').setAttribute('miterlimit', this.value); document.getElementById('sec3DiamondLimitVal').innerText = this.value; document.getElementById('sec3DiamondLimitCode').innerText = this.value;" data-mark="sec3DiamondLimitCode">
+                  <label><span>Miter Limit</span> <span id="sec3DiamondMiterlimitVal">10</span></label>
+                  <input type="range" min="1" max="15" step="0.5" value="10" autocomplete="off" id="sec3DiamondMiterlimitInput"
+                    oninput="document.getElementById('sec3Diamond').setAttribute('miterlimit', this.value); document.getElementById('sec3DiamondMiterlimitVal').innerText = this.value; document.getElementById('sec3DiamondMiterlimitCode').innerText = this.value;" data-mark="sec3DiamondMiterlimitCode">
                 </div>
                 <div class="control-group">
-                  <label><span>Stroke Width</span> <span id="sec3DiamondWidthVal">40</span></label>
-                  <input type="range" min="10" max="80" step="2" value="40" autocomplete="off" id="sec3DiamondWidthInput"
-                    oninput="document.getElementById('sec3Diamond').setAttribute('strokewidth', this.value); document.getElementById('sec3DiamondWidthVal').innerText = this.value; document.getElementById('sec3DiamondWidthCode').innerText = this.value;" data-mark="sec3DiamondWidthCode">
+                  <label><span>Stroke Width</span> <span id="sec3DiamondStrokewidthVal">40</span></label>
+                  <input type="range" min="10" max="80" step="2" value="40" autocomplete="off" id="sec3DiamondStrokewidthInput"
+                    oninput="document.getElementById('sec3Diamond').setAttribute('strokewidth', this.value); document.getElementById('sec3DiamondStrokewidthVal').innerText = this.value; document.getElementById('sec3DiamondStrokewidthCode').innerText = this.value;" data-mark="sec3DiamondStrokewidthCode">
                 </div>
               </div>
             </div>
