@@ -1,6 +1,6 @@
 # Framework Compatibility: Kilopixel as a Well-Behaved Custom Element
 
-- **Status**: 🟡 **Proposed** (2026-10-30, no code changes yet)
+- **Status**: 🟡 **Proposed** (2026-11-09, D1 decided: `pxl-on-*` handler names; no code changes yet)
 - **Date**: 2026-10-30
 - **Related**: `scratch/frameworks/` (React 19 and Vue 3.5 prototypes, `FINDINGS.md`; local only), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
@@ -110,13 +110,20 @@ Candidates (§13 D1):
 
 | Name | Reads | Checks |
 |---|---|---|
-| `pxl-click`, `pxl-enter`, `pxl-leave`, `pxl-down`, `pxl-up`, `pxl-move` | "Kilopixel's click" | all three rules ✓; consistent with the `pxl-` element prefix; like Alpine `x-on:click` / htmx `hx-on:click` |
+| **`pxl-on-click`, `pxl-on-enter`, `pxl-on-leave`, `pxl-on-down`, `pxl-on-up`, `pxl-on-move`** | "Kilopixel: on click" | all three rules ✓; reads as an event, can't be mistaken for a tag; like Datastar `data-on-click` / htmx `hx-on-click` |
+| `pxl-click`, `pxl-enter`, … | "Kilopixel's click" | all three rules ✓, but `pxl-enter` reads like a tag name (`<pxl-enter>`) and nothing says "event" |
+| `pxl-onclick`, `pxl-onenter`, … | "on enter" | ✓; close to `onclick`, but `onenter`, `onleave`, `ondown` blur together |
+| `pxl-on:click`, … | like Alpine `x-on:click` | ❌ React's JSX doesn't accept a colon in attribute names |
 | `do-click`, `do-enter`, … | "do on click" | ✓ |
 | `on-click`, … | familiar | ❌ Vue treats `on` + non-lowercase character as a listener (`on-click` → event `-click`) |
 | `click`, `enter`, … | short | ❌ `click` is `HTMLElement.click()` |
 | `action`, … | only one event | ❌ doesn't scale to six events |
 
-Recommended: `pxl-click` etc. Implementation: `pxl.Shape.HANDLER_EVENTS` keys change; `observedAttributes` change; the `on*` names are removed (pre-release, no compatibility). A compile-time warning for the old names would help migration: if a shape has an `onclick` / `onenter` / … attribute at connect, warn once ("use pxl-click"). Remove the warning later.
+**Decided 2026-11-09: `pxl-on-click`, `pxl-on-enter`, `pxl-on-leave`, `pxl-on-down`, `pxl-on-up`, `pxl-on-move`.** They are the only prefixed Kilopixel attributes, on purpose: every other attribute is safe without a prefix, only the handlers must stay clear of `on…`.
+
+**Handlers stay attribute-only:** no JavaScript property (no `pxlOnEnter`), no accessor (§6.1), not readable through `ref.*` (they are compiled into `this.handlers`, not stored in `attributeValues`). The hyphens are therefore harmless, unlike `stroke-width` for a drawing value: nothing reads a handler in dot notation, and React / Vue set the attribute because no matching property exists. Frameworks use their own event syntax instead (§4.1).
+
+Implementation: `pxl.Shape.HANDLER_EVENTS` keys change; `observedAttributes` change; the `on*` names are removed (pre-release, no compatibility). A compile-time warning for the old names would help migration: if a shape has an `onclick` / `onenter` / … attribute at connect, warn once ("use pxl-on-click"). Remove the warning later.
 
 Migration count (2026-10-30): **25 handlers on Kilopixel elements** in `examples/test32.html` (20: enter / leave / down / up), `examples/test37.html` (4 clicks) and `tests/index.html` (1). Plus docs text and KILOPIXEL.md (Events section, AI guide), `design/` plans as history (unchanged). The other ~320 `onclick` hits in the repository are ordinary HTML buttons on docs pages.
 
@@ -127,7 +134,7 @@ The hand cursor (`isClickable()`) should also show for shapes that a framework l
 ### 4.5 Performance
 
 - Event dispatch happens only on user input over shapes (not per frame unless the pointer moves over shapes). One event object per dispatched event, like the browser's own events; no allocations in frames without input.
-- `pointermove` over a shape: one `PointerEvent` per frame while moving. Acceptable (the browser itself allocates one native event per move); could be limited to shapes with a `pointermove` listener or `pxl-move` handler (the listener count from §4.2 per type makes that cheap). Recommended: count per type, dispatch only types that have listeners or `interactive`.
+- `pointermove` over a shape: one `PointerEvent` per frame while moving. Acceptable (the browser itself allocates one native event per move); could be limited to shapes with a `pointermove` listener or `pxl-on-move` handler (the listener count from §4.2 per type makes that cheap). Recommended: count per type, dispatch only types that have listeners or `interactive`.
 - `addEventListener` override: one string comparison and an integer update per call; listeners are added at mount, not per frame.
 
 ## 5. Workstream W2: DOM Ownership (C9, C10, C11)
@@ -192,7 +199,7 @@ Object.defineProperty(Class.prototype, name, {
 
 - **No reflection** to the attribute (like Lit's default): reflecting would trigger `attributeChangedCallback` and recompile. The DOM attribute then shows the last attribute value, not the property; documented. When both are used, the last write wins.
 - **Getter returns the evaluated value**, so `el.x` reads the current animated value, the same as `ref.<id>.x`. Useful for frameworks reading values back.
-- **Name collisions** with `HTMLElement` (audit §3 C3): `hidden` (native property reflects to the attribute; keep native) and the `on*` handlers (renamed by W1). `id` is native. No accessor for these.
+- **Name collisions** with `HTMLElement` (audit §3 C3): `hidden` (native property reflects to the attribute; keep native) and the handler attributes (renamed to `pxl-on-*` by W1, attribute-only, §4.3). `id` is native. No accessor for these.
 - **Effect on frameworks**: React 19, Vue, Preact set properties when `name in element`; with accessors they pass numbers as numbers (C14 fix for the common case: no string, no compilation). Angular `[x]="…"`, Lit `.x=${…}`, Svelte 5 and Solid `prop:x` get a working target.
 - **Cost**: accessors live on the prototype (no per-instance cost). `pxl.setAttributeValue` for numbers is cheaper than today's string path (no `Number()` parse, no regex checks).
 
@@ -276,7 +283,7 @@ The core deliverable: the DOM contract as automated tests, **without any framewo
 | T-E3 | C6 | without `interactive` and without a direct listener: not hit-tested (registration rule) |
 | T-E4 | §4.1 | enter / leave sequence: `pointerover`, `pointerenter`, `pointerout`, `pointerleave` in order; `pointerenter` doesn't bubble |
 | T-E5 | §5.1 | with the canvas in a shadow root: `mouseX` / `mouseY` correct (offset retargeting) |
-| T-E6 | §4.3 | `pxl-click` handler runs; a leftover `onclick` warns once |
+| T-E6 | §4.3 | `pxl-on-click` handler runs; a leftover `onclick` warns once |
 | T-E7 | §4.1 | a listener that calls `setAttribute` on another shape during dispatch: no error, change drawn next frame |
 | T-M1 | C8 | move a circle to another group in the same task (`appendChild` to the new parent): registered once, new matrix (extends the existing matrix test) |
 | T-M2 | C8 | remove and re-insert a whole stage: layers resized, animation resumes, listeners still work |
@@ -320,7 +327,7 @@ Sidebar: a new entry under "Engine & Reactivity" or a new section "Integration".
 
 | # | Decision | Options | Recommendation |
 |---|---|---|---|
-| D1 | Names of the declarative handlers | `pxl-click` / `do-click` / other (§4.3) | `pxl-click`, `pxl-enter`, `pxl-leave`, `pxl-down`, `pxl-up`, `pxl-move` |
+| D1 | Names of the declarative handlers | `pxl-on-click` / `pxl-click` / `pxl-onclick` / other (§4.3) | **decided 2026-11-09:** `pxl-on-click`, `pxl-on-enter`, `pxl-on-leave`, `pxl-on-down`, `pxl-on-up`, `pxl-on-move`; attribute-only |
 | D2 | Scoped names | A global ids / B stage-scoped ids / C `name` attribute (§8.2) | decide later; A for now, C if components need it |
 | D3 | Logical coordinates on events | extra fields / none (§4.1) | none; `ref.<stage>.mouseX` |
 | D4 | Native canvas `click` next to the synthetic shape `click` | accept / stop propagation when a shape was hit (§4.1) | decide with T-E tests on a real page |
@@ -336,7 +343,7 @@ Sidebar: a new entry under "Engine & Reactivity" or a new section "Integration".
 
 1. `tests/frameworks.html` with the tests that pass today (T-C1…, T-C4, T-M1, T-M2) as a baseline; the others added with their features.
 2. W5.1 observe `id` (+ T-C2, T-C2b). `fix(engine): register ids set or changed after connect`.
-3. W1 events: dispatch DOM events, `addEventListener` override, `interactive`, rename `on*` → D1 names, warning for the old names; migrate the 25 handlers (`test32`, `test37`, `tests/index.html`), KILOPIXEL.md Events + AI guide, docs pages that mention `onclick` on shapes (+ T-E1…T-E7). `feat(engine)!: DOM events on shapes; pxl-click replaces onclick`.
+3. W1 events: dispatch DOM events, `addEventListener` override, `interactive`, rename `on*` → D1 names, warning for the old names; migrate the 25 handlers (`test32`, `test37`, `tests/index.html`), KILOPIXEL.md Events + AI guide, docs pages that mention `onclick` on shapes (+ T-E1…T-E7). `feat(engine)!: DOM events on shapes; pxl-on-click replaces onclick`.
 4. W2 canvas in a shadow root + stylesheet defaults (+ T-M3, T-S1, T-S2, T-H1, T-E5). `refactor(engine): layer canvas in a shadow root, default styles in a stylesheet`.
 5. W4 cache bound (+ T-K1). `perf(compiler): bound the expression caches`.
 6. Smoke pages in `scratch/frameworks/` for the frameworks in §12 that load without a build; record results in `FINDINGS.md`.
@@ -381,7 +388,7 @@ Rough estimates from the code read for this plan; "session" = one working sessio
 
 **What takes the time:**
 
-1. **Decisions before code**: D1 (handler names) and D4 (native vs. synthetic `click` on the stage) change behaviour users see; best decided with a test page.
+1. **Decisions before code**: D1 (handler names, decided 2026-11-09) and D4 (native vs. synthetic `click` on the stage) change behaviour users see; best decided with a test page.
 2. **Shadow root on layers**: pointer coordinates across the shadow boundary must be verified (T-E5); if `offsetX` / `offsetY` don't fit, a fallback from `clientX` and the stage rect is needed.
 3. **Testing in the dev environment**: a hidden browser pane stops layout, `ResizeObserver` and `requestAnimationFrame` (seen in the prototypes and the `test32` check on 2026-10-30). The conformance tests force rendering (`stage.resize()`, `stage.render()`) and fall back to calling compiled handlers where pointer input needs layout.
 
