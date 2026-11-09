@@ -92,13 +92,12 @@ A snippet shows the markup behind the demo, as short and easy to scan as possibl
   * **`strokewidth`** is shown whenever the stage sets it, so the snippet matches the drawing.
 * **Pairs stay on one line:** `x y`, `x1 y1`, `x2 y2`, `w h`, `rx ry`, `r ir`, `irx iry`, `start sweep`, `start end`, `arrowstart arrowend`, `linecap linejoin`. A pair with one controlled value goes where the controlled value goes. Paint, font and layout values follow the line 1 order instead: a slider-driven `strokewidth` or `size` moves alone.
 * **Taught attributes:** a fixed attribute that is the topic of the example (`closed="true"`, `pie="true"`, `anchor="top-left"`, `direction="rtl"`, `toLocal()` positions where mapping is the topic) goes on a feature line, not on line 1.
-* **Comments and blank lines:** when a snippet has two or more shapes, each shape, or the layer, group or unit that holds it, gets a comment on the line above: `<!-- Position: Name, what it shows -->`.
-  * **Position:** where the shape is on the stage (`Left`, `Right`, `Top`, `Middle`, `Bottom`, or combined like `Top Left`). Overlapping shapes get no position.
+* **Comments and blank lines:** every shape, or the layer, group or unit that holds it, gets a comment on the line above: `<!-- Position: Name, what it shows -->`. A layer or group may get its own comment as well (walkthrough, mapping).
+  * **Position:** where the shape is on the stage (`Left`, `Right`, `Top`, `Middle`, `Bottom`, or combined like `Top Left`). Overlapping shapes and a shape alone in its snippet get no position (`<!-- Text, wraps at the width -->`).
   * **Name:** its tab name, so the reader can match the snippet to the controls, or a short name when the tabs aren't per shape (`Layer Filter`).
   * **What it shows:** a few lowercase words, not a sentence (`Right: Pill, radius is half the height`). Left out when the name already says it (`Left: Center Spin`).
   * No color schemes, notes or explanations: the stage shows the colors, and explanations belong in the text.
-  * One blank line between commented blocks, none between a comment and its element. A snippet with one shape has no comment.
-  * The walkthrough also comments its layers and single shapes, because it introduces the stage, layer and shape one step at a time.
+  * One blank line between commented blocks, none between a comment and its element.
 
 ```html
 <pxl-stage ratio="5 / 3">
