@@ -99,6 +99,7 @@ A snippet shows the markup behind the demo, as short and easy to scan as possibl
   * No color schemes, notes or explanations: the stage shows the colors, and explanations belong in the text.
   * When each shape sits in its own layer or group, the comment goes above that layer or group.
   * One blank line between commented blocks, none between a comment and its element. A snippet with one shape has no comment.
+  * The walkthrough also comments its layers and single shapes, because it introduces the stage, layer and shape one step at a time.
 
 ```html
 <pxl-stage ratio="5 / 3">

@@ -114,8 +114,8 @@
         <li><strong>Nesting Spaces:</strong> Drag the layer sliders below. Notice how the entire local grid moves. Any shape you place inside this layer will be drawn relative to this moving layer center, rather than the static stage origin.</li>
       </ul>
       
-      <pre><code class="language-html">&lt;!-- Moving the layer center to the middle of the stage --&gt;
-&lt;pxl-stage ratio="<mark id="sec2RatioCode">5 / 3</mark>"&gt;
+      <pre><code class="language-html">&lt;pxl-stage ratio="<mark id="sec2RatioCode">5 / 3</mark>"&gt;
+  &lt;!-- Layer, center in the middle of the stage --&gt;
   &lt;pxl-layer x="<mark id="sec2LayerXCode">500</mark>" y="<mark id="sec2LayerYCode">300</mark>"&gt;
     &lt;!-- Insert shapes and groups here --&gt;
   &lt;/pxl-layer&gt;
@@ -199,9 +199,10 @@
       <p>In Kilopixel, the <code>x</code> and <code>y</code> attributes of any shape define its <strong>center</strong> relative to its parent layer or group.</p>
       <p>Because the circle sits inside a layer, both positions add up. In the example below, the circle is placed at <code>(350, 150)</code> in the layer, and the layer's center is at <code>(400, 200)</code> on the stage, so the circle's center appears at <code>(750, 350)</code>.</p>
       
-      <pre><code class="language-html">&lt;!-- Placing a shape whose center is at (350, 150) --&gt;
-&lt;pxl-stage ratio="5 / 3"&gt;
+      <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;!-- Layer, center at (400, 200) --&gt;
   &lt;pxl-layer x="<mark id="sec3LayerXCode">400</mark>" y="<mark id="sec3LayerYCode">200</mark>"&gt;
+    &lt;!-- Circle, center at (350, 150) in the layer --&gt;
     &lt;pxl-circle fill="#ffedd566" stroke="#f97316" strokewidth="4"
       x="<mark id="sec3CircleXCode">350</mark>" y="<mark id="sec3CircleYCode">150</mark>" r="<mark id="sec3CircleRCode">250</mark>"&gt;
     &lt;/pxl-circle&gt;
@@ -319,9 +320,10 @@
       </ul>
       <p>The controls marked with a pulsing dot <span class="indicator-dot indicator-dot-inline"></span> rotate the layer and the ellipse, so both effects can be compared.</p>
 
-      <pre><code class="language-html">&lt;!-- An ellipse rotated around its center --&gt;
-&lt;pxl-stage ratio="5 / 3"&gt;
+      <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;!-- Layer, rotates everything in it --&gt;
   &lt;pxl-layer x="<mark id="sec4LayerXCode">500</mark>" y="<mark id="sec4LayerYCode">300</mark>" rotate="<mark id="sec4LayerRotateCode">0</mark>"&gt;
+    &lt;!-- Ellipse, rotated around its own center --&gt;
     &lt;pxl-ellipse fill="#ffedd566" stroke="#f97316" strokewidth="4"
       x="<mark id="sec4EllipseXCode">200</mark>" y="<mark id="sec4EllipseYCode">150</mark>"
       rx="<mark id="sec4EllipseRxCode">250</mark>" ry="<mark id="sec4EllipseRyCode">100</mark>" rotate="<mark id="sec4EllipseRotateCode">20</mark>"&gt;
@@ -453,9 +455,10 @@
       <p>The offset attributes <code>dx</code> and <code>dy</code> ("d" stands for delta) move the drawn shape away from its center (<code>x</code>, <code>y</code>).</p>
       <p>Because this offset happens <em>inside</em> the shape's local coordinate system, any rotation applied will cause the shape to <strong>orbit</strong> the center instead of just spinning in place.</p>
       
-      <pre><code class="language-html">&lt;!-- A rectangle orbiting its pivot point --&gt;
-&lt;pxl-stage ratio="5 / 3"&gt;
+      <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;!-- Layer, rotates everything in it --&gt;
   &lt;pxl-layer x="<mark id="sec5LayerXCode">200</mark>" y="<mark id="sec5LayerYCode">150</mark>" rotate="<mark id="sec5LayerRotateCode">0</mark>"&gt;
+    &lt;!-- Rect, offset from its pivot by dx and dy --&gt;
     &lt;pxl-rect w="100" h="100" fill="#ffedd566" stroke="#f97316" strokewidth="4"
       x="<mark id="sec5RectXCode">300</mark>" y="<mark id="sec5RectYCode">150</mark>"
       dx="<mark id="sec5RectDxCode">150</mark>" dy="<mark id="sec5RectDyCode">150</mark>" rotate="<mark id="sec5RectRotateCode">0</mark>"&gt;
@@ -620,8 +623,8 @@
       <p>Other shapes can read the attributes of any element with an <code>id</code>: <code>ref.master.x</code> is the current <code>x</code> of the element with <code>id="master"</code>. When that value changes, every attribute that reads it updates.</p>
       <p>In this example, two shapes follow the <strong>Master</strong>: the <strong>Mirror</strong> takes the mirrored x position (<code>1000 - ref.master.x</code>), and the <strong>Reactor</strong> takes its size and rotation from the Master's x position.</p>
       
-      <pre><code class="language-html">&lt;!-- Linking attributes across different shapes --&gt;
-&lt;pxl-stage ratio="5 / 3"&gt;
+      <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;!-- Layer, three shapes linked by ref.* --&gt;
   &lt;pxl-layer x="<mark id="sec6LayerXCode">0</mark>" y="<mark id="sec6LayerYCode">0</mark>" rotate="<mark id="sec6LayerRotateCode">0</mark>"&gt;
     &lt;!-- Left: Master, the shape you move --&gt;
     &lt;pxl-rect id="master" w="100" h="100" fill="#ffedd566" stroke="#f97316" strokewidth="4"
@@ -780,8 +783,8 @@
       <p>A value that several shapes share doesn't have to belong to one of them. A <code>&lt;pxl-var&gt;</code> holds a value and draws nothing.</p>
       <p>Shapes read it with <code>ref.&lt;id&gt;.value</code>, and they update when it changes. In this example, three variables set the color, spread and size of all three circles:</p>
       
-      <pre><code class="language-html">&lt;!-- Variables act as global state for the canvas --&gt;
-&lt;pxl-stage ratio="5 / 3"&gt;
+      <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;!-- Layer, rotates the three circles --&gt;
   &lt;pxl-layer x="<mark id="sec7LayerXCode">500</mark>" y="<mark id="sec7LayerYCode">300</mark>" rotate="<mark id="sec7LayerRotateCode">0</mark>"&gt;
     &lt;!-- Variables, set by the sliders --&gt;
     &lt;pxl-var id="hue" value="<mark id="sec7HueCode">250</mark>"&gt;&lt;/pxl-var&gt;
@@ -1066,8 +1069,12 @@
       <p>In this example, <code>sin()</code> and <code>cos()</code> with different x and y frequencies move the circle along a Lissajous curve, and <code>hsl()</code> with <code>loop(10)</code> turns its color once around the color wheel every 10 seconds.</p>
       
       <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;!-- Layer, center of the motion --&gt;
   &lt;pxl-layer x="<mark id="sec9LayerXCode">500</mark>" y="<mark id="sec9LayerYCode">300</mark>" rotate="<mark id="sec9LayerRotateCode">0</mark>"&gt;
+    &lt;!-- Variable, hue turns once every 10 seconds --&gt;
     &lt;pxl-var id="hue" value="loop(10) * 360"&gt;&lt;/pxl-var&gt;
+
+    &lt;!-- Circle, Lissajous path from sin() and cos() --&gt;
     &lt;pxl-circle id="oscillator"
       fill="hsla(ref.hue.value, 100, 60, 0.4)" stroke="hsl(ref.hue.value, 100, 60)" strokewidth="4"
       shadowcolor="ref.oscillator.stroke" shadowblur="20"
