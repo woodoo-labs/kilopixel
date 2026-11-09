@@ -108,7 +108,7 @@ A moving container calls the walk from its own `evaluateAnimations` (animated mo
 
 | Alternative | Why not |
 |---|---|
-| Treat every `toLocal` expression as time-dependent (1 line in the compiler) | Every layer with a `toLocal` reader would redraw every frame forever, even when nothing moves. Breaks the "static layers are drawn once" principle (`DOCS_STANDARDS.md` §10, layer dirty flags). |
+| Treat every `toLocal` expression as time-dependent (1 line in the compiler) | Every layer with a `toLocal` reader would redraw every frame forever, even when nothing moves. Breaks the "static layers are drawn once" principle (`DOCS_STANDARDS.md` §7, layer dirty flags). |
 | Subscribe the reader to its ancestors' `ref.*` keys | Ancestors often have no `id`, so they have no key and never broadcast. |
 | Check the caller's parent matrix version inside `pxl.toLocal` | `toLocal` only runs when something evaluates it; a stale reader is never evaluated. Needs the walk anyway. |
 

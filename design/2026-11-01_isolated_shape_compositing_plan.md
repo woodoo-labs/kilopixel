@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (2026-11-01, no code changes yet)
 - **Date**: 2026-11-01
-- **Related**: `design/2026-11-07_safe_shape_render_plan.md` (built 2026-11-07, same function `Shape.render()`; the base for this plan, §9), TODO §14 `paintorder` (changes the order of the same draw calls; build it after this plan, §9), `docs/DOCS_STANDARDS.md` §1 ("Ghosts of fill-only shapes", the docs rule this removes)
+- **Related**: `design/2026-11-07_safe_shape_render_plan.md` (built 2026-11-07, same function `Shape.render()`; the base for this plan, §9), TODO §14 `paintorder` (changes the order of the same draw calls; build it after this plan, §9), `docs/DOCS_STANDARDS.md` §2 ("Ghosts of fill-only shapes", the docs rule this removes)
 - **Target Implementation**: `js/elements/shape.js` (`render()`), `js/graphics.js` (`applyContextState` split), `js/elements/stage.js` (scratch canvas size), `js/elements/shapes/text.js` and `grid.js` (draw count)
 - **Prototypes**: `scratch/mask_fill_stroke.html` (today vs isolated, every mask mode plus alpha, blend, shadow, multi-line text), `scratch/isolation_bench.html` (cost)
 
@@ -23,7 +23,7 @@ A shape with both `fill` and `stroke` draws wrong as soon as it has `mask`, `sha
 | `alpha="0.5"` | The inner half of the stroke shows the fill through it (subtle) |
 | multi-line `<pxl-text>` with `mask` | Each line is masked against the previous lines; with `source-in` the text disappears |
 
-Users hit this in normal use: a stroked card with a drop shadow, a masked badge with an outline. The docs work around it: `mask.html` uses fill-only shapes, and DOCS_STANDARDS.md needs an extra rule for their ghosts ("a colored outline would look like their own stroke"). `shadow.html` §1 shows it today: the translucent circle with stroke and `shadowblur="15"` has a soft dark band inside its upper edge, the stroke's own shadow.
+Users hit this in normal use: a stroked card with a drop shadow, a masked badge with an outline. The docs work around it: `mask.html` uses fill-only shapes, and DOCS_STANDARDS.md needs an extra rule for their ghosts ("a colored outline would look like the shape's own stroke"). `shadow.html` §1 shows it today: the translucent circle with stroke and `shadowblur="15"` has a soft dark band inside its upper edge, the stroke's own shadow.
 
 ## 2. Cause
 
