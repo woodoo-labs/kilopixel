@@ -1,8 +1,8 @@
 # Framework Compatibility: Kilopixel as a Well-Behaved Custom Element
 
-- **Status**: 🟡 **Proposed** (2026-11-09, D1 decided: `pxl-on-*` handler names; no code changes yet)
+- **Status**: 🟡 **Proposed** (2026-11-10, D1 and D4 decided; no code changes yet)
 - **Date**: 2026-10-30
-- **Related**: `scratch/frameworks/` (React 19 and Vue 3.5 prototypes, `FINDINGS.md`; local only), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`
+- **Related**: `scratch/frameworks/` (React 19 and Vue 3.5 prototypes, `FINDINGS.md`, `d4_clicks.html` for D4; local only), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
 
 ---
@@ -84,8 +84,10 @@ After the hit test in `InteractionEngine.process()`, Kilopixel dispatches DOM ev
 - **Logical coordinates**: users read `ref.<stage>.mouseX` / `mouseY` (already there). Optionally the event could carry them; a plain `PointerEvent` has no free field, and adding own properties to native event objects is fragile across frameworks that wrap events (React's synthetic events copy only known fields). Decision §13 D3: no extra fields; document `ref.<stage>.mouseX`, or `stage.attributeValues.mouseX` in JS.
 - **`event.target`** is the shape element, so delegated framework handlers (React, Svelte 5, Solid) find the right component, and `event.currentTarget` works for direct listeners.
 - **Order**: the declarative handler (§4.3) runs first, then the DOM event; both after the state broadcast (`isHovered` / `isPressed` already updated), like today.
-- **When**: `process()` runs inside `Stage.render()`, after all layers drew. Dispatching there runs user code synchronously inside the frame. Frameworks schedule their re-render (React / Vue / Svelte batch), but a direct listener may call `setAttribute` synchronously; that only invalidates layers for the next frame, so it is safe. To keep `process()` simple, events are collected during `process()` in a small preallocated queue and dispatched at its end.
-- **Native click on the canvas**: the browser's own `click` (on the layer canvas) still bubbles to the stage and up, as today. Kilopixel's synthetic `click` on the shape is an additional, separate event. Listeners on the stage or above therefore see **two** clicks: the native one (`target` = canvas) and the synthetic one (`target` = shape). Options §13 D4: (a) accept and document (listeners check `event.target`), (b) stop the native canvas `click` from propagating beyond the stage when a shape was hit, so only the shape's synthetic `click` reaches the page. (b) is cleaner for page code but changes native behaviour for code that listens on the stage itself; decided with a test page.
+- **When**: `click`, `pointerdown` and `pointerup` are hit-tested and dispatched **when the browser's event arrives** (D4, below). The other events (`pointerover` / `pointerenter` / `pointerout` / `pointerleave` / `pointermove`) come from `process()`, which runs inside `Stage.render()`, after all layers drew. Dispatching there runs user code synchronously inside the frame. Frameworks schedule their re-render (React / Vue / Svelte batch), but a direct listener may call `setAttribute` synchronously; that only invalidates layers for the next frame, so it is safe. To keep `process()` simple, events are collected during `process()` in a small preallocated queue and dispatched at its end.
+- **One event per user action (D4, decided 2026-11-10)**: the browser's own `click` targets the layer canvas and bubbles up through the stage. If Kilopixel only added its own `click` on the shape, handlers on the stage or above would run **twice** for one click. Today the engine stores a click and hit-tests it in the next frame, so when the browser's click passes the stage, Kilopixel doesn't know yet whether a shape was hit. Decision: for `click`, `pointerdown` and `pointerup`, the stage hit-tests **when the browser's event arrives** (a capture listener on the stage, positions from the last frame). Over a shape, it stops the browser's event (`stopPropagation()`) and dispatches Kilopixel's event on the shape right away; over empty space, the browser's event passes unchanged. Every framework then sees exactly one event per action, with the shape as `target`, and `stopPropagation()` in a shape handler protects the parents as usual. `pointermove` keeps both events (many per second, also over empty space; stage-level move listeners usually want the native coordinates); documented.
+  - **Prototype** (`scratch/frameworks/d4_clicks.html`, 2026-11-10, React 19 and Vue 3.5, a shim in place of the engine): with both events (option a), a card around the stage that toggles on click received **two** clicks per circle click (the toggle cancelled itself), and a circle handler's `stopPropagation()` didn't stop the card from toggling, because the browser's click had passed one frame earlier. With option (b) every case was correct in both frameworks: one card call, `stopPropagation()` respected, background clicks unchanged.
+  - **Cost**: one hit test per click / press / release (rare compared to moves). The test uses the matrices of the last drawn frame, at most one frame old.
 
 ### 4.2 Which Shapes Are Hit-Tested
 
@@ -330,7 +332,7 @@ Sidebar: a new entry under "Engine & Reactivity" or a new section "Integration".
 | D1 | Names of the declarative handlers | `pxl-on-click` / `pxl-click` / `pxl-onclick` / other (§4.3) | **decided 2026-11-09:** `pxl-on-click`, `pxl-on-enter`, `pxl-on-leave`, `pxl-on-down`, `pxl-on-up`, `pxl-on-move`; attribute-only |
 | D2 | Scoped names | A global ids / B stage-scoped ids / C `name` attribute (§8.2) | decide later; A for now, C if components need it |
 | D3 | Logical coordinates on events | extra fields / none (§4.1) | none; `ref.<stage>.mouseX` |
-| D4 | Native canvas `click` next to the synthetic shape `click` | accept / stop propagation when a shape was hit (§4.1) | decide with T-E tests on a real page |
+| D4 | Native canvas `click` next to the synthetic shape `click` | (a) accept both / (b) hit-test when the event arrives and stop the native event over a shape / (c) Kilopixel owns every click in the stage (§4.1) | **decided 2026-11-10: (b)** for `click`, `pointerdown`, `pointerup`; `pointermove` keeps both (prototype `d4_clicks.html`) |
 | D5 | Hand cursor for framework listeners | `interactive` implies pointer / separate `cursor` attribute (§4.4) | `interactive` implies pointer |
 | D6 | `<slot>` in the layer's shadow root | yes / no (§5.1) | yes |
 | D7 | Stage `aspect-ratio` | inline / CSS custom property (§5.2) | inline, documented |
@@ -374,7 +376,7 @@ Every engine step: `node build.js`, update the `pxl.min.js` size, `tests/index.h
 - **API change of the handlers (W1)**: pre-release, 25 uses; the old-name warning makes leftovers visible.
 - **Shadow root on layers (W2)**: pointer coordinate behaviour across the shadow boundary (T-E5) and any code that looks for `layer.querySelector('canvas')` (search the repo before changing; tests and examples may read the canvas for pixel checks, e.g. `scratch/custom_shape/test.html`).
 - **Accessors (W3)**: a framework that sets a property Kilopixel doesn't expect (e.g. `style`, `className`) is unaffected (no accessor); a user who set expando properties with attribute names on elements (`el.x = …` as a private field) would now change the drawing. Unlikely; documented.
-- **Event duplication (D4)**: page code listening for `click` on the stage may see the synthetic event too. Covered by a test and the docs.
+- **Event duplication (D4)**: solved for `click`, `pointerdown` and `pointerup` by option (b); stage-level `pointermove` listeners see the native and the Kilopixel event (documented). Code that listens on the stage for the browser's click over a shape now gets Kilopixel's click instead (`target` = the shape, `isTrusted` = false).
 
 ## 17. Effort Estimate (2026-10-30)
 
@@ -388,7 +390,7 @@ Rough estimates from the code read for this plan; "session" = one working sessio
 
 **What takes the time:**
 
-1. **Decisions before code**: D1 (handler names, decided 2026-11-09) and D4 (native vs. synthetic `click` on the stage) change behaviour users see; best decided with a test page.
+1. **Decisions before code**: D1 (handler names) and D4 (one click per user click) are decided (2026-11-09 / 2026-11-10); D5–D8 are smaller.
 2. **Shadow root on layers**: pointer coordinates across the shadow boundary must be verified (T-E5); if `offsetX` / `offsetY` don't fit, a fallback from `clientX` and the stage rect is needed.
 3. **Testing in the dev environment**: a hidden browser pane stops layout, `ResizeObserver` and `requestAnimationFrame` (seen in the prototypes and the `test32` check on 2026-10-30). The conformance tests force rendering (`stage.resize()`, `stage.render()`) and fall back to calling compiled handlers where pointer input needs layout.
 
