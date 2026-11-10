@@ -158,12 +158,12 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 
 ## 30. Framework Compatibility (DOM Contract)
 - **Status**: 🟡 **Proposed** (2026-11-10, D1 and D4 decided)
-- **Reference**: `design/2026-10-30_framework_compatibility_plan.md`; prototypes `scratch/frameworks/` (React 19, Vue 3.5; local only)
+- **Reference**: `design/2026-10-30_framework_compatibility_plan.md`; prototypes in `scratch/frameworks/`, each only on the laptop where it was made: React 19 / Vue 3.5 components with `FINDINGS.md` (2026-10-30) and `d4_clicks.html` for D4 (2026-11-10)
 - **Idea**: target the DOM contract frameworks use (attributes, properties, events, insert / move / remove, style, hydration), not the frameworks. Conformance test page `tests/frameworks.html` without any framework.
-- **Phase 1**: observe `id`; DOM events on shapes (`click`, `pointer*`) + `interactive` for delegating frameworks; rename the `on*` handlers (collide with native `onclick` and framework `on*` rules; decided: `pxl-on-click`, `pxl-on-enter`, … (D1, attribute-only); layer canvas in a shadow root (today `layer.innerHTML = …` silently removes the canvas: nothing is drawn, nothing is logged; confirmed 2026-11-05) and default styles in a stylesheet; bounded expression caches.
+- **Phase 1**: observe `id`; DOM events on shapes (`click`, `pointer*`) + `interactive` for delegating frameworks; rename the `on*` handlers, which collide with native `onclick` and framework `on*` rules (D1: `pxl-on-click`, `pxl-on-enter`, …, attribute-only); layer canvas in a shadow root (today `layer.innerHTML = …` silently removes the canvas: nothing is drawn, nothing is logged; confirmed 2026-11-05) and default styles in a stylesheet; bounded expression caches.
 - **Phase 2**: attribute properties (numbers without compiling, values set before upgrade). **Phase 3**: `docs/frameworks.html`, optional TypeScript typings.
 - **Decided**: D1 handler names `pxl-on-click` … (attribute-only); D4 `click` / `pointerdown` / `pointerup` are hit-tested when they arrive, so frameworks see one event per action (prototype `scratch/frameworks/d4_clicks.html`).
-- **Open**: scoped names instead of global ids, cursor for delegated listeners.
+- **Open**: D2 scoped names instead of global ids and D5 cursor for delegated listeners (left open 2026-11-10); D3 coordinates on events, D6 `<slot>` in the layer's shadow root, D7 stage `aspect-ratio`, D8 array values as properties, D9 scope of phase 1 (each has a recommendation in plan §13, not confirmed yet).
 - **Related**: §33 (stage sizing) also moves the stage's default styles out of inline styles.
 
 ## 31. Isolated Shape Compositing (Fill and Stroke Composite as One)
