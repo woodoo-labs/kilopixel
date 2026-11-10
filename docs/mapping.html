@@ -43,15 +43,15 @@
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;!-- Planet, in a transformed layer --&gt;
   &lt;pxl-layer x="<mark id="sec1LayerXCode">500</mark>" y="<mark id="sec1LayerYCode">300</mark>" rotate="<mark id="sec1LayerRotateCode">0</mark>" zoom="<mark id="sec1LayerZoomCode">1</mark>"&gt;
+    &lt;!-- Planet, in a transformed layer --&gt;
     &lt;pxl-circle id="planet" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"
       x="<mark id="sec1PlanetXCode">200</mark>" y="<mark id="sec1PlanetYCode">100</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
-  &lt;!-- Line, in an untransformed layer --&gt;
   &lt;pxl-layer&gt;
+    &lt;!-- Line, in an untransformed layer --&gt;
     &lt;pxl-line stroke="#22c55e" strokewidth="4"
       x1="<mark id="sec1LineX1Code">150</mark>" y1="<mark id="sec1LineY1Code">150</mark>"
       x2="<mark id="sec1LineX2Code" class="highlight-reactive">toLocal(ref.planet, 'x')</mark>" y2="<mark id="sec1LineY2Code" class="highlight-reactive">toLocal(ref.planet, 'y')</mark>"&gt;
@@ -334,8 +334,8 @@
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;!-- Planet, drawn at its offset dx="150" --&gt;
   &lt;pxl-layer x="<mark id="sec3LayerXCode">400</mark>" y="<mark id="sec3LayerYCode">300</mark>" rotate="<mark id="sec3LayerRotateCode">0</mark>"&gt;
+    &lt;!-- Planet, drawn at its offset dx="150" --&gt;
     &lt;pxl-circle id="planet" x="200" y="0" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"
       dx="<mark id="sec3PlanetDxCode">150</mark>" rotate="<mark id="sec3PlanetRotateCode">0</mark>"&gt;
     &lt;/pxl-circle&gt;
@@ -491,17 +491,17 @@
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;!-- Left: Pointer, in a group in a rotated layer --&gt;
   &lt;pxl-layer x="<mark id="sec4LayerXCode">250</mark>" y="<mark id="sec4LayerYCode">300</mark>" rotate="<mark id="sec4LayerRotateCode">0</mark>"&gt;
     &lt;pxl-group x="<mark id="sec4GroupXCode">150</mark>" y="<mark id="sec4GroupYCode">-100</mark>" rotate="<mark id="sec4GroupRotateCode">0</mark>"&gt;
+      &lt;!-- Left: Pointer, in a group in a rotated layer --&gt;
       &lt;pxl-line id="pointer" x2="100" stroke="#f97316" strokewidth="4" arrowend="auto"
         x="<mark id="sec4PointerXCode">100</mark>" y="<mark id="sec4PointerYCode">50</mark>" rotate="<mark id="sec4PointerRotateCode">90</mark>"&gt;
       &lt;/pxl-line&gt;
     &lt;/pxl-group&gt;
   &lt;/pxl-layer&gt;
 
-  &lt;!-- Right: Needle, copies the rotation --&gt;
   &lt;pxl-layer&gt;
+    &lt;!-- Right: Needle, copies the rotation --&gt;
     &lt;pxl-line x="850" y="150" x1="-50" x2="50" stroke="#3b82f6" strokewidth="4" arrowend="auto"
       rotate="<mark id="sec4NeedleRotateCode" class="highlight-reactive">toLocal(ref.pointer, 'rotate')</mark>"&gt;
     &lt;/pxl-line&gt;
@@ -649,17 +649,17 @@
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;!-- Planet, in a group in a zoomed layer --&gt;
   &lt;pxl-layer x="<mark id="sec5LayerXCode">300</mark>" y="<mark id="sec5LayerYCode">300</mark>" zoom="<mark id="sec5LayerZoomCode">1.2</mark>"&gt;
     &lt;pxl-group x="<mark id="sec5GroupXCode">150</mark>" y="<mark id="sec5GroupYCode">0</mark>" zoom="<mark id="sec5GroupZoomCode">1.5</mark>"&gt;
+      &lt;!-- Planet, in a group in a zoomed layer --&gt;
       &lt;pxl-circle id="planet" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"
         x="<mark id="sec5PlanetXCode">100</mark>" y="<mark id="sec5PlanetYCode">0</mark>" zoom="<mark id="sec5PlanetZoomCode">1</mark>"&gt;
       &lt;/pxl-circle&gt;
     &lt;/pxl-group&gt;
   &lt;/pxl-layer&gt;
 
-  &lt;!-- Ring, in an untransformed layer --&gt;
   &lt;pxl-layer&gt;
+    &lt;!-- Ring, in an untransformed layer --&gt;
     &lt;pxl-circle stroke="#3b82f6" strokewidth="4"
       x="<mark id="sec5RingXCode" class="highlight-reactive">toLocal(ref.planet, 'x')</mark>" y="<mark id="sec5RingYCode" class="highlight-reactive">toLocal(ref.planet, 'y')</mark>"
       r="<mark id="sec5RingRCode" class="highlight-reactive">ref.planet.r * toLocal(ref.planet, 'zoom') + 15</mark>"&gt;
@@ -810,16 +810,16 @@
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;!-- Flag, in a stretched layer --&gt;
   &lt;pxl-layer x="<mark id="sec6LayerXCode">250</mark>" y="<mark id="sec6LayerYCode">300</mark>" rotate="<mark id="sec6LayerRotateCode">0</mark>" scalex="<mark id="sec6LayerScalexCode">1.6</mark>"&gt;
+    &lt;!-- Flag, in a stretched layer --&gt;
     &lt;pxl-polyline id="flag" stroke="#f97316" strokewidth="4" fill="#ffedd566" closed="true"
       points="-60,90; -60,-90; 90,-45; -30,0; -30,90"
       x="<mark id="sec6FlagXCode">100</mark>" y="<mark id="sec6FlagYCode">0</mark>" rotate="<mark id="sec6FlagRotateCode">30</mark>" skewx="<mark id="sec6FlagSkewxCode">0</mark>" scaley="<mark id="sec6FlagScaleyCode">1</mark>"&gt;
     &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
 
-  &lt;!-- Outline, copies the whole frame --&gt;
   &lt;pxl-layer&gt;
+    &lt;!-- Outline, copies the whole frame --&gt;
     &lt;pxl-polyline stroke="#3b82f6" strokewidth="4" closed="true" zoom="1.2"
       points="-60,90; -60,-90; 90,-45; -30,0; -30,90"
       x="<mark id="sec6OutlineXCode" class="highlight-reactive">toLocal(ref.flag, 'x')</mark>" y="<mark id="sec6OutlineYCode" class="highlight-reactive">toLocal(ref.flag, 'y')</mark>"
@@ -963,13 +963,13 @@
       x="<mark id="sec7LeftRingXCode" class="highlight-reactive">toLocal(ref.leftPlanet, 'x')</mark>" y="<mark id="sec7LeftRingYCode" class="highlight-reactive">toLocal(ref.leftPlanet, 'y')</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
-  &lt;pxl-layer x="250" y="330" rotate="t * <mark id="sec7LeftSpeedCode">360</mark>"&gt;
+  &lt;pxl-layer x="250" y="330" rotate="t * <mark id="sec7LeftSpeedCode">180</mark>"&gt;
     &lt;pxl-circle id="leftPlanet" x="170" r="30" fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
   &lt;!-- Right: Ring Last, it covers the planet --&gt;
-  &lt;pxl-layer x="750" y="330" rotate="t * <mark id="sec7RightSpeedCode">360</mark>"&gt;
+  &lt;pxl-layer x="750" y="330" rotate="t * <mark id="sec7RightSpeedCode">180</mark>"&gt;
     &lt;pxl-circle id="rightPlanet" x="170" r="30" fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
@@ -993,8 +993,8 @@
             <div class="tab-content active" id="sec7PlanetsTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Speed <span class="indicator-dot"></span></span> <span id="sec7SpeedVal">360°/s</span></label>
-                  <input type="range" min="0" max="720" step="60" value="360" autocomplete="off" id="sec7SpeedInput"
+                  <label><span>Speed <span class="indicator-dot"></span></span> <span id="sec7SpeedVal">180°/s</span></label>
+                  <input type="range" min="0" max="360" step="30" value="180" autocomplete="off" id="sec7SpeedInput"
                     oninput="document.getElementById('sec7LeftOrbit').setAttribute('rotate', 't * ' + this.value); document.getElementById('sec7RightOrbit').setAttribute('rotate', 't * ' + this.value); document.getElementById('sec7SpeedVal').innerText = this.value + '°/s'; document.getElementById('sec7LeftSpeedCode').innerText = this.value; document.getElementById('sec7RightSpeedCode').innerText = this.value;" data-mark="sec7LeftSpeedCode, sec7RightSpeedCode, sec7LeftRingXCode, sec7LeftRingYCode, sec7RightRingXCode, sec7RightRingYCode">
                 </div>
               </div>
@@ -1013,7 +1013,7 @@
             <pxl-layer>
               <pxl-circle id="sec7LeftRing" r="45" x="toLocal(ref.sec7LeftPlanet, 'x')" y="toLocal(ref.sec7LeftPlanet, 'y')" stroke="#3b82f6" strokewidth="4"></pxl-circle>
             </pxl-layer>
-            <pxl-layer id="sec7LeftOrbit" x="250" y="330" rotate="t * 360">
+            <pxl-layer id="sec7LeftOrbit" x="250" y="330" rotate="t * 180">
               <!-- Layer center (orange 300: two layers take the hue of their shapes) and the orbit at the planet's distance (center helper 300) -->
               <pxl-circle r="170" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-circle>
               <pxl-circle r="5" fill="#fdba74"></pxl-circle>
@@ -1021,7 +1021,7 @@
             </pxl-layer>
 
             <!-- Right: the ring's layer after the planet's layer -->
-            <pxl-layer id="sec7RightOrbit" x="750" y="330" rotate="t * 360">
+            <pxl-layer id="sec7RightOrbit" x="750" y="330" rotate="t * 180">
               <pxl-circle r="170" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-circle>
               <pxl-circle r="5" fill="#fdba74"></pxl-circle>
               <pxl-circle id="sec7RightPlanet" x="170" r="30" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
