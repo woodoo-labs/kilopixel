@@ -139,11 +139,12 @@
             <pxl-layer id="sec1Layer" x="500" y="300" rotate="0" zoom="1">
               <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
-              <pxl-circle x="0" y="0" r="5" fill="#a78bfa"></pxl-circle>
-              <pxl-text x="15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#a78bfa" font="monospace"></pxl-text>
+              <!-- Center dot and labels undo the layer's zoom, so they keep their size -->
+              <pxl-circle x="0" y="0" r="5 / ref.sec1Layer.zoom" fill="#a78bfa"></pxl-circle>
+              <pxl-text x="15" y="-15" zoom="1 / ref.sec1Layer.zoom" baseline="bottom" text="'Layer Center'" size="27" fill="#a78bfa" font="monospace"></pxl-text>
 
               <pxl-circle id="sec1Planet" x="200" y="100" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
-              <pxl-text x="ref.sec1Planet.x" y="ref.sec1Planet.y - 55" baseline="bottom" text="'Planet'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+              <pxl-text x="ref.sec1Planet.x" y="ref.sec1Planet.y - 55" zoom="1 / ref.sec1Layer.zoom" baseline="bottom" text="'Planet'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
             </pxl-layer>
 
             <!-- Line in an Untransformed Layer (Green Scheme) -->
@@ -187,8 +188,7 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;!-- Left: Layer 1, holds the planet --&gt;
   &lt;pxl-layer x="<mark id="sec2Layer1XCode">300</mark>" y="<mark id="sec2Layer1YCode">300</mark>" rotate="<mark id="sec2Layer1RotateCode">0</mark>"&gt;
-    &lt;pxl-circle id="planet" x="150" y="0" fill="#ffedd566" stroke="#f97316" strokewidth="4"
-      r="40"&gt;
+    &lt;pxl-circle id="planet" x="150" y="0" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
@@ -267,6 +267,7 @@
               <pxl-text x="-15" y="-15" baseline="bottom" text="'Layer 1 Center'" size="27" fill="#fdba74" font="monospace" align="right"></pxl-text>
 
               <pxl-circle id="sec2Planet" x="150" y="0" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
+              <pxl-text x="ref.sec2Planet.x" y="ref.sec2Planet.y + 75" baseline="top" text="'Planet'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
             </pxl-layer>
 
             <!-- Layer 2 With the Ring -->
@@ -317,7 +318,7 @@
         <!-- SECTION 3: CENTER, OFFSET AND TOTAL POSITION                      -->
         <!-- ================================================================= -->
         <h2>3. Center, Offset and Total Position</h2>
-        <p>A shape's <code>x</code> and <code>y</code> are its center (the pivot): <code>rotate</code> and <code>zoom</code> turn and scale the shape around this point. <code>dx</code> and <code>dy</code> then move the drawn shape away from the center. The planet below has <code>dx="200"</code>, so it is drawn at a distance of 200 from its center, and its <code>rotate</code> moves it around the center like an orbit.</p>
+        <p>A shape's <code>x</code> and <code>y</code> are its center (the pivot): <code>rotate</code> and <code>zoom</code> turn and scale the shape around this point. <code>dx</code> and <code>dy</code> then move the drawn shape away from the center. The planet below has <code>dx="150"</code>, so it is drawn at a distance of 150 from its center, and its <code>rotate</code> moves it around the center like an orbit.</p>
         <p><code>toLocal()</code> can read both points. Its second argument chooses which one:</p>
         <ul>
           <li><strong>Center:</strong> <code>toLocal(ref.planet, 'x')</code> and <code>toLocal(ref.planet, 'y')</code> return the center. Use them for rings and orbits around the shape.</li>
@@ -327,11 +328,10 @@
 
         <!-- Declarative HTML markup above stage -->
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
-  &lt;!-- Planet, drawn at its offset dx="200" --&gt;
+  &lt;!-- Planet, drawn at its offset dx="150" --&gt;
   &lt;pxl-layer x="<mark id="sec3LayerXCode">400</mark>" y="<mark id="sec3LayerYCode">300</mark>" rotate="<mark id="sec3LayerRotateCode">0</mark>"&gt;
-    &lt;pxl-circle id="planet" x="100" y="0" fill="#ffedd566" stroke="#f97316" strokewidth="4"
-      r="40"
-      dx="<mark id="sec3PlanetDxCode">200</mark>" rotate="<mark id="sec3PlanetRotateCode">0</mark>"&gt;
+    &lt;pxl-circle id="planet" x="200" y="0" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"
+      dx="<mark id="sec3PlanetDxCode">150</mark>" rotate="<mark id="sec3PlanetRotateCode">0</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
@@ -386,8 +386,8 @@
             <div class="tab-content" id="sec3PlanetTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Offset X <span class="indicator-dot"></span></span> <span id="sec3PlanetDxVal">200</span></label>
-                  <input type="range" min="0" max="250" step="10" value="200" autocomplete="off" id="sec3PlanetDxInput"
+                  <label><span>Offset X <span class="indicator-dot"></span></span> <span id="sec3PlanetDxVal">150</span></label>
+                  <input type="range" min="0" max="250" step="10" value="150" autocomplete="off" id="sec3PlanetDxInput"
                     oninput="document.getElementById('sec3Planet').setAttribute('dx', this.value); document.getElementById('sec3PlanetDxVal').innerText = this.value; document.getElementById('sec3PlanetDxCode').innerText = this.value;" data-mark="sec3PlanetDxCode, sec3RingRCode, sec3LineX2Code, sec3LineY2Code">
                 </div>
                 <div class="control-group">
@@ -428,7 +428,7 @@
               <pxl-circle x="0" y="0" r="5" fill="#a78bfa"></pxl-circle>
               <pxl-text x="-15" y="15" baseline="top" text="'Layer Center'" size="27" fill="#a78bfa" font="monospace" align="right"></pxl-text>
 
-              <pxl-circle id="sec3Planet" x="100" y="0" dx="200" rotate="0" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
+              <pxl-circle id="sec3Planet" x="200" y="0" dx="150" rotate="0" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
 
               <!-- Planet center (step 400) and offset (steps 600 / 700) -->
               <pxl-line x1="ref.sec3Planet.x" y1="ref.sec3Planet.y" x2="ref.sec3Planet.tx" y2="ref.sec3Planet.ty" stroke="#ea580c" strokewidth="2" linedash="[5, 5]"></pxl-line>
@@ -446,7 +446,7 @@
               <!-- Line to the drawn planet (Green Scheme) -->
               <pxl-line id="sec3Line" x1="150" y1="520" x2="toLocal(ref.sec3Planet, 'tx')" y2="toLocal(ref.sec3Planet, 'ty')" stroke="#22c55e" strokewidth="4"></pxl-line>
               <pxl-circle x="ref.sec3Line.x1" y="ref.sec3Line.y1" r="5" fill="#4ade80"></pxl-circle>
-              <pxl-text x="ref.sec3Line.x1" y="ref.sec3Line.y1 - 15" baseline="bottom" text="'Start Point'" size="27" fill="#4ade80" font="monospace" align="center"></pxl-text>
+              <pxl-text x="ref.sec3Line.x1" y="ref.sec3Line.y1 + 15" baseline="top" text="'Start Point'" size="27" fill="#4ade80" font="monospace" align="center"></pxl-text>
               <pxl-circle x="ref.sec3Line.x2" y="ref.sec3Line.y2" r="5" fill="#4ade80"></pxl-circle>
 
               <!-- Readout: mapped end point = layer (violet 400) + planet center (orange 400) + offset (orange 700, like the "Planet" label), in the line's space -->
@@ -488,8 +488,7 @@
   &lt;!-- Left: Pointer, in a group in a rotated layer --&gt;
   &lt;pxl-layer x="<mark id="sec4LayerXCode">250</mark>" y="<mark id="sec4LayerYCode">300</mark>" rotate="<mark id="sec4LayerRotateCode">0</mark>"&gt;
     &lt;pxl-group x="<mark id="sec4GroupXCode">150</mark>" y="<mark id="sec4GroupYCode">-100</mark>" rotate="<mark id="sec4GroupRotateCode">0</mark>"&gt;
-      &lt;pxl-line id="pointer" x2="100" stroke="#f97316" strokewidth="4"
-        arrowend="auto"
+      &lt;pxl-line id="pointer" x2="100" stroke="#f97316" strokewidth="4" arrowend="auto"
         x="<mark id="sec4PointerXCode">100</mark>" y="<mark id="sec4PointerYCode">50</mark>" rotate="<mark id="sec4PointerRotateCode">90</mark>"&gt;
       &lt;/pxl-line&gt;
     &lt;/pxl-group&gt;
@@ -497,9 +496,8 @@
 
   &lt;!-- Right: Needle, copies the rotation --&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-line x="850" y="150" x1="-50" x2="50" stroke="#3b82f6" strokewidth="4"
-      arrowend="auto"
-      rotate="<mark id="sec4NeedleRotCode" class="highlight-reactive">toLocal(ref.pointer, 'rotate')</mark>"&gt;
+    &lt;pxl-line x="850" y="150" x1="-50" x2="50" stroke="#3b82f6" strokewidth="4" arrowend="auto"
+      rotate="<mark id="sec4NeedleRotateCode" class="highlight-reactive">toLocal(ref.pointer, 'rotate')</mark>"&gt;
     &lt;/pxl-line&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -531,7 +529,7 @@
                 <div class="control-group">
                   <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec4LayerRotateVal">0°</span></label>
                   <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off" id="sec4LayerRotateInput"
-                    oninput="document.getElementById('sec4Layer').setAttribute('rotate', this.value); document.getElementById('sec4LayerRotateVal').innerText = this.value + '°'; document.getElementById('sec4LayerRotateCode').innerText = this.value;" data-mark="sec4LayerRotateCode, sec4NeedleRotCode">
+                    oninput="document.getElementById('sec4Layer').setAttribute('rotate', this.value); document.getElementById('sec4LayerRotateVal').innerText = this.value + '°'; document.getElementById('sec4LayerRotateCode').innerText = this.value;" data-mark="sec4LayerRotateCode, sec4NeedleRotateCode">
                 </div>
               </div>
             </div>
@@ -552,7 +550,7 @@
                 <div class="control-group">
                   <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec4GroupRotateVal">0°</span></label>
                   <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off" id="sec4GroupRotateInput"
-                    oninput="document.getElementById('sec4Group').setAttribute('rotate', this.value); document.getElementById('sec4GroupRotateVal').innerText = this.value + '°'; document.getElementById('sec4GroupRotateCode').innerText = this.value;" data-mark="sec4GroupRotateCode, sec4NeedleRotCode">
+                    oninput="document.getElementById('sec4Group').setAttribute('rotate', this.value); document.getElementById('sec4GroupRotateVal').innerText = this.value + '°'; document.getElementById('sec4GroupRotateCode').innerText = this.value;" data-mark="sec4GroupRotateCode, sec4NeedleRotateCode">
                 </div>
               </div>
             </div>
@@ -573,7 +571,7 @@
                 <div class="control-group">
                   <label><span>Rotation</span> <span id="sec4PointerRotateVal">90°</span></label>
                   <input type="range" min="-180" max="180" step="5" value="90" autocomplete="off" id="sec4PointerRotateInput"
-                    oninput="document.getElementById('sec4Pointer').setAttribute('rotate', this.value); document.getElementById('sec4PointerRotateVal').innerText = this.value + '°'; document.getElementById('sec4PointerRotateCode').innerText = this.value;" data-mark="sec4PointerRotateCode, sec4NeedleRotCode">
+                    oninput="document.getElementById('sec4Pointer').setAttribute('rotate', this.value); document.getElementById('sec4PointerRotateVal').innerText = this.value + '°'; document.getElementById('sec4PointerRotateCode').innerText = this.value;" data-mark="sec4PointerRotateCode, sec4NeedleRotateCode">
                 </div>
               </div>
             </div>
@@ -747,24 +745,25 @@
             </pxl-layer>
 
             <!-- Zoomed Layer With the Group and the Planet -->
+            <!-- Helpers, dots and labels undo the zoom of their layer and group, so they keep their size -->
             <pxl-layer id="sec5Layer" x="300" y="300" zoom="1.2">
-              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
-              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
-              <pxl-circle x="0" y="0" r="5" fill="#a78bfa"></pxl-circle>
-              <pxl-text x="-15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#a78bfa" font="monospace" align="right"></pxl-text>
+              <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2 / ref.sec5Layer.zoom" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2 / ref.sec5Layer.zoom" linedash="[5, 5]"></pxl-line>
+              <pxl-circle x="0" y="0" r="5 / ref.sec5Layer.zoom" fill="#a78bfa"></pxl-circle>
+              <pxl-text x="-15 / ref.sec5Layer.zoom" y="-15 / ref.sec5Layer.zoom" zoom="1 / ref.sec5Layer.zoom" baseline="bottom" text="'Layer Center'" size="27" fill="#a78bfa" font="monospace" align="right"></pxl-text>
 
               <!-- Group position along the layer's axes (center helpers, step 300) -->
-              <pxl-line x2="ref.sec5Group.x" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
-              <pxl-line x1="ref.sec5Group.x" x2="ref.sec5Group.x" y2="ref.sec5Group.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+              <pxl-line x2="ref.sec5Group.x" stroke="#fdba74" strokewidth="2 / ref.sec5Layer.zoom" linedash="[5, 5]"></pxl-line>
+              <pxl-line x1="ref.sec5Group.x" x2="ref.sec5Group.x" y2="ref.sec5Group.y" stroke="#fdba74" strokewidth="2 / ref.sec5Layer.zoom" linedash="[5, 5]"></pxl-line>
 
               <pxl-group id="sec5Group" x="150" y="0" zoom="1.5">
                 <!-- Group center (300, two-layer colors) and the planet's position along the group's axes (center helpers 300) -->
-                <pxl-circle x="0" y="0" r="5" fill="#fdba74"></pxl-circle>
-                <pxl-text x="-15" y="15" baseline="top" text="'Group Center'" size="27" fill="#fdba74" font="monospace" align="right"></pxl-text>
-                <pxl-line x2="ref.sec5Planet.x" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
-                <pxl-line x1="ref.sec5Planet.x" x2="ref.sec5Planet.x" y2="ref.sec5Planet.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+                <pxl-circle x="0" y="0" r="5 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" fill="#fdba74"></pxl-circle>
+                <pxl-text x="-15 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" y="15 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" zoom="1 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" baseline="top" text="'Group Center'" size="27" fill="#fdba74" font="monospace" align="right"></pxl-text>
+                <pxl-line x2="ref.sec5Planet.x" stroke="#fdba74" strokewidth="2 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" linedash="[5, 5]"></pxl-line>
+                <pxl-line x1="ref.sec5Planet.x" x2="ref.sec5Planet.x" y2="ref.sec5Planet.y" stroke="#fdba74" strokewidth="2 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" linedash="[5, 5]"></pxl-line>
                 <pxl-circle id="sec5Planet" x="100" y="0" zoom="1" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
-                <pxl-text x="ref.sec5Planet.x" y="ref.sec5Planet.y - ref.sec5Planet.r * ref.sec5Planet.zoom - 15" baseline="bottom" text="'Planet'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+                <pxl-text x="ref.sec5Planet.x" y="ref.sec5Planet.y - ref.sec5Planet.r * ref.sec5Planet.zoom - 15 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" zoom="1 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" baseline="bottom" text="'Planet'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
               </pxl-group>
             </pxl-layer>
 
@@ -799,7 +798,7 @@
           <li><strong>Direction and Lean:</strong> <code>toLocal(ref.flag, 'rotate')</code> returns the direction of the flag's x axis, <code>toLocal(ref.flag, 'skewx')</code> the lean of its y axis.</li>
           <li><strong>Width and Height:</strong> <code>toLocal(ref.flag, 'scalex')</code> and <code>toLocal(ref.flag, 'scaley')</code> return the total scale along both axes. <code>'scaley'</code> is negative when the flag is mirrored.</li>
         </ul>
-        <p>A shape has eight attributes for its frame: <code>x</code>, <code>y</code>, <code>rotate</code>, <code>zoom</code>, <code>scalex</code>, <code>scaley</code>, <code>skewx</code> and <code>skewy</code>. Six values are enough to describe any frame, so the outline reads only six and still rebuilds any combination of rotation, zoom, stretch, skew and mirror: <code>zoom</code> is already contained in <code>'scalex'</code> and <code>'scaley'</code>, and a skew along y can always be written with <code>rotate</code>, <code>scalex</code>, <code>scaley</code> and <code>skewx</code>. The outline's own <code>zoom</code> stays free, so <code>zoom="1.2"</code> draws the copy 20 % larger around the flag's center.</p>
+        <p>Six values describe any frame, so the outline needs no <code>zoom</code> and no <code>skewy</code> from the flag: <code>'scalex'</code> and <code>'scaley'</code> already contain the zoom, and a skew along y can be expressed with the other values. The outline's own <code>zoom</code> stays free: <code>zoom="1.2"</code> draws the copy 1.2 times as large around the flag's center.</p>
         <p>If the target has an offset (<code>dx</code>, <code>dy</code>), map <code>'tx'</code> and <code>'ty'</code> instead of <code>'x'</code> and <code>'y'</code> and leave out the offset: the copy then sits on the drawn shape, and its own <code>zoom</code> grows it around the shape instead of around the distant center.</p>
 
         <div class="callout-info">
@@ -811,8 +810,7 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;!-- Flag, in a stretched layer --&gt;
   &lt;pxl-layer x="<mark id="sec6LayerXCode">250</mark>" y="<mark id="sec6LayerYCode">300</mark>" rotate="<mark id="sec6LayerRotateCode">0</mark>" scalex="<mark id="sec6LayerScalexCode">1.6</mark>"&gt;
-    &lt;pxl-polyline id="flag" stroke="#f97316" strokewidth="4" fill="#ffedd566"
-      closed="true"
+    &lt;pxl-polyline id="flag" stroke="#f97316" strokewidth="4" fill="#ffedd566" closed="true"
       points="-60,90; -60,-90; 90,-45; -30,0; -30,90"
       x="<mark id="sec6FlagXCode">100</mark>" y="<mark id="sec6FlagYCode">0</mark>" rotate="<mark id="sec6FlagRotateCode">30</mark>" skewx="<mark id="sec6FlagSkewxCode">0</mark>" scaley="<mark id="sec6FlagScaleyCode">1</mark>"&gt;
     &lt;/pxl-polyline&gt;
@@ -820,11 +818,11 @@
 
   &lt;!-- Outline, copies the whole frame --&gt;
   &lt;pxl-layer&gt;
-    &lt;pxl-polyline closed="true" points="-60,90; -60,-90; 90,-45; -30,0; -30,90"
-      stroke="#3b82f6" strokewidth="4" zoom="1.2"
+    &lt;pxl-polyline stroke="#3b82f6" strokewidth="4" closed="true" zoom="1.2"
+      points="-60,90; -60,-90; 90,-45; -30,0; -30,90"
       x="<mark id="sec6OutlineXCode" class="highlight-reactive">toLocal(ref.flag, 'x')</mark>" y="<mark id="sec6OutlineYCode" class="highlight-reactive">toLocal(ref.flag, 'y')</mark>"
-      rotate="<mark id="sec6OutlineRotCode" class="highlight-reactive">toLocal(ref.flag, 'rotate')</mark>" skewx="<mark id="sec6OutlineSkewCode" class="highlight-reactive">toLocal(ref.flag, 'skewx')</mark>"
-      scalex="<mark id="sec6OutlineScaleXCode" class="highlight-reactive">toLocal(ref.flag, 'scalex')</mark>" scaley="<mark id="sec6OutlineScaleYCode" class="highlight-reactive">toLocal(ref.flag, 'scaley')</mark>"&gt;
+      rotate="<mark id="sec6OutlineRotateCode" class="highlight-reactive">toLocal(ref.flag, 'rotate')</mark>" skewx="<mark id="sec6OutlineSkewxCode" class="highlight-reactive">toLocal(ref.flag, 'skewx')</mark>"
+      scalex="<mark id="sec6OutlineScalexCode" class="highlight-reactive">toLocal(ref.flag, 'scalex')</mark>" scaley="<mark id="sec6OutlineScaleyCode" class="highlight-reactive">toLocal(ref.flag, 'scaley')</mark>"&gt;
     &lt;/pxl-polyline&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;</code></pre>
@@ -855,12 +853,12 @@
                 <div class="control-group">
                   <label><span>Rotation</span> <span id="sec6LayerRotateVal">0°</span></label>
                   <input type="range" min="-180" max="180" step="5" value="0" autocomplete="off" id="sec6LayerRotateInput"
-                    oninput="document.getElementById('sec6Layer').setAttribute('rotate', this.value); document.getElementById('sec6LayerRotateVal').innerText = this.value + '°'; document.getElementById('sec6LayerRotateCode').innerText = this.value;" data-mark="sec6LayerRotateCode, sec6OutlineXCode, sec6OutlineYCode, sec6OutlineRotCode, sec6OutlineSkewCode, sec6OutlineScaleXCode, sec6OutlineScaleYCode">
+                    oninput="document.getElementById('sec6Layer').setAttribute('rotate', this.value); document.getElementById('sec6LayerRotateVal').innerText = this.value + '°'; document.getElementById('sec6LayerRotateCode').innerText = this.value;" data-mark="sec6LayerRotateCode, sec6OutlineXCode, sec6OutlineYCode, sec6OutlineRotateCode, sec6OutlineSkewxCode, sec6OutlineScalexCode, sec6OutlineScaleyCode">
                 </div>
                 <div class="control-group">
                   <label><span>Scale X <span class="indicator-dot"></span></span> <span id="sec6LayerScalexVal">1.6</span></label>
                   <input type="range" min="0.5" max="2" step="0.1" value="1.6" autocomplete="off" id="sec6LayerScalexInput"
-                    oninput="document.getElementById('sec6Layer').setAttribute('scalex', this.value); document.getElementById('sec6LayerScalexVal').innerText = this.value; document.getElementById('sec6LayerScalexCode').innerText = this.value;" data-mark="sec6LayerScalexCode, sec6OutlineXCode, sec6OutlineYCode, sec6OutlineRotCode, sec6OutlineSkewCode, sec6OutlineScaleXCode, sec6OutlineScaleYCode">
+                    oninput="document.getElementById('sec6Layer').setAttribute('scalex', this.value); document.getElementById('sec6LayerScalexVal').innerText = this.value; document.getElementById('sec6LayerScalexCode').innerText = this.value;" data-mark="sec6LayerScalexCode, sec6OutlineXCode, sec6OutlineYCode, sec6OutlineRotateCode, sec6OutlineSkewxCode, sec6OutlineScalexCode, sec6OutlineScaleyCode">
                 </div>
               </div>
             </div>
@@ -881,17 +879,17 @@
                 <div class="control-group">
                   <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec6FlagRotateVal">30°</span></label>
                   <input type="range" min="-180" max="180" step="5" value="30" autocomplete="off" id="sec6FlagRotateInput"
-                    oninput="document.getElementById('sec6Flag').setAttribute('rotate', this.value); document.getElementById('sec6FlagRotateVal').innerText = this.value + '°'; document.getElementById('sec6FlagRotateCode').innerText = this.value;" data-mark="sec6FlagRotateCode, sec6OutlineRotCode, sec6OutlineSkewCode, sec6OutlineScaleXCode, sec6OutlineScaleYCode">
+                    oninput="document.getElementById('sec6Flag').setAttribute('rotate', this.value); document.getElementById('sec6FlagRotateVal').innerText = this.value + '°'; document.getElementById('sec6FlagRotateCode').innerText = this.value;" data-mark="sec6FlagRotateCode, sec6OutlineRotateCode, sec6OutlineSkewxCode, sec6OutlineScalexCode, sec6OutlineScaleyCode">
                 </div>
                 <div class="control-group">
                   <label><span>Skew X</span> <span id="sec6FlagSkewxVal">0°</span></label>
                   <input type="range" min="-60" max="60" step="5" value="0" autocomplete="off" id="sec6FlagSkewxInput"
-                    oninput="document.getElementById('sec6Flag').setAttribute('skewx', this.value); document.getElementById('sec6FlagSkewxVal').innerText = this.value + '°'; document.getElementById('sec6FlagSkewxCode').innerText = this.value;" data-mark="sec6FlagSkewxCode, sec6OutlineRotCode, sec6OutlineSkewCode, sec6OutlineScaleXCode, sec6OutlineScaleYCode">
+                    oninput="document.getElementById('sec6Flag').setAttribute('skewx', this.value); document.getElementById('sec6FlagSkewxVal').innerText = this.value + '°'; document.getElementById('sec6FlagSkewxCode').innerText = this.value;" data-mark="sec6FlagSkewxCode, sec6OutlineRotateCode, sec6OutlineSkewxCode, sec6OutlineScalexCode, sec6OutlineScaleyCode">
                 </div>
                 <div class="control-group">
                   <label><span>Scale Y</span> <span id="sec6FlagScaleyVal">1</span></label>
                   <input type="range" min="-1.5" max="1.5" step="0.1" value="1" autocomplete="off" id="sec6FlagScaleyInput"
-                    oninput="document.getElementById('sec6Flag').setAttribute('scaley', this.value); document.getElementById('sec6FlagScaleyVal').innerText = this.value; document.getElementById('sec6FlagScaleyCode').innerText = this.value;" data-mark="sec6FlagScaleyCode, sec6OutlineRotCode, sec6OutlineSkewCode, sec6OutlineScaleXCode, sec6OutlineScaleYCode">
+                    oninput="document.getElementById('sec6Flag').setAttribute('scaley', this.value); document.getElementById('sec6FlagScaleyVal').innerText = this.value; document.getElementById('sec6FlagScaleyCode').innerText = this.value;" data-mark="sec6FlagScaleyCode, sec6OutlineRotateCode, sec6OutlineSkewxCode, sec6OutlineScalexCode, sec6OutlineScaleyCode">
                 </div>
               </div>
             </div>
@@ -963,16 +961,14 @@
       x="<mark id="sec7LeftRingXCode" class="highlight-reactive">toLocal(ref.leftPlanet, 'x')</mark>" y="<mark id="sec7LeftRingYCode" class="highlight-reactive">toLocal(ref.leftPlanet, 'y')</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
-  &lt;pxl-layer x="250" y="330" rotate="t * <mark id="sec7LeftSpeedCode">180</mark>"&gt;
-    &lt;pxl-circle id="leftPlanet" x="170" fill="#ffedd566" stroke="#f97316" strokewidth="4"
-      r="30"&gt;
+  &lt;pxl-layer x="250" y="330" rotate="t * <mark id="sec7LeftSpeedCode">360</mark>"&gt;
+    &lt;pxl-circle id="leftPlanet" x="170" r="30" fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
   &lt;!-- Right: Ring Last, it covers the planet --&gt;
-  &lt;pxl-layer x="750" y="330" rotate="t * <mark id="sec7RightSpeedCode">180</mark>"&gt;
-    &lt;pxl-circle id="rightPlanet" x="170" fill="#ffedd566" stroke="#f97316" strokewidth="4"
-      r="30"&gt;
+  &lt;pxl-layer x="750" y="330" rotate="t * <mark id="sec7RightSpeedCode">360</mark>"&gt;
+    &lt;pxl-circle id="rightPlanet" x="170" r="30" fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
   &lt;pxl-layer&gt;
@@ -995,8 +991,8 @@
             <div class="tab-content active" id="sec7PlanetsTab">
               <div class="playground-sliders">
                 <div class="control-group">
-                  <label><span>Speed <span class="indicator-dot"></span></span> <span id="sec7SpeedVal">180°/s</span></label>
-                  <input type="range" min="0" max="360" step="30" value="180" autocomplete="off" id="sec7SpeedInput"
+                  <label><span>Speed <span class="indicator-dot"></span></span> <span id="sec7SpeedVal">360°/s</span></label>
+                  <input type="range" min="0" max="720" step="60" value="360" autocomplete="off" id="sec7SpeedInput"
                     oninput="document.getElementById('sec7LeftOrbit').setAttribute('rotate', 't * ' + this.value); document.getElementById('sec7RightOrbit').setAttribute('rotate', 't * ' + this.value); document.getElementById('sec7SpeedVal').innerText = this.value + '°/s'; document.getElementById('sec7LeftSpeedCode').innerText = this.value; document.getElementById('sec7RightSpeedCode').innerText = this.value;" data-mark="sec7LeftSpeedCode, sec7RightSpeedCode, sec7LeftRingXCode, sec7LeftRingYCode, sec7RightRingXCode, sec7RightRingYCode">
                 </div>
               </div>
@@ -1015,7 +1011,7 @@
             <pxl-layer>
               <pxl-circle id="sec7LeftRing" r="45" x="toLocal(ref.sec7LeftPlanet, 'x')" y="toLocal(ref.sec7LeftPlanet, 'y')" stroke="#3b82f6" strokewidth="4"></pxl-circle>
             </pxl-layer>
-            <pxl-layer id="sec7LeftOrbit" x="250" y="330" rotate="t * 180">
+            <pxl-layer id="sec7LeftOrbit" x="250" y="330" rotate="t * 360">
               <!-- Layer center (orange 300: two layers take the hue of their shapes) and the orbit at the planet's distance (center helper 300) -->
               <pxl-circle r="170" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-circle>
               <pxl-circle r="5" fill="#fdba74"></pxl-circle>
@@ -1023,7 +1019,7 @@
             </pxl-layer>
 
             <!-- Right: the ring's layer after the planet's layer -->
-            <pxl-layer id="sec7RightOrbit" x="750" y="330" rotate="t * 180">
+            <pxl-layer id="sec7RightOrbit" x="750" y="330" rotate="t * 360">
               <pxl-circle r="170" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-circle>
               <pxl-circle r="5" fill="#fdba74"></pxl-circle>
               <pxl-circle id="sec7RightPlanet" x="170" r="30" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>

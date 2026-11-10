@@ -635,14 +635,14 @@
     &lt;!-- Right: Mirror, moves in reverse --&gt;
     &lt;pxl-rect id="mirror" x="1000 - <mark id="sec6MirrorRefXCode" class="highlight-reactive">ref.master.x</mark>" y="<mark id="sec6MirrorRefYCode" class="highlight-reactive">ref.master.y</mark>"
       fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
-      rotate="<mark id="sec6MirrorRefRotCode" class="highlight-reactive">-ref.master.rotate</mark>"
+      rotate="<mark id="sec6MirrorRefRotateCode" class="highlight-reactive">-ref.master.rotate</mark>"
       w="<mark id="sec6MirrorWCode">100</mark>" h="<mark id="sec6MirrorHCode">100</mark>"&gt;
     &lt;/pxl-rect&gt;
 
     &lt;!-- Bottom: Reactor, spins and grows with the master --&gt;
     &lt;pxl-rect id="reactor" w="<mark id="sec6ReactorRefWCode" class="highlight-reactive">ref.master.x</mark> / 5" h="<mark id="sec6ReactorRefHCode" class="highlight-reactive">ref.master.x</mark> / 5"
       fill="#dcfce766" stroke="#22c55e" strokewidth="4"
-      rotate="<mark id="sec6ReactorRefRotCode" class="highlight-reactive">ref.master.x</mark>"
+      rotate="<mark id="sec6ReactorRefRotateCode" class="highlight-reactive">ref.master.x</mark>"
       x="<mark id="sec6ReactorXCode">500</mark>" y="<mark id="sec6ReactorYCode">450</mark>"&gt;
     &lt;/pxl-rect&gt;
   &lt;/pxl-layer&gt;
@@ -686,7 +686,7 @@
             <div class="playground-sliders">
               <div class="control-group">
                 <label><span>Center X <span class="indicator-dot"></span></span> <span id="sec6MasterXVal">250</span></label>
-                <input type="range" min="0" max="1000" step="10" value="250" autocomplete="off" data-mark="sec6MasterXCode, sec6MirrorRefXCode, sec6ReactorRefWCode, sec6ReactorRefHCode, sec6ReactorRefRotCode"
+                <input type="range" min="0" max="1000" step="10" value="250" autocomplete="off" data-mark="sec6MasterXCode, sec6MirrorRefXCode, sec6ReactorRefWCode, sec6ReactorRefHCode, sec6ReactorRefRotateCode"
                   oninput="document.getElementById('sec6Master').setAttribute('x', this.value); document.getElementById('sec6MasterXVal').innerText = this.value; document.getElementById('sec6MasterXCode').innerText = this.value;">
               </div>
               <div class="control-group">
@@ -696,7 +696,7 @@
               </div>
               <div class="control-group">
                 <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec6MasterRotateVal">0°</span></label>
-                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec6MasterRotateCode, sec6MirrorRefRotCode"
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec6MasterRotateCode, sec6MirrorRefRotateCode"
                   oninput="document.getElementById('sec6Master').setAttribute('rotate', this.value); document.getElementById('sec6MasterRotateVal').innerText = this.value + '°'; document.getElementById('sec6MasterRotateCode').innerText = this.value;">
               </div>
             </div>
@@ -888,14 +888,14 @@
       
       <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;!-- Left: Layer 1, rotates with its circle --&gt;
-  &lt;pxl-layer id="layer1" x="<mark id="sec8Layer1XCode">350</mark>" y="<mark id="sec8Layer1YCode">250</mark>" rotate="<mark id="sec8Layer1RotCode">0</mark>"&gt;
+  &lt;pxl-layer id="layer1" x="<mark id="sec8Layer1XCode">350</mark>" y="<mark id="sec8Layer1YCode">250</mark>" rotate="<mark id="sec8Layer1RotateCode">0</mark>"&gt;
     &lt;pxl-circle id="circle1" fill="#ffedd566" stroke="#f97316" strokewidth="4"
       x="<mark id="sec8Circle1XCode">-150</mark>" y="<mark id="sec8Circle1YCode">-150</mark>" r="<mark id="sec8Circle1RCode">100</mark>"&gt;
     &lt;/pxl-circle&gt;
   &lt;/pxl-layer&gt;
 
   &lt;!-- Right: Layer 2, rotates with its circle --&gt;
-  &lt;pxl-layer id="layer2" x="<mark id="sec8Layer2XCode">650</mark>" y="<mark id="sec8Layer2YCode">350</mark>" rotate="<mark id="sec8Layer2RotCode">0</mark>"&gt;
+  &lt;pxl-layer id="layer2" x="<mark id="sec8Layer2XCode">650</mark>" y="<mark id="sec8Layer2YCode">350</mark>" rotate="<mark id="sec8Layer2RotateCode">0</mark>"&gt;
     &lt;pxl-circle id="circle2" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
       x="<mark id="sec8Circle2XCode">150</mark>" y="<mark id="sec8Circle2YCode">150</mark>" r="<mark id="sec8Circle2RCode">100</mark>"&gt;
     &lt;/pxl-circle&gt;
@@ -938,8 +938,8 @@
               </div>
               <div class="control-group">
                 <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec8Var3Val">0°</span></label>
-                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec8Layer1RotCode, sec8LineRefCirc1X, sec8LineRefCirc1Y"
-                  oninput="document.getElementById('sec8Var3').setAttribute('value', this.value); document.getElementById('sec8Var3Val').innerText = this.value + '°'; document.getElementById('sec8Layer1RotCode').innerText = this.value;">
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec8Layer1RotateCode, sec8LineRefCirc1X, sec8LineRefCirc1Y"
+                  oninput="document.getElementById('sec8Var3').setAttribute('value', this.value); document.getElementById('sec8Var3Val').innerText = this.value + '°'; document.getElementById('sec8Layer1RotateCode').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -978,8 +978,8 @@
               </div>
               <div class="control-group">
                 <label><span>Rotation <span class="indicator-dot"></span></span> <span id="sec8Var6Val">0°</span></label>
-                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec8Layer2RotCode, sec8LineRefCirc2X, sec8LineRefCirc2Y"
-                  oninput="document.getElementById('sec8Var6').setAttribute('value', this.value); document.getElementById('sec8Var6Val').innerText = this.value + '°'; document.getElementById('sec8Layer2RotCode').innerText = this.value;">
+                <input type="range" min="-360" max="360" step="5" value="0" autocomplete="off" data-mark="sec8Layer2RotateCode, sec8LineRefCirc2X, sec8LineRefCirc2Y"
+                  oninput="document.getElementById('sec8Var6').setAttribute('value', this.value); document.getElementById('sec8Var6Val').innerText = this.value + '°'; document.getElementById('sec8Layer2RotateCode').innerText = this.value;">
               </div>
             </div>
           </div>
