@@ -1,7 +1,7 @@
 # Technical Implementation Plan: Declarative `<pxl-plot>` Element
 
 **Date**: 2026-09-07  
-**Status**: 🟡 **Proposed** (2026-09-07)  
+**Status**: 🟡 **Proposed** (2026-11-11, notes on sampling and smoothing in §10)  
 **Target Files**: 
 - `js/compiler.js` (Expression compiler parameter injection & static-path guard)
 - `js/elements/shapes/plot.js` (New Custom Element implementation)
@@ -50,7 +50,7 @@ HTMLElement
 | **`scale`** | number | `50` | Mathematical coordinate scale: canvas pixels per 1 mathematical unit. Preserves 1:1 isotropic aspect ratio. |
 | **`steps`** | number | `100` | Number of segments/slices sampled across the `domain`. Allocates `(steps + 1) * 2` floats. |
 | **`closed`** | boolean | `false` | When true, connects the final point back to the first point (e.g. for closed polygons or pie slices). |
-| **`smooth`** | boolean / number | `false` | When true or a number, interpolates vertices with a Catmull-Rom spline (reuses tension logic from `<pxl-polyline>`). |
+| **`smooth`** | boolean / number | `false` | When true or a number, interpolates vertices with a Catmull-Rom spline. Use the **uniform** spline, not the polyline's centripetal one (§10). |
 | **`reveal`** | number (0.0 - 1.0) | `1.0` | Progressive path tracing factor (0 = invisible, 0.5 = 50% drawn, 1.0 = fully drawn). Reuses `<pxl-text>` typewriter logic for animated pen-drawing. |
 | **`markers`** | array | `null` | Array of mathematical values (e.g. `[1, 3, ref.m1.value]`) to draw highlight dots along the curve. |
 | **`markersize`**| number | `5` | Radius of marker dots in logical units. |
@@ -236,3 +236,39 @@ Object.defineProperty(this.attributeValues, 'getY', {
 2. **Parametric Curves**: Test circles ($x = \cos(v), y = \sin(v)$), Lissajous figures ($x = \sin(3v), y = \sin(2v)$), and Archimedean spirals ($r = v$).
 3. **Progressive Reveal**: Test `reveal="loop(3)"` animating from 0.0 to 1.0 to ensure paths trace smoothly over time.
 4. **Zero-GC Benchmarks**: Verify with `ref.main.renderAvg` on `<pxl-stage>` that running an animated marker on an invisible curve (`stroke="none"`) executes in $< 0.05\text{ms}$.
+
+---
+
+## 10. Sampling and Smoothing (Notes, 2026-11-11)
+
+Found while fixing the trace path in `docs/walkthrough.html` section 9 (a Lissajous curve written out as polyline points). Reproduce with `scratch/spline_error.js`, `scratch/sec9_curve_compare.html` (git-ignored, may be gone).
+
+### 10.1 What went wrong in the walkthrough
+
+- The trace path was 100 hand-written points, `smooth="true"`, frequencies 1–10. Since the centripetal spline (`design/2026-10-23_smooth_polyline_spline_plan.md`, 2026-10-24) the tips looked pointed, and curves traced several times (frequencies with a common factor, e.g. 9 / 3) showed frayed double lines at the tips.
+- Fixed for now with 60 points and frequencies 1–5: 60 is divisible by every frequency up to 5, so every pass of a repeated curve hits the same points. The tips are still slightly pointed (below).
+
+### 10.2 Why: the spline must match how the points were sampled
+
+Catmull-Rom guesses the curve between points from their neighbours. The two variants assume different spacing of the curve parameter between points:
+
+- **Uniform**: equal parameter steps between points. That is exactly how a plot samples (`v` in equal steps over `domain`), so for a plot it is close to the true curve.
+- **Centripetal**: parameter steps proportional to the square root of the distance. Right for hand-placed points (no hooks, no run-back; the reason the polyline switched), but wrong for sampled curves: where the curve slows down, e.g. at the tips of a Lissajous curve, the samples crowd together and the spline turns too sharply.
+
+Largest distance from the drawn curve to the true curve (stage units, stage 1000 wide; 0.2 is the measuring resolution):
+
+| Curve, points | Uniform | Centripetal | Straight segments |
+|---|---|---|---|
+| 4 / 1, 60 | 0.3 | 3.9 | 7.5 |
+| 5 / 3, 60 | 0.6 | 3.2 | 12.0 |
+| 2 / 3, 60 | 0.2 | 0.5 | 3.6 |
+| 9 / 3, 100 | 1.0 | 9.2 | 15.9 |
+| 4 / 1, 600 | 0.2 | 0.2 | 0.3 |
+
+### 10.3 Consequences for `<pxl-plot>`
+
+- **`smooth` uses the uniform spline** (the polyline's spline before 2026-10-24: handles `±(next − previous) · k / 6`). Between equal steps it is about 5–10 times closer to the true curve than the centripetal one at the same number of samples. `<pxl-polyline>` keeps the centripetal spline.
+- **Dense sampling is the other way out**: with about 600 steps, straight segments are within half a unit of the true curve. Steps cost one evaluation of `fx` / `fy` each and are only recomputed when an input changes, so a high default (several hundred) may be better than smoothing by default. Decide with a benchmark.
+- **Free ends** (open plots) still need a rule; uniform Catmull-Rom with clamped ends straightens out before the end (problem #1 of the 2026-10-23 plan). For a plot, the missing neighbour can be computed: one more sample just outside `domain`.
+- **Repeated curves** (a parametric curve traced several times over `domain`) are drawn identically on every pass only if the steps per pass are a whole number. With dense sampling the difference is below a pixel.
+- **Test case**: the walkthrough section 9 curve, frequencies 1–10 including 9 / 3 and 4 / 1. When `<pxl-plot>` exists, section 9 moves to it and its sliders go back to 1–10.

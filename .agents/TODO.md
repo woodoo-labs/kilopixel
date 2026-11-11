@@ -46,12 +46,13 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
   - Accessibility: live values as real DOM text; no automatic `aria-live`.
 
 ## 7. Declarative Math Plotting Element (`<pxl-plot>`)
-- **Status**: 🟡 **Proposed** (2026-09-07)
+- **Status**: 🟡 **Proposed** (2026-11-11, notes on sampling and smoothing)
 - **Reference**: `design/2026-09-07_plot_element_plan.md`
 - **Core Features**:
   - Dedicated shape element for high-performance plotting of functions ($y = f(x)$) and parametric curves ($x = f(v), y = g(v)$).
   - Upward $+Y$ mathematical orientation, 1:1 isotropic scaling, decoupled domain intervals, and pre-allocated `Float32Array` vertex caching.
 - **Open**: the plan names the plot's own magnification (pixels per math unit) `scale`. Since 2026-10-30 every element has `zoom`, `scalex` and `scaley`, so a plot attribute `scale` beside them would be confusing; find another name before implementing.
+- **Open**: `smooth` should use the uniform spline (closer to sampled curves than the polyline's centripetal one), or a high `steps` default without smoothing; see section 10 of the plan. Test case: walkthrough section 9, which then goes back to frequencies 1–10.
 
 ## 8. Layer FPS Throttling (`maxfps`), Stage-Level `<pxl-var>` & Performance Monitor
 - **Status**: 🟡 **Proposed** — needs a dedicated, in-depth session
