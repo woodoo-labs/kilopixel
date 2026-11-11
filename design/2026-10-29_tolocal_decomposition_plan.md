@@ -4,7 +4,7 @@
 - **Date**: 2026-10-29
 - **Related**: `design/2026-10-25_refs_across_spaces_note.md` (hub for `toLocal`, §2 and §3), `design/archive/coordinate_mapping_implementation_plan.md` (original property list), `design/2026-10-26_tolocal_fix_plan.md` (reactivity)
 - **Target Implementation**: `js/matrix.js` (`pxl.toLocal`), `js/compiler.js` (warning for unknown `toLocal` names); for §5 (`zoom`) also `js/elements/node.js` (`getLocalMatrix`), `js/graphics.js` (`applyContextState`), `js/engine.js` (`isSpatialKey`), `js/elements/shape.js`, `group.js`, `layer.js` (attribute lists, defaults, `hasStateChanges`), and every page that uses `scale="…"`
-- **Check** (local only, scratch is git-ignored): `scratch/decompose_check.js` (decompose and rebuild 100,000 random matrices, max error 7·10⁻¹⁴); `scratch/tolocal_bench.js` (cost per toLocal call, §3.5); demo of the current limits: `scratch/tolocal_probe.html` (P4); `examples/test53.html` (four transformed layers, toLocal lines through the rects)
+- **Check**: `design/prototypes/2026-10-29_tolocal_decomposition/decompose_check.js` (decompose and rebuild 100,000 random matrices, max error 7·10⁻¹⁴); `scratch/tolocal_bench.js` (not kept) (cost per toLocal call, §3.5); demo of the current limits: `scratch/tolocal_probe.html` (P4); `examples/test53.html` (four transformed layers, toLocal lines through the rects)
 
 ---
 
@@ -79,7 +79,7 @@ Decompose D in Kilopixel's own transform order (`pxl.Matrix.updateLocal`: rotate
 
 Derivation: `updateLocal` with `skewy = 0` gives the columns `scalex·(c, s)` and `tan(skewx)·scalex·(c, s) + scaley·(−s, c)`. The first column gives `rotate` and `scalex`. The second column's part along the first column is `tan(skewx)·scalex`, its part perpendicular to it is `scaley`. The perpendicular part is the determinant divided by `scalex`, which keeps the sign of a mirror.
 
-Results for the cases in §1 (checked in `scratch/decompose_check.js`):
+Results for the cases in §1 (checked in `design/prototypes/2026-10-29_tolocal_decomposition/decompose_check.js`):
 
 | Target | `rotate` / `scalex` / `scaley` / `skewx` / `zoom` |
 |---|---|
@@ -168,7 +168,7 @@ Every per-frame path this plan touches, checked for work and garbage:
 | `hasStateChanges` checks | each draw | `zoom !== 1` instead of `scale !== 1` | none |
 | Unknown-name check (§3.3) | compile time only, once per expression string (`pxl.animationCache` shares compiled functions) | regex over the source | at compile time only |
 
-**Measured** (`scratch/tolocal_bench.js`, Node / V8, the toLocal core with Float32Array matrices like the engine, 2·10⁶ iterations after warm-up; the `getGlobalMatrix()` walk is left out, it only compares version numbers while nothing moves):
+**Measured** (`scratch/tolocal_bench.js` (not kept), Node / V8, the toLocal core with Float32Array matrices like the engine, 2·10⁶ iterations after warm-up; the `getGlobalMatrix()` walk is left out, it only compares version numbers while nothing moves):
 
 | Case | Today | Plan |
 |---|---|---|

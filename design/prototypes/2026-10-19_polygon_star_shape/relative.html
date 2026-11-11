@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Polygon / Star: relative inner radius</title>
+  <script src="/dist/pxl.min.js"></script>
+  <script>
+    // Prototype only: star amount measured from the polygon's edge (0 = polygon, 1 = spokes, < 0 = bulges)
+    // Absolute inner radius = r * cos(180° / sides) * (1 - star)
+    pxl.Polygon = class Polygon extends pxl.Shape {
+      static get observedAttributes() { return [...super.observedAttributes, 'sides', 'r', 'star', 'start']; }
+      static defaults = { ...pxl.Shape.defaults, sides: 5, r: 0, star: 0, start: -90 };
+
+      draw(ctx, u) {
+        const { r, star, start } = this.attributeValues;
+        const sides = Math.floor(this.attributeValues.sides);
+        if (!(sides >= 3) || !(r > 0)) return;
+        const ir = r * Math.cos(Math.PI / sides) * (1 - star);
+        const step = Math.PI / sides;
+        const startRad = start * Math.PI / 180;
+        ctx.beginPath();
+        for (let i = 0; i < sides * 2; i++) {
+          const radius = (i % 2 === 1 ? ir : r) * u;
+          const angle = startRad + i * step;
+          ctx.lineTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
+        }
+        ctx.closePath();
+        this.applyStyle(ctx, u);
+      }
+
+      getBoundingBox() {
+        const { r } = this.attributeValues;
+        this.boundingBox.left = -r; this.boundingBox.right = r;
+        this.boundingBox.top = -r; this.boundingBox.bottom = r;
+        return this.boundingBox;
+      }
+    };
+    customElements.define('pxl-polygon', pxl.Polygon);
+  </script>
+  <style>body { margin: 0; background: #fff; } pxl-stage { max-width: 1000px; }</style>
+</head>
+<body>
+  <pxl-stage id="main" ratio="1000 / 600">
+    <pxl-layer id="layer">
+      <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+    </pxl-layer>
+  </pxl-stage>
+  <script>
+    // Rows: sides 3 / 5 / 8. Columns: star amount -0.3 / 0 / 0.25 / 0.5 / 0.75 / 1
+    const layer = document.getElementById('layer');
+    const rows = [{ sides: 3, color: ['#ffedd566', '#f97316', '#fb923c'] },
+                  { sides: 5, color: ['#dbeafe66', '#3b82f6', '#60a5fa'] },
+                  { sides: 8, color: ['#dcfce766', '#22c55e', '#4ade80'] }];
+    const stars = [-0.3, 0, 0.25, 0.5, 0.75, 1];
+    rows.forEach((row, ri) => {
+      const y = 95 + ri * 175;
+      stars.forEach((s, ci) => {
+        const x = 85 + ci * 166;
+        const p = document.createElement('pxl-polygon');
+        Object.entries({ x, y, sides: row.sides, r: 62, star: s, fill: row.color[0], stroke: row.color[1], strokewidth: 4 })
+          .forEach(([k, v]) => p.setAttribute(k, v));
+        layer.appendChild(p);
+        const label = document.createElement('pxl-text');
+        Object.entries({ x, y: y + 80, text: `'${ri === 0 ? 'star ' : ''}${s}'`, size: 20, font: 'monospace', align: 'center', fill: row.color[2] })
+          .forEach(([k, v]) => label.setAttribute(k, v));
+        layer.appendChild(label);
+      });
+    });
+  </script>
+</body>
+</html>

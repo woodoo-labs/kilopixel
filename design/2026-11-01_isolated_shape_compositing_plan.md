@@ -4,7 +4,7 @@
 - **Date**: 2026-11-01
 - **Related**: `design/2026-11-07_safe_shape_render_plan.md` (built 2026-11-07, same function `Shape.render()`; the base for this plan, §9), TODO §14 `paintorder` (changes the order of the same draw calls; build it after this plan, §9), `docs/DOCS_STANDARDS.md` §2 ("Ghosts of fill-only shapes", the docs rule this removes)
 - **Target Implementation**: `js/elements/shape.js` (`render()`), `js/graphics.js` (`applyContextState` split), `js/elements/stage.js` (scratch canvas size), `js/elements/shapes/text.js` and `grid.js` (draw count)
-- **Prototypes**: `scratch/mask_fill_stroke.html` (today vs isolated, every mask mode plus alpha, blend, shadow, multi-line text), `scratch/isolation_bench.html` (cost)
+- **Prototypes**: `scratch/mask_fill_stroke.html` (not kept) (today vs isolated, every mask mode plus alpha, blend, shadow, multi-line text), `scratch/isolation_bench.html` (cost)
 
 ---
 
@@ -92,7 +92,7 @@ Recommendation: (a), with an engine test that compares it against `ctx.getTransf
 
 ## 4. Cost
 
-Measured with `scratch/isolation_bench.html` in the desktop app's browser pane: layer 1000 × 600 at DPR 2 (2000 × 1200 px), ellipse 180 × 120 with fill and stroke, `mask="xor"`, 20 shapes per frame, GPU work included.
+Measured with `scratch/isolation_bench.html` (not kept) in the desktop app's browser pane: layer 1000 × 600 at DPR 2 (2000 × 1200 px), ellipse 180 × 120 with fill and stroke, `mask="xor"`, 20 shapes per frame, GPU work included.
 
 | Variant | Per shape |
 |---|---|
@@ -115,7 +115,7 @@ Measured with `scratch/isolation_bench.html` in the desktop app's browser pane: 
 
 ### 6.1 `alpha`
 
-Isolating `alpha` is correct (SVG `opacity` is isolated too), but fades are common, and every stroked, filled shape that fades would pay §4 per frame. The artifact is subtle (`scratch/mask_fill_stroke.html`, row "alpha 0.5").
+Isolating `alpha` is correct (SVG `opacity` is isolated too), but fades are common, and every stroked, filled shape that fades would pay §4 per frame. The artifact is subtle (`scratch/mask_fill_stroke.html` (not kept), row "alpha 0.5").
 
 Recommendation: leave `alpha` out for now. It keeps today's per-call behavior, like SVG `fill-opacity` / `stroke-opacity`. Revisit if users notice it.
 
@@ -141,7 +141,7 @@ Pixel reads on a small stage, one test per row:
 3. Tests §7; `node build.js`; all tests pass.
 4. KILOPIXEL.md, TODO.md entry.
 5. Docs: `mask.html` shapes with fill and stroke and the standard ghosts; remove the "Ghosts of fill-only shapes" note; check `shadow.html` §1, `blend.html` and `fill.html`.
-6. Step 2: bounding-box scratch region, measured with `scratch/isolation_bench.html` again.
+6. Step 2: bounding-box scratch region, measured with `scratch/isolation_bench.html` (not kept) again.
 
 ## 9. Build Order with Related Plans
 

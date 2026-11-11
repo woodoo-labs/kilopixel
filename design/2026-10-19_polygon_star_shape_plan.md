@@ -4,7 +4,7 @@
 - **Date**: 2026-10-19
 - **Related**: `design/2026-10-17_shape_authoring_plan.md` (custom shape template, the Star example), `design/2026-10-18_polyline_optimization_plan.md` (closed polylines), `.agents/TODO.md` §23
 - **Target Implementation**: `js/elements/shapes/polygon.js` (new), `build.js`, `docs/polygon.html` (new), `docs/js/layout.js`, `.agents/KILOPIXEL.md`
-- **Prototypes** (local): `scratch/regular_polygon/test.html` (absolute `ir`), `scratch/regular_polygon/relative.html` (relative star amount, §3)
+- **Prototypes**: `design/prototypes/2026-10-19_polygon_star_shape/test.html` (absolute `ir`), `design/prototypes/2026-10-19_polygon_star_shape/relative.html` (relative star amount, §3)
 
 ---
 
@@ -214,7 +214,7 @@ Sidebar: "Polygon" link back under Shapes & Paths, after "Polyline".
 | # | Case | Expected |
 |---|---|---|
 | 1 | `sides` 3 / 4 / 5 / 6 / 8, `indent="0"` | regular polygons, first corner up, `n` path corners |
-| 2 | `indent` 0.25 / 0.5 / 0.75 / 1 per `sides` | stars as in `scratch/regular_polygon/relative.html`; `1` = spokes |
+| 2 | `indent` 0.25 / 0.5 / 0.75 / 1 per `sides` | stars as in `design/prototypes/2026-10-19_polygon_star_shape/relative.html`; `1` = spokes |
 | 3 | negative `indent`, including `1 − 1 / cos(180° / n)` | bulges; exact regular `2n`-gon at that value |
 | 4 | `indent="2"` | same as `1` (clamped) |
 | 5 | `sides` "2", "abc", "5.7"; `r="0"` | nothing / nothing / 5 corners / nothing |

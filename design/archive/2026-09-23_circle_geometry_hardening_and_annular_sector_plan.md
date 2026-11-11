@@ -398,7 +398,7 @@ customElements.define('pxl-ellipse', Ellipse);
 ## 6. Verification & Test Plan
 
 ### 6.1 Automated Verification
-Create a test script in `scratch/test_circle_hardening.js` to execute via Node:
+Create a test script in `scratch/test_circle_hardening.js` (not kept) to execute via Node:
 1. Verify `safeR` clamps negative numbers to `0`.
 2. Verify `ir > r` renders smoothly without errors or clamping, allowing dynamic animations to expand outward.
 3. Verify sweep of `359°` sets `isFull = false`.

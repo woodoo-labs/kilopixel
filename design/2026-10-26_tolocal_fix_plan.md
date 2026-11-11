@@ -4,7 +4,7 @@
 - **Date**: 2026-10-26
 - **Related**: `design/2026-10-25_refs_across_spaces_note.md` (what `toLocal` maps), `design/archive/coordinate_mapping_implementation_plan.md` (original `toLocal` design), `.agents/TODO.md` §25
 - **Target Implementation**: `js/compiler.js` (`compileExpression`), `js/engine.js` (`compileAttribute`, new `evaluateToLocalAttributes`), `js/elements/node.js` (constructor, `broadcastGlobalMatrixChange`)
-- **Demo** (local only, scratch is git-ignored): `scratch/tolocal_numbers.html`
+- **Demo**: `design/prototypes/2026-10-26_tolocal_fix/tolocal_numbers.html`
 - **Tests** (committed): `tests/index.html`, the `toLocal:` tests (10, added 2026-10-26)
 
 ---
@@ -13,7 +13,7 @@
 
 `toLocal(ref.target, prop)` returns the target's position (or rotation, scale) in the space where the reader's own `x` / `y` live: the reader's parent space. The result goes stale when **the reader's own space moves** and the target does not.
 
-Demo (`scratch/tolocal_numbers.html`): a circle `sun` sits still in an untransformed layer A at `(50, 100)`. A ring in layer B reads it:
+Demo (`design/prototypes/2026-10-26_tolocal_fix/tolocal_numbers.html`): a circle `sun` sits still in an untransformed layer A at `(50, 100)`. A ring in layer B reads it:
 
 ```html
 <pxl-layer x="600" y="350" rotate="t * 12" scale="1.5">
@@ -147,7 +147,7 @@ A reader with `x` and `y` costs two calls (≈ 0.1 µs), only in frames where it
 
 ## 7. Tests
 
-1. `scratch/tolocal_numbers.html` **without** the `+ t * 0` workaround: the ring stays on the circle; the read-out changes every frame.
+1. `design/prototypes/2026-10-26_tolocal_fix/tolocal_numbers.html` **without** the `+ t * 0` workaround: the ring stays on the circle; the read-out changes every frame.
 2. Static move: a button / `setAttribute('rotate', …)` on layer B (no animation) moves the reader once and the layer then stays idle (check `fps` drops to 0 when nothing moves).
 3. Nested: reader inside a group inside a rotating layer; target in another layer.
 4. Same subtree: reader and target both inside the rotating layer (no regression, no flicker).
@@ -157,7 +157,7 @@ A reader with `x` and `y` costs two calls (≈ 0.1 µs), only in frames where it
 
 ### 7.1 Results (2026-10-26)
 
-Tests 2–4 run in `scratch/tolocal_fix_tests.html`; "OK" means the stored value equals a fresh `pxl.toLocal()` call.
+Tests 2–4 run in `design/prototypes/2026-10-26_tolocal_fix/tolocal_fix_tests.html`; "OK" means the stored value equals a fresh `pxl.toLocal()` call.
 
 | Test | Result |
 |---|---|

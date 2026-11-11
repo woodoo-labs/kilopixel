@@ -118,5 +118,5 @@ No engine change, so no `tests/index.html` entry. Check on the dev server:
   5. Phone width: the closed drawer keeps its position between pages, also on `text.html` after the fix ✓
   6. Back: the page shows its active link at the stored position (the preview browser reloads instead of using the back / forward cache) ✓
   7. Console clean ✓
-  8. No flicker: `scratch/sidebar_paint_check.html` reads the sidebar right after `<docs-sidebar>` while the page is parsed: already at the stored position (600). Restoring happens before anything after the sidebar is drawn. A throttled-network visual check wasn't possible in this environment (no throttling in the browser tools); worth a quick look in a normal browser.
+  8. No flicker: `design/prototypes/2026-11-11_sidebar_scroll/sidebar_paint_check.html` reads the sidebar right after `<docs-sidebar>` while the page is parsed: already at the stored position (600). Restoring happens before anything after the sidebar is drawn. A throttled-network visual check wasn't possible in this environment (no throttling in the browser tools); worth a quick look in a normal browser.
 

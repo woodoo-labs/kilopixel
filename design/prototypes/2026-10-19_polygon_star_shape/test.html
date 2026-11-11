@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Polygon / Star prototype</title>
+  <script src="/dist/pxl.min.js"></script>
+  <script>
+    // Prototype only (custom shape, no engine change): regular polygon, star when ir is set
+    pxl.Polygon = class Polygon extends pxl.Shape {
+      static get observedAttributes() { return [...super.observedAttributes, 'sides', 'r', 'ir', 'start']; }
+      static defaults = { ...pxl.Shape.defaults, sides: 5, r: 0, ir: null, start: -90 };
+
+      draw(ctx, u) {
+        const { r, ir, start } = this.attributeValues;
+        const sides = Math.floor(this.attributeValues.sides);
+        if (!(sides >= 3) || !(r > 0)) return;
+        const isStar = ir !== null;
+        const count = isStar ? sides * 2 : sides;
+        const step = Math.PI * 2 / count;
+        const startRad = start * Math.PI / 180;
+        ctx.beginPath();
+        for (let i = 0; i < count; i++) {
+          const radius = (isStar && i % 2 === 1 ? ir : r) * u;
+          const angle = startRad + i * step;
+          ctx.lineTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
+        }
+        ctx.closePath();
+        this.applyStyle(ctx, u);
+      }
+
+      getBoundingBox() {
+        const { r } = this.attributeValues;
+        this.boundingBox.left = -r; this.boundingBox.right = r;
+        this.boundingBox.top = -r; this.boundingBox.bottom = r;
+        return this.boundingBox;
+      }
+    };
+    customElements.define('pxl-polygon', pxl.Polygon);
+  </script>
+  <style>body { margin: 0; background: #fff; } pxl-stage { max-width: 1000px; }</style>
+</head>
+<body>
+  <pxl-stage id="main" ratio="2 / 1">
+    <pxl-layer>
+      <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+      <!-- Columns: same sides, same r. Row 1: regular polygons (no ir). Row 2: stars with ir = 1.3 × r -->
+      <pxl-polygon x="100" y="100" sides="3" r="70" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-polygon>
+      <pxl-polygon x="300" y="100" sides="4" r="70" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-polygon>
+      <pxl-polygon x="500" y="100" sides="5" r="70" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-polygon>
+      <pxl-polygon x="700" y="100" sides="6" r="70" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-polygon>
+      <pxl-polygon x="900" y="100" sides="8" r="70" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-polygon>
+      <pxl-text x="100" y="195" text="'sides 3'" size="22" font="monospace" align="center" fill="#fb923c"></pxl-text>
+      <pxl-text x="300" y="195" text="'sides 4'" size="22" font="monospace" align="center" fill="#fb923c"></pxl-text>
+      <pxl-text x="500" y="195" text="'sides 5'" size="22" font="monospace" align="center" fill="#fb923c"></pxl-text>
+      <pxl-text x="700" y="195" text="'sides 6'" size="22" font="monospace" align="center" fill="#fb923c"></pxl-text>
+      <pxl-text x="900" y="195" text="'sides 8'" size="22" font="monospace" align="center" fill="#fb923c"></pxl-text>
+
+      <pxl-polygon x="100" y="330" sides="3" r="70" ir="91" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-polygon>
+      <pxl-polygon x="300" y="330" sides="4" r="70" ir="91" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-polygon>
+      <pxl-polygon x="500" y="330" sides="5" r="70" ir="91" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-polygon>
+      <pxl-polygon x="700" y="330" sides="6" r="70" ir="91" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-polygon>
+      <pxl-polygon x="900" y="330" sides="8" r="70" ir="91" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-polygon>
+      <pxl-text x="100" y="455" text="'r 70, ir 91'" size="22" font="monospace" align="center" fill="#60a5fa"></pxl-text>
+      <pxl-text x="300" y="455" text="'r 70, ir 91'" size="22" font="monospace" align="center" fill="#60a5fa"></pxl-text>
+      <pxl-text x="500" y="455" text="'r 70, ir 91'" size="22" font="monospace" align="center" fill="#60a5fa"></pxl-text>
+      <pxl-text x="700" y="455" text="'r 70, ir 91'" size="22" font="monospace" align="center" fill="#60a5fa"></pxl-text>
+      <pxl-text x="900" y="455" text="'r 70, ir 91'" size="22" font="monospace" align="center" fill="#60a5fa"></pxl-text>
+    </pxl-layer>
+  </pxl-stage>
+</body>
+</html>

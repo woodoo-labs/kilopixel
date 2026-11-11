@@ -117,7 +117,7 @@ Class expressions are not top-level names, so Terser may shorten or drop their n
 
 - **Debugger:** typing `pxl` in the console shows every class (`pxl.Circle`, `pxl.Shape`, …) next to the existing engine functions and state.
 - **Custom shapes:** `class Star extends pxl.Shape` with `static defaults = { ...pxl.Shape.defaults, … }` (shape authoring plan). Built-in shapes use exactly the same form, so the built-ins are the template.
-- **Scratch tools** that patch `Shape.prototype` at runtime (`scratch/save_restore/always_save.js`, `scratch/custom_shape/*`) switch to `pxl.Shape`.
+- **Scratch tools** that patch `Shape.prototype` at runtime (`scratch/save_restore/always_save.js` (not kept), `scratch/custom_shape/*`) switch to `pxl.Shape`.
 
 ---
 
@@ -160,6 +160,6 @@ No runtime difference. `pxl.Shape` and the other prefixed references are looked 
 | 3 | Global names added by the bundle | only `pxl` |
 | 4 | `pxl` in the console | all 13 classes listed; `pxl.Circle.name === 'Circle'` in the minified build |
 | 5 | Temporarily add a top-level `const leakTest = 1;` to a source file | `node build.js` stops with the error message; remove it again |
-| 6 | Custom `Star` with `class Star extends pxl.Shape` | works as in `scratch/custom_shape/test.html` |
+| 6 | Custom `Star` with `class Star extends pxl.Shape` | works as in `scratch/custom_shape/test.html` (not kept) |
 | 7 | Expressions (`t`, `wave()`, `toLocal()`, `ref.*`) and event handlers | unchanged behaviour |
-| 8 | Rule A unit tests and regression (`scratch/rule_a/unit.html`, `regress.html` against the previous bundle) | 20 / 20; identical values on all pages, no new console errors |
+| 8 | Rule A unit tests and regression (`scratch/rule_a/unit.html` (not kept), `regress.html` against the previous bundle) | 20 / 20; identical values on all pages, no new console errors |

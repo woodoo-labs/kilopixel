@@ -4,7 +4,7 @@
 - **Date**: 2026-10-17
 - **Related**: `design/2026-10-17_bundle_scope_plan.md` (`pxl.Shape`, implemented), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, introduced `static defaults`), `design/2026-11-07_safe_shape_render_plan.md` (state isolation and error handling for foreign code, implemented), `design/2026-10-30_framework_compatibility_plan.md` (proposes renaming the `on*` handlers, §0), `design/2026-10-27_engine_cleanup_inventory_note.md` (code style, §0), `.agents/TODO.md` §20
 - **Target Implementation**: `js/elements/node.js`, `js/elements/shape.js`, `js/elements/shapes/*.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/interaction.js`
-- **Prototype** (local only, scratch is git-ignored): `scratch/custom_shape/star.js`, `scratch/custom_shape/test.html` (out of date since the field renames of 2026-10-28: it reads `layer.ctx` and `layer.dpr`, now `_ctx` and `_dpr`; update before reusing it)
+- **Prototype** (not kept): `scratch/custom_shape/star.js`, `scratch/custom_shape/test.html` (out of date since the field renames of 2026-10-28: it reads `layer.ctx` and `layer.dpr`, now `_ctx` and `_dpr`; update before reusing it)
 
 ---
 
@@ -251,6 +251,6 @@ Verified 2026-10-17 (frames driven by hand; not run again after the 2026-11-07 r
 | 5 | Two Rects, two Polylines | separate `_radii` / `flatCache` per instance (no shared arrays) |
 | 6 | Hover / click on every shape type (incl. text) | unchanged hit testing |
 | 7 | Pump with pattern B | animates, toggles with `running`, hit testing follows the impeller |
-| 8 | Rule A unit tests (`scratch/rule_a/unit.html`) | 20 / 20 still pass |
+| 8 | Rule A unit tests (`scratch/rule_a/unit.html` (not kept)) | 20 / 20 still pass |
 
-**Regression:** `scratch/rule_a/regress.html` (old vs. new bundle on all docs / examples pages): expected differences only in key order (`isHovered` / `isPressed`) and the new Polyline `points` key; no new console errors.
+**Regression:** `scratch/rule_a/regress.html` (not kept) (old vs. new bundle on all docs / examples pages): expected differences only in key order (`isHovered` / `isPressed`) and the new Polyline `points` key; no new console errors.

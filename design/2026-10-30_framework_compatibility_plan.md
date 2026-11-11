@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (2026-11-10, D1 and D4 decided; no code changes yet)
 - **Date**: 2026-10-30
-- **Related**: `scratch/frameworks/` (React 19 and Vue 3.5 prototypes, `FINDINGS.md`, `d4_clicks.html` for D4; local only), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`
+- **Related**: `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes with `FINDINGS.md` were in `scratch/frameworks/` (not kept), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
 
 ---
@@ -41,7 +41,7 @@ Kilopixel should work in **any** framework (React, Preact, Vue, Svelte, Solid, A
 
 ## 3. Current State (Audit 2026-10-30)
 
-From the React 19 / Vue 3.5 prototypes (`scratch/frameworks/FINDINGS.md`) and the code:
+From the React 19 / Vue 3.5 prototypes (`scratch/frameworks/FINDINGS.md` (not kept)) and the code:
 
 | # | State | Detail |
 |---|---|---|
@@ -53,7 +53,7 @@ From the React 19 / Vue 3.5 prototypes (`scratch/frameworks/FINDINGS.md`) and th
 | C6 | ❌ | same; React `onClick` never fires |
 | C7 | ❌ | `onclick`, `onenter`, `onleave`, `ondown`, `onup`, `onmove` are the declarative handlers. `onclick` is also a **native event handler content attribute**: the browser compiles it as global JavaScript on every HTML element. React 19 drops it (no attribute; `element.onclick` is React's noop). Vue keeps it (string `on*` values on native handler names stay attributes). Svelte 5 / Solid treat `onclick` as a listener prop (not verified here) |
 | C8 | ✅ (untested as a whole) | `disconnectedCallback` unregisters, `connectedCallback` re-registers; unmount / remount verified in both prototypes |
-| C9 | ⚠️ | each `<pxl-layer>` appends its `<canvas>` as a light-DOM child (`layer.js` `connectedCallback`). Frameworks keep nodes they didn't create in client rendering, but full child replacement (`innerHTML`, htmx swaps of a layer's content) removes it, and hydration sees an unexpected node. Confirmed 2026-11-05 (`scratch/gradient_stops/thin_shapes.html`, first version): after `layer.innerHTML = …` the engine keeps drawing into the removed canvas, so the new shapes are invisible and nothing is logged |
+| C9 | ⚠️ | each `<pxl-layer>` appends its `<canvas>` as a light-DOM child (`layer.js` `connectedCallback`). Frameworks keep nodes they didn't create in client rendering, but full child replacement (`innerHTML`, htmx swaps of a layer's content) removes it, and hydration sees an unexpected node. Confirmed 2026-11-05 (`scratch/gradient_stops/thin_shapes.html` (not kept), first version): after `layer.innerHTML = …` the engine keeps drawing into the removed canvas, so the new shapes are invisible and nothing is logged |
 | C10 | ⚠️ | inline styles written by the engine: stage (`display`, `position`, `width`, `aspect-ratio`), layer (`display`, `position`, `inset`), var (`display: none`), stage `cursor`. A framework binding `style` can overwrite them (Vue `:style` and React `style` set individual properties, Angular `[style]` and Lit `style=${…}` can replace the whole attribute) |
 | C11 | ⚠️ | server HTML has no canvases; the client adds them inside `<pxl-layer>` (C9) → hydration mismatch warnings in React / Vue |
 | C12 | ⚠️ | parents are found with `closest('pxl-layer')`, `parentElement.closest('pxl-group, pxl-layer')`, `closest('pxl-stage')`: they stop at a shadow root. Slotted children are fine (they stay in the light tree of the host) |
@@ -86,7 +86,7 @@ After the hit test in `InteractionEngine.process()`, Kilopixel dispatches DOM ev
 - **Order**: the declarative handler (§4.3) runs first, then the DOM event; both after the state broadcast (`isHovered` / `isPressed` already updated), like today.
 - **When**: `click`, `pointerdown` and `pointerup` are hit-tested and dispatched **when the browser's event arrives** (D4, below). The other events (`pointerover` / `pointerenter` / `pointerout` / `pointerleave` / `pointermove`) come from `process()`, which runs inside `Stage.render()`, after all layers drew. Dispatching there runs user code synchronously inside the frame. Frameworks schedule their re-render (React / Vue / Svelte batch), but a direct listener may call `setAttribute` synchronously; that only invalidates layers for the next frame, so it is safe. To keep `process()` simple, events are collected during `process()` in a small preallocated queue and dispatched at its end.
 - **One event per user action (D4, decided 2026-11-10)**: the browser's own `click` targets the layer canvas and bubbles up through the stage. If Kilopixel only added its own `click` on the shape, handlers on the stage or above would run **twice** for one click. Today the engine stores a click and hit-tests it in the next frame, so when the browser's click passes the stage, Kilopixel doesn't know yet whether a shape was hit. Decision: for `click`, `pointerdown` and `pointerup`, the stage hit-tests **when the browser's event arrives** (a capture listener on the stage, positions from the last frame). Over a shape, it stops the browser's event (`stopPropagation()`) and dispatches Kilopixel's event on the shape right away; over empty space, the browser's event passes unchanged. Every framework then sees exactly one event per action, with the shape as `target`, and `stopPropagation()` in a shape handler protects the parents as usual. `pointermove` keeps both events (many per second, also over empty space; stage-level move listeners usually want the native coordinates); documented.
-  - **Prototype** (`scratch/frameworks/d4_clicks.html`, 2026-11-10, React 19 and Vue 3.5, a shim in place of the engine): with both events (option a), a card around the stage that toggles on click received **two** clicks per circle click (the toggle cancelled itself), and a circle handler's `stopPropagation()` didn't stop the card from toggling, because the browser's click had passed one frame earlier. With option (b) every case was correct in both frameworks: one card call, `stopPropagation()` respected, background clicks unchanged.
+  - **Prototype** (`design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html`, 2026-11-10, React 19 and Vue 3.5, a shim in place of the engine): with both events (option a), a card around the stage that toggles on click received **two** clicks per circle click (the toggle cancelled itself), and a circle handler's `stopPropagation()` didn't stop the card from toggling, because the browser's click had passed one frame earlier. With option (b) every case was correct in both frameworks: one card call, `stopPropagation()` respected, background clicks unchanged.
   - **Cost**: one hit test per click / press / release (rare compared to moves). The test uses the matrices of the last drawn frame, at most one frame old.
 
 ### 4.2 Which Shapes Are Hit-Tested
@@ -302,7 +302,7 @@ Each test that needs rendering forces it (`stage.resize()` / `alwaysrender`) so 
 
 ## 12. Framework Smoke Pages and Docs
 
-**Smoke pages** (`scratch/frameworks/`, local; promote one or two to `examples/` later): the same component (two instances, number binding, expression binding, removal via `undefined`, mount / unmount, a click handler in the framework's own syntax, hover state shown in the framework's UI) in:
+**Smoke pages** (in `design/prototypes/2026-10-30_framework_compatibility/`; promote one or two to `examples/` later): the same component (two instances, number binding, expression binding, removal via `undefined`, mount / unmount, a click handler in the framework's own syntax, hover state shown in the framework's UI) in:
 
 | Framework | Load without a build | Event syntax to check |
 |---|---|---|
@@ -348,7 +348,7 @@ Sidebar: a new entry under "Engine & Reactivity" or a new section "Integration".
 3. W1 events: dispatch DOM events, `addEventListener` override, `interactive`, rename `on*` → D1 names, warning for the old names; migrate the 25 handlers (`test32`, `test37`, `tests/index.html`), KILOPIXEL.md Events + AI guide, docs pages that mention `onclick` on shapes (+ T-E1…T-E7). `feat(engine)!: DOM events on shapes; pxl-on-click replaces onclick`.
 4. W2 canvas in a shadow root + stylesheet defaults (+ T-M3, T-S1, T-S2, T-H1, T-E5). `refactor(engine): layer canvas in a shadow root, default styles in a stylesheet`.
 5. W4 cache bound (+ T-K1). `perf(compiler): bound the expression caches`.
-6. Smoke pages in `scratch/frameworks/` for the frameworks in §12 that load without a build; record results in `FINDINGS.md`.
+6. Smoke pages in `design/prototypes/2026-10-30_framework_compatibility/` for the frameworks in §12 that load without a build; record results in `FINDINGS.md`.
 
 **Phase 2: properties**
 
@@ -374,7 +374,7 @@ Every engine step: `node build.js`, update the `pxl.min.js` size, `tests/index.h
 ## 16. Risks
 
 - **API change of the handlers (W1)**: pre-release, 25 uses; the old-name warning makes leftovers visible.
-- **Shadow root on layers (W2)**: pointer coordinate behaviour across the shadow boundary (T-E5) and any code that looks for `layer.querySelector('canvas')` (search the repo before changing; tests and examples may read the canvas for pixel checks, e.g. `scratch/custom_shape/test.html`).
+- **Shadow root on layers (W2)**: pointer coordinate behaviour across the shadow boundary (T-E5) and any code that looks for `layer.querySelector('canvas')` (search the repo before changing; tests and examples may read the canvas for pixel checks, e.g. `scratch/custom_shape/test.html` (not kept)).
 - **Accessors (W3)**: a framework that sets a property Kilopixel doesn't expect (e.g. `style`, `className`) is unaffected (no accessor); a user who set expando properties with attribute names on elements (`el.x = …` as a private field) would now change the drawing. Unlikely; documented.
 - **Event duplication (D4)**: solved for `click`, `pointerdown` and `pointerup` by option (b); stage-level `pointermove` listeners see the native and the Kilopixel event (documented). Code that listens on the stage for the browser's click over a shape now gets Kilopixel's click instead (`target` = the shape, `isTrusted` = false).
 
@@ -413,4 +413,4 @@ No per-frame cost for pages that don't use the new features; some paths get chea
 
 - **File size**: about +2–3 KB minified (`pxl.min.js` ~53 KB → ~55–56 KB); the main measurable cost.
 - **Worst case avoided by design**: `pointermove` dispatched every frame while the pointer moves over many shapes. Only the shape under the pointer gets events, and only for types with listeners.
-- **Check**: run `scratch/perf/run.html` before and after phase 1 (same pages, interleaved rounds). In this environment it resolves differences above ~20 % only (`scratch/perf/RESULTS.md`); smaller effects need a quiet machine or more rounds.
+- **Check**: run `scratch/perf/run.html` (not kept) before and after phase 1 (same pages, interleaved rounds). In this environment it resolves differences above ~20 % only (`scratch/perf/RESULTS.md`); smaller effects need a quiet machine or more rounds.

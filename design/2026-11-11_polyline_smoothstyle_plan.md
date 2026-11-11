@@ -4,7 +4,7 @@
 - **Date**: 2026-11-11
 - **Related**: `design/2026-10-23_smooth_polyline_spline_plan.md` (the centripetal spline, implemented 2026-10-24), `design/2026-09-07_plot_element_plan.md` §10 (`<pxl-plot>` needs the uniform spline and reuses this code, §6)
 - **Target Implementation**: `js/elements/shapes/polyline.js`, `tests/index.html`, `.agents/KILOPIXEL.md` (Smoothing), `docs/polyline.html` (new section 5), `docs/walkthrough.html` section 9 (D3)
-- **Prototypes** (scratch is git-ignored, may be gone): `scratch/smoothstyle_examples.html` (both splines on 6 candidate examples, plain canvas), `scratch/spline_error.js`, `scratch/spline_uniform_sec9.js`, `scratch/smoothstyle_search.js` (error against the true curve)
+- **Prototypes**: `design/prototypes/2026-11-11_polyline_smoothstyle/smoothstyle_examples.html` (both splines on 6 candidate examples, plain canvas), `design/prototypes/2026-11-11_polyline_smoothstyle/spline_error.js`, `design/prototypes/2026-11-11_polyline_smoothstyle/spline_uniform_sec9.js`, `design/prototypes/2026-11-11_polyline_smoothstyle/smoothstyle_search.js` (error against the true curve)
 
 ---
 

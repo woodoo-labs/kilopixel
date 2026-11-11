@@ -4,7 +4,7 @@
 **Status**: ✅ **Implemented** (2026-11-05, revised approach of §3–4; 6 tests in `tests/index.html` fail on the old build and pass on the new one; 160 docs canvases pixel-identical before and after)  
 **Target Component:** `js/elements/shape.js` (`Shape.prototype.createGradient`, `this._gradCache`)  
 **Related:** `design/archive/2026-11-05_draw_errors_plan.md` §3.1 (stop offset clamping in the same function; built together, §7)  
-**Prototype** (local, scratch is git-ignored): `scratch/gradient_stops/stroke_gradient_zero.html` (9 cases, before / after)
+**Prototype** (not kept): `scratch/gradient_stops/stroke_gradient_zero.html` (9 cases, before / after)
 
 ---
 
@@ -218,7 +218,7 @@ Reviewed 2026-11-05. `createGradient` runs for every fill and stroke on every dr
 | B: cache hit | static gradient: the same descriptor object every frame | `getBoundingBox()` + 6 comparisons | one property read (`strokewidth`) + 1 comparison |
 | C: cache miss | animated gradient: a new descriptor every frame | new `CanvasGradient` + color stops | 2 × `Math.max`, a few additions, the offset clamp |
 
-**Measured** (`scratch/gradient_stops/create_gradient_bench.html`, Chrome, the current function against the planned one, median of 7 rounds, two runs):
+**Measured** (`scratch/gradient_stops/create_gradient_bench.html` (not kept), Chrome, the current function against the planned one, median of 7 rounds, two runs):
 
 | Path | Current | Planned |
 |---|---|---|

@@ -27,7 +27,7 @@ These already work and must keep working: `'rotate = ref.angle.value'` (a single
 
 What users write is normal: plain text without quotes, single quotes when text looks like code, backticks for apostrophes and `${…}` values (`docs/text.html`, `docs/mapping.html`). Most of it works. It breaks as soon as quoted text and a value are in one expression (`+`, `${…}`, a function call), and there is no rule we could document to avoid it other than "don't use certain words in your text". Realistic cases: a readout that shows an expression next to its value (`` `ref.angle.value = ${ref.angle.value}` ``, as on the mapping page), a game label (`` `Press return: ${ref.score.value}` ``).
 
-The original repro, `` `rotate = ref.angle.value` `` without `${…}` (`scratch/draw_order_var_first_check.html`), is an unusual way to write text (single quotes are the convention), but it has the same cause.
+The original repro, `` `rotate = ref.angle.value` `` without `${…}` (`scratch/draw_order_var_first_check.html` (not kept)), is an unusual way to write text (single quotes are the convention), but it has the same cause.
 
 ---
 
@@ -179,7 +179,7 @@ The value is static, so it is evaluated once and cached. Consequence: escapes no
 
 ### 3.6 Draft check (Node, 2026-11-02)
 
-The code in §3.1–3.4 was applied to a copy of `js/compiler.js` and run in Node with a stub `pxl.nodes` (`scratch/compiler_string_literals.js` and `.diff` in the worktree `epic-tharp-ffec3e`; scratch is git-ignored, so this plan holds all the code). Results:
+The code in §3.1–3.4 was applied to a copy of `js/compiler.js` and run in Node with a stub `pxl.nodes` (`scratch/compiler_string_literals.js` (not kept) and `.diff` in the worktree `epic-tharp-ffec3e`; scratch is git-ignored, so this plan holds all the code). Results:
 
 - Every row of §1 renders the expected text; the gradient compiles without a SyntaxError.
 - Unchanged: `hsl(t * 36, 80%, 50%)`, `hsla((t/5)%360, 100%, 60%, 0.5)`, `` `hsl(${t * 36}, 80%, 50%)` ``, `toLocal(ref.score, 'x') + 1` (still a `toLocal` reader with dependency `ref.score`), `'Hello'`, `t * 100 % 1000`, `'rotate = ref.angle.value'`, `` `rotate = ${ref.angle.value}` ``.

@@ -13,10 +13,10 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 | `.agents/AGENTS.md` | Rules for Google Antigravity, kept in case it is used again. Ignore it: this file is authoritative. When a rule changes here, mention whether AGENTS.md should get the same change |
 | `js/` | Engine source. Build order is the `files` list in `build.js` |
 | `docs/` | Public documentation site. Rules: `docs/DOCS_STANDARDS.md` |
-| `design/` | Plans and notes, named `YYYY-MM-DD_<topic>_plan.md` (or `_note.md`). `design/archive/`: superseded, dropped and outdated plans |
+| `design/` | Plans and notes, named `YYYY-MM-DD_<topic>_plan.md` (or `_note.md`). `design/archive/`: superseded, dropped and outdated plans. `design/prototypes/<plan>/`: prototypes and measurement scripts a plan relies on (committed; folder named like the plan without `_plan` / `_note`) |
 | `tests/index.html` | Automated engine tests in the browser (`http://localhost:8124/tests/`); result in the tab title and `window.kilopixelTests` |
 | `examples/test*.html` | Manual demo and test pages |
-| `scratch/` | Temporary files, gitignored |
+| `scratch/` | Temporary files, gitignored, different on each laptop; may be emptied at any time |
 | `dist/`, `docs/js/pxl.min.js`, `docs/download/*` | **Build output.** Never edit by hand; they are committed. Exception: `docs/download/index.html` is the starter kit source, from which `node build.js` makes the zip |
 
 ## Workflow
@@ -45,7 +45,8 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 - **Verify in the browser:** the dev server is `node tools/serve.js` (launch config `kilopixel`, http://localhost:8124, `/` redirects to `/docs/`). Check docs pages and `examples/` there, including the console.
 - **Engine tests:** after every engine change and build, open `tests/index.html`; all tests must pass. Every engine fix gets a test there (committed, unlike `scratch/`).
 - **Line endings:** LF everywhere, set by `.gitattributes`. Don't change it per file.
-- **Temporary files** (helper scripts, dumps, screenshots, visual prototypes) go in `scratch/`, not the project root. Don't delete them afterwards; the user cleans up.
+- **Temporary files** (helper scripts, dumps, screenshots, visual prototypes) go in `scratch/`, not the project root. Don't delete them afterwards; the user cleans up. Nothing in `scratch/` must be needed later: it is git-ignored and differs between the two laptops.
+- **Prototypes worth keeping:** when a prototype or measurement script supports a plan, copy it to `design/prototypes/<plan>/` in the same change (paths inside it: absolute dev-server paths like `/dist/pxl.js`; Node scripts reach the repo with `../../../`). Plans, TODO and KILOPIXEL.md link only committed files; a `scratch/` file may only be named as history, marked "(not kept)" (`tools/check_plans.js` checks both). Old engine builds aren't copied: name the commit (`git show <commit>:dist/pxl.js`). Also use `design/prototypes/` for work in progress the user needs on the other laptop.
 - **Commits:** only when asked. Conventional style `type(scope): summary`, e.g. `feat(polyline): …`, `fix(arrows): …`, `docs(circle, ellipse): …`, `docs(design): …`, `refactor(engine): …`.
 
 ## Working on Another Machine

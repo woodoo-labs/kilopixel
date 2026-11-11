@@ -29,7 +29,7 @@ Reproduced with [`examples/test52.html`](../examples/test52.html) (a `<pxl-rect>
 | Fill changes on hover | ✅ | ❌ |
 | `onclick` fires | ✅ | ❌ |
 
-Confirmed both by an automated headless run (`scratch/run_test52_hover.html`) and by manual testing in the browser.
+Confirmed both by an automated headless run (`scratch/run_test52_hover.html` (not kept)) and by manual testing in the browser.
 
 ---
 
@@ -231,7 +231,7 @@ With `linejoin="miter"`, glyph corners can extend slightly further than `strokew
 > [!NOTE]
 > In `test52.html` the `onclick` handlers currently double as a workaround for §6 (they force registration). Keep them for this plan; once auto-registration (§6 decision) is implemented, remove them so test52 covers both fixes.
 
-**Automated (headless Chrome):** `scratch/run_test52_hover.html` injects the example's stage markup, dispatches synthetic `pointerenter` / `pointermove` events and pumps frames manually via `stage.render()` (headless Chrome throttles `requestAnimationFrame`).
+**Automated (headless Chrome):** `scratch/run_test52_hover.html` (not kept) injects the example's stage markup, dispatches synthetic `pointerenter` / `pointermove` events and pumps frames manually via `stage.render()` (headless Chrome throttles `requestAnimationFrame`).
 
 | # | Case | Expected |
 |---|---|---|

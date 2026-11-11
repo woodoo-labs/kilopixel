@@ -125,7 +125,7 @@ This goes into `pxl.applyTransformState` (an element with `spaceNode` applies R 
 - **No DPR or canvas coupling:** R is relative to whatever the context holds, so the layer's DPR scale and the stage don't need to be known.
 - Uses the shared scratch matrices (`pxl._scratchMatrixA` / `B`): no allocations.
 
-Alternative: `ctx.setTransform(dpr, 0, 0, dpr, 0, 0)` and then A's global matrix directly. Saves the inversion, but needs the layer's DPR in `graphics.js` and a different path for hit testing (whose context has no DPR). Rejected for coupling; the inversion costs about 40 ns (`scratch/tolocal_bench.js`).
+Alternative: `ctx.setTransform(dpr, 0, 0, dpr, 0, 0)` and then A's global matrix directly. Saves the inversion, but needs the layer's DPR in `graphics.js` and a different path for hit testing (whose context has no DPR). Rejected for coupling; the inversion costs about 40 ns (`scratch/tolocal_bench.js` (not kept)).
 
 **Edge case:** if P can't be inverted (B's own layer or group has `zoom="0"` or `scalex="0"`), `pxl.Matrix.invert` returns the identity and B is drawn wrong. B's container is invisible then anyway; B stays invisible with it, which matches what users expect from a hidden container.
 

@@ -4,7 +4,7 @@
 - **Date**: 2026-10-23
 - **Related**: `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming on smooth polylines, §4.3), `design/2026-10-18_polyline_optimization_plan.md` (§5 edge cases #8, #9, #11, #12; §6.2 smooth loop), `design/2026-09-07_plot_element_plan.md` and `design/2026-09-30_path_element_plan.md` (both reuse the polyline spline)
 - **Target Implementation**: `js/elements/shapes/polyline.js`, `js/elements/shapes/circle.js` and `ellipse.js` (arrow trim, §5.4), `.agents/KILOPIXEL.md` (Smoothing, Arrowheads), `docs/polyline.html` (section 2)
-- **Test Pages** (local, scratch is git-ignored): `scratch/polyline_shapes/smooth_ends.html` (17 cases × 6 variants A–F, opens directly from the file system; `?v=AF` shows only some variants), `smooth_bench.html` (loop benchmark, §4.3.1), `arrow_trim.html` (polyline arrow trimming, §5.2), `ellipse_arrows.html` (ellipse arrows, real engine, §5.4; needs the dev server)
+- **Test Pages** (not kept): `scratch/polyline_shapes/smooth_ends.html` (17 cases × 6 variants A–F, opens directly from the file system; `?v=AF` shows only some variants), `smooth_bench.html` (loop benchmark, §4.3.1), `arrow_trim.html` (polyline arrow trimming, §5.2), `ellipse_arrows.html` (ellipse arrows, real engine, §5.4; needs the dev server)
 
 ---
 
@@ -39,7 +39,7 @@ Known problems (`design/2026-10-18_polyline_optimization_plan.md` §5):
 
 ## 3. Variants Compared (2026-10-23)
 
-All variants were drawn with the same Bézier code in `scratch/polyline_shapes/smooth_ends.html`. Column A at `k = 1` is today's engine.
+All variants were drawn with the same Bézier code in `scratch/polyline_shapes/smooth_ends.html` (not kept). Column A at `k = 1` is today's engine.
 
 | Variant | What | Result |
 |---|---|---|
@@ -121,7 +121,7 @@ next(i) = wrap ? (i + 1) % m     : i + 1   (missing → zero-length side)
 - The `aIn < ε` guards are ternaries in the loop body. They are taken only at free ends and duplicate points, so they predict well. The "branch-free hot loop" claim of the arrow plan (§4.3 there) is relaxed to "no branches except the two degenerate-side ternaries".
 - Today the loop has no `sqrt` at all. The planned loop adds 2 `sqrt` + ~20 multiplications per segment.
 
-#### 4.3.1 Measured (2026-10-23, `scratch/polyline_shapes/smooth_bench.html`)
+#### 4.3.1 Measured (2026-10-23, `scratch/polyline_shapes/smooth_bench.html` (not kept))
 
 Sketch of the planned loop (rolling distances, seam lookup) against today's loop, both reading a `Float32Array` like `flatCache`; verified against the reference formula (max difference 3·10⁻¹⁴). Chromium (browser pane), µs per frame, best of 3:
 
@@ -146,7 +146,7 @@ Sketch of the planned loop (rolling distances, seam lookup) against today's loop
 
 The drawing loop calls the same `loadSegment(i, len, m, wrap, k3)` as the arrow trimming, instead of an inline loop with rolling distances. Drawing and trimming can't disagree, and the spline math exists once. Cost: 3 lengths per segment (6 `sqrt`) instead of 1 (2 `sqrt`).
 
-Measured in the engine (`scratch/polyline_shapes/engine_bench.html`, previous build vs. new build, `draw()` with path building only, µs per frame):
+Measured in the engine (`scratch/polyline_shapes/engine_bench.html` (not kept), previous build vs. new build, `draw()` with path building only, µs per frame):
 
 | Points | Before | After |
 |---|---|---|
@@ -168,7 +168,7 @@ With stroking, the differences disappear in the rasterization time (50 points: 4
 
 ### 5.2 Distance trim (`trimParameter`)
 
-Today the curve parameter for the shaft end and the arrow base comes from the chord estimate `t = 1 − inset / chord`. That assumes the curve moves at a steady speed along the segment. **D's free ends start without a handle**, so the curve leaves the end point slowly and the estimate trims far too little: the shaft pokes out of the head (`scratch/polyline_shapes/arrow_trim.html`, filled head, butt cap):
+Today the curve parameter for the shaft end and the arrow base comes from the chord estimate `t = 1 − inset / chord`. That assumes the curve moves at a steady speed along the segment. **D's free ends start without a handle**, so the curve leaves the end point slowly and the estimate trims far too little: the shaft pokes out of the head (`scratch/polyline_shapes/arrow_trim.html` (not kept), filled head, butt cap):
 
 | Case | Today | D + chord estimate | D + distance trim |
 |---|---|---|---|
@@ -221,7 +221,7 @@ The head is a straight triangle, so the shaft is hidden when its end lies the in
 | `<pxl-ellipse>` | `parameterOffset`: speed estimate + one chord correction. Exact on round ellipses, **far off at the tip of thin ellipses** | 12 bisection steps on the angle (below) |
 | `<pxl-polyline smooth>` | chord estimate | `trimParameter` (§5.2) |
 
-**Ellipse** (`scratch/polyline_shapes/ellipse_arrows.html`, real engine plus a test subclass `<pxl-ellipse-fixed>`): with the arrow at the tip (`start="0"`), strokewidth 6, the shaft end lands far too close to the tip:
+**Ellipse** (`scratch/polyline_shapes/ellipse_arrows.html` (not kept), real engine plus a test subclass `<pxl-ellipse-fixed>`): with the arrow at the tip (`start="0"`), strokewidth 6, the shaft end lands far too close to the tip:
 
 | Ellipse | Intended 7.5 px | 11.2 px | 22.4 px | Visible |
 |---|---|---|---|---|

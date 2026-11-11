@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>toLocal Fix Tests | Kilopixel</title>
+  <link rel="stylesheet" href="/docs/css/docs.css">
+  <script src="/docs/js/pxl.min.js"></script>
+</head>
+<body>
+  <main class="docs-content">
+    <div class="docs-inner">
+      <h2>toLocal fix tests (design/2026-10-26_tolocal_fix_plan.md §7)</h2>
+
+      <!-- Test 2: static move, nothing animated -->
+      <h3>2. Static move</h3>
+      <pxl-stage id="t2Stage" ratio="5 / 3" alwaysrender>
+        <pxl-layer>
+          <pxl-circle id="t2Sun" x="150" y="150" r="18" fill="#fb923c"></pxl-circle>
+        </pxl-layer>
+        <pxl-layer id="t2LayerB" x="600" y="350">
+          <pxl-circle id="t2Reader" x="toLocal(ref.t2Sun, 'x')" y="toLocal(ref.t2Sun, 'y')" r="16" stroke="#1d4ed8" strokewidth="3"></pxl-circle>
+        </pxl-layer>
+      </pxl-stage>
+
+      <!-- Test 3: nested reader (group inside rotating layer), Test 5: pxl-var reader, Polyline point reader -->
+      <h3>3. Nested, variable and polyline readers</h3>
+      <pxl-stage id="t3Stage" ratio="5 / 3" alwaysrender>
+        <pxl-layer>
+          <pxl-circle id="t3Sun" x="200" y="150" r="18" fill="#fb923c"></pxl-circle>
+        </pxl-layer>
+        <pxl-layer x="600" y="350" rotate="t * 12" scale="1.2">
+          <pxl-var id="t3Var" value="toLocal(ref.t3Sun, 'x')"></pxl-var>
+          <pxl-group x="50" y="20" rotate="-t * 30" scale="0.8">
+            <pxl-circle id="t3Reader" x="toLocal(ref.t3Sun, 'x')" y="toLocal(ref.t3Sun, 'y')" r="16" stroke="#1d4ed8" strokewidth="3"></pxl-circle>
+            <pxl-polyline id="t3Poly" points="0,0; toLocal(ref.t3Sun, 'x'), toLocal(ref.t3Sun, 'y')" stroke="#22c55e" strokewidth="3"></pxl-polyline>
+          </pxl-group>
+        </pxl-layer>
+      </pxl-stage>
+
+      <!-- Test 4: reader and target in the same moving subtree -->
+      <h3>4. Same subtree</h3>
+      <pxl-stage id="t4Stage" ratio="5 / 3" alwaysrender>
+        <pxl-layer x="500" y="300" rotate="t * 15">
+          <pxl-circle id="t4Target" x="200" dx="60" rotate="t * 40" r="18" fill="#fb923c"></pxl-circle>
+          <pxl-group x="-150" rotate="t * -25">
+            <pxl-circle id="t4Reader" x="toLocal(ref.t4Target, 'tx')" y="toLocal(ref.t4Target, 'ty')" r="16" stroke="#1d4ed8" strokewidth="3"></pxl-circle>
+          </pxl-group>
+        </pxl-layer>
+      </pxl-stage>
+    </div>
+  </main>
+</body>
+</html>

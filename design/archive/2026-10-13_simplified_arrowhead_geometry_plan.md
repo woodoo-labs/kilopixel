@@ -243,8 +243,8 @@ Tested against 1,000,000 continuous evaluations in Node.js (V8) with `--expose-g
 ## 5. Visual Proofs Reference
 
 Both visual proofs are confirmed and saved in [`scratch/`](file:///c:/Users/micha/woodoo-labs/kilopixel/scratch):
-* [`scratch/test24_user_spec.png`](file:///c:/Users/micha/woodoo-labs/kilopixel/scratch/test24_user_spec.png): Confirms `BUTT`, `SQUARE`, and `ROUND` arrow tips ending at the exact physical spot of plain stroked lines without chevron protrusion.
-* [`scratch/compare_decasteljau_vs_simple.png`](file:///c:/Users/micha/woodoo-labs/kilopixel/scratch/compare_decasteljau_vs_simple.png): Confirms that the simple 2-line destination pullback produces a curve 100% pixel-identical to heavy de Casteljau math with zero wave flattening.
+* `scratch/test24_user_spec.png` (not kept): Confirms `BUTT`, `SQUARE`, and `ROUND` arrow tips ending at the exact physical spot of plain stroked lines without chevron protrusion.
+* `scratch/compare_decasteljau_vs_simple.png` (not kept): Confirms that the simple 2-line destination pullback produces a curve 100% pixel-identical to heavy de Casteljau math with zero wave flattening.
 
 ---
 

@@ -4,7 +4,7 @@
 - **Date**: 2026-10-14
 - **Supersedes**: `design/archive/2026-10-12_centralized_arrowhead_geometry_plan.md`, `design/archive/2026-10-13_simplified_arrowhead_geometry_plan.md`, `design/archive/2026-10-13_arrowhead_linecap_alignment_and_spline_integrity_plan.md` (kept as history)
 - **Target Implementation**: `js/elements/shape.js`, `js/elements/shapes/line.js`, `js/elements/shapes/polyline.js`, `js/elements/shapes/circle.js`, `js/elements/shapes/ellipse.js`
-- **Validation**: `scratch/arrow_testgrid.html` (new), `docs/arrows.html`, `docs/line.html`, `docs/circle.html`, `docs/ellipse.html`, `examples/test24.html`
+- **Validation**: `scratch/arrow_testgrid.html` (not kept) (new), `docs/arrows.html`, `docs/line.html`, `docs/circle.html`, `docs/ellipse.html`, `examples/test24.html`
 
 ---
 
@@ -260,12 +260,12 @@ drawArrows(ctx, u, recA, recB) { ... }
 - [x] Constructors: `_arrowStart` / `_arrowEnd` records only in the four arrow shapes.
 - [x] `node build.js`.
 - [x] Regression check: `examples/test24.html` (all 7 sections). **Note**: test24 only covers `<pxl-line>`, so it doesn't catch D1–D3, D7 or D10.
-- [x] `scratch/arrow_testgrid.html`: shape × style × cap × join × (`auto`, small arrow `< strokewidth`) × two stage widths; old (`a5cb956`) vs new side by side. It reuses test24's proven patterns:
+- [x] `scratch/arrow_testgrid.html` (not kept): shape × style × cap × join × (`auto`, small arrow `< strokewidth`) × two stage widths; old (`a5cb956`) vs new side by side. It reuses test24's proven patterns:
   - **Ghost reference path**: the same path *without* an arrow, semi-transparent, drawn next to it (test24 §1). The arrow tip has to land exactly on the ghost's cap boundary, marked with dashed guide lines.
   - **Gradient strokes** (`linear(...)` on `stroke`): the arrow takes its colour from the stroke gradient, and vertical lines have a zero-width bounding box (see `2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`).
   - **Extremes** (test24 §4): huge arrow on a thin stroke, tiny arrow on a thick stroke, two different sizes on one path.
   - **Animated size across the small-arrow threshold** (test24 §5) to check continuity (Principle 6), and rotated/nested transforms (test24 §6).
   - **New**: arcs with small `r` (tight curvature), eccentric ellipses (`rx ≫ ry`, end on the flat and the pointed side), smooth polyline with a short end segment, single-segment smooth polyline with both arrows, and paths shorter than both insets combined (D9).
-- [x] `scratch/arrow_bench.html`: 1,000 animated arrows, compare `renderAvg` / `renderMax` with today.
+- [x] `scratch/arrow_bench.html` (not kept): 1,000 animated arrows, compare `renderAvg` / `renderMax` with today.
 - [ ] Docs: `arrows.html` section 3 (all shapes now advance the tip for the cap), document the open-stroke rule (§4.6), `Kilopixel.md` (element references + `drawArrows`), polyline arrows.
 - [x] Mark the 12 Oct / 13 Oct plans as "Superseded by 2026-10-14".

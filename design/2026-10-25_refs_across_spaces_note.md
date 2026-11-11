@@ -143,7 +143,7 @@ Question: "Can `toLocal` map only `x3`?" Answer: it reads the partner itself.
 
 `toLocal` returns numbers for the **reader's parent space**: where the reader's `x` / `y` live. Attributes measured inside the shape (line `x1`…`y2`, polyline points) live one level deeper, in the shape's own space after its own `x` / `y` / `rotate` / `scale`.
 
-Example (`scratch/tolocal_reader_lines.html`, local only): a circle `sun` in layer A; layer B moved to `(250, 450)` and rotated 20°; three lines in layer B, all with `x2="toLocal(ref.sun, 'x')" y2="toLocal(ref.sun, 'y')"`, plus a ring with `x` / `y` = `toLocal(…)`:
+Example (`design/prototypes/2026-10-25_refs_across_spaces/tolocal_reader_lines.html`): a circle `sun` in layer A; layer B moved to `(250, 450)` and rotated 20°; three lines in layer B, all with `x2="toLocal(ref.sun, 'x')" y2="toLocal(ref.sun, 'y')"`, plus a ring with `x` / `y` = `toLocal(…)`:
 
 | Reader in layer B | Own attributes | Result |
 |---|---|---|
@@ -152,7 +152,7 @@ Example (`scratch/tolocal_reader_lines.html`, local only): a circle `sun` in lay
 | Purple line | `rotate="30"` | turned 30° around its center: misses |
 | Ring | `x` / `y` = `toLocal` | sits on the circle |
 
-The walkthrough §8 line works because it has no own `x`, `y` or `rotate`, like the green line. Related demo `scratch/tolocal_numbers.html`: the same screen spot has different numbers in each space; `toLocal` keeps the place, not the numbers.
+The walkthrough §8 line works because it has no own `x`, `y` or `rotate`, like the green line. Related demo `design/prototypes/2026-10-26_tolocal_fix/tolocal_numbers.html`: the same screen spot has different numbers in each space; `toLocal` keeps the place, not the numbers.
 
 ### 7.5 "Always Hit the Point": The Attribute Decides the Space
 

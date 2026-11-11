@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D4 Clicks Prototype</title>
+<!-- Prototype for design/2026-10-30_framework_compatibility_plan.md D4 (native click vs. Kilopixel click).
+     The engine sends no DOM events yet, so a small shim below does it in two modes:
+       (a) the browser's click bubbles as today; Kilopixel adds its own click on the hit shape one frame later
+       (b) the click is hit-tested at once; over a shape the browser's click is stopped and Kilopixel's click
+           is sent right away; over empty space the browser's click passes unchanged -->
+<script src="/dist/pxl.min.js"></script>
+<style>
+  body { font: 14px/1.4 system-ui, sans-serif; margin: 16px; background: #f8fafc; color: #0f172a; }
+  .mode { margin-bottom: 12px; padding: 8px 12px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; }
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .panel { background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; }
+  .card { border: 2px dashed #94a3b8; border-radius: 8px; padding: 8px; cursor: pointer; }
+  .card.open { border-color: #22c55e; background: #f0fdf4; }
+  .state { margin: 6px 0; font-family: ui-monospace, monospace; }
+  pre { height: 180px; overflow: auto; background: #0f172a; color: #e2e8f0; padding: 8px; border-radius: 6px; font-size: 12px; margin: 8px 0 0; }
+  button { margin-left: 8px; }
+</style>
+</head>
+<body>
+  <div class="mode">
+    <strong>D4 mode:</strong>
+    <label><input type="radio" name="mode" value="a" checked> (a) both clicks</label>
+    <label><input type="radio" name="mode" value="b"> (b) hit-test at once, one click</label>
+    <button id="reset">Reset</button>
+    <div>Left circle: handler only logs. Right circle: selects and calls <code>stopPropagation()</code>.
+      The stage deselects. The card around the stage toggles open / closed on every click it receives.</div>
+  </div>
+  <div class="panels">
+    <div class="panel"><h3>React 19 (delegated events)</h3><div id="react-root"></div><pre id="log-react"></pre></div>
+    <div class="panel"><h3>Vue 3.5 (direct listeners)</h3><div id="vue-root"></div><pre id="log-vue"></pre></div>
+  </div>
+
+<script>
+// ===== Shim: DOM events on Kilopixel shapes =====
+window.D4 = { mode: 'a' };
+document.querySelectorAll('input[name=mode]').forEach(r => r.onchange = () => { D4.mode = r.value; });
+
+// Logical hit test for the circles of this page (untransformed layer, logical width 1000)
+function hitShape(stage, clientX, clientY) {
+  const rect = stage.getBoundingClientRect();
+  const unit = rect.width / 1000;
+  const x = (clientX - rect.left) / unit, y = (clientY - rect.top) / unit;
+  const circles = [...stage.querySelectorAll('pxl-circle')].reverse();   // topmost first
+  return circles.find(c => Math.hypot(x - +c.getAttribute('x'), y - +c.getAttribute('y')) <= +c.getAttribute('r')) || null;
+}
+
+function sendKilopixelClick(shape, e) {
+  shape.dispatchEvent(new MouseEvent('click', {
+    bubbles: true, cancelable: true, composed: true,
+    clientX: e.clientX, clientY: e.clientY, button: e.button, buttons: e.buttons,
+    ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey, metaKey: e.metaKey
+  }));
+}
+
+// Capture at the document: runs before any framework listener
+document.addEventListener('click', e => {
+  if (!(e.target instanceof HTMLCanvasElement)) return;
+  const stage = e.target.closest('pxl-stage');
+  if (!stage) return;
+  const shape = hitShape(stage, e.clientX, e.clientY);
+  if (!shape) return;                                   // empty space: the browser's click passes in both modes
+  if (D4.mode === 'b') {
+    e.stopPropagation();                                // the browser's click ends here
+    sendKilopixelClick(shape, e);                       // one click, target = shape, no delay
+  } else {
+    setTimeout(() => sendKilopixelClick(shape, e), 16);   // like today's engine: hit test in the next frame (a timer, so it also runs in a hidden tab)
+  }
+}, true);
+
+// Logging shared by both panels
+window.log = (panel, who, e) => {
+  const pre = document.getElementById('log-' + panel);
+  const t = e.target.localName;
+  const n = e.nativeEvent || e;   // React passes its own event object; simNative marks a test click standing in for the browser's
+  pre.textContent += `${who.padEnd(8)} target=<${t}> ${n.isTrusted || n.simNative ? 'browser' : 'kilopixel'}\n`;
+  pre.scrollTop = pre.scrollHeight;
+};
+</script>
+
+<script type="module">
+// ===== React 19 =====
+import React, { useState } from 'https://esm.sh/react@19.1.0';
+import { createRoot } from 'https://esm.sh/react-dom@19.1.0/client';
+import htm from 'https://esm.sh/htm@3.1.1';
+const html = htm.bind(React.createElement);
+
+function App() {
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState(null);
+  const [cardCalls, setCardCalls] = useState(0);
+  window.resetReact = () => { setOpen(false); setSelected(null); setCardCalls(0); };
+  return html`
+    <div class=${'card' + (open ? ' open' : '')} onClick=${e => { log('react', 'card', e); setCardCalls(n => n + 1); setOpen(o => !o); }}>
+      <div class="state">open: ${String(open)} | selected: ${selected ?? '—'} | card calls: ${cardCalls}</div>
+      <pxl-stage ratio="5 / 3" onClick=${e => { log('react', 'stage', e); setSelected(null); }}>
+        <pxl-layer>
+          <pxl-circle x="300" y="300" r="140" fill="#ffedd566" stroke="#f97316" strokewidth="4"
+            onClick=${e => log('react', 'left', e)}></pxl-circle>
+          <pxl-circle x="700" y="300" r="140" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"
+            onClick=${e => { log('react', 'right', e); e.stopPropagation(); setSelected('right'); }}></pxl-circle>
+        </pxl-layer>
+      </pxl-stage>
+    </div>`;
+}
+createRoot(document.getElementById('react-root')).render(html`<${App} />`);
+</script>
+
+<script type="module">
+// ===== Vue 3.5 =====
+import { createApp, ref } from 'https://unpkg.com/vue@3.5.13/dist/vue.esm-browser.prod.js';
+const app = createApp({
+  setup() {
+    const open = ref(false), selected = ref(null), cardCalls = ref(0);
+    window.resetVue = () => { open.value = false; selected.value = null; cardCalls.value = 0; };
+    return {
+      open, selected, cardCalls,
+      card: e => { log('vue', 'card', e); cardCalls.value++; open.value = !open.value; },
+      stage: e => { log('vue', 'stage', e); selected.value = null; },
+      left: e => log('vue', 'left', e),
+      right: e => { log('vue', 'right', e); e.stopPropagation(); selected.value = 'right'; },
+    };
+  },
+  template: `
+    <div :class="['card', { open }]" @click="card">
+      <div class="state">open: {{ open }} | selected: {{ selected ?? '—' }} | card calls: {{ cardCalls }}</div>
+      <pxl-stage ratio="5 / 3" @click="stage">
+        <pxl-layer>
+          <pxl-circle x="300" y="300" r="140" fill="#ffedd566" stroke="#f97316" strokewidth="4" @click="left"></pxl-circle>
+          <pxl-circle x="700" y="300" r="140" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4" @click="right"></pxl-circle>
+        </pxl-layer>
+      </pxl-stage>
+    </div>`
+});
+app.config.compilerOptions.isCustomElement = tag => tag.startsWith('pxl-');
+app.mount('#vue-root');
+</script>
+
+<script>
+document.getElementById('reset').onclick = () => {
+  window.resetReact?.(); window.resetVue?.();
+  document.getElementById('log-react').textContent = ''; document.getElementById('log-vue').textContent = '';
+};
+</script>
+</body>
+</html>

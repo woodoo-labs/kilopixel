@@ -185,7 +185,7 @@ This ensures `ref.main.fps` reports meaningful values — the actual composite r
 
 ### Known Issue: Monitor Freezes When Idle (added 2026-10-15)
 
-Observed with `scratch/text_hit/mixed.html` (static scene, renders only on pointer movement):
+Observed with `scratch/text_hit/mixed.html` (not kept) (static scene, renders only on pointer movement):
 
 - **Values only update during a render.** `pxl.perf.publish()` is called from inside `stage.render()` (at most once per second). Without animation and without input, nothing renders, so `fps` / `renderAvg` / `renderMax` **keep their last values** instead of dropping to `0`. A frozen "26 FPS" on an idle page suggests it is still rendering.
 - **`fps` is "frames since the last publish", not frames per second.** It is not normalized to the elapsed time, so the first value after a pause counts all frames over the whole pause and shows a misleadingly low number.
@@ -280,7 +280,7 @@ A 60fps variable broadcasting to a shape in a 4fps layer: the reactive callback 
 
 ### Manual Testing
 
-Create a test page (`scratch/throttle-test.html`) with:
+Create a test page (`scratch/throttle-test.html` (not kept)) with:
 1. **Layer A** — unthrottled, animated (verify still runs at full speed).
 2. **Layer B** — `maxfps="4"`, animated (verify visually slower updates, animations still smooth when they render because `t` is wall-clock).
 3. **Layer C** — `maxfps="8"`, reactive only (verify responds to slider/setAttribute within ~125ms).

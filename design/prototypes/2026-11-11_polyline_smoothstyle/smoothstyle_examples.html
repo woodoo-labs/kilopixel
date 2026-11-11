@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>smoothstyle: example candidates</title>
+<!-- Plain canvas prototype: both splines with free ends (no handle at an end point), smooth = 1.
+     Blue: uniform, pink: centripetal, grey dashed: the true curve (sampled examples only), dots: the points. -->
+<style>
+  body { font-family: sans-serif; margin: 12px; color: #334155; }
+  .g { display: grid; grid-template-columns: 1fr; gap: 14px; max-width: 760px; }
+  canvas { width: 100%; border: 1px solid #e2e8f0; background: #fff; display: block; }
+  h3 { font-size: 14px; margin: 0 0 2px; }
+  p { font-size: 12px; margin: 0 0 4px; }
+  .legend span { margin-right: 14px; font-size: 12px; }
+</style>
+</head>
+<body>
+<p class="legend"><span style="color:#0ea5e9">■ uniform</span><span style="color:#ec4899">■ centripetal</span><span style="color:#94a3b8">- - true curve</span>
+  <label><input type="checkbox" id="sep" checked onchange="drawAll()"> side by side</label></p>
+<div class="g" id="g"></div>
+<script>
+// ===== Splines =====
+function handles(p, j, closed, style) {
+  const n = p.length;
+  const A = j > 0 ? p[j - 1] : closed ? p[n - 1] : null;
+  const B = j < n - 1 ? p[j + 1] : closed ? p[0] : null;
+  const P = p[j];
+  if (!A || !B) return [[0, 0], [0, 0]];                       // free end: no handle
+  if (style === 'uniform') {
+    const T = [(B[0] - A[0]) / 6, (B[1] - A[1]) / 6];
+    return [[-T[0], -T[1]], T];
+  }
+  const din = Math.hypot(P[0] - A[0], P[1] - A[1]), dout = Math.hypot(B[0] - P[0], B[1] - P[1]);
+  const ai = Math.sqrt(din), ao = Math.sqrt(dout);
+  if (ai < 1e-6 || ao < 1e-6) return [[0, 0], [0, 0]];
+  const T = [din * (B[0] - P[0]) + dout * (P[0] - A[0]), din * (B[1] - P[1]) + dout * (P[1] - A[1])];
+  const so = 1 / (3 * ai * (ai + ao)), si = -1 / (3 * ao * (ai + ao));
+  return [[T[0] * si, T[1] * si], [T[0] * so, T[1] * so]];
+}
+function trace(ctx, p, closed, style) {
+  const n = p.length, segs = closed ? n : n - 1;
+  ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]);
+  for (let i = 0; i < segs; i++) {
+    const a = p[i], b = p[(i + 1) % n];
+    const ha = handles(p, i, closed, style)[1], hb = handles(p, (i + 1) % n, closed, style)[0];
+    ctx.bezierCurveTo(a[0] + ha[0], a[1] + ha[1], b[0] + hb[0], b[1] + hb[1], b[0], b[1]);
+  }
+  if (closed) ctx.closePath();
+}
+
+// ===== Candidates =====
+const W = 1000, H = 420;
+const ex = [];
+
+// 1. Sampled wave: y = sin(x), 7 points per period, equal x steps
+{
+  const pts = [], tru = [];
+  for (let i = 0; i <= 14; i++) { const x = 60 + i * 63; pts.push([x, 210 - Math.sin(i * 2 * Math.PI / 7) * 150]); }
+  for (let i = 0; i <= 1400; i++) { const x = 60 + i * 0.63; tru.push([x, 210 - Math.sin(i / 100 * 2 * Math.PI / 7) * 150]); }
+  ex.push({ title: '1. Sampled wave: sin, 7 points per wave (equal steps)', pts, tru, closed: false });
+}
+// 2. Sampled Lissajous 3 / 2, 24 points
+{
+  const f = v => [500 + Math.sin(3 * v) * 400, 210 - Math.cos(2 * v) * 170];
+  const pts = [], tru = [];
+  for (let i = 0; i < 24; i++) pts.push(f(i * 2 * Math.PI / 24));
+  for (let i = 0; i < 2000; i++) tru.push(f(i * 2 * Math.PI / 2000));
+  ex.push({ title: '2. Sampled Lissajous 3 / 2, 24 points (equal steps)', pts, tru, closed: true });
+}
+// 3. Sampled damped oscillation (a spring settling), equal time steps
+{
+  const f = s => [60 + s * 880, 210 - Math.exp(-3 * s) * Math.cos(s * 6 * Math.PI) * 170];
+  const pts = [], tru = [];
+  for (let i = 0; i <= 18; i++) pts.push(f(i / 18));
+  for (let i = 0; i <= 2000; i++) tru.push(f(i / 2000));
+  ex.push({ title: '3. Sampled spring: damped oscillation, 19 points (equal time steps)', pts, tru, closed: false });
+}
+// 6. Sampled figure eight: x = sin(2v), y = cos(v), 20 points (found by design/prototypes/2026-11-11_polyline_smoothstyle/smoothstyle_search.js)
+{
+  const f = v => [500 + Math.sin(2 * v) * 400, 210 - Math.cos(v) * 150];
+  const pts = [], tru = [];
+  for (let i = 0; i < 20; i++) pts.push(f(i * 2 * Math.PI / 20).map(Math.round));
+  for (let i = 0; i < 2000; i++) tru.push(f(i * 2 * Math.PI / 2000));
+  ex.unshift({ title: '6. Sampled figure eight, 20 points (equal steps)', pts, tru, closed: true });
+}
+// 4. Hand-placed path with uneven spacing and an arrow
+{
+  const pts = [[80, 340], [120, 300], [520, 90], [560, 100], [900, 330]];
+  ex.push({ title: '4. Placed by hand: uneven spacing (short and long segments)', pts, closed: false, arrow: true });
+}
+// 5. Hand-placed with a repeated point (corner)
+{
+  const pts = [[120, 300], [300, 100], [500, 300], [500, 300], [700, 100], [880, 300]];
+  ex.push({ title: '5. Placed by hand: point written twice (corner with centripetal)', pts, closed: false });
+}
+
+function drawOne(c, e, styles) {
+  const ctx = c.getContext('2d'), s = c.width / W;
+  ctx.setTransform(s, 0, 0, s, 0, 0); ctx.clearRect(0, 0, W, H);
+  if (e.tru) {
+    ctx.setLineDash([8, 8]); ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2;
+    ctx.beginPath(); e.tru.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); if (e.closed) ctx.closePath(); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  for (const st of styles) {
+    ctx.strokeStyle = st === 'uniform' ? '#0ea5e9' : '#ec4899'; ctx.lineWidth = 5;
+    trace(ctx, e.pts, e.closed, st); ctx.stroke();
+  }
+  ctx.fillStyle = '#334155';
+  for (const q of e.pts) { ctx.beginPath(); ctx.arc(q[0], q[1], 7, 0, 7); ctx.fill(); }
+}
+
+function drawAll() {
+  const g = document.getElementById('g'); g.innerHTML = '';
+  const sep = document.getElementById('sep').checked;
+  for (const e of ex) {
+    const d = document.createElement('div');
+    d.innerHTML = `<h3>${e.title}</h3>`;
+    const variants = sep ? [['uniform'], ['centripetal']] : [['uniform', 'centripetal']];
+    for (const v of variants) {
+      const c = document.createElement('canvas'); c.width = 1000; c.height = H;
+      d.appendChild(c); drawOne(c, e, v);
+      if (sep) { const p = document.createElement('p'); p.textContent = v[0]; d.appendChild(p); }
+    }
+    g.appendChild(d);
+  }
+}
+drawAll();
+</script>
+</body>
+</html>

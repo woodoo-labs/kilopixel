@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sidebar Paint Check</title>
+  <!-- Same head as a docs page: does the sidebar get its scroll position before the first paint? -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/docs/css/docs.css">
+  <script src="/docs/js/layout.js"></script>
+</head>
+<body>
+  <docs-header></docs-header>
+  <div class="layout-container">
+    <docs-sidebar></docs-sidebar>
+    <script>
+      // Runs right after <docs-sidebar> was built and restored, while the page is still being parsed
+      window.sidebarCheck = { at: performance.now(), scrollTop: document.querySelector('.sidebar').scrollTop };
+    </script>
+    <main class="docs-content"><div class="docs-inner">
+      <h1>Paint check</h1>
+      <p>Filler text so the page has some content to parse and paint.</p>
+    </div></main>
+  </div>
+</body>
+</html>

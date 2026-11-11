@@ -9,7 +9,7 @@
 
 ## 1. Problems
 
-The text bounding box is the hit area and the area gradients are placed in. It is wrong in two cases. Measured with the real engine (`scratch/text_box/demo.html`).
+The text bounding box is the hit area and the area gradients are placed in. It is wrong in two cases. Measured with the real engine (`scratch/text_box/demo.html` (not kept)).
 
 ### 1.1 `maxwidth` is ignored by the box
 
@@ -143,8 +143,8 @@ document.fonts.addEventListener('loadingdone', () => {
 
 ### 5.1 Method
 
-- Patched engine copies from `dist/pxl.js` (`scratch/text_box/make_variants.js`): `base` (today), `simple` (§3, chosen), `cached` (§10). Both patched copies include §4.
-- `scratch/text_box/bench.html`: each copy in its own iframe. Frames rendered directly with `stage.render(t)`: 60 warm-up frames, then 200 measured frames, 5 rounds with rotating order.
+- Patched engine copies from `dist/pxl.js` (`scratch/text_box/make_variants.js` (not kept)): `base` (today), `simple` (§3, chosen), `cached` (§10). Both patched copies include §4.
+- `scratch/text_box/bench.html` (not kept): each copy in its own iframe. Frames rendered directly with `stage.render(t)`: 60 warm-up frames, then 200 measured frames, 5 rounds with rotating order.
 - **Time** is the main-thread cost of the engine. Rasterizing runs later and is the same in all copies.
 - **Allocation** comes from `performance.memory.usedJSHeapSize` across the 200 frames. A GC during a round makes the value negative, so only rounds without a GC are comparable. Treat these values as rough.
 - Chromium in the Claude desktop app, one laptop, device pixel ratio as on that machine. **Noise:** in S1 the patched `simple` copy came out 5% *faster* than `base`, which it can't really be, so differences of about that size mean nothing.
@@ -178,7 +178,7 @@ Other measurements:
 
 | What | Result |
 |---|---|
-| The new Tier 1 comparison alone (`scratch/text_box/checks.html`) | 0.004 ms per frame for 2000 texts |
+| The new Tier 1 comparison alone (`scratch/text_box/checks.html` (not kept)) | 0.004 ms per frame for 2000 texts |
 | Font arrival, 2000 texts, the one frame that measures everything again | median ≈ 15 to 16 ms, max 19.8 ms, compared with ≈ 12.5 ms for a normal frame |
 | `loadingdone` per page load | 1 event with 9 faces on `text.html` (9 stages) and on `linear.html` (5 stages). A batch count above 1 is possible: one run of the end-to-end check in §6.2 had 2 events |
 
@@ -207,13 +207,13 @@ Other measurements:
 
 ## 6. Behavior and Edge Cases
 
-### 6.1 Font events (measured, `checkBatches` in `scratch/text_box/checks.html`)
+### 6.1 Font events (measured, `checkBatches` in `scratch/text_box/checks.html` (not kept))
 
 | Case | Result |
 |---|---|
 | One font arrives, one returns 404 | `loadingdone` lists the good font, `loadingerror` the bad one. The good font is corrected |
 | One font arrives, one hangs | **No `loadingdone` while the second hangs**: none within 7 s, `document.fonts.status` stayed `loading` |
-| Load started by drawing on canvas alone | Fires without any DOM use or `document.fonts.load()` (`scratch/text_box/fix_test.html`) |
+| Load started by drawing on canvas alone | Fires without any DOM use or `document.fonts.load()` (`scratch/text_box/fix_test.html` (not kept)) |
 
 **Accepted limitation (§2):** text using the fast font stays in its fallback until the batch ends, which happens when the browser gives up on the hanging font (how long that takes was not measured). Text stays readable and corrects itself. Today's `document.fonts.ready` handlers wait for the same moment, so this is no regression. Following each `FontFace.loaded` promise would avoid it, but needs more code for a rare case.
 
@@ -225,8 +225,8 @@ Other measurements:
 | End to end: stage off-screen when the font arrives | not redrawn while off-screen, corrected when scrolled into view: same wrapping and box. Pixels differed by at most 1/255 on 123 of about 1.17 million bytes in one comparison and matched in another, which looks like read-back noise |
 | Cache consistency (`checkConsistency`): 28 changes in a row on one text (`maxwidth`, `align`, `baseline`, `lineheight`, `text`, `width`, `size`, `font`, `weight`, `letterspacing`, `direction`), compared with a fresh text after each | no differences, `simple` and `cached` |
 | Box against drawn pixels (`checkInk`): 24 combinations of alignment, spacing, `maxwidth`, one and two lines | at most 3 units apart in both variants (`base`: up to 811). The larger differences have the box slightly bigger than the ink |
-| Built engine, real late font (`scratch/text_box/verify_built.html`) | static layer corrected on its own: same wrapping and box as text created after the font arrived. Box width 199 at `maxwidth` 200 and 697 at 700 |
-| Old against built engine, all 23 docs pages, pixels per layer (`scratch/text_box/regress.html`) | 158 of 162 layers identical, no script errors. The other 4 are noise: a live FPS readout (`dashes.html`, `fill.html`), 2046 pixels that differ between two runs of the old engine too (`mapping.html`), and 4 pixels that were 0 when compared again (`radial.html`). No docs layer combines a squeezed line with a gradient, so the sweep doesn't show the corrected gradient |
+| Built engine, real late font (`scratch/text_box/verify_built.html` (not kept)) | static layer corrected on its own: same wrapping and box as text created after the font arrived. Box width 199 at `maxwidth` 200 and 697 at 700 |
+| Old against built engine, all 23 docs pages, pixels per layer (`scratch/text_box/regress.html` (not kept)) | 158 of 162 layers identical, no script errors. The other 4 are noise: a live FPS readout (`dashes.html`, `fill.html`), 2046 pixels that differ between two runs of the old engine too (`mapping.html`), and 4 pixels that were 0 when compared again (`radial.html`). No docs layer combines a squeezed line with a gradient, so the sweep doesn't show the corrected gradient |
 | Off-screen stages on `linear.html` | not redrawn until scrolled into view, then up to date |
 
 ### 6.3 Unchanged or accepted
@@ -237,7 +237,7 @@ Other measurements:
 - **Custom shapes:** they are redrawn, but a custom shape with its own text cache would have to compare `pxl._fontGeneration` itself. `pxl._*` is internal, so no public promise.
 - **Not tested:** other browsers, and right-to-left text against drawn pixels (RTL is only in the cache consistency check).
 
-### 6.4 Removing the font preloader (measured, `scratch/text_box/no_preloader.html`)
+### 6.4 Removing the font preloader (measured, `scratch/text_box/no_preloader.html` (not kept))
 
 `text.html`, `fill.html` and `linear.html` had a hidden `<div>` that rendered all 9 weights of Inter, so the weight sliders never had to wait for a font. The real pages were compared with and without it, changing the weight six times:
 
@@ -258,7 +258,7 @@ After the removal, the real sliders on `fill.html` and `linear.html` were logged
 | First download of the font | 234 to 298 ms | 20 to 46 ms | 20 to 59 ms |
 | New weight from the same file | 47 to 91 ms | 18 to 28 ms | 11 to 36 ms |
 
-**Slow networks, simulated** (`scratch/text_box/slow/`): a Service Worker delays the Google Fonts requests of the real `text.html` and delivers the real bytes at a set speed, so the browser uses its normal font loading path. 2 runs per speed and version, page visible in all 20 loads. Times count from the start of the page load.
+**Slow networks, simulated** (`scratch/text_box/slow/` (not kept)): a Service Worker delays the Google Fonts requests of the real `text.html` and delivers the real bytes at a set speed, so the browser uses its normal font loading path. 2 runs per speed and version, page visible in all 20 loads. Times count from the start of the page load.
 
 | Network | CSS arrives | Font arrives | Text correct, without preloader | Text correct, with preloader | Weight 100, first use (both versions) |
 |---|---|---|---|---|---|
@@ -318,7 +318,7 @@ Both end with `layer.invalidate()`, which exists, and a full redraw: besides the
    - `docs/text.html`, `docs/fill.html`, `docs/linear.html`: remove the hidden preloader `<div>` and its comment (§6.4).
    - `docs/text.html`, "System Fonts vs. Web Fonts" callout: web fonts load lazily, each font and each weight the first time text is drawn with it; the text uses a fallback font until then and is redrawn automatically.
    - `docs/DOCS_STANDARDS.md` §9: one "Lazy Loading" rule replaces the preloader and handler rules. §8: remove the inline style exception for font preloaders. Tested in Chromium only.
-8. Verify in the browser: `text.html` §1 and §5, `fill.html`, `linear.html`, `scratch/text_box/demo.html` adapted to the built engine; console clean.
+8. Verify in the browser: `text.html` §1 and §5, `fill.html`, `linear.html`, `scratch/text_box/demo.html` (not kept) adapted to the built engine; console clean.
 9. `.agents/TODO.md`: remove the item, add the note from §7 to §9. This plan to ✅. `node tools/check_plans.js`.
 
 ---
@@ -339,7 +339,7 @@ Both end with `layer.invalidate()`, which exists, and a full redraw: besides the
 | T8 | Text with a gradient, `maxwidth` changes | `_gradCache[0]` holds the new box values |
 | T9 | `measureText` replaced with one that reports wider text, standing in for another font | no new layout without the event; more lines after `loadingdone`; back to the first layout after the next one |
 
-T1, T4, T7, T8 and T9 fail on the old engine; T2, T3, T5 and T6 pass there and guard against regressions. A real network font stays a manual check (`scratch/text_box/verify_built.html`).
+T1, T4, T7, T8 and T9 fail on the old engine; T2, T3, T5 and T6 pass there and guard against regressions. A real network font stays a manual check (`scratch/text_box/verify_built.html` (not kept)).
 
 ---
 

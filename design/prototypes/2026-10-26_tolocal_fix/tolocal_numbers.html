@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>toLocal Numbers | Kilopixel</title>
+  <link rel="stylesheet" href="/docs/css/docs.css">
+  <script src="/docs/js/pxl.min.js"></script>
+</head>
+<body>
+  <main class="docs-content">
+    <div class="docs-inner">
+      <h2>Same place, different numbers</h2>
+      <p>Orange: a circle in layer A at <code>x="50" y="100"</code>. Blue: a ring in layer B (moved, rotating, scaled), placed with <code>toLocal(ref.sun, 'x')</code> and <code>toLocal(ref.sun, 'y')</code>. The ring always sits on the circle, but its numbers in layer B keep changing.</p>
+
+      <pxl-stage id="demoStage" ratio="5 / 3">
+        <!-- Layer A: no transform (stage space) -->
+        <pxl-layer>
+          <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+          <pxl-circle id="sun" x="50" y="100" r="18" fill="#fb923c"></pxl-circle>
+        </pxl-layer>
+
+        <!-- Layer B: moved to (600, 350), rotating, scaled 1.5 -->
+        <pxl-layer x="600" y="350" rotate="t * 12" scale="1.5">
+          <!-- Layer B's own axes -->
+          <pxl-line x1="-400" x2="400" stroke="#93c5fd" strokewidth="2" arrowend="14"></pxl-line>
+          <pxl-line y1="-400" y2="400" stroke="#93c5fd" strokewidth="2" arrowend="14"></pxl-line>
+          <pxl-text x="380" y="-12" text="'x'" size="22" fill="#3b82f6" font="monospace"></pxl-text>
+          <pxl-text x="12" y="380" text="'y'" size="22" fill="#3b82f6" font="monospace"></pxl-text>
+          <pxl-circle r="6" fill="#3b82f6"></pxl-circle>
+          <pxl-text x="10" y="-10" text="'Layer B (0, 0)'" size="18" fill="#3b82f6" font="monospace"></pxl-text>
+
+          <!-- The reader: lives in layer B, lands on the circle in layer A -->
+          <pxl-circle id="reader" x="toLocal(ref.sun, 'x')" y="toLocal(ref.sun, 'y')" r="16" stroke="#1d4ed8" strokewidth="3"></pxl-circle>
+        </pxl-layer>
+
+        <!-- Read-out (stage space) -->
+        <pxl-layer>
+          <pxl-text x="980" y="40" align="end" size="24" font="monospace" fill="#c2410c"
+            text="'circle in layer A: (50, 100)'"></pxl-text>
+          <pxl-text x="980" y="75" align="end" size="24" font="monospace" fill="#1d4ed8"
+            text="'ring in layer B: (' + round(ref.reader.x) + ', ' + round(ref.reader.y) + ')'"></pxl-text>
+        </pxl-layer>
+      </pxl-stage>
+    </div>
+  </main>
+</body>
+</html>

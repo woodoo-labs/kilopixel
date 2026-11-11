@@ -5,7 +5,7 @@
 - **Supersedes**: `design/archive/2026-08-25_gradient_optimization_plan.md` (stop clamping, never built; its allocation part is dropped, §7)
 - **Related**: `design/archive/2026-10-17_always_save_restore_plan.md` (same lines in `Shape.render()`), `design/2026-10-18_polyline_optimization_plan.md` (small fix "non-finite points + gradient")
 - **Target Implementation**: `js/elements/shape.js` (`createGradient`, `render`), `js/elements/shapes/rect.js`, `js/elements/node.js` (`reportError`), `js/elements/group.js`, `js/elements/layer.js`, `js/elements/variable.js`, `js/interaction.js` (`process`), `tests/index.html`, `.agents/KILOPIXEL.md`
-- **Prototypes** (local, scratch is git-ignored): `scratch/gradient_stops/overshoot.html` (stop offset leaves 0–1), `scratch/gradient_stops/try_finally_bench.html` (cost of `try` per shape)
+- **Prototypes** (not kept): `scratch/gradient_stops/overshoot.html` (stop offset leaves 0–1), `scratch/gradient_stops/try_finally_bench.html` (cost of `try` per shape)
 
 ---
 

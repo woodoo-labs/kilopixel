@@ -1,7 +1,7 @@
 # Engine Cleanup: Inventory
 
 - **Status**: ✅ **Implemented** (2026-10-27, branch `refactor/engine-cleanup`; only B8 is left, "consider only, measure first"). §2 decided as recommended (now CLAUDE.md "Engine Code Style"). Done: A1–A6, B1–B7 (B5 partly: shared `pxl.arcEndRadians` / `pxl.isFullTurn`; the arrow trimming stays per shape), C (except the Q5 cases kept on purpose: grid `step <= 0`, circle / ellipse `Math.max(0, r)`, text `null` / `undefined` from unresolved refs), D, E (without renames, see Q2), F, G. Q2 extended on 2026-10-28: `_` = ownership, applied to all existing fields (13 cross-file `_` fields fixed, 19 own-file fields prefixed), checked by `build.js`.
-- **Verification**: 18/18 engine tests (6 new for A1–A6); 137 docs canvases pixel-identical before and after (`scratch/pixel_snapshot.js`, local; one canvas on `blend.html` uses `random()` and is excluded); no console errors on the docs and the `toLocal` examples.
+- **Verification**: 18/18 engine tests (6 new for A1–A6); 137 docs canvases pixel-identical before and after (`design/prototypes/2026-10-27_engine_cleanup_inventory/pixel_snapshot.js`; one canvas on `blend.html` uses `random()` and is excluded); no console errors on the docs and the `toLocal` examples.
 - **Scope**: the 19 engine files in `js/` (≈3,060 lines, build order in `build.js`). Not covered: `docs/js/*`, docs pages, `examples/`.
 - **Method**: every file read in full, plus pattern scans over `js/` (fallbacks, `typeof` checks, duplicated helpers, comment tone, whitespace, line length).
 - **Goal**: one consistent style, no dead or defensive code, no duplicated logic; behavior unchanged.
@@ -148,7 +148,7 @@ Fix: declare every field in the constructor (stable hidden classes, one place to
 ## 5. Suggested Order
 
 1. **Decisions** (§2, Q1–Q7) → style guide section.
-2. **Safety net**: one smoke test per element in `tests/index.html` (renders, key attributes, no console errors) and a pixel comparison of docs / example pages before and after (like `scratch/css_snapshot.js`, but on canvas pixels). Today's 12 tests cover only `toLocal` and `tx`.
+2. **Safety net**: one smoke test per element in `tests/index.html` (renders, key attributes, no console errors) and a pixel comparison of docs / example pages before and after (like `design/prototypes/2026-10-27_engine_cleanup_inventory/css_snapshot.js`, but on canvas pixels). Today's 12 tests cover only `toLocal` and `tx`.
 3. **Real problems** (A1–A6), one commit each with a test; A4 is a behavior change.
 4. **Duplication** (B1–B7), then defensive code (C) and state ownership (D).
 5. **Naming, comments, formatting** (E–G): mechanical, file by file.

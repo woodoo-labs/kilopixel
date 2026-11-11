@@ -108,5 +108,5 @@ Case 3 is the critical one: it needs `arrowjoin="miter"` for a sharp tip on a ro
 - [ ] Decide §6.1 (inheritance scope) and §6.2 (default `arrowstyle`).
 - [ ] Derive the `filled` corner geometry (§6.3), including tip alignment and small-head fallback.
 - [ ] Test page in `scratch/`: all four cases from §4 × both styles × relevant overrides.
-- [ ] Implement, `node build.js`, regression check with `scratch/arrows/grid.html` and `examples/test24.html`.
+- [ ] Implement, `node build.js`, regression check with `scratch/arrows/grid.html` (not kept) and `examples/test24.html`.
 - [ ] Docs: `arrows.html` (section 4 Line Joins becomes "Arrow Joins & Caps" or similar, callout "Sharp Tips on Rounded Paths" replaced by `arrowjoin`), `KILOPIXEL.md` Arrowhead System.

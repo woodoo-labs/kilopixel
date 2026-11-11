@@ -4,7 +4,7 @@
 - **Date**: 2026-10-18
 - **Related**: `design/archive/performance-analysis.md` (Issue #6, point key lookup), `design/2026-10-17_shape_authoring_plan.md` (Polyline `points: ''`, class fields, `draw(ctx, u)`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A), `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming), `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` (stroke gradients on flat shapes, implemented), `design/2026-10-23_smooth_polyline_spline_plan.md` (spline quality)
 - **Target Implementation**: `js/graphics.js` (parser), `js/elements/shapes/polyline.js`, `.agents/KILOPIXEL.md`
-- **Test Scripts** (local): `scratch/points_parser_cases.js` (today's parser), `scratch/points_parser_sketch.js` (§3.3 sketch)
+- **Test Scripts**: `design/prototypes/2026-10-18_polyline_optimization/points_parser_cases.js` (today's parser), `design/prototypes/2026-10-18_polyline_optimization/points_parser_sketch.js` (§3.3 sketch)
 
 ---
 
@@ -70,15 +70,15 @@ There are **no allocations per frame** today. The cost is the string-keyed prope
 
 ### 2.3 Hidden Costs Outside the Hot Loop
 
-1. **Dictionary mode — not relevant in practice (corrected 2026-10-19).** `delete` does switch an object to dictionary (hash table) mode, but V8 already does that for any `attributeValues` with **10 or more points** (too many added properties; checked with `%HasFastProperties`). `scratch/polyline_lookup_bench.js` shows no measurable difference between the two modes.
+1. **Dictionary mode — not relevant in practice (corrected 2026-10-19).** `delete` does switch an object to dictionary (hash table) mode, but V8 already does that for any `attributeValues` with **10 or more points** (too many added properties; checked with `%HasFastProperties`). `design/prototypes/2026-10-18_polyline_optimization/polyline_lookup_bench.js` shows no measurable difference between the two modes.
 2. **More hidden classes.** Polylines with different point counts get different `attributeValues` shapes. With several shape types on a page the shared property reads in `Shape` code are likely megamorphic anyway, so the effect is uncertain.
 3. **`ref.poly.pN` is readable.** Kept on purpose since 2026-10-19 and noted in `.agents/KILOPIXEL.md` (internal, not in the public docs, which recommend `<pxl-var>`). Any storage change must keep it.
 4. ~~A points change sends no `ref.<id>` broadcast.~~ **Fixed 2026-10-19**: `polyline.js` broadcasts after a points change, and `clearPoints(count)` only deletes keys beyond the new count, so readers never see `undefined` for a coordinate that still exists.
 
-**Measured cost of the per-frame lookups** (`scratch/polyline_lookup_bench.js`, JavaScript only, Node / V8): 100 points ≈ 1.3 µs, 500 points ≈ 8 µs, 2000 points ≈ 44 µs per frame, i.e. 0.01–0.3 % of the 16.7 ms frame budget. Phase 2 brings this to ≈ 0.1 / 0.7 / 2.7 µs. **Phase 2 is a micro-optimization** for typical point counts.
+**Measured cost of the per-frame lookups** (`design/prototypes/2026-10-18_polyline_optimization/polyline_lookup_bench.js`, JavaScript only, Node / V8): 100 points ≈ 1.3 µs, 500 points ≈ 8 µs, 2000 points ≈ 44 µs per frame, i.e. 0.01–0.3 % of the 16.7 ms frame budget. Phase 2 brings this to ≈ 0.1 / 0.7 / 2.7 µs. **Phase 2 is a micro-optimization** for typical point counts.
 5. **Reallocation on every points change.** `new Float32Array(n)` and new `p${i}` key strings, even if the count is unchanged. Matters when JavaScript sets `points` often (slider, live data).
 
-### 2.4 Parser Behavior (from `scratch/points_parser_cases.js`)
+### 2.4 Parser Behavior (from `design/prototypes/2026-10-18_polyline_optimization/points_parser_cases.js`)
 
 | Input | Result |
 |---|---|
@@ -144,7 +144,7 @@ pxl.parsePointsIntoArray = function(str, targetArray) {
 };
 ```
 
-Verified with `scratch/points_parser_sketch.js`: all docs / examples patterns parse as today; missing y, three values, trailing comma and empty x warn and skip that point; unbalanced `(` / `)` warn and reject all points; empty and `null` give no points without a warning.
+Verified with `design/prototypes/2026-10-18_polyline_optimization/points_parser_sketch.js`: all docs / examples patterns parse as today; missing y, three values, trailing comma and empty x warn and skip that point; unbalanced `(` / `)` warn and reject all points; empty and `null` give no points without a warning.
 
 ### 3.4 Cost
 
@@ -348,7 +348,7 @@ Build the path once per (`u`, points, `smooth`, `closed`, arrows) and reuse it. 
 
 | # | Test | Expected |
 |---|---|---|
-| 1 | `scratch/points_parser_cases.js`: all cases of §2.4 + §3.1 | new results as specified, warnings only where specified |
+| 1 | `design/prototypes/2026-10-18_polyline_optimization/points_parser_cases.js`: all cases of §2.4 + §3.1 | new results as specified, warnings only where specified |
 | 2 | Every `points` value in `docs/` and `examples/` (harvested by script), old vs. new parser | identical output |
 | 3 | Visual regression: all docs / examples pages with polylines (`caps`, `dashes`, `linear`, `arrows`, test03, test05, test25, test40, test50, benchmark), old vs. new bundle | identical (tiny antialiasing differences allowed from float32 → float64) |
 | 4 | Reactive points via `<pxl-var>` (test40 pattern), variable changed by slider | polyline follows; unused variables get unsubscribed |

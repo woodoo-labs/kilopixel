@@ -5,7 +5,7 @@
 - **Supersedes**: `design/archive/2026-10-17_always_save_restore_plan.md` (decided, not built) and Part 2 of `design/archive/2026-11-05_draw_errors_plan.md` (its Part 1, the clamping of stop offsets and corner radii, was built on 2026-11-05 and stays)
 - **Related**: `design/2026-11-01_isolated_shape_compositing_plan.md` (builds on this one: same `Shape.render()`, order in its §9), `design/2026-10-17_shape_authoring_plan.md` (custom shapes need this before a docs page), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, implemented), `design/2026-10-18_polyline_optimization_plan.md` (small fix "non-finite points + gradient", covered here)
 - **Target Implementation**: `js/elements/shape.js` (`render`, `createGradient`, `drawArrows`), `js/elements/shapes/grid.js`, `js/elements/node.js` (`reportError`), `js/elements/group.js`, `js/elements/layer.js`, `js/elements/variable.js`, `js/interaction.js` (`process`), `tests/index.html`, `.agents/KILOPIXEL.md`
-- **Measurement tools** (local only, scratch is git-ignored): `scratch/gradient_stops/try_finally_bench.html` (all variants, §4), `scratch/save_restore/measure.html` and `lines.html` (real pages, worst case), `scratch/custom_shape/test.html` (leak test), `scratch/gradient_stops/overshoot.html` (frame aborted by an error), `scratch/safe_render/bench.html` (repeated errors, text, hidden shapes, §4.4), `scratch/safe_render/hidden_refs.html` (what `hidden` does to evaluation, §5.1), `scratch/safe_render/edge_cases.html` (errors in readers, at connect and in `setAttribute()`, messages with values, §4.5)
+- **Measurement tools** (not kept): `scratch/gradient_stops/try_finally_bench.html` (all variants, §4), `scratch/save_restore/measure.html` and `lines.html` (real pages, worst case), `scratch/custom_shape/test.html` (leak test), `scratch/gradient_stops/overshoot.html` (frame aborted by an error), `scratch/safe_render/bench.html` (repeated errors, text, hidden shapes, §4.4), `scratch/safe_render/hidden_refs.html` (what `hidden` does to evaluation, §5.1), `scratch/safe_render/edge_cases.html` (errors in readers, at connect and in `setAttribute()`, messages with values, §4.5)
 
 ---
 
@@ -28,7 +28,7 @@ Built separately, the second would rewrite the first a few days later. Together 
 
 All shapes in a layer share one canvas context. Today a shape saves and restores only when it has transforms or compositing (`hasStateChanges`, a 15-term check in `Shape.render()`). The built-in shapes are safe, because they always set the state they use (Rule 1, made reliable by Rule A). Code that changes state without resetting it is not:
 
-- **Custom shapes** (`design/2026-10-17_shape_authoring_plan.md`): a `draw()` that sets `ctx.globalAlpha = 0.2` and forgets to reset it faded **every** shape in the layer to alpha 51 instead of 255, including shapes drawn before it (the state carries over into the next frame) and shapes that save (`save()` copies the leaked state). Measured in `scratch/custom_shape/test.html`, 2026-10-17.
+- **Custom shapes** (`design/2026-10-17_shape_authoring_plan.md`): a `draw()` that sets `ctx.globalAlpha = 0.2` and forgets to reset it faded **every** shape in the layer to alpha 51 instead of 255, including shapes drawn before it (the state carries over into the next frame) and shapes that save (`save()` copies the leaked state). Measured in `scratch/custom_shape/test.html` (not kept), 2026-10-17.
 - **Engine code:** `hasStateChanges` must mirror `applyContextState()` exactly; if the two lists drift apart, a shape leaks silently. `drawArrows` and `Grid.draw` reset values by hand.
 
 ### 2.2 Errors While Drawing (Details: `design/archive/2026-11-05_draw_errors_plan.md` §1, §2)
@@ -277,7 +277,7 @@ In `broadcastGlobalMatrixChange()`:
 
 ### 4.1 Measured 2026-11-07
 
-`scratch/gradient_stops/try_finally_bench.html`, page visible (80 timer firings per second), stage rendered directly with `stage.render(t)`, 60 frames per variant, 7 interleaved rounds, median, two runs. Variant D was added to the page at runtime and is the exact code of §3.1 (with `console.warn` in place of `reportError`).
+`scratch/gradient_stops/try_finally_bench.html` (not kept), page visible (80 timer firings per second), stage rendered directly with `stage.render(t)`, 60 frames per variant, 7 interleaved rounds, median, two runs. Variant D was added to the page at runtime and is the exact code of §3.1 (with `console.warn` in place of `reportError`).
 
 | Per frame | A: today | B: always save | C: B + `try / finally` | D: this plan |
 |---|---|---|---|---|
@@ -286,12 +286,12 @@ In `broadcastGlobalMatrixChange()`:
 | `try / finally` alone, pure JavaScript, 20 million calls | | | about +6 to +7 ns per call | |
 
 - **Mixed page:** all four within noise.
-- **Worst case:** D costs +1.6 ms per frame (+46 %), B +1.8 ms (+52 %): all of it from `save()` / `restore()`, and D is no slower than B. That is about 0.8 to 0.9 µs per bare shape, a little more than the 0.65 µs measured on 2026-10-17 (+1.3 ms then, `scratch/save_restore/lines.html`). 5.1 ms is still far within the 16.7 ms budget.
+- **Worst case:** D costs +1.6 ms per frame (+46 %), B +1.8 ms (+52 %): all of it from `save()` / `restore()`, and D is no slower than B. That is about 0.8 to 0.9 µs per bare shape, a little more than the 0.65 µs measured on 2026-10-17 (+1.3 ms then, `scratch/save_restore/lines.html` (not kept)). 5.1 ms is still far within the 16.7 ms budget.
 - **`try / catch / finally`:** not measurable in the engine. In pure JavaScript about 7 ns per call, which is about 15 µs per frame for 2,300 shapes.
 
 ### 4.2 Earlier Measurements, Still Valid
 
-- **Real pages within noise** (2026-10-17, `scratch/save_restore/measure.html`): `docs/dashes.html`, `docs/walkthrough.html` and five benchmark presets; differences went both ways and were smaller than the spread between rounds. Most shapes on real pages save already, because they have `x` / `y`.
+- **Real pages within noise** (2026-10-17, `scratch/save_restore/measure.html` (not kept)): `docs/dashes.html`, `docs/walkthrough.html` and five benchmark presets; differences went both ways and were smaller than the spread between rounds. Most shapes on real pages save already, because they have `x` / `y`.
 - **Who pays:** only animated layers with thousands of shapes that have no transform: lines and polylines with absolute coordinates, shapes at `0, 0` inside a positioned group. One polyline with 2,000 points is one shape with one save. Table of use cases: `design/archive/2026-10-17_always_save_restore_plan.md` §5.3.
 
 ### 4.3 Allocation
@@ -300,7 +300,7 @@ No new per-frame allocation on the normal path: `save()` / `restore()` and `try`
 
 ### 4.4 Second Check (2026-11-07): Repeated Errors, Text, Hidden Shapes
 
-`scratch/safe_render/bench.html`, page visible, same method as §4.1 (stage rendered directly, interleaved rounds, median). D is §4.1's variant (save before the evaluation), E evaluates first and saves only for a visible shape (§3.1 now), F is D plus the error cache of §3.5 (added at runtime).
+`scratch/safe_render/bench.html` (not kept), page visible, same method as §4.1 (stage rendered directly, interleaved rounds, median). D is §4.1's variant (save before the evaluation), E evaluates first and saves only for a visible shape (§3.1 now), F is D plus the error cache of §3.5 (added at runtime).
 
 **Engine state:** no cache in the engine relies on canvas state surviving between shapes. The only code that reads canvas state is the reset in `drawArrows()` and `Grid.draw()`, which §3.6 removes. The layer's `_lastAppliedFilter` is a CSS filter on the canvas element, not context state.
 
@@ -345,7 +345,7 @@ Reader updates per animation frame on real pages, counted with a wrapper around 
 
 ### 4.6 After the Build (2026-11-07)
 
-`scratch/safe_render/engine_bench.html`: the engine of the previous commit against the new build, each in its own iframe, page visible, 60 frames per variant, 7 interleaved rounds, median, three runs. A first run with the page hidden (throttled) gave about twice the cost on bare lines and is not counted.
+`scratch/safe_render/engine_bench.html` (not kept): the engine of the previous commit against the new build, each in its own iframe, page visible, 60 frames per variant, 7 interleaved rounds, median, three runs. A first run with the page hidden (throttled) gave about twice the cost on bare lines and is not counted.
 
 | Per frame | Previous engine | New engine | Difference (median) |
 |---|---|---|---|
@@ -356,7 +356,7 @@ Reader updates per animation frame on real pages, counted with a wrapper around 
 | 2,000 bare lines + 100 static typo rects | (breaks the frame) | 4.45 to 4.66 ms | close to bare lines alone: the kept error works |
 
 - **Texts** cost about 2 µs each in the build, about twice the 1 µs of the prototype (§4.4). Only texts without their own `x` / `y` pay it (texts with a transform saved before already), and 1,000 of them still take 6.3 ms. Accepted.
-- **Regression** (`scratch/safe_render/regress.html`): 79 pages (23 docs, 56 examples), 306 layers, 303 pixel-identical; no new warnings, errors or exceptions. The other 3 also differ between two runs of the same engine: `docs/mapping.html` sec7 (a `toLocal` ring on an animated planet), `docs/text.html` sec9 (scrolling text with `loop()`), `examples/test50.html` (a live FPS readout).
+- **Regression** (`scratch/safe_render/regress.html` (not kept)): 79 pages (23 docs, 56 examples), 306 layers, 303 pixel-identical; no new warnings, errors or exceptions. The other 3 also differ between two runs of the same engine: `docs/mapping.html` sec7 (a `toLocal` ring on an animated planet), `docs/text.html` sec9 (scrolling text with `loop()`), `examples/test50.html` (a live FPS readout).
 - **Tests on the previous engine:** 11 of the 12 new tests fail there; the hidden-shape test passes (the previous engine didn't save for hidden shapes either) and guards the behavior.
 - **Size:** minified 54.29 KB (was 53.74 KB), gzipped 16.16 KB (was 15.97 KB); the rounded sizes in the docs stay ~54KB and ~16KB.
 - **Implementation detail:** the gradient building moved into its own method, `buildGradient()`, so `createGradient()` only handles the cache and the kept error and the build code didn't need a new indentation level.
@@ -367,7 +367,7 @@ Reader updates per animation frame on real pages, counted with a wrapper around 
 
 ### 5.1 Hidden Elements (Unchanged, Measured 2026-11-07)
 
-`scratch/safe_render/hidden_refs.html`, values sampled twice, 1.5 s apart:
+`scratch/safe_render/hidden_refs.html` (not kept), values sampled twice, 1.5 s apart:
 
 | The value… | follows `t` | follows another `ref.*` |
 |---|---|---|
@@ -408,7 +408,7 @@ A hidden shape evaluates before it checks `hidden`; a hidden group or layer skip
 4. `js/elements/group.js`, `layer.js`, `variable.js`: `try` around their evaluation (§3.3).
 5. `js/interaction.js`: `try / catch / finally` around the hit-test draw (§3.4).
 6. `tests/index.html`: tests from §8. `node build.js`, update the `~NNKB` sizes, all tests pass.
-7. Regression: all `docs/*.html` and `examples/*.html` without new console warnings, pixels compared with the old engine (`scratch/text_box/regress.html` adapted), `scratch/custom_shape/test.html` with the built engine, `scratch/save_restore/measure.html` with the built engine as A (A and B must be equal, B's patch is then a no-op), `scratch/safe_render/bench.html` against the old engine (hidden first faster or equal; repeated errors as in §4.4).
+7. Regression: all `docs/*.html` and `examples/*.html` without new console warnings, pixels compared with the old engine (`scratch/text_box/regress.html` (not kept) adapted), `scratch/custom_shape/test.html` with the built engine, `scratch/save_restore/measure.html` with the built engine as A (A and B must be equal, B's patch is then a no-op), `scratch/safe_render/bench.html` against the old engine (hidden first faster or equal; repeated errors as in §4.4).
 8. `.agents/KILOPIXEL.md` and docs (§9).
 9. Plan status → ✅, TODO item removed; remove the small fix "non-finite points + gradient" from `design/2026-10-18_polyline_optimization_plan.md` and from the polyline item in the TODO.
 

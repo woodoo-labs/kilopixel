@@ -1,10 +1,10 @@
 # Attribute Defaults & Canvas State Isolation
 
-- **Status**: ✅ **Implemented** (Rule A, 2026-10-17; 20/20 unit tests in `scratch/rule_a/unit.html`; regression: 76 docs / examples pages, 3,682 elements, identical static values old vs. new bundle, no new console errors). Always save / restore was split off into `design/archive/2026-10-17_always_save_restore_plan.md`, now part of `design/2026-11-07_safe_shape_render_plan.md`.
+- **Status**: ✅ **Implemented** (Rule A, 2026-10-17; 20/20 unit tests in `scratch/rule_a/unit.html` (not kept); regression: 76 docs / examples pages, 3,682 elements, identical static values old vs. new bundle, no new console errors). Always save / restore was split off into `design/archive/2026-10-17_always_save_restore_plan.md`, now part of `design/2026-11-07_safe_shape_render_plan.md`.
 - **Date**: 2026-10-17 (reviewed 2026-10-17: hot loop / GC, edge cases)
 - **Related**: `design/2026-10-15_interactive_state_auto_registration_plan.md` (lazy unregister)
 - **Target Implementation**: `js/engine.js` (`pxl.compileAttribute`), `js/elements/node.js`, `js/elements/shape.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/variable.js`, `js/elements/stage.js`, `js/elements/shapes/*.js`
-- **Test Files** (local only, scratch is git-ignored): `scratch/rule_a/unit.html` (unit tests), `scratch/rule_a/regress.html` (old vs. new bundle on all pages)
+- **Test Files** (not kept): `scratch/rule_a/unit.html` (unit tests), `scratch/rule_a/regress.html` (old vs. new bundle on all pages)
 
 ---
 

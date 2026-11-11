@@ -123,12 +123,29 @@ for (const file of documents) {
       }
     }
 
+    // scratch/ is git-ignored and differs per laptop: a scratch file may only be named as history
+    if (/scratch\/[A-Za-z0-9_*]/.test(text) && !text.includes('(not kept)')) {
+      report(file, i + 1, 'links a scratch/ file: move it to design/prototypes/<plan>/ or mark it "(not kept)"');
+    }
+
     if (file !== TODO) {
       for (const m of text.matchAll(/TODO(?:\.md)?`? §(\d+)/g)) {
         if (items[m[1]] === undefined) report(file, i + 1, `refers to TODO §${m[1]}, which doesn't exist (link the plan instead)`);
       }
     }
   });
+}
+
+// =========================================================================
+// Prototypes: one folder per plan, named like the plan without _plan / _note
+// =========================================================================
+
+const PROTOTYPES = 'design/prototypes';
+if (exists(PROTOTYPES)) {
+  const planNames = new Set(planFiles.map(f => path.basename(f).replace(/_(plan|note)\.md$/, '')));
+  for (const dir of fs.readdirSync(path.join(root, PROTOTYPES))) {
+    if (!planNames.has(dir)) report(`${PROTOTYPES}/${dir}`, null, 'no plan with this name in design/ or design/archive/');
+  }
 }
 
 // =========================================================================

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>toLocal Reader Lines | Kilopixel</title>
+  <link rel="stylesheet" href="/docs/css/docs.css">
+  <script src="/docs/js/pxl.min.js"></script>
+</head>
+<body>
+  <main class="docs-content">
+    <div class="docs-inner">
+      <h2>Which reader lands on the circle?</h2>
+      <p>All three lines live in layer B and use the same end point: <code>x2="toLocal(ref.sun, 'x')" y2="toLocal(ref.sun, 'y')"</code>. Only the line without its own <code>x</code>, <code>y</code> and <code>rotate</code> ends on the orange circle.</p>
+
+      <pxl-stage id="demoStage" ratio="5 / 3">
+        <!-- Layer A: the target -->
+        <pxl-layer>
+          <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+          <pxl-circle id="sun" x="850" y="120" r="22" fill="#fb923c"></pxl-circle>
+          <pxl-text x="850" y="170" text="'sun (layer A)'" size="22" fill="#c2410c" font="monospace" align="center"></pxl-text>
+        </pxl-layer>
+
+        <!-- Layer B: moved to (250, 450) and rotated 20° -->
+        <pxl-layer x="250" y="450" rotate="20">
+          <!-- Layer B's own axes -->
+          <pxl-line x1="-200" x2="700" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+          <pxl-line y1="-400" y2="200" stroke="#cbd5e1" strokewidth="2" linedash="[6, 6]"></pxl-line>
+          <pxl-circle r="7" fill="#64748b"></pxl-circle>
+          <pxl-text x="12" y="30" text="'Layer B (0, 0)'" size="20" fill="#64748b" font="monospace"></pxl-text>
+
+          <!-- 1. Green: no own x, y, rotate. Its (0, 0) IS layer B's (0, 0) -->
+          <pxl-line x2="toLocal(ref.sun, 'x')" y2="toLocal(ref.sun, 'y')" stroke="#22c55e" strokewidth="5"></pxl-line>
+
+          <!-- 2. Blue: own center moved to x="150". x2 is measured from there -->
+          <pxl-line x="150" x2="toLocal(ref.sun, 'x')" y2="toLocal(ref.sun, 'y')" stroke="#3b82f6" strokewidth="5"></pxl-line>
+          <pxl-circle x="150" r="7" fill="#3b82f6"></pxl-circle>
+
+          <!-- 3. Purple: own rotate="30". x2 / y2 are turned with the line -->
+          <pxl-line rotate="30" x2="toLocal(ref.sun, 'x')" y2="toLocal(ref.sun, 'y')" stroke="#a855f7" strokewidth="5"></pxl-line>
+
+          <!-- 4. Ring: x and y are in layer B, so toLocal fits -->
+          <pxl-circle x="toLocal(ref.sun, 'x')" y="toLocal(ref.sun, 'y')" r="30" stroke="#0f172a" strokewidth="3"></pxl-circle>
+        </pxl-layer>
+
+        <!-- Legend (stage space) -->
+        <pxl-layer>
+          <pxl-text x="30" y="40" size="22" font="monospace" fill="#16a34a" text="'green:  no own x / rotate  -> hits'"></pxl-text>
+          <pxl-text x="30" y="72" size="22" font="monospace" fill="#2563eb" text="'blue:   x=&quot;150&quot;          -> misses'"></pxl-text>
+          <pxl-text x="30" y="104" size="22" font="monospace" fill="#9333ea" text="'purple: rotate=&quot;30&quot;      -> misses'"></pxl-text>
+          <pxl-text x="30" y="136" size="22" font="monospace" fill="#0f172a" text="'ring:   x / y = toLocal   -> hits'"></pxl-text>
+        </pxl-layer>
+      </pxl-stage>
+    </div>
+  </main>
+</body>
+</html>
