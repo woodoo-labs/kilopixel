@@ -137,6 +137,29 @@ class DocsSidebar extends HTMLElement {
     const backdrop = this.querySelector('.sidebar-backdrop');
     const sidebar = this.querySelector('.sidebar');
 
+    // Keep the sidebar's scroll position between pages (design/2026-11-11_sidebar_scroll_plan.md).
+    // This runs while the page is parsed, before the first paint, so the list never shows its top first.
+    // Storage can be blocked (private windows); then only the active link is kept in view.
+    const SCROLL_KEY = 'kilopixel-docs-sidebar';
+    const restoreScroll = () => {
+      try { sidebar.scrollTop = Number(sessionStorage.getItem(SCROLL_KEY)) || 0; } catch (e) {}
+      const active = sidebar.querySelector('a.active');
+      if (!active) return;
+      // Scroll only the sidebar, just enough to show the current page's link (scrollIntoView could move the page too)
+      const top = active.getBoundingClientRect().top - sidebar.getBoundingClientRect().top + sidebar.scrollTop;
+      const bottom = top + active.offsetHeight;
+      if (top < sidebar.scrollTop) sidebar.scrollTop = top - 16;
+      else if (bottom > sidebar.scrollTop + sidebar.clientHeight) sidebar.scrollTop = bottom - sidebar.clientHeight + 16;
+    };
+    restoreScroll();
+    // In phone emulation a layout during loading can reset the closed drawer to the top (seen on text.html).
+    // Restoring again on load is invisible there (the drawer is out of view) and changes nothing elsewhere.
+    const restored = sidebar.scrollTop;
+    window.addEventListener('load', () => { if (restored > 0 && sidebar.scrollTop === 0) restoreScroll(); }, { once: true });
+    window.addEventListener('pagehide', () => {
+      try { sessionStorage.setItem(SCROLL_KEY, String(sidebar.scrollTop)); } catch (e) {}
+    });
+
     const closeSidebar = () => {
       if (sidebar) sidebar.classList.remove('mobile-open');
       if (backdrop) backdrop.classList.remove('active');
