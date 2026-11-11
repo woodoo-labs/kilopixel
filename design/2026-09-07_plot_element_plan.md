@@ -1,7 +1,7 @@
 # Technical Implementation Plan: Declarative `<pxl-plot>` Element
 
 **Date**: 2026-09-07  
-**Status**: 🟡 **Proposed** (2026-11-11, notes on sampling and smoothing in §10)  
+**Status**: 🟡 **Proposed** (2026-11-11, notes on sampling and smoothing in §10; uniform spline from `design/2026-11-11_polyline_smoothstyle_plan.md`)  
 **Target Files**: 
 - `js/compiler.js` (Expression compiler parameter injection & static-path guard)
 - `js/elements/shapes/plot.js` (New Custom Element implementation)
@@ -268,7 +268,8 @@ Largest distance from the drawn curve to the true curve (stage units, stage 1000
 
 ### 10.3 Consequences for `<pxl-plot>`
 
-- **`smooth` uses the uniform spline** (the polyline's spline before 2026-10-24: handles `±(next − previous) · k / 6`). Between equal steps it is about 5–10 times closer to the true curve than the centripetal one at the same number of samples. `<pxl-polyline>` keeps the centripetal spline.
+- **`smooth` uses the uniform spline** (the polyline's spline before 2026-10-24: handles `±(next − previous) · k / 6`). Between equal steps it is about 5–10 times closer to the true curve than the centripetal one at the same number of samples. `<pxl-polyline>` keeps the centripetal spline as its default.
+- **Reusable code**: `design/2026-11-11_polyline_smoothstyle_plan.md` adds the uniform spline to `<pxl-polyline>` (`smoothstyle="uniform"`) in the shared segment loader `loadSegment()`, which also serves arrow trimming and hit testing. The plot builds on that code instead of writing its own spline: extend `pxl.Polyline` or move the spline into a shared helper (that plan, §6).
 - **Dense sampling is the other way out**: with about 600 steps, straight segments are within half a unit of the true curve. Steps cost one evaluation of `fx` / `fy` each and are only recomputed when an input changes, so a high default (several hundred) may be better than smoothing by default. Decide with a benchmark.
 - **Free ends** (open plots) still need a rule; uniform Catmull-Rom with clamped ends straightens out before the end (problem #1 of the 2026-10-23 plan). For a plot, the missing neighbour can be computed: one more sample just outside `domain`.
 - **Repeated curves** (a parametric curve traced several times over `domain`) are drawn identically on every pass only if the steps per pass are a whole number. With dense sampling the difference is below a pixel.

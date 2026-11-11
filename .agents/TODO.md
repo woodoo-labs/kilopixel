@@ -3,7 +3,7 @@
 Open work only. Done items are removed: the plan's status line, `.agents/KILOPIXEL.md` and git history keep the record.
 
 - **Status words** (same as in the plans): 💬 **Discussion** (ideas, nothing decided) · 🟡 **Proposed** (complete plan, waiting for a decision) · 🟢 **Decided** (agreed, not built yet). Plans also use ✅ **Implemented**, ⚪ **Superseded by** `<file>` and ⚪ **Dropped** (decided not to do it); those have no TODO item.
-- **Numbers are stable:** other files refer to items as "TODO §29". A removed item leaves a gap; a new item gets the next free number (next: §38).
+- **Numbers are stable:** other files refer to items as "TODO §29". A removed item leaves a gap; a new item gets the next free number (next: §39).
 - **Plans:** `design/`; superseded, dropped and outdated plans are in `design/archive/`. Workflow: `.claude/CLAUDE.md` → "Plans and TODO". Check: `node tools/check_plans.js`.
 
 ## 1. Native SVG Path2D & Vector Sprites (`<pxl-path>`)
@@ -53,6 +53,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
   - Upward $+Y$ mathematical orientation, 1:1 isotropic scaling, decoupled domain intervals, and pre-allocated `Float32Array` vertex caching.
 - **Open**: the plan names the plot's own magnification (pixels per math unit) `scale`. Since 2026-10-30 every element has `zoom`, `scalex` and `scaley`, so a plot attribute `scale` beside them would be confusing; find another name before implementing.
 - **Open**: `smooth` should use the uniform spline (closer to sampled curves than the polyline's centripetal one), or a high `steps` default without smoothing; see section 10 of the plan. Test case: walkthrough section 9, which then goes back to frequencies 1–10.
+- **Related**: §38 builds the uniform spline into `<pxl-polyline>`; the plot reuses that code.
 
 ## 8. Layer FPS Throttling (`maxfps`), Stage-Level `<pxl-var>` & Performance Monitor
 - **Status**: 🟡 **Proposed** — needs a dedicated, in-depth session
@@ -197,3 +198,11 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Status**: 💬 **Discussion** (spec 2026-07-19, never built)
 - **Reference**: `design/2026-07-19_logph_diagram_note.md`
 - **Idea**: a thermodynamic pressure-enthalpy diagram as a Kilopixel shape, and a general scale interface: `mapX(value)` / `mapY(value)` turn a domain value into a stage coordinate, so other shapes can place markers on data shapes. Related to `<pxl-plot>` (§7).
+
+## 38. Polyline `smoothstyle`: Uniform or Centripetal Spline
+- **Status**: 🟡 **Proposed** (2026-11-11)
+- **Reference**: `design/2026-11-11_polyline_smoothstyle_plan.md`
+- **Problem**: the centripetal spline (since 2026-10-24) is right for points placed by hand but turns too sharply on points sampled at equal steps (formulas, data over time): walkthrough section 9 needs 120 points; with the uniform spline 60 are more accurate (worst 0.7 instead of 6.9 units).
+- **Idea**: `smoothstyle="centripetal"` (default) | `"uniform"`, only `loadSegment()` changes; new `docs/polyline.html` section 5 (hand-placed arrow vs. sampled figure eight).
+- **Open**: D1 name, D2 repeated point in the uniform style (corner recommended), D3 walkthrough section 9 back to 60 points.
+- **Related**: §7 (`<pxl-plot>` reuses the uniform spline).
