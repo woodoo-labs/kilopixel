@@ -241,12 +241,13 @@ Object.defineProperty(this.attributeValues, 'getY', {
 
 ## 10. Sampling and Smoothing (Notes, 2026-11-11)
 
-Found while fixing the trace path in `docs/walkthrough.html` section 9 (a Lissajous curve written out as polyline points). Reproduce with `scratch/spline_error.js`, `scratch/sec9_curve_compare.html` (git-ignored, may be gone).
+Found while fixing the trace path in `docs/walkthrough.html` section 9 (a Lissajous curve written out as polyline points). Reproduce with `scratch/spline_error.js`, `scratch/sec9_curve_compare.html`, `scratch/spline_offset.js` (git-ignored, may be gone).
 
 ### 10.1 What went wrong in the walkthrough
 
 - The trace path was 100 hand-written points, `smooth="true"`, frequencies 1–10. Since the centripetal spline (`design/2026-10-23_smooth_polyline_spline_plan.md`, 2026-10-24) the tips looked pointed, and curves traced several times (frequencies with a common factor, e.g. 9 / 3) showed frayed double lines at the tips.
-- Fixed for now with 60 points and frequencies 1–5: 60 is divisible by every frequency up to 5, so every pass of a repeated curve hits the same points. The tips are still slightly pointed (below).
+- Fixed for now with 120 points and frequencies 1–5: 120 is divisible by every frequency up to 5, so every pass of a repeated curve hits the same points. Over all 25 slider combinations the centripetal error is at most 1.6 (7.0 with 60 points), about a pixel; the markup is back to about 11 KB.
+- Starting the samples elsewhere doesn't help: shifting them by ¼, ½ or ¾ of a step raised the average error at 60 points from 1.96 to about 3.1. Starting at `v = 0` places the points symmetrically around the curve's axes, the best case (`scratch/spline_offset.js`).
 
 ### 10.2 Why: the spline must match how the points were sampled
 
