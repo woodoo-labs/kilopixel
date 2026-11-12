@@ -206,6 +206,19 @@
           <pxl-layer id="srLayerB"></pxl-layer>
         </pxl-stage>
 
+        <!-- Layer CSS-only fast path (design/2026-11-12_two_phase_frame_plan.md §7.1) -->
+        <pxl-stage id="fpStage" ratio="5 / 3" alwaysrender>
+          <pxl-layer id="fpFade" alpha="0.5 + wave(2) * 0.5">
+            <pxl-circle id="fpFadeCircle" x="150" y="300" r="80" fill="#38bdf8"></pxl-circle>
+          </pxl-layer>
+          <pxl-layer id="fpBlink" alpha="0.5 + wave(2) * 0.5" hidden="t % 2 >= 1">
+            <pxl-circle x="450" y="300" r="80" fill="#38bdf8"></pxl-circle>
+          </pxl-layer>
+          <pxl-layer id="fpMoving" alpha="0.5 + wave(2) * 0.5">
+            <pxl-circle id="fpMovingCircle" x="750" y="300" r="80" dx="wave(1) * 20" fill="#38bdf8"></pxl-circle>
+          </pxl-layer>
+        </pxl-stage>
+
       </div>
     </div>
   </main>
@@ -931,6 +944,72 @@
       srRender(2);
       if (pixelAt('srLayerA', 150, 300)[3] === 0) throw new Error('not drawn after the coordinate became valid');
       srClear();
+    });
+
+    // ===================================================================
+    // Layer CSS-only fast path (design/2026-11-12_two_phase_frame_plan.md §7.1)
+    // ===================================================================
+
+    // Renders the fast path stage for `frames` frames after time `from`; resize() first, so it also works in a background tab
+    function fpRender(from, frames) {
+      const stage = el('fpStage');
+      if (stage.unit === 0) stage.resize();
+      for (let i = 1; i <= frames; i++) stage.render(from + i / 60);
+    }
+    // clearRect() calls on a layer's canvas while fn runs
+    function countClears(layerId, fn) {
+      const ctx = el(layerId)._ctx, original = CanvasRenderingContext2D.prototype.clearRect;
+      let calls = 0;
+      ctx.clearRect = function(...args) { calls++; return original.apply(this, args); };
+      try { fn(); } finally { delete ctx.clearRect; }
+      return calls;
+    }
+
+    test('layer fast path: a layer with only alpha animated updates its CSS and keeps its pixels', () => {
+      fpRender(20, 1);
+      const before = el('fpFade')._canvas.style.opacity;
+      const clears = countClears('fpFade', () => fpRender(20.2, 10));
+      if (clears !== 0) throw new Error(`canvas cleared in ${clears} of 10 frames`);
+      if (el('fpFade')._canvas.style.opacity === before) throw new Error('opacity did not change');
+      if (pixelAt('fpFade', 150, 300)[3] === 0) throw new Error('the circle is gone');
+    });
+
+    test('layer fast path: an animated hidden still clears and redraws the canvas', () => {
+      fpRender(30, 1);   // t = 30.02: visible
+      if (pixelAt('fpBlink', 450, 300)[3] === 0) throw new Error('not drawn while visible');
+      fpRender(31, 1);   // t = 31.02: hidden
+      if (pixelAt('fpBlink', 450, 300)[3] !== 0) throw new Error('still drawn while hidden');
+      fpRender(32, 1);   // visible again
+      if (pixelAt('fpBlink', 450, 300)[3] === 0) throw new Error('not drawn again after hidden');
+    });
+
+    test('layer fast path: an animated child still redraws the layer every frame', () => {
+      fpRender(40, 1);
+      const clears = countClears('fpMoving', () => fpRender(40.2, 10));
+      if (clears !== 10) throw new Error(`canvas cleared in ${clears} of 10 frames`);
+    });
+
+    test('layer fast path: a shape changed, added or moved in from another layer is drawn in the next frame', () => {
+      fpRender(50, 1);
+      el('fpFadeCircle').setAttribute('fill', '#ff0000');
+      if (countClears('fpFade', () => fpRender(50.1, 1)) !== 1) throw new Error('not redrawn after setAttribute()');
+      if (!isPinkish(pixelAt('fpFade', 150, 300))) throw new Error('the new fill is not drawn');
+
+      el('fpFade').insertAdjacentHTML('beforeend', '<pxl-rect id="fpAdded" x="300" y="150" w="60" h="60" fill="#ff0000"></pxl-rect>');
+      if (countClears('fpFade', () => fpRender(50.2, 1)) !== 1) throw new Error('not redrawn after adding a shape');
+      if (pixelAt('fpFade', 300, 150)[3] === 0) throw new Error('the added shape is not drawn');
+
+      const moved = el('fpMovingCircle');
+      el('fpFade').appendChild(moved);
+      fpRender(50.3, 1);
+      if (pixelAt('fpFade', 750, 300)[3] === 0) throw new Error('the moved shape is not drawn in its new layer');
+      if (pixelAt('fpMoving', 750, 300)[3] !== 0) throw new Error('the moved shape is still drawn in its old layer');
+
+      // Restore the stage for later runs of the page state
+      el('fpMoving').appendChild(moved);
+      el('fpAdded').remove();
+      el('fpFadeCircle').setAttribute('fill', '#38bdf8');
+      fpRender(50.4, 1);
     });
 
     // --- Run all tests in order ---

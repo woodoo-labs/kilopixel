@@ -133,7 +133,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       pxl.broadcast(this.refKey);
     }
 
-    if (this.isAnimated) this.parentLayer?.invalidate();
+    // A layer is its own parentLayer (closest() includes the element). Marking itself dirty here would rule out
+    // the CSS-only fast path in Layer.render(); an animated layer keeps the loop running there instead.
+    if (this.isAnimated && this.parentLayer !== this) this.parentLayer?.invalidate();
 
     return animatedValuesChanged;
   }

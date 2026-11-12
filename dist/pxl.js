@@ -1395,7 +1395,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       pxl.broadcast(this.refKey);
     }
 
-    if (this.isAnimated) this.parentLayer?.invalidate();
+    // A layer is its own parentLayer (closest() includes the element). Marking itself dirty here would rule out
+    // the CSS-only fast path in Layer.render(); an animated layer keeps the loop running there instead.
+    if (this.isAnimated && this.parentLayer !== this) this.parentLayer?.invalidate();
 
     return animatedValuesChanged;
   }
@@ -1622,17 +1624,19 @@ pxl.Layer = class Layer extends pxl.PxlNode {
       this._lastAppliedFilter = filterStr;
     }
 
-    // CSS-only fast path: only compositing is animated, so the pixels stay the same
-    let transformsAnimated = false;
-    let compositingAnimated = false;
+    // CSS-only fast path: only compositing is animated (no transform, no hidden) and nothing in the layer changed,
+    // so the pixels stay the same
+    let onlyCompositingAnimated = this.isAnimated;
     for (let i = 0; i < this.animatedAttributeKeys.length; i++) {
       const k = this.animatedAttributeKeys[i];
-      if (pxl.isSpatialKey(k)) transformsAnimated = true;
-      if (k === 'alpha' || k === 'blend' || k === 'filter') compositingAnimated = true;
+      if (k !== 'alpha' && k !== 'blend' && k !== 'filter') {
+        onlyCompositingAnimated = false;
+        break;
+      }
     }
 
-    if (compositingAnimated && !transformsAnimated && !this.isDirty) {
-      if (this.isAnimated) this.stage.requestRender();
+    if (onlyCompositingAnimated && !this.isDirty) {
+      this.stage.requestRender();
       return;
     }
 
