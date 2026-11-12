@@ -1,7 +1,7 @@
 # 2026-08-04: Unified Responsive Filters & Scope Helpers Plan
 
-**Date:** 2026-08-04  
-**Status**: ✅ **Implemented** (current behavior: `.agents/KILOPIXEL.md`)  
+- **Status**: ✅ **Implemented** (current behavior: `.agents/KILOPIXEL.md`)
+- **Date**: 2026-08-04
 
 ---
 

@@ -16,25 +16,25 @@ By mapping `<pxl-layer>`'s context states to CSS (`opacity`, `mix-blend-mode`, `
 
 ## Proposed Changes
 
-### [js/graphics.js](file:///C:/Users/micha/woodoo-labs/kilopixel/js/graphics.js)
+### `js/graphics.js`
 - **[MODIFY]** `pxl.applyContextState`
   - Add `mask` to the destructured attributes.
   - Prioritize `mask` over `blend` when setting `ctx.globalCompositeOperation`. 
   - **[PERF/GC OPTIMIZATION]**: Fix the `filter.join(' ')` memory leak. Currently, if `filter` is an array of dynamic helpers, `join(' ')` allocates a new string every frame, thrashing the Garbage Collector. We will implement a fast Array shallow-compare: only `join` and `scaleResponsiveFilter` if the array's contents have actually changed!
 
-### [js/elements/shape.js](file:///C:/Users/micha/woodoo-labs/kilopixel/js/elements/shape.js)
+### `js/elements/shape.js`
 - **[MODIFY]** `render()`
   - Add `mask !== 'none'` to the `hasStateChanges` boolean flag, ensuring we retain our Phase 1 zero-cost early exit for shapes that don't need context states.
 
-### [js/elements/node.js](file:///C:/Users/micha/woodoo-labs/kilopixel/js/elements/node.js)
+### `js/elements/node.js`
 - **[MODIFY]** `constructor()` and `attributeChangedCallback`
   - Add `mask` to the list of `pxl.attributes` defaults.
 
-### [js/elements/stage.js](file:///C:/Users/micha/woodoo-labs/kilopixel/js/elements/stage.js)
+### `js/elements/stage.js`
 - **[MODIFY]** `render(t)`
   - **[EDGE CASE FIX]**: Change the render loop to `if (layer.isDirty || layer.isAnimated) layer.render(this.unit, t);`. We must separate the "Canvas Needs Redraw" flag (`isDirty`) from the "Layer Needs Animation Check" flag (`isAnimated`), otherwise the `cssOnly` fast path will never execute!
 
-### [js/elements/layer.js](file:///C:/Users/micha/woodoo-labs/kilopixel/js/elements/layer.js)
+### `js/elements/layer.js`
 - **[MODIFY]** `render(u, t)`
   - Remove `pxl.applyContextState(ctx, u, this.attributeValues, this)` from the layer's internal render loop.
   - After `evaluateAnimations(t)`, manually sync `this.attributeValues.alpha`, `blend`, and `filter` to `this.canvas.style.opacity`, `mixBlendMode`, and `filter`.
@@ -46,10 +46,10 @@ By mapping `<pxl-layer>`'s context states to CSS (`opacity`, `mix-blend-mode`, `
 
 ## Documentation & Example Updates
 
-### [examples/test40.html](file:///C:/Users/micha/woodoo-labs/kilopixel/examples/test40.html)
+### `examples/test40.html`
 - **[MODIFY]**: Change the two `<pxl-circle blend="destination-in">` masking elements to use the new `mask="destination-in"` attribute instead.
 
-### [.agents/KILOPIXEL.md](file:///C:/Users/micha/woodoo-labs/kilopixel/.agents/KILOPIXEL.md)
+### `.agents/KILOPIXEL.md`
 - **[MODIFY]** `Style Cascade & Inheritance`: Rewrite this section to clearly explain the new Dual Architecture (Layers = CSS DOM properties, Shapes = Canvas API properties).
 - **[MODIFY]** `Element Reference — Layer`: Remove `shadow*` attributes from the list. Explain that `blend` maps to CSS `mix-blend-mode` and `alpha` maps to CSS `opacity`.
 - **[MODIFY]** `Element Reference — Shape`: Add `mask` to the list of observed attributes. Explain that `mask` is strictly for Porter-Duff masking operators like `destination-out`.

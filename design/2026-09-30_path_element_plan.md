@@ -1,8 +1,8 @@
 # Design Plan: `<pxl-path>` — Native SVG Path2D Element & Vector Sprites
 
-**Date**: 2026-09-30  
-**Status**: 🟡 **Proposed** (2026-09-30)  
-**Files affected**: `js/elements/shapes/path.js` (new), `js/elements/shape.js`, `js/interaction.js`, `build.js`
+- **Status**: 🟡 **Proposed** (2026-11-12: idea still open, but the code sketches predate today's engine: zero allocations per frame, no defensive fallbacks, `hasFill()` / `isStroked()`, `applyLineDash()` as a method, safe render; bring them up to date before implementing. First draft 2026-09-30)
+- **Date**: 2026-09-30
+- **Files affected**: `js/elements/shapes/path.js` (new), `js/elements/shape.js`, `js/interaction.js`, `build.js`
 
 ---
 
@@ -46,8 +46,8 @@ Implementing `<pxl-path>` unlocks:
 
 ### 3.1 Inherited Attributes (from `Shape`)
 
-`<pxl-path>` inherits all standard [`Shape`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/shape.js) attributes:
-* **Spatial Transforms**: `x`, `y`, `dx`, `dy`, `rotate`, `scale`, `scalex`, `scaley`, `skewx`, `skewy`
+`<pxl-path>` inherits all standard `Shape` (`js/elements/shape.js`) attributes:
+* **Spatial Transforms**: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `scalex`, `scaley`, `skewx`, `skewy`
 * **Styling**: `fill`, `stroke`, `strokewidth`, `linecap`, `linejoin`, `miterlimit`, `linedash`, `dashoffset`
 * **Compositing & Effects**: `alpha`, `blend`, `mask`, `filter`, `shadowcolor`, `shadowblur`, `shadowx`, `shadowy`, `hidden`
 * **Interaction**: `onclick`, `onenter`, `onleave`, `ondown`, `onup`, `onmove`, `isHovered`, `isPressed`
@@ -74,7 +74,7 @@ Implementing `<pxl-path>` unlocks:
 
 ### 4.1 Dual-Format ViewBox Parser (`parseViewBox`)
 
-Following Kilopixel's established precedent for [`linedash="[20, 10]"`](file:///c:/Users/micha/woodoo-labs/kilopixel/.agents/KILOPIXEL.md#L804), `viewbox` accepts both standard SVG strings and JavaScript Arrays:
+Following Kilopixel's established precedent for `linedash="[20, 10]"` (`.agents/KILOPIXEL.md`), `viewbox` accepts both standard SVG strings and JavaScript Arrays:
 
 ```javascript
 parseViewBox(val) {
@@ -247,7 +247,7 @@ getBoundingBox() {
 
 ## 6. Core Engine Modifications
 
-### 6.1 `Shape.applyStyle` Update ([`js/elements/shape.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/shape.js))
+### 6.1 `Shape.applyStyle` Update (`js/elements/shape.js`)
 
 Update `applyStyle` to accept optional `path2d`, `fillrule`, and `scaleMultiplier` without breaking any existing shape:
 
@@ -282,7 +282,7 @@ applyStyle(ctx, u, path2d = null, fillrule = 'nonzero', scaleMultiplier = 1) {
 }
 ```
 
-### 6.2 `InteractionEngine` Dummy Context Interception ([`js/interaction.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/interaction.js))
+### 6.2 `InteractionEngine` Dummy Context Interception (`js/interaction.js`)
 
 Forward `Path2D` instances in the dummy hit-test context:
 
@@ -312,7 +312,7 @@ pxl.dummyCtx.stroke = function(path) {
 };
 ```
 
-### 6.3 Build System Integration ([`build.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/build.js))
+### 6.3 Build System Integration (`build.js`)
 
 Add `js/elements/shapes/path.js` to the `files` array immediately following `grid.js`:
 

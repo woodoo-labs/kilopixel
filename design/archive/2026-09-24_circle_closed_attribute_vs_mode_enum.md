@@ -1,9 +1,9 @@
 # Circle API: `closed` Attribute vs. `mode` Enum
 
-**Date:** 2026-09-24  
-**Status**: ✅ **Implemented** (decision: the `closed` attribute instead of a `mode` enum)  
-**Supersedes Section 4.5 of:** `2026-09-23_circle_geometry_hardening_and_annular_sector_plan.md`  
-**Target Component:** `js/elements/shapes/circle.js`
+- **Status**: ✅ **Implemented** (decision: the `closed` attribute instead of a `mode` enum)
+- **Date**: 2026-09-24
+- **Supersedes Section 4.5 of**: `2026-09-23_circle_geometry_hardening_and_annular_sector_plan.md`
+- **Target Component**: `js/elements/shapes/circle.js`
 
 ---
 

@@ -31,7 +31,7 @@ Replace the current scalar-radius radial gradient API with a point-based system 
 
 ### Compiler
 
-#### [MODIFY] [compiler.js](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js)
+#### [MODIFY] `js/compiler.js`
 
 Replace the `pxl.scope.radial` function (lines 81–118). The new function:
 
@@ -77,7 +77,7 @@ pxl.scope.radial = (config, colorsArray) => {
 
 ### Shape Rendering
 
-#### [MODIFY] [shape.js](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/shape.js)
+#### [MODIFY] `js/elements/shape.js`
 
 Replace the radial branch in `createGradient()` (lines 147–160). The new code:
 
@@ -123,7 +123,7 @@ Replace the radial branch in `createGradient()` (lines 147–160). The new code:
 
 ### Documentation
 
-#### [MODIFY] [KILOPIXEL.md](file:///c:/Users/micha/woodoo-labs/kilopixel/.agents/KILOPIXEL.md)
+#### [MODIFY] `.agents/KILOPIXEL.md`
 
 Update the "Color & Gradient System" section (around lines 401–428) to replace the old 7-mode radial documentation with the new 4-mode point-based syntax.
 

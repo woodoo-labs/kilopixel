@@ -1,10 +1,10 @@
 # Stroke Gradient Zero-Dimension Hardening & Degeneracy Prevention Plan
 
-**Date:** 2026-10-11 (revised 2026-11-05)  
-**Status**: ✅ **Implemented** (2026-11-05, revised approach of §3–4; 6 tests in `tests/index.html` fail on the old build and pass on the new one; 160 docs canvases pixel-identical before and after)  
-**Target Component:** `js/elements/shape.js` (`Shape.prototype.createGradient`, `this._gradCache`)  
-**Related:** `design/archive/2026-11-05_draw_errors_plan.md` §3.1 (stop offset clamping in the same function; built together, §7)  
-**Prototype** (not kept): `scratch/gradient_stops/stroke_gradient_zero.html` (9 cases, before / after)
+- **Status**: ✅ **Implemented** (2026-11-05, revised approach of §3–4; 6 tests in `tests/index.html` fail on the old build and pass on the new one; 160 docs canvases pixel-identical before and after)
+- **Date**: 2026-10-11 (revised 2026-11-05)
+- **Target Component**: `js/elements/shape.js` (`Shape.prototype.createGradient`, `this._gradCache`)
+- **Related**: `design/archive/2026-11-05_draw_errors_plan.md` §3.1 (stop offset clamping in the same function; built together, §7)
+- **Prototype** (not kept): `scratch/gradient_stops/stroke_gradient_zero.html` (9 cases, before / after)
 
 ---
 

@@ -1,8 +1,8 @@
 # Circle & Ellipse Geometry Hardening, Zero-GC Safety & 'mode' Architecture
 
-**Date:** 2026-09-23 (Updated 2026-09-24)  
-**Status**: ✅ **Implemented** (except §4.5, replaced by `design/archive/2026-09-24_circle_closed_attribute_vs_mode_enum.md`)  
-**Target Components:** `js/elements/shapes/circle.js`, `js/elements/shapes/ellipse.js`
+- **Status**: ✅ **Implemented** (except §4.5, replaced by `design/archive/2026-09-24_circle_closed_attribute_vs_mode_enum.md`)
+- **Date**: 2026-09-23 (Updated 2026-09-24)
+- **Target Components**: `js/elements/shapes/circle.js`, `js/elements/shapes/ellipse.js`
 
 ---
 

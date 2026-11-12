@@ -1,12 +1,12 @@
 # Technical Implementation Plan: Declarative `<pxl-plot>` Element
 
-**Date**: 2026-09-07  
-**Status**: 🟡 **Proposed** (2026-11-11, notes on sampling and smoothing in §10; uniform spline from `design/2026-11-11_polyline_smoothstyle_plan.md`)  
-**Target Files**: 
-- `js/compiler.js` (Expression compiler parameter injection & static-path guard)
-- `js/elements/shapes/plot.js` (New Custom Element implementation)
-- `build.js` (Bundler file order registration)
-- `.agents/KILOPIXEL.md` (Framework reference documentation)
+- **Status**: 🟡 **Proposed** (2026-11-11, notes on sampling and smoothing in §10; uniform spline from `design/2026-11-11_polyline_smoothstyle_plan.md`)
+- **Date**: 2026-09-07
+- **Target Files**:
+  - `js/compiler.js` (Expression compiler parameter injection & static-path guard)
+  - `js/elements/shapes/plot.js` (New Custom Element implementation)
+  - `build.js` (Bundler file order registration)
+  - `.agents/KILOPIXEL.md` (Framework reference documentation)
 
 ---
 
@@ -35,7 +35,7 @@ HTMLElement
 ```
 
 - **Tag**: `<pxl-plot></pxl-plot>`
-- **Class**: `class Plot extends Shape`
+- **Class**: `pxl.Plot = class Plot extends pxl.Shape`
 - **Source File**: `js/elements/shapes/plot.js`
 
 ---

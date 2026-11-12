@@ -1,7 +1,7 @@
 # 2026-08-04: Group Pure Transform & Structural Architecture Plan
 
-**Date:** 2026-08-04  
-**Status**: ✅ **Implemented** (current behavior: `.agents/KILOPIXEL.md`)  
+- **Status**: ✅ **Implemented** (current behavior: `.agents/KILOPIXEL.md`)
+- **Date**: 2026-08-04
 
 ---
 
@@ -46,18 +46,18 @@ Refactor `<pxl-group>` into a **Pure Spatial Transform & Structural Container** 
 
 ### 2. [MODIFY] `examples/` (Audit & Cleanup)
 Strip invalid compositing attributes from `<pxl-group>` tags across the following 6 example files:
-* **[MODIFY] [examples/test01.html](file:///C:/Users/micha/woodoo-labs/kilopixel/examples/test01.html)**:
+* **[MODIFY] `examples/test01.html`**:
   * Line 52: Remove `blend="screen"` from `<pxl-group ...>`.
   * Line 64: Remove `filter="\`blur(${wave(2)*4}px)\`"` from `<pxl-group ...>`.
-* **[MODIFY] [examples/test25.html](file:///C:/Users/micha/woodoo-labs/kilopixel/examples/test25.html)**:
+* **[MODIFY] `examples/test25.html`**:
   * Line 55: Remove `alpha="0.05"` from `<pxl-group>`.
-* **[MODIFY] [examples/test26.html](file:///C:/Users/micha/woodoo-labs/kilopixel/examples/test26.html)**:
+* **[MODIFY] `examples/test26.html`**:
   * Line 29: Remove `alpha="0.05"` from `<pxl-group>`.
-* **[MODIFY] [examples/test27.html](file:///C:/Users/micha/woodoo-labs/kilopixel/examples/test27.html)**:
+* **[MODIFY] `examples/test27.html`**:
   * Line 21: Remove `alpha="0.05"` from `<pxl-group>`.
-* **[MODIFY] [examples/test28.html](file:///C:/Users/micha/woodoo-labs/kilopixel/examples/test28.html)**:
+* **[MODIFY] `examples/test28.html`**:
   * Line 68: Remove `alpha="0.03"` from `<pxl-group>`.
-* **[MODIFY] [examples/test38.html](file:///C:/Users/micha/woodoo-labs/kilopixel/examples/test38.html)**:
+* **[MODIFY] `examples/test38.html`**:
   * Line 67: Remove `shadowcolor="#a855f7" shadowblur="25" shadowy="12"` from `<pxl-group x="0" y="0">`.
 
 ---
