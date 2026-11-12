@@ -10,7 +10,6 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 |---|---|
 | `.agents/KILOPIXEL.md` | Complete technical reference (architecture, compiler, every element and attribute). Read the relevant sections before engine or docs work. |
 | `.agents/TODO.md` | Roadmap: open work and open design questions only |
-| `.agents/AGENTS.md` | Rules for Google Antigravity, kept in case it is used again. Ignore it: this file is authoritative. When a rule changes here, mention whether AGENTS.md should get the same change |
 | `js/` | Engine source. Build order is the `files` list in `build.js` |
 | `docs/` | Public documentation site. Rules: `docs/DOCS_STANDARDS.md` |
 | `design/` | Plans and notes, named `YYYY-MM-DD_<topic>_plan.md` (or `_note.md`). `design/archive/`: superseded, dropped and outdated plans. `design/prototypes/<plan>/`: prototypes and measurement scripts a plan relies on (committed; folder named like the plan without `_plan` / `_note`) |
@@ -55,6 +54,8 @@ The user works on two Windows laptops. When a session starts on a machine that h
 1. `git fetch` and `git status`; show what's new and pull only after the user's OK.
 2. **Line endings, once per machine:** if `git ls-files --eol` shows working files as `w/crlf`, the copy predates `.gitattributes`. With no uncommitted work, rewrite them once: `git rm -r --cached -q . && git reset -q --hard HEAD`.
 3. Start the dev server and open `tests/index.html`; the tab title must show all tests passed.
+
+Only git syncs. `scratch/`, `.claude/worktrees/` and Claude's memory are per machine: rules that must hold on both laptops go in this file, not in memory.
 
 ## Working Style
 

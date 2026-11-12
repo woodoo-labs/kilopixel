@@ -31,7 +31,7 @@ Kilopixel scenes are written in HTML without a JavaScript API. Values can flow *
 ## 2. Naming
 
 - **Tag `<pxl-out>`:** short, pairs with `<pxl-var>` and with HTML's own `<output>` element.
-- **Attribute `value`** only. The first draft also accepted `text` as an alias; two names for the same thing contradict the "one clean API" rule (`.agents/AGENTS.md`), so `text` is dropped. The unused `format` attribute from the first draft is dropped as well: formatting is done in the expression (`round()`, template literals, `toFixed()`).
+- **Attribute `value`** only. The first draft also accepted `text` as an alias; two names for the same thing contradict the "cleanest API" rule (`.claude/CLAUDE.md`, pre-release), so `text` is dropped. The unused `format` attribute from the first draft is dropped as well: formatting is done in the expression (`round()`, template literals, `toFixed()`).
 
 ---
 
