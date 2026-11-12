@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Rule A Regression</title></head>
+<body>
+<!-- Loads every docs / examples page with an old and the new bundle and compares all static
+     attribute values (incl. key order) of every pxl-* element, plus console errors / warnings.
+     The old bundle is a file you make from a commit, e.g. the one before Rule A:
+       git show 0908ec0:dist/pxl.js > scratch/pxl_0908ec0.js
+     then open rule_a_regress.html?old=/scratch/pxl_0908ec0.js and call runRegression() in the console.
+     PAGES: output of  ls docs/*.html examples/*.html  (update it when pages are added). -->
+<script>
+const PAGES = ["docs/arrows.html","docs/blend.html","docs/caps.html","docs/circle.html","docs/conic.html","docs/dashes.html","docs/ellipse.html","docs/fill.html","docs/filter.html","docs/gallery.html","docs/index.html","docs/installation.html","docs/line.html","docs/linear.html","docs/mapping.html","docs/mask.html","docs/polyline.html","docs/radial.html","docs/rect.html","docs/shadow.html","docs/stroke.html","docs/text.html","docs/walkthrough.html","examples/benchmark.html","examples/index.html","examples/test01.html","examples/test02.html","examples/test03.html","examples/test04.html","examples/test05.html","examples/test06.html","examples/test07.html","examples/test08.html","examples/test09.html","examples/test10.html","examples/test11.html","examples/test12.html","examples/test13.html","examples/test14.html","examples/test15.html","examples/test16.html","examples/test17.html","examples/test18.html","examples/test19.html","examples/test20.html","examples/test21.html","examples/test22.html","examples/test23.html","examples/test24.html","examples/test25.html","examples/test26.html","examples/test27.html","examples/test28.html","examples/test29.html","examples/test30.html","examples/test31.html","examples/test32.html","examples/test33.html","examples/test34.html","examples/test35.html","examples/test36.html","examples/test37.html","examples/test38.html","examples/test39.html","examples/test40.html","examples/test41.html","examples/test42.html","examples/test43.html","examples/test44.html","examples/test45.html","examples/test46.html","examples/test47.html","examples/test48.html","examples/test49.html","examples/test50.html","examples/test51.html","examples/test52.html","examples/test53.html","examples/test_responsive_filters.html"];
+const BUNDLES = { old: new URLSearchParams(location.search).get('old'), new: '/dist/pxl.js' };
+const HOOK = `<script>
+  window.__log = [];
+  addEventListener('error', e => __log.push('error: ' + e.message));
+  addEventListener('unhandledrejection', e => __log.push('rejection: ' + e.reason));
+  for (const k of ['error', 'warn']) { const o = console[k]; console[k] = (...a) => { __log.push(k + ': ' + a.map(String).join(' ')); o.apply(console, a); }; }
+<\/script>`;
+
+function snapshot(doc) {
+  const out = [];
+  for (const el of doc.querySelectorAll('*')) {
+    if (!el.tagName.startsWith('PXL-') || !el.attributeValues) continue;
+    const entries = [];
+    for (const k of Object.keys(el.attributeValues)) {
+      if (k === 'fps' || k === 'renderAvg' || k === 'renderMax') continue; // timing telemetry, published once per second
+      if (typeof el.attributeExpressions?.[k] === 'function') { entries.push([k, '<fn>']); continue; }
+      entries.push([k, el.attributeValues[k]]);
+    }
+    out.push(el.tagName + '#' + (el.id || '') + ' ' + JSON.stringify(entries));
+  }
+  return out;
+}
+
+async function load(page, bundle) {
+  let html = await (await fetch('/' + page, { cache: 'no-store' })).text();
+  const base = '/' + page.slice(0, page.lastIndexOf('/') + 1);
+  html = html
+    .replace(/<script[^>]*src="https?:\/\/[^"]*"[^>]*><\/script>/g, '')        // skip CDN scripts (Prism)
+    .replace(/src="[^"]*pxl\.min\.js"/g, `src="${BUNDLES[bundle]}"`)
+    .replace(/<head>/i, `<head><base href="${base}">${HOOK}`);
+  const frame = document.createElement('iframe');
+  frame.style.cssText = 'width:1000px;height:800px';
+  document.body.appendChild(frame);
+  await new Promise(res => { frame.onload = res; frame.srcdoc = html; });
+  // Wait until every stage has resized (its logical height comes from the ResizeObserver), max 3 s
+  for (let i = 0; i < 30; i++) {
+    const stages = [...frame.contentDocument.querySelectorAll('pxl-stage')];
+    if (stages.every(st => (st._isSizePending ?? st.isSizePending) === false || st.clientWidth === 0)) break;
+    await new Promise(res => setTimeout(res, 100));
+  }
+  await new Promise(res => setTimeout(res, 300));
+  const snap = snapshot(frame.contentDocument);
+  const log = frame.contentWindow.__log.slice();
+  frame.remove();
+  return { snap, log };
+}
+
+window.runRegression = async function() {
+  if (!BUNDLES.old) throw new Error('Missing ?old=<url of the old bundle>, see the comment at the top');
+  window.__progress = 0;
+  const report = { pages: PAGES.length, elements: 0, diffs: [], newLogs: [], logsBoth: 0 };
+  for (const page of PAGES) {
+    const a = await load(page, 'old'), b = await load(page, 'new');
+    report.elements += b.snap.length;
+    if (a.snap.length !== b.snap.length) report.diffs.push({ page, msg: `element count ${a.snap.length} → ${b.snap.length}` });
+    for (let i = 0; i < Math.min(a.snap.length, b.snap.length); i++) {
+      if (a.snap[i] !== b.snap[i]) { report.diffs.push({ page, old: a.snap[i].slice(0, 400), new: b.snap[i].slice(0, 400) }); }
+    }
+    const added = b.log.filter(l => !a.log.includes(l));
+    if (added.length) report.newLogs.push({ page, added });
+    if (a.log.length) report.logsBoth++;
+    window.__progress++;
+  }
+  window.__report = report;
+  return report;
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stage sizing prototype</title>
+  <script src="/dist/pxl.js"></script>
+  <style>
+    body { margin: 16px; font-family: sans-serif; color: #334155; width: 900px; }
+    .case { border: 2px dashed #cbd5e1; margin: 0 0 24px; padding: 8px; }
+    h4 { margin: 0 0 6px; font-size: 14px; }
+    .flex-center { display: flex; justify-content: center; align-items: center; }
+    .grid-center { display: grid; place-items: center; }
+    .inline-block { display: inline-block; }
+    .abs-host { position: relative; height: 140px; }
+    .abs-card { position: absolute; left: 50%; top: 0; transform: translateX(-50%); }
+    #authorWidth { width: 300px; }
+    canvas { background: #e2e8f0; }
+  </style>
+</head>
+<body>
+  <!-- Each stage: a filled grid so a visible stage is obvious -->
+  <div class="case" id="A"><h4>A. Plain block div</h4>
+    <div><pxl-stage ratio="4 / 1"><pxl-layer><pxl-rect x="500" y="125" width="1000" height="250" fill="#fed7aa"></pxl-rect></pxl-layer></pxl-stage></div>
+  </div>
+  <div class="case" id="B"><h4>B. Wrapper div centered in a flex container</h4>
+    <div class="flex-center"><div class="wrapper"><pxl-stage ratio="4 / 1"><pxl-layer><pxl-rect x="500" y="125" width="1000" height="250" fill="#fed7aa"></pxl-rect></pxl-layer></pxl-stage></div></div>
+  </div>
+  <div class="case" id="C"><h4>C. Stage directly in a centered flex container</h4>
+    <div class="flex-center"><pxl-stage ratio="4 / 1"><pxl-layer><pxl-rect x="500" y="125" width="1000" height="250" fill="#fed7aa"></pxl-rect></pxl-layer></pxl-stage></div>
+  </div>
+  <div class="case" id="D"><h4>D. Wrapper div in a grid with place-items: center</h4>
+    <div class="grid-center"><div class="wrapper"><pxl-stage ratio="4 / 1"><pxl-layer><pxl-rect x="500" y="125" width="1000" height="250" fill="#fed7aa"></pxl-rect></pxl-layer></pxl-stage></div></div>
+  </div>
+  <div class="case" id="E"><h4>E. Inline-block wrapper</h4>
+    <div class="inline-block"><pxl-stage ratio="4 / 1"><pxl-layer><pxl-rect x="500" y="125" width="1000" height="250" fill="#fed7aa"></pxl-rect></pxl-layer></pxl-stage></div>
+  </div>
+  <div class="case abs-host" id="F"><h4>F. Absolutely positioned card (modal style)</h4>
+    <div class="abs-card"><pxl-stage ratio="4 / 1"><pxl-layer><pxl-rect x="500" y="125" width="1000" height="250" fill="#fed7aa"></pxl-rect></pxl-layer></pxl-stage></div>
+  </div>
+  <div class="case" id="G"><h4>G. Author CSS: #authorWidth { width: 300px }</h4>
+    <pxl-stage id="authorWidth" ratio="4 / 1"><pxl-layer><pxl-rect x="500" y="125" width="1000" height="250" fill="#fed7aa"></pxl-rect></pxl-layer></pxl-stage>
+  </div>
+  <div class="case" id="I"><h4>I. Narrow 250 px column (fallback must not overflow)</h4>
+    <div style="width: 250px"><div class="flex-center"><div class="wrapper"><pxl-stage ratio="4 / 1"><pxl-layer><pxl-rect x="500" y="125" width="1000" height="250" fill="#fed7aa"></pxl-rect></pxl-layer></pxl-stage></div></div></div>
+  </div>
+  <div class="case" id="H"><h4>H. For comparison: a plain canvas in case B's layout</h4>
+    <div class="flex-center"><div class="wrapper"><canvas></canvas></div></div>
+  </div>
+  <script>
+    // Prototype: move the stage's inline display/position/width into a lowest-priority cascade layer
+    const mode = new URLSearchParams(location.search).get('fallback');
+    const fallback = mode === 'min' ? 'min-width: 300px;' : mode === 'minpct' ? 'min-width: min(300px, 100%);' : '';
+    const sheet = document.createElement('style');
+    sheet.textContent = '@layer pxl { pxl-stage { display: block; position: relative; width: 100%; ' + fallback + ' } }';
+    document.head.prepend(sheet);
+    for (const st of document.querySelectorAll('pxl-stage')) {
+      st.style.removeProperty('display'); st.style.removeProperty('position'); st.style.removeProperty('width');
+    }
+    addEventListener('load', () => requestAnimationFrame(() => {
+      window.result = [...document.querySelectorAll('.case')].map(c => {
+        const el = c.querySelector('pxl-stage, canvas');
+        const r = el.getBoundingClientRect();
+        return c.id + ': ' + Math.round(r.width) + ' x ' + Math.round(r.height);
+      });
+    }));
+  </script>
+</body>
+</html>

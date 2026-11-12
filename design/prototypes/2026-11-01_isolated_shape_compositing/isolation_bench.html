@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Isolation benchmark</title>
+<style>
+  body { font: 14px/1.5 monospace; margin: 24px; color: #334155; background: #fff; }
+  canvas { border: 1px solid #e2e8f0; width: 500px; }
+</style>
+</head>
+<body>
+<p>Cost per masked shape of drawing it into a scratch canvas and compositing it once.
+Layer canvas 1000 × 600 logical at DPR 2 (2000 × 1200 px). Each run draws N ellipses (fill + stroke, mask xor)
+and ends with getImageData(1 px) so the GPU work is included.</p>
+<pre id="out">running…</pre>
+<script>
+// Fresh canvases per variant: repeated getImageData makes Chrome move a canvas to the CPU,
+// so each variant reads back only once, after FRAMES x N shapes.
+const DPR = 2, W = 1000, H = 600, N = 20, FRAMES = 60;
+
+function make() {
+  const c = document.createElement('canvas');
+  c.width = W * DPR; c.height = H * DPR;
+  return c;
+}
+
+function ellipse(c, i) {
+  c.beginPath();
+  c.ellipse((100 + (i * 37) % 800) * DPR, (100 + (i * 53) % 400) * DPR, 90 * DPR, 60 * DPR, 0, 0, Math.PI * 2);
+  c.fillStyle = '#dbeafe'; c.fill();
+  c.lineWidth = 8 * DPR; c.strokeStyle = '#3b82f6'; c.stroke();
+}
+
+const variants = {
+  direct(ctx, sctx, scratch, i) {
+    ctx.save(); ctx.globalCompositeOperation = 'xor'; ellipse(ctx, i); ctx.restore();
+  },
+  fullCanvas(ctx, sctx, scratch, i) {
+    sctx.clearRect(0, 0, scratch.width, scratch.height);
+    ellipse(sctx, i);
+    ctx.save(); ctx.globalCompositeOperation = 'xor'; ctx.drawImage(scratch, 0, 0); ctx.restore();
+  },
+  boundingBox(ctx, sctx, scratch, i) {
+    const cx = (100 + (i * 37) % 800) * DPR, cy = (100 + (i * 53) % 400) * DPR;
+    const hw = (90 + 4) * DPR + 2, hh = (60 + 4) * DPR + 2;
+    const x = Math.floor(cx - hw), y = Math.floor(cy - hh), w = Math.ceil(hw * 2), h = Math.ceil(hh * 2);
+    sctx.clearRect(x, y, w, h);
+    ellipse(sctx, i);
+    ctx.save(); ctx.globalCompositeOperation = 'xor'; ctx.drawImage(scratch, x, y, w, h, x, y, w, h); ctx.restore();
+  },
+};
+
+function run(name) {
+  const layer = make(), scratch = make();
+  document.body.appendChild(layer);
+  const ctx = layer.getContext('2d'), sctx = scratch.getContext('2d');
+  const fn = variants[name];
+  const t0 = performance.now();
+  for (let f = 0; f < FRAMES; f++) {
+    ctx.clearRect(0, 0, layer.width, layer.height);
+    ctx.fillStyle = '#ffedd5'; ctx.fillRect(200, 200, 1200, 800);
+    for (let i = 0; i < N; i++) fn(ctx, sctx, scratch, i);
+  }
+  ctx.getImageData(0, 0, 1, 1);
+  const ms = (performance.now() - t0) / FRAMES;
+  layer.remove();
+  return ms;
+}
+
+setTimeout(() => {
+  const lines = [];
+  for (const name of ['direct', 'fullCanvas', 'boundingBox', 'direct', 'fullCanvas', 'boundingBox']) {
+    const ms = run(name);
+    lines.push(name.padEnd(12) + ms.toFixed(2).padStart(7) + ' ms per frame (' + N + ' shapes)   ' + (ms / N).toFixed(3) + ' ms per shape');
+  }
+  document.getElementById('out').textContent = lines.join('\n');
+  window.benchResult = lines;
+}, 300);
+</script>
+</body>
+</html>

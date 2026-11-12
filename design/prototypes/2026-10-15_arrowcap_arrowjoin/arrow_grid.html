@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Arrow Test Grid</title>
+  <style>
+    body { background: #050505; margin: 0; }
+    pxl-stage { display: block; width: 100%; background: #0a0a0a; }
+  </style>
+  <script>
+    // Draws with /dist/pxl.js. To compare with an older build (the grid was made to compare 9a956bd and
+    // a5cb956), make it from the commit and pass its URL:
+    //   git show 9a956bd:dist/pxl.js > scratch/pxl_9a956bd.js   →   arrow_grid.html?lib=/scratch/pxl_9a956bd.js
+    const src = new URLSearchParams(location.search).get('lib') || '/dist/pxl.js';
+    document.write('<script src="' + src + '"><\/script>');
+  </script>
+</head>
+<body>
+  <pxl-stage id="main" ratio="1000 / 1895">
+    <pxl-layer>
+      <pxl-grid step="50" stroke="rgba(255,255,255,0.04)"></pxl-grid>
+      <pxl-text x="20" y="40" text="'A  <pxl-line>  rows: style × linecap   cols: sw 4 / 12 / 24 auto / 24 with arrow 16 (small)'" size="20" fill="#fff" font="monospace" align="left"></pxl-text>
+      <pxl-text x="40" y="68" text="'sw=4 arrow=auto'" size="13" fill="#9ca3af" font="monospace" align="left"></pxl-text>
+      <pxl-text x="280" y="68" text="'sw=12 arrow=auto'" size="13" fill="#9ca3af" font="monospace" align="left"></pxl-text>
+      <pxl-text x="520" y="68" text="'sw=24 arrow=auto'" size="13" fill="#9ca3af" font="monospace" align="left"></pxl-text>
+      <pxl-text x="760" y="68" text="'sw=24 arrow=16'" size="13" fill="#9ca3af" font="monospace" align="left"></pxl-text>
+      <pxl-text x="10" y="88" text="'filled / butt'" size="11" fill="#9ca3af" font="monospace" align="left"></pxl-text>
+      <pxl-line x1="50" y1="110" x2="220" y2="110" stroke="rgba(255,255,255,0.22)" strokewidth="4" linecap="butt"></pxl-line>
+      <pxl-line x1="50" y1="110" x2="220" y2="110" stroke="#60a5fa" strokewidth="4" linecap="butt" arrowend="auto" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="220" y1="84" x2="220" y2="136" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="290" y1="110" x2="460" y2="110" stroke="rgba(255,255,255,0.22)" strokewidth="12" linecap="butt"></pxl-line>
+      <pxl-line x1="290" y1="110" x2="460" y2="110" stroke="#60a5fa" strokewidth="12" linecap="butt" arrowend="auto" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="460" y1="84" x2="460" y2="136" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="530" y1="110" x2="700" y2="110" stroke="rgba(255,255,255,0.22)" strokewidth="24" linecap="butt"></pxl-line>
+      <pxl-line x1="530" y1="110" x2="700" y2="110" stroke="#60a5fa" strokewidth="24" linecap="butt" arrowend="auto" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="700" y1="84" x2="700" y2="136" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="770" y1="110" x2="940" y2="110" stroke="rgba(255,255,255,0.22)" strokewidth="24" linecap="butt"></pxl-line>
+      <pxl-line x1="770" y1="110" x2="940" y2="110" stroke="#60a5fa" strokewidth="24" linecap="butt" arrowend="16" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="940" y1="84" x2="940" y2="136" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-text x="10" y="183" text="'filled / square'" size="11" fill="#9ca3af" font="monospace" align="left"></pxl-text>
+      <pxl-line x1="50" y1="205" x2="220" y2="205" stroke="rgba(255,255,255,0.22)" strokewidth="4" linecap="square"></pxl-line>
+      <pxl-line x1="50" y1="205" x2="220" y2="205" stroke="#60a5fa" strokewidth="4" linecap="square" arrowend="auto" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="222" y1="179" x2="222" y2="231" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="290" y1="205" x2="460" y2="205" stroke="rgba(255,255,255,0.22)" strokewidth="12" linecap="square"></pxl-line>
+      <pxl-line x1="290" y1="205" x2="460" y2="205" stroke="#60a5fa" strokewidth="12" linecap="square" arrowend="auto" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="466" y1="179" x2="466" y2="231" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="530" y1="205" x2="700" y2="205" stroke="rgba(255,255,255,0.22)" strokewidth="24" linecap="square"></pxl-line>
+      <pxl-line x1="530" y1="205" x2="700" y2="205" stroke="#60a5fa" strokewidth="24" linecap="square" arrowend="auto" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="712" y1="179" x2="712" y2="231" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="770" y1="205" x2="940" y2="205" stroke="rgba(255,255,255,0.22)" strokewidth="24" linecap="square"></pxl-line>
+      <pxl-line x1="770" y1="205" x2="940" y2="205" stroke="#60a5fa" strokewidth="24" linecap="square" arrowend="16" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="952" y1="179" x2="952" y2="231" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-text x="10" y="278" text="'filled / round'" size="11" fill="#9ca3af" font="monospace" align="left"></pxl-text>
+      <pxl-line x1="50" y1="300" x2="220" y2="300" stroke="rgba(255,255,255,0.22)" strokewidth="4" linecap="round"></pxl-line>
+      <pxl-line x1="50" y1="300" x2="220" y2="300" stroke="#60a5fa" strokewidth="4" linecap="round" arrowend="auto" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="222" y1="274" x2="222" y2="326" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="290" y1="300" x2="460" y2="300" stroke="rgba(255,255,255,0.22)" strokewidth="12" linecap="round"></pxl-line>
+      <pxl-line x1="290" y1="300" x2="460" y2="300" stroke="#60a5fa" strokewidth="12" linecap="round" arrowend="auto" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="466" y1="274" x2="466" y2="326" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="530" y1="300" x2="700" y2="300" stroke="rgba(255,255,255,0.22)" strokewidth="24" linecap="round"></pxl-line>
+      <pxl-line x1="530" y1="300" x2="700" y2="300" stroke="#60a5fa" strokewidth="24" linecap="round" arrowend="auto" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="712" y1="274" x2="712" y2="326" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="770" y1="300" x2="940" y2="300" stroke="rgba(255,255,255,0.22)" strokewidth="24" linecap="round"></pxl-line>
+      <pxl-line x1="770" y1="300" x2="940" y2="300" stroke="#60a5fa" strokewidth="24" linecap="round" arrowend="16" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="952" y1="274" x2="952" y2="326" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-text x="10" y="373" text="'line / butt'" size="11" fill="#9ca3af" font="monospace" align="left"></pxl-text>
+      <pxl-line x1="50" y1="395" x2="220" y2="395" stroke="rgba(255,255,255,0.22)" strokewidth="4" linecap="butt"></pxl-line>
+      <pxl-line x1="50" y1="395" x2="220" y2="395" stroke="#60a5fa" strokewidth="4" linecap="butt" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="220" y1="369" x2="220" y2="421" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="290" y1="395" x2="460" y2="395" stroke="rgba(255,255,255,0.22)" strokewidth="12" linecap="butt"></pxl-line>
+      <pxl-line x1="290" y1="395" x2="460" y2="395" stroke="#60a5fa" strokewidth="12" linecap="butt" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="460" y1="369" x2="460" y2="421" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="530" y1="395" x2="700" y2="395" stroke="rgba(255,255,255,0.22)" strokewidth="24" linecap="butt"></pxl-line>
+      <pxl-line x1="530" y1="395" x2="700" y2="395" stroke="#60a5fa" strokewidth="24" linecap="butt" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="700" y1="369" x2="700" y2="421" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="770" y1="395" x2="940" y2="395" stroke="rgba(255,255,255,0.22)" strokewidth="24" linecap="butt"></pxl-line>
+      <pxl-line x1="770" y1="395" x2="940" y2="395" stroke="#60a5fa" strokewidth="24" linecap="butt" arrowend="16" arrowstyle="line"></pxl-line>
+      <pxl-line x1="940" y1="369" x2="940" y2="421" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-text x="10" y="468" text="'line / square'" size="11" fill="#9ca3af" font="monospace" align="left"></pxl-text>
+      <pxl-line x1="50" y1="490" x2="220" y2="490" stroke="rgba(255,255,255,0.22)" strokewidth="4" linecap="square"></pxl-line>
+      <pxl-line x1="50" y1="490" x2="220" y2="490" stroke="#60a5fa" strokewidth="4" linecap="square" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="222" y1="464" x2="222" y2="516" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="290" y1="490" x2="460" y2="490" stroke="rgba(255,255,255,0.22)" strokewidth="12" linecap="square"></pxl-line>
+      <pxl-line x1="290" y1="490" x2="460" y2="490" stroke="#60a5fa" strokewidth="12" linecap="square" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="466" y1="464" x2="466" y2="516" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="530" y1="490" x2="700" y2="490" stroke="rgba(255,255,255,0.22)" strokewidth="24" linecap="square"></pxl-line>
+      <pxl-line x1="530" y1="490" x2="700" y2="490" stroke="#60a5fa" strokewidth="24" linecap="square" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="712" y1="464" x2="712" y2="516" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="770" y1="490" x2="940" y2="490" stroke="rgba(255,255,255,0.22)" strokewidth="24" linecap="square"></pxl-line>
+      <pxl-line x1="770" y1="490" x2="940" y2="490" stroke="#60a5fa" strokewidth="24" linecap="square" arrowend="16" arrowstyle="line"></pxl-line>
+      <pxl-line x1="952" y1="464" x2="952" y2="516" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-text x="10" y="563" text="'line / round'" size="11" fill="#9ca3af" font="monospace" align="left"></pxl-text>
+      <pxl-line x1="50" y1="585" x2="220" y2="585" stroke="rgba(255,255,255,0.22)" strokewidth="4" linecap="round"></pxl-line>
+      <pxl-line x1="50" y1="585" x2="220" y2="585" stroke="#60a5fa" strokewidth="4" linecap="round" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="222" y1="559" x2="222" y2="611" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="290" y1="585" x2="460" y2="585" stroke="rgba(255,255,255,0.22)" strokewidth="12" linecap="round"></pxl-line>
+      <pxl-line x1="290" y1="585" x2="460" y2="585" stroke="#60a5fa" strokewidth="12" linecap="round" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="466" y1="559" x2="466" y2="611" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="530" y1="585" x2="700" y2="585" stroke="rgba(255,255,255,0.22)" strokewidth="24" linecap="round"></pxl-line>
+      <pxl-line x1="530" y1="585" x2="700" y2="585" stroke="#60a5fa" strokewidth="24" linecap="round" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="712" y1="559" x2="712" y2="611" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="770" y1="585" x2="940" y2="585" stroke="rgba(255,255,255,0.22)" strokewidth="24" linecap="round"></pxl-line>
+      <pxl-line x1="770" y1="585" x2="940" y2="585" stroke="#60a5fa" strokewidth="24" linecap="round" arrowend="16" arrowstyle="line"></pxl-line>
+      <pxl-line x1="952" y1="559" x2="952" y2="611" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-text x="20" y="670" text="'A2  arrowstyle=line, sw 16, auto, butt:  miter | bevel | round | miter + miterlimit 1.5'" size="13" fill="#fff" font="monospace" align="left"></pxl-text>
+      <pxl-line x1="50" y1="720" x2="220" y2="720" stroke="rgba(255,255,255,0.22)" strokewidth="16" linecap="butt" linejoin="miter" miterlimit="10"></pxl-line>
+      <pxl-line x1="50" y1="720" x2="220" y2="720" stroke="#a78bfa" strokewidth="16" linecap="butt" linejoin="miter" miterlimit="10" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="220" y1="694" x2="220" y2="746" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="290" y1="720" x2="460" y2="720" stroke="rgba(255,255,255,0.22)" strokewidth="16" linecap="butt" linejoin="bevel" miterlimit="10"></pxl-line>
+      <pxl-line x1="290" y1="720" x2="460" y2="720" stroke="#a78bfa" strokewidth="16" linecap="butt" linejoin="bevel" miterlimit="10" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="460" y1="694" x2="460" y2="746" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="530" y1="720" x2="700" y2="720" stroke="rgba(255,255,255,0.22)" strokewidth="16" linecap="butt" linejoin="round" miterlimit="10"></pxl-line>
+      <pxl-line x1="530" y1="720" x2="700" y2="720" stroke="#a78bfa" strokewidth="16" linecap="butt" linejoin="round" miterlimit="10" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="700" y1="694" x2="700" y2="746" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-line x1="770" y1="720" x2="940" y2="720" stroke="rgba(255,255,255,0.22)" strokewidth="16" linecap="butt" linejoin="miter" miterlimit="1.5"></pxl-line>
+      <pxl-line x1="770" y1="720" x2="940" y2="720" stroke="#a78bfa" strokewidth="16" linecap="butt" linejoin="miter" miterlimit="1.5" arrowend="auto" arrowstyle="line"></pxl-line>
+      <pxl-line x1="940" y1="694" x2="940" y2="746" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-text x="20" y="800" text="'B  <pxl-circle>  arcs, both ends (tight + wide radius, thick strokes)'" size="20" fill="#fff" font="monospace" align="left"></pxl-text>
+      <pxl-circle x="130" y="950" r="50" start="200" sweep="250" stroke="rgba(255,255,255,0.22)" strokewidth="16" linecap="butt"></pxl-circle>
+      <pxl-circle x="130" y="950" r="50" start="200" sweep="250" stroke="#34d399" strokewidth="16" linecap="butt" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-circle>
+      <pxl-text x="130" y="1075" text="'r50 sw16 filled butt'" size="11" fill="#9ca3af" font="monospace" align="center"></pxl-text>
+      <pxl-circle x="375" y="950" r="50" start="200" sweep="250" stroke="rgba(255,255,255,0.22)" strokewidth="16" linecap="round" linejoin="round"></pxl-circle>
+      <pxl-circle x="375" y="950" r="50" start="200" sweep="250" stroke="#34d399" strokewidth="16" linecap="round" arrowstart="auto" arrowend="auto" arrowstyle="line" linejoin="round"></pxl-circle>
+      <pxl-text x="375" y="1075" text="'r50 sw16 line round'" size="11" fill="#9ca3af" font="monospace" align="center"></pxl-text>
+      <pxl-circle x="620" y="950" r="90" start="200" sweep="250" stroke="rgba(255,255,255,0.22)" strokewidth="30" linecap="butt"></pxl-circle>
+      <pxl-circle x="620" y="950" r="90" start="200" sweep="250" stroke="#34d399" strokewidth="30" linecap="butt" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-circle>
+      <pxl-text x="620" y="1075" text="'r90 sw30 filled (screenshot)'" size="11" fill="#9ca3af" font="monospace" align="center"></pxl-text>
+      <pxl-circle x="865" y="950" r="90" start="200" sweep="-250" stroke="rgba(255,255,255,0.22)" strokewidth="20" linecap="square" anticlockwise="true"></pxl-circle>
+      <pxl-circle x="865" y="950" r="90" start="200" sweep="-250" stroke="#34d399" strokewidth="20" linecap="square" arrowstart="auto" arrowend="auto" arrowstyle="filled" anticlockwise="true"></pxl-circle>
+      <pxl-text x="865" y="1075" text="'r90 sw20 square anticlockwise'" size="11" fill="#9ca3af" font="monospace" align="center"></pxl-text>
+      <pxl-text x="20" y="1120" text="'C  <pxl-ellipse>  eccentric (ends on flat and pointed sides)'" size="20" fill="#fff" font="monospace" align="left"></pxl-text>
+      <pxl-ellipse x="260" y="1250" rx="200" ry="60" start="20" sweep="140" stroke="rgba(255,255,255,0.22)" strokewidth="14"></pxl-ellipse>
+      <pxl-ellipse x="260" y="1250" rx="200" ry="60" start="20" sweep="140" stroke="#fbbf24" strokewidth="14" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-ellipse>
+      <pxl-text x="260" y="1345" text="'rx200 ry60, ends near pointed side'" size="11" fill="#9ca3af" font="monospace" align="center"></pxl-text>
+      <pxl-ellipse x="740" y="1250" rx="200" ry="60" start="60" sweep="240" stroke="rgba(255,255,255,0.22)" strokewidth="14"></pxl-ellipse>
+      <pxl-ellipse x="740" y="1250" rx="200" ry="60" start="60" sweep="240" stroke="#fbbf24" strokewidth="14" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-ellipse>
+      <pxl-text x="740" y="1345" text="'rx200 ry60, ends on flat sides'" size="11" fill="#9ca3af" font="monospace" align="center"></pxl-text>
+      <pxl-text x="20" y="1400" text="'D  <pxl-polyline>  straight | smooth | smooth line-style | 2-point smooth'" size="20" fill="#fff" font="monospace" align="left"></pxl-text>
+      <pxl-polyline points="70,1460; 130,1540; 190,1460; 250,1540" smooth="false" stroke="rgba(255,255,255,0.22)" strokewidth="12" linejoin="round"></pxl-polyline>
+      <pxl-polyline points="70,1460; 130,1540; 190,1460; 250,1540" smooth="false" stroke="#f472b6" strokewidth="12" linejoin="round" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-polyline>
+      <pxl-polyline points="270,1460; 340,1550; 410,1460; 470,1520; 485,1490" smooth="1" stroke="rgba(255,255,255,0.22)" strokewidth="12" linejoin="round"></pxl-polyline>
+      <pxl-polyline points="270,1460; 340,1550; 410,1460; 470,1520; 485,1490" smooth="1" stroke="#f472b6" strokewidth="12" linejoin="round" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-polyline>
+      <pxl-polyline points="510,1460; 580,1550; 650,1460; 710,1520; 725,1490" smooth="1" stroke="rgba(255,255,255,0.22)" strokewidth="12" linejoin="round"></pxl-polyline>
+      <pxl-polyline points="510,1460; 580,1550; 650,1460; 710,1520; 725,1490" smooth="1" stroke="#f472b6" strokewidth="12" linejoin="round" arrowstart="auto" arrowend="auto" arrowstyle="line"></pxl-polyline>
+      <pxl-polyline points="750,1540; 950,1460" smooth="1" stroke="rgba(255,255,255,0.22)" strokewidth="12" linejoin="round"></pxl-polyline>
+      <pxl-polyline points="750,1540; 950,1460" smooth="1" stroke="#f472b6" strokewidth="12" linejoin="round" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-polyline>
+      <pxl-text x="20" y="1610" text="'E  edge cases'" size="20" fill="#fff" font="monospace" align="left"></pxl-text>
+      <pxl-text x="40" y="1660" text="'animated size across small-arrow threshold (sw 6 round): must not jump'" size="12" fill="#9ca3af" font="monospace" align="left"></pxl-text>
+      <pxl-line x1="40" y1="1695" x2="400" y2="1695" stroke="rgba(255,255,255,0.22)" strokewidth="6" linecap="round"></pxl-line>
+      <pxl-line x1="40" y1="1695" x2="400" y2="1695" stroke="#60a5fa" strokewidth="6" linecap="round" arrowend="3 + wave(3)*30" arrowstyle="filled"></pxl-line>
+      <pxl-line x1="403" y1="1669" x2="403" y2="1721" stroke="#f0f" strokewidth="1"></pxl-line>
+      <pxl-text x="480" y="1660" text="'path shorter than both insets (len 20, sw 10, auto both)'" size="12" fill="#9ca3af" font="monospace" align="left"></pxl-text>
+      <pxl-line x1="600" y1="1695" x2="620" y2="1695" stroke="rgba(255,255,255,0.22)" strokewidth="10"></pxl-line>
+      <pxl-line x1="600" y1="1695" x2="620" y2="1695" stroke="#60a5fa" strokewidth="10" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-line>
+      <pxl-text x="40" y="1745" text="'D8: red line, then line with stroke=none + arrow (should draw nothing)'" size="12" fill="#9ca3af" font="monospace" align="left"></pxl-text>
+      <pxl-line x1="40" y1="1775" x2="200" y2="1775" stroke="red" strokewidth="20"></pxl-line>
+      <pxl-line x1="240" y1="1775" x2="400" y2="1775" stroke="none" strokewidth="2" arrowend="40"></pxl-line>
+      <pxl-text x="520" y="1745" text="'D10: pie + arrows / closed polyline + arrows (arrows ignored)'" size="12" fill="#9ca3af" font="monospace" align="left"></pxl-text>
+      <pxl-circle x="580" y="1805" r="50" start="0" sweep="270" pie="true" fill="rgba(52,211,153,0.3)" stroke="#34d399" strokewidth="6" arrowend="auto"></pxl-circle>
+      <pxl-polyline points="700,1775; 800,1845; 900,1775" closed="true" stroke="#f472b6" strokewidth="6" arrowstart="auto" arrowend="auto"></pxl-polyline>
+    </pxl-layer>
+  </pxl-stage>
+</body>
+</html>

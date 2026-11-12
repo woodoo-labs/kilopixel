@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Rule A Unit Tests</title>
+  <script src="/dist/pxl.js"></script>
+  <style>body { margin: 0; width: 1000px; } pxl-stage { width: 1000px; }</style>
+</head>
+<body>
+<!-- Test plan: design/2026-10-17_attribute_defaults_and_state_isolation_plan.md §7 -->
+<pxl-stage id="main" ratio="5 / 3">
+  <pxl-layer id="lay">
+    <pxl-var id="size" value="40"></pxl-var>
+    <pxl-var id="n" value="0"></pxl-var>
+    <pxl-polyline id="poly1" points="100,100; 300,100; 300,300" stroke="red" strokewidth="6" closed></pxl-polyline>
+    <pxl-polyline id="poly18" points="400,100; 600,100; 600,300" stroke="red" strokewidth="6" closed="1"></pxl-polyline>
+    <pxl-polyline id="poly5" points="0,0; 50,50; 100,0" stroke="red" smooth></pxl-polyline>
+    <pxl-circle id="hid" x="800" y="100" r="40" fill="blue" hidden></pxl-circle>
+    <pxl-circle id="c6" x y r="50" fill="green"></pxl-circle>
+    <pxl-circle id="pieC" x="800" y="400" r="60" sweep="90" stroke="black" fill="orange"></pxl-circle>
+    <pxl-circle id="sc" x="700" y="500" r="30" fill="purple" zoom="2" alpha="0.5" strokewidth="5" stroke="black"></pxl-circle>
+    <pxl-polyline id="miter" points="0,0; 10,10" stroke="red" miterlimit="1"></pxl-polyline>
+    <pxl-text id="txt" x="500" y="550" text="Hi" fill="black" align="center" baseline="middle"></pxl-text>
+    <pxl-circle id="anim" x="500" y="300" r="10" fill="red" rotate="t * 90"></pxl-circle>
+    <pxl-circle id="react" x="500" y="300" r="ref.size.value" stroke="red"></pxl-circle>
+    <pxl-rect id="rr" x="200" y="450" w="100" h="80" r="20" r1="0" fill="gray"></pxl-rect>
+    <pxl-rect id="btn" x="150" y="500" w="100" h="60" fill="gray" onclick="ref.n.set('value', ref.n.value + 1); this.removeAttribute('onclick')"></pxl-rect>
+    <pxl-rect id="click2" x="900" y="500" w="60" h="60" fill="gray" onclick="ref.n.set('value', 100)"></pxl-rect>
+    <pxl-rect id="empty" x="900" y="300" w="60" h="60" fill="gray" onclick=""></pxl-rect>
+    <pxl-var id="bareVar" value></pxl-var>
+    <pxl-group id="grp" x="10"><pxl-circle r="5" fill="red"></pxl-circle></pxl-group>
+  </pxl-layer>
+</pxl-stage>
+<pxl-stage id="st2" ratio="2" alwaysrender>
+  <pxl-layer><pxl-circle x="500" y="250" r="50" fill="red"></pxl-circle></pxl-layer>
+</pxl-stage>
+
+<script>
+const $ = id => document.getElementById(id);
+const v = id => pxl.nodes[id];
+const frame = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+const errors = [];
+addEventListener('error', e => errors.push(e.message));
+
+// Alpha of the layer canvas at a logical point
+function ink(layerId, x, y) {
+  const layer = $(layerId), u = layer.stage.unit, dpr = layer._dpr;
+  return layer._ctx.getImageData(Math.round(x * u * dpr), Math.round(y * u * dpr), 1, 1).data[3];
+}
+
+// Simulates a click on a logical point through the real InteractionEngine.process()
+function clickAt(stageId, x, y) {
+  const stage = $(stageId), ia = stage.interaction;
+  stage.attributeValues.isHovered = true;
+  stage.attributeValues.mouseX = x;
+  stage.attributeValues.mouseY = y;
+  ia._lastClick = true;
+  ia.process();
+}
+
+window.runTests = async function() {
+  await frame();
+  const results = [];
+  const check = (n, name, ok, info) => results.push({ n, name, ok: !!ok, info });
+
+  // 1 bare closed
+  check(1, 'bare closed → true and closing edge drawn', v('poly1').closed === true && ink('lay', 200, 200) > 0, { closed: v('poly1').closed, ink: ink('lay', 200, 200) });
+
+  // 2 bare hidden, then removed
+  const hidBefore = v('hid').hidden === true && ink('lay', 800, 100) === 0;
+  $('hid').removeAttribute('hidden'); await frame();
+  check(2, 'bare hidden hides, removal shows', hidBefore && v('hid').hidden === false && ink('lay', 800, 100) > 0);
+
+  // 3 el.hidden property on shape, group, layer
+  $('hid').hidden = true; $('grp').hidden = true; await frame();
+  const r3a = v('hid').hidden === true && ink('lay', 800, 100) === 0 && v('grp').hidden === true;
+  $('hid').hidden = false; $('grp').hidden = false; await frame();
+  const r3b = v('hid').hidden === false && ink('lay', 800, 100) > 0 && v('grp').hidden === false;
+  $('lay').hidden = true; await frame();
+  const r3c = v('lay').hidden === true && ink('lay', 800, 100) === 0;
+  $('lay').hidden = false; await frame();
+  const r3d = ink('lay', 800, 100) > 0;
+  check(3, 'el.hidden = true/false on shape, group, layer', r3a && r3b && r3c && r3d, { r3a, r3b, r3c, r3d });
+
+  // 4 toggleAttribute pie
+  $('pieC').toggleAttribute('pie'); const p1 = v('pieC').pie;
+  $('pieC').toggleAttribute('pie'); const p2 = v('pieC').pie;
+  check(4, 'toggleAttribute(pie) twice → true, false', p1 === true && p2 === false, { p1, p2 });
+
+  // 5 bare smooth
+  check(5, 'bare smooth → true', v('poly5').smooth === true);
+
+  // 6 bare x y
+  check(6, 'bare x y → number 0', v('c6').x === 0 && v('c6').y === 0 && v('c6').tx === 0 && v('c6').x + 10 + 5 === 15);
+
+  // 7 + 8 removed zoom / alpha / strokewidth
+  $('sc').removeAttribute('zoom'); $('sc').removeAttribute('alpha'); $('sc').removeAttribute('strokewidth'); await frame();
+  check(7, 'removed zoom / alpha → 1, still visible', v('sc').zoom === 1 && v('sc').alpha === 1 && ink('lay', 700, 500) > 0);
+  check(8, 'removed strokewidth → 1', v('sc').strokewidth === 1);
+
+  // 9 removed miterlimit → valid default (no leak possible)
+  $('miter').removeAttribute('miterlimit');
+  check(9, 'removed miterlimit → 10', v('miter').miterlimit === 10);
+
+  // 10 removed text align
+  $('txt').removeAttribute('align'); $('txt').removeAttribute('font');
+  check(10, 'removed align / font → defaults', v('txt').align === 'start' && v('txt').font === 'sans-serif');
+
+  // 11 animated attribute removed
+  $('anim').removeAttribute('rotate'); await frame();
+  check(11, 'removed animated rotate → 0, not animated', v('anim').rotate === 0 && !$('anim').animatedAttributeKeys.includes('rotate') && $('anim').isAnimated === false);
+
+  // 12 reactive attribute removed
+  $('react').removeAttribute('r');
+  $('size').setAttribute('value', '90'); await frame();
+  check(12, 'removed reactive r → default, no further updates', v('react').r === 0 && !$('react').reactiveAttributeKeys.includes('r'));
+
+  // 13 rect r1 removed → null (falls back to r)
+  $('rr').removeAttribute('r1');
+  check(13, 'removed r1 → null (falls back to r)', v('rr').r1 === null);
+
+  // 14 removeAttribute onclick from outside
+  let e14 = null;
+  try { $('click2').removeAttribute('onclick'); } catch (e) { e14 = String(e); }
+  const before14 = v('n').value;
+  clickAt('main', 900, 500);
+  check(14, 'removeAttribute(onclick): no error, no effect, not clickable', !e14 && $('click2').handlers.click === null && !$('click2').isClickable() && v('n').value === before14, { e14 });
+
+  // 15 one-shot button removes its own onclick during process()
+  $('n').setAttribute('value', '0');
+  let e15 = null;
+  try { clickAt('main', 150, 500); clickAt('main', 150, 500); } catch (e) { e15 = String(e); }
+  check(15, 'one-shot onclick counts once, no error', !e15 && v('n').value === 1, { n: v('n').value, e15 });
+
+  // 16 onclick="" → no handler, not registered
+  check(16, 'onclick="" → no handler, not registered', $('empty').handlers.click === null && !$('main').interaction._interactiveElements.includes($('empty')));
+
+  // 17 stage bare alwaysrender, removed ratio
+  const st2 = $('st2');
+  const r17a = st2.intersectionObserver === null || st2.intersectionObserver === undefined;
+  st2.removeAttribute('ratio');
+  check(17, 'bare alwaysrender (no IntersectionObserver), removed ratio → 16/9', r17a && st2._parsedRatio === 16 / 9 && Number.isFinite(st2.attributeValues.height), { obs: !!st2.intersectionObserver, ratio: st2._parsedRatio, h: st2.attributeValues.height });
+
+  // 18 closed="1" stays open
+  check(18, 'closed="1" → open', ink('lay', 500, 200) === 0, { ink: ink('lay', 500, 200) });
+
+  // 19 bare var value / removed
+  const b19 = v('bareVar').value;
+  $('bareVar').removeAttribute('value');
+  check(19, '<pxl-var value> → "", removed → 0', b19 === '' && v('bareVar').value === 0, { b19 });
+
+  // 20 createElement with empty x before append
+  const c = document.createElement('pxl-circle');
+  c.id = 'late'; c.setAttribute('x', ''); c.setAttribute('r', '5'); c.setAttribute('fill', 'red');
+  $('lay').appendChild(c); await frame();
+  check(20, 'createElement, x="" before append → 0', v('late').x === 0);
+
+  return { passed: results.filter(r => r.ok).length, total: results.length, failed: results.filter(r => !r.ok), errors };
+};
+</script>
+</body>
+</html>

@@ -5,7 +5,7 @@
 - **Supersedes**: `design/archive/2026-10-17_always_save_restore_plan.md` (decided, not built) and Part 2 of `design/archive/2026-11-05_draw_errors_plan.md` (its Part 1, the clamping of stop offsets and corner radii, was built on 2026-11-05 and stays)
 - **Related**: `design/2026-11-01_isolated_shape_compositing_plan.md` (builds on this one: same `Shape.render()`, order in its §9), `design/2026-10-17_shape_authoring_plan.md` (custom shapes need this before a docs page), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, implemented), `design/2026-10-18_polyline_optimization_plan.md` (small fix "non-finite points + gradient", covered here)
 - **Target Implementation**: `js/elements/shape.js` (`render`, `createGradient`, `drawArrows`), `js/elements/shapes/grid.js`, `js/elements/node.js` (`reportError`), `js/elements/group.js`, `js/elements/layer.js`, `js/elements/variable.js`, `js/interaction.js` (`process`), `tests/index.html`, `.agents/KILOPIXEL.md`
-- **Measurement tools** (not kept): `scratch/gradient_stops/try_finally_bench.html` (all variants, §4), `scratch/save_restore/measure.html` and `lines.html` (real pages, worst case), `scratch/custom_shape/test.html` (leak test), `scratch/gradient_stops/overshoot.html` (frame aborted by an error), `scratch/safe_render/bench.html` (repeated errors, text, hidden shapes, §4.4), `scratch/safe_render/hidden_refs.html` (what `hidden` does to evaluation, §5.1), `scratch/safe_render/edge_cases.html` (errors in readers, at connect and in `setAttribute()`, messages with values, §4.5)
+- **Measurement tools** (not kept): `scratch/gradient_stops/try_finally_bench.html` (all variants, §4), `scratch/save_restore/measure.html` and `lines.html` (real pages, worst case), `design/prototypes/2026-10-17_shape_authoring/star_test.html` (leak test), `scratch/gradient_stops/overshoot.html` (frame aborted by an error), `scratch/safe_render/bench.html` (repeated errors, text, hidden shapes, §4.4), `scratch/safe_render/hidden_refs.html` (what `hidden` does to evaluation, §5.1), `scratch/safe_render/edge_cases.html` (errors in readers, at connect and in `setAttribute()`, messages with values, §4.5)
 
 ---
 
@@ -28,7 +28,7 @@ Built separately, the second would rewrite the first a few days later. Together 
 
 All shapes in a layer share one canvas context. Today a shape saves and restores only when it has transforms or compositing (`hasStateChanges`, a 15-term check in `Shape.render()`). The built-in shapes are safe, because they always set the state they use (Rule 1, made reliable by Rule A). Code that changes state without resetting it is not:
 
-- **Custom shapes** (`design/2026-10-17_shape_authoring_plan.md`): a `draw()` that sets `ctx.globalAlpha = 0.2` and forgets to reset it faded **every** shape in the layer to alpha 51 instead of 255, including shapes drawn before it (the state carries over into the next frame) and shapes that save (`save()` copies the leaked state). Measured in `scratch/custom_shape/test.html` (not kept), 2026-10-17.
+- **Custom shapes** (`design/2026-10-17_shape_authoring_plan.md`): a `draw()` that sets `ctx.globalAlpha = 0.2` and forgets to reset it faded **every** shape in the layer to alpha 51 instead of 255, including shapes drawn before it (the state carries over into the next frame) and shapes that save (`save()` copies the leaked state). Measured in `design/prototypes/2026-10-17_shape_authoring/star_test.html`, 2026-10-17.
 - **Engine code:** `hasStateChanges` must mirror `applyContextState()` exactly; if the two lists drift apart, a shape leaks silently. `drawArrows` and `Grid.draw` reset values by hand.
 
 ### 2.2 Errors While Drawing (Details: `design/archive/2026-11-05_draw_errors_plan.md` §1, §2)
@@ -408,7 +408,7 @@ A hidden shape evaluates before it checks `hidden`; a hidden group or layer skip
 4. `js/elements/group.js`, `layer.js`, `variable.js`: `try` around their evaluation (§3.3).
 5. `js/interaction.js`: `try / catch / finally` around the hit-test draw (§3.4).
 6. `tests/index.html`: tests from §8. `node build.js`, update the `~NNKB` sizes, all tests pass.
-7. Regression: all `docs/*.html` and `examples/*.html` without new console warnings, pixels compared with the old engine (`scratch/text_box/regress.html` (not kept) adapted), `scratch/custom_shape/test.html` with the built engine, `scratch/save_restore/measure.html` with the built engine as A (A and B must be equal, B's patch is then a no-op), `scratch/safe_render/bench.html` against the old engine (hidden first faster or equal; repeated errors as in §4.4).
+7. Regression: all `docs/*.html` and `examples/*.html` without new console warnings, pixels compared with the old engine (`scratch/text_box/regress.html` (not kept) adapted), `design/prototypes/2026-10-17_shape_authoring/star_test.html` with the built engine, `scratch/save_restore/measure.html` with the built engine as A (A and B must be equal, B's patch is then a no-op), `scratch/safe_render/bench.html` against the old engine (hidden first faster or equal; repeated errors as in §4.4).
 8. `.agents/KILOPIXEL.md` and docs (§9).
 9. Plan status → ✅, TODO item removed; remove the small fix "non-finite points + gradient" from `design/2026-10-18_polyline_optimization_plan.md` and from the polyline item in the TODO.
 

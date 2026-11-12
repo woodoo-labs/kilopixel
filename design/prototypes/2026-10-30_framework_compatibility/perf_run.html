@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Perf: old vs. new</title>
+  <style>
+    body { font-family: sans-serif; margin: 16px; background: #f8fafc; color: #0f172a; }
+    iframe { width: 1200px; height: 800px; border: 1px solid #e2e8f0; background: #fff; display: block; }
+    table { border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+    td, th { border: 1px solid #e2e8f0; padding: 4px 8px; text-align: right; }
+    th:first-child, td:first-child { text-align: left; }
+    #status { margin: 8px 0; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h3>Engine frame time: old vs. new build</h3>
+  <div id="status">idle</div>
+  <iframe id="frame"></iframe>
+  <table id="results"></table>
+  <script>
+    // Compares two engine builds on the same current pages from examples/. Each page is loaded with
+    // both builds, alternating the order per round. Per run: warm-up, then the per-frame CPU time of
+    // all rAF callbacks (engine work) is recorded by perf_raf_timer.js.
+    //
+    // The old build is a file you make from a commit, e.g.
+    //   git show 0cb53ac:dist/pxl.min.js > scratch/pxl_0cb53ac.min.js
+    // and open perf_run.html?old=/scratch/pxl_0cb53ac.min.js
+    // Optional: &new=<url> (default /dist/pxl.min.js), &pages=test02,benchmark, &rounds=6
+    const params = new URLSearchParams(location.search);
+    const bundles = { old: params.get('old'), new: params.get('new') || '/dist/pxl.min.js' };
+    const pages = (params.get('pages') || 'test01,test02,test06,test07,test09,test37,test40,benchmark').split(',');
+    const rounds = Number(params.get('rounds') || 3);
+    const warmup = 1500, measure = 4000;
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    const frame = document.getElementById('frame');
+    const status = document.getElementById('status');
+    const timer = new URL('perf_raf_timer.js', location.href).pathname;
+
+    // The page's own <script src="…pxl.min.js"> is swapped for the chosen build; the timer runs first
+    async function pageSource(version, page) {
+      const html = await (await fetch(`/examples/${page}.html`, { cache: 'no-store' })).text();
+      return html
+        .replace(/src="[^"]*pxl(\.min)?\.js"/g, `src="${bundles[version]}"`)
+        .replace(/<head>/i, `<head><base href="/examples/"><script src="${timer}"><\/script>`);
+    }
+
+    function stats(values) {
+      const s = values.slice().sort((a, b) => a - b);
+      const q = (p) => s.length ? s[Math.min(s.length - 1, Math.floor(p * s.length))] : NaN;
+      const mean = s.reduce((a, b) => a + b, 0) / (s.length || 1);
+      return { n: s.length, median: q(0.5), p95: q(0.95), mean };
+    }
+
+    async function runOnce(version, page) {
+      const html = await pageSource(version, page);
+      await new Promise((resolve) => { frame.onload = resolve; frame.srcdoc = html; });
+      const w = frame.contentWindow;
+      await wait(warmup);
+      w.__perf.start();
+      await wait(measure);
+      const frames = w.__perf.stop();
+      const errors = w.__perfErrors || 0;
+      return { ...stats(frames), errors };
+    }
+
+    const results = window.perfResults = {};
+    (async () => {
+      if (!bundles.old) { status.textContent = 'Missing ?old=<url of the old build>, see the comment in the source.'; return; }
+      for (const page of pages) {
+        results[page] = { old: [], new: [] };
+        for (let r = 0; r < rounds; r++) {
+          const order = r % 2 === 0 ? ['old', 'new'] : ['new', 'old'];
+          for (const v of order) {
+            status.textContent = `${page}: ${v}, round ${r + 1} / ${rounds}`;
+            results[page][v].push(await runOnce(v, page));
+          }
+        }
+      }
+      frame.src = 'about:blank';
+
+      // Median over rounds of each round's median / mean / p95
+      const med = (arr) => { const s = arr.slice().sort((a, b) => a - b); return s[Math.floor(s.length / 2)]; };
+      const table = document.getElementById('results');
+      table.innerHTML = '<tr><th>Page</th><th>Frames / 4 s (old, new)</th><th>Old median ms</th><th>New median ms</th><th>Δ median</th><th>Old mean</th><th>New mean</th><th>Old p95</th><th>New p95</th></tr>';
+      const summary = [];
+      for (const page of pages) {
+        const o = results[page].old, n = results[page].new;
+        const row = {
+          page,
+          frames: `${med(o.map((x) => x.n))}, ${med(n.map((x) => x.n))}`,
+          oldMedian: med(o.map((x) => x.median)), newMedian: med(n.map((x) => x.median)),
+          oldMean: med(o.map((x) => x.mean)), newMean: med(n.map((x) => x.mean)),
+          oldP95: med(o.map((x) => x.p95)), newP95: med(n.map((x) => x.p95)),
+          oldMedians: o.map((x) => x.median.toFixed(3)).join(' / '), newMedians: n.map((x) => x.median.toFixed(3)).join(' / ')
+        };
+        row.delta = ((row.newMedian - row.oldMedian) / row.oldMedian * 100);
+        summary.push(row);
+        const f = (x) => x.toFixed(3);
+        table.insertAdjacentHTML('beforeend', `<tr><td>${page}</td><td>${row.frames}</td><td>${f(row.oldMedian)}</td><td>${f(row.newMedian)}</td><td>${row.delta.toFixed(1)} %</td><td>${f(row.oldMean)}</td><td>${f(row.newMean)}</td><td>${f(row.oldP95)}</td><td>${f(row.newP95)}</td></tr>`);
+      }
+      window.perfSummary = summary;
+      status.textContent = 'done';
+      document.title = 'Perf: done';
+    })();
+  </script>
+</body>
+</html>

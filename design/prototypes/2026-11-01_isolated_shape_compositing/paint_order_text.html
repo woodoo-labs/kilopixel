@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Text paint order comparison</title>
+<style>
+  body { margin: 0; padding: 20px; background: #1a1a1a; color: #ddd; font-family: sans-serif; width: 1360px; }
+  .row { display: flex; gap: 20px; margin-bottom: 14px; }
+  .cell { width: 440px; }
+  h2 { font-size: 17px; margin: 0 0 6px; color: #fff; }
+  p { font-size: 13px; margin: 0 0 8px; color: #aaa; height: 34px; }
+  canvas { display: block; border-radius: 6px; }
+  .rowlabel { font-size: 14px; color: #7fd; margin: 4px 0 8px; }
+</style>
+</head>
+<body>
+
+<div class="row">
+  <div class="cell"><h2>1 · Current: interleaved per line</h2><p>fill L1 → stroke L1 → fill L2 → stroke L2 …<br>Lower lines cover the outline of upper lines.</p></div>
+  <div class="cell"><h2>2 · Two passes: all fill, then all stroke</h2><p>Same as applyStyle / SVG default / CSS text-stroke.<br>Outlines are always on top.</p></div>
+  <div class="cell"><h2>3 · paintorder="stroke": stroke under fill</h2><p>All strokes first, fills on top.<br>Glyphs keep their full shape; only the outer half of the outline shows.</p></div>
+</div>
+
+<div class="rowlabel">A) Multi-line, overlapping lines (lineheight 0.72), strokewidth 7: watch where descenders (y, p, j) meet the next line</div>
+<div class="row">
+  <canvas id="a1" width="440" height="300"></canvas>
+  <canvas id="a2" width="440" height="300"></canvas>
+  <canvas id="a3" width="440" height="300"></canvas>
+</div>
+
+<div class="rowlabel">B) Single line on a busy background, strokewidth 10 (options 1 and 2 are identical here)</div>
+<div class="row">
+  <canvas id="b1" width="440" height="150"></canvas>
+  <canvas id="b2" width="440" height="150"></canvas>
+  <canvas id="b3" width="440" height="150"></canvas>
+</div>
+
+<script>
+  // Mirrors Text.draw(): one fillText/strokeText call per line, same y-offset math.
+  function paint(canvas, opts, mode) {
+    const ctx = canvas.getContext('2d');
+    const { lines, size, lineheight, font, fill, stroke, strokewidth, x, y, bg } = opts;
+
+    bg(ctx, canvas);
+
+    ctx.font = font;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = fill;
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = strokewidth;
+    ctx.lineJoin = 'round';
+
+    const yAt = i => y + i * size * lineheight;
+
+    if (mode === 'interleaved') {
+      for (let i = 0; i < lines.length; i++) {
+        ctx.fillText(lines[i], x, yAt(i));
+        ctx.strokeText(lines[i], x, yAt(i));
+      }
+    } else if (mode === 'fillThenStroke') {
+      for (let i = 0; i < lines.length; i++) ctx.fillText(lines[i], x, yAt(i));
+      for (let i = 0; i < lines.length; i++) ctx.strokeText(lines[i], x, yAt(i));
+    } else if (mode === 'strokeThenFill') {
+      for (let i = 0; i < lines.length; i++) ctx.strokeText(lines[i], x, yAt(i));
+      for (let i = 0; i < lines.length; i++) ctx.fillText(lines[i], x, yAt(i));
+    }
+  }
+
+  const plainBg = (ctx, c) => { ctx.fillStyle = '#2b2f3a'; ctx.fillRect(0, 0, c.width, c.height); };
+  const busyBg = (ctx, c) => {
+    const colors = ['#3b6fd1', '#f2f2f2', '#d9822b', '#222222'];
+    let k = 0;
+    for (let i = -c.height; i < c.width; i += 18, k++) {
+      ctx.fillStyle = colors[k % colors.length];
+      ctx.beginPath();
+      ctx.moveTo(i, 0); ctx.lineTo(i + 18, 0); ctx.lineTo(i + 18 + c.height, c.height); ctx.lineTo(i + c.height, c.height);
+      ctx.fill();
+    }
+  };
+
+  const A = { lines: ['Typography', 'glyph jumps', 'Quality'], size: 66, lineheight: 0.72, font: 'bold 66px sans-serif',
+              fill: '#ffd400', stroke: '#c0143c', strokewidth: 7, x: 22, y: 90, bg: plainBg };
+  const B = { lines: ['Readable label'], size: 56, lineheight: 1.2, font: '600 56px sans-serif',
+              fill: '#ffffff', stroke: '#000000', strokewidth: 9, x: 24, y: 95, bg: busyBg };
+
+  paint(a1, A, 'interleaved');    paint(a2, A, 'fillThenStroke'); paint(a3, A, 'strokeThenFill');
+  paint(b1, B, 'interleaved');    paint(b2, B, 'fillThenStroke'); paint(b3, B, 'strokeThenFill');
+</script>
+</body>
+</html>

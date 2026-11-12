@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kilopixel in Vue 3</title>
+  <script src="/dist/pxl.min.js"></script>
+  <script src="https://unpkg.com/vue@3.5.13/dist/vue.global.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 16px; background: #f8fafc; color: #0f172a; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 1200px; }
+    .card { background: #fff; border: 1px solid #e2e8f0; padding: 8px; }
+    .card h3 { margin: 4px 0 8px; font-size: 14px; }
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; font-size: 13px; margin-top: 8px; }
+    .controls label { display: grid; gap: 2px; }
+    .out { font: 12px monospace; white-space: pre-wrap; background: #f1f5f9; padding: 6px; margin-top: 6px; }
+    #debug { font: 12px monospace; white-space: pre-wrap; margin-top: 12px; max-width: 1200px; }
+  </style>
+</head>
+<body>
+  <h2>Kilopixel in Vue 3.5 (prototype)</h2>
+  <div id="app"></div>
+  <div id="debug"></div>
+
+  <script>
+    // Same scenarios as react.html: two instances (unique ids from useId), numeric binding (r),
+    // expression binding that changes per render, removeAttribute via undefined (zoom), mount / unmount,
+    // Kilopixel onclick string vs. Vue @click, reading engine state back.
+    const { createApp, ref, useId, computed } = Vue;
+
+    const Planet = {
+      props: ['title', 'hue'],
+      setup(props) {
+        const rawId = useId();
+        const id = 'p' + rawId.replace(/[^a-zA-Z0-9]/g, '');
+        const r = ref(60), base = ref(120), showMoon = ref(true), big = ref(false), vueClicks = ref(0), readBack = ref('');
+        const moonX = computed(() => `${base.value} + sin(t / 400) * 20`);
+        const read = () => {
+          const sun = pxl.nodes[`${id}sun`];
+          const attr = document.getElementById(`${id}sun`);
+          readBack.value = JSON.stringify({
+            rawId, id,
+            'sun.r': sun?.r, 'sun.zoom': sun?.zoom, 'sun.isHovered': sun?.isHovered,
+            'clicks var': pxl.nodes[`${id}clicks`]?.value,
+            'onclick attribute': attr?.getAttribute('onclick'),
+            'zoom attribute': attr?.getAttribute('zoom'),
+            'moon x attribute': document.getElementById(`${id}moon`)?.getAttribute('x') ?? '(unmounted)'
+          }, null, 1);
+        };
+        return { id, r, base, showMoon, big, vueClicks, readBack, moonX, read };
+      },
+      template: `
+        <div class="card">
+          <h3>{{ title }} (id prefix {{ id }})</h3>
+          <pxl-stage :id="id + 'stage'" ratio="2 / 1">
+            <pxl-layer>
+              <pxl-var :id="id + 'clicks'" value="0"></pxl-var>
+              <pxl-circle :id="id + 'sun'" x="500" y="250" :r="r" :fill="'hsl(' + hue + ', 80, 55)'"
+                :zoom="big ? 1.3 : undefined"
+                :onclick="'ref.' + id + 'clicks.set(\\'value\\', ref.' + id + 'clicks.value + 1)'"
+                @click="vueClicks++"></pxl-circle>
+              <pxl-group x="500" y="250" rotate="loop(4) * 360">
+                <pxl-circle v-if="showMoon" :id="id + 'moon'" :x="moonX" r="18" fill="#94a3b8"></pxl-circle>
+              </pxl-group>
+              <pxl-text x="20" y="30" size="16" fill="#0f172a"
+                :text="'\\'clicks (Kilopixel): \\' + ref.' + id + 'clicks.value + \\' | hovered: \\' + ref.' + id + 'sun.isHovered'"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+          <div class="controls">
+            <label>Sun r (number): {{ r }}<input type="range" min="20" max="120" v-model.number="r"></label>
+            <label>Moon orbit (expression): {{ base }}<input type="range" min="80" max="220" v-model.number="base"></label>
+            <label><span><input type="checkbox" v-model="showMoon"> Moon mounted</span></label>
+            <label><span><input type="checkbox" v-model="big"> zoom 1.3 (else undefined)</span></label>
+            <span>Vue @click count: {{ vueClicks }}</span>
+            <button @click="read">Read engine state</button>
+          </div>
+          <div class="out">{{ readBack }}</div>
+        </div>`
+    };
+
+    const app = createApp({
+      components: { Planet },
+      template: `<div class="cards"><Planet title="Planet A" :hue="200" /><Planet title="Planet B" :hue="20" /></div>`
+    });
+    // Lifecycle log for the sizing problem
+    window.__log = [];
+    for (const name of ["connectedCallback", "disconnectedCallback", "resize", "attributeChangedCallback"]) {
+      const original = pxl.Stage.prototype[name];
+      pxl.Stage.prototype[name] = function(...args) {
+        window.__log.push(`${name} ${this.id || "(no id yet)"} connected=${this.isConnected} w=${this.clientWidth} ${name === "attributeChangedCallback" ? args[0] + "=" + args[2] : ""}`);
+        return original.apply(this, args);
+      };
+    }
+    app.config.compilerOptions.isCustomElement = (tag) => tag.startsWith('pxl-');
+    app.mount('#app');
+
+    setInterval(() => {
+      document.getElementById('debug').textContent =
+        `pxl.nodes: ${Object.keys(pxl.nodes).join(', ')}\n` +
+        `animationCache: ${pxl.animationCache.size}   staticCache: ${pxl.staticCache.size}`;
+    }, 500);
+  </script>
+</body>
+</html>

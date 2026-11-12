@@ -4,13 +4,13 @@
 - **Date**: 2026-11-04
 - **Related**: `design/2026-10-17_bundle_scope_plan.md` (classic script in `<head>`), `docs/installation.html` (script in `<head>` since 5891224)
 - **Target Implementation**: `js/elements/stage.js` (default styles, warning), `js/elements/variable.js` (`display: none`), `tests/index.html`, `docs/installation.html`, `.agents/KILOPIXEL.md` (Stage, Key Behavior)
-- **Prototypes**: `scratch/stage_width_check.html` (not kept) (today, eight layouts), `scratch/stage_sizing_prototype.html` (defaults in a cascade layer; `?fallback=min` and `?fallback=minpct` for the rejected fallback widths), `scratch/zero_width_while_parsing.html` (width 0 while the page is parsed)
+- **Prototypes**: `design/prototypes/2026-11-04_stage_sizing/stage_width_check.html` (today, eight layouts), `design/prototypes/2026-11-04_stage_sizing/stage_sizing_prototype.html` (defaults in a cascade layer; `?fallback=min` and `?fallback=minpct` for the rejected fallback widths), `design/prototypes/2026-11-04_stage_sizing/zero_width_while_parsing.html` (width 0 while the page is parsed)
 
 ---
 
 ## 1. Problem
 
-A stage takes the full width of its parent. Two cases go wrong, measured in `scratch/stage_width_check.html` (not kept) (parent 880 px wide, `ratio="4 / 1"`):
+A stage takes the full width of its parent. Two cases go wrong, measured in `design/prototypes/2026-11-04_stage_sizing/stage_width_check.html` (parent 880 px wide, `ratio="4 / 1"`):
 
 | Layout | Stage size |
 |---|---|
@@ -70,7 +70,7 @@ At load, `stage.js` adds one `<style>` element at the start of `<head>`:
 
 ### 4.2 Zero-Width Warning
 
-A width of 0 alone is not an error: while the page is still loading, the parent may not have its width yet. Measured in `scratch/zero_width_while_parsing.html` (not kept) (script in `<head>`, stage in a centered wrapper, a paragraph that widens the wrapper later in the HTML): the stage reports `0 (loading, rects 1)`, then `828 (complete, rects 1)`. Warning at the first 0 would flag a page that works. So the warning waits until the page has loaded:
+A width of 0 alone is not an error: while the page is still loading, the parent may not have its width yet. Measured in `design/prototypes/2026-11-04_stage_sizing/zero_width_while_parsing.html` (script in `<head>`, stage in a centered wrapper, a paragraph that widens the wrapper later in the HTML): the stage reports `0 (loading, rects 1)`, then `828 (complete, rects 1)`. Warning at the first 0 would flag a page that works. So the warning waits until the page has loaded:
 
 ```js
 resize() {

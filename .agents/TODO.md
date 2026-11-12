@@ -93,7 +93,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 
 ## 14. Shape-Level Paint Order (`paintorder`)
 - **Status**: 💬 **Discussion** (decided 2026-10-13: keep current behavior until implemented properly; no plan yet)
-- **Visual Comparison**: `scratch/test_paint_order.html` / `scratch/paint_order_comparison.png` (not kept)
+- **Visual Comparison**: `design/prototypes/2026-11-01_isolated_shape_compositing/paint_order_text.html` (text; kept with the isolation plan, which `paintorder` builds on)
 - **Background**:
   - Path shapes paint via `applyStyle`: fill, then stroke (outline on top, half of `strokewidth` covers the fill).
   - `<pxl-text>` paints per line, alternating: fill L1 → stroke L1 → fill L2 → stroke L2. Only differs from "all fills, then all strokes" where lines overlap (tight `lineheight` / thick outline) — visually negligible, so not worth changing on its own.
@@ -160,7 +160,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 
 ## 30. Framework Compatibility (DOM Contract)
 - **Status**: 🟡 **Proposed** (2026-11-10, D1 and D4 decided)
-- **Reference**: `design/2026-10-30_framework_compatibility_plan.md`; prototype `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4, 2026-11-10); the React 19 / Vue 3.5 components with `FINDINGS.md` (2026-10-30) were in `scratch/frameworks/` (not kept)
+- **Reference**: `design/2026-10-30_framework_compatibility_plan.md`; prototype `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4, 2026-11-10); the React 19 / Vue 3.5 components with `FINDINGS.md` (2026-10-30) in the same folder
 - **Idea**: target the DOM contract frameworks use (attributes, properties, events, insert / move / remove, style, hydration), not the frameworks. Conformance test page `tests/frameworks.html` without any framework.
 - **Phase 1**: observe `id`; DOM events on shapes (`click`, `pointer*`) + `interactive` for delegating frameworks; rename the `on*` handlers, which collide with native `onclick` and framework `on*` rules (D1: `pxl-on-click`, `pxl-on-enter`, …, attribute-only); layer canvas in a shadow root (today `layer.innerHTML = …` silently removes the canvas: nothing is drawn, nothing is logged; confirmed 2026-11-05) and default styles in a stylesheet; bounded expression caches.
 - **Phase 2**: attribute properties (numbers without compiling, values set before upgrade). **Phase 3**: `docs/frameworks.html`, optional TypeScript typings.
@@ -170,7 +170,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 
 ## 31. Isolated Shape Compositing (Fill and Stroke Composite as One)
 - **Status**: 🟡 **Proposed** (2026-11-01)
-- **Reference**: `design/2026-11-01_isolated_shape_compositing_plan.md`; prototypes `scratch/mask_fill_stroke.html`, `scratch/isolation_bench.html` (not kept)
+- **Reference**: `design/2026-11-01_isolated_shape_compositing_plan.md`; prototypes `design/prototypes/2026-11-01_isolated_shape_compositing/mask_fill_stroke.html`, `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_bench.html`
 - **Problem**: a shape that draws more than once (fill + stroke, arrowheads, multi-line text, grid major lines or labels) composites each draw call separately. With `mask` 7 of 9 modes are wrong (`source-in` erases the fill, `xor` cuts the stroke into the fill); with `shadowcolor` the stroke casts a shadow onto the shape's own fill (visible in `shadow.html` §1); `filter` and `blend` are affected too.
 - **Shadows on arrowheads** (noted 2026-10-15): the shaft (`stroke()`) and the heads (`drawArrows`) are separate calls, so a dark band shows where the shaft enters the head. Overlaps within one path (polyline corners) cast one shadow and are fine. Workaround today: `filter="dropShadow(...)"` on the `<pxl-layer>` instead of `shadowcolor` on the shape (one shadow of the combined silhouette).
 - **Idea**: draw such a shape normally into one shared scratch canvas, then composite it onto the layer once with its alpha / mask / blend / filter / shadow. Single-draw shapes keep the direct path.

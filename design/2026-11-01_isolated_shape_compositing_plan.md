@@ -4,7 +4,7 @@
 - **Date**: 2026-11-01
 - **Related**: `design/2026-11-07_safe_shape_render_plan.md` (built 2026-11-07, same function `Shape.render()`; the base for this plan, §9), TODO §14 `paintorder` (changes the order of the same draw calls; build it after this plan, §9), `docs/DOCS_STANDARDS.md` §2 ("Ghosts of fill-only shapes", the docs rule this removes)
 - **Target Implementation**: `js/elements/shape.js` (`render()`), `js/graphics.js` (`applyContextState` split), `js/elements/stage.js` (scratch canvas size), `js/elements/shapes/text.js` and `grid.js` (draw count)
-- **Prototypes**: `scratch/mask_fill_stroke.html` (not kept) (today vs isolated, every mask mode plus alpha, blend, shadow, multi-line text), `scratch/isolation_bench.html` (cost)
+- **Prototypes**: `design/prototypes/2026-11-01_isolated_shape_compositing/mask_fill_stroke.html` (today vs isolated, every mask mode plus alpha, blend, shadow, multi-line text), `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_bench.html` (cost), `design/prototypes/2026-11-01_isolated_shape_compositing/paint_order_text.html` (`paintorder` for text, §9)
 
 ---
 
@@ -92,7 +92,7 @@ Recommendation: (a), with an engine test that compares it against `ctx.getTransf
 
 ## 4. Cost
 
-Measured with `scratch/isolation_bench.html` (not kept) in the desktop app's browser pane: layer 1000 × 600 at DPR 2 (2000 × 1200 px), ellipse 180 × 120 with fill and stroke, `mask="xor"`, 20 shapes per frame, GPU work included.
+Measured with `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_bench.html` in the desktop app's browser pane: layer 1000 × 600 at DPR 2 (2000 × 1200 px), ellipse 180 × 120 with fill and stroke, `mask="xor"`, 20 shapes per frame, GPU work included.
 
 | Variant | Per shape |
 |---|---|
@@ -115,7 +115,7 @@ Measured with `scratch/isolation_bench.html` (not kept) in the desktop app's bro
 
 ### 6.1 `alpha`
 
-Isolating `alpha` is correct (SVG `opacity` is isolated too), but fades are common, and every stroked, filled shape that fades would pay §4 per frame. The artifact is subtle (`scratch/mask_fill_stroke.html` (not kept), row "alpha 0.5").
+Isolating `alpha` is correct (SVG `opacity` is isolated too), but fades are common, and every stroked, filled shape that fades would pay §4 per frame. The artifact is subtle (`design/prototypes/2026-11-01_isolated_shape_compositing/mask_fill_stroke.html`, row "alpha 0.5").
 
 Recommendation: leave `alpha` out for now. It keeps today's per-call behavior, like SVG `fill-opacity` / `stroke-opacity`. Revisit if users notice it.
 
@@ -141,7 +141,7 @@ Pixel reads on a small stage, one test per row:
 3. Tests §7; `node build.js`; all tests pass.
 4. KILOPIXEL.md, TODO.md entry.
 5. Docs: `mask.html` shapes with fill and stroke and the standard ghosts; remove the "Ghosts of fill-only shapes" note; check `shadow.html` §1, `blend.html` and `fill.html`.
-6. Step 2: bounding-box scratch region, measured with `scratch/isolation_bench.html` (not kept) again.
+6. Step 2: bounding-box scratch region, measured with `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_bench.html` again.
 
 ## 9. Build Order with Related Plans
 
@@ -149,4 +149,4 @@ Three plans change how a shape's draw calls (fill, stroke, arrowheads, text line
 
 1. **Always `save()` / `restore()` per shape** (`design/2026-11-07_safe_shape_render_plan.md`, built 2026-11-07): `Shape.render()` gets one path, save → transform → draw → restore, instead of the `hasStateChanges` check. The isolated path then only swaps the target of `draw()` (the scratch canvas) instead of adding a third path. The shared scratch canvas also needs the same protection against custom shapes that change canvas state and don't reset it (the `GhostStar` test, `design/archive/2026-10-17_always_save_restore_plan.md` §5.2): a leak there would reach every isolated shape after it.
 2. **This plan** (TODO §31).
-3. **`paintorder`** (TODO §14, concept): `paintorder="stroke"` draws the stroke first and the fill on top. Without isolation it has the same compositing bug: with a shadow, the fill's shadow falls onto the stroke drawn just before it. With isolation it only swaps two calls inside the scratch canvas, and shadow, mask and filter apply to the finished shape. Shared open questions: arrowheads (§3.1 counts them as an extra draw call; §14 asks how they paint with `paintorder="stroke"`) and semi-transparent fills (§14 "fills show the stroke underneath", here §6.1 `alpha`).
+3. **`paintorder`** (TODO §14, concept): `paintorder="stroke"` draws the stroke first and the fill on top. Without isolation it has the same compositing bug: with a shadow, the fill's shadow falls onto the stroke drawn just before it. With isolation it only swaps two calls inside the scratch canvas, and shadow, mask and filter apply to the finished shape. Shared open questions: arrowheads (§3.1 counts them as an extra draw call; §14 asks how they paint with `paintorder="stroke"`) and semi-transparent fills (§14 "fills show the stroke underneath", here §6.1 `alpha`). Prototype for text: `design/prototypes/2026-11-01_isolated_shape_compositing/paint_order_text.html` (plain canvas: per line as today, all fills then all strokes, strokes under the fills; overlapping lines and a label on a busy background).

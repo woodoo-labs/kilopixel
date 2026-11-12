@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mask with fill + stroke</title>
+<style>
+  body { font: 14px/1.4 system-ui, sans-serif; margin: 24px; color: #334155; background: #fff; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p { margin: 0 0 16px; max-width: 900px; }
+  table { border-collapse: collapse; }
+  th, td { padding: 6px 10px; text-align: center; vertical-align: middle; }
+  th { font-weight: 600; }
+  td.mode { text-align: right; font-family: monospace; font-size: 14px; }
+  canvas { border: 1px solid #e2e8f0; display: block; }
+</style>
+</head>
+<body>
+<h1>mask with fill + stroke</h1>
+<p>Orange rect (fill + stroke) is the destination, blue ellipse (fill + stroke) is the source with <code>mask</code>.
+<b>Today</b>: the engine calls <code>fill()</code> and then <code>stroke()</code>, both with the mask operation, so the ellipse's stroke is composited against its own fill.
+<b>Isolated</b>: the ellipse is first drawn normally into a scratch canvas, then that bitmap is composited once with the mask operation.</p>
+<table id="t">
+  <tr><th></th><th>Today (fill, then stroke)</th><th>Isolated (offscreen, then one composite)</th></tr>
+</table>
+<script>
+const extra = [
+  ['alpha 0.5', c => { c.globalAlpha = 0.5; }],
+  ['blend multiply', c => { c.globalCompositeOperation = 'multiply'; }],
+  ['shadow', c => { c.shadowColor = 'rgba(15, 23, 42, 0.6)'; c.shadowBlur = 0; c.shadowOffsetX = 10; c.shadowOffsetY = 10; }],
+  ['multi-line text, source-in', null],
+];
+const modes = ['source-over', 'source-in', 'source-out', 'source-atop', 'destination-over',
+  'destination-in', 'destination-out', 'destination-atop', 'xor'];
+const W = 360, H = 200, dpr = window.devicePixelRatio || 1;
+
+function canvas() {
+  const c = document.createElement('canvas');
+  c.width = W * dpr; c.height = H * dpr;
+  c.style.width = W + 'px'; c.style.height = H + 'px';
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return [c, ctx];
+}
+
+function rect(ctx) {
+  ctx.beginPath();
+  ctx.rect(50, 45, 150, 110);
+  ctx.fillStyle = '#ffedd5'; ctx.fill();
+  ctx.lineWidth = 8; ctx.strokeStyle = '#f97316'; ctx.stroke();
+}
+
+function ellipse(ctx) {
+  ctx.beginPath();
+  ctx.ellipse(230, 100, 85, 62, 0, 0, Math.PI * 2);
+  ctx.fillStyle = '#dbeafe'; ctx.fill();
+  ctx.lineWidth = 8; ctx.strokeStyle = '#3b82f6'; ctx.stroke();
+}
+
+const scratch = document.createElement('canvas');
+scratch.width = W * dpr; scratch.height = H * dpr;
+const sctx = scratch.getContext('2d');
+
+const table = document.getElementById('t');
+for (const mode of modes) {
+  const tr = document.createElement('tr');
+  const td0 = document.createElement('td'); td0.className = 'mode'; td0.textContent = mode; tr.appendChild(td0);
+
+  // Today: same as Shape.applyStyle with globalCompositeOperation set for the whole shape
+  const [c1, a] = canvas();
+  rect(a);
+  a.save(); a.globalCompositeOperation = mode; ellipse(a); a.restore();
+
+  // Isolated: draw the source shape with source-over into a scratch canvas, composite it once
+  const [c2, b] = canvas();
+  rect(b);
+  sctx.setTransform(1, 0, 0, 1, 0, 0);
+  sctx.clearRect(0, 0, scratch.width, scratch.height);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ellipse(sctx);
+  b.save(); b.setTransform(1, 0, 0, 1, 0, 0); b.globalCompositeOperation = mode; b.drawImage(scratch, 0, 0); b.restore();
+
+  for (const c of [c1, c2]) { const td = document.createElement('td'); td.appendChild(c); tr.appendChild(td); }
+  table.appendChild(tr);
+}
+
+// Other render state that is applied once per draw call
+for (const [name, apply] of extra) {
+  const tr = document.createElement('tr');
+  const td0 = document.createElement('td'); td0.className = 'mode'; td0.textContent = name; tr.appendChild(td0);
+  const draw = apply ? ellipse : text;
+  const state = apply || (c => { c.globalCompositeOperation = 'source-in'; });
+  const [c1, a] = canvas();
+  rect(a);
+  a.save(); state(a); draw(a); a.restore();
+  const [c2, b] = canvas();
+  rect(b);
+  sctx.setTransform(1, 0, 0, 1, 0, 0);
+  sctx.clearRect(0, 0, scratch.width, scratch.height);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  draw(sctx);
+  b.save(); b.setTransform(1, 0, 0, 1, 0, 0); state(b); b.drawImage(scratch, 0, 0); b.restore();
+  for (const c of [c1, c2]) { const td = document.createElement('td'); td.appendChild(c); tr.appendChild(td); }
+  table.appendChild(tr);
+}
+
+function text(ctx) {
+  ctx.font = 'bold 34px monospace';
+  ctx.fillStyle = '#3b82f6';
+  ctx.fillText('LINE 1', 150, 85);
+  ctx.fillText('LINE 2', 150, 130);
+}
+</script>
+</body>
+</html>

@@ -4,7 +4,7 @@
 - **Date**: 2026-10-17
 - **Related**: `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, implemented; this plan was split off from its former §3), `design/2026-10-17_shape_authoring_plan.md` (custom shapes), `design/2026-11-01_isolated_shape_compositing_plan.md` (builds on this one: same `Shape.render()`, order in its §9)
 - **Target Implementation**: `js/elements/shape.js` (`render`, `drawArrows`), `js/elements/shapes/grid.js`
-- **Measurement Tools** (not kept): `scratch/save_restore_audit.js`, `scratch/save_restore_bench.html`, `scratch/save_restore/measure.html`, `scratch/custom_shape/test.html`
+- **Measurement Tools** (not kept): `scratch/save_restore_audit.js`, `scratch/save_restore_bench.html`, `scratch/save_restore/measure.html`, `design/prototypes/2026-10-17_shape_authoring/star_test.html`
 
 ---
 
@@ -127,7 +127,7 @@ Harness: `scratch/save_restore/measure.html` (not kept) (A = current engine, B =
 
 ### 5.2 Custom Shape Leak Test (2026-10-17)
 
-`scratch/custom_shape/test.html` (not kept): a user-made `Star` (separate `star.js`, `class Star extends Shape`) and a careless variant `GhostStar` whose `draw()` sets `ctx.globalAlpha = 0.2` and never resets it. Pixel alpha of shapes drawn with full colour (255 = clean):
+`design/prototypes/2026-10-17_shape_authoring/star_test.html`: a user-made `Star` (separate `star.js`, `class Star extends Shape`) and a careless variant `GhostStar` whose `draw()` sets `ctx.globalAlpha = 0.2` and never resets it. Pixel alpha of shapes drawn with full colour (255 = clean):
 
 | Measured shape | Today | Always save |
 |---|---|---|
@@ -199,6 +199,6 @@ render(ctx, u, t) {
 | 2 | Arrowheads (filled and line) after a filled shape | arrowhead and following shape colours correct (no `fillStyle` reset needed) |
 | 3 | `arrowstyle="line"` with a low `miterlimit`, followed by a polyline with default `miterlimit` | chevron tip sharp, following polyline uses its own miter limit |
 | 4 | Grid with `major` followed by a line | line uses its own `strokewidth` |
-| 5 | `scratch/custom_shape/test.html` (not kept) with the real build (no runtime patch) | star and both lines at full alpha (255) |
+| 5 | `design/prototypes/2026-10-17_shape_authoring/star_test.html` with the real build (no runtime patch) | star and both lines at full alpha (255) |
 | 6 | `scratch/save_restore/measure.html` (not kept) with the real build as A | A and B identical within noise (B's patch becomes a no-op) |
-| 7 | Rule A unit tests (`scratch/rule_a/unit.html` (not kept)) and regression (`scratch/rule_a/regress.html`) | 20 / 20; identical values, no new console errors |
+| 7 | Rule A unit tests (`design/prototypes/2026-10-17_shape_authoring/rule_a_unit.html`) and regression (`design/prototypes/2026-10-17_shape_authoring/rule_a_regress.html`) | 20 / 20; identical values, no new console errors |

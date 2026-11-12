@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Shape Test</title>
+  <script src="/dist/pxl.min.js"></script>
+  <script src="star.js"></script>
+  <style>body { margin: 0; width: 1000px; } pxl-stage { width: 1000px; }</style>
+</head>
+<body>
+<pxl-stage id="main" ratio="5 / 3">
+  <pxl-layer id="lay">
+    <pxl-var id="n" value="0"></pxl-var>
+    <pxl-var id="pts" value="5"></pxl-var>
+
+    <!-- Left: user star with expressions, gradient, animation and a click handler -->
+    <pxl-star id="star" x="300" y="300" r="150" ir="60" points="ref.pts.value"
+      fill="linear(90, ['gold', 'orange'])" stroke="#c2410c" strokewidth="4" rotate="t * 30"
+      onclick="ref.n.set('value', ref.n.value + 1)"></pxl-star>
+
+    <!-- Careless star inside a positioned group: every shape draws in its own canvas state, so nothing leaks -->
+    <pxl-group x="750" y="250">
+      <pxl-ghost-star r="100" ir="40" fill="#3b82f6"></pxl-ghost-star>
+    </pxl-group>
+    <pxl-line id="safe" x1="550" y1="420" x2="950" y2="420" stroke="black" strokewidth="30"></pxl-line>
+
+    <!-- Careless star directly in the layer, no x / y (top-left corner): its state change must not leak either -->
+    <pxl-ghost-star r="100" ir="40" fill="#3b82f6"></pxl-ghost-star>
+
+    <!-- A plain line drawn after it: full alpha (255) means the star's globalAlpha didn't leak -->
+    <pxl-line id="victim" x1="550" y1="500" x2="950" y2="500" stroke="black" strokewidth="30"></pxl-line>
+  </pxl-layer>
+</pxl-stage>
+<script>
+  const $ = id => document.getElementById(id);
+  const frame = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const errors = [];
+  addEventListener('error', e => errors.push(e.message));
+
+  function ink(x, y) {
+    const layer = $('lay'), u = layer.stage.unit, dpr = layer._dpr;
+    return layer._ctx.getImageData(Math.round(x * u * dpr), Math.round(y * u * dpr), 1, 1).data[3];
+  }
+
+  window.runTests = async function() {
+    await frame();
+    const r = {};
+    r.starDrawn = ink(300, 300) > 0;
+    r.starAlpha = ink(300, 300);   // star has x / y and fill without alpha: 255 = clean
+    r.starRegistered = $('star') instanceof Star && $('star').attributeValues.points === 5;
+
+    // Reactive custom attribute
+    $('pts').setAttribute('value', '7'); await frame();
+    r.reactivePoints = $('star').attributeValues.points === 7;
+
+    // Rule A with custom defaults
+    $('star').removeAttribute('ir');
+    r.removedIrDefault = $('star').attributeValues.ir === 20;
+
+    // Hit testing + onclick through the real InteractionEngine
+    const stage = $('main'), ia = stage.interaction;
+    stage.attributeValues.isHovered = true;
+    stage.attributeValues.mouseX = 300; stage.attributeValues.mouseY = 300;
+    ia._lastClick = true; ia.process();
+    r.clickCount = pxl.nodes.n.value;
+
+    // Does the careless shape leak globalAlpha into the line drawn after it?
+    r.lineAfterGroupAlpha = ink(750, 420); // 255 = clean, ~51 = leaked globalAlpha 0.2
+    r.lineAfterLayerLevelAlpha = ink(750, 500);
+    r.errors = errors;
+    return r;
+  };
+</script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (2026-11-10, D1 and D4 decided; no code changes yet)
 - **Date**: 2026-10-30
-- **Related**: `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes with `FINDINGS.md` were in `scratch/frameworks/` (not kept), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`
+- **Related**: `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
 
 ---
@@ -41,7 +41,7 @@ Kilopixel should work in **any** framework (React, Preact, Vue, Svelte, Solid, A
 
 ## 3. Current State (Audit 2026-10-30)
 
-From the React 19 / Vue 3.5 prototypes (`scratch/frameworks/FINDINGS.md` (not kept)) and the code:
+From the React 19 / Vue 3.5 prototypes (`design/prototypes/2026-10-30_framework_compatibility/FINDINGS.md`) and the code:
 
 | # | State | Detail |
 |---|---|---|
@@ -374,7 +374,7 @@ Every engine step: `node build.js`, update the `pxl.min.js` size, `tests/index.h
 ## 16. Risks
 
 - **API change of the handlers (W1)**: pre-release, 25 uses; the old-name warning makes leftovers visible.
-- **Shadow root on layers (W2)**: pointer coordinate behaviour across the shadow boundary (T-E5) and any code that looks for `layer.querySelector('canvas')` (search the repo before changing; tests and examples may read the canvas for pixel checks, e.g. `scratch/custom_shape/test.html` (not kept)).
+- **Shadow root on layers (W2)**: pointer coordinate behaviour across the shadow boundary (T-E5) and any code that looks for `layer.querySelector('canvas')` (search the repo before changing; tests and examples may read the canvas for pixel checks, e.g. `design/prototypes/2026-10-17_shape_authoring/star_test.html`).
 - **Accessors (W3)**: a framework that sets a property Kilopixel doesn't expect (e.g. `style`, `className`) is unaffected (no accessor); a user who set expando properties with attribute names on elements (`el.x = …` as a private field) would now change the drawing. Unlikely; documented.
 - **Event duplication (D4)**: solved for `click`, `pointerdown` and `pointerup` by option (b); stage-level `pointermove` listeners see the native and the Kilopixel event (documented). Code that listens on the stage for the browser's click over a shape now gets Kilopixel's click instead (`target` = the shape, `isTrusted` = false).
 
@@ -413,4 +413,4 @@ No per-frame cost for pages that don't use the new features; some paths get chea
 
 - **File size**: about +2–3 KB minified (`pxl.min.js` ~53 KB → ~55–56 KB); the main measurable cost.
 - **Worst case avoided by design**: `pointermove` dispatched every frame while the pointer moves over many shapes. Only the shape under the pointer gets events, and only for types with listeners.
-- **Check**: run `scratch/perf/run.html` (not kept) before and after phase 1 (same pages, interleaved rounds). In this environment it resolves differences above ~20 % only (`scratch/perf/RESULTS.md`); smaller effects need a quiet machine or more rounds.
+- **Check**: run `design/prototypes/2026-10-30_framework_compatibility/perf_run.html` before and after phase 1 (same pages, interleaved rounds). In this environment it resolves differences above ~20 % only (`design/prototypes/2026-10-30_framework_compatibility/perf_results.md`); smaller effects need a quiet machine or more rounds.
