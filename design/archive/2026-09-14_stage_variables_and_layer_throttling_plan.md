@@ -1,13 +1,13 @@
 # Technical Implementation Plan: Stage-Level Variables & Layer-Level FPS Throttling
 
-**Date**: 2026-09-14  
-**Status**: 🟡 **Proposed** (2026-09-14; the `maxfps` part overlaps `design/2026-09-14_layer_throttling_plan.md`, TODO §8)  
-**Target Files**:
-- `js/elements/stage.js` (Root variable registration, master variable loop, performance metrics)
-- `js/elements/layer.js` (`maxfps` attribute parsing, interval gate, loop keep-alive, layer-level metrics)
-- `js/elements/variable.js` (Stage attachment registration)
-- `js/monitor.js` (Publishing layer-level FPS and render times)
-- `.agents/KILOPIXEL.md` (Engine reference documentation)
+- **Status**: ⚪ **Superseded by** `design/2026-11-12_layer_throttling_plan.md` (2026-11-12, merged with `design/archive/2026-09-14_layer_throttling_plan.md` and checked against the engine of that date)
+- **Date**: 2026-09-14
+- **Target Files**:
+  - `js/elements/stage.js` (Root variable registration, master variable loop, performance metrics)
+  - `js/elements/layer.js` (`maxfps` attribute parsing, interval gate, loop keep-alive, layer-level metrics)
+  - `js/elements/variable.js` (Stage attachment registration)
+  - `js/monitor.js` (Publishing layer-level FPS and render times)
+  - `.agents/KILOPIXEL.md` (Engine reference documentation)
 
 ---
 

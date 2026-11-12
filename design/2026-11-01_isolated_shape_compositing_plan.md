@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (2026-11-01, no code changes yet)
 - **Date**: 2026-11-01
-- **Related**: `design/2026-11-07_safe_shape_render_plan.md` (built 2026-11-07, same function `Shape.render()`; the base for this plan, §9), TODO §14 `paintorder` (changes the order of the same draw calls; build it after this plan, §9), `docs/DOCS_STANDARDS.md` §2 ("Ghosts of fill-only shapes", the docs rule this removes)
+- **Related**: `design/2026-11-07_safe_shape_render_plan.md` (built 2026-11-07, same function `Shape.render()`; the base for this plan, §9), TODO §14 `paintorder` (changes the order of the same draw calls; build it after this plan, §9), `docs/DOCS_STANDARDS.md` §2 ("Ghosts of fill-only shapes", the docs rule this removes), `design/2026-11-12_two_phase_frame_plan.md` (💬; also changes `Shape.render()`, the evaluation part: build one after the other, not in parallel)
 - **Target Implementation**: `js/elements/shape.js` (`render()`), `js/graphics.js` (`applyContextState` split), `js/elements/stage.js` (scratch canvas size), `js/elements/shapes/text.js` and `grid.js` (draw count)
 - **Prototypes**: `design/prototypes/2026-11-01_isolated_shape_compositing/mask_fill_stroke.html` (today vs isolated, every mask mode plus alpha, blend, shadow, multi-line text), `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_bench.html` (cost), `design/prototypes/2026-11-01_isolated_shape_compositing/paint_order_text.html` (`paintorder` for text, §9)
 

@@ -1,8 +1,9 @@
 # Tween Animation Plan (Unified Specification)
 
-**Date**: 2026-10-01  
-**Status**: 🟡 **Proposed** (2026-10-01)  
-**Files affected**: [`js/compiler.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js), [`js/elements/node.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/node.js), [`js/elements/layer.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/layer.js), [`js/elements/stage.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/stage.js), [`.agents/KILOPIXEL.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/.agents/KILOPIXEL.md)
+- **Status**: 🟡 **Proposed** (2026-11-12: idea still open, but the design predates today's engine: compiler changes, Rule A, the stage's own idle logic (`isAnimated`, `requestRender()`) that §7 must fit into; bring it up to date before implementing. First draft 2026-10-01)
+- **Date**: 2026-10-01
+- **Related**: `design/2026-11-12_two_phase_frame_plan.md` (💬; with a two-phase frame the stage decides from the update phase whether to keep running, and change-based dirty flags stop redrawing a finished tween: §7 here would be rewritten on that model; see its §3.2, §3.3, §6)
+- **Files affected**: `js/compiler.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `.agents/KILOPIXEL.md`
 
 ---
 
@@ -27,7 +28,7 @@ tween(from, to, duration, [ease = 'ease'], [delay = 0])
 ```
 
 ### Overload 1: Normalized Ratio Form (`0 -> 1`)
-Consistent with all other Kilopixel time drivers ([`loop()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L123), [`wave()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L125), [`yoyo()`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L124)), this form produces a normalized progress value that clamps at `1.0` upon completion:
+Consistent with all other Kilopixel time drivers (`loop()`, `wave()`, `yoyo()` in `js/compiler.js`), this form produces a normalized progress value that clamps at `1.0` upon completion:
 ```html
 <!-- Opacity fade-in over 0.8s -->
 <pxl-circle alpha="tween(0.8)" r="40" fill="coral"></pxl-circle>
@@ -75,7 +76,7 @@ Tween drivers compose cleanly with continuous time drivers (`wave`, `loop`, `pul
 ## 4. Solving the Multi-Element Cache Problem
 
 ### 4.1 The Challenge
-In Kilopixel, [`pxl.compileExpression`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L215) caches compiled evaluation functions in `pxl.animationCache`:
+In Kilopixel, `pxl.compileExpression` (`js/compiler.js`) caches compiled evaluation functions in `pxl.animationCache`:
 ```javascript
 if (this.animationCache.has(str)) return this.animationCache.get(str);
 ```
@@ -108,7 +109,7 @@ This guarantees:
 
 ## 5. Easing Catalog (`pxl.easings`)
 
-A zero-allocation easing table defined in [`js/compiler.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js):
+A zero-allocation easing table defined in `js/compiler.js`:
 
 | Name | Formula / Behavior | Common Use Cases |
 | :--- | :--- | :--- |
@@ -230,7 +231,7 @@ pxl._evalTween = function(node, attrName, slotIndex, t, a, b, c, d, e) {
 
 ### 6.2 Expression Compiler Transformation
 
-In [`pxl.compileExpression`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js#L213):
+In `pxl.compileExpression` (`js/compiler.js`):
 
 1. **Detection & Classification**:
    ```javascript
@@ -295,7 +296,7 @@ In [`pxl.compileExpression`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/com
 
 ### 7.1 Node-Level Activity Check
 
-At the end of [`PxlNode.prototype.evaluateAnimations`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/node.js#L88):
+At the end of `PxlNode.prototype.evaluateAnimations` (`js/elements/node.js`):
 
 ```javascript
 // Determine if node still demands render frames
@@ -333,7 +334,7 @@ if (this.isAnimated) this.parentLayer?.invalidate();
 
 ### 7.2 Layer Heartbeat & Stage Sleep
 
-In [`Layer.prototype.render`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/layer.js#L152):
+In `Layer.prototype.render` (`js/elements/layer.js`):
 ```javascript
 // Check if layer itself or any child is still actively animating
 let layerNeedsAnimation = this.isAnimated;
@@ -362,9 +363,9 @@ When all elements settle:
 ### 7.3 Automatic Wake-Up Triggers
 
 The stage and layer automatically awaken on:
-1. **DOM Attribute Changes**: [`attributeChangedCallback`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/node.js#L23) sets `this.isAnimated = true` and invalidates the layer.
-2. **Reactive Variable Changes**: [`variableChangedCallback`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/node.js#L78) resets the attribute's tween slots (`t0 = null`, `done = false`), sets `this.isAnimated = true`, and requests a render.
-3. **Pointer / Touch Interaction**: [`InteractionEngine`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/interaction.js) calls `stage.requestRender()` on mouse move, enter, leave, and click.
+1. **DOM Attribute Changes**: `attributeChangedCallback` (`js/elements/node.js`) sets `this.isAnimated = true` and invalidates the layer.
+2. **Reactive Variable Changes**: `variableChangedCallback` (`js/elements/node.js`) resets the attribute's tween slots (`t0 = null`, `done = false`), sets `this.isAnimated = true`, and requests a render.
+3. **Pointer / Touch Interaction**: `InteractionEngine` (`js/interaction.js`) calls `stage.requestRender()` on mouse move, enter, leave, and click.
 
 ---
 
@@ -372,11 +373,11 @@ The stage and layer automatically awaken on:
 
 | File | Changes |
 | :--- | :--- |
-| [`js/compiler.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/compiler.js) | Add `pxl.easings` table, `pxl._evalTween` runtime helper, regex classification (`hasInfiniteDriver`, `hasTweens`), rewrite call sites. |
-| [`js/engine.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/engine.js) | Ensure `_attrKey` context is passed during attribute compilation and reactive evaluation. |
-| [`js/elements/node.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/node.js) | Pre-allocate `this._twSlots = {}`, reset slots on variable changes, add dynamic `isAnimated` calculation at end of `evaluateAnimations()`. |
-| [`js/elements/layer.js`](file:///c:/Users/micha/woodoo-labs/kilopixel/js/elements/layer.js) | Guard layer heartbeat in `render()` so it only calls `requestRender()` if `this.isAnimated` or any child `child.isAnimated` is true. |
-| [`.agents/KILOPIXEL.md`](file:///c:/Users/micha/woodoo-labs/kilopixel/.agents/KILOPIXEL.md) | Full API reference, syntax examples, and easing table documentation. |
+| `js/compiler.js` | Add `pxl.easings` table, `pxl._evalTween` runtime helper, regex classification (`hasInfiniteDriver`, `hasTweens`), rewrite call sites. |
+| `js/engine.js` | Ensure `_attrKey` context is passed during attribute compilation and reactive evaluation. |
+| `js/elements/node.js` | Pre-allocate `this._twSlots = {}`, reset slots on variable changes, add dynamic `isAnimated` calculation at end of `evaluateAnimations()`. |
+| `js/elements/layer.js` | Guard layer heartbeat in `render()` so it only calls `requestRender()` if `this.isAnimated` or any child `child.isAnimated` is true. |
+| `.agents/KILOPIXEL.md` | Full API reference, syntax examples, and easing table documentation. |
 
 ---
 

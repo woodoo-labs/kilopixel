@@ -1,8 +1,9 @@
 # Design Plan: `<pxl-clip>` — Compound Clipping Geometry
 
-**Date**: 2026-09-29  
-**Status**: 🟡 **Proposed** (2026-09-29)  
-**Files affected**: `js/elements/clip.js` (new), `js/elements/node.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/shape.js`, all 7 shape classes, `build.js`
+- **Status**: 🟡 **Proposed** (2026-09-29)
+- **Date**: 2026-09-29
+- **Related**: `design/2026-11-12_two_phase_frame_plan.md` (💬; with a two-phase frame the clip's children are evaluated in the update phase, not in `applyClip()` (§6.1 here), and the layer heartbeat (§9 here) goes away; see its §3.3, §6)
+- **Files affected**: `js/elements/clip.js` (new), `js/elements/node.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/shape.js`, all 7 shape classes, `build.js`
 
 ---
 

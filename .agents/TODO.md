@@ -7,7 +7,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Plans:** `design/`; superseded, dropped and outdated plans are in `design/archive/`. Workflow: `.claude/CLAUDE.md` → "Plans and TODO". Check: `node tools/check_plans.js`.
 
 ## 1. Native SVG Path2D & Vector Sprites (`<pxl-path>`)
-- **Status**: 🟡 **Proposed** (2026-09-30)
+- **Status**: 🟡 **Proposed** (2026-09-30; the plan needs updating to today's engine before implementing)
 - **Reference**: `design/2026-09-30_path_element_plan.md`
 - **Core Features**:
   - Direct integration with native browser `Path2D` API for sub-1 KB bundle footprint.
@@ -26,7 +26,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
   - Supports compound path unions, `fillrule="evenodd"` boolean holes, and nested intersection clipping without offscreen canvas buffers.
 
 ## 3. Animation, Easing & Physics Expansion (`tween`, `ease`, `spring`)
-- **Status**: 🟡 **Proposed** (`tween`, 2026-10-01); easing, springs and angle helpers: 💬 **Discussion**
+- **Status**: 🟡 **Proposed** (`tween`, 2026-10-01; the plan needs updating to today's engine before implementing); easing, springs and angle helpers: 💬 **Discussion**
 - **Reference**: `design/2026-10-01_tween_animation_plan.md` (`tween` only)
 - **Motivation**: Current time drivers are strictly periodic loops (`loop`, `wave`, `bounce`). Interactive UIs need one-shot animations and smooth organic state transitions.
 - **Proposed Additions**:
@@ -56,13 +56,11 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Related**: §38 builds the uniform spline into `<pxl-polyline>`; the plot reuses that code.
 
 ## 8. Layer FPS Throttling (`maxfps`), Stage-Level `<pxl-var>` & Performance Monitor
-- **Status**: 🟡 **Proposed** — needs a dedicated, in-depth session
-- **References** (two overlapping plans, to be merged in that session):
-  - `design/2026-09-14_stage_variables_and_layer_throttling_plan.md` — stage-level `<pxl-var>` **and** `maxfps`, per-layer metrics.
-  - `design/2026-09-14_layer_throttling_plan.md` (revised 2026-09-15) — `maxfps` only, more detailed (stage gate, baton relay, keep-alive timer, cross-layer variables, frame counting).
-- **Layer throttling**: a `maxfps` attribute on `<pxl-layer>` throttles secondary layers (e.g. background effects to 24 FPS, clocks to 1 FPS); per-layer profiling telemetry (`layer.fps`, `layer.renderAvg`).
-- **Stage-level `<pxl-var>`**: a `<pxl-var>` directly under `<pxl-stage>` is never evaluated today (only layers render their children). The stage would register its direct `<pxl-var>` children and evaluate animated ones before the layer loop, so no empty `<pxl-layer>` (and canvas) is needed just to hold variables. Could be split off as its own topic.
-- **Performance monitor** (found 2026-10-15, confirmed in the code 2026-11-05): values freeze on idle pages instead of dropping to `0`, because `pxl.perf.publish()` only runs inside `stage.render()`; and `fps` counts "frames since the last publish" rather than per second. Details and a possible fix in `design/2026-09-14_layer_throttling_plan.md` → Performance Metrics → "Known Issue: Monitor Freezes When Idle".
+- **Status**: 🟡 **Proposed** (2026-11-12, the two plans of 2026-09-14 merged; decisions D1–D9 open; D9: build `maxfps` after the two-phase frame, §29)
+- **Reference**: `design/2026-11-12_layer_throttling_plan.md` (replaces the two plans of 2026-09-14, now in `design/archive/`)
+- **Layer throttling** (plan Part A): a `maxfps` attribute on `<pxl-layer>` throttles secondary layers (e.g. background effects to 12 FPS, clocks to 1 FPS); the gate lives in `Layer.render()`, a skipped layer comes back via rAF (short wait) or a one-shot timer (long wait).
+- **Stage-level `<pxl-var>`** (plan Part B): a `<pxl-var>` in the stage but outside any layer never evaluates `t` today. The stage would evaluate its variables before the layer loop, so no empty `<pxl-layer>` (and canvas) is needed just to hold shared animated state. Can ship on its own.
+- **Performance monitor** (plan Part C; bug found 2026-10-15, confirmed in the code 2026-11-05): values freeze on idle pages instead of dropping to `0`, because `pxl.perf.publish()` only runs inside `stage.render()`; and `fps` counts "frames since the last publish" rather than per second. Fix: a 1-second timer in `pxl.perf`. Also frame counting (only frames in which a layer drew) and per-layer metrics (`ref.<layerId>.fps`, `.renderAvg`, `.renderMax`).
 
 ## 9. Raster Bitmaps & Complex SVG Graphics (`<pxl-image>`)
 - **Status**: 💬 **Discussion** (no plan yet)
@@ -113,7 +111,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 ## 20. Shape Authoring (Derived Attributes, Class Fields, Custom Animation)
 - **Status**: 🟡 **Proposed** (2026-10-17, no code changes yet)
 - **Reference**: `design/2026-10-17_shape_authoring_plan.md`
-- **Goal**: writing a shape (built-in or user-made, e.g. a separate `star.js` with `class Star extends Shape`) needs only `static defaults`, `draw(ctx, u)` and `getBoundingBox()`. A prototype Star already works with today's engine.
+- **Goal**: writing a shape (built-in or user-made, e.g. a separate `star.js` with `class Star extends pxl.Shape`) needs only `static defaults`, `draw(ctx, u)` and `getBoundingBox()`. A prototype Star already works with today's engine.
 - **Changes**: derive `observedAttributes` from `static defaults` (event handlers appended by `Shape`, `isHovered` / `isPressed` moved out of defaults, Polyline `points: ''`, lowercase-key warning); class fields instead of constructors (except Layer); `draw(ctx, u)` without `t` (hit testing calls `draw()` with `t = 0`).
 - **Custom animation (note)**: time belongs in attribute expressions. Pattern A: `spin="t * 180"` in the HTML. Pattern B: internal animated value via `pxl.compileAttribute` (internal API, a public helper like `this.animate()` later).
 - **Ready for custom shapes** (2026-11-07, `design/2026-11-07_safe_shape_render_plan.md`): every shape draws in its own canvas state and errors are caught, so a careless or failing custom shape can't fade or break the rest of the layer. A custom shape that draws arrowheads must call `drawArrows()` last.
@@ -149,15 +147,11 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Open**: name (`space` / `frame`), origin (drawing origin / pivot), scope (shapes and groups / also layers), hidden target.
 
 ## 29. Two-Phase Frame: Evaluate Everything, Then Draw
-- **Status**: 💬 **Discussion** (idea 2026-10-30, no plan yet)
-- **Problem**: a frame is one walk in DOM order; each element evaluates its animated values inside `render()` (`evaluateAnimations`) and then draws. A reader drawn before its target (toLocal, `space`, plain `ref.*`) sees the target's values from the previous frame: a one-frame lag. Today's rule avoids it: put readers in a layer after their targets.
-- **Idea**: split the frame into an update phase (the stage runs `evaluateAnimations` for every element of every layer; reactive refs and toLocal readers settle through the existing broadcasts) and a draw phase (every layer draws with this frame's values). Removes the lag whatever the DOM order. Each value is still evaluated once; the cost is a second walk over the elements.
-- **Open**: measure the extra walk (benchmark presets, docs pages); layers whose only animated attributes are compositing skip drawing today (CSS fast path in `Layer.render()`), the update phase must keep that; static layers must stay idle (0 FPS); order of broadcasts during the update phase.
-- **Chains of readers** (tested 2026-11-02, `scratch/draw_order_chain_check.html` (not kept)): reactive readers (`ref.*` / toLocal without `t`) settle through broadcasts, so the update phase fixes chains of any length in any order. Readers whose expression also uses `t` don't subscribe to refs (`pxl.compileAttribute`, `js/engine.js`); they read their source only at their turn in the update phase, so each one before its source in the DOM still adds one frame (today: C reads B reads A in the order C, B, A lags 2 frames). Options: let time-dependent expressions with refs subscribe as well (re-evaluated on the broadcast, a second evaluation for those few), or sort by dependencies before the update phase (needs a rule for cycles).
-- **Hidden subtrees** (measured 2026-11-07, `design/2026-11-07_safe_shape_render_plan.md` §5.1): a hidden shape is still evaluated, so `ref.*` to it stays current. Inside a hidden group or layer, values that follow `t` freeze (a `<pxl-var>` too); values that follow other refs keep updating through broadcasts. Should the update phase evaluate hidden subtrees? Doing it every frame would keep a page with a hidden animated panel running at 60 fps for values nobody sees. Middle way: evaluate a hidden subtree only when something outside reads it (`pxl._subscriptions` already knows the readers).
-- **Docs when solved**: delete section 7 "Draw Order" of `docs/mapping.html` (and renumber the sections after it), and drop the draw-order rule from KILOPIXEL.md Coordinate Mapping and the AI guide.
-- **Related**: not fixed by always save / restore (`design/2026-11-07_safe_shape_render_plan.md`), which isolates canvas *state*, not *values*; the same render path, though. `design/2026-10-30_space_attribute_plan.md` §3.5, KILOPIXEL.md Coordinate Mapping, "Draw order (one-frame lag)".
-
+- **Status**: 💬 **Discussion** (idea 2026-10-30; plan started 2026-11-12, measurements open)
+- **Reference**: `design/2026-11-12_two_phase_frame_plan.md` (hub: the plans that depend on it and what changes for each in §6, suggested order in §7)
+- **Idea**: split the frame into an update phase (evaluate every element) and a draw phase. Removes the one-frame lag of readers drawn before their targets (toLocal, `space`, `ref.*`), and allows change-based dirty flags: a layer redraws only when a value really changed (a `floor(t)` clock redraws once per second, a finished `clamp()` animation stops redrawing), and the stage, not the drawing, keeps the loop alive.
+- **Open**: cost of the second walk (measure first), hidden subtrees, readers that use `t` and refs, order of broadcasts; plan §4.
+- **Steps**: (1) only split evaluation from drawing (fixes the lag for broadcast readers, doubles as the measurement), (2) change-based dirty flags and keep-alive in the stage, (3) stage-level variables, `t` readers, hidden subtrees, (4) the dependent plans; plan §7.2.
 ## 30. Framework Compatibility (DOM Contract)
 - **Status**: 🟡 **Proposed** (2026-11-10, D1 and D4 decided)
 - **Reference**: `design/2026-10-30_framework_compatibility_plan.md`; prototype `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4, 2026-11-10); the React 19 / Vue 3.5 components with `FINDINGS.md` (2026-10-30) in the same folder

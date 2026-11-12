@@ -79,17 +79,17 @@ graph TD
 ```
 Stage.requestRender() → requestAnimationFrame → Stage.render(t)
   ├─ Sort layers by DOM position (if dirty)
-  ├─ For each layer (if isDirty):
+  ├─ For each layer (if isDirty || isAnimated):
   │   ├─ evaluateAnimations(t)  → update attributeValues, broadcast ref.*
-  │   ├─ ctx.clearRect()
-  │   ├─ Heartbeat: if animated → self.invalidate() (keeps rAF alive)
-  │   ├─ ctx.save() + applyContextState(translate→rotate→scale→skew→offset)
+  │   ├─ ctx.clearRect(), isDirty = false
+  │   ├─ ctx.save() + applyTransformState(translate→rotate→scale→skew→offset)
   │   ├─ For each child (group/shape):
-  │   │   ├─ evaluateAnimations(t)
+  │   │   ├─ evaluateAnimations(t)  → if animated: parentLayer.invalidate() (isDirty again, next rAF)
   │   │   ├─ ctx.save() + applyContextState()
   │   │   ├─ shape.draw(ctx, u, t) → _buildPath + applyStyle
   │   │   └─ ctx.restore()
-  │   └─ ctx.restore()
+  │   ├─ ctx.restore()
+  │   └─ Heartbeat: if the layer's own attributes are animated → stage.requestRender()
   ├─ Performance metrics accumulation
   ├─ interaction.process()  → hit testing, state updates, event dispatch
   └─ pxl.perf.publish()  (every 1 second)
@@ -843,7 +843,7 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 - `unit = clientWidth / 1000`
 - **Built-in `IntersectionObserver`**: Automatically pauses requestAnimationFrame loops when the stage is scrolled out of the viewport (or out of an overflow scroll container like a carousel), and resumes rendering immediately upon re-entry. Can be overridden with `alwaysrender="true"`.
 - Manages its `_layers` array, sorts by DOM position when dirty
-- Only renders dirty layers: `if (layer.isDirty) layer.render(u, t)`
+- Only renders dirty or animated layers: `if (layer.isDirty || layer.isAnimated) layer.render(u, t)`
 - Delegates all pointer events to its `InteractionEngine`
 - Registers with `pxl.perf` for telemetry
 - Supports multiple independent stages per page
@@ -871,13 +871,13 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 ### Key Behavior
 
 - Each layer creates its own `<canvas>` element, absolutely positioned over the stage
-- `isDirty` flag controls whether the layer re-renders
+- `isDirty` flag (or the layer's own animated attributes, `isAnimated`) controls whether the layer re-renders
 - `_isCanvasEmpty` tracks whether the canvas was just cleared (optimization for hidden layers)
 - `invalidate()` sets `isDirty = true` and calls `stage.requestRender()`
 - Hidden optimization: if `hidden` (checked against `attributeExpressions`) AND `_isCanvasEmpty`, `invalidate()` returns early without scheduling rAF
 - Layer compositing uses **CSS DOM properties** (`canvas.style.opacity`, `canvas.style.mixBlendMode`, `canvas.style.filter`) — not Canvas context state. The `'source-over'` blend mode maps to CSS `'normal'`.
 - Layer transforms use `pxl.applyTransformState()` (spatial only), NOT `pxl.applyContextState()` (which adds compositing). This enforces the dual architecture.
-- **CSS-Only Fast Path**: When all of a layer's animated attributes are compositing properties (`alpha`, `blend`, `filter`; not transforms, not `hidden`) and the layer isn't dirty (nothing inside it is animated or changed), the layer skips canvas clearing and child re-rendering entirely — it only updates CSS DOM properties and requests the next frame. This works because a layer, which is its own `parentLayer` (`closest('pxl-layer')` includes the element), doesn't invalidate itself in `evaluateAnimations()`; a layer's own `setAttribute()` still invalidates it.
+- **CSS-Only Fast Path**: When all of a layer's animated attributes are compositing properties (`alpha`, `blend`, `filter`; not transforms, not `hidden`) and the layer isn't dirty (nothing inside it is animated or changed), the layer skips canvas clearing and child re-rendering entirely — it only updates CSS DOM properties and requests the next frame. This works because a layer, which is its own `parentLayer` (`closest('pxl-layer')` includes the element), doesn't invalidate itself in `evaluateAnimations()`; a layer's own `setAttribute()` still invalidates it (fixed 2026-11-12, `design/2026-11-12_two_phase_frame_plan.md` §7.1).
 - **Heartbeat**: animated layers call `this.stage?.requestRender()` at the end of `render()` (deliberately without setting `isDirty`, enabling the CSS-Only Fast Path)
 - Children (groups and shapes) sorted by DOM position when `_isOrderDirty`
 - `resize(w, h, dpr)` — called by stage, resizes canvas to physical pixels, scales context by DPR
@@ -1423,7 +1423,8 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 
 ```
 1. Something triggers stage.requestRender()
-   ├─ An animated layer self-invalidates (heartbeat)
+   ├─ An animated element invalidates its layer while it is drawn (heartbeat)
+   ├─ An animated layer requests the next frame at the end of its render (heartbeat)
    ├─ A pointer event fires
    ├─ A reactive variable broadcasts
    └─ A DOM attribute changes
@@ -1434,20 +1435,24 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 3. stage.render(t):
    ├─ Record performance: start = performance.now()
    ├─ Sort layers by DOM position (if _isOrderDirty)
-   ├─ For each layer where isDirty:
+   ├─ For each layer where isDirty || isAnimated:
    │   └─ layer.render(u, t)
    │       ├─ Sort children by DOM position (if _isOrderDirty)
-   │       ├─ layer.evaluateAnimations(t)  ← evaluate layer's own animations
+   │       ├─ layer.evaluateAnimations(t)  ← evaluate layer's own animations (error: reportError, keep old pixels, return)
+   │       ├─ update CSS compositing (opacity, mix-blend-mode, filter) if changed
+   │       ├─ CSS-only fast path: only compositing animated (no transform, no hidden) and not dirty → heartbeat, return
    │       ├─ ctx.clearRect(full canvas)
    │       ├─ layer.isDirty = false
-   │       ├─ HEARTBEAT: if layer.isAnimated → layer.invalidate()
-   │       ├─ if hidden: mark canvas empty, return
-   │       ├─ if has transforms: ctx.save() + applyContextState()
+   │       ├─ if hidden: mark canvas empty, heartbeat, return
+   │       ├─ if has transforms: ctx.save() + applyTransformState()
    │       ├─ For each child:
    │       │   └─ child.render(ctx, u, t)  ← group or shape
-   │       │       ├─ group: evaluateAnimations → recurse children
+   │       │       ├─ group: evaluateAnimations → (hidden: stop) → recurse children
    │       │       └─ shape: evaluateAnimations → (hidden: stop) → save → applyContextState → draw() → restore
-   │       └─ if has transforms: ctx.restore()
+   │       │           (an animated element's evaluateAnimations ends with parentLayer.invalidate():
+   │       │            isDirty = true again and the next rAF is requested)
+   │       ├─ if has transforms: ctx.restore()
+   │       └─ HEARTBEAT: if layer.isAnimated → stage.requestRender()  (without isDirty)
    ├─ Record performance: ms = performance.now() - start
    ├─ interaction.process()  ← hit testing and event dispatch
    └─ pxl.perf.publish()  (if >= 1 second since last publish)
@@ -1455,9 +1460,11 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 
 ### Dirty-Flag Optimization
 
-- Only layers with `isDirty === true` re-render
+- Only layers with `isDirty === true` or animated attributes of their own (`isAnimated`) re-render
 - Static layers (no animated attributes, no animated children) pay zero per-frame cost
-- The heartbeat pattern: animated layers call `invalidate()` during render, which sets `isDirty = true` and schedules another rAF — but only if they have animated attributes
+- The heartbeat has two callers:
+  - an animated **element** (group, shape, variable; not a layer, which is its own `parentLayer`) ends `evaluateAnimations()` with `parentLayer.invalidate()`. The layer set `isDirty = false` before drawing its children, so it is dirty again after the frame and the next rAF is scheduled.
+  - an animated **layer** (its own attributes, `isAnimated`) calls `stage.requestRender()` at the end of `render()`, without setting `isDirty`. So a layer whose only animated attributes are compositing stays on the CSS-only fast path and doesn't redraw its canvas.
 - Hidden + empty canvas: if a layer is `hidden` and its canvas was already cleared, `invalidate()` returns early without scheduling rAF
 
 ### Hidden Elements and Evaluation

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CSS-Only Fast Path Check</title>
+  <!-- design/2026-11-12_two_phase_frame_plan.md §7.1. Open via the dev server: /design/prototypes/2026-11-12_two_phase_frame/css_fast_path.html -->
+  <script src="/dist/pxl.js"></script>
+</head>
+<body>
+  <!-- The layer's only animated attribute is alpha: the CSS-only fast path in Layer.render() should skip clearing and redrawing -->
+  <pxl-stage id="main" ratio="2" alwaysrender>
+    <pxl-layer id="fade" alpha="0.5 + wave(2) * 0.5">
+      <pxl-circle x="500" y="250" r="150" fill="#38bdf8"></pxl-circle>
+    </pxl-layer>
+  </pxl-stage>
+  <pre id="out">measuring…</pre>
+  <script>
+    // Frames are driven by hand with stage.render(t), so the result doesn't depend on rAF
+    // (a hidden tab or browser pane runs no rAF). Counts canvas clears of the layer in 10 frames.
+    window.addEventListener('load', () => {
+      const stage = document.getElementById('main');
+      const layer = document.getElementById('fade');
+      const clearRect = CanvasRenderingContext2D.prototype.clearRect;
+      let clears = 0;
+      layer._ctx.clearRect = function(...args) {
+        clears++;
+        return clearRect.apply(this, args);
+      };
+
+      // The first frame draws the layer once (it starts dirty); count the 10 frames after it
+      const measure = (t0) => {
+        stage.render(t0);
+        clears = 0;
+        for (let i = 1; i <= 10; i++) stage.render(t0 + i / 60);
+        return clears;
+      };
+
+      const today = measure(10);
+      // Experiment: the layer no longer invalidates itself in evaluateAnimations()
+      layer.parentLayer = null;
+      const withoutSelfInvalidate = measure(20);
+      layer.parentLayer = layer;
+
+      window.result = {
+        parentLayerIsSelf: layer.parentLayer === layer,
+        clearsIn10Frames: today,
+        clearsIn10FramesWithoutSelfInvalidate: withoutSelfInvalidate,
+        fastPathWorks: today === 0
+      };
+      document.getElementById('out').textContent = JSON.stringify(window.result, null, 2);
+    });
+  </script>
+</body>
+</html>

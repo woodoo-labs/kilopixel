@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (2026-10-30, no code changes yet)
 - **Date**: 2026-10-30
-- **Related**: `design/2026-10-29_tolocal_decomposition_plan.md` (§7 "Later idea", the clone rule this replaces for exact copies), `design/2026-10-25_refs_across_spaces_note.md` (hub for refs across spaces; §4 anchors), `design/2026-10-26_tolocal_fix_plan.md` (reactivity walk), `design/2026-11-07_safe_shape_render_plan.md` (same render path, §10)
+- **Related**: `design/2026-10-29_tolocal_decomposition_plan.md` (§7 "Later idea", the clone rule this replaces for exact copies), `design/2026-10-25_refs_across_spaces_note.md` (hub for refs across spaces; §4 anchors), `design/2026-10-26_tolocal_fix_plan.md` (reactivity walk), `design/2026-11-07_safe_shape_render_plan.md` (same render path, §10), `design/2026-11-12_two_phase_frame_plan.md` (💬; would remove the one-frame lag of §3.5 here)
 - **Target Implementation**: `js/elements/node.js` (`getParentMatrix`, `getGlobalMatrix`, space resolution), `js/graphics.js` (`applyTransformState`), `js/matrix.js` (`pxl.toLocal` uses the parent matrix), `js/elements/shape.js` and `group.js` (attribute, state check), `js/engine.js` (spatial key, reactivity); hit testing in `js/interaction.js` needs no change (§3.2)
 - **Demo**: `examples/test53.html` (the corner helpers become one attribute each)
 
@@ -120,7 +120,7 @@ ctx.transform(R0, R1, R2, R3, R4 · u, R5 · u)
 
 This goes into `pxl.applyTransformState` (an element with `spaceNode` applies R first, then its own state), so:
 
-- **Shapes and groups** get it through their existing `hasStateChanges` path (`space` set counts as a state change).
+- **Shapes** get it in `Shape.render()`, which always saves and applies the state; **groups** through their `hasStateChanges` check in `group.js` (`space` set counts as a state change).
 - **Hit testing** (`interaction.js`) rebuilds the transform by applying `applyTransformState` for every DOM ancestor and then the element, in the same order as rendering. R is relative to the DOM parent's matrix, which those ancestors put on the stack, so B's hit area matches what is drawn without a change in `interaction.js`. This also holds for children of a group with `space`.
 - **No DPR or canvas coupling:** R is relative to whatever the context holds, so the layer's DPR scale and the stage don't need to be known.
 - Uses the shared scratch matrices (`pxl._scratchMatrixA` / `B`): no allocations.
@@ -161,7 +161,7 @@ When `space` is evaluated:
 
 Like toLocal: if B's layer is drawn before A's layer and A animates, B uses A's matrix from the previous frame (A's animated values are evaluated when A's layer renders). The rule stays the same: put readers (here: elements with `space`) in a layer after their target. Within one layer, children render in DOM order, so B after A.
 
-A general fix (a two-phase frame: evaluate every element first, then draw) would remove this lag for `space`, toLocal and plain refs alike. It is a separate topic: `.agents/TODO.md` §29.
+A general fix (a two-phase frame: evaluate every element first, then draw) would remove this lag for `space`, toLocal and plain refs alike. It is a separate topic: `design/2026-11-12_two_phase_frame_plan.md` (TODO §29).
 
 ## 4. Performance and Allocations
 
