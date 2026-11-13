@@ -79,7 +79,7 @@ The stage knows after the update phase whether anything is animated and requests
 
 ### 3.4 Stage-level `<pxl-var>`
 
-A `<pxl-var>` outside any layer is never evaluated today (`design/2026-11-12_layer_throttling_plan.md` Part B). In the update phase it is simply evaluated first. Part B can still be built before this plan as a small step; it then moves into the update phase.
+Built 2026-11-13 (`design/2026-11-12_layer_throttling_plan.md` Part B): `Stage.render()` evaluates variables outside every layer before the layers. The update phase simply starts with them; their keep-alive in the stage is already what §3.3 proposes for everything.
 
 ### 3.5 `maxfps` becomes a pure draw gate
 
@@ -128,7 +128,7 @@ Plans whose per-frame design assumes today's single pass. Each has a pointer to 
 
 | TODO | Plan | What changes with a two-phase frame |
 |---|---|---|
-| §8 | `design/2026-11-12_layer_throttling_plan.md` | Part A: the keep-alive (§3.4) and the variable placement rule (§3.6) are workarounds for the single pass; the gate stays. Part B: becomes the start of the update phase. Part C: independent. Its D9 is the order |
+| §8 | `design/2026-11-12_layer_throttling_plan.md` | Part A: the keep-alive (§3.4) and the variable placement rule (§3.6) are workarounds for the single pass; the gate stays. Part B (built 2026-11-13): becomes the start of the update phase. Part C: independent. Its D9 is the order |
 | §3 | `design/2026-10-01_tween_animation_plan.md` | §7 (sleep when tweens finish) works through `isAnimated` and the layer heartbeat; with §3.3 the stage decides from the update phase, and change-based dirty flags stop redrawing a finished tween on their own |
 | §2 | `design/2026-09-29_pxl-clip_element_plan.md` | §6.1 `applyClip()` evaluates its children while drawing and §9 relies on the layer heartbeat; the clip's children must be evaluated in the update phase |
 | §28 | `design/2026-10-30_space_attribute_plan.md` | §3.5 "Draw Order" (one-frame lag, readers after targets) goes away |
@@ -144,7 +144,7 @@ Not affected: TODO §30 (`design/2026-10-30_framework_compatibility_plan.md`: it
 
 1. **Independent fixes, any time:** the monitor bug (throttling plan Part C1). The CSS-only fast path (§7.1) and the crash of reactive cycles that never settle (2026-11-13) are fixed.
 2. **This plan:** measure (§5), answer §4, then 🟡. Step 1 below can double as the measurement.
-3. **Build it in steps** (§7.2), including stage-level variables (or build throttling Part B first as a small step).
+3. **Build it in steps** (§7.2).
 4. **Update the dependent plans to the new model, then build them:** throttling Part A (much simpler), tween §7, `<pxl-clip>`, `space` (without §3.5).
 5. **Isolated compositing (TODO §31)** before or after item 3, not in parallel; `paintorder` after it.
 6. **Docs cleanup** (§8): already with step 1 of §7.2.
@@ -180,7 +180,7 @@ Step 1 doubles as the measurement of §5: the same bundle with one walk and with
 - **Which layers the update phase walks.** Today the per-frame `parentLayer.invalidate()` is what brings an animated layer back into the next frame; step 2 removes it. So the update phase needs a fact **per layer**, not only for the stage: "had animated content in the last walk", collected during the walk (allowed by §7.3: recomputed on every walk, and any added, removed or changed element invalidates the layer, which forces a walk). The update phase walks a layer when it has that fact, is dirty, or has animated attributes of its own. Without it the stage would either walk every layer in every frame (a static background with 5,000 shapes: 0.2 ms per frame for nothing, §5.1) or none, and the animation would stop.
 - **Optional, a micro-optimization: skip static subtrees.** With evaluation separate from drawing, the update phase only has to visit animated elements. The same fact on groups ("has animated descendants", collected the same way) lets it skip static groups. Saves about as much as the second walk costs (§5.1); only worth it for large static scenes.
 
-**Step 3: the open behavior questions.** Stage-level `<pxl-var>` (§3.4), readers that use `t` and refs (the dependency order, §3.1.1), hidden subtrees (§4, question 6).
+**Step 3: the open behavior questions.** Readers that use `t` and refs (the dependency order, §3.1.1), hidden subtrees (§4, question 6).
 
 **Step 4: the dependent plans** (§6; their order in item 4 of the list above).
 
@@ -194,7 +194,8 @@ Per step:
 
 - **Step 1:** safe. An added element marks its layer dirty, so the update phase evaluates it before it is drawn; sorting moves into the update phase (§7.2).
 - **Step 2:** the step where the rule matters most (§3.2, §3.3).
-- **Step 3:** a stage-level `<pxl-var>` moved from the stage into a layer, or back, leaves and joins the stage's list in `disconnectedCallback()` / `connectedCallback()` (throttling plan §4.2). Evaluating a hidden subtree only when something reads it (§4, question 6) uses the live `pxl._subscriptions`, so it follows readers added later.
+- **Stage-level variables** (built): one moved from the stage into a layer, or back, leaves and joins the stage's list in `disconnectedCallback()` / `connectedCallback()` (engine test "stage variables: moved into a layer or removed …").
+- **Step 3:** evaluating a hidden subtree only when something reads it (§4, question 6) uses the live `pxl._subscriptions`, so it follows readers added later.
 - **Throttling** (`design/2026-11-12_layer_throttling_plan.md` §3.3): a layer moved to another stage clears its timer on disconnect and resets its wait on connect; a shape moved into a throttled layer waits for that layer's next window, like any other change there.
 - **Copies** (`cloneNode()`): a copy is a new element and needs nothing special. Unrelated to this plan and unchanged: a copy keeps its `id`, so two elements share it and `ref.<id>` points to the one connected last.
 - **Elements added in an event handler:** hit testing and event dispatch run after drawing (`interaction.process()`), so such elements appear in the next frame, as today.

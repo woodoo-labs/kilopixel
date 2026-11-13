@@ -78,7 +78,8 @@ graph TD
 
 ```
 Stage.requestRender() → requestAnimationFrame → Stage.render(t)
-  ├─ Sort layers by DOM position (if dirty)
+  ├─ Sort layers and stage-level variables by DOM position (if dirty)
+  ├─ For each stage-level <pxl-var>: evaluateAnimations(t); if one is animated → stage.requestRender()
   ├─ For each layer (if isDirty || isAnimated):
   │   ├─ evaluateAnimations(t)  → update attributeValues, broadcast ref.*
   │   ├─ ctx.clearRect(), isDirty = false
@@ -1387,6 +1388,9 @@ Returns zeroed bounding box by default (grid is infinite). However, during draw,
 - Extends PxlNode directly (not Shape), so it has no visual output
 - Registers in `pxl.nodes` via its `id`, so other elements can read `ref.myVar.value`
 - Has a `render()` method that only calls `evaluateAnimations(t)` — this allows animated variables
+- **Inside a layer** it is evaluated by that layer, like a shape: frozen while the layer (or a group around it) is hidden.
+- **Stage-level** (inside a `<pxl-stage>`, outside every layer, at any depth): `connectedCallback()` registers it with `closest('pxl-stage')` (`registerVariable()`, stage field `_variables`, field `stage` on the variable), `disconnectedCallback()` unregisters it. `Stage.render()` evaluates these before the layers, in DOM order, so readers in every layer see this frame's value, whatever a layer's `hidden`. It has no layer heartbeat: the stage requests the next frame while one is animated, and `attributeChangedCallback()` requests a frame (a value that becomes animated starts the loop). A static stage variable keeps the page at 0 FPS. Design: `design/2026-11-12_layer_throttling_plan.md` Part B.
+- Outside every stage: static and reactive values work, `t` doesn't (nothing evaluates it).
 - The `value` attribute can be any expression: static, animated, or reactive
 - Bare `value` (`value=""`) is an empty string, not `0`, so a cleared text input bound to the variable gives `''`. Removed `value` → `0`
 
@@ -1430,6 +1434,7 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 1. Something triggers stage.requestRender()
    ├─ An animated element invalidates its layer while it is drawn (heartbeat)
    ├─ An animated layer requests the next frame at the end of its render (heartbeat)
+   ├─ An animated stage-level <pxl-var> (the stage requests the next frame after evaluating it)
    ├─ A pointer event fires
    ├─ A reactive variable broadcasts
    └─ A DOM attribute changes
@@ -1439,7 +1444,9 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 
 3. stage.render(t):
    ├─ Record performance: start = performance.now()
-   ├─ Sort layers by DOM position (if _isOrderDirty)
+   ├─ Sort layers and stage-level variables by DOM position (if _isOrderDirty)
+   ├─ For each stage-level <pxl-var>: variable.render(null, u, t)  ← before the layers, so readers in every
+   │   layer see this frame's value; if one is animated → stage.requestRender()
    ├─ For each layer where isDirty || isAnimated:
    │   └─ layer.render(u, t)
    │       ├─ Sort children by DOM position (if _isOrderDirty)
@@ -1475,7 +1482,7 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 ### Hidden Elements and Evaluation
 
 - A hidden **shape** still evaluates its animated values and only skips drawing, so `ref.*` to it stays current.
-- A hidden **group** or **layer** skips its children entirely: their values that follow `t` (also in a `<pxl-var>`) stay frozen while it is hidden. When it is shown again they are correct in the next frame, because expressions depend only on `t`. Readers outside see the frozen value meanwhile.
+- A hidden **group** or **layer** skips its children entirely: their values that follow `t` (also in a `<pxl-var>`) stay frozen while it is hidden (a stage-level `<pxl-var>`, outside every layer, is not affected). When it is shown again they are correct in the next frame, because expressions depend only on `t`. Readers outside see the frozen value meanwhile.
 - Values that follow other `ref.*` keep updating inside hidden groups and layers, because broadcasts don't go through drawing.
 - Measured 2026-11-07 (`design/2026-11-07_safe_shape_render_plan.md` §5.1). Whether a two-phase frame should evaluate hidden subtrees: TODO §29.
 

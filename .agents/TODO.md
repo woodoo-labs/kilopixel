@@ -55,11 +55,10 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Open**: `smooth` should use the uniform spline (closer to sampled curves than the polyline's centripetal one), or a high `steps` default without smoothing; see section 10 of the plan. Test case: walkthrough section 9, which then goes back to frequencies 1–10.
 - **Related**: §38 builds the uniform spline into `<pxl-polyline>`; the plot reuses that code.
 
-## 8. Layer FPS Throttling (`maxfps`), Stage-Level `<pxl-var>` & Performance Monitor
-- **Status**: 🟡 **Proposed** (2026-11-12, the two plans of 2026-09-14 merged; decisions D1–D9 open; D9: build `maxfps` after the two-phase frame, §29)
+## 8. Layer FPS Throttling (`maxfps`) & Performance Monitor
+- **Status**: 🟡 **Proposed** (2026-11-13, Part B built; decisions D1–D5, D7–D9 open; D9: build `maxfps` after the two-phase frame, §29)
 - **Reference**: `design/2026-11-12_layer_throttling_plan.md` (replaces the two plans of 2026-09-14, now in `design/archive/`)
 - **Layer throttling** (plan Part A): a `maxfps` attribute on `<pxl-layer>` throttles secondary layers (e.g. background effects to 12 FPS, clocks to 1 FPS); the gate lives in `Layer.render()`, a skipped layer comes back via rAF (short wait) or a one-shot timer (long wait).
-- **Stage-level `<pxl-var>`** (plan Part B): a `<pxl-var>` in the stage but outside any layer never evaluates `t` today. The stage would evaluate its variables before the layer loop, so no empty `<pxl-layer>` (and canvas) is needed just to hold shared animated state. Can ship on its own.
 - **Performance monitor** (plan Part C; bug found 2026-10-15, confirmed in the code 2026-11-05): values freeze on idle pages instead of dropping to `0`, because `pxl.perf.publish()` only runs inside `stage.render()`; and `fps` counts "frames since the last publish" rather than per second. Fix: a 1-second timer in `pxl.perf`. Also frame counting (only frames in which a layer drew) and per-layer metrics (`ref.<layerId>.fps`, `.renderAvg`, `.renderMax`).
 
 ## 9. Raster Bitmaps & Complex SVG Graphics (`<pxl-image>`)
@@ -151,7 +150,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Reference**: `design/2026-11-12_two_phase_frame_plan.md` (hub: the plans that depend on it and what changes for each in §6, suggested order in §7)
 - **Idea**: split the frame into an update phase (evaluate every element) and a draw phase. Removes the one-frame lag of readers drawn before their targets (toLocal, `space`, `ref.*`), and allows change-based dirty flags: a layer redraws only when a value really changed (a `floor(t)` clock redraws once per second, a finished `clamp()` animation stops redrawing), and the stage, not the drawing, keeps the loop alive.
 - **Open**: cost of the second walk (first measurement: about 0.02 ms per 1,000 elements, 1–2 % of a frame, plan §5.1), redraws saved, hidden subtrees, readers that use `t` and refs (dependency order with a cycle rule recommended, plan §3.1.1), order of broadcasts; plan §4.
-- **Steps**: (1) only split evaluation from drawing (fixes the lag for broadcast readers, doubles as the measurement), (2) change-based dirty flags and keep-alive in the stage, (3) stage-level variables, `t` readers, hidden subtrees, (4) the dependent plans; plan §7.2.
+- **Steps**: (1) only split evaluation from drawing (fixes the lag for broadcast readers, doubles as the measurement), (2) change-based dirty flags and keep-alive in the stage, (3) `t` readers, hidden subtrees, (4) the dependent plans; plan §7.2.
 ## 30. Framework Compatibility (DOM Contract)
 - **Status**: 🟡 **Proposed** (2026-11-10, D1 and D4 decided)
 - **Reference**: `design/2026-10-30_framework_compatibility_plan.md`; prototype `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4, 2026-11-10); the React 19 / Vue 3.5 components with `FINDINGS.md` (2026-10-30) in the same folder

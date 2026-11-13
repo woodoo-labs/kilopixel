@@ -743,6 +743,15 @@
     function srClear() {
       for (const id of ['srLayerA', 'srLayerB']) el(id).querySelectorAll(':scope > :not(canvas)').forEach((n) => n.remove());
       document.querySelectorAll('#srStage > pxl-layer:not(#srLayerA):not(#srLayerB)').forEach((n) => n.remove());
+      document.querySelectorAll('#srStage > pxl-var').forEach((n) => n.remove());
+    }
+    // Calls of the test stage's requestRender() while fn runs
+    function countRenderRequests(fn) {
+      const stage = el('srStage');
+      let calls = 0;
+      stage.requestRender = function() { calls++; };
+      try { fn(); } finally { delete stage.requestRender; }
+      return calls;
     }
     // console.warn calls while fn runs
     function captureWarnings(fn) {
@@ -1103,6 +1112,58 @@
       const expectedSum = 150 * 1000 + 150 * 151 / 2;
       if (el('rcSum').attributeValues.value !== expectedSum) throw new Error(`sum = ${el('rcSum').attributeValues.value}, expected ${expectedSum}`);
       if (warnings.length !== 0) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      srClear();
+    });
+
+    // --- Stage-level variables (design/2026-11-12_layer_throttling_plan.md Part B) ---
+
+    test('stage variables: an animated <pxl-var> outside every layer is evaluated, and readers in all layers see this frame\'s value', () => {
+      srClear();
+      // Readers come before the variable in the DOM: the stage still evaluates it first
+      srAdd('srLayerA', '<pxl-circle id="svReaderA" x="ref.svHue.value" y="50" r="5"></pxl-circle>');
+      srAdd('srLayerB', '<pxl-circle id="svReaderB" x="ref.svHue.value * 2" y="50" r="5"></pxl-circle>');
+      srAdd('srStage', '<pxl-var id="svHue" value="t * 10"></pxl-var>');
+      srRender(2);
+      const v = el('svHue').attributeValues.value, a = el('svReaderA').attributeValues.x, b = el('svReaderB').attributeValues.x;
+      if (v !== 20 || a !== 20 || b !== 40) throw new Error(`value ${v}, reader A ${a}, reader B ${b}`);
+      srClear();
+    });
+
+    test('stage variables: the stage asks for frames while one is animated, and for none when all are static (0 FPS)', () => {
+      srClear();
+      srAdd('srStage', '<pxl-var id="svLoop" value="t * 10"></pxl-var>');
+      const animated = countRenderRequests(() => srRender(3));
+      if (animated === 0) throw new Error('an animated stage variable did not ask for the next frame');
+      el('svLoop').setAttribute('value', '5');
+      const idle = countRenderRequests(() => srRender(4));
+      if (idle !== 0) throw new Error(`a static stage variable asked for ${idle} frames`);
+      srClear();
+    });
+
+    test('stage variables: setAttribute() that makes a static one animated starts the loop', () => {
+      srClear();
+      srAdd('srStage', '<pxl-var id="svStart" value="1"></pxl-var>');
+      srRender(1);
+      const calls = countRenderRequests(() => el('svStart').setAttribute('value', 't * 2'));
+      if (calls === 0) throw new Error('no frame requested');
+      srRender(5);
+      if (el('svStart').attributeValues.value !== 10) throw new Error(`value ${el('svStart').attributeValues.value}`);
+      srClear();
+    });
+
+    test('stage variables: moved into a layer or removed, the stage no longer evaluates it', () => {
+      srClear();
+      srAdd('srStage', '<pxl-var id="svMove" value="t"></pxl-var>');
+      const stage = el('srStage'), variable = el('svMove');
+      if (!stage._variables.includes(variable)) throw new Error('not registered with the stage');
+      el('srLayerA').appendChild(variable);
+      if (stage._variables.includes(variable) || variable.stage !== null) throw new Error('still registered after moving into a layer');
+      srRender(7);
+      if (variable.attributeValues.value !== 7) throw new Error(`the layer did not evaluate it: ${variable.attributeValues.value}`);
+      stage.appendChild(variable);
+      if (!stage._variables.includes(variable)) throw new Error('not registered after moving back');
+      variable.remove();
+      if (stage._variables.includes(variable)) throw new Error('still registered after remove()');
       srClear();
     });
 

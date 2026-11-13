@@ -876,7 +876,9 @@
           </pxl-layer>
         </pxl-stage>
       </div>
-      
+
+      <p>A variable can also sit directly in the stage, outside every layer. Shapes in all layers then read the same value, and an animated variable (<code>value="t * 36"</code>) keeps running when a layer is hidden.</p>
+
       <h2>8. Cross-Space Projection <code>toLocal()</code></h2>
       <p><code>toLocal()</code> maps a position from one coordinate space into another. A shape can follow a shape in a different layer, however that layer is moved, rotated or zoomed, without any trigonometry.</p>
       <ul>

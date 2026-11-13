@@ -58,7 +58,7 @@ Widths of 2 and 4 stay crisp on high-PPI screens and keep shapes visually above 
 
 A layer draws its children in DOM order, back to front:
 
-1. `<pxl-var>` elements (variables always live inside a layer; first by convention, the engine accepts them anywhere in it)
+1. `<pxl-var>` elements (first by convention, the engine accepts them anywhere in the layer; a variable shared by several layers goes directly in the stage, before the layers)
 2. `<pxl-grid>`
 3. Layer helpers (dashed lines and `x =` / `y =` labels to the layer center)
 4. Layer crosshairs and the Layer Center dot and label

@@ -7,6 +7,7 @@ pxl.Stage = class Stage extends HTMLElement {
   constructor() {
     super();
     this._layers = [];
+    this._variables = []; // stage-level <pxl-var>: inside the stage, outside every layer
     this._isOrderDirty = false;
     this._isUpdatePending = false;
     this._isSizePending = true;
@@ -92,6 +93,7 @@ pxl.Stage = class Stage extends HTMLElement {
     this._resizeObserver = null;
     this._isUpdatePending = false;
     this._layers = [];
+    this._variables = [];
 
     for (const type of pxl.Stage.POINTER_EVENTS) this.removeEventListener(type, this.interaction);
     pxl.perf.unregisterStage(this);
@@ -127,6 +129,17 @@ pxl.Stage = class Stage extends HTMLElement {
     this.requestRender();
   }
 
+  registerVariable(variable) {
+    if (this._variables.includes(variable)) return;
+    this._variables.push(variable);
+    this._isOrderDirty = true;
+    this.requestRender();
+  }
+
+  unregisterVariable(variable) {
+    pxl.removeFromArray(this._variables, variable);
+  }
+
   resize() {
     const w = this.clientWidth;
     const h = this.clientHeight;
@@ -160,8 +173,19 @@ pxl.Stage = class Stage extends HTMLElement {
 
     if (this._isOrderDirty) {
       this._layers.sort(pxl.sortByDOMPosition);
+      this._variables.sort(pxl.sortByDOMPosition);
       this._isOrderDirty = false;
     }
+
+    // Stage-level variables first, so readers in every layer see this frame's value.
+    // They have no layer heartbeat: the stage keeps the loop running while one is animated.
+    let isVariableAnimated = false;
+    for (let i = 0; i < this._variables.length; i++) {
+      const variable = this._variables[i];
+      variable.render(null, this.unit, t);
+      if (variable.isAnimated) isVariableAnimated = true;
+    }
+    if (isVariableAnimated) this.requestRender();
 
     for (let i = 0; i < this._layers.length; i++) {
       const layer = this._layers[i];
