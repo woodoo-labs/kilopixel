@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Propagation cost bench</title>
+<script src="/dist/pxl.js"></script>
+<style>body { font: 14px monospace; } pre { white-space: pre-wrap; }</style>
+</head>
+<body>
+<pxl-stage id="st" width="200" height="100"><pxl-layer id="lay"></pxl-layer></pxl-stage>
+<pre id="out">running… call run()</pre>
+<script>
+// ===== Part A: today's engine, one <pxl-var> read by N shapes (fan-out of depth 1, the common hot path)
+function buildEngine(n) {
+  const lay = document.getElementById('lay');
+  lay.innerHTML = '';
+  let html = '<pxl-var id="v" value="1"></pxl-var>';
+  for (let i = 0; i < n; i++) html += `<pxl-circle x="ref.v.value + ${i}" y="50" radius="2"></pxl-circle>`;
+  lay.innerHTML = html;
+}
+function timeEngine(n, reps) {
+  buildEngine(n);
+  const vals = pxl.nodes.v;
+  for (let k = 0; k < 200; k++) { vals.value = k; pxl.broadcast('ref.v'); }
+  const t0 = performance.now();
+  for (let k = 0; k < reps; k++) { vals.value = k + 1000; pxl.broadcast('ref.v'); }
+  return (performance.now() - t0) / reps;
+}
+
+// ===== Part B: the two algorithms on plain objects (same graph, cheap evaluation)
+function node(i) { return { i, readers: [], sources: [], value: 0, rank: 0, inList: 0, changed: 0, leafReaders: true, evals: 0 }; }
+function link(src, rd) { src.readers.push(rd); rd.sources.push(src); }
+function evalNode(m) { m.evals++; let s = 1; const src = m.sources; for (let i = 0; i < src.length; i++) s += src[i].value; return s; }
+
+function graph(kind, n) {
+  const g = [];
+  if (kind === 'fanout') {
+    g.push(node(0));
+    for (let i = 1; i <= n; i++) { g.push(node(i)); link(g[0], g[i]); }
+  } else if (kind === 'chain') {
+    g.push(node(0));
+    for (let i = 1; i <= n; i++) { g.push(node(i)); link(g[i - 1], g[i]); }
+  } else if (kind === 'diamonds') {
+    let d = node(0); g.push(d);
+    for (let k = 0; k < n; k++) {
+      const l = node(g.length); g.push(l); link(d, l);
+      const r = node(g.length); g.push(r); link(d, r);
+      const nd = node(g.length); g.push(nd); link(l, nd); link(r, nd);
+      d = nd;
+    }
+  }
+  // Rank: longest path from a source (Kahn), done once like the plan's rebuild
+  const indeg = g.map(x => x.sources.length), queue = g.filter(x => x.sources.length === 0);
+  while (queue.length) { const x = queue.shift(); for (const r of x.readers) { r.rank = Math.max(r.rank, x.rank + 1); if (--indeg[r.i] === 0) queue.push(r); } }
+  for (const x of g) x.leafReaders = x.readers.every(r => r.readers.length === 0);
+  return g;
+}
+
+// Today: recursive, depth first, once per path
+function bcRecursive(n) {
+  const r = n.readers;
+  for (let i = r.length - 1; i >= 0; i--) {
+    const m = r[i];
+    const v = evalNode(m);
+    if (v !== m.value) { m.value = v; bcRecursive(m); }
+  }
+}
+
+// Plan: work list (binary heap by rank, pre-allocated), stamps, outermost call runs the loop
+const heap = new Array(4096);
+let heapSize = 0, prop = 0, running = false;
+function heapPush(m) {
+  let i = heapSize++;
+  while (i > 0) { const p = (i - 1) >> 1; if (heap[p].rank <= m.rank) break; heap[i] = heap[p]; i = p; }
+  heap[i] = m;
+}
+function heapPop() {
+  const top = heap[0], last = heap[--heapSize];
+  let i = 0;
+  for (;;) {
+    let c = 2 * i + 1; if (c >= heapSize) break;
+    if (c + 1 < heapSize && heap[c + 1].rank < heap[c].rank) c++;
+    if (heap[c].rank >= last.rank) break;
+    heap[i] = heap[c]; i = c;
+  }
+  heap[i] = last; heap[heapSize] = undefined;
+  return top;
+}
+function pushReaders(n) {
+  const r = n.readers;
+  for (let i = 0; i < r.length; i++) { const m = r[i]; if (m.inList !== prop) { m.inList = prop; heapPush(m); } }
+}
+function bcWorkList(n, fastPath) {
+  if (!running && fastPath && n.leafReaders) {
+    // Nobody reads the readers: a plain loop as today
+    const r = n.readers;
+    for (let i = r.length - 1; i >= 0; i--) { const m = r[i]; const v = evalNode(m); if (v !== m.value) m.value = v; }
+    return;
+  }
+  if (!running) prop++;
+  n.changed = prop;
+  pushReaders(n);
+  if (running) return;
+  running = true;
+  while (heapSize > 0) {
+    const m = heapPop();
+    const v = evalNode(m);
+    if (v !== m.value) { m.value = v; m.changed = prop; pushReaders(m); }
+  }
+  running = false;
+}
+
+// Alternative: no persistent graph. Pass 1 marks the affected readers and counts their affected inputs,
+// pass 2 evaluates in topological order of that subgraph (Kahn). Readers left with pending > 0 are cycles.
+const stack = new Array(4096), ready = new Array(4096);
+function bcCount(n) {
+  prop++;
+  let sp = 0;
+  stack[sp++] = n; n.inList = prop;
+  while (sp > 0) {
+    const x = stack[--sp], r = x.readers;
+    for (let i = 0; i < r.length; i++) {
+      const m = r[i];
+      if (m.inList !== prop) { m.inList = prop; m.pending = 0; m.changed = 0; stack[sp++] = m; }
+      m.pending++;
+    }
+  }
+  let head = 0, tail = 0;
+  let r = n.readers;
+  for (let i = 0; i < r.length; i++) { const m = r[i]; m.changed = prop; if (--m.pending === 0) ready[tail++] = m; }
+  while (head < tail) {
+    const m = ready[head++];
+    let ch = false;
+    if (m.changed === prop) { const v = evalNode(m); if (v !== m.value) { m.value = v; ch = true; } }
+    r = m.readers;
+    for (let i = 0; i < r.length; i++) { const k = r[i]; if (ch) k.changed = prop; if (--k.pending === 0) ready[tail++] = k; }
+  }
+}
+
+function timeMock(kind, n, algo, reps) {
+  const g = graph(kind, n), src = g[0];
+  for (const x of g) { x.pending = 0; }
+  const run = algo === 'today' ? () => bcRecursive(src) : algo === 'heap' ? () => bcWorkList(src, false)
+    : algo === 'count' ? () => bcCount(src) : () => bcWorkList(src, true);
+  for (let k = 0; k < 200; k++) { src.value++; run(); }
+  for (const x of g) x.evals = 0;
+  const t0 = performance.now();
+  for (let k = 0; k < reps; k++) { src.value++; run(); }
+  const ms = (performance.now() - t0) / reps;
+  const evals = g.reduce((s, x) => s + x.evals, 0) / reps;
+  return { ms, evals, end: g[g.length - 1].value };
+}
+
+function fmt(ms) { return ms < 0.01 ? (ms * 1000).toFixed(2) + ' µs' : ms.toFixed(3) + ' ms'; }
+
+function run() {
+  const lines = [];
+  lines.push('A) Engine today, pxl.broadcast("ref.v") with N circles reading it (per broadcast):');
+  for (const n of [10, 100, 1000]) {
+    const ms = timeEngine(n, n >= 1000 ? 500 : 3000);
+    lines.push(`   N=${n}: ${fmt(ms)}  = ${(ms * 1e6 / n).toFixed(0)} ns per reader`);
+  }
+  lines.push('');
+  lines.push('B) Algorithms on plain objects (per broadcast; evals = readers evaluated):');
+  const cases = [['fanout', 10], ['fanout', 100], ['fanout', 1000], ['chain', 150], ['diamonds', 10], ['diamonds', 14]];
+  for (const [kind, n] of cases) {
+    const reps = kind === 'diamonds' ? 50 : 3000;
+    for (const algo of ['today', 'heap', 'heap+fast', 'count']) {
+      const r = timeMock(kind, n, algo, reps);
+      lines.push(`   ${(kind + ' ' + n).padEnd(13)} ${algo.padEnd(10)} ${fmt(r.ms).padStart(10)}  evals ${String(r.evals).padStart(6)}  ${(r.ms * 1e6 / r.evals).toFixed(0)} ns/eval`);
+    }
+  }
+  document.getElementById('out').textContent = lines.join('\n');
+  return lines.join('\n');
+}
+setTimeout(run, 300);
+</script>
+</body>
+</html>

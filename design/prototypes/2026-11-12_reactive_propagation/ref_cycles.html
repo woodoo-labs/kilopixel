@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reference cycles today</title>
+  <script src="/dist/pxl.js"></script>
+  <style>body { margin: 16px; font-family: sans-serif; width: 800px; } pxl-stage { width: 800px; }</style>
+</head>
+<body>
+<pre id="out">running…</pre>
+<pxl-stage id="main" ratio="2 / 1">
+  <pxl-layer id="lay">
+    <!-- 1. Reactive cycle that settles: b = a, a = b -->
+    <pxl-var id="a1" value="5"></pxl-var>
+    <pxl-var id="b1" value="ref.a1.value"></pxl-var>
+    <!-- 2. Reactive cycle that never settles: each adds 1 -->
+    <pxl-var id="a2" value="0"></pxl-var>
+    <pxl-var id="b2" value="ref.a2.value + 1"></pxl-var>
+    <!-- 3. Self-reference with t ("follow" smoothing): reads its own previous value -->
+    <pxl-var id="f" value="ref.f.value + (100 - ref.f.value) * 0.1 + t * 0"></pxl-var>
+    <!-- 4. Animated chain in the "wrong" DOM order: c reads b reads a, all with t -->
+    <pxl-var id="c4" value="ref.b4.value + t * 0"></pxl-var>
+    <pxl-var id="b4" value="ref.a4.value + t * 0"></pxl-var>
+    <pxl-var id="a4" value="floor(t * 60)"></pxl-var>
+  </pxl-layer>
+</pxl-stage>
+<script>
+  const out = document.getElementById('out'), log = [];
+  const errors = [];
+  addEventListener('error', e => errors.push(e.message));
+  const stage = document.getElementById('main');
+  const v = id => pxl.nodes[id].value;
+
+  window.run = function() {
+    // 1 and 2: close the cycles with setAttribute, the way a page would
+    let r1, r2;
+    try { document.getElementById('a1').setAttribute('value', 'ref.b1.value'); r1 = { a1: v('a1'), b1: v('b1') }; }
+    catch (e) { r1 = String(e); }
+    try { document.getElementById('a2').setAttribute('value', 'ref.b2.value + 1'); r2 = { a2: v('a2'), b2: v('b2') }; }
+    catch (e) { r2 = String(e).slice(0, 80); }
+
+    // 3 and 4: drive frames by hand
+    const t0 = 10; let t = t0, f = [], lag = [];
+    for (let i = 0; i < 5; i++) {
+      stage._layers.forEach(l => l.invalidate());
+      stage.render(t);
+      f.push(+v('f').toFixed(2));
+      lag.push({ a: v('a4'), b: v('b4'), c: v('c4') });
+      t += 1 / 60;
+    }
+    return { reactiveSettles: r1, reactiveDiverges: r2, followSelf: f, animatedChainWrongOrder: lag, errors };
+  };
+  setTimeout(() => { out.textContent = JSON.stringify(run(), null, 1); }, 500);
+</script>
+</body>
+</html>

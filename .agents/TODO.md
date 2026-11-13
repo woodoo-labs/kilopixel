@@ -3,7 +3,7 @@
 Open work only. Done items are removed: the plan's status line, `.agents/KILOPIXEL.md` and git history keep the record.
 
 - **Status words** (same as in the plans): 💬 **Discussion** (ideas, nothing decided) · 🟡 **Proposed** (complete plan, waiting for a decision) · 🟢 **Decided** (agreed, not built yet). Plans also use ✅ **Implemented**, ⚪ **Superseded by** `<file>` and ⚪ **Dropped** (decided not to do it); those have no TODO item.
-- **Numbers are stable:** other files refer to items as "TODO §29". A removed item leaves a gap; a new item gets the next free number (next: §39).
+- **Numbers are stable:** other files refer to items as "TODO §29". A removed item leaves a gap; a new item gets the next free number (next: §40).
 - **Plans:** `design/`; superseded, dropped and outdated plans are in `design/archive/`. Workflow: `.claude/CLAUDE.md` → "Plans and TODO". Check: `node tools/check_plans.js`.
 
 ## 1. Native SVG Path2D & Vector Sprites (`<pxl-path>`)
@@ -150,7 +150,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Status**: 💬 **Discussion** (idea 2026-10-30; plan started 2026-11-12, measurements open)
 - **Reference**: `design/2026-11-12_two_phase_frame_plan.md` (hub: the plans that depend on it and what changes for each in §6, suggested order in §7)
 - **Idea**: split the frame into an update phase (evaluate every element) and a draw phase. Removes the one-frame lag of readers drawn before their targets (toLocal, `space`, `ref.*`), and allows change-based dirty flags: a layer redraws only when a value really changed (a `floor(t)` clock redraws once per second, a finished `clamp()` animation stops redrawing), and the stage, not the drawing, keeps the loop alive.
-- **Open**: cost of the second walk (measure first), hidden subtrees, readers that use `t` and refs, order of broadcasts; plan §4.
+- **Open**: cost of the second walk (first measurement: about 0.02 ms per 1,000 elements, 1–2 % of a frame, plan §5.1), redraws saved, hidden subtrees, readers that use `t` and refs (dependency order with a cycle rule recommended, plan §3.1.1), order of broadcasts; plan §4.
 - **Steps**: (1) only split evaluation from drawing (fixes the lag for broadcast readers, doubles as the measurement), (2) change-based dirty flags and keep-alive in the stage, (3) stage-level variables, `t` readers, hidden subtrees, (4) the dependent plans; plan §7.2.
 ## 30. Framework Compatibility (DOM Contract)
 - **Status**: 🟡 **Proposed** (2026-11-10, D1 and D4 decided)
@@ -200,3 +200,11 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Idea**: `smoothstyle="centripetal"` (default) | `"uniform"`, only `loadSegment()` changes; new `docs/polyline.html` section 5 (hand-placed arrow vs. sampled figure eight).
 - **Open**: D1 name, D2 repeated point in the uniform style (corner recommended), D3 walkthrough section 9 back to 60 points.
 - **Related**: §7 (`<pxl-plot>` reuses the uniform spline).
+
+## 39. Reactive Propagation in Dependency Order
+- **Status**: 💬 **Discussion** (2026-11-13, the cycle crash is fixed; the rest waits for a feature that needs it)
+- **Reference**: `design/2026-11-12_reactive_propagation_plan.md`; prototypes in `design/prototypes/2026-11-12_reactive_propagation/`
+- **Problem**: `pxl.broadcast()` propagates recursively, depth first. Stacked diamonds evaluate their bottom once per path (1,024 times after ten layers), and a diamond's bottom briefly sees half-updated values (210 before 220). Neither is visible today. A cycle that never settles stops after 100 rounds with a warning (per-element nesting counter, 2026-11-13).
+- **Idea**: find every affected reader first, then evaluate each once in dependency order, computed per broadcast over the affected readers only (recommended) or from a lasting graph. Measured cost: about +20 ns per reader, +1 KB minified (plan §5).
+- **Open**: when to build it (with `<pxl-out>`, §5, or event handlers that react to every change); D1–D4.
+- **Related**: §29 (its update phase orders readers with `t`; could share the ordering code).

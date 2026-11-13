@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reactive propagation: chains and diamonds</title>
+  <script>
+    // ?lib=<url> compares with another build, e.g. git show <commit>:dist/pxl.js > scratch/pxl_<commit>.js
+    // and open chains_and_diamonds.html?lib=/scratch/pxl_<commit>.js
+    document.write('<script src="' + (new URLSearchParams(location.search).get('lib') || '/dist/pxl.js') + '"><\/script>');
+  </script>
+  <style>body { margin: 16px; font-family: sans-serif; width: 800px; } pxl-stage { width: 800px; }</style>
+</head>
+<body>
+<pre id="out">running…</pre>
+<pxl-stage id="main" ratio="2 / 1"><pxl-layer id="lay"></pxl-layer></pxl-stage>
+<script>
+  // Counts evaluations; expressions can call global functions
+  window.evals = {};
+  window.count = (name, value) => { evals[name] = (evals[name] || 0) + 1; return value; };
+  window.seen = [];
+  window.note = (value) => { seen.push(value); return value; };
+
+  const lay = document.getElementById('lay');
+  let html = '';
+
+  // 1. Chain of 150 reactive variables without any cycle: each reads the previous one
+  html += '<pxl-var id="ch0" value="0"></pxl-var>';
+  for (let i = 1; i <= 150; i++) html += `<pxl-var id="ch${i}" value="ref.ch${i - 1}.value + 1"></pxl-var>`;
+
+  // 2. Ten stacked diamonds: d(k) = l(k) + r(k), with l(k) and r(k) both reading d(k-1)
+  html += '<pxl-var id="dm0" value="0"></pxl-var>';
+  for (let k = 1; k <= 10; k++) {
+    html += `<pxl-var id="dl${k}" value="ref.dm${k - 1}.value"></pxl-var>`;
+    html += `<pxl-var id="dr${k}" value="ref.dm${k - 1}.value"></pxl-var>`;
+    html += `<pxl-var id="dm${k}" value="count('dm${k}', ref.dl${k}.value + ref.dr${k}.value)"></pxl-var>`;
+  }
+
+  // 3. One diamond whose bottom notes every value it computes: does it ever see a half-updated state?
+  html += '<pxl-var id="g0" value="1"></pxl-var>';
+  html += '<pxl-var id="gl" value="ref.g0.value * 10"></pxl-var>';
+  html += '<pxl-var id="gr" value="ref.g0.value * 100"></pxl-var>';
+  html += '<pxl-var id="gb" value="note(ref.gl.value + ref.gr.value)"></pxl-var>';
+  lay.innerHTML = html;
+
+  setTimeout(() => {
+    const warnings = [];
+    const warn = console.warn;
+    console.warn = (...a) => { warnings.push(a.join(' ')); warn.apply(console, a); };
+
+    document.getElementById('ch0').setAttribute('value', '1000');
+    const chainEnd = pxl.nodes.ch150.value;
+
+    for (const k in evals) evals[k] = 0;
+    document.getElementById('dm0').setAttribute('value', '1');
+    const bottomEvals = evals.dm10, bottomValue = pxl.nodes.dm10.value;
+
+    seen.length = 0;
+    document.getElementById('g0').setAttribute('value', '2');
+
+    console.warn = warn;
+    const result = {
+      engine: new URLSearchParams(location.search).get('lib') || '/dist/pxl.js',
+      chain150: { expectedEnd: 1150, actualEnd: chainEnd },
+      diamonds10: { bottomEvaluations: bottomEvals, evaluationsPerLayer: Array.from({ length: 10 }, (_, i) => evals['dm' + (i + 1)]), bottomValue, expectedValue: 1024 },
+      glitch: { valuesSeenByBottom: seen.slice(), finalValue: pxl.nodes.gb.value, expectedFinal: 220 },
+      warnings
+    };
+    document.getElementById('out').textContent = JSON.stringify(result, null, 1);
+    window.result = result;
+  }, 500);
+</script>
+</body>
+</html>

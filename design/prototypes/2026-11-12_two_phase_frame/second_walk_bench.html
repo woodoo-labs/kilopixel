@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Two-phase frame: cost of the second walk</title>
+  <script src="/dist/pxl.js"></script>
+  <style>body { margin: 16px; font-family: sans-serif; width: 1000px; } pxl-stage { width: 1000px; }</style>
+</head>
+<body>
+<p>Cost of a second walk over all elements (plan §5). Parameters: <code>?n=5000&amp;animated=0.1&amp;groups=1</code> (circles in one layer, optionally in groups of 50). Run <code>measure()</code> in the console.</p>
+<pxl-stage id="main" ratio="16 / 9"><pxl-layer id="lay"></pxl-layer></pxl-stage>
+<script>
+  const q = new URLSearchParams(location.search);
+  const n = Number(q.get('n') || 1000), share = Number(q.get('animated') || 0.1), grouped = q.get('groups') === '1';
+  let html = '', open = false;
+  for (let i = 0; i < n; i++) {
+    if (grouped && i % 50 === 0) { if (open) html += '</pxl-group>'; html += '<pxl-group>'; open = true; }
+    const x = (i * 37) % 1000, y = (i * 53) % 560;
+    const anim = i < n * share;
+    html += anim
+      ? `<pxl-circle x="${x}" y="${y} + sin(t * 2 + ${i}) * 10" r="4" fill="#f97316"></pxl-circle>`
+      : `<pxl-circle x="${x}" y="${y}" r="4" fill="#94a3b8"></pxl-circle>`;
+  }
+  if (open) html += '</pxl-group>';
+  document.getElementById('lay').innerHTML = html;
+
+  const stage = document.getElementById('main');
+  let t = 0;
+  function frame() { stage._layers.forEach(l => l.invalidate()); stage.render(t += 1 / 60); }
+  function time(fn, reps) { for (let i = 0; i < 20; i++) fn(); const t0 = performance.now(); for (let i = 0; i < reps; i++) fn(); return (performance.now() - t0) / reps; }
+
+  // Visit every element like an update loop would, without evaluating (the evaluation itself only moves)
+  let visited = 0, sink = 0;
+  function walk(list) {
+    for (let i = 0; i < list.length; i++) {
+      const el = list[i];
+      visited++;
+      if (el.attributeValues.hidden) continue;
+      sink += el.animatedAttributeKeys.length;
+      if (el.childList) walk(el.childList);
+    }
+  }
+  // Today's evaluateAnimations() calls on static elements (0 keys): what skipping static subtrees would save
+  function callStatic(list) {
+    for (let i = 0; i < list.length; i++) {
+      const el = list[i];
+      if (!el.isAnimated) el.evaluateAnimations(t);
+      if (el.childList) callStatic(el.childList);
+    }
+  }
+
+  window.measure = function() {
+    const frameMs = time(frame, 60);
+    const walkMs = time(() => { visited = 0; walk(stage._layers); }, 500);
+    const staticMs = time(() => callStatic(stage._layers), 500);
+    return { n, grouped, elements: visited, frameMs: +frameMs.toFixed(3), extraWalkMs: +walkMs.toFixed(4),
+      extraWalkPercent: +(walkMs / frameMs * 100).toFixed(2), staticEvalCallsMs: +staticMs.toFixed(4) };
+  };
+</script>
+</body>
+</html>
