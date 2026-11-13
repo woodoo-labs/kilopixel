@@ -142,7 +142,7 @@ Not affected: TODO §30 (`design/2026-10-30_framework_compatibility_plan.md`: it
 
 ## 7. Suggested Order
 
-1. **Independent fixes, any time:** the monitor bug (throttling plan Part C1). The CSS-only fast path (§7.1) and the crash of reactive cycles that never settle (2026-11-13) are fixed.
+1. **Independent fixes:** all done. The CSS-only fast path (§7.1), the crash of reactive cycles that never settle and the monitor bug (throttling plan Part C1, both 2026-11-13).
 2. **This plan:** measure (§5), answer §4, then 🟡. Step 1 below can double as the measurement.
 3. **Build it in steps** (§7.2).
 4. **Update the dependent plans to the new model, then build them:** throttling Part A (much simpler), tween §7, `<pxl-clip>`, `space` (without §3.5).

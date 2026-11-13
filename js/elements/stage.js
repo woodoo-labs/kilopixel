@@ -19,7 +19,7 @@ pxl.Stage = class Stage extends HTMLElement {
     this._parsedRatio = 16 / 9;
     this.refKey = null;
 
-    // Published as ref.<id>.*; renderAvg / renderMax are strings with 2 decimals (pxl.perf.publish)
+    // Published as ref.<id>.* once per second by pxl.perf's timer; renderAvg / renderMax are strings with 2 decimals
     this.attributeValues = {
       mouseX: 500, mouseY: 500, isHovered: false, width: 1000, height: 1000 / this._parsedRatio,
       fps: 0, renderAvg: '0.00', renderMax: '0.00'
@@ -198,11 +198,6 @@ pxl.Stage = class Stage extends HTMLElement {
     this.perfFrames++;
 
     this.interaction.process();
-
-    if (start - pxl.perf.lastUpdate >= 1000) {
-      pxl.perf.lastUpdate = start;
-      pxl.perf.publish();
-    }
   }
 };
 

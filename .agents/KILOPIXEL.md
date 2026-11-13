@@ -1,6 +1,6 @@
 # Kilopixel Framework — Complete Technical Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~55KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~56KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes using custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, etc.) and the framework compiles, evaluates, and renders everything at 60fps automatically.
 
@@ -91,9 +91,8 @@ Stage.requestRender() → requestAnimationFrame → Stage.render(t)
   │   │   └─ ctx.restore()
   │   ├─ ctx.restore()
   │   └─ Heartbeat: if the layer's own attributes are animated → stage.requestRender()
-  ├─ Performance metrics accumulation
-  ├─ interaction.process()  → hit testing, state updates, event dispatch
-  └─ pxl.perf.publish()  (every 1 second)
+  ├─ Performance metrics accumulation (published by pxl.perf's own 1-second timer, not here)
+  └─ interaction.process()  → hit testing, state updates, event dispatch
 ```
 
 ---
@@ -835,7 +834,7 @@ Note: The compiler rewrites `toLocal(` to `pxl.toLocal(this, ` at compile time.
 | `isHovered` | boolean | True when pointer is over the stage |
 | `width` | number | Always 1000 (fixed logical width) |
 | `height` | number | Dynamic, based on aspect ratio (`1000 / parsedRatio`) |
-| `fps` | number | Frames rendered in last second |
+| `fps` | number | Frames rendered per second over the last interval; `0` on an idle page |
 | `renderAvg` | string | Average ms per frame (2 decimal places, `'0.00'` before the first publish) |
 | `renderMax` | string | Worst frame ms in last second (2 decimal places, `'0.00'` before the first publish) |
 
@@ -1465,9 +1464,8 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
    │       │            isDirty = true again and the next rAF is requested)
    │       ├─ if has transforms: ctx.restore()
    │       └─ HEARTBEAT: if layer.isAnimated → stage.requestRender()  (without isDirty)
-   ├─ Record performance: ms = performance.now() - start
-   ├─ interaction.process()  ← hit testing and event dispatch
-   └─ pxl.perf.publish()  (if >= 1 second since last publish)
+   ├─ Record performance: ms = performance.now() - start  (published once per second by pxl.perf's timer)
+   └─ interaction.process()  ← hit testing and event dispatch
 ```
 
 ### Dirty-Flag Optimization
@@ -1507,8 +1505,10 @@ A canvas call or an expression that throws must not break the frame (`design/202
 - `pxl.perf` — global singleton with a `stages[]` array
 - Each stage registers on connect, unregisters on disconnect
 - Each stage tracks: `perfFrames` (count), `perfAccumulated` (total ms), `perfMax` (worst ms)
-- Publishing is triggered from `stage.render()` when >= 1 second has elapsed
-- On publish: writes `fps`, `renderAvg`, `renderMax` directly to `stage.attributeValues` and broadcasts `ref.stageId`
+- Publishing runs on its own `setInterval` of 1 second (`_timer`), started by the first `registerStage()` and stopped when the last stage unregisters. Not from `stage.render()`: an idle page has no frames, and its values would freeze at the last ones (a "26 FPS" on a page that draws nothing)
+- On publish: `fps = round(frames / seconds since the last publish)` (timers fire late in background tabs), `renderAvg`, `renderMax`; an interval without frames gives `0`, `'0.00'`, `'0.00'`. Written directly to `stage.attributeValues`, then `ref.stageId` is broadcast every second
+- An FPS display is itself a reader: when its value changes, its layer redraws, which counts as a frame. An otherwise idle page with a display therefore alternates between 0 and 1 (measured 2026-11-13; accepted, `design/2026-11-12_layer_throttling_plan.md` D5)
+- Every `stage.render()` counts as a frame, also pointer-move frames in which no layer drew (frame counting: plan §5.2, D4, open)
 
 ### Display
 

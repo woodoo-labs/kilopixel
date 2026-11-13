@@ -1,6 +1,6 @@
 # Layer Throttling (`maxfps`), Stage-Level `<pxl-var>` and Performance Monitor
 
-- **Status**: 🟡 **Proposed** (2026-11-13, Part B built with D6 (b), §4.5; Parts A and C open, decisions D1–D5 and D7–D9 open, D9: build A after the two-phase frame?)
+- **Status**: 🟡 **Proposed** (2026-11-13, Part B built with D6 (b), §4.5; C1 built with D5 (a), §5.4; Part A, frame counting (D4) and C2 open, decisions D1–D4 and D7–D9 open, D9: build A after the two-phase frame?)
 - **Date**: 2026-11-12
 - **Supersedes**: `design/archive/2026-09-14_stage_variables_and_layer_throttling_plan.md` (stage-level `<pxl-var>`, `maxfps`, per-layer metrics) and `design/archive/2026-09-14_layer_throttling_plan.md` (revised 2026-09-15: `maxfps` in detail, keep-alive, cross-layer variables, frame counting, monitor bug)
 - **Related**: `design/2026-11-07_safe_shape_render_plan.md` (error path in `Layer.render()`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: `maxfps` comes from `static defaults`), `design/2026-11-12_two_phase_frame_plan.md` (💬, TODO §29: an update phase before drawing would simplify Part A and absorb Part B, §1.1 and D9 here)
@@ -14,11 +14,11 @@
 |---|---|---|
 | **A. `maxfps`** | Attribute on `<pxl-layer>`: at most N canvas redraws per second | Yes, but needs C2 to verify it |
 | **B. Stage-level `<pxl-var>`** | A `<pxl-var>` in the stage but outside any layer is evaluated by the stage every frame | Yes; **built 2026-11-13** (§4.5) |
-| **C. Performance monitor** | C1: fix the known bug (values freeze when idle, `fps` is not per second). C2: per-layer metrics | C1 yes (a bug fix); C2 together with A |
+| **C. Performance monitor** | C1: fix the known bug (values freeze when idle, `fps` is not per second). C2: per-layer metrics | C1 yes (a bug fix; **built 2026-11-13**, §5.4); C2 together with A |
 
 They belong in one plan because they meet in the same 20 lines of `Stage.render()`, and because B is the answer to A's main pitfall: an animated variable inside a throttled layer only updates at that layer's rate (§3.6), so shared animated state should live on the stage.
 
-Suggested order: B (built 2026-11-13) → C1 → A + C2, each its own commit with its tests. But see §1.1 and D9: if the two-phase frame is decided, A should wait for it.
+Suggested order: B and C1 (both built 2026-11-13) → A + C2, each its own commit with its tests. But see §1.1 and D9: if the two-phase frame is decided, A should wait for it.
 
 ### 1.1 If the Two-Phase Frame Comes First
 
@@ -200,13 +200,23 @@ One effect to accept or avoid (D5): a HUD showing `ref.main.fps` is itself a rea
 
 Today every `stage.render()` counts, including pointer-move frames in which no layer drew and, with `maxfps`, frames in which every layer skipped. Proposal: a stage frame counts only when at least one layer drew (`Layer.render()` returns `true`), and `renderAvg` / `renderMax` cover only those frames. `ref.<stage>.fps` then means "how often the picture changed", which is what an FPS counter is read as.
 
-### 5.3 C2: Per-layer metrics
+### 5.3 C2: Per-layer metrics (Open)
 
 `ref.<layerId>.fps`, `.renderAvg`, `.renderMax`: how often *this* layer's canvas was redrawn and how long its own `render()` took. Needed to see that `maxfps` works (stage 60, layer 4) and to find the expensive layer.
 
 - The layer measures its own `render()` (two `performance.now()` calls per drawn frame, well under a microsecond) and counts only frames that drew.
 - Publishing: the monitor can't read `stage._layers`, so it calls a stage method that publishes the stage and its layers (one shared helper writes `fps` / `renderAvg` / `renderMax` from the counters). The counters can then become `_` fields of their classes.
 - `ref.<layerId>` is broadcast once per second, only for layers with an `id`. Readers of a layer's position (`toLocal(ref.myLayer, …)`, `ref.myLayer.x`) are re-evaluated once per second as a side effect: negligible.
+
+### 5.4 C1 Built 2026-11-13
+
+As designed in §5.1:
+
+- **`js/monitor.js`:** `pxl.perf` has its own `setInterval` of 1 second (`_timer`), started by the first `registerStage()` and stopped when the last stage unregisters. `publish()` divides the frames by the real time since the last publish (`_lastPublish`), so a timer that fires late still gives frames per second; an interval without frames publishes `0`, `'0.00'`, `'0.00'`.
+- **`js/elements/stage.js`:** `render()` only counts frames and time; it no longer publishes (`pxl.perf.lastUpdate` is gone).
+- **D5 (a), measured:** a page whose only redraws come from its own FPS display (`text="ref.hud.fps + ' FPS'"`) alternates between 0 and 1 (`scratch/fps_hud_idle.html` (not kept)). Accepted.
+- **Frame counting (§5.2, D4) unchanged:** every `stage.render()` still counts, also pointer-move frames in which no layer drew. Open, with Part A.
+- **Tests** (`tests/index.html`, "monitor: …"): 30 frames over a 2-second interval give `fps` 15 with the right average and maximum; an idle stage set to 26 FPS drops to 0 within a second. 71/71 pass. Checked live: animated stages report 60, an idle one 0, `examples/benchmark.html` 61 (no console errors).
 
 ## 6. Decisions
 
@@ -216,7 +226,7 @@ Today every `stage.render()` counts, including pointer-move frames in which no l
 | D2 | How does a skipped layer come back? | (a) short wait via rAF, long wait via timer (§3.4); (b) always rAF (old plan 1); (c) rAF if `isAnimated`, else timer (old plan 2) | (a), thresholds checked with a prototype |
 | D3 | Is the CSS-only compositing path (`alpha="wave(2)"` with nothing else animated) throttled too? | (a) yes, like everything else; (b) no, it's cheap anyway | (a): one simple rule ("the layer updates at most N times per second") |
 | D4 | What does `ref.<stage>.fps` count? | (a) frames in which a layer drew; (b) every rAF tick (old plan 1) | (a) |
-| D5 | The FPS display's own redraw on an idle page (§5.1) | (a) accept 1 FPS; (b) broadcast only changed values (0 / 1 alternates); (c) don't count frames caused by the monitor's own broadcast | (a) for now; revisit if it confuses in the docs |
+| D5 | The FPS display's own redraw on an idle page (§5.1) | (a) accept 1 FPS; (b) broadcast only changed values (0 / 1 alternates); (c) don't count frames caused by the monitor's own broadcast | (a), decided and built 2026-11-13 (alternates 0 / 1, §5.4); revisit if it confuses in the docs |
 | D6 | Which `<pxl-var>` elements does the stage evaluate? | (a) direct children of `<pxl-stage>`; (b) every one inside the stage but outside any layer (like layers, which use `closest('pxl-stage')`) | (b), decided and built 2026-11-13 |
 | D7 | Can `maxfps` be an expression (`ref.speed.value`, `t`-based)? | (a) any expression, the gate reads the last value; (b) static only | (a): no extra code; docs show numbers |
 | D8 | Docs | There is no Layer, Stage or Variable page yet. (a) a section in an existing page (`walkthrough.html`?); (b) wait for a Layer page | Decide when A is built |
@@ -228,7 +238,7 @@ Later, not in this plan: `maxfps` on `<pxl-stage>` as a default for its layers o
 
 - **A:** a `maxfps="4"` layer with an animated shape: it draws about 4 times per second while a sibling layer draws every frame; the loop doesn't stop after the first skip; a reactive change after a long idle redraws in the next frame; a resize redraws a throttled layer at once; a disconnected throttled layer leaves no timer; a page whose only animation is a `maxfps="1"` layer runs (almost) no rAF between redraws.
 - **B** (built, §4.5; the `maxfps` reader comes with A): `<pxl-var id="v" value="t">` directly in a stage with only a static layer: `ref.v.value` advances; a reader in a `maxfps` layer and a reader in a full-rate layer see the same value when both draw; `setAttribute('value', 't')` on a static stage variable starts the loop; removing it stops the loop.
-- **C:** `fps` drops to `0` within about 2 seconds after the last frame; `fps` is per second after a pause; pointer moves over a static stage give `fps` 0; layer `fps` follows `maxfps`.
+- **C** (C1 built, §5.4: the first two): `fps` drops to `0` within about 2 seconds after the last frame; `fps` is per second after a pause; pointer moves over a static stage give `fps` 0; layer `fps` follows `maxfps`.
 
 A manual test page with all cases side by side (layers at full rate, `maxfps` 30 / 8 / 1, a stage variable read by all of them, the monitor) goes into `design/prototypes/` (folder named like this plan) when A is built.
 
@@ -238,4 +248,4 @@ A manual test page with all cases side by side (layers at full rate, `maxfps` 30
 - Stage: frame counting (`_variables` done with Part B).
 - Variable: the placement rule from §3.6 (evaluation by the stage done with Part B).
 - Per-Frame Render Pipeline and Per-Frame Data Flow: the gate and the keep-alive of a skipped layer (the heartbeat itself was corrected there on 2026-11-12).
-- Performance Monitor: the timer, per-second `fps`, per-layer metrics.
+- Performance Monitor: frame counting, per-layer metrics (the timer and per-second `fps` done with C1).

@@ -56,10 +56,10 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Related**: §38 builds the uniform spline into `<pxl-polyline>`; the plot reuses that code.
 
 ## 8. Layer FPS Throttling (`maxfps`) & Performance Monitor
-- **Status**: 🟡 **Proposed** (2026-11-13, Part B built; decisions D1–D5, D7–D9 open; D9: build `maxfps` after the two-phase frame, §29)
+- **Status**: 🟡 **Proposed** (2026-11-13, Part B and the monitor bug C1 built; decisions D1–D4, D7–D9 open; D9: build `maxfps` after the two-phase frame, §29)
 - **Reference**: `design/2026-11-12_layer_throttling_plan.md` (replaces the two plans of 2026-09-14, now in `design/archive/`)
 - **Layer throttling** (plan Part A): a `maxfps` attribute on `<pxl-layer>` throttles secondary layers (e.g. background effects to 12 FPS, clocks to 1 FPS); the gate lives in `Layer.render()`, a skipped layer comes back via rAF (short wait) or a one-shot timer (long wait).
-- **Performance monitor** (plan Part C; bug found 2026-10-15, confirmed in the code 2026-11-05): values freeze on idle pages instead of dropping to `0`, because `pxl.perf.publish()` only runs inside `stage.render()`; and `fps` counts "frames since the last publish" rather than per second. Fix: a 1-second timer in `pxl.perf`. Also frame counting (only frames in which a layer drew) and per-layer metrics (`ref.<layerId>.fps`, `.renderAvg`, `.renderMax`).
+- **Performance monitor** (plan Part C; the idle-freeze bug C1 is fixed): frame counting (only frames in which a layer drew, D4) and per-layer metrics (`ref.<layerId>.fps`, `.renderAvg`, `.renderMax`), both with Part A.
 
 ## 9. Raster Bitmaps & Complex SVG Graphics (`<pxl-image>`)
 - **Status**: 💬 **Discussion** (no plan yet)

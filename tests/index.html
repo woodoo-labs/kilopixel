@@ -1167,6 +1167,31 @@
       srClear();
     });
 
+    // --- Performance monitor (design/2026-11-12_layer_throttling_plan.md Part C1) ---
+
+    test('monitor: fps is frames per second of the real interval, not frames since the last publish', () => {
+      const stage = el('srStage');
+      stage.perfFrames = 30;
+      stage.perfAccumulated = 60;
+      stage.perfMax = 4;
+      pxl.perf._lastPublish = performance.now() - 2000; // a timer that fired a second late
+      pxl.perf.publish();
+      const { fps, renderAvg, renderMax } = stage.attributeValues;
+      if (fps !== 15 || renderAvg !== '2.00' || renderMax !== '4.00') throw new Error(`fps ${fps}, renderAvg ${renderAvg}, renderMax ${renderMax}`);
+    });
+
+    test('monitor: an idle stage drops to 0 within a second instead of keeping its last values', async () => {
+      // tlStage2 is static (see "stage idle at 0 FPS"): no frames, so the timer must publish 0 on its own
+      const values = pxl.nodes.tlStage2;
+      values.fps = 26;
+      values.renderAvg = '3.00';
+      values.renderMax = '5.00';
+      await wait(1200);
+      if (values.fps !== 0 || values.renderAvg !== '0.00' || values.renderMax !== '0.00') {
+        throw new Error(`fps ${values.fps}, renderAvg ${values.renderAvg}, renderMax ${values.renderMax}`);
+      }
+    });
+
     // --- Run all tests in order ---
     (async () => {
       const results = [];
