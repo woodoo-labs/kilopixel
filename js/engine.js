@@ -34,6 +34,11 @@ pxl._subscriptions = {};
 // Element id → its attributeValues, read by expressions as ref.<id>.<name>
 pxl.nodes = {};
 
+// A ref.* cycle whose values keep changing stops after this many rounds (PxlNode.variableChangedCallback).
+// A cycle of n elements nests n × rounds calls, so the limit keeps cycles of up to ~200 elements below the stack limit.
+pxl.MAX_CYCLE_ROUNDS = 100;
+pxl.CYCLE_MESSAGE = `a ref.* cycle never settles: values still changed after ${pxl.MAX_CYCLE_ROUNDS} rounds`;
+
 pxl.broadcast = function(fullKey) {
   const subs = pxl._subscriptions[fullKey];
   if (subs) {

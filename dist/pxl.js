@@ -35,6 +35,11 @@ pxl._subscriptions = {};
 // Element id → its attributeValues, read by expressions as ref.<id>.<name>
 pxl.nodes = {};
 
+// A ref.* cycle whose values keep changing stops after this many rounds (PxlNode.variableChangedCallback).
+// A cycle of n elements nests n × rounds calls, so the limit keeps cycles of up to ~200 elements below the stack limit.
+pxl.MAX_CYCLE_ROUNDS = 100;
+pxl.CYCLE_MESSAGE = `a ref.* cycle never settles: values still changed after ${pxl.MAX_CYCLE_ROUNDS} rounds`;
+
 pxl.broadcast = function(fullKey) {
   const subs = pxl._subscriptions[fullKey];
   if (subs) {
@@ -1287,6 +1292,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this.parentContainer = null;
     this.refKey = null;
 
+    // Own broadcasts from variableChangedCallback() that are still running (see there)
+    this._broadcastNesting = 0;
+
     // Matrices are recomputed lazily: a version counter per matrix tells children when to recompute theirs
     this._localMatrix = pxl.Matrix.create();
     this._globalMatrix = pxl.Matrix.create();
@@ -1358,6 +1366,13 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   }
 
   variableChangedCallback(varName) {
+    // Chains, diamonds and elements with many inputs are entered one call after the other. A cycle whose values
+    // keep changing enters again from inside its own broadcast, one level deeper in every round.
+    if (this._broadcastNesting === pxl.MAX_CYCLE_ROUNDS) {
+      this.reportError(pxl.CYCLE_MESSAGE);
+      return;
+    }
+
     let result;
     try {
       result = pxl.evaluateAttributesForVariable(this, varName);
@@ -1370,7 +1385,11 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
     if ((result & 1) === 0) pxl.unsubscribeFromVariable(varName, this);
     if ((result & 2) !== 0) {
-      if (this.refKey) pxl.broadcast(this.refKey);
+      if (this.refKey) {
+        this._broadcastNesting++;
+        pxl.broadcast(this.refKey);
+        this._broadcastNesting--;
+      }
       this.parentLayer?.invalidate();
     }
   }

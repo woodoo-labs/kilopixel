@@ -1012,6 +1012,100 @@
       fpRender(50.4, 1);
     });
 
+    // --- Reference cycles (design/2026-11-12_reactive_propagation_plan.md) ---
+
+    test('ref cycles: a cycle whose values never settle stops instead of overflowing the stack, and warns once', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-var id="rcA" value="0"></pxl-var>
+        <pxl-var id="rcB" value="ref.rcA.value + 1"></pxl-var>`);
+      let error = null;
+      const warnings = captureWarnings(() => {
+        try {
+          el('rcA').setAttribute('value', 'ref.rcB.value + 1');
+          el('rcA').setAttribute('value', 'ref.rcB.value + 2');
+        } catch (e) { error = e; }
+      });
+      if (error) throw new Error(`setAttribute threw: ${error}`);
+      const a = el('rcA').attributeValues.value, b = el('rcB').attributeValues.value;
+      if (!(a < 1000 && b < 1000)) throw new Error(`values ran away: a = ${a}, b = ${b}`);
+      if (el('rcA')._broadcastNesting !== 0 || el('rcB')._broadcastNesting !== 0) throw new Error('broadcast nesting not reset');
+      if (warnings.length !== 1 || !warnings[0].includes('never settles')) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      srClear();
+    });
+
+    test('ref cycles: an attribute that reads another attribute of its own element follows it at once, without a warning', () => {
+      srClear();
+      // The walkthrough's section 9 orb: shadowcolor="ref.sec9FlyingOrb.stroke"
+      srAdd('srLayerA', `<pxl-var id="rcHue" value="10"></pxl-var>
+        <pxl-circle id="rcSelf" x="100" y="100" r="10" stroke="hsl(ref.rcHue.value, 100, 60)" shadowcolor="ref.rcSelf.stroke"></pxl-circle>`);
+      const warnings = captureWarnings(() => el('rcHue').setAttribute('value', '200'));
+      const { stroke, shadowcolor } = el('rcSelf').attributeValues;
+      if (shadowcolor !== stroke) throw new Error(`shadowcolor ${shadowcolor} lags behind stroke ${stroke}`);
+      if (warnings.length !== 0) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      srClear();
+    });
+
+    test('ref cycles: a cycle that settles keeps its values, without a warning', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-var id="rcC" value="5"></pxl-var>
+        <pxl-var id="rcD" value="ref.rcC.value"></pxl-var>`);
+      const warnings = captureWarnings(() => el('rcC').setAttribute('value', 'ref.rcD.value'));
+      if (el('rcC').attributeValues.value !== 5 || el('rcD').attributeValues.value !== 5) {
+        throw new Error(`c = ${el('rcC').attributeValues.value}, d = ${el('rcD').attributeValues.value}`);
+      }
+      if (warnings.length !== 0) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      srClear();
+    });
+
+    test('ref cycles: a self-reference with t follows its own previous value ("follow" smoothing)', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-var id="rcFollow" value="ref.rcFollow.value + (100 - ref.rcFollow.value) * 0.1 + t * 0"></pxl-var>`);
+      srRender(1);
+      for (let i = 0; i < 3; i++) {
+        const before = el('rcFollow').attributeValues.value;
+        srRender(1 + (i + 1) / 60);
+        const after = el('rcFollow').attributeValues.value;
+        if (Math.abs(after - (before + (100 - before) * 0.1)) > 1e-9) throw new Error(`step ${i}: ${before} → ${after}`);
+      }
+      srClear();
+    });
+
+    test('ref cycles: two toLocal readers that read each other stop and warn', () => {
+      srClear();
+      let error = null;
+      const warnings = captureWarnings(() => {
+        try {
+          srAdd('srLayerA', `<pxl-circle id="rcTlA" x="0" y="50" r="5"></pxl-circle>
+            <pxl-circle id="rcTlB" x="toLocal(ref.rcTlA, 'x') + 10" y="50" r="5"></pxl-circle>`);
+          el('rcTlA').setAttribute('x', "toLocal(ref.rcTlB, 'x') + 10");
+          srRender(1);
+        } catch (e) { error = e; }
+      });
+      if (error) throw new Error(`threw: ${error}`);
+      const a = el('rcTlA').attributeValues.x, b = el('rcTlB').attributeValues.x;
+      if (!(a < 5000 && b < 5000)) throw new Error(`values ran away: a = ${a}, b = ${b}`);
+      if (!warnings.some((w) => w.includes('never settles'))) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      srClear();
+    });
+
+    test('ref cycles: a chain of 150 readers and an element with 150 changed inputs are not taken for cycles', () => {
+      srClear();
+      let html = '<pxl-var id="rcCh0" value="0"></pxl-var>';
+      for (let i = 1; i <= 150; i++) html += `<pxl-var id="rcCh${i}" value="ref.rcCh${i - 1}.value + 1"></pxl-var>`;
+      // Reads all 150 links: entered once per link in one broadcast, one call after the other
+      let sum = '0';
+      for (let i = 1; i <= 150; i++) sum += ` + ref.rcCh${i}.value`;
+      html += `<pxl-var id="rcSum" value="${sum}"></pxl-var>`;
+      srAdd('srLayerA', html);
+      const warnings = captureWarnings(() => el('rcCh0').setAttribute('value', '1000'));
+      const end = el('rcCh150').attributeValues.value;
+      if (end !== 1150) throw new Error(`chain end = ${end}, expected 1150`);
+      const expectedSum = 150 * 1000 + 150 * 151 / 2;
+      if (el('rcSum').attributeValues.value !== expectedSum) throw new Error(`sum = ${el('rcSum').attributeValues.value}, expected ${expectedSum}`);
+      if (warnings.length !== 0) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      srClear();
+    });
+
     // --- Run all tests in order ---
     (async () => {
       const results = [];

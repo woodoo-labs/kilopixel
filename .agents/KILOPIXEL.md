@@ -1,6 +1,6 @@
 # Kilopixel Framework — Complete Technical Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~54KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~55KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes using custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, etc.) and the framework compiles, evaluates, and renders everything at 60fps automatically.
 
@@ -316,6 +316,11 @@ pxl.broadcast('ref.myVar')
         → if bit 1 is 0: unsubscribe (self-cleaning)
         → if bit 2 is 1: broadcast own ref key + invalidate layer
 ```
+
+Propagation is recursive and depth first. Known limits, accepted for now (`design/2026-11-12_reactive_propagation_plan.md`):
+- **Cycles:** a cycle that settles (`a = b`, `b = a`) keeps its values, and an attribute that reads another attribute of its own element (`shadowcolor="ref.orb.stroke"`) follows after one extra round. A cycle whose values keep changing (`a = b + 1`, `b = a + 1`) re-enters an element from inside that element's own broadcast. `variableChangedCallback()` counts that nesting (`_broadcastNesting`) and stops at `pxl.MAX_CYCLE_ROUNDS` (100) with a warning through `reportError()`. Chains, diamonds and elements with many inputs are entered one call after the other, so the count never grows for them. A cycle of n elements nests n × 100 calls, which stays below the stack limit up to about 200 elements.
+- **Diamonds:** a reader reached on two paths is evaluated once per path, and its first evaluation can see one new and one old input. Only final values are drawn, so this costs a little time but is not visible.
+- **Readers with `t`** don't subscribe: a self-reference with `t` reads its previous frame's value (the "follow" effect).
 
 ### The `ref.*` Namespace
 
