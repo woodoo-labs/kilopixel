@@ -242,6 +242,8 @@ Later, not in this plan: `maxfps` on `<pxl-stage>` as a default for its layers o
 
 A manual test page with all cases side by side (layers at full rate, `maxfps` 30 / 8 / 1, a stage variable read by all of them, the monitor) goes into `design/prototypes/` (folder named like this plan) when A is built.
 
+`examples/benchmark.html` computes its dashboard and its 10-second score from the active stage's `fps`, `renderAvg` and `renderMax` (fixed 2026-11-13). When frame counting (D4) or per-layer metrics (C2) are built, check its numbers, and consider showing the per-layer values in its dashboard.
+
 ## 8. KILOPIXEL.md When Built
 
 - Layer: `maxfps` in the attribute list and defaults (15 attributes), the gate, the keep-alive, the return value of `render()`.

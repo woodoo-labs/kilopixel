@@ -721,16 +721,23 @@
       ctx.shadowBlur = 0; // Reset
     }
 
+    // FPS and render times of the active workload's stage, published once per second by the engine's
+    // performance monitor (the same values as ref.<stageId>.fps / .renderAvg / .renderMax)
+    function stageMetrics() {
+      const stage = document.querySelector('#stage-container pxl-stage');
+      return stage ? stage.attributeValues : null;
+    }
+
     // Telemetry Reader Loop
     function updateTelemetry() {
-      // FPS & Render times directly from cvs framework
-      if (pxl.sys) {
-        document.getElementById('telemetry-fps').innerHTML = `${pxl.sys.fps || 0}<span class="unit">FPS</span>`;
-        document.getElementById('telemetry-avg').innerHTML = `${pxl.sys.renderAvg || '0.00'}<span class="unit">ms</span>`;
-        document.getElementById('telemetry-max').innerHTML = `${pxl.sys.renderMax || '0.00'}<span class="unit">ms</span>`;
-        
+      const metrics = stageMetrics();
+      if (metrics) {
+        document.getElementById('telemetry-fps').innerHTML = `${metrics.fps}<span class="unit">FPS</span>`;
+        document.getElementById('telemetry-avg').innerHTML = `${metrics.renderAvg}<span class="unit">ms</span>`;
+        document.getElementById('telemetry-max').innerHTML = `${metrics.renderMax}<span class="unit">ms</span>`;
+
         // Push current average render time to history buffer
-        const currentMs = parseFloat(pxl.sys.renderAvg) || 0;
+        const currentMs = parseFloat(metrics.renderAvg) || 0;
         renderTimeHistory[historyIndex] = currentMs;
         historyIndex = (historyIndex + 1) % historyLength;
       }
@@ -896,7 +903,7 @@
           const x = 50 + (i % 10) * 98;
           const y = 45 + Math.floor(i / 10) * 18;
           // Complex dynamic math text output, stressing expression resolver
-          const textExpr = `'P#' + ${i} + ' : ' + floor(sin(t + ${i}) * 100) + ' | ' + ref.main.fps`;
+          const textExpr = `'P#' + ${i} + ' : ' + floor(sin(t + ${i}) * 100) + ' | ' + ref.main5.fps`;
           texts += `<pxl-text x="${x}" y="${y}" size="8.5" fill="hsla(${i % 360}, 100, 50, 0.85)" text="${textExpr}"></pxl-text>`;
         }
         return `
@@ -942,13 +949,7 @@
         'math-300': 'WORKLOAD: COMPLEX JIT MATH TEXT (300 STRINGS)'
       };
       hudName.textContent = nameMapping[name];
-
-      // Reset Telemetry counters
-      if (pxl.perf) {
-        pxl.perf._frames = 0;
-        pxl.perf._accumulatedTime = 0;
-        pxl.perf._maxTime = 0;
-      }
+      // No counters to reset: each workload has its own new stage, which counts from zero
 
       // Update button visual state
       const buttons = document.querySelectorAll('.sidebar button');
@@ -1000,11 +1001,12 @@
         statusText.textContent = `Gathering data... ${(elapsed / 1000).toFixed(1)}s`;
 
         // Gather instantaneous statistics
-        if (pxl.sys) {
+        const metrics = stageMetrics();
+        if (metrics) {
           samples.push({
-            fps: pxl.sys.fps,
-            avg: parseFloat(pxl.sys.renderAvg) || 0,
-            max: parseFloat(pxl.sys.renderMax) || 0,
+            fps: metrics.fps,
+            avg: parseFloat(metrics.renderAvg) || 0,
+            max: parseFloat(metrics.renderMax) || 0,
             memory: performance.memory ? performance.memory.usedJSHeapSize : 0
           });
         }
@@ -1020,7 +1022,7 @@
           const avgs = [];
           
           samples.forEach(s => {
-            sumFps += ref.main.fps;
+            sumFps += s.fps;
             sumAvg += s.avg;
             avgs.push(s.avg);
             if (s.max > peakMax) peakMax = s.max;
