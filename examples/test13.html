@@ -45,7 +45,8 @@
         html += `<pxl-circle x="${x}" y="${y}" r="${mathExpr}" fill="#ff0055"></pxl-circle>`;
       }
     }
-    gridLayer.innerHTML = html;
+    // insertAdjacentHTML adds the circles and keeps the layer's own canvas (innerHTML would remove it)
+    gridLayer.insertAdjacentHTML('beforeend', html);
   </script>
 </body>
 </html>
