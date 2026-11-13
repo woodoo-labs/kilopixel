@@ -20,7 +20,7 @@ All documents on this topic, oldest first. Older plans are kept unchanged as his
 | `design/2026-10-26_tolocal_fix_plan.md` | 2026-10-26 | Readers update when their **own** space moves | ✅ Implemented |
 | `design/2026-10-29_tolocal_decomposition_plan.md` | 2026-10-29 | Frame decomposition (`skewx`, signed `scaley`, `zoom`), warning for unknown names; the `scale` attribute becomes `zoom` (multiplier) | ✅ Implemented |
 | `design/2026-10-30_space_attribute_plan.md` | 2026-10-30 | `space="ref.A"`: draw an element in another element's space (exact overlays, points inside the target, attachments) | 🟡 Proposed |
-| `design/2026-11-12_two_phase_frame_plan.md` | 2026-11-12 | Evaluate every element before drawing: removes the one-frame lag of readers drawn before their targets (toLocal, `space`, `ref.*`) | 💬 Discussion |
+| `design/2026-11-12_two_phase_frame_plan.md` | 2026-11-12 | Evaluate every element before drawing: removes the one-frame lag of readers drawn before their targets (toLocal, `space`, `ref.*`) | 💬 Discussion; step 1 built 2026-11-13 (no lag for readers without `t`) |
 
 ## 1. Core Finding: Refs Are Values, Not Positions
 

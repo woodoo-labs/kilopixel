@@ -1,3 +1,7 @@
+// Frame number, counted by every Stage.render(): per-frame state (_failedFrame, a layer's update frame) is stored as
+// the frame it belongs to, so it never needs a reset
+pxl._frame = 0;
+
 pxl.Stage = class Stage extends HTMLElement {
   static get observedAttributes() { return ['ratio', 'alwaysrender']; }
 
@@ -168,8 +172,12 @@ pxl.Stage = class Stage extends HTMLElement {
     requestAnimationFrame(this._frameCallback);
   }
 
+  // Two phases: every layer evaluates first (update), then the layers draw. A reader drawn before its target then
+  // sees the target's value of this frame, whatever the DOM order (readers that also use t excepted: they read
+  // their target when they are evaluated).
   render(t) {
     const start = performance.now();
+    pxl._frame++;
 
     if (this._isOrderDirty) {
       this._layers.sort(pxl.sortByDOMPosition);
@@ -182,14 +190,18 @@ pxl.Stage = class Stage extends HTMLElement {
     let isVariableAnimated = false;
     for (let i = 0; i < this._variables.length; i++) {
       const variable = this._variables[i];
-      variable.render(null, this.unit, t);
+      variable.update(t);
       if (variable.isAnimated) isVariableAnimated = true;
     }
     if (isVariableAnimated) this.requestRender();
 
     for (let i = 0; i < this._layers.length; i++) {
       const layer = this._layers[i];
-      if (layer.isDirty || layer.isAnimated) layer.render(this.unit, t);
+      if (layer.isDirty || layer.isAnimated) layer.update(t);
+    }
+    for (let i = 0; i < this._layers.length; i++) {
+      const layer = this._layers[i];
+      if (layer.needsRender()) layer.render(this.unit, t);
     }
 
     const ms = performance.now() - start;

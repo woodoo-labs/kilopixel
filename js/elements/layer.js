@@ -18,6 +18,11 @@ pxl.Layer = class Layer extends pxl.PxlNode {
 
     this.isDirty = true;
     this._isCanvasEmpty = false;
+
+    // The heartbeat across the two phases (see update())
+    this._updateFrame = -1;
+    this._wasDirty = false;
+    this._keepAlive = false;
     this.stage = null;
     this._dpr = 1; // set by the stage
 
@@ -81,20 +86,53 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     this.invalidate();
   }
 
-  render(u, t) {
+  // Update phase. isDirty carries two things into a frame:
+  // - requests from before it (setAttribute(), broadcasts from earlier layers, resize, the first draw): kept in
+  //   _wasDirty, because isDirty is cleared now;
+  // - the heartbeat: every animated child calls parentLayer.invalidate() while it is evaluated, so after the
+  //   children isDirty says "something in here is animated" (_keepAlive), and the layer stays in the next frame.
+  update(t) {
+    this._updateFrame = pxl._frame;
     if (this._isOrderDirty) {
       this.childList.sort(pxl.sortByDOMPosition);
       this._isOrderDirty = false;
     }
 
-    // A failing expression skips the layer with its children for this frame. It keeps its previous pixels,
-    // because clearRect comes later; reportError() keeps an animated layer asking for frames.
+    this._wasDirty = this.isDirty;
+    this.isDirty = false;
+    this._keepAlive = false;
+
+    // A failing expression skips the layer with its children for this frame; it keeps its previous pixels and
+    // its request. reportError() keeps an animated layer asking for frames.
     try {
       this.evaluateAnimations(t);
     } catch (error) {
+      this._failedFrame = pxl._frame;
+      this.isDirty = this._wasDirty;
       this.reportError(error);
       return;
     }
+
+    // A hidden layer doesn't evaluate its children: their values that follow t stay as they are until it is shown
+    if (!this.attributeValues.hidden) {
+      for (let i = 0; i < this.childList.length; i++) {
+        this.childList[i].update(t);
+      }
+    }
+    this._keepAlive = this.isDirty;
+  }
+
+  // Draw in this frame: dirty before the update or since (a later layer's broadcast reaches it after its update;
+  // the broadcast has already set its values), or animated itself
+  needsRender() {
+    return (this._updateFrame === pxl._frame && this._wasDirty) || this.isDirty || this.isAnimated;
+  }
+
+  // Draw phase
+  render(u, t) {
+    if (this._failedFrame === pxl._frame) return;
+    const isUpdated = this._updateFrame === pxl._frame;
+    const hasChanged = (isUpdated && this._wasDirty) || this.isDirty;
 
     const { alpha, blend, filter, hidden } = this.attributeValues;
 
@@ -126,14 +164,15 @@ pxl.Layer = class Layer extends pxl.PxlNode {
       }
     }
 
-    if (onlyCompositingAnimated && !this.isDirty) {
+    if (onlyCompositingAnimated && !hasChanged) {
       this.stage.requestRender();
       return;
     }
 
     const ctx = this._ctx;
     ctx.clearRect(0, 0, this._canvas.width / this._dpr, this._canvas.height / this._dpr);
-    this.isDirty = false;
+    // Drawn with this frame's values: only the heartbeat survives into the next frame
+    this.isDirty = isUpdated && this._keepAlive;
 
     if (hidden) {
       this._isCanvasEmpty = true;

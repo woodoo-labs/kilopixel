@@ -1,18 +1,18 @@
 # Two-Phase Frame: Evaluate Everything, Then Draw
 
-- **Status**: 💬 **Discussion** (2026-11-13: builds its own dependency order, reactive propagation stays recursive; 2026-11-12: plan started from TODO §29 (idea 2026-10-30) and made the hub for the plans that depend on it; performance and GC review: the second walk costs about 1–2 % of a frame (§5.1), redraws saved still to measure; dependency order with a cycle rule recommended, §3.1.1; nothing decided)
+- **Status**: 💬 **Discussion** (2026-11-13: step 1 built, §7.4: no one-frame lag for readers without `t`, no measurable cost; steps 2–4 not decided; builds its own dependency order, reactive propagation stays recursive; 2026-11-12: plan started from TODO §29 (idea 2026-10-30) and made the hub for the plans that depend on it; performance and GC review: the second walk costs about 1–2 % of a frame (§5.1), redraws saved still to measure; dependency order with a cycle rule recommended, §3.1.1; nothing decided)
 - **Date**: 2026-11-12
 - **Related**: see §6 (every plan whose per-frame design depends on this one, and what changes for it); background: `design/2026-11-07_safe_shape_render_plan.md` (same render path, hidden subtrees in §5.1), `design/2026-10-26_tolocal_fix_plan.md` (matrix walk within the frame), `design/2026-10-25_refs_across_spaces_note.md` (hub for refs, toLocal and the one-frame lag)
-- **Target Implementation** (if built): `js/elements/stage.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/variable.js`, `tests/index.html`, `.agents/KILOPIXEL.md` (Per-Frame Data Flow, Per-Frame Render Pipeline, Coordinate Mapping, AI guide), `docs/mapping.html` (section 7, see §8)
-- **Prototypes**: `design/prototypes/2026-11-12_two_phase_frame/css_fast_path.html` (the CSS-only fast path, before and after the fix, §7.1), `design/prototypes/2026-11-12_two_phase_frame/second_walk_bench.html` (cost of the second walk, §5.1)
+- **Target Implementation** (step 1 built, §7.4): `js/elements/stage.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/variable.js`, `tests/index.html`, `.agents/KILOPIXEL.md` (Per-Frame Data Flow, Per-Frame Render Pipeline, Coordinate Mapping, AI guide), `docs/mapping.html` (section 7 removed, §8)
+- **Prototypes**: `design/prototypes/2026-11-12_two_phase_frame/css_fast_path.html` (the CSS-only fast path, before and after the fix, §7.1), `design/prototypes/2026-11-12_two_phase_frame/second_walk_bench.html` (cost of the second walk, §5.1), `design/prototypes/2026-11-12_two_phase_frame/frame_bench.html` (frame time of the built engine, §7.4)
 
 ---
 
-## 1. Today's Frame: One Pass
+## 1. The Frame Before Step 1: One Pass
 
-`Stage.render(t)` walks the layers in DOM order. Each layer evaluates its own animated attributes, clears its canvas, then walks its children; each child evaluates (`evaluateAnimations(t)`) and draws in the same step. Evaluation happens *inside* drawing. Two consequences:
+Until 2026-11-13 (step 1, §7.4), `Stage.render(t)` walked the layers in DOM order. Each layer evaluates its own animated attributes, clears its canvas, then walks its children; each child evaluates (`evaluateAnimations(t)`) and draws in the same step. Evaluation happens *inside* drawing. Two consequences:
 
-1. **One-frame lag.** A reader drawn before its target (toLocal, `space`, plain `ref.*`) sees the target's values from the previous frame. Today's rule: put readers in a layer after their targets (`docs/mapping.html` section 7 "Draw Order", KILOPIXEL.md Coordinate Mapping).
+1. **One-frame lag.** A reader drawn before its target (toLocal, `space`, plain `ref.*`) sees the target's values from the previous frame. The rule was: put readers in a layer after their targets (`docs/mapping.html` section 7 "Draw Order", removed with step 1). Fixed by step 1 for readers without `t`.
 2. **`isDirty` means two things.** When an animated child is evaluated, its layer has already cleared the canvas, so the engine can't ask "did anything change?" before redrawing. Every animated element therefore calls `parentLayer.invalidate()` in every frame, whether its value changed or not. `isDirty` means both "pixels out of date" and "something is animated, keep the loop running" (KILOPIXEL.md Dirty-Flag Optimization, corrected 2026-11-12).
 
 ## 2. Idea
@@ -30,7 +30,7 @@ Each value is still evaluated once per frame; the cost is a second walk over the
 
 Readers see this frame's values whatever the DOM order. Tested 2026-11-02 (`scratch/draw_order_chain_check.html` (not kept)):
 
-- **Reactive readers** (`ref.*` / toLocal without `t`) settle through broadcasts, so the update phase fixes chains of any length in any order.
+- **Reactive readers** (`ref.*` / toLocal without `t`) settle through broadcasts, so the update phase fixes chains of any length in any order. Built with step 1 (§7.4).
 - **Readers whose expression also uses `t`** don't subscribe to refs (`pxl.compileAttribute`, `js/engine.js`); they read their source only at their turn in the update phase, so each one before its source in the DOM still adds one frame (today: C reads B reads A in the order C, B, A lags 2 frames; confirmed 2026-11-12 with `design/prototypes/2026-11-12_reactive_propagation/ref_cycles.html`). Options: let time-dependent expressions with refs subscribe as well (re-evaluated on the broadcast, a second evaluation for those few), or sort by dependencies before the update phase (needs a rule for cycles). Recommended: the dependency order, §3.1.1.
 
 #### 3.1.1 Dependency Order (Recommended, 2026-11-12)
@@ -87,7 +87,7 @@ With §3.3, a throttled layer just stays dirty until its window: no rAF relay or
 
 ## 4. Open Questions
 
-1. **Cost of the second walk** (§5). The whole idea depends on it. First answer (§5.1): about 0.02 ms per 1,000 elements, 1–2 % of a frame; not a blocker. Step 1 confirms it in the engine.
+1. **Cost of the second walk** (§5). The whole idea depends on it. First answer (§5.1): about 0.02 ms per 1,000 elements, 1–2 % of a frame; not a blocker. Confirmed in the engine with step 1 (§7.4): no measurable difference.
 2. **CSS-only fast path:** a layer whose only animated attributes are compositing (`alpha`, `blend`, `filter`) skips its canvas (works since the fix in §7.1); the split must keep that.
 3. **Static layers stay idle:** a page without animation keeps 0 FPS.
 4. **Order of broadcasts** during the update phase: a broadcast reaches readers that may or may not have been evaluated yet this frame.
@@ -131,7 +131,7 @@ Plans whose per-frame design assumes today's single pass. Each has a pointer to 
 | §8 | `design/2026-11-12_layer_throttling_plan.md` | Part A: the keep-alive (§3.4) and the variable placement rule (§3.6) are workarounds for the single pass; the gate stays. Part B (built 2026-11-13): becomes the start of the update phase. Part C: independent. Its D9 is the order |
 | §3 | `design/2026-10-01_tween_animation_plan.md` | §7 (sleep when tweens finish) works through `isAnimated` and the layer heartbeat; with §3.3 the stage decides from the update phase, and change-based dirty flags stop redrawing a finished tween on their own |
 | §2 | `design/2026-09-29_pxl-clip_element_plan.md` | §6.1 `applyClip()` evaluates its children while drawing and §9 relies on the layer heartbeat; the clip's children must be evaluated in the update phase |
-| §28 | `design/2026-10-30_space_attribute_plan.md` | §3.5 "Draw Order" (one-frame lag, readers after targets) goes away |
+| §28 | `design/2026-10-30_space_attribute_plan.md` | §3.5 "Draw Order" (one-frame lag, readers after targets) goes away: no lag since step 1 for readers without `t` |
 | §25 | `design/2026-10-25_refs_across_spaces_note.md` | the same lag for toLocal and plain `ref.*`; this plan is the general fix |
 | §20 | `design/2026-10-17_shape_authoring_plan.md` | §3.3 `draw(ctx, u)` without `t` becomes a requirement (§3.2); §4 Pattern B sets `isAnimated` by hand, which the update phase must keep working; its open point "while stopped, the layer keeps redrawing" is solved by §3.2 |
 | §39 | `design/2026-11-12_reactive_propagation_plan.md` | no dependency: reactive propagation stays recursive (the cycle crash is fixed); this plan builds its own order for readers with `t` (§3.1.1). If §39 is built later, both could share the ordering code |
@@ -143,8 +143,8 @@ Not affected: TODO §30 (`design/2026-10-30_framework_compatibility_plan.md`: it
 ## 7. Suggested Order
 
 1. **Independent fixes:** all done. The CSS-only fast path (§7.1), the crash of reactive cycles that never settle and the monitor bug (throttling plan Part C1, both 2026-11-13).
-2. **This plan:** measure (§5), answer §4, then 🟡. Step 1 below can double as the measurement.
-3. **Build it in steps** (§7.2).
+2. **This plan:** step 1 measured and built (§7.4); answer the rest of §4, then 🟡 for steps 2–4.
+3. **Build it in steps** (§7.2): step 1 done; step 2 when a measurement shows that the saved redraws matter, or with throttling or tweens.
 4. **Update the dependent plans to the new model, then build them:** throttling Part A (much simpler), tween §7, `<pxl-clip>`, `space` (without §3.5).
 5. **Isolated compositing (TODO §31)** before or after item 3, not in parallel; `paintorder` after it.
 6. **Docs cleanup** (§8): already with step 1 of §7.2.
@@ -163,7 +163,7 @@ Not affected: TODO §30 (`design/2026-10-30_framework_compatibility_plan.md`: it
 
 Little code breaks: the split stays inside `stage.js`, `layer.js`, `group.js`, `shape.js` and `variable.js`. The `draw()` of all shapes (also custom shapes, which only override `draw()`), the compiler, broadcasts, the toLocal walk, hit testing, event dispatch, attributes and the public API stay unchanged. No engine test expects the lag (checked 2026-11-12).
 
-**Step 1: only split evaluation from drawing.** Each `render()` becomes `update(t)` (evaluate) and a draw method; `Stage.render()` runs two loops over the same layers as today (`isDirty || isAnimated`). Hidden subtrees and errors keep today's rules. Three things must be adjusted, because they rely on evaluation and drawing being one step:
+**Step 1: only split evaluation from drawing** (built 2026-11-13, §7.4). Each `render()` becomes `update(t)` (evaluate) and a draw method; `Stage.render()` runs two loops over the same layers as today (`isDirty || isAnimated`). Hidden subtrees and errors keep today's rules. Three things must be adjusted, because they rely on evaluation and drawing being one step:
 
 1. **Heartbeat.** Today an animated layer stays alive through an order inside `Layer.render()`: `isDirty = false`, then the children evaluate and set it again. After the split they evaluate before the draw clears it, and the animation would stop after one frame. Fix: clear `isDirty` at the start of the layer's update; draw when the layer was dirty at the start of the frame or became dirty during the update (also through a broadcast from a later layer). The engine test "nothing redraws while nothing moves (0 FPS)" guards this.
 2. **Errors.** A failing evaluation skips the drawing today because both are in one `try`. After the split, an element remembers that its evaluation failed in this frame, and the draw phase skips it (a layer keeps its pixels, a group its children).
@@ -200,6 +200,28 @@ Per step:
 - **Copies** (`cloneNode()`): a copy is a new element and needs nothing special. Unrelated to this plan and unchanged: a copy keeps its `id`, so two elements share it and `ref.<id>` points to the one connected last.
 - **Elements added in an event handler:** hit testing and event dispatch run after drawing (`interaction.process()`), so such elements appear in the next frame, as today.
 
+### 7.4 Step 1 Built 2026-11-13
+
+`Stage.render()` runs an update phase over all layers, then a draw phase. Prototyped first as a patch over the running engine (`scratch/two_phase_step1/patch.js` (not kept)), with the same results as the build below.
+
+- **Code** (+96 / −23 lines in `js/`, comments included; 56.5 KB minified, +0.9 KB): `update(t)` in `layer.js`, `group.js`, `shape.js`, `variable.js` evaluates; `render()` only draws (a variable draws nothing). `pxl._frame` counts frames in `stage.js`; per-frame state is a frame stamp (§7.2): `_failedFrame` (declared in `node.js`) makes the draw phase skip an element whose update failed, and a layer's `_updateFrame` tells the draw phase whether it was updated in this frame.
+- **The heartbeat** (the risky part, §7.2 item 1): `Layer.update()` keeps the requests from before the frame in `_wasDirty`, clears `isDirty`, and after the children keeps their heartbeat in `_keepAlive`. `needsRender()` = updated and `_wasDirty`, or `isDirty` (also a later layer's broadcast after this layer's update), or animated itself. Drawing sets `isDirty = _keepAlive`, so only the heartbeat survives into the next frame.
+- **Not changed:** the `draw()` of every shape (also custom shapes), the compiler, broadcasts, the toLocal walk, hit testing, attributes. `draw(ctx, u, t)` still receives `t` (step 2 makes `draw()` without `t` a contract).
+- **Tests** (`tests/index.html`, "two-phase frame: …", 76/76 pass): a reader in an earlier layer is drawn with its target's value of the same frame (`ref.*` and the toLocal case of the removed mapping section 7); the heartbeat keeps a layer with an animated child redrawing and a static one idle; a layer made dirty by an earlier layer's broadcast draws once per frame with the new value; a shape whose update fails is skipped in the draw phase, and a failing layer keeps its pixels. Against the build of commit `eb26043`, the two lag tests fail (line 5 px behind the ball, ring 340 px off the planet) and the other three pass: they guard behavior that stays.
+- **Heartbeat cases**, live and hand-driven, one pass vs. step 1 (`scratch/two_phase_step1/heartbeat.html` (not kept)): animated child 60 redraws/s in both; static 0; one `setAttribute()` 1 redraw, then idle; animated made static 0; static made animated 60; CSS-only fast path 0; hidden layer with an animated child 0; a throwing shape next to an animated one keeps the layer at 60. Reader before its target: gap 5 px before, 0 px with step 1, and its layer redraws once per frame, not twice.
+- **Frame time** (`design/prototypes/2026-11-12_two_phase_frame/frame_bench.html`, frames driven by hand, best of three, two runs each, ms per frame):
+
+| Scene | One pass (`eb26043`) | Step 1 |
+|---|---|---|
+| 5,000 circles, 1 layer, 10 % animated | 16.37 | 15.74 |
+| 5,000 circles, 10 layers, 10 % animated | 16.74 | 16.15 |
+| 1,000 circles, 1 layer, all animated | 3.68 | 3.33 |
+| 1,000 circles, 20 layers, all animated | 3.88 | 3.19 |
+
+  No measurable cost: the differences lie within the run-to-run variation (up to 15 % between runs of the same build).
+- **Pages:** all 78 docs and example pages (166 stages), each loaded with the build of `eb26043` and with step 1, 60 frames driven by hand on every stage: 5,646 canvas clears before, 5,648 with step 1; no warnings or errors in either. The only difference: `examples/test26.html` and `test27.html` nest a `<pxl-layer>` inside a `<pxl-layer>`, which the engine doesn't really support (the outer layer treats the inner one as a child and calls its `render()` with the child arguments, and the stage draws it as well); with step 1 the inner layer is drawn twice in its first frame. (A live sweep with the browser's own frames needs the window in the foreground: in a background tab, rAF runs about 3 times per second and measures nothing.)
+- **Docs:** `docs/mapping.html` section 7 "Draw Order" deleted (§8); KILOPIXEL.md Per-Frame Data Flow, Per-Frame Render Pipeline, Dirty-Flag Optimization, Errors While Rendering, Coordinate Mapping, AI guide.
+
 ## 8. Docs When Solved
 
-Delete section 7 "Draw Order" of `docs/mapping.html` (and renumber the sections after it), and drop the draw-order rule from KILOPIXEL.md Coordinate Mapping and the AI guide.
+Done with step 1 (2026-11-13): section 7 "Draw Order" of `docs/mapping.html` deleted (it was the last section, nothing to renumber); KILOPIXEL.md Coordinate Mapping and the AI guide no longer ask for readers after their targets, only a reader that also uses `t` does.

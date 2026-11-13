@@ -28,6 +28,10 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     // Own broadcasts from variableChangedCallback() that are still running (see there)
     this._broadcastNesting = 0;
 
+    // Frame (pxl._frame) in which the update phase failed for this element: the draw phase of that frame skips it.
+    // A frame number needs no reset, unlike a boolean.
+    this._failedFrame = -1;
+
     // Matrices are recomputed lazily: a version counter per matrix tells children when to recompute theirs
     this._localMatrix = pxl.Matrix.create();
     this._globalMatrix = pxl.Matrix.create();

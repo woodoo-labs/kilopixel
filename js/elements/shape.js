@@ -93,21 +93,27 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     this.stage?.interaction.unregisterElement(this);
   }
 
-  // Every shape draws in its own canvas state: whatever it changes or throws, the next shape starts clean.
-  // A hidden shape still evaluates, so ref.* to it stays current; it only skips the save and the drawing.
-  render(ctx, u, t) {
+  // Update phase. A hidden shape still evaluates, so ref.* to it stays current.
+  update(t) {
     try {
       this.evaluateAnimations(t);
-      if (this.attributeValues.hidden) return;
-      ctx.save();
-      try {
-        pxl.applyContextState(ctx, u, this.attributeValues, this);
-        this.draw(ctx, u, t);
-      } finally {
-        ctx.restore();
-      }
+    } catch (error) {
+      this._failedFrame = pxl._frame;
+      this.reportError(error);
+    }
+  }
+
+  // Draw phase. Every shape draws in its own canvas state: whatever it changes or throws, the next shape starts clean.
+  render(ctx, u, t) {
+    if (this._failedFrame === pxl._frame || this.attributeValues.hidden) return;
+    ctx.save();
+    try {
+      pxl.applyContextState(ctx, u, this.attributeValues, this);
+      this.draw(ctx, u, t);
     } catch (error) {
       this.reportError(error);
+    } finally {
+      ctx.restore();
     }
   }
 

@@ -30,13 +30,16 @@ pxl.Variable = class Variable extends pxl.PxlNode {
     this.stage?.requestRender();
   }
 
-  // A failing expression keeps the previous value for this frame
-  render(ctx, u, t) {
+  // Update phase. A failing expression keeps the previous value for this frame.
+  update(t) {
     try {
       this.evaluateAnimations(t);
     } catch (error) {
       this.reportError(error);
     }
   }
+
+  // Draw phase: a variable draws nothing (it is in its layer's or group's childList like a shape)
+  render() {}
 };
 customElements.define('pxl-var', pxl.Variable);

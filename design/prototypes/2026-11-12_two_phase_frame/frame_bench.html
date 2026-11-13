@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Frame bench</title>
+<!-- Frame time of the current build. The one-pass numbers in the plan (§7.4) came from the build of commit eb26043
+     (git show eb26043:dist/pxl.min.js), loaded in place of this script. -->
+<script src="/dist/pxl.min.js"></script>
+<style>body { font: 13px monospace; } pxl-stage { width: 600px; }</style>
+</head>
+<body>
+<pxl-stage id="st" ratio="5 / 3"></pxl-stage>
+<pre id="out">run() in the console</pre>
+<script>
+// Scene: `layers` layers with n circles in total, `share` of them animated
+function build(n, layers, share) {
+  const st = document.getElementById('st');
+  let html = '';
+  const per = Math.floor(n / layers);
+  for (let l = 0; l < layers; l++) {
+    html += '<pxl-layer>';
+    for (let i = 0; i < per; i++) {
+      const k = l * per + i;
+      const x = (k * 37) % 1000, y = (k * 53) % 600;
+      html += Math.random() < share
+        ? `<pxl-circle x="${x} + wave(2) * 20" y="${y}" r="4" fill="#38bdf8"></pxl-circle>`
+        : `<pxl-circle x="${x}" y="${y}" r="4" fill="#94a3b8"></pxl-circle>`;
+    }
+    html += '</pxl-layer>';
+  }
+  st.innerHTML = html;
+  st.resize();
+}
+// Average ms of stage.render(t) over frames driven by hand (the browser's own rAF frames are excluded)
+function measure(frames) {
+  const st = document.getElementById('st');
+  for (let i = 0; i < 30; i++) st.render(1 + i / 60);
+  const t0 = performance.now();
+  for (let i = 0; i < frames; i++) st.render(2 + i / 60);
+  return (performance.now() - t0) / frames;
+}
+// Best of three runs per scene
+function run() {
+  const cases = [[5000, 1, 0.1], [5000, 10, 0.1], [1000, 1, 1], [1000, 20, 1]];
+  const res = {};
+  for (const [n, layers, share] of cases) {
+    build(n, layers, share);
+    const runs = [measure(120), measure(120), measure(120)];
+    res[`${n} circles, ${layers} layers, ${share * 100}% animated`] = Math.min(...runs).toFixed(3) + ' ms';
+  }
+  document.getElementById('out').textContent = JSON.stringify(res, null, 2);
+  return res;
+}
+</script>
+</body>
+</html>

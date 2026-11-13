@@ -1,6 +1,6 @@
 # Kilopixel Framework — Complete Technical Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~56KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~57KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes using custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, etc.) and the framework compiles, evaluates, and renders everything at 60fps automatically.
 
@@ -78,14 +78,19 @@ graph TD
 
 ```
 Stage.requestRender() → requestAnimationFrame → Stage.render(t)
+  ├─ pxl._frame++
   ├─ Sort layers and stage-level variables by DOM position (if dirty)
-  ├─ For each stage-level <pxl-var>: evaluateAnimations(t); if one is animated → stage.requestRender()
-  ├─ For each layer (if isDirty || isAnimated):
+  ├─ For each stage-level <pxl-var>: update(t); if one is animated → stage.requestRender()
+  ├─ Update phase, for each layer (if isDirty || isAnimated): layer.update(t)
+  │   ├─ _wasDirty = isDirty, isDirty = false
   │   ├─ evaluateAnimations(t)  → update attributeValues, broadcast ref.*
-  │   ├─ ctx.clearRect(), isDirty = false
+  │   ├─ For each child (group/shape/variable): child.update(t)
+  │   │   └─ evaluateAnimations(t)  → if animated: parentLayer.invalidate() (heartbeat: isDirty again, next rAF)
+  │   └─ _keepAlive = isDirty
+  ├─ Draw phase, for each layer where needsRender(): layer.render(u, t)
+  │   ├─ ctx.clearRect(), isDirty = _keepAlive
   │   ├─ ctx.save() + applyTransformState(translate→rotate→scale→skew→offset)
-  │   ├─ For each child (group/shape):
-  │   │   ├─ evaluateAnimations(t)  → if animated: parentLayer.invalidate() (isDirty again, next rAF)
+  │   ├─ For each child: child.render(ctx, u, t)
   │   │   ├─ ctx.save() + applyContextState()
   │   │   ├─ shape.draw(ctx, u, t) → _buildPath + applyStyle
   │   │   └─ ctx.restore()
@@ -804,7 +809,7 @@ The reader doesn't set `skewy` and keeps `zoom` at `1` (or uses it on purpose: `
 
 **Targets**: shapes, groups and layers (anything with a frame). `ref.<stage>` returns `0` (the stage has no frame), a not yet connected `ref.<id>` returns `0`, and a `pxl-var` returns `NaN` (it observes only `value`, so its matrix is built from `undefined`).
 
-**Draw order (one-frame lag)**: an element evaluates its animated values while it is drawn (`evaluateAnimations()` in `render()`); layers draw in DOM order, children in DOM order. A reader drawn **before** an animated target therefore reads the target's values from the previous frame; the target's broadcast then re-evaluates the reader and redraws its layer in the next frame. Rule: put readers after their targets (a later layer, or later in the same layer), like the connecting line in the walkthrough's §8 and the connector layer in `examples/test53.html`, which are the last layers. The reader-side walk above has no lag. The same applies to plain `ref.*` readers. A general fix (evaluate everything, then draw) is an idea in `.agents/TODO.md` §29.
+**Draw order**: every frame evaluates all layers first and draws them afterwards (two phases, [Per-Frame Render Pipeline](#per-frame-render-pipeline)). A reader drawn before its target (an earlier layer, or earlier in the same layer) gets the target's value through the broadcast during the update phase, so it is drawn with this frame's value, whatever the DOM order. This holds for toLocal and plain `ref.*` readers. Remaining limit: a reader whose expression also uses `t` doesn't subscribe and reads its target when it is evaluated itself; placed before an animated target, it still lags one frame (`design/2026-11-12_two_phase_frame_plan.md` §3.1.1, step 3).
 
 Note: The compiler rewrites `toLocal(` to `pxl.toLocal(this, ` at compile time.
 
@@ -1431,7 +1436,7 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 
 ```
 1. Something triggers stage.requestRender()
-   ├─ An animated element invalidates its layer while it is drawn (heartbeat)
+   ├─ An animated element invalidates its layer while it is evaluated (heartbeat)
    ├─ An animated layer requests the next frame at the end of its render (heartbeat)
    ├─ An animated stage-level <pxl-var> (the stage requests the next frame after evaluating it)
    ├─ A pointer event fires
@@ -1443,25 +1448,40 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 
 3. stage.render(t):
    ├─ Record performance: start = performance.now()
+   ├─ pxl._frame++  ← per-frame state is stored as the frame it belongs to (_failedFrame, a layer's _updateFrame)
    ├─ Sort layers and stage-level variables by DOM position (if _isOrderDirty)
-   ├─ For each stage-level <pxl-var>: variable.render(null, u, t)  ← before the layers, so readers in every
+   ├─ For each stage-level <pxl-var>: variable.update(t)  ← before the layers, so readers in every
    │   layer see this frame's value; if one is animated → stage.requestRender()
-   ├─ For each layer where isDirty || isAnimated:
+   │
+   ├─ UPDATE PHASE, for each layer where isDirty || isAnimated:
+   │   └─ layer.update(t)
+   │       ├─ _updateFrame = pxl._frame; sort children by DOM position (if _isOrderDirty)
+   │       ├─ _wasDirty = isDirty; isDirty = false  ← requests from before this frame are kept in _wasDirty
+   │       ├─ layer.evaluateAnimations(t)  ← error: _failedFrame, isDirty = _wasDirty, reportError, return
+   │       ├─ if not hidden: for each child: child.update(t)
+   │       │   ├─ group: sort children, evaluateAnimations (error: _failedFrame, return) → (hidden: stop) → children
+   │       │   ├─ shape: evaluateAnimations (error: _failedFrame); a hidden shape is still evaluated
+   │       │   └─ variable: evaluateAnimations
+   │       │   (an animated element's evaluateAnimations ends with parentLayer.invalidate():
+   │       │    isDirty = true again and the next rAF is requested)
+   │       └─ _keepAlive = isDirty  ← the heartbeat of this frame
+   │
+   ├─ DRAW PHASE, for each layer where needsRender():
+   │   │   needsRender = (updated this frame && _wasDirty) || isDirty || isAnimated
+   │   │   (isDirty also catches a later layer's broadcast after this layer's update)
    │   └─ layer.render(u, t)
-   │       ├─ Sort children by DOM position (if _isOrderDirty)
-   │       ├─ layer.evaluateAnimations(t)  ← evaluate layer's own animations (error: reportError, keep old pixels, return)
+   │       ├─ _failedFrame === pxl._frame → return (keeps its old pixels)
    │       ├─ update CSS compositing (opacity, mix-blend-mode, filter) if changed
-   │       ├─ CSS-only fast path: only compositing animated (no transform, no hidden) and not dirty → heartbeat, return
+   │       ├─ CSS-only fast path: only compositing animated (no transform, no hidden) and nothing changed → heartbeat, return
    │       ├─ ctx.clearRect(full canvas)
-   │       ├─ layer.isDirty = false
+   │       ├─ isDirty = (updated this frame && _keepAlive)  ← only the heartbeat survives into the next frame
    │       ├─ if hidden: mark canvas empty, heartbeat, return
    │       ├─ if has transforms: ctx.save() + applyTransformState()
    │       ├─ For each child:
-   │       │   └─ child.render(ctx, u, t)  ← group or shape
-   │       │       ├─ group: evaluateAnimations → (hidden: stop) → recurse children
-   │       │       └─ shape: evaluateAnimations → (hidden: stop) → save → applyContextState → draw() → restore
-   │       │           (an animated element's evaluateAnimations ends with parentLayer.invalidate():
-   │       │            isDirty = true again and the next rAF is requested)
+   │       │   └─ child.render(ctx, u, t)
+   │       │       ├─ group: (_failedFrame or hidden: stop) → transforms → children
+   │       │       ├─ shape: (_failedFrame or hidden: stop) → save → applyContextState → draw() → restore
+   │       │       └─ variable: nothing
    │       ├─ if has transforms: ctx.restore()
    │       └─ HEARTBEAT: if layer.isAnimated → stage.requestRender()  (without isDirty)
    ├─ Record performance: ms = performance.now() - start  (published once per second by pxl.perf's timer)
@@ -1473,7 +1493,7 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 - Only layers with `isDirty === true` or animated attributes of their own (`isAnimated`) re-render
 - Static layers (no animated attributes, no animated children) pay zero per-frame cost
 - The heartbeat has two callers:
-  - an animated **element** (group, shape, variable; not a layer, which is its own `parentLayer`) ends `evaluateAnimations()` with `parentLayer.invalidate()`. The layer set `isDirty = false` before drawing its children, so it is dirty again after the frame and the next rAF is scheduled.
+  - an animated **element** (group, shape, variable; not a layer, which is its own `parentLayer`) ends `evaluateAnimations()` with `parentLayer.invalidate()`. The layer cleared `isDirty` at the start of its update (keeping earlier requests in `_wasDirty`), so after its children it is dirty again (`_keepAlive`); drawing sets `isDirty = _keepAlive`, so the layer stays in the next frame and the next rAF is scheduled. Measured against the single pass on 2026-11-13: same redraw counts on 78 docs and example pages (`design/2026-11-12_two_phase_frame_plan.md` §7.4).
   - an animated **layer** (its own attributes, `isAnimated`) calls `stage.requestRender()` at the end of `render()`, without setting `isDirty`. So a layer whose only animated attributes are compositing stays on the CSS-only fast path and doesn't redraw its canvas.
 - Hidden + empty canvas: if a layer is `hidden` and its canvas was already cleared, `invalidate()` returns early without scheduling rAF
 
@@ -1488,8 +1508,8 @@ Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getEle
 
 A canvas call or an expression that throws must not break the frame (`design/2026-11-07_safe_shape_render_plan.md`):
 
-- **Shape:** `render()` catches errors from its evaluation and its drawing. The shape is skipped for that frame, the canvas state is restored (no shifted layer), and the rest of the layer, later layers and hit testing keep working.
-- **Group, layer, variable:** a failing evaluation skips the element (with its children) for that frame. A layer keeps its previous pixels; a variable keeps its previous value.
+- **Shape:** `update()` catches errors from its evaluation and stores the frame in `_failedFrame`; the draw phase of that frame skips the shape. `render()` catches errors from its drawing. Either way the canvas state is restored (no shifted layer), and the rest of the layer, later layers and hit testing keep working.
+- **Group, layer, variable:** a failing evaluation skips the element (with its children) for that frame, in both phases (`_failedFrame`). A layer keeps its previous pixels and its redraw request; a variable keeps its previous value.
 - **Readers:** a reader evaluated by a broadcast (`variableChangedCallback`) or by a `toLocal` walk (`broadcastGlobalMatrixChange`) catches its own error. The element that changed isn't blamed or skipped, the other readers still update, and the failing reader keeps its previous values and stays subscribed. This also holds for broadcasts outside frames (`setAttribute()`, pointer events, the performance monitor).
 - **`PxlNode.reportError(error)`** (`node.js`): warns once per distinct message and at most 3 times per element (the third warning says that more are hidden; some browser messages contain the bad value, e.g. a negative `arc()` radius). The same error object again returns early, so a repeated gradient error (kept by `createGradient`) allocates nothing. An animated element keeps invalidating its layer, so an error that depends on `t` recovers on its own.
 - **Not covered:** an expression that fails immediately in `setAttribute()` is reported by the browser as an uncaught error in a custom element reaction (the element keeps its old value); errors in `on*` handlers behave like DOM event handler errors.
@@ -1687,7 +1707,7 @@ Write filters with the `pxl.scope` helpers, also when they are animated: they ad
   r="ref.planet.r * toLocal(ref.planet, 'zoom') + 10" stroke="white" fill="none"></pxl-circle>
 ```
 
-`'tx'`/`'ty'` = total drawn position (center + offset). `'x'`/`'y'` = pivot center only. `'tx' = 'x' + 'dx'` algebraically. `'rotate'` = direction of the target's x axis; `'zoom'` = total uniform zoom (exact while nothing in between is stretched, otherwise use `'scalex'` / `'scaley'`). To copy a whole frame (skew and mirror included), use the clone rule in [Coordinate Mapping](#coordinate-mapping-tolocal). Put readers in a layer after their target (one-frame lag otherwise).
+`'tx'`/`'ty'` = total drawn position (center + offset). `'x'`/`'y'` = pivot center only. `'tx' = 'x' + 'dx'` algebraically. `'rotate'` = direction of the target's x axis; `'zoom'` = total uniform zoom (exact while nothing in between is stretched, otherwise use `'scalex'` / `'scaley'`). To copy a whole frame (skew and mirror included), use the clone rule in [Coordinate Mapping](#coordinate-mapping-tolocal). Readers may come before or after their target; only a reader that also uses `t` belongs after an animated target (one-frame lag otherwise).
 
 Note: `ref.myShape.tx` gives the shape's drawn origin in its own parent space (`x` plus the offset `dx` turned by the shape's own `rotate` / `zoom` / `scalex` / `scaley` / skew), correct for readers in the same space. `toLocal(ref.myShape, 'tx')` projects that into the CALLER's parent coordinate space. Use `toLocal` when shapes are in different layers or groups.
 

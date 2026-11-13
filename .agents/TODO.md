@@ -146,11 +146,12 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Open**: name (`space` / `frame`), origin (drawing origin / pivot), scope (shapes and groups / also layers), hidden target.
 
 ## 29. Two-Phase Frame: Evaluate Everything, Then Draw
-- **Status**: 💬 **Discussion** (idea 2026-10-30; plan started 2026-11-12, measurements open)
+- **Status**: 💬 **Discussion** (2026-11-13: step 1 built, plan §7.4; steps 2–4 not decided)
 - **Reference**: `design/2026-11-12_two_phase_frame_plan.md` (hub: the plans that depend on it and what changes for each in §6, suggested order in §7)
-- **Idea**: split the frame into an update phase (evaluate every element) and a draw phase. Removes the one-frame lag of readers drawn before their targets (toLocal, `space`, `ref.*`), and allows change-based dirty flags: a layer redraws only when a value really changed (a `floor(t)` clock redraws once per second, a finished `clamp()` animation stops redrawing), and the stage, not the drawing, keeps the loop alive.
-- **Open**: cost of the second walk (first measurement: about 0.02 ms per 1,000 elements, 1–2 % of a frame, plan §5.1), redraws saved, hidden subtrees, readers that use `t` and refs (dependency order with a cycle rule recommended, plan §3.1.1), order of broadcasts; plan §4.
-- **Steps**: (1) only split evaluation from drawing (fixes the lag for broadcast readers, doubles as the measurement), (2) change-based dirty flags and keep-alive in the stage, (3) `t` readers, hidden subtrees, (4) the dependent plans; plan §7.2.
+- **Built (step 1)**: the frame evaluates all layers first, then draws them. Readers drawn before their targets (toLocal, `ref.*` without `t`) no longer lag a frame; no measurable cost.
+- **Idea, still open**: change-based dirty flags (step 2): a layer redraws only when a value really changed (a `floor(t)` clock redraws once per second, a finished `clamp()` animation stops redrawing), and the stage, not the drawing, keeps the loop alive.
+- **Open**: redraws saved by step 2, hidden subtrees, readers that use `t` and refs (dependency order with a cycle rule recommended, plan §3.1.1), order of broadcasts; plan §4.
+- **Steps**: (1) split evaluation from drawing (built), (2) change-based dirty flags and keep-alive in the stage, (3) `t` readers, hidden subtrees, (4) the dependent plans; plan §7.2.
 ## 30. Framework Compatibility (DOM Contract)
 - **Status**: 🟡 **Proposed** (2026-11-10, D1 and D4 decided)
 - **Reference**: `design/2026-10-30_framework_compatibility_plan.md`; prototype `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4, 2026-11-10); the React 19 / Vue 3.5 components with `FINDINGS.md` (2026-10-30) in the same folder

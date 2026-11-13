@@ -1095,6 +1095,10 @@ pxl.perf = {
   }
 };
 
+// Frame number, counted by every Stage.render(): per-frame state (_failedFrame, a layer's update frame) is stored as
+// the frame it belongs to, so it never needs a reset
+pxl._frame = 0;
+
 pxl.Stage = class Stage extends HTMLElement {
   static get observedAttributes() { return ['ratio', 'alwaysrender']; }
 
@@ -1265,8 +1269,12 @@ pxl.Stage = class Stage extends HTMLElement {
     requestAnimationFrame(this._frameCallback);
   }
 
+  // Two phases: every layer evaluates first (update), then the layers draw. A reader drawn before its target then
+  // sees the target's value of this frame, whatever the DOM order (readers that also use t excepted: they read
+  // their target when they are evaluated).
   render(t) {
     const start = performance.now();
+    pxl._frame++;
 
     if (this._isOrderDirty) {
       this._layers.sort(pxl.sortByDOMPosition);
@@ -1279,14 +1287,18 @@ pxl.Stage = class Stage extends HTMLElement {
     let isVariableAnimated = false;
     for (let i = 0; i < this._variables.length; i++) {
       const variable = this._variables[i];
-      variable.render(null, this.unit, t);
+      variable.update(t);
       if (variable.isAnimated) isVariableAnimated = true;
     }
     if (isVariableAnimated) this.requestRender();
 
     for (let i = 0; i < this._layers.length; i++) {
       const layer = this._layers[i];
-      if (layer.isDirty || layer.isAnimated) layer.render(this.unit, t);
+      if (layer.isDirty || layer.isAnimated) layer.update(t);
+    }
+    for (let i = 0; i < this._layers.length; i++) {
+      const layer = this._layers[i];
+      if (layer.needsRender()) layer.render(this.unit, t);
     }
 
     const ms = performance.now() - start;
@@ -1329,6 +1341,10 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
     // Own broadcasts from variableChangedCallback() that are still running (see there)
     this._broadcastNesting = 0;
+
+    // Frame (pxl._frame) in which the update phase failed for this element: the draw phase of that frame skips it.
+    // A frame number needs no reset, unlike a boolean.
+    this._failedFrame = -1;
 
     // Matrices are recomputed lazily: a version counter per matrix tells children when to recompute theirs
     this._localMatrix = pxl.Matrix.create();
@@ -1581,6 +1597,11 @@ pxl.Layer = class Layer extends pxl.PxlNode {
 
     this.isDirty = true;
     this._isCanvasEmpty = false;
+
+    // The heartbeat across the two phases (see update())
+    this._updateFrame = -1;
+    this._wasDirty = false;
+    this._keepAlive = false;
     this.stage = null;
     this._dpr = 1; // set by the stage
 
@@ -1644,20 +1665,53 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     this.invalidate();
   }
 
-  render(u, t) {
+  // Update phase. isDirty carries two things into a frame:
+  // - requests from before it (setAttribute(), broadcasts from earlier layers, resize, the first draw): kept in
+  //   _wasDirty, because isDirty is cleared now;
+  // - the heartbeat: every animated child calls parentLayer.invalidate() while it is evaluated, so after the
+  //   children isDirty says "something in here is animated" (_keepAlive), and the layer stays in the next frame.
+  update(t) {
+    this._updateFrame = pxl._frame;
     if (this._isOrderDirty) {
       this.childList.sort(pxl.sortByDOMPosition);
       this._isOrderDirty = false;
     }
 
-    // A failing expression skips the layer with its children for this frame. It keeps its previous pixels,
-    // because clearRect comes later; reportError() keeps an animated layer asking for frames.
+    this._wasDirty = this.isDirty;
+    this.isDirty = false;
+    this._keepAlive = false;
+
+    // A failing expression skips the layer with its children for this frame; it keeps its previous pixels and
+    // its request. reportError() keeps an animated layer asking for frames.
     try {
       this.evaluateAnimations(t);
     } catch (error) {
+      this._failedFrame = pxl._frame;
+      this.isDirty = this._wasDirty;
       this.reportError(error);
       return;
     }
+
+    // A hidden layer doesn't evaluate its children: their values that follow t stay as they are until it is shown
+    if (!this.attributeValues.hidden) {
+      for (let i = 0; i < this.childList.length; i++) {
+        this.childList[i].update(t);
+      }
+    }
+    this._keepAlive = this.isDirty;
+  }
+
+  // Draw in this frame: dirty before the update or since (a later layer's broadcast reaches it after its update;
+  // the broadcast has already set its values), or animated itself
+  needsRender() {
+    return (this._updateFrame === pxl._frame && this._wasDirty) || this.isDirty || this.isAnimated;
+  }
+
+  // Draw phase
+  render(u, t) {
+    if (this._failedFrame === pxl._frame) return;
+    const isUpdated = this._updateFrame === pxl._frame;
+    const hasChanged = (isUpdated && this._wasDirty) || this.isDirty;
 
     const { alpha, blend, filter, hidden } = this.attributeValues;
 
@@ -1689,14 +1743,15 @@ pxl.Layer = class Layer extends pxl.PxlNode {
       }
     }
 
-    if (onlyCompositingAnimated && !this.isDirty) {
+    if (onlyCompositingAnimated && !hasChanged) {
       this.stage.requestRender();
       return;
     }
 
     const ctx = this._ctx;
     ctx.clearRect(0, 0, this._canvas.width / this._dpr, this._canvas.height / this._dpr);
-    this.isDirty = false;
+    // Drawn with this frame's values: only the heartbeat survives into the next frame
+    this.isDirty = isUpdated && this._keepAlive;
 
     if (hidden) {
       this._isCanvasEmpty = true;
@@ -1751,22 +1806,31 @@ pxl.Group = class Group extends pxl.PxlNode {
     this.parentLayer?.invalidate();
   }
 
-  // Draws into the parent layer's canvas
-  render(ctx, u, t) {
+  // Update phase. A failing expression skips the group with its children for this frame (also in the draw phase).
+  // A hidden group doesn't evaluate its children: their values that follow t stay as they are until it is shown.
+  update(t) {
     if (this._isOrderDirty) {
       this.childList.sort(pxl.sortByDOMPosition);
       this._isOrderDirty = false;
     }
 
-    // A failing expression skips the group with its children for this frame; nothing is saved yet, so nothing to restore
     try {
       this.evaluateAnimations(t);
     } catch (error) {
+      this._failedFrame = pxl._frame;
       this.reportError(error);
       return;
     }
 
     if (this.attributeValues.hidden) return;
+    for (let i = 0; i < this.childList.length; i++) {
+      this.childList[i].update(t);
+    }
+  }
+
+  // Draw phase, into the parent layer's canvas
+  render(ctx, u, t) {
+    if (this._failedFrame === pxl._frame || this.attributeValues.hidden) return;
 
     const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.attributeValues;
     const hasStateChanges = x || y || dx || dy || rotate ||
@@ -1880,21 +1944,27 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     this.stage?.interaction.unregisterElement(this);
   }
 
-  // Every shape draws in its own canvas state: whatever it changes or throws, the next shape starts clean.
-  // A hidden shape still evaluates, so ref.* to it stays current; it only skips the save and the drawing.
-  render(ctx, u, t) {
+  // Update phase. A hidden shape still evaluates, so ref.* to it stays current.
+  update(t) {
     try {
       this.evaluateAnimations(t);
-      if (this.attributeValues.hidden) return;
-      ctx.save();
-      try {
-        pxl.applyContextState(ctx, u, this.attributeValues, this);
-        this.draw(ctx, u, t);
-      } finally {
-        ctx.restore();
-      }
+    } catch (error) {
+      this._failedFrame = pxl._frame;
+      this.reportError(error);
+    }
+  }
+
+  // Draw phase. Every shape draws in its own canvas state: whatever it changes or throws, the next shape starts clean.
+  render(ctx, u, t) {
+    if (this._failedFrame === pxl._frame || this.attributeValues.hidden) return;
+    ctx.save();
+    try {
+      pxl.applyContextState(ctx, u, this.attributeValues, this);
+      this.draw(ctx, u, t);
     } catch (error) {
       this.reportError(error);
+    } finally {
+      ctx.restore();
     }
   }
 
@@ -3209,14 +3279,17 @@ pxl.Variable = class Variable extends pxl.PxlNode {
     this.stage?.requestRender();
   }
 
-  // A failing expression keeps the previous value for this frame
-  render(ctx, u, t) {
+  // Update phase. A failing expression keeps the previous value for this frame.
+  update(t) {
     try {
       this.evaluateAnimations(t);
     } catch (error) {
       this.reportError(error);
     }
   }
+
+  // Draw phase: a variable draws nothing (it is in its layer's or group's childList like a shape)
+  render() {}
 };
 customElements.define('pxl-var', pxl.Variable);
 

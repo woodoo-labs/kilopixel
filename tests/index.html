@@ -1192,6 +1192,101 @@
       }
     });
 
+    // --- Two-phase frame, step 1 (design/2026-11-12_two_phase_frame_plan.md §7.2) ---
+
+    // Records the value of key each time the element is drawn (read after render(), which may evaluate first)
+    function recordDrawn(id, key) {
+      const node = el(id), original = node.render;
+      node.drawn = [];
+      node.render = function(...args) { const r = original.apply(this, args); node.drawn.push(node.attributeValues[key]); return r; };
+    }
+    // Clears of a layer's canvas while fn runs
+    function countClears(layerId, fn) {
+      const ctx = el(layerId)._ctx, original = ctx.clearRect;
+      let calls = 0;
+      ctx.clearRect = function(...args) { calls++; return original.apply(this, args); };
+      try { fn(); } finally { ctx.clearRect = original; }
+      return calls;
+    }
+
+    test('two-phase frame: a reader in an earlier layer is drawn with its target\'s value of the same frame', () => {
+      srClear();
+      srAdd('srLayerA', '<pxl-line id="tpLine" x1="0" y1="100" x2="ref.tpBall.x" y2="100"></pxl-line>');
+      srAdd('srLayerB', '<pxl-circle id="tpBall" x="t * 300" y="100" r="10"></pxl-circle>');
+      recordDrawn('tpLine', 'x2');
+      recordDrawn('tpBall', 'x');
+      for (let i = 0; i < 4; i++) srRender(2 + i / 60);
+      const line = el('tpLine').drawn, ball = el('tpBall').drawn;
+      for (let i = 1; i < 4; i++) {
+        if (Math.abs(line[line.length - i] - ball[ball.length - i]) > 1e-9) throw new Error(`line drawn to ${line.slice(-3)}, ball at ${ball.slice(-3)}`);
+      }
+      srClear();
+    });
+
+    test('two-phase frame: a toLocal reader in an earlier layer stays on a target in a rotating later layer (mapping draw-order case)', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-circle id="tpRing" r="45" x="toLocal(ref.tpPlanet, 'x')" y="toLocal(ref.tpPlanet, 'y')"></pxl-circle>`);
+      srAdd('srStage', '<pxl-layer id="tpOrbit" x="250" y="330" rotate="t * 180"><pxl-circle id="tpPlanet" x="170" r="30"></pxl-circle></pxl-layer>');
+      recordDrawn('tpRing', 'x');
+      for (let i = 0; i < 4; i++) {
+        const t = 3 + i / 60;
+        srRender(t);
+        const expected = 250 + 170 * Math.cos(t * Math.PI);
+        const drawn = el('tpRing').drawn.at(-1);
+        // Matrices are Float32 (about 1e-5 here); one frame of lag would be about 9 px
+        if (Math.abs(drawn - expected) > 1e-3) throw new Error(`frame ${i}: ring drawn at x ${drawn}, planet at ${expected}`);
+      }
+      srClear();
+    });
+
+    test('two-phase frame: the heartbeat keeps a layer with an animated child redrawing, and a static layer idle', () => {
+      srClear();
+      srAdd('srLayerA', '<pxl-circle x="t * 100" y="100" r="10"></pxl-circle>');
+      srAdd('srLayerB', '<pxl-circle x="500" y="100" r="10"></pxl-circle>');
+      const stage = el('srStage');
+      if (stage.unit === 0) stage.resize();
+      stage.render(1); // draws both once (added shapes made them dirty)
+      let animated = 0;
+      const idle = countClears('srLayerB', () => {
+        animated = countClears('srLayerA', () => { for (let i = 0; i < 30; i++) stage.render(1 + (i + 1) / 60); });
+      });
+      if (animated !== 30 || idle !== 0) throw new Error(`animated layer cleared ${animated} times in 30 frames, static layer ${idle} times`);
+      srClear();
+    });
+
+    test('two-phase frame: a layer made dirty by an earlier layer\'s broadcast is drawn once per frame, with the new value', () => {
+      srClear();
+      srAdd('srLayerA', '<pxl-var id="tpVar" value="t * 10"></pxl-var>');
+      srAdd('srLayerB', '<pxl-circle id="tpReader" x="ref.tpVar.value" y="100" r="10"></pxl-circle>');
+      const stage = el('srStage');
+      if (stage.unit === 0) stage.resize();
+      stage.render(1);
+      recordDrawn('tpReader', 'x');
+      const clears = countClears('srLayerB', () => { for (let i = 0; i < 10; i++) stage.render(2 + i); });
+      const drawn = el('tpReader').drawn;
+      if (clears !== 10 || drawn.length !== 10 || drawn[9] !== 110) throw new Error(`clears ${clears}, drawn ${JSON.stringify(drawn)}`);
+      srClear();
+    });
+
+    test('two-phase frame: a shape whose update fails is skipped in the draw phase; a failing layer keeps its pixels', () => {
+      srClear();
+      srAdd('srLayerA', `<test-probe-shape id="tpBad" x="t > 0 ? missingFunction() : 0"></test-probe-shape>
+        <test-probe-shape id="tpGood" x="t * 10"></test-probe-shape>`);
+      const draws = { tpBad: 0, tpGood: 0 };
+      for (const id of Object.keys(draws)) {
+        const node = el(id), original = node.draw;
+        node.draw = function(...args) { draws[id]++; return original.apply(this, args); };
+      }
+      captureWarnings(() => srRender(1));
+      if (draws.tpBad !== 0 || draws.tpGood !== 1) throw new Error(`draw calls: ${JSON.stringify(draws)}`);
+
+      el('srLayerB').setAttribute('rotate', 't > 0 ? missingFunction() : 0');
+      const clears = countClears('srLayerB', () => captureWarnings(() => srRender(2)));
+      el('srLayerB').removeAttribute('rotate');
+      if (clears !== 0) throw new Error(`the failing layer cleared its canvas ${clears} times`);
+      srClear();
+    });
+
     // --- Run all tests in order ---
     (async () => {
       const results = [];

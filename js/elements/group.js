@@ -24,22 +24,31 @@ pxl.Group = class Group extends pxl.PxlNode {
     this.parentLayer?.invalidate();
   }
 
-  // Draws into the parent layer's canvas
-  render(ctx, u, t) {
+  // Update phase. A failing expression skips the group with its children for this frame (also in the draw phase).
+  // A hidden group doesn't evaluate its children: their values that follow t stay as they are until it is shown.
+  update(t) {
     if (this._isOrderDirty) {
       this.childList.sort(pxl.sortByDOMPosition);
       this._isOrderDirty = false;
     }
 
-    // A failing expression skips the group with its children for this frame; nothing is saved yet, so nothing to restore
     try {
       this.evaluateAnimations(t);
     } catch (error) {
+      this._failedFrame = pxl._frame;
       this.reportError(error);
       return;
     }
 
     if (this.attributeValues.hidden) return;
+    for (let i = 0; i < this.childList.length; i++) {
+      this.childList[i].update(t);
+    }
+  }
+
+  // Draw phase, into the parent layer's canvas
+  render(ctx, u, t) {
+    if (this._failedFrame === pxl._frame || this.attributeValues.hidden) return;
 
     const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.attributeValues;
     const hasStateChanges = x || y || dx || dy || rotate ||
