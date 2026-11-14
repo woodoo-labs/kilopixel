@@ -338,7 +338,7 @@ Every engine step: `node build.js`, update the `pxl.min.js` size, `tests/index.h
 
 ## 15. Interplay with Other Plans
 
-- **Stage sizing** (`2026-11-04_stage_sizing_plan.md`, 🟢 2026-11-14): builds W2 (§5) together with overridable stage sizes and the zero-width warning.
+- **Stage sizing** (`2026-11-04_stage_sizing_plan.md`, 🟢 2026-11-14): builds W2 (§5) together with overridable stage sizes and a 300 px fallback width.
 - **Always save / restore** (`2026-11-07_safe_shape_render_plan.md`, built 2026-11-07): independent; both touch `Shape.render()` only lightly (W1 doesn't change rendering).
 - **`space` attribute** (`2026-10-30_space_attribute_plan.md`): hit testing of space elements is unchanged; DOM events work the same for them. W3 accessors would include `space` (its value is a ref object, set as a property it could be the element itself: `el.space = otherEl` is a natural framework API; note for that plan).
 - **Two-phase frame** (TODO §29): event dispatch at the end of `process()` fits both the current single pass and a later update / draw split.

@@ -175,11 +175,11 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Docs**: afterwards `mask.html` shapes get fill + stroke and the standard ghosts; the "Ghosts of fill-only shapes" note in DOCS_STANDARDS.md goes.
 - **Related**: builds on always save / restore (`design/2026-11-07_safe_shape_render_plan.md`, built 2026-11-07); build before §14 (`paintorder`); plan §9.
 
-## 33. Stage Sizing and Layer Canvas: Overridable Defaults, Zero-Width Warning, Canvas in a Shadow Root
+## 33. Stage Sizing and Layer Canvas: Overridable Defaults, Fallback Width, Canvas in a Shadow Root
 - **Status**: 🟢 **Decided** (2026-11-14, includes W2 of the framework plan, §30)
 - **Reference**: `design/2026-11-04_stage_sizing_plan.md`; prototypes in `design/prototypes/2026-11-04_stage_sizing/`
 - **Problem**: the stage takes `width: 100%` of its parent. In a wrapper that sizes itself to its content (centered flex or grid item, `inline-block`, absolutely positioned card) it gets 0 × 0, draws nothing and logs nothing. Author CSS such as `pxl-stage { width: 600px }` is ignored, because `connectedCallback()` writes `display`, `position` and `width` as inline styles. `layer.innerHTML = …` removes the layer's canvas, silently (confirmed again 2026-11-14).
-- **Decided**: stage and `pxl-var` defaults in `@layer pxl { … }`, in a `<style>` at the start of `<head>` (or of the shadow root the stage sits in), so page CSS wins, also classes in the page's own cascade layers (Tailwind v4; an adopted sheet or `:where()` would not, measured); a warning when the stage still has zero width once the page has loaded; the layer canvas in an open shadow root with `:host` styles and a `<slot>` (mouse coordinates and `innerHTML` checked in a prototype); `aspect-ratio` stays inline.
+- **Decided**: stage and `pxl-var` defaults in `@layer pxl { … }`, in a `<style>` at the start of `<head>` (or of the shadow root the stage sits in), so page CSS wins, also classes in the page's own cascade layers (Tailwind v4; an adopted sheet or `:where()` would not, measured); in a parent without a width the stage is 300 px wide like `<canvas>` (`contain-intrinsic-inline-size`, measured in nine layouts; replaces the zero-width warning); the layer canvas in an open shadow root with `:host` styles and a `<slot>` (mouse coordinates and `innerHTML` checked in a prototype); `aspect-ratio` stays inline.
 
 ## 34. String Literals in Expressions
 - **Status**: 🟡 **Proposed** (2026-11-02; code drafted and checked in Node, implementation postponed)

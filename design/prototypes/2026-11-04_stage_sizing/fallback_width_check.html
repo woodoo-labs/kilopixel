@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fallback width of 300 px</title>
+  <style>
+    body { margin: 16px; font-family: sans-serif; color: #334155; width: 900px; }
+    pre { font-size: 13px; }
+    .flex-center { display: flex; justify-content: center; }
+    .grid-center { display: grid; place-items: center; }
+    .inline-block { display: inline-block; }
+    .abs-host { position: relative; height: 120px; }
+    .abs-card { position: absolute; left: 50%; transform: translateX(-50%); }
+    .col250 { width: 250px; }
+    .phone { width: 288px; }
+    /* x-stage plays the stage: block, full width, height from aspect-ratio, absolutely positioned content */
+    x-stage { display: block; position: relative; width: 100%; aspect-ratio: 4 / 1; background: #fed7aa; }
+    x-stage > i { position: absolute; inset: 0; }
+    /* Candidate: an intrinsic width of 300 px like <canvas>, used only by parents that size to their content */
+    .fallback x-stage { contain: inline-size; contain-intrinsic-inline-size: 300px; }
+    .author x-stage { width: 300px; }
+  </style>
+</head>
+<body>
+  <p>
+    Stage width in common layouts, today (<code>width: 100%</code> only) and with the fallback
+    (<code>contain: inline-size; contain-intrinsic-inline-size: 300px</code>). Result also in <code>window.fallbackResults</code>.
+  </p>
+  <pre id="out"></pre>
+  <script>
+    const layouts = {
+      'A plain div':                     '<div><S></div>',
+      'B wrapper in centered flex':      '<div class="flex-center"><div><S></div></div>',
+      'C stage in centered flex':        '<div class="flex-center"><S></div>',
+      'D wrapper in centered grid':      '<div class="grid-center"><div><S></div></div>',
+      'E inline-block wrapper':          '<div class="inline-block"><S></div>',
+      'F absolute card':                 '<div class="abs-host"><div class="abs-card"><S></div></div>',
+      'G author width 300px':            '<div class="author"><S></div>',
+      'I 250px column':                  '<div class="col250"><S></div>',
+      'J phone 288px, centered wrapper': '<div class="phone"><div class="flex-center"><div><S></div></div></div>'
+    };
+
+    const results = {};
+    for (const mode of ['today', 'fallback']) {
+      const box = document.createElement('div');
+      box.className = mode;
+      box.innerHTML = Object.values(layouts).map((html) => html.replace('<S>', '<x-stage><i></i></x-stage>')).join('');
+      document.body.append(box);
+      box.querySelectorAll('x-stage').forEach((stage, i) => {
+        const r = stage.getBoundingClientRect();
+        (results[Object.keys(layouts)[i]] ??= {})[mode] = Math.round(r.width) + ' x ' + Math.round(r.height);
+      });
+    }
+    document.getElementById('out').textContent = JSON.stringify(results, null, 1);
+    window.fallbackResults = results;
+  </script>
+</body>
+</html>

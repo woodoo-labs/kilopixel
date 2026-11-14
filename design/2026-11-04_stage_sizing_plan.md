@@ -1,15 +1,16 @@
-# Stage Sizing and Layer Canvas: Overridable Defaults, Zero-Width Warning, Canvas in a Shadow Root
+# Stage Sizing and Layer Canvas: Overridable Defaults, Fallback Width, Canvas in a Shadow Root
 
-- **Status**: 🟢 **Decided** (2026-11-14, now includes workstream W2 of the framework plan; decisions in §4.5)
+- **Status**: 🟢 **Decided** (2026-11-14, now includes workstream W2 of the framework plan; a 300 px fallback width replaces the zero-width warning; decisions in §4.5)
 - **Date**: 2026-11-04 (extended 2026-11-14)
 - **Related**: `design/2026-10-30_framework_compatibility_plan.md` (W2 §5, C9–C11: this plan builds that workstream), `design/2026-10-17_bundle_scope_plan.md` (classic script in `<head>`), `docs/installation.html` (script in `<head>` since 5891224)
-- **Target Implementation**: `js/elements/stage.js` (default styles, warning), `js/elements/layer.js` (shadow root), `js/elements/variable.js` (`display: none`), `tests/index.html`, `docs/installation.html`, `.agents/KILOPIXEL.md` (Stage, Layer, Variable)
+- **Target Implementation**: `js/elements/stage.js` (default styles), `js/elements/layer.js` (shadow root), `js/elements/variable.js` (`display: none`), `tests/index.html`, `docs/installation.html`, `.agents/KILOPIXEL.md` (Stage, Layer, Variable)
 - **Prototypes** in `design/prototypes/2026-11-04_stage_sizing/`:
   - `stage_width_check.html` (today, eight layouts);
   - `stage_sizing_prototype.html` (defaults in a cascade layer; `?fallback=min` and `?fallback=minpct` for the rejected fallback widths);
   - `zero_width_while_parsing.html` (width 0 while the page is parsed);
   - `cascade_layer_order.html` (where the default sheet must go, with page CSS in cascade layers like Tailwind v4; 2026-11-14);
-  - `shadow_root_check.html` (layer canvas moved into a shadow root: mouse coordinates and `layer.innerHTML`; 2026-11-14).
+  - `shadow_root_check.html` (layer canvas moved into a shadow root: mouse coordinates and `layer.innerHTML`; 2026-11-14);
+  - `fallback_width_check.html` (the 300 px fallback width in nine layouts; 2026-11-14).
 
 ---
 
@@ -55,7 +56,7 @@ this.style.aspectRatio = this._parsedRatio;
 ## 3. Goals
 
 - Author CSS can change a stage's `display`, `position` and `width`, like on any HTML element, also when the page puts its own CSS in cascade layers (Tailwind v4).
-- A stage that is laid out but 0 px wide logs one warning that names the cause and the fix.
+- A stage in a parent that sizes itself to its content still draws, 300 px wide like `<canvas>`, without CSS from the user.
 - The layer canvas can't be removed by changing the layer's children, and the layer's light DOM is exactly what the author or framework wrote.
 - The default stays: a stage fills its parent's width. No change for pages that work today, except pages whose stage CSS never applied (§5).
 
@@ -67,7 +68,10 @@ At load, `stage.js` adds one `<style>` element at the start of `<head>`:
 
 ```css
 @layer pxl {
-  pxl-stage { display: block; position: relative; width: 100%; }
+  pxl-stage {
+    display: block; position: relative; width: 100%;
+    contain: inline-size; contain-intrinsic-inline-size: 300px;
+  }
   pxl-var { display: none; }
 }
 ```
@@ -91,50 +95,42 @@ At load, `stage.js` adds one `<style>` element at the start of `<head>`:
   - layer `opacity`, `mix-blend-mode` and `filter` on the canvas (the compositing fast path; the canvas is private, §4.4).
 - **Where:** a function in `stage.js`, run once when the file loads (`document.head` exists for a script in `<head>` and at the bottom of `<body>`), plus the shadow-root check in `connectedCallback()`. `pxl-var` moves to the sheet as well, so its `display: none` is no longer written per element in `variable.js`. The layer's styles are not in this sheet; they are `:host` styles in its own shadow root (§4.4).
 
-### 4.2 Zero-Width Warning
+### 4.2 Fallback Width of 300 px
 
-A width of 0 alone is not an error: while the page is still loading, the parent may not have its width yet. Measured in `design/prototypes/2026-11-04_stage_sizing/zero_width_while_parsing.html` (script in `<head>`, stage in a centered wrapper, a paragraph that widens the wrapper later in the HTML): the stage reports `0 (loading, rects 1)`, then `828 (complete, rects 1)`. Warning at the first 0 would flag a page that works. So the warning waits until the page has loaded:
+A stage whose parent has a width fills it, as today. A parent that sizes itself to its content (cases B–F) asks the stage for its own width, and today the answer is 0, because the layers are absolutely positioned. The two lines `contain: inline-size; contain-intrinsic-inline-size: 300px` in the sheet (§4.1) make the answer 300 px, the default width of `<canvas>`:
 
-```js
-resize() {
-  const w = this.clientWidth;
-  const h = this.clientHeight;
-  if (!this._hasCheckedWidth && this.getClientRects().length > 0) this.checkWidth(w);
-  if (w === 0) return;
-  …
-}
+- **`contain: inline-size`:** the stage's width no longer depends on its content (the layers never added any, so nothing is lost). It creates no stacking context and no containing block, so layers and compositing are unchanged.
+- **`contain-intrinsic-inline-size: 300px`:** the width the stage reports when a parent asks for its content width. `width: 100%` still decides whenever the parent has a width of its own.
 
-// The first time the stage is laid out, a width of 0 usually means its parent sizes itself to its content.
-// While the page loads, later HTML, images or load scripts can still give the parent its width, so the
-// warning waits for the load event and one frame.
-checkWidth(w) {
-  this._hasCheckedWidth = true;
-  if (w > 0) return;
+Measured in `design/prototypes/2026-11-04_stage_sizing/fallback_width_check.html` (`ratio` 4 / 1, page 900 px wide), and with the real engine in `design/prototypes/2026-11-04_stage_sizing/stage_width_check.html` plus these two lines (cases A–F identical, the layer canvases resized to 300 × 75):
 
-  const check = () => requestAnimationFrame(() => {
-    if (!this.isConnected || this.clientWidth > 0 || this.getClientRects().length === 0) return;
-    console.warn('<pxl-stage> has no width: its parent sizes itself to its content (a flex or grid item, ' +
-      'inline-block, absolute). Give the parent a width, e.g. width: 100% or 600px. ' +
-      'If the stage is meant to be hidden, ignore this.', this);
-  });
-  if (document.readyState === 'complete') check();
-  else window.addEventListener('load', check, { once: true });
-}
-```
+| Layout | Today | With the fallback |
+|---|---|---|
+| A. Plain `div` | 900 × 225 | 900 × 225 |
+| B. Wrapper in a centered flex container | **0 × 0** | **300 × 75** |
+| C. Stage directly in a centered flex container | 900 × 225 | 900 × 225 |
+| D. Wrapper in a centered grid | **0 × 0** | **300 × 75** |
+| E. `inline-block` wrapper | **0 × 0** | **300 × 75** |
+| F. Absolutely positioned card | **0 × 0** | **300 × 75** |
+| G. Author CSS `width: 300px` | 300 × 75 | 300 × 75 |
+| I. 250 px column | 250 × 63 | 250 × 63 (no overflow) |
+| J. 288 px phone, centered wrapper without a width | **0 × 0** | 300 × 75 (12 px too wide, like `<canvas>`) |
 
-- **Hidden stages stay quiet:** the ResizeObserver also fires with width 0 for a stage inside `display: none` (a closed tab), but then `getClientRects()` is empty. Measured: case B fires with width 0 and 1 rect, a stage in a `display: none` parent with width 0 and 0 rects. Such a stage is checked the first time it is shown.
-- **Only the first layout:** `_hasCheckedWidth` (set in the constructor) is set at the first `resize()` where the stage has a box, so a stage that shrinks to 0 later (a panel being closed) never warns, and the warning appears at most once per stage.
-- **Waits for loading:** the load event covers parsing, images without a size and most scripts that size containers at load. One more frame lets their layout settle.
-- **Remaining false alarm:** a stage in a panel that is already collapsed when the page opens (`width: 0; overflow: hidden`). Rare; the last sentence of the message covers it.
-- **Cost:** none per frame; `resize()` runs only when the size changes, and the check once per stage.
+- **No warning needed:** with the fallback, a stage is 0 px wide only when it is meant to be (hidden, or in a collapsed panel). The zero-width warning planned until 2026-11-14 had nothing left to catch, and needed care to avoid false alarms while the page loads; it is dropped (§4.3).
+- **A small stage explains itself:** users see a 300 px stage and give the parent a width; the docs say how (§6).
+- **Overridable:** both lines are in `@layer pxl`, so any width rule of the page, or `contain: none`, wins.
+- **Browser support:** `contain: inline-size` and `contain-intrinsic-inline-size` in current Chrome, Edge, Firefox and Safari (17 and later). An older browser ignores them and behaves as today (0 × 0 in cases B–F).
+- **Cost:** none per frame.
 
 ### 4.3 Rejected
 
-- **A default width like `<canvas>` (`min-width: 300px`):** fixes B–F (all draw 300 × 75) but overflows narrow columns: a 250 px column gets a 300 px stage (case I), and a phone at 320 px with 16 px padding has only 288 px. A default that breaks mobile layouts is worse than the warning.
+- **`min-width: 300px`:** fixes B–F (all draw 300 × 75) but overflows narrow columns: a 250 px column gets a 300 px stage (case I), and a phone at 320 px with 16 px padding has only 288 px. The fallback in §4.2 isn't a minimum: it only answers a parent that asks for the content width, so case I stays 250 px.
 - **`min-width: min(300px, 100%)`:** doesn't help; in a parent that sizes to its content the percentage counts as 0, so B–F stay 0 × 0 (measured).
 - **Shadow DOM with `:host` for the stage:** layers are light DOM children; the stage would need a shadow root with a `<slot>` only to get one lowest-priority rule. The cascade layer gives the same priority without changing the DOM. (The layer does get a shadow root, for its canvas: §4.4.)
 - **`document.adoptedStyleSheets`** (proposed in the framework plan §5.2): its `pxl` layer ranks above the page's layers (§4.1 table).
 - **`:where(pxl-stage)` outside any layer** (proposed in the framework plan §5.2): zero specificity, but a rule outside any layer beats every layered page rule (§4.1 table).
+- **Zero-width warning** (planned 2026-11-04 to 2026-11-14): a `console.warn` when the stage is still 0 px wide after the `load` event and one frame (`checkWidth()` called from `resize()`, about 15 lines). It had to wait for loading, because a parent can get its width late (measured in `design/prototypes/2026-11-04_stage_sizing/zero_width_while_parsing.html`). Replaced by the fallback width (§4.2): the stage draws instead of asking the user to fix the CSS.
+- **Detecting author styles in JavaScript and writing the defaults inline otherwise:** `getComputedStyle()` returns the width in pixels whether or not the page set it (only `computedStyleMap()` reports `auto`, and Firefox lacks it); the check would be a snapshot that misses stylesheets loaded later, CSS-in-JS, classes added later and media queries; and the inline defaults would again beat every later rule. The cascade layer makes the same choice in the browser, and keeps making it when the CSS changes.
 
 ### 4.4 Layer Canvas in a Shadow Root
 
@@ -172,6 +168,7 @@ From the framework plan §5.1. Each `<pxl-layer>` attaches an open shadow root i
 2. The layer's default styles go in `:host` in its own shadow root.
 3. The layer's shadow root has a `<slot>` (framework plan D6).
 4. `aspect-ratio` stays inline on the stage (framework plan D7). Documented: set single properties on a stage's `style`, don't replace the whole attribute.
+5. A stage in a parent without a width is 300 px wide, like `<canvas>` (`contain-intrinsic-inline-size`, §4.2); no zero-width warning.
 
 ## 5. Effects on Existing Pages
 
@@ -187,9 +184,9 @@ The docs pages don't set a stage width (`docs.css` `.demo-stage` sets only `disp
 
 ## 6. Docs
 
-- **`docs/installation.html`**, new short section after "Download & Include", "Stage Size": the stage fills its parent's width, and its height follows `ratio`. A parent that sizes itself to its content (a centered flex or grid item, `inline-block`, an absolute card) needs a width. Snippet with a centered wrapper and `width: min(100%, 800px)`. Sections after it are renumbered.
+- **`docs/installation.html`**, new short section after "Download & Include", "Stage Size": the stage fills its parent's width, and its height follows `ratio`. In a parent that sizes itself to its content (a centered flex or grid item, `inline-block`, an absolute card) it is 300 px wide, like `<canvas>`; give the parent or the stage a width to change that. Snippet with a centered wrapper and `width: min(100%, 800px)`. Page CSS always wins over the defaults. Sections after it are renumbered.
 - **`.agents/KILOPIXEL.md`**:
-  - Stage, Key Behavior: replace "Sets `display: block`, `position: relative`, `width: 100%` on connect" with the cascade layer and the warning;
+  - Stage, Key Behavior: replace "Sets `display: block`, `position: relative`, `width: 100%` on connect" with the cascade layer and the 300 px fallback width;
   - Layer: the canvas lives in an open shadow root with a `<slot>`;
   - Variable: `display: none` comes from the sheet.
 
@@ -198,8 +195,7 @@ The docs pages don't set a stage width (`docs.css` `.demo-stage` sets only `disp
 In `tests/index.html` (IDs from the framework plan §11 where they exist):
 
 - **T-S2:** an author rule `width: 300px` on a stage gives `clientWidth` 300.
-- A stage in a centered flex wrapper logs the warning once, one frame after it is added (spy on `console.warn`).
-- No warning when the wrapper gets its width before that frame (a wide sibling added right after the stage), and none for a stage in a `display: none` parent.
+- A stage in a centered flex wrapper (case B) is 300 px wide, and so are its layer canvases; a stage in a 250 px column is 250 px wide.
 - **T-S1:** `stage.style.cssText = 'border: 1px solid'` (full replacement): the stage is still a block with its parent's width.
 - **T-M3:** `layer.innerHTML = '<pxl-circle …>'`: the canvas stays in the shadow root and the new circle is drawn.
 - **T-H1:** stage / layer / shapes inserted via `innerHTML`: after upgrade, the light DOM is exactly the inserted markup.
@@ -208,15 +204,14 @@ In `tests/index.html` (IDs from the framework plan §11 where they exist):
 
 ## 8. Steps
 
-1. `stage.js`: add the sheet, remove the three inline styles; the shadow-root check in `connectedCallback()`. `variable.js`: remove the inline `display`.
-2. `stage.js`: `checkWidth()` called from `resize()`, the `_hasCheckedWidth` field in the constructor.
-3. `layer.js`: shadow root with `<style>`, canvas and `<slot>` in the constructor; remove the inline styles and the `appendChild` in `connectedCallback()`.
-4. `node build.js`, update the sizes (CLAUDE.md "File size after a build").
-5. Tests (§7); `tests/index.html` all passing.
-6. Check the examples in §5, all docs pages and the console.
-7. Docs (§6) and KILOPIXEL.md; the framework plan's W2 and TODO §30 marked as built.
+1. `stage.js`: add the sheet (with the fallback width), remove the three inline styles; the shadow-root check in `connectedCallback()`. `variable.js`: remove the inline `display`.
+2. `layer.js`: shadow root with `<style>`, canvas and `<slot>` in the constructor; remove the inline styles and the `appendChild` in `connectedCallback()`.
+3. `node build.js`, update the sizes (CLAUDE.md "File size after a build").
+4. Tests (§7); `tests/index.html` all passing.
+5. Check the examples in §5, all docs pages and the console.
+6. Docs (§6) and KILOPIXEL.md; the framework plan's W2 and TODO §30 marked as built.
 
-Commit: `refactor(engine): default styles in a cascade layer, layer canvas in a shadow root, zero-width warning`.
+Commit: `refactor(engine): default styles in a cascade layer with a fallback width, layer canvas in a shadow root`.
 
 ## 9. Out of Scope
 
