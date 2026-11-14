@@ -11,6 +11,10 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     alpha: 1, blend: 'source-over', filter: 'none', hidden: false
   };
 
+  // :host styles have the lowest priority, so page CSS on pxl-layer wins
+  static STYLES = ':host { display: block; position: absolute; inset: 0; } ' +
+                  'canvas { display: block; position: absolute; left: 0; top: 0; width: 100%; height: 100%; }';
+
   constructor() {
     super();
     this.childList = []; // groups and shapes
@@ -26,9 +30,14 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     this.stage = null;
     this._dpr = 1; // set by the stage
 
+    // The canvas lives in the layer's shadow root: replacing the layer's children (innerHTML, htmx, frameworks)
+    // can't remove it, and the light DOM holds only what the page wrote. The slot shows the light-DOM children;
+    // shapes draw nothing as elements, but text or buttons placed in a layer for accessibility need it.
     this._canvas = document.createElement('canvas');
-    this._canvas.style.cssText = 'display: block; position: absolute; left: 0; top: 0; width: 100%; height: 100%;';
     this._ctx = this._canvas.getContext('2d');
+    const style = document.createElement('style');
+    style.textContent = pxl.Layer.STYLES;
+    this.attachShadow({ mode: 'open' }).append(style, this._canvas, document.createElement('slot'));
 
     // Compositing is CSS on the canvas element; only written when it changes
     this._lastAlpha = null;
@@ -37,11 +46,6 @@ pxl.Layer = class Layer extends pxl.PxlNode {
   }
 
   connectedCallback() {
-    this.style.display = 'block';
-    this.style.position = 'absolute';
-    this.style.inset = '0';
-
-    if (!this.contains(this._canvas)) this.appendChild(this._canvas);
     this.stage = this.closest('pxl-stage');
     this.stage?.registerLayer(this);
 

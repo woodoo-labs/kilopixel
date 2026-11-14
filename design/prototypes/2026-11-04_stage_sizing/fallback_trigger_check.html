@@ -1,0 +1,61 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Fallback width only for stages measured at 0 width</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 16px; font-family: sans-serif; width: 1160px; }
+  .flex-center { display: flex; justify-content: center; }
+  .phone { width: 288px; }
+  .row400 { display: flex; width: 400px; } .row400 aside { flex: none; width: 200px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 288px; }
+  .grid2card { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 320px; }
+  .grid2card > div { padding: 12px; border: 1px solid; }
+  /* test16: a growing grid of cards beside a 420 px panel */
+  .t16 { display: flex; gap: 25px; width: 1160px; align-items: flex-start; }
+  .t16 .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; flex-grow: 1; }
+  .t16 .card { padding: 24px; border: 1px solid; }
+  .t16 .panel { width: 420px; border: 1px solid; height: 40px; }
+  x-stage { display: block; position: relative; width: 100%; aspect-ratio: 16 / 9; background: #fed7aa; }
+  x-stage > i { position: absolute; inset: 0; }
+  /* A: fallback on every stage (plan as written) */
+  .always x-stage { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0; }
+  /* B: fallback only on stages that measured 0 wide (attribute set by the engine) */
+  .triggered x-stage[data-fallback] { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0; }
+</style></head><body>
+<script>
+  const layouts = {
+    'B wrapper in centered flex':          '<div class="flex-center"><div><S></div></div>',
+    'J phone 288, centered wrapper':       '<div class="phone"><div class="flex-center"><div><S></div></div></div>',
+    'K beside a 200px aside, 400px row':   '<div class="row400"><aside></aside><S></div>',
+    'L two 1fr columns, 288px':            '<div class="grid2"><S><S></div>',
+    'R two 1fr columns of cards, 320px':   '<div class="grid2card"><div><S></div><div><S></div></div>',
+    'S test16: card grid beside a panel':  '<div class="t16"><div class="grid"><div class="card"><S></div><div class="card"><S></div></div><div class="panel"></div></div>',
+  };
+  const results = {};
+  for (const mode of ['today', 'always', 'triggered']) {
+    const box = document.createElement('div');
+    box.className = mode;
+    for (const [name, html] of Object.entries(layouts)) {
+      const wrap = document.createElement('div');
+      wrap.dataset.name = name;
+      wrap.innerHTML = html.replaceAll('<S>', '<x-stage><i></i></x-stage>');
+      box.append(wrap);
+    }
+    document.body.append(box);
+    // What the engine would do in resize(): a stage that is laid out but 0 wide gets the fallback
+    if (mode === 'triggered') {
+      box.querySelectorAll('x-stage').forEach((s) => {
+        if (s.clientWidth === 0 && s.getClientRects().length > 0) s.setAttribute('data-fallback', '');
+      });
+    }
+    box.querySelectorAll('[data-name]').forEach((wrap) => {
+      const s = wrap.querySelector('x-stage');
+      const r = s.getBoundingClientRect();
+      const outer = wrap.firstElementChild.getBoundingClientRect();
+      const panel = wrap.querySelector('.panel');
+      (results[wrap.dataset.name] ??= {})[mode] = Math.round(r.width) + (r.right > outer.right + 0.5 ? ' OVERFLOW' : '') +
+        (panel ? ' (panel ' + Math.round(panel.getBoundingClientRect().width) + ')' : '');
+    });
+  }
+  window.results = results;
+</script>
+</body></html>

@@ -848,7 +848,8 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 ### Key Behavior
 
 - Creates no shadow DOM or internal canvas — layers each create their own
-- Sets `display: block`, `position: relative`, `width: 100%` on connect
+- **Default styles** (`pxl.DEFAULT_STYLES` in `stage.js`): `pxl-stage { display: block; position: relative; width: 100% }`, `pxl-stage:state(fallback) { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0 }` and `pxl-var { display: none }`, inside `@layer pxl { … }`. `pxl.addDefaultStyles(root)` adds them as one `<style data-pxl>` at the start of `<head>` when the script loads, and at the start of a shadow root when a stage connects inside one (document styles don't reach into it). The first cascade layer declared ranks lowest, so any page rule wins, also rules in the page's own layers (Tailwind v4); `adoptedStyleSheets` and `:where()` would beat layered page rules. Only `aspect-ratio` (from `ratio`) and `cursor` are written inline
+- **300 px fallback width**: a parent that sizes itself to its content (a centered flex or grid item, `inline-block`, an absolute card) asks the stage for its content width; the layers are absolutely positioned and give none, so the stage would be 0 × 0. `markFallbackWidth()` then adds the custom state `fallback` (`attachInternals()` on first use, field `_internals`): `contain-intrinsic-inline-size: 300px` answers 300 (like `<canvas>`), `min-width: 0` keeps the stage shrinkable as a flex or grid item. It is called from `resize()` when the width is 0 and once in the frame after `connectedCallback()` (a ResizeObserver needn't report an element that stays 0 × 0); a stage without a box (`display: none`) is skipped; `disconnectedCallback()` removes the state. Only such stages get it: on every stage, the 300 px would also be the minimum content width that keeps the cards and grid columns around a stage from shrinking. Older browsers without custom states keep the stage 0 × 0. Design: `design/2026-11-04_stage_sizing_plan.md`
 - `ResizeObserver` with `device-pixel-content-box` (fallback to `content-box`)
 - `unit = clientWidth / 1000`
 - **Built-in `IntersectionObserver`**: Automatically pauses requestAnimationFrame loops when the stage is scrolled out of the viewport (or out of an overflow scroll container like a carousel), and resumes rendering immediately upon re-entry. Can be overridden with `alwaysrender="true"`.
@@ -881,7 +882,7 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 
 ### Key Behavior
 
-- Each layer creates its own `<canvas>` element, absolutely positioned over the stage
+- Each layer creates its own `<canvas>` element in an open shadow root (constructor), with a `<style>` (`pxl.Layer.STYLES`: `:host { display: block; position: absolute; inset: 0 }` and the canvas filling the layer) and a `<slot>` for the light-DOM children. Replacing the layer's children (`innerHTML`, htmx, frameworks) can't remove the canvas, and the light DOM holds only what the page wrote. Pointer events from the canvas are retargeted to `<pxl-layer>` outside the shadow root; `offsetX` / `offsetY` stay exact. Engine and tests reach the canvas as `layer._canvas`
 - `isDirty` flag (or the layer's own animated attributes, `isAnimated`) controls whether the layer is updated in a frame
 - `update(t)` (update phase): keeps earlier requests in `_wasDirty`, clears `isDirty`, evaluates its own animations and (unless hidden) its children's; animated children set `isDirty` again (the heartbeat, kept in `_keepAlive`). `_updateFrame` records the frame
 - `needsRender()`: draw in this frame when it was dirty before its update, is dirty now (also through a later layer's broadcast), or is animated itself
@@ -1395,7 +1396,7 @@ Returns zeroed bounding box by default (grid is infinite). However, during draw,
 
 ### Key Behavior
 
-- Sets `display: none` (invisible in DOM)
+- Invisible in the DOM: `display: none` from the stage's default styles (`pxl.DEFAULT_STYLES`)
 - Extends PxlNode directly (not Shape), so it has no visual output
 - Registers in `pxl.nodes` via its `id`, so other elements can read `ref.myVar.value`
 - `update(t)` calls `evaluateAnimations(t)` (this allows animated variables; a failing expression keeps the previous value). `render()` does nothing: a variable in a layer or group is in its `childList` like a shape, so the draw phase calls it

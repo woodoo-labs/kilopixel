@@ -9,8 +9,8 @@ pxl.Variable = class Variable extends pxl.PxlNode {
     this.stage = null;
   }
 
+  // display: none comes from pxl.DEFAULT_STYLES
   connectedCallback() {
-    this.style.display = 'none';
     super.connectedCallback();
     if (!this.parentLayer) {
       this.stage = this.closest('pxl-stage');

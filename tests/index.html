@@ -270,6 +270,7 @@
     });
 
     test('toLocal: nothing redraws while nothing moves (stage idle at 0 FPS)', async () => {
+      await document.fonts.ready; // a font that finishes loading redraws every stage once (text.js)
       await wait(2200); // fps is published once per second
       const fps = pxl.nodes.tlStage2.fps;
       if (fps !== 0) throw new Error(`static stage renders at ${fps} FPS`);
@@ -1181,7 +1182,11 @@
     });
 
     test('monitor: an idle stage drops to 0 within a second instead of keeping its last values', async () => {
-      // tlStage2 is static (see "stage idle at 0 FPS"): no frames, so the timer must publish 0 on its own
+      // tlStage2 is static (see "stage idle at 0 FPS"): no frames, so the timer must publish 0 on its own.
+      // A font that finishes loading redraws every stage once (text.js), and the previous test published by hand:
+      // wait for the fonts and one full timer interval first, so no earlier frame lands in this test's interval.
+      await document.fonts.ready;
+      await wait(1100);
       const values = pxl.nodes.tlStage2;
       values.fps = 26;
       values.renderAvg = '3.00';
@@ -1286,6 +1291,148 @@
       if (clears !== 0) throw new Error(`the failing layer cleared its canvas ${clears} times`);
       srClear();
     });
+
+    // --- Stage sizing and layer canvas (design/2026-11-04_stage_sizing_plan.md) ---
+
+    // Adds `html` (with a stage) at the end of the page, sizes the stage without waiting for its ResizeObserver
+    // (which doesn't run while the page is hidden), runs fn(stage, box) and removes everything again
+    async function withStage(html, fn, root = null) {
+      const box = document.createElement('div');
+      box.innerHTML = html;
+      (root || document.querySelector('.docs-inner')).append(box);
+      try {
+        const stage = box.querySelector('pxl-stage');
+        stage.resize();
+        await fn(stage, box);
+      } finally {
+        box.remove();
+      }
+    }
+    const SZ_LAYER = '<pxl-layer><pxl-circle x="500" y="300" r="100" fill="#0f172a"></pxl-circle></pxl-layer>';
+
+    test('stage sizing: the default styles are one <style> at the start of <head>, the stage has no inline width', () =>
+      withStage(`<div style="width: 500px"><pxl-stage alwaysrender>${SZ_LAYER}</pxl-stage></div>`, (stage) => {
+        const sheets = document.querySelectorAll('style[data-pxl]');
+        if (sheets.length !== 1 || document.head.firstElementChild !== sheets[0]) {
+          throw new Error(`${sheets.length} sheets, first in <head>: ${document.head.firstElementChild === sheets[0]}`);
+        }
+        const css = getComputedStyle(stage);
+        if (stage.style.width || stage.style.display || stage.style.position) throw new Error(`inline: ${stage.style.cssText}`);
+        if (css.display !== 'block' || css.position !== 'relative' || stage.offsetWidth !== 500) {
+          throw new Error(`display ${css.display}, position ${css.position}, width ${stage.offsetWidth}`);
+        }
+      }));
+
+    test('stage sizing: page CSS sets the stage width without !important', async () => {
+      const style = document.createElement('style');
+      style.textContent = '.sz-author pxl-stage { width: 300px; }';
+      document.head.append(style);
+      try {
+        await withStage(`<div class="sz-author"><pxl-stage alwaysrender>${SZ_LAYER}</pxl-stage></div>`, (stage) => {
+          if (stage.offsetWidth !== 300) throw new Error(`width ${stage.offsetWidth}`);
+        });
+      } finally {
+        style.remove();
+      }
+    });
+
+    test('stage sizing: in a parent without a width the stage and its canvases are 300 px wide; removed, it is checked again', () =>
+      withStage(`<div style="display: flex; justify-content: center"><div><pxl-stage ratio="4 / 1" alwaysrender>${SZ_LAYER}</pxl-stage></div></div>`, (stage, box) => {
+        stage.resize(); // the first resize() found width 0 and set the fallback state; this one sizes the canvases
+        const canvas = stage.querySelector('pxl-layer')._canvas;
+        const expected = Math.floor(300 * stage._dpr);
+        if (!stage.matches(':state(fallback)') || stage.clientWidth !== 300 || canvas.width !== expected) {
+          throw new Error(`fallback state ${stage.matches(':state(fallback)')}, stage ${stage.clientWidth} px, canvas ${canvas.width} px (expected 300 / ${expected})`);
+        }
+        box.remove();
+        if (stage.matches(':state(fallback)')) throw new Error('the fallback state is kept after the stage was removed');
+      }));
+
+    test('stage sizing: a stage with a width of its own gets no fallback, so a narrow grid of cards still shrinks', () =>
+      withStage(`<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 320px">
+          <div style="padding: 12px; border: 1px solid"><pxl-stage alwaysrender>${SZ_LAYER}</pxl-stage></div><div></div>
+        </div>`, (stage) => {
+        if (stage.matches(':state(fallback)') || stage.offsetWidth !== 130) {
+          throw new Error(`fallback state ${stage.matches(':state(fallback)')}, width ${stage.offsetWidth} px (expected 130)`);
+        }
+      }));
+
+    test('stage sizing: as a flex or grid item the stage still shrinks below 300 px', () =>
+      withStage(`<div style="display: grid; grid-template-columns: 1fr; width: 250px"><pxl-stage alwaysrender>${SZ_LAYER}</pxl-stage></div>
+        <div style="display: flex; width: 400px"><div style="flex: none; width: 200px"></div><pxl-stage alwaysrender></pxl-stage></div>`, (stage, box) => {
+        const [inGrid, inFlex] = box.querySelectorAll('pxl-stage');
+        if (inGrid.offsetWidth !== 250 || inFlex.offsetWidth !== 200) {
+          throw new Error(`grid column: ${inGrid.offsetWidth} px (expected 250), flex row: ${inFlex.offsetWidth} px (expected 200)`);
+        }
+      }));
+
+    test('stage sizing: replacing the whole style attribute keeps the stage a block with its parent\'s width', () =>
+      withStage(`<div style="width: 500px"><pxl-stage alwaysrender>${SZ_LAYER}</pxl-stage></div>`, (stage) => {
+        stage.style.cssText = 'border: 1px solid #94a3b8';
+        const css = getComputedStyle(stage);
+        if (css.display !== 'block' || css.position !== 'relative' || stage.offsetWidth !== 500) {
+          throw new Error(`display ${css.display}, position ${css.position}, width ${stage.offsetWidth}`);
+        }
+      }));
+
+    test('stage sizing: a stage inside a shadow root gets the default styles in that root', async () => {
+      const host = document.createElement('div');
+      document.querySelector('.docs-inner').append(host);
+      const root = host.attachShadow({ mode: 'open' });
+      try {
+        await withStage(`<div style="width: 400px"><pxl-stage alwaysrender><pxl-var id="szShadowVar" value="1"></pxl-var>${SZ_LAYER}</pxl-stage></div>`, (stage) => {
+          const sheet = root.querySelector('style[data-pxl]');
+          const varDisplay = getComputedStyle(root.querySelector('pxl-var')).display;
+          if (!sheet || root.firstElementChild !== sheet || stage.offsetWidth !== 400 || varDisplay !== 'none') {
+            throw new Error(`sheet first in the root: ${root.firstElementChild === sheet}, width ${stage.offsetWidth}, var display ${varDisplay}`);
+          }
+        }, root);
+      } finally {
+        host.remove();
+      }
+    });
+
+    test('layer canvas: it lives in the layer\'s shadow root; the light DOM holds only the inserted markup', () => {
+      const markup = '<pxl-circle x="500" y="300" r="100" fill="#0f172a"></pxl-circle>';
+      return withStage(`<div style="width: 500px"><pxl-stage alwaysrender><pxl-layer>${markup}</pxl-layer></pxl-stage></div>`, (stage) => {
+        const layer = stage.querySelector('pxl-layer');
+        if (layer.innerHTML !== markup || stage.querySelector('canvas') || layer.shadowRoot?.querySelector('canvas') !== layer._canvas) {
+          throw new Error(`layer light DOM: ${layer.innerHTML}`);
+        }
+      });
+    });
+
+    // Alpha of the layer canvas pixel under stage coordinates (x, y)
+    function alphaAt(layer, x, y) {
+      const k = layer.stage.unit * layer._dpr;
+      return layer._ctx.getImageData(Math.round(x * k), Math.round(y * k), 1, 1).data[3];
+    }
+
+    test('layer canvas: layer.innerHTML keeps the canvas and draws the new shapes', () =>
+      withStage(`<div style="width: 500px"><pxl-stage alwaysrender>${SZ_LAYER}</pxl-stage></div>`, (stage) => {
+        const layer = stage.querySelector('pxl-layer');
+        stage.render(1);
+        layer.innerHTML = '<pxl-circle x="200" y="200" r="60" fill="#0f172a"></pxl-circle>';
+        stage.render(2);
+        const oldCircle = alphaAt(layer, 500, 300), newCircle = alphaAt(layer, 200, 200);
+        if (!layer.shadowRoot.contains(layer._canvas) || layer.children.length !== 1 || oldCircle !== 0 || newCircle !== 255) {
+          throw new Error(`canvas in shadow root: ${layer.shadowRoot.contains(layer._canvas)}, children ${layer.children.length}, ` +
+            `old circle alpha ${oldCircle}, new circle alpha ${newCircle}`);
+        }
+      }));
+
+    test('layer canvas: pointer moves over the canvas in the shadow root give exact mouseX / mouseY', () =>
+      withStage(`<div style="width: 500px"><pxl-stage alwaysrender>${SZ_LAYER}</pxl-stage></div>`, (stage) => {
+        const canvas = stage.querySelector('pxl-layer')._canvas;
+        const rect = stage.getBoundingClientRect();
+        for (const [px, py] of [[100, 50], [400, 200]]) {
+          canvas.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, composed: true, clientX: rect.left + px, clientY: rect.top + py }));
+          const { mouseX, mouseY } = stage.attributeValues;
+          if (Math.abs(mouseX * stage.unit - px) > 0.01 || Math.abs(mouseY * stage.unit - py) > 0.01) {
+            throw new Error(`pointer at ${px}, ${py} px: mouse ${round(mouseX * stage.unit)}, ${round(mouseY * stage.unit)} px`);
+          }
+        }
+      }));
 
     // --- Run all tests in order ---
     (async () => {

@@ -1,6 +1,6 @@
 # Framework Compatibility: Kilopixel as a Well-Behaved Custom Element
 
-- **Status**: 🟡 **Proposed** (2026-11-14, D1, D4, D6, D7 decided; W2 moved to the stage sizing plan; no code changes yet)
+- **Status**: 🟡 **Proposed** (2026-11-15, D1, D4, D6, D7 decided; W2 built with the stage sizing plan; the rest not built yet)
 - **Date**: 2026-10-30
 - **Related**: `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`, `design/2026-11-04_stage_sizing_plan.md` (builds W2)
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
@@ -141,7 +141,7 @@ The hand cursor (`isClickable()`) should also show for shapes that a framework l
 
 ## 5. Workstream W2: DOM Ownership (C9, C10, C11)
 
-**Moved to `design/2026-11-04_stage_sizing_plan.md` (2026-11-14, 🟢 Decided)**, which builds it together with the stage sizing fix, because both remove the engine's inline default styles. Summary:
+**Moved to `design/2026-11-04_stage_sizing_plan.md` (2026-11-14), built there on 2026-11-15**, together with the stage sizing fix, because both remove the engine's inline default styles. Summary:
 
 - **Layer canvas in a shadow root** (C9, C11): each `<pxl-layer>` attaches an open shadow root with a `<style>` (`:host` defaults, canvas styles), its `<canvas>` and a `<slot>`. `innerHTML`, htmx swaps and frameworks can't remove the canvas, and the light DOM is exactly the rendered markup. Measured 2026-11-14: `mouseX` / `mouseY` stay exact across the shadow boundary, so the `offsetX` fallback first proposed here isn't needed (sizing plan §4.4).
 - **Default styles in a stylesheet** (C10): `pxl-stage` and `pxl-var` defaults in `@layer pxl { … }`, in a `<style>` element at the start of `<head>` (or of the shadow root the stage sits in, C12). The first proposal here, `:where()` selectors in an adopted stylesheet, was dropped: both an adopted sheet and a rule outside any layer beat classes in the page's own cascade layers (Tailwind v4), measured in the sizing plan §4.1.
@@ -318,7 +318,7 @@ Sidebar: a new entry under "Engine & Reactivity" or a new section "Integration".
 1. `tests/frameworks.html` with the tests that pass today (T-C1…, T-C4, T-M1, T-M2) as a baseline; the others added with their features.
 2. W5.1 observe `id` (+ T-C2, T-C2b). `fix(engine): register ids set or changed after connect`.
 3. W1 events: dispatch DOM events, `addEventListener` override, `interactive`, rename `on*` → D1 names, warning for the old names; migrate the 25 handlers (`test32`, `test37`, `tests/index.html`), KILOPIXEL.md Events + AI guide, docs pages that mention `onclick` on shapes (+ T-E1…T-E7). `feat(engine)!: DOM events on shapes; pxl-on-click replaces onclick`.
-4. W2 canvas in a shadow root + stylesheet defaults (+ T-M3, T-S1, T-S2, T-H1, T-E5): moved to `design/2026-11-04_stage_sizing_plan.md`, which builds it; its tests go in `tests/index.html`.
+4. W2 canvas in a shadow root + stylesheet defaults (+ T-M3, T-S1, T-S2, T-H1, T-E5): built 2026-11-15 with `design/2026-11-04_stage_sizing_plan.md`; its tests are in `tests/index.html` (sizing plan §7).
 5. W4 cache bound (+ T-K1). `perf(compiler): bound the expression caches`.
 6. Smoke pages in `design/prototypes/2026-10-30_framework_compatibility/` for the frameworks in §12 that load without a build; record results in `FINDINGS.md`.
 
@@ -338,7 +338,7 @@ Every engine step: `node build.js`, update the `pxl.min.js` size, `tests/index.h
 
 ## 15. Interplay with Other Plans
 
-- **Stage sizing** (`2026-11-04_stage_sizing_plan.md`, 🟢 2026-11-14): builds W2 (§5) together with overridable stage sizes and a 300 px fallback width.
+- **Stage sizing** (`2026-11-04_stage_sizing_plan.md`, ✅ 2026-11-15): built W2 (§5) together with overridable stage sizes and a 300 px fallback width.
 - **Always save / restore** (`2026-11-07_safe_shape_render_plan.md`, built 2026-11-07): independent; both touch `Shape.render()` only lightly (W1 doesn't change rendering).
 - **`space` attribute** (`2026-10-30_space_attribute_plan.md`): hit testing of space elements is unchanged; DOM events work the same for them. W3 accessors would include `space` (its value is a ref object, set as a property it could be the element itself: `el.space = otherEl` is a natural framework API; note for that plan).
 - **Two-phase frame** (TODO §29): event dispatch at the end of `process()` fits both the current single pass and a later update / draw split.

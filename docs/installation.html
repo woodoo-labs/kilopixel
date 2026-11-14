@@ -49,7 +49,28 @@
         </a>
       </div>
 
-      <h2>2. Fullscreen Starter Boilerplate</h2>
+      <h2>2. Stage Size</h2>
+      <p>A stage is as wide as its parent element, and its height follows its <code>ratio</code> attribute (<code>16 / 9</code> unless set). It needs no CSS of its own.</p>
+      <p>Some parents take their width from their content: a wrapper centered in a flex or grid container, an <code>inline-block</code> element, or an absolutely positioned card. A stage gives such a parent no width, so there it is 300 CSS pixels wide, the same default as a <code>&lt;canvas&gt;</code>. Give the parent or the stage a width to change that:</p>
+
+      <pre><code class="language-html">&lt;style&gt;
+  .page { display: flex; justify-content: center; }
+  /* The card takes its width from its content: give it one */
+  .card { width: min(100%, 800px); }
+&lt;/style&gt;
+
+&lt;div class="page"&gt;
+  &lt;div class="card"&gt;
+    &lt;pxl-stage ratio="16 / 9"&gt;…&lt;/pxl-stage&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+      <div class="callout-info">
+        <p class="callout-title">Your CSS Wins</p>
+        <p class="callout-body">Kilopixel's default styles for <code>&lt;pxl-stage&gt;</code> (<code>display</code>, <code>position</code>, <code>width</code>) have the lowest priority, so any rule in your stylesheet overrides them without <code>!important</code>, for example <code>pxl-stage { width: 600px; }</code>. In JavaScript, set single style properties (<code>stage.style.border = …</code>) instead of replacing the whole <code>style</code> attribute: it holds the stage's aspect ratio.</p>
+      </div>
+
+      <h2>3. Fullscreen Starter Boilerplate</h2>
       <p>A complete starter page to copy. A short CSS rule in the <code>&lt;head&gt;</code> removes the browser's page margin, sets a dark background and hides the scrollbars, so the stage spans the full width of the window.</p>
 
       <pre><code class="language-html">&lt;!DOCTYPE html&gt;
@@ -80,13 +101,13 @@
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
 
-      <h2>3. No Web Server Needed</h2>
+      <h2>4. No Web Server Needed</h2>
       <div class="callout-info">
         <p class="callout-title">Opening a Local File</p>
         <p class="callout-body">Kilopixel loads no other files, so a page also works when it is opened as a local file (<code>file://</code>). Save <code>index.html</code> anywhere on your computer and open it with a double-click: no Node.js, bundler or local web server is needed.</p>
       </div>
 
-      <h2>4. Live Verification Playground</h2>
+      <h2>5. Live Verification Playground</h2>
       <p>Use the interactive controls below to verify that the Kilopixel engine is loaded and responsive:</p>
 
       <div class="demo-container">
@@ -95,21 +116,21 @@
           <div class="demo-controls-header">
             <h3 class="demo-controls-title">Controls</h3>
             <div class="demo-tabs">
-              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec4CircleTab')">Circle</button>
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec5CircleTab')">Circle</button>
             </div>
           </div>
 
-          <div class="tab-content active" id="sec4CircleTab">
+          <div class="tab-content active" id="sec5CircleTab">
             <div class="playground-sliders">
               <div class="control-group">
-                <label>Center X <span id="sec4CircleXVal">500</span></label>
+                <label>Center X <span id="sec5CircleXVal">500</span></label>
                 <input type="range" min="0" max="1000" step="10" value="500" autocomplete="off"
-                  oninput="document.getElementById('sec4Circle').setAttribute('x', this.value); document.getElementById('sec4CircleXVal').innerText = this.value;">
+                  oninput="document.getElementById('sec5Circle').setAttribute('x', this.value); document.getElementById('sec5CircleXVal').innerText = this.value;">
               </div>
               <div class="control-group">
-                <label>Center Y <span id="sec4CircleYVal">300</span></label>
+                <label>Center Y <span id="sec5CircleYVal">300</span></label>
                 <input type="range" min="0" max="600" step="10" value="300" autocomplete="off"
-                  oninput="document.getElementById('sec4Circle').setAttribute('y', this.value); document.getElementById('sec4CircleYVal').innerText = this.value;">
+                  oninput="document.getElementById('sec5Circle').setAttribute('y', this.value); document.getElementById('sec5CircleYVal').innerText = this.value;">
               </div>
             </div>
           </div>
@@ -121,20 +142,20 @@
             <pxl-grid stroke="#f1f5f9" major="4"></pxl-grid>
 
             <!-- 2. Shape helpers -->
-            <pxl-line x1="0" y1="ref.sec4Circle.y" x2="ref.sec4Circle.x" y2="ref.sec4Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.sec4Circle.x / 2" y="ref.sec4Circle.y + 15" baseline="top" align="center" text="`x = ${ref.sec4Circle.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
-            <pxl-line x1="ref.sec4Circle.x" y1="0" x2="ref.sec4Circle.x" y2="ref.sec4Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.sec4Circle.x + 15" y="ref.sec4Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.sec4Circle.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+            <pxl-line x1="0" y1="ref.sec5Circle.y" x2="ref.sec5Circle.x" y2="ref.sec5Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec5Circle.x / 2" y="ref.sec5Circle.y + 15" baseline="top" align="center" text="`x = ${ref.sec5Circle.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+            <pxl-line x1="ref.sec5Circle.x" y1="0" x2="ref.sec5Circle.x" y2="ref.sec5Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
+            <pxl-text x="ref.sec5Circle.x + 15" y="ref.sec5Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.sec5Circle.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
 
             <!-- 3. The shape -->
-            <pxl-circle id="sec4Circle" x="500" y="300" r="80 + wave(2) * 20"
+            <pxl-circle id="sec5Circle" x="500" y="300" r="80 + wave(2) * 20"
               fill="#ffedd566" stroke="#f97316" strokewidth="4">
             </pxl-circle>
 
             <!-- 4. Shape center -->
-            <pxl-circle x="ref.sec4Circle.x" y="ref.sec4Circle.y" r="5" fill="#fb923c"></pxl-circle>
-            <pxl-text x="ref.sec4Circle.x + 15" y="ref.sec4Circle.y - 15" baseline="bottom"
-              text="`Circle (${ref.sec4Circle.x}, ${ref.sec4Circle.y})`"
+            <pxl-circle x="ref.sec5Circle.x" y="ref.sec5Circle.y" r="5" fill="#fb923c"></pxl-circle>
+            <pxl-text x="ref.sec5Circle.x + 15" y="ref.sec5Circle.y - 15" baseline="bottom"
+              text="`Circle (${ref.sec5Circle.x}, ${ref.sec5Circle.y})`"
               size="27" fill="#fb923c" font="monospace">
             </pxl-text>
           </pxl-layer>

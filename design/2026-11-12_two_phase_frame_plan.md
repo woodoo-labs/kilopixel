@@ -138,7 +138,7 @@ Plans whose per-frame design assumes today's single pass. Each has a pointer to 
 | §31 | `design/2026-11-01_isolated_shape_compositing_plan.md` | no logical dependency, but both change `Shape.render()` (it the drawing, this plan the evaluation): build one after the other, not in parallel |
 | §14 | (no plan) `paintorder` | same draw path; only ordering, after §31 |
 
-Not affected: TODO §30 (`design/2026-10-30_framework_compatibility_plan.md`: its event dispatch fits both models), `<pxl-out>` (TODO §5: updates through broadcasts, independent of draw order), `<pxl-plot>` (TODO §7), stage sizing (TODO §33). TODO §9 (`<pxl-image>`) only adds an external invalidation source (§3.2).
+Not affected: TODO §30 (`design/2026-10-30_framework_compatibility_plan.md`: its event dispatch fits both models), `<pxl-out>` (TODO §5: updates through broadcasts, independent of draw order), `<pxl-plot>` (TODO §7), stage sizing (`design/2026-11-04_stage_sizing_plan.md`). TODO §9 (`<pxl-image>`) only adds an external invalidation source (§3.2).
 
 ## 7. Suggested Order
 
