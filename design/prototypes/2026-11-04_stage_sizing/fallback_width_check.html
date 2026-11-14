@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Fallback width of 300 px</title>
   <style>
+    * { box-sizing: border-box; }
     body { margin: 16px; font-family: sans-serif; color: #334155; width: 900px; }
     pre { font-size: 13px; }
     .flex-center { display: flex; justify-content: center; }
@@ -13,42 +14,70 @@
     .abs-card { position: absolute; left: 50%; transform: translateX(-50%); }
     .col250 { width: 250px; }
     .phone { width: 288px; }
+    .row400 { display: flex; width: 400px; }
+    .row400 aside { flex: none; width: 200px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 288px; }
+    .grid1 { display: grid; grid-template-columns: 1fr; width: 250px; }
+    .gridauto { display: grid; grid-template-columns: auto 1fr; width: 600px; }
+    .table { display: table; }
+    .cell { display: table-cell; }
+    .padded { padding: 24px; border: 1px solid; }
+    .author x-stage { width: 300px; }
+    .author-ib x-stage { display: inline-block; }
     /* x-stage plays the stage: block, full width, height from aspect-ratio, absolutely positioned content */
     x-stage { display: block; position: relative; width: 100%; aspect-ratio: 4 / 1; background: #fed7aa; }
     x-stage > i { position: absolute; inset: 0; }
-    /* Candidate: an intrinsic width of 300 px like <canvas>, used only by parents that size to their content */
-    .fallback x-stage { contain: inline-size; contain-intrinsic-inline-size: 300px; }
-    .author x-stage { width: 300px; }
+    /* The fallback: an intrinsic width of 300 px like <canvas>, used only by parents that size to their content */
+    .fallback x-stage, .planned x-stage { contain: inline-size; contain-intrinsic-inline-size: 300px; }
+    /* Planned: plus min-width: 0, so flex and grid items can still shrink below 300 px */
+    .planned x-stage { min-width: 0; }
   </style>
 </head>
 <body>
   <p>
-    Stage width in common layouts, today (<code>width: 100%</code> only) and with the fallback
-    (<code>contain: inline-size; contain-intrinsic-inline-size: 300px</code>). Result also in <code>window.fallbackResults</code>.
+    Stage width in common layouts: today (<code>width: 100%</code> only), with the fallback
+    (<code>contain: inline-size; contain-intrinsic-inline-size: 300px</code>) and as planned (fallback plus <code>min-width: 0</code>).
+    "OVERFLOW" marks a stage wider than its parent. Result also in <code>window.fallbackResults</code>.
   </p>
   <pre id="out"></pre>
   <script>
     const layouts = {
-      'A plain div':                     '<div><S></div>',
-      'B wrapper in centered flex':      '<div class="flex-center"><div><S></div></div>',
-      'C stage in centered flex':        '<div class="flex-center"><S></div>',
-      'D wrapper in centered grid':      '<div class="grid-center"><div><S></div></div>',
-      'E inline-block wrapper':          '<div class="inline-block"><S></div>',
-      'F absolute card':                 '<div class="abs-host"><div class="abs-card"><S></div></div>',
-      'G author width 300px':            '<div class="author"><S></div>',
-      'I 250px column':                  '<div class="col250"><S></div>',
-      'J phone 288px, centered wrapper': '<div class="phone"><div class="flex-center"><div><S></div></div></div>'
+      'A plain div':                              '<div><S></div>',
+      'B wrapper in centered flex':               '<div class="flex-center"><div><S></div></div>',
+      'C stage in centered flex':                 '<div class="flex-center"><S></div>',
+      'D wrapper in centered grid':               '<div class="grid-center"><div><S></div></div>',
+      'E inline-block wrapper':                   '<div class="inline-block"><S></div>',
+      'F absolute card':                          '<div class="abs-host"><div class="abs-card"><S></div></div>',
+      'G author width 300px':                     '<div class="author"><S></div>',
+      'I 250px column':                           '<div class="col250"><S></div>',
+      'J phone 288px, centered wrapper':          '<div class="phone"><div class="flex-center"><div><S></div></div></div>',
+      'K beside a 200px aside, 400px flex row':   '<div class="row400"><aside></aside><S></div>',
+      'L two 1fr grid columns, 288px':            '<div class="grid2"><S><S></div>',
+      'M one 1fr grid column, 250px':             '<div class="grid1"><S></div>',
+      'N grid auto column next to 1fr, 600px':    '<div class="gridauto"><S><div></div></div>',
+      'O table cell':                             '<div class="table"><div class="cell"><S></div></div>',
+      'P stage with padding, border-box':         '<div><P></div>',
+      'Q author display: inline-block':           '<div class="author-ib"><S></div>'
     };
 
     const results = {};
-    for (const mode of ['today', 'fallback']) {
+    for (const mode of ['today', 'fallback', 'planned']) {
       const box = document.createElement('div');
       box.className = mode;
-      box.innerHTML = Object.values(layouts).map((html) => html.replace('<S>', '<x-stage><i></i></x-stage>')).join('');
+      for (const [name, html] of Object.entries(layouts)) {
+        const wrap = document.createElement('div');
+        wrap.dataset.name = name;
+        wrap.innerHTML = html
+          .replaceAll('<S>', '<x-stage><i></i></x-stage>')
+          .replaceAll('<P>', '<x-stage class="padded"><i></i></x-stage>');
+        box.append(wrap);
+      }
       document.body.append(box);
-      box.querySelectorAll('x-stage').forEach((stage, i) => {
-        const r = stage.getBoundingClientRect();
-        (results[Object.keys(layouts)[i]] ??= {})[mode] = Math.round(r.width) + ' x ' + Math.round(r.height);
+      box.querySelectorAll('[data-name]').forEach((wrap) => {
+        const r = wrap.querySelector('x-stage').getBoundingClientRect();
+        const parent = wrap.firstElementChild.getBoundingClientRect();
+        (results[wrap.dataset.name] ??= {})[mode] = Math.round(r.width) + ' x ' + Math.round(r.height) +
+          (r.right > parent.right + 0.5 ? ' OVERFLOW' : '');
       });
     }
     document.getElementById('out').textContent = JSON.stringify(results, null, 1);

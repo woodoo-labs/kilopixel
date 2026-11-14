@@ -1,0 +1,77 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Layer canvas in a shadow root: frame cost</title>
+<script src="/dist/pxl.js"></script>
+<style>body { margin: 0; background: #111; color: #ddd; font-family: sans-serif; } pxl-stage { width: 900px; }</style>
+</head><body>
+<pxl-stage id="stage" alwaysrender="true">
+  <pxl-layer id="l0"></pxl-layer><pxl-layer id="l1" alpha="0.8"></pxl-layer>
+  <pxl-layer id="l2" blend="screen"></pxl-layer><pxl-layer id="l3" filter="blur(1px)"></pxl-layer>
+</pxl-stage>
+<pre id="out">running…</pre>
+<script>
+  // 4 layers x 300 animated circles; one layer with alpha, one with blend, one with a filter (compositing on the canvas)
+  for (let l = 0; l < 4; l++) {
+    let html = '';
+    for (let i = 0; i < 300; i++) {
+      html += `<pxl-circle x="500 + sin(t * 0.7 + ${i * 0.1 + l}) * 420" y="280 + cos(t * 0.9 + ${i * 0.13}) * 230" r="6" fill="hsl(${(i * 7 + l * 60) % 360}, 80%, 60%)"></pxl-circle>`;
+    }
+    document.getElementById('l' + l).insertAdjacentHTML('beforeend', html);
+  }
+
+  const stage = document.getElementById('stage');
+  const layers = [...stage.querySelectorAll('pxl-layer')];
+  // Every layer gets a shadow root with a <slot>, so a canvas in the light DOM is shown too
+  const roots = layers.map((layer) => {
+    const root = layer.attachShadow({ mode: 'open' });
+    root.append(document.createElement('slot'));
+    return root;
+  });
+
+  // Move every canvas between the light DOM and the layer's shadow root (before the slot)
+  function setMode(shadow) {
+    layers.forEach((layer, i) => {
+      if (shadow) roots[i].prepend(layer._canvas);
+      else layer.prepend(layer._canvas);
+    });
+  }
+
+  let renderSum = 0, renderCount = 0;
+  const original = stage.render.bind(stage);
+  stage.render = (t) => { const s = performance.now(); original(t); renderSum += performance.now() - s; renderCount++; };
+
+  function measure(ms) {
+    return new Promise((resolve) => {
+      renderSum = 0; renderCount = 0;
+      const deltas = [];
+      let last = performance.now();
+      const end = last + ms;
+      const tick = (now) => {
+        deltas.push(now - last); last = now;
+        if (now < end) requestAnimationFrame(tick);
+        else resolve({ render: renderSum / renderCount, frame: deltas.reduce((a, b) => a + b, 0) / deltas.length, long: deltas.filter((d) => d > 20).length });
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+
+  (async () => {
+    const res = { light: [], shadow: [] };
+    await measure(1000); // warm-up
+    for (let round = 0; round < 5; round++) {
+      for (const mode of round % 2 ? ['shadow', 'light'] : ['light', 'shadow']) {
+        setMode(mode === 'shadow');
+        await measure(300);
+        res[mode].push(await measure(2000));
+      }
+    }
+    const avg = (arr, key) => +(arr.reduce((a, r) => a + r[key], 0) / arr.length).toFixed(3);
+    const summary = {};
+    for (const mode of ['light', 'shadow']) {
+      summary[mode] = { renderMs: avg(res[mode], 'render'), frameMs: avg(res[mode], 'frame'), longFrames: res[mode].reduce((a, r) => a + r.long, 0) };
+    }
+    summary.rounds = res;
+    document.getElementById('out').textContent = JSON.stringify(summary, null, 1);
+    window.perfResults = summary;
+  })();
+</script>
+</body></html>
