@@ -879,6 +879,66 @@
       srClear();
     });
 
+    // console.error calls while fn runs
+    function captureErrors(fn) {
+      const original = console.error, out = [];
+      console.error = (...args) => out.push(args.join(' '));
+      try { fn(); } finally { console.error = original; }
+      return out;
+    }
+
+    // design/2026-11-15_handler_errors_plan.md
+    test('handler errors: a throwing onclick runs once per click, is logged with its element, and no other shape gets the click', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-rect id="srThrowClick" x="100" y="100" w="60" h="60" fill="#ff0000"
+          onclick="this.calls = (this.calls || 0) + 1; throw new Error('handler failed')"></pxl-rect>
+        <pxl-rect id="srOtherClick" x="300" y="100" w="60" h="60" fill="#00ff00" onclick="this.calls = (this.calls || 0) + 1"></pxl-rect>`);
+      const stage = el('srStage'), values = stage.attributeValues, interaction = stage.interaction;
+      srRender(1);
+      values.isHovered = true;
+      values.mouseX = 100; values.mouseY = 100;
+      const errors = captureErrors(() => {
+        interaction._lastClick = true;
+        interaction.process();
+        interaction.process(); // a pointer move inside the shape
+        values.mouseX = 300;
+        interaction.process(); // a pointer move onto the other shape
+      });
+      const calls = el('srThrowClick').calls, otherCalls = el('srOtherClick').calls;
+      values.isHovered = false;
+      interaction.process();
+      if (calls !== 1) throw new Error(`the handler ran ${calls} times for one click`);
+      if (otherCalls !== undefined) throw new Error(`the other shape's onclick ran ${otherCalls} times without a click`);
+      if (errors.length !== 1 || !errors[0].includes('id="srThrowClick"') || !errors[0].includes('onclick')) throw new Error(`errors: ${JSON.stringify(errors)}`);
+      srClear();
+    });
+
+    test('handler errors: a throwing onleave runs once, and the shape\'s later handlers still run in that frame', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-rect id="srThrowLeave" x="100" y="100" w="60" h="60" fill="#ff0000"
+          onleave="this.calls = (this.calls || 0) + 1; throw new Error('handler failed')"></pxl-rect>
+        <pxl-rect id="srEnterAfter" x="300" y="100" w="60" h="60" fill="#00ff00" onenter="this.calls = (this.calls || 0) + 1"></pxl-rect>`);
+      const stage = el('srStage'), values = stage.attributeValues, interaction = stage.interaction;
+      srRender(1);
+      values.isHovered = true;
+      values.mouseX = 100; values.mouseY = 100;
+      interaction.process();
+      const errors = captureErrors(() => {
+        values.mouseX = 300;
+        interaction.process(); // leaves the first shape and enters the second
+        interaction.process();
+      });
+      const calls = el('srThrowLeave').calls, enterCalls = el('srEnterAfter').calls;
+      const stillHovered = el('srThrowLeave').attributeValues.isHovered;
+      values.isHovered = false;
+      interaction.process();
+      if (calls !== 1) throw new Error(`onleave ran ${calls} times for one leave`);
+      if (enterCalls !== 1) throw new Error(`the other shape's onenter ran ${enterCalls} times`);
+      if (stillHovered) throw new Error('the left shape is still hovered');
+      if (errors.length !== 1) throw new Error(`errors: ${JSON.stringify(errors)}`);
+      srClear();
+    });
+
     test('safe render: a gradient on a NaN box draws once the box is valid (the kept error doesn\'t stick)', () => {
       srClear();
       srAdd('srLayerA', `<pxl-rect id="srNaNBox" x="100" y="400" w="NaN" h="60" fill="linear(0, ['#ff0000', '#0000ff'])"></pxl-rect>`);

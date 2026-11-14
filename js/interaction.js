@@ -120,6 +120,18 @@ pxl.InteractionEngine = class InteractionEngine {
     }
   }
 
+  // Calls an on* handler. A handler that throws is logged and doesn't end process(): the event flags are still
+  // reset and the hover list stays right, so the event isn't delivered again in every later frame.
+  callHandler(el, event) {
+    const handler = el.handlers[event];
+    if (!handler) return;
+    try {
+      handler();
+    } catch (error) {
+      console.error(`[pxl] <${el.localName}${el.id ? ` id="${el.id}"` : ''}> on${event} failed:`, error);
+    }
+  }
+
   process() {
     if (this._isMouseDirty) {
       if (this.stage.refKey) pxl.broadcast(this.stage.refKey);
@@ -197,7 +209,7 @@ pxl.InteractionEngine = class InteractionEngine {
       if (prevHovered !== hitEl) {
         prevHovered.attributeValues.isHovered = false;
         if (prevHovered.refKey) pxl.broadcast(prevHovered.refKey);
-        if (prevHovered.handlers.leave) prevHovered.handlers.leave();
+        this.callHandler(prevHovered, 'leave');
         pxl.removeFromArray(this._hoveredElements, prevHovered);
         this.releaseIfUnused(prevHovered);
       }
@@ -208,7 +220,7 @@ pxl.InteractionEngine = class InteractionEngine {
       this._hoveredElements.push(hitEl);
       hitEl.attributeValues.isHovered = true;
       if (hitEl.refKey) pxl.broadcast(hitEl.refKey);
-      if (hitEl.handlers.enter) hitEl.handlers.enter();
+      this.callHandler(hitEl, 'enter');
     }
 
     // Update Cursor: hand only for clickable elements (DOM write only on change)
@@ -219,14 +231,14 @@ pxl.InteractionEngine = class InteractionEngine {
     }
 
     if (hitEl) {
-      if (this._lastMove && hitEl.handlers.move) hitEl.handlers.move();
-      if (this._lastClick && hitEl.handlers.click) hitEl.handlers.click();
+      if (this._lastMove) this.callHandler(hitEl, 'move');
+      if (this._lastClick) this.callHandler(hitEl, 'click');
 
       if (this._lastDown) {
         hitEl.attributeValues.isPressed = true;
         this._pressedElement = hitEl;
         if (hitEl.refKey) pxl.broadcast(hitEl.refKey);
-        if (hitEl.handlers.down) hitEl.handlers.down();
+        this.callHandler(hitEl, 'down');
       }
     }
 
@@ -237,7 +249,7 @@ pxl.InteractionEngine = class InteractionEngine {
         if (released.refKey) pxl.broadcast(released.refKey);
         this._pressedElement = null;
       }
-      if (hitEl && hitEl.handlers.up) hitEl.handlers.up();
+      if (hitEl) this.callHandler(hitEl, 'up');
       if (released) this.releaseIfUnused(released);
     }
 

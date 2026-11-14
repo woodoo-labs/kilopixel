@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Throwing handler</title>
+  <script src="/dist/pxl.js"></script>
+  <style>
+    body { margin: 0; background: #111; color: #eee; font-family: sans-serif; }
+    pxl-stage { width: 600px; }
+  </style>
+</head>
+<body>
+  <p>Click the left rect once (its onclick throws), then move the pointer over it. Calls: <b id="out">0</b></p>
+  <pxl-stage id="main" ratio="2 / 1">
+    <pxl-layer>
+      <pxl-rect id="bad" x="250" y="250" w="300" h="300" fill="#f97316"
+        onclick="window.calls = (window.calls || 0) + 1; document.getElementById('out').textContent = window.calls; throw new Error('boom')"></pxl-rect>
+      <pxl-rect id="good" x="750" y="250" w="300" h="300" fill="#3b82f6"
+        onclick="window.goodCalls = (window.goodCalls || 0) + 1"></pxl-rect>
+    </pxl-layer>
+  </pxl-stage>
+</body>
+</html>

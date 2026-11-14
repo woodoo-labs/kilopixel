@@ -999,6 +999,8 @@ When `attributeChangedCallback` receives an event attribute (`onclick`, `onenter
 
 A removed or empty handler (`removeAttribute('onclick')`, `onclick=""`) sets the compiled handler to `null`. The shape is **not** unregistered immediately (a handler may remove itself while `InteractionEngine.process()` iterates); `releaseIfUnused()` unregisters it on its next leave / release.
 
+A handler that throws is caught by `InteractionEngine.callHandler()` and logged with `console.error` (`[pxl] <pxl-rect id="btn"> onclick failed:` plus the error with its stack trace). The rest of `process()` still runs: the event flags are reset and the hover list is updated, so the event is delivered once, and the other handlers of that frame are called (`design/2026-11-15_handler_errors_plan.md`).
+
 ---
 
 ## Element Reference — Circle
@@ -1520,7 +1522,7 @@ A canvas call or an expression that throws must not break the frame (`design/202
 - **Group, layer, variable:** a failing evaluation skips the element (with its children) for that frame, in both phases (`_failedFrame`). A layer keeps its previous pixels and its redraw request; a variable keeps its previous value.
 - **Readers:** a reader evaluated by a broadcast (`variableChangedCallback`) or by a `toLocal` walk (`broadcastGlobalMatrixChange`) catches its own error. The element that changed isn't blamed or skipped, the other readers still update, and the failing reader keeps its previous values and stays subscribed. This also holds for broadcasts outside frames (`setAttribute()`, pointer events, the performance monitor).
 - **`PxlNode.reportError(error)`** (`node.js`): warns once per distinct message and at most 3 times per element (the third warning says that more are hidden; some browser messages contain the bad value, e.g. a negative `arc()` radius). The same error object again returns early, so a repeated gradient error (kept by `createGradient`) allocates nothing. An animated element keeps invalidating its layer, so an error that depends on `t` recovers on its own.
-- **Not covered:** an expression that fails immediately in `setAttribute()` is reported by the browser as an uncaught error in a custom element reaction (the element keeps its old value); errors in `on*` handlers behave like DOM event handler errors.
+- **Not covered:** an expression that fails immediately in `setAttribute()` is reported by the browser as an uncaught error in a custom element reaction (the element keeps its old value). Errors in `on*` handlers are logged and don't stop the frame, see [Event Handling](#event-handling).
 
 ---
 
