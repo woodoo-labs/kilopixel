@@ -1,8 +1,8 @@
 # The `space` Attribute: Draw an Element in Another Element's Space
 
-- **Status**: 🟡 **Proposed** (2026-10-30, no code changes yet)
+- **Status**: 🟡 **Proposed** (2026-11-13: the draw-order rule of §3.5 is gone with two-phase frame step 1; 2026-10-30, no code changes yet)
 - **Date**: 2026-10-30
-- **Related**: `design/2026-10-29_tolocal_decomposition_plan.md` (§7 "Later idea", the clone rule this replaces for exact copies), `design/2026-10-25_refs_across_spaces_note.md` (hub for refs across spaces; §4 anchors), `design/2026-10-26_tolocal_fix_plan.md` (reactivity walk), `design/2026-11-07_safe_shape_render_plan.md` (same render path, §10), `design/2026-11-12_two_phase_frame_plan.md` (💬; would remove the one-frame lag of §3.5 here)
+- **Related**: `design/2026-10-29_tolocal_decomposition_plan.md` (§7 "Later idea", the clone rule this replaces for exact copies), `design/2026-10-25_refs_across_spaces_note.md` (hub for refs across spaces; §4 anchors), `design/2026-10-26_tolocal_fix_plan.md` (reactivity walk), `design/2026-11-07_safe_shape_render_plan.md` (same render path, §10), `design/2026-11-12_two_phase_frame_plan.md` (💬; its step 1, built 2026-11-13, removed the one-frame lag of §3.5 here)
 - **Target Implementation**: `js/elements/node.js` (`getParentMatrix`, `getGlobalMatrix`, space resolution), `js/graphics.js` (`applyTransformState`), `js/matrix.js` (`pxl.toLocal` uses the parent matrix), `js/elements/shape.js` and `group.js` (attribute, state check), `js/engine.js` (spatial key, reactivity); hit testing in `js/interaction.js` needs no change (§3.2)
 - **Demo**: `examples/test53.html` (the corner helpers become one attribute each)
 
@@ -159,9 +159,9 @@ When `space` is evaluated:
 
 ### 3.5 Draw Order
 
-Like toLocal: if B's layer is drawn before A's layer and A animates, B uses A's matrix from the previous frame (A's animated values are evaluated when A's layer renders). The rule stays the same: put readers (here: elements with `space`) in a layer after their target. Within one layer, children render in DOM order, so B after A.
+No rule needed since 2026-11-13. Every frame now evaluates all layers before any of them draws (two-phase frame step 1, `design/2026-11-12_two_phase_frame_plan.md` §7.4). B reads A's matrix while it is drawn, and matrices are computed lazily from the current values, so B uses A's matrix of this frame whatever the order of their layers or of B and A within one layer.
 
-A general fix (a two-phase frame: evaluate every element first, then draw) would remove this lag for `space`, toLocal and plain refs alike. It is a separate topic: `design/2026-11-12_two_phase_frame_plan.md` (TODO §29).
+Before step 1, B drawn before an animated A used A's matrix from the previous frame, and the rule was to put readers in a layer after their target. The lag of readers that also use `t` (two-phase plan §3.1.1) doesn't apply here: `space` reads a matrix, not an expression value.
 
 ## 4. Performance and Allocations
 

@@ -853,7 +853,8 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 - `unit = clientWidth / 1000`
 - **Built-in `IntersectionObserver`**: Automatically pauses requestAnimationFrame loops when the stage is scrolled out of the viewport (or out of an overflow scroll container like a carousel), and resumes rendering immediately upon re-entry. Can be overridden with `alwaysrender="true"`.
 - Manages its `_layers` array, sorts by DOM position when dirty
-- Only renders dirty or animated layers: `if (layer.isDirty || layer.isAnimated) layer.render(u, t)`
+- `render(t)` runs two phases ([Per-Frame Render Pipeline](#per-frame-render-pipeline)): first its stage-level variables and every dirty or animated layer evaluate (`if (layer.isDirty || layer.isAnimated) layer.update(t)`), then every layer that needs it draws (`if (layer.needsRender()) layer.render(u, t)`). `pxl._frame` counts the frames
+- Manages its stage-level `<pxl-var>` elements in `_variables` (`registerVariable()` / `unregisterVariable()`)
 - Delegates all pointer events to its `InteractionEngine`
 - Registers with `pxl.perf` for telemetry
 - Supports multiple independent stages per page
@@ -881,7 +882,10 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 ### Key Behavior
 
 - Each layer creates its own `<canvas>` element, absolutely positioned over the stage
-- `isDirty` flag (or the layer's own animated attributes, `isAnimated`) controls whether the layer re-renders
+- `isDirty` flag (or the layer's own animated attributes, `isAnimated`) controls whether the layer is updated in a frame
+- `update(t)` (update phase): keeps earlier requests in `_wasDirty`, clears `isDirty`, evaluates its own animations and (unless hidden) its children's; animated children set `isDirty` again (the heartbeat, kept in `_keepAlive`). `_updateFrame` records the frame
+- `needsRender()`: draw in this frame when it was dirty before its update, is dirty now (also through a later layer's broadcast), or is animated itself
+- `render(u, t)` (draw phase): updates the CSS compositing, clears and redraws the canvas, then sets `isDirty = _keepAlive`, so only the heartbeat carries into the next frame ([Dirty-Flag Optimization](#dirty-flag-optimization))
 - `_isCanvasEmpty` tracks whether the canvas was just cleared (optimization for hidden layers)
 - `invalidate()` sets `isDirty = true` and calls `stage.requestRender()`
 - Hidden optimization: if `hidden` (checked against `attributeExpressions`) AND `_isCanvasEmpty`, `invalidate()` returns early without scheduling rAF
@@ -912,7 +916,8 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `sca
 
 - Does NOT own a canvas — draws into parent layer's context
 - Groups can nest infinitely, each adding transforms to the stack
-- `render(ctx, u, t)` evaluates animations, applies transforms, iterates children
+- `update(t)` (update phase): sorts children by DOM position (if `_isOrderDirty`), evaluates its animations, and, unless hidden, calls `update(t)` on its children. A failing evaluation stores `_failedFrame` and skips the children.
+- `render(ctx, u, t)` (draw phase): stops if it failed in this frame or is hidden, applies transforms, calls `render()` on its children
 - Only saves/restores context if there are actual transform changes (optimization)
 
 ---
@@ -962,7 +967,9 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `sca
 
 ### Key Methods
 
-**`render(ctx, u, t)`**: Evaluates animations, stops if hidden (a hidden shape is still evaluated, so `ref.*` to it stays current), then draws inside `ctx.save()` / `ctx.restore()`: `applyContextState()` and `this.draw(ctx, u, t)`. Every shape draws in its own canvas state, so whatever a shape (also a custom one) changes, the next shape starts clean. Errors are caught and reported ([Errors While Rendering](#errors-while-rendering)).
+**`update(t)`** (update phase): evaluates animations, also for a hidden shape (so `ref.*` to it stays current). A failing evaluation is reported and stores `_failedFrame`.
+
+**`render(ctx, u, t)`** (draw phase): stops if the update failed in this frame or the shape is hidden, then draws inside `ctx.save()` / `ctx.restore()`: `applyContextState()` and `this.draw(ctx, u, t)`. Every shape draws in its own canvas state, so whatever a shape (also a custom one) changes, the next shape starts clean. Errors are caught and reported ([Errors While Rendering](#errors-while-rendering)). Custom shapes override `draw()`, not `update()` or `render()`.
 
 **`applyStyle(ctx, u)`**: After a path is built:
 1. If `fill` is set (not `none`/`transparent`): resolve gradient, `ctx.fill()`
@@ -1391,7 +1398,7 @@ Returns zeroed bounding box by default (grid is infinite). However, during draw,
 - Sets `display: none` (invisible in DOM)
 - Extends PxlNode directly (not Shape), so it has no visual output
 - Registers in `pxl.nodes` via its `id`, so other elements can read `ref.myVar.value`
-- Has a `render()` method that only calls `evaluateAnimations(t)` — this allows animated variables
+- `update(t)` calls `evaluateAnimations(t)` (this allows animated variables; a failing expression keeps the previous value). `render()` does nothing: a variable in a layer or group is in its `childList` like a shape, so the draw phase calls it
 - **Inside a layer** it is evaluated by that layer, like a shape: frozen while the layer (or a group around it) is hidden.
 - **Stage-level** (inside a `<pxl-stage>`, outside every layer, at any depth): `connectedCallback()` registers it with `closest('pxl-stage')` (`registerVariable()`, stage field `_variables`, field `stage` on the variable), `disconnectedCallback()` unregisters it. `Stage.render()` evaluates these before the layers, in DOM order, so readers in every layer see this frame's value, whatever a layer's `hidden`. It has no layer heartbeat: the stage requests the next frame while one is animated, and `attributeChangedCallback()` requests a frame (a value that becomes animated starts the loop). A static stage variable keeps the page at 0 FPS. Design: `design/2026-11-12_layer_throttling_plan.md` Part B.
 - Outside every stage: static and reactive values work, `t` doesn't (nothing evaluates it).
