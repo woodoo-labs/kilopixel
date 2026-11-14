@@ -152,15 +152,16 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Idea, still open**: change-based dirty flags (step 2): a layer redraws only when a value really changed (a `floor(t)` clock redraws once per second, a finished `clamp()` animation stops redrawing), and the stage, not the drawing, keeps the loop alive.
 - **Open**: redraws saved by step 2, hidden subtrees, readers that use `t` and refs (dependency order with a cycle rule recommended, plan §3.1.1), order of broadcasts; plan §4.
 - **Steps**: (1) split evaluation from drawing (built), (2) change-based dirty flags and keep-alive in the stage, (3) `t` readers, hidden subtrees, (4) the dependent plans; plan §7.2.
+
 ## 30. Framework Compatibility (DOM Contract)
-- **Status**: 🟡 **Proposed** (2026-11-10, D1 and D4 decided)
+- **Status**: 🟡 **Proposed** (2026-11-14, D1, D4, D6, D7 decided; W2 moved to §33)
 - **Reference**: `design/2026-10-30_framework_compatibility_plan.md`; prototype `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4, 2026-11-10); the React 19 / Vue 3.5 components with `FINDINGS.md` (2026-10-30) in the same folder
 - **Idea**: target the DOM contract frameworks use (attributes, properties, events, insert / move / remove, style, hydration), not the frameworks. Conformance test page `tests/frameworks.html` without any framework.
-- **Phase 1**: observe `id`; DOM events on shapes (`click`, `pointer*`) + `interactive` for delegating frameworks; rename the `on*` handlers, which collide with native `onclick` and framework `on*` rules (D1: `pxl-on-click`, `pxl-on-enter`, …, attribute-only); layer canvas in a shadow root (today `layer.innerHTML = …` silently removes the canvas: nothing is drawn, nothing is logged; confirmed 2026-11-05, and it broke `examples/test13.html`, fixed there on 2026-11-13) and default styles in a stylesheet; bounded expression caches.
+- **Phase 1**: observe `id`; DOM events on shapes (`click`, `pointer*`) + `interactive` for delegating frameworks; rename the `on*` handlers, which collide with native `onclick` and framework `on*` rules (D1: `pxl-on-click`, `pxl-on-enter`, …, attribute-only); bounded expression caches. The layer canvas in a shadow root and the default styles in a stylesheet (W2) moved to §33.
 - **Phase 2**: attribute properties (numbers without compiling, values set before upgrade). **Phase 3**: `docs/frameworks.html`, optional TypeScript typings.
-- **Decided**: D1 handler names `pxl-on-click` … (attribute-only); D4 `click` / `pointerdown` / `pointerup` are hit-tested when they arrive, so frameworks see one event per action (prototype `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html`).
-- **Open**: D2 scoped names instead of global ids and D5 cursor for delegated listeners (left open 2026-11-10); D3 coordinates on events, D6 `<slot>` in the layer's shadow root, D7 stage `aspect-ratio`, D8 array values as properties, D9 scope of phase 1 (each has a recommendation in plan §13, not confirmed yet).
-- **Related**: §33 (stage sizing) also moves the stage's default styles out of inline styles.
+- **Decided**: D1 handler names `pxl-on-click` … (attribute-only); D4 `click` / `pointerdown` / `pointerup` are hit-tested when they arrive, so frameworks see one event per action (prototype `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html`); D6 `<slot>` in the layer's shadow root and D7 inline `aspect-ratio` (2026-11-14, with §33).
+- **Open**: D2 scoped names instead of global ids and D5 cursor for delegated listeners (left open 2026-11-10); D3 coordinates on events, D8 array values as properties, D9 scope of phase 1 (each has a recommendation in plan §13, not confirmed yet).
+- **Related**: §33 builds W2 (canvas in a shadow root, stylesheet defaults).
 
 ## 31. Isolated Shape Compositing (Fill and Stroke Composite as One)
 - **Status**: 🟡 **Proposed** (2026-11-01)
@@ -174,11 +175,11 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Docs**: afterwards `mask.html` shapes get fill + stroke and the standard ghosts; the "Ghosts of fill-only shapes" note in DOCS_STANDARDS.md goes.
 - **Related**: builds on always save / restore (`design/2026-11-07_safe_shape_render_plan.md`, built 2026-11-07); build before §14 (`paintorder`); plan §9.
 
-## 33. Stage Sizing: Overridable Defaults and a Zero-Width Warning
-- **Status**: 🟡 **Proposed** (2026-11-04, no code changes yet)
-- **Reference**: `design/2026-11-04_stage_sizing_plan.md`
-- **Problem**: the stage takes `width: 100%` of its parent. In a wrapper that sizes itself to its content (centered flex or grid item, `inline-block`, absolutely positioned card) it gets 0 × 0, draws nothing and logs nothing. Author CSS such as `pxl-stage { width: 600px }` is ignored, because `connectedCallback()` writes `display`, `position` and `width` as inline styles.
-- **Idea**: default styles that author CSS can override, and a warning when the stage still has zero width once the page has loaded.
+## 33. Stage Sizing and Layer Canvas: Overridable Defaults, Zero-Width Warning, Canvas in a Shadow Root
+- **Status**: 🟢 **Decided** (2026-11-14, includes W2 of the framework plan, §30)
+- **Reference**: `design/2026-11-04_stage_sizing_plan.md`; prototypes in `design/prototypes/2026-11-04_stage_sizing/`
+- **Problem**: the stage takes `width: 100%` of its parent. In a wrapper that sizes itself to its content (centered flex or grid item, `inline-block`, absolutely positioned card) it gets 0 × 0, draws nothing and logs nothing. Author CSS such as `pxl-stage { width: 600px }` is ignored, because `connectedCallback()` writes `display`, `position` and `width` as inline styles. `layer.innerHTML = …` removes the layer's canvas, silently (confirmed again 2026-11-14).
+- **Decided**: stage and `pxl-var` defaults in `@layer pxl { … }`, in a `<style>` at the start of `<head>` (or of the shadow root the stage sits in), so page CSS wins, also classes in the page's own cascade layers (Tailwind v4; an adopted sheet or `:where()` would not, measured); a warning when the stage still has zero width once the page has loaded; the layer canvas in an open shadow root with `:host` styles and a `<slot>` (mouse coordinates and `innerHTML` checked in a prototype); `aspect-ratio` stays inline.
 
 ## 34. String Literals in Expressions
 - **Status**: 🟡 **Proposed** (2026-11-02; code drafted and checked in Node, implementation postponed)

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cascade layer order of the default styles</title>
+  <style>
+    /* Page CSS like Tailwind v4: the author's own cascade layers, utilities last */
+    @layer theme, base, components, utilities;
+    @layer utilities { .w-300 { width: 300px; } }
+    .plain-300 { width: 300px; }
+    body { margin: 16px; font-family: sans-serif; color: #334155; }
+    x-box { display: block; height: 20px; background: tomato; margin: 4px 0; }
+    pre { font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h3>Default <code>width: 100%</code> in <code>@layer pxl</code>; the page asks for 300 px</h3>
+  <p>
+    Each iframe copies this page's CSS, adds the default sheet in a different place and measures two boxes:
+    one sized by a class in the page's <code>utilities</code> layer (like Tailwind v4), one by a rule outside any layer.
+    The default must lose in both cases (300).
+  </p>
+  <pre id="out"></pre>
+  <script>
+    // Stand-in for the engine's default sheet; x-box plays the stage
+    const css = '@layer pxl { x-box { width: 100%; } }';
+    const results = [];
+
+    function measure(name, addDefaults) {
+      const frame = document.createElement('iframe');
+      frame.style.cssText = 'width: 900px; height: 70px; border: 1px solid #cbd5e1; display: block';
+      frame.srcdoc = '<!DOCTYPE html><html><head>' + document.querySelector('style').outerHTML + '</head><body></body></html>';
+      document.body.append(frame);
+      frame.onload = () => {
+        const doc = frame.contentDocument;
+        doc.body.innerHTML = '<x-box class="w-300"></x-box><x-box class="plain-300"></x-box>';
+        addDefaults(doc);
+        const [layered, unlayered] = doc.querySelectorAll('x-box');
+        results.push({ name, layeredClass: layered.clientWidth, unlayeredRule: unlayered.clientWidth });
+        document.getElementById('out').textContent = JSON.stringify(results, null, 1);
+        window.cascadeResults = results;
+      };
+    }
+
+    function styleElement(doc, text) {
+      const s = doc.createElement('style');
+      s.textContent = text;
+      return s;
+    }
+
+    function constructedSheet(doc) {
+      const sheet = new doc.defaultView.CSSStyleSheet();
+      sheet.replaceSync(css);
+      return sheet;
+    }
+
+    measure('adoptedStyleSheets', (doc) => {
+      doc.adoptedStyleSheets = [...doc.adoptedStyleSheets, constructedSheet(doc)];
+    });
+    measure('<style> at the start of <head>', (doc) => doc.head.prepend(styleElement(doc, css)));
+    measure('<style> at the end of <head>', (doc) => doc.head.append(styleElement(doc, css)));
+    measure(':where(x-box) outside any layer, start of <head>', (doc) => {
+      doc.head.prepend(styleElement(doc, ':where(x-box) { width: 100%; }'));
+    });
+  </script>
+</body>
+</html>

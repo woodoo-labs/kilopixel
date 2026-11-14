@@ -1,8 +1,8 @@
 # Framework Compatibility: Kilopixel as a Well-Behaved Custom Element
 
-- **Status**: 🟡 **Proposed** (2026-11-10, D1 and D4 decided; no code changes yet)
+- **Status**: 🟡 **Proposed** (2026-11-14, D1, D4, D6, D7 decided; W2 moved to the stage sizing plan; no code changes yet)
 - **Date**: 2026-10-30
-- **Related**: `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`
+- **Related**: `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`, `design/2026-11-04_stage_sizing_plan.md` (builds W2)
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
 
 ---
@@ -141,39 +141,11 @@ The hand cursor (`isClickable()`) should also show for shapes that a framework l
 
 ## 5. Workstream W2: DOM Ownership (C9, C10, C11)
 
-### 5.1 Canvases in a Shadow Root
+**Moved to `design/2026-11-04_stage_sizing_plan.md` (2026-11-14, 🟢 Decided)**, which builds it together with the stage sizing fix, because both remove the engine's inline default styles. Summary:
 
-Each `<pxl-layer>` attaches a shadow root in its constructor and puts its `<canvas>` there, plus a `<slot>` so its light-DOM children (shapes, groups) stay in the document tree:
-
-```
-<pxl-layer>                       light DOM: only what the user / framework rendered
-  #shadow-root
-    <canvas style="…">            the layer's pixels
-    <slot></slot>                 children stay where the framework put them (they render nothing themselves)
-  <pxl-circle …>
-```
-
-- **Effect**: frameworks never see the canvas (C9); server HTML and client DOM match (C11); `innerHTML` / htmx swaps of a layer's content can't remove it.
-- **Styling**: the canvas styles move into the shadow root (constant). Layer compositing (`alpha`, `blend`, `filter`) is written on the canvas as today.
-- **Hit testing / events**: the native pointer events target the canvas inside the shadow root; they are retargeted to `<pxl-layer>` at the shadow boundary and still bubble to the stage, where `InteractionEngine` listens. `e.offsetX` / `offsetY` are relative to the **retargeted** target? `offsetX` is computed for the original target (the canvas), which covers the stage like today. To verify in the conformance page (§11 T-E5); fallback: compute from `clientX - stage.getBoundingClientRect().left` (one rect read per pointer event, not per frame).
-- **Do children need a slot at all?** Shapes don't render DOM; but without a `<slot>`, light-DOM children are not rendered into the flat tree, which doesn't matter for them. Keeping the slot avoids surprises for users who put normal elements (text, buttons) into a layer for accessibility. Decision §13 D6.
-- **Browser support**: Shadow DOM is supported everywhere Kilopixel runs (it already requires Custom Elements).
-- **`pxl-stage`** gets no shadow root: it has no own content besides the layers; its styles move to the stylesheet (§5.2).
-
-### 5.2 Default Styles in a Stylesheet, Not Inline
-
-The engine injects one stylesheet once (on the first `pxl-stage` connect, or at script load), with zero-specificity selectors so any user or framework style wins:
-
-```css
-:where(pxl-stage) { display: block; position: relative; width: 100%; }
-:where(pxl-layer) { display: block; position: absolute; inset: 0; }
-:where(pxl-var)   { display: none; }
-```
-
-- `aspect-ratio` depends on the `ratio` attribute: set it as a CSS custom property on the element (`this.style.setProperty('--pxl-ratio', …)`) and use `aspect-ratio: var(--pxl-ratio)` in the stylesheet, or keep this one inline property. A custom property survives Vue / React style patches (they set individual properties), but not Angular `[style]` / Lit `style=${}` full replacement. Alternative: an attribute selector can't read a numeric attribute in CSS. Decision §13 D7; recommended: inline `aspect-ratio` stays (it is the stage's core behaviour), documented: "don't replace the whole `style` of a `<pxl-stage>`; set individual properties".
-- `cursor` stays inline on the stage (it changes with hover); document the same rule.
-- Injection: `document.adoptedStyleSheets` with a constructed `CSSStyleSheet` (no DOM node, works in shadow roots too if added there), or one `<style>` element in `<head>`. Constructed stylesheets are supported in all current browsers. For pages where Kilopixel's tags live inside a framework component's shadow root (C12), the stylesheet must also be adopted by that root: `pxl-stage` can add it to `this.getRootNode()` on connect if that is a `ShadowRoot`.
-- Users can override any default with normal CSS (e.g. `pxl-stage { width: 600px; }`), which today requires `!important` because of the inline styles. This is a usability gain beyond frameworks.
+- **Layer canvas in a shadow root** (C9, C11): each `<pxl-layer>` attaches an open shadow root with a `<style>` (`:host` defaults, canvas styles), its `<canvas>` and a `<slot>`. `innerHTML`, htmx swaps and frameworks can't remove the canvas, and the light DOM is exactly the rendered markup. Measured 2026-11-14: `mouseX` / `mouseY` stay exact across the shadow boundary, so the `offsetX` fallback first proposed here isn't needed (sizing plan §4.4).
+- **Default styles in a stylesheet** (C10): `pxl-stage` and `pxl-var` defaults in `@layer pxl { … }`, in a `<style>` element at the start of `<head>` (or of the shadow root the stage sits in, C12). The first proposal here, `:where()` selectors in an adopted stylesheet, was dropped: both an adopted sheet and a rule outside any layer beat classes in the page's own cascade layers (Tailwind v4), measured in the sizing plan §4.1.
+- **D6** (`<slot>`: yes) and **D7** (`aspect-ratio` stays inline, documented) are decided (§13).
 
 ## 6. Workstream W3: Properties (C3, C15)
 
@@ -284,7 +256,7 @@ The core deliverable: the DOM contract as automated tests, **without any framewo
 | T-E2 | C6 | listener on `document` (delegation) + `interactive` on the circle: called, `target` is the circle |
 | T-E3 | C6 | without `interactive` and without a direct listener: not hit-tested (registration rule) |
 | T-E4 | §4.1 | enter / leave sequence: `pointerover`, `pointerenter`, `pointerout`, `pointerleave` in order; `pointerenter` doesn't bubble |
-| T-E5 | §5.1 | with the canvas in a shadow root: `mouseX` / `mouseY` correct (offset retargeting) |
+| T-E5 | §5 | with the canvas in a shadow root: `mouseX` / `mouseY` correct (offset retargeting) |
 | T-E6 | §4.3 | `pxl-on-click` handler runs; a leftover `onclick` warns once |
 | T-E7 | §4.1 | a listener that calls `setAttribute` on another shape during dispatch: no error, change drawn next frame |
 | T-M1 | C8 | move a circle to another group in the same task (`appendChild` to the new parent): registered once, new matrix (extends the existing matrix test) |
@@ -334,8 +306,8 @@ Sidebar: a new entry under "Engine & Reactivity" or a new section "Integration".
 | D3 | Logical coordinates on events | extra fields / none (§4.1) | none; `ref.<stage>.mouseX` |
 | D4 | Native canvas `click` next to the synthetic shape `click` | (a) accept both / (b) hit-test when the event arrives and stop the native event over a shape / (c) Kilopixel owns every click in the stage (§4.1) | **decided 2026-11-10: (b)** for `click`, `pointerdown`, `pointerup`; `pointermove` keeps both (prototype `d4_clicks.html`) |
 | D5 | Hand cursor for framework listeners | `interactive` implies pointer / separate `cursor` attribute (§4.4) | `interactive` implies pointer |
-| D6 | `<slot>` in the layer's shadow root | yes / no (§5.1) | yes |
-| D7 | Stage `aspect-ratio` | inline / CSS custom property (§5.2) | inline, documented |
+| D6 | `<slot>` in the layer's shadow root | yes / no (§5) | **decided 2026-11-14:** yes |
+| D7 | Stage `aspect-ratio` | inline / CSS custom property (§5) | **decided 2026-11-14:** inline, documented ("set single properties on a stage's `style`, don't replace the whole attribute") |
 | D8 | Properties for array-valued attributes | direct arrays / strings only (§6.1) | direct where the parsed form is an array |
 | D9 | Scope of the first implementation | all workstreams / W1 + W2 + W5.1 + tests first | W1, W2, W5.1, W4, tests (§14 phase 1); W3 next; W5.2 / W6 only on demand |
 
@@ -346,7 +318,7 @@ Sidebar: a new entry under "Engine & Reactivity" or a new section "Integration".
 1. `tests/frameworks.html` with the tests that pass today (T-C1…, T-C4, T-M1, T-M2) as a baseline; the others added with their features.
 2. W5.1 observe `id` (+ T-C2, T-C2b). `fix(engine): register ids set or changed after connect`.
 3. W1 events: dispatch DOM events, `addEventListener` override, `interactive`, rename `on*` → D1 names, warning for the old names; migrate the 25 handlers (`test32`, `test37`, `tests/index.html`), KILOPIXEL.md Events + AI guide, docs pages that mention `onclick` on shapes (+ T-E1…T-E7). `feat(engine)!: DOM events on shapes; pxl-on-click replaces onclick`.
-4. W2 canvas in a shadow root + stylesheet defaults (+ T-M3, T-S1, T-S2, T-H1, T-E5). `refactor(engine): layer canvas in a shadow root, default styles in a stylesheet`.
+4. W2 canvas in a shadow root + stylesheet defaults (+ T-M3, T-S1, T-S2, T-H1, T-E5): moved to `design/2026-11-04_stage_sizing_plan.md`, which builds it; its tests go in `tests/index.html`.
 5. W4 cache bound (+ T-K1). `perf(compiler): bound the expression caches`.
 6. Smoke pages in `design/prototypes/2026-10-30_framework_compatibility/` for the frameworks in §12 that load without a build; record results in `FINDINGS.md`.
 
@@ -366,6 +338,7 @@ Every engine step: `node build.js`, update the `pxl.min.js` size, `tests/index.h
 
 ## 15. Interplay with Other Plans
 
+- **Stage sizing** (`2026-11-04_stage_sizing_plan.md`, 🟢 2026-11-14): builds W2 (§5) together with overridable stage sizes and the zero-width warning.
 - **Always save / restore** (`2026-11-07_safe_shape_render_plan.md`, built 2026-11-07): independent; both touch `Shape.render()` only lightly (W1 doesn't change rendering).
 - **`space` attribute** (`2026-10-30_space_attribute_plan.md`): hit testing of space elements is unchanged; DOM events work the same for them. W3 accessors would include `space` (its value is a ref object, set as a property it could be the element itself: `el.space = otherEl` is a natural framework API; note for that plan).
 - **Two-phase frame** (TODO §29): event dispatch at the end of `process()` fits both the current single pass and a later update / draw split.
@@ -374,7 +347,7 @@ Every engine step: `node build.js`, update the `pxl.min.js` size, `tests/index.h
 ## 16. Risks
 
 - **API change of the handlers (W1)**: pre-release, 25 uses; the old-name warning makes leftovers visible.
-- **Shadow root on layers (W2)**: pointer coordinate behaviour across the shadow boundary (T-E5) and any code that looks for `layer.querySelector('canvas')` (search the repo before changing; tests and examples may read the canvas for pixel checks, e.g. `design/prototypes/2026-10-17_shape_authoring/star_test.html`).
+- **Shadow root on layers (W2)**: checked 2026-11-14 (sizing plan §4.4): pointer coordinates are exact across the shadow boundary, and nothing in the repo reads the canvas with `querySelector`.
 - **Accessors (W3)**: a framework that sets a property Kilopixel doesn't expect (e.g. `style`, `className`) is unaffected (no accessor); a user who set expando properties with attribute names on elements (`el.x = …` as a private field) would now change the drawing. Unlikely; documented.
 - **Event duplication (D4)**: solved for `click`, `pointerdown` and `pointerup` by option (b); stage-level `pointermove` listeners see the native and the Kilopixel event (documented). Code that listens on the stage for the browser's click over a shape now gets Kilopixel's click instead (`target` = the shape, `isTrusted` = false).
 
@@ -384,14 +357,14 @@ Rough estimates from the code read for this plan; "session" = one working sessio
 
 | Phase | Engine | Other work | Estimate |
 |---|---|---|---|
-| **1**: `id` fix, DOM events + `interactive`, handler rename, canvas in a shadow root, stylesheet defaults, cache bound | ~250–350 lines in 7 files (`interaction.js`, `shape.js`, `node.js`, `layer.js`, `stage.js`, `variable.js`, `compiler.js`) | `tests/frameworks.html` (~20 tests, ~400 lines); migrate 25 handlers (`test32`, `test37`, `tests/index.html`); KILOPIXEL.md Events section and AI guide; smoke pages for 5–7 frameworks | 2–3 sessions |
+| **1**: `id` fix, DOM events + `interactive`, handler rename, canvas in a shadow root, stylesheet defaults, cache bound (the shadow root and the stylesheet defaults moved to the stage sizing plan on 2026-11-14) | ~250–350 lines in 7 files (`interaction.js`, `shape.js`, `node.js`, `layer.js`, `stage.js`, `variable.js`, `compiler.js`) | `tests/frameworks.html` (~20 tests, ~400 lines); migrate 25 handlers (`test32`, `test37`, `tests/index.html`); KILOPIXEL.md Events section and AI guide; smoke pages for 5–7 frameworks | 2–3 sessions |
 | **2**: property accessors, properties set before the upgrade | ~100–150 lines (generated accessors, `pxl.setAttributeValue`) | ~6 tests; re-run the smoke pages | 1 session |
 | **3**: `docs/frameworks.html`, sidebar, KILOPIXEL.md section | none | docs page per `docs/DOCS_STANDARDS.md`; optional typings generator in `tools/` | 1 session (+1 for typings) |
 
 **What takes the time:**
 
 1. **Decisions before code**: D1 (handler names) and D4 (one click per user click) are decided (2026-11-09 / 2026-11-10); D5–D8 are smaller.
-2. **Shadow root on layers**: pointer coordinates across the shadow boundary must be verified (T-E5); if `offsetX` / `offsetY` don't fit, a fallback from `clientX` and the stage rect is needed.
+2. **Shadow root on layers**: pointer coordinates across the shadow boundary verified 2026-11-14 (exact, no fallback needed); W2 moved to the stage sizing plan.
 3. **Testing in the dev environment**: a hidden browser pane stops layout, `ResizeObserver` and `requestAnimationFrame` (seen in the prototypes and the `test32` check on 2026-10-30). The conformance tests force rendering (`stage.resize()`, `stage.render()`) and fall back to calling compiled handlers where pointer input needs layout.
 
 Phase 1 alone delivers most of the value (framework events, no `on*` collisions, no hydration / reconcile conflicts, bounded memory). Phase 2 is an improvement, not a requirement.
@@ -405,8 +378,8 @@ No per-frame cost for pages that don't use the new features; some paths get chea
 | DOM events (W1) | none without input; on pointer actions over shapes only, and only for event types with a listener (per-type counts, §4.5) | one event object per dispatched event, like the browser's own events | — |
 | `addEventListener` override (W1) | none | one comparison per `addEventListener` call (at mount) | — |
 | `interactive` (W1) | only for shapes the user marks: hit-tested on pointer moves, like shapes with handlers today | — | — |
-| Canvas in a shadow root (W2) | none: drawing and compositing unchanged | possibly one `getBoundingClientRect()` per pointer event (fallback in §5.1) | — |
-| Stylesheet defaults (W2) | none | one stylesheet per page, once | users override styles without `!important` |
+| Canvas in a shadow root (W2) | none: drawing and compositing unchanged | one shadow root and `<style>` per layer, once | canvas can't be removed by `innerHTML` or frameworks |
+| Stylesheet defaults (W2) | none | one `<style>` per page (or per shadow root with a stage), once | users override styles without `!important` |
 | Property accessors (W3) | none | defined once on the prototype; the pre-upgrade check runs once per element at creation (~80 `hasOwnProperty` checks) | numbers set as properties skip parsing and compiling |
 | Cache bound (W4) | none | one size check per compile | bounded memory |
 | `id` observed (W5.1) | none | only when an `id` changes | — |

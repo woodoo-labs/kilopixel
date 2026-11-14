@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Layer canvas in a shadow root</title>
+  <script src="/dist/pxl.js"></script>
+  <style>
+    body { margin: 16px; font-family: sans-serif; color: #334155; width: 800px; }
+    pre { font-size: 13px; }
+  </style>
+</head>
+<body>
+  <p>
+    Moves the layer's canvas into a shadow root at runtime (what the engine would do in the layer's constructor),
+    then checks mouse coordinates and <code>layer.innerHTML</code>. Result also in <code>window.shadowResults</code>.
+  </p>
+  <pxl-stage id="stage" alwaysrender="true">
+    <pxl-layer id="layer">
+      <pxl-circle x="30" y="30" r="20" fill="red"></pxl-circle>
+    </pxl-layer>
+  </pxl-stage>
+  <pre id="out"></pre>
+  <script>
+    const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
+
+    // Painted pixels of the layer canvas and their center, in canvas pixels
+    function paintedArea(canvas) {
+      const d = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+      let n = 0, sx = 0, sy = 0;
+      for (let i = 3; i < d.length; i += 4) {
+        if (!d[i]) continue;
+        n++;
+        sx += ((i - 3) / 4) % canvas.width;
+        sy += Math.floor((i - 3) / 4 / canvas.width);
+      }
+      return { pixels: n, center: n ? [Math.round(sx / n), Math.round(sy / n)] : null };
+    }
+
+    window.addEventListener('load', async () => {
+      const stage = document.getElementById('stage');
+      const layer = document.getElementById('layer');
+      const canvas = layer._canvas;
+      const root = layer.attachShadow({ mode: 'open' });
+      root.append(canvas, document.createElement('slot'));
+      // The stage ignores pointer moves until its ResizeObserver has set the unit
+      while (stage.unit === 0) await nextFrame();
+
+      const results = {};
+      const rect = stage.getBoundingClientRect();
+      for (const [px, py] of [[100, 50], [400, 200]]) {
+        canvas.dispatchEvent(new PointerEvent('pointermove', {
+          bubbles: true, composed: true, clientX: rect.left + px, clientY: rect.top + py
+        }));
+        await nextFrame();
+        results[`mouse at ${px}, ${py} px`] = [stage.attributeValues.mouseX, stage.attributeValues.mouseY]
+          .map((v) => +(v * stage.unit).toFixed(2));
+      }
+
+      layer.innerHTML = '<pxl-circle x="500" y="300" r="40" fill="blue"></pxl-circle>';
+      await nextFrame();
+      await nextFrame();
+      results.canvasStillInShadowRoot = root.contains(canvas);
+      results.lightDomAfterInnerHTML = layer.innerHTML;
+      results.expectedCenter = [500, 300].map((v) => Math.round(v * stage.unit * layer._dpr));
+      results.painted = paintedArea(canvas);
+
+      document.getElementById('out').textContent = JSON.stringify(results, null, 1);
+      window.shadowResults = results;
+    });
+  </script>
+</body>
+</html>
