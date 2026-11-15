@@ -89,4 +89,6 @@ Decided 2026-10-27 (`design/2026-10-27_engine_cleanup_inventory_note.md` §2). T
 
 ## English & Language Coach
 
+Always answer in English, also when a message arrives in another language (e.g. the app's Commit button sends a German prompt). Code, comments, commit messages and project files are in English anyway.
+
 The user is improving their English. Unless paused, start each response with a short **English & Phrasing Notes** section: noticeable typos, grammar fixes and more natural phrasing from the user's last message. Skip it when there is nothing worth noting. If the user asks to pause it, leave it out until they ask to resume.
