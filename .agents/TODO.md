@@ -155,8 +155,10 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Related**: §40 proposes another way after step 2 (one evaluation per frame for all expressions, no broadcasts); step 2 is the first step of both.
 
 ## 30. Framework Compatibility (DOM Contract)
-- **Status**: 🟡 **Proposed** (2026-11-15, D1, D4, D6, D7 decided; W2 built with the stage sizing plan)
-- **Reference**: `design/2026-10-30_framework_compatibility_plan.md`; prototype `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4, 2026-11-10); the React 19 / Vue 3.5 components with `FINDINGS.md` (2026-10-30) in the same folder
+- **Status**: 🟡 **Proposed** (2026-11-15, review plan §19: new findings and order; D1, D4, D6, D7 decided; W2 built with the stage sizing plan)
+- **Reference**: `design/2026-10-30_framework_compatibility_plan.md`; prototypes `design/prototypes/2026-10-30_framework_compatibility/review_checks.html` (review, 2026-11-15), `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4, 2026-11-10); the React 19 / Vue 3.5 components with `FINDINGS.md` (2026-10-30) in the same folder
+- **Review 2026-11-15** (plan §19): measured on the current engine: removing 2,000 shapes with 2,000 readers takes 374–389 ms (quadratic `clearAllVariableSubscriptions()`); an `id` set after insertion is never registered, a renamed one leaves its old entry; a second copy of the script breaks the first; text children of shapes show as HTML; JSX arrays become strings. New: W8 distribution (npm, SSR / double-load guard, typings required), W9 hidden text children, D10 clicks without `interactive`, D11, D12.
+- **Order** (plan §19.4): (1) quick fixes (removal cost, `id`, guard, cache bound, text children), (2) `tests/frameworks.html`, (3) events W1, (4) properties W3, (5) distribution and docs, (6) the evaluation model (§29 / §40) with scoped names D2.
 - **Idea**: target the DOM contract frameworks use (attributes, properties, events, insert / move / remove, style, hydration), not the frameworks. Conformance test page `tests/frameworks.html` without any framework.
 - **Phase 1**: observe `id`; DOM events on shapes (`click`, `pointer*`) + `interactive` for delegating frameworks; rename the `on*` handlers, which collide with native `onclick` and framework `on*` rules (D1: `pxl-on-click`, `pxl-on-enter`, …, attribute-only); bounded expression caches. The layer canvas in a shadow root and the default styles in a stylesheet (W2) are built (2026-11-15, `design/2026-11-04_stage_sizing_plan.md`).
 - **Phase 2**: attribute properties (numbers without compiling, values set before upgrade). **Phase 3**: `docs/frameworks.html`, optional TypeScript typings.
@@ -214,3 +216,4 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Behavior change**: a reactive value updates in the next frame's update phase, not inside `setAttribute()` (same frame on screen).
 - **Open**: D1 this plan or the path of §29 steps 2–3 plus §39 (decide after a prototype patch and a page sweep), D2–D7 (plan §10). The riskiest part is a `toLocal` reader that is read by others (plan §3.5).
 - **Steps**: (1) §29 step 2, needed on both paths, (2) prototype as a patch over the engine, page sweep, decide D1, (3) build, (4) update the plans that assume broadcasts.
+- **When**: after the framework steps 1–5 of §30 (their conformance tests are the safety net); scoped names (§30 D2) are designed together with D1, because both change how `ref` is resolved (framework plan §19.3).

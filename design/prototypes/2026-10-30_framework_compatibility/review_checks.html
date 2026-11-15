@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Framework Review Checks</title>
+<!-- Checks for design/2026-10-30_framework_compatibility_plan.md §19 (review 2026-11-15).
+     Each check does with plain DOM calls what a framework does, on the current engine, and prints what happened.
+     Results also in window.reviewChecks; the tab title says when all checks ran. -->
+<script src="/dist/pxl.min.js"></script>
+<style>
+  body { font: 14px/1.4 system-ui, sans-serif; margin: 16px; background: #f8fafc; color: #0f172a; }
+  table { border-collapse: collapse; background: #fff; }
+  td, th { border: 1px solid #cbd5e1; padding: 4px 8px; text-align: left; vertical-align: top; }
+  td:last-child { font-family: ui-monospace, monospace; font-size: 12px; white-space: pre-wrap; }
+  pxl-stage { max-width: 600px; margin-top: 16px; border: 1px solid #cbd5e1; }
+</style>
+</head>
+<body>
+  <h1>Framework Review Checks</h1>
+  <table><thead><tr><th>Check</th><th>Result</th></tr></thead><tbody id="results"></tbody></table>
+
+  <pxl-stage id="rcStage" ratio="5 / 3" alwaysrender>
+    <pxl-layer id="rcLayer"></pxl-layer>
+  </pxl-stage>
+
+<script>
+const results = {};
+const row = (name, value) => {
+  results[name] = value;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td></td><td></td>`;
+  tr.children[0].textContent = name;
+  tr.children[1].textContent = typeof value === 'string' ? value : JSON.stringify(value, null, 1);
+  document.getElementById('results').append(tr);
+};
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const layer = () => document.getElementById('rcLayer');
+
+// Several runs, median: timings vary by about 30 % between runs
+function median(fn, runs = 5) {
+  const times = [];
+  for (let i = 0; i < runs; i++) times.push(fn());
+  times.sort((a, b) => a - b);
+  return +times[Math.floor(runs / 2)].toFixed(2);
+}
+
+function checkLateId() {
+  layer().insertAdjacentHTML('beforeend',
+    '<pxl-circle id="rcReader" r="10" x="ref.rcLate.x + 1"></pxl-circle><pxl-circle r="10" x="50"></pxl-circle>');
+  const late = layer().lastElementChild;
+  late.id = 'rcLate'; // Angular [id], Alpine :id, htmx: the id arrives after insertion
+  late.setAttribute('x', '70');
+  row('C2: id set after insertion', {
+    registered: !!pxl.nodes.rcLate, readerX: pxl.nodes.rcReader.x, expected: 71
+  });
+
+  const reader = document.getElementById('rcReader');
+  reader.id = 'rcRenamed';
+  const afterRename = { newKey: !!pxl.nodes.rcRenamed, oldKey: !!pxl.nodes.rcReader };
+  layer().replaceChildren();
+  row('C2: id renamed, then element removed', { ...afterRename, oldKeyAfterRemove: !!pxl.nodes.rcReader });
+  delete pxl.nodes.rcReader;
+}
+
+function checkRemoval() {
+  const build = (n, readers) => {
+    let html = '';
+    for (let i = 0; i < n; i++) html += `<pxl-circle id="rm${i}" x="${i % 1000}" y="100" r="3"></pxl-circle>`;
+    if (readers) for (let i = 0; i < n; i++) html += `<pxl-circle x="ref.rm${i}.x" y="200" r="2"></pxl-circle>`;
+    return html;
+  };
+  const out = {};
+  for (const [n, readers] of [[1000, false], [1000, true], [2000, true]]) {
+    const html = build(n, readers);
+    out[`${n} shapes${readers ? ` + ${n} readers` : ''}`] = median(() => {
+      layer().insertAdjacentHTML('beforeend', html);
+      const t0 = performance.now();
+      layer().replaceChildren();
+      return performance.now() - t0;
+    }, 3) + ' ms to remove';
+  }
+  const html = build(2000, true);
+  out['mount 2000 + 2000 readers'] = median(() => {
+    const t0 = performance.now();
+    layer().insertAdjacentHTML('beforeend', html);
+    const ms = performance.now() - t0;
+    layer().replaceChildren();
+    return ms;
+  }, 3) + ' ms to insert';
+  row('C8 / C14: removing a list (route change, unmount)', out);
+}
+
+function checkSetAttribute() {
+  let html = '';
+  for (let i = 0; i < 1000; i++) html += `<pxl-circle id="sa${i}" x="${i}" y="100" r="3" fill="#000"></pxl-circle>`;
+  layer().insertAdjacentHTML('beforeend', html);
+  const shapes = [...layer().querySelectorAll('pxl-circle')];
+  let k = 0;
+  const frame = () => {
+    k++;
+    const t0 = performance.now();
+    for (let i = 0; i < shapes.length; i++) {
+      shapes[i].setAttribute('x', String(i + k * 0.37));
+      shapes[i].setAttribute('y', String(100 + (k % 50)));
+    }
+    return performance.now() - t0;
+  };
+  const plain = median(frame);
+  let readers = '';
+  for (let i = 0; i < 1000; i++) readers += `<pxl-circle x="ref.sa${i}.x" y="200" r="2"></pxl-circle>`;
+  layer().insertAdjacentHTML('beforeend', readers);
+  const withReaders = median(frame);
+  layer().replaceChildren();
+  row('C14: 2,000 setAttribute() per frame (framework-driven animation)', {
+    plain: plain + ' ms', withOneReaderEach: withReaders + ' ms', budget: '16.7 ms'
+  });
+}
+
+function checkHitTest() {
+  const stage = document.getElementById('rcStage');
+  if (stage.unit === 0) stage.resize();
+  const out = {};
+  for (const n of [100, 1000, 3000]) {
+    let html = '';
+    for (let i = 0; i < n; i++) {
+      html += `<pxl-rect x="${(i % 100) * 10 + 5}" y="${Math.floor(i / 100) * 10 + 5}" w="8" h="8" fill="#000" onenter="0"></pxl-rect>`;
+    }
+    layer().insertAdjacentHTML('beforeend', html);
+    // Pointer over empty space: every registered shape is tested
+    stage.attributeValues.isHovered = true;
+    stage.attributeValues.mouseX = 999;
+    stage.attributeValues.mouseY = 590;
+    stage.interaction.process();
+    out[`${n} clickable shapes`] = median(() => {
+      const t0 = performance.now();
+      for (let k = 0; k < 20; k++) stage.interaction.process();
+      return (performance.now() - t0) / 20;
+    }) + ' ms per pointer frame';
+    layer().replaceChildren();
+  }
+  stage.attributeValues.isHovered = false;
+  row('Hit test cost (pointer over empty space)', out);
+}
+
+function checkTextChildren() {
+  layer().insertAdjacentHTML('beforeend',
+    '<pxl-text id="rcText" x="100" y="100" size="30" fill="#000" text="Canvas">Hello from JSX children</pxl-text>');
+  const el = document.getElementById('rcText');
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  row('C17: text children of a shape (<pxl-text>{label}</pxl-text>)', {
+    slotted: !!el.assignedSlot,
+    visibleHtmlTextBoxes: [...range.getClientRects()].map((r) => `${Math.round(r.width)} × ${Math.round(r.height)} px`)
+  });
+  // left on the page on purpose: the text is visible above the stage
+}
+
+function checkArrayProperty() {
+  layer().insertAdjacentHTML('beforeend', '<pxl-line id="rcDash" x2="100" stroke="#000"></pxl-line>');
+  const el = document.getElementById('rcDash');
+  el.setAttribute('linedash', [20, 10]); // what React / Preact do with linedash={[20, 10]} today
+  row('C3: array value from JSX (linedash={[20, 10]})', { stored: el.attributeValues.linedash, type: typeof el.attributeValues.linedash });
+  el.remove();
+}
+
+// The second copy runs in an iframe, so this page stays intact
+async function checkDoubleLoad() {
+  const frame = document.createElement('iframe');
+  frame.style.display = 'none';
+  frame.srcdoc = `<!DOCTYPE html><script>window.errors = []; addEventListener('error', (e) => errors.push(e.message));<\/script>
+    <script src="/dist/pxl.min.js"><\/script>
+    <pxl-stage><pxl-layer><pxl-circle id="a" x="40" r="5"></pxl-circle></pxl-layer></pxl-stage>
+    <script>window.first = window.pxl;<\/script>
+    <script src="/dist/pxl.min.js?second"><\/script>
+    <pxl-stage><pxl-layer><pxl-circle id="b" x="ref.a.x + 1" r="5"></pxl-circle></pxl-layer></pxl-stage>`;
+  document.body.append(frame);
+  await new Promise((r) => frame.addEventListener('load', r));
+  await wait(200);
+  const w = frame.contentWindow;
+  row('C16: script loaded twice (script tag + import, micro-frontends)', {
+    pxlReplaced: w.pxl !== w.first,
+    firstRegistryLost: !w.pxl.nodes.a,
+    readerX: w.document.getElementById('b').attributeValues.x,
+    expected: 41,
+    errors: w.errors
+  });
+  frame.remove();
+}
+
+async function run() {
+  await wait(300);
+  checkLateId();
+  checkRemoval();
+  checkSetAttribute();
+  checkHitTest();
+  checkArrayProperty();
+  await checkDoubleLoad();
+  checkTextChildren();
+  row('Caches after all checks', { animationCache: pxl.animationCache.size, staticCache: pxl.staticCache.size });
+  window.reviewChecks = results;
+  document.title = 'Framework Review Checks: done';
+}
+run();
+</script>
+</body>
+</html>

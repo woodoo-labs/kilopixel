@@ -196,3 +196,4 @@ The existing tests stay (ref cycles, two-phase frame, safe render, toLocal, laye
 | D5 | Derived values right after `setAttribute()`: accept the next frame, or evaluate on demand when a stale value is read? | Accept the next frame, if step 1 finds no page that relies on it |
 | D6 | Granularity: element, or attribute (`ref.orb.stroke` as its own source)? | Element, as today |
 | D7 | Wake every stage in view, or only stages with readers of the changed source? | Every stage in view; the check costs about 20 ns per reader |
+| D8 | Scoped names (`design/2026-10-30_framework_compatibility_plan.md` D2): resolve `ref` per stage? | Design it with D1: compiled functions would receive `ref` at call time instead of binding the global `pxl.nodes`, so component instances share their compiled expressions (framework plan §19.3, added 2026-11-15) |

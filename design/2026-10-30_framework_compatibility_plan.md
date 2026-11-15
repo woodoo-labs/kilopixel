@@ -1,8 +1,8 @@
 # Framework Compatibility: Kilopixel as a Well-Behaved Custom Element
 
-- **Status**: 🟡 **Proposed** (2026-11-15, D1, D4, D6, D7 decided; W2 built with the stage sizing plan; the rest not built yet)
+- **Status**: 🟡 **Proposed** (2026-11-15, review §19: new findings, workstreams W8 / W9, decisions D10–D12, new order; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; the rest not built yet)
 - **Date**: 2026-10-30
-- **Related**: `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`, `design/2026-11-04_stage_sizing_plan.md` (builds W2)
+- **Related**: `design/prototypes/2026-10-30_framework_compatibility/review_checks.html` (review §19); `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`, `design/2026-11-04_stage_sizing_plan.md` (builds W2)
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
 
 ---
@@ -38,6 +38,8 @@ Kilopixel should work in **any** framework (React, Preact, Vue, Svelte, Solid, A
 | C13 | Reuse a component many times on one page | all | ids / names must not collide between instances |
 | C14 | Re-render often (every state change) | all | repeated identical values are free; changing values must not leak memory |
 | C15 | Load the library after the markup, or define elements late (code splitting) | all bundlers, `<script defer>`, `type="module"` | upgrade correctly; values set before the upgrade must not be lost |
+| C16 | Install and import the library: `npm install`, `import 'kilopixel'`, evaluated on the server during SSR, sometimes twice (a script tag plus an import, micro-frontends, Storybook) | all bundler-based setups; Next.js, Nuxt, SvelteKit, Astro, Angular SSR | an import entry point; importing on the server does nothing; a second copy doesn't break the first; typings for TypeScript projects (added 2026-11-15, §19) |
+| C17 | Render content as children (`<pxl-text>{label}</pxl-text>`) | JSX, Vue / Svelte templates | children of shapes must not show up as page content (added 2026-11-15, §19) |
 
 ## 3. Current State (Audit 2026-10-30)
 
@@ -46,7 +48,7 @@ From the React 19 / Vue 3.5 prototypes (`design/prototypes/2026-10-30_framework_
 | # | State | Detail |
 |---|---|---|
 | C1 | ✅ | both prototypes: elements upgrade, stages size and animate (with the browser pane visible) |
-| C2 | ⚠️ | attributes after connect work, **except `id`**: `id` isn't an observed attribute, so an `id` set or changed after connect is never registered in `pxl.nodes` (`node.js` `connectedCallback` reads it once) |
+| C2 | ⚠️ | attributes after connect work, **except `id`**: `id` isn't an observed attribute, so an `id` set or changed after connect is never registered in `pxl.nodes` (`node.js` `connectedCallback` reads it once). Measured 2026-11-15 (§19.1): a renamed element also keeps its **old** entry in `pxl.nodes` after it is removed (`disconnectedCallback()` deletes only the current id), so readers of the old id keep reading a removed element |
 | C3 | ❌ | no properties: `el.r = 50` creates a plain JS property and changes nothing. React / Vue only worked because `r` isn't a property of `HTMLElement` and they fell back to attributes. Collisions with `HTMLElement` (checked in the browser over all 82 observed attribute names): `hidden` (harmless, it reflects to the attribute) and `onclick` (see C7) |
 | C4 | ✅ | Rule A; verified (`zoom={undefined}` → attribute removed → `1`) |
 | C5 | ❌ | Kilopixel dispatches no DOM events; `@click` never fires (the browser's click targets the layer canvas, which isn't inside `<pxl-circle>`) |
@@ -60,6 +62,8 @@ From the React 19 / Vue 3.5 prototypes (`design/prototypes/2026-10-30_framework_
 | C13 | ⚠️ | `pxl.nodes` is one flat registry per document. Each instance needs unique ids; `useId()` values (React `:r0:`, Vue `v-0`) aren't valid in `ref.<id>` and must be cleaned (`'p' + id.replace(/[^a-zA-Z0-9]/g, '')`) |
 | C14 | ⚠️ | identical values are skipped (`oldValue === newValue`); numbers aren't compiled. But every distinct **expression** string is compiled and cached forever (`pxl.animationCache` / `pxl.staticCache`): 71 slider steps of a rebuilt `x="${base} + sin(t / 400) * 20"` grew `animationCache` from 4 to 74 entries |
 | C15 | ⚠️ | upgrading after the markup works (attributes are read on upgrade). Properties set before the upgrade would shadow future accessors (only relevant once C3 exists) |
+| C16 | ❌ | (2026-11-15, §19.1) no npm package and no import entry point; the bundle starts with `window.pxl = …` and extends `HTMLElement`, so importing it on a server throws; a second copy replaces `window.pxl`, empties the registry and throws `TypeError`s on the elements of the first copy; no typings |
+| C17 | ❌ | (2026-11-15, §19.1) a shape's children are slotted into the layer's shadow root (D6) and render as visible HTML text above the canvas |
 
 Test-environment notes from the prototypes (not framework problems): a hidden browser pane stops `ResizeObserver` and `requestAnimationFrame`, so stages stay unsized; real clicks in a scaled (emulated) viewport land at wrong coordinates. The conformance tests (§11) must dispatch synthetic events with exact coordinates and must not depend on the pane being visible where possible.
 
@@ -302,16 +306,21 @@ Sidebar: a new entry under "Engine & Reactivity" or a new section "Integration".
 | # | Decision | Options | Recommendation |
 |---|---|---|---|
 | D1 | Names of the declarative handlers | `pxl-on-click` / `pxl-click` / `pxl-onclick` / other (§4.3) | **decided 2026-11-09:** `pxl-on-click`, `pxl-on-enter`, `pxl-on-leave`, `pxl-on-down`, `pxl-on-up`, `pxl-on-move`; attribute-only |
-| D2 | Scoped names | A global ids / B stage-scoped ids / C `name` attribute (§8.2) | decide later; A for now, C if components need it |
+| D2 | Scoped names | A global ids / B stage-scoped ids / C `name` attribute (§8.2) | decide later; A for now, C if components need it. **2026-11-15 (§19.3):** design it together with the evaluation model (`design/2026-11-15_per_frame_evaluation_plan.md` D1), because both change how `ref` is resolved |
 | D3 | Logical coordinates on events | extra fields / none (§4.1) | none; `ref.<stage>.mouseX` |
 | D4 | Native canvas `click` next to the synthetic shape `click` | (a) accept both / (b) hit-test when the event arrives and stop the native event over a shape / (c) Kilopixel owns every click in the stage (§4.1) | **decided 2026-11-10: (b)** for `click`, `pointerdown`, `pointerup`; `pointermove` keeps both (prototype `d4_clicks.html`) |
 | D5 | Hand cursor for framework listeners | `interactive` implies pointer / separate `cursor` attribute (§4.4) | `interactive` implies pointer |
 | D6 | `<slot>` in the layer's shadow root | yes / no (§5) | **decided 2026-11-14:** yes |
 | D7 | Stage `aspect-ratio` | inline / CSS custom property (§5) | **decided 2026-11-14:** inline, documented ("set single properties on a stage's `style`, don't replace the whole attribute") |
 | D8 | Properties for array-valued attributes | direct arrays / strings only (§6.1) | direct where the parsed form is an array |
-| D9 | Scope of the first implementation | all workstreams / W1 + W2 + W5.1 + tests first | W1, W2, W5.1, W4, tests (§14 phase 1); W3 next; W5.2 / W6 only on demand |
+| D9 | Scope of the first implementation | all workstreams / W1 + W2 + W5.1 + tests first | W1, W2, W5.1, W4, tests (§14 phase 1); W3 next; W5.2 / W6 only on demand. **2026-11-15:** replaced by the order in §19.4 (quick fixes first, distribution W8 added) |
+| D10 | Clicks on shapes without `interactive` (§19.2) | `interactive` needed for every delegated listener (§4.2) / `click`, `pointerdown`, `pointerup` hit-test every shape of the stage when they arrive, `interactive` only for hover with delegated listeners | the second: React / Svelte / Solid `onClick` then works without an extra attribute; needs D11 |
+| D11 | Shapes that should not catch clicks (with D10, a decorative shape on top catches the click, as in the DOM) | a `pointer-events`-like attribute / only shapes with a fill or stroke at the point count (as today) and nothing else | open; decide with D10 |
+| D12 | Text children of shapes (C17) | hide them (one rule in `pxl.DEFAULT_STYLES`) / hide them and use the text content of `<pxl-text>` when `text` is not set | hide now (W9); the text content as a fallback is a separate API decision |
 
 ## 14. Phases and Steps
+
+**2026-11-15:** the review in §19 adds quick fixes, distribution (W8) and text children (W9), and puts the steps in a new order (§19.4). The phases below are the original plan and stay for their details.
 
 **Phase 1: the contract that breaks today** (one plan approval, several commits)
 
@@ -387,3 +396,69 @@ No per-frame cost for pages that don't use the new features; some paths get chea
 - **File size**: about +2–3 KB minified (estimated 2026-10-30, when `pxl.min.js` was ~53 KB; from ~57 KB on 2026-11-13 that means about 59–60 KB); the main measurable cost.
 - **Worst case avoided by design**: `pointermove` dispatched every frame while the pointer moves over many shapes. Only the shape under the pointer gets events, and only for types with listeners.
 - **Check**: run `design/prototypes/2026-10-30_framework_compatibility/perf_run.html` before and after phase 1 (same pages, interleaved rounds). In this environment it resolves differences above ~20 % only (`design/prototypes/2026-10-30_framework_compatibility/perf_results.md`); smaller effects need a quiet machine or more rounds.
+
+## 19. Review 2026-11-15: Findings, New Workstreams, Order
+
+A review of this plan against the goal "Kilopixel works in the major frameworks out of the box", with checks on the current engine (`design/prototypes/2026-10-30_framework_compatibility/review_checks.html`: plain DOM calls that do what frameworks do; results in a table and in `window.reviewChecks`).
+
+### 19.1 Measured on the Current Engine
+
+| Check | Result | Who hits it |
+|---|---|---|
+| `id` set after insertion (C2) | not registered; a reader of it gets `null` | Angular `[id]`, Alpine `:id`, htmx |
+| `id` renamed, element removed (C2) | the new id is not registered; the **old entry stays in `pxl.nodes`** after removal | any changing id binding |
+| Removing 1,000 shapes + 1,000 readers (C8, C14) | 54–59 ms | route change, list unmount |
+| Removing 2,000 shapes + 2,000 readers | **374–389 ms**, 97 % of it in `pxl.clearAllVariableSubscriptions()`, which scans every subscription key for every removed element (quadratic). Inserting the same: 28–40 ms. Without readers: under 2 ms | same, a visible freeze |
+| Script loaded twice (C16) | `window.pxl` replaced, the first copy's registry is lost, `TypeError`s on every element of the first copy, readers compute wrong values | a script tag plus an import, micro-frontends, Storybook |
+| `<pxl-text>{label}</pxl-text>` (C17) | the text is visible as HTML above the stage (slotted into the layer) | JSX, templates |
+| `linedash={[20, 10]}` in JSX (C3) | stored as the string `"20,10"`: no dash | React, Preact; every array prop until W3 (D8) |
+| 2,000 `setAttribute()` per frame (C14) | 1.9–2.4 ms; 3.2–3.3 ms when each shape has one reader | animation driven by framework state |
+| Hit test, pointer over empty space | 0.07–0.19 ms (100 shapes), 0.6–1.1 ms (1,000), 1.7–3.3 ms (3,000) per pointer frame | clickable charts |
+| `hidden="false"` or an animated `hidden` on a layer | visible as intended: the layer's `:host` style beats the browser's `[hidden]` rule | — |
+
+### 19.2 What the Plan Didn't Cover
+
+**W8: Distribution (C16).** "Out of the box" in a bundler-based project means `npm install kilopixel` and `import 'kilopixel'`; none of it exists yet.
+
+- **Guard in `build.js`** (no change to the source files): wrap the bundle in a function that returns early when `typeof window === 'undefined'` (an import during SSR does nothing) or when `window.pxl` already exists (warn once: "Kilopixel loaded twice; the second copy is ignored"). The namespace check of `build.js` runs on the source files and is not affected.
+- **npm package:** `package.json` with `exports` / `main` pointing to the bundle, `"sideEffects": true` (a side-effect import must not be removed by tree shaking), `types`. The ES-module entry stays a side-effect file plus optional named exports (`design/2026-10-17_bundle_scope_plan.md`, "later, only if needed": now needed).
+- **Typings are required, not optional** (§12 called them optional): TypeScript React, Solid and Angular projects reject unknown tags and attributes without them. Generated from `observedAttributes` and `static defaults` by a script in `tools/` (§12).
+- **Framework settings Kilopixel can't avoid:** Vue's `isCustomElement` (without it Vue renders the elements but warns), Angular's `CUSTOM_ELEMENTS_SCHEMA`. One line each in `docs/frameworks.html`.
+- **Smoke tests with SSR** (Next.js, Nuxt) need `npm install`, which CLAUDE.md doesn't allow in the repository. Open: a folder outside the repository, or only the no-build smoke pages of §12.
+
+**W9: Text children (C17, D12).** Shapes draw nothing as elements, but their children are slotted and shown. Fix: `pxl.DEFAULT_STYLES` hides the content of shape elements (one rule; shapes don't use layout, so drawing and hit testing are unaffected). The layer's `<slot>` stays for accessible content placed directly in a layer (D6). Using the text content of `<pxl-text>` as its `text` is a separate decision.
+
+**Quick fix: removal cost (C8, C14).** `clearAllVariableSubscriptions()` loops over all keys of `pxl._subscriptions` for every removed element. Each element knows its own keys (the `variableDependencies` of its reactive attributes, as `restoreVariableSubscriptions()` uses them on connect), so it can unsubscribe only those: removal becomes linear. A subscription left by an attribute that changed from reactive to static is currently dropped lazily on the next broadcast; `compileAttribute()` should drop it when it replaces the function, so nothing stale is left for the new removal path.
+
+**W5.1 extended:** handling `id` changes must delete the **old** key as well (the measured leak), not only register the new one.
+
+**D10 (clicks without `interactive`).** D4 hit-tests `click`, `pointerdown` and `pointerup` when the browser's event arrives. Testing every shape of the stage at that moment, not only registered ones, costs 0.6–1.1 ms per 1,000 shapes once per click, not per frame. React, Svelte and Solid `onClick` then work without an extra attribute; `interactive` remains only for hover and move events with delegated listeners, which are tested every pointer frame. With every shape testable, a decorative shape on top catches a click like an element in the DOM does: D11.
+
+**Sets that only grow** (W4 extended): `pxl._interactiveIds`, `pxl._pressableIds` and `pxl._stickyIds` keep every id ever read; with framework-generated ids that change on remount, they grow slowly. Bound or clean them with the caches.
+
+### 19.3 Relation to the Evaluation Model (TODO §29, §39, §40)
+
+- **Not on the critical path.** Events (W1), properties (W3), ids (W5.1), the cache bound (W4) and distribution (W8) work with today's broadcasts and with `design/2026-11-15_per_frame_evaluation_plan.md`. Where they broadcast (the `setAttribute` path, `id` changes), the per-frame plan replaces the call with `pxl.markChanged()`.
+- **Framework work first** gives the per-frame plan a safety net: `tests/frameworks.html` covers insert, move, remove and late ids, the lifecycle paths a core rewrite is most likely to break.
+- **Scoped names (D2) belong to the evaluation model.** Compiled functions are shared by source string and bound to the global `pxl.nodes`, and subscription keys are global `'ref.<id>'` strings; N component instances with their own ids therefore compile N copies of each expression. Resolving `ref` per stage changes exactly the code the per-frame plan rewrites (`ref` passed at call time, lookups by id at check time), so D2 is designed together with that plan's D1.
+- **Timing:** with the per-frame plan, a reactive value is updated in the next frame, not inside `setAttribute()`. A framework that reads a derived value back through a W3 getter right after setting its source would see the old value; the same question as the per-frame plan's D5.
+- **The removal fix** (§19.2) is needed only until subscriptions go away (per-frame plan); it is small enough to build now.
+
+### 19.4 Order
+
+| # | Step | Contents | Size |
+|---|---|---|---|
+| 1 | Quick fixes | removal cost, W5.1 (`id` observed, old key deleted), W8 guard in `build.js`, W4 cache bound and the growing sets, W9 hidden text children | 1 session |
+| 2 | Conformance tests | `tests/frameworks.html` (§11), plus tests for step 1 | 1 session |
+| 3 | Events (W1) | DOM events, `pxl-on-*` handlers (D1), D10 / D11 | 1–2 sessions |
+| 4 | Properties (W3) | accessors, arrays (D8), values set before the upgrade | 1 session |
+| 5 | Distribution and docs (W8) | npm layout, typings generator, smoke pages, `docs/frameworks.html` | 1–2 sessions |
+| 6 | Evaluation model | two-phase step 2, the per-frame prototype, its D1, scoped names (D2) in the same design | several sessions |
+
+Plans that assume the evaluation model (throttling `maxfps`, tweens, `<pxl-clip>`, `space`) come after step 6.
+
+### 19.5 Performance
+
+- Steps 1–5 add no per-frame work for pages that don't use the new features. Events allocate only on input; `pointermove` is dispatched only for types with listeners (§4.5).
+- Framework-driven animation (state updated every frame) costs about 1 µs per `setAttribute()` on Kilopixel's side, before the framework's own rendering. The docs recommend `t`, drivers or a `<pxl-var>` for continuous motion and framework state for changes; W3 makes numeric writes cheaper.
+- Hit testing grows linearly, about 0.6–1.1 µs per shape per pointer frame; fine up to about 1,000 interactive shapes. A bounding-box check before the path test is the next step if a page needs more.
