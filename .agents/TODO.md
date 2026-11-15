@@ -3,7 +3,7 @@
 Open work only. Done items are removed: the plan's status line, `.agents/KILOPIXEL.md` and git history keep the record.
 
 - **Status words** (same as in the plans): 💬 **Discussion** (ideas, nothing decided) · 🟡 **Proposed** (complete plan, waiting for a decision) · 🟢 **Decided** (agreed, not built yet). Plans also use ✅ **Implemented**, ⚪ **Superseded by** `<file>` and ⚪ **Dropped** (decided not to do it); those have no TODO item.
-- **Numbers are stable:** other files refer to items as "TODO §29". A removed item leaves a gap; a new item gets the next free number (next: §40).
+- **Numbers are stable:** other files refer to items as "TODO §29". A removed item leaves a gap; a new item gets the next free number (next: §41).
 - **Plans:** `design/`; superseded, dropped and outdated plans are in `design/archive/`. Workflow: `.claude/CLAUDE.md` → "Plans and TODO". Check: `node tools/check_plans.js`.
 
 ## 1. Native SVG Path2D & Vector Sprites (`<pxl-path>`)
@@ -152,6 +152,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Idea, still open**: change-based dirty flags (step 2): a layer redraws only when a value really changed (a `floor(t)` clock redraws once per second, a finished `clamp()` animation stops redrawing), and the stage, not the drawing, keeps the loop alive.
 - **Open**: redraws saved by step 2, hidden subtrees, readers that use `t` and refs (dependency order with a cycle rule recommended, plan §3.1.1), order of broadcasts; plan §4.
 - **Steps**: (1) split evaluation from drawing (built), (2) change-based dirty flags and keep-alive in the stage, (3) `t` readers, hidden subtrees, (4) the dependent plans; plan §7.2.
+- **Related**: §40 proposes another way after step 2 (one evaluation per frame for all expressions, no broadcasts); step 2 is the first step of both.
 
 ## 30. Framework Compatibility (DOM Contract)
 - **Status**: 🟡 **Proposed** (2026-11-15, D1, D4, D6, D7 decided; W2 built with the stage sizing plan)
@@ -202,4 +203,14 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Problem**: `pxl.broadcast()` propagates recursively, depth first. Stacked diamonds evaluate their bottom once per path (1,024 times after ten layers), and a diamond's bottom briefly sees half-updated values (210 before 220). Neither is visible today. A cycle that never settles stops after 100 rounds with a warning (per-element nesting counter, 2026-11-13).
 - **Idea**: find every affected reader first, then evaluate each once in dependency order, computed per broadcast over the affected readers only (recommended) or from a lasting graph. Measured cost: about +20 ns per reader, +1 KB minified (plan §5).
 - **Open**: when to build it (with `<pxl-out>`, §5, or event handlers that react to every change); D1–D4.
-- **Related**: §29 (its update phase orders readers with `t`; could share the ordering code).
+- **Related**: §29 (its update phase orders readers with `t`; could share the ordering code); §40 (the alternative: no broadcasts at all; if it is built, this item goes).
+
+## 40. Per-Frame Evaluation in Dependency Order (No Broadcasts)
+- **Status**: 🟡 **Proposed** (2026-11-15, design and measurements; nothing built)
+- **Reference**: `design/2026-11-15_per_frame_evaluation_plan.md`; prototype `design/prototypes/2026-11-15_per_frame_evaluation/pull_bench.html`
+- **Problem**: expressions are re-evaluated by three mechanisms (the frame loop for `t`, recursive broadcasts for `ref.*`, a matrix walk for `toLocal`), each with its own bookkeeping; the open problems of §29 and §39 sit where they meet.
+- **Idea**: a change only raises a version number and asks for a frame; the frame evaluates what is out of date, sources before readers, then draws the layers in which a value changed. No subscriptions, no `pxl.broadcast()`, one order for expressions with and without `t`.
+- **Measured**: about the same cost as broadcasts when a source changes (330–620 ns per reader either way); with a version check 20–25 ns per reader that is up to date; ordering 1,000 nodes takes 0.06 ms. The gain is one mechanism instead of three, not speed.
+- **Behavior change**: a reactive value updates in the next frame's update phase, not inside `setAttribute()` (same frame on screen).
+- **Open**: D1 this plan or the path of §29 steps 2–3 plus §39 (decide after a prototype patch and a page sweep), D2–D7 (plan §10). The riskiest part is a `toLocal` reader that is read by others (plan §3.5).
+- **Steps**: (1) §29 step 2, needed on both paths, (2) prototype as a patch over the engine, page sweep, decide D1, (3) build, (4) update the plans that assume broadcasts.
