@@ -3,8 +3,9 @@
 // =========================================================================
 
 pxl.Matrix = {
+  // Float64, like JavaScript numbers: Float32 would turn x="333.3" into 333.29998779296875 in ref.<id>.tx and toLocal()
   create: function() {
-    return new Float32Array([1, 0, 0, 1, 0, 0]);
+    return new Float64Array([1, 0, 0, 1, 0, 0]);
   },
 
   // Order: Translate(x,y) -> Rotate -> Scale -> Skew -> Translate(dx,dy)

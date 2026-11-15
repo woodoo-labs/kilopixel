@@ -376,7 +376,7 @@ Build the path once per (`u`, points, `smooth`, `closed`, arrows) and reuse it. 
 | Parser stays parentheses-only (no `[ ]`, `{ }`, strings) | ✅ | no real use case in coordinates; parentheses already protect commas |
 | Unbalanced parentheses → reject all points; point error → skip the point | ✅ | split positions after a missing / extra `)` are unreliable |
 | Non-finite coordinate → polyline not drawn | ✅ | predictable, one multiply-add per value, prevents the gradient exception |
-| `Float64Array` for `flatCache` | ✅ | exact relative-mode sums, one array type |
+| `Float64Array` for `flatCache` | ✅ | exact relative-mode sums, one array type. Done 2026-11-15, without the rest of phase 2 |
 | Statement code in coordinates | ❌ | `;` separates points; document ternaries |
 | Batch compilation, smooth loop, partial updates | ⏸️ phase 3 | only with measurements |
 | `Path2D` caching | ⏸️ separate engine-wide plan | cross-cuts `applyStyle` and hit testing |

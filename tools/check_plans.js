@@ -103,6 +103,8 @@ const documents = [TODO, '.agents/KILOPIXEL.md', '.claude/CLAUDE.md', 'docs/DOCS
 // links to other plans are checked. js/ and docs/ paths aren't checked: plans name files that don't exist yet.
 const LIVE_PATH = /(?:^|[\s`(\[])((?:design|\.agents|\.claude|tools)\/[A-Za-z0-9_.\/-]+)/g;
 const PLAN_PATH = /(?:^|[\s`(\[])(design\/[A-Za-z0-9_.\/-]+\.md)/g;
+// Folders that exist only on some laptops (not in git): documents may name them, but they needn't exist here
+const PER_MACHINE = ['.claude/worktrees'];
 
 for (const file of documents) {
   const archived = file.startsWith('design/archive/');
@@ -110,7 +112,7 @@ for (const file of documents) {
   read(file).split('\n').forEach((text, i) => {
     for (const m of text.matchAll(archived ? PLAN_PATH : LIVE_PATH)) {
       const p = m[1].replace(/[.,;:]+$/, '').replace(/\/$/, '');
-      if (!p.includes('*') && !exists(p)) report(file, i + 1, `missing: ${p}`);
+      if (!p.includes('*') && !PER_MACHINE.includes(p) && !exists(p)) report(file, i + 1, `missing: ${p}`);
     }
 
     // Relative Markdown links, outside code blocks and inline code

@@ -2,7 +2,7 @@
 
 > **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~57KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
-Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes using custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, etc.) and the framework compiles, evaluates, and renders everything at 60fps automatically.
+Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes with custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, …); the engine compiles their attribute expressions and redraws a layer in every frame in which something in it changed or is animated.
 
 ```html
 <!-- Minimal working example -->
@@ -109,7 +109,7 @@ The framework compiles from these files (in build order):
 | # | File | Purpose |
 |---|------|---------|
 | 1 | `js/engine.js` | Global `pxl` namespace, reactivity pub-sub, attribute compilation bridge |
-| 2 | `js/matrix.js` | Zero-GC 2D affine matrix engine (Float32Array) |
+| 2 | `js/matrix.js` | 2D affine matrices (Float64Array, written in place), `toLocal()` |
 | 3 | `js/compiler.js` | Multi-tier expression parser, built-in scope, time drivers |
 | 4 | `js/interaction.js` | InteractionEngine class, dummy context hit testing, pointer events |
 | 5 | `js/graphics.js` | Transform pipeline helper, anchor tables, points parser, radius resolver, arrowhead constants & record factory, line dash helper |
@@ -134,7 +134,7 @@ The framework compiles from these files (in build order):
 
 ```
 HTMLElement
-├── Stage (pxl-stage)           — NOT a PxlNode; standalone root
+├── Stage (pxl-stage)           — the root, not a PxlNode
 └── PxlNode (abstract base)
     ├── Layer (pxl-layer)       — extends PxlNode, owns <canvas>
     ├── Group (pxl-group)       — extends PxlNode, transform container
@@ -179,7 +179,7 @@ Every PxlNode has:
 - `reactiveAttributeKeys[]` — attributes that depend on `ref.*` variables (evaluated on change)
 - `toLocalAttributeKeys[]` — reactive attributes using `toLocal()`, also re-evaluated when an ancestor's transform changes (see [Coordinate Mapping](#coordinate-mapping-tolocal))
 - `isAnimated` — true if any attribute uses time-dependent expressions
-- `_localMatrix` / `_globalMatrix` — Float32Array affine matrices, recomputed lazily
+- `_localMatrix` / `_globalMatrix` — Float64Array affine matrices, recomputed lazily
 - `parentLayer` — reference to closest `<pxl-layer>` ancestor
 - `parentContainer` — reference to closest `<pxl-group>` or `<pxl-layer>` parent
 
@@ -205,41 +205,39 @@ Has four hidden (non-enumerable) properties:
 
 ### Compilation Pipeline
 
-The compiler uses a progressive "Fast Path" classification system. Static strings are intercepted early to avoid any runtime cost. The pipeline (in order):
+`pxl.parseAttributeValue()` checks the cheap cases first, so most attribute values never reach the compiler. In order:
 
-1. **Hex Colors** (`#ff0000`, `#fff`) → returned as-is (zero cost)
-2. **Template Literals** (`` `...` ``) → always compiled dynamically
-3. **Alphabetical Words** — sub-checks:
-   - Pure alphabetical (`/^[a-zA-Z\s]+$/`) → returned as string (e.g. `"red"`, `"none"`)
-   - Exception: `"t"` → compiled as time expression
-   - Exception: `"true"` / `"false"` → boolean
-   - Exception: Math constants like `"PI"` → numeric value from scope
-   - Static CSS color functions (`rgb(...)`, `rgba(...)` with only numbers) → returned as string
-4. **Quoted String Literals** (`'Hello World'`) → inner string extracted
-5. **Pure Numbers** (`"100"`, `"-50"`, `"0.25"`) → parsed to Number
-6. **Math/Animation Guard** — regex detects `t`, `ref.`, `toLocal(`, operators, parentheses → compiled
+1. **Hex colors** (`#ff0000`, `#fff`) → returned as they are
+2. **Template literals** (`` `...` ``) → always compiled
+3. **Words** (letters and spaces only, `/^[a-zA-Z\s]+$/`) → returned as a string (`"red"`, `"none"`, `"Hello World"`), except:
+   - `"t"` → compiled as a time expression
+   - `"true"` / `"false"` → boolean
+   - names of `Math` constants (`"PI"`) → their number
+   - static `rgb(...)` / `rgba(...)` with numbers only → returned as a string
+4. **One quoted string** (`'Hello World'`) → the text between the quotes
+5. **Numbers** (`"100"`, `"-50"`, `"0.25"`) → `Number`
+6. **Anything that looks like code** (a regex finds `t`, `ref.`, `toLocal(`, parentheses, brackets, operators next to numbers, or `+` next to a quote) → compiled
+7. Anything else → returned as a string
 
 ### Expression Compilation (`compileExpression`)
 
-When a string reaches this stage:
+1. **Cache lookup**: `staticCache` and `animationCache` (Maps keyed by the source string)
+2. **CSS percentages**: `50%` isn't valid JavaScript, so `hsl(120, 50%, 40%)` becomes `hsl(120, '50%', '40%')` (not inside template literals)
+3. **Time dependency**: a regex finds `t` (not after a `.`) or a call of a time driver; `toLocal(` sets `usesToLocal`
+4. **`pxl.rewriteExpression()`** (shared with `on*` handlers): `ref.player.x` → `ref.player?.x` (no TypeError before the element connects), `toLocal(` → `pxl.toLocal(this, `
+5. **Dependencies**: a regex collects every `ref.<id>`
+6. **Return**: without the word `return`, the code is wrapped in `return …;`
 
-1. **Cache lookup** — checks `staticCache` and `animationCache` Maps first
-2. **CSS % sanitizer** — converts illegal JS percentages: `50%` → `'50%'`
-3. **Time dependency check** — regex tests for `t` (not preceded by `.`) or any driver function name; `toLocal(` sets `usesToLocal`
-4. **`pxl.rewriteExpression()`** (shared with `on*` handlers) — `ref.player.x` → `ref.player?.x` (no TypeError before elements connect) and `toLocal(` → `pxl.toLocal(this, `
-5. **Variable dependency extraction** — regex extracts all `ref.xxx` identifiers
-6. **Smart return detector** — if no `return` keyword, wraps in `return ...;`
+Then two branches:
 
-Then branches:
-
-**Animation Path** (has time dependency or variable refs):
+**Animated or reactive** (uses time or `ref.*`):
 ```javascript
 const fn = new Function('scope', 'ref', `
-  const { PI, sin, cos, wave, ... } = scope;
+  const { PI, sin, cos, ... } = scope;
   let t;
+  const _d = new Date();
   const loop = (d) => (t % d) / d;
-  const wave = (d) => 0.5 - cos((t / d) * PI * 2) * 0.5;
-  // ... all 8 time drivers
+  // ... the other time drivers
   return function(_t) {
     t = _t;
     return <user expression>;
@@ -247,28 +245,28 @@ const fn = new Function('scope', 'ref', `
 `)(pxl.scope, pxl.nodes);
 ```
 
-The outer function (factory) executes ONCE, destructuring the entire scope. The inner function (closure) executes every frame, receiving only `_t`.
+The outer function runs once per distinct string and unpacks the scope; the returned function runs at every evaluation and receives only `_t`. Elements with the same string share the function.
 
-**Properties added to the function**:
-- `fn.isTimeDependent` — true if uses `t` or time drivers
-- `fn.variableDependencies` — array of `ref.xxx` strings (if any)
-- `fn.usesToLocal` — true if the expression calls `toLocal()` (reader-side reactivity, see [Coordinate Mapping](#coordinate-mapping-tolocal))
+Properties set on the function:
+- `fn.isTimeDependent`: uses `t` or a time driver
+- `fn.variableDependencies`: the `ref.<id>` keys (only when there are any)
+- `fn.usesToLocal`: calls `toLocal()` (reader-side reactivity, see [Coordinate Mapping](#coordinate-mapping-tolocal))
 
-**Static Path** (no time, no variables):
-Evaluated once via `new Function`, result cached in `staticCache`.
+**Static** (neither): evaluated once with `new Function`; the result is cached in `staticCache`.
 
-### No `Math.` Prefix Required (Top-Level Scope Injection)
+**Errors**: a string that doesn't compile logs a warning and is used as a plain string (also cached).
 
-All standard JavaScript `Math` constants and methods (`PI`, `cos`, `sin`, `abs`, `min`, `max`, `pow`, `round`, etc.) are injected directly into every compiled expression's top-level scope.
+**Content Security Policy**: every expression and `on*` handler is compiled with `new Function`, so a page whose CSP doesn't allow `'unsafe-eval'` can't run Kilopixel.
 
-> [!IMPORTANT]
-> **Never use the `Math.` prefix** inside declarative expressions. Write `cos(t)` and `sin(t)` directly instead of `Math.cos(t)` or `Math.sin(t)`.
+### `Math` Without the Prefix
 
-### Smart Return
+All `Math` constants and methods (`PI`, `cos`, `sin`, `abs`, `min`, `max`, `pow`, `round`, …) are in every expression's scope. Write `cos(t)`, not `Math.cos(t)`: both work (`Math` is a global), but docs and examples use the short form.
 
-The compiler auto-wraps expressions in `return` unless the string already contains the `return` keyword. This enables two syntax modes:
-- **Simple expressions**: `t > 1000 ? 'red' : 'blue'` (auto-wrapped)
-- **Full code blocks**: `if (t < 1000) { return 'red'; } else { return 'blue'; }`
+### Return Statements
+
+An expression without the word `return` is wrapped in `return …;`, so two forms work:
+- **Expressions**: `t > 10 ? 'red' : 'blue'`
+- **Code blocks**: `if (t < 10) { return 'red'; } else { return 'blue'; }`
 
 ---
 
@@ -335,189 +333,165 @@ All reactive references use a flat `ref.` prefix:
 - `ref.speed.value` — reads a `<pxl-var id="speed">` element's value
 - `ref.btn.isHovered` — reads a shape's hover state
 
-The optional chaining injector ensures `ref.player?.x` so unresolved refs return `undefined` instead of throwing.
+The compiler rewrites `ref.player.x` to `ref.player?.x`, so a ref to an element that isn't connected yet reads `undefined` instead of throwing.
 
-> [!WARNING]
-> **Why Canvas Target IDs Must Not Use Kebab-Case (`-`)**
-> Never use hyphens (`kebab-case`) in IDs for `<pxl-layer>`, `<pxl-var>`, or any shape element that will be referenced by `ref.*` in declarative expressions. Because hyphens are subtraction operators in JavaScript, writing `ref.ex4-layer.x` throws a JavaScript syntax error (`(ref.ex4) - (layer.x)`). Always use **`camelCase`** (`id="ex4Layer"`, `id="orbitSpeed"`) for elements referenced by `ref.*`.
+**IDs in camelCase:** an element read through `ref.*` needs an id that is a JavaScript name (`id="ex4Layer"`, `id="orbitSpeed"`). A hyphen is a minus sign in an expression: `ref.ex4-layer.x` reads as `ref.ex4 - layer.x` and throws.
 
 ---
 
 ## Coordinate System & Transform Pipeline
 
-### Center + Offset Architecture
+### Center and Offset
 
-Every element (layer, group, shape) has this coordinate model:
+Every element (layer, group, shape) has the same coordinate model:
 
-- **`x`, `y`** — The **Center** of the element. All transforms (rotation, scaling, skewing) occur around this point. When `dx`/`dy` offsets are applied, the shape is visually displaced but `x`/`y` remains the transform origin.
-- **`dx`, `dy`** — A **Local Offset** applied *after* rotation and scaling. Shifts where the shape is drawn without moving its center of transformation. This allows orbiting without changing the rotation center.
+- **`x`, `y`**: the element's **center**, the point that rotation, scaling and skewing turn around. An offset moves the drawing, but `x` / `y` stays the transform origin.
+- **`dx`, `dy`**: a **local offset**, applied *after* rotation, scaling and skewing. It moves where the shape is drawn without moving its center, so a rotating element with an offset orbits its center.
 
-### Transform Pipeline Order
+### Transform Order
 
-Applied by `pxl.applyContextState()` in this exact order:
+Shapes go through `pxl.applyContextState()`, which calls `pxl.applyTransformState()` (steps 1–5, also used by layers, groups and hit testing) and then sets the compositing (steps 6–9):
 
 ```
-1. ctx.translate(x * u, y * u)      ← Move to center (transform origin)
-2. ctx.rotate(rotate * π/180)        ← Rotate around pivot
-3. ctx.scale(zoom * scalex, zoom * scaley) ← Zoom and scale around center
-4. ctx.transform(1, skewy, skewx, 1) ← Skew
-5. ctx.translate(dx * u, dy * u)     ← Offset AFTER rotation/scale
-6. ctx.globalAlpha *= alpha           ← Compound opacity
-7. ctx.globalCompositeOperation       ← Blend mode
-8. ctx.filter                         ← CSS filter
+1. ctx.translate(x * u, y * u)                     ← move to the center (transform origin)
+2. ctx.rotate(rotate * π/180)                       ← rotate around it
+3. ctx.scale(zoom * scalex, zoom * scaley)          ← scale around it
+4. ctx.transform(1, tan(skewy), tan(skewx), 1, 0, 0) ← skew (angles in degrees)
+5. ctx.translate(dx * u, dy * u)                    ← offset, after rotate / scale / skew
+6. ctx.globalAlpha *= alpha                         ← opacity, multiplied
+7. ctx.globalCompositeOperation = mask or blend     ← mask wins when both are set
+8. ctx.filter                                       ← CSS filter, px values scaled by u
+9. ctx.shadowColor / shadowBlur / shadowOffsetX / Y  ← only when shadowcolor is set
 ```
+
+Each step is skipped when its values are the defaults.
 
 **Zoom and Scale**: `scalex` / `scaley` are the two arguments of the canvas `ctx.scale(x, y)` (two attributes, because splitting one `scale="x, y"` expression at commas isn't safe). `zoom` is a uniform factor on top: it **multiplies** both axes (`zoom * scalex`, `zoom * scaley`), so `zoom="2" scalex="1.5"` draws at 3 / 2, and an animated `zoom` (a pulse, hover feedback) can be combined with a stretched shape. `zoom="-1"` turns the element by 180° (both axes negative). Design: `design/2026-10-29_tolocal_decomposition_plan.md` §5.
 
-### Why This Matters
+### Example: an Orbit
 
-The center/offset split makes orbital motion trivial:
+With the offset applied after the rotation, an orbit needs one element, no nested group and no trigonometry:
 
 ```html
-<!-- Planet orbiting center at 60°/sec, 200-unit orbital radius -->
+<!-- Planet orbiting (500, 300) at 60° per second, orbit radius 200 -->
 <pxl-circle x="500" y="300" dx="200" rotate="t * 60" r="20" fill="red"></pxl-circle>
 ```
 
-Without this split, you'd need nested groups or trigonometry.
-
 ### Shape Drawing Origin
 
-Shapes are drawn relative to `(0, 0)` within the transformed context. The transform pipeline has already positioned the canvas context at the shape's center. For example, a circle draws `ctx.arc(0, 0, r * u, ...)`.
+After the transform steps, the context's origin is the shape's drawn position, so `draw()` works around `(0, 0)`: a circle draws `ctx.arc(0, 0, r * u, …)`.
 
 ---
 
-### Style Cascade & Inheritance (Dual Architecture)
+### Compositing: Layers Use CSS, Shapes Use the Canvas
 
-Kilopixel uses a strict **Dual Architecture** for context states, separating flattened DOM compositing from Canvas pixel operations.
+`alpha`, `blend` and `filter` mean the same on layers and shapes, but are applied in two different places:
 
-- **Layer-Level (`<pxl-layer>`)**: Uses the **CSS DOM API**. Applying `alpha`, `blend`, or `filter` to a layer modifies the `<canvas>` DOM element itself (`opacity`, `mix-blend-mode`, `filter`). The entire flattened canvas blends with the stage background. Shapes inside the layer do *not* inherit these properties; they are drawn sharp and opaque into the canvas buffer, and the browser's GPU composites the final flattened image into the page.
-- **Shape-Level (`<pxl-circle>`, etc.)**: Uses the **HTML5 Canvas API**. Applying `alpha`, `blend`, `filter`, or `mask` to a shape changes how its pixels are drawn onto the layer's canvas (`ctx.globalAlpha`, `ctx.globalCompositeOperation`, `ctx.filter`). Overlapping shapes will cast shadows on each other, bleed through each other, or mask each other mathematically.
-- **Zero-Inheritance Groups (`<pxl-group>`)**: Groups are **Pure Spatial Transform Containers** and do *not* support compositing attributes (`alpha`, `blend`, etc.). This enforces a clean 3-tier architecture with maximum performance.
-- **Native Shadows (Shapes Only)**: Raw canvas shadows (`shadowcolor`, `shadowblur`, `shadowx`, `shadowy`) are only supported on Shapes. For layers, use the `filter="dropShadow(...)"` helper instead to cast a unified silhouette shadow.
+- **Layers (`<pxl-layer>`):** set as CSS on the layer's `<canvas>` (`opacity`, `mix-blend-mode`, `filter`). The browser composites the finished canvas with the layers below and the page. Shapes in the layer don't inherit these values; they are drawn normally into the canvas.
+- **Shapes:** set on the canvas context (`ctx.globalAlpha`, `ctx.globalCompositeOperation`, `ctx.filter`, shadows) while the shape draws, so they affect how its pixels combine with the shapes drawn before it in the same layer.
+- **Groups (`<pxl-group>`)** only transform: they have no `alpha`, `blend`, `filter` or shadow. Use a layer, or set the values on the shapes.
+- **Shadows** (`shadowcolor`, `shadowblur`, `shadowx`, `shadowy`) exist only on shapes. For one shadow of a whole layer's silhouette, use `filter="dropShadow(…)"` on the layer.
 
-### Blend vs. Masking (Semantic Separation)
+### `blend` and `mask`
 
-While both `blend` and `mask` on a Shape map to the exact same underlying Canvas property (`ctx.globalCompositeOperation`), they are separated in the API to clarify intent and respect the limitations of the Dual Architecture:
-- **`blend` (Layers & Shapes)**: Designed for color mixing (e.g., `screen`, `multiply`, `overlay`, `lighter`). Because `<pxl-layer>` uses CSS `mix-blend-mode`, it supports standard color-mixing algorithms. *Note: Kilopixel officially supports the Canvas `lighter` mode for additive blending, and automatically translates it to the CSS `plus-lighter` standard when applied to a layer.*
-- **`mask` (Shapes Only)**: Designed for Boolean alpha-compositing and clipping (e.g., `destination-in`, `destination-out`, `source-atop`). Because CSS `mix-blend-mode` cannot perform Canvas-style alpha clipping, these operations would fail on a Layer. The `mask` attribute was added strictly to Shapes as a semantic alias, giving developers a dedicated, logical place to execute these Canvas-only boolean operations without causing confusion.
+On a shape, both set `ctx.globalCompositeOperation`; they are two attributes because they do different jobs and only one of them works on layers:
+- **`blend`** (layers and shapes): color mixing (`screen`, `multiply`, `overlay`, `lighter`, …). On a layer it becomes CSS `mix-blend-mode`; the canvas name `lighter` (additive) is translated to CSS `plus-lighter`.
+- **`mask`** (shapes only): alpha compositing and clipping (`destination-in`, `destination-out`, `source-atop`, …). CSS `mix-blend-mode` has no such modes, so layers don't have `mask`.
 
-*(Note: If both attributes are applied to a shape, `mask` takes precedence over `blend`.)*
+If a shape sets both, `mask` wins.
 
 ---
 
 ## The Responsive Unit System
 
-- **Logical width**: Always **1000** (hardcoded)
-- **Unit `u`**: `clientWidth / 1000` — the scaling factor
-- **Logical height**: Dynamic, calculated as `clientHeight / u`
-- All spatial values (x, y, dx, dy, r, w, h, strokewidth, etc.) are multiplied by `u` at draw time
-- **DPI awareness**: Canvas is scaled by `devicePixelRatio` via ResizeObserver
+- **Logical width**: always **1000**
+- **Unit `u`**: `clientWidth / 1000`, the scale factor
+- **Logical height**: `1000 / ratio` (`ref.<stageId>.height`)
+- Lengths and positions (`x`, `y`, `dx`, `dy`, `r`, `w`, `h`, `strokewidth`, …) are multiplied by `u` when drawing
+- **Pixel density**: each layer's canvas has `devicePixelRatio` pixels per CSS pixel; the stage's ResizeObserver updates it
 
-This means:
-- `x="500"` is always horizontal center
-- `x="0"` is always left edge, `x="1000"` is always right edge
-- The same code works at 50×50px and 4K resolution
+So:
+- `x="500"` is always the horizontal center
+- `x="0"` is the left edge, `x="1000"` the right edge
+- The same markup works at any stage size
 
-**Performance implication**: Because the logical width is fixed at 1000, raw numbers like `x="500"` hit the compiler's Fast Path (just a number, zero evaluation cost). Prefer `x="500"` over `x="ref.main.width / 2"`.
+Write fixed positions as numbers: `x="500"`, not `x="ref.main.width / 2"`. A number is parsed once and never evaluated again; the expression subscribes to the stage and is evaluated when it broadcasts.
 
 ---
 
 ## Color & Gradient System
 
-### Color Functions (Scope Injected)
+### Color Functions
 
-These are JavaScript functions in the compiler's scope, **not** CSS. They return strings:
+These are JavaScript functions in the expression scope, not CSS. They return strings:
 
 ```javascript
 rgb(r, g, b)       → "rgb(r,g,b)"
 rgba(r, g, b, a)   → "rgba(r,g,b,a)"
-hsl(h, s, l)       → "hsl(h,s%,l%)"      // numbers auto-get '%' suffix
+hsl(h, s, l)       → "hsl(h,s%,l%)"      // numbers get a '%'
 hsla(h, s, l, a)   → "hsla(h,s%,l%,a)"
 ```
 
-Because they contain parentheses, the compiler automatically routes them through the expression path (not the static Fast Path). They are safely re-evaluated at 60fps.
+A call with variables (`hsl(t * 36, 80, 50)`) is compiled like any expression. A static `rgb(…)` / `rgba(…)` with numbers only is passed to the canvas as a CSS string without compiling.
 
-### Gradient Descriptors (Deferred Creation)
+### Gradient Descriptors
 
-`linear()`, `radial()`, and `conic()` return lightweight **descriptor objects**, not `CanvasGradient` instances. The actual gradient is created at draw time by `shape.createGradient()` when the bounding box is known.
+`linear()`, `radial()` and `conic()` return plain **descriptor objects**, not `CanvasGradient` instances. `shape.createGradient()` builds the gradient at draw time, when the shape's bounding box is known.
 
-#### The `colorsArray` Parameter
+#### Color Stops
 
-All three gradient types share a common `colorsArray` parameter to define their color stops. You can provide this array in two formats:
-- **Colors Only**: `['red', 'yellow', 'blue']` (The engine automatically spaces them evenly from 0.0 to 1.0)
-- **Color Stops**: `[0, 'red', 0.8, 'blue', 1, 'yellow']` (Alternating numeric offsets and color strings for explicit control)
+All three gradient functions take their color stops as the second argument, in one of two forms:
+```javascript
+['red', 'yellow', 'blue']             // colors only: evenly spaced from 0 to 1
+[0, 'red', 0.8, 'blue', 1, 'yellow']  // offset, color, offset, color, …
+```
 
-#### `linear(direction, colorsArray)`
+Offsets are clamped to 0–1 when the gradient is created (`addColorStop` throws outside that range): an animated stop that overshoots stays at the end, and `NaN` (e.g. a `ref` that isn't connected yet) becomes `0`.
 
-**Angle mode** (number):
+#### `linear(direction, colors)`
+
+**Angle** (number):
 ```html
 fill="linear(45, ['red', 'blue'])"
 ```
-The angle uses CSS-like geometry. At draw time, endpoints are calculated using `distance = |w/2·cos| + |h/2·sin|`, ensuring the gradient line always reaches the bounding box edges regardless of angle or aspect ratio.
+Degrees in canvas orientation: `0` runs left to right, `90` top to bottom (unlike CSS, where `0deg` points up). The gradient line goes through the box center with half-length `|w/2·cos| + |h/2·sin|`, so it reaches the farthest corners at any angle and aspect ratio, like in CSS.
 
-**Vector mode** (array):
+**Vector** (array):
 ```html
 fill="linear([0, 0, 1, 1], ['red', 'blue'])"
 ```
-Coordinates are **proportional** to the shape's bounding box. `[0, 0]` = top-left, `[1, 1]` = bottom-right.
+`[x1, y1, x2, y2]`, relative to the shape's bounding box: `[0, 0]` is the top-left corner, `[1, 1]` the bottom-right.
 
-#### `radial(config, colorsArray)`
+#### `radial(config, colors)`
 
-The radial gradient API accepts configurations with **1**, **3**, or **6** arguments, mapped directly to HTML5 Canvas 2D radial gradient geometry (`ctx.createRadialGradient(x0, y0, r0, x1, y1, r1)`):
+The config has **1**, **3** or **6** values, the arguments of `ctx.createRadialGradient(x0, y0, r0, x1, y1, r1)` with defaults for the missing ones. Centers are relative to the bounding box (`0`–`1`):
 
-| Args | Syntax | Description |
+| Values | Syntax | Meaning |
 |:---:|---|---|
-| **1** | `radial([r1], colorsArray)` | **Concentric, Center-Locked**: Origin is locked to shape center `(0.5, 0.5)` with inner radius `r0 = 0`, expanding out to outer radius `r1`. |
-| **3** | `radial([x0, y0, r1], colorsArray)` | **Concentric, Custom Origin**: Origin is set to point `(x0, y0)` (proportional 0..1 to bounding box) with inner radius `r0 = 0`, expanding out to outer radius `r1`. |
-| **6** | `radial([x0, y0, r0, x1, y1, r1], colorsArray)` | **3D Spotlight / Eccentric Cones**: Full independent control over Start Circle `(x0, y0, r0)` and End Circle `(x1, y1, r1)` for directional beams, 3D spotlights, and hollow cores. |
+| **1** | `radial([r1], colors)` (or `radial(r1, colors)`) | Centered on the box `(0.5, 0.5)`, from radius `0` to `r1` |
+| **3** | `radial([x0, y0, r1], colors)` | Centered on `(x0, y0)`, from radius `0` to `r1` |
+| **6** | `radial([x0, y0, r0, x1, y1, r1], colors)` | Start circle `(x0, y0, r0)` and end circle `(x1, y1, r1)`, for off-center highlights, cones and gradients with a hollow core |
 
-##### Radius Formats (`r0`, `r1`)
-Radii can be expressed in four distinct formats:
-1. **Logical Numbers**: Responsive logical canvas units (e.g., `200`, automatically scaled by unit `u` at draw time via `Math.abs(r * u)`).
-2. **Side Edge Keywords (Perpendicular Projection)**: Calculates the perpendicular distance straight to the boundary line, ensuring the radial circle is perfectly tangent to the target edge without diagonal overshoot:
-   - `'top'`: Distance straight up to top edge ($y \cdot h \cdot u$).
-   - `'bottom'`: Distance straight down to bottom edge ($(1 - y) \cdot h \cdot u$).
-   - `'left'`: Distance straight left to left edge ($x \cdot w \cdot u$).
-   - `'right'`: Distance straight right to right edge ($(1 - x) \cdot w \cdot u$).
-3. **Perimeter Point Keywords (Euclidean Distance)**: Measures Euclidean distance from circle center `(x, y)` to a discrete perimeter point:
-   - **Corner Vertices**: `'top-left'`, `'top-right'`, `'bottom-right'`, `'bottom-left'`
-   - **Edge Midpoints**: `'top-center'`, `'right-center'`, `'bottom-center'`, `'left-center'`
-4. **Dynamic CSS Keywords**: Dynamically measures distance to the shape's bounding box edges and corners:
-   - `'closest-side'`: Distance to the nearest bounding box edge.
-   - `'farthest-side'`: Distance to the farthest bounding box edge.
-   - `'closest-corner'`: Distance to the nearest bounding box corner.
-   - `'farthest-corner'`: Distance to the farthest bounding box corner.
+##### Radii (`r0`, `r1`)
+A radius is a number or a keyword:
+1. **Number**: a logical length (`200`), drawn as `|r × u|`.
+2. **Side** (`'top'`, `'bottom'`, `'left'`, `'right'`): the perpendicular distance from the center to that edge of the box, e.g. `'top'` = `y · h · u`, `'right'` = `(1 − x) · w · u`. The circle touches that edge.
+3. **Point on the box** (corners `'top-left'`, `'top-right'`, `'bottom-right'`, `'bottom-left'`; edge midpoints `'top-center'`, `'right-center'`, `'bottom-center'`, `'left-center'`, also written `'center-top'` etc.): the straight distance from the center to that point, `√(((x − ax) · w · u)² + ((y − ay) · h · u)²)`. The circle passes through it.
+4. **CSS keywords**: `'closest-side'`, `'farthest-side'`, `'closest-corner'`, `'farthest-corner'`, as in CSS. The two `closest-` keywords return at least `0.001`, so a center on an edge still draws.
 
-##### Distance Model
-- **For Side Edges**: Perpendicular 1D line projection (0 square roots, zero allocations, sub-nanosecond register execution):
-  $$\text{radius}_{\text{top}} = |y \cdot h \cdot u|, \quad \text{radius}_{\text{left}} = |x \cdot w \cdot u|$$
-- **For Perimeter Points**: Continuous monotonic Euclidean distance from circle origin `(x, y)` to target anchor point `(ax, ay)`:
-  $$\text{radius} = \sqrt{((x - ax) \cdot w \cdot u)^2 + ((y - ay) \cdot h \cdot u)^2}$$
-This guarantees mathematical alignment with the Canvas 2D specification, smooth continuous transitions, and zero GC pressure during 60fps animations.
+#### `conic(angle, colors)`
 
-#### `conic(startAngleOrConfig, colorsArray)`
-
-**Simple mode** (number):
+**Angle** (number):
 ```html
 fill="conic(0, ['red', 'yellow', 'lime', 'cyan', 'blue', 'magenta', 'red'])"
 ```
-`startAngle` in degrees, centered on the bounding box center.
+Start angle in degrees, around the box center.
 
-**Config mode** (array):
+**Config** (array):
 ```html
 fill="conic([90, 0.3, 0.7], ['red', 'blue'])"
 ```
-`[startAngle, cx, cy]` — start angle in degrees, center coordinates (proportional).
-
-#### Color Stop Formats
-
-All gradient functions accept two color stop formats:
-```javascript
-['red', 'blue']                    // Simple — evenly spaced
-[0, 'red', 0.5, 'green', 1, 'blue'] // Offset-mapped — explicit positions
-```
-
-Offsets are clamped to 0–1 when the gradient is created (`addColorStop` throws outside that range): an animated stop that overshoots parks at the end, and `NaN` (e.g. a `ref` that isn't connected yet) becomes `0`.
+`[angle, cx, cy]`: start angle in degrees and the center, relative to the box.
 
 #### Gradient Area (Stroke vs. Fill)
 
@@ -525,47 +499,46 @@ Gradient positions and keyword radii are relative to the shape's bounding box (`
 
 #### Gradient Caching
 
-The Shape base class maintains a **dual-slot gradient cache** (`_gradCache[0]` for fill, `_gradCache[1]` for stroke). Each slot tracks the descriptor object reference, responsive unit `u`, all four bounding box values (`left`, `top`, `right`, `bottom`) and `strokewidth` (`sw`, which sizes the stroke gradient's area). If all values match, the cached `CanvasGradient` is reused. This ensures gradients update correctly when a shape's geometry or stroke width animates (e.g., changing radius or width), while avoiding unnecessary recreation for static shapes. An animated gradient expression returns a new descriptor every frame, so it creates a new `CanvasGradient` every frame (≈ 0.8 µs).
+Each shape caches two gradients, `_gradCache[0]` for the fill and `_gradCache[1]` for the stroke. A slot keeps the descriptor object, `u`, the four bounding box values (`left`, `top`, `right`, `bottom`) and `strokewidth` (`sw`, which sizes the stroke gradient's area); while all of them are the same, the cached `CanvasGradient` is reused. So a gradient follows an animated size or stroke width, and a static shape builds its gradient once. An animated gradient expression returns a new descriptor in every frame, so it builds a new `CanvasGradient` in every frame (≈ 0.8 µs).
 
 ---
 
-## Unified Responsive Filters
+## Filters
 
-Kilopixel provides a unified API for CSS and Canvas filters that mirrors the Gradient architecture, accessible natively via `pxl.scope`.
+The `filter` attribute (layers: CSS `filter` on the canvas; shapes: `ctx.filter`) takes CSS filter strings, written with helper functions from `pxl.scope`. The helpers add the units, so values are plain numbers like everywhere else in Kilopixel.
 
 ### Usage
 
-Filters are invoked as standard function calls rather than raw string concatenation. They can be applied individually or chained using an array.
-
-**Single Filter**:
+**One filter**:
 ```html
 <pxl-layer filter="blur(5)"></pxl-layer>
 ```
 
-**Chained Filters (Array)**:
+**Several filters** (an array, joined with spaces):
 ```html
-<pxl-shape filter="[blur(10), contrast(150), saturate(200)]"></pxl-shape>
+<pxl-circle filter="[blur(10), contrast(150), saturate(200)]"></pxl-circle>
 ```
 
-### Available Filter Helpers
+**Animated**: any expression works, with or without an array: `filter="blur(wave(2) * 10)"`.
 
-| Function | Output | Description |
+### Filter Helpers
+
+| Function | Output | Unit |
 | :--- | :--- | :--- |
-| `blur(radius)` | `blur(...)` | `radius` is automatically scaled by `u`. |
-| `dropShadow(x, y, blur, color)` | `drop-shadow(...)` | `x`, `y`, `blur` are scaled by `u`. Defaults to `#000` if no color provided. |
-| `brightness(val)` | `brightness(...)` | Uses percentage (`val`%). |
-| `contrast(val)` | `contrast(...)` | Uses percentage (`val`%). |
-| `hueRotate(deg)` | `hue-rotate(...)` | Uses degrees (`deg`deg). |
-| `invert(val)` | `invert(...)` | Uses percentage (`val`%). |
-| `saturate(val)` | `saturate(...)` | Uses percentage (`val`%). |
-| `grayscale(val)` | `grayscale(...)` | Uses percentage (`val`%). |
-| `sepia(val)` | `sepia(...)` | Uses percentage (`val`%). |
-| `opacity(val)` | `opacity(...)` | Uses percentage (`val`%). |
+| `blur(radius)` | `blur(…px)` | logical length, scaled by `u` |
+| `dropShadow(x, y, blur, color)` | `drop-shadow(…px …px …px color)` | logical lengths, scaled by `u`; `color` defaults to `#000` |
+| `brightness(val)` | `brightness(…%)` | percent |
+| `contrast(val)` | `contrast(…%)` | percent |
+| `hueRotate(deg)` | `hue-rotate(…deg)` | degrees |
+| `invert(val)` | `invert(…%)` | percent |
+| `saturate(val)` | `saturate(…%)` | percent |
+| `grayscale(val)` | `grayscale(…%)` | percent |
+| `sepia(val)` | `sepia(…%)` | percent |
+| `opacity(val)` | `opacity(…%)` | percent |
 
-> [!IMPORTANT]
-> **No Units Required**: Do not provide `px`, `%`, or `deg` manually! The scope helpers automatically append the correct units (`blur(5)` → `blur(5px)`). Kilopixel's graphics pipeline automatically detects pixel values and multiplies them by the physical scaling factor (`u`) before drawing.
->
-> **Scaling happens on the final string** (`pxl.scaleResponsiveFilter`, called by `resolveFilter()`): every number followed by `px` is multiplied by `u`, including exponent notation (`1.2e-15px`, which JavaScript prints for values near 0). So `px` values written in backticks (`` filter="`blur(${t * 10}px)`" ``) scale with the stage too; `px` means stage units there, not screen pixels. `%` and `deg` are not scaled.
+**Scaling** happens on the final string (`pxl.scaleResponsiveFilter`, called by `resolveFilter()`, cached per filter string and `u`): every number followed by `px` is multiplied by `u`, including exponent notation (`1.2e-15px`, which JavaScript prints for values near 0). So `px` values written by hand in backticks (`` filter="`blur(${t * 10}px)`" ``) scale with the stage too; `px` means logical units there, not screen pixels. `%` and `deg` are not scaled.
+
+**Backticks** are only needed for CSS filters without a helper (e.g. `url(#svgFilter)`). There every unit is up to you, and a missing `px` makes the whole string invalid: the browser ignores it without an error.
 
 ---
 
@@ -634,7 +607,7 @@ fill="hsl(loop(5) * 360, 80, 50)"  <!-- hue cycles through rainbow every 5 secon
 ```
 
 **Real-world time clocks**:
-The `time(unit)` driver returns exact real-world values based on the user's local clock. To enable smooth 60fps animations (e.g., sweeping analog clock hands), the returned values include decimal precision (e.g., `time('s')` might return `45.242`).
+The `time(unit)` driver reads the user's local clock. The values have decimals (`time('s')` may return `45.242`), so a clock hand sweeps smoothly instead of jumping once per second.
 
 | Unit | Returns | Range | Use case |
 |------|---------|-------|----------|
@@ -655,15 +628,15 @@ The `time(unit)` driver returns exact real-world values based on the user's loca
 
 **Source**: `js/interaction.js`
 
-### Dual Architecture
+### States and Handlers
 
-The framework exposes interactions via two complementary systems:
+Shapes offer interaction in two ways: states that expressions read, and handlers that run code.
 
-#### 1. Declarative States (for styling/expressions)
+#### 1. States (for expressions)
 
-Automatically updated boolean properties on shape elements:
-- `isHovered` — true while pointer is over the element
-- `isPressed` — true while pointer is held down on the element
+Two booleans on every shape, set by the engine:
+- `isHovered`: the pointer is over the shape
+- `isPressed`: the pointer was pressed on the shape and isn't released yet
 
 ```html
 <pxl-rect id="btn" w="100" h="40"
@@ -671,25 +644,25 @@ Automatically updated boolean properties on shape elements:
   zoom="ref.btn.isPressed ? 0.95 : (ref.btn.isHovered ? 1.05 : 1)"></pxl-rect>
 ```
 
-#### 2. Imperative Events (for logic/scripting)
+#### 2. Handlers (for code)
 
-Instantaneous JavaScript blocks compiled and attached to elements:
-- `onclick` — pointer click
-- `onenter` — pointer enters element
-- `onleave` — pointer leaves element
-- `ondown` — pointer press starts
-- `onup` — pointer press ends
-- `onmove` — pointer moves while over element
+JavaScript statements in an attribute, run when the event happens:
+- `onclick`: click
+- `onenter`: the pointer enters the shape
+- `onleave`: the pointer leaves the shape
+- `ondown`: a press starts on the shape
+- `onup`: a press ends on the shape
+- `onmove`: the pointer moves over the shape
 
 ```html
 <pxl-circle onclick="ref.counter.set('value', ref.counter.value + 1)" ...></pxl-circle>
 ```
 
-**Event compilation**: Event strings are compiled via `new Function` with the full scope (including `ref`, all math functions, all drivers). They are bound to the element via `.bind(this)`.
+Handlers are compiled with `new Function`, with the expression scope (`ref`, `Math` names, colors, gradients, filters; no `t` and no time drivers) and `this` bound to the shape; details in [Event Handling](#event-handling). The names collide with the browser's own `onclick` attribute; a rename to `pxl-on-click` … is decided (`design/2026-10-30_framework_compatibility_plan.md`, D1).
 
 ### Hit Testing Algorithm
 
-The framework uses a **dummy canvas context** (`pxl.dummyCtx`) with intercepted `fill()` and `stroke()` methods:
+Hit testing uses a **dummy canvas context** (`pxl.dummyCtx`) whose `fill()` and `stroke()` test the pointer instead of painting:
 
 1. A 1×1 off-screen canvas is created at module load
 2. Its `fill` method is overridden to call `isPointInPath(hitX, hitY)`
@@ -702,7 +675,7 @@ The framework uses a **dummy canvas context** (`pxl.dummyCtx`) with intercepted 
    - The intercepted fill/stroke methods check if the mouse point is inside
    - First hit wins (topmost element)
 
-This reuses the shape's own `draw()` method for pixel-perfect mathematical hit testing without any separate collision geometry.
+So the hit area is the shape's own path, the same one it draws: no separate collision geometry. Strokes count with their width (`isPointInStroke`).
 
 **`hitTest(ctx, u)` hook**: for shapes whose hit area can't be expressed as a path. Currently only `<pxl-text>` implements it (glyphs drawn with `fillText` produce no path): it adds its bounding box as a rect and calls the intercepted `ctx.fill()`. See [Element Reference — Text](#element-reference--text).
 
@@ -725,16 +698,16 @@ This reuses the shape's own `draw()` method for pixel-perfect mathematical hit t
 
 **Source**: `js/matrix.js`
 
-### Zero-GC Affine Matrix
+### Affine Matrices
 
-`pxl.Matrix` is a namespace of static functions that operate on `Float32Array(6)` matrices `[a, b, c, d, tx, ty]`:
+`pxl.Matrix` is a namespace of static functions that write into existing `Float64Array(6)` matrices `[a, b, c, d, tx, ty]`. Float64 is the precision of JavaScript numbers, so `ref.<id>.tx` and `toLocal()` return attribute values unchanged where no transform is involved (`x="333.3"` gives `333.3`; a `Float32Array` gave `333.29998779296875`, visible in text readouts). Same speed and code as Float32.
 
-- `create()` → identity Float32Array
+- `create()` → identity Float64Array
 - `updateLocal(out, x, y, dx, dy, rotate, scalex, scaley, skewx, skewy)` → builds local transform
 - `multiply(out, a, b)` → `out = a * b`
-- `invert(out, a)` → `out = a⁻¹` (with degenerate fallback to identity)
+- `invert(out, a)` → `out = a⁻¹` (identity when the matrix can't be inverted, e.g. `zoom="0"`)
 
-Three pre-allocated scratch matrices prevent GC pressure:
+Three matrices are allocated once and reused by `toLocal()` and the grid:
 - `pxl._scratchMatrixA`
 - `pxl._scratchMatrixB`
 - `pxl._identityMatrix`
@@ -821,7 +794,7 @@ Note: The compiler rewrites `toLocal(` to `pxl.toLocal(this, ` at compile time.
 **Class**: `pxl.Stage extends HTMLElement`  
 **Source**: `js/elements/stage.js`
 
-> Note: Stage does NOT extend PxlNode. It is a standalone root container.
+The stage extends `HTMLElement` directly, not `PxlNode`: it is the root and has no frame of its own.
 
 ### Observed Attributes
 
@@ -905,9 +878,7 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 **Class**: `pxl.Group extends pxl.PxlNode`  
 **Source**: `js/elements/group.js`
 
-> [!NOTE]
-> **Pure Spatial Transform Container**  
-> `<pxl-group>` is a lightweight container dedicated exclusively to structural grouping and geometric transforms. It does NOT support bitmap compositing (`alpha`, `blend`, `filter`, `shadow*`). For compositing, use `<pxl-layer>` or apply the attributes directly to leaf shapes.
+**Transforms only:** `<pxl-group>` groups elements and transforms them together. It has no compositing attributes (`alpha`, `blend`, `filter`, `shadow*`): for those, use a `<pxl-layer>` or set them on the shapes.
 
 ### Observed Attributes (11)
 
@@ -915,7 +886,7 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `sca
 
 ### Key Behavior
 
-- Does NOT own a canvas — draws into parent layer's context
+- Has no canvas of its own: draws into its layer's context
 - Groups can nest infinitely, each adding transforms to the stack
 - `update(t)` (update phase): sorts children by DOM position (if `_isOrderDirty`), evaluates its animations, and, unless hidden, calls `update(t)` on its children. A failing evaluation stores `_failedFrame` and skips the children.
 - `render(ctx, u, t)` (draw phase): stops if it failed in this frame or is hidden, applies transforms, calls `render()` on its children
@@ -944,16 +915,13 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `sca
 - **`linejoin`**: Defines how two connecting segments are joined. Options: `'miter'` (default), `'round'`, `'bevel'`.
 - **`miterlimit`**: Maximum miter length. Defaults to `10`.
 - **`dashoffset`**: Shifts the start of the dash pattern. Multiplied by the responsive unit `u`. Defaults to `0`.
-- **`linedash`**: Sets the stroke dash pattern. All values are automatically scaled by the responsive unit `u` at draw time. 
-  > [!IMPORTANT]
-  > **Architectural Rule (Seamless Animation):** For multiple dash/gap values, you MUST use JavaScript Array syntax (e.g., `linedash="[20, 10]"`). Kilopixel DOES NOT support SVG-style unbracketed strings (like `"20, 10"`). Enforcing the array syntax ensures that transitioning from a static dash to an animated dash (e.g., `linedash="[wave(t) * 20, 10]"`) requires zero syntax changes, keeping the engine clean and GC-free.
-  
-  Accepts the following strict formats:
-  - **JavaScript Array (Required for multiple values)**: `linedash="[20, 10]"` or `setAttribute('linedash', [20, 10])`
-  - **Dynamic Expression**: `linedash="[wave(2) * 20, 10]"`
-  - **Single Number (Fast-path)**: `linedash="20"` or `setAttribute('linedash', 20)` (creates equal repeating dash and gap)
-  - **Reset to Solid**: `linedash="none"`, `linedash="0"`, or `null`
-  Scaled values are strictly evaluated by the compiler and cached per-shape (`(linedash, u)`) by the shape method `applyLineDash(ctx, u)`, without allocations per frame.
+- **`linedash`**: the dash pattern; every value is scaled by `u` when drawing. Forms:
+  - **Array** for several values: `linedash="[20, 10]"`. Brackets are required: `"20, 10"` without them is not a pattern (it stays a string). The array form also takes expressions without a change of syntax: `linedash="[wave(2) * 20, 10]"`.
+  - **One number**: `linedash="20"` (dash and gap of equal length).
+  - **Solid**: `linedash="none"`, `linedash="0"`, or the attribute removed (`removeAttribute('linedash')`).
+  - From JavaScript, pass the attribute text: `setAttribute('linedash', '[20, 10]')`. An array argument becomes the string `"20,10"` (no pattern), and `setAttribute('linedash', null)` stores `"null"`, which doesn't reset the dash.
+
+  `applyLineDash(ctx, u)` caches the scaled pattern per (`linedash`, `u`), so drawing allocates nothing.
 
 ### Default Values
 
@@ -1228,7 +1196,7 @@ When `smooth` is not false:
 ### Drawing Logic
 
 - Minimum 4 values (2 points) required
-- Fills `_flatCache` Float32Array with scaled values
+- Fills the `_flatCache` Float64Array with scaled values (Float64 like the matrices, so relative-mode sums carry no Float32 rounding)
 - **Invalid coordinate:** if any coordinate is not a finite number (a `ref` that isn't connected yet, `NaN`, a division by zero), the polyline draws nothing and isn't hittable until all are valid. The canvas would otherwise drop that vertex or bend a smooth curve. Checked in the same loop (`probe += value * 0`), no warning; it also keeps a gradient from being built on a `NaN` box
 - Draws path: simple `lineTo` or smooth `bezierCurveTo` (2-point polylines are always straight)
 - `closed` is strict (`closed === true`, like circle and ellipse): bare or `"true"` closes, `"1"` does not
@@ -1422,12 +1390,12 @@ Mutating from event handlers:
 
 The `set(key, value)` method on `attributeValues` calls `setAttribute()` on the element, triggering recompilation and broadcast.
 
-### Composite Parameter Pattern (Decomposing Compound Attributes)
+### Several Inputs, One Attribute
 
-`<pxl-var>` acts as a clean reactive bridge when multiple UI inputs (such as range sliders) compose a single compound property (such as gradient vectors or color functions):
+When several inputs (e.g. sliders) set parts of one attribute (a gradient vector, a color function), each input sets its own `<pxl-var>` and the attribute reads them all:
 
 ```html
-<!-- Reactive bridge for gradient coordinates -->
+<!-- Gradient vector from four sliders -->
 <pxl-var id="x0" value="0"></pxl-var>
 <pxl-var id="y0" value="0"></pxl-var>
 <pxl-var id="x1" value="1"></pxl-var>
@@ -1436,7 +1404,7 @@ The `set(key, value)` method on `attributeValues` calls `setAttribute()` on the 
 <pxl-rect fill="linear([ref.x0.value, ref.y0.value, ref.x1.value, ref.y1.value], ['red', 'blue'])"></pxl-rect>
 ```
 
-Each slider only needs to mutate its corresponding `<pxl-var>` (`document.getElementById('x0').setAttribute('value', this.value)`), completely avoiding complex string interpolation or external JavaScript glue functions.
+A slider then sets one value (`document.getElementById('x0').setAttribute('value', this.value)`) instead of building the whole attribute string in JavaScript. The docs pages call this Tier 2 (`docs/DOCS_STANDARDS.md` §4).
 
 ---
 
@@ -1584,12 +1552,11 @@ node build.js
 
 ### Essential Rules for Generating Kilopixel HTML
 
-#### 0. Documentation Pages & Interactive Playgrounds
+#### 0. Documentation Pages
 
-When creating or modifying documentation pages under `docs/`, you MUST first consult `docs/DOCS_STANDARDS.md` to strictly follow all 3-part layout requirements (`Markup` -> `Stage` -> `Tabbed Controls`), color semantics, `pxlDocs` namespacing, top-of-layer variable placement, and the **3-Tier Playground Control Standard** (Tier 1: Direct `setAttribute`, Tier 2: Reactive `<pxl-var>`, Tier 3: Bottom `<script>`).
+Pages in `docs/` follow `docs/DOCS_STANDARDS.md` (page layout, colors, snippets, controls, IDs, prose). Read it before writing or changing a page; it is the only copy of those rules.
 
-
-#### 1. Always Include These Elements
+#### 1. Page Skeleton
 
 ```html
 <script src="pxl.min.js"></script>  <!-- or path/to/dist/pxl.min.js -->
@@ -1600,55 +1567,50 @@ When creating or modifying documentation pages under `docs/`, you MUST first con
 </pxl-stage>
 ```
 
-Every shape MUST be inside a `<pxl-layer>`. Layers MUST be inside a `<pxl-stage>`.
+Shapes go inside a `<pxl-layer>`, layers inside a `<pxl-stage>`. A shape outside every layer isn't drawn.
 
-#### 2. String Quoting Rules
+#### 2. Quoting Text
 
-Plain text attributes work without quotes — the compiler's Fast Path handles them:
+Plain words need no quotes; text inside an expression does:
 
 ```html
-<!-- Plain text: no quotes needed -->
+<!-- Plain words: no quotes -->
 <pxl-text text="Hello World" ...></pxl-text>
 
-<!-- Inside JS expressions: quotes ARE needed -->
+<!-- Inside expressions: quoted strings -->
 <pxl-circle fill="t > 5 ? 'red' : 'blue'" ...></pxl-circle>
 <pxl-text text="`Score: ${ref.score.value}`" ...></pxl-text>
 
-<!-- Function arguments (like colors) inside expressions MUST also be quoted -->
-<!-- Incorrect (SyntaxError: '#' not followed by identifier) -->
-<!-- <pxl-layer filter="dropShadow(0, 20, 20, #0ff)"> -->
-<!-- Correct -->
+<!-- Colors as function arguments are strings too -->
+<!-- Wrong (SyntaxError: '#0ff' isn't JavaScript): filter="dropShadow(0, 20, 20, #0ff)" -->
 <pxl-layer filter="dropShadow(0, 20, 20, '#0ff')">
 ```
 
-#### 3. Colors and Gradients Don't Need Backticks
+Text that contains digits next to operators, parentheses or brackets looks like code to the compiler (`text="Level 2-3"`). Quote it (`text="'Level 2-3'"`) so it stays text.
+
+#### 3. Colors and Gradients Without Backticks
+
+Function calls are expressions already, so they need no backticks:
 
 ```html
-<!-- These work because parentheses trigger dynamic evaluation -->
 <pxl-circle fill="hsl(t * 36, 80, 50)" ...></pxl-circle>
 <pxl-rect fill="linear(45, ['red', 'blue'])" ...></pxl-rect>
 <pxl-circle fill="radial(['farthest-corner'], ['white', 'black'])" ...></pxl-circle>
 <pxl-circle fill="conic(0, ['red', 'yellow', 'lime', 'cyan', 'blue', 'magenta', 'red'])" ...></pxl-circle>
 ```
 
-#### 4. Unified Responsive Filters (Arrays vs Strings)
+#### 4. Filters
 
-Write filters with the `pxl.scope` helpers, also when they are animated: they add the units and the CSS syntax for you. Backticks work too (their `px` values scale with the stage, see Unified Responsive Filters), but every unit is then up to you: a missing `px` makes the whole filter string invalid, and the browser ignores it without an error. Use backticks only for CSS filter syntax without a helper, e.g. `url(#svgFilter)`.
+Write filters with the helpers, also when they are animated (see [Filters](#filters)): they add the units. Use an array only to combine several filters.
 
 ```html
-<!-- Static filter (Single function call) -->
 <pxl-circle filter="blur(5)" ...></pxl-circle>
 <pxl-circle filter="dropShadow(0, 0, 10, '#38bdf8')" ...></pxl-circle>
-
-<!-- Complex / Animated filter (Array syntax) -->
-<pxl-circle filter="[blur(wave(2) * 10)]" ...></pxl-circle>
-<pxl-circle filter="[dropShadow(0, 0, wave(2)*15, 'red')]" ...></pxl-circle>
+<pxl-circle filter="blur(wave(2) * 10)" ...></pxl-circle>
+<pxl-circle filter="[blur(2), dropShadow(0, 0, wave(2) * 15, 'red')]" ...></pxl-circle>
 ```
 
-> [!NOTE]
-> **CSS Filters vs. Native Canvas Shadows**:
-> - **CSS Filters (`filter="..."`)**: The scope helpers (`blur`, `dropShadow`, etc.) take values in logical units and automatically scale them to physical pixels internally.
-> - **Native Canvas Shadows (`shadowblur="10"`)**: Native shadow attributes also operate in logical units (`u`). Native shadows are often faster for individual shapes, while `dropShadow` is required for tracing a layer's silhouette.
+Shadows: shape shadows (`shadowcolor`, `shadowblur`, …) and filter helpers both take logical units. Use `filter="dropShadow(…)"` on a layer for one shadow of everything in it.
 
 
 #### 5. Reactive Variables Pattern
@@ -1724,14 +1686,14 @@ Note: `ref.myShape.tx` gives the shape's drawn origin in its own parent space (`
 #### 11. Common Pitfalls
 
 - **No Self-Closing Tags (`/>`)** → Custom Web Components are not void elements in HTML5. Always use explicit closing tags (`<pxl-circle></pxl-circle>`), never `<pxl-circle />` (causes silent DOM nesting bugs)
-- **No Redundant Defensive Fallbacks** → All `PxlNode` attributes are strictly initialized with their class `defaults`, and bare / removed attributes resolve to those defaults again ([Empty & Removed Attributes](#empty--removed-attributes)). Never use `alpha !== undefined` or `(shadowblur || 0)`. Trust the engine's deterministic initialization.
+- **No defensive fallbacks in engine code** → every `PxlNode` attribute starts at its class `defaults`, and bare / removed attributes go back to them ([Empty & Removed Attributes](#empty--removed-attributes)), so `alpha !== undefined` or `(shadowblur || 0)` are never needed.
 - **Boolean attributes** → `closed`, `pie`, `smooth`, `hidden`, `anticlockwise`, `labels` accept bare (`<pxl-polyline closed>`), `"true"` or `"false"`. Write `="true"` in examples for readability.
 - **Use `onenter` not `onhover`** → The hover-entry event attribute is `onenter`, not `onhover`
 - **Use raw numbers for coordinates** → `x="500"` not `ref.main.width / 2` (logical width is always 1000)
-- **Time `t` is in seconds** → `t * 90` = 90°/sec, `wave(2)` = 2-second cycle. Never treat `t` as milliseconds.
+- **Time `t` is in seconds** → `t * 90` = 90° per second, `wave(2)` = a 2-second cycle (not milliseconds)
 - **Don't forget `fill` or `stroke`** → shapes with neither are invisible
-- **Don't animate inside static CSS filter strings** → use Array syntax `filter="[blur(wave(2)*10)]"` instead
-- **CSS filter pixels vs logical units** → filter helpers (`blur(5)`) auto-scale the values to physical pixels; native shadows (`shadowblur="5"`) also use responsive logical units (`5 * u`)
+- **Animated filters with helpers** → `filter="blur(wave(2) * 10)"`, not a backtick string with hand-written units
+- **Filters and shadows use logical units** → `blur(5)` and `shadowblur="5"` are both `5 × u` on screen
 - **Don't nest `<pxl-stage>` inside `<pxl-stage>`** → stages are independent roots
 - **Arrowheads need an open, stroked path** → they are ignored on `pie`, `closed`, rings (`ir`), closed polylines, and shapes without `stroke`
 - **Radial Gradients** → Use 1/3/6-value syntax: `radial([r1], colors)`, `radial([x0, y0, r1], colors)`, or `radial([x0, y0, r0, x1, y1, r1], colors)`. Radii accept logical numbers (e.g., `200`), side edges (`'top'`, `'bottom'`, `'left'`, `'right'`), perimeter points (`'top-center'`, `'top-right'`, etc.), or dynamic CSS keywords (`'closest-side'`, `'farthest-corner'`, etc.). Centers `x0`/`y0`/`x1`/`y1` are proportional (`0..1`) to bounding box.
@@ -1746,7 +1708,9 @@ Note: `ref.myShape.tx` gives the shape's drawn origin in its own parent space (`
 
 **Gradient constructors**: `linear()`, `radial()`, `conic()`
 
-**Utility functions**: `lerp(a, b, t)`, `clamp(v, low, high)`, `map(v, inMin, inMax, outMin, outMax)`
+**Filter helpers**: `blur()`, `dropShadow()`, `brightness()`, `contrast()`, `hueRotate()`, `invert()`, `saturate()`, `grayscale()`, `sepia()`, `opacity()`
+
+**Utility functions**: `lerp(a, b, f)`, `clamp(v, low, high)`, `map(v, inMin, inMax, outMin, outMax)`
 
 **Time drivers**: `loop()`, `yoyo()`, `wave()`, `bounce()`, `strobe()`, `glide()`, `pulse()`, `glitch()`, `time(unit)`
 

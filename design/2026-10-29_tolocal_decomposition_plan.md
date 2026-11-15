@@ -279,7 +279,7 @@ All 79 tracked `.html` files were searched (attributes, `setAttribute` calls, `t
 - **Degenerate target** (`scalex = 0` in the chain): `scaley` and `skewx` divide by `0` and return `NaN` or `Infinity`; `zoom` returns `0`. The target is invisible then; the reader is not drawn (`NaN`) or is flat. No guard: it does not throw or freeze (CLAUDE.md "Invalid user values").
 - **Value ranges**: `rotate` in (−180, 180], `skewx` in (−90, 90), `scaley` any sign, `zoom` ≥ 0. A continuously turning target wraps from 180 to −180 (unchanged behaviour; visually the same angle).
 - **Negative `zoom` attribute**: `zoom="-1"` turns the element by 180° (both axes negative), like `scale="-1"` today. `toLocal(…, 'zoom')` reports `1` (sizes have no sign) and `rotate` reports the turn.
-- **Float32 matrices**: values carry Float32 noise (`29.999999` instead of `30`). Harmless for drawing, visible in text readouts. Separate topic: `pxl.Matrix.create()` could return a `Float64Array` (no slower, same code).
+- **Float32 matrices**: values carry Float32 noise (`29.999999` instead of `30`). Harmless for drawing, visible in text readouts. Separate topic: `pxl.Matrix.create()` could return a `Float64Array` (no slower, same code). Done 2026-11-15.
 - **Reactivity**: unchanged. The new properties are read through the same `toLocal` call, so they update with the target and with the reader's space (`2026-10-26_tolocal_fix_plan.md`).
 - **Stroke**: a cloned outline is scaled and skewed like the target, so its stroke is too (a thicker line along a stretched axis). Same as the target; no change planned.
 

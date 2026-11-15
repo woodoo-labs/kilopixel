@@ -336,6 +336,36 @@
       expectMapped('txReader', 'txBox', [['x', 'tx'], ['y', 'ty']]);
     });
 
+    test('ref.tx and toLocal: x="333.3" comes back exactly, without Float32 rounding (333.29998779296875)', () => {
+      srClear();
+      srAdd('srLayerA', '<pxl-circle id="f64Reader" r="10"></pxl-circle>');
+      srAdd('srLayerB', '<pxl-circle id="f64Target" x="333.3" y="150.7" r="10"></pxl-circle>');
+      const target = pxl.nodes.f64Target, reader = el('f64Reader');
+      const values = {
+        tx: target.tx, ty: target.ty,
+        'toLocal x': pxl.toLocal(reader, target, 'x'), 'toLocal ty': pxl.toLocal(reader, target, 'ty')
+      };
+      srClear();
+      for (const [name, value] of Object.entries(values)) {
+        const expected = name.endsWith('x') ? 333.3 : 150.7;
+        if (value !== expected) throw new Error(`${name} is ${value}, expected ${expected}`);
+      }
+    });
+
+    test('polyline: drawn coordinates are value × u without Float32 rounding, also summed in relative mode', () => {
+      srClear();
+      srAdd('srLayerA', '<pxl-polyline id="f64Abs" points="333.3,150.7; 400,200" stroke="#000"></pxl-polyline>');
+      srAdd('srLayerA', '<pxl-polyline id="f64Rel" mode="relative" points="100.1,0; 50.2,80.3; 33.3,-0.7" stroke="#000"></pxl-polyline>');
+      srRender(1);
+      const u = el('srStage').unit;
+      const abs = el('f64Abs')._flatCache, rel = el('f64Rel')._flatCache;
+      const expected = { 'absolute x0': [abs[0], 333.3 * u], 'relative x2': [rel[4], 100.1 * u + 50.2 * u + 33.3 * u] };
+      srClear();
+      for (const [name, [value, want]] of Object.entries(expected)) {
+        if (value !== want) throw new Error(`${name} is ${value}, expected ${want}`);
+      }
+    });
+
     // ===================================================================
     // toLocal decomposition and zoom (design/2026-10-29_tolocal_decomposition_plan.md)
     // ===================================================================
@@ -1298,7 +1328,7 @@
         srRender(t);
         const expected = 250 + 170 * Math.cos(t * Math.PI);
         const drawn = el('tpRing').drawn.at(-1);
-        // Matrices are Float32 (about 1e-5 here); one frame of lag would be about 9 px
+        // Small tolerance for float rounding in the matrices; one frame of lag would be about 9 px
         if (Math.abs(drawn - expected) > 1e-3) throw new Error(`frame ${i}: ring drawn at x ${drawn}, planet at ${expected}`);
       }
       srClear();

@@ -14,8 +14,9 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     this._rawParts = []; // parser output, reused
 
     // Each coordinate is its own attribute p0, p1, … (keys built once per points change);
-    // draw() copies their values, scaled by u, into flatCache
-    this._flatCache = new Float32Array(0);
+    // draw() copies their values, scaled by u, into flatCache. Float64 like the matrices: relative mode adds the
+    // points up, and Float32 rounding would add up with them.
+    this._flatCache = new Float64Array(0);
     this._pointKeys = [];
 
     this._arrowStart = pxl.createArrowRecord();
@@ -36,7 +37,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
       this.clearPoints(count);
       this._pointCount = count;
 
-      this._flatCache = new Float32Array(this._pointCount);
+      this._flatCache = new Float64Array(this._pointCount);
       this._pointKeys.length = this._pointCount;
 
       for (let i = 0; i < this._pointCount; i++) {
