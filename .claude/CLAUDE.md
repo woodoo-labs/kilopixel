@@ -11,7 +11,7 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 | `.agents/KILOPIXEL.md` | Complete technical reference (architecture, compiler, every element and attribute). Read the relevant sections before engine or docs work. |
 | `.agents/TODO.md` | Roadmap: open work and open design questions only |
 | `js/` | Engine source. Build order is the `files` list in `build.js` |
-| `docs/` | Public documentation site. Rules: `docs/DOCS_STANDARDS.md` |
+| `docs/` | Public documentation site, published by GitHub Pages from `main` on every push (work in progress on `main` is public). Rules: `docs/DOCS_STANDARDS.md` |
 | `design/` | Plans and notes, named `YYYY-MM-DD_<topic>_plan.md` (or `_note.md`). `design/archive/`: superseded, dropped and outdated plans. `design/prototypes/<plan>/`: prototypes and measurement scripts a plan relies on (committed; folder named like the plan without `_plan` / `_note`) |
 | `tests/` | Automated tests (`design/2026-11-15_testing_plan.md`), all on the shared `runner.js`: `unit.html` (pure functions, Rule A for every attribute), `index.html` (engine, interaction, lifecycle), `render.html` (pixel probes), `scaling.html` (cost ratios n vs. 2n, slow). In the browser via the dev server (`http://localhost:8124/tests/`, `?grep=text` for a subset); result in the tab title and `window.kilopixelTests` |
 | `tools/run_tests.js` | Runs the build checks (`tools/check_build.js`: the checks of `build.js`, build output and starter-kit zip up to date, sizes in the docs), all test pages headless, and the sweep of every docs and example page for console messages (needs Chrome or Edge; Node 22+ for the fast sweep) |
@@ -22,8 +22,8 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 ## Workflow
 
 - **Approval before edits:** before changing any project file outside `scratch/`, describe what you will change and wait for an explicit OK. A code preview is not required. Reading, searching, running the dev server and writing to `scratch/` need no approval.
-- **Build:** run `node build.js` after changing anything in `js/` (not after `.html` / `.md`-only changes). It runs Terser through `npx`; never install packages locally or create `node_modules` (use `npx` or a global install).
-- **File size after a build:** update the `~NNKB` size of `pxl.min.js` (the build's "Minified size", rounded to whole KB) in `docs/installation.html` (section 1 text and download button) and in the header line of `.agents/KILOPIXEL.md`, and the `~NNKB gzipped` size (the build's "Gzipped size") in the section 1 text of `docs/installation.html`.
+- **Build:** run `node build.js` after changing anything in `js/` (not after `.html` / `.md`-only changes). It runs Terser through `npx`; never install packages locally or create `node_modules` (use `npx` or a global install). A build rewrites `dist/`, the `docs/` copies of `pxl.min.js` and the starter-kit zip: commit them together, and after a build that changed `js/` don't restore any of them from git (the zip contains `pxl.min.js`; `tools/check_build.js` checks all of them).
+- **File size after a build:** update the `~NNKB` size of `pxl.min.js` (the build's "Minified size", rounded to whole KB) in `docs/installation.html` (section 1 text and download button) and in the header line of `.agents/KILOPIXEL.md`, and the `~NNKB gzipped` size (the build's "Gzipped size") in the section 1 text of `docs/installation.html`. `tools/check_build.js` fails until they match.
 - **Keep the reference in sync:** when engine behavior or an attribute changes, update `.agents/KILOPIXEL.md` in the same change, plus the affected docs pages and examples.
 - **Plan bigger changes first:** for non-trivial engine work, write a plan in `design/` and agree on it before implementing.
 - **Plans and TODO:** a plan's status line comes right after its title: `- **Status**: 🟡 **Proposed** (date of the last change, short note)`. Six words only:
@@ -42,7 +42,8 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
   5. **Removing or merging a TODO item:** its number stays free; remove every reference to it (link the plan instead); move ideas that are still open into another item or plan.
 
   Then run `node tools/check_plans.js`; it must report no problems.
-- **Verify in the browser:** the dev server is `node tools/serve.js` (launch config `kilopixel`, http://localhost:8124, `/` redirects to `/docs/`). Check docs pages and `examples/` there, including the console.
+- **Verify in the browser:** the dev server is `node tools/serve.js` (launch config `kilopixel`, http://localhost:8124, `/` redirects to `/docs/`). Check docs pages and `examples/` there, including the console. A hidden browser pane pauses animation frames and may not take screenshots: run tests with `node tools/run_tests.js`, check one page's console headless with `node tools/run_tests.js --page docs/x.html`, and use the pane for looking at pages.
+- **Processes:** never stop processes by name (`taskkill /IM`, `pkill`): the user's own browser and tools run on the same machine. Stop only processes you started, by their id or through the tool that started them.
 - **Tests:** after every engine change and build, run `node tools/run_tests.js --tests` (build checks and the quick test pages, headless, a few seconds); all tests must pass. Before a commit, run `node tools/run_tests.js` (also the scaling page and the sweep of all docs and example pages: no console messages). GitHub Actions runs the full run on every push.
   - Every engine fix gets a test (committed, unlike `scratch/`).
   - A new attribute gets tests for its default, an empty value, a removed value and its main effect.
@@ -51,6 +52,7 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 - **Temporary files** (helper scripts, dumps, screenshots, visual prototypes) go in `scratch/`, not the project root. Don't delete them afterwards; the user cleans up. Nothing in `scratch/` must be needed later: it is git-ignored and differs between the two laptops.
 - **Prototypes worth keeping:** when a prototype or measurement script supports a plan, copy it to `design/prototypes/<plan>/` in the same change (paths inside it: absolute dev-server paths like `/dist/pxl.js`; Node scripts reach the repo with `../../../`). Plans, TODO and KILOPIXEL.md link only committed files; a `scratch/` file may only be named as history, marked "(not kept)" (`tools/check_plans.js` checks both). Old engine builds aren't copied: name the commit (`git show <commit>:dist/pxl.js`). Also use `design/prototypes/` for work in progress the user needs on the other laptop.
 - **Commits:** only when asked. Conventional style `type(scope): summary`, e.g. `feat(polyline): …`, `fix(arrows): …`, `docs(circle, ellipse): …`, `docs(design): …`, `refactor(engine): …`.
+- **Branches:** work happens on `main` (the user checks the docs site on other devices, and GitHub Pages publishes only `main`). Before a risky experiment, save the state as a pushed branch `snapshot/YYYY-MM-DD` (exists: `snapshot/2026-11-15`); a large experiment can also live on its own pushed branch, viewed through the dev server.
 
 ## Working on Another Machine
 

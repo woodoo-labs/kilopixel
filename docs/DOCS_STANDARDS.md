@@ -148,6 +148,7 @@ Examples: `sec2CircleTab`, `sec2CircleXVal`, `sec2CircleXCode`, `sec2CircleXInpu
 
 ## 6. Prose
 
+* **Simple rules over complete ones:** a short rule that is always safe to follow beats an exact description of every edge case. Example: the callouts "never use units or % signs unless you use backticks" (`fill.html`, `filter.html`) stay, although `hsl(120, 50%, 40%)` also works, because "% only after a plain number" is harder to remember (decided 2026-11-08). In a review, flag such a rule only if following it would break something; the exact behavior belongs in `.agents/KILOPIXEL.md`.
 * **Tone:** like engineering docs (MDN, Tailwind, Stripe), not marketing. No buzzwords, drama or performance claims. Avoid "A multi-mode radial primitive that renders…", "Backed by an intelligent 3-tier layout cache…", "All from a single declarative tag." Prefer "The circle shape renders discs, hollow rings, pie slices…"
 * **Lead paragraph** (`<p class="lead">`): what the shape or feature does and its 2–3 main capabilities.
 * **"Shape", not "element",** for drawing primitives (`<pxl-circle>`, `<pxl-text>`): they draw on the canvas, they aren't HTML boxes. "Element" or "container" is for `<pxl-stage>` and `<pxl-layer>`.
