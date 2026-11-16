@@ -448,7 +448,7 @@ A review of this plan against the goal "Kilopixel works in the major frameworks 
 
 | # | Step | Contents | Size |
 |---|---|---|---|
-| 1 | Quick fixes | removal cost, W5.1 (`id` observed, old key deleted), W8 guard in `build.js`, W4 cache bound and the growing sets, W9 hidden text children | 1 session |
+| 1 | Quick fixes | removal cost, W5.1 (`id` observed, old key deleted), W8 guard in `build.js`, W4 cache bound and the growing sets, W9 hidden text children. Acceptance tests: the four `test.known()` in `tests/index.html`, section "Known bugs (framework review)" (2026-11-16, `design/2026-11-15_testing_plan.md` §14); the removal cost gets a scaling check there (step 6) | 1 session |
 | 2 | Conformance tests | `tests/frameworks.html` (§11), plus tests for step 1 | 1 session |
 | 3 | Events (W1) | DOM events, `pxl-on-*` handlers (D1), D10 / D11 | 1–2 sessions |
 | 4 | Properties (W3) | accessors, arrays (D8), values set before the upgrade | 1 session |

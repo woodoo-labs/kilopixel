@@ -1,6 +1,6 @@
 # Testing: Levels, a Headless Runner and the Missing Cases
 
-- **Status**: 🟢 **Decided** (2026-11-16, D1–D6 decided, D2 changed after measuring; steps 1–3 built, §12–§13; steps 4–6 not built)
+- **Status**: 🟢 **Decided** (2026-11-16, D1–D6 decided, D2 changed after measuring; steps 1–4 built, §12–§14; steps 5–6 not built)
 - **Date**: 2026-11-15
 - **Related**: `design/2026-10-30_framework_compatibility_plan.md` (§11 conformance tests, §19.4 order: its quick fixes get their tests from this plan), `.claude/CLAUDE.md` (Workflow: "Tests", "Verify in the browser")
 - **Target Implementation**: `tools/run_tests.js` (built), `tests/runner.js` (built), `tests/index.html` (moved onto the runner), `tests/unit.html` and `tests/render.html` (new), `tests/frameworks.html` (from the framework plan), `.claude/CLAUDE.md` (Workflow, built), `.github/workflows/tests.yml` (built)
@@ -132,7 +132,7 @@ All four are in CLAUDE.md since step 2 (§12).
 | 1 | `tests/runner.js` (timeout, sections, `test.known`, `?grep`, JSON results); `tests/index.html` moved onto it unchanged | 1 session | built 2026-11-16 |
 | 2 | `tools/run_tests.js` (test pages, sweep, exit code); CLAUDE.md workflow; GitHub Actions (D4) | 1 session | built 2026-11-16 |
 | 3 | `tests/unit.html`: compiler tables, drivers, radii, points, matrices, filters; the generated Rule A sweep | 1 session | built 2026-11-16 |
-| 4 | Interaction and lifecycle tests, the known bugs of the framework review as `test.known` | 1 session | |
+| 4 | Interaction and lifecycle tests, the known bugs of the framework review as `test.known` | 1 session | built 2026-11-16 |
 | 5 | `tests/render.html`: probes per shape and paint feature | 1–2 sessions | |
 | 6 | Scaling checks; build checks | 1 session | |
 
@@ -175,3 +175,14 @@ Decided 2026-11-16, as recommended; D2 changed after measuring (§5.2).
 - **Rule A** – generated from `observedAttributes` and `static defaults` for `pxl-circle`, `pxl-ellipse`, `pxl-rect`, `pxl-line`, `pxl-polyline`, `pxl-text`, `pxl-grid`, `pxl-group`, `pxl-layer`, `pxl-var`: every attribute has a default; a bare attribute gives `true` (booleans), `''` (`<pxl-var>` value) or the default; a removed attribute gives the default, also after an animated value, and leaves nothing animated. Plus polyline `points`, shape handlers and the stage's `ratio` / `alwaysrender`.
 
 Found: nothing new. Apart from the five known problems of TODO §34, every function behaves as `.agents/KILOPIXEL.md` describes. A new attribute without a default, or one that doesn't fall back on removal, now fails a test without anyone writing one for it.
+
+## 14. Step 4 Built 2026-11-16: Interaction, Lifecycle, Known Bugs
+
+In `tests/index.html` (level 2), three new sections; the page has 108 tests now (104 counted, 4 known), about 1.8 s headless.
+
+- **Interaction** (9 tests): pointer events are dispatched on the layer canvas, as the browser sends them, and `stage.render()` runs the hit test. Covered: enter / leave with `isHovered` and the handlers called once each; down / up / click with `isPressed` and their order; a press released outside the shape (`isPressed` cleared, no `onup`); the topmost shape wins, hidden shapes and shapes in hidden groups are not hit; a stroke counts with its width, text with its box, a group's rotation applies; handlers that read and set refs and remove themselves while running; auto-registration with the reader before or after the shape; lazy unregistering without readers, sticky registration with a reader that uses `t`; the hand cursor for `onclick` and a read `isPressed`, not for hover-only shapes.
+- **Lifecycle** (5 tests): a shape moved to another layer (listed once, in the new layer), into a group (takes its transform), with its click handler to another stage (registered there, not in the old one); a stage removed and inserted again (draws, one monitor entry); a reader written before its source, and after the source is removed and inserted again.
+- **Known bugs (framework review)** (4 `test.known()`): an `id` set after insertion, a renamed `id`, a second copy of the script, text children of a shape (`design/2026-10-30_framework_compatibility_plan.md` §19.1). All four fail as measured there; they are the acceptance tests for that plan's quick fixes (§19.4 step 1). The removal cost of that review belongs to the scaling checks (step 6).
+- **Checked that the tests can fail:** in a temporary copy of the page with `InteractionEngine.process()` replaced by an empty function and `Layer.registerChild()` disabled, all 9 interaction tests failed and the 2 lifecycle tests that depend on layer registration failed, each with a message naming what went wrong.
+
+Found: no new bugs; interaction and lifecycle behave as `.agents/KILOPIXEL.md` describes.

@@ -1537,6 +1537,294 @@
         }
       }));
 
+    // ===================================================================
+    // Interaction: hover, press, click, handlers, registration, cursor (KILOPIXEL.md "Interaction System").
+    // Pointer events go to the layer canvas, as the browser sends them; hit testing runs at the end of render().
+    // ===================================================================
+    section('Interaction');
+
+    // Handlers write here: ixLog.push('enter') in a handler attribute (handlers see globals)
+    window.ixLog = [];
+
+    // A stage 500 px wide (unit 0.5, logical 1000 × 562.5) with the given layer content
+    const ixStage = (content) => `<div style="width: 500px"><pxl-stage alwaysrender><pxl-layer>${content}</pxl-layer></pxl-stage></div>`;
+
+    // Sends a pointer event of `type` at logical (x, y) to the stage's first layer canvas
+    function pointerAt(stage, type, x, y) {
+      const canvas = stage.querySelector('pxl-layer')._canvas;
+      const rect = stage.getBoundingClientRect();
+      canvas.dispatchEvent(new PointerEvent(type, {
+        bubbles: true, composed: true, clientX: rect.left + x * stage.unit, clientY: rect.top + y * stage.unit
+      }));
+    }
+    // The pointer enters the stage and moves to (x, y); the frame after it hit-tests
+    function hover(stage, x, y) {
+      if (!stage.attributeValues.isHovered) stage.dispatchEvent(new PointerEvent('pointerenter'));
+      pointerAt(stage, 'pointermove', x, y);
+      stage.render(1);
+    }
+    function input(stage, type) {
+      pointerAt(stage, type, stage.attributeValues.mouseX, stage.attributeValues.mouseY);
+      stage.render(1);
+    }
+    function leaveStage(stage) {
+      stage.dispatchEvent(new PointerEvent('pointerleave'));
+      stage.render(1);
+    }
+    const expectLog = (expected) => {
+      if (ixLog.join(',') !== expected.join(',')) throw new Error(`handlers called: [${ixLog}], expected [${expected}]`);
+    };
+
+    test('interaction: enter and leave set isHovered and call onenter / onleave once each', () => {
+      ixLog = [];
+      return withStage(ixStage(`<pxl-circle id="ixHover" x="500" y="300" r="80" fill="#000"
+        onenter="ixLog.push('enter')" onleave="ixLog.push('leave')"></pxl-circle>`), (stage) => {
+        hover(stage, 500, 300);
+        hover(stage, 510, 300); // moving inside: no second enter
+        const inside = pxl.nodes.ixHover.isHovered;
+        hover(stage, 900, 100);
+        if (!inside || pxl.nodes.ixHover.isHovered) throw new Error(`isHovered inside ${inside}, outside ${pxl.nodes.ixHover.isHovered}`);
+        expectLog(['enter', 'leave']);
+      });
+    });
+
+    test('interaction: down, up and click set isPressed and call their handlers in order', () => {
+      ixLog = [];
+      return withStage(ixStage(`<pxl-circle id="ixPress" x="500" y="300" r="80" fill="#000"
+        ondown="ixLog.push('down')" onup="ixLog.push('up')" onclick="ixLog.push('click')"></pxl-circle>`), (stage) => {
+        hover(stage, 500, 300);
+        input(stage, 'pointerdown');
+        const pressed = pxl.nodes.ixPress.isPressed;
+        input(stage, 'pointerup');
+        input(stage, 'click');
+        if (!pressed || pxl.nodes.ixPress.isPressed) throw new Error(`isPressed while down ${pressed}, after up ${pxl.nodes.ixPress.isPressed}`);
+        expectLog(['down', 'up', 'click']);
+      });
+    });
+
+    test('interaction: a press released outside the shape clears isPressed without calling onup', () => {
+      ixLog = [];
+      return withStage(ixStage(`<pxl-circle id="ixOutside" x="500" y="300" r="80" fill="#000"
+        ondown="ixLog.push('down')" onup="ixLog.push('up')" onleave="ixLog.push('leave')"></pxl-circle>`), (stage) => {
+        hover(stage, 500, 300);
+        input(stage, 'pointerdown');
+        hover(stage, 900, 100);
+        const stillPressed = pxl.nodes.ixOutside.isPressed;
+        input(stage, 'pointerup');
+        if (!stillPressed || pxl.nodes.ixOutside.isPressed) {
+          throw new Error(`isPressed after leaving ${stillPressed}, after release ${pxl.nodes.ixOutside.isPressed}`);
+        }
+        expectLog(['down', 'leave']);
+      });
+    });
+
+    test('interaction: the topmost shape wins; hidden shapes and shapes in hidden groups are not hit', () => {
+      ixLog = [];
+      return withStage(ixStage(`
+        <pxl-circle x="500" y="300" r="80" fill="#000" onenter="ixLog.push('bottom')"></pxl-circle>
+        <pxl-circle id="ixTop" x="500" y="300" r="80" fill="#000" onenter="ixLog.push('top')"></pxl-circle>
+        <pxl-circle x="500" y="300" r="80" fill="#000" hidden="true" onenter="ixLog.push('hidden')"></pxl-circle>
+        <pxl-group hidden="true"><pxl-circle x="500" y="300" r="80" fill="#000" onenter="ixLog.push('in hidden group')"></pxl-circle></pxl-group>`),
+      (stage) => {
+        hover(stage, 500, 300);
+        expectLog(['top']);
+      });
+    });
+
+    test('interaction: strokes count with their width, text with its box, transforms of groups apply', () => {
+      ixLog = [];
+      return withStage(ixStage(`
+        <pxl-line x1="100" y1="100" x2="900" y2="100" stroke="#000" strokewidth="20" onenter="ixLog.push('line')"></pxl-line>
+        <pxl-text x="100" y="250" size="40" text="Hit me" fill="#000" onenter="ixLog.push('text')"></pxl-text>
+        <pxl-group x="500" y="300" rotate="90">
+          <pxl-rect x="200" w="40" h="40" fill="#000" onenter="ixLog.push('rect')"></pxl-rect>
+        </pxl-group>`), (stage) => {
+        for (const [x, y] of [[500, 106], [500, 140], [130, 240], [700, 300], [500, 500]]) {
+          hover(stage, x, y);
+          hover(stage, 950, 30); // empty space between the checks
+        }
+        // (500, 140) is outside the 20-wide line; (700, 300) is where the rect would be without the group's rotation
+        expectLog(['line', 'text', 'rect']);
+      });
+    });
+
+    test('interaction: handlers read and set refs, and may remove themselves while running', () => {
+      ixLog = [];
+      return withStage(ixStage(`<pxl-var id="ixCount" value="0"></pxl-var>
+        <pxl-circle id="ixSelf" x="500" y="300" r="80" fill="#000"
+          onclick="ref.ixCount.set('value', ref.ixCount.value + 1); ixLog.push('click'); this.removeAttribute('onclick')"></pxl-circle>`),
+      (stage) => {
+        hover(stage, 500, 300);
+        input(stage, 'click');
+        input(stage, 'click');
+        if (pxl.nodes.ixCount.value !== 1) throw new Error(`count ${pxl.nodes.ixCount.value}`);
+        expectLog(['click']);
+      });
+    });
+
+    test('interaction: a shape whose isHovered is read is hit-tested, with the reader before or after it in the DOM', () =>
+      withStage(ixStage(`
+        <pxl-circle id="ixReaderA" x="50" y="50" r="5" fill="ref.ixBtnA.isHovered ? '#f00' : '#00f'"></pxl-circle>
+        <pxl-circle id="ixBtnA" x="300" y="300" r="80" fill="#000"></pxl-circle>
+        <pxl-circle id="ixBtnB" x="700" y="300" r="80" fill="#000"></pxl-circle>`), (stage) => {
+        stage.querySelector('pxl-layer').insertAdjacentHTML('beforeend',
+          `<pxl-circle id="ixReaderB" x="60" y="50" r="5" fill="ref.ixBtnB.isHovered ? '#f00' : '#00f'"></pxl-circle>`);
+        hover(stage, 300, 300);
+        const a = pxl.nodes.ixReaderA.fill;
+        hover(stage, 700, 300);
+        const b = pxl.nodes.ixReaderB.fill;
+        if (a !== '#f00' || b !== '#f00') throw new Error(`reader before: ${a}, reader added after: ${b}`);
+      }));
+
+    test('interaction: without readers a shape is unregistered on leave; a reader with t keeps it registered', () =>
+      withStage(ixStage(`
+        <pxl-circle id="ixLazyReader" x="50" y="50" r="5" fill="ref.ixLazy.isHovered ? '#f00' : '#00f'"></pxl-circle>
+        <pxl-circle id="ixLazy" x="300" y="300" r="80" fill="#000"></pxl-circle>
+        <pxl-circle id="ixStickyReader" x="60" y="50" r="5" alpha="t * 0 + (ref.ixSticky.isHovered ? 1 : 0.5)" fill="#000"></pxl-circle>
+        <pxl-circle id="ixSticky" x="700" y="300" r="80" fill="#000"></pxl-circle>`), (stage) => {
+        const registered = (id) => stage.interaction._interactiveElements.includes(el(id));
+        el('ixLazyReader').remove();
+        el('ixStickyReader').remove();
+        hover(stage, 300, 300);
+        hover(stage, 700, 300);
+        hover(stage, 950, 30);
+        if (registered('ixLazy') || !registered('ixSticky')) {
+          throw new Error(`after leave: lazy registered ${registered('ixLazy')}, sticky registered ${registered('ixSticky')}`);
+        }
+      }));
+
+    test('interaction: hand cursor over clickable shapes (onclick or isPressed read), not over hover-only ones', () =>
+      withStage(ixStage(`
+        <pxl-circle x="150" y="300" r="80" fill="#000" onclick="0"></pxl-circle>
+        <pxl-circle x="400" y="300" r="80" fill="#000" onenter="0"></pxl-circle>
+        <pxl-circle id="ixPressRead" x="650" y="300" r="80" fill="#000"></pxl-circle>
+        <pxl-circle x="900" y="50" r="5" fill="ref.ixPressRead.isPressed ? '#f00' : '#00f'"></pxl-circle>`), (stage) => {
+        const cursors = [150, 400, 650, 900].map((x) => {
+          hover(stage, x, 300);
+          return stage.style.cursor;
+        });
+        if (cursors.join(',') !== 'pointer,default,pointer,default') throw new Error(`cursors: ${cursors}`);
+      }));
+
+    // ===================================================================
+    // Lifecycle: moving, removing and re-inserting elements (framework plan C1, C8)
+    // ===================================================================
+    section('Lifecycle');
+
+    test('lifecycle: a shape moved to another layer is listed once, in the new layer only', () =>
+      withStage(`<div style="width: 500px"><pxl-stage alwaysrender><pxl-layer id="lcLayer1">
+        <pxl-circle id="lcMover" x="500" y="300" r="80" fill="#000"></pxl-circle></pxl-layer><pxl-layer id="lcLayer2"></pxl-layer></pxl-stage></div>`,
+      () => {
+        const mover = el('lcMover'), one = el('lcLayer1'), two = el('lcLayer2');
+        two.append(mover);
+        const count = two.childList.filter((c) => c === mover).length;
+        if (one.childList.includes(mover) || count !== 1 || mover.parentLayer !== two) {
+          throw new Error(`in old layer ${one.childList.includes(mover)}, ${count}× in new layer, parentLayer ${mover.parentLayer && mover.parentLayer.id}`);
+        }
+      }));
+
+    test('lifecycle: a shape moved into a group takes the group\'s transform', () =>
+      withStage(ixStage(`<pxl-circle id="lcIntoGroup" x="10" y="20" r="5" fill="#000"></pxl-circle>
+        <pxl-group id="lcGroup" x="100" y="200"></pxl-group>`), () => {
+        const shape = el('lcIntoGroup');
+        el('lcGroup').append(shape);
+        const m = shape.getGlobalMatrix();
+        if (shape.parentContainer !== el('lcGroup') || m[4] !== 110 || m[5] !== 220) {
+          throw new Error(`parent ${shape.parentContainer && shape.parentContainer.localName}, global position ${m[4]}, ${m[5]}`);
+        }
+      }));
+
+    test('lifecycle: a click handler moves with its shape to another stage', () =>
+      withStage(`<div style="width: 500px">
+        <pxl-stage id="lcStageA" alwaysrender><pxl-layer><pxl-circle id="lcClick" x="500" y="300" r="80" fill="#000" onclick="0"></pxl-circle></pxl-layer></pxl-stage>
+        <pxl-stage id="lcStageB" alwaysrender><pxl-layer id="lcLayerB"></pxl-layer></pxl-stage></div>`, () => {
+        const shape = el('lcClick');
+        el('lcLayerB').append(shape);
+        const inA = document.getElementById('lcStageA').interaction._interactiveElements.includes(shape);
+        const inB = document.getElementById('lcStageB').interaction._interactiveElements.includes(shape);
+        if (inA || !inB) throw new Error(`registered in the old stage ${inA}, in the new stage ${inB}`);
+      }));
+
+    test('lifecycle: a stage removed and inserted again draws again, registered once with the monitor', () =>
+      withStage(ixStage('<pxl-circle x="500" y="300" r="100" fill="#0f172a"></pxl-circle>'), (stage, box) => {
+        const holder = stage.parentElement;
+        stage.remove();
+        holder.append(stage);
+        stage.resize();
+        stage.render(2);
+        const layer = stage.querySelector('pxl-layer');
+        const monitored = pxl.perf.stages.filter((s) => s === stage).length;
+        if (stage._layers.length !== 1 || monitored !== 1 || alphaAt(layer, 500, 300) !== 255) {
+          throw new Error(`layers ${stage._layers.length}, monitor entries ${monitored}, alpha ${alphaAt(layer, 500, 300)}`);
+        }
+      }));
+
+    test('lifecycle: a reader written before its source updates when the source arrives, and after a re-insert', () =>
+      withStage(ixStage('<pxl-circle id="lcReader" x="ref.lcSource.x + 1" r="5" fill="#000"></pxl-circle>'), (stage) => {
+        const layer = stage.querySelector('pxl-layer');
+        layer.insertAdjacentHTML('beforeend', '<pxl-circle id="lcSource" x="60" r="5"></pxl-circle>');
+        const first = pxl.nodes.lcReader.x;
+        const source = el('lcSource');
+        source.remove();
+        source.setAttribute('x', '80');
+        layer.append(source);
+        if (first !== 61 || pxl.nodes.lcReader.x !== 81) throw new Error(`reader ${first}, after re-insert ${pxl.nodes.lcReader.x}`);
+      }));
+
+    // ===================================================================
+    // Known bugs from the framework review (design/2026-10-30_framework_compatibility_plan.md §19.1). Each turns into
+    // "passes now" when its fix lands (§19.4 step 1); then change test.known() to test().
+    // ===================================================================
+    section('Known bugs (framework review)');
+
+    test.known('an id set after insertion is registered, and a reader of it resolves (C2)', () =>
+      withStage(ixStage(`<pxl-circle id="kbReader" x="ref.kbLate.x + 1" r="5"></pxl-circle><pxl-circle x="70" r="5"></pxl-circle>`), (stage) => {
+        const late = stage.querySelector('pxl-layer').lastElementChild;
+        late.id = 'kbLate';
+        if (!pxl.nodes.kbLate || pxl.nodes.kbReader.x !== 71) throw new Error(`registered ${!!pxl.nodes.kbLate}, reader ${pxl.nodes.kbReader.x}`);
+      }));
+
+    test.known('a renamed id is registered under the new name and leaves no old entry (C2)', () =>
+      withStage(ixStage('<pxl-circle id="kbOldName" x="10" r="5"></pxl-circle>'), (stage) => {
+        const shape = el('kbOldName');
+        shape.id = 'kbNewName';
+        const state = { newKey: !!pxl.nodes.kbNewName, oldKey: !!pxl.nodes.kbOldName };
+        shape.remove();
+        state.oldKeyAfterRemove = !!pxl.nodes.kbOldName;
+        delete pxl.nodes.kbOldName; // don't leave the stale entry for later tests
+        if (!state.newKey || state.oldKey || state.oldKeyAfterRemove) throw new Error(JSON.stringify(state));
+      }));
+
+    test.known('a second copy of the script leaves the first one working (C16)', async () => {
+      const frame = document.createElement('iframe');
+      frame.style.display = 'none';
+      frame.srcdoc = `<!DOCTYPE html><script>window.errors = []; addEventListener('error', (e) => errors.push(e.message));<\/script>
+        <script src="/dist/pxl.min.js"><\/script>
+        <pxl-stage><pxl-layer><pxl-circle id="a" x="40" r="5"></pxl-circle></pxl-layer></pxl-stage>
+        <script>window.first = window.pxl;<\/script>
+        <script src="/dist/pxl.min.js?second"><\/script>
+        <pxl-stage><pxl-layer><pxl-circle id="b" x="ref.a.x + 1" r="5"></pxl-circle></pxl-layer></pxl-stage>`;
+      document.body.append(frame);
+      try {
+        await new Promise((resolve) => frame.addEventListener('load', resolve));
+        const w = frame.contentWindow;
+        const x = w.document.getElementById('b').attributeValues.x;
+        if (w.pxl !== w.first || w.errors.length || x !== 41) {
+          throw new Error(`pxl replaced ${w.pxl !== w.first}, ${w.errors.length} errors, reader ${x}`);
+        }
+      } finally {
+        frame.remove();
+      }
+    });
+
+    test.known('text children of a shape are not shown as page text (C17)', () =>
+      withStage(ixStage('<pxl-text id="kbChildren" x="100" y="100" text="Canvas">Hello from JSX children</pxl-text>'), () => {
+        const range = document.createRange();
+        range.selectNodeContents(el('kbChildren'));
+        const visible = [...range.getClientRects()].filter((r) => r.width > 0).length;
+        if (visible) throw new Error(`${visible} visible text box(es)`);
+      }));
+
     runTests();
   </script>
 </body>
