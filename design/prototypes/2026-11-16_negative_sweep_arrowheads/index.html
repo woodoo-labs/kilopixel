@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<!-- Prototype for design/2026-11-16_negative_sweep_arrowheads_plan.md: today (B) and the variants A1 / A2 on real engine arcs. ?endOnly shows a single arrowhead. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Negative Sweep and Arrowheads</title>
+<script src="/dist/pxl.min.js"></script>
+<style>
+  body { font: 14px/1.4 system-ui, sans-serif; margin: 16px; background: #fff; color: #0f172a; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 16px; margin: 20px 0 4px; }
+  p { margin: 0 0 12px; max-width: 700px; }
+  pxl-stage { border: 1px solid #e2e8f0; max-width: 600px; margin-bottom: 12px; }
+  .controls { margin: 8px 0 12px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<h1>Negative sweep: what the arrowheads do</h1>
+<p>Real <code>&lt;pxl-circle&gt;</code> and <code>&lt;pxl-ellipse&gt;</code> arcs with the engine's arrowheads (shaft trimmed under the heads), arrowheads 44 at both ends, stroke 14. The blue dot is the start.
+<b>B</b>: today, <code>sweep="S"</code>. <b>A1</b>: the sign is the direction, written today as <code>sweep="S" anticlockwise="S &lt; 0"</code>.
+<b>A2</b>: like A1, and the heads shrink while the arc is shorter than both heads (the arc length, measured along the curve).</p>
+<div class="controls">
+  <label><input type="checkbox" id="animate" checked> animate <code>sin(t) × 90</code></label>
+  <label><input type="checkbox" id="endOnly"> only <code>arrowend</code></label>
+  <label>sweep <input type="range" id="sweep" min="-120" max="120" value="40"> <span id="sweepVal"></span></label>
+</div>
+
+<pxl-stage id="live" ratio="1000 / 900" alwaysrender>
+  <pxl-var id="sw" value="0"></pxl-var>
+  <pxl-var id="eh0" value="0"></pxl-var>
+  <pxl-var id="eh90" value="0"></pxl-var>
+  <pxl-layer id="liveLayer"></pxl-layer>
+</pxl-stage>
+
+<h2>Ellipse, A2 two ways: heads shrunk by the arc length (left) or by r × |sweep| with r = (rx + ry) / 2 = 85 (right)</h2>
+<pxl-stage id="cmpLive" ratio="1000 / 620" alwaysrender><pxl-layer id="cmpLiveLayer"></pxl-layer></pxl-stage>
+<pxl-stage ratio="1000 / 2500" alwaysrender><pxl-layer id="cmpLayer"></pxl-layer></pxl-stage>
+
+<h2>Circle, radius 130</h2>
+<pxl-stage ratio="1000 / 1900" alwaysrender><pxl-layer id="circleLayer"></pxl-layer></pxl-stage>
+
+<h2>Ellipse 130 × 40, start 0 (the pointed end)</h2>
+<pxl-stage ratio="1000 / 1350" alwaysrender><pxl-layer id="ellipse0Layer"></pxl-layer></pxl-stage>
+
+<h2>Ellipse 130 × 40, start 90 (the flat side)</h2>
+<pxl-stage ratio="1000 / 1350" alwaysrender><pxl-layer id="ellipse90Layer"></pxl-layer></pxl-stage>
+
+<script>
+const R = 130, RX = 130, RY = 40, SW = 14, HEAD = 44;
+const endOnly = new URLSearchParams(location.search).has('endOnly');
+document.getElementById('endOnly').checked = endOnly;
+document.getElementById('endOnly').onchange = (e) => { location.search = e.target.checked ? '?endOnly' : ''; };
+// Arc length the heads need: one or two head lengths
+const BOTH_HEADS = (endOnly ? 1 : 2) * HEAD * Math.cos(Math.PI / 6);
+const COLS = [['B', 180], ['A1', 500], ['A2', 820]];
+const SWEEPS = [60, 20, 6, 0, -6, -20, -60];
+
+// Length along the ellipse from parameter a0 by `sweep` degrees (sum of 96 chords)
+function ellipseArcLength(rx, ry, startDeg, sweepDeg) {
+  const a0 = startDeg * Math.PI / 180, da = sweepDeg * Math.PI / 180 / 96;
+  let length = 0, px = rx * Math.cos(a0), py = ry * Math.sin(a0);
+  for (let i = 1; i <= 96; i++) {
+    const x = rx * Math.cos(a0 + da * i), y = ry * Math.sin(a0 + da * i);
+    length += Math.hypot(x - px, y - py);
+    px = x; py = y;
+  }
+  return length;
+}
+const shrunk = (length) => +(HEAD * Math.min(1, length / BOTH_HEADS)).toFixed(2);
+
+// Markup for one arc; s and head are numbers or expressions (strings)
+function arc(tag, variant, x, y, start, s, a2Head) {
+  const anti = variant === 'B' ? 'false' : `${s} < 0`;
+  const head = variant === 'A2' ? a2Head : HEAD;
+  const size = tag === 'pxl-circle' ? `r="${R}"` : `rx="${RX}" ry="${RY}"`;
+  const dot = tag === 'pxl-circle'
+    ? [x + R * Math.cos(start * Math.PI / 180), y + R * Math.sin(start * Math.PI / 180)]
+    : [x + RX * Math.cos(start * Math.PI / 180), y + RY * Math.sin(start * Math.PI / 180)];
+  return `<${tag} x="${x}" y="${y}" ${size} start="${start}" sweep="${s}" anticlockwise="${anti}"
+      stroke="#f97316" strokewidth="${SW}" arrowstart="${endOnly ? 0 : head}" arrowend="${head}"></${tag}>
+    <pxl-circle x="${dot[0]}" y="${dot[1]}" r="6" fill="#2563eb"></pxl-circle>`;
+}
+const text = (x, y, t, size = 30, align = 'center') =>
+  `<pxl-text x="${x}" y="${y}" size="${size}" text="'${t}'" fill="#0f172a" align="${align}"></pxl-text>`;
+
+// Fixed sweeps, one row each
+function strip(layerId, tag, start, rowHeight, firstRow) {
+  let markup = '';
+  for (const [name, x] of COLS) markup += text(x + 50, 50, name, 36);
+  SWEEPS.forEach((s, row) => {
+    const y = firstRow + row * rowHeight;
+    markup += text(20, y + 10, `${s}°`, 30, 'start');
+    const length = tag === 'pxl-circle' ? Math.abs(s) * Math.PI / 180 * R : ellipseArcLength(RX, RY, start, Math.abs(s));
+    for (const [name, x] of COLS) markup += arc(tag, name, x, y, start, `(${s})`, shrunk(length));
+  });
+  document.getElementById(layerId).innerHTML = markup;
+}
+strip('circleLayer', 'pxl-circle', 0, 245, 200);
+strip('ellipse0Layer', 'pxl-ellipse', 0, 175, 150);
+strip('ellipse90Layer', 'pxl-ellipse', 90, 175, 120);
+
+// Live: circle, ellipse from the pointed end, ellipse from the flat side
+let live = `<pxl-text x="20" y="40" size="30" text="\`sweep \${Number(ref.sw.value).toFixed(0)}°\`" fill="#0f172a"></pxl-text>`;
+for (const [name, x] of COLS) {
+  live += arc('pxl-circle', name, x, 190, 0, '(ref.sw.value)', `${HEAD} * min(1, abs(ref.sw.value) * PI / 180 * ${R} / ${BOTH_HEADS.toFixed(2)})`);
+  live += arc('pxl-ellipse', name, x, 470, 0, '(ref.sw.value)', 'ref.eh0.value');
+  live += arc('pxl-ellipse', name, x, 680, 90, '(ref.sw.value)', 'ref.eh90.value');
+  live += text(x + 50, 870, name);
+}
+document.getElementById('liveLayer').innerHTML = live;
+
+// A2 two ways for ellipses: arc length (left column) vs r × |sweep| with the mean radius (right column)
+const MEAN_R = (RX + RY) / 2;
+const CMP = [['arc length', 270], ['r × |sweep|', 730]];
+const byMeanRadius = (s) => `${HEAD} * min(1, abs(${s}) * PI / 180 * ${MEAN_R} / ${BOTH_HEADS.toFixed(2)})`;
+{
+  let markup = '';
+  for (const [name, x] of CMP) markup += text(x, 50, name, 34);
+  [0, 90].forEach((start, block) => {
+    markup += text(20, 120 + block * 1230, `start ${start}`, 30, 'start');
+    SWEEPS.forEach((s, row) => {
+      const y = 200 + block * 1230 + row * 160;
+      markup += text(20, y + 10, `${s}°`, 30, 'start');
+      markup += arc('pxl-ellipse', 'A2', CMP[0][1], y, start, `(${s})`, shrunk(ellipseArcLength(RX, RY, start, Math.abs(s))));
+      markup += arc('pxl-ellipse', 'A2', CMP[1][1], y, start, `(${s})`, byMeanRadius(`(${s})`));
+    });
+  });
+  document.getElementById('cmpLayer').innerHTML = markup;
+
+  let live = `<pxl-text x="20" y="40" size="30" text="\`sweep \${Number(ref.sw.value).toFixed(0)}°\`" fill="#0f172a"></pxl-text>`;
+  for (const [name, x] of CMP) live += text(x, 80, name, 30);
+  live += arc('pxl-ellipse', 'A2', CMP[0][1], 220, 0, '(ref.sw.value)', 'ref.eh0.value');
+  live += arc('pxl-ellipse', 'A2', CMP[1][1], 220, 0, '(ref.sw.value)', byMeanRadius('ref.sw.value'));
+  live += arc('pxl-ellipse', 'A2', CMP[0][1], 470, 90, '(ref.sw.value)', 'ref.eh90.value');
+  live += arc('pxl-ellipse', 'A2', CMP[1][1], 470, 90, '(ref.sw.value)', byMeanRadius('ref.sw.value'));
+  live += text(20, 230, 'start 0', 26, 'start') + text(20, 480, 'start 90', 26, 'start');
+  document.getElementById('cmpLiveLayer').innerHTML = live;
+}
+
+// The sweep and the ellipses' A2 head sizes, set every frame (the arc length of an ellipse has no closed form)
+const slider = document.getElementById('sweep'), animate = document.getElementById('animate');
+slider.oninput = () => { animate.checked = false; };
+(function frame(t) {
+  const s = animate.checked ? Math.sin(t / 1000) * 90 : Number(slider.value);
+  document.getElementById('sweepVal').textContent = animate.checked ? '' : slider.value + '°';
+  document.getElementById('sw').setAttribute('value', s.toFixed(3));
+  document.getElementById('eh0').setAttribute('value', shrunk(ellipseArcLength(RX, RY, 0, Math.abs(s))));
+  document.getElementById('eh90').setAttribute('value', shrunk(ellipseArcLength(RX, RY, 90, Math.abs(s))));
+  requestAnimationFrame(frame);
+})(0);
+</script>
+</body>
+</html>

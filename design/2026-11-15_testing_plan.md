@@ -1,6 +1,6 @@
 # Testing: Levels, a Headless Runner and the Missing Cases
 
-- **Status**: 🟢 **Decided** (2026-11-16, D1–D6 decided, D2 changed after measuring; steps 1–4 built, §12–§14; steps 5–6 not built)
+- **Status**: 🟢 **Decided** (2026-11-16, D1–D6 decided, D2 changed after measuring; steps 1–5 built, §12–§15; step 6 not built)
 - **Date**: 2026-11-15
 - **Related**: `design/2026-10-30_framework_compatibility_plan.md` (§11 conformance tests, §19.4 order: its quick fixes get their tests from this plan), `.claude/CLAUDE.md` (Workflow: "Tests", "Verify in the browser")
 - **Target Implementation**: `tools/run_tests.js` (built), `tests/runner.js` (built), `tests/index.html` (moved onto the runner), `tests/unit.html` and `tests/render.html` (new), `tests/frameworks.html` (from the framework plan), `.claude/CLAUDE.md` (Workflow, built), `.github/workflows/tests.yml` (built)
@@ -133,7 +133,7 @@ All four are in CLAUDE.md since step 2 (§12).
 | 2 | `tools/run_tests.js` (test pages, sweep, exit code); CLAUDE.md workflow; GitHub Actions (D4) | 1 session | built 2026-11-16 |
 | 3 | `tests/unit.html`: compiler tables, drivers, radii, points, matrices, filters; the generated Rule A sweep | 1 session | built 2026-11-16 |
 | 4 | Interaction and lifecycle tests, the known bugs of the framework review as `test.known` | 1 session | built 2026-11-16 |
-| 5 | `tests/render.html`: probes per shape and paint feature | 1–2 sessions | |
+| 5 | `tests/render.html`: probes per shape and paint feature | 1–2 sessions | built 2026-11-16 |
 | 6 | Scaling checks; build checks | 1 session | |
 
 Step 4 overlaps with the framework plan's quick fixes (§19.4 step 1): its `test.known` tests become their acceptance tests. Steps 1–2 come first, because everything after them runs through them.
@@ -186,3 +186,21 @@ In `tests/index.html` (level 2), three new sections; the page has 108 tests now 
 - **Checked that the tests can fail:** in a temporary copy of the page with `InteractionEngine.process()` replaced by an empty function and `Layer.registerChild()` disabled, all 9 interaction tests failed and the 2 lifecycle tests that depend on layer registration failed, each with a message naming what went wrong.
 
 Found: no new bugs; interaction and lifecycle behave as `.agents/KILOPIXEL.md` describes.
+
+## 15. Step 5 Built 2026-11-16: `tests/render.html`
+
+40 tests, about 1.5 s headless. Each test draws on a stage of 1000 × 600 px (unit 1; the probes multiply by `devicePixelRatio`, so the page also works on screens with another pixel ratio) and reads single pixels at chosen points, at least 3 px from an edge. Helpers: `expectInk()` (painted: alpha > 200, empty: alpha < 30), `expectColor()` (per channel, with a tolerance), `inkIn()` (painted pixels in a box, for text).
+
+- **Circle** (7): disc, ring, pie quarter, `start` / `end` and `sweep` winning over `end`, chord of a filled arc, ring wedge, negative radius.
+- **Ellipse** (2): `rx` / `ry`, elliptical ring.
+- **Rect** (10): all nine anchors (each also checked at a point inside the centered rect but outside the anchored one, so a wrong anchor fails), corner radii `r`, `r1` and a negative radius.
+- **Line and polyline** (7): thickness and the three caps, a filled arrowhead (tip and base width), no stroke means no line and no arrowheads, open and closed polylines, relative mode, `smooth` through its points, a coordinate that is not a number.
+- **Text** (4): position on the alphabetic baseline, `align` center and end, `reveal`, wrapping with `width`.
+- **Grid** (1), **Paint** (7): fill color, stroke without fill, `alpha`; `linear()` at 0 and 90; `radial()` and `conic()` (0 points right, clockwise); `linedash` in logical units; `mask="destination-out"` and `blend="multiply"`; a shadow at its offset; a hidden shape.
+- **Layers** (2): `alpha`, `blend` (`lighter` → `plus-lighter`) and `filter` as CSS on the canvas; a layer's `x`, `y`, `rotate`.
+- **Checked that the probes can fail:** in a temporary copy with a wrong `top-left` anchor, text that draws nothing, a dash that is never set and radius keywords that return 1, 7 tests failed, each naming the point and the value it found.
+- **One wrong expectation, fixed in the test:** a wrapped text with the default `alphabetic` baseline grows upward, its last line on `y` (`startY = -totalBlockHeight` in `text.js`); the test first expected the lines below `y`.
+
+**Negative sweep (not tested yet; planned in `design/2026-11-16_negative_sweep_arrowheads_plan.md`, TODO §42):** a negative or anticlockwise sweep draws the long way round. Measured 2026-11-16: `pie="true" start="0" sweep="90" anticlockwise="true"` fills three quarters (all but the lower right), and `sweep="-90"` without `anticlockwise` fills three quarters as well (all but the upper right). `ctx.arc()` goes from start to end in the given direction, so an end "behind" the start means the long way. A reader of `sweep="-90"` probably expects one quarter going up. Decided 2026-11-16 with a prototype: the sign of `sweep` is the direction, and arrowheads shrink on short paths; the tests come with that plan.
+
+Found: no bugs in the documented behavior.
