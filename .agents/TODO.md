@@ -3,7 +3,7 @@
 Open work only. Done items are removed: the plan's status line, `.agents/KILOPIXEL.md` and git history keep the record.
 
 - **Status words** (same as in the plans): 💬 **Discussion** (ideas, nothing decided) · 🟡 **Proposed** (complete plan, waiting for a decision) · 🟢 **Decided** (agreed, not built yet). Plans also use ✅ **Implemented**, ⚪ **Superseded by** `<file>` and ⚪ **Dropped** (decided not to do it); those have no TODO item.
-- **Numbers are stable:** other files refer to items as "TODO §29". A removed item leaves a gap; a new item gets the next free number (next: §41).
+- **Numbers are stable:** other files refer to items as "TODO §29". A removed item leaves a gap; a new item gets the next free number (next: §42).
 - **Plans:** `design/`; superseded, dropped and outdated plans are in `design/archive/`. Workflow: `.claude/CLAUDE.md` → "Plans and TODO". Check: `node tools/check_plans.js`.
 
 ## 1. Native SVG Path2D & Vector Sprites (`<pxl-path>`)
@@ -217,3 +217,12 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Open**: D1 this plan or the path of §29 steps 2–3 plus §39 (decide after a prototype patch and a page sweep), D2–D7 (plan §10). The riskiest part is a `toLocal` reader that is read by others (plan §3.5).
 - **Steps**: (1) §29 step 2, needed on both paths, (2) prototype as a patch over the engine, page sweep, decide D1, (3) build, (4) update the plans that assume broadcasts.
 - **When**: after the framework steps 1–5 of §30 (their conformance tests are the safety net); scoped names (§30 D2) are designed together with D1, because both change how `ref` is resolved (framework plan §19.3).
+
+## 41. Testing: Levels, a Headless Runner and the Missing Cases
+- **Status**: 🟡 **Proposed** (2026-11-15, runner prototype measured, nothing built)
+- **Reference**: `design/2026-11-15_testing_plan.md`; prototype `design/prototypes/2026-11-15_testing/headless_probe.js`
+- **Problem**: the 90 engine tests are regression tests for fixes; whole areas have none (compiler classification, Rule A per attribute, `isPressed` and handlers, drivers, `conic()` / `radial()` keywords, `anchor`, `reveal`, `blend`, `mask`). The runner has no timeout, shared state and real-frame waits, so it depends on the browser pane.
+- **Idea**: six levels (unit, engine, rendering probes, framework conformance, page sweep, scaling ratios), a shared `tests/runner.js` (timeout, sections, `test.known` for open bugs, `?grep`), and a runner `run_tests.js` in `tools/`: headless Chrome, no npm packages, one command on both laptops.
+- **Measured**: the engine tests run headless in 0.7 s (virtual time); the sweep of 79 docs and example pages took 81 s with one Chrome per page and found no console messages.
+- **Open**: D1–D6 (plan §11): one page per level, the DevTools protocol for one browser, golden images (not now), GitHub Actions, CLAUDE.md rules, when to sweep.
+- **Related**: §30 (its quick fixes get `test.known` tests here first; its `tests/frameworks.html` is level 4).
