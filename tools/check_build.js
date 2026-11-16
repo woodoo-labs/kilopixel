@@ -87,6 +87,43 @@ check('the minified copies in dist/ and docs/ are identical', () => {
   }
 });
 
+// The files in a zip archive as { name: Buffer }, without packages: the central directory at the end lists every
+// entry with its real sizes (zip tools may write them only after the data) and where its local header starts.
+function readZip(buffer) {
+  const end = buffer.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06])); // end of central directory
+  if (end === -1) throw new Error('not a zip archive');
+  const count = buffer.readUInt16LE(end + 10);
+  let p = buffer.readUInt32LE(end + 16);
+  const files = {};
+  for (let i = 0; i < count; i++) {
+    const method = buffer.readUInt16LE(p + 10);
+    const size = buffer.readUInt32LE(p + 20);
+    const nameLength = buffer.readUInt16LE(p + 28), extraLength = buffer.readUInt16LE(p + 30);
+    const commentLength = buffer.readUInt16LE(p + 32), local = buffer.readUInt32LE(p + 42);
+    const name = buffer.toString('utf8', p + 46, p + 46 + nameLength);
+    const start = local + 30 + buffer.readUInt16LE(local + 26) + buffer.readUInt16LE(local + 28);
+    const data = buffer.subarray(start, start + size);
+    if (method === 8) files[name] = zlib.inflateRawSync(data);
+    else if (method === 0) files[name] = data;
+    else throw new Error(`${name}: compression method ${method}`);
+    p += 46 + nameLength + extraLength + commentLength;
+  }
+  return files;
+}
+
+// build.js writes the starter kit from docs/download/index.html and the minified bundle; a build without engine
+// changes only changes the zip's file times, so restoring it from git is tempting, and wrong after an engine change
+check('the starter kit zip contains the current pxl.min.js and index.html', () => {
+  const files = readZip(fs.readFileSync(path.join(ROOT, 'docs/download/kilopixel-boilerplate.zip')));
+  const expectedHtml = read('docs/download/index.html').replace('src="pxl.min.js"', 'src="js/pxl.min.js"');
+  const wrong = [];
+  if (!files['js/pxl.min.js']) wrong.push('js/pxl.min.js missing');
+  else if (!files['js/pxl.min.js'].equals(fs.readFileSync(path.join(ROOT, 'dist/pxl.min.js')))) wrong.push('js/pxl.min.js is not dist/pxl.min.js');
+  if (!files['index.html']) wrong.push('index.html missing');
+  else if (files['index.html'].toString('utf8') !== expectedHtml) wrong.push('index.html is not docs/download/index.html');
+  if (wrong.length > 0) throw new Error(`${wrong.join('; ')} (run node build.js and commit the zip)`);
+});
+
 // --- Sizes in the docs (CLAUDE.md "File size after a build") ---
 
 check('the sizes of pxl.min.js in installation.html and KILOPIXEL.md match the build', () => {

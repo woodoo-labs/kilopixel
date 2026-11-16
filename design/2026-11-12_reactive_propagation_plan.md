@@ -81,7 +81,7 @@ Measured with `propagation_cost_bench.html` (Chrome, this laptop):
 | 14 stacked diamonds | 0.76 ms, 65,532 evaluations | ~2 µs, 42 evaluations | same |
 
 - **Performance:** about +20 ns per reader, 15–20 % of a broadcast. 1,000 readers take 0.15–0.18 ms today and about 0.02 ms more: 0.1 % of a 16.7 ms frame. Diamonds go from exponential to linear.
-- **GC:** zero per broadcast with stamps and reused arrays. B allocates on graph rebuilds unless written carefully. Found while reviewing, unrelated to this plan: `pxl.clearAllVariableSubscriptions()` allocates an `Object.keys()` copy and walks every key on every disconnect; a list of sources per element would make it a loop over its own dependencies.
+- **GC:** zero per broadcast with stamps and reused arrays. B allocates on graph rebuilds unless written carefully. Found while reviewing, unrelated to this plan: `pxl.clearAllVariableSubscriptions()` allocates an `Object.keys()` copy and walks every key on every disconnect; a list of sources per element would make it a loop over its own dependencies. Fixed 2026-11-16 that way (`pxl._subscribedKeys`, `design/2026-10-30_framework_compatibility_plan.md` §20).
 - **Code:** A about 90 lines (+1 KB minified), B about 170 lines (+2.5 KB, about 5 % of the engine). Nearly all in `js/engine.js`, plus the fields and a shorter `variableChangedCallback()` in `js/elements/node.js`.
 
 ## 6. Tests (for the Full Design)

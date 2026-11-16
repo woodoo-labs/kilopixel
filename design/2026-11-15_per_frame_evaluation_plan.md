@@ -41,7 +41,7 @@ One mechanism: **when a stage runs a frame, it evaluates what is out of date, so
 ### 3.1 Versions Instead of Broadcasts
 
 - `pxl._changeCounter` counts every change. Each source (every `PxlNode`, and the stage) has a `changeVersion`: the counter's value at its last change.
-- The 17 places that call `pxl.broadcast(refKey)` today call `pxl.markChanged(node)` instead: it raises the version and asks for a frame (§3.6). Nothing else runs at that moment.
+- The 19 places that call `pxl.broadcast()` today (17 when this plan was written; `pxl.renameNode()` added two on 2026-11-16) call `pxl.markChanged(node)` instead: it raises the version and asks for a frame (§3.6). Nothing else runs at that moment.
 - A reader keeps `_seenVersion`, the counter's value when its reactive attributes were last evaluated. It is out of date when a source's `changeVersion` is larger.
 - **Sources are looked up by id at check time** (`pxl.nodes[id]`, as expressions do today): no resolved pointers to keep valid. An element that connects with an `id` marks itself changed, so readers written before it pick it up. Removing an element with an `id` raises `pxl._registryVersion`, which every reader also compares.
 - **Granularity:** the element, as the compiler records it today (`variableDependencies`). A reader of `ref.main.fps` is also checked when the pointer moves; it evaluates, finds the same value and changes nothing.
@@ -137,7 +137,7 @@ Estimates from reading the source; nothing is built.
 
 | Goes away | Lines (about) |
 |---|---|
-| `pxl._subscriptions`, `broadcast()`, `subscribeToVariable()`, `unsubscribeFromVariable()`, `clearAllVariableSubscriptions()`, `restoreVariableSubscriptions()` (`engine.js`) | 55 |
+| `pxl._subscriptions`, `pxl._subscribedKeys` (since 2026-11-16), `broadcast()`, `subscribeToVariable()`, `unsubscribeFromVariable()`, `clearAllVariableSubscriptions()`, `restoreVariableSubscriptions()` (`engine.js`) | 65 |
 | `evaluateAttributesForVariable()`, `evaluateToLocalAttributes()`, the subscription part of `compileAttribute()` (`engine.js`) | 55 |
 | `variableChangedCallback()`, `broadcastGlobalMatrixChange()`, `_broadcastNesting`, `toLocalAttributeKeys` (`node.js`) | 65 |
 | `releaseIfUnused()`, `pxl._stickyIds` (`interaction.js`) | 15 |
@@ -149,7 +149,7 @@ Estimates from reading the source; nothing is built.
 | The stage's reader list and part 3 of the update phase | 40 |
 | The order (nodes, edges, Kahn, cycle rule and warning) | 90 |
 
-About 210 lines out, 170 in. The engine doesn't get much smaller; it gets one mechanism instead of three, and the five problems of §1 have no place left to occur.
+About 220 lines out, 170 in. The engine doesn't get much smaller; it gets one mechanism instead of three, and the five problems of §1 have no place left to occur.
 
 ## 7. Compared With the Path of the Two Related Plans
 
