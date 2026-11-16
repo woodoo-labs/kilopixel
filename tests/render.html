@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Render Tests | Kilopixel</title>
+  <link rel="stylesheet" href="../docs/css/docs.css">
+  <style>
+    .test-summary { font-weight: 700; margin: 16px 0; }
+    .test-passed { color: #15803d; }
+    .test-failed, .test-fixed { color: #b91c1c; }
+    .test-known { color: #b45309; }
+    .test-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .test-table td { border-bottom: 1px solid #e2e8f0; padding: 6px 8px; vertical-align: top; }
+    .test-section td { font-weight: 700; padding-top: 16px; }
+  </style>
+  <!-- The built bundle: run `node build.js` before opening this page -->
+  <script src="../dist/pxl.min.js"></script>
+  <script src="runner.js"></script>
+</head>
+<body>
+  <main class="docs-content">
+    <div class="docs-inner">
+      <h1>Render Tests</h1>
+      <p>Level 3 of <code>design/2026-11-15_testing_plan.md</code>: each test draws shapes on a stage of 1000 × 600 px (one logical unit per CSS pixel) and reads single pixels at chosen points, away from the edges. Run with <code>node tools/run_tests.js --tests</code>, or here via the dev server (<code>?grep=</code> for a subset).</p>
+      <p id="summary" class="test-summary">Running…</p>
+      <table class="test-table"><tbody id="results"></tbody></table>
+    </div>
+  </main>
+
+  <script>
+    // test(), test.known(), section(), wait() and runTests() come from runner.js
+
+    // --- Helpers ---
+
+    // Draws `content` in one layer of a 1000 × 600 px stage (unit 1), runs fn(layer, stage), removes the stage.
+    // resize() renders once; render(t) draws again at time t, as the tests need.
+    async function draw(content, fn, t = 1) {
+      const box = document.createElement('div');
+      box.style.width = '1000px';
+      box.innerHTML = `<pxl-stage ratio="5 / 3" alwaysrender><pxl-layer>${content}</pxl-layer></pxl-stage>`;
+      document.querySelector('.docs-inner').append(box);
+      try {
+        const stage = box.querySelector('pxl-stage');
+        stage.resize();
+        stage.querySelectorAll('pxl-layer').forEach((layer) => { layer.isDirty = true; });
+        stage.render(t);
+        await fn(stage.querySelector('pxl-layer'), stage);
+      } finally {
+        box.remove();
+      }
+    }
+
+    // [r, g, b, a] of the layer canvas at stage position (x, y)
+    function pixel(layer, x, y) {
+      const k = layer.stage.unit * layer._dpr;
+      return Array.from(layer._ctx.getImageData(Math.round(x * k), Math.round(y * k), 1, 1).data);
+    }
+
+    // Checks points as [x, y, true] (painted: alpha > 200) or [x, y, false] (empty: alpha < 30); lists every mismatch
+    function expectInk(layer, points) {
+      const wrong = [];
+      for (const [x, y, painted] of points) {
+        const a = pixel(layer, x, y)[3];
+        if (painted ? a <= 200 : a >= 30) wrong.push(`(${x}, ${y}) alpha ${a}, expected ${painted ? 'painted' : 'empty'}`);
+      }
+      if (wrong.length) throw new Error(wrong.join('; '));
+    }
+
+    // Color [r, g, b] at (x, y) within a tolerance per channel
+    function expectColor(layer, x, y, rgb, tolerance = 12) {
+      const p = pixel(layer, x, y);
+      if (rgb.some((c, i) => Math.abs(p[i] - c) > tolerance) || p[3] < 245) {
+        throw new Error(`(${x}, ${y}) is rgba(${p}), expected rgb(${rgb})`);
+      }
+    }
+
+    // Number of painted pixels (alpha > 128) in a box, sampled every 3 px
+    function inkIn(layer, x0, y0, x1, y1) {
+      let count = 0;
+      for (let y = y0; y <= y1; y += 3) {
+        for (let x = x0; x <= x1; x += 3) if (pixel(layer, x, y)[3] > 128) count++;
+      }
+      return count;
+    }
+
+    const BLACK = 'fill="#000"';
+
+    // ===================================================================
+    // Circle (KILOPIXEL.md "Element Reference — Circle"); angles: 0 points right, 90 down
+    // ===================================================================
+    section('Circle');
+
+    test('circle: a disc of radius r', () => draw(`<pxl-circle x="500" y="300" r="100" ${BLACK}></pxl-circle>`, (layer) =>
+      expectInk(layer, [[500, 300, true], [590, 300, true], [500, 390, true], [610, 300, false], [500, 410, false], [580, 380, false]])));
+
+    test('circle: an inner radius makes a ring', () => draw(`<pxl-circle x="500" y="300" r="100" ir="50" ${BLACK}></pxl-circle>`, (layer) =>
+      expectInk(layer, [[500, 300, false], [540, 300, false], [575, 300, true], [500, 225, true], [610, 300, false]])));
+
+    test('circle: pie with start 0 and sweep 90 fills the lower right quarter', () =>
+      draw(`<pxl-circle x="500" y="300" r="100" pie="true" start="0" sweep="90" ${BLACK}></pxl-circle>`, (layer) =>
+        expectInk(layer, [[550, 350, true], [450, 350, false], [550, 250, false], [450, 250, false]])));
+
+    test('circle: start and end are absolute angles; sweep wins over end', () =>
+      draw(`<pxl-circle x="300" y="300" r="100" pie="true" start="90" end="180" ${BLACK}></pxl-circle>
+        <pxl-circle x="700" y="300" r="100" pie="true" start="0" end="270" sweep="90" ${BLACK}></pxl-circle>`, (layer) =>
+        expectInk(layer, [[250, 350, true], [350, 350, false], [750, 350, true], [650, 350, false], [650, 250, false]])));
+
+    test('circle: a filled arc without pie closes with a chord', () =>
+      draw(`<pxl-circle x="500" y="300" r="100" sweep="180" ${BLACK}></pxl-circle>`, (layer) =>
+        expectInk(layer, [[500, 350, true], [580, 320, true], [500, 250, false]])));
+
+    test('circle: a ring with a sweep is a ring wedge', () =>
+      draw(`<pxl-circle x="500" y="300" r="100" ir="50" sweep="90" ${BLACK}></pxl-circle>`, (layer) =>
+        expectInk(layer, [[575, 350, true], [520, 320, false], [425, 350, false], [575, 250, false]])));
+
+    test('circle: a negative radius draws nothing and throws nothing', () =>
+      draw(`<pxl-circle x="500" y="300" r="-50" ${BLACK}></pxl-circle>`, (layer) => expectInk(layer, [[500, 300, false]])));
+
+    // ===================================================================
+    // Ellipse
+    // ===================================================================
+    section('Ellipse');
+
+    test('ellipse: rx and ry', () => draw(`<pxl-ellipse x="500" y="300" rx="200" ry="50" ${BLACK}></pxl-ellipse>`, (layer) =>
+      expectInk(layer, [[680, 300, true], [500, 340, true], [500, 370, false], [690, 330, false], [720, 300, false]])));
+
+    test('ellipse: irx and iry make an elliptical ring', () =>
+      draw(`<pxl-ellipse x="500" y="300" rx="200" ry="50" irx="100" iry="25" ${BLACK}></pxl-ellipse>`, (layer) =>
+        expectInk(layer, [[500, 300, false], [560, 300, false], [650, 300, true], [500, 340, true]])));
+
+    // ===================================================================
+    // Rect
+    // ===================================================================
+    section('Rect');
+
+    // 100 × 100 rect at (500, 300): the anchor moves its center by (0.5 − ax, 0.5 − ay) × size
+    const ANCHORS = [['center', 0.5, 0.5], ['top-left', 0, 0], ['top', 0.5, 0], ['top-right', 1, 0], ['left', 0, 0.5],
+      ['right', 1, 0.5], ['bottom-left', 0, 1], ['bottom', 0.5, 1], ['bottom-right', 1, 1]];
+    for (const [anchor, ax, ay] of ANCHORS) {
+      test(`rect: anchor ${anchor} puts that point of the rect at (x, y)`, () =>
+        draw(`<pxl-rect x="500" y="300" w="100" h="100" anchor="${anchor}" ${BLACK}></pxl-rect>`, (layer) => {
+          const cx = 500 + (0.5 - ax) * 100, cy = 300 + (0.5 - ay) * 100;
+          const points = [[cx, cy, true], [cx + 65, cy, false], [cx, cy + 65, false], [cx - 65, cy, false], [cx, cy - 65, false]];
+          // A point inside the centered rect but outside this one: tells the anchors apart
+          if (anchor !== 'center') points.push([500 - (0.5 - ax) * 80, 300 - (0.5 - ay) * 80, false]);
+          expectInk(layer, points);
+        }));
+    }
+
+    test('rect: r rounds every corner, r1 overrides the top-left, a negative radius counts as 0', () =>
+      draw(`<pxl-rect x="250" y="300" w="200" h="200" r="40" ${BLACK}></pxl-rect>
+        <pxl-rect x="750" y="300" w="200" h="200" r="0" r1="60" ${BLACK}></pxl-rect>
+        <pxl-rect x="500" y="550" w="100" h="60" r="-20" ${BLACK}></pxl-rect>`, (layer) =>
+        expectInk(layer, [
+          [155, 205, false], [170, 220, true], [153, 300, true], [345, 395, false],
+          [655, 205, false], [845, 205, true], [845, 395, true],
+          [453, 523, true]
+        ])));
+
+    // ===================================================================
+    // Line and polyline
+    // ===================================================================
+    section('Line and polyline');
+
+    test('line: strokewidth is the full thickness; caps butt, round, square', () =>
+      draw(`<pxl-line x1="100" y1="100" x2="900" y2="100" stroke="#000" strokewidth="20"></pxl-line>
+        <pxl-line x1="100" y1="300" x2="900" y2="300" stroke="#000" strokewidth="20" linecap="round"></pxl-line>
+        <pxl-line x1="100" y1="500" x2="900" y2="500" stroke="#000" strokewidth="20" linecap="square"></pxl-line>`, (layer) =>
+        expectInk(layer, [
+          [500, 107, true], [500, 114, false], [94, 100, false],
+          [94, 300, true], [88, 300, false],
+          [93, 500, true], [87, 500, false]
+        ])));
+
+    test('line: a filled arrowhead ends at the end point (butt cap) and is 60 wide at its base', () =>
+      draw(`<pxl-line x1="100" y1="300" x2="900" y2="300" stroke="#000" strokewidth="10" arrowend="60"></pxl-line>`, (layer) =>
+        // 30 behind the tip the head is 2 × 30 × tan 30° ≈ 34.6 wide
+        expectInk(layer, [[870, 315, true], [870, 285, true], [870, 322, false], [905, 300, false], [500, 303, true], [500, 310, false]])));
+
+    test('line: no stroke, no line and no arrowheads', () =>
+      draw(`<pxl-line x1="100" y1="300" x2="900" y2="300" ${BLACK} strokewidth="10" arrowend="60"></pxl-line>`, (layer) =>
+        expectInk(layer, [[500, 300, false], [880, 300, false]])));
+
+    test('polyline: an open polyline strokes its segments; closed with a fill makes a polygon', () =>
+      draw(`<pxl-polyline points="50,100; 250,500; 450,100" stroke="#000" strokewidth="10"></pxl-polyline>
+        <pxl-polyline points="550,100; 950,100; 750,500" closed="true" ${BLACK}></pxl-polyline>`, (layer) =>
+        expectInk(layer, [[150, 300, true], [250, 300, false], [750, 200, true], [750, 520, false], [580, 300, false]])));
+
+    test('polyline: relative mode adds each point to the previous one', () =>
+      draw(`<pxl-polyline mode="relative" points="100,100; 400,0; 0,400" closed="true" ${BLACK}></pxl-polyline>`, (layer) =>
+        // the triangle (100, 100), (500, 100), (500, 500)
+        expectInk(layer, [[450, 150, true], [490, 450, true], [150, 450, false], [550, 300, false]])));
+
+    test('polyline: smooth passes through its points', () =>
+      draw(`<pxl-polyline points="100,300; 500,100; 900,300" smooth="true" stroke="#000" strokewidth="10"></pxl-polyline>`, (layer) =>
+        expectInk(layer, [[500, 101, true], [104, 300, true], [500, 300, false]])));
+
+    test('polyline: a coordinate that is not a number draws nothing and throws nothing', () =>
+      draw(`<pxl-polyline points="100,100; ref.nobody.x,500; 900,100" stroke="#000" strokewidth="10"></pxl-polyline>`, (layer) =>
+        expectInk(layer, [[100, 100, false], [500, 300, false], [900, 100, false]])));
+
+    // ===================================================================
+    // Text
+    // ===================================================================
+    section('Text');
+
+    test('text: drawn from x on the alphabetic baseline by default', () =>
+      draw(`<pxl-text x="100" y="300" size="100" text="HHHH" ${BLACK}></pxl-text>`, (layer) => {
+        const above = inkIn(layer, 100, 230, 400, 295), below = inkIn(layer, 100, 310, 400, 380), left = inkIn(layer, 0, 230, 90, 295);
+        if (above === 0 || below !== 0 || left !== 0) throw new Error(`ink above the baseline ${above}, below ${below}, left of x ${left}`);
+      }));
+
+    test('text: align center and end', () =>
+      draw(`<pxl-text x="500" y="150" size="80" text="HHHH" align="center" ${BLACK}></pxl-text>
+        <pxl-text x="500" y="400" size="80" text="HHHH" align="end" ${BLACK}></pxl-text>`, (layer) => {
+        const centerLeft = inkIn(layer, 300, 100, 495, 145), centerRight = inkIn(layer, 505, 100, 700, 145);
+        const endLeft = inkIn(layer, 200, 350, 495, 395), endRight = inkIn(layer, 505, 350, 800, 395);
+        if (!centerLeft || !centerRight || !endLeft || endRight) {
+          throw new Error(`center: left ${centerLeft}, right ${centerRight}; end: left ${endLeft}, right ${endRight}`);
+        }
+      }));
+
+    test('text: reveal shows the first characters', () =>
+      draw(`<pxl-text x="100" y="150" size="80" text="HHHH" reveal="0" ${BLACK}></pxl-text>
+        <pxl-text x="100" y="400" size="80" text="HHHH" reveal="0.5" ${BLACK}></pxl-text>`, (layer) => {
+        // 0.5 of 4 characters (+1): floor(2.5) = 2 characters, about the left half
+        const hidden = inkIn(layer, 100, 90, 500, 145);
+        const first = inkIn(layer, 100, 340, 190, 395), last = inkIn(layer, 330, 340, 500, 395);
+        if (hidden || !first || last) throw new Error(`reveal 0: ${hidden}; reveal 0.5: first characters ${first}, last ${last}`);
+      }));
+
+    // With the alphabetic baseline a text block grows upward: its last line sits on y (text.js, startY)
+    test('text: width wraps onto a second line; with the alphabetic baseline the last line sits on y', () =>
+      draw(`<pxl-text x="100" y="300" size="60" width="300" text="HHH HHH HHH" ${BLACK}></pxl-text>`, (layer) => {
+        const last = inkIn(layer, 100, 260, 400, 297), first = inkIn(layer, 100, 185, 400, 225);
+        const below = inkIn(layer, 100, 305, 400, 380), wide = inkIn(layer, 450, 150, 900, 300);
+        if (!last || !first || below || wide) {
+          throw new Error(`last line ${last}, first line ${first}, below y ${below}, beyond the width ${wide}`);
+        }
+      }));
+
+    // ===================================================================
+    // Grid
+    // ===================================================================
+    section('Grid');
+
+    test('grid: lines every step', () =>
+      draw(`<pxl-grid step="100" stroke="#000" strokewidth="4"></pxl-grid>`, (layer) =>
+        expectInk(layer, [[100, 50, true], [500, 250, true], [150, 50, false], [150, 250, false]])));
+
+    // ===================================================================
+    // Paint: fill, stroke, alpha, gradients, dashes, compositing, shadows
+    // ===================================================================
+    section('Paint');
+
+    test('paint: fill color, stroke without fill, alpha', () =>
+      draw(`<pxl-rect x="200" y="300" w="100" h="100" fill="#ff0000"></pxl-rect>
+        <pxl-circle x="500" y="300" r="80" stroke="#000" strokewidth="10"></pxl-circle>
+        <pxl-rect x="800" y="300" w="100" h="100" fill="#000" alpha="0.5"></pxl-rect>`, (layer) => {
+        expectColor(layer, 200, 300, [255, 0, 0]);
+        expectInk(layer, [[580, 300, true], [500, 300, false]]);
+        const a = pixel(layer, 800, 300)[3];
+        if (Math.abs(a - 128) > 3) throw new Error(`alpha 0.5 gives ${a}`);
+      }));
+
+    test('paint: linear() at 0 runs left to right, at 90 top to bottom', () =>
+      draw(`<pxl-rect x="250" y="300" w="300" h="300" fill="linear(0, ['#ff0000', '#0000ff'])"></pxl-rect>
+        <pxl-rect x="750" y="300" w="300" h="300" fill="linear(90, ['#ff0000', '#0000ff'])"></pxl-rect>`, (layer) => {
+        expectColor(layer, 105, 300, [255, 0, 0], 20);
+        expectColor(layer, 395, 300, [0, 0, 255], 20);
+        expectColor(layer, 750, 155, [255, 0, 0], 20);
+        expectColor(layer, 750, 445, [0, 0, 255], 20);
+      }));
+
+    test('paint: radial() from the center, conic() clockwise from the right', () =>
+      draw(`<pxl-rect x="250" y="300" w="300" h="300" fill="radial(['closest-side'], ['#ff0000', '#0000ff'])"></pxl-rect>
+        <pxl-rect x="750" y="300" w="300" h="300" fill="conic(0, ['#ff0000', '#0000ff'])"></pxl-rect>`, (layer) => {
+        expectColor(layer, 250, 300, [255, 0, 0], 20);
+        expectColor(layer, 395, 300, [0, 0, 255], 20);
+        expectColor(layer, 850, 304, [255, 0, 0], 30); // just after 0°
+        expectColor(layer, 850, 296, [0, 0, 255], 30); // just before 360°
+      }));
+
+    test('paint: linedash draws dashes and gaps in logical units', () =>
+      draw(`<pxl-line x1="100" y1="300" x2="900" y2="300" stroke="#000" strokewidth="10" linedash="[20, 20]"></pxl-line>`, (layer) =>
+        expectInk(layer, [[110, 300, true], [130, 300, false], [150, 300, true], [170, 300, false]])));
+
+    test('paint: mask destination-out cuts a hole, blend multiply mixes colors', () =>
+      draw(`<pxl-rect x="250" y="300" w="300" h="300" ${BLACK}></pxl-rect>
+        <pxl-circle x="250" y="300" r="80" ${BLACK} mask="destination-out"></pxl-circle>
+        <pxl-rect x="750" y="300" w="200" h="200" fill="#ff0000"></pxl-rect>
+        <pxl-rect x="800" y="300" w="200" h="200" fill="#0000ff" blend="multiply"></pxl-rect>`, (layer) => {
+        expectInk(layer, [[250, 300, false], [130, 300, true]]);
+        expectColor(layer, 780, 300, [0, 0, 0]);
+        expectColor(layer, 670, 300, [255, 0, 0]);
+      }));
+
+    test('paint: a shadow is drawn at its offset in logical units', () =>
+      draw(`<pxl-rect x="300" y="300" w="100" h="100" ${BLACK} shadowcolor="#000" shadowx="200"></pxl-rect>`, (layer) =>
+        expectInk(layer, [[300, 300, true], [500, 300, true], [400, 300, false]])));
+
+    test('paint: a hidden shape is not drawn', () =>
+      draw(`<pxl-rect x="500" y="300" w="100" h="100" ${BLACK} hidden="true"></pxl-rect>`, (layer) =>
+        expectInk(layer, [[500, 300, false]])));
+
+    // ===================================================================
+    // Layers: compositing as CSS on the canvas, transforms
+    // ===================================================================
+    section('Layers');
+
+    test('layer: alpha, blend and filter become CSS on the canvas; lighter is plus-lighter', () =>
+      draw('', (layer, stage) => {
+        layer.setAttribute('alpha', '0.5');
+        layer.setAttribute('blend', 'lighter');
+        layer.setAttribute('filter', 'blur(5)');
+        stage.render(2);
+        const s = layer._canvas.style;
+        if (s.opacity !== '0.5' || s.mixBlendMode !== 'plus-lighter' || s.filter !== 'blur(5px)') {
+          throw new Error(`opacity ${s.opacity}, mix-blend-mode ${s.mixBlendMode}, filter ${s.filter}`);
+        }
+      }));
+
+    test('layer: x, y and rotate move everything in the layer', () =>
+      draw(`<pxl-rect x="100" w="40" h="40" ${BLACK}></pxl-rect>`, (layer, stage) => {
+        layer.setAttribute('x', '500');
+        layer.setAttribute('y', '300');
+        layer.setAttribute('rotate', '90');
+        stage.render(2);
+        // (100, 0) in the layer, turned by 90°, is (0, 100) from the layer's (500, 300)
+        expectInk(layer, [[500, 400, true], [600, 300, false]]);
+      }));
+
+    runTests({ settle: 0 });
+  </script>
+</body>
+</html>
