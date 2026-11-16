@@ -219,10 +219,8 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **When**: after the framework steps 1–5 of §30 (their conformance tests are the safety net); scoped names (§30 D2) are designed together with D1, because both change how `ref` is resolved (framework plan §19.3).
 
 ## 41. Testing: Levels, a Headless Runner and the Missing Cases
-- **Status**: 🟡 **Proposed** (2026-11-15, runner prototype measured, nothing built)
-- **Reference**: `design/2026-11-15_testing_plan.md`; prototype `design/prototypes/2026-11-15_testing/headless_probe.js`
-- **Problem**: the 90 engine tests are regression tests for fixes; whole areas have none (compiler classification, Rule A per attribute, `isPressed` and handlers, drivers, `conic()` / `radial()` keywords, `anchor`, `reveal`, `blend`, `mask`). The runner has no timeout, shared state and real-frame waits, so it depends on the browser pane.
-- **Idea**: six levels (unit, engine, rendering probes, framework conformance, page sweep, scaling ratios), a shared `tests/runner.js` (timeout, sections, `test.known` for open bugs, `?grep`), and a runner `run_tests.js` in `tools/`: headless Chrome, no npm packages, one command on both laptops.
-- **Measured**: the engine tests run headless in 0.7 s (virtual time); the sweep of 79 docs and example pages took 81 s with one Chrome per page and found no console messages.
-- **Open**: D1–D6 (plan §11): one page per level, the DevTools protocol for one browser, golden images (not now), GitHub Actions, CLAUDE.md rules, when to sweep.
+- **Status**: 🟢 **Decided** (2026-11-16, D1–D6 decided; steps 1–2 built: shared runner, `tools/run_tests.js`, CLAUDE.md rules, GitHub Actions)
+- **Reference**: `design/2026-11-15_testing_plan.md` (built: §12); prototype `design/prototypes/2026-11-15_testing/headless_probe.js`
+- **Built**: `tests/runner.js` (timeout, sections, `test.known()`, `?grep=`, JSON results), `tests/index.html` on it; `node tools/run_tests.js` (test pages on virtual time in about 1.5 s, sweep of 79 pages in 6 tabs in 25 s, exit code; `--tests`, `--sweep`, `--page`, `--grep`, `--repeat`); `.github/workflows/tests.yml`.
+- **Left**: steps 3–6 (plan §10): `tests/unit.html` (compiler tables, drivers, radii, points, matrices, filters, the generated Rule A sweep), interaction and lifecycle tests with the framework review's known bugs as `test.known()`, `tests/render.html` (pixel probes), scaling and build checks. Missing areas: compiler classification, Rule A per attribute, `isPressed` and handlers, drivers, `conic()` / `radial()` keywords, `anchor`, `reveal`, `blend`, `mask`.
 - **Related**: §30 (its quick fixes get `test.known` tests here first; its `tests/frameworks.html` is level 4).

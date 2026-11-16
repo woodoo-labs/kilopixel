@@ -1,10 +1,10 @@
 # Testing: Levels, a Headless Runner and the Missing Cases
 
-- **Status**: 🟡 **Proposed** (2026-11-15, inventory, runner prototype measured, nothing built)
+- **Status**: 🟢 **Decided** (2026-11-16, D1–D6 decided, D2 changed after measuring; steps 1–2 built, §12; steps 3–6 not built)
 - **Date**: 2026-11-15
-- **Related**: `design/2026-10-30_framework_compatibility_plan.md` (§11 conformance tests, §19.4 order: its quick fixes get their tests from this plan), `.claude/CLAUDE.md` (Workflow: "Engine tests", "Verify in the browser")
-- **Target Implementation**: `run_tests.js` in `tools/` (new; named without the folder in this plan until it exists), `tests/index.html` (runner), `tests/unit.html` and `tests/render.html` (new), `tests/frameworks.html` (from the framework plan), `.claude/CLAUDE.md` (Workflow), optional `.github/workflows/tests.yml`
-- **Prototype**: `design/prototypes/2026-11-15_testing/headless_probe.js` (engine tests and page sweep in headless Chrome, no npm packages, §5.1)
+- **Related**: `design/2026-10-30_framework_compatibility_plan.md` (§11 conformance tests, §19.4 order: its quick fixes get their tests from this plan), `.claude/CLAUDE.md` (Workflow: "Tests", "Verify in the browser")
+- **Target Implementation**: `tools/run_tests.js` (built), `tests/runner.js` (built), `tests/index.html` (moved onto the runner), `tests/unit.html` and `tests/render.html` (new), `tests/frameworks.html` (from the framework plan), `.claude/CLAUDE.md` (Workflow, built), `.github/workflows/tests.yml` (built)
+- **Prototype**: `design/prototypes/2026-11-15_testing/headless_probe.js` (engine tests and page sweep in headless Chrome, no npm packages, §5.1; the first version of `tools/run_tests.js`)
 
 ---
 
@@ -43,7 +43,7 @@
 | 2. Engine | lifecycle, reactivity, frame pipeline, interaction with synthetic pointer events | `tests/index.html` (exists) | press / click / leave sequences, handler registration, move between layers, reconnecting a stage, Rule A for every attribute |
 | 3. Rendering | pixel probes at chosen points of a fixed-size stage | `tests/render.html` (new) | pie vs. ring vs. chord, rect anchors and corner radii, arrowhead tips, gradient colors near the edges, `reveal`, `mask`, `linedash` gaps |
 | 4. Frameworks | the DOM contract | `tests/frameworks.html` (framework plan §11) | late `id`, insert / move / remove, events, properties |
-| 5. Page sweep | every docs and example page loads without console messages | the runner (`run_tests.js`) | measured clean on 2026-11-15 (§5.1) |
+| 5. Page sweep | every docs and example page loads without console messages | `tools/run_tests.js` | measured clean on 2026-11-15 (§5.1) |
 | 6. Scaling | cost ratios, not absolute times | the runner or a level-2 page | removing 2,000 elements takes at most ~3× as long as 1,000 (today 7×, framework plan §19.1) |
 
 Unit tests run in the browser too: the bundle needs `HTMLElement` and `customElements` when it loads, so a Node-only run would need a DOM shim (a dependency).
@@ -61,7 +61,7 @@ Shared by all test pages (a small `tests/runner.js`, loaded by each page):
 - **Results as JSON** in `window.kilopixelTests` (exists) and in a `<script type="application/json" id="test-results">` element at the end, which the headless runner reads from the DOM.
 - **Generated tests:** for each element class, loop over `observedAttributes` and `static defaults` (Rule A: bare, removed, invalid type), so a new attribute is tested without writing a test for it.
 
-## 5. Headless Runner (`run_tests.js` in `tools/`)
+## 5. Headless Runner (`tools/run_tests.js`)
 
 ### 5.1 Measured with the Prototype (2026-11-15)
 
@@ -73,20 +73,21 @@ Shared by all test pages (a small `tests/runner.js`, loaded by each page):
 | Page sweep, 79 pages (`docs/`, `examples/`) | 0 pages with console messages | 81 s (one Chrome start per page, about 1 s each) |
 | A probe page with a warning and an uncaught error | both reported | — |
 
-### 5.2 Design
+### 5.2 Design (as built, §12)
 
-- **Finds the browser** (Chrome, then Edge; paths for Windows, macOS, Linux) and uses a temporary profile (never the user's).
+- **Finds the browser** (Chrome, then Edge; paths for Windows, macOS, Linux; `PXL_BROWSER` overrides) and uses temporary profiles (never the user's).
 - **Starts the dev server** if `http://localhost:8124` doesn't answer, and stops it at the end.
-- **Runs** the test pages (levels 1–4), the page sweep (5) and the scaling checks (6); prints one line per page, the failures with their messages, and a summary; exits with 1 on any failure.
-- **Options:** `--tests` (only the test pages), `--sweep` (only the sweep), `--grep <text>`.
-- **One browser for all pages** (D2): Chrome with `--remote-debugging-port` and the Chrome DevTools Protocol over Node's built-in `WebSocket` (Node 22 and later; both laptops run Node 24): one start instead of 79, console messages and exceptions as events, `window.kilopixelTests` read directly. Expected to bring the sweep from 81 s to a few seconds; to measure. The prototype's one-process-per-page approach stays as the fallback.
-- **Virtual time** (`--virtual-time-budget`, or `Emulation.setVirtualTimePolicy` over the protocol) makes timer-based tests fast and independent of the pane. Tests that must see real time are rare; they can opt out with a flag in their name or section.
+- **Test pages** (every `tests/*.html`): one browser process per page with `--virtual-time-budget` and `--dump-dom`, as in the prototype. The page's report comes from `<script id="test-results">` in the dumped DOM. Timers and frames run on virtual time: the waits in the tests cost no real time, and the result doesn't depend on a visible window.
+- **Page sweep** (every `docs/*.html` and `examples/*.html`): one browser with 6 tabs over the Chrome DevTools Protocol (Node's built-in `WebSocket`, Node 22 and later), in real time: each tab loads a page, runs 1.5 s after the load event, and reports console calls, uncaught errors and failed requests. Without `WebSocket` (older Node) the sweep falls back to one process per page, which sees console messages and uncaught errors but not failed requests.
+- **Options:** `--tests`, `--sweep`, `--page <path>` (sweep one or more pages), `--grep <text>`, `--repeat <n>` (finds flaky tests), `--verbose`. Exit code 0 (all passed), 1 (failures), 2 (setup problem).
+- **Changed from D2 as first decided** (one browser for everything, virtual time over the protocol), after measuring on 2026-11-16 (§12): with a virtual-time policy set over the protocol (`Emulation.setVirtualTimePolicy`, with or without `waitForNavigation`), the page never loaded; the command-line flag works. And browser processes start one after another on Windows: 6 at once took as long as 6 in a row (empty pages: 4.1 s), so the sweep over processes stayed at 81–91 s even in parallel. Tabs in one browser load in parallel: 25 s.
 
 ### 5.3 In the Workflow
 
-- CLAUDE.md "Engine tests": after every engine change and build, run the runner (`run_tests.js`) instead of opening `tests/index.html` by hand; the browser stays the tool for looking at pages.
-- "Working on Another Machine", step 3: the same command.
-- Optional (D4): a GitHub Actions workflow runs it on every push (Chrome is preinstalled on GitHub's Ubuntu runners). It is a file in the repository, no packages.
+- CLAUDE.md "Tests": after every engine change and build, `node tools/run_tests.js --tests`; before a commit, `node tools/run_tests.js`; the browser stays the tool for looking at pages.
+- "Working on Another Machine", step 3: `node tools/run_tests.js`.
+- GitHub Actions (D4): `.github/workflows/tests.yml` runs `node tools/run_tests.js` on every push and pull request (Chrome is preinstalled on GitHub's Ubuntu machines; the runner adds `--no-sandbox` only when `CI` is set, because those machines don't allow Chrome's sandbox).
+- **Both laptops:** nothing to sync beyond git. Each needs Chrome or Edge (Edge comes with Windows) and Node; Node 22 or later for the fast sweep (this laptop: Node 24; the other laptop: check with `node --version`).
 
 ## 6. Missing Cases, by Area
 
@@ -120,28 +121,41 @@ Absolute times differ between the two laptops and between runs (±30 %, per-fram
 - Existing: "Every engine fix gets a test."
 - New: "A new attribute gets tests for its default, an empty and a removed value, and its main effect (level 2 or 3)."
 - New: "A bug found but not fixed gets a `test.known()`."
-- Changed: "Engine tests" and the sync check use the runner.
+- Changed: "Engine tests" (now "Tests") and the sync check use the runner.
+
+All four are in CLAUDE.md since step 2 (§12).
 
 ## 10. Steps
 
-| # | Step | Size |
-|---|---|---|
-| 1 | `tests/runner.js` (timeout, sections, `test.known`, `?grep`, JSON results); `tests/index.html` moved onto it unchanged | 1 session |
-| 2 | The runner `run_tests.js` with the DevTools protocol (D2), sweep, exit code; CLAUDE.md workflow | 1 session |
-| 3 | `tests/unit.html`: compiler tables, drivers, radii, points, matrices, filters; the generated Rule A sweep | 1 session |
-| 4 | Interaction and lifecycle tests, the known bugs of the framework review as `test.known` | 1 session |
-| 5 | `tests/render.html`: probes per shape and paint feature | 1–2 sessions |
-| 6 | Scaling checks; build checks; optional CI (D4) | 1 session |
+| # | Step | Size | State |
+|---|---|---|---|
+| 1 | `tests/runner.js` (timeout, sections, `test.known`, `?grep`, JSON results); `tests/index.html` moved onto it unchanged | 1 session | built 2026-11-16 |
+| 2 | `tools/run_tests.js` (test pages, sweep, exit code); CLAUDE.md workflow; GitHub Actions (D4) | 1 session | built 2026-11-16 |
+| 3 | `tests/unit.html`: compiler tables, drivers, radii, points, matrices, filters; the generated Rule A sweep | 1 session | |
+| 4 | Interaction and lifecycle tests, the known bugs of the framework review as `test.known` | 1 session | |
+| 5 | `tests/render.html`: probes per shape and paint feature | 1–2 sessions | |
+| 6 | Scaling checks; build checks | 1 session | |
 
 Step 4 overlaps with the framework plan's quick fixes (§19.4 step 1): its `test.known` tests become their acceptance tests. Steps 1–2 come first, because everything after them runs through them.
 
-## 11. Open Decisions
+## 11. Decisions
 
-| | Question | Recommended |
+Decided 2026-11-16, as recommended; D2 changed after measuring (§5.2).
+
+| | Question | Decided |
 |---|---|---|
 | D1 | One test page per level, or everything in `tests/index.html`? | One page per level with a shared `tests/runner.js`: smaller files, and a failing page doesn't hide the others |
-| D2 | Headless: one Chrome per page, or one Chrome over the DevTools protocol? | The protocol (one start, real console events); one per page as the fallback |
+| D2 | Headless: one Chrome per page, or one Chrome over the DevTools protocol? | Decided first: the protocol for everything. Built: test pages one process per page on virtual time (the protocol's virtual time didn't load pages), the sweep in 6 tabs of one browser over the protocol (processes don't start in parallel); §5.2 |
 | D3 | Golden images? | Not now; probes first (§7) |
-| D4 | GitHub Actions on every push? | Yes, after step 2; it costs nothing and catches what was forgotten on one laptop |
-| D5 | The CLAUDE.md rules of §9? | Yes, with step 2 |
+| D4 | GitHub Actions on every push? | Yes, built with step 2 |
+| D5 | The CLAUDE.md rules of §9? | Yes, built with step 2 |
 | D6 | Run the page sweep on every engine change, or only before a commit? | Before a commit and in CI; the test pages after every build |
+
+## 12. Steps 1–2 Built 2026-11-16
+
+- **`tests/runner.js`:** `test()`, `test.known()`, `section()`, `wait()`, `runTests()`; a timeout per test (5 s, `test(name, fn, { timeout })`); `?grep=` on names and sections; results in the table (with section rows), the title (`Tests: N/N passed`, plus `, K known`), `window.kilopixelTests` (`passed`, `total`, `known`, `ok`, `results` with `status` and `ms`) and `<script type="application/json" id="test-results">`. A known test that passes counts as a failure ("passes now: change test.known() to test()").
+- **`tests/index.html`:** the same 90 tests on the shared runner, in 13 sections.
+- **`tools/run_tests.js`:** as in §5.2. Measured on this laptop: test pages 1.4–1.7 s, sweep of 79 pages 25 s, the whole run 27 s. Checked with probe pages (not kept): a failing test, a known test that passes and a test that never settles (timeout after 1 s) are reported and fail the run; a sweep page with `console.warn`, an uncaught error and a missing image reports all three; the fallback without `WebSocket` (`node --no-experimental-websocket`) reports the warning and the error. `--repeat 5`: 5 × 90/90.
+- **Flaky test seen once:** "toLocal: nothing redraws while nothing moves" failed once with "static stage renders at 1 FPS" in the in-app browser pane, on the first load right after the dev server started (real time; probably a late web font that redraws every stage once). Not seen again on reload or in the headless runs (virtual time); watch it.
+- **CLAUDE.md:** "Tests" bullet (the commands and the three rules of §9), "Where Things Are" (`tests/`, `tools/run_tests.js`), "Working on Another Machine" step 3.
+- **`.github/workflows/tests.yml`:** Node 24, `node tools/run_tests.js`; not run yet (runs on the next push).

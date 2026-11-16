@@ -13,7 +13,8 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 | `js/` | Engine source. Build order is the `files` list in `build.js` |
 | `docs/` | Public documentation site. Rules: `docs/DOCS_STANDARDS.md` |
 | `design/` | Plans and notes, named `YYYY-MM-DD_<topic>_plan.md` (or `_note.md`). `design/archive/`: superseded, dropped and outdated plans. `design/prototypes/<plan>/`: prototypes and measurement scripts a plan relies on (committed; folder named like the plan without `_plan` / `_note`) |
-| `tests/index.html` | Automated engine tests in the browser (`http://localhost:8124/tests/`); result in the tab title and `window.kilopixelTests` |
+| `tests/` | Automated tests: `index.html` (engine), more pages per test level (`design/2026-11-15_testing_plan.md`), all on the shared `runner.js`. In the browser via the dev server (`http://localhost:8124/tests/`, `?grep=text` for a subset); result in the tab title and `window.kilopixelTests` |
+| `tools/run_tests.js` | Runs all test pages headless and sweeps every docs and example page for console messages (needs Chrome or Edge; Node 22+ for the fast sweep) |
 | `examples/test*.html` | Manual demo and test pages |
 | `scratch/` | Temporary files, gitignored, different on each laptop; may be emptied at any time |
 | `dist/`, `docs/js/pxl.min.js`, `docs/download/*` | **Build output.** Never edit by hand; they are committed. Exception: `docs/download/index.html` is the starter kit source, from which `node build.js` makes the zip |
@@ -42,7 +43,10 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 
   Then run `node tools/check_plans.js`; it must report no problems.
 - **Verify in the browser:** the dev server is `node tools/serve.js` (launch config `kilopixel`, http://localhost:8124, `/` redirects to `/docs/`). Check docs pages and `examples/` there, including the console.
-- **Engine tests:** after every engine change and build, open `tests/index.html`; all tests must pass. Every engine fix gets a test there (committed, unlike `scratch/`).
+- **Tests:** after every engine change and build, run `node tools/run_tests.js --tests` (all test pages, headless, a few seconds); all tests must pass. Before a commit, run `node tools/run_tests.js` (also the sweep of all docs and example pages: no console messages). GitHub Actions runs the same on every push.
+  - Every engine fix gets a test (committed, unlike `scratch/`).
+  - A new attribute gets tests for its default, an empty value, a removed value and its main effect.
+  - A bug found but not fixed gets a `test.known()`: it shows as "known" until the fix makes it pass, then it fails the run until it is changed to `test()`.
 - **Line endings:** LF everywhere, set by `.gitattributes`. Don't change it per file.
 - **Temporary files** (helper scripts, dumps, screenshots, visual prototypes) go in `scratch/`, not the project root. Don't delete them afterwards; the user cleans up. Nothing in `scratch/` must be needed later: it is git-ignored and differs between the two laptops.
 - **Prototypes worth keeping:** when a prototype or measurement script supports a plan, copy it to `design/prototypes/<plan>/` in the same change (paths inside it: absolute dev-server paths like `/dist/pxl.js`; Node scripts reach the repo with `../../../`). Plans, TODO and KILOPIXEL.md link only committed files; a `scratch/` file may only be named as history, marked "(not kept)" (`tools/check_plans.js` checks both). Old engine builds aren't copied: name the commit (`git show <commit>:dist/pxl.js`). Also use `design/prototypes/` for work in progress the user needs on the other laptop.
@@ -53,7 +57,7 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 The user works on two Windows laptops. When a session starts on a machine that hasn't pulled for a while, or when the user asks to sync:
 1. `git fetch` and `git status`; show what's new and pull only after the user's OK.
 2. **Line endings, once per machine:** if `git ls-files --eol` shows working files as `w/crlf`, the copy predates `.gitattributes`. With no uncommitted work, rewrite them once: `git rm -r --cached -q . && git reset -q --hard HEAD`.
-3. Start the dev server and open `tests/index.html`; the tab title must show all tests passed.
+3. Run `node tools/run_tests.js`; it must end with "All passed." (It starts the dev server itself if needed. The machine needs Chrome or Edge, and Node 22 or later for the fast page sweep; older Node works, the sweep is just slower.)
 
 Only git syncs. `scratch/`, `.claude/worktrees/` and Claude's memory are per machine: rules that must hold on both laptops go in this file, not in memory.
 

@@ -7,21 +7,24 @@
   <link rel="stylesheet" href="../docs/css/docs.css">
   <style>
     .test-summary { font-weight: 700; margin: 16px 0; }
-    .test-pass { color: #15803d; }
-    .test-fail { color: #b91c1c; }
+    .test-passed { color: #15803d; }
+    .test-failed, .test-fixed { color: #b91c1c; }
+    .test-known { color: #b45309; }
     .test-table { width: 100%; border-collapse: collapse; font-size: 14px; }
     .test-table td { border-bottom: 1px solid #e2e8f0; padding: 6px 8px; vertical-align: top; }
+    .test-section td { font-weight: 700; padding-top: 16px; }
     .test-stages { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 24px; }
     .test-stages pxl-stage { border: 1px solid #e2e8f0; }
   </style>
   <!-- The built bundle: run `node build.js` before opening this page -->
   <script src="../dist/pxl.min.js"></script>
+  <script src="runner.js"></script>
 </head>
 <body>
   <main class="docs-content">
     <div class="docs-inner">
       <h1>Engine Tests</h1>
-      <p>Open after every engine change (after <code>node build.js</code>), via the dev server: <code>http://localhost:8124/tests/</code>. All tests run automatically; the result is also shown in the tab title (<code>Tests: N/N passed</code>) and stored in <code>window.kilopixelTests</code>. Add a test for every engine fix.</p>
+      <p>Run after every engine change (after <code>node build.js</code>): <code>node tools/run_tests.js --tests</code> runs this page and the other test pages headless. In the browser, via the dev server: <code>http://localhost:8124/tests/</code>, or <code>?grep=toLocal</code> for the tests whose name or section contains a text. The result is also shown in the tab title (<code>Tests: N/N passed</code>) and stored in <code>window.kilopixelTests</code>. Add a test for every engine fix, and a <code>test.known()</code> for a bug found but not fixed.</p>
 
       <p id="summary" class="test-summary">Running…</p>
       <table class="test-table"><tbody id="results"></tbody></table>
@@ -224,10 +227,7 @@
   </main>
 
   <script>
-    // --- Minimal test runner (no dependencies) ---
-    const tests = [];
-    const test = (name, fn) => tests.push({ name, fn });
-    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    // test(), test.known(), section(), wait() and runTests() come from runner.js
     const el = (id) => pxl.nodes[id].$node;
     const round = (n) => Math.round(n * 10) / 10;
 
@@ -255,6 +255,7 @@
     // ===================================================================
     // toLocal (design/2026-10-26_tolocal_fix_plan.md)
     // ===================================================================
+    section('toLocal');
 
     test('toLocal: reader in a rotating, scaled layer follows a still target', () =>
       sampled(() => expectMapped('tlReader1', 'tlSun1', XY)));
@@ -319,6 +320,7 @@
     // ===================================================================
     // ref.<id>.tx / ty
     // ===================================================================
+    section('ref.tx / ty');
 
     test('ref.tx: includes the element\'s own rotate (x=300, dx=150, rotate=90 → 300, 300)', () => {
       const { tx, ty } = pxl.nodes.txBox;
@@ -369,6 +371,7 @@
     // ===================================================================
     // toLocal decomposition and zoom (design/2026-10-29_tolocal_decomposition_plan.md)
     // ===================================================================
+    section('toLocal decomposition and zoom');
 
     // toLocal() of `targetId` as seen from dcReader (untransformed layer), compared with `expected`
     function expectFrame(targetId, expected) {
@@ -444,6 +447,7 @@
     // ===================================================================
     // Engine cleanup fixes (design/2026-10-27_engine_cleanup_inventory_note.md §3 A)
     // ===================================================================
+    section('Engine cleanup fixes');
 
     test('grid: bounding box is the visible stage area (corners mapped without a per-frame closure)', () => {
       el('ecStage').resize(); // sizes and draws the stage now (ResizeObserver doesn't fire in a hidden tab)
@@ -503,6 +507,7 @@
     // Stroke gradients on thin shapes (design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md)
     // and stop offsets / corner radii (design/2026-11-05_draw_errors_plan.md §3.1)
     // ===================================================================
+    section('Stroke gradients, stops and radii');
 
     // Pixel [r, g, b, a] of a layer canvas at a stage position. Draws the stage first: resize() renders now
     // (the ResizeObserver doesn't fire in a hidden tab).
@@ -590,6 +595,7 @@
     // ===================================================================
     // Text box: maxwidth and late web fonts (design/2026-11-06_text_box_accuracy_plan.md)
     // ===================================================================
+    section('Text box');
 
     // resize() also works in a background tab, where the stage may not have a size yet
     const drawTextStage = () => el('tbStage').resize();
@@ -746,6 +752,7 @@
     // ===================================================================
     // Safe shape render: always save / restore, draw errors (design/2026-11-07_safe_shape_render_plan.md)
     // ===================================================================
+    section('Safe shape render');
 
     // Test shapes, the way a custom shape would be written
     customElements.define('test-leak-shape', class extends pxl.Shape {
@@ -1049,6 +1056,7 @@
     // ===================================================================
     // Layer CSS-only fast path (design/2026-11-12_two_phase_frame_plan.md §7.1)
     // ===================================================================
+    section('Layer fast path');
 
     // Renders the fast path stage for `frames` frames after time `from`; resize() first, so it also works in a background tab
     function fpRender(from, frames) {
@@ -1113,6 +1121,7 @@
     });
 
     // --- Reference cycles (design/2026-11-12_reactive_propagation_plan.md) ---
+    section('Reference cycles');
 
     test('ref cycles: a cycle whose values never settle stops instead of overflowing the stack, and warns once', () => {
       srClear();
@@ -1207,6 +1216,7 @@
     });
 
     // --- Stage-level variables (design/2026-11-12_layer_throttling_plan.md Part B) ---
+    section('Stage-level variables');
 
     test('stage variables: an animated <pxl-var> outside every layer is evaluated, and readers in all layers see this frame\'s value', () => {
       srClear();
@@ -1259,6 +1269,7 @@
     });
 
     // --- Performance monitor (design/2026-11-12_layer_throttling_plan.md Part C1) ---
+    section('Performance monitor');
 
     test('monitor: fps is frames per second of the real interval, not frames since the last publish', () => {
       const stage = el('srStage');
@@ -1288,6 +1299,7 @@
     });
 
     // --- Two-phase frame, step 1 (design/2026-11-12_two_phase_frame_plan.md §7.2) ---
+    section('Two-phase frame');
 
     // Records the value of key each time the element is drawn (read after render(), which may evaluate first)
     function recordDrawn(id, key) {
@@ -1383,6 +1395,7 @@
     });
 
     // --- Stage sizing and layer canvas (design/2026-11-04_stage_sizing_plan.md) ---
+    section('Stage sizing and layer canvas');
 
     // Adds `html` (with a stage) at the end of the page, sizes the stage without waiting for its ResizeObserver
     // (which doesn't run while the page is hidden), runs fn(stage, box) and removes everything again
@@ -1524,31 +1537,7 @@
         }
       }));
 
-    // --- Run all tests in order ---
-    (async () => {
-      const results = [];
-      const rows = document.getElementById('results');
-      await wait(300); // let stages connect and render once
-
-      for (const { name, fn } of tests) {
-        let error = null;
-        try { await fn(); } catch (e) { error = e; }
-        results.push({ name, passed: !error, error: error ? error.message : null });
-
-        const row = rows.insertRow();
-        row.insertCell().textContent = error ? '✗' : '✓';
-        row.cells[0].className = error ? 'test-fail' : 'test-pass';
-        row.insertCell().textContent = name + (error ? ` — ${error.message}` : '');
-      }
-
-      const passed = results.filter((r) => r.passed).length;
-      const summary = `Tests: ${passed}/${results.length} passed`;
-      const summaryEl = document.getElementById('summary');
-      summaryEl.textContent = summary;
-      summaryEl.className = 'test-summary ' + (passed === results.length ? 'test-pass' : 'test-fail');
-      document.title = summary;
-      window.kilopixelTests = { passed, total: results.length, results };
-    })();
+    runTests();
   </script>
 </body>
 </html>

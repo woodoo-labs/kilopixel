@@ -1,0 +1,19 @@
+# Runs the engine tests and the page sweep on every push and pull request (design/2026-11-15_testing_plan.md D4).
+# The same command as on the laptops; no packages: Chrome is preinstalled on GitHub's Ubuntu machines, and the
+# built bundle (dist/) is committed.
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node tools/run_tests.js
