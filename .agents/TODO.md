@@ -3,7 +3,7 @@
 Open work only. Done items are removed: the plan's status line, `.agents/KILOPIXEL.md` and git history keep the record.
 
 - **Status words** (same as in the plans): 💬 **Discussion** (ideas, nothing decided) · 🟡 **Proposed** (complete plan, waiting for a decision) · 🟢 **Decided** (agreed, not built yet). Plans also use ✅ **Implemented**, ⚪ **Superseded by** `<file>` and ⚪ **Dropped** (decided not to do it); those have no TODO item.
-- **Numbers are stable:** other files refer to items as "TODO §29". A removed item leaves a gap; a new item gets the next free number (next: §43).
+- **Numbers are stable:** other files refer to items as "TODO §29". A removed item leaves a gap; a new item gets the next free number (next: §44).
 - **Plans:** `design/`; superseded, dropped and outdated plans are in `design/archive/`. Workflow: `.claude/CLAUDE.md` → "Plans and TODO". Check: `node tools/check_plans.js`.
 
 ## 1. Native SVG Path2D & Vector Sprites (`<pxl-path>`)
@@ -225,3 +225,15 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Decided with the prototype (A2)**: the sign of `sweep` is the direction (`anticlockwise` mirrors it); arrowheads shrink while the path is shorter than them, so they vanish at 0 and turn around invisibly; ellipses measure the arc length (8 chords, early exit), not `r × |sweep|`. Replaces D9 of `design/2026-10-14_unified_arrowhead_geometry_plan.md`.
 - **Open**: D1 `end` keeps "from start to end in the arc's direction", D2 polyline length (whole path recommended), D3 threshold (head lengths), D4 two commits (direction first), D5 heads on tight turns of thin ellipses (accept for now) (plan §7).
 - **Related**: §12 (`docs/arrows.html` rules section); its render tests go into `tests/render.html` (`design/2026-11-15_testing_plan.md`).
+
+## 43. AI Discoverability (`llms.txt`, a Page for AI Use)
+- **Status**: 💬 **Discussion** (2026-11-16, idea, no plan yet)
+- **Problem**: today's AI models don't know Kilopixel (pre-release, no npm package, little public material); an AI only knows it when the reference is given to it (as `.agents/KILOPIXEL.md` in this repository) or when it finds the docs. Training on public material comes much later, if at all.
+- **Ideas**, cheapest first:
+  - `docs/llms.txt`: a short plain-text summary for AI tools at the root of the docs site (a growing convention: what Kilopixel is, the main elements and attributes, the rules an AI gets wrong without it, links to the important pages). Published with the docs site on every push. Source: the "AI Code Generation Guide" of KILOPIXEL.md.
+  - A docs page "Using Kilopixel with AI" with a prompt to copy ("Use Kilopixel; the reference is at …").
+  - With the npm package (§30, W8): README and typings, which AI coding tools read from installed packages.
+  - Later: register the docs with documentation indexes for coding assistants.
+- **Open**: write `llms.txt` by hand or generate it from KILOPIXEL.md in `build.js` (stays in sync, but the guide must then be written for the public: KILOPIXEL.md also documents internals, e.g. `ref.<id>.pN`); how much of the guide goes public (CLAUDE.md "Public vs. internal").
+- **Related**: §30 (W8: npm package and typings); `docs/DOCS_STANDARDS.md` §6 ("simple rules over complete ones" helps AIs as much as people).
+
