@@ -201,10 +201,13 @@ class Browser {
     return sessionId;
   }
 
-  // Loads url in the tab and resolves to { messages }: console calls, uncaught errors and browser log errors /
-  // warnings (failed requests) until SWEEP_SETTLE ms after the load event
+  // Loads url in the tab and resolves to { messages, external }: console calls, uncaught errors and browser log
+  // errors / warnings (failed requests) until SWEEP_SETTLE ms after the load event. Network errors for files on
+  // other servers (CDNs, web fonts) go to `external`: without internet every docs page has them, and they say
+  // nothing about the page. HTTP errors (404) from any server stay messages.
   async load(sessionId, url) {
     const messages = [];
+    const external = [];
     let loaded;
     const loadEvent = new Promise((resolve) => { loaded = resolve; });
     const listener = (message) => {
@@ -221,6 +224,10 @@ class Browser {
       } else if (message.method === 'Log.entryAdded' && (p.entry.level === 'error' || p.entry.level === 'warning')) {
         // The browser asks for /favicon.ico on its own; the pages don't declare one
         if (p.entry.url && p.entry.url.endsWith('/favicon.ico')) return;
+        if (p.entry.url && !p.entry.url.startsWith(BASE) && p.entry.text.includes('net::ERR_')) {
+          external.push(p.entry.url);
+          return;
+        }
         messages.push(`${p.entry.level}: ${p.entry.text}${p.entry.url ? ` (${p.entry.url})` : ''}`);
       } else if (message.method === 'Page.loadEventFired') {
         loaded();
@@ -235,7 +242,7 @@ class Browser {
       } else {
         await new Promise((resolve) => setTimeout(resolve, SWEEP_SETTLE));
       }
-      return { messages };
+      return { messages, external };
     } finally {
       this.listeners.delete(listener);
     }
@@ -332,6 +339,14 @@ async function runSweep() {
     console.log(`    ${page}`);
     for (const m of [...new Set(loaded[i].messages)]) console.log(`      ${m.slice(0, 300)}`);
   });
+
+  // A note, not a failure: usually no internet (the fallback without WebSocket doesn't see requests at all)
+  const offline = pages.filter((page, i) => loaded[i].external && loaded[i].external.length > 0);
+  if (offline.length > 0) {
+    const hosts = new Set(offline.flatMap((page) => loaded[pages.indexOf(page)].external.map((u) => new URL(u).host)));
+    console.log(`  Note: ${offline.length} page(s) couldn't load files from ${[...hosts].join(', ')} ` +
+      '(no internet?). Not counted as failures; run again online to check those files.');
+  }
   return noisy.length;
 }
 
