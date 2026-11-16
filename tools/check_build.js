@@ -71,6 +71,15 @@ check('dist/pxl.js matches the sources in js/ (run node build.js after changing 
   }
 });
 
+// An import during server-side rendering runs the bundle in Node, without window (framework plan §19.2, W8)
+check('the bundle loads without a browser (server-side rendering) and defines nothing', () => {
+  for (const file of ['dist/pxl.js', 'dist/pxl.min.js']) {
+    const sandbox = { console };
+    require('vm').runInNewContext(read(file), sandbox, { filename: file });
+    if ('pxl' in sandbox) throw new Error(`${file} defined pxl without a window`);
+  }
+});
+
 check('the minified copies in dist/ and docs/ are identical', () => {
   const minified = read(`dist/kilopixel-v${VERSION}.min.js`);
   for (const file of ['dist/pxl.min.js', 'docs/js/pxl.min.js', 'docs/download/pxl.min.js']) {

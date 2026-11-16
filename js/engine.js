@@ -49,26 +49,50 @@ pxl.broadcast = function(fullKey) {
   }
 };
 
+// The keys each element is subscribed to (element → Set), the other side of pxl._subscriptions: removing an
+// element then touches only its own keys. Scanning every key for every removed element was quadratic (2,000 shapes
+// with 2,000 readers took 380 ms to remove, design/2026-10-30_framework_compatibility_plan.md §19.1).
+pxl._subscribedKeys = new WeakMap();
+
 pxl.subscribeToVariable = function(fullKey, element) {
-  if (!pxl._subscriptions[fullKey]) pxl._subscriptions[fullKey] = [];
-  if (!pxl._subscriptions[fullKey].includes(element)) {
-    pxl._subscriptions[fullKey].push(element);
-  }
+  let keys = pxl._subscribedKeys.get(element);
+  if (!keys) pxl._subscribedKeys.set(element, keys = new Set());
+  if (keys.has(fullKey)) return;
+  keys.add(fullKey);
+  (pxl._subscriptions[fullKey] ||= []).push(element);
 };
 
 pxl.unsubscribeFromVariable = function(fullKey, element) {
-  const subs = pxl._subscriptions[fullKey];
-  if (!subs) return;
+  const keys = pxl._subscribedKeys.get(element);
+  if (!keys || !keys.delete(fullKey)) return;
 
+  const subs = pxl._subscriptions[fullKey];
   pxl.removeFromArray(subs, element);
   if (subs.length === 0) delete pxl._subscriptions[fullKey]; // keeps the map small for debugging
 };
 
 pxl.clearAllVariableSubscriptions = function(element) {
-  // Snapshot of the keys: unsubscribing deletes empty keys while we loop
-  const trackedKeys = Object.keys(pxl._subscriptions);
-  for (let i = 0; i < trackedKeys.length; i++) {
-    pxl.unsubscribeFromVariable(trackedKeys[i], element);
+  const keys = pxl._subscribedKeys.get(element);
+  if (!keys) return;
+  for (const fullKey of keys) {
+    const subs = pxl._subscriptions[fullKey];
+    pxl.removeFromArray(subs, element);
+    if (subs.length === 0) delete pxl._subscriptions[fullKey];
+  }
+  keys.clear();
+};
+
+// An element's id was set, changed or removed after it connected (connectedCallback reads the id once): move its
+// registry entry, and tell the readers of both names (readers of the old name now read undefined)
+pxl.renameNode = function(element, oldId, newId) {
+  if (oldId && pxl.nodes[oldId] === element.attributeValues) {
+    delete pxl.nodes[oldId];
+    pxl.broadcast(`ref.${oldId}`);
+  }
+  element.refKey = newId ? `ref.${newId}` : null;
+  if (newId) {
+    pxl.nodes[newId] = element.attributeValues;
+    pxl.broadcast(element.refKey);
   }
 };
 

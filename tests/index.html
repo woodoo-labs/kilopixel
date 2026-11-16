@@ -1772,19 +1772,18 @@
       }));
 
     // ===================================================================
-    // Known bugs from the framework review (design/2026-10-30_framework_compatibility_plan.md §19.1). Each turns into
-    // "passes now" when its fix lands (§19.4 step 1); then change test.known() to test().
+    // Fixes from the framework review (design/2026-10-30_framework_compatibility_plan.md §19.1, fixed in §19.4 step 1)
     // ===================================================================
-    section('Known bugs (framework review)');
+    section('Framework review fixes');
 
-    test.known('an id set after insertion is registered, and a reader of it resolves (C2)', () =>
+    test('an id set after insertion is registered, and a reader of it resolves (C2)', () =>
       withStage(ixStage(`<pxl-circle id="kbReader" x="ref.kbLate.x + 1" r="5"></pxl-circle><pxl-circle x="70" r="5"></pxl-circle>`), (stage) => {
         const late = stage.querySelector('pxl-layer').lastElementChild;
         late.id = 'kbLate';
         if (!pxl.nodes.kbLate || pxl.nodes.kbReader.x !== 71) throw new Error(`registered ${!!pxl.nodes.kbLate}, reader ${pxl.nodes.kbReader.x}`);
       }));
 
-    test.known('a renamed id is registered under the new name and leaves no old entry (C2)', () =>
+    test('a renamed id is registered under the new name and leaves no old entry (C2)', () =>
       withStage(ixStage('<pxl-circle id="kbOldName" x="10" r="5"></pxl-circle>'), (stage) => {
         const shape = el('kbOldName');
         shape.id = 'kbNewName';
@@ -1795,10 +1794,11 @@
         if (!state.newKey || state.oldKey || state.oldKeyAfterRemove) throw new Error(JSON.stringify(state));
       }));
 
-    test.known('a second copy of the script leaves the first one working (C16)', async () => {
+    test('a second copy of the script leaves the first one working (C16)', async () => {
       const frame = document.createElement('iframe');
       frame.style.display = 'none';
-      frame.srcdoc = `<!DOCTYPE html><script>window.errors = []; addEventListener('error', (e) => errors.push(e.message));<\/script>
+      frame.srcdoc = `<!DOCTYPE html><script>window.errors = []; addEventListener('error', (e) => errors.push(e.message));
+          window.warnings = []; const warn = console.warn; console.warn = (...a) => { warnings.push(a.join(' ')); warn(...a); };<\/script>
         <script src="/dist/pxl.min.js"><\/script>
         <pxl-stage><pxl-layer><pxl-circle id="a" x="40" r="5"></pxl-circle></pxl-layer></pxl-stage>
         <script>window.first = window.pxl;<\/script>
@@ -1809,20 +1809,64 @@
         await new Promise((resolve) => frame.addEventListener('load', resolve));
         const w = frame.contentWindow;
         const x = w.document.getElementById('b').attributeValues.x;
-        if (w.pxl !== w.first || w.errors.length || x !== 41) {
-          throw new Error(`pxl replaced ${w.pxl !== w.first}, ${w.errors.length} errors, reader ${x}`);
+        const loadedTwice = w.warnings.filter((m) => m.includes('already loaded')).length;
+        if (w.pxl !== w.first || w.errors.length || x !== 41 || loadedTwice !== 1) {
+          throw new Error(`pxl replaced ${w.pxl !== w.first}, ${w.errors.length} errors, reader ${x}, ${loadedTwice} "already loaded" warnings`);
         }
       } finally {
         frame.remove();
       }
     });
 
-    test.known('text children of a shape are not shown as page text (C17)', () =>
+    test('text children of a shape are not shown as page text (C17)', () =>
       withStage(ixStage('<pxl-text id="kbChildren" x="100" y="100" text="Canvas">Hello from JSX children</pxl-text>'), () => {
         const range = document.createRange();
         range.selectNodeContents(el('kbChildren'));
         const visible = [...range.getClientRects()].filter((r) => r.width > 0).length;
         if (visible) throw new Error(`${visible} visible text box(es)`);
+      }));
+
+    test('an id removed after insertion leaves the registry, and its readers read undefined (C2)', () =>
+      withStage(ixStage('<pxl-circle id="fxReader" x="ref.fxGone.x + 1" r="5"></pxl-circle><pxl-circle id="fxGone" x="30" r="5"></pxl-circle>'), () => {
+        const before = pxl.nodes.fxReader.x;
+        el('fxGone').removeAttribute('id');
+        const after = pxl.nodes.fxReader.x;
+        if (before !== 31 || pxl.nodes.fxGone || !Number.isNaN(after)) throw new Error(`reader ${before} → ${after}, entry left ${!!pxl.nodes.fxGone}`);
+      }));
+
+    test('a shape whose isHovered is read gets hit-tested when its id arrives after insertion (C2)', () =>
+      withStage(ixStage(`<pxl-circle id="fxHoverReader" x="50" y="50" r="5" fill="ref.fxLateBtn.isHovered ? '#f00' : '#00f'"></pxl-circle>
+        <pxl-circle x="500" y="300" r="80" fill="#000"></pxl-circle>`), (stage) => {
+        stage.querySelector('pxl-layer').lastElementChild.id = 'fxLateBtn';
+        hover(stage, 500, 300);
+        if (pxl.nodes.fxHoverReader.fill !== '#f00') throw new Error(`reader fill ${pxl.nodes.fxHoverReader.fill}`);
+      }));
+
+    test('a stage renamed after insertion works for readers of its new name; removing it leaves no entry', () =>
+      withStage('<div style="width: 500px"><pxl-stage id="fxStageOld" ratio="2" alwaysrender><pxl-layer><pxl-circle id="fxStageReader" r="5" y="ref.fxStageNew.height"></pxl-circle></pxl-layer></pxl-stage></div>', (stage) => {
+        stage.id = 'fxStageNew';
+        const state = { reader: pxl.nodes.fxStageReader.y, old: !!pxl.nodes.fxStageOld };
+        stage.remove();
+        state.afterRemove = !!pxl.nodes.fxStageNew;
+        if (state.reader !== 500 || state.old || state.afterRemove) throw new Error(JSON.stringify(state));
+      }));
+
+    test('removed readers leave no subscriptions; a reader inserted again is subscribed once', () =>
+      withStage(ixStage(`<pxl-circle id="fxSource" x="10" r="5"></pxl-circle>
+        <pxl-circle id="fxSub" x="ref.fxSource.x + 1" y="ref.fxSource.x + 2" r="5"></pxl-circle>
+        <pxl-circle id="fxSwitched" x="ref.fxSource.x + 3" r="5"></pxl-circle>`), (stage) => {
+        const subs = () => pxl._subscriptions['ref.fxSource'] || [];
+        const reader = el('fxSub'), switched = el('fxSwitched');
+        switched.setAttribute('x', '5'); // no longer a reader: dropped on the next broadcast or on removal
+        reader.remove();
+        switched.remove();
+        const afterRemove = subs().length;
+        stage.querySelector('pxl-layer').append(reader);
+        const afterInsert = subs().filter((e) => e === reader).length;
+        el('fxSource').setAttribute('x', '20');
+        if (afterRemove !== 0 || afterInsert !== 1 || pxl.nodes.fxSub.x !== 21) {
+          throw new Error(`subscribers after removal ${afterRemove}, reader subscribed ${afterInsert}×, reader x ${pxl.nodes.fxSub.x}`);
+        }
       }));
 
     runTests();

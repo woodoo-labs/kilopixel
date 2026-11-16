@@ -1,5 +1,5 @@
 pxl.Variable = class Variable extends pxl.PxlNode {
-  static get observedAttributes() { return ['value']; }
+  static get observedAttributes() { return ['value', 'id']; }
 
   static defaults = { value: 0 };
 

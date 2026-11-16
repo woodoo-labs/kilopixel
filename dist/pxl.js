@@ -1,4 +1,10 @@
 /** Kilopixel Framework v0.1.0 */
+(function() {
+if (typeof window === 'undefined' || typeof customElements === 'undefined') return;
+if (customElements.get('pxl-stage')) {
+  console.warn('[pxl] Kilopixel is already loaded (<pxl-stage> is defined); this second copy is ignored.');
+  return;
+}
 window.pxl = { version: '0.1.0' };
 
 // =========================================================================
@@ -50,26 +56,50 @@ pxl.broadcast = function(fullKey) {
   }
 };
 
+// The keys each element is subscribed to (element → Set), the other side of pxl._subscriptions: removing an
+// element then touches only its own keys. Scanning every key for every removed element was quadratic (2,000 shapes
+// with 2,000 readers took 380 ms to remove, design/2026-10-30_framework_compatibility_plan.md §19.1).
+pxl._subscribedKeys = new WeakMap();
+
 pxl.subscribeToVariable = function(fullKey, element) {
-  if (!pxl._subscriptions[fullKey]) pxl._subscriptions[fullKey] = [];
-  if (!pxl._subscriptions[fullKey].includes(element)) {
-    pxl._subscriptions[fullKey].push(element);
-  }
+  let keys = pxl._subscribedKeys.get(element);
+  if (!keys) pxl._subscribedKeys.set(element, keys = new Set());
+  if (keys.has(fullKey)) return;
+  keys.add(fullKey);
+  (pxl._subscriptions[fullKey] ||= []).push(element);
 };
 
 pxl.unsubscribeFromVariable = function(fullKey, element) {
-  const subs = pxl._subscriptions[fullKey];
-  if (!subs) return;
+  const keys = pxl._subscribedKeys.get(element);
+  if (!keys || !keys.delete(fullKey)) return;
 
+  const subs = pxl._subscriptions[fullKey];
   pxl.removeFromArray(subs, element);
   if (subs.length === 0) delete pxl._subscriptions[fullKey]; // keeps the map small for debugging
 };
 
 pxl.clearAllVariableSubscriptions = function(element) {
-  // Snapshot of the keys: unsubscribing deletes empty keys while we loop
-  const trackedKeys = Object.keys(pxl._subscriptions);
-  for (let i = 0; i < trackedKeys.length; i++) {
-    pxl.unsubscribeFromVariable(trackedKeys[i], element);
+  const keys = pxl._subscribedKeys.get(element);
+  if (!keys) return;
+  for (const fullKey of keys) {
+    const subs = pxl._subscriptions[fullKey];
+    pxl.removeFromArray(subs, element);
+    if (subs.length === 0) delete pxl._subscriptions[fullKey];
+  }
+  keys.clear();
+};
+
+// An element's id was set, changed or removed after it connected (connectedCallback reads the id once): move its
+// registry entry, and tell the readers of both names (readers of the old name now read undefined)
+pxl.renameNode = function(element, oldId, newId) {
+  if (oldId && pxl.nodes[oldId] === element.attributeValues) {
+    delete pxl.nodes[oldId];
+    pxl.broadcast(`ref.${oldId}`);
+  }
+  element.refKey = newId ? `ref.${newId}` : null;
+  if (newId) {
+    pxl.nodes[newId] = element.attributeValues;
+    pxl.broadcast(element.refKey);
   }
 };
 
@@ -473,6 +503,16 @@ pxl.animationCache = new Map();
 // Results of static expressions, evaluated once
 pxl.staticCache = new Map();
 
+// Entries kept per cache. A framework that rebuilds an expression string on every render (`x="${base} + sin(t)"`)
+// would otherwise grow the caches without end. Dropping the oldest entry is safe: elements keep their compiled
+// function, and the same string only compiles again.
+pxl.COMPILE_CACHE_LIMIT = 2000;
+
+pxl.cacheExpression = function(cache, source, value) {
+  if (cache.size >= pxl.COMPILE_CACHE_LIMIT) cache.delete(cache.keys().next().value); // Maps keep insertion order
+  cache.set(source, value);
+};
+
 // Rewrites shared by attribute expressions and on* handlers:
 // ref.a.b → ref.a?.b (the referenced element may not be connected yet),
 // toLocal( → pxl.toLocal(this, (the caller is the element the code belongs to)
@@ -592,7 +632,7 @@ pxl.compileExpression = function(str) {
       if (hasVars) fn.variableDependencies = deps;
       if (usesToLocal) fn.usesToLocal = true;
 
-      pxl.animationCache.set(str, fn);
+      pxl.cacheExpression(pxl.animationCache, str, fn);
       return fn;
     }
 
@@ -602,10 +642,10 @@ pxl.compileExpression = function(str) {
       ${code}
     `)(pxl.scope);
     const val = (result !== undefined) ? result : str;
-    pxl.staticCache.set(str, val);
+    pxl.cacheExpression(pxl.staticCache, str, val);
     return val;
   } catch (e) {
-    pxl.staticCache.set(str, str);
+    pxl.cacheExpression(pxl.staticCache, str, str);
     console.warn(`Failed to compile expression, returned string instead: ${str}`, e);
     return str;
   }
@@ -1112,13 +1152,16 @@ pxl.perf = {
 // the frame it belongs to, so it never needs a reset
 pxl._frame = 0;
 
-// Default styles of stages and variables, in a cascade layer so that any page CSS wins over them, also CSS in the
-// page's own cascade layers: the <style> goes first, and the layer declared first ranks lowest.
+// Default styles of stages, variables and shapes, in a cascade layer so that any page CSS wins over them, also CSS in
+// the page's own cascade layers: the <style> goes first, and the layer declared first ranks lowest.
 // :state(fallback): see Stage.markFallbackWidth().
+// Shapes and groups draw on the canvas, not as elements: content written inside them (<pxl-text>{label}</pxl-text>
+// in JSX) would otherwise appear as page text through the layer's <slot>. Content placed directly in a layer
+// (accessible text, buttons) stays visible.
 pxl.DEFAULT_STYLES = `@layer pxl {
   pxl-stage { display: block; position: relative; width: 100%; }
   pxl-stage:state(fallback) { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0; }
-  pxl-var { display: none; }
+  pxl-var, pxl-group, pxl-circle, pxl-ellipse, pxl-rect, pxl-line, pxl-polyline, pxl-text, pxl-grid { display: none; }
 }`;
 
 // Once per document, and once per shadow root that holds a stage (document styles don't reach into it)
@@ -1133,7 +1176,7 @@ pxl.addDefaultStyles = function(root) {
 pxl.addDefaultStyles(document);
 
 pxl.Stage = class Stage extends HTMLElement {
-  static get observedAttributes() { return ['ratio', 'alwaysrender']; }
+  static get observedAttributes() { return ['ratio', 'alwaysrender', 'id']; }
 
   // Pointer events handled by the stage's InteractionEngine (its handleEvent)
   static POINTER_EVENTS = ['pointermove', 'pointerdown', 'pointerup', 'pointerenter', 'pointerleave', 'click'];
@@ -1153,6 +1196,7 @@ pxl.Stage = class Stage extends HTMLElement {
     this._parsedRatio = 16 / 9;
     this._internals = null; // ElementInternals, attached when the stage first needs the fallback width
     this.refKey = null;
+    this._isRegistered = false; // connectedCallback has run: id changes from now on move the registry entry
 
     // Published as ref.<id>.* once per second by pxl.perf's timer; renderAvg / renderMax are strings with 2 decimals
     this.attributeValues = {
@@ -1177,7 +1221,9 @@ pxl.Stage = class Stage extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
-    if (name === 'ratio') {
+    if (name === 'id') {
+      if (this._isRegistered) pxl.renameNode(this, oldValue, newValue);
+    } else if (name === 'ratio') {
       // Bare or removed ratio falls back to the default 16 / 9
       this._parsedRatio = (newValue === null || newValue === '') ? 16 / 9 : pxl.parseAttributeValue(newValue);
       this.style.aspectRatio = this._parsedRatio;
@@ -1202,6 +1248,7 @@ pxl.Stage = class Stage extends HTMLElement {
       this.refKey = `ref.${this.id}`;
       pxl.broadcast(this.refKey);
     }
+    this._isRegistered = true;
 
     // display, position and width come from pxl.DEFAULT_STYLES; the aspect ratio stays inline, because the
     // coordinate system depends on it
@@ -1228,6 +1275,8 @@ pxl.Stage = class Stage extends HTMLElement {
   }
 
   disconnectedCallback() {
+    this._isRegistered = false;
+    if (this.id && pxl.nodes[this.id] === this.attributeValues) delete pxl.nodes[this.id];
     this._intersectionObserver?.disconnect();
     this._intersectionObserver = null;
     this._resizeObserver.disconnect();
@@ -1398,6 +1447,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this.parentLayer = null;
     this.parentContainer = null;
     this.refKey = null;
+    // connectedCallback has run: an id that changes from now on is moved in the registry by attributeChangedCallback.
+    // During an upgrade the attributes arrive before connectedCallback, which registers the id itself.
+    this.isRegistered = false;
 
     // Own broadcasts from variableChangedCallback() that are still running (see there)
     this._broadcastNesting = 0;
@@ -1428,6 +1480,11 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
+    // id is observed for the registry (frameworks such as Angular or Alpine set it after insertion), not drawn
+    if (name === 'id') {
+      if (this.isRegistered) pxl.renameNode(this, oldValue, newValue);
+      return;
+    }
     pxl.compileAttribute(this, name, newValue);
     this.isAnimated = this.animatedAttributeKeys.length > 0;
     if (pxl.isSpatialKey(name)) {
@@ -1466,9 +1523,11 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       // Broadcast arrival so any elements initialized earlier can successfully re-evaluate
       pxl.broadcast(this.refKey);
     }
+    this.isRegistered = true;
   }
 
   disconnectedCallback() {
+    this.isRegistered = false;
     if (this.id && pxl.nodes[this.id] === this.attributeValues) {
       delete pxl.nodes[this.id];
     }
@@ -1641,7 +1700,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
   static get observedAttributes() {
     return [
       'x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy',
-      'alpha', 'blend', 'filter', 'hidden'
+      'alpha', 'blend', 'filter', 'hidden', 'id'
     ];
   }
 
@@ -1699,8 +1758,8 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     this.isDirty = false;
   }
 
+  // Called once per connect (PxlNode.connectedCallback); no includes() check, which made inserting n children quadratic
   registerChild(child) {
-    if (this.childList.includes(child)) return;
     this.childList.push(child);
     this._isOrderDirty = true;
     this.invalidate();
@@ -1846,7 +1905,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
 customElements.define('pxl-layer', pxl.Layer);
 pxl.Group = class Group extends pxl.PxlNode {
   static get observedAttributes() {
-    return ['x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden'];
+    return ['x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden', 'id'];
   }
 
   static defaults = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false };
@@ -1857,12 +1916,11 @@ pxl.Group = class Group extends pxl.PxlNode {
     this._isOrderDirty = false; // children need sorting by DOM position
   }
 
+  // Called once per connect (PxlNode.connectedCallback); no includes() check, which made inserting n children quadratic
   registerChild(child) {
-    if (!this.childList.includes(child)) {
-      this.childList.push(child);
-      this._isOrderDirty = true;
-      this.parentLayer?.invalidate();
-    }
+    this.childList.push(child);
+    this._isOrderDirty = true;
+    this.parentLayer?.invalidate();
   }
 
   unregisterChild(child) {
@@ -1919,7 +1977,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
       'x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy',
       'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset',
       'alpha', 'blend', 'mask', 'filter', 'shadowcolor', 'shadowblur', 'shadowx', 'shadowy', 'hidden',
-      'onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove'
+      'onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove', 'id'
     ];
   }
 
@@ -1980,6 +2038,11 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     }
 
     super.attributeChangedCallback(name, oldValue, newValue);
+
+    // A new id that another element reads isHovered / isPressed of: hit-test the shape (as connectedCallback does)
+    if (name === 'id' && this.isRegistered && newValue && pxl._interactiveIds.has(newValue)) {
+      this.stage?.interaction.registerElement(this);
+    }
   }
 
   connectedCallback() {
@@ -3313,7 +3376,7 @@ pxl.Grid = class Grid extends pxl.Shape {
 customElements.define('pxl-grid', pxl.Grid);
 
 pxl.Variable = class Variable extends pxl.PxlNode {
-  static get observedAttributes() { return ['value']; }
+  static get observedAttributes() { return ['value', 'id']; }
 
   static defaults = { value: 0 };
 
@@ -3358,3 +3421,4 @@ pxl.Variable = class Variable extends pxl.PxlNode {
 };
 customElements.define('pxl-var', pxl.Variable);
 
+})();

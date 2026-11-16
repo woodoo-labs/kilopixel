@@ -111,9 +111,9 @@
       return ms;
     }, 2000), { timeout: 20000 });
 
-    // design/2026-10-30_framework_compatibility_plan.md §19.1: clearAllVariableSubscriptions() scans every subscription key
-    // for every removed element. Acceptance test of that plan's quick fix (§19.4 step 1).
-    test.known('removing shapes with readers is linear (today quadratic, framework review)', () => expectLinear((n) => {
+    // design/2026-10-30_framework_compatibility_plan.md §19.1: clearAllVariableSubscriptions() scanned every subscription
+    // key for every removed element (ratio 5–9); fixed with per-element keys (pxl._subscribedKeys)
+    test('removing shapes with readers is linear', () => expectLinear((n) => {
       const { layer, clear } = freshStage();
       layer.insertAdjacentHTML('beforeend', shapesMarkup(n, true, 'rrm'));
       const t0 = performance.now();
@@ -197,7 +197,7 @@
     // ===================================================================
     section('Bounded memory');
 
-    test.known('expression caches stay bounded when a framework rebuilds expression strings (framework plan W4)', () => {
+    test('expression caches stay bounded when a framework rebuilds expression strings (framework plan W4)', () => {
       const { layer, clear } = freshStage();
       layer.insertAdjacentHTML('beforeend', '<pxl-circle id="cacheShape" r="5"></pxl-circle>');
       const shape = document.getElementById('cacheShape');

@@ -424,8 +424,8 @@
     const ELEMENTS = ['pxl-circle', 'pxl-ellipse', 'pxl-rect', 'pxl-line', 'pxl-polyline', 'pxl-text', 'pxl-grid',
       'pxl-group', 'pxl-layer', 'pxl-var'];
     const HANDLERS = new Set(['onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove']);
-    // Attributes that are not stored as one value (polyline points become p0, p1, …)
-    const NOT_A_VALUE = new Set(['points']);
+    // Attributes that are not stored as one value: polyline points become p0, p1, …; id only moves the registry entry
+    const NOT_A_VALUE = new Set(['points', 'id']);
 
     for (const tag of ELEMENTS) {
       const Class = customElements.get(tag);

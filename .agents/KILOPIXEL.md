@@ -1,6 +1,6 @@
 # Kilopixel Framework — Complete Technical Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~57KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~59KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes with custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, …); the engine compiles their attribute expressions and redraws a layer in every frame in which something in it changed or is animated.
 
@@ -184,9 +184,9 @@ Every PxlNode has:
 - `parentContainer` — reference to closest `<pxl-group>` or `<pxl-layer>` parent
 
 **Key Methods**:
-- `attributeChangedCallback(name, old, new)` — compiles attribute via `pxl.compileAttribute()`, broadcasts ref changes, invalidates layer
-- `connectedCallback()` — finds parentLayer/parentContainer, registers child, restores subscriptions, registers in `pxl.nodes` if has `id`
-- `disconnectedCallback()` — removes from `pxl.nodes`, clears subscriptions, unregisters from parent
+- `attributeChangedCallback(name, old, new)` — compiles attribute via `pxl.compileAttribute()`, broadcasts ref changes, invalidates layer. `id` is observed too, but not compiled: once the element is registered (`isRegistered`, set at the end of `connectedCallback()`), an `id` that is set, changed or removed moves its entry in `pxl.nodes` (`pxl.renameNode()`: the old entry is deleted if it points to this element, `refKey` follows, both names are broadcast, so readers of the old name read `undefined`). Frameworks such as Angular and Alpine set `id` after insertion. During an upgrade the attributes arrive before `connectedCallback()`, which registers the id itself. A shape whose new id is read for `isHovered` / `isPressed` registers for hit testing (`Shape.attributeChangedCallback()`)
+- `connectedCallback()` — finds parentLayer/parentContainer, registers child (once per connect, no `includes()` check), restores subscriptions, registers in `pxl.nodes` if has `id`, sets `isRegistered`
+- `disconnectedCallback()` — clears `isRegistered`, removes from `pxl.nodes`, clears its own subscriptions, unregisters from parent
 - `variableChangedCallback(varName)` — re-evaluates reactive attributes for a changed variable, unsubscribes if no longer needed
 - `evaluateAnimations(t)` — iterates `animatedAttributeKeys`, calls expression functions with time, broadcasts ref changes if values changed, marks local matrix dirty on transform changes
 - `getLocalMatrix()` / `getGlobalMatrix()` — lazy versioned matrix computation with parent chain walking
@@ -221,7 +221,7 @@ Has four hidden (non-enumerable) properties:
 
 ### Expression Compilation (`compileExpression`)
 
-1. **Cache lookup**: `staticCache` and `animationCache` (Maps keyed by the source string)
+1. **Cache lookup**: `staticCache` and `animationCache` (Maps keyed by the source string). Each keeps at most `pxl.COMPILE_CACHE_LIMIT` (2,000) entries; `pxl.cacheExpression()` drops the oldest when a new one comes (Maps keep insertion order). A framework that rebuilds an expression string on every render would otherwise grow them without end; elements keep their compiled functions, and a dropped string only compiles again
 2. **CSS percentages**: `50%` isn't valid JavaScript, so `hsl(120, 50%, 40%)` becomes `hsl(120, '50%', '40%')` (not inside template literals)
 3. **Time dependency**: a regex finds `t` (not after a `.`) or a call of a time driver; `toLocal(` sets `usesToLocal`
 4. **`pxl.rewriteExpression()`** (shared with `on*` handlers): `ref.player.x` → `ref.player?.x` (no TypeError before the element connects), `toLocal(` → `pxl.toLocal(this, `
@@ -278,6 +278,7 @@ An expression without the word `return` is wrapped in `return …;`, so two form
 
 - **`pxl.nodes`** — a flat `{}` registry mapping element `id` → `attributeValues` object. When any element with an `id` connects to the DOM, it registers: `pxl.nodes[myId] = this.attributeValues`
 - **`pxl._subscriptions`** — a `{ fullKey: [element, element, ...] }` pub-sub map
+- **`pxl._subscribedKeys`** — the other side: a `WeakMap` element → `Set` of its keys. `subscribeToVariable()` checks the set instead of scanning the subscriber list, and `clearAllVariableSubscriptions()` (on disconnect) removes the element only from its own keys. Scanning every key for every removed element was quadratic: 2,000 shapes with 2,000 readers took 622–732 ms to remove, now 4 ms (2026-11-16, `design/2026-10-30_framework_compatibility_plan.md` §20)
 - **`pxl.broadcast(fullKey)`** — iterates subscribers backwards (safe for in-place removal), calling `element.variableChangedCallback(fullKey)`
 
 ### Attribute Classification (Three Tiers)
@@ -821,7 +822,7 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 ### Key Behavior
 
 - Creates no shadow DOM or internal canvas — layers each create their own
-- **Default styles** (`pxl.DEFAULT_STYLES` in `stage.js`): `pxl-stage { display: block; position: relative; width: 100% }`, `pxl-stage:state(fallback) { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0 }` and `pxl-var { display: none }`, inside `@layer pxl { … }`. `pxl.addDefaultStyles(root)` adds them as one `<style data-pxl>` at the start of `<head>` when the script loads, and at the start of a shadow root when a stage connects inside one (document styles don't reach into it). The first cascade layer declared ranks lowest, so any page rule wins, also rules in the page's own layers (Tailwind v4); `adoptedStyleSheets` and `:where()` would beat layered page rules. Only `aspect-ratio` (from `ratio`) and `cursor` are written inline
+- **Default styles** (`pxl.DEFAULT_STYLES` in `stage.js`): `pxl-stage { display: block; position: relative; width: 100% }`, `pxl-stage:state(fallback) { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0 }` and `display: none` for `pxl-var`, `pxl-group` and the built-in shapes (their content, e.g. `<pxl-text>{label}</pxl-text>` in JSX, would otherwise show as page text through the layer's `<slot>`; content placed directly in a layer stays visible; a custom shape element needs its own rule if it may get children), inside `@layer pxl { … }`. `pxl.addDefaultStyles(root)` adds them as one `<style data-pxl>` at the start of `<head>` when the script loads, and at the start of a shadow root when a stage connects inside one (document styles don't reach into it). The first cascade layer declared ranks lowest, so any page rule wins, also rules in the page's own layers (Tailwind v4); `adoptedStyleSheets` and `:where()` would beat layered page rules. Only `aspect-ratio` (from `ratio`) and `cursor` are written inline
 - **300 px fallback width**: a parent that sizes itself to its content (a centered flex or grid item, `inline-block`, an absolute card) asks the stage for its content width; the layers are absolutely positioned and give none, so the stage would be 0 × 0. `markFallbackWidth()` then adds the custom state `fallback` (`attachInternals()` on first use, field `_internals`): `contain-intrinsic-inline-size: 300px` answers 300 (like `<canvas>`), `min-width: 0` keeps the stage shrinkable as a flex or grid item. It is called from `resize()` when the width is 0 and once in the frame after `connectedCallback()` (a ResizeObserver needn't report an element that stays 0 × 0); a stage without a box (`display: none`) is skipped; `disconnectedCallback()` removes the state. Only such stages get it: on every stage, the 300 px would also be the minimum content width that keeps the cards and grid columns around a stage from shrinking. Older browsers without custom states keep the stage 0 × 0. Design: `design/2026-11-04_stage_sizing_plan.md`
 - `ResizeObserver` with `device-pixel-content-box` (fallback to `content-box`)
 - `unit = clientWidth / 1000`
@@ -831,6 +832,7 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 - Manages its stage-level `<pxl-var>` elements in `_variables` (`registerVariable()` / `unregisterVariable()`)
 - Delegates all pointer events to its `InteractionEngine`
 - Registers with `pxl.perf` for telemetry
+- `id` is observed like on every element (`pxl.renameNode()`, field `_isRegistered`); `disconnectedCallback()` removes its `pxl.nodes` entry
 - Supports multiple independent stages per page
 
 ---
@@ -1366,7 +1368,7 @@ Returns zeroed bounding box by default (grid is infinite). However, during draw,
 
 ### Key Behavior
 
-- Invisible in the DOM: `display: none` from the stage's default styles (`pxl.DEFAULT_STYLES`)
+- Invisible in the DOM: `display: none` from the stage's default styles (`pxl.DEFAULT_STYLES`), like groups and the built-in shapes
 - Extends PxlNode directly (not Shape), so it has no visual output
 - Registers in `pxl.nodes` via its `id`, so other elements can read `ref.myVar.value`
 - `update(t)` calls `evaluateAnimations(t)` (this allows animated variables; a failing expression keeps the previous value). `render()` does nothing: a variable in a layer or group is in its `childList` like a shape, so the draw phase calls it
@@ -1523,12 +1525,12 @@ A canvas call or an expression that throws must not break the frame (`design/202
 
 ### Build Process
 
-1. Reads and concatenates all 19 source files in dependency order
+1. Reads and concatenates all 19 source files in dependency order (`readSources()`, `bundleSource()`; `require('./build.js')` builds nothing and exports them with `checkSources()` for `tools/check_build.js`)
 2. **Namespace check:** stops with an error if any line starts with a top-level `class` / `const` / `let` / `var` / `function` (only `pxl` may be global, see [Namespace](#namespace-only-pxl-is-global))
 3. **Style checks:** stops with an error on
    - trailing whitespace in any engine file (`.editorconfig` trims it in most editors);
    - a field that breaks the underscore rule: every field set with `this.x = …` is found by name; a `_x` field used in another engine file, or an `x` field used only in its own file, is listed with the fix (rule: CLAUDE.md "Engine Code Style")
-4. Injects version string: `window.pxl = { version: '0.1.0' };`
+4. Injects version string: `window.pxl = { version: '0.1.0' };`, and wraps the bundle in a function that returns at once without a browser (`typeof window` or `customElements` undefined: an import during server-side rendering) or when `<pxl-stage>` is already defined (the script loaded twice: warns `[pxl] Kilopixel is already loaded …` and leaves the first copy working)
 5. Writes concatenated file to `dist/temp_concat.js` and runs Terser via `npx terser` with `--compress passes=2 --mangle --keep-classnames` (class expressions keep readable names for DevTools and warnings)
 6. Outputs to `dist/kilopixel-v0.1.0.min.js`
 7. Copies to `dist/pxl.min.js` (generic alias)

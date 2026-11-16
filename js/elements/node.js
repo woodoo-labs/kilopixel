@@ -24,6 +24,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this.parentLayer = null;
     this.parentContainer = null;
     this.refKey = null;
+    // connectedCallback has run: an id that changes from now on is moved in the registry by attributeChangedCallback.
+    // During an upgrade the attributes arrive before connectedCallback, which registers the id itself.
+    this.isRegistered = false;
 
     // Own broadcasts from variableChangedCallback() that are still running (see there)
     this._broadcastNesting = 0;
@@ -54,6 +57,11 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
+    // id is observed for the registry (frameworks such as Angular or Alpine set it after insertion), not drawn
+    if (name === 'id') {
+      if (this.isRegistered) pxl.renameNode(this, oldValue, newValue);
+      return;
+    }
     pxl.compileAttribute(this, name, newValue);
     this.isAnimated = this.animatedAttributeKeys.length > 0;
     if (pxl.isSpatialKey(name)) {
@@ -92,9 +100,11 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       // Broadcast arrival so any elements initialized earlier can successfully re-evaluate
       pxl.broadcast(this.refKey);
     }
+    this.isRegistered = true;
   }
 
   disconnectedCallback() {
+    this.isRegistered = false;
     if (this.id && pxl.nodes[this.id] === this.attributeValues) {
       delete pxl.nodes[this.id];
     }

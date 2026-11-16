@@ -2,7 +2,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
   static get observedAttributes() {
     return [
       'x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy',
-      'alpha', 'blend', 'filter', 'hidden'
+      'alpha', 'blend', 'filter', 'hidden', 'id'
     ];
   }
 
@@ -60,8 +60,8 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     this.isDirty = false;
   }
 
+  // Called once per connect (PxlNode.connectedCallback); no includes() check, which made inserting n children quadratic
   registerChild(child) {
-    if (this.childList.includes(child)) return;
     this.childList.push(child);
     this._isOrderDirty = true;
     this.invalidate();

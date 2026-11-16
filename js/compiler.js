@@ -153,6 +153,16 @@ pxl.animationCache = new Map();
 // Results of static expressions, evaluated once
 pxl.staticCache = new Map();
 
+// Entries kept per cache. A framework that rebuilds an expression string on every render (`x="${base} + sin(t)"`)
+// would otherwise grow the caches without end. Dropping the oldest entry is safe: elements keep their compiled
+// function, and the same string only compiles again.
+pxl.COMPILE_CACHE_LIMIT = 2000;
+
+pxl.cacheExpression = function(cache, source, value) {
+  if (cache.size >= pxl.COMPILE_CACHE_LIMIT) cache.delete(cache.keys().next().value); // Maps keep insertion order
+  cache.set(source, value);
+};
+
 // Rewrites shared by attribute expressions and on* handlers:
 // ref.a.b → ref.a?.b (the referenced element may not be connected yet),
 // toLocal( → pxl.toLocal(this, (the caller is the element the code belongs to)
@@ -272,7 +282,7 @@ pxl.compileExpression = function(str) {
       if (hasVars) fn.variableDependencies = deps;
       if (usesToLocal) fn.usesToLocal = true;
 
-      pxl.animationCache.set(str, fn);
+      pxl.cacheExpression(pxl.animationCache, str, fn);
       return fn;
     }
 
@@ -282,10 +292,10 @@ pxl.compileExpression = function(str) {
       ${code}
     `)(pxl.scope);
     const val = (result !== undefined) ? result : str;
-    pxl.staticCache.set(str, val);
+    pxl.cacheExpression(pxl.staticCache, str, val);
     return val;
   } catch (e) {
-    pxl.staticCache.set(str, str);
+    pxl.cacheExpression(pxl.staticCache, str, str);
     console.warn(`Failed to compile expression, returned string instead: ${str}`, e);
     return str;
   }

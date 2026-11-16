@@ -77,10 +77,24 @@ function checkSources(sources, fileList = files) {
   return problems;
 }
 
-// The unminified bundle (dist/pxl.js): the sources in build order, with the version injected
+// The unminified bundle (dist/pxl.js): the sources in build order, with the version injected, inside a function that
+// stops early in two cases (design/2026-10-30_framework_compatibility_plan.md §19.2, W8):
+// - no browser (an import during server-side rendering in Next.js, Nuxt, SvelteKit, Astro): nothing to define;
+// - <pxl-stage> already defined (the script loaded twice, e.g. a script tag and an import): a second copy would
+//   replace window.pxl, and the first copy's elements would lose their registry.
+const BUNDLE_START = `(function() {
+if (typeof window === 'undefined' || typeof customElements === 'undefined') return;
+if (customElements.get('pxl-stage')) {
+  console.warn('[pxl] Kilopixel is already loaded (<pxl-stage> is defined); this second copy is ignored.');
+  return;
+}
+`;
+const BUNDLE_END = '})();\n';
+
 function bundleSource(sources) {
   const code = files.map(f => sources[f] + '\n').join('');
-  return `/** Kilopixel Framework v${VERSION} */\n` + code.replace('window.pxl = {};', `window.pxl = { version: '${VERSION}' };`);
+  return `/** Kilopixel Framework v${VERSION} */\n` + BUNDLE_START +
+    code.replace('window.pxl = {};', `window.pxl = { version: '${VERSION}' };`) + BUNDLE_END;
 }
 
 function build() {

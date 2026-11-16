@@ -4,7 +4,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
       'x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy',
       'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset',
       'alpha', 'blend', 'mask', 'filter', 'shadowcolor', 'shadowblur', 'shadowx', 'shadowy', 'hidden',
-      'onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove'
+      'onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove', 'id'
     ];
   }
 
@@ -65,6 +65,11 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     }
 
     super.attributeChangedCallback(name, oldValue, newValue);
+
+    // A new id that another element reads isHovered / isPressed of: hit-test the shape (as connectedCallback does)
+    if (name === 'id' && this.isRegistered && newValue && pxl._interactiveIds.has(newValue)) {
+      this.stage?.interaction.registerElement(this);
+    }
   }
 
   connectedCallback() {

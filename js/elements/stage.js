@@ -2,13 +2,16 @@
 // the frame it belongs to, so it never needs a reset
 pxl._frame = 0;
 
-// Default styles of stages and variables, in a cascade layer so that any page CSS wins over them, also CSS in the
-// page's own cascade layers: the <style> goes first, and the layer declared first ranks lowest.
+// Default styles of stages, variables and shapes, in a cascade layer so that any page CSS wins over them, also CSS in
+// the page's own cascade layers: the <style> goes first, and the layer declared first ranks lowest.
 // :state(fallback): see Stage.markFallbackWidth().
+// Shapes and groups draw on the canvas, not as elements: content written inside them (<pxl-text>{label}</pxl-text>
+// in JSX) would otherwise appear as page text through the layer's <slot>. Content placed directly in a layer
+// (accessible text, buttons) stays visible.
 pxl.DEFAULT_STYLES = `@layer pxl {
   pxl-stage { display: block; position: relative; width: 100%; }
   pxl-stage:state(fallback) { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0; }
-  pxl-var { display: none; }
+  pxl-var, pxl-group, pxl-circle, pxl-ellipse, pxl-rect, pxl-line, pxl-polyline, pxl-text, pxl-grid { display: none; }
 }`;
 
 // Once per document, and once per shadow root that holds a stage (document styles don't reach into it)
@@ -23,7 +26,7 @@ pxl.addDefaultStyles = function(root) {
 pxl.addDefaultStyles(document);
 
 pxl.Stage = class Stage extends HTMLElement {
-  static get observedAttributes() { return ['ratio', 'alwaysrender']; }
+  static get observedAttributes() { return ['ratio', 'alwaysrender', 'id']; }
 
   // Pointer events handled by the stage's InteractionEngine (its handleEvent)
   static POINTER_EVENTS = ['pointermove', 'pointerdown', 'pointerup', 'pointerenter', 'pointerleave', 'click'];
@@ -43,6 +46,7 @@ pxl.Stage = class Stage extends HTMLElement {
     this._parsedRatio = 16 / 9;
     this._internals = null; // ElementInternals, attached when the stage first needs the fallback width
     this.refKey = null;
+    this._isRegistered = false; // connectedCallback has run: id changes from now on move the registry entry
 
     // Published as ref.<id>.* once per second by pxl.perf's timer; renderAvg / renderMax are strings with 2 decimals
     this.attributeValues = {
@@ -67,7 +71,9 @@ pxl.Stage = class Stage extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
-    if (name === 'ratio') {
+    if (name === 'id') {
+      if (this._isRegistered) pxl.renameNode(this, oldValue, newValue);
+    } else if (name === 'ratio') {
       // Bare or removed ratio falls back to the default 16 / 9
       this._parsedRatio = (newValue === null || newValue === '') ? 16 / 9 : pxl.parseAttributeValue(newValue);
       this.style.aspectRatio = this._parsedRatio;
@@ -92,6 +98,7 @@ pxl.Stage = class Stage extends HTMLElement {
       this.refKey = `ref.${this.id}`;
       pxl.broadcast(this.refKey);
     }
+    this._isRegistered = true;
 
     // display, position and width come from pxl.DEFAULT_STYLES; the aspect ratio stays inline, because the
     // coordinate system depends on it
@@ -118,6 +125,8 @@ pxl.Stage = class Stage extends HTMLElement {
   }
 
   disconnectedCallback() {
+    this._isRegistered = false;
+    if (this.id && pxl.nodes[this.id] === this.attributeValues) delete pxl.nodes[this.id];
     this._intersectionObserver?.disconnect();
     this._intersectionObserver = null;
     this._resizeObserver.disconnect();

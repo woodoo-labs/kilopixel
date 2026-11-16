@@ -1,6 +1,6 @@
 # Framework Compatibility: Kilopixel as a Well-Behaved Custom Element
 
-- **Status**: 🟡 **Proposed** (2026-11-15, review §19: new findings, workstreams W8 / W9, decisions D10–D12, new order; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; the rest not built yet)
+- **Status**: 🟡 **Proposed** (2026-11-16, step 1 of §19.4 built, §20: removal cost, late and renamed `id`, SSR / double-load guard, cache bound, hidden text children; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 2–6 not built)
 - **Date**: 2026-10-30
 - **Related**: `design/prototypes/2026-10-30_framework_compatibility/review_checks.html` (review §19); `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`, `design/2026-11-04_stage_sizing_plan.md` (builds W2)
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
@@ -48,7 +48,7 @@ From the React 19 / Vue 3.5 prototypes (`design/prototypes/2026-10-30_framework_
 | # | State | Detail |
 |---|---|---|
 | C1 | ✅ | both prototypes: elements upgrade, stages size and animate (with the browser pane visible) |
-| C2 | ⚠️ | attributes after connect work, **except `id`**: `id` isn't an observed attribute, so an `id` set or changed after connect is never registered in `pxl.nodes` (`node.js` `connectedCallback` reads it once). Measured 2026-11-15 (§19.1): a renamed element also keeps its **old** entry in `pxl.nodes` after it is removed (`disconnectedCallback()` deletes only the current id), so readers of the old id keep reading a removed element |
+| C2 | ✅ (2026-11-16, §20) | before: attributes after connect worked, **except `id`**: `id` isn't an observed attribute, so an `id` set or changed after connect is never registered in `pxl.nodes` (`node.js` `connectedCallback` reads it once). Measured 2026-11-15 (§19.1): a renamed element also keeps its **old** entry in `pxl.nodes` after it is removed (`disconnectedCallback()` deletes only the current id), so readers of the old id keep reading a removed element |
 | C3 | ❌ | no properties: `el.r = 50` creates a plain JS property and changes nothing. React / Vue only worked because `r` isn't a property of `HTMLElement` and they fell back to attributes. Collisions with `HTMLElement` (checked in the browser over all 82 observed attribute names): `hidden` (harmless, it reflects to the attribute) and `onclick` (see C7) |
 | C4 | ✅ | Rule A; verified (`zoom={undefined}` → attribute removed → `1`) |
 | C5 | ❌ | Kilopixel dispatches no DOM events; `@click` never fires (the browser's click targets the layer canvas, which isn't inside `<pxl-circle>`) |
@@ -62,8 +62,8 @@ From the React 19 / Vue 3.5 prototypes (`design/prototypes/2026-10-30_framework_
 | C13 | ⚠️ | `pxl.nodes` is one flat registry per document. Each instance needs unique ids; `useId()` values (React `:r0:`, Vue `v-0`) aren't valid in `ref.<id>` and must be cleaned (`'p' + id.replace(/[^a-zA-Z0-9]/g, '')`) |
 | C14 | ⚠️ | identical values are skipped (`oldValue === newValue`); numbers aren't compiled. But every distinct **expression** string is compiled and cached forever (`pxl.animationCache` / `pxl.staticCache`): 71 slider steps of a rebuilt `x="${base} + sin(t / 400) * 20"` grew `animationCache` from 4 to 74 entries |
 | C15 | ⚠️ | upgrading after the markup works (attributes are read on upgrade). Properties set before the upgrade would shadow future accessors (only relevant once C3 exists) |
-| C16 | ❌ | (2026-11-15, §19.1) no npm package and no import entry point; the bundle starts with `window.pxl = …` and extends `HTMLElement`, so importing it on a server throws; a second copy replaces `window.pxl`, empties the registry and throws `TypeError`s on the elements of the first copy; no typings |
-| C17 | ❌ | (2026-11-15, §19.1) a shape's children are slotted into the layer's shadow root (D6) and render as visible HTML text above the canvas |
+| C16 | ⚠️ (guard built 2026-11-16, §20; npm and typings open) | (2026-11-15, §19.1) no npm package and no import entry point; the bundle starts with `window.pxl = …` and extends `HTMLElement`, so importing it on a server throws; a second copy replaces `window.pxl`, empties the registry and throws `TypeError`s on the elements of the first copy; no typings |
+| C17 | ✅ (2026-11-16, §20) | (2026-11-15, §19.1) a shape's children are slotted into the layer's shadow root (D6) and render as visible HTML text above the canvas |
 
 Test-environment notes from the prototypes (not framework problems): a hidden browser pane stops `ResizeObserver` and `requestAnimationFrame`, so stages stay unsized; real clicks in a scaled (emulated) viewport land at wrong coordinates. The conformance tests (§11) must dispatch synthetic events with exact coordinates and must not depend on the pane being visible where possible.
 
@@ -448,7 +448,7 @@ A review of this plan against the goal "Kilopixel works in the major frameworks 
 
 | # | Step | Contents | Size |
 |---|---|---|---|
-| 1 | Quick fixes | removal cost, W5.1 (`id` observed, old key deleted), W8 guard in `build.js`, W4 cache bound and the growing sets, W9 hidden text children. Acceptance tests: the four `test.known()` in `tests/index.html`, section "Known bugs (framework review)" (2026-11-16, `design/2026-11-15_testing_plan.md` §14); the removal cost gets a scaling check there (step 6) | 1 session |
+| 1 | Quick fixes (built 2026-11-16, §20) | removal cost, W5.1 (`id` observed, old key deleted), W8 guard in `build.js`, W4 cache bound and the growing sets, W9 hidden text children. Acceptance tests: the four `test.known()` in `tests/index.html`, section "Known bugs (framework review)" (2026-11-16, `design/2026-11-15_testing_plan.md` §14); the removal cost gets a scaling check there (step 6) | 1 session |
 | 2 | Conformance tests | `tests/frameworks.html` (§11), plus tests for step 1 | 1 session |
 | 3 | Events (W1) | DOM events, `pxl-on-*` handlers (D1), D10 / D11 | 1–2 sessions |
 | 4 | Properties (W3) | accessors, arrays (D8), values set before the upgrade | 1 session |
@@ -462,3 +462,22 @@ Plans that assume the evaluation model (throttling `maxfps`, tweens, `<pxl-clip>
 - Steps 1–5 add no per-frame work for pages that don't use the new features. Events allocate only on input; `pointermove` is dispatched only for types with listeners (§4.5).
 - Framework-driven animation (state updated every frame) costs about 1 µs per `setAttribute()` on Kilopixel's side, before the framework's own rendering. The docs recommend `t`, drivers or a `<pxl-var>` for continuous motion and framework state for changes; W3 makes numeric writes cheaper.
 - Hit testing grows linearly, about 0.6–1.1 µs per shape per pointer frame; fine up to about 1,000 interactive shapes. A bounding-box check before the path test is the next step if a page needs more.
+
+## 20. Step 1 Built 2026-11-16: Quick Fixes
+
+All six framework-review bugs that were `test.known()` (testing plan §14, §16) pass now and are ordinary tests; `node tools/run_tests.js` passes (build checks 11, `tests/index.html` 112, `tests/render.html` 40, `tests/scaling.html` 8, `tests/unit.html` 61 + 5 known, 79 pages).
+
+| Fix | Code | Measured / tested |
+|---|---|---|
+| Removal cost (C8, C14) | `pxl._subscribedKeys` (`engine.js`): a `WeakMap` element → `Set` of its keys, kept by `subscribeToVariable()` / `unsubscribeFromVariable()`; `clearAllVariableSubscriptions()` removes the element only from its own keys. Subscribing checks the set instead of scanning the subscriber list | Same pane, alternating with the engine of `a4cdbf5` (copies of `review_checks.html`, not kept): 2,000 shapes + 2,000 readers removed in 3.9–4.3 ms instead of 622–732 ms; 1,000 + 1,000 in 1.8–1.9 ms instead of 89–90 ms; inserting (44–47 ms → 48–50 ms) and `setAttribute()` unchanged. Scaling test "removing shapes with readers is linear"; "removed readers leave no subscriptions" (also an attribute that stopped reading) |
+| Insert cost (found in testing step 6) | `registerChild()` in `layer.js` and `group.js` without the `includes()` scan (called once per connect) | scaling test "inserting shapes with readers is linear" |
+| `id` after insertion, renamed, removed (C2, W5.1) | `id` in `observedAttributes` of layer, group, shapes, variable and stage; `pxl.renameNode()` (`engine.js`) moves the registry entry and broadcasts both names, once the element is registered (`isRegistered` in `PxlNode`, `_isRegistered` in `Stage`; during an upgrade `connectedCallback()` registers it). A shape whose new id is read for `isHovered` / `isPressed` registers for hit testing. The stage's `disconnectedCallback()` now removes its entry too | tests: late id with a reader; renamed id (new name, no old entry, none after removal); removed id (readers read `undefined`); late id of a hover target; renamed and removed stage. The Rule A sweep (`tests/unit.html`) skips `id`, which is not a drawing value |
+| SSR import and double load (C16, W8 guard) | `bundleSource()` in `build.js` wraps the bundle in a function that returns without `window` / `customElements` and, when `<pxl-stage>` is already defined, warns once and returns | test: a second copy warns once, the first keeps working, no errors; build check: `dist/pxl.js` and `dist/pxl.min.js` run in Node's `vm` without a window and define nothing |
+| Cache bound (C14, W4) | `pxl.COMPILE_CACHE_LIMIT` = 2,000 per cache, `pxl.cacheExpression()` drops the oldest entry | scaling test "expression caches stay bounded" (3,000 distinct strings) |
+| Text children (C17, W9, D12) | `pxl.DEFAULT_STYLES`: `display: none` for `pxl-var`, `pxl-group` and the built-in shapes, in `@layer pxl` | test: `<pxl-text>` content is not visible |
+
+- **File size:** `pxl.min.js` 57.46 → 58.70 KB (the docs say ~59KB; gzipped 17.43 KB, still ~17KB). The build check caught the outdated sizes.
+- **Not done: the sets that only grow** (`pxl._interactiveIds`, `pxl._pressableIds`, `pxl._stickyIds`, §19.2). They record that some expression reads an id's `isHovered` / `isPressed`; removing an id is only safe once no reader exists, and readers are not tracked per id. They hold strings, one per distinct id ever read: small. Revisit with the per-frame plan (`design/2026-11-15_per_frame_evaluation_plan.md`), whose `pxl._readIds` has the same question.
+- **Custom shapes** (`class Star extends pxl.Shape`, own tag): their content is not hidden by the default rule; a page that writes content into them adds `star-shape { display: none }`. Noted in KILOPIXEL.md.
+- **Next:** §19.4 step 2, `tests/frameworks.html`.
+
