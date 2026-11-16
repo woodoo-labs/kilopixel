@@ -218,20 +218,10 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Steps**: (1) §29 step 2, needed on both paths, (2) prototype as a patch over the engine, page sweep, decide D1, (3) build, (4) update the plans that assume broadcasts.
 - **When**: after the framework steps 1–5 of §30 (their conformance tests are the safety net); scoped names (§30 D2) are designed together with D1, because both change how `ref` is resolved (framework plan §19.3).
 
-## 41. Testing: Levels, a Headless Runner and the Missing Cases
-- **Status**: 🟢 **Decided** (2026-11-16, D1–D6 decided; steps 1–5 built: shared runner, `tools/run_tests.js`, CLAUDE.md rules, GitHub Actions, `tests/unit.html`, interaction and lifecycle tests, `tests/render.html`)
-- **Reference**: `design/2026-11-15_testing_plan.md` (built: plan §12 to plan §15); prototype `design/prototypes/2026-11-15_testing/headless_probe.js`
-- **Built**: `tests/runner.js` (timeout, sections, `test.known()`, `?grep=`, JSON results), `tests/index.html` on it; `node tools/run_tests.js` (test pages on virtual time in about 1.5 s each, sweep of 79 pages in 6 tabs in 25 s, exit code; `--tests`, `--sweep`, `--page`, `--grep`, `--repeat`); `.github/workflows/tests.yml`; `tests/unit.html` (compiler, drivers, scope helpers, gradients, points parser, matrices and `toLocal`, Rule A generated for every attribute of every element; the five problems of §34 as `test.known()`).
-- **Also built**: in `tests/index.html`, interaction (hover, press, click, handlers, registration, cursor) and lifecycle tests (moves between layers, groups and stages, re-inserted stages and sources), and the four framework-review bugs as `test.known()` (late and renamed `id`, double load, text children; the acceptance tests for §30's quick fixes).
-- **Also built**: `tests/render.html`, 40 pixel-probe tests (circle, ellipse, rect with all anchors and radii, lines, caps, arrowheads, polylines, text, grid, fill, alpha, gradients, dashes, `mask`, `blend`, shadows, layer CSS and transforms).
-- **Negative sweep**: found in step 5 (plan §15); the behavior is planned in §42, its render tests come with it.
-- **Left**: step 6 (plan §10): scaling checks (removal cost of §30) and build checks.
-- **Related**: §30 (its quick fixes get `test.known` tests here first; its `tests/frameworks.html` is level 4).
-
 ## 42. Negative Sweep and Arrowheads That Shrink on Short Paths
 - **Status**: 🟡 **Proposed** (2026-11-16, direction and head behavior chosen with the prototype; D1–D5 open)
 - **Reference**: `design/2026-11-16_negative_sweep_arrowheads_plan.md`; prototype `design/prototypes/2026-11-16_negative_sweep_arrowheads/index.html`
 - **Problem**: a negative `sweep` (or `anticlockwise` with a positive one) draws the long way round: `sweep="-90"` fills three quarters, an animated sweep jumps to 359° at −1°, and a short negative sweep with arrowheads draws two floating heads without an arc. Full-size heads on short arcs overlap and flip 180° when a sweep crosses zero; on the pointed end of a thin ellipse they stick out beside the curve.
 - **Decided with the prototype (A2)**: the sign of `sweep` is the direction (`anticlockwise` mirrors it); arrowheads shrink while the path is shorter than them, so they vanish at 0 and turn around invisibly; ellipses measure the arc length (8 chords, early exit), not `r × |sweep|`. Replaces D9 of `design/2026-10-14_unified_arrowhead_geometry_plan.md`.
 - **Open**: D1 `end` keeps "from start to end in the arc's direction", D2 polyline length (whole path recommended), D3 threshold (head lengths), D4 two commits (direction first), D5 heads on tight turns of thin ellipses (accept for now) (plan §7).
-- **Related**: §12 (`docs/arrows.html` rules section), §41 (render tests for it).
+- **Related**: §12 (`docs/arrows.html` rules section); its render tests go into `tests/render.html` (`design/2026-11-15_testing_plan.md`).

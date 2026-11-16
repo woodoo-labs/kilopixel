@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scaling Tests | Kilopixel</title>
+  <link rel="stylesheet" href="../docs/css/docs.css">
+  <style>
+    .test-summary { font-weight: 700; margin: 16px 0; }
+    .test-passed { color: #15803d; }
+    .test-failed, .test-fixed { color: #b91c1c; }
+    .test-known { color: #b45309; }
+    .test-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .test-table td { border-bottom: 1px solid #e2e8f0; padding: 6px 8px; vertical-align: top; }
+    .test-section td { font-weight: 700; padding-top: 16px; }
+  </style>
+  <!-- The built bundle: run `node build.js` before opening this page -->
+  <script src="../dist/pxl.min.js"></script>
+  <script src="runner.js"></script>
+</head>
+<body>
+  <main class="docs-content">
+    <div class="docs-inner">
+      <h1>Scaling Tests</h1>
+      <p>Level 6 of <code>design/2026-11-15_testing_plan.md</code>: each test measures an operation with n and with 2n elements and compares the two times. Linear work takes about twice as long (ratio 2), quadratic work about four times as long; a test fails above ratio 3.5. Ratios are the same on every machine, unlike absolute times. Each size is measured five times, the median counts, and n grows until the smaller measurement takes at least 5 ms (shorter times are mostly noise). Run with <code>node tools/run_tests.js --tests</code>, or here via the dev server.</p>
+      <p id="summary" class="test-summary">Running…</p>
+      <table class="test-table"><tbody id="results"></tbody></table>
+      <div id="host" style="width: 1000px"></div>
+    </div>
+  </main>
+
+  <script>
+    // test(), test.known(), section(), wait() and runTests() come from runner.js
+
+    // --- Helpers ---
+
+    // Linear ≈ 2, quadratic ≈ 4. Linear code with a small quadratic part (a list scan per insert) reaches about 3
+    // on large n, and the browser's optimizing compiler adds noise, so the limit leaves room above 3.
+    const LIMIT = 3.5;
+
+    // A stage 1000 px wide with one layer, for the elements of a measurement; removed with replaceChildren()
+    function freshStage() {
+      const host = document.getElementById('host');
+      host.innerHTML = '<pxl-stage ratio="5 / 3" alwaysrender><pxl-layer></pxl-layer></pxl-stage>';
+      const stage = host.querySelector('pxl-stage');
+      stage.resize();
+      return { stage, layer: stage.querySelector('pxl-layer'), clear: () => host.replaceChildren() };
+    }
+
+    // Median time in ms of measure(n), which prepares its own elements and returns the ms of the part it times
+    function median(measure, n, runs = 5) {
+      const times = [];
+      for (let i = 0; i < runs; i++) times.push(measure(n));
+      times.sort((a, b) => a - b);
+      return times[Math.floor(runs / 2)];
+    }
+
+    // Fails when time(2n) / time(n) is above LIMIT; the message has both times. n doubles until the smaller
+    // measurement takes at least MIN_MS: a time of 1–2 ms doubles with one garbage collection or timer step.
+    const MIN_MS = 5;
+    function expectLinear(measure, n) {
+      let small = median(measure, n);
+      while (small < MIN_MS && n < 32000) {
+        n *= 2;
+        small = median(measure, n);
+      }
+      const large = median(measure, 2 * n);
+      let ratio = large / Math.max(small, 0.01);
+      let message = `${n}: ${small.toFixed(1)} ms, ${2 * n}: ${large.toFixed(1)} ms, ratio ${ratio.toFixed(1)}`;
+      // Over the limit: measure both sizes once more and keep the lower ratio. Quadratic work fails both times,
+      // a one-off pause (garbage collection, another process) doesn't.
+      if (ratio > LIMIT) {
+        const small2 = median(measure, n), large2 = median(measure, 2 * n);
+        const ratio2 = large2 / Math.max(small2, 0.01);
+        message += `; again: ${small2.toFixed(1)} ms, ${large2.toFixed(1)} ms, ratio ${ratio2.toFixed(1)}`;
+        ratio = Math.min(ratio, ratio2);
+      }
+      if (ratio > LIMIT) throw new Error(`${message} (limit ${LIMIT})`);
+    }
+
+    // n shapes with ids, and optionally one reader of each (x="ref.<id>.x")
+    function shapesMarkup(n, readers, prefix) {
+      let html = '';
+      for (let i = 0; i < n; i++) html += `<pxl-circle id="${prefix}${i}" x="${i % 1000}" y="100" r="3" fill="#000"></pxl-circle>`;
+      if (readers) for (let i = 0; i < n; i++) html += `<pxl-circle x="ref.${prefix}${i}.x" y="200" r="2" fill="#000"></pxl-circle>`;
+      return html;
+    }
+
+    // ===================================================================
+    // Inserting and removing elements (framework plan C1, C8, §19.1)
+    // ===================================================================
+    section('Insert and remove');
+
+    test('inserting shapes with readers is linear', () => expectLinear((n) => {
+      const { layer, clear } = freshStage();
+      const html = shapesMarkup(n, true, 'sin');
+      const t0 = performance.now();
+      layer.insertAdjacentHTML('beforeend', html);
+      const ms = performance.now() - t0;
+      clear();
+      return ms;
+    }, 1000), { timeout: 20000 });
+
+    test('removing shapes without readers is linear', () => expectLinear((n) => {
+      const { layer, clear } = freshStage();
+      layer.insertAdjacentHTML('beforeend', shapesMarkup(n, false, 'srm'));
+      const t0 = performance.now();
+      layer.replaceChildren();
+      const ms = performance.now() - t0;
+      clear();
+      return ms;
+    }, 2000), { timeout: 20000 });
+
+    // design/2026-10-30_framework_compatibility_plan.md §19.1: clearAllVariableSubscriptions() scans every subscription key
+    // for every removed element. Acceptance test of that plan's quick fix (§19.4 step 1).
+    test.known('removing shapes with readers is linear (today quadratic, framework review)', () => expectLinear((n) => {
+      const { layer, clear } = freshStage();
+      layer.insertAdjacentHTML('beforeend', shapesMarkup(n, true, 'rrm'));
+      const t0 = performance.now();
+      layer.replaceChildren();
+      const ms = performance.now() - t0;
+      clear();
+      return ms;
+    }, 1000), { timeout: 30000 });
+
+    // ===================================================================
+    // Changing values
+    // ===================================================================
+    section('Changing values');
+
+    test('setAttribute() on shapes that have readers is linear', () => expectLinear((n) => {
+      const { layer, clear } = freshStage();
+      layer.insertAdjacentHTML('beforeend', shapesMarkup(n, true, 'sat'));
+      const shapes = [...layer.querySelectorAll('pxl-circle[id]')];
+      for (let i = 0; i < shapes.length; i++) shapes[i].setAttribute('x', String(i + 0.5)); // warm-up: readers run once
+      const t0 = performance.now();
+      for (let round = 1; round <= 5; round++) {
+        for (let i = 0; i < shapes.length; i++) shapes[i].setAttribute('x', String(i + round * 0.37));
+      }
+      const ms = performance.now() - t0;
+      clear();
+      return ms;
+    }, 1000), { timeout: 20000 });
+
+    // The readers share one expression: with one per reader, 4,000 compiled functions make memory effects, not the
+    // broadcast, grow faster than linear (measured ratio up to 4.5)
+    test('one variable read by n shapes: a change costs linear time', () => expectLinear((n) => {
+      const { layer, clear } = freshStage();
+      let html = '<pxl-var id="scVar" value="0"></pxl-var>';
+      for (let i = 0; i < n; i++) html += `<pxl-circle x="ref.scVar.value" y="${i % 600}" r="2"></pxl-circle>`;
+      layer.insertAdjacentHTML('beforeend', html);
+      const variable = document.getElementById('scVar');
+      for (let round = 1; round <= 3; round++) variable.setAttribute('value', String(-round)); // warm-up
+      const t0 = performance.now();
+      for (let round = 1; round <= 20; round++) variable.setAttribute('value', String(round));
+      const ms = performance.now() - t0;
+      clear();
+      return ms;
+    }, 1000), { timeout: 20000 });
+
+    // ===================================================================
+    // Per frame
+    // ===================================================================
+    section('Per frame');
+
+    test('a frame with n animated shapes is linear (evaluate and draw)', () => expectLinear((n) => {
+      const { stage, layer, clear } = freshStage();
+      let html = '';
+      for (let i = 0; i < n; i++) html += `<pxl-circle x="${i % 1000}" y="300 + sin(t + ${i}) * 100" r="4" fill="#000"></pxl-circle>`;
+      layer.insertAdjacentHTML('beforeend', html);
+      stage.render(1); // compile and draw once before timing
+      const t0 = performance.now();
+      for (let f = 0; f < 10; f++) stage.render(1 + f / 60);
+      const ms = performance.now() - t0;
+      clear();
+      return ms;
+    }, 1000), { timeout: 20000 });
+
+    test('hit testing n clickable shapes is linear (pointer over empty space)', () => expectLinear((n) => {
+      const { stage, layer, clear } = freshStage();
+      let html = '';
+      for (let i = 0; i < n; i++) {
+        html += `<pxl-rect x="${(i % 100) * 10 + 5}" y="${Math.floor(i / 100) * 10 + 5}" w="8" h="8" fill="#000" onenter="0"></pxl-rect>`;
+      }
+      layer.insertAdjacentHTML('beforeend', html);
+      Object.assign(stage.attributeValues, { isHovered: true, mouseX: 999, mouseY: 590 });
+      stage.interaction.process();
+      const t0 = performance.now();
+      for (let k = 0; k < 20; k++) stage.interaction.process();
+      const ms = performance.now() - t0;
+      clear();
+      return ms;
+    }, 1000), { timeout: 20000 });
+
+    // ===================================================================
+    // Memory that grows with distinct values (framework plan C14, W4)
+    // ===================================================================
+    section('Bounded memory');
+
+    test.known('expression caches stay bounded when a framework rebuilds expression strings (framework plan W4)', () => {
+      const { layer, clear } = freshStage();
+      layer.insertAdjacentHTML('beforeend', '<pxl-circle id="cacheShape" r="5"></pxl-circle>');
+      const shape = document.getElementById('cacheShape');
+      const before = pxl.animationCache.size + pxl.staticCache.size;
+      for (let i = 0; i < 3000; i++) shape.setAttribute('x', `${i} + sin(t) * 20`);
+      const grown = pxl.animationCache.size + pxl.staticCache.size - before;
+      clear();
+      if (grown > 2000) throw new Error(`the caches grew by ${grown} entries for 3,000 distinct strings`);
+    });
+
+    runTests({ settle: 0 });
+  </script>
+</body>
+</html>

@@ -13,8 +13,8 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 | `js/` | Engine source. Build order is the `files` list in `build.js` |
 | `docs/` | Public documentation site. Rules: `docs/DOCS_STANDARDS.md` |
 | `design/` | Plans and notes, named `YYYY-MM-DD_<topic>_plan.md` (or `_note.md`). `design/archive/`: superseded, dropped and outdated plans. `design/prototypes/<plan>/`: prototypes and measurement scripts a plan relies on (committed; folder named like the plan without `_plan` / `_note`) |
-| `tests/` | Automated tests: `index.html` (engine), more pages per test level (`design/2026-11-15_testing_plan.md`), all on the shared `runner.js`. In the browser via the dev server (`http://localhost:8124/tests/`, `?grep=text` for a subset); result in the tab title and `window.kilopixelTests` |
-| `tools/run_tests.js` | Runs all test pages headless and sweeps every docs and example page for console messages (needs Chrome or Edge; Node 22+ for the fast sweep) |
+| `tests/` | Automated tests (`design/2026-11-15_testing_plan.md`), all on the shared `runner.js`: `unit.html` (pure functions, Rule A for every attribute), `index.html` (engine, interaction, lifecycle), `render.html` (pixel probes), `scaling.html` (cost ratios n vs. 2n, slow). In the browser via the dev server (`http://localhost:8124/tests/`, `?grep=text` for a subset); result in the tab title and `window.kilopixelTests` |
+| `tools/run_tests.js` | Runs the build checks (`tools/check_build.js`: the checks of `build.js`, build output up to date, sizes in the docs), all test pages headless, and the sweep of every docs and example page for console messages (needs Chrome or Edge; Node 22+ for the fast sweep) |
 | `examples/test*.html` | Manual demo and test pages |
 | `scratch/` | Temporary files, gitignored, different on each laptop; may be emptied at any time |
 | `dist/`, `docs/js/pxl.min.js`, `docs/download/*` | **Build output.** Never edit by hand; they are committed. Exception: `docs/download/index.html` is the starter kit source, from which `node build.js` makes the zip |
@@ -43,7 +43,7 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 
   Then run `node tools/check_plans.js`; it must report no problems.
 - **Verify in the browser:** the dev server is `node tools/serve.js` (launch config `kilopixel`, http://localhost:8124, `/` redirects to `/docs/`). Check docs pages and `examples/` there, including the console.
-- **Tests:** after every engine change and build, run `node tools/run_tests.js --tests` (all test pages, headless, a few seconds); all tests must pass. Before a commit, run `node tools/run_tests.js` (also the sweep of all docs and example pages: no console messages). GitHub Actions runs the same on every push.
+- **Tests:** after every engine change and build, run `node tools/run_tests.js --tests` (build checks and the quick test pages, headless, a few seconds); all tests must pass. Before a commit, run `node tools/run_tests.js` (also the scaling page and the sweep of all docs and example pages: no console messages). GitHub Actions runs the full run on every push.
   - Every engine fix gets a test (committed, unlike `scratch/`).
   - A new attribute gets tests for its default, an empty value, a removed value and its main effect.
   - A bug found but not fixed gets a `test.known()`: it shows as "known" until the fix makes it pass, then it fails the run until it is changed to `test()`.

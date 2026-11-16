@@ -27,67 +27,74 @@ const files = [
   'js/elements/variable.js'
 ];
 
+// The engine sources as { file: text }, in build order
+function readSources() {
+  const sources = {};
+  for (const file of files) {
+    const filePath = path.join(__dirname, file);
+    if (!fs.existsSync(filePath)) throw new Error(`Could not find file: ${file}`);
+    sources[file] = fs.readFileSync(filePath, 'utf8');
+  }
+  return sources;
+}
+
+// The problems the build refuses, as messages (none = buildable). Separate from build() so that
+// tools/check_build.js can test the checks with small examples.
+function checkSources(sources, fileList = files) {
+  const problems = [];
+
+  // Only `pxl` may be global: a top-level declaration would leak into every script on the page
+  // (design/2026-10-17_bundle_scope_plan.md). Define it on pxl (public) or pxl._ (internal) instead.
+  const code = fileList.map(f => sources[f] + '\n').join('');
+  const leak = code.match(/^(?:async\s+)?(?:class|const|let|var|function\*?)\s+([A-Za-z_$][\w$]*)/m);
+  if (leak) problems.push(`top-level declaration "${leak[1]}" would become a global name. Define it on pxl instead.`);
+
+  // Style checks (CLAUDE.md "Engine Code Style"); .editorconfig trims whitespace in most editors already
+  for (const file of fileList) {
+    const bad = sources[file].split('\n').findIndex(line => /[ \t]+$/.test(line));
+    if (bad !== -1) problems.push(`trailing whitespace in ${file}:${bad + 1}`);
+  }
+
+  // Field ownership: a field with a leading _ is used only in the file that sets it (this._x = …);
+  // a field without _ is also used in another engine file. Matched by name, so equal names in
+  // different classes count together.
+  const ownerFiles = {};
+  for (const file of fileList) {
+    for (const m of sources[file].matchAll(/\bthis\.([A-Za-z_$][\w$]*)\s*=(?!=)/g)) {
+      (ownerFiles[m[1]] ||= new Set()).add(file);
+    }
+  }
+  for (const [name, owners] of Object.entries(ownerFiles)) {
+    const use = new RegExp(`\\.${name.replace(/\$/g, '\\$')}(?![\\w$])`);
+    const otherFiles = fileList.filter(f => !owners.has(f) && use.test(sources[f]));
+    const where = [...owners].map(f => path.basename(f)).join(', ');
+    if (name.startsWith('_') && otherFiles.length > 0) {
+      problems.push(`field ${name} (${where}) is also used in ${otherFiles.map(f => path.basename(f)).join(', ')}: rename it without _ (CLAUDE.md "Engine Code Style")`);
+    } else if (!name.startsWith('_') && otherFiles.length === 0) {
+      problems.push(`field ${name} (${where}) is used only there: rename it to _${name} (CLAUDE.md "Engine Code Style")`);
+    }
+  }
+  return problems;
+}
+
+// The unminified bundle (dist/pxl.js): the sources in build order, with the version injected
+function bundleSource(sources) {
+  const code = files.map(f => sources[f] + '\n').join('');
+  return `/** Kilopixel Framework v${VERSION} */\n` + code.replace('window.pxl = {};', `window.pxl = { version: '${VERSION}' };`);
+}
+
 function build() {
   console.log('Concatenating and minifying framework files...');
-  
+
   try {
-    // 1. Read and concatenate all files
-    let code = '';
-    for (const file of files) {
-      const filePath = path.join(__dirname, file);
-      if (!fs.existsSync(filePath)) {
-        console.error(`Error: Could not find file: ${file}`);
-        process.exit(1);
-      }
-      code += fs.readFileSync(filePath, 'utf8') + '\n';
-    }
-
-    // Only `pxl` may be global: a top-level declaration would leak into every script on the page
-    // (design/2026-10-17_bundle_scope_plan.md). Define it on pxl (public) or pxl._ (internal) instead.
-    const leak = code.match(/^(?:async\s+)?(?:class|const|let|var|function\*?)\s+([A-Za-z_$][\w$]*)/m);
-    if (leak) {
-      console.error(`Error: top-level declaration "${leak[1]}" would become a global name. Define it on pxl instead.`);
+    // 1. Read the sources, check them, and concatenate them
+    const sources = readSources();
+    const problems = checkSources(sources);
+    if (problems.length > 0) {
+      console.error('Error: ' + problems.join('\nError: '));
       process.exit(1);
     }
-
-    // Style checks (CLAUDE.md "Engine Code Style"); .editorconfig trims whitespace in most editors already
-    const sources = {};
-    for (const file of files) {
-      sources[file] = fs.readFileSync(path.join(__dirname, file), 'utf8');
-      const bad = sources[file].split('\n').findIndex(line => /[ \t]+$/.test(line));
-      if (bad !== -1) {
-        console.error(`Error: trailing whitespace in ${file}:${bad + 1}`);
-        process.exit(1);
-      }
-    }
-
-    // Field ownership: a field with a leading _ is used only in the file that sets it (this._x = …);
-    // a field without _ is also used in another engine file. Matched by name, so equal names in
-    // different classes count together.
-    const ownerFiles = {};
-    for (const file of files) {
-      for (const m of sources[file].matchAll(/\bthis\.([A-Za-z_$][\w$]*)\s*=(?!=)/g)) {
-        (ownerFiles[m[1]] ||= new Set()).add(file);
-      }
-    }
-    const ownershipErrors = [];
-    for (const [name, owners] of Object.entries(ownerFiles)) {
-      const use = new RegExp(`\\.${name.replace(/\$/g, '\\$')}(?![\\w$])`);
-      const otherFiles = files.filter(f => !owners.has(f) && use.test(sources[f]));
-      const where = [...owners].map(f => path.basename(f)).join(', ');
-      if (name.startsWith('_') && otherFiles.length > 0) {
-        ownershipErrors.push(`${name} (${where}) is also used in ${otherFiles.map(f => path.basename(f)).join(', ')}: rename it without _`);
-      } else if (!name.startsWith('_') && otherFiles.length === 0) {
-        ownershipErrors.push(`${name} (${where}) is used only there: rename it to _${name}`);
-      }
-    }
-    if (ownershipErrors.length > 0) {
-      console.error('Error: field names break the underscore rule (CLAUDE.md "Engine Code Style"):\n  ' + ownershipErrors.join('\n  '));
-      process.exit(1);
-    }
-
-    // Inject version into the code
-    code = `/** Kilopixel Framework v${VERSION} */\n` + code.replace('window.pxl = {};', `window.pxl = { version: '${VERSION}' };`);
+    const code = bundleSource(sources);
 
     // 2. Ensure dist/ directory exists
     const distDir = path.join(__dirname, 'dist');
@@ -187,4 +194,6 @@ function build() {
   }
 }
 
-build();
+// `node build.js` builds; tools/check_build.js loads this file for its checks without building
+if (require.main === module) build();
+module.exports = { VERSION, files, readSources, checkSources, bundleSource };

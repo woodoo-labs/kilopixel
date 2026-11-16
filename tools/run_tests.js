@@ -1,8 +1,11 @@
-// Runs the test pages in tests/ and sweeps every docs and example page for console messages, in headless Chrome
-// or Edge, without npm packages (design/2026-11-15_testing_plan.md §5).
+// Runs the build checks (tools/check_build.js), the test pages in tests/ and the sweep of every docs and example
+// page for console messages, in headless Chrome or Edge, without npm packages (design/2026-11-15_testing_plan.md §5).
 //
-// Usage: node tools/run_tests.js [--tests] [--sweep] [--page <path>] [--grep <text>] [--repeat <n>] [--verbose]
-//   --tests          only the test pages             --sweep     only the page sweep
+// Usage: node tools/run_tests.js [--tests] [--slow] [--sweep] [--page <path>] [--grep <text>] [--repeat <n>] [--verbose]
+//   (no option)      everything: build checks, all test pages, the sweep (before a commit, and in CI)
+//   --tests          build checks and the quick test pages (after a build; without the slow pages)
+//   --slow           with --tests: also the slow test pages (tests/scaling.html, about 20 s)
+//   --sweep          only the page sweep
 //   --page <path>    sweep one page, e.g. docs/circle.html (can be repeated)
 //   --grep <text>    only tests whose name or section contains the text (passed to the pages as ?grep=)
 //   --repeat <n>     run the test pages n times (finds flaky tests)
@@ -42,10 +45,15 @@ const onlyTests = flag('--tests'), onlySweep = flag('--sweep') || pagesToSweep.l
 const options = {
   tests: onlyTests || !onlySweep,
   sweep: onlySweep || !onlyTests,
+  // The slow pages run in the full run; with --tests only on request
+  slow: !onlyTests || flag('--slow'),
   grep: value('--grep'),
   repeat: Math.max(1, Number(value('--repeat')) || 1),
   verbose: flag('--verbose')
 };
+
+// Test pages that take long (scaling measurements); left out of a quick run (--tests)
+const SLOW_PAGES = new Set(['tests/scaling.html']);
 
 // =========================================================================
 // Browser and dev server
@@ -281,10 +289,20 @@ function readReport(dom) {
   return match ? JSON.parse(match[1]) : null;
 }
 
+// tools/check_build.js: checks of build.js, build output up to date, sizes in the docs (no browser needed)
+function runBuildChecks() {
+  const start = Date.now();
+  const { passed, total, failures } = require('./check_build.js').runChecks();
+  console.log(`  ${pad('build checks', 30)}${pad(`${passed}/${total} passed`, 30)}${seconds(Date.now() - start)}`);
+  for (const f of failures) console.log(`      ✗ ${f.name} — ${f.error}`);
+  return failures.length;
+}
+
 async function runTestPages() {
   let failures = 0;
   const query = options.grep ? `?grep=${encodeURIComponent(options.grep)}` : '';
-  const pages = htmlFiles('tests');
+  const pages = htmlFiles('tests').filter((page) => options.slow || !SLOW_PAGES.has(page));
+  if (!options.slow) console.log(`  (left out: ${[...SLOW_PAGES].join(', ')}; add --slow, or run without --tests)`);
   for (let round = 1; round <= options.repeat; round++) {
     if (options.repeat > 1) console.log(`Round ${round} of ${options.repeat}`);
     for (const page of pages) {
@@ -363,6 +381,7 @@ async function main() {
   try {
     server = await ensureServer();
     console.log(`Kilopixel tests: ${path.basename(browserPath)}` + (server ? ', dev server started for this run' : ''));
+    if (options.tests) failures += runBuildChecks();
     if (options.tests) failures += await runTestPages();
     if (options.sweep) failures += await runSweep();
     console.log(failures === 0 ? 'All passed.' : `FAILED: ${failures} problem(s).`);

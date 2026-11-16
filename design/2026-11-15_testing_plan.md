@@ -1,6 +1,6 @@
 # Testing: Levels, a Headless Runner and the Missing Cases
 
-- **Status**: 🟢 **Decided** (2026-11-16, D1–D6 decided, D2 changed after measuring; steps 1–5 built, §12–§15; step 6 not built)
+- **Status**: ✅ **Implemented** (2026-11-16, steps 1–6 built, §12–§16; level 4 `tests/frameworks.html` comes with `design/2026-10-30_framework_compatibility_plan.md`, the negative-sweep tests with `design/2026-11-16_negative_sweep_arrowheads_plan.md`)
 - **Date**: 2026-11-15
 - **Related**: `design/2026-10-30_framework_compatibility_plan.md` (§11 conformance tests, §19.4 order: its quick fixes get their tests from this plan), `.claude/CLAUDE.md` (Workflow: "Tests", "Verify in the browser")
 - **Target Implementation**: `tools/run_tests.js` (built), `tests/runner.js` (built), `tests/index.html` (moved onto the runner), `tests/unit.html` and `tests/render.html` (new), `tests/frameworks.html` (from the framework plan), `.claude/CLAUDE.md` (Workflow, built), `.github/workflows/tests.yml` (built)
@@ -134,7 +134,7 @@ All four are in CLAUDE.md since step 2 (§12).
 | 3 | `tests/unit.html`: compiler tables, drivers, radii, points, matrices, filters; the generated Rule A sweep | 1 session | built 2026-11-16 |
 | 4 | Interaction and lifecycle tests, the known bugs of the framework review as `test.known` | 1 session | built 2026-11-16 |
 | 5 | `tests/render.html`: probes per shape and paint feature | 1–2 sessions | built 2026-11-16 |
-| 6 | Scaling checks; build checks | 1 session | |
+| 6 | Scaling checks; build checks | 1 session | built 2026-11-16 |
 
 Step 4 overlaps with the framework plan's quick fixes (§19.4 step 1): its `test.known` tests become their acceptance tests. Steps 1–2 come first, because everything after them runs through them.
 
@@ -204,3 +204,27 @@ Found: no new bugs; interaction and lifecycle behave as `.agents/KILOPIXEL.md` d
 **Negative sweep (not tested yet; planned in `design/2026-11-16_negative_sweep_arrowheads_plan.md`, TODO §42):** a negative or anticlockwise sweep draws the long way round. Measured 2026-11-16: `pie="true" start="0" sweep="90" anticlockwise="true"` fills three quarters (all but the lower right), and `sweep="-90"` without `anticlockwise` fills three quarters as well (all but the upper right). `ctx.arc()` goes from start to end in the given direction, so an end "behind" the start means the long way. A reader of `sweep="-90"` probably expects one quarter going up. Decided 2026-11-16 with a prototype: the sign of `sweep` is the direction, and arrowheads shrink on short paths; the tests come with that plan.
 
 Found: no bugs in the documented behavior.
+
+## 16. Step 6 Built 2026-11-16: Scaling and Build Checks
+
+**`tests/scaling.html`** (level 6), 8 tests (6 counted, 2 known), 20–35 s headless:
+
+- `expectLinear(measure, n)` times an operation at n and 2n (median of 5) and fails above ratio 3.5. n doubles until the smaller time is at least 5 ms: with `n` too small the first run measured 1.7 ms against 10.4 ms (ratio 6.1) for a linear removal, which larger sizes showed to be noise (8.2 / 12.0 / 21.5 ms for 2,000 / 4,000 / 8,000 shapes). Warm-up rounds before timing keep the browser's optimizing compiler out of the ratio. Over the limit, both sizes are measured once more and the lower ratio counts: quadratic work fails both times, a one-off pause doesn't. "One variable read by n shapes" uses one shared expression: with one expression per reader, 4,000 compiled functions made memory effects grow faster than linear (ratio up to 4.5) although the broadcast itself is linear.
+- Covered: inserting shapes with readers, removing shapes without readers, `setAttribute()` on shapes with readers, one variable read by n shapes, a frame with n animated shapes, hit testing n clickable shapes.
+- **Known** (acceptance tests of `design/2026-10-30_framework_compatibility_plan.md` §19.4 step 1): removing shapes with readers is quadratic (measured ratio 5.2–9.2: 1,000 shapes 111–129 ms, 2,000 shapes 676–1,189 ms); the expression caches grow by one entry per distinct string (3,000 for 3,000), W4.
+- Clocks advance with computation on virtual time (`performance.now()` and `Date.now()` both measured 139 ms for a 139 ms loop), so the page runs in the headless runner like the others.
+- **Observation, not a test:** inserting has a small quadratic part, `registerChild()` checks `childList.includes(child)` for every new shape (2,000 shapes with readers: 41 ms, 4,000: 123 ms; ratio about 3). Small next to the removal bug; a candidate for the same quick-fix session.
+- Slow, so `node tools/run_tests.js --tests` leaves it out (`--slow` adds it); the full run and CI include it.
+
+**`tools/check_build.js`** (10 checks, 0.1 s, run by `tools/run_tests.js` before the test pages, also on its own):
+
+- `build.js` refactored without changing its output (checked: the build wrote identical files): `checkSources()` returns the problems the build refuses, `bundleSource()` the unminified bundle, `readSources()` the sources; `node build.js` builds as before, `require('build.js')` builds nothing. The examples are kept in memory, not in fixture files as first planned.
+- Checks: every kind of top-level declaration is refused, declarations on `pxl` and indented ones are not; trailing whitespace with its line; a `_field` used in another file; a field without `_` used only in its own file; correct fields pass; the engine sources pass.
+- Build output: `dist/pxl.js` and `dist/kilopixel-v0.1.0.js` are the current bundle of `js/` (a forgotten `node build.js`, e.g. after a pull on the other laptop); the minified copies in `dist/` and `docs/` are identical.
+- Sizes: the `~NNKB` and `~NNKB gzipped` of `pxl.min.js` in `docs/installation.html` and the KILOPIXEL.md header match the build (CLAUDE.md "File size after a build").
+- **Checked that they can fail:** with a line appended to `dist/pxl.js` and a wrong size in KILOPIXEL.md, both checks failed with their message; the files were restored.
+
+**CLAUDE.md:** the "Tests" bullet names the quick run (`--tests`, with build checks) and the full run (with scaling and the sweep); "Where Things Are" lists the test pages and `tools/check_build.js`.
+
+With step 6 every step of §10 is built; the plan is ✅ and its TODO item is removed. Still to come, in other plans: level 4 (`tests/frameworks.html`, framework plan §11) and the negative-sweep render tests (`design/2026-11-16_negative_sweep_arrowheads_plan.md` §5).
+
