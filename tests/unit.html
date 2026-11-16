@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unit Tests | Kilopixel</title>
+  <link rel="stylesheet" href="../docs/css/docs.css">
+  <style>
+    .test-summary { font-weight: 700; margin: 16px 0; }
+    .test-passed { color: #15803d; }
+    .test-failed, .test-fixed { color: #b91c1c; }
+    .test-known { color: #b45309; }
+    .test-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .test-table td { border-bottom: 1px solid #e2e8f0; padding: 6px 8px; vertical-align: top; }
+    .test-section td { font-weight: 700; padding-top: 16px; }
+  </style>
+  <!-- The built bundle: run `node build.js` before opening this page -->
+  <script src="../dist/pxl.min.js"></script>
+  <script src="runner.js"></script>
+</head>
+<body>
+  <main class="docs-content">
+    <div class="docs-inner">
+      <h1>Unit Tests</h1>
+      <p>Level 1 of <code>design/2026-11-15_testing_plan.md</code>: the engine's pure functions, as tables of inputs and expected results, and the empty / removed attribute rule for every attribute of every element. No stage is drawn. Run with <code>node tools/run_tests.js --tests</code>, or here via the dev server (<code>?grep=</code> for a subset).</p>
+      <p id="summary" class="test-summary">Running…</p>
+      <table class="test-table"><tbody id="results"></tbody></table>
+    </div>
+  </main>
+
+  <script>
+    // test(), test.known(), section(), wait() and runTests() come from runner.js
+
+    // --- Helpers ---
+
+    // Equal with a tolerance for numbers; arrays and plain objects compared by their keys
+    function same(a, b) {
+      if (typeof a === 'number' && typeof b === 'number') {
+        return (Number.isNaN(a) && Number.isNaN(b)) || Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(b));
+      }
+      if (a && b && typeof a === 'object' && typeof b === 'object') {
+        const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+        return [...keys].every((k) => same(a[k], b[k]));
+      }
+      return a === b;
+    }
+    const show = (v) => (typeof v === 'string' ? `'${v}'` : typeof v === 'function' ? 'function' : JSON.stringify(v));
+
+    // One test per table: every row is checked, and all mismatches are listed in one message.
+    // check(row) returns [actual, expected].
+    function table(name, rows, check, label = (row) => show(row[0])) {
+      test(name, () => {
+        const wrong = [];
+        for (const row of rows) {
+          let actual, expected;
+          try {
+            [actual, expected] = check(row);
+          } catch (e) {
+            wrong.push(`${label(row)}: threw ${e.message}`);
+            continue;
+          }
+          if (!same(actual, expected)) wrong.push(`${label(row)}: got ${show(actual)}, expected ${show(expected)}`);
+        }
+        if (wrong.length) throw new Error(wrong.join('; '));
+      });
+    }
+
+    // What the compiler made of a string: the value, or for functions their flags
+    function kind(value) {
+      if (typeof value !== 'function') return value;
+      return {
+        fn: true,
+        time: value.isTimeDependent === true,
+        deps: value.variableDependencies || [],
+        toLocal: value.usesToLocal === true
+      };
+    }
+    const STATIC_FN = { fn: true, time: false, deps: [], toLocal: false };
+    const TIME_FN = { fn: true, time: true, deps: [], toLocal: false };
+
+    // Runs fn with console.warn replaced, returns the warnings
+    function warnings(fn) {
+      const original = console.warn, seen = [];
+      console.warn = (...args) => seen.push(args.join(' '));
+      try {
+        fn();
+      } finally {
+        console.warn = original;
+      }
+      return seen;
+    }
+
+    // Temporary entries in the ref registry, removed again after fn
+    function withRefs(refs, fn) {
+      Object.assign(pxl.nodes, refs);
+      try {
+        return fn();
+      } finally {
+        for (const id of Object.keys(refs)) delete pxl.nodes[id];
+      }
+    }
+
+    // An expression evaluated at time t (one without t or refs is already its value)
+    const at = (source, t) => {
+      const compiled = pxl.compileExpression(source);
+      return typeof compiled === 'function' ? compiled(t) : compiled;
+    };
+
+    // ===================================================================
+    // Compiler: how an attribute string is classified (KILOPIXEL.md "The Expression Compiler")
+    // ===================================================================
+    section('Compiler: classification');
+
+    table('parseAttributeValue: plain values are not compiled', [
+      ['#ff0000', '#ff0000'], ['#fff', '#fff'],
+      ['100', 100], ['-50', -50], ['0.25', 0.25], ['.5', 0.5], ['1e3', 1000],
+      ['red', 'red'], ['none', 'none'], ['Hello World', 'Hello World'], ['Hello, World!', 'Hello, World!'],
+      ['true', true], ['false', false],
+      ['PI', Math.PI], ['E', Math.E],
+      ['rgb(10, 20, 30)', 'rgb(10, 20, 30)'], ['rgba(124, 211, 15, 0.8)', 'rgba(124, 211, 15, 0.8)'],
+      ['RGB(1,2,3)', 'RGB(1,2,3)'],
+      ["'Hello World'", 'Hello World'], ['"quoted"', 'quoted'], ["'Level 2-3'", 'Level 2-3']
+    ], ([input, expected]) => [pxl.parseAttributeValue(input), expected]);
+
+    table('parseAttributeValue: static expressions are evaluated once', [
+      ['100 * 2', 200], ['[20, 10]', [20, 10]], ['10 / 4 + 1', 3.5],
+      ['hsl(120, 50%, 40%)', 'hsl(120,50%,40%)'], ['rgb(255, 0, 0)', 'rgb(255, 0, 0)'],
+      ['`a${1 + 1}`', 'a2'], ["'a' + 'b'", 'ab'],
+      ['blur(5)', 'blur(5px)'], ['[blur(1), contrast(150)]', ['blur(1px)', 'contrast(150%)']]
+    ], ([input, expected]) => [pxl.parseAttributeValue(input), expected]);
+
+    table('parseAttributeValue: time and refs make functions with the right flags', [
+      ['t', TIME_FN], ['t * 90', TIME_FN], ['wave(2) * 10', TIME_FN], ['loop(3)', TIME_FN],
+      ["time('s')", TIME_FN], ['`${t}`', TIME_FN],
+      ['ref.uA.x + 1', { fn: true, time: false, deps: ['ref.uA'], toLocal: false }],
+      ['ref.uA.x + ref.uB.y + ref.uA.z', { fn: true, time: false, deps: ['ref.uA', 'ref.uB'], toLocal: false }],
+      ['ref.uA.x + t', { fn: true, time: true, deps: ['ref.uA'], toLocal: false }],
+      ["toLocal(ref.uA, 'x')", { fn: true, time: false, deps: ['ref.uA'], toLocal: true }],
+      ['if (t < 10) { return 1; } else { return 2; }', TIME_FN]
+    ], ([input, expected]) => [kind(pxl.parseAttributeValue(input)), expected]);
+
+    table('parseAttributeValue: a "t" after a dot or inside a word is not time', [
+      ['item.t', 'item.t'], ['bt', 'bt'], ['tt', 'tt']
+    ], ([input, expected]) => [pxl.parseAttributeValue(input), expected]);
+
+    test('compileExpression: the same string gives the same function (shared cache)', () => {
+      if (pxl.compileExpression('t * 7.5') !== pxl.compileExpression('t * 7.5')) throw new Error('two functions');
+    });
+
+    test('compileExpression: random() without t is evaluated once, so every element with that string gets the same value', () => {
+      const a = pxl.parseAttributeValue('random() * 1000'), b = pxl.parseAttributeValue('random() * 1000');
+      if (typeof a !== 'number' || a !== b) throw new Error(`got ${a} and ${b}`);
+    });
+
+    table('compiled functions: evaluated at t, refs read through the ?. rewrite', [
+      ['if (t < 10) { return 1; } else { return 2; }', 5, 1],
+      ['if (t < 10) { return 1; } else { return 2; }', 15, 2],
+      ['t * 2 + 1', 3, 7],
+      ['ref.uA.x * 2', 0, 42],
+      ['ref.uMissing.x', 0, undefined],
+      ['`x = ${ref.uA.x}`', 0, 'x = 21']
+    ], ([source, t, expected]) => withRefs({ uA: { x: 21 } }, () => [at(source, t), expected]),
+    ([source, t]) => `${source} at t=${t}`);
+
+    test('compileExpression: code that doesn\'t compile warns once and is used as a plain string', () => {
+      let value;
+      const seen = warnings(() => { value = pxl.parseAttributeValue('ref.uA.x +* 2'); });
+      if (value !== 'ref.uA.x +* 2' || seen.length !== 1) throw new Error(`value ${show(value)}, ${seen.length} warnings`);
+    });
+
+    test('compileExpression: an unknown toLocal() property warns at compile time', () => {
+      const seen = warnings(() => pxl.parseAttributeValue("toLocal(ref.uA, 'skewy') + 0.001"));
+      if (seen.length !== 1 || !seen[0].includes("'skewy'")) throw new Error(`warnings: ${seen.join(' | ')}`);
+    });
+
+    // ===================================================================
+    // Compiler: known problems with quoted text in expressions (TODO §34, design/2026-11-02_string_literals_in_expressions_plan.md)
+    // ===================================================================
+    section('Compiler: string literals (known, TODO §34)');
+
+    test.known('a quoted "return" doesn\'t stop the automatic return', () =>
+      withRefs({ uScore: { value: 5 } }, () => {
+        const value = at("'Press return: ' + ref.uScore.value", 0);
+        if (value !== 'Press return: 5') throw new Error(`got ${show(value)}`);
+      }));
+
+    test.known('"ref.x.y" inside a template text is not rewritten to "ref.x?.y"', () =>
+      withRefs({ uAngle: { value: 30 } }, () => {
+        const value = at('`ref.uAngle.value = ${ref.uAngle.value}`', 0);
+        if (value !== 'ref.uAngle.value = 30') throw new Error(`got ${show(value)}`);
+      }));
+
+    test.known('a lone "t" inside quoted text doesn\'t make the expression animated', () => {
+      const fn = pxl.parseAttributeValue("'Item t: ' + ref.uA.x");
+      if (fn.isTimeDependent) throw new Error('compiled as time-dependent');
+    });
+
+    test.known('a CSS percentage inside a quoted color is left alone', () => {
+      let value;
+      warnings(() => { value = pxl.parseAttributeValue("radial(0.8, ['hsla(280, 80%, 30%, 0.06)', 'transparent'])"); });
+      if (!value || value.isGradient !== true) throw new Error(`got ${show(value)}`);
+    });
+
+    test.known('an escaped quote inside a quoted string is read', () => {
+      const value = pxl.parseAttributeValue("'It\\'s'");
+      if (value !== "It's") throw new Error(`got ${show(value)}`);
+    });
+
+    // ===================================================================
+    // Time drivers (KILOPIXEL.md "Time Drivers")
+    // ===================================================================
+    section('Time drivers');
+
+    table('drivers at chosen times', [
+      ['loop(2)', 0.5, 0.25], ['loop(2)', 2.5, 0.25], ['loop(2)', 0, 0],
+      ['yoyo(1)', 0.25, 0.25], ['yoyo(1)', 1.25, 0.75], ['yoyo(1)', 1, 1],
+      ['wave(2)', 0, 0], ['wave(2)', 1, 1], ['wave(2)', 0.5, 0.5],
+      ['bounce(1)', 0.5, 1], ['bounce(1)', 0, 0],
+      ['strobe(1)', 0.25, 1], ['strobe(1)', 0.75, 0],
+      ['glide(1)', 0.5, 0.5], ['glide(1)', 0.25, 0.15625], ['glide(1)', 0, 0],
+      ['pulse(1)', 0.5, 1], ['pulse(1)', 0.25, 0.125],
+      ['glitch(1)', 0.5, 0]
+    ], ([source, t, expected]) => [at(source, t), expected], ([source, t]) => `${source} at t=${t}`);
+
+    test('glitch(d) holds its value for d seconds and stays in 0–1', () => {
+      for (const t of [1.2, 2.7, 9.1]) {
+        const a = at('glitch(1)', t), b = at('glitch(1)', Math.floor(t) + 0.95);
+        if (a !== b || a < 0 || a >= 1) throw new Error(`t=${t}: ${a}, later in the same second ${b}`);
+      }
+    });
+
+    test('time(unit) reads the local clock with decimals', () => {
+      const fixed = new Date(2026, 10, 16, 14, 30, 15, 250).getTime(); // Monday, local time
+      const original = Date.now;
+      Date.now = () => fixed;
+      try {
+        const expected = { ms: 250, s: 15.25, m: 30.25, h: 14.5, day: 1, date: 16, month: 11, year: 2026 };
+        const wrong = Object.entries(expected).filter(([u, v]) => !same(at(`time('${u}')`, 0), v));
+        if (wrong.length) throw new Error(wrong.map(([u, v]) => `${u}: ${at(`time('${u}')`, 0)} instead of ${v}`).join('; '));
+      } finally {
+        Date.now = original;
+      }
+    });
+
+    // ===================================================================
+    // Scope helpers: colors, filters, utilities
+    // ===================================================================
+    section('Scope helpers');
+
+    table('color functions', [
+      ['rgb(1, 2, 3)', 'rgb(1,2,3)'], ['rgba(1, 2, 3, 0.5)', 'rgba(1,2,3,0.5)'],
+      ['hsl(t * 0 + 120, 50, 40)', 'hsl(120,50%,40%)'], ["hsl(t * 0 + 120, '50%', '40%')", 'hsl(120,50%,40%)'],
+      ['hsla(t * 0 + 10, 20, 30, 0.4)', 'hsla(10,20%,30%,0.4)']
+    ], ([source, expected]) => [at(source, 0), expected]);
+
+    table('filter helpers add their units', [
+      ['blur', [5], 'blur(5px)'], ['dropShadow', [1, 2, 3], 'drop-shadow(1px 2px 3px #000)'],
+      ['dropShadow', [1, 2, 3, 'red'], 'drop-shadow(1px 2px 3px red)'],
+      ['brightness', [150], 'brightness(150%)'], ['contrast', [80], 'contrast(80%)'],
+      ['hueRotate', [90], 'hue-rotate(90deg)'], ['invert', [100], 'invert(100%)'],
+      ['saturate', [200], 'saturate(200%)'], ['grayscale', [50], 'grayscale(50%)'],
+      ['sepia', [30], 'sepia(30%)'], ['opacity', [70], 'opacity(70%)']
+    ], ([name, args, expected]) => [pxl.scope[name](...args), expected], ([name, args]) => `${name}(${args})`);
+
+    table('clamp, lerp, map', [
+      ['clamp', [5, 0, 10], 5], ['clamp', [-5, 0, 10], 0], ['clamp', [15, 0, 10], 10],
+      ['lerp', [10, 20, 0.25], 12.5], ['lerp', [10, 20, 1.5], 25],
+      ['map', [5, 0, 10, 100, 200], 150], ['map', [0, 0, 10, 1, -1], 1]
+    ], ([name, args, expected]) => [pxl.scope[name](...args), expected], ([name, args]) => `${name}(${args})`);
+
+    table('scaleResponsiveFilter scales px by u, leaves % and deg', [
+      ['blur(5px)', 2, 'blur(10px)'], ['blur(.5px)', 2, 'blur(1px)'],
+      ['drop-shadow(-4px 2px 0px #000)', 2, 'drop-shadow(-8px 4px 0px #000)'],
+      ['brightness(50%) hue-rotate(90deg)', 2, 'brightness(50%) hue-rotate(90deg)']
+    ], ([filter, u, expected]) => [pxl.scaleResponsiveFilter(filter, u), expected]);
+
+    table('hasLineDash: solid for null, none and 0', [
+      [null, false], ['none', false], [0, false], ['0', false], [[20, 10], true], [20, true]
+    ], ([value, expected]) => [pxl.hasLineDash(value), expected]);
+
+    table('arcEndRadians: sweep wins over end, neither is a full turn', [
+      [0, null, null, Math.PI * 2], [0, 90, null, Math.PI / 2], [0, 90, 180, Math.PI],
+      [Math.PI / 2, null, 90, Math.PI], [Math.PI / 2, 0, null, 0]
+    ], ([start, end, sweep, expected]) => [pxl.arcEndRadians(start, end, sweep), expected],
+    ([start, end, sweep]) => `start ${start.toFixed(2)}, end ${end}, sweep ${sweep}`);
+
+    table('isFullTurn', [
+      [0, Math.PI * 2, true], [0, -Math.PI * 2, true], [0, Math.PI * 2 - 1e-3, false], [1, 1 + Math.PI, false]
+    ], ([start, end, expected]) => [pxl.isFullTurn(start, end), expected], ([start, end]) => `${start} → ${end.toFixed(4)}`);
+
+    // ===================================================================
+    // Gradients: descriptors, stops, radii (KILOPIXEL.md "Color & Gradient System")
+    // ===================================================================
+    section('Gradients');
+
+    table('parseStops: colors only or offset / color pairs', [
+      [['red', 'blue'], [{ offset: 0, color: 'red' }, { offset: 1, color: 'blue' }]],
+      [['a', 'b', 'c'], [{ offset: 0, color: 'a' }, { offset: 0.5, color: 'b' }, { offset: 1, color: 'c' }]],
+      [['red'], [{ offset: 0, color: 'red' }]],
+      [[0, 'red', 0.8, 'blue'], [{ offset: 0, color: 'red' }, { offset: 0.8, color: 'blue' }]],
+      [[], []], ['red', []]
+    ], ([stops, expected]) => [pxl.parseStops(stops), expected]);
+
+    const grad = (source) => {
+      const { isGradient, stops, ...rest } = at(source, 0);
+      return { isGradient, stopCount: stops.length, ...rest };
+    };
+    table('linear(), radial(), conic() descriptors', [
+      ["linear(45, ['r', 'b'])", { isGradient: true, stopCount: 2, type: 'linear', angle: 45 }],
+      ["linear([0, 0.5, 1, 0.5], ['r', 'b'])", { isGradient: true, stopCount: 2, type: 'linear', x1: 0, y1: 0.5, x2: 1, y2: 0.5 }],
+      ["linear(undefined, ['r'])", { isGradient: true, stopCount: 1, type: 'linear', angle: 0 }],
+      ["radial(0.8, ['r', 'b'])", { isGradient: true, stopCount: 2, type: 'radial', x0: 0.5, y0: 0.5, r0: 0, x1: 0.5, y1: 0.5, r1: 0.8 }],
+      ["radial([0.4], ['r', 'b'])", { isGradient: true, stopCount: 2, type: 'radial', x0: 0.5, y0: 0.5, r0: 0, x1: 0.5, y1: 0.5, r1: 0.4 }],
+      ["radial([0.2, 0.3, 'farthest-corner'], ['r', 'b'])", { isGradient: true, stopCount: 2, type: 'radial', x0: 0.2, y0: 0.3, r0: 0, x1: 0.2, y1: 0.3, r1: 'farthest-corner' }],
+      ["radial([0.1, 0.2, 5, 0.6, 0.7, 300], ['r', 'b'])", { isGradient: true, stopCount: 2, type: 'radial', x0: 0.1, y0: 0.2, r0: 5, x1: 0.6, y1: 0.7, r1: 300 }],
+      ["radial(undefined, ['r'])", { isGradient: true, stopCount: 1, type: 'radial', x0: 0.5, y0: 0.5, r0: 0, x1: 0.5, y1: 0.5, r1: 0.5 }],
+      ["conic(90, ['r', 'b'])", { isGradient: true, stopCount: 2, type: 'conic', startAngle: 90, cx: 0.5, cy: 0.5 }],
+      ["conic([90, 0.3, 0.7], ['r', 'b'])", { isGradient: true, stopCount: 2, type: 'conic', startAngle: 90, cx: 0.3, cy: 0.7 }],
+      ["conic([30], ['r', 'b'])", { isGradient: true, stopCount: 2, type: 'conic', startAngle: 30, cx: 0.5, cy: 0.5 }]
+    ], ([source, expected]) => [grad(source), expected]);
+
+    // Box 200 × 100, center at (0.25, 0.5) of the box, u = 1: distances to left / right / top / bottom are 50 / 150 / 50 / 50
+    table('resolveRadius: numbers, sides, points on the box, CSS keywords', [
+      [200, 400, 'u = 2'], [-100, 200, 'negative, u = 2'],
+      ['top', 50], ['bottom', 50], ['left', 50], ['right', 150],
+      ['top-left', Math.hypot(50, 50)], ['bottom-right', Math.hypot(150, 50)], ['right-center', 150],
+      ['center-top', Math.hypot(50, 50)], ['top-center', Math.hypot(50, 50)],
+      ['closest-side', 50], ['farthest-side', 150],
+      ['closest-corner', Math.hypot(50, 50)], ['farthest-corner', Math.hypot(150, 50)],
+      ['unknown-word', 0]
+    ], ([r, expected]) => [pxl.resolveRadius(r, 0.25, 0.5, 200, 100, typeof r === 'number' ? 2 : 1), expected],
+    ([r, , note]) => `${show(r)}${note ? ` (${note})` : ''}`);
+
+    test('resolveRadius: closest-side and closest-corner stay above 0 for a center on the edge', () => {
+      const side = pxl.resolveRadius('closest-side', 0, 0.5, 200, 100, 1);
+      const corner = pxl.resolveRadius('closest-corner', 0, 0, 200, 100, 1);
+      if (!(side > 0) || !(corner > 0)) throw new Error(`closest-side ${side}, closest-corner ${corner}`);
+    });
+
+    // ===================================================================
+    // Polyline points parser
+    // ===================================================================
+    section('Points parser');
+
+    table('parsePointsIntoArray: semicolons between points, commas inside parentheses stay', [
+      ['0,0; 100,50', ['0', '0', '100', '50']],
+      ['  10 , 20 ;30,40  ', ['10', '20', '30', '40']],
+      ['0, min(1, 2); 3,4', ['0', 'min(1, 2)', '3', '4']],
+      ['a(b(1,2),3), 4', ['a(b(1,2),3)', '4']],
+      ['wave(2) * 50, 100; max(1; 2), 3', ['wave(2) * 50', '100', 'max(1; 2)', '3']],
+      ['1,2;', ['1', '2']],
+      ['1,2; 3', ['1', '2']],
+      ['', []]
+    ], ([input, expected]) => {
+      const out = ['stale'];
+      pxl.parsePointsIntoArray(input, out);
+      return [out, expected];
+    });
+
+    // ===================================================================
+    // Matrices and toLocal on fixed matrices (KILOPIXEL.md "Matrix Engine & Coordinate Mapping")
+    // ===================================================================
+    section('Matrices and toLocal');
+
+    const M = pxl.Matrix;
+    const local = (x, y, dx, dy, rotate, sx, sy, skx, sky) => M.updateLocal(M.create(), x, y, dx, dy, rotate, sx, sy, skx, sky);
+    const list = (m) => Array.from(m);
+
+    table('Matrix.updateLocal: translate → rotate → scale → skew → offset', [
+      ['identity', local(0, 0, 0, 0, 0, 1, 1, 0, 0), [1, 0, 0, 1, 0, 0]],
+      ['translate', local(10, 20, 0, 0, 0, 1, 1, 0, 0), [1, 0, 0, 1, 10, 20]],
+      ['rotate 90', local(0, 0, 0, 0, 90, 1, 1, 0, 0), [Math.cos(Math.PI / 2), 1, -1, Math.cos(Math.PI / 2), 0, 0]],
+      ['scale 2, 3', local(0, 0, 0, 0, 0, 2, 3, 0, 0), [2, 0, 0, 3, 0, 0]],
+      ['skewx 45', local(0, 0, 0, 0, 0, 1, 1, 45, 0), [1, 0, Math.tan(Math.PI / 4), 1, 0, 0]],
+      ['offset after rotate 90', local(10, 0, 5, 0, 90, 1, 1, 0, 0).slice(4), [10, 5]],
+      ['offset after scale 2', local(0, 0, 5, 5, 0, 2, 2, 0, 0).slice(4), [10, 10]],
+      ['333.3 kept exactly (Float64)', local(333.3, 150.7, 0, 0, 0, 1, 1, 0, 0).slice(4), [333.3, 150.7]]
+    ], ([, actual, expected]) => [list(actual), expected], ([name]) => name);
+
+    test('Matrix.multiply and invert: m × m⁻¹ is the identity; a singular matrix inverts to the identity', () => {
+      const m = local(30, -40, 7, 3, 33, 1.5, 0.75, 20, 0);
+      const product = list(M.multiply(M.create(), m, M.invert(M.create(), m)));
+      const singular = list(M.invert(M.create(), local(5, 5, 0, 0, 0, 0, 0, 0, 0)));
+      if (!same(product, [1, 0, 0, 1, 0, 0]) || !same(singular, [1, 0, 0, 1, 0, 0])) {
+        throw new Error(`m × m⁻¹ = ${show(product)}, inverse of zoom 0 = ${show(singular)}`);
+      }
+    });
+
+    // A reader whose parent has the global matrix `parent`, and a target with global matrix `target` and offset dx / dy
+    const readerIn = (parent) => ({ parentContainer: { getGlobalMatrix: () => parent } });
+    const targetAt = (target, dx = 0, dy = 0) => ({ $node: { getGlobalMatrix: () => target, attributeValues: { dx, dy } } });
+    const IDENTITY = local(0, 0, 0, 0, 0, 1, 1, 0, 0);
+
+    table('toLocal: position, offset and frame of a target seen from a reader', [
+      ['tx / ty of an offset target', IDENTITY, local(100, 50, 10, 0, 90, 1, 1, 0, 0), 10,
+        { tx: 100, ty: 60, x: 100, y: 50, dx: 0, dy: 10 }],
+      ['rotate and zoom', IDENTITY, local(0, 0, 0, 0, 30, 2, 2, 0, 0), 0,
+        { rotate: 30, scalex: 2, scaley: 2, skewx: 0, zoom: 2 }],
+      ['reader parent rotated too', local(0, 0, 0, 0, 30, 1, 1, 0, 0), local(0, 0, 0, 0, 30, 2, 2, 0, 0), 0,
+        { rotate: 0, scalex: 2, scaley: 2, zoom: 2 }],
+      ['mirror is not a 180° turn', IDENTITY, local(0, 0, 0, 0, 0, 1, -1, 0, 0), 0,
+        { rotate: 0, scalex: 1, scaley: -1, skewx: 0, zoom: 1 }],
+      ['skewx comes back', IDENTITY, local(0, 0, 0, 0, 0, 1, 1, 30, 0), 0,
+        { rotate: 0, scalex: 1, scaley: 1, skewx: 30, zoom: 1 }],
+      ['reader parent moved: positions in its space', local(50, 20, 0, 0, 0, 2, 2, 0, 0), local(150, 120, 0, 0, 0, 1, 1, 0, 0), 0,
+        { x: 50, y: 50, tx: 50, ty: 50, scalex: 0.5 }]
+    ], ([, parent, target, dx, expected]) => {
+      const actual = {};
+      for (const prop of Object.keys(expected)) actual[prop] = pxl.toLocal(readerIn(parent), targetAt(target, dx), prop);
+      return [actual, expected];
+    }, ([name]) => name);
+
+    table('toLocal: 0 for a target that has no frame', [
+      ['not connected (undefined ref)', undefined], ['a stage (no matrix)', { $node: {} }],
+      ['an unknown property', targetAt(IDENTITY), 'skewy']
+    ], ([, target, prop = 'x']) => [pxl.toLocal(readerIn(IDENTITY), target, prop), 0], ([name]) => name);
+
+    // ===================================================================
+    // Empty and removed attributes, every attribute of every element (Rule A, KILOPIXEL.md "Empty & Removed Attributes").
+    // Generated from observedAttributes and static defaults, so a new attribute is covered without a new test.
+    // ===================================================================
+    section('Rule A: empty and removed attributes');
+
+    const ELEMENTS = ['pxl-circle', 'pxl-ellipse', 'pxl-rect', 'pxl-line', 'pxl-polyline', 'pxl-text', 'pxl-grid',
+      'pxl-group', 'pxl-layer', 'pxl-var'];
+    const HANDLERS = new Set(['onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove']);
+    // Attributes that are not stored as one value (polyline points become p0, p1, …)
+    const NOT_A_VALUE = new Set(['points']);
+
+    for (const tag of ELEMENTS) {
+      const Class = customElements.get(tag);
+      const names = Class.observedAttributes.filter((n) => !HANDLERS.has(n) && !NOT_A_VALUE.has(n));
+
+      test(`${tag}: every observed attribute has a default`, () => {
+        const missing = names.filter((n) => !(n in Class.defaults));
+        if (missing.length) throw new Error(`no default for ${missing.join(', ')}`);
+      });
+
+      test(`${tag}: bare attribute → true for booleans, '' for <pxl-var> value, otherwise the default`, () => {
+        const el = document.createElement(tag), wrong = [];
+        for (const name of names) {
+          el.setAttribute(name, '');
+          const expected = pxl.BOOLEAN_ATTRIBUTES.has(name) ? true : name === 'value' ? '' : (Class.defaults[name] ?? null);
+          if (!same(el.attributeValues[name], expected)) wrong.push(`${name}: ${show(el.attributeValues[name])} instead of ${show(expected)}`);
+        }
+        if (wrong.length) throw new Error(wrong.join('; '));
+      });
+
+      test(`${tag}: removed attribute → the default, also after an animated value`, () => {
+        const el = document.createElement(tag), wrong = [];
+        for (const name of names) {
+          el.setAttribute(name, pxl.BOOLEAN_ATTRIBUTES.has(name) ? 'true' : 't * 0 + 7');
+          el.removeAttribute(name);
+          const expected = Class.defaults[name] ?? null;
+          if (!same(el.attributeValues[name], expected)) wrong.push(`${name}: ${show(el.attributeValues[name])} instead of ${show(expected)}`);
+          if (el.animatedAttributeKeys.includes(name)) wrong.push(`${name}: still animated`);
+        }
+        if (el.isAnimated) wrong.push('element still animated');
+        if (wrong.length) throw new Error(wrong.join('; '));
+      });
+    }
+
+    test('pxl-polyline: points set, emptied and removed', () => {
+      const el = document.createElement('pxl-polyline');
+      el.setAttribute('points', '1,2; 3,4');
+      const set = el._pointCount;
+      el.setAttribute('points', '');
+      const empty = el._pointCount;
+      el.setAttribute('points', 't,0; 5,6');
+      el.removeAttribute('points');
+      if (set !== 4 || empty !== 0 || el._pointCount !== 0 || el.isAnimated) {
+        throw new Error(`counts ${set} / ${empty} / ${el._pointCount}, animated ${el.isAnimated}`);
+      }
+    });
+
+    test('shape handlers: set, emptied and removed', () => {
+      const el = document.createElement('pxl-circle');
+      el.setAttribute('onclick', 'this.x = 1');
+      const set = typeof el.handlers.click;
+      el.setAttribute('onclick', '');
+      const empty = el.handlers.click;
+      el.setAttribute('onenter', 'this.x = 2');
+      el.removeAttribute('onenter');
+      if (set !== 'function' || empty !== null || el.handlers.enter !== null) {
+        throw new Error(`set ${set}, empty ${show(empty)}, removed ${show(el.handlers.enter)}`);
+      }
+    });
+
+    test('pxl-stage: bare or removed ratio → 16 / 9; bare alwaysrender → true', () => {
+      const stage = document.createElement('pxl-stage');
+      stage.setAttribute('ratio', '2');
+      stage.setAttribute('ratio', '');
+      const bare = stage.attributeValues.height;
+      stage.setAttribute('ratio', '4 / 3');
+      const set = stage.attributeValues.height;
+      stage.removeAttribute('ratio');
+      const removed = stage.attributeValues.height;
+      stage.setAttribute('alwaysrender', '');
+      const always = stage.isAlwaysRender();
+      if (!same(bare, 562.5) || !same(set, 750) || !same(removed, 562.5) || !always) {
+        throw new Error(`heights ${bare} / ${set} / ${removed}, alwaysrender ${always}`);
+      }
+    });
+
+    runTests({ settle: 0 });
+  </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # Testing: Levels, a Headless Runner and the Missing Cases
 
-- **Status**: 🟢 **Decided** (2026-11-16, D1–D6 decided, D2 changed after measuring; steps 1–2 built, §12; steps 3–6 not built)
+- **Status**: 🟢 **Decided** (2026-11-16, D1–D6 decided, D2 changed after measuring; steps 1–3 built, §12–§13; steps 4–6 not built)
 - **Date**: 2026-11-15
 - **Related**: `design/2026-10-30_framework_compatibility_plan.md` (§11 conformance tests, §19.4 order: its quick fixes get their tests from this plan), `.claude/CLAUDE.md` (Workflow: "Tests", "Verify in the browser")
 - **Target Implementation**: `tools/run_tests.js` (built), `tests/runner.js` (built), `tests/index.html` (moved onto the runner), `tests/unit.html` and `tests/render.html` (new), `tests/frameworks.html` (from the framework plan), `.claude/CLAUDE.md` (Workflow, built), `.github/workflows/tests.yml` (built)
@@ -131,7 +131,7 @@ All four are in CLAUDE.md since step 2 (§12).
 |---|---|---|---|
 | 1 | `tests/runner.js` (timeout, sections, `test.known`, `?grep`, JSON results); `tests/index.html` moved onto it unchanged | 1 session | built 2026-11-16 |
 | 2 | `tools/run_tests.js` (test pages, sweep, exit code); CLAUDE.md workflow; GitHub Actions (D4) | 1 session | built 2026-11-16 |
-| 3 | `tests/unit.html`: compiler tables, drivers, radii, points, matrices, filters; the generated Rule A sweep | 1 session | |
+| 3 | `tests/unit.html`: compiler tables, drivers, radii, points, matrices, filters; the generated Rule A sweep | 1 session | built 2026-11-16 |
 | 4 | Interaction and lifecycle tests, the known bugs of the framework review as `test.known` | 1 session | |
 | 5 | `tests/render.html`: probes per shape and paint feature | 1–2 sessions | |
 | 6 | Scaling checks; build checks | 1 session | |
@@ -158,5 +158,20 @@ Decided 2026-11-16, as recommended; D2 changed after measuring (§5.2).
 - **`tools/run_tests.js`:** as in §5.2. Measured on this laptop: test pages 1.4–1.7 s, sweep of 79 pages 25 s, the whole run 27 s. Checked with probe pages (not kept): a failing test, a known test that passes and a test that never settles (timeout after 1 s) are reported and fail the run; a sweep page with `console.warn`, an uncaught error and a missing image reports all three; the fallback without `WebSocket` (`node --no-experimental-websocket`) reports the warning and the error. `--repeat 5`: 5 × 90/90.
 - **Flaky test seen once:** "toLocal: nothing redraws while nothing moves" failed once with "static stage renders at 1 FPS" in the in-app browser pane, on the first load right after the dev server started (real time; probably a late web font that redraws every stage once). Not seen again on reload or in the headless runs (virtual time); watch it.
 - **CLAUDE.md:** "Tests" bullet (the commands and the three rules of §9), "Where Things Are" (`tests/`, `tools/run_tests.js`), "Working on Another Machine" step 3.
-- **`.github/workflows/tests.yml`:** Node 24, `node tools/run_tests.js`; first run with the push of 2026-11-16, result not checked here.
+- **`.github/workflows/tests.yml`:** Node 24, `node tools/run_tests.js`; the first two runs on GitHub (pushes of 2026-11-16) passed in about 50 s each.
 - **Refined 2026-11-16:** the sweep tabs really animate (a probe page counted 65 frames in 1.2 s with 7 tabs at once, about 54 frames per second). A file from an unreachable server was reported as `net::ERR_NAME_NOT_RESOLVED` and failed the sweep, so a laptop without internet would fail every docs page (they load Prism, a stylesheet and fonts from CDNs, and call none of them from their own code). Such errors are now one note at the end; a 404 from the dev server still fails (checked with probe pages, not kept).
+
+## 13. Step 3 Built 2026-11-16: `tests/unit.html`
+
+66 tests (61 counted, 5 known), about 1.5 s headless. One test per table: every row is checked and all mismatches are listed in one message. Sections:
+
+- **Compiler: classification** – `pxl.parseAttributeValue()` for plain values (hex, numbers including `.5` and `1e3`, words, `true` / `false`, `Math` constants, static `rgb()`, quoted strings), static expressions (arithmetic, arrays, `hsl()` with CSS percentages, template literals, filter helpers), and the flags of compiled functions (`isTimeDependent`, `variableDependencies`, `usesToLocal`); a `t` after a dot or inside a word; the shared cache; `random()` without `t` evaluated once; compiled functions evaluated with refs; a compile error (warns once, plain string); an unknown `toLocal()` property (warns at compile time).
+- **Compiler: string literals** – the five problems of TODO §34 as `test.known()`: a quoted `return`, `ref.x.y` in template text, a lone `t` in quoted text, a CSS percentage inside a quoted color, an escaped quote. All five fail as described there, so they are confirmed.
+- **Time drivers** – each driver at chosen times; `glitch()` holds its value; `time()` for every unit against a fixed local date.
+- **Scope helpers** – color functions, filter helpers and their units, `clamp` / `lerp` / `map`, `pxl.scaleResponsiveFilter`, `pxl.hasLineDash`, `pxl.arcEndRadians`, `pxl.isFullTurn`.
+- **Gradients** – `pxl.parseStops`, the descriptors of `linear()` / `radial()` (1, 3, 6 values) / `conic()`, `pxl.resolveRadius` for numbers, sides, points on the box (also `center-top`), the CSS keywords, the minimum for a center on the edge.
+- **Points parser** – `pxl.parsePointsIntoArray` with spaces, nested parentheses, `;` inside parentheses, a trailing `;`, an incomplete last point, an empty string.
+- **Matrices and toLocal** – `pxl.Matrix.updateLocal` per step (also 333.3 exact), `multiply` / `invert`, a singular matrix; `pxl.toLocal` with mock reader and target objects: offset targets, rotate and zoom, a rotated reader parent, a mirror, `skewx`, a moved and scaled reader parent, and the cases that return 0.
+- **Rule A** – generated from `observedAttributes` and `static defaults` for `pxl-circle`, `pxl-ellipse`, `pxl-rect`, `pxl-line`, `pxl-polyline`, `pxl-text`, `pxl-grid`, `pxl-group`, `pxl-layer`, `pxl-var`: every attribute has a default; a bare attribute gives `true` (booleans), `''` (`<pxl-var>` value) or the default; a removed attribute gives the default, also after an animated value, and leaves nothing animated. Plus polyline `points`, shape handlers and the stage's `ratio` / `alwaysrender`.
+
+Found: nothing new. Apart from the five known problems of TODO §34, every function behaves as `.agents/KILOPIXEL.md` describes. A new attribute without a default, or one that doesn't fall back on removal, now fails a test without anyone writing one for it.
