@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Open points of the DOM-like model</title>
+  <script src="/dist/pxl.min.js"></script>
+</head>
+<body>
+<pre id="out">running…</pre>
+<div id="box" style="width: 1000px"></div>
+<script>
+// design/2026-10-30_framework_compatibility_plan.md §22.5, the measurable open points of the DOM-like event model:
+// 1. Registering every shape in the hit list (registerElement uses includes(), unregisterElement indexOf()):
+//    inserting and removing n shapes, today's list against a list with an index per shape.
+// 2. Dispatching a pointer event on the hovered shape in every pointer frame (delegated listeners can't be counted).
+const out = [];
+const log = (...lines) => out.push(...lines);
+const box = document.getElementById('box');
+
+function makeStage(n) {
+  const shapes = Array.from({ length: n }, (_, i) => `<pxl-circle x="${i % 1000}" y="${(i * 7) % 500}" r="3" fill="#888"></pxl-circle>`).join('');
+  box.innerHTML = `<pxl-stage alwaysrender ratio="2"><pxl-layer>${shapes}</pxl-layer></pxl-stage>`;
+  const stage = box.querySelector('pxl-stage');
+  stage.resize();
+  return { stage, shapes: [...stage.querySelectorAll('pxl-circle')] };
+}
+
+// --- 1. Hit list ---
+// Today's InteractionEngine list (includes / indexOf) and an indexed list: each element keeps its position, removal
+// swaps the last element in and updates its index (as pxl.removeFromArray does, plus the index)
+function indexedAdd(list, el) {
+  if (el._hitIndex !== undefined && el._hitIndex >= 0) return;
+  el._hitIndex = list.length;
+  list.push(el);
+}
+function indexedRemove(list, el) {
+  const i = el._hitIndex;
+  if (i === undefined || i < 0) return;
+  const last = list[list.length - 1];
+  list[i] = last;
+  last._hitIndex = i;
+  list.length--;
+  el._hitIndex = -1;
+}
+log('1. Every shape in the hit list: register all, then unregister all (ms)');
+for (const n of [1000, 2000, 5000, 10000]) {
+  const { stage, shapes } = makeStage(n);
+  const ia = stage.interaction;
+  ia._interactiveElements.length = 0;
+  let a = performance.now();
+  for (const s of shapes) ia.registerElement(s);
+  const regToday = performance.now() - a;
+  a = performance.now();
+  for (const s of shapes) ia.unregisterElement(s);
+  const unregToday = performance.now() - a;
+  const list = [];
+  a = performance.now();
+  for (const s of shapes) indexedAdd(list, s);
+  const regIndexed = performance.now() - a;
+  a = performance.now();
+  for (const s of shapes) indexedRemove(list, s);
+  const unregIndexed = performance.now() - a;
+  log(`  ${String(n).padStart(6)} shapes: today register ${regToday.toFixed(1)}, unregister ${unregToday.toFixed(1)}` +
+    ` | indexed register ${regIndexed.toFixed(2)}, unregister ${unregIndexed.toFixed(2)}`);
+}
+
+// --- 2. One pointermove event per frame on the hovered shape ---
+log('', '2. Dispatching a pointermove on a shape (µs per event, 20,000 events)');
+{
+  const { stage, shapes } = makeStage(10);
+  const shape = shapes[0];
+  const init = { bubbles: true, composed: true, clientX: 100, clientY: 100, pointerId: 1, pointerType: 'mouse', isPrimary: true };
+  const time = (label) => {
+    for (let i = 0; i < 1000; i++) shape.dispatchEvent(new PointerEvent('pointermove', init));
+    const a = performance.now();
+    for (let i = 0; i < 20000; i++) shape.dispatchEvent(new PointerEvent('pointermove', init));
+    log(`  ${label.padEnd(58)} ${((performance.now() - a) / 20000 * 1000).toFixed(2)}`);
+  };
+  time('no listener anywhere');
+  let calls = 0;
+  const onDoc = () => { calls++; };
+  document.addEventListener('pointermove', onDoc);
+  time('a listener on document (React, Svelte, Solid delegate there)');
+  for (let k = 0; k < 5; k++) box.addEventListener('pointermove', onDoc);
+  time('plus 5 more listeners on the way up');
+  document.removeEventListener('pointermove', onDoc);
+  log(`  (listener calls: ${calls})`);
+}
+
+box.innerHTML = '';
+document.getElementById('out').textContent = out.join('\n');
+</script>
+</body>
+</html>
