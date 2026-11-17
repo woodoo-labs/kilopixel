@@ -1,6 +1,6 @@
 # Framework Compatibility: Kilopixel as a Well-Behaved Custom Element
 
-- **Status**: 🟡 **Proposed** (2026-11-16, step 1 of §19.4 built, §20: removal cost, late and renamed `id`, SSR / double-load guard, cache bound, hidden text children; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 2–6 not built)
+- **Status**: 🟡 **Proposed** (2026-11-17, steps 1–2 of §19.4 built: quick fixes §20, conformance tests `tests/frameworks.html` §21; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 3–6 not built)
 - **Date**: 2026-10-30
 - **Related**: `design/prototypes/2026-10-30_framework_compatibility/review_checks.html` (review §19); `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`, `design/2026-11-04_stage_sizing_plan.md` (builds W2)
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
@@ -276,6 +276,8 @@ The core deliverable: the DOM contract as automated tests, **without any framewo
 
 Each test that needs rendering forces it (`stage.resize()` / `alwaysrender`) so the result doesn't depend on the browser pane being visible (lesson from the prototypes).
 
+**Built 2026-11-17 (§21):** `tests/frameworks.html` has T-C1, T-C1b, T-C1c, T-H1 and further tests as `test()`; T-C3…T-C3d, T-U1, T-K2, T-E1, T-E2, T-E4, T-E6, T-E7, the listener part of T-M2 and T-N1 as `test.known()` (the acceptance tests of steps 3 and 4 in §19.4); T-E3 as `test()`, for hover only, so it holds with either answer to D10. Elsewhere: T-C2, T-C2b, T-M1, T-M3, T-S1, T-S2, T-E5 and the drawing part of T-M2 in `tests/index.html`, T-C4 in `tests/unit.html`, T-K1 in `tests/scaling.html`.
+
 ## 12. Framework Smoke Pages and Docs
 
 **Smoke pages** (in `design/prototypes/2026-10-30_framework_compatibility/`; promote one or two to `examples/` later): the same component (two instances, number binding, expression binding, removal via `undefined`, mount / unmount, a click handler in the framework's own syntax, hover state shown in the framework's UI) in:
@@ -449,7 +451,7 @@ A review of this plan against the goal "Kilopixel works in the major frameworks 
 | # | Step | Contents | Size |
 |---|---|---|---|
 | 1 | Quick fixes (built 2026-11-16, §20) | removal cost, W5.1 (`id` observed, old key deleted), W8 guard in `build.js`, W4 cache bound and the growing sets, W9 hidden text children. Acceptance tests: the four `test.known()` in `tests/index.html`, section "Known bugs (framework review)" (2026-11-16, `design/2026-11-15_testing_plan.md` §14); the removal cost gets a scaling check there (step 6) | 1 session |
-| 2 | Conformance tests | `tests/frameworks.html` (§11), plus tests for step 1 | 1 session |
+| 2 | Conformance tests (built 2026-11-17, §21) | `tests/frameworks.html` (§11), plus tests for step 1 | 1 session |
 | 3 | Events (W1) | DOM events, `pxl-on-*` handlers (D1), D10 / D11 | 1–2 sessions |
 | 4 | Properties (W3) | accessors, arrays (D8), values set before the upgrade | 1 session |
 | 5 | Distribution and docs (W8) | npm layout, typings generator, smoke pages, `docs/frameworks.html` | 1–2 sessions |
@@ -479,5 +481,27 @@ All six framework-review bugs that were `test.known()` (testing plan §14, §16)
 - **File size:** `pxl.min.js` 57.46 → 58.70 KB (the docs say ~59KB; gzipped 17.43 KB, still ~17KB). The build check caught the outdated sizes.
 - **Not done: the sets that only grow** (`pxl._interactiveIds`, `pxl._pressableIds`, `pxl._stickyIds`, §19.2). They record that some expression reads an id's `isHovered` / `isPressed`; removing an id is only safe once no reader exists, and readers are not tracked per id. They hold strings, one per distinct id ever read: small. Revisit with the per-frame plan (`design/2026-11-15_per_frame_evaluation_plan.md`), whose `pxl._readIds` has the same question.
 - **Custom shapes** (`class Star extends pxl.Shape`, own tag): their content is not hidden by the default rule; a page that writes content into them adds `star-shape { display: none }`. Noted in KILOPIXEL.md.
-- **Next:** §19.4 step 2, `tests/frameworks.html`.
+- **Next:** §19.4 step 2, `tests/frameworks.html` (built 2026-11-17, §21).
+
+## 21. Step 2 Built 2026-11-17: Conformance Tests
+
+`tests/frameworks.html`: 36 tests, 16 passing and 20 known, about 1.5 s headless; `node tools/run_tests.js --tests` picks the page up by itself. Plain DOM calls, no framework; every test that draws adds its own stage, sizes and draws it by hand (`stage.resize()`, `stage.render()`) and removes it. The helpers (`withStage()`, `pointerAt()`, `hover()`, `alphaAt()`) are copies of those in `tests/index.html`; the page lists in its introduction which §11 tests live on the other pages.
+
+| Section | `test()` | `test.known()` |
+|---|---|---|
+| Create and insert (C1) | T-C1 (detached tree with a stage-level `<pxl-var>`), T-C1b (one element at a time; the late layer gets the stage size), T-C1c (attributes after the children, or only after insertion), a reader before its target in one inserted tree | — |
+| Attributes after insertion (C2, C4, C14) | a removed attribute on a connected shape is redrawn at the default; setting the same values again compiles nothing and leaves the layer clean | — |
+| Properties and late definition (C3, C15) | the native `hidden` property; attributes written before `customElements.define()` (a fresh subclass of `pxl.Circle`) | T-C3, T-C3b, T-C3c, T-C3d, an array property (`linedash`, D8), T-K2, T-U1 (W3) |
+| Events (C5, C6, C7) | a click over empty space reaches a listener around the stage once (D4: unchanged), T-E3 | T-E1, a listener added before insertion (Vue, Lit and Solid add them at creation), D4 one click with the shape as `target`, D4 `stopPropagation()`, T-E2, T-E4, `pointermove` on the shape and on the stage, a removed listener releases the shape, T-E6, C7 attribute names, T-E7, T-M2 listeners after moves (W1) |
+| Move and remove (C8) | keyed reordering (`insertBefore`) changes the draw order and the topmost hit; a stage inserted again is still hit-tested; unmounting a tree leaves no registry entries, subscriptions, stage variables or monitor entry | — |
+| Style, hydration, shadow DOM (C10–C12) | one style property keeps the aspect ratio (D7); T-H1 (server markup compared node by node with a `<template>` copy, which isn't upgraded: only the stage's inline `aspect-ratio` and `cursor` differ); a stage inside a component's shadow root draws and hit-tests | — |
+| Small items (§10) | — | T-N1 |
+
+- **What the known tests expect** (decided details, so steps 3 and 4 can flip them to `test()`): events with `bubbles` and `composed`; one `click` per action around the stage, with the shape as `target`; `pointerenter` / `pointerleave` not bubbling; a `pointermove` on the shape and the browser's move on the stage; the old-name warning mentions `pxl-on-click` and comes once for two shapes; `set()` warns once per unknown name and not for known ones; properties as in §6.1. Each click test also runs the frame after the event, so it passes whether the click is dispatched when it arrives (D4) or in `process()`.
+- **C7 today:** the only names that start with `on` or are properties of `HTMLElement` are the six handlers (`onclick` … `onmove`) on every shape; no other observed attribute collides.
+- **Checked that the tests can fail:** a copy of the page in `scratch/` (not kept) broke one engine function per run. Every one of the 16 passing tests failed under at least one break: `Layer.registerChild()` (the C1 tests, removed attribute, `hidden`, late definition, reordering, shadow root), `InteractionEngine.process()` (reordering, re-inserted stage, shadow root), `Stage.registerVariable()` (T-C1, unmount), `clearAllVariableSubscriptions()` and a registry entry kept on disconnect (unmount), `pxl.broadcast()` (reader before target), a canvas in the layer's light DOM (T-H1), the pointer listeners lost on re-insert (re-inserted stage), the same-value guard removed from `attributeChangedCallback()` (re-render), a default of 500 for a removed `x`, `hidden` ignored, clicks stopped at the stage (empty space), every shape registered (T-E3), `aspect-ratio` cleared on resize (style test), `sortByDOMPosition()` returning 0 (reordering). The known tests fail with messages that name the missing feature (no events, `attributeValues` unchanged by properties).
+- **Lesson for such checks:** custom elements read their lifecycle callbacks (`connectedCallback`, `attributeChangedCallback`, …) once, at `customElements.define()`. Replacing them on the prototype afterwards does nothing; a break must replace a method they call (`registerLayer()`, `pxl.perf.registerStage()`) or use a modified copy of the bundle.
+- **Found:** no new bugs.
+- **Left out:** C13 scoped names (D2 open), the hand cursor for `interactive` (D5 open), crossing shadow boundaries (W6, on demand).
+- **Next:** §19.4 step 3, events (W1).
 

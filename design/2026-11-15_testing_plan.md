@@ -1,9 +1,9 @@
 # Testing: Levels, a Headless Runner and the Missing Cases
 
-- **Status**: ✅ **Implemented** (2026-11-16, steps 1–6 built, §12–§16; level 4 `tests/frameworks.html` comes with `design/2026-10-30_framework_compatibility_plan.md`, the negative-sweep tests with `design/2026-11-16_negative_sweep_arrowheads_plan.md`)
+- **Status**: ✅ **Implemented** (2026-11-17, steps 1–6 built, §12–§16; level 4 `tests/frameworks.html` built with `design/2026-10-30_framework_compatibility_plan.md` §21; the negative-sweep tests come with `design/2026-11-16_negative_sweep_arrowheads_plan.md`)
 - **Date**: 2026-11-15
 - **Related**: `design/2026-10-30_framework_compatibility_plan.md` (§11 conformance tests, §19.4 order: its quick fixes get their tests from this plan), `.claude/CLAUDE.md` (Workflow: "Tests", "Verify in the browser")
-- **Target Implementation**: `tools/run_tests.js` (built), `tests/runner.js` (built), `tests/index.html` (moved onto the runner), `tests/unit.html` and `tests/render.html` (new), `tests/frameworks.html` (from the framework plan), `.claude/CLAUDE.md` (Workflow, built), `.github/workflows/tests.yml` (built)
+- **Target Implementation**: `tools/run_tests.js` (built), `tests/runner.js` (built), `tests/index.html` (moved onto the runner), `tests/unit.html` and `tests/render.html` (new), `tests/frameworks.html` (built with the framework plan, §21 there), `.claude/CLAUDE.md` (Workflow, built), `.github/workflows/tests.yml` (built)
 - **Prototype**: `design/prototypes/2026-11-15_testing/headless_probe.js` (engine tests and page sweep in headless Chrome, no npm packages, §5.1; the first version of `tools/run_tests.js`)
 
 ---
@@ -42,7 +42,7 @@
 | 1. Unit | pure functions, as tables of inputs and expected results | `tests/unit.html` (new) | `pxl.parseAttributeValue`, `pxl.compileExpression` flags, `pxl.resolveRadius`, `pxl.parsePointsIntoArray`, `pxl.parseStops`, `pxl.Matrix`, `pxl.toLocal` on fixed matrices, `pxl.scaleResponsiveFilter`, drivers, `pxl.hasLineDash`, `pxl.arcEndRadians` |
 | 2. Engine | lifecycle, reactivity, frame pipeline, interaction with synthetic pointer events | `tests/index.html` (exists) | press / click / leave sequences, handler registration, move between layers, reconnecting a stage, Rule A for every attribute |
 | 3. Rendering | pixel probes at chosen points of a fixed-size stage | `tests/render.html` (new) | pie vs. ring vs. chord, rect anchors and corner radii, arrowhead tips, gradient colors near the edges, `reveal`, `mask`, `linedash` gaps |
-| 4. Frameworks | the DOM contract | `tests/frameworks.html` (framework plan §11) | late `id`, insert / move / remove, events, properties |
+| 4. Frameworks | the DOM contract | `tests/frameworks.html` (framework plan §11; built 2026-11-17, framework plan §21) | insert / move / remove, hydration, events and properties (known until built) |
 | 5. Page sweep | every docs and example page loads without console messages | `tools/run_tests.js` | measured clean on 2026-11-15 (§5.1) |
 | 6. Scaling | cost ratios, not absolute times | the runner or a level-2 page | removing 2,000 elements takes at most ~3× as long as 1,000 (today 7×, framework plan §19.1) |
 
@@ -228,5 +228,5 @@ Found: no bugs in the documented behavior.
 
 **CLAUDE.md:** the "Tests" bullet names the quick run (`--tests`, with build checks) and the full run (with scaling and the sweep); "Where Things Are" lists the test pages and `tools/check_build.js`.
 
-With step 6 every step of §10 is built; the plan is ✅ and its TODO item is removed. Still to come, in other plans: level 4 (`tests/frameworks.html`, framework plan §11) and the negative-sweep render tests (`design/2026-11-16_negative_sweep_arrowheads_plan.md` §5).
+With step 6 every step of §10 is built; the plan is ✅ and its TODO item is removed. Still to come, in other plans: level 4 (`tests/frameworks.html`, framework plan §11; built 2026-11-17, framework plan §21: 16 tests passing, 20 known for events and properties) and the negative-sweep render tests (`design/2026-11-16_negative_sweep_arrowheads_plan.md` §5).
 
