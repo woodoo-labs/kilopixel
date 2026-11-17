@@ -1,6 +1,6 @@
 # Framework Compatibility: Kilopixel as a Well-Behaved Custom Element
 
-- **Status**: 🟡 **Proposed** (2026-11-17, `process()` moved to the start of the frame, §4.1 and §15; steps 1–2 of §19.4 built: quick fixes §20, conformance tests `tests/frameworks.html` §21; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 3–6 not built)
+- **Status**: 🟡 **Proposed** (2026-11-17, hit testing every shape measured and a DOM-like event model proposed, §22 (replaces `interactive` if decided; D5, D10, D11 open); `process()` moved to the start of the frame, §4.1 and §15; steps 1–2 of §19.4 built: quick fixes §20, conformance tests `tests/frameworks.html` §21; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 3–6 not built)
 - **Date**: 2026-10-30
 - **Related**: `design/prototypes/2026-10-30_framework_compatibility/review_checks.html` (review §19); `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`, `design/2026-11-04_stage_sizing_plan.md` (builds W2)
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
@@ -95,6 +95,8 @@ After the hit test in `InteractionEngine.process()`, Kilopixel dispatches DOM ev
 
 ### 4.2 Which Shapes Are Hit-Tested
 
+**Proposal 2026-11-17 (§22):** hit-test every shape, with a bounding-box pre-check (measured: 5–25× faster than testing every path); then the registration below and `interactive` are not needed for testing. This section is the model before that proposal.
+
 Today only shapes with a declarative handler, or whose `isHovered` / `isPressed` someone reads, are hit-tested (`_interactiveElements`, auto-registration plan). A framework listener must also register the shape. Two ways in, both needed:
 
 1. **Direct listeners**: `pxl.Shape` overrides `addEventListener` / `removeEventListener`. For the pointer types in §4.1 and `click`, it counts listeners per element (a small integer field) and registers / releases the shape like `hasEventHandlers()` does today. Covers Vue, Lit, Angular, Solid `on:`, Alpine, plain JS.
@@ -134,6 +136,8 @@ Implementation: `pxl.Shape.HANDLER_EVENTS` keys change; `observedAttributes` cha
 Migration count (2026-10-30): **25 handlers on Kilopixel elements** in `examples/test32.html` (20: enter / leave / down / up), `examples/test37.html` (4 clicks) and `tests/index.html` (1). Plus docs text and KILOPIXEL.md (Events section, AI guide), `design/` plans as history (unchanged). The other ~320 `onclick` hits in the repository are ordinary HTML buttons on docs pages.
 
 ### 4.4 Cursor
+
+**Proposal 2026-11-17 (§22.3, D5):** without `interactive`, the shape's CSS `cursor` decides for delegated listeners, read when the pointer enters the shape.
 
 The hand cursor (`isClickable()`) should also show for shapes that a framework listens to. With a direct `click` listener (§4.2 count) Kilopixel knows it. With delegated listeners it can't know whether a click handler exists. Options (§13 D5): `interactive` implies "may be clicked" and shows the hand, or a separate `cursor` attribute. Recommended: `interactive` implies the hand cursor; simple and predictable.
 
@@ -257,8 +261,8 @@ The core deliverable: the DOM contract as automated tests, **without any framewo
 | T-C3d | C3 | getter returns the evaluated (animated) value |
 | T-C4 | C4 | `removeAttribute` for every observed attribute of each element class: default, no throw (extends Rule A tests) |
 | T-E1 | C5 | `addEventListener('click')` on a circle; synthetic pointer events at the circle's position on the stage: listener called once, `event.target` is the circle |
-| T-E2 | C6 | listener on `document` (delegation) + `interactive` on the circle: called, `target` is the circle |
-| T-E3 | C6 | without `interactive` and without a direct listener: not hit-tested (registration rule) |
+| T-E2 | C6 | listener on `document` (delegation) + `interactive` on the circle: called, `target` is the circle (with §22: without `interactive`) |
+| T-E3 | C6 | without `interactive` and without a direct listener: not hit-tested (registration rule; inverts with §22: every shape is hit-tested) |
 | T-E4 | §4.1 | enter / leave sequence: `pointerover`, `pointerenter`, `pointerout`, `pointerleave` in order; `pointerenter` doesn't bubble |
 | T-E5 | §5 | with the canvas in a shadow root: `mouseX` / `mouseY` correct (offset retargeting) |
 | T-E6 | §4.3 | `pxl-on-click` handler runs; a leftover `onclick` warns once |
@@ -311,13 +315,13 @@ Sidebar: a new entry under "Engine & Reactivity" or a new section "Integration".
 | D2 | Scoped names | A global ids / B stage-scoped ids / C `name` attribute (§8.2) | decide later; A for now, C if components need it. **2026-11-15 (§19.3):** design it together with the evaluation model (`design/2026-11-15_per_frame_evaluation_plan.md` D1), because both change how `ref` is resolved |
 | D3 | Logical coordinates on events | extra fields / none (§4.1) | none; `ref.<stage>.mouseX` |
 | D4 | Native canvas `click` next to the synthetic shape `click` | (a) accept both / (b) hit-test when the event arrives and stop the native event over a shape / (c) Kilopixel owns every click in the stage (§4.1) | **decided 2026-11-10: (b)** for `click`, `pointerdown`, `pointerup`; `pointermove` keeps both (prototype `d4_clicks.html`) |
-| D5 | Hand cursor for framework listeners | `interactive` implies pointer / separate `cursor` attribute (§4.4) | `interactive` implies pointer |
+| D5 | Hand cursor for framework listeners | `interactive` implies pointer / separate `cursor` attribute (§4.4) / **the shape's CSS `cursor`** (§22.3) | **2026-11-17:** the shape's CSS `cursor`, no `interactive` (if D10 tests every shape for hover too); before: `interactive` implies pointer |
 | D6 | `<slot>` in the layer's shadow root | yes / no (§5) | **decided 2026-11-14:** yes |
 | D7 | Stage `aspect-ratio` | inline / CSS custom property (§5) | **decided 2026-11-14:** inline, documented ("set single properties on a stage's `style`, don't replace the whole attribute") |
 | D8 | Properties for array-valued attributes | direct arrays / strings only (§6.1) | direct where the parsed form is an array |
 | D9 | Scope of the first implementation | all workstreams / W1 + W2 + W5.1 + tests first | W1, W2, W5.1, W4, tests (§14 phase 1); W3 next; W5.2 / W6 only on demand. **2026-11-15:** replaced by the order in §19.4 (quick fixes first, distribution W8 added) |
-| D10 | Clicks on shapes without `interactive` (§19.2) | `interactive` needed for every delegated listener (§4.2) / `click`, `pointerdown`, `pointerup` hit-test every shape of the stage when they arrive, `interactive` only for hover with delegated listeners | the second: React / Svelte / Solid `onClick` then works without an extra attribute; needs D11 |
-| D11 | Shapes that should not catch clicks (with D10, a decorative shape on top catches the click, as in the DOM) | a `pointer-events`-like attribute / only shapes with a fill or stroke at the point count (as today) and nothing else | open; decide with D10 |
+| D10 | Clicks on shapes without `interactive` (§19.2) | `interactive` needed for every delegated listener (§4.2) / `click`, `pointerdown`, `pointerup` hit-test every shape of the stage when they arrive, `interactive` only for hover with delegated listeners | the second: React / Svelte / Solid `onClick` then works without an extra attribute; needs D11. **2026-11-17 (§22):** a third option, every shape hit-tested for clicks **and** hover with a bounding-box pre-check (measured 5–25× faster than testing every path), recommended: no `interactive` at all |
+| D11 | Shapes that should not catch clicks (with D10, a decorative shape on top catches the click, as in the DOM) | a `pointer-events`-like attribute / only shapes with a fill or stroke at the point count (as today) and nothing else / **CSS `pointer-events: none`** (§22.3) | **2026-11-17:** CSS `pointer-events: none`, inherited, so a layer or group with it leaves its subtree out; how to read it cheaply is open (§22.4) |
 | D12 | Text children of shapes (C17) | hide them (one rule in `pxl.DEFAULT_STYLES`) / hide them and use the text content of `<pxl-text>` when `text` is not set | hide now (W9); the text content as a fallback is a separate API decision |
 
 ## 14. Phases and Steps
@@ -388,7 +392,7 @@ No per-frame cost for pages that don't use the new features; some paths get chea
 |---|---|---|---|
 | DOM events (W1) | none without input; on pointer actions over shapes only, and only for event types with a listener (per-type counts, §4.5) | one event object per dispatched event, like the browser's own events | — |
 | `addEventListener` override (W1) | none | one comparison per `addEventListener` call (at mount) | — |
-| `interactive` (W1) | only for shapes the user marks: hit-tested on pointer moves, like shapes with handlers today | — | — |
+| `interactive` (W1) | only for shapes the user marks: hit-tested on pointer moves, like shapes with handlers today (2026-11-17, §22: every shape with a box pre-check instead, 0.1–0.4 µs per shape per pointer frame) | — | — |
 | Canvas in a shadow root (W2) | none: drawing and compositing unchanged | one shadow root and `<style>` per layer, once | canvas can't be removed by `innerHTML` or frameworks |
 | Stylesheet defaults (W2) | none | one `<style>` per page (or per shadow root with a stage), once | users override styles without `!important` |
 | Property accessors (W3) | none | defined once on the prototype; the pre-upgrade check runs once per element at creation (~80 `hasOwnProperty` checks) | numbers set as properties skip parsing and compiling |
@@ -463,7 +467,7 @@ Plans that assume the evaluation model (throttling `maxfps`, tweens, `<pxl-clip>
 
 - Steps 1–5 add no per-frame work for pages that don't use the new features. Events allocate only on input; `pointermove` is dispatched only for types with listeners (§4.5).
 - Framework-driven animation (state updated every frame) costs about 1 µs per `setAttribute()` on Kilopixel's side, before the framework's own rendering. The docs recommend `t`, drivers or a `<pxl-var>` for continuous motion and framework state for changes; W3 makes numeric writes cheaper.
-- Hit testing grows linearly, about 0.6–1.1 µs per shape per pointer frame; fine up to about 1,000 interactive shapes. A bounding-box check before the path test is the next step if a page needs more.
+- Hit testing grows linearly, about 0.6–1.1 µs per shape per pointer frame; fine up to about 1,000 interactive shapes. A bounding-box check before the path test is the next step if a page needs more. **Measured 2026-11-17 (§22.2):** with it, every shape can be tested (1–4 exact tests per frame, 0.1–0.4 µs per shape).
 
 ## 20. Step 1 Built 2026-11-16: Quick Fixes
 
@@ -504,4 +508,53 @@ All six framework-review bugs that were `test.known()` (testing plan §14, §16)
 - **Found:** no new bugs.
 - **Left out:** C13 scoped names (D2 open), the hand cursor for `interactive` (D5 open), crossing shadow boundaries (W6, on demand).
 - **Next:** §19.4 step 3, events (W1).
+
+## 22. Hit Testing Every Shape (Measured 2026-11-17): a DOM-like Event Model
+
+### 22.1 Question
+
+W1 as planned (§4.2) hit-tests only registered shapes: those with a handler, a direct listener (counted in the `addEventListener` override), or the new attribute `interactive`. React, Svelte and Solid delegate their listeners to the document root, so Kilopixel can't see them; their users would have to add `interactive` to every shape that should get hover events or a hand cursor, and with D10 still for clicks only. That is not what React users know: in the DOM, in SVG and in react-konva every element gets events, and a CSS `cursor` gives the hand. PixiJS is the one canvas library with an opt-in (`eventMode`, until v7 `interactive`), for the same reason as here: testing every object on every pointer move is expensive. So: can every shape be hover-tested in every pointer frame?
+
+### 22.2 Measurement
+
+Prototype `design/prototypes/2026-10-30_framework_compatibility/hover_hit_every_shape.html`: 10 rotated groups (static, or rotating with `t`) with circles, rings, rects (anchors, rotation), lines (some with `arrowend="auto"`), text and polylines (half of them smooth); the pointer walks across the stage, frames driven by hand, only the hit test timed. Three variants, all on every shape, topmost first:
+
+- **Exact:** the per-element body of `InteractionEngine.process()` (`isPointInPath` / `isPointInStroke` on the shape's own path) for every shape: what `process()` would cost if every shape were registered.
+- **Box first:** the pointer is mapped into the shape's own space (inverse of `getGlobalMatrix()`) and compared with `getBoundingBox()`, padded by what a stroke can reach beyond the path (half the width, a miter up to `miterlimit` × half the width, a square cap's corner, arrowheads); only shapes inside it get the exact test. Smooth polylines, the grid and custom shapes without `getBoundingBox()` always get the exact test.
+- **Box cached:** the same, with the inverse matrix and the padded box kept per shape until its global matrix version changes (or every frame for an animated shape).
+
+**Correctness:** 900 pointer positions (half of them near a shape, about 450 on one), 1,000 and 5,000 shapes, static and rotating: all three variants found the same shape every time.
+
+**Time** per pointer frame, ms, median of 3 runs × 60 frames, headless Chrome on this laptop (noisy: the same run varied by up to 2×; headless measured about 2–3× slower than the normal browser for the exact test, §19.1). Scene without smooth polylines:
+
+| Shapes | Exact | Box first | Box cached | Exact tests per frame | Drawing the frame |
+|---|---|---|---|---|---|
+| 1,000, static | 3.1 | 0.34 | 0.17 | 1.2 | 3.7 |
+| 1,000, rotating | 3.1 | 0.38 | 0.41 | 1.4 | 2.3 |
+| 5,000, static | 9.2 | 1.16 | 0.39 | 3.5 | 11.9 |
+| 5,000, rotating | 11.1 | 1.8 | 1.8 | 4.0 | 14.9 |
+
+- **The box check is 5–25× faster than testing every path,** and leaves 1–4 exact tests per frame.
+- **Static scenes:** with the cache, about 0.1–0.2 µs per shape. **Animated scenes:** the matrices change every frame, so the cache doesn't help: about 0.4 µs per shape (an inverse, a box and the parent chain per shape).
+- **Smooth polylines** (about 6 % of the shapes in the other run) always got the exact test: 70–180 exact tests per frame, roughly twice the time. Not needed: a Bézier curve stays inside the box of its control points, which `Polyline.draw()` computes anyway; cached with the box, they would be checked like the others.
+- For scale: 1,000 animated shapes cost about 0.4 ms per pointer frame headless (probably 0.15–0.2 ms in the browser); 5,000 animated shapes about an eighth of their drawing. Hit testing runs only while the pointer is over the stage.
+
+### 22.3 Proposal: Every Shape Gets Events, CSS Decides the Rest
+
+Not decided; replaces the registration model of §4.2 and the `interactive` attribute if it is.
+
+| | Proposal |
+|---|---|
+| **Box pre-check** | build it in any case (with the cache and the control-point box for smooth polylines): it also makes today's hit test of registered shapes faster |
+| **D10** | every shape is hit-tested, for clicks **and** for hover / move: React `onClick` and `onPointerEnter`, Svelte, Solid and delegated listeners on the stage work as written, without an attribute. `isHovered` / `isPressed` work for every shape; the auto-registration of `pxl._interactiveIds`, `pxl._stickyIds` and `releaseIfUnused()` (`design/2026-10-15_interactive_state_auto_registration_plan.md`) and the listener counts of §4.2 are then only needed to decide which **events** to dispatch (§4.5), not which shapes to test |
+| **D5** | no `interactive`. The hand cursor: as today for `pxl-on-click` / `-down` / `-up` and `isPressed` readers, plus a direct `click` / `pointerdown` / `pointerup` listener (§4.2 counts); otherwise the shape's CSS `cursor` (`style="cursor: pointer"`, Tailwind `cursor-pointer`), read when the pointer enters the shape, not per frame |
+| **D11** | CSS `pointer-events: none` on a shape lets clicks and hover through to the shape below, as in the DOM. It is inherited, so `<pxl-layer style="pointer-events: none">` or a group with it takes a whole subtree out of hit testing: the way to keep large decorative scenes (particles) out of it |
+
+### 22.4 Open Before Building
+
+- **Reading `pointer-events` without `getComputedStyle()` in every frame:** a cached value per element, refreshed when its `class` or `style` changes. Inheritance makes it harder: a class change on a group or layer changes its children. Options to check: read it for the hit candidates only (1–4 per frame, §22.2), or a `MutationObserver` on `class` / `style` within the stage that marks the cache stale. Measure `getComputedStyle()` on a `display: none` shape element first.
+- **Text before its first draw:** its box comes from `draw()` (`_hasInk` false until then), so it can't be hit before it was drawn once; the same as today.
+- **Custom shapes without `getBoundingBox()`** keep the exact test (slower, correct); the shape authoring plan (`design/2026-10-17_shape_authoring_plan.md`) already asks for `getBoundingBox()`.
+- **Tests that change:** T-E3 (§11: a shape without a listener is not hit-tested) inverts; T-E2 drops `interactive`; the "every shape registered" break of §21 no longer fails a test. New: hit with the box pre-check equals the exact test (the prototype's check as a test), `pointer-events: none` on a shape and on a layer, CSS `cursor`.
+- **Docs:** `docs/frameworks.html` without the `interactive` rule; the AI guide's "Interactive Elements".
 

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hover hit test of every shape</title>
+  <script src="/dist/pxl.min.js"></script>
+</head>
+<body>
+<pre id="out">running…</pre>
+<div id="box" style="width: 1000px"></div>
+<script>
+// Can every shape be hover-tested in every pointer frame? (design/2026-10-30_framework_compatibility_plan.md §22,
+// decisions D5, D10, D11). Compares, per pointer frame, the exact test of InteractionEngine.process() run on every
+// shape ("today": what process() would cost if every shape were registered) with a bounding-box pre-check in the
+// shape's local space before the exact test ("box first"), and the same with the inverse matrix and the box cached
+// per shape until its matrix changes ("box cached"). Frames are driven by hand; only the hit test is timed.
+// Run it headless (Chrome with --dump-dom and --virtual-time-budget, as tools/run_tests.js does) or open it via the
+// dev server and read the <pre> (it runs synchronously on load, so a hidden tab is fine). Takes a few minutes.
+const out = [];
+const log = (...lines) => out.push(...lines);
+
+// --- Deterministic random numbers (same scene every run) ---
+let seed = 1;
+const rand = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+const pick = (a) => a[Math.floor(rand() * a.length)];
+
+// --- Scene: groups (rotated, or rotating with t) holding a mix of shapes ---
+// smoothShare: share of polylines with smooth="true" (they always get the exact test)
+function buildScene(n, animated, smoothShare = 0.5) {
+  seed = 7;
+  const groups = [];
+  const perGroup = n / 10;
+  for (let g = 0; g < 10; g++) {
+    const shapes = [];
+    for (let i = 0; i < perGroup; i++) {
+      const x = Math.round(rand() * 900 - 450), y = Math.round(rand() * 460 - 230);
+      const kind = pick(['circle', 'circle', 'rect', 'rect', 'line', 'text', 'polyline', 'ring']);
+      if (kind === 'circle') shapes.push(`<pxl-circle x="${x}" y="${y}" r="${4 + Math.round(rand() * 8)}" fill="#3b82f6"></pxl-circle>`);
+      if (kind === 'ring') shapes.push(`<pxl-circle x="${x}" y="${y}" r="${6 + Math.round(rand() * 8)}" stroke="#f97316" strokewidth="3"></pxl-circle>`);
+      if (kind === 'rect') shapes.push(`<pxl-rect x="${x}" y="${y}" w="${8 + Math.round(rand() * 16)}" h="${6 + Math.round(rand() * 10)}" rotate="${Math.round(rand() * 90)}" anchor="${pick(['center', 'top-left', 'bottom'])}" fill="#22c55e"></pxl-rect>`);
+      if (kind === 'line') shapes.push(`<pxl-line x="${x}" y="${y}" x2="${Math.round(rand() * 30 - 15)}" y2="${Math.round(rand() * 30 - 15)}" stroke="#334155" strokewidth="3" arrowend="${rand() < 0.3 ? 'auto' : 0}"></pxl-line>`);
+      if (kind === 'text') shapes.push(`<pxl-text x="${x}" y="${y}" text="Ab" size="14" fill="#0f172a"></pxl-text>`);
+      if (kind === 'polyline') shapes.push(`<pxl-polyline x="${x}" y="${y}" points="0,0; 12,-10; 24,0" stroke="#a855f7" strokewidth="2" smooth="${rand() < smoothShare}"></pxl-polyline>`);
+    }
+    const rotate = animated ? `t * ${5 + g}` : `${g * 7}`;
+    groups.push(`<pxl-group x="500" y="250" rotate="${rotate}" zoom="${0.8 + g * 0.04}">${shapes.join('')}</pxl-group>`);
+  }
+  document.getElementById('box').innerHTML = `<pxl-stage alwaysrender ratio="2"><pxl-layer>${groups.join('')}</pxl-layer></pxl-stage>`;
+  const stage = document.querySelector('#box pxl-stage');
+  stage.resize();
+  stage.render(1);
+  const shapes = [...stage.querySelectorAll('pxl-circle, pxl-rect, pxl-line, pxl-text, pxl-polyline')];
+  shapes.sort(pxl.sortByDOMPosition);
+  return { stage, shapes };
+}
+
+// --- Exact test of one shape: the per-element body of InteractionEngine.process() ---
+const hitStack = new Array(50);
+function exactHit(stage, el) {
+  let curr = el, stackLen = 0;
+  while (curr && curr !== stage) {
+    if (curr.attributeValues) {
+      if (curr.attributeValues.hidden) return false;
+      hitStack[stackLen++] = curr;
+    }
+    curr = curr.parentElement;
+  }
+  const ctx = pxl.dummyCtx;
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  for (let j = stackLen - 1; j >= 0; j--) pxl.applyTransformState(ctx, stage.unit, hitStack[j].attributeValues);
+  pxl._hitResult = false;
+  ctx.beginPath();
+  try {
+    if (el.hitTest) el.hitTest(ctx, stage.unit);
+    else el.draw(ctx, stage.unit, 0);
+  } catch (e) {
+    // counts as not hit, like process()
+  } finally {
+    ctx.restore();
+  }
+  return pxl._hitResult;
+}
+
+// --- Box pre-check in the shape's local space ---
+const inverse = new Float64Array(6);
+const arrowSize = (value, sw) => (value === 'auto' ? sw * 3.6 : value > 0 ? value : 0);
+// How far the stroke can reach beyond the path's box: half the width, a miter up to miterlimit × half the width,
+// a square cap's corner, arrowheads
+function strokePad(el) {
+  if (!el.isStroked()) return 0;
+  const v = el.attributeValues, sw = v.strokewidth;
+  let pad = sw / 2 * (v.linejoin === 'miter' ? Math.max(1, v.miterlimit) : 1);
+  if (v.linecap === 'square') pad = Math.max(pad, sw * 0.71);
+  if (v.arrowstart !== undefined) pad += Math.max(arrowSize(v.arrowstart, sw), arrowSize(v.arrowend, sw));
+  return pad;
+}
+// Shapes whose box doesn't bound their path are always tested exactly: smooth polylines (the curve can leave the
+// points' box), the grid (infinite), custom shapes without getBoundingBox()
+function needsExact(el) {
+  return (el.localName === 'pxl-polyline' && el.attributeValues.smooth !== false) ||
+    el.localName === 'pxl-grid' || el.getBoundingBox === pxl.Shape.prototype.getBoundingBox;
+}
+function inBox(el, mx, my) {
+  if (needsExact(el)) return true;
+  pxl.Matrix.invert(inverse, el.getGlobalMatrix());
+  const lx = inverse[0] * mx + inverse[2] * my + inverse[4];
+  const ly = inverse[1] * mx + inverse[3] * my + inverse[5];
+  const b = el.getBoundingBox();
+  const pad = strokePad(el);
+  return lx >= b.left - pad && lx <= b.right + pad && ly >= b.top - pad && ly <= b.bottom + pad;
+}
+
+// Cached variant, as engine code would do it: per shape the inverse matrix and the padded box, recomputed only when
+// the global matrix version changes or the shape is animated (its box may change). Expando fields: prototype only.
+function inBoxCached(el, mx, my) {
+  let c = el._hitCache;
+  if (c === undefined) {
+    c = el._hitCache = new Float64Array(11);
+    c[0] = -1;
+    el._hitExact = needsExact(el);
+  }
+  if (el._hitExact) return true;
+  el.getGlobalMatrix(); // brings _globalMatrixVersion up to date (walks the parents' versions)
+  const version = el._globalMatrixVersion;
+  if (c[0] !== version || el.isAnimated) {
+    pxl.Matrix.invert(inverse, el._globalMatrix);
+    for (let k = 0; k < 6; k++) c[1 + k] = inverse[k];
+    const b = el.getBoundingBox(), pad = strokePad(el);
+    c[7] = b.left - pad; c[8] = b.right + pad; c[9] = b.top - pad; c[10] = b.bottom + pad;
+    c[0] = version;
+  }
+  const lx = c[1] * mx + c[3] * my + c[5];
+  const ly = c[2] * mx + c[4] * my + c[6];
+  return lx >= c[7] && lx <= c[8] && ly >= c[9] && ly <= c[10];
+}
+function hitBoxCached(stage, shapes, mx, my) {
+  pxl._hitX = mx * stage.unit; pxl._hitY = my * stage.unit;
+  for (let i = shapes.length - 1; i >= 0; i--) {
+    const el = shapes[i];
+    if (!inBoxCached(el, mx, my)) continue;
+    exactCalls++;
+    if (exactHit(stage, el)) return el;
+  }
+  return null;
+}
+
+// --- The two hit tests over all shapes, topmost first; pointer (mx, my) in stage units ---
+function hitToday(stage, shapes, mx, my) {
+  pxl._hitX = mx * stage.unit; pxl._hitY = my * stage.unit;
+  for (let i = shapes.length - 1; i >= 0; i--) if (exactHit(stage, shapes[i])) return shapes[i];
+  return null;
+}
+let exactCalls = 0;
+function hitBoxFirst(stage, shapes, mx, my) {
+  pxl._hitX = mx * stage.unit; pxl._hitY = my * stage.unit;
+  for (let i = shapes.length - 1; i >= 0; i--) {
+    const el = shapes[i];
+    if (!inBox(el, mx, my)) continue;
+    exactCalls++;
+    if (exactHit(stage, el)) return el;
+  }
+  return null;
+}
+
+// --- 1. Same result: random points and points on shape centers ---
+function verify(n, animated) {
+  const { stage, shapes } = buildScene(n, animated);
+  let points = 0, mismatches = 0, hits = 0, t = 1;
+  for (let k = 0; k < 150; k++) {
+    if (animated) { t += 1 / 60; stage.render(t); }
+    const tries = [[rand() * 1000, rand() * 500]];
+    // a point near a random shape's drawn position, so that many tries land on shapes
+    const s = pick(shapes), m = s.getGlobalMatrix();
+    tries.push([m[4] + rand() * 6 - 3, m[5] + rand() * 6 - 3]);
+    for (const [mx, my] of tries) {
+      const a = hitToday(stage, shapes, mx, my), b = hitBoxFirst(stage, shapes, mx, my), c = hitBoxCached(stage, shapes, mx, my);
+      points++;
+      if (a) hits++;
+      if (a !== b || a !== c) mismatches++;
+    }
+  }
+  return { points, hits, mismatches };
+}
+
+// --- 2. Time per pointer frame: the pointer walks across the stage ---
+function timeScene(n, animated, smoothShare) {
+  const { stage, shapes } = buildScene(n, animated, smoothShare);
+  seed = 99;
+  const FRAMES = 60;
+  const path = Array.from({ length: FRAMES }, (_, i) => [500 + 450 * Math.cos(i / 40), 250 + 220 * Math.sin(i / 23)]);
+  const result = {};
+  for (const [name, fn] of [['today', hitToday], ['box first', hitBoxFirst], ['box cached', hitBoxCached]]) {
+    const runs = [];
+    let t = 1;
+    for (let r = 0; r < 3; r++) {
+      let ms = 0;
+      exactCalls = 0;
+      for (let i = 0; i < FRAMES; i++) {
+        if (animated) { t += 1 / 60; stage.render(t); } // matrices change every frame, as on a real page
+        const a = performance.now();
+        fn(stage, shapes, path[i][0], path[i][1]);
+        ms += performance.now() - a;
+      }
+      runs.push(ms / FRAMES);
+    }
+    runs.sort((x, y) => x - y);
+    result[name] = { best: runs[0], median: runs[1], exactPerFrame: name === 'today' ? n : exactCalls / FRAMES };
+  }
+  // The box check alone, for every shape (no exact test, no early stop at the topmost hit)
+  for (const [name, check] of [['boxOnly', inBox], ['boxOnlyCached', inBoxCached]]) {
+    const boxRuns = [];
+    for (let r = 0; r < 3; r++) {
+      let ms = 0;
+      let tt = 1;
+      for (let i = 0; i < FRAMES; i++) {
+        if (animated) { tt += 1 / 60; stage.render(tt); }
+        const a = performance.now();
+        let inside = 0;
+        for (let k = shapes.length - 1; k >= 0; k--) if (check(shapes[k], path[i][0], path[i][1])) inside++;
+        ms += performance.now() - a;
+      }
+      boxRuns.push(ms / FRAMES);
+    }
+    boxRuns.sort((x, y) => x - y);
+    result[name] = boxRuns[1];
+  }
+  // Frame time of the drawing, for scale
+  let t = 1;
+  const a = performance.now();
+  for (let i = 0; i < 20; i++) { t += 1 / 60; stage.querySelector('pxl-layer').isDirty = true; stage.render(t); }
+  result.draw = (performance.now() - a) / 20;
+  return result;
+}
+
+log('1. Same shape found by all three tests');
+for (const [n, animated] of [[1000, false], [1000, true], [5000, false]]) {
+  const v = verify(n, animated);
+  log(`  ${String(n).padStart(5)} shapes, ${animated ? 'rotating' : 'static  '}: ${v.points} points, ${v.hits} on a shape, ${v.mismatches} different`);
+}
+
+log('', '2. Hit test of every shape per pointer frame (ms; median of 3 runs × 60 frames)');
+for (const smoothShare of [0.5, 0]) {
+  log(`  ${smoothShare ? 'with smooth polylines (about 6 % of the shapes, always tested exactly)' : 'without smooth polylines'}:`);
+  for (const [n, animated] of [[1000, false], [1000, true], [5000, false], [5000, true]]) {
+    const r = timeScene(n, animated, smoothShare);
+    const f = (x) => x.toFixed(3);
+    log(`    ${String(n).padStart(5)} shapes, ${animated ? 'rotating' : 'static  '}: today ${f(r.today.median)}` +
+      ` | box first ${f(r['box first'].median)} | box cached ${f(r['box cached'].median)}` +
+      ` | exact tests per frame ${r['box first'].exactPerFrame.toFixed(1)}` +
+      ` | all box checks: ${f(r.boxOnly)}, cached ${f(r.boxOnlyCached)} | drawing the frame ${r.draw.toFixed(2)}`);
+  }
+}
+
+document.getElementById('box').innerHTML = '';
+document.getElementById('out').textContent = out.join('\n');
+</script>
+</body>
+</html>
