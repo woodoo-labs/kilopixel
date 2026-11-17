@@ -320,6 +320,7 @@
         <div class="callout-info">
           <p class="callout-title">Never Use % Signs!</p>
           <p class="callout-body">By sticking to pure numbers (e.g., <code>fill="hsl(120, 100, 50)"</code>), you can animate colors with math and time variables. The engine handles all the CSS units behind the scenes.</p>
+          <p class="callout-body"><code>hsl()</code> and <code>hsla()</code> are functions, so they need no quotes, also in the color list of a gradient: <code>fill="linear(0, [hsl(200, 80, 50), hsl(260, 80, 50)])"</code>.</p>
           <p class="callout-body"><strong>Exception:</strong> If you choose to use JavaScript <strong>backticks</strong> (template literals) for string interpolation (e.g., <code>fill="`hsl(${t*90}, 100%, 50%)`"</code>), your math and time variables are evaluated natively by JavaScript. Because this bypasses Kilopixel's formatting helpers, you <strong>must</strong> include the <code>%</code> signs manually so the final generated string is valid CSS.</p>
         </div>
 

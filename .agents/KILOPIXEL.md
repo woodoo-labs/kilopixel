@@ -214,7 +214,7 @@ Has four hidden (non-enumerable) properties:
    - `"true"` / `"false"` → boolean
    - names of `Math` constants (`"PI"`) → their number
    - static `rgb(...)` / `rgba(...)` with numbers only → returned as a string
-4. **One quoted string** (`'Hello World'`) → the text between the quotes
+4. **One quoted string** (`'Hello World'`) → the text between the quotes. Escapes aren't read: `'It\'s'` stays raw (write `It's` without quotes, or backticks); a written `\n` reaches the text shape, which breaks the line there (decided 2026-11-17, `design/2026-11-02_string_literals_in_expressions_plan.md` §7)
 5. **Numbers** (`"100"`, `"-50"`, `"0.25"`) → `Number`
 6. **Anything that looks like code** (a regex finds `t`, `ref.`, `toLocal(`, parentheses, brackets, operators next to numbers, or `+` next to a quote) → compiled
 7. Anything else → returned as a string
@@ -222,11 +222,12 @@ Has four hidden (non-enumerable) properties:
 ### Expression Compilation (`compileExpression`)
 
 1. **Cache lookup**: `staticCache` and `animationCache` (Maps keyed by the source string). Each keeps at most `pxl.COMPILE_CACHE_LIMIT` (2,000) entries; `pxl.cacheExpression()` drops the oldest when a new one comes (Maps keep insertion order). A framework that rebuilds an expression string on every render would otherwise grow them without end; elements keep their compiled functions, and a dropped string only compiles again
-2. **CSS percentages**: `50%` isn't valid JavaScript, so `hsl(120, 50%, 40%)` becomes `hsl(120, '50%', '40%')` (not inside template literals)
-3. **Time dependency**: a regex finds `t` (not after a `.`) or a call of a time driver; `toLocal(` sets `usesToLocal`
-4. **`pxl.rewriteExpression()`** (shared with `on*` handlers): `ref.player.x` → `ref.player?.x` (no TypeError before the element connects), `toLocal(` → `pxl.toLocal(this, `
-5. **Dependencies**: a regex collects every `ref.<id>`
-6. **Return**: without the word `return`, the code is wrapped in `return …;`
+2. **Code and quoted text**: `pxl.splitStringLiterals()` splits the string once into code and string literals (`'…'`, `"…"`, the text of `` `…` ``; the code inside `${…}` counts as code). Steps 3–7 read and rewrite only the code, so words in quoted text stay text: `'Press return: ' + ref.score.value` keeps its automatic `return`, `` `ref.angle.value = ${ref.angle.value}` `` shows `ref.angle.value` as written, a lone `t` in text doesn't make the expression animated, and `ref.<id>` in text adds no dependency
+3. **CSS percentages**: `50%` isn't valid JavaScript, so `hsl(120, 50%, 40%)` becomes `hsl(120, '50%', '40%')`. In code only: a quoted CSS color (`'hsla(280, 80%, 30%, 0.06)'` in a gradient's colors) stays as written
+4. **Time dependency**: a regex finds `t` (not after a `.`) or a call of a time driver; `toLocal(` sets `usesToLocal`
+5. **`pxl.rewriteExpression()`** (shared with `on*` handlers, also code only): `ref.player.x` → `ref.player?.x` (no TypeError before the element connects), `toLocal(` → `pxl.toLocal(this, `
+6. **Dependencies**: a regex collects every `ref.<id>`
+7. **Return**: without the word `return` in the code, the code is wrapped in `return …;`
 
 Then two branches:
 

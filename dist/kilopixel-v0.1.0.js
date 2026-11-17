@@ -513,13 +513,60 @@ pxl.cacheExpression = function(cache, source, value) {
   cache.set(source, value);
 };
 
-// Rewrites shared by attribute expressions and on* handlers:
+// Splits an expression into code and string literals, so rewrites and checks can skip quoted text
+// (design/2026-11-02_string_literals_in_expressions_plan.md). Even indices are code, odd indices are literals with
+// their quotes. In a template literal, the code inside ${…} is code again: 'a' + `b${x}c` → ['', "'a'", ' + ', '`b${',
+// 'x', '}c`', '']. Regex literals and comments aren't recognized; attribute expressions don't use them.
+// Compile time only: it runs once per distinct string, so its allocations don't matter.
+pxl.splitStringLiterals = function(str) {
+  const parts = [];
+  // One entry per open ${…}: the depth of { } inside it, so its own } can be told apart from an object literal's
+  const templateDepths = [];
+  let start = 0;
+  let i = 0;
+  while (i < str.length) {
+    const char = str[i];
+    const depth = templateDepths.length;
+    const endsTemplateCode = char === '}' && depth > 0 && templateDepths[depth - 1] === 0;
+    if (char === '\'' || char === '"' || char === '`' || endsTemplateCode) {
+      parts.push(str.slice(start, i));
+      if (endsTemplateCode) templateDepths.pop();
+      const quote = endsTemplateCode ? '`' : char;
+      let end = i + 1;
+      while (end < str.length && str[end] !== quote) {
+        if (str[end] === '\\') end++;
+        else if (quote === '`' && str[end] === '$' && str[end + 1] === '{') break;
+        end++;
+      }
+      if (str[end] === '$') {
+        end += 2;
+        templateDepths.push(0);
+      } else {
+        end++; // an unterminated string runs to the end
+      }
+      parts.push(str.slice(i, end));
+      start = i = end;
+    } else {
+      if (depth > 0 && char === '{') templateDepths[depth - 1]++;
+      if (depth > 0 && char === '}') templateDepths[depth - 1]--;
+      i++;
+    }
+  }
+  parts.push(str.slice(start));
+  return parts;
+};
+
+// Rewrites shared by attribute expressions and on* handlers, applied to code only (quoted text stays as written):
 // ref.a.b → ref.a?.b (the referenced element may not be connected yet),
 // toLocal( → pxl.toLocal(this, (the caller is the element the code belongs to)
 pxl.rewriteExpression = function(str) {
-  return str
-    .replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.')
-    .replace(/\btoLocal\(/g, 'pxl.toLocal(this, ');
+  const parts = pxl.splitStringLiterals(str);
+  for (let i = 0; i < parts.length; i += 2) {
+    parts[i] = parts[i]
+      .replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.')
+      .replace(/\btoLocal\(/g, 'pxl.toLocal(this, ');
+  }
+  return parts.join('');
 };
 
 // Warns about toLocal() property names that don't exist (e.g. 'skewy', which isn't unique, or a typo).
@@ -591,29 +638,33 @@ pxl.compileExpression = function(str) {
   if (pxl.animationCache.has(str)) return pxl.animationCache.get(str);
 
   try {
-    // CSS percentages aren't valid JavaScript: hsl(120, 50%, 40%) → hsl(120, '50%', '40%')
-    let source = str;
-    if (source.includes('%') && source[0] !== '`') {
-      source = source.replace(/(\d+(?:\.\d+)?)%(\s*[,)])/g, '\'$1%\'$2');
+    // The checks below read only the code outside string literals, so words in quoted text don't count
+    // ('Press return: ' + …, a lone t, ref.a.b or 80% inside a string)
+    const parts = pxl.splitStringLiterals(str);
+    let unquoted = '';
+    for (let i = 0; i < parts.length; i += 2) {
+      // CSS percentages aren't valid JavaScript: hsl(120, 50%, 40%) → hsl(120, '50%', '40%')
+      parts[i] = parts[i].replace(/(\d+(?:\.\d+)?)%(\s*[,)])/g, '\'$1%\'$2');
+      unquoted += parts[i] + ' ';
     }
 
-    const isAnimated = pxl.timeDriverRegex.test(source);
+    const isAnimated = pxl.timeDriverRegex.test(unquoted);
     // toLocal readers are also re-evaluated when their own space moves (design/2026-10-26_tolocal_fix_plan.md)
-    const usesToLocal = /\btoLocal\(/.test(source);
-    if (usesToLocal) pxl.checkToLocalProperties(str);
-    source = pxl.rewriteExpression(source);
+    const usesToLocal = /\btoLocal\(/.test(unquoted);
+    if (usesToLocal) pxl.checkToLocalProperties(str); // reads the full string: the property name is a string
+    const source = pxl.rewriteExpression(parts.join(''));
 
     const deps = [];
     const refRegex = /\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
     let match;
-    while ((match = refRegex.exec(source)) !== null) {
+    while ((match = refRegex.exec(unquoted)) !== null) {
       const fullKey = `ref.${match[1]}`;
       if (!deps.includes(fullKey)) deps.push(fullKey);
     }
     const hasVars = deps.length > 0;
 
     // A plain expression gets a return; code with its own return statements is used as written
-    const code = /\breturn\b/.test(source) ? source : `return ${source};`;
+    const code = /\breturn\b/.test(unquoted) ? source : `return ${source};`;
 
     if (isAnimated || hasVars) {
       // The outer function runs once (destructures the scope); the returned closure runs per evaluation

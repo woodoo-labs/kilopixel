@@ -134,7 +134,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Reference**: `design/2026-10-25_refs_across_spaces_note.md` (hub: index of all related documents in §0, ideas in §7)
 - **Finding**: refs (`ref.v.value`, `ref.box.x`, `ref.zig.pN`) are values in the target's space, not positions; only `toLocal()` crosses spaces, and it maps only an element's frame (`x`, `y`, `tx`, `ty`, `rotate`, `scalex`, `scaley`, `skewx`, `zoom`), not points inside it.
 - **Works today**: shared space; track one point via `dx` / `dy` + `toLocal(ref, 'tx')`; anchors (`pxl-group` or a drawn / hidden dot) in the shape's space; phantom groups as spatial variables; sizes and angles by composition (`ref.c.r * toLocal(ref.c, 'zoom')`).
-- **Possible later**: `toLocal(ref.el, 'x', px, py)` point form; `toLocal(ref.zig, 'pN')` sugar (relative mode); lazy evaluated `ref.zig.points`; list-expression rule for `points="ref.zig.points"` with a quote-aware parser (could reuse `pxl.splitStringLiterals` from §34).
+- **Possible later**: `toLocal(ref.el, 'x', px, py)` point form; `toLocal(ref.zig, 'pN')` sugar (relative mode); lazy evaluated `ref.zig.points`; list-expression rule for `points="ref.zig.points"` with a quote-aware parser (could reuse `pxl.splitStringLiterals`, built with §34).
 - **Docs**: `ref.<id>.pN` stays internal; teach the patterns in the walkthrough's `toLocal` section.
 - **Ideas 2026-10-26** (note §7): point names `xN` / `yN` counted from 1 like `<pxl-line>` (§7.1); `toLocal` maps the whole point even when asked for one coordinate (§7.2); one-argument syntax `toLocal(ref.zig.x3)` via a compiler rewrite (§7.3, preferred); the reader-line rule with example (§7.4); "always hit the point" by letting the attribute decide the space, about 40 lines, scoped (§7.5); flip-the-roles workaround (§7.6); other frameworks (§7.7); over-engineering check, next step is a plan with one real use case (§7.8).
 - **Older ideas**: mapping raw points such as the mouse into a group (`design/archive/local_coordinates_implementation_plan.md`, never implemented; continued as the point form in the note).
@@ -178,13 +178,12 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Docs**: afterwards `mask.html` shapes get fill + stroke and the standard ghosts; the "Ghosts of fill-only shapes" note in DOCS_STANDARDS.md goes.
 - **Related**: builds on always save / restore (`design/2026-11-07_safe_shape_render_plan.md`, built 2026-11-07); build before §14 (`paintorder`); plan §9.
 
-## 34. String Literals in Expressions
-- **Status**: 🟡 **Proposed** (2026-11-02; code drafted and checked in Node, implementation postponed)
-- **Reference**: `design/2026-11-02_string_literals_in_expressions_plan.md`
-- **Problem**: the compiler's regexes also match inside quoted text. `'Press return: ' + ref.score.value` renders nothing (the word "return" stops the auto `return`), `` `ref.angle.value = ${ref.angle.value}` `` shows `ref.angle?.value`, a lone `t` in text makes it animated, and `radial(0.8, ['hsla(280, 80%, 30%, 0.06)', 'transparent'])` fails with a SyntaxError (the CSS `%` sanitizer quotes `80%` inside the string; confirmed 2026-11-05). Escaped quotes (`'It\'s'`) aren't read.
-- **Idea**: `pxl.splitStringLiterals` splits an expression into code and literals once at compile time; rewrites and checks only read the code parts. No per-frame cost.
-- **Open**: plan §7 (scope of the fix, a `docs/text.html` section on quoting, a snippet convention in DOCS_STANDARDS.md).
-- **Related**: `pxl.trackInteractiveRefs` (`js/interaction.js`) also scans the raw string, so `ref.btn.isHovered` inside quoted text registers the shape (an accepted false positive); the splitter could fix that too. §25 could reuse it for a quote-aware `points` parser.
+## 34. String Literals in Expressions: Docs Left
+- **Status**: 💬 **Discussion** (2026-11-17: the compiler fix is built, plan ✅; only docs ideas are left)
+- **Reference**: `design/2026-11-02_string_literals_in_expressions_plan.md` (§5, §7)
+- **Built 2026-11-17**: quoted text in expressions is text, not code (`pxl.splitStringLiterals`): `return`, `ref.a.b`, a lone `t` and `%` inside strings no longer change the code. Escapes in a lone quoted string (`'It\'s'`) were left out on purpose (plan §7).
+- **Open (docs)**: a `docs/text.html` section on what the `text` attribute accepts (plain text, single quotes, backticks for apostrophes and values, `\n`); a snippet quoting convention in DOCS_STANDARDS.md.
+- **Related**: `pxl.trackInteractiveRefs` (`js/interaction.js`) still scans the raw string, so `ref.btn.isHovered` inside quoted text registers the shape (an accepted false positive); the splitter could fix that too. §25 could reuse it for a quote-aware `points` parser.
 
 ## 35. Log-P-H Diagram & Scale Interface (`mapX` / `mapY`)
 - **Status**: 💬 **Discussion** (spec 2026-07-19, never built)

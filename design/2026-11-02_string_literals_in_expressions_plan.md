@@ -1,10 +1,10 @@
 # String Literals in Expressions
 
-- **Status**: 🟡 **Proposed** (2026-11-02). The code in §3 was drafted and checked in Node (§3.6); implementation postponed. Open decisions in §7.
+- **Status**: ✅ **Implemented** (2026-11-17, §3.1–3.3 built, escapes §3.4 left out; decisions §7, results §8; the docs ideas of §5 stay in TODO §34)
 - **Date**: 2026-11-02
 - **Related**: `design/archive/quote-aware-percent-sanitizer.md` (2026-07-13, never implemented; this plan covers its case), `docs/text.html` (`text` attribute: when to quote)
 - **Target Implementation**: `js/compiler.js` (`rewriteExpression`, `compileExpression`, `parseAttributeValue`)
-- **Tests** (committed): `tests/index.html`, new section "Expression compiler: string literals"
+- **Tests** (committed): `tests/unit.html`, section "Compiler: string literals" (§8)
 
 ---
 
@@ -237,8 +237,15 @@ Verification: all tests in `tests/index.html` pass; `docs/text.html`, `docs/mapp
 
 ---
 
-## 7. Open Decisions
+## 7. Decisions (2026-11-17)
 
-- Implement as in §3 (all checks skip strings), or only the rewrite and the escapes (§3.1, 3.2, 3.4)? Recommended: all of §3; the `return` check is the case where text disappears.
-- `docs/text.html`: new section on what the `text` attribute accepts (§5), and where.
-- `docs/DOCS_STANDARDS.md`: quoting convention for snippets (§5).
+- **Scope:** §3.1–3.3 as drafted: every check and rewrite reads only the code. The `return` check is the case where text disappears without a warning; the `?.` rewrite and the lone `t` come with it.
+- **Colors:** the `%` quoting runs on code only, so `'hsla(280, 80%, 30%, 0.06)'` as a gradient stop works now. It comes free with the split: keeping the old behavior would have needed extra code. The docs keep the rule "no % signs" and say that `hsl()` / `hsla()` are functions that need no quotes, also in a gradient's colors (`docs/fill.html` §3 callout).
+- **Escapes (§3.4): left out.** Only a lone quoted string with an escaped quote breaks (`'It\'s'` shows raw), and simpler forms exist for every case: `It's` without quotes, backticks, or an expression (`'It\'s ' + …` works, JavaScript reads the escape). §3.4 would have sent every quoted string with a backslash to JavaScript, which changes what backslashes mean in quoted text (`'C:\dir'`). `\n` works in every form without it: the text shape turns a written `\n` into a line break. Its known test was removed.
+- **Docs left for later** (TODO §34): `docs/text.html`, a section on what the `text` attribute accepts (§5); `docs/DOCS_STANDARDS.md`, a quoting convention for snippets.
+
+## 8. Built 2026-11-17
+
+- **Code** (`js/compiler.js`): `pxl.splitStringLiterals` as in §3.1; `pxl.rewriteExpression` (also used by `on*` handlers) rewrites code parts only (§3.2); `compileExpression` runs the `%` quoting, the time, `toLocal`, dependency and `return` checks on the code parts (§3.3). `pxl.checkToLocalProperties` still reads the full string. 59.30 KB minified (+0.60 KB), 17.65 KB gzipped (+0.22 KB). No per-frame cost: the split runs once per distinct expression string.
+- **Tests** (`tests/unit.html`, section "Compiler: string literals", replacing the five `test.known()`): the splitter (template nesting, object literals in `${…}`, escapes, an unterminated string), the rows of §1 and §6 as rendered values, no time or ref dependency from quoted text, `%` in code and in strings, the quoted gradient stop, and the rewrite of code only. `'It\'s'` has no test (left out above). The `tests/index.html` section proposed in §6 went to `tests/unit.html`, where the compiler tests live since the testing plan.
+- **Reference:** `.agents/KILOPIXEL.md`, Compilation Pipeline step 4 and Expression Compilation steps 2–7.

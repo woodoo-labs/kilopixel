@@ -174,36 +174,71 @@
     });
 
     // ===================================================================
-    // Compiler: known problems with quoted text in expressions (TODO §34, design/2026-11-02_string_literals_in_expressions_plan.md)
+    // Compiler: quoted text in expressions is text, not code
+    // (design/2026-11-02_string_literals_in_expressions_plan.md)
     // ===================================================================
-    section('Compiler: string literals (known, TODO §34)');
+    section('Compiler: string literals');
 
-    test.known('a quoted "return" doesn\'t stop the automatic return', () =>
-      withRefs({ uScore: { value: 5 } }, () => {
-        const value = at("'Press return: ' + ref.uScore.value", 0);
-        if (value !== 'Press return: 5') throw new Error(`got ${show(value)}`);
-      }));
+    // An attribute string as the engine reads it, evaluated at t
+    const valueAt = (source, t) => {
+      const parsed = pxl.parseAttributeValue(source);
+      return typeof parsed === 'function' ? parsed(t) : parsed;
+    };
 
-    test.known('"ref.x.y" inside a template text is not rewritten to "ref.x?.y"', () =>
-      withRefs({ uAngle: { value: 30 } }, () => {
-        const value = at('`ref.uAngle.value = ${ref.uAngle.value}`', 0);
-        if (value !== 'ref.uAngle.value = 30') throw new Error(`got ${show(value)}`);
-      }));
+    table('splitStringLiterals: code at even indices, literals with their quotes at odd ones', [
+      ["'a' + `b${x}c`", ['', "'a'", ' + ', '`b${', 'x', '}c`', '']],
+      ['`a${`in${y}`}b`', ['', '`a${', '', '`in${', 'y', '}`', '', '}b`', '']],
+      ['`${ {a: 1}.a } z`', ['', '`${', ' {a: 1}.a ', '} z`', '']],
+      ["'it\\'s' + x", ['', "'it\\'s'", ' + x']],
+      ['"say" + \'hi\'', ['', '"say"', ' + ', "'hi'", '']],
+      ["'open", ['', "'open", '']],
+      ['{a: 1}.a', ['{a: 1}.a']]
+    ], ([input, expected]) => [pxl.splitStringLiterals(input), expected]);
 
-    test.known('a lone "t" inside quoted text doesn\'t make the expression animated', () => {
-      const fn = pxl.parseAttributeValue("'Item t: ' + ref.uA.x");
-      if (fn.isTimeDependent) throw new Error('compiled as time-dependent');
-    });
+    table('words in quoted text stay text: return, ref.a.b and a lone t', [
+      ["'Press return: ' + ref.uScore.value", 'Press return: 5'],
+      ['`Press return: ${ref.uScore.value}`', 'Press return: 5'],
+      ['`press return`', 'press return'],
+      ["'ref.uAngle.value = ' + ref.uAngle.value", 'ref.uAngle.value = 30'],
+      ['`ref.uAngle.value = ${ref.uAngle.value}`', 'ref.uAngle.value = 30'],
+      ['`rotate = ref.uAngle.value`', 'rotate = ref.uAngle.value'],
+      ["'rotate = ref.uAngle.value'", 'rotate = ref.uAngle.value'],
+      ['`rotate = ${ref.uAngle.value}`', 'rotate = 30'],
+      ["'Item t: ' + ref.uScore.value", 'Item t: 5'],
+      ['`${ {a: ref.uScore.value}.a } ref.x.y`', '5 ref.x.y'],
+      ['if (t < 10) { return \'early\'; } else { return \'late\'; }', 'early']
+    ], ([source, expected]) => withRefs({ uScore: { value: 5 }, uAngle: { value: 30 } }, () => [valueAt(source, 1), expected]));
 
-    test.known('a CSS percentage inside a quoted color is left alone', () => {
+    table('quoted text adds no time or ref dependency', [
+      ['`wait t seconds`', 'wait t seconds'],
+      ["'Item t: ' + ref.uA.x", { fn: true, time: false, deps: ['ref.uA'], toLocal: false }],
+      ["'ref.uB.y = ' + ref.uA.x", { fn: true, time: false, deps: ['ref.uA'], toLocal: false }],
+      ['`value: ${ref.uA.x}`', { fn: true, time: false, deps: ['ref.uA'], toLocal: false }],
+      ["'toLocal(ref.uB) = ' + toLocal(ref.uA, 'x')", { fn: true, time: false, deps: ['ref.uA'], toLocal: true }],
+      ['`${t} seconds`', TIME_FN]
+    ], ([input, expected]) => [kind(pxl.parseAttributeValue(input)), expected]);
+
+    table('CSS percentages in code are quoted; inside a string they stay as written', [
+      ['hsl(t * 36, 80%, 50%)', 'hsl(36,80%,50%)'],
+      ['hsla((t / 5) % 360, 100%, 60%, 0.5)', 'hsla(0.2,100%,60%,0.5)'],
+      ['`hsl(${t * 36}, 80%, 50%)`', 'hsl(36, 80%, 50%)'],
+      ['`${hsl(t * 36, 80%, 50%)}`', 'hsl(36,80%,50%)'],
+      ['t * 100 % 1000', 100]
+    ], ([source, expected]) => [valueAt(source, 1), expected]);
+
+    test('a CSS color with % signs as a quoted gradient stop compiles', () => {
       let value;
-      warnings(() => { value = pxl.parseAttributeValue("radial(0.8, ['hsla(280, 80%, 30%, 0.06)', 'transparent'])"); });
-      if (!value || value.isGradient !== true) throw new Error(`got ${show(value)}`);
+      const seen = warnings(() => { value = pxl.parseAttributeValue("radial(0.8, ['hsla(280, 80%, 30%, 0.06)', 'transparent'])"); });
+      if (seen.length || value?.isGradient !== true || value.stops[0].color !== 'hsla(280, 80%, 30%, 0.06)') {
+        throw new Error(`got ${show(value)}, warnings: ${seen.join(' | ')}`);
+      }
     });
 
-    test.known('an escaped quote inside a quoted string is read', () => {
-      const value = pxl.parseAttributeValue("'It\\'s'");
-      if (value !== "It's") throw new Error(`got ${show(value)}`);
+    test('rewriteExpression (attributes and on* handlers): only code is rewritten', () => {
+      const source = "ref.a.b + 'ref.a.b' + `${ref.c.d} ref.e.f` + toLocal(ref.g, 'x') + 'toLocal('";
+      const expected = "ref.a?.b + 'ref.a.b' + `${ref.c?.d} ref.e.f` + pxl.toLocal(this, ref.g, 'x') + 'toLocal('";
+      const actual = pxl.rewriteExpression(source);
+      if (actual !== expected) throw new Error(`got ${actual}`);
     });
 
     // ===================================================================
