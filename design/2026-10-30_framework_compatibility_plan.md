@@ -262,7 +262,7 @@ The core deliverable: the DOM contract as automated tests, **without any framewo
 | T-E4 | §4.1 | enter / leave sequence: `pointerover`, `pointerenter`, `pointerout`, `pointerleave` in order; `pointerenter` doesn't bubble |
 | T-E5 | §5 | with the canvas in a shadow root: `mouseX` / `mouseY` correct (offset retargeting) |
 | T-E6 | §4.3 | `pxl-on-click` handler runs; a leftover `onclick` warns once |
-| T-E7 | §4.1 | a listener that calls `setAttribute` on another shape during dispatch: no error, change drawn next frame |
+| T-E7 | §4.1 | a listener that calls `setAttribute` on another shape during dispatch: no error, change drawn in the same frame (since `design/2026-11-17_pointer_frame_order_plan.md`; first written as "next frame") |
 | T-M1 | C8 | move a circle to another group in the same task (`appendChild` to the new parent): registered once, new matrix (extends the existing matrix test) |
 | T-M2 | C8 | remove and re-insert a whole stage: layers resized, animation resumes, listeners still work |
 | T-M3 | C9 | `layer.innerHTML = '<pxl-circle …>'`: canvas survives (shadow root), new circle drawn |

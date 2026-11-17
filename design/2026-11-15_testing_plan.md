@@ -93,7 +93,7 @@ Shared by all test pages (a small `tests/runner.js`, loaded by each page):
 
 | Area | Level | Cases |
 |---|---|---|
-| Compiler | 1 | words, numbers (`.5`, `-0`, `1e3`), hex colors, static `rgb()`, quoted strings, template literals, `t` alone, drivers, `ref.*`, `toLocal(`, `return` code blocks, CSS `%` inside functions; the flags `isTimeDependent`, `variableDependencies`, `usesToLocal`; the known string-literal problems of TODO §34 as `test.known` |
+| Compiler | 1 | words, numbers (`.5`, `-0`, `1e3`), hex colors, static `rgb()`, quoted strings, template literals, `t` alone, drivers, `ref.*`, `toLocal(`, `return` code blocks, CSS `%` inside functions; the flags `isTimeDependent`, `variableDependencies`, `usesToLocal`; the known string-literal problems of TODO §34 as `test.known` (fixed 2026-11-17, see §13) |
 | Rule A | 2 | every observed attribute of every element: bare, removed, `hidden="false"`, boolean presence rule, `<pxl-var value="">` |
 | Interaction | 2 | enter / leave / down / up / click order, `isPressed` while pressed and after release outside, auto-registration by a reader added before and after the shape, lazy unregister, sticky ids, cursor for clickable vs. hover-only, hidden shapes not hit, handler errors (exists) |
 | Lifecycle | 2 | move a shape between layers and groups, remove and re-insert a stage (resize, animation resumes), elements added in a handler, `cloneNode()`, late `id` and renamed `id` (`test.known` until the framework plan's step 1) |
@@ -166,7 +166,7 @@ Decided 2026-11-16, as recommended; D2 changed after measuring (§5.2).
 66 tests (61 counted, 5 known), about 1.5 s headless. One test per table: every row is checked and all mismatches are listed in one message. Sections:
 
 - **Compiler: classification** – `pxl.parseAttributeValue()` for plain values (hex, numbers including `.5` and `1e3`, words, `true` / `false`, `Math` constants, static `rgb()`, quoted strings), static expressions (arithmetic, arrays, `hsl()` with CSS percentages, template literals, filter helpers), and the flags of compiled functions (`isTimeDependent`, `variableDependencies`, `usesToLocal`); a `t` after a dot or inside a word; the shared cache; `random()` without `t` evaluated once; compiled functions evaluated with refs; a compile error (warns once, plain string); an unknown `toLocal()` property (warns at compile time).
-- **Compiler: string literals** – the five problems of TODO §34 as `test.known()`: a quoted `return`, `ref.x.y` in template text, a lone `t` in quoted text, a CSS percentage inside a quoted color, an escaped quote. All five fail as described there, so they are confirmed.
+- **Compiler: string literals** – the five problems of TODO §34 as `test.known()`: a quoted `return`, `ref.x.y` in template text, a lone `t` in quoted text, a CSS percentage inside a quoted color, an escaped quote. All five fail as described there, so they are confirmed. Fixed 2026-11-17 (`design/2026-11-02_string_literals_in_expressions_plan.md` §8): the first four are tests now; the escaped quote was left out on purpose (plan §7), and its test was removed.
 - **Time drivers** – each driver at chosen times; `glitch()` holds its value; `time()` for every unit against a fixed local date.
 - **Scope helpers** – color functions, filter helpers and their units, `clamp` / `lerp` / `map`, `pxl.scaleResponsiveFilter`, `pxl.hasLineDash`, `pxl.arcEndRadians`, `pxl.isFullTurn`.
 - **Gradients** – `pxl.parseStops`, the descriptors of `linear()` / `radial()` (1, 3, 6 values) / `conic()`, `pxl.resolveRadius` for numbers, sides, points on the box (also `center-top`), the CSS keywords, the minimum for a center on the edge.
@@ -174,7 +174,7 @@ Decided 2026-11-16, as recommended; D2 changed after measuring (§5.2).
 - **Matrices and toLocal** – `pxl.Matrix.updateLocal` per step (also 333.3 exact), `multiply` / `invert`, a singular matrix; `pxl.toLocal` with mock reader and target objects: offset targets, rotate and zoom, a rotated reader parent, a mirror, `skewx`, a moved and scaled reader parent, and the cases that return 0.
 - **Rule A** – generated from `observedAttributes` and `static defaults` for `pxl-circle`, `pxl-ellipse`, `pxl-rect`, `pxl-line`, `pxl-polyline`, `pxl-text`, `pxl-grid`, `pxl-group`, `pxl-layer`, `pxl-var`: every attribute has a default; a bare attribute gives `true` (booleans), `''` (`<pxl-var>` value) or the default; a removed attribute gives the default, also after an animated value, and leaves nothing animated. Plus polyline `points`, shape handlers and the stage's `ratio` / `alwaysrender`.
 
-Found: nothing new. Apart from the five known problems of TODO §34, every function behaves as `.agents/KILOPIXEL.md` describes. A new attribute without a default, or one that doesn't fall back on removal, now fails a test without anyone writing one for it.
+Found: nothing new. Apart from the five known problems of TODO §34 (fixed 2026-11-17, see above), every function behaves as `.agents/KILOPIXEL.md` describes. A new attribute without a default, or one that doesn't fall back on removal, now fails a test without anyone writing one for it.
 
 ## 14. Step 4 Built 2026-11-16: Interaction, Lifecycle, Known Bugs
 

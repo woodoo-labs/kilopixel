@@ -146,9 +146,9 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Open**: name (`space` / `frame`), origin (drawing origin / pivot), scope (shapes and groups / also layers), hidden target.
 
 ## 29. Two-Phase Frame: Evaluate Everything, Then Draw
-- **Status**: 💬 **Discussion** (2026-11-13: step 1 built, plan §7.4; steps 2–4 not decided)
+- **Status**: 💬 **Discussion** (2026-11-17: pointer readers fixed, plan §7.4; 2026-11-13: step 1 built; steps 2–4 not decided)
 - **Reference**: `design/2026-11-12_two_phase_frame_plan.md` (hub: the plans that depend on it and what changes for each in §6, suggested order in §7)
-- **Built (step 1)**: the frame evaluates all layers first, then draws them. Readers drawn before their targets (toLocal, `ref.*` without `t`) no longer lag a frame; no measurable cost.
+- **Built (step 1)**: the frame evaluates all layers first, then draws them. Readers drawn before their targets (toLocal, `ref.*` without `t`) no longer lag a frame; no measurable cost. Readers of the pointer and of hover / press states kept the lag until 2026-11-17, when hit testing moved to the start of the frame (`design/2026-11-17_pointer_frame_order_plan.md`).
 - **Idea, still open**: change-based dirty flags (step 2): a layer redraws only when a value really changed (a `floor(t)` clock redraws once per second, a finished `clamp()` animation stops redrawing), and the stage, not the drawing, keeps the loop alive.
 - **Open**: redraws saved by step 2, hidden subtrees, readers that use `t` and refs (dependency order with a cycle rule recommended, plan §3.1.1), order of broadcasts; plan §4.
 - **Steps**: (1) split evaluation from drawing (built), (2) change-based dirty flags and keep-alive in the stage, (3) `t` readers, hidden subtrees, (4) the dependent plans; plan §7.2.

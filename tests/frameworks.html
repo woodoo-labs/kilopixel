@@ -90,14 +90,14 @@
         bubbles: true, composed: true, cancelable: true, clientX: rect.left + x * stage.unit, clientY: rect.top + y * stage.unit
       }));
     }
-    // The pointer enters the stage and moves to (x, y); the frame after it hit-tests
+    // The pointer enters the stage and moves to (x, y); the next frame hit-tests at its start, then draws
     function hover(stage, x, y) {
       if (!stage.attributeValues.isHovered) stage.dispatchEvent(new PointerEvent('pointerenter'));
       pointerAt(stage, 'pointermove', x, y);
       stage.render(1);
     }
-    // down / up / click at the current pointer position. The frame after it runs too, so the test holds whether
-    // the event is dispatched when it arrives (D4) or in the next frame.
+    // down / up / click at the current pointer position. A frame runs after it, so the test holds whether the event
+    // is dispatched when it arrives (D4) or at the start of the next frame.
     function input(stage, type) {
       pointerAt(stage, type, stage.attributeValues.mouseX, stage.attributeValues.mouseY);
       stage.render(1);
@@ -472,7 +472,9 @@
       if (wrong.length) throw new Error(wrong.join(', '));
     });
 
-    test.known('T-E7: a listener that changes another shape during dispatch causes no error; the change is drawn in the next frame (W1)', () =>
+    // Hover events come from process() at the start of the frame (design/2026-11-17_pointer_frame_order_plan.md), so
+    // a listener's change is drawn in the frame of the event
+    test.known('T-E7: a listener that changes another shape during dispatch causes no error; the change is drawn in the same frame (W1)', () =>
       withStage(oneLayer(`${CIRCLE('fwChanger')}<pxl-rect id="fwChanged" x="50" y="50" w="60" h="60" fill="#00f"></pxl-rect>`), (stage) => {
         const errors = [];
         const onError = (e) => errors.push(e.message);
@@ -484,7 +486,6 @@
         } finally {
           window.removeEventListener('error', onError);
         }
-        stage.render(2);
         const [r, , b] = pixelAt(stage.querySelector('pxl-layer'), 80, 80);
         if (calls.length !== 1 || errors.length || r < 200 || b > 50) throw new Error(`listener ${calls.length}×, errors [${errors}], pixel ${r}, ${b}`);
       }));

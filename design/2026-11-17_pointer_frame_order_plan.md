@@ -69,5 +69,5 @@ With B the hit test uses the values from the last update, which are the pixels o
 
 ## 6. Found on the Way
 
-- **Heap growth in the frame loop:** 600 hand-driven frames of the bench scene grow the heap by about 1.6–3.6 MB, in both orders and also without any pointer input (800 animated circles). Not caused by this change and not investigated; likely candidates are the numbers returned by compiled expressions and canvas API calls. Worth a measurement of its own before a fix is planned.
+- **Heap growth in the frame loop:** 600 hand-driven frames of the bench scene grow the heap by about 1.6–3.6 MB, in both orders and also without any pointer input (800 animated circles). Not caused by this change. Measured 2026-11-17 (`scratch/heap/` (not kept)): the engine's drawing and the canvas calls allocate nothing; the bytes are the values expressions return (12 B per decimal result, about 130–240 B per color or gradient built with `t`, about 400 B per animated filter). Even 800 animated colors cause one minor GC every 1.4 s of 0.4–1.0 ms, and the frame-time spikes are the same without any garbage. Nothing to fix.
 - **`process()` costs about 0.22–0.32 ms per call with 200 interactive shapes** headless (software rendering, `isPointInPath` per shape), also over empty space. Unchanged by this plan; the frame time in the browser pane suggests less there.
