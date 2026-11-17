@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><script src="/dist/pxl.min.js"></script></head>
+<body><div id="box" style="width: 1000px"></div><pre id="out"></pre>
+<script>
+// Heap growth of InteractionEngine.process() alone (the code that moved to the start of the frame), 10,000 calls.
+// Run headless with --js-flags=--expose-gc --enable-precise-memory-info.
+const rects = [];
+for (let i = 0; i < 200; i++) rects.push(`<pxl-rect id="bR${i}" x="${25 + (i % 20) * 50}" y="${25 + Math.floor(i / 20) * 50}" w="40" h="40" fill="ref.bR${i}.isHovered ? 'red' : 'blue'"></pxl-rect>`);
+document.getElementById('box').innerHTML = `<pxl-stage id="bS" alwaysrender ratio="2"><pxl-layer>${rects.join('')}</pxl-layer></pxl-stage>`;
+const S = document.getElementById('bS');
+S.resize();
+S.render(0);
+const ia = S.interaction;
+const ev = { type: 'pointermove', offsetX: 0, offsetY: 0 };
+ia.handleEvent({ type: 'pointerenter' });
+function calls(n, scenario) {
+  for (let i = 0; i < n; i++) {
+    ev.offsetX = scenario === 'switch' ? (i % 2 ? 30 : 280) : scenario === 'empty' ? 1 + (i % 3) : 20 + (i % 10);
+    ev.offsetY = scenario === 'empty' ? 1 : 30;
+    ia.handleEvent(ev);
+    ia.process();
+  }
+}
+const lines = [`interactive shapes: ${ia._interactiveElements.length}`];
+for (const scenario of ['steady', 'switch', 'empty']) {
+  for (let round = 0; round < 3; round++) {
+    calls(500, scenario);
+    gc(); gc();
+    const before = performance.memory.usedJSHeapSize;
+    const start = performance.now();
+    calls(10000, scenario);
+    const ms = performance.now() - start;
+    const after = performance.memory.usedJSHeapSize;
+    lines.push(`${scenario.padEnd(6)} heap growth over 10,000 process() calls: ${String(after - before).padStart(7)} bytes, ${(ms / 10000 * 1000).toFixed(1)} µs per call`);
+  }
+}
+document.getElementById('out').textContent = lines.join('\n');
+</script></body></html>

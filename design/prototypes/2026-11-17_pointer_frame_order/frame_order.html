@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pointer Frame Order | Kilopixel prototype</title>
+  <script src="/dist/pxl.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 20px; }
+    pre { background: #f4f4f5; padding: 12px; }
+    #box { width: 1000px; }
+  </style>
+</head>
+<body>
+  <h1>Pointer frame order</h1>
+  <p>design/2026-11-17_pointer_frame_order_plan.md. Compares the engine's order (InteractionEngine.process() at the start
+    of Stage.render()) with the old order (process() after drawing), recreated here by moving the call. Frames are driven
+    by hand with stage.render(t), so the page also works in a hidden or background tab.</p>
+  <pre id="out">running…</pre>
+  <div id="box"></div>
+<script>
+const box = document.getElementById('box');
+const origRender = pxl.Stage.prototype.render;
+const origProcess = pxl.InteractionEngine.prototype.process;
+const noop = function() {};
+
+// The two orders for one stage. 'old' skips the call at the start and runs process() after drawing.
+function orders(stage) {
+  const ia = stage.interaction;
+  return {
+    engine: (t) => origRender.call(stage, t),
+    old: (t) => {
+      ia.process = noop;
+      try { origRender.call(stage, t); } finally { delete ia.process; }
+      origProcess.call(ia);
+    }
+  };
+}
+function makeStage(id, content) {
+  box.innerHTML = `<pxl-stage id="${id}" alwaysrender ratio="2">${content}</pxl-stage>`;
+  const stage = box.querySelector('pxl-stage');
+  stage.resize();
+  stage.interaction.handleEvent({ type: 'pointerenter' });
+  return stage;
+}
+// A reused event object: the harness itself allocates nothing per frame
+const ev = { type: 'pointermove', offsetX: 0, offsetY: 0 };
+function moveTo(stage, x, y) { ev.offsetX = x * stage.unit; ev.offsetY = y * stage.unit; stage.interaction.handleEvent(ev); }
+function recordDrawn(id, key, drawn) {
+  const node = document.getElementById(id);
+  node.render = function(ctx, u, t) { drawn[id] = node.attributeValues[key]; return pxl.Shape.prototype.render.call(this, ctx, u, t); };
+}
+
+const lines = [];
+let t = 1;
+
+// 1. In which frame each reader shows the change
+{
+  const stage = makeStage('foS', `<pxl-layer>
+    <pxl-var id="foM" value="ref.foS.mouseX + t * 0"></pxl-var>
+    <pxl-line id="foLine" x1="ref.foS.mouseX" y1="100" x2="0" y2="0" stroke="red"></pxl-line>
+    <pxl-circle id="foDot" x="ref.foM.value" y="100" r="5" fill="red"></pxl-circle>
+    <pxl-rect id="foBtn" x="800" y="250" w="100" h="100" fill="ref.foBtn.isHovered ? 'red' : 'blue'"></pxl-rect>
+    <pxl-rect id="foBtnT" x="200" y="250" w="100" h="100" fill="ref.foBtnT.isHovered && t >= 0 ? 'red' : 'blue'"></pxl-rect>
+  </pxl-layer>`);
+  const drawn = {};
+  recordDrawn('foLine', 'x1', drawn);
+  recordDrawn('foDot', 'x', drawn);
+  recordDrawn('foBtn', 'fill', drawn);
+  recordDrawn('foBtnT', 'fill', drawn);
+  lines.push('1. Drawn values per frame (pointer moves in frames 1 and 3)');
+  for (const [name, frame] of Object.entries(orders(stage))) {
+    moveTo(stage, 100, 100);
+    for (let i = 0; i < 3; i++) frame(t += 1 / 60);
+    lines.push(`  ${name}:`);
+    [[850, 300], null, [250, 300], null].forEach((m, i) => {
+      if (m) moveTo(stage, ...m);
+      frame(t += 1 / 60);
+      lines.push(`    f${i + 1}${m ? ' move to ' + m[0] : '            '}: line.x1 ${drawn.foLine.toFixed(0)}, dot.x ${drawn.foDot.toFixed(0)}, ` +
+        `hover reactive ${drawn.foBtn}, hover with t ${drawn.foBtnT}`);
+    });
+  }
+}
+
+// 2. Frames and layer draws for one pointer move on an idle page
+{
+  const stage = makeStage('fiS', `
+    <pxl-layer><pxl-line x1="ref.fiS.mouseX" y1="0" x2="500" y2="250" stroke="red"></pxl-line></pxl-layer>
+    <pxl-layer><pxl-rect id="fiBtn" x="800" y="250" w="100" h="100" fill="ref.fiBtn.isHovered ? 'red' : 'blue'"></pxl-rect></pxl-layer>`);
+  const layers = [...stage.querySelectorAll('pxl-layer')];
+  let clears = 0;
+  for (const layer of layers) {
+    const ctx = layer._canvas.getContext('2d'), original = ctx.clearRect;
+    ctx.clearRect = function(...args) { clears++; return original.apply(this, args); };
+  }
+  lines.push('', '2. One pointer move on an idle page: frames until nothing is dirty, layer draws');
+  for (const [name, frame] of Object.entries(orders(stage))) {
+    for (const [label, from, to] of [['outside the button', 300, 320], ['onto the button', 300, 850], ['off the button', 850, 300]]) {
+      moveTo(stage, from, 300);
+      for (let i = 0; i < 4; i++) frame(t += 1 / 60);
+      moveTo(stage, to, 300);
+      clears = 0;
+      let frames = 0;
+      do { frame(t += 1 / 60); frames++; } while (frames < 5 && layers.some((layer) => layer.isDirty));
+      lines.push(`  ${name.padEnd(6)} ${label.padEnd(19)}: ${frames} frame(s), ${clears} layer draw(s)`);
+    }
+  }
+}
+
+// 3. Frame time: 800 animated circles, 200 hover rects, a mouse reader; best and median of 5 runs of 300 frames
+{
+  const rects = [], circles = [];
+  for (let i = 0; i < 200; i++) {
+    rects.push(`<pxl-rect id="ftR${i}" x="${25 + (i % 20) * 50}" y="${25 + Math.floor(i / 20) * 50}" w="40" h="40" fill="ref.ftR${i}.isHovered ? 'red' : 'blue'"></pxl-rect>`);
+  }
+  for (let i = 0; i < 800; i++) circles.push(`<pxl-circle x="${(i * 37) % 1000}" y="${(i * 53) % 500}" r="5 + wave(${1 + i % 5}) * 5" fill="#888"></pxl-circle>`);
+  const stage = makeStage('ftS', `<pxl-layer>${circles.join('')}</pxl-layer>
+    <pxl-layer>${rects.join('')}<pxl-line x1="ref.ftS.mouseX" y1="0" x2="500" y2="250" stroke="red"></pxl-line></pxl-layer>`);
+  const run = (frame, scenario) => {
+    for (let i = 0; i < 30; i++) { moveTo(stage, 30, 30); frame(t += 1 / 60); }
+    const start = performance.now();
+    for (let i = 0; i < 300; i++) {
+      // switch: the pointer jumps between two rects every frame (enter, leave, broadcasts); steady: moves inside one
+      moveTo(stage, scenario === 'switch' ? (i % 2 ? 30 : 280) : 20 + (i % 10), 30);
+      frame(t += 1 / 60);
+    }
+    return (performance.now() - start) / 300;
+  };
+  const results = {};
+  const variants = orders(stage);
+  for (let round = 0; round < 5; round++) {
+    for (const scenario of ['switch', 'steady']) {
+      for (const name of Object.keys(variants)) ((results[name] ||= {})[scenario] ||= []).push(run(variants[name], scenario));
+    }
+  }
+  const fmt = (a) => { const s = a.slice().sort((x, y) => x - y); return `best ${s[0].toFixed(3)} ms, median ${s[2].toFixed(3)} ms`; };
+  lines.push('', '3. Frame time (ms per frame)');
+  for (const [name, r] of Object.entries(results)) lines.push(`  ${name.padEnd(6)} switch ${fmt(r.switch)} | steady ${fmt(r.steady)}`);
+}
+
+box.innerHTML = '';
+document.getElementById('out').textContent = lines.join('\n');
+</script>
+</body>
+</html>

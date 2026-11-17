@@ -1385,6 +1385,11 @@ pxl.Stage = class Stage extends HTMLElement {
     const start = performance.now();
     pxl._frame++;
 
+    // Pointer first: broadcast the stage's pointer values, hit-test against the picture on screen, update the
+    // hover / press states and run the handlers. Their readers are then drawn in this frame, not the next one
+    // (design/2026-11-17_pointer_frame_order_plan.md).
+    this.interaction.process();
+
     if (this._isOrderDirty) {
       this._layers.sort(pxl.sortByDOMPosition);
       this._variables.sort(pxl.sortByDOMPosition);
@@ -1414,8 +1419,6 @@ pxl.Stage = class Stage extends HTMLElement {
     this.perfAccumulated += ms;
     if (ms > this.perfMax) this.perfMax = ms;
     this.perfFrames++;
-
-    this.interaction.process();
   }
 };
 

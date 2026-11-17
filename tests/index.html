@@ -1539,7 +1539,7 @@
 
     // ===================================================================
     // Interaction: hover, press, click, handlers, registration, cursor (KILOPIXEL.md "Interaction System").
-    // Pointer events go to the layer canvas, as the browser sends them; hit testing runs at the end of render().
+    // Pointer events go to the layer canvas, as the browser sends them; hit testing runs at the start of render().
     // ===================================================================
     section('Interaction');
 
@@ -1557,7 +1557,7 @@
         bubbles: true, composed: true, clientX: rect.left + x * stage.unit, clientY: rect.top + y * stage.unit
       }));
     }
-    // The pointer enters the stage and moves to (x, y); the frame after it hit-tests
+    // The pointer enters the stage and moves to (x, y); the next frame hit-tests at its start, then draws
     function hover(stage, x, y) {
       if (!stage.attributeValues.isHovered) stage.dispatchEvent(new PointerEvent('pointerenter'));
       pointerAt(stage, 'pointermove', x, y);
@@ -1704,6 +1704,49 @@
           return stage.style.cursor;
         });
         if (cursors.join(',') !== 'pointer,default,pointer,default') throw new Error(`cursors: ${cursors}`);
+      }));
+
+    // The pointer is handled at the start of the frame, so its readers are drawn in the frame of the event
+    // (design/2026-11-17_pointer_frame_order_plan.md). Handled after drawing, they were one frame late.
+    test('interaction: readers of the stage pointer are drawn at the new position in the frame of the move, with and without t', () =>
+      withStage(`<div style="width: 500px"><pxl-stage id="ixPtrStage" alwaysrender><pxl-layer>
+        <pxl-line id="ixPtrLine" x1="ref.ixPtrStage.mouseX" y1="0" x2="500" y2="300" stroke="#000"></pxl-line>
+        <pxl-var id="ixPtrVar" value="ref.ixPtrStage.mouseX + t * 0"></pxl-var>
+        <pxl-circle id="ixPtrDot" x="ref.ixPtrVar.value" y="100" r="5" fill="#000"></pxl-circle>
+      </pxl-layer></pxl-stage></div>`, (stage) => {
+        recordDrawn('ixPtrLine', 'x1');
+        recordDrawn('ixPtrDot', 'x');
+        for (const x of [200, 700, 300]) {
+          hover(stage, x, 300);
+          const mouseX = stage.attributeValues.mouseX, line = el('ixPtrLine').drawn.at(-1), dot = el('ixPtrDot').drawn.at(-1);
+          if (Math.abs(mouseX - x) > 1 || line !== mouseX || dot !== mouseX) {
+            throw new Error(`pointer moved to ${x} (mouseX ${mouseX}): line drawn from ${line}, dot drawn at ${dot}`);
+          }
+        }
+      }));
+
+    test('interaction: hover feedback is drawn in the frame the pointer enters or leaves, with and without t', () =>
+      withStage(ixStage(`
+        <pxl-circle id="ixFbBtn" x="300" y="300" r="80" fill="ref.ixFbBtn.isHovered ? '#f00' : '#00f'"></pxl-circle>
+        <pxl-circle id="ixFbBtnT" x="700" y="300" r="80" fill="ref.ixFbBtnT.isHovered && t >= 0 ? '#f00' : '#00f'"></pxl-circle>`),
+      (stage) => {
+        recordDrawn('ixFbBtn', 'fill');
+        recordDrawn('ixFbBtnT', 'fill');
+        for (const [x, expected] of [[300, '#f00,#00f'], [700, '#00f,#f00'], [950, '#00f,#00f']]) {
+          hover(stage, x, 300);
+          const drawn = `${el('ixFbBtn').drawn.at(-1)},${el('ixFbBtnT').drawn.at(-1)}`;
+          if (drawn !== expected) throw new Error(`pointer at ${x}: drawn ${drawn}, expected ${expected}`);
+        }
+      }));
+
+    test('interaction: a handler\'s setAttribute() is drawn in the frame of the click, and the layer is idle afterwards', () =>
+      withStage(ixStage(`<pxl-circle id="ixSetBtn" x="300" y="300" r="80" fill="#00f" onclick="this.setAttribute('fill', '#f00')"></pxl-circle>`),
+      (stage) => {
+        recordDrawn('ixSetBtn', 'fill');
+        hover(stage, 300, 300);
+        input(stage, 'click');
+        const drawn = el('ixSetBtn').drawn.at(-1), dirty = stage.querySelector('pxl-layer').isDirty;
+        if (drawn !== '#f00' || dirty) throw new Error(`drawn in the click frame: ${drawn}; layer still dirty: ${dirty}`);
       }));
 
     // ===================================================================

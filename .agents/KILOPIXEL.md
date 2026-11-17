@@ -79,6 +79,7 @@ graph TD
 ```
 Stage.requestRender() → requestAnimationFrame → Stage.render(t)
   ├─ pxl._frame++
+  ├─ interaction.process()  → pointer broadcast, hit testing, state updates, handlers (drawn in this frame)
   ├─ Sort layers and stage-level variables by DOM position (if dirty)
   ├─ For each stage-level <pxl-var>: update(t); if one is animated → stage.requestRender()
   ├─ Update phase, for each layer (if isDirty || isAnimated): layer.update(t)
@@ -96,8 +97,7 @@ Stage.requestRender() → requestAnimationFrame → Stage.render(t)
   │   │   └─ ctx.restore()
   │   ├─ ctx.restore()
   │   └─ Heartbeat: if the layer's own attributes are animated → stage.requestRender()
-  ├─ Performance metrics accumulation (published by pxl.perf's own 1-second timer, not here)
-  └─ interaction.process()  → hit testing, state updates, event dispatch
+  └─ Performance metrics accumulation (published by pxl.perf's own 1-second timer, not here)
 ```
 
 ---
@@ -689,7 +689,7 @@ So the hit area is the shape's own path, the same one it draws: no separate coll
 - **Lazy unregister**: on leave / release, a shape without `on*` handlers is unregistered once nobody reads its states any more (no subscribers left on `ref.<id>`). References from time-dependent expressions and from `on*` handlers don't subscribe, so those ids are **sticky** (`pxl._stickyIds`) and stay registered until the shape is disconnected.
 - Limitations: dynamic ids and bracket notation (`ref[name].isHovered`, `ref['btn'].isHovered`, `ref.btn['isHovered']`) are not detected. False positives (e.g. a string literally containing `ref.btn.isHovered`) only cause a harmless extra registration.
 - Pointer events (`pointermove`, `pointerdown`, `pointerup`, `click`, `pointerenter`, `pointerleave`) are handled by the InteractionEngine via `handleEvent()`
-- Hit testing runs in `process()`, called at the end of each `stage.render()`
+- Hit testing runs in `process()`, called at the **start** of each `stage.render()`, before the update phase: it first broadcasts the stage's pointer values (`mouseX`, `mouseY`, `isHovered`) if a pointer event arrived, then hit-tests against the values of the last update (the picture on screen), updates `isHovered` / `isPressed` and runs the handlers. Their readers (with or without `t`) and whatever a handler changes are drawn in the same frame. Called after drawing, all of these were one frame late (`design/2026-11-17_pointer_frame_order_plan.md`)
 - Mouse coordinates are converted to logical units: `offsetX / stage.unit`
 - **Cursor**: the stage shows `cursor = 'pointer'` only over **clickable** shapes (an `onclick` / `ondown` / `onup` handler, or `isPressed` referenced somewhere — `pxl._pressableIds`); hover-only shapes keep `'default'`. The DOM style is only written when the cursor actually changes.
 
@@ -783,7 +783,7 @@ The reader doesn't set `skewy` and keeps `zoom` at `1` (or uses it on purpose: `
 
 **Targets**: shapes, groups and layers (anything with a frame). `ref.<stage>` returns `0` (the stage has no frame), a not yet connected `ref.<id>` returns `0`, and a `pxl-var` returns `NaN` (it observes only `value`, so its matrix is built from `undefined`).
 
-**Draw order**: every frame evaluates all layers first and draws them afterwards (two phases, [Per-Frame Render Pipeline](#per-frame-render-pipeline)). A reader drawn before its target (an earlier layer, or earlier in the same layer) gets the target's value through the broadcast during the update phase, so it is drawn with this frame's value, whatever the DOM order. This holds for toLocal and plain `ref.*` readers. Remaining limit: a reader whose expression also uses `t` doesn't subscribe and reads its target when it is evaluated itself; placed before an animated target, it still lags one frame (`design/2026-11-12_two_phase_frame_plan.md` §3.1.1, step 3).
+**Draw order**: every frame evaluates all layers first and draws them afterwards (two phases, [Per-Frame Render Pipeline](#per-frame-render-pipeline)). A reader drawn before its target (an earlier layer, or earlier in the same layer) gets the target's value through the broadcast during the update phase, so it is drawn with this frame's value, whatever the DOM order. This holds for toLocal and plain `ref.*` readers, and for readers of the stage's pointer and of `isHovered` / `isPressed` (handled at the start of the frame). Remaining limit: a reader whose expression also uses `t` doesn't subscribe and reads its target when it is evaluated itself; placed before an animated target, it still lags one frame (`design/2026-11-12_two_phase_frame_plan.md` §3.1.1, step 3).
 
 Note: The compiler rewrites `toLocal(` to `pxl.toLocal(this, ` at compile time.
 
@@ -828,7 +828,7 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 - `unit = clientWidth / 1000`
 - **Built-in `IntersectionObserver`**: Automatically pauses requestAnimationFrame loops when the stage is scrolled out of the viewport (or out of an overflow scroll container like a carousel), and resumes rendering immediately upon re-entry. Can be overridden with `alwaysrender="true"`.
 - Manages its `_layers` array, sorts by DOM position when dirty
-- `render(t)` runs two phases ([Per-Frame Render Pipeline](#per-frame-render-pipeline)): first its stage-level variables and every dirty or animated layer evaluate (`if (layer.isDirty || layer.isAnimated) layer.update(t)`), then every layer that needs it draws (`if (layer.needsRender()) layer.render(u, t)`). `pxl._frame` counts the frames
+- `render(t)` first handles the pointer (`interaction.process()`, [Interaction System](#interaction-system)), then runs two phases ([Per-Frame Render Pipeline](#per-frame-render-pipeline)): first its stage-level variables and every dirty or animated layer evaluate (`if (layer.isDirty || layer.isAnimated) layer.update(t)`), then every layer that needs it draws (`if (layer.needsRender()) layer.render(u, t)`). `pxl._frame` counts the frames
 - Manages its stage-level `<pxl-var>` elements in `_variables` (`registerVariable()` / `unregisterVariable()`)
 - Delegates all pointer events to its `InteractionEngine`
 - Registers with `pxl.perf` for telemetry
@@ -1419,7 +1419,7 @@ A slider then sets one value (`document.getElementById('x0').setAttribute('value
    ├─ An animated element invalidates its layer while it is evaluated (heartbeat)
    ├─ An animated layer requests the next frame at the end of its render (heartbeat)
    ├─ An animated stage-level <pxl-var> (the stage requests the next frame after evaluating it)
-   ├─ A pointer event fires
+   ├─ A pointer event fires (handled at the start of the next frame)
    ├─ A reactive variable broadcasts
    └─ A DOM attribute changes
 
@@ -1429,6 +1429,9 @@ A slider then sets one value (`document.getElementById('x0').setAttribute('value
 3. stage.render(t):
    ├─ Record performance: start = performance.now()
    ├─ pxl._frame++  ← per-frame state is stored as the frame it belongs to (_failedFrame, a layer's _updateFrame)
+   ├─ interaction.process()  ← pointer first: broadcast mouseX / mouseY / isHovered of the stage, hit testing
+   │   against the picture on screen, isHovered / isPressed, on* handlers; their readers update now and are
+   │   drawn in this frame
    ├─ Sort layers and stage-level variables by DOM position (if _isOrderDirty)
    ├─ For each stage-level <pxl-var>: variable.update(t)  ← before the layers, so readers in every
    │   layer see this frame's value; if one is animated → stage.requestRender()
@@ -1464,8 +1467,7 @@ A slider then sets one value (`document.getElementById('x0').setAttribute('value
    │       │       └─ variable: nothing
    │       ├─ if has transforms: ctx.restore()
    │       └─ HEARTBEAT: if layer.isAnimated → stage.requestRender()  (without isDirty)
-   ├─ Record performance: ms = performance.now() - start  (published once per second by pxl.perf's timer)
-   └─ interaction.process()  ← hit testing and event dispatch
+   └─ Record performance: ms = performance.now() - start  (includes hit testing; published once per second by pxl.perf's timer)
 ```
 
 ### Dirty-Flag Optimization

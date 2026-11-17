@@ -1,6 +1,6 @@
 # Declarative HTML Output Element (`<pxl-out>`)
 
-- **Status**: 🟡 **Proposed** (revised 2026-10-17, first draft 2026-08-02)
+- **Status**: 🟡 **Proposed** (2026-11-17, §3.3 pointer timing; revised 2026-10-17, first draft 2026-08-02)
 - **Date**: 2026-08-02 (revised 2026-10-17: based on `PxlNode`, Rule A, write-on-change, stage pause / `alwaysrender`, accessibility)
 - **Related**: `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, `static defaults`), `design/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`), `.agents/TODO.md` §5
 - **Target Implementation**: new `js/elements/out.js` (after `variable.js` in `build.js`)
@@ -104,7 +104,7 @@ The class is named `Output`, not `Out`: engine classes are global names (`Shape`
 | `<pxl-var>` with a static / reactive value, slider-driven attributes | on change |
 | Animated attribute (`ref.spinner.rotate` with `rotate="t * 90"`) | every frame **while its stage renders** |
 | `ref.<stage>.fps`, `renderAvg`, `renderMax` | once per second **while the stage renders** |
-| `ref.<stage>.mouseX`, `mouseY`, `isHovered` | on pointer events |
+| `ref.<stage>.mouseX`, `mouseY`, `isHovered` | at the start of the frame after a pointer event, **while the stage renders** (`design/2026-11-17_pointer_frame_order_plan.md`) |
 
 **Write-on-change:** an animated source broadcasts every frame. `writeText()` compares strings and only touches the DOM when the text differs. Rounding in the expression (`round(ref.spinner.rotate)`) reduces DOM writes further and makes the output readable.
 
