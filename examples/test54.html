@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Kilopixel Clock</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0f172a; }
+  pxl-stage { width: min(90vw, 90vh); }
+  /* Ticks, hands and cap are decorations: let the pointer reach the face below them */
+  pxl-circle:not(#face), pxl-line { pointer-events: none; }
+</style>
+<script src="../dist/pxl.min.js"></script>
+</head>
+<body>
+<!-- 1000 x 1000 logical units, center at (500, 500) -->
+<pxl-stage id="main" ratio="1 / 1">
+  <pxl-layer>
+    <!-- Face: hovering it makes the rim glow -->
+    <pxl-circle id="face" x="500" y="500" r="460"
+                fill="radial(460, ['#1e293b', '#0b1222'])"
+                stroke="ref.face.isHovered ? '#38bdf8' : '#334155'" strokewidth="12"></pxl-circle>
+
+    <!-- Minute ticks: one dashed circle, 60 dashes (2π · 400 / 60 ≈ 41.888) -->
+    <pxl-circle x="500" y="500" r="400" stroke="#64748b" strokewidth="18"
+                linedash="[3, 38.888]" dashoffset="1.5" rotate="-90"></pxl-circle>
+    <!-- Hour ticks: 12 dashes (2π · 400 / 12 ≈ 209.44) -->
+    <pxl-circle x="500" y="500" r="400" stroke="#e2e8f0" strokewidth="40"
+                linedash="[10, 199.44]" dashoffset="5" rotate="-90"></pxl-circle>
+
+    <!-- Hands: lines pointing up (negative y), rotated around the center -->
+    <pxl-line x="500" y="500" y1="15" y2="-220" rotate="(time('h') % 12) / 12 * 360"
+              stroke="#e2e8f0" strokewidth="22" linecap="round"></pxl-line>
+    <pxl-line x="500" y="500" y1="20" y2="-330" rotate="time('m') / 60 * 360"
+              stroke="#cbd5e1" strokewidth="14" linecap="round"></pxl-line>
+    <pxl-line x="500" y="500" y1="35" y2="-370" rotate="floor(time('s')) * 6"
+              stroke="#f43f5e" strokewidth="5" linecap="round"></pxl-line>
+
+    <!-- Center cap -->
+    <pxl-circle x="500" y="500" r="18" fill="#f43f5e"></pxl-circle>
+  </pxl-layer>
+</pxl-stage>
+</body>
+</html>
