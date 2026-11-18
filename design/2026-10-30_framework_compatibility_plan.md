@@ -1,6 +1,6 @@
 # Framework Compatibility: Kilopixel as a Well-Behaved Custom Element
 
-- **Status**: 🟡 **Proposed** (2026-11-17, DOM-like event model decided, §22: every shape gets events, no `interactive`, D5, D10, D11 decided; `process()` moved to the start of the frame, §4.1 and §15; steps 1–2 of §19.4 built: quick fixes §20, conformance tests `tests/frameworks.html` §21; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 3–6 not built)
+- **Status**: 🟡 **Proposed** (2026-11-18, W1 build plan decided, §23: three steps, E1–E9, E1 changes D5 (no listener counts), E2 settles §22.5 (hit walk over the layer tree); 2026-11-17, DOM-like event model decided, §22: every shape gets events, no `interactive`, D5, D10, D11 decided; `process()` moved to the start of the frame, §4.1 and §15; steps 1–2 of §19.4 built: quick fixes §20, conformance tests `tests/frameworks.html` §21; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 3–6 not built)
 - **Date**: 2026-10-30
 - **Related**: `design/prototypes/2026-10-30_framework_compatibility/review_checks.html` (review §19); `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`, `design/2026-11-04_stage_sizing_plan.md` (builds W2)
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
@@ -131,7 +131,7 @@ Candidates (§13 D1):
 
 **Handlers stay attribute-only:** no JavaScript property (no `pxlOnEnter`), no accessor (§6.1), not readable through `ref.*` (they are compiled into `this.handlers`, not stored in `attributeValues`). The hyphens are therefore harmless, unlike `stroke-width` for a drawing value: nothing reads a handler in dot notation, and React / Vue set the attribute because no matching property exists. Frameworks use their own event syntax instead (§4.1).
 
-Implementation: `pxl.Shape.HANDLER_EVENTS` keys change; `observedAttributes` change; the `on*` names are removed (pre-release, no compatibility). A compile-time warning for the old names would help migration: if a shape has an `onclick` / `onenter` / … attribute at connect, warn once ("use pxl-on-click"). Remove the warning later.
+Implementation: `pxl.Shape.HANDLER_EVENTS` keys change; `observedAttributes` change; the `on*` names are removed (pre-release, no compatibility). A compile-time warning for the old names would help migration: if a shape has an `onclick` / `onenter` / … attribute at connect, warn once ("use pxl-on-click"). Remove the warning later. (Dropped 2026-11-18: no warning, Kilopixel needs no backwards compatibility, §23.1.)
 
 Migration count (2026-10-30): **25 handlers on Kilopixel elements** in `examples/test32.html` (20: enter / leave / down / up), `examples/test37.html` (4 clicks) and `tests/index.html` (1). Plus docs text and KILOPIXEL.md (Events section, AI guide), `design/` plans as history (unchanged). The other ~320 `onclick` hits in the repository are ordinary HTML buttons on docs pages.
 
@@ -315,7 +315,7 @@ Sidebar: a new entry under "Engine & Reactivity" or a new section "Integration".
 | D2 | Scoped names | A global ids / B stage-scoped ids / C `name` attribute (§8.2) | decide later; A for now, C if components need it. **2026-11-15 (§19.3):** design it together with the evaluation model (`design/2026-11-15_per_frame_evaluation_plan.md` D1), because both change how `ref` is resolved |
 | D3 | Logical coordinates on events | extra fields / none (§4.1) | none; `ref.<stage>.mouseX` |
 | D4 | Native canvas `click` next to the synthetic shape `click` | (a) accept both / (b) hit-test when the event arrives and stop the native event over a shape / (c) Kilopixel owns every click in the stage (§4.1) | **decided 2026-11-10: (b)** for `click`, `pointerdown`, `pointerup`; `pointermove` keeps both (prototype `d4_clicks.html`) |
-| D5 | Hand cursor for framework listeners | `interactive` implies pointer / separate `cursor` attribute (§4.4) / **the shape's CSS `cursor`** (§22.3) | **decided 2026-11-17:** the shape's CSS `cursor`, no `interactive` (§22.3); before: `interactive` implies pointer |
+| D5 | Hand cursor for framework listeners | `interactive` implies pointer / separate `cursor` attribute (§4.4) / **the shape's CSS `cursor`** (§22.3) | **decided 2026-11-17:** the shape's CSS `cursor`, no `interactive` (§22.3); before: `interactive` implies pointer. **Changed 2026-11-18 (§23 E1):** no listener counts; the hand comes from handlers, `isPressed` readers or CSS `cursor` |
 | D6 | `<slot>` in the layer's shadow root | yes / no (§5) | **decided 2026-11-14:** yes |
 | D7 | Stage `aspect-ratio` | inline / CSS custom property (§5) | **decided 2026-11-14:** inline, documented ("set single properties on a stage's `style`, don't replace the whole attribute") |
 | D8 | Properties for array-valued attributes | direct arrays / strings only (§6.1) | direct where the parsed form is an array |
@@ -501,7 +501,7 @@ All six framework-review bugs that were `test.known()` (testing plan §14, §16)
 | Style, hydration, shadow DOM (C10–C12) | one style property keeps the aspect ratio (D7); T-H1 (server markup compared node by node with a `<template>` copy, which isn't upgraded: only the stage's inline `aspect-ratio` and `cursor` differ); a stage inside a component's shadow root draws and hit-tests | — |
 | Small items (§10) | — | T-N1 |
 
-- **What the known tests expect** (decided details, so steps 3 and 4 can flip them to `test()`): events with `bubbles` and `composed`; one `click` per action around the stage, with the shape as `target`; `pointerenter` / `pointerleave` not bubbling; a `pointermove` on the shape and the browser's move on the stage; the old-name warning mentions `pxl-on-click` and comes once for two shapes; `set()` warns once per unknown name and not for known ones; properties as in §6.1. Each click test also runs the frame after the event, so it passes whether the click is dispatched when it arrives (D4) or in `process()`.
+- **What the known tests expect** (decided details, so steps 3 and 4 can flip them to `test()`): events with `bubbles` and `composed`; one `click` per action around the stage, with the shape as `target`; `pointerenter` / `pointerleave` not bubbling; a `pointermove` on the shape and the browser's move on the stage; a `pxl-on-click` handler runs and a plain `onclick` on a shape is not compiled (changed 2026-11-18: no warning for the old names, §23.1); `set()` warns once per unknown name and not for known ones; properties as in §6.1. Each click test also runs the frame after the event, so it passes whether the click is dispatched when it arrives (D4) or in `process()`.
 - **C7 today:** the only names that start with `on` or are properties of `HTMLElement` are the six handlers (`onclick` … `onmove`) on every shape; no other observed attribute collides.
 - **Checked that the tests can fail:** a copy of the page in `scratch/` (not kept) broke one engine function per run. Every one of the 16 passing tests failed under at least one break: `Layer.registerChild()` (the C1 tests, removed attribute, `hidden`, late definition, reordering, shadow root), `InteractionEngine.process()` (reordering, re-inserted stage, shadow root), `Stage.registerVariable()` (T-C1, unmount), `clearAllVariableSubscriptions()` and a registry entry kept on disconnect (unmount), `pxl.broadcast()` (reader before target), a canvas in the layer's light DOM (T-H1), the pointer listeners lost on re-insert (re-inserted stage), the same-value guard removed from `attributeChangedCallback()` (re-render), a default of 500 for a removed `x`, `hidden` ignored, clicks stopped at the stage (empty space), every shape registered (T-E3), `aspect-ratio` cleared on resize (style test), `sortByDOMPosition()` returning 0 (reordering). The known tests fail with messages that name the missing feature (no events, `attributeValues` unchanged by properties).
 - **Lesson for such checks:** custom elements read their lifecycle callbacks (`connectedCallback`, `attributeChangedCallback`, …) once, at `customElements.define()`. Replacing them on the prototype afterwards does nothing; a break must replace a method they call (`registerLayer()`, `pxl.perf.registerStage()`) or use a modified copy of the bundle.
@@ -561,6 +561,8 @@ Approach: read it once per frame for each layer and group (a handful; a layer or
 
 ### 22.5 Open Before Building
 
+Settled 2026-11-18 by the build plan, §23: the hit list (E2: a walk over the layer tree, no list), skipping subtrees (E2, E3), which events to dispatch (every type, as below), transparent hit areas (not in W1), the listener counts of §22.3 (dropped, E1).
+
 - **The hit list with every shape:** `registerElement()` checks with `includes()` and `unregisterElement()` removes with `indexOf()` (`js/interaction.js`), both O(n) per shape. Measured 2026-11-17 (`design/prototypes/2026-10-30_framework_compatibility/open_points_dom_model.html`, headless), registering / unregistering every shape: 1,000 shapes 0.6 / 0.8 ms, 5,000 3.2 / 1.8 ms, 10,000 11.1 / 5.3 ms; with an index per shape (`removeFromArray()` swaps in the last element, the index follows it) 0.3–0.4 ms at every size. Only on insert and remove, never per frame: small, but build the index (about 10 lines) with a scaling check, and sort only when the order is dirty, as today.
 - **Skipping a subtree:** the hit list is flat (every shape, DOM order across layers). To leave out a layer or group with `pointer-events: none` without walking every shape's parent chain, either keep one list per layer and skip whole layers, and check groups only for candidates, or mark the shapes under such a group once per frame (a frame stamp). To decide while building; layers are the common case (particles).
 - **Which events to dispatch:** §4.5 dispatches only event types that have listeners (per-type counts). Delegated listeners can't be counted, so in the DOM-like model the enter / leave events (`pointerover`, `pointerenter`, `pointerout`, `pointerleave`) are dispatched on every change, and `pointermove` on the shape under the pointer in every pointer frame: one event object per frame while the pointer moves over a shape, like the browser's own events. Measured 2026-11-17 (same prototype): about 6 µs per `pointermove` created and dispatched on a shape, with no listener, with one on `document`, or with five more on the way up. Settled: dispatch every type.
@@ -586,3 +588,60 @@ Approach: read it once per frame for each layer and group (a handful; a layer or
 
 `interactive` was simpler and changed nothing for existing pages; the DOM-like model fits the main goal (frameworks work as written), and its technical open points measured small (§22.4, §22.5). Pre-release, so the behavior change for decorations costs nothing; after a release, switching in either direction would have been a breaking change.
 
+## 23. W1 Build Plan (Decided 2026-11-18)
+
+Review of §4 and §22 against the engine after the pointer frame order change (`design/2026-11-17_pointer_frame_order_plan.md`), with edge cases, size and per-frame cost. Checked in the browser on 2026-11-18: `pointer-events` and `cursor` on a layer or group reach the shapes by CSS inheritance (through the layer's `<slot>`); an object from `getComputedStyle()` stays live, a new call returns a new object, and one read costs about 1 µs either way; an event dispatched on a shape (`display: none`) reports `offsetX` / `offsetY` equal to `clientX` / `clientY`.
+
+### 23.1 Steps (One Commit Each)
+
+| Step | Contents | Tests that turn into `test()` |
+|---|---|---|
+| 1 | Rename the handlers (D1): `pxl-on-click`, `pxl-on-enter`, `pxl-on-leave`, `pxl-on-down`, `pxl-on-up`, `pxl-on-move`; no warning and no fallback for the old names (pre-release, no backwards compatibility). Migrate `examples/test32.html`, `examples/test37.html`, the test pages, KILOPIXEL.md | T-E6, C7 |
+| 2 | Hit-test every shape (D10, D11): E2–E5 below; `pxl._interactiveIds`, `pxl._stickyIds`, `releaseIfUnused()`, `registerElement()` / `unregisterElement()` and the auto-registration in `pxl.trackInteractiveRefs` go (`pxl._pressableIds` stays, for the cursor). Measurement gate (§23.4) | T-E3 inverted |
+| 3 | DOM events on shapes (§4.1, D4, D5): E1, E6–E9; `process()` dispatches enter / leave / over / out and `pointermove`, collected during the hit walk and dispatched after it; `click`, `pointerdown`, `pointerup` are hit-tested when they arrive. Check `examples/test32.html`, `test33.html`, `test37.html`, `test52.html` by hand | the other known tests of `tests/frameworks.html` (T-E2 without `interactive`, the removed-listener test moved to the new model) |
+
+Each step: `node build.js`, the sizes in the docs, KILOPIXEL.md in the same change, `node tools/run_tests.js` passing.
+
+### 23.2 Decisions E1–E9
+
+| # | Decision | Why |
+|---|---|---|
+| E1 | **No `addEventListener` override, no listener counts.** Hand cursor from `pxl-on-click` / `-down` / `-up` handlers, readers of `isPressed`, or the shape's CSS `cursor` (read when the pointer enters a shape); otherwise the engine removes its inline `cursor`, so page CSS applies. Replaces the listener part of D5 | Listeners removed with `{ once: true }` or an `AbortSignal` never pass `removeEventListener()`, and a listener added twice is kept once: counts drift. The DOM shows no hand for an element with a click listener either |
+| E2 | **Hit-test by walking the layer tree in reverse** (layers, then `childList`), not a flat list of every shape; the exact test sets the shape's global matrix (translation × `u`) on `pxl.dummyCtx` instead of walking its parents | A flat list needs sorting: 5,000 shapes cost about 30 ms with `compareDocumentPosition()`, and particles inserted out of order would sort it while the pointer is over the stage. The walk reuses the sorted `childList`, needs no index and no registration, and skips hidden subtrees on the way |
+| E3 | **`pointer-events`** is read for each layer once per pointer frame (also `display` and `visibility`, so a layer hidden by CSS isn't hit) and for the 1–4 shapes that pass the box check; groups and shapes inherit it. The `getComputedStyle()` objects are cached per element | A read costs about 1 µs; pages with hundreds of groups would pay for reading every group |
+| E4 | **`pxl-grid { pointer-events: none }`** in `pxl.DEFAULT_STYLES` | The grid's box is infinite, so it would get the exact test (its whole path with labels) in every pointer frame on almost every docs stage, and catch hover between its lines. A page can set `pointer-events: auto` |
+| E5 | **Box check:** only the inverse matrix is cached (per shape, by global matrix version, allocated on the first test); the padded box (stroke, miter, square cap, arrowheads) is computed in every test. Smooth polylines and custom shapes without their own `getBoundingBox()` get the exact test; the latter are detected by comparing the method with `pxl.Shape.prototype.getBoundingBox`, without calling it | The prototype's cache of the box goes stale after `setAttribute('r', …)` on a static shape (`r` doesn't change the matrix). The base `getBoundingBox()` warns on every call |
+| E6 | **`pointerenter` / `pointerleave` also on the groups entered or left** (from the common ancestor down), and **`relatedTarget`** on `pointerover` / `pointerout` (the shape left or entered, or the layer) | React builds `onPointerEnter` from `pointerover` / `pointerout` and their `relatedTarget`; with `null` it treats the pointer as coming from outside the page. A group around the parts of a button needs its own enter / leave |
+| E7 | **`click` on a shape only when `pointerdown` and `pointerup` hit the same shape**; otherwise the browser's click passes to the stage | DOM rule: pressing on A and releasing on B is no click on B |
+| E8 | **`pointercancel` resets `isPressed`** (like a release without `pxl-on-up` and `click`) | On touch devices, scrolling cancels the pointer; `isPressed` would stay `true` (also today) |
+| E9 | **Documented limitation:** capture listeners above the stage (React `onClickCapture`) see the browser's `click` (target: the layer) before Kilopixel's | Avoiding it needs a capture listener on `window` per stage; more code for a rare case |
+
+Not in W1 (unchanged): `fill="transparent"` as a hit area (§22.5; today `rgba(0,0,0,0)`), coordinates on events (D3: none), properties (W3).
+
+### 23.3 Edge Cases
+
+- **Kilopixel's own events reach the stage's listeners:** its `pointermove`, `pointerdown`, `pointerup` and `click` bubble from the shape to the stage, and the D4 capture listener sees them in the capture phase. The stage ignores events it dispatched itself (a flag while dispatching); `isTrusted` can't decide it, because the tests dispatch untrusted events.
+- **Hit test when `click`, `pointerdown` or `pointerup` arrives** (D4): with the event's own position, so a tap without a move before it is hit too (`design/2026-11-15_handler_errors_plan.md` §5). The handlers and `isPressed` run then, outside the frame; their changes are drawn in the next frame, which is the frame of the event.
+- **`preventDefault()`** on Kilopixel's `pointerdown` or `click` is passed on to the browser's event.
+- **Listeners during `process()`** may remove shapes or stages: the events are collected during the hit walk and dispatched after it, from a preallocated queue. A listener that throws is reported by the browser and doesn't stop the dispatch.
+- **A shape removed while hovered or pressed** clears its state and broadcasts (`unregisterElement()` did this until now).
+- **Decorations on top catch events** (labels, helpers, `mask` shapes used as erasers): `pointer-events: none` in the markup. The four interactive example pages are checked by hand.
+- **`offsetX` / `offsetY`** on shape events equal `clientX` / `clientY` (measured above); documented: use `clientX` or `ref.<stage>.mouseX`.
+- **`setPointerCapture()`** on a shape (drag libraries call it on `event.target`): no error with an inactive pointer; with a real drag, check by hand in step 3.
+
+### 23.4 Size, Per-Frame Cost and GC (Estimated 2026-11-18)
+
+| Step | Engine lines (net, with comments) | Minified |
+|---|---|---|
+| 1 | +15 | +0.3 KB |
+| 2 | +120 / −50 ≈ +70 | +1.3 KB |
+| 3 | +130 | +2.2 KB |
+| Total | ≈ +215 (`interaction.js` about 262 → 400) | 59.3 → about 63 KB; gzipped 17.7 → about 19 KB |
+
+Based on about 17–18 minified bytes per source line (60.8 KB for about 3,450 lines). Tests: about +250 lines.
+
+- **Drawing and the update phase:** unchanged.
+- **Pointer outside the stage, or a static page:** no cost (no frames without animation; hit testing only while the pointer is over the stage).
+- **Pointer over an animated stage:** the hit walk runs every frame. Prototype (§22.2, headless, 2–3× slower than the browser): 0.1–0.4 µs per shape, so 1,000 animated shapes about 0.15–0.4 ms per frame, 5,000 about 0.4–1.8 ms. **Gate after step 2:** measured in the engine in the browser; above about 0.3 ms for 1,000 animated shapes, a resting pointer is re-tested at most every 100 ms (about 6 lines).
+- **Allocations:** none per frame in the walk and the box check (inverse matrices once per shape on its first test, style objects cached). Events allocate only on change or movement: one `PointerEvent` per frame while the pointer moves over a shape (about 6 µs), plus enter / leave events when the hovered shape changes; one reused init object.
+- **Memory:** about 100 bytes per shape for the inverse matrix, only for shapes the pointer has reached (5,000 shapes: about 0.5 MB).
