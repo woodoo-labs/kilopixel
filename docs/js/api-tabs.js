@@ -317,7 +317,7 @@ class DocsApiEvents extends HTMLElement {
               <div class="api-subheading">Interactive Event Handlers (HTML Attributes)</div>
               <div class="api-item">
                 <div class="api-item-header">
-                  <code class="api-name">onclick</code>
+                  <code class="api-name">pxl-on-click</code>
                   <div class="api-meta">
                     <span class="api-pill values-pill">script</span>
                     <span class="api-pill default-pill">default: null</span>
@@ -330,7 +330,7 @@ class DocsApiEvents extends HTMLElement {
 
               <div class="api-item">
                 <div class="api-item-header">
-                  <code class="api-name">onenter</code>
+                  <code class="api-name">pxl-on-enter</code>
                   <div class="api-meta">
                     <span class="api-pill values-pill">script</span>
                     <span class="api-pill default-pill">default: null</span>
@@ -343,7 +343,7 @@ class DocsApiEvents extends HTMLElement {
 
               <div class="api-item">
                 <div class="api-item-header">
-                  <code class="api-name">onleave</code>
+                  <code class="api-name">pxl-on-leave</code>
                   <div class="api-meta">
                     <span class="api-pill values-pill">script</span>
                     <span class="api-pill default-pill">default: null</span>
@@ -356,7 +356,7 @@ class DocsApiEvents extends HTMLElement {
 
               <div class="api-item">
                 <div class="api-item-header">
-                  <code class="api-name">onmove</code>
+                  <code class="api-name">pxl-on-move</code>
                   <div class="api-meta">
                     <span class="api-pill values-pill">script</span>
                     <span class="api-pill default-pill">default: null</span>
@@ -369,7 +369,7 @@ class DocsApiEvents extends HTMLElement {
 
               <div class="api-item">
                 <div class="api-item-header">
-                  <code class="api-name">ondown</code>
+                  <code class="api-name">pxl-on-down</code>
                   <div class="api-meta">
                     <span class="api-pill values-pill">script</span>
                     <span class="api-pill default-pill">default: null</span>
@@ -382,7 +382,7 @@ class DocsApiEvents extends HTMLElement {
 
               <div class="api-item">
                 <div class="api-item-header">
-                  <code class="api-name">onup</code>
+                  <code class="api-name">pxl-on-up</code>
                   <div class="api-meta">
                     <span class="api-pill values-pill">script</span>
                     <span class="api-pill default-pill">default: null</span>

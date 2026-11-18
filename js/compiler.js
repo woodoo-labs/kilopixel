@@ -206,7 +206,7 @@ pxl.splitStringLiterals = function(str) {
   return parts;
 };
 
-// Rewrites shared by attribute expressions and on* handlers, applied to code only (quoted text stays as written):
+// Rewrites shared by attribute expressions and pxl-on-* handlers, applied to code only (quoted text stays as written):
 // ref.a.b → ref.a?.b (the referenced element may not be connected yet),
 // toLocal( → pxl.toLocal(this, (the caller is the element the code belongs to)
 pxl.rewriteExpression = function(str) {

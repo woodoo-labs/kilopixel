@@ -556,7 +556,7 @@ pxl.splitStringLiterals = function(str) {
   return parts;
 };
 
-// Rewrites shared by attribute expressions and on* handlers, applied to code only (quoted text stays as written):
+// Rewrites shared by attribute expressions and pxl-on-* handlers, applied to code only (quoted text stays as written):
 // ref.a.b → ref.a?.b (the referenced element may not be connected yet),
 // toLocal( → pxl.toLocal(this, (the caller is the element the code belongs to)
 pxl.rewriteExpression = function(str) {
@@ -725,7 +725,7 @@ pxl._interactiveStateRegex = new RegExp(
 );
 pxl._interactiveIds = new Set(); // ids whose shapes must be hit-tested
 pxl._pressableIds = new Set();   // ids whose isPressed is referenced (hand cursor)
-pxl._stickyIds = new Set();      // ids read without a subscription (time-dependent expressions, on* handlers)
+pxl._stickyIds = new Set();      // ids read without a subscription (time-dependent expressions, pxl-on-* handlers)
 
 // Compile time only: finds ref.<id>.isHovered / isPressed in an attribute string and registers the referenced shape.
 pxl.trackInteractiveRefs = function(source, sticky) {
@@ -824,7 +824,7 @@ pxl.InteractionEngine = class InteractionEngine {
     }
   }
 
-  // Calls an on* handler. A handler that throws is logged and doesn't end process(): the event flags are still
+  // Calls a pxl-on-* handler. A handler that throws is logged and doesn't end process(): the event flags are still
   // reset and the hover list stays right, so the event isn't delivered again in every later frame.
   callHandler(el, event) {
     const handler = el.handlers[event];
@@ -832,7 +832,7 @@ pxl.InteractionEngine = class InteractionEngine {
     try {
       handler();
     } catch (error) {
-      console.error(`[pxl] <${el.localName}${el.id ? ` id="${el.id}"` : ''}> on${event} failed:`, error);
+      console.error(`[pxl] <${el.localName}${el.id ? ` id="${el.id}"` : ''}> pxl-on-${event} failed:`, error);
     }
   }
 
@@ -2032,7 +2032,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
       'x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy',
       'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset',
       'alpha', 'blend', 'mask', 'filter', 'shadowcolor', 'shadowblur', 'shadowx', 'shadowy', 'hidden',
-      'onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove', 'id'
+      'pxl-on-click', 'pxl-on-enter', 'pxl-on-leave', 'pxl-on-down', 'pxl-on-up', 'pxl-on-move', 'id'
     ];
   }
 
@@ -2043,8 +2043,12 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     isHovered: false, isPressed: false
   };
 
-  // Event attribute → its key in this.handlers
-  static HANDLER_EVENTS = { onclick: 'click', onenter: 'enter', onleave: 'leave', ondown: 'down', onup: 'up', onmove: 'move' };
+  // Handler attribute → its key in this.handlers. Not on…: onclick is the browser's own handler attribute, and
+  // frameworks treat on… names as their own listeners (design/2026-10-30_framework_compatibility_plan.md §4.3)
+  static HANDLER_EVENTS = {
+    'pxl-on-click': 'click', 'pxl-on-enter': 'enter', 'pxl-on-leave': 'leave',
+    'pxl-on-down': 'down', 'pxl-on-up': 'up', 'pxl-on-move': 'move'
+  };
 
   constructor() {
     super();
@@ -2064,7 +2068,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     this._lastDashU = 0;
     this._scaledDash = [];
 
-    // Compiled on* handlers, called by the InteractionEngine
+    // Compiled pxl-on-* handlers, called by the InteractionEngine
     this.handlers = { click: null, enter: null, leave: null, down: null, up: null, move: null };
   }
 

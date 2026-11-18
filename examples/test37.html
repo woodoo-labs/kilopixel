@@ -274,7 +274,7 @@
       stroke="ref.nodeA.isHovered ? '#00e5ff' : '#004455'" strokewidth="1"
       zoom="ref.nodeA.isPressed ? 0.9 : (ref.nodeA.isHovered ? 1.15 : 1)"
       filter="ref.nodeA.isHovered ? dropShadow(0, 0, 8, '#00e5ff') : 'none'"
-      onclick="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
+      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
     <pxl-text x="80" y="60" text="'⬡'" size="16" fill="#00e5ff" align="center" baseline="middle"
       alpha="0.5 + bounce(2) * 0.5"></pxl-text>
 
@@ -284,7 +284,7 @@
       stroke="ref.nodeB.isHovered ? '#ff00aa' : '#440044'" strokewidth="1"
       zoom="ref.nodeB.isPressed ? 0.9 : (ref.nodeB.isHovered ? 1.15 : 1)"
       filter="ref.nodeB.isHovered ? dropShadow(0, 0, 8, '#ff00aa') : 'none'"
-      onclick="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
+      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
     <pxl-text x="920" y="60" text="'◈'" size="16" fill="#ff00aa" align="center" baseline="middle"
       alpha="0.5 + yoyo(2) * 0.5"></pxl-text>
 
@@ -294,7 +294,7 @@
       stroke="ref.nodeC.isHovered ? '#ffbb00' : '#443300'" strokewidth="1"
       zoom="ref.nodeC.isPressed ? 0.9 : (ref.nodeC.isHovered ? 1.15 : 1)"
       filter="ref.nodeC.isHovered ? dropShadow(0, 0, 8, '#ffbb00') : 'none'"
-      onclick="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
+      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
     <pxl-text x="80" y="502" text="'◇'" size="16" fill="#ffbb00" align="center" baseline="middle"
       alpha="0.5 + glide(2) * 0.5"></pxl-text>
 
@@ -304,7 +304,7 @@
       stroke="ref.nodeD.isHovered ? '#aa44ff' : '#330055'" strokewidth="1"
       zoom="ref.nodeD.isPressed ? 0.9 : (ref.nodeD.isHovered ? 1.15 : 1)"
       filter="ref.nodeD.isHovered ? dropShadow(0, 0, 8, '#aa44ff') : 'none'"
-      onclick="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
+      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
     <pxl-text x="920" y="502" text="'✦'" size="16" fill="#aa44ff" align="center" baseline="middle"
       alpha="0.3 + glitch(0.5) * 0.7"></pxl-text>
 

@@ -146,7 +146,7 @@
             <pxl-group id="ecGroupB" x="300"></pxl-group>
             <pxl-circle id="ecTarget" x="640" y="120" r="12" fill="#3b82f6"></pxl-circle>
             <pxl-rect id="ecButton" x="200" y="400" w="80" h="40" fill="#22c55e"
-              onclick="ref.ecVar.set('value', toLocal(ref.ecTarget, 'x'))"></pxl-rect>
+              pxl-on-click="ref.ecVar.set('value', toLocal(ref.ecTarget, 'x'))"></pxl-rect>
             <pxl-polyline id="ecPoly" points="100,500; 300,550" stroke="#ec4899" strokewidth="3"></pxl-polyline>
           </pxl-layer>
         </pxl-stage>
@@ -896,8 +896,8 @@
 
     test('safe render: hit testing a shape that throws leaves the hit-test context unshifted', () => {
       srClear();
-      srAdd('srLayerA', `<pxl-rect id="srHitTypo" x="100" y="100" w="60" h="60" fill="linear(0, ['red', 'blu'])" onclick="0"></pxl-rect>
-        <pxl-rect id="srHitOk" x="300" y="100" w="60" h="60" fill="#00ff00" onclick="0"></pxl-rect>`);
+      srAdd('srLayerA', `<pxl-rect id="srHitTypo" x="100" y="100" w="60" h="60" fill="linear(0, ['red', 'blu'])" pxl-on-click="0"></pxl-rect>
+        <pxl-rect id="srHitOk" x="300" y="100" w="60" h="60" fill="#00ff00" pxl-on-click="0"></pxl-rect>`);
       const stage = el('srStage'), values = stage.attributeValues;
       captureWarnings(() => {
         srRender(1);
@@ -925,11 +925,11 @@
     }
 
     // design/2026-11-15_handler_errors_plan.md
-    test('handler errors: a throwing onclick runs once per click, is logged with its element, and no other shape gets the click', () => {
+    test('handler errors: a throwing pxl-on-click runs once per click, is logged with its element, and no other shape gets the click', () => {
       srClear();
       srAdd('srLayerA', `<pxl-rect id="srThrowClick" x="100" y="100" w="60" h="60" fill="#ff0000"
-          onclick="this.calls = (this.calls || 0) + 1; throw new Error('handler failed')"></pxl-rect>
-        <pxl-rect id="srOtherClick" x="300" y="100" w="60" h="60" fill="#00ff00" onclick="this.calls = (this.calls || 0) + 1"></pxl-rect>`);
+          pxl-on-click="this.calls = (this.calls || 0) + 1; throw new Error('handler failed')"></pxl-rect>
+        <pxl-rect id="srOtherClick" x="300" y="100" w="60" h="60" fill="#00ff00" pxl-on-click="this.calls = (this.calls || 0) + 1"></pxl-rect>`);
       const stage = el('srStage'), values = stage.attributeValues, interaction = stage.interaction;
       srRender(1);
       values.isHovered = true;
@@ -945,16 +945,16 @@
       values.isHovered = false;
       interaction.process();
       if (calls !== 1) throw new Error(`the handler ran ${calls} times for one click`);
-      if (otherCalls !== undefined) throw new Error(`the other shape's onclick ran ${otherCalls} times without a click`);
-      if (errors.length !== 1 || !errors[0].includes('id="srThrowClick"') || !errors[0].includes('onclick')) throw new Error(`errors: ${JSON.stringify(errors)}`);
+      if (otherCalls !== undefined) throw new Error(`the other shape's pxl-on-click ran ${otherCalls} times without a click`);
+      if (errors.length !== 1 || !errors[0].includes('id="srThrowClick"') || !errors[0].includes('pxl-on-click')) throw new Error(`errors: ${JSON.stringify(errors)}`);
       srClear();
     });
 
-    test('handler errors: a throwing onleave runs once, and the shape\'s later handlers still run in that frame', () => {
+    test('handler errors: a throwing pxl-on-leave runs once, and the shape\'s later handlers still run in that frame', () => {
       srClear();
       srAdd('srLayerA', `<pxl-rect id="srThrowLeave" x="100" y="100" w="60" h="60" fill="#ff0000"
-          onleave="this.calls = (this.calls || 0) + 1; throw new Error('handler failed')"></pxl-rect>
-        <pxl-rect id="srEnterAfter" x="300" y="100" w="60" h="60" fill="#00ff00" onenter="this.calls = (this.calls || 0) + 1"></pxl-rect>`);
+          pxl-on-leave="this.calls = (this.calls || 0) + 1; throw new Error('handler failed')"></pxl-rect>
+        <pxl-rect id="srEnterAfter" x="300" y="100" w="60" h="60" fill="#00ff00" pxl-on-enter="this.calls = (this.calls || 0) + 1"></pxl-rect>`);
       const stage = el('srStage'), values = stage.attributeValues, interaction = stage.interaction;
       srRender(1);
       values.isHovered = true;
@@ -969,8 +969,8 @@
       const stillHovered = el('srThrowLeave').attributeValues.isHovered;
       values.isHovered = false;
       interaction.process();
-      if (calls !== 1) throw new Error(`onleave ran ${calls} times for one leave`);
-      if (enterCalls !== 1) throw new Error(`the other shape's onenter ran ${enterCalls} times`);
+      if (calls !== 1) throw new Error(`pxl-on-leave ran ${calls} times for one leave`);
+      if (enterCalls !== 1) throw new Error(`the other shape's pxl-on-enter ran ${enterCalls} times`);
       if (stillHovered) throw new Error('the left shape is still hovered');
       if (errors.length !== 1) throw new Error(`errors: ${JSON.stringify(errors)}`);
       srClear();
@@ -1597,10 +1597,10 @@
       if (ixLog.join(',') !== expected.join(',')) throw new Error(`handlers called: [${ixLog}], expected [${expected}]`);
     };
 
-    test('interaction: enter and leave set isHovered and call onenter / onleave once each', () => {
+    test('interaction: enter and leave set isHovered and call pxl-on-enter / pxl-on-leave once each', () => {
       ixLog = [];
       return withStage(ixStage(`<pxl-circle id="ixHover" x="500" y="300" r="80" fill="#000"
-        onenter="ixLog.push('enter')" onleave="ixLog.push('leave')"></pxl-circle>`), (stage) => {
+        pxl-on-enter="ixLog.push('enter')" pxl-on-leave="ixLog.push('leave')"></pxl-circle>`), (stage) => {
         hover(stage, 500, 300);
         hover(stage, 510, 300); // moving inside: no second enter
         const inside = pxl.nodes.ixHover.isHovered;
@@ -1613,7 +1613,7 @@
     test('interaction: down, up and click set isPressed and call their handlers in order', () => {
       ixLog = [];
       return withStage(ixStage(`<pxl-circle id="ixPress" x="500" y="300" r="80" fill="#000"
-        ondown="ixLog.push('down')" onup="ixLog.push('up')" onclick="ixLog.push('click')"></pxl-circle>`), (stage) => {
+        pxl-on-down="ixLog.push('down')" pxl-on-up="ixLog.push('up')" pxl-on-click="ixLog.push('click')"></pxl-circle>`), (stage) => {
         hover(stage, 500, 300);
         input(stage, 'pointerdown');
         const pressed = pxl.nodes.ixPress.isPressed;
@@ -1624,10 +1624,10 @@
       });
     });
 
-    test('interaction: a press released outside the shape clears isPressed without calling onup', () => {
+    test('interaction: a press released outside the shape clears isPressed without calling pxl-on-up', () => {
       ixLog = [];
       return withStage(ixStage(`<pxl-circle id="ixOutside" x="500" y="300" r="80" fill="#000"
-        ondown="ixLog.push('down')" onup="ixLog.push('up')" onleave="ixLog.push('leave')"></pxl-circle>`), (stage) => {
+        pxl-on-down="ixLog.push('down')" pxl-on-up="ixLog.push('up')" pxl-on-leave="ixLog.push('leave')"></pxl-circle>`), (stage) => {
         hover(stage, 500, 300);
         input(stage, 'pointerdown');
         hover(stage, 900, 100);
@@ -1643,10 +1643,10 @@
     test('interaction: the topmost shape wins; hidden shapes and shapes in hidden groups are not hit', () => {
       ixLog = [];
       return withStage(ixStage(`
-        <pxl-circle x="500" y="300" r="80" fill="#000" onenter="ixLog.push('bottom')"></pxl-circle>
-        <pxl-circle id="ixTop" x="500" y="300" r="80" fill="#000" onenter="ixLog.push('top')"></pxl-circle>
-        <pxl-circle x="500" y="300" r="80" fill="#000" hidden="true" onenter="ixLog.push('hidden')"></pxl-circle>
-        <pxl-group hidden="true"><pxl-circle x="500" y="300" r="80" fill="#000" onenter="ixLog.push('in hidden group')"></pxl-circle></pxl-group>`),
+        <pxl-circle x="500" y="300" r="80" fill="#000" pxl-on-enter="ixLog.push('bottom')"></pxl-circle>
+        <pxl-circle id="ixTop" x="500" y="300" r="80" fill="#000" pxl-on-enter="ixLog.push('top')"></pxl-circle>
+        <pxl-circle x="500" y="300" r="80" fill="#000" hidden="true" pxl-on-enter="ixLog.push('hidden')"></pxl-circle>
+        <pxl-group hidden="true"><pxl-circle x="500" y="300" r="80" fill="#000" pxl-on-enter="ixLog.push('in hidden group')"></pxl-circle></pxl-group>`),
       (stage) => {
         hover(stage, 500, 300);
         expectLog(['top']);
@@ -1656,10 +1656,10 @@
     test('interaction: strokes count with their width, text with its box, transforms of groups apply', () => {
       ixLog = [];
       return withStage(ixStage(`
-        <pxl-line x1="100" y1="100" x2="900" y2="100" stroke="#000" strokewidth="20" onenter="ixLog.push('line')"></pxl-line>
-        <pxl-text x="100" y="250" size="40" text="Hit me" fill="#000" onenter="ixLog.push('text')"></pxl-text>
+        <pxl-line x1="100" y1="100" x2="900" y2="100" stroke="#000" strokewidth="20" pxl-on-enter="ixLog.push('line')"></pxl-line>
+        <pxl-text x="100" y="250" size="40" text="Hit me" fill="#000" pxl-on-enter="ixLog.push('text')"></pxl-text>
         <pxl-group x="500" y="300" rotate="90">
-          <pxl-rect x="200" w="40" h="40" fill="#000" onenter="ixLog.push('rect')"></pxl-rect>
+          <pxl-rect x="200" w="40" h="40" fill="#000" pxl-on-enter="ixLog.push('rect')"></pxl-rect>
         </pxl-group>`), (stage) => {
         for (const [x, y] of [[500, 106], [500, 140], [130, 240], [700, 300], [500, 500]]) {
           hover(stage, x, y);
@@ -1674,7 +1674,7 @@
       ixLog = [];
       return withStage(ixStage(`<pxl-var id="ixCount" value="0"></pxl-var>
         <pxl-circle id="ixSelf" x="500" y="300" r="80" fill="#000"
-          onclick="ref.ixCount.set('value', ref.ixCount.value + 1); ixLog.push('click'); this.removeAttribute('onclick')"></pxl-circle>`),
+          pxl-on-click="ref.ixCount.set('value', ref.ixCount.value + 1); ixLog.push('click'); this.removeAttribute('pxl-on-click')"></pxl-circle>`),
       (stage) => {
         hover(stage, 500, 300);
         input(stage, 'click');
@@ -1715,10 +1715,10 @@
         }
       }));
 
-    test('interaction: hand cursor over clickable shapes (onclick or isPressed read), not over hover-only ones', () =>
+    test('interaction: hand cursor over clickable shapes (pxl-on-click or isPressed read), not over hover-only ones', () =>
       withStage(ixStage(`
-        <pxl-circle x="150" y="300" r="80" fill="#000" onclick="0"></pxl-circle>
-        <pxl-circle x="400" y="300" r="80" fill="#000" onenter="0"></pxl-circle>
+        <pxl-circle x="150" y="300" r="80" fill="#000" pxl-on-click="0"></pxl-circle>
+        <pxl-circle x="400" y="300" r="80" fill="#000" pxl-on-enter="0"></pxl-circle>
         <pxl-circle id="ixPressRead" x="650" y="300" r="80" fill="#000"></pxl-circle>
         <pxl-circle x="900" y="50" r="5" fill="ref.ixPressRead.isPressed ? '#f00' : '#00f'"></pxl-circle>`), (stage) => {
         const cursors = [150, 400, 650, 900].map((x) => {
@@ -1762,7 +1762,7 @@
       }));
 
     test('interaction: a handler\'s setAttribute() is drawn in the frame of the click, and the layer is idle afterwards', () =>
-      withStage(ixStage(`<pxl-circle id="ixSetBtn" x="300" y="300" r="80" fill="#00f" onclick="this.setAttribute('fill', '#f00')"></pxl-circle>`),
+      withStage(ixStage(`<pxl-circle id="ixSetBtn" x="300" y="300" r="80" fill="#00f" pxl-on-click="this.setAttribute('fill', '#f00')"></pxl-circle>`),
       (stage) => {
         recordDrawn('ixSetBtn', 'fill');
         hover(stage, 300, 300);
@@ -1822,7 +1822,7 @@
 
     test('lifecycle: a click handler moves with its shape to another stage', () =>
       withStage(`<div style="width: 500px">
-        <pxl-stage id="lcStageA" alwaysrender><pxl-layer><pxl-circle id="lcClick" x="500" y="300" r="80" fill="#000" onclick="0"></pxl-circle></pxl-layer></pxl-stage>
+        <pxl-stage id="lcStageA" alwaysrender><pxl-layer><pxl-circle id="lcClick" x="500" y="300" r="80" fill="#000" pxl-on-click="0"></pxl-circle></pxl-layer></pxl-stage>
         <pxl-stage id="lcStageB" alwaysrender><pxl-layer id="lcLayerB"></pxl-layer></pxl-stage></div>`, () => {
         const shape = el('lcClick');
         el('lcLayerB').append(shape);

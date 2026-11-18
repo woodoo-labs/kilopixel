@@ -4,7 +4,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
       'x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy',
       'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset',
       'alpha', 'blend', 'mask', 'filter', 'shadowcolor', 'shadowblur', 'shadowx', 'shadowy', 'hidden',
-      'onclick', 'onenter', 'onleave', 'ondown', 'onup', 'onmove', 'id'
+      'pxl-on-click', 'pxl-on-enter', 'pxl-on-leave', 'pxl-on-down', 'pxl-on-up', 'pxl-on-move', 'id'
     ];
   }
 
@@ -15,8 +15,12 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     isHovered: false, isPressed: false
   };
 
-  // Event attribute → its key in this.handlers
-  static HANDLER_EVENTS = { onclick: 'click', onenter: 'enter', onleave: 'leave', ondown: 'down', onup: 'up', onmove: 'move' };
+  // Handler attribute → its key in this.handlers. Not on…: onclick is the browser's own handler attribute, and
+  // frameworks treat on… names as their own listeners (design/2026-10-30_framework_compatibility_plan.md §4.3)
+  static HANDLER_EVENTS = {
+    'pxl-on-click': 'click', 'pxl-on-enter': 'enter', 'pxl-on-leave': 'leave',
+    'pxl-on-down': 'down', 'pxl-on-up': 'up', 'pxl-on-move': 'move'
+  };
 
   constructor() {
     super();
@@ -36,7 +40,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     this._lastDashU = 0;
     this._scaledDash = [];
 
-    // Compiled on* handlers, called by the InteractionEngine
+    // Compiled pxl-on-* handlers, called by the InteractionEngine
     this.handlers = { click: null, enter: null, leave: null, down: null, up: null, move: null };
   }
 

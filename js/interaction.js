@@ -21,7 +21,7 @@ pxl._interactiveStateRegex = new RegExp(
 );
 pxl._interactiveIds = new Set(); // ids whose shapes must be hit-tested
 pxl._pressableIds = new Set();   // ids whose isPressed is referenced (hand cursor)
-pxl._stickyIds = new Set();      // ids read without a subscription (time-dependent expressions, on* handlers)
+pxl._stickyIds = new Set();      // ids read without a subscription (time-dependent expressions, pxl-on-* handlers)
 
 // Compile time only: finds ref.<id>.isHovered / isPressed in an attribute string and registers the referenced shape.
 pxl.trackInteractiveRefs = function(source, sticky) {
@@ -120,7 +120,7 @@ pxl.InteractionEngine = class InteractionEngine {
     }
   }
 
-  // Calls an on* handler. A handler that throws is logged and doesn't end process(): the event flags are still
+  // Calls a pxl-on-* handler. A handler that throws is logged and doesn't end process(): the event flags are still
   // reset and the hover list stays right, so the event isn't delivered again in every later frame.
   callHandler(el, event) {
     const handler = el.handlers[event];
@@ -128,7 +128,7 @@ pxl.InteractionEngine = class InteractionEngine {
     try {
       handler();
     } catch (error) {
-      console.error(`[pxl] <${el.localName}${el.id ? ` id="${el.id}"` : ''}> on${event} failed:`, error);
+      console.error(`[pxl] <${el.localName}${el.id ? ` id="${el.id}"` : ''}> pxl-on-${event} failed:`, error);
     }
   }
 

@@ -180,7 +180,7 @@
       const { stage, layer, clear } = freshStage();
       let html = '';
       for (let i = 0; i < n; i++) {
-        html += `<pxl-rect x="${(i % 100) * 10 + 5}" y="${Math.floor(i / 100) * 10 + 5}" w="8" h="8" fill="#000" onenter="0"></pxl-rect>`;
+        html += `<pxl-rect x="${(i % 100) * 10 + 5}" y="${Math.floor(i / 100) * 10 + 5}" w="8" h="8" fill="#000" pxl-on-enter="0"></pxl-rect>`;
       }
       layer.insertAdjacentHTML('beforeend', html);
       Object.assign(stage.attributeValues, { isHovered: true, mouseX: 999, mouseY: 590 });

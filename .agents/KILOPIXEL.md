@@ -69,7 +69,7 @@ graph TD
 
     J["<pxl-var>"] -->|"ref.id.value"| H
     K["monitor.js<br/>(Performance)"] -->|"fps, renderAvg, renderMax"| A
-    L["interaction.js<br/>(Hit Testing)"] -->|"isHovered, isPressed, onclick..."| D
+    L["interaction.js<br/>(Hit Testing)"] -->|"isHovered, isPressed, pxl-on-click..."| D
     M["matrix.js<br/>(Affine Math)"] -->|"toLocal(), getGlobalMatrix()"| D
     N["graphics.js<br/>(Transform Helpers)"] -->|"applyContextState(), parsePoints"| D
 ```
@@ -225,7 +225,7 @@ Has four hidden (non-enumerable) properties:
 2. **Code and quoted text**: `pxl.splitStringLiterals()` splits the string once into code and string literals (`'…'`, `"…"`, the text of `` `…` ``; the code inside `${…}` counts as code). Steps 3–7 read and rewrite only the code, so words in quoted text stay text: `'Press return: ' + ref.score.value` keeps its automatic `return`, `` `ref.angle.value = ${ref.angle.value}` `` shows `ref.angle.value` as written, a lone `t` in text doesn't make the expression animated, and `ref.<id>` in text adds no dependency
 3. **CSS percentages**: `50%` isn't valid JavaScript, so `hsl(120, 50%, 40%)` becomes `hsl(120, '50%', '40%')`. In code only: a quoted CSS color (`'hsla(280, 80%, 30%, 0.06)'` in a gradient's colors) stays as written
 4. **Time dependency**: a regex finds `t` (not after a `.`) or a call of a time driver; `toLocal(` sets `usesToLocal`
-5. **`pxl.rewriteExpression()`** (shared with `on*` handlers, also code only): `ref.player.x` → `ref.player?.x` (no TypeError before the element connects), `toLocal(` → `pxl.toLocal(this, `
+5. **`pxl.rewriteExpression()`** (shared with `pxl-on-*` handlers, also code only): `ref.player.x` → `ref.player?.x` (no TypeError before the element connects), `toLocal(` → `pxl.toLocal(this, `
 6. **Dependencies**: a regex collects every `ref.<id>`
 7. **Return**: without the word `return` in the code, the code is wrapped in `return …;`
 
@@ -257,7 +257,7 @@ Properties set on the function:
 
 **Errors**: a string that doesn't compile logs a warning and is used as a plain string (also cached).
 
-**Content Security Policy**: every expression and `on*` handler is compiled with `new Function`, so a page whose CSP doesn't allow `'unsafe-eval'` can't run Kilopixel.
+**Content Security Policy**: every expression and `pxl-on-*` handler is compiled with `new Function`, so a page whose CSP doesn't allow `'unsafe-eval'` can't run Kilopixel.
 
 ### `Math` Without the Prefix
 
@@ -649,18 +649,18 @@ Two booleans on every shape, set by the engine:
 #### 2. Handlers (for code)
 
 JavaScript statements in an attribute, run when the event happens:
-- `onclick`: click
-- `onenter`: the pointer enters the shape
-- `onleave`: the pointer leaves the shape
-- `ondown`: a press starts on the shape
-- `onup`: a press ends on the shape
-- `onmove`: the pointer moves over the shape
+- `pxl-on-click`: click
+- `pxl-on-enter`: the pointer enters the shape
+- `pxl-on-leave`: the pointer leaves the shape
+- `pxl-on-down`: a press starts on the shape
+- `pxl-on-up`: a press ends on the shape
+- `pxl-on-move`: the pointer moves over the shape
 
 ```html
-<pxl-circle onclick="ref.counter.set('value', ref.counter.value + 1)" ...></pxl-circle>
+<pxl-circle pxl-on-click="ref.counter.set('value', ref.counter.value + 1)" ...></pxl-circle>
 ```
 
-Handlers are compiled with `new Function`, with the expression scope (`ref`, `Math` names, colors, gradients, filters; no `t` and no time drivers) and `this` bound to the shape; details in [Event Handling](#event-handling). The names collide with the browser's own `onclick` attribute; a rename to `pxl-on-click` … is decided (`design/2026-10-30_framework_compatibility_plan.md`, D1).
+Handlers are compiled with `new Function`, with the expression scope (`ref`, `Math` names, colors, gradients, filters; no `t` and no time drivers) and `this` bound to the shape; details in [Event Handling](#event-handling). The names start with `pxl-` and don't start with `on`: `onclick` is the browser's own handler attribute (run as page JavaScript, without `ref`), and frameworks treat `on…` names as their own listeners (`design/2026-10-30_framework_compatibility_plan.md` §4.3, D1). Until 2026-11-18 they were `onclick` … `onmove`; a plain `onclick` on a shape is not a Kilopixel handler.
 
 ### Hit Testing Algorithm
 
@@ -684,15 +684,15 @@ So the hit area is the shape's own path, the same one it draws: no separate coll
 ### InteractionEngine Lifecycle
 
 - Shapes are registered with `stage.interaction.registerElement(el)` (only registered shapes are hit-tested) when they:
-  - have an event handler (`onclick`, `onenter`, etc.), **or**
-  - have their `isHovered` / `isPressed` read anywhere: in an expression on **any** element (`fill="ref.btn.isHovered ? …"` on `btn` itself or on another shape, a `<pxl-var>`, …) or inside an `on*` handler.
-- **Auto-registration** (`pxl.trackInteractiveRefs`, compile time only): every attribute string and `on*` handler is scanned for `ref.<id>.isHovered` / `ref.<id>.isPressed` (state list: `pxl.INTERACTIVE_STATES`). The id is remembered in `pxl._interactiveIds`; the shape registers immediately if it is already connected, otherwise in its `connectedCallback` (works for any DOM order and for shapes added or re-added later).
-- **Lazy unregister**: on leave / release, a shape without `on*` handlers is unregistered once nobody reads its states any more (no subscribers left on `ref.<id>`). References from time-dependent expressions and from `on*` handlers don't subscribe, so those ids are **sticky** (`pxl._stickyIds`) and stay registered until the shape is disconnected.
+  - have an event handler (`pxl-on-click`, `pxl-on-enter`, etc.), **or**
+  - have their `isHovered` / `isPressed` read anywhere: in an expression on **any** element (`fill="ref.btn.isHovered ? …"` on `btn` itself or on another shape, a `<pxl-var>`, …) or inside an `pxl-on-*` handler.
+- **Auto-registration** (`pxl.trackInteractiveRefs`, compile time only): every attribute string and `pxl-on-*` handler is scanned for `ref.<id>.isHovered` / `ref.<id>.isPressed` (state list: `pxl.INTERACTIVE_STATES`). The id is remembered in `pxl._interactiveIds`; the shape registers immediately if it is already connected, otherwise in its `connectedCallback` (works for any DOM order and for shapes added or re-added later).
+- **Lazy unregister**: on leave / release, a shape without `pxl-on-*` handlers is unregistered once nobody reads its states any more (no subscribers left on `ref.<id>`). References from time-dependent expressions and from `pxl-on-*` handlers don't subscribe, so those ids are **sticky** (`pxl._stickyIds`) and stay registered until the shape is disconnected.
 - Limitations: dynamic ids and bracket notation (`ref[name].isHovered`, `ref['btn'].isHovered`, `ref.btn['isHovered']`) are not detected. False positives (e.g. a string literally containing `ref.btn.isHovered`) only cause a harmless extra registration.
 - Pointer events (`pointermove`, `pointerdown`, `pointerup`, `click`, `pointerenter`, `pointerleave`) are handled by the InteractionEngine via `handleEvent()`
 - Hit testing runs in `process()`, called at the **start** of each `stage.render()`, before the update phase: it first broadcasts the stage's pointer values (`mouseX`, `mouseY`, `isHovered`) if a pointer event arrived, then hit-tests against the values of the last update (the picture on screen), updates `isHovered` / `isPressed` and runs the handlers. Their readers (with or without `t`) and whatever a handler changes are drawn in the same frame. Called after drawing, all of these were one frame late (`design/2026-11-17_pointer_frame_order_plan.md`)
 - Mouse coordinates are converted to logical units: `offsetX / stage.unit`
-- **Cursor**: the stage shows `cursor = 'pointer'` only over **clickable** shapes (an `onclick` / `ondown` / `onup` handler, or `isPressed` referenced somewhere — `pxl._pressableIds`); hover-only shapes keep `'default'`. The DOM style is only written when the cursor actually changes.
+- **Cursor**: the stage shows `cursor = 'pointer'` only over **clickable** shapes (an `pxl-on-click` / `pxl-on-down` / `pxl-on-up` handler, or `isPressed` referenced somewhere — `pxl._pressableIds`); hover-only shapes keep `'default'`. The DOM style is only written when the cursor actually changes.
 
 ---
 
@@ -908,7 +908,7 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `sca
 **Transform**: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `scalex`, `scaley`, `skewx`, `skewy`  
 **Style**: `fill`, `stroke`, `strokewidth`, `linecap`, `linejoin`, `miterlimit`, `linedash`, `dashoffset`  
 **Render**: `alpha`, `blend`, `mask`, `filter`, `shadowcolor`, `shadowblur`, `shadowx`, `shadowy`, `hidden`  
-**Events**: `onclick`, `onenter`, `onleave`, `ondown`, `onup`, `onmove`
+**Events**: `pxl-on-click`, `pxl-on-enter`, `pxl-on-leave`, `pxl-on-down`, `pxl-on-up`, `pxl-on-move`
 
 ### Style Attributes Breakdown
 
@@ -961,16 +961,16 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `sca
 
 ### Event Handling
 
-When `attributeChangedCallback` receives an event attribute (`onclick`, `onenter`, etc.):
+When `attributeChangedCallback` receives an event attribute (`pxl-on-click`, `pxl-on-enter`, etc.):
 1. The string goes through `pxl.rewriteExpression()` like attribute expressions: `ref.a.b` → `ref.a?.b`, and `toLocal()` works (the caller is the shape)
 2. Compiled via `new Function` with full scope access
 3. Bound to the element via `.bind(this)`
 4. Stored in `this.handlers` (`handlers.click`, `handlers.enter`, …); the InteractionEngine calls them from there
 5. Element is registered with `stage.interaction`
 
-A removed or empty handler (`removeAttribute('onclick')`, `onclick=""`) sets the compiled handler to `null`. The shape is **not** unregistered immediately (a handler may remove itself while `InteractionEngine.process()` iterates); `releaseIfUnused()` unregisters it on its next leave / release.
+A removed or empty handler (`removeAttribute('pxl-on-click')`, `pxl-on-click=""`) sets the compiled handler to `null`. The shape is **not** unregistered immediately (a handler may remove itself while `InteractionEngine.process()` iterates); `releaseIfUnused()` unregisters it on its next leave / release.
 
-A handler that throws is caught by `InteractionEngine.callHandler()` and logged with `console.error` (`[pxl] <pxl-rect id="btn"> onclick failed:` plus the error with its stack trace). The rest of `process()` still runs: the event flags are reset and the hover list is updated, so the event is delivered once, and the other handlers of that frame are called (`design/2026-11-15_handler_errors_plan.md`).
+A handler that throws is caught by `InteractionEngine.callHandler()` and logged with `console.error` (`[pxl] <pxl-rect id="btn"> pxl-on-click failed:` plus the error with its stack trace). The rest of `process()` still runs: the event flags are reset and the hover list is updated, so the event is delivered once, and the other handlers of that frame are called (`design/2026-11-15_handler_errors_plan.md`).
 
 ---
 
@@ -1388,7 +1388,7 @@ Returns zeroed bounding box by default (grid is infinite). However, during draw,
 
 Mutating from event handlers:
 ```html
-<pxl-circle onclick="ref.speed.set('value', ref.speed.value + 10)" ...></pxl-circle>
+<pxl-circle pxl-on-click="ref.speed.set('value', ref.speed.value + 10)" ...></pxl-circle>
 ```
 
 The `set(key, value)` method on `attributeValues` calls `setAttribute()` on the element, triggering recompilation and broadcast.
@@ -1431,7 +1431,7 @@ A slider then sets one value (`document.getElementById('x0').setAttribute('value
    ├─ Record performance: start = performance.now()
    ├─ pxl._frame++  ← per-frame state is stored as the frame it belongs to (_failedFrame, a layer's _updateFrame)
    ├─ interaction.process()  ← pointer first: broadcast mouseX / mouseY / isHovered of the stage, hit testing
-   │   against the picture on screen, isHovered / isPressed, on* handlers; their readers update now and are
+   │   against the picture on screen, isHovered / isPressed, pxl-on-* handlers; their readers update now and are
    │   drawn in this frame
    ├─ Sort layers and stage-level variables by DOM position (if _isOrderDirty)
    ├─ For each stage-level <pxl-var>: variable.update(t)  ← before the layers, so readers in every
@@ -1495,7 +1495,7 @@ A canvas call or an expression that throws must not break the frame (`design/202
 - **Group, layer, variable:** a failing evaluation skips the element (with its children) for that frame, in both phases (`_failedFrame`). A layer keeps its previous pixels and its redraw request; a variable keeps its previous value.
 - **Readers:** a reader evaluated by a broadcast (`variableChangedCallback`) or by a `toLocal` walk (`broadcastGlobalMatrixChange`) catches its own error. The element that changed isn't blamed or skipped, the other readers still update, and the failing reader keeps its previous values and stays subscribed. This also holds for broadcasts outside frames (`setAttribute()`, pointer events, the performance monitor).
 - **`PxlNode.reportError(error)`** (`node.js`): warns once per distinct message and at most 3 times per element (the third warning says that more are hidden; some browser messages contain the bad value, e.g. a negative `arc()` radius). The same error object again returns early, so a repeated gradient error (kept by `createGradient`) allocates nothing. An animated element keeps invalidating its layer, so an error that depends on `t` recovers on its own.
-- **Not covered:** an expression that fails immediately in `setAttribute()` is reported by the browser as an uncaught error in a custom element reaction (the element keeps its old value). Errors in `on*` handlers are logged and don't stop the frame, see [Event Handling](#event-handling).
+- **Not covered:** an expression that fails immediately in `setAttribute()` is reported by the browser as an uncaught error in a custom element reaction (the element keeps its old value). Errors in `pxl-on-*` handlers are logged and don't stop the frame, see [Event Handling](#event-handling).
 
 ---
 
@@ -1623,7 +1623,7 @@ Shadows: shape shadows (`shadowcolor`, `shadowblur`, …) and filter helpers bot
 ```html
 <pxl-var id="score" value="0"></pxl-var>
 <pxl-text text="`Score: ${ref.score.value}`" ...></pxl-text>
-<pxl-circle onclick="ref.score.set('value', ref.score.value + 1)" ...></pxl-circle>
+<pxl-circle pxl-on-click="ref.score.set('value', ref.score.value + 1)" ...></pxl-circle>
 ```
 
 #### 6. Orbital Motion
@@ -1640,7 +1640,7 @@ Shadows: shape shadows (`shadowcolor`, `shadowblur`, …) and filter helpers bot
 <pxl-rect id="btn" x="500" y="300" w="120" h="50" r="10"
   fill="ref.btn.isPressed ? '#222' : (ref.btn.isHovered ? '#555' : '#888')"
   zoom="ref.btn.isPressed ? 0.95 : (ref.btn.isHovered ? 1.05 : 1)"
-  onclick="ref.counter.set('value', ref.counter.value + 1)"></pxl-rect>
+  pxl-on-click="ref.counter.set('value', ref.counter.value + 1)"></pxl-rect>
 ```
 
 #### 8. Performance Monitor Display
@@ -1693,7 +1693,7 @@ Note: `ref.myShape.tx` gives the shape's drawn origin in its own parent space (`
 - **No Self-Closing Tags (`/>`)** → Custom Web Components are not void elements in HTML5. Always use explicit closing tags (`<pxl-circle></pxl-circle>`), never `<pxl-circle />` (causes silent DOM nesting bugs)
 - **No defensive fallbacks in engine code** → every `PxlNode` attribute starts at its class `defaults`, and bare / removed attributes go back to them ([Empty & Removed Attributes](#empty--removed-attributes)), so `alpha !== undefined` or `(shadowblur || 0)` are never needed.
 - **Boolean attributes** → `closed`, `pie`, `smooth`, `hidden`, `anticlockwise`, `labels` accept bare (`<pxl-polyline closed>`), `"true"` or `"false"`. Write `="true"` in examples for readability.
-- **Use `onenter` not `onhover`** → The hover-entry event attribute is `onenter`, not `onhover`
+- **Use `pxl-on-click`, `pxl-on-enter` …, not `onclick` or `onhover`** → The handler attributes start with `pxl-on-` (`pxl-on-click`, `pxl-on-enter`, `pxl-on-leave`, `pxl-on-down`, `pxl-on-up`, `pxl-on-move`). A plain `onclick` on a shape is not a Kilopixel handler
 - **Use raw numbers for coordinates** → `x="500"` not `ref.main.width / 2` (logical width is always 1000)
 - **Time `t` is in seconds** → `t * 90` = 90° per second, `wave(2)` = a 2-second cycle (not milliseconds)
 - **Don't forget `fill` or `stroke`** → shapes with neither are invisible

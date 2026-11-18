@@ -448,19 +448,18 @@
         }
       }));
 
-    test.known('T-E6: a pxl-on-click handler runs; a leftover onclick warns once (W1, D1)', async () => {
+    test('T-E6: a pxl-on-click handler runs; onclick on a shape is not a Kilopixel handler (W1, D1)', () => {
       window.fwLog = [];
-      const warnings = await captureWarnings(() =>
-        withStage(oneLayer(`${CIRCLE('fwNewHandler', 'pxl-on-click="fwLog.push(\'click\')"')}
-          <pxl-circle x="100" y="100" r="10" onclick="0"></pxl-circle><pxl-circle x="150" y="100" r="10" onclick="0"></pxl-circle>`), (stage) => {
-          hover(stage, 500, 300);
-          input(stage, 'click');
-        }));
-      const oldNameWarnings = warnings.filter((w) => w.includes('pxl-on-click')).length;
-      if (fwLog.join(',') !== 'click' || oldNameWarnings !== 1) throw new Error(`handler calls [${fwLog}], warnings about onclick ${oldNameWarnings}`);
+      return withStage(oneLayer(`${CIRCLE('fwNewHandler', 'pxl-on-click="fwLog.push(\'click\')"')}
+        <pxl-circle id="fwOldName" x="100" y="100" r="10" onclick="0"></pxl-circle>`), (stage) => {
+        hover(stage, 500, 300);
+        input(stage, 'click');
+        const oldName = el('fwOldName').handlers.click;
+        if (fwLog.join(',') !== 'click' || oldName !== null) throw new Error(`handler calls [${fwLog}], onclick compiled: ${oldName !== null}`);
+      });
     });
 
-    test.known('C7: no attribute name starts with "on" or is a property of HTMLElement (except hidden and id) (W1)', () => {
+    test('C7: no attribute name starts with "on" or is a property of HTMLElement (except hidden and id) (W1)', () => {
       const tags = ['pxl-stage', 'pxl-layer', 'pxl-group', 'pxl-var', 'pxl-circle', 'pxl-ellipse', 'pxl-rect', 'pxl-line', 'pxl-polyline', 'pxl-text', 'pxl-grid'];
       const wrong = [];
       for (const tag of tags) {
