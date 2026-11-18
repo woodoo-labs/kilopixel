@@ -249,6 +249,16 @@
       draw(`<pxl-grid step="100" stroke="#000" strokewidth="4"></pxl-grid>`, (layer) =>
         expectInk(layer, [[100, 50, true], [500, 250, true], [150, 50, false], [150, 250, false]])));
 
+    test('grid: major lines need a stroke; without one only the labels are drawn, in the fill color', () =>
+      draw(`<pxl-grid step="100" major="2" fill="#ff0000" labels="true"></pxl-grid>`, (layer) => {
+        expectInk(layer, [[200, 50, false], [400, 150, false], [100, 50, false]]);
+        if (inkIn(layer, 175, 195, 225, 205) === 0) throw new Error('no label at (200, 200)');
+      }));
+
+    test('grid: with a stroke, major lines are drawn', () =>
+      draw(`<pxl-grid step="100" major="2" stroke="#000" strokewidth="2"></pxl-grid>`, (layer) =>
+        expectInk(layer, [[200, 50, true], [100, 50, true], [150, 50, false]])));
+
     // ===================================================================
     // Paint: fill, stroke, alpha, gradients, dashes, compositing, shadows
     // ===================================================================

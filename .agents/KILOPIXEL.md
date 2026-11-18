@@ -865,7 +865,7 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 - `render(u, t)` (draw phase): updates the CSS compositing, clears and redraws the canvas, then sets `isDirty = _keepAlive`, so only the heartbeat carries into the next frame ([Dirty-Flag Optimization](#dirty-flag-optimization))
 - `_isCanvasEmpty` tracks whether the canvas was just cleared (optimization for hidden layers)
 - `invalidate()` sets `isDirty = true` and calls `stage.requestRender()`
-- Hidden optimization: if `hidden` (checked against `attributeExpressions`) AND `_isCanvasEmpty`, `invalidate()` returns early without scheduling rAF
+- Hidden optimization: if `hidden` (its current value in `attributeValues`, so a reactive `hidden` that turns false asks for a frame again) AND `_isCanvasEmpty`, `invalidate()` returns early without scheduling rAF
 - Layer compositing uses **CSS DOM properties** (`canvas.style.opacity`, `canvas.style.mixBlendMode`, `canvas.style.filter`) — not Canvas context state. The `'source-over'` blend mode maps to CSS `'normal'`.
 - Layer transforms use `pxl.applyTransformState()` (spatial only), NOT `pxl.applyContextState()` (which adds compositing). This enforces the dual architecture.
 - **CSS-Only Fast Path**: When all of a layer's animated attributes are compositing properties (`alpha`, `blend`, `filter`; not transforms, not `hidden`) and the layer isn't dirty (nothing inside it is animated or changed), the layer skips canvas clearing and child re-rendering entirely — it only updates CSS DOM properties and requests the next frame. This works because a layer, which is its own `parentLayer` (`closest('pxl-layer')` includes the element), doesn't invalidate itself in `evaluateAnimations()`; a layer's own `setAttribute()` still invalidates it (fixed 2026-11-12, `design/2026-11-12_two_phase_frame_plan.md` §7.1).
@@ -1342,8 +1342,8 @@ This works correctly regardless of zoom, rotation, or deep group nesting.
 2. Snap bounds to `step` increments
 3. Draw minor grid lines (batched `beginPath` → multiple `moveTo`/`lineTo` → single `stroke`)
 4. Apply fill/stroke style via standard `applyStyle`
-5. Draw major grid lines (same batch approach, 2× lineWidth)
-6. If `labels` and `major > 0`: draw coordinate text at major intersections using monospace font
+5. Draw major grid lines (same batch approach, 2× lineWidth), only when the grid is stroked (`isStroked()`): without a stroke there are no lines
+6. If `labels` and `major > 0`: draw coordinate text at major intersections using monospace font, in the fill color, or the stroke color without a fill; neither fill nor stroke: no labels
 
 ### Bounding Box
 

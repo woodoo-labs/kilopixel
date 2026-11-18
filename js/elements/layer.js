@@ -75,8 +75,9 @@ pxl.Layer = class Layer extends pxl.PxlNode {
   // Called by the layer itself and by everything inside it
   invalidate() {
     this.isDirty = true;
-    // A hidden layer renders once more to clear its canvas, then stays idle
-    if (this.attributeExpressions.hidden && this._isCanvasEmpty) return;
+    // A hidden layer renders once more to clear its canvas, then stays idle. The current value, not the expression:
+    // a reactive hidden is a function, which would keep the layer idle after it turned false.
+    if (this.attributeValues.hidden && this._isCanvasEmpty) return;
     this.stage?.requestRender();
   }
 

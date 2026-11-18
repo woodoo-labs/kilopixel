@@ -47,8 +47,10 @@ pxl.Grid = class Grid extends pxl.Shape {
     }
     this.applyStyle(ctx, u);
 
-    // Major lines: every major-th line, twice as thick
-    if (major > 0) {
+    // Major lines: every major-th line, twice as thick. Only with a stroke: applyStyle() set the stroke state, without
+    // it the canvas would draw them in its default black.
+    const isStroked = this.isStroked();
+    if (major > 0 && isStroked) {
       ctx.beginPath();
       for (let x = startX; x <= endX; x += step) {
         if (Math.round(x / step) % major !== 0) continue;
@@ -66,9 +68,10 @@ pxl.Grid = class Grid extends pxl.Shape {
       ctx.stroke();
     }
 
-    // Coordinates at the major intersections, in the fill color (or the stroke color without fill)
-    if (labels && major > 0) {
-      ctx.fillStyle = this.hasFill() ? this.createGradient(ctx, u, this.attributeValues.fill, 0) : ctx.strokeStyle;
+    // Coordinates at the major intersections, in the fill color (or the stroke color without fill; neither: no labels)
+    const hasFill = this.hasFill();
+    if (labels && major > 0 && (hasFill || isStroked)) {
+      ctx.fillStyle = hasFill ? this.createGradient(ctx, u, this.attributeValues.fill, 0) : ctx.strokeStyle;
       ctx.font = `${labelsize * u}px monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';

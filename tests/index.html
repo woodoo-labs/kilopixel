@@ -1120,6 +1120,28 @@
       fpRender(50.4, 1);
     });
 
+    // A hidden layer with an empty canvas asks for no frames. It must check the current value of hidden: for a reactive
+    // hidden, attributeExpressions.hidden is the compiled function, which is always truthy, so the layer never came back
+    // when nothing else asked for a frame (here: its source is outside the stage).
+    test('layer hidden: a reactive hidden that turns false asks for a frame, also when its source is outside the stage', () =>
+      withStage(`<pxl-var id="lhSource" value="1"></pxl-var>
+        <div style="width: 500px"><pxl-stage alwaysrender><pxl-layer id="lhLayer" hidden="ref.lhSource.value > 0">
+          <pxl-circle x="500" y="300" r="100" fill="#0f172a"></pxl-circle>
+        </pxl-layer></pxl-stage></div>`, (stage) => {
+        const layer = el('lhLayer');
+        stage.render(1); // hidden: the canvas is cleared and stays empty
+        let requests = 0;
+        stage.requestRender = function() { requests++; return pxl.Stage.prototype.requestRender.call(this); };
+        try {
+          el('lhSource').setAttribute('value', '0');
+        } finally {
+          delete stage.requestRender;
+        }
+        stage.render(2);
+        const state = { hidden: layer.attributeValues.hidden, requests, alpha: alphaAt(layer, 500, 300) };
+        if (state.hidden !== false || requests === 0 || state.alpha === 0) throw new Error(JSON.stringify(state));
+      }));
+
     // --- Reference cycles (design/2026-11-12_reactive_propagation_plan.md) ---
     section('Reference cycles');
 
