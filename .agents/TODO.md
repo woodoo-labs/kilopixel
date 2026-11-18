@@ -146,11 +146,12 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Open**: name (`space` / `frame`), origin (drawing origin / pivot), scope (shapes and groups / also layers), hidden target.
 
 ## 29. Two-Phase Frame: Evaluate Everything, Then Draw
-- **Status**: 💬 **Discussion** (2026-11-17: pointer readers fixed, plan §7.4; 2026-11-13: step 1 built; steps 2–4 not decided)
+- **Status**: 💬 **Discussion** (2026-11-18: rules both paths share, plan §9; 2026-11-17: pointer readers fixed, plan §7.4; 2026-11-13: step 1 built; steps 2–4 not decided)
 - **Reference**: `design/2026-11-12_two_phase_frame_plan.md` (hub: the plans that depend on it and what changes for each in §6, suggested order in §7)
 - **Built (step 1)**: the frame evaluates all layers first, then draws them. Readers drawn before their targets (toLocal, `ref.*` without `t`) no longer lag a frame; no measurable cost. Readers of the pointer and of hover / press states kept the lag until 2026-11-17, when hit testing moved to the start of the frame (`design/2026-11-17_pointer_frame_order_plan.md`).
 - **Idea, still open**: change-based dirty flags (step 2): a layer redraws only when a value really changed (a `floor(t)` clock redraws once per second, a finished `clamp()` animation stops redrawing), and the stage, not the drawing, keeps the loop alive.
-- **Open**: redraws saved by step 2, hidden subtrees, readers that use `t` and refs (dependency order with a cycle rule recommended, plan §3.1.1), order of broadcasts; plan §4.
+- **Open**: redraws saved by step 2, hidden subtrees, readers that use `t` and refs (dependency order with a cycle rule recommended, plan §3.1.1), order of broadcasts; plan §4. C1, the rule for cycles without `t` on both paths (plan §9.1).
+- **Shared rules** (plan §9, aligned 2026-11-18 with §39, §40 and the pointer frame order plan): no frame request for a change before the running frame's update phase (R1: today a pointer reader adds an empty frame per move, `test.known()` in `tests/index.html`, fixed with step 2); self-reads within an element (R3); which elements are nodes of the order (R4); readers with `t` count as readers (R5); stage-level variables first (R6).
 - **Steps**: (1) split evaluation from drawing (built), (2) change-based dirty flags and keep-alive in the stage, (3) `t` readers, hidden subtrees, (4) the dependent plans; plan §7.2.
 - **Related**: §40 proposes another way after step 2 (one evaluation per frame for all expressions, no broadcasts); step 2 is the first step of both.
 
@@ -204,17 +205,17 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Reference**: `design/2026-11-12_reactive_propagation_plan.md`; prototypes in `design/prototypes/2026-11-12_reactive_propagation/`
 - **Problem**: `pxl.broadcast()` propagates recursively, depth first. Stacked diamonds evaluate their bottom once per path (1,024 times after ten layers), and a diamond's bottom briefly sees half-updated values (210 before 220). Neither is visible today. A cycle that never settles stops after 100 rounds with a warning (per-element nesting counter, 2026-11-13).
 - **Idea**: find every affected reader first, then evaluate each once in dependency order, computed per broadcast over the affected readers only (recommended) or from a lasting graph. Measured cost: about +20 ns per reader, +1 KB minified (plan §5).
-- **Open**: when to build it (with `<pxl-out>`, §5, or event handlers that react to every change); D1–D4.
+- **Open**: when to build it (with `<pxl-out>`, §5, or event handlers that react to every change); D1–D4. The cycle rule is decided together with §29 and §40 (C1, `design/2026-11-12_two_phase_frame_plan.md` §9.1).
 - **Related**: §29 (its update phase orders readers with `t`; could share the ordering code); §40 (the alternative: no broadcasts at all; if it is built, this item goes).
 
 ## 40. Per-Frame Evaluation in Dependency Order (No Broadcasts)
-- **Status**: 🟡 **Proposed** (2026-11-15, design and measurements; nothing built)
+- **Status**: 🟡 **Proposed** (2026-11-18, aligned with §29 plan §9; 2026-11-15, design and measurements; nothing built)
 - **Reference**: `design/2026-11-15_per_frame_evaluation_plan.md`; prototype `design/prototypes/2026-11-15_per_frame_evaluation/pull_bench.html`
 - **Problem**: expressions are re-evaluated by three mechanisms (the frame loop for `t`, recursive broadcasts for `ref.*`, a matrix walk for `toLocal`), each with its own bookkeeping; the open problems of §29 and §39 sit where they meet.
 - **Idea**: a change only raises a version number and asks for a frame; the frame evaluates what is out of date, sources before readers, then draws the layers in which a value changed. No subscriptions, no `pxl.broadcast()`, one order for expressions with and without `t`.
 - **Measured**: about the same cost as broadcasts when a source changes (330–620 ns per reader either way); with a version check 20–25 ns per reader that is up to date; ordering 1,000 nodes takes 0.06 ms. The gain is one mechanism instead of three, not speed.
 - **Behavior change**: a reactive value updates in the next frame's update phase, not inside `setAttribute()` (same frame on screen).
-- **Open**: D1 this plan or the path of §29 steps 2–3 plus §39 (decide after a prototype patch and a page sweep), D2–D7 (plan §10). The riskiest part is a `toLocal` reader that is read by others (plan §3.5).
+- **Open**: D1 this plan or the path of §29 steps 2–3 plus §39 (decide after a prototype patch and a page sweep), D2, D3, D5–D8 (plan §10; D4 moved to C1 of §29, `design/2026-11-12_two_phase_frame_plan.md` §9.1). The riskiest part is a `toLocal` reader that is read by others (plan §3.5). The rules both paths share are in that plan's §9.
 - **Steps**: (1) §29 step 2, needed on both paths, (2) prototype as a patch over the engine, page sweep, decide D1, (3) build, (4) update the plans that assume broadcasts.
 - **When**: after the framework steps 1–5 of §30 (their conformance tests are the safety net); scoped names (§30 D2) are designed together with D1, because both change how `ref` is resolved (framework plan §19.3).
 

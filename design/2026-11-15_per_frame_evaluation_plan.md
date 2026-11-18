@@ -1,6 +1,6 @@
 # Per-Frame Evaluation in Dependency Order (No Broadcasts)
 
-- **Status**: 🟡 **Proposed** (2026-11-17, §3.7 follows the pointer frame order; 2026-11-15, design and measurements; nothing built; D1 decides between this plan and the path of the two related plans)
+- **Status**: 🟡 **Proposed** (2026-11-18, aligned with the two-phase plan §9: stage-level variables in §3.2, self-reads in §3.4, no frame request inside the running frame in §3.6, D4 moved to its C1; 2026-11-17, §3.7 follows the pointer frame order; 2026-11-15, design and measurements; nothing built; D1 decides between this plan and the path of the two related plans)
 - **Date**: 2026-11-15
 - **Related**: `design/2026-11-12_two_phase_frame_plan.md` (TODO §29: step 1 built; its steps 2 and 3 are the first steps of this plan too, §8), `design/2026-11-12_reactive_propagation_plan.md` (TODO §39: orders the broadcasts instead of removing them; this plan is the alternative, §7), `design/2026-10-26_tolocal_fix_plan.md` (the matrix walk this plan removes), `design/2026-10-15_interactive_state_auto_registration_plan.md` (sticky ids and lazy unregistering, §3.7), `design/2026-11-07_safe_shape_render_plan.md` (error rules, kept)
 - **Target Implementation** (if decided): `js/engine.js`, `js/elements/node.js`, `js/elements/stage.js`, `js/elements/layer.js`, `js/interaction.js`, `js/monitor.js`, `tests/index.html`, `.agents/KILOPIXEL.md` (Reactivity Engine, Per-Frame Render Pipeline)
@@ -56,6 +56,8 @@ The update phase of `Stage.render()` gets three parts; the draw phase stays as b
 
 An element whose value changed marks itself changed (for later readers in the same frame) and its layer dirty. The stage asks for the next frame when anything with `t` was evaluated (two-phase plan §3.3).
 
+Before these three parts, as in today's engine: `interaction.process()` (pointer values, hover / press states, handlers; §3.7) and the stage-level `<pxl-var>` elements (built 2026-11-13, two-phase plan §9 R6). A stage-level variable that others read is an ordered source and is evaluated in part 1; the others are evaluated first, before part 1, in DOM order. Their keep-alive stays in the stage: it asks for the next frame while one of them is animated.
+
 ### 3.3 The Order
 
 - **Nodes:** elements that have an `id`, are named in some expression, and have at least one expression of their own. Most shapes are not nodes: a shape that only reads is in the flat list of §3.2 part 3, and a source with only plain values needs no order.
@@ -67,8 +69,8 @@ An element whose value changed marks itself changed (for later readers in the sa
 ### 3.4 Cycles
 
 - **With `t`** (`x="ref.me.x + (100 - ref.me.x) * 0.1 + t * 0"`, shapes chasing each other): members are evaluated once per frame in DOM order; a member that reads a later one gets the previous frame's value. This is the rule of the two-phase plan §3.1.1, and what such pages do today.
-- **Without `t`** (`a = b + 1`, `b = a + 1`, by mistake): today 100 rounds and a warning. Proposed (D4): one warning when the order is built, naming the elements; the members are evaluated in DOM order, and the edge that closes the cycle doesn't count as "source changed". The cycle then stops after one pass instead of counting up in every frame.
-- **An element that reads itself** (walkthrough section 9, `shadowcolor="ref.sec9FlyingOrb.stroke"`) is not a cycle: inside one element, expressions with `t` are evaluated before the reactive ones.
+- **Without `t`** (`a = b + 1`, `b = a + 1`, by mistake): today 100 rounds and a warning. Proposed (D4): one warning when the order is built, naming the elements; the members are evaluated in DOM order, and the edge that closes the cycle doesn't count as "source changed". The cycle then stops after one pass instead of counting up in every frame. **Aligned 2026-11-18:** the rule for cycles without `t` is one decision for both paths, C1 in `design/2026-11-12_two_phase_frame_plan.md` §9.1; it recommends repeated rounds (at most `pxl.MAX_CYCLE_ROUNDS`) with this plan's "closing edge" rule, because one pass changes the result of cycles that converge over several rounds.
+- **An element that reads itself** (walkthrough section 9, `shadowcolor="ref.sec9FlyingOrb.stroke"`) is not a cycle: inside one element, expressions with `t` are evaluated before the reactive ones, and its own reactive expressions are evaluated once more when one of its values changed and another one reads the element (two-phase plan §9 R3). Without that extra round, two reactive attributes in the wrong key order would lag a frame.
 
 ### 3.5 `toLocal`
 
@@ -82,6 +84,7 @@ A `toLocal()` result depends on the target's global matrix and on the matrix of 
 ### 3.6 Waking a Stage
 
 - `pxl.markChanged(node)` asks every stage that is in view for a frame (D7). A frame in which nothing is out of date costs the version checks of part 3 (about 20 ns per reader, §5) and draws nothing.
+- **Not the running frame:** a change before the update phase of the stage's running frame (in `interaction.process()`, by a stage-level variable, or by an ordered source for a later reader) is evaluated and drawn in that frame, so `markChanged()` requests no frame from that stage, only from the others (two-phase plan §9 R1). Today's engine doesn't do this: a pointer reader adds an empty frame after each move (measured 2026-11-18, `test.known()` in `tests/index.html`).
 - **Only when someone reads the source:** the compiler adds every id it sees in an expression to a set (`pxl._readIds`, never shrinks, like `pxl._interactiveIds` today). A change to an element whose id isn't in the set wakes nobody. This keeps a page idle while the performance monitor publishes `fps` once per second and nobody shows it.
 - `setAttribute()`, resize and font arrival invalidate their layer as today.
 
@@ -192,7 +195,7 @@ The existing tests stay (ref cycles, two-phase frame, safe render, toLocal, laye
 | D1 | This plan, or the two related plans' path (§7)? | Build step 1, prototype step 2, then decide |
 | D2 | Reactive readers: version check, or evaluate all of them in every frame that runs? | Version check (§5: 0.11 ms instead of 1 ms per 5,000 readers) |
 | D3 | `toLocal`: every frame that runs, or compare matrix versions? | Every frame that runs; versions only if a measurement asks for it |
-| D4 | Cycles without `t`: warn when the order is built and stop after one pass, or keep the 100 rounds? | Warn and stop |
+| D4 | Cycles without `t`: warn when the order is built and stop after one pass, or keep the 100 rounds? | Moved 2026-11-18 to C1 in `design/2026-11-12_two_phase_frame_plan.md` §9.1 (one rule for both paths; recommended there: repeated rounds with this plan's closing-edge rule) |
 | D5 | Derived values right after `setAttribute()`: accept the next frame, or evaluate on demand when a stale value is read? | Accept the next frame, if step 1 finds no page that relies on it |
 | D6 | Granularity: element, or attribute (`ref.orb.stroke` as its own source)? | Element, as today |
 | D7 | Wake every stage in view, or only stages with readers of the changed source? | Every stage in view; the check costs about 20 ns per reader |

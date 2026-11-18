@@ -1771,6 +1771,27 @@
         if (drawn !== '#f00' || dirty) throw new Error(`drawn in the click frame: ${drawn}; layer still dirty: ${dirty}`);
       }));
 
+    // A change before the update phase of the running frame (here: the pointer reader's invalidate() in process()) is
+    // drawn in that frame, so it must not ask for another one (design/2026-11-12_two_phase_frame_plan.md §9, R1).
+    // The stage's frames are queued and run by hand; other stages keep the browser's requestAnimationFrame.
+    test.known('interaction: one pointer move with a reader of the pointer runs one frame, not an extra empty one', () =>
+      withStage(`<div style="width: 500px"><pxl-stage id="ixOneFrame" alwaysrender><pxl-layer>
+        <pxl-circle x="ref.ixOneFrame.mouseX" y="300" r="20" fill="#000"></pxl-circle>
+      </pxl-layer></pxl-stage></div>`, (stage) => {
+        const queued = [], realRaf = window.requestAnimationFrame;
+        window.requestAnimationFrame = (cb) => (cb === stage._frameCallback ? queued.push(cb) : realRaf(cb));
+        let frames = 0;
+        try {
+          stage._isUpdatePending = false; // a frame requested while the stage was inserted is not part of this test
+          stage.dispatchEvent(new PointerEvent('pointerenter'));
+          pointerAt(stage, 'pointermove', 300, 300);
+          while (queued.length && frames < 10) queued.shift()(++frames * 1000 / 60);
+        } finally {
+          window.requestAnimationFrame = realRaf;
+        }
+        if (frames !== 1) throw new Error(`${frames} frames for one pointer move`);
+      }));
+
     // ===================================================================
     // Lifecycle: moving, removing and re-inserting elements (framework plan C1, C8)
     // ===================================================================
