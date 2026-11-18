@@ -12,67 +12,45 @@ pxl.dummyCtx.fill = function() { if (this.isPointInPath(pxl._hitX, pxl._hitY)) p
 pxl.dummyCtx.stroke = function() { if (this.isPointInStroke(pxl._hitX, pxl._hitY)) pxl._hitResult = true; };
 
 // =========================================================================
-// Auto-Registration for Interactive States
-// (design/2026-10-15_interactive_state_auto_registration_plan.md)
+// isPressed Readers (Hand Cursor)
 // =========================================================================
-pxl.INTERACTIVE_STATES = ['isHovered', 'isPressed'];
-pxl._interactiveStateRegex = new RegExp(
-  `\\bref\\.([a-zA-Z_$][a-zA-Z0-9_$]*)\\??\\.(${pxl.INTERACTIVE_STATES.join('|')})\\b`, 'g'
-);
-pxl._interactiveIds = new Set(); // ids whose shapes must be hit-tested
-pxl._pressableIds = new Set();   // ids whose isPressed is referenced (hand cursor)
-pxl._stickyIds = new Set();      // ids read without a subscription (time-dependent expressions, pxl-on-* handlers)
+// Ids whose isPressed an expression or handler reads: the pointer shows a hand over those shapes
+pxl._pressableIds = new Set();
+pxl._pressedRefRegex = /\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\??\.isPressed\b/g;
 
-// Compile time only: finds ref.<id>.isHovered / isPressed in an attribute string and registers the referenced shape.
-pxl.trackInteractiveRefs = function(source, sticky) {
-  if (typeof source !== 'string' || source.indexOf('.is') === -1) return;
-  const re = pxl._interactiveStateRegex;
+// Compile time only: finds ref.<id>.isPressed in an attribute string or handler
+pxl.trackPressedRefs = function(source) {
+  if (typeof source !== 'string' || source.indexOf('.isPressed') === -1) return;
+  const re = pxl._pressedRefRegex;
   re.lastIndex = 0;
   let match;
-  while ((match = re.exec(source)) !== null) {
-    const id = match[1];
-    pxl._interactiveIds.add(id);
-    if (match[2] === 'isPressed') pxl._pressableIds.add(id);
-    if (sticky) pxl._stickyIds.add(id);
-    const node = pxl.nodes[id]?.$node; // already connected? Otherwise Shape.connectedCallback registers it.
-    if (node && node.draw && node.stage) node.stage.interaction.registerElement(node);
-  }
+  while ((match = re.exec(source)) !== null) pxl._pressableIds.add(match[1]);
 };
+
+// =========================================================================
+// InteractionEngine: hit testing, hover / press states, handlers
+// =========================================================================
+// Every shape is hit-tested, like elements in the DOM (design/2026-10-30_framework_compatibility_plan.md §22, §23).
+// CSS pointer-events: none takes a shape, or a group or layer with everything inside it, out of hit testing.
+// While the pointer rests, the hit test runs at most this often (ms); any pointer event tests at once
+pxl.RESTING_HIT_INTERVAL = 100;
 
 pxl.InteractionEngine = class InteractionEngine {
   constructor(stage) {
     this.stage = stage;
-    this._interactiveElements = [];
-    this._isOrderDirty = false;
     this._hoveredElements = [];
     this._pressedElement = null;
-    this._hitStack = new Array(50);
     this._lastCursor = '';
     this._lastClick = false;
     this._lastDown = false;
     this._lastUp = false;
     this._lastMove = false;
     this._isMouseDirty = false;
+    this._lastHitTime = -1e9; // performance.now() of the last hit test (process())
   }
 
-  registerElement(el) {
-    if (!this._interactiveElements.includes(el)) {
-      this._interactiveElements.push(el);
-      this._isOrderDirty = true;
-    }
-  }
-
-  // Lazy unregister, called on leave / release after the state broadcast (subscribers have
-  // re-evaluated and dropped stale subscriptions): nobody reads this element's states any more.
-  releaseIfUnused(el) {
-    if (el.hasEventHandlers() || pxl._stickyIds.has(el.id)) return;
-    const subs = el.refKey ? pxl._subscriptions[el.refKey] : null;
-    if (!subs || subs.length === 0) this.unregisterElement(el);
-  }
-
-  unregisterElement(el) {
-    pxl.removeFromArray(this._interactiveElements, el);
-
+  // A shape that leaves the DOM while it is hovered or pressed gives up its states
+  releaseElement(el) {
     if (this._hoveredElements.includes(el)) {
       pxl.removeFromArray(this._hoveredElements, el);
       el.attributeValues.isHovered = false;
@@ -97,15 +75,15 @@ pxl.InteractionEngine = class InteractionEngine {
         break;
       case 'pointerdown':
         this._lastDown = true;
-        if (this._interactiveElements.length > 0) this.stage.requestRender();
+        this.stage.requestRender();
         break;
       case 'pointerup':
         this._lastUp = true;
-        if (this._interactiveElements.length > 0) this.stage.requestRender();
+        this.stage.requestRender();
         break;
       case 'click':
         this._lastClick = true;
-        if (this._interactiveElements.length > 0) this.stage.requestRender();
+        this.stage.requestRender();
         break;
       case 'pointerenter':
         this.stage.attributeValues.isHovered = true;
@@ -132,74 +110,94 @@ pxl.InteractionEngine = class InteractionEngine {
     }
   }
 
+  // --- Hit Testing ---
+
+  // The topmost shape under the point (x, y) in stage units, or null. Walks the layers and their children in reverse
+  // drawing order, so no list of shapes has to be kept or sorted; hidden layers and groups are skipped with
+  // everything inside them. Uses the values of the last update: the picture on screen.
+  findShapeAt(x, y) {
+    pxl._hitX = x * this.stage.unit;
+    pxl._hitY = y * this.stage.unit;
+    const layers = this.stage.layers;
+    for (let i = layers.length - 1; i >= 0; i--) {
+      const layer = layers[i];
+      if (layer.attributeValues.hidden) continue;
+      // A layer is a real box on the page: CSS can take it out (pointer-events, display, visibility). Few layers,
+      // so reading them costs little; groups and shapes are only read when a shape could be hit (they inherit).
+      const css = layer.cssStyle();
+      if (css.pointerEvents === 'none' || css.display === 'none' || css.visibility === 'hidden') continue;
+      const hit = this.findShapeIn(layer, x, y);
+      if (hit) return hit;
+    }
+    return null;
+  }
+
+  findShapeIn(container, x, y) {
+    const children = container.childList;
+    for (let i = children.length - 1; i >= 0; i--) {
+      const child = children[i];
+      if (child.attributeValues.hidden) continue;
+      if (child.childList !== null) {
+        // A group (also a layer nested in a layer, which the engine doesn't really support)
+        const hit = this.findShapeIn(child, x, y);
+        if (hit) return hit;
+      } else if (child.draw && this.hitsShape(child, x, y)) {
+        return child;
+      }
+    }
+    return null;
+  }
+
+  // The box check first (cheap, rules out almost every shape), then the shape's CSS pointer-events (inherited from
+  // its groups and layer), then the exact test: the shape's own drawing on pxl.dummyCtx, with its global matrix.
+  // A shape that throws here is not hit; the dummy context is restored either way.
+  // save() / restore() only around the exact test: about 1 µs per pair, which every shape would pay otherwise.
+  hitsShape(shape, x, y) {
+    try {
+      if (!shape.mayContainPoint(x, y) || shape.cssStyle().pointerEvents === 'none') return false;
+    } catch (error) {
+      shape.reportError(error); // a custom getBoundingBox() that throws
+      return false;
+    }
+    const ctx = pxl.dummyCtx;
+    pxl._hitResult = false;
+    ctx.save();
+    try {
+      const m = shape.getGlobalMatrix(), u = this.stage.unit;
+      ctx.setTransform(m[0], m[1], m[2], m[3], m[4] * u, m[5] * u);
+      ctx.beginPath();
+      // Shapes that can't express their hit area as a path (e.g. text) provide hitTest()
+      if (shape.hitTest) shape.hitTest(ctx, u);
+      else shape.draw(ctx, u, 0);
+    } catch (error) {
+      shape.reportError(error);
+      return false;
+    } finally {
+      ctx.restore();
+    }
+    return pxl._hitResult;
+  }
+
+  // Start of every frame (Stage.render()): pointer values, hit test, hover / press states, handlers
   process() {
+    const pointerChanged = this._isMouseDirty || this._lastDown || this._lastUp || this._lastClick;
     if (this._isMouseDirty) {
       if (this.stage.refKey) pxl.broadcast(this.stage.refKey);
       this._isMouseDirty = false;
     }
 
-    const elements = this._interactiveElements;
-    const len = elements.length;
-    if (len === 0) return;
-
-    if (this._isOrderDirty) {
-      elements.sort(pxl.sortByDOMPosition);
-      this._isOrderDirty = false;
-    }
-
-    const ctx = pxl.dummyCtx;
-    pxl._hitX = this.stage.attributeValues.mouseX * this.stage.unit;
-    pxl._hitY = this.stage.attributeValues.mouseY * this.stage.unit;
-
+    // A resting pointer is tested again at most every RESTING_HIT_INTERVAL ms: shapes may move under it, but a page
+    // with many animated shapes shouldn't pay the walk in every frame (0.4–1 ms per 1,000 shapes, measured with
+    // design/prototypes/2026-10-30_framework_compatibility/hit_walk_bench.html)
+    const values = this.stage.attributeValues;
+    const now = performance.now();
     let hitEl = null;
-
-    if (this.stage.attributeValues.isHovered) {
-      for (let i = len - 1; i >= 0; i--) {
-        const el = elements[i];
-        if (!el.draw) continue;
-
-        let curr = el;
-        let isHidden = false;
-        let stackLen = 0;
-
-        while (curr && curr !== this.stage) {
-          if (curr.attributeValues) {
-            if (curr.attributeValues.hidden) {
-              isHidden = true;
-              break;
-            }
-            this._hitStack[stackLen++] = curr;
-          }
-          curr = curr.parentElement;
-        }
-
-        if (isHidden) continue;
-
-        ctx.save();
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-        // Spatial transforms only: alpha, blend, filter and shadows don't affect isPointInPath
-        for (let j = stackLen - 1; j >= 0; j--) {
-          pxl.applyTransformState(ctx, this.stage.unit, this._hitStack[j].attributeValues);
-        }
-
-        pxl._hitResult = false;
-        ctx.beginPath();
-        // Shapes that can't express their hit area as a path (e.g. text) provide hitTest().
-        // A shape that throws here is not hit; the dummy context is restored either way, so later tests aren't offset.
-        try {
-          if (el.hitTest) el.hitTest(ctx, this.stage.unit);
-          else el.draw(ctx, this.stage.unit, 0);
-        } catch (error) {
-          el.reportError(error);
-        } finally {
-          ctx.restore();
-        }
-
-        if (pxl._hitResult) {
-          hitEl = el;
-          break;
-        }
+    if (values.isHovered) {
+      if (pointerChanged || now - this._lastHitTime >= pxl.RESTING_HIT_INTERVAL) {
+        hitEl = this.findShapeAt(values.mouseX, values.mouseY);
+        this._lastHitTime = now;
+      } else if (this._hoveredElements.length > 0) {
+        hitEl = this._hoveredElements[0];
       }
     }
 
@@ -211,7 +209,6 @@ pxl.InteractionEngine = class InteractionEngine {
         if (prevHovered.refKey) pxl.broadcast(prevHovered.refKey);
         this.callHandler(prevHovered, 'leave');
         pxl.removeFromArray(this._hoveredElements, prevHovered);
-        this.releaseIfUnused(prevHovered);
       }
     }
 
@@ -250,7 +247,6 @@ pxl.InteractionEngine = class InteractionEngine {
         this._pressedElement = null;
       }
       if (hitEl) this.callHandler(hitEl, 'up');
-      if (released) this.releaseIfUnused(released);
     }
 
     // Reset event flags

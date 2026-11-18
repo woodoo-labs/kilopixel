@@ -1,6 +1,6 @@
 # Kilopixel Framework — Complete Technical Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~59KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~60KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes with custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, …); the engine compiles their attribute expressions and redraws a layer in every frame in which something in it changed or is animated.
 
@@ -669,13 +669,14 @@ Hit testing uses a **dummy canvas context** (`pxl.dummyCtx`) whose `fill()` and 
 1. A 1×1 off-screen canvas is created at module load
 2. Its `fill` method is overridden to call `isPointInPath(hitX, hitY)`
 3. Its `stroke` method is overridden to call `isPointInStroke(hitX, hitY)`
-4. During hit testing, the engine:
-   - Iterates interactive elements in **reverse DOM order** (front-to-back)
-   - Walks the parent chain to build the transform stack
-   - Applies the **spatial transforms only** (`pxl.applyTransformState`) to the dummy context — alpha, blend, mask, filter and shadows don't affect `isPointInPath`, so they are skipped
-   - Calls the shape's optional **`hitTest(ctx, u)`** hook if it has one, otherwise its `draw()` method, on the dummy context, inside `try / catch / finally`: a shape that throws counts as not hit, reports its error, and the dummy context is always restored
+4. During hit testing (`InteractionEngine.findShapeAt(x, y)`), the engine:
+   - Walks the stage's layers and their children (`childList`, groups recursively) in **reverse drawing order**, so the topmost shape is tested first and no list of shapes is kept or sorted. A layer or group with `hidden` is skipped with everything inside it, and so is a layer that CSS takes out (`pointer-events: none`, `display: none`, `visibility: hidden`, read from its computed style)
+   - **Box check** first (`Shape.mayContainPoint()`): the point is mapped into the shape's own space with the inverse of its global matrix (`getInverseGlobalMatrix()`, inverted again only when the matrix changed) and compared with `getBoundingBox()`, padded by what the stroke can reach (`hitPadding()`: half the width, a miter up to `miterlimit` × half the width, a square cap's corner, arrowheads). The box is read in every test, so a shape changed with `setAttribute()` is hit at its new size. Smooth polylines and custom shapes without their own `getBoundingBox()` skip the box check (`needsExactHitTest()`)
+   - Then the shape's CSS `pointer-events` (`cssStyle()`, the cached computed style; inherited from its groups and layer, so `pointer-events: none` on a group takes its shapes out, and `auto` on a shape inside it brings that shape back, as in the DOM)
+   - Then the exact test: sets the shape's global matrix on the dummy context (translation × `u`) and calls the shape's optional **`hitTest(ctx, u)`** hook if it has one, otherwise its `draw()` method, inside `try / catch / finally`: a shape that throws counts as not hit, reports its error, and the dummy context is always restored. Alpha, blend, mask, filter and shadows don't affect `isPointInPath`
    - The intercepted fill/stroke methods check if the mouse point is inside
    - First hit wins (topmost element)
+   - Cost (`design/prototypes/2026-10-30_framework_compatibility/hit_walk_bench.html`, 2026-11-18, browser pane): about 0.4–0.8 µs per shape for a full walk, 1–4 exact tests per hit test
 
 So the hit area is the shape's own path, the same one it draws: no separate collision geometry. Strokes count with their width (`isPointInStroke`).
 
@@ -683,16 +684,13 @@ So the hit area is the shape's own path, the same one it draws: no separate coll
 
 ### InteractionEngine Lifecycle
 
-- Shapes are registered with `stage.interaction.registerElement(el)` (only registered shapes are hit-tested) when they:
-  - have an event handler (`pxl-on-click`, `pxl-on-enter`, etc.), **or**
-  - have their `isHovered` / `isPressed` read anywhere: in an expression on **any** element (`fill="ref.btn.isHovered ? …"` on `btn` itself or on another shape, a `<pxl-var>`, …) or inside an `pxl-on-*` handler.
-- **Auto-registration** (`pxl.trackInteractiveRefs`, compile time only): every attribute string and `pxl-on-*` handler is scanned for `ref.<id>.isHovered` / `ref.<id>.isPressed` (state list: `pxl.INTERACTIVE_STATES`). The id is remembered in `pxl._interactiveIds`; the shape registers immediately if it is already connected, otherwise in its `connectedCallback` (works for any DOM order and for shapes added or re-added later).
-- **Lazy unregister**: on leave / release, a shape without `pxl-on-*` handlers is unregistered once nobody reads its states any more (no subscribers left on `ref.<id>`). References from time-dependent expressions and from `pxl-on-*` handlers don't subscribe, so those ids are **sticky** (`pxl._stickyIds`) and stay registered until the shape is disconnected.
-- Limitations: dynamic ids and bracket notation (`ref[name].isHovered`, `ref['btn'].isHovered`, `ref.btn['isHovered']`) are not detected. False positives (e.g. a string literally containing `ref.btn.isHovered`) only cause a harmless extra registration.
+- **Every shape is hit-tested**, like elements in the DOM: no registration, and no handler or reader needed (`design/2026-10-30_framework_compatibility_plan.md` §22, §23 step 2). `isHovered` / `isPressed` work for every shape. A shape that leaves the DOM while it is hovered or pressed gives up both states (`releaseElement()`).
+- **Out of hit testing:** CSS `pointer-events: none` on a shape, a group or a layer (inline style, class, Tailwind `pointer-events-none`); `hidden` shapes, groups and layers. The default styles give `pxl-grid` `pointer-events: none` (it covers the stage and would catch the pointer between its lines); a page can set `auto`. A decoration drawn on top of a clickable shape catches the pointer too, so it gets `pointer-events: none` (`examples/test37.html`, the icons on the nodes).
+- **Resting pointer:** while no pointer event arrives, `process()` tests again at most every `pxl.RESTING_HIT_INTERVAL` (100 ms): a shape that moves under a resting pointer is hovered within 100 ms, and any pointer event tests in its own frame. Measured with the bench above: a full walk costs about 0.4–0.6 ms for 1,000 shapes, `process()` with the pointer resting 0.03–0.16 ms per frame for 1,000–5,000 animated shapes.
 - Pointer events (`pointermove`, `pointerdown`, `pointerup`, `click`, `pointerenter`, `pointerleave`) are handled by the InteractionEngine via `handleEvent()`
 - Hit testing runs in `process()`, called at the **start** of each `stage.render()`, before the update phase: it first broadcasts the stage's pointer values (`mouseX`, `mouseY`, `isHovered`) if a pointer event arrived, then hit-tests against the values of the last update (the picture on screen), updates `isHovered` / `isPressed` and runs the handlers. Their readers (with or without `t`) and whatever a handler changes are drawn in the same frame. Called after drawing, all of these were one frame late (`design/2026-11-17_pointer_frame_order_plan.md`)
 - Mouse coordinates are converted to logical units: `offsetX / stage.unit`
-- **Cursor**: the stage shows `cursor = 'pointer'` only over **clickable** shapes (an `pxl-on-click` / `pxl-on-down` / `pxl-on-up` handler, or `isPressed` referenced somewhere — `pxl._pressableIds`); hover-only shapes keep `'default'`. The DOM style is only written when the cursor actually changes.
+- **Cursor**: the stage shows `cursor = 'pointer'` only over **clickable** shapes (a `pxl-on-click` / `pxl-on-down` / `pxl-on-up` handler, or `isPressed` referenced somewhere — `pxl.trackPressedRefs()` collects the ids in `pxl._pressableIds`); hover-only shapes keep `'default'`. The DOM style is only written when the cursor actually changes. (Step 3 of the plan makes the cursor CSS only.)
 
 ---
 
@@ -823,7 +821,7 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 ### Key Behavior
 
 - Creates no shadow DOM or internal canvas — layers each create their own
-- **Default styles** (`pxl.DEFAULT_STYLES` in `stage.js`): `pxl-stage { display: block; position: relative; width: 100% }`, `pxl-stage:state(fallback) { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0 }` and `display: none` for `pxl-var`, `pxl-group` and the built-in shapes (their content, e.g. `<pxl-text>{label}</pxl-text>` in JSX, would otherwise show as page text through the layer's `<slot>`; content placed directly in a layer stays visible; a custom shape element needs its own rule if it may get children), inside `@layer pxl { … }`. `pxl.addDefaultStyles(root)` adds them as one `<style data-pxl>` at the start of `<head>` when the script loads, and at the start of a shadow root when a stage connects inside one (document styles don't reach into it). The first cascade layer declared ranks lowest, so any page rule wins, also rules in the page's own layers (Tailwind v4); `adoptedStyleSheets` and `:where()` would beat layered page rules. Only `aspect-ratio` (from `ratio`) and `cursor` are written inline
+- **Default styles** (`pxl.DEFAULT_STYLES` in `stage.js`): `pxl-stage { display: block; position: relative; width: 100% }`, `pxl-stage:state(fallback) { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0 }` and `display: none` for `pxl-var`, `pxl-group` and the built-in shapes (their content, e.g. `<pxl-text>{label}</pxl-text>` in JSX, would otherwise show as page text through the layer's `<slot>`; content placed directly in a layer stays visible; a custom shape element needs its own rule if it may get children), and `pxl-grid { pointer-events: none }` (out of hit testing, see [Interaction System](#interaction-system)), inside `@layer pxl { … }`. `pxl.addDefaultStyles(root)` adds them as one `<style data-pxl>` at the start of `<head>` when the script loads, and at the start of a shadow root when a stage connects inside one (document styles don't reach into it). The first cascade layer declared ranks lowest, so any page rule wins, also rules in the page's own layers (Tailwind v4); `adoptedStyleSheets` and `:where()` would beat layered page rules. Only `aspect-ratio` (from `ratio`) and `cursor` are written inline
 - **300 px fallback width**: a parent that sizes itself to its content (a centered flex or grid item, `inline-block`, an absolute card) asks the stage for its content width; the layers are absolutely positioned and give none, so the stage would be 0 × 0. `markFallbackWidth()` then adds the custom state `fallback` (`attachInternals()` on first use, field `_internals`): `contain-intrinsic-inline-size: 300px` answers 300 (like `<canvas>`), `min-width: 0` keeps the stage shrinkable as a flex or grid item. It is called from `resize()` when the width is 0 and once in the frame after `connectedCallback()` (a ResizeObserver needn't report an element that stays 0 × 0); a stage without a box (`display: none`) is skipped; `disconnectedCallback()` removes the state. Only such stages get it: on every stage, the 300 px would also be the minimum content width that keeps the cards and grid columns around a stage from shrinking. Older browsers without custom states keep the stage 0 × 0. Design: `design/2026-11-04_stage_sizing_plan.md`
 - `ResizeObserver` with `device-pixel-content-box` (fallback to `content-box`)
 - `unit = clientWidth / 1000`
@@ -965,10 +963,9 @@ When `attributeChangedCallback` receives an event attribute (`pxl-on-click`, `px
 1. The string goes through `pxl.rewriteExpression()` like attribute expressions: `ref.a.b` → `ref.a?.b`, and `toLocal()` works (the caller is the shape)
 2. Compiled via `new Function` with full scope access
 3. Bound to the element via `.bind(this)`
-4. Stored in `this.handlers` (`handlers.click`, `handlers.enter`, …); the InteractionEngine calls them from there
-5. Element is registered with `stage.interaction`
+4. Stored in `this.handlers` (`handlers.click`, `handlers.enter`, …); the InteractionEngine calls them from there. Every shape is hit-tested, so nothing is registered
 
-A removed or empty handler (`removeAttribute('pxl-on-click')`, `pxl-on-click=""`) sets the compiled handler to `null`. The shape is **not** unregistered immediately (a handler may remove itself while `InteractionEngine.process()` iterates); `releaseIfUnused()` unregisters it on its next leave / release.
+A removed or empty handler (`removeAttribute('pxl-on-click')`, `pxl-on-click=""`) sets the compiled handler to `null`; a handler may remove itself while it runs.
 
 A handler that throws is caught by `InteractionEngine.callHandler()` and logged with `console.error` (`[pxl] <pxl-rect id="btn"> pxl-on-click failed:` plus the error with its stack trace). The rest of `process()` still runs: the event flags are reset and the hover list is updated, so the event is delivered once, and the other handlers of that frame are called (`design/2026-11-15_handler_errors_plan.md`).
 

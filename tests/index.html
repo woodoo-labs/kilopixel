@@ -902,12 +902,12 @@
       captureWarnings(() => {
         srRender(1);
         values.isHovered = true;
-        values.mouseX = 100; values.mouseY = 100;
+        values.mouseX = 100; values.mouseY = 100; stage.interaction._isMouseDirty = true; // as a pointermove does
         stage.interaction.process();
       });
       const identity = new DOMMatrix().toString();
       if (pxl.dummyCtx.getTransform().toString() !== identity) throw new Error(`hit-test context left at ${pxl.dummyCtx.getTransform()}`);
-      values.mouseX = 300;
+      values.mouseX = 300; stage.interaction._isMouseDirty = true;
       stage.interaction.process();
       const hovered = el('srHitOk').attributeValues.isHovered;
       values.isHovered = false;
@@ -933,12 +933,12 @@
       const stage = el('srStage'), values = stage.attributeValues, interaction = stage.interaction;
       srRender(1);
       values.isHovered = true;
-      values.mouseX = 100; values.mouseY = 100;
+      values.mouseX = 100; values.mouseY = 100; stage.interaction._isMouseDirty = true; // as a pointermove does
       const errors = captureErrors(() => {
         interaction._lastClick = true;
         interaction.process();
         interaction.process(); // a pointer move inside the shape
-        values.mouseX = 300;
+        values.mouseX = 300; stage.interaction._isMouseDirty = true;
         interaction.process(); // a pointer move onto the other shape
       });
       const calls = el('srThrowClick').calls, otherCalls = el('srOtherClick').calls;
@@ -958,10 +958,10 @@
       const stage = el('srStage'), values = stage.attributeValues, interaction = stage.interaction;
       srRender(1);
       values.isHovered = true;
-      values.mouseX = 100; values.mouseY = 100;
+      values.mouseX = 100; values.mouseY = 100; stage.interaction._isMouseDirty = true; // as a pointermove does
       interaction.process();
       const errors = captureErrors(() => {
-        values.mouseX = 300;
+        values.mouseX = 300; stage.interaction._isMouseDirty = true;
         interaction.process(); // leaves the first shape and enters the second
         interaction.process();
       });
@@ -1698,20 +1698,146 @@
         if (a !== '#f00' || b !== '#f00') throw new Error(`reader before: ${a}, reader added after: ${b}`);
       }));
 
-    test('interaction: without readers a shape is unregistered on leave; a reader with t keeps it registered', () =>
+    // --- Every shape is hit-tested (design/2026-10-30_framework_compatibility_plan.md §23, step 2) ---
+
+    test('interaction: every shape is hit-tested, with or without handlers or readers, also after its reader is removed', () =>
       withStage(ixStage(`
-        <pxl-circle id="ixLazyReader" x="50" y="50" r="5" fill="ref.ixLazy.isHovered ? '#f00' : '#00f'"></pxl-circle>
-        <pxl-circle id="ixLazy" x="300" y="300" r="80" fill="#000"></pxl-circle>
-        <pxl-circle id="ixStickyReader" x="60" y="50" r="5" alpha="t * 0 + (ref.ixSticky.isHovered ? 1 : 0.5)" fill="#000"></pxl-circle>
-        <pxl-circle id="ixSticky" x="700" y="300" r="80" fill="#000"></pxl-circle>`), (stage) => {
-        const registered = (id) => stage.interaction._interactiveElements.includes(el(id));
-        el('ixLazyReader').remove();
-        el('ixStickyReader').remove();
+        <pxl-circle id="ixPlainReader" x="50" y="50" r="5" fill="ref.ixPlainRead.isHovered ? '#f00' : '#00f'"></pxl-circle>
+        <pxl-circle id="ixPlainRead" x="300" y="300" r="80" fill="#000"></pxl-circle>
+        <pxl-circle id="ixPlain" x="700" y="300" r="80" fill="#000"></pxl-circle>`), (stage) => {
+        el('ixPlainReader').remove();
         hover(stage, 300, 300);
+        const read = pxl.nodes.ixPlainRead.isHovered;
         hover(stage, 700, 300);
-        hover(stage, 950, 30);
-        if (registered('ixLazy') || !registered('ixSticky')) {
-          throw new Error(`after leave: lazy registered ${registered('ixLazy')}, sticky registered ${registered('ixSticky')}`);
+        const plain = pxl.nodes.ixPlain.isHovered;
+        if (read !== true || plain !== true) throw new Error(`hovered: shape whose reader was removed ${read}, plain shape ${plain}`);
+      }));
+
+    // The box check rules out shapes before the exact test; it must never rule out a shape the exact test would hit
+    // (strokes, miter corners, square caps, arrowheads, rotated / skewed / mirrored groups, text, smooth curves)
+    test('interaction: the box check finds the same shape as the exact test of every shape, at 2,000 points', () =>
+      withStage(ixStage(`
+        <pxl-group x="250" y="150" rotate="30" zoom="1.3">
+          <pxl-circle x="-60" r="40" stroke="#000" strokewidth="16"></pxl-circle>
+          <pxl-rect x="60" w="-70" h="40" fill="#000"></pxl-rect>
+          <pxl-rect x="0" y="60" dx="20" w="50" h="30" anchor="top-left" rotate="15" stroke="#000" strokewidth="10" linejoin="miter"></pxl-rect>
+        </pxl-group>
+        <pxl-line x1="500" y1="80" x2="700" y2="120" stroke="#000" strokewidth="12" linecap="square" arrowend="auto"></pxl-line>
+        <pxl-polyline points="560,200; 600,330; 640,200" stroke="#000" strokewidth="24" miterlimit="10"></pxl-polyline>
+        <pxl-polyline points="700,200; 760,320; 820,180; 880,320" smooth="true" stroke="#000" strokewidth="8"></pxl-polyline>
+        <pxl-polyline x="100" y="380" mode="relative" points="0,0; 60,40; 60,-40" stroke="#000" strokewidth="6" arrowstart="30" arrowstyle="line"></pxl-polyline>
+        <pxl-group x="450" y="420" skewx="25" scalex="-1">
+          <pxl-ellipse rx="80" ry="40" start="0" sweep="250" stroke="#000" strokewidth="8" arrowend="auto"></pxl-ellipse>
+          <pxl-text y="10" size="30" text="Mirrored" fill="#000"></pxl-text>
+        </pxl-group>
+        <pxl-text x="700" y="450" size="36" text="Hit" stroke="#000" strokewidth="6" align="center"></pxl-text>`), (stage) => {
+        stage.render(1);
+        const ix = stage.interaction, proto = pxl.Shape.prototype, boxCheck = proto.mayContainPoint;
+        const names = (shape) => (shape ? `${shape.localName}#${[...shape.parentElement.children].indexOf(shape)}` : 'none');
+        const wrong = [];
+        let hits = 0;
+        for (let i = 0; i < 2000; i++) {
+          const x = (i * 37) % 1000 + 0.5, y = Math.floor(i * 37 / 1000) * 7.5 + (i % 7);
+          const withBox = ix.findShapeAt(x, y);
+          proto.mayContainPoint = () => true; // every shape gets the exact test
+          let exact;
+          try { exact = ix.findShapeAt(x, y); } finally { proto.mayContainPoint = boxCheck; }
+          if (exact) hits++;
+          if (withBox !== exact) wrong.push(`(${x}, ${y}): box ${names(withBox)}, exact ${names(exact)}`);
+        }
+        if (wrong.length || hits < 100) throw new Error(`${hits} points on a shape; ${wrong.slice(0, 5).join('; ')}`);
+      }));
+
+    test('interaction: CSS pointer-events: none on a shape, a group or a layer lets the pointer through, as in the DOM', () =>
+      withStage(`<div style="width: 500px"><pxl-stage alwaysrender>
+        <pxl-layer>
+          <pxl-circle id="peBottom" x="200" y="300" r="80" fill="#000"></pxl-circle>
+          <pxl-circle id="peTop" x="200" y="300" r="80" fill="#000" style="pointer-events: none"></pxl-circle>
+          <pxl-circle id="peUnderGroup" x="500" y="300" r="80" fill="#000"></pxl-circle>
+          <pxl-group style="pointer-events: none">
+            <pxl-circle id="peInGroup" x="500" y="300" r="80" fill="#000"></pxl-circle>
+            <pxl-circle id="peAutoInGroup" x="500" y="100" r="60" fill="#000" style="pointer-events: auto"></pxl-circle>
+          </pxl-group>
+          <pxl-circle id="peUnderLayer" x="800" y="300" r="80" fill="#000"></pxl-circle>
+        </pxl-layer>
+        <pxl-layer style="pointer-events: none"><pxl-circle id="peInLayer" x="800" y="300" r="80" fill="#000"></pxl-circle></pxl-layer>
+      </pxl-stage></div>`, (stage) => {
+        const hovered = (x, y) => {
+          hover(stage, x, y);
+          return ['peBottom', 'peTop', 'peUnderGroup', 'peInGroup', 'peAutoInGroup', 'peUnderLayer', 'peInLayer']
+            .filter((id) => pxl.nodes[id].isHovered).join(',');
+        };
+        const got = [hovered(200, 300), hovered(500, 300), hovered(500, 100), hovered(800, 300)].join(' | ');
+        if (got !== 'peBottom | peUnderGroup | peAutoInGroup | peUnderLayer') throw new Error(got);
+      }));
+
+    test('interaction: a layer hidden by CSS (display: none, visibility: hidden) is not hit', () =>
+      withStage(`<div style="width: 500px"><pxl-stage alwaysrender>
+        <pxl-layer><pxl-circle id="cssUnder" x="500" y="300" r="80" fill="#000"></pxl-circle></pxl-layer>
+        <pxl-layer id="cssHiddenLayer"><pxl-circle id="cssOver" x="500" y="300" r="80" fill="#000"></pxl-circle></pxl-layer>
+      </pxl-stage></div>`, (stage) => {
+        const result = [];
+        for (const css of ['display: none', 'visibility: hidden', '']) {
+          el('cssHiddenLayer').setAttribute('style', css);
+          hover(stage, 500, 300);
+          result.push(pxl.nodes.cssOver.isHovered ? 'over' : pxl.nodes.cssUnder.isHovered ? 'under' : 'none');
+        }
+        if (result.join(',') !== 'under,under,over') throw new Error(result.join(','));
+      }));
+
+    test('interaction: a grid is not hit-tested by default; with pointer-events: auto it is', () =>
+      withStage(ixStage('<pxl-grid id="ixGrid" step="100" stroke="#000" strokewidth="20"></pxl-grid>'), (stage) => {
+        hover(stage, 200, 250);
+        const byDefault = pxl.nodes.ixGrid.isHovered;
+        el('ixGrid').style.pointerEvents = 'auto';
+        hover(stage, 200, 251);
+        const withAuto = pxl.nodes.ixGrid.isHovered;
+        if (byDefault !== false || withAuto !== true) throw new Error(`hovered by default ${byDefault}, with pointer-events: auto ${withAuto}`);
+      }));
+
+    test('interaction: a shape changed with setAttribute() is hit with its new size and place', () =>
+      withStage(ixStage('<pxl-circle id="ixGrow" x="300" y="300" r="20" fill="#000"></pxl-circle>'), (stage) => {
+        hover(stage, 370, 300);
+        const before = pxl.nodes.ixGrow.isHovered;
+        el('ixGrow').setAttribute('r', '100');
+        hover(stage, 371, 300);
+        const grown = pxl.nodes.ixGrow.isHovered;
+        el('ixGrow').setAttribute('x', '700');
+        hover(stage, 760, 300);
+        const moved = pxl.nodes.ixGrow.isHovered;
+        if (before !== false || grown !== true || moved !== true) throw new Error(`before ${before}, grown ${grown}, moved ${moved}`);
+      }));
+
+    // A shape that moves under a resting pointer is found again within RESTING_HIT_INTERVAL, not in every frame
+    test('interaction: a shape moving under a resting pointer is hovered within 100 ms; a pointer event tests at once', () =>
+      withStage(ixStage('<pxl-circle id="ixMover" x="200" y="300" r="60" fill="#000"></pxl-circle>'), async (stage) => {
+        hover(stage, 600, 300);
+        el('ixMover').setAttribute('x', '600');
+        stage.render(2);
+        const sameFrame = pxl.nodes.ixMover.isHovered;
+        await wait(pxl.RESTING_HIT_INTERVAL + 20);
+        stage.render(3);
+        const later = pxl.nodes.ixMover.isHovered;
+        el('ixMover').setAttribute('x', '200');
+        hover(stage, 200, 300);
+        const afterMove = pxl.nodes.ixMover.isHovered;
+        if (sameFrame !== false || later !== true || afterMove !== true) {
+          throw new Error(`hovered in the next frame ${sameFrame}, after the interval ${later}, after a pointer move ${afterMove}`);
+        }
+      }));
+
+    test('interaction: a hovered and pressed shape removed from the page gives up both states', () =>
+      withStage(ixStage(`<pxl-circle id="ixGone" x="500" y="300" r="80" fill="#000"></pxl-circle>
+        <pxl-circle id="ixGoneReader" x="50" y="50" r="5" fill="ref.ixGone.isHovered ? '#f00' : '#00f'"></pxl-circle>`), (stage) => {
+        hover(stage, 500, 300);
+        input(stage, 'pointerdown');
+        const shape = el('ixGone'), values = shape.attributeValues;
+        const before = `${values.isHovered},${values.isPressed}`;
+        shape.remove();
+        stage.render(2);
+        const after = `${values.isHovered},${values.isPressed}`;
+        if (before !== 'true,true' || after !== 'false,false' || pxl.nodes.ixGoneReader.fill !== '#00f') {
+          throw new Error(`before ${before}, after ${after}, reader ${pxl.nodes.ixGoneReader.fill}`);
         }
       }));
 
@@ -1820,15 +1946,18 @@
         }
       }));
 
-    test('lifecycle: a click handler moves with its shape to another stage', () =>
+    test('lifecycle: a shape with a click handler moved to another stage is hit there, not in the old one', () =>
       withStage(`<div style="width: 500px">
         <pxl-stage id="lcStageA" alwaysrender><pxl-layer><pxl-circle id="lcClick" x="500" y="300" r="80" fill="#000" pxl-on-click="0"></pxl-circle></pxl-layer></pxl-stage>
         <pxl-stage id="lcStageB" alwaysrender><pxl-layer id="lcLayerB"></pxl-layer></pxl-stage></div>`, () => {
-        const shape = el('lcClick');
+        const shape = el('lcClick'), stageA = document.getElementById('lcStageA'), stageB = document.getElementById('lcStageB');
         el('lcLayerB').append(shape);
-        const inA = document.getElementById('lcStageA').interaction._interactiveElements.includes(shape);
-        const inB = document.getElementById('lcStageB').interaction._interactiveElements.includes(shape);
-        if (inA || !inB) throw new Error(`registered in the old stage ${inA}, in the new stage ${inB}`);
+        stageB.resize();
+        hover(stageA, 500, 300);
+        const inA = pxl.nodes.lcClick.isHovered;
+        hover(stageB, 500, 300);
+        const inB = pxl.nodes.lcClick.isHovered;
+        if (inA || !inB) throw new Error(`hit in the old stage ${inA}, in the new stage ${inB}`);
       }));
 
     test('lifecycle: a stage removed and inserted again draws again, registered once with the monitor', () =>
@@ -1840,8 +1969,8 @@
         stage.render(2);
         const layer = stage.querySelector('pxl-layer');
         const monitored = pxl.perf.stages.filter((s) => s === stage).length;
-        if (stage._layers.length !== 1 || monitored !== 1 || alphaAt(layer, 500, 300) !== 255) {
-          throw new Error(`layers ${stage._layers.length}, monitor entries ${monitored}, alpha ${alphaAt(layer, 500, 300)}`);
+        if (stage.layers.length !== 1 || monitored !== 1 || alphaAt(layer, 500, 300) !== 255) {
+          throw new Error(`layers ${stage.layers.length}, monitor entries ${monitored}, alpha ${alphaAt(layer, 500, 300)}`);
         }
       }));
 

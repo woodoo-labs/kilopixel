@@ -132,6 +132,13 @@ pxl.ARROW_COS30 = Math.cos(Math.PI / 6); // arrowhead half-angle is 30°
 pxl.ARROW_SIN30 = 0.5;
 pxl.ARROW_K_DEPTH = 0.6;                 // min shaft depth inside a filled head, as fraction of head length
 
+// Side length of an arrowhead in logical units for an arrowstart / arrowend value: 'auto' is 3.6 × strokewidth;
+// 0 (also for a negative or invalid value) means no arrowhead
+pxl.arrowSize = function(value, strokewidth) {
+  const size = value === 'auto' ? strokewidth * 3.6 : value;
+  return size > 0 ? size : 0;
+};
+
 // Per-arrow-end record, allocated once per shape and reused every frame. All fields start as doubles
 // so V8 keeps one stable hidden class for every arrow shape.
 pxl.createArrowRecord = function() {

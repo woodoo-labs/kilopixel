@@ -263,6 +263,12 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     return (lo + hi) / 2;
   }
 
+  // A smooth curve can leave the box of its points, so hit testing skips the box check for it
+  needsExactHitTest() {
+    const { smooth } = this.attributeValues;
+    return smooth !== false && smooth !== null;
+  }
+
   // Points closer than 0.01 px count as the same (zero-length end segments for arrows)
   isSamePoint(i, j) {
     const pts = this._flatCache;

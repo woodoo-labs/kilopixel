@@ -266,7 +266,7 @@
       stroke="hsla(185, 100, 70, 0.3)" strokewidth="0.3" fill="none"
       alpha="ref.s.isHovered ? 0.5 : 0"></pxl-circle>
 
-    <!-- ─── INTERACTIVE POWER NODES (4 corners) ─── -->
+    <!-- ─── INTERACTIVE POWER NODES (4 corners): the icons on top have pointer-events: none, so clicks reach the node ─── -->
 
     <!-- [80-81] Top-left node: CYAN — uses bounce() driver -->
     <pxl-rect id="nodeA" x="80" y="60" w="40" h="40" r="8"
@@ -275,7 +275,7 @@
       zoom="ref.nodeA.isPressed ? 0.9 : (ref.nodeA.isHovered ? 1.15 : 1)"
       filter="ref.nodeA.isHovered ? dropShadow(0, 0, 8, '#00e5ff') : 'none'"
       pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
-    <pxl-text x="80" y="60" text="'⬡'" size="16" fill="#00e5ff" align="center" baseline="middle"
+    <pxl-text x="80" y="60" text="'⬡'" size="16" fill="#00e5ff" align="center" baseline="middle" style="pointer-events: none"
       alpha="0.5 + bounce(2) * 0.5"></pxl-text>
 
     <!-- [82-83] Top-right node: MAGENTA — uses yoyo() driver -->
@@ -285,7 +285,7 @@
       zoom="ref.nodeB.isPressed ? 0.9 : (ref.nodeB.isHovered ? 1.15 : 1)"
       filter="ref.nodeB.isHovered ? dropShadow(0, 0, 8, '#ff00aa') : 'none'"
       pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
-    <pxl-text x="920" y="60" text="'◈'" size="16" fill="#ff00aa" align="center" baseline="middle"
+    <pxl-text x="920" y="60" text="'◈'" size="16" fill="#ff00aa" align="center" baseline="middle" style="pointer-events: none"
       alpha="0.5 + yoyo(2) * 0.5"></pxl-text>
 
     <!-- [84-85] Bottom-left node: GOLD — uses glide() driver -->
@@ -295,7 +295,7 @@
       zoom="ref.nodeC.isPressed ? 0.9 : (ref.nodeC.isHovered ? 1.15 : 1)"
       filter="ref.nodeC.isHovered ? dropShadow(0, 0, 8, '#ffbb00') : 'none'"
       pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
-    <pxl-text x="80" y="502" text="'◇'" size="16" fill="#ffbb00" align="center" baseline="middle"
+    <pxl-text x="80" y="502" text="'◇'" size="16" fill="#ffbb00" align="center" baseline="middle" style="pointer-events: none"
       alpha="0.5 + glide(2) * 0.5"></pxl-text>
 
     <!-- [86-87] Bottom-right node: VIOLET — uses glitch() driver -->
@@ -305,15 +305,15 @@
       zoom="ref.nodeD.isPressed ? 0.9 : (ref.nodeD.isHovered ? 1.15 : 1)"
       filter="ref.nodeD.isHovered ? dropShadow(0, 0, 8, '#aa44ff') : 'none'"
       pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
-    <pxl-text x="920" y="502" text="'✦'" size="16" fill="#aa44ff" align="center" baseline="middle"
+    <pxl-text x="920" y="502" text="'✦'" size="16" fill="#aa44ff" align="center" baseline="middle" style="pointer-events: none"
       alpha="0.3 + glitch(0.5) * 0.7"></pxl-text>
 
-    <!-- [88-89] Connecting polylines with arrows — linking nodes to center -->
-    <pxl-polyline smooth="1"
+    <!-- [88-89] Connecting polylines with arrows — linking nodes to center (decorations: pointer-events: none, like the icons) -->
+    <pxl-polyline smooth="1" style="pointer-events: none"
       points="80,60; 200,150; 380,220; 500,281"
       stroke="hsla(185, 100, 60, 0.06)" strokewidth="0.5" fill="none"
       arrowend="auto" arrowstyle="line"></pxl-polyline>
-    <pxl-polyline smooth="1"
+    <pxl-polyline smooth="1" style="pointer-events: none"
       points="920,502; 800,420; 620,340; 500,281"
       stroke="hsla(270, 80, 60, 0.06)" strokewidth="0.5" fill="none"
       arrowend="auto" arrowstyle="line"></pxl-polyline>

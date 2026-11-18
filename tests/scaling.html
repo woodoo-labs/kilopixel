@@ -176,17 +176,19 @@
       return ms;
     }, 1000), { timeout: 20000 });
 
-    test('hit testing n clickable shapes is linear (pointer over empty space)', () => expectLinear((n) => {
+    // Every shape is hit-tested (design/2026-10-30_framework_compatibility_plan.md §23, step 2). The walk is timed
+    // directly: process() repeats it only every pxl.RESTING_HIT_INTERVAL ms while the pointer rests.
+    test('hit testing n shapes is linear (pointer over empty space)', () => expectLinear((n) => {
       const { stage, layer, clear } = freshStage();
       let html = '';
       for (let i = 0; i < n; i++) {
-        html += `<pxl-rect x="${(i % 100) * 10 + 5}" y="${Math.floor(i / 100) * 10 + 5}" w="8" h="8" fill="#000" pxl-on-enter="0"></pxl-rect>`;
+        html += `<pxl-rect x="${(i % 100) * 10 + 5}" y="${Math.floor(i / 100) * 10 + 5}" w="8" h="8" fill="#000"></pxl-rect>`;
       }
       layer.insertAdjacentHTML('beforeend', html);
-      Object.assign(stage.attributeValues, { isHovered: true, mouseX: 999, mouseY: 590 });
-      stage.interaction.process();
+      stage.render(1); // sorts the new children
+      stage.interaction.findShapeAt(999, 590);
       const t0 = performance.now();
-      for (let k = 0; k < 20; k++) stage.interaction.process();
+      for (let k = 0; k < 20; k++) stage.interaction.findShapeAt(999, 590);
       const ms = performance.now() - t0;
       clear();
       return ms;

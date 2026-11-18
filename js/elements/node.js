@@ -20,13 +20,17 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this.toLocalAttributeKeys = []; // reactive keys using toLocal(): also depend on this element's own space
     this.isAnimated = false;
 
+    // The children of a layer or group (set there); null for shapes and variables. A field on every node, so the hit
+    // walk and the matrix walk read an own property instead of searching HTMLElement's prototype chain for it.
+    this.childList = null;
+
     // Set in connectedCallback
     this.parentLayer = null;
     this.parentContainer = null;
     this.refKey = null;
     // connectedCallback has run: an id that changes from now on is moved in the registry by attributeChangedCallback.
     // During an upgrade the attributes arrive before connectedCallback, which registers the id itself.
-    this.isRegistered = false;
+    this._isRegistered = false;
 
     // Own broadcasts from variableChangedCallback() that are still running (see there)
     this._broadcastNesting = 0;
@@ -43,6 +47,12 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this._lastLocalMatrixVersion = -1;
     this._globalMatrixVersion = 0;
     this._lastParentMatrixVersion = -1;
+    // Inverse of the global matrix for hit testing, created on first use: most elements are never hit-tested
+    this._inverseMatrix = null;
+    this._inverseMatrixVersion = -1;
+
+    // The element's computed CSS (pointer-events, cursor), created on first use; the browser keeps it up to date
+    this._cssStyle = null;
 
     // Scaled filter string, cached per (filter, u) by resolveFilter() (layers and shapes)
     this._lastFilterRaw = null;
@@ -59,7 +69,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     if (oldValue === newValue) return;
     // id is observed for the registry (frameworks such as Angular or Alpine set it after insertion), not drawn
     if (name === 'id') {
-      if (this.isRegistered) pxl.renameNode(this, oldValue, newValue);
+      if (this._isRegistered) pxl.renameNode(this, oldValue, newValue);
       return;
     }
     pxl.compileAttribute(this, name, newValue);
@@ -100,11 +110,11 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       // Broadcast arrival so any elements initialized earlier can successfully re-evaluate
       pxl.broadcast(this.refKey);
     }
-    this.isRegistered = true;
+    this._isRegistered = true;
   }
 
   disconnectedCallback() {
-    this.isRegistered = false;
+    this._isRegistered = false;
     if (this.id && pxl.nodes[this.id] === this.attributeValues) {
       delete pxl.nodes[this.id];
     }
@@ -207,7 +217,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   }
 
   broadcastGlobalMatrixChange() {
-    if (this.childList) {
+    if (this.childList !== null) {
       const len = this.childList.length;
       const subs = pxl._subscriptions;
       for (let i = 0; i < len; i++) {
@@ -269,6 +279,27 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
     if (isDirty) this._globalMatrixVersion++;
     return this._globalMatrix;
+  }
+
+  // Maps stage coordinates into the element's own space (hit testing). Inverted again only when the global matrix
+  // changed; a singular matrix (zoom 0) gives the identity, and the exact hit test then finds nothing.
+  getInverseGlobalMatrix() {
+    const global = this.getGlobalMatrix();
+    if (this._inverseMatrix === null) this._inverseMatrix = pxl.Matrix.create();
+    if (this._inverseMatrixVersion !== this._globalMatrixVersion) {
+      pxl.Matrix.invert(this._inverseMatrix, global);
+      this._inverseMatrixVersion = this._globalMatrixVersion;
+    }
+    return this._inverseMatrix;
+  }
+
+  // --- CSS ---
+
+  // The live computed style, kept per element: getComputedStyle() returns a new object on every call. Reading a
+  // property costs about 1 µs, so the engine reads it only where needed (hit testing: layers and candidate shapes).
+  cssStyle() {
+    if (this._cssStyle === null) this._cssStyle = getComputedStyle(this);
+    return this._cssStyle;
   }
 };
 

@@ -8,10 +8,13 @@ pxl._frame = 0;
 // Shapes and groups draw on the canvas, not as elements: content written inside them (<pxl-text>{label}</pxl-text>
 // in JSX) would otherwise appear as page text through the layer's <slot>. Content placed directly in a layer
 // (accessible text, buttons) stays visible.
+// The grid is out of hit testing: it covers the whole stage and would catch the pointer between its lines
+// (design/2026-10-30_framework_compatibility_plan.md §23, E4). A page can set pointer-events: auto on it.
 pxl.DEFAULT_STYLES = `@layer pxl {
   pxl-stage { display: block; position: relative; width: 100%; }
   pxl-stage:state(fallback) { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0; }
   pxl-var, pxl-group, pxl-circle, pxl-ellipse, pxl-rect, pxl-line, pxl-polyline, pxl-text, pxl-grid { display: none; }
+  pxl-grid { pointer-events: none; }
 }`;
 
 // Once per document, and once per shadow root that holds a stage (document styles don't reach into it)
@@ -33,7 +36,7 @@ pxl.Stage = class Stage extends HTMLElement {
 
   constructor() {
     super();
-    this._layers = [];
+    this.layers = [];
     this._variables = []; // stage-level <pxl-var>: inside the stage, outside every layer
     this._isOrderDirty = false;
     this._isUpdatePending = false;
@@ -132,7 +135,7 @@ pxl.Stage = class Stage extends HTMLElement {
     this._resizeObserver.disconnect();
     this._resizeObserver = null;
     this._isUpdatePending = false;
-    this._layers = [];
+    this.layers = [];
     this._variables = [];
 
     for (const type of pxl.Stage.POINTER_EVENTS) this.removeEventListener(type, this.interaction);
@@ -173,8 +176,8 @@ pxl.Stage = class Stage extends HTMLElement {
   }
 
   registerLayer(layer) {
-    if (this._layers.includes(layer)) return;
-    this._layers.push(layer);
+    if (this.layers.includes(layer)) return;
+    this.layers.push(layer);
     this._isOrderDirty = true;
     if (this._isSizePending) return;
     layer.resize(this.clientWidth, this.clientHeight, this._dpr);
@@ -182,7 +185,7 @@ pxl.Stage = class Stage extends HTMLElement {
   }
 
   unregisterLayer(layer) {
-    pxl.removeFromArray(this._layers, layer);
+    pxl.removeFromArray(this.layers, layer);
     this.requestRender();
   }
 
@@ -212,14 +215,14 @@ pxl.Stage = class Stage extends HTMLElement {
     this._dpr = window.devicePixelRatio;
     this._isSizePending = false;
 
-    for (let i = 0; i < this._layers.length; i++) {
-      this._layers[i].resize(w, h, this._dpr);
+    for (let i = 0; i < this.layers.length; i++) {
+      this.layers[i].resize(w, h, this._dpr);
     }
     this.render(performance.now() / 1000);
   }
 
   invalidateLayers() {
-    for (let i = 0; i < this._layers.length; i++) this._layers[i].invalidate();
+    for (let i = 0; i < this.layers.length; i++) this.layers[i].invalidate();
   }
 
   requestRender() {
@@ -241,7 +244,7 @@ pxl.Stage = class Stage extends HTMLElement {
     this.interaction.process();
 
     if (this._isOrderDirty) {
-      this._layers.sort(pxl.sortByDOMPosition);
+      this.layers.sort(pxl.sortByDOMPosition);
       this._variables.sort(pxl.sortByDOMPosition);
       this._isOrderDirty = false;
     }
@@ -256,12 +259,12 @@ pxl.Stage = class Stage extends HTMLElement {
     }
     if (isVariableAnimated) this.requestRender();
 
-    for (let i = 0; i < this._layers.length; i++) {
-      const layer = this._layers[i];
+    for (let i = 0; i < this.layers.length; i++) {
+      const layer = this.layers[i];
       if (layer.isDirty || layer.isAnimated) layer.update(t);
     }
-    for (let i = 0; i < this._layers.length; i++) {
-      const layer = this._layers[i];
+    for (let i = 0; i < this.layers.length; i++) {
+      const layer = this.layers[i];
       if (layer.needsRender()) layer.render(this.unit, t);
     }
 

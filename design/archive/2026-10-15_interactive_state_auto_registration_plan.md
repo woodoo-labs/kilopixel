@@ -1,6 +1,6 @@
 # Auto-Registration for `isHovered` / `isPressed`
 
-- **Status**: ✅ **Implemented** (2026-10-15; all 17 test cases passed; regression: examples unchanged except test52, which now works without `onclick`)
+- **Status**: ⚪ **Superseded by** `design/2026-10-30_framework_compatibility_plan.md` (2026-11-18: every shape is hit-tested since §23 step 2, so nothing is registered; implemented 2026-10-15, all 17 test cases passed; regression: examples unchanged except test52, which now works without `onclick`)
 - **Date**: 2026-10-15
 - **Related**: `design/2026-10-13_text_hit_testing_plan.md` (§6 side finding → decided: auto-registration)
 - **Target Implementation**: `js/engine.js` (`pxl.compileAttribute`), `js/elements/shape.js` (event compile, `connectedCallback`), `js/interaction.js` (unchanged API)

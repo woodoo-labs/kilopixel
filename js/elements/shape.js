@@ -49,12 +49,10 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
     const event = pxl.Shape.HANDLER_EVENTS[name];
     if (event) {
-      // Removed or empty: no handler. Not unregistered here (a handler may remove itself during
-      // InteractionEngine.process()); releaseIfUnused() unregisters the shape on its next leave / release.
+      // Removed or empty: no handler
       let compiled = null;
       if (newValue) {
-        // Handlers are plain JavaScript and never subscribe to ref.*, so their state references are sticky
-        pxl.trackInteractiveRefs(newValue, true);
+        pxl.trackPressedRefs(newValue);
         compiled = new Function('scope', 'ref', `
           const { ${pxl.scopeKeys} } = scope;
           return function() {
@@ -62,33 +60,16 @@ pxl.Shape = class Shape extends pxl.PxlNode {
           };
         `)(pxl.scope, pxl.nodes).bind(this);
       }
-
       this.handlers[event] = compiled;
-      if (compiled) this.stage?.interaction.registerElement(this);
       return;
     }
 
     super.attributeChangedCallback(name, oldValue, newValue);
-
-    // A new id that another element reads isHovered / isPressed of: hit-test the shape (as connectedCallback does)
-    if (name === 'id' && this.isRegistered && newValue && pxl._interactiveIds.has(newValue)) {
-      this.stage?.interaction.registerElement(this);
-    }
   }
 
   connectedCallback() {
     this.stage = this.closest('pxl-stage');
     super.connectedCallback();
-
-    // Register if it has handlers, or if another element reads its isHovered / isPressed
-    if (this.hasEventHandlers() || (this.id && pxl._interactiveIds.has(this.id))) {
-      this.stage?.interaction.registerElement(this);
-    }
-  }
-
-  hasEventHandlers() {
-    const h = this.handlers;
-    return !!(h.click || h.enter || h.leave || h.down || h.up || h.move);
   }
 
   // Hand cursor only for elements that react to clicks or presses
@@ -99,7 +80,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.stage?.interaction.unregisterElement(this);
+    this.stage?.interaction.releaseElement(this);
   }
 
   // Update phase. A hidden shape still evaluates, so ref.* to it stays current.
@@ -134,6 +115,39 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     this.boundingBox.top = 0;
     this.boundingBox.bottom = 0;
     return this.boundingBox;
+  }
+
+  // --- Hit Testing ---
+  // (design/2026-10-30_framework_compatibility_plan.md §23, E5)
+
+  // Quick test before the exact one: is the point (x, y) in stage units inside the box of what this shape paints?
+  // The box is read in every test: a cached box would miss setAttribute('r', …) on a static shape, which doesn't
+  // change the matrix. min / max because a rect with a negative w or h is drawn mirrored.
+  mayContainPoint(x, y) {
+    if (this.needsExactHitTest()) return true;
+    const m = this.getInverseGlobalMatrix();
+    const lx = m[0] * x + m[2] * y + m[4];
+    const ly = m[1] * x + m[3] * y + m[5];
+    const box = this.getBoundingBox();
+    const pad = this.hitPadding();
+    return lx >= Math.min(box.left, box.right) - pad && lx <= Math.max(box.left, box.right) + pad &&
+           ly >= Math.min(box.top, box.bottom) - pad && ly <= Math.max(box.top, box.bottom) + pad;
+  }
+
+  // A custom shape without its own getBoundingBox() always gets the exact test (the base method warns on every call)
+  needsExactHitTest() {
+    return this.getBoundingBox === pxl.Shape.prototype.getBoundingBox;
+  }
+
+  // How far the paint can reach beyond the path's box: half the stroke, a miter join up to miterlimit × half the
+  // stroke, the corner of a square cap, arrowheads (only lines, polylines, circles and ellipses have arrowstart)
+  hitPadding() {
+    if (!this.isStroked()) return 0;
+    const { strokewidth, linejoin, miterlimit, linecap, arrowstart, arrowend } = this.attributeValues;
+    let pad = strokewidth / 2 * (linejoin === 'miter' ? Math.max(1, miterlimit) : 1);
+    if (linecap === 'square') pad = Math.max(pad, strokewidth * Math.SQRT1_2);
+    if (arrowstart !== undefined) pad += Math.max(pxl.arrowSize(arrowstart, strokewidth), pxl.arrowSize(arrowend, strokewidth));
+    return pad;
   }
 
   createGradient(ctx, u, styleValue, slot) {
@@ -310,7 +324,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // Returns true if this end has an arrowhead.
   resolveArrow(rec, attrValue, u) {
     const { strokewidth, linecap, linejoin, arrowstyle } = this.attributeValues;
-    const size = (attrValue === 'auto' ? strokewidth * 3.6 : attrValue) * u;
+    const size = pxl.arrowSize(attrValue, strokewidth) * u;
 
     if (!(size > 0)) {
       rec.size = 0;

@@ -334,21 +334,15 @@
         expectLog(log, ['click:pxl-layer']); // the canvas is in the layer's shadow root: retargeted to the layer
       }));
 
-    test('T-E3: without interactive and without a listener, a shape is not hit-tested for hover', () =>
+    // Inverted 2026-11-18 (plan §22.3, D10): every shape is hit-tested, as in the DOM, with no handler, listener,
+    // reader or attribute needed
+    test('T-E3: a shape without handlers, listeners or readers is hit-tested: isHovered follows the pointer', () =>
       withStage(oneLayer(CIRCLE('fwPlain')), (stage) => {
-        const log = [];
-        const record = (e) => { if (e.target.id === 'fwPlain') log.push(e.type); };
-        document.addEventListener('pointerover', record);
-        document.addEventListener('pointermove', record);
-        try {
-          hover(stage, 500, 300);
-          hover(stage, 510, 300);
-        } finally {
-          document.removeEventListener('pointerover', record);
-          document.removeEventListener('pointermove', record);
-        }
-        const registered = stage.interaction._interactiveElements.includes(el('fwPlain'));
-        if (log.length || registered) throw new Error(`events on the shape [${log}], registered ${registered}`);
+        hover(stage, 500, 300);
+        const over = pxl.nodes.fwPlain.isHovered;
+        hover(stage, 950, 30);
+        const away = pxl.nodes.fwPlain.isHovered;
+        if (over !== true || away !== false) throw new Error(`isHovered over the shape ${over}, away from it ${away}`);
       }));
 
     test.known('T-E1: addEventListener on a shape: pointerdown, pointerup and click arrive once each, in order, with the shape as target (W1)', () =>
@@ -558,7 +552,7 @@
         const left = {
           entries: ids.filter((id) => pxl.nodes[id]),
           subscriptions: ids.filter((id) => (pxl._subscriptions['ref.' + id] || []).length),
-          monitored: pxl.perf.stages.includes(stage), variables: stage._variables.length, layers: stage._layers.length
+          monitored: pxl.perf.stages.includes(stage), variables: stage._variables.length, layers: stage.layers.length
         };
         if (mounted !== ids.length || variables !== 1 || left.entries.length || left.subscriptions.length || left.monitored || left.variables || left.layers) {
           throw new Error(`mounted ${mounted} ids, ${variables} stage variable(s); left: ${JSON.stringify(left)}`);
