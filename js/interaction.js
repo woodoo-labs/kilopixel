@@ -307,8 +307,12 @@ pxl.InteractionEngine = class InteractionEngine {
 
   // The pointer is now over next (a shape, or null): isHovered on the nodes left and entered, and their boundary
   // events (E6). Moving between shapes of one group leaves and enters nothing on the group. relatedTarget is the
-  // node left or entered, or the shape's layer for empty space: React builds onPointerEnter / onPointerLeave from
-  // pointerover / pointerout and their relatedTarget.
+  // node left or entered, or the shape's layer for empty space.
+  // Over empty space the layer is the element under the pointer, as in the DOM: moving onto a shape, the layer gets
+  // pointerout / mouseout first (relatedTarget: the shape), and moving off it, pointerover / mouseover after the leave
+  // events. The browser sends neither (the pointer stays on the same canvas). React needs them: it builds
+  // onPointerEnter / onPointerLeave only from the out events and ignores an over event whose relatedTarget is an
+  // element it rendered, such as the layer (found with a React 19 page, plan §23.8).
   hover(next) {
     const prev = this._hovered;
     if (prev === next) return;
@@ -323,7 +327,10 @@ pxl.InteractionEngine = class InteractionEngine {
           if (isPointer) this.setState(n, 'isHovered', false);
           this.queue(types[1], n, to);
         }
+      } else {
+        this.queue(types[0], from, next); // the layer, left for the shape
       }
+      if (next === null) this.queue(types[2], to, prev); // the layer, entered from the shape
       if (next !== null) {
         this.queue(types[2], next, from);
         // Enter events go from the outermost node entered down to the shape: counted first, then filled backwards

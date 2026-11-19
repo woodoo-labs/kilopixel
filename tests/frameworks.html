@@ -493,8 +493,9 @@
         } finally {
           for (const type of types) document.removeEventListener(type, record);
         }
-        expectLog(log, ['pointerover:fwDelegated:pxl-layer', 'click:fwDelegated', 'pointerout:fwDelegated:fwDelegatedB',
-          'pointerover:fwDelegatedB:fwDelegated', 'pointerout:fwDelegatedB:pxl-layer']);
+        expectLog(log, ['pointerout:pxl-layer:fwDelegated', 'pointerover:fwDelegated:pxl-layer', 'click:fwDelegated',
+          'pointerout:fwDelegated:fwDelegatedB', 'pointerover:fwDelegatedB:fwDelegated',
+          'pointerout:fwDelegatedB:pxl-layer', 'pointerover:pxl-layer:fwDelegatedB']);
       }));
 
     test('T-E4: entering and leaving give pointerover, pointerenter, pointerout, pointerleave; enter and leave don\'t bubble (W1)', () =>
@@ -732,6 +733,44 @@
         expectLog(log, ['pointermove:fwCaptured', 'pointerup:fwCaptured', 'click:fwCaptured']);
       }));
 
+    // React 19 builds onPointerEnter / onPointerLeave only from pointerout (from: target, to: relatedTarget) and ignores
+    // a pointerover whose relatedTarget is an element it rendered; only a pointerover from outside counts. Found with a
+    // React page (plan §23.8): from empty space onto a shape, the layer must send its pointerout, as in the DOM.
+    test('a delegated listener with React\'s enter / leave rule sees the pointer enter and leave a group from empty space (W1)', () =>
+      withStage(oneLayer(`<pxl-group id="fwReactGroup"><pxl-rect x="500" y="300" w="200" h="100" fill="#000"></pxl-rect>
+        <pxl-circle id="fwReactDot" x="560" y="300" r="20" fill="#fff"></pxl-circle></pxl-group>`), (stage, box) => {
+        const group = el('fwReactGroup'), calls = [];
+        const inGroup = (node) => node !== null && group.contains(node);
+        const transition = (from, to) => {
+          if (inGroup(from) && !inGroup(to)) calls.push('leave');
+          if (!inGroup(from) && inGroup(to)) calls.push('enter');
+        };
+        const onOut = (e) => transition(e.target, e.relatedTarget);
+        const onOver = (e) => { if (!(e.relatedTarget && box.contains(e.relatedTarget))) transition(null, e.target); };
+        const order = [];
+        const onAny = (e) => { if (e.target === stage.querySelector('pxl-layer') || inGroup(e.target)) order.push(`${e.type}:${e.target.id || e.target.localName}`); };
+        document.addEventListener('pointerout', onOut);
+        document.addEventListener('pointerover', onOver);
+        document.addEventListener('pointerout', onAny);
+        document.addEventListener('pointerover', onAny);
+        try {
+          hover(stage, 950, 30);
+          order.length = 0;
+          calls.length = 0;
+          hover(stage, 450, 300); // empty space → the rect
+          hover(stage, 560, 300); // the rect → the dot, inside the group
+          hover(stage, 950, 30);  // the dot → empty space
+        } finally {
+          for (const type of ['pointerout', 'pointerover']) {
+            document.removeEventListener(type, type === 'pointerout' ? onOut : onOver);
+            document.removeEventListener(type, onAny);
+          }
+        }
+        expectLog(calls, ['enter', 'leave']);
+        expectLog(order, ['pointerout:pxl-layer', 'pointerover:pxl-rect', 'pointerout:pxl-rect', 'pointerover:fwReactDot',
+          'pointerout:fwReactDot', 'pointerover:pxl-layer']);
+      }));
+
     test('Kilopixel\'s own events bubbling through the stage don\'t move the stage pointer (W1)', () =>
       withStage(oneLayer(CIRCLE('fwOwn')), (stage) => {
         hover(stage, 520, 310);
@@ -758,6 +797,7 @@
         const log = listen(box, ['pointerout']);
         const groupLog = listen(el('fwLeaveGroup'), ['pointerleave']);
         hover(stage, 500, 300);
+        log.length = 0; // entering gave the layer's own pointerout (relatedTarget: the shape)
         pointerAt(stage, 'pointerout', 500, 300, { relatedTarget: document.body });
         expectLog(log, ['pointerout:fwLeaveShape', 'pointerout:pxl-layer']);
         expectLog(groupLog, ['pointerleave:fwLeaveGroup']);

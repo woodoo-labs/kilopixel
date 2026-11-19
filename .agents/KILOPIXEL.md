@@ -1,6 +1,6 @@
 # Kilopixel Framework — Complete Technical Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~69KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~70KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes with custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, …); the engine compiles their attribute expressions and redraws a layer in every frame in which something in it changed or is animated.
 
@@ -699,7 +699,7 @@ The engine dispatches real DOM events on shapes, so `addEventListener()`, React 
 | Events | When | Notes |
 |---|---|---|
 | `pointerdown`, `mousedown`, `pointerup`, `mouseup`, `click`, `dblclick`, `contextmenu` | when the browser's event arrives (D4) | over a shape, the browser's event is stopped at the stage (capture phase) and the same event is dispatched on the shape: every listener sees one event, with the shape as `target`. Over empty space the browser's event passes unchanged (target: the layer) |
-| `pointerover`, `pointerout` (bubble), `pointerenter`, `pointerleave` (don't bubble), then `mouseover`, `mouseout`, `mouseenter`, `mouseleave` | when the hovered shape changes | enter / leave also on every group entered or left, from the outermost group in; `relatedTarget`: the shape left or entered, or the shape's layer for empty space (React builds `onPointerEnter` from `pointerover` / `pointerout` and `relatedTarget`) |
+| `pointerover`, `pointerout` (bubble), `pointerenter`, `pointerleave` (don't bubble), then `mouseover`, `mouseout`, `mouseenter`, `mouseleave` | when the hovered shape changes | enter / leave also on every group entered or left, from the outermost group in; `relatedTarget`: the shape left or entered, or the shape's layer for empty space. Over empty space the layer is the element under the pointer: moving onto a shape, the layer first gets `pointerout` / `mouseout` (`relatedTarget`: the shape); moving off it, `pointerover` / `mouseover` after the leave events. The browser sends neither (the pointer stays on one canvas), and React needs them: it builds `onPointerEnter` / `onPointerLeave` only from the out events and ignores an over event whose `relatedTarget` is an element it rendered |
 | `pointermove`, `mousemove` | once per frame while the pointer moves over a shape | `movementX` / `movementY`: the browser's moves since the last one, summed. The stage's listeners also get the browser's own moves |
 
 - **Event objects:** a new `PointerEvent` / `MouseEvent` per dispatch (event fields are read-only, and frameworks may keep the object), `composed: true`, built from one reused init object with the browser event's fields (`clientX`, `screenX`, buttons, modifier keys, `pointerId`, `pointerType`, `isPrimary`, `pressure`, `width`, `tilt*`, …). `offsetX` / `offsetY` equal `clientX` / `clientY` (shapes are `display: none`): use `clientX`, or `ref.<stage>.mouseX` for stage units (D3: no extra fields).
