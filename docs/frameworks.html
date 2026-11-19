@@ -59,16 +59,22 @@ export default {
   selector: 'app-chart', templateUrl: './chart.html', schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ChartComponent {}</code></pre>
+      <p><strong>TypeScript:</strong> without type definitions, TypeScript rejects <code>&lt;pxl-circle r={50}&gt;</code> as an unknown tag. Download <a href="download/types/kilopixel.d.ts" download>kilopixel.d.ts</a> and the file for the framework, and put both in the project's source folder, where the <code>tsconfig.json</code> includes them:</p>
+      <ul>
+        <li><strong>React 19:</strong> <a href="download/types/kilopixel-react.d.ts" download>kilopixel-react.d.ts</a></li>
+        <li><strong>Preact 11:</strong> <a href="download/types/kilopixel-preact.d.ts" download>kilopixel-preact.d.ts</a></li>
+        <li><strong>Solid 2:</strong> <a href="download/types/kilopixel-solid.d.ts" download>kilopixel-solid.d.ts</a></li>
+        <li><strong>Vue 3:</strong> <a href="download/types/kilopixel-vue.d.ts" download>kilopixel-vue.d.ts</a>, read by Volar and <code>vue-tsc</code></li>
+        <li><strong>Svelte 5:</strong> <a href="download/types/kilopixel-svelte.d.ts" download>kilopixel-svelte.d.ts</a>, read by <code>svelte-check</code></li>
+        <li><strong>Angular and plain TypeScript:</strong> <code>kilopixel.d.ts</code> alone</li>
+      </ul>
+      <p>Every attribute is then typed: a number accepts numbers and expression strings, keyword attributes like <code>linecap</code> suggest their keywords, and reading a property returns its current value.</p>
+      <pre><code class="language-javascript">const circle = document.querySelector('pxl-circle'); // PxlCircleElement
+circle.r = 50;                 // or an expression: 'sin(t) * 10 + 50'
+const radius: number = circle.r;</code></pre>
       <div class="callout-info">
-        <p class="callout-title">TypeScript</p>
-        <p class="callout-body">Kilopixel has no type definitions yet, so TypeScript rejects <code>&lt;pxl-circle r={50}&gt;</code> in JSX. Until it ships them, a declaration in the project allows the tags with any props. For React:</p>
-        <pre><code class="language-javascript">// kilopixel.d.ts
-import 'react';
-declare module 'react' {
-  namespace JSX {
-    interface IntrinsicElements { [tag: `pxl-${string}`]: any }
-  }
-}</code></pre>
+        <p class="callout-title">Inside the Project</p>
+        <p class="callout-body">The framework files import the framework's own types (<code>react</code>, <code>vue</code>, …), so they must sit inside the project, next to its <code>node_modules</code>. They are generated from the engine with each version; download them again when you update <code>pxl.min.js</code>.</p>
       </div>
 
       <h2>2. Values: Properties and Attributes</h2>
@@ -179,7 +185,7 @@ declare module 'react' {
         <li><strong>Global IDs:</strong> every instance of a component needs its own ids (section 5).</li>
         <li><strong>Capture Listeners:</strong> a capture listener above the stage (React <code>onClickCapture</code>) sees the browser's click, with the layer as <code>target</code>, before the shape's click.</li>
         <li><strong>Angular with zone.js:</strong> every frame of an animated stage triggers change detection. Create animated stages outside Angular's zone (<code>NgZone.runOutsideAngular()</code>), or use zoneless change detection.</li>
-        <li><strong>Packages:</strong> no npm package and no type definitions yet (section 1).</li>
+        <li><strong>Packages:</strong> no npm package yet; the type definitions are downloads (section 1).</li>
       </ul>
 
       <h2>9. Live Events Playground</h2>

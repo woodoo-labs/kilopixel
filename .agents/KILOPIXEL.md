@@ -312,7 +312,7 @@ A bare attribute (`<pxl-polyline closed>`, `el.hidden = true`, `toggleAttribute`
 
 ### Properties (JavaScript and Frameworks)
 
-For users: `docs/frameworks.html` (setup per framework, values, events, cursor, components, Tailwind, server rendering, known limits, a live event log).
+For users: `docs/frameworks.html` (setup per framework and the TypeScript downloads, values, events, cursor, components, Tailwind, server rendering, known limits, a live event log).
 
 Every observed attribute is also a JavaScript property (`design/2026-10-30_framework_compatibility_plan.md` §6, §24): `el.r = 50`, `el.x = '500 + sin(t) * 100'`, `el.r = undefined`. React 19, Vue, Preact and Svelte set a property when the element has one (`name in element`); Angular `[x]`, Lit `.x` and Solid `prop:x` always do.
 
@@ -1595,15 +1595,16 @@ A canvas call or an expression that throws must not break the frame (`design/202
 3. **Style checks:** stops with an error on
    - trailing whitespace in any engine file (`.editorconfig` trims it in most editors);
    - a field that breaks the underscore rule: every field set with `this.x = …` is found by name; a `_x` field used in another engine file, or an `x` field used only in its own file, is listed with the fix (rule: CLAUDE.md "Engine Code Style")
-4. Injects version string: `window.pxl = { version: '0.1.0' };`, and wraps the bundle in a function that returns at once without a browser (`typeof window` or `customElements` undefined: an import during server-side rendering) or when `<pxl-stage>` is already defined (the script loaded twice: warns `[pxl] Kilopixel is already loaded …` and leaves the first copy working)
-5. Writes concatenated file to `dist/temp_concat.js` and runs Terser via `npx terser` with `--compress passes=2 --mangle --keep-classnames` (class expressions keep readable names for DevTools and warnings)
-6. Outputs to `dist/kilopixel-v0.1.0.min.js`
-7. Copies to `dist/pxl.min.js` (generic alias)
-8. Copies to `docs/js/pxl.min.js` (for GitHub Pages)
-9. Copies to `docs/download/pxl.min.js` (for downloads page)
-10. Generates `docs/download/kilopixel-boilerplate.zip` (starter package with `js/pxl.min.js` and modified `index.html`)
-11. Cleans up legacy zip locations (`dist/` and `docs/`)
-12. Reports original and minified sizes
+4. **TypeScript definitions** (`tools/build_types.js`, design/2026-10-30_framework_compatibility_plan.md §27): runs the unminified bundle in a Node `vm` with a stubbed DOM, reads every element's `observedAttributes` and `static defaults`, and writes `kilopixel.d.ts` (element interfaces with typed properties, `HTMLElementTagNameMap`, the global `pxl`) and one file per framework (`kilopixel-react.d.ts`, `-preact`, `-solid`, `-vue`, `-svelte`) to `dist/types/` and `docs/download/types/`. Attribute types come from the default's type, plus a table in the script for keywords, colors, arrays, `points`, `text` and numbers whose default `null` means "not set"; an attribute with a `null` default that the table doesn't cover stops the build. Every value also accepts an expression string (`PxlExpression`, `string & {}`, which keeps keyword suggestions). `tools/check_build.js` fails when the files are out of date; `node tools/run_tests.js --types` checks them against the real framework types (`tests/types/`, npm)
+5. Injects version string: `window.pxl = { version: '0.1.0' };`, and wraps the bundle in a function that returns at once without a browser (`typeof window` or `customElements` undefined: an import during server-side rendering) or when `<pxl-stage>` is already defined (the script loaded twice: warns `[pxl] Kilopixel is already loaded …` and leaves the first copy working)
+6. Writes concatenated file to `dist/temp_concat.js` and runs Terser via `npx terser` with `--compress passes=2 --mangle --keep-classnames` (class expressions keep readable names for DevTools and warnings)
+7. Outputs to `dist/kilopixel-v0.1.0.min.js`
+8. Copies to `dist/pxl.min.js` (generic alias)
+9. Copies to `docs/js/pxl.min.js` (for GitHub Pages)
+10. Copies to `docs/download/pxl.min.js` (for downloads page)
+11. Generates `docs/download/kilopixel-boilerplate.zip` (starter package with `js/pxl.min.js` and modified `index.html`)
+12. Cleans up legacy zip locations (`dist/` and `docs/`)
+13. Reports original and minified sizes
 
 ### Build Command
 
@@ -1611,7 +1612,7 @@ A canvas call or an expression that throws must not break the frame (`design/202
 node build.js
 ```
 
-**No `node_modules` in project** — Terser is invoked via `npx`.
+**No `node_modules` in project** — Terser is invoked via `npx`. The one exception are the test projects `tests/types/` and `tests/smoke/<app>/` (CLAUDE.md "Build").
 
 ---
 

@@ -1,0 +1,1 @@
+{ "extends": "./tsconfig.base.json", "files": ["kilopixel/kilopixel.d.ts", "fixtures/core.ts"] }

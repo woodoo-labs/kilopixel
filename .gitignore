@@ -1,3 +1,9 @@
 # Temporary helper scripts, dumps and screenshots (keep the folder itself)
 scratch/*
 !scratch/.gitkeep
+
+# npm packages of the test projects (tests/types/, tests/smoke/<app>/): installed per laptop with npm ci
+node_modules/
+
+# Copies of dist/types/ made by tests/types/check.js (the declarations must sit inside the project to find its packages)
+tests/types/kilopixel/

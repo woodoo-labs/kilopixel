@@ -124,6 +124,24 @@ check('the starter kit zip contains the current pxl.min.js and index.html', () =
   if (wrong.length > 0) throw new Error(`${wrong.join('; ')} (run node build.js and commit the zip)`);
 });
 
+// --- TypeScript definitions (design/2026-10-30_framework_compatibility_plan.md §27) ---
+
+// build.js generates them from the bundle; they must match the current engine in dist/types/ and in the download
+check('the TypeScript definitions in dist/types/ and docs/download/types/ match the engine', () => {
+  const bundle = read('dist/pxl.js');
+  const version = (bundle.match(/Kilopixel Framework v([\d.]+)/) || [])[1];
+  const expected = require('./build_types.js').buildTypes(bundle, version);
+  const wrong = [];
+  for (const dir of ['dist/types', 'docs/download/types']) {
+    for (const [name, text] of Object.entries(expected)) {
+      const file = path.join(ROOT, dir, name);
+      if (!fs.existsSync(file)) wrong.push(`${dir}/${name} missing`);
+      else if (fs.readFileSync(file, 'utf8') !== text) wrong.push(`${dir}/${name} is out of date`);
+    }
+  }
+  if (wrong.length > 0) throw new Error(`${wrong.join('; ')} (run node build.js)`);
+});
+
 // --- Sizes in the docs (CLAUDE.md "File size after a build") ---
 
 check('the sizes of pxl.min.js in installation.html and KILOPIXEL.md match the build', () => {

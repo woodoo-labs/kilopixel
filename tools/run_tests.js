@@ -1,13 +1,15 @@
 // Runs the build checks (tools/check_build.js), the test pages in tests/ and the sweep of every docs and example
 // page for console messages, in headless Chrome or Edge, without npm packages (design/2026-11-15_testing_plan.md §5).
 //
-// Usage: node tools/run_tests.js [--tests] [--slow] [--sweep] [--smoke] [--page <path>] [--grep <text>] [--repeat <n>] [--verbose]
+// Usage: node tools/run_tests.js [--tests] [--slow] [--sweep] [--smoke] [--types] [--page <path>] [--grep <text>] [--repeat <n>] [--verbose]
 //   (no option)      everything: build checks, all test pages, the sweep (before a commit, and in CI)
 //   --tests          build checks and the quick test pages (after a build; without the slow pages)
 //   --slow           with --tests: also the slow test pages (tests/scaling.html, about 20 s)
 //   --sweep          only the page sweep
 //   --smoke          the framework smoke pages in tests/smoke/ (React, Vue, Tailwind, loaded from CDNs: needs
 //                    internet; never part of the other runs or CI). Alone: only them; with --tests: both
+//   --types          the TypeScript definitions (dist/types/) against the real framework types (tests/types/;
+//                    needs npm ci there once per laptop; never part of the other runs or CI). Combines like --smoke
 //   --page <path>    sweep one page, e.g. docs/circle.html (can be repeated)
 //   --grep <text>    only tests whose name or section contains the text (passed to the pages as ?grep=)
 //   --repeat <n>     run the test pages n times (finds flaky tests)
@@ -44,11 +46,12 @@ const value = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : nu
 const values = (name) => args.flatMap((a, i) => (a === name && args[i + 1] ? [args[i + 1]] : []));
 const pagesToSweep = values('--page');
 const onlyTests = flag('--tests'), onlySweep = flag('--sweep') || pagesToSweep.length > 0;
-const onlySmoke = flag('--smoke') && !onlyTests && !onlySweep;
+const onlyExtra = (flag('--smoke') || flag('--types')) && !onlyTests && !onlySweep;
 const options = {
-  tests: onlyTests || (!onlySweep && !onlySmoke),
-  sweep: onlySweep || (!onlyTests && !onlySmoke),
+  tests: onlyTests || (!onlySweep && !onlyExtra),
+  sweep: onlySweep || (!onlyTests && !onlyExtra),
   smoke: flag('--smoke'),
+  types: flag('--types'),
   // The slow pages run in the full run; with --tests only on request
   slow: !onlyTests || flag('--slow'),
   grep: value('--grep'),
@@ -333,6 +336,26 @@ async function runTestPages(pages) {
   return failures;
 }
 
+// tests/types/check.js: the TypeScript definitions against the real framework types (no browser needed)
+function runTypeChecks() {
+  const start = Date.now();
+  let results;
+  try {
+    results = require('../tests/types/check.js').runTypeChecks();
+  } catch (error) {
+    console.log(`  ${pad('TypeScript definitions', 30)}not run: ${error.message}`);
+    return 1;
+  }
+  const passed = results.filter((r) => r.ok).length;
+  console.log(`  ${pad('TypeScript definitions', 30)}${pad(`${passed}/${results.length} passed`, 30)}${seconds(Date.now() - start)}`);
+  for (const r of results) {
+    if (r.ok && !options.verbose) continue;
+    console.log(`      ${r.ok ? MARKS.passed : MARKS.failed} ${r.name}`);
+    if (!r.ok) for (const line of r.output.split('\n').slice(0, 10)) console.log(`          ${line.slice(0, 200)}`);
+  }
+  return results.length - passed;
+}
+
 async function runSweep() {
   const pages = pagesToSweep.length > 0 ? pagesToSweep : [...htmlFiles('docs'), ...htmlFiles('examples')];
   const start = Date.now();
@@ -393,6 +416,7 @@ async function main() {
       console.log('  Smoke pages (frameworks from CDNs, needs internet):');
       failures += await runTestPages(htmlFiles('tests/smoke'));
     }
+    if (options.types) failures += runTypeChecks();
     if (options.sweep) failures += await runSweep();
     console.log(failures === 0 ? 'All passed.' : `FAILED: ${failures} problem(s).`);
     process.exitCode = failures === 0 ? 0 : 1;

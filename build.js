@@ -122,6 +122,13 @@ function build() {
     const unminifiedAliasPath = path.join(distDir, 'pxl.js');
     fs.copyFileSync(unminifiedOutputPath, unminifiedAliasPath);
 
+    // 3b. TypeScript definitions, generated from the bundle (tools/build_types.js), also for download
+    const types = require('./tools/build_types.js').buildTypes(code, VERSION);
+    for (const dir of [path.join(distDir, 'types'), path.join(__dirname, 'docs', 'download', 'types')]) {
+      fs.mkdirSync(dir, { recursive: true });
+      for (const [name, text] of Object.entries(types)) fs.writeFileSync(path.join(dir, name), text, 'utf8');
+    }
+
     // 4. Write a temporary file for Terser to process
     const tempPath = path.join(distDir, 'temp_concat.js');
     fs.writeFileSync(tempPath, code, 'utf8');

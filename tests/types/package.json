@@ -1,0 +1,17 @@
+{
+  "name": "kilopixel-type-tests",
+  "private": true,
+  "description": "Checks Kilopixel's TypeScript definitions (dist/types/) against the real framework types. Install with npm ci; run with node tools/run_tests.js --types (design/2026-10-30_framework_compatibility_plan.md §27).",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@solidjs/web": "2.0.3",
+    "@types/react": "19.3.0",
+    "preact": "11.2.0",
+    "solid-js": "2.0.3",
+    "svelte": "5.58.0",
+    "svelte-check": "4.7.8",
+    "typescript": "6.0.3",
+    "vue": "3.5.45",
+    "vue-tsc": "3.3.14"
+  }
+}

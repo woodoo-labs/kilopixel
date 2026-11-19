@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": { "jsx": "preserve", "jsxImportSource": "@solidjs/web", "skipLibCheck": true },
+  "files": ["kilopixel/kilopixel.d.ts", "kilopixel/kilopixel-solid.d.ts", "fixtures/solid.tsx"]
+}

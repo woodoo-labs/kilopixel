@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": { "jsx": "react-jsx", "jsxImportSource": "preact", "skipLibCheck": true },
+  "files": ["kilopixel/kilopixel.d.ts", "kilopixel/kilopixel-preact.d.ts", "fixtures/preact.tsx"]
+}
