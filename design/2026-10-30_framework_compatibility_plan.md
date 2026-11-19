@@ -1,6 +1,6 @@
 # Framework Compatibility: Kilopixel as a Well-Behaved Custom Element
 
-- **Status**: 🟡 **Proposed** (2026-11-19, W3 built: properties for every attribute, §24; W1 built: step 3 (DOM events on shapes and groups, handlers as listeners, mouse events, cursor on the canvases, layer `pointer-events` fix) §23.8; 2026-11-18, W1 build plan decided, §23, step 1 (handler rename) built, §23.5, step 2 (every shape hit-tested) built, §23.7: three steps, E1–E10, E1 changes D5 (no listener counts, the cursor only CSS), E10 adds handlers and hover / press states to groups, React / Vue / Tailwind expectations and known limits §23.6, E2 settles §22.5 (hit walk over the layer tree); 2026-11-17, DOM-like event model decided, §22: every shape gets events, no `interactive`, D5, D10, D11 decided; `process()` moved to the start of the frame, §4.1 and §15; steps 1–2 of §19.4 built: quick fixes §20, conformance tests `tests/frameworks.html` §21; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 5–6 of §19.4 not built)
+- **Status**: 🟡 **Proposed** (2026-11-19, smoke pages for React, Vue and Tailwind built, §25; W3 built: properties for every attribute, §24; W1 built: step 3 (DOM events on shapes and groups, handlers as listeners, mouse events, cursor on the canvases, layer `pointer-events` fix) §23.8; 2026-11-18, W1 build plan decided, §23, step 1 (handler rename) built, §23.5, step 2 (every shape hit-tested) built, §23.7: three steps, E1–E10, E1 changes D5 (no listener counts, the cursor only CSS), E10 adds handlers and hover / press states to groups, React / Vue / Tailwind expectations and known limits §23.6, E2 settles §22.5 (hit walk over the layer tree); 2026-11-17, DOM-like event model decided, §22: every shape gets events, no `interactive`, D5, D10, D11 decided; `process()` moved to the start of the frame, §4.1 and §15; steps 1–2 of §19.4 built: quick fixes §20, conformance tests `tests/frameworks.html` §21; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 5–6 of §19.4 not built)
 - **Date**: 2026-10-30
 - **Related**: `design/prototypes/2026-10-30_framework_compatibility/review_checks.html` (review §19); `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`, `design/2026-11-04_stage_sizing_plan.md` (builds W2)
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
@@ -288,7 +288,7 @@ Each test that needs rendering forces it (`stage.resize()` / `alwaysrender`) so 
 
 ## 12. Framework Smoke Pages and Docs
 
-**Smoke pages** (in `design/prototypes/2026-10-30_framework_compatibility/`; promote one or two to `examples/` later): the same component (two instances, number binding, expression binding, removal via `undefined`, mount / unmount, a click handler in the framework's own syntax, hover state shown in the framework's UI) in:
+**Smoke pages** (built 2026-11-19 for React, Vue and Tailwind, §25; in `design/prototypes/2026-10-30_framework_compatibility/`; promote one or two to `examples/` later): the same component (two instances, number binding, expression binding, removal via `undefined`, mount / unmount, a click handler in the framework's own syntax, hover state shown in the framework's UI) in:
 
 | Framework | Load without a build | Event syntax to check |
 |---|---|---|
@@ -753,4 +753,23 @@ Step 4 of §19.4. Built as proposed in §6, with the decisions and additions bel
 - **Tests:** the seven W3 tests and T-N1 of `tests/frameworks.html` are ordinary tests (57, none known). New there: a property before the upgrade wins over the markup's attribute; the last change wins between property and attribute, the attribute is not written; properties on a detached tree, with a ref expression that follows its target and a `<pxl-var>` `value` property; arrays and gradient objects stored as given, 360 `hsl()` colors without cache growth; the same value again leaves the layer clean; `ref.<id>.set()` with numbers, arrays and strings. `tests/unit.html` (82): every attribute of every element is a property (number, `undefined`, `null`, no attribute written), generated like Rule A; `points` as a string, flat array, pairs and expression strings; the stage properties; literal `text`; the function warning; the CSS color fast path (and `hsl(120, 50, 40)` still compiled). `tests/scaling.html`: setting a property on n shapes with readers is linear.
 - **Docs:** `.agents/KILOPIXEL.md` (new section "Properties (JavaScript and Frameworks)", parser rules, `linedash`, `set()`, `points`, `<pxl-var>`, stage, text, `PxlNode` methods); the API reference (`docs/js/api-tabs.js`): a "Properties" item in the JavaScript and frameworks part of the events tab.
 - **Found, not part of W3:** a change of a layer's `alpha`, `blend` or `filter` (property or attribute) redraws all its shapes; only animated compositing values use the CSS-only fast path. A framework that fades a layer in every frame pays a full redraw (TODO §30).
-- **Next:** §19.4 step 5, distribution and docs (W8).
+- **Next:** §19.4 step 5, distribution and docs (W8); smoke pages first (§25).
+
+## 25. Framework Smoke Pages (Built 2026-11-19)
+
+The conformance tests (§11, `tests/frameworks.html`) imitate what frameworks do with plain DOM calls; they can't know a framework's own rules. A React page found such a rule on its first real-mouse run (React's `onPointerEnter`, §23.8). So §12's smoke pages are built now, in the folder of this plan, loading Kilopixel as a script tag and the frameworks from CDNs (no build step):
+
+| Page | Framework | Checks | Real mouse |
+|---|---|---|---|
+| `design/prototypes/2026-10-30_framework_compatibility/smoke_react.html` | React 19.1.0 + htm from esm.sh | 21/21 (`smoke_checks.js`) | ✅ |
+| `design/prototypes/2026-10-30_framework_compatibility/smoke_vue.html` | Vue 3.5.13 with the template compiler, jsDelivr | 21/21 (`smoke_checks.js`) | ✅ |
+| `design/prototypes/2026-10-30_framework_compatibility/smoke_tailwind.html` | Tailwind CSS 4.1.7 browser build, plain HTML | 11/11 (own checks) | ✅ |
+
+- **Shared checks** (`design/prototypes/2026-10-30_framework_compatibility/smoke_checks.js`): every framework page renders the same scene in its own syntax and registers each instance (`window.smoke.instances`); `window.runSceneChecks()` tests properties (numbers, arrays, literal text, expression strings, colors from state, points), events (clicks on shapes and groups, `stopPropagation()`, enter / leave from empty space and from another shape, the cursor), and mount / unmount. Results in the page and the tab title.
+- **Real mouse:** each page was also driven with real mouse input in the browser pane (it must be visible: a hidden pane leaves stages unsized).
+- **Not in `node tools/run_tests.js`:** the pages need the network (CDNs). They run on demand.
+- **Findings:** `design/prototypes/2026-10-30_framework_compatibility/FINDINGS.md` (second part, 2026-11-19).
+- **Next:**
+  - **Angular** needs a build. Agreed approach (2026-11-19): an npm app in a top-level folder `frameworks/angular/` with its own `package.json` and committed `package-lock.json`; `node_modules` and build output ignored by git; each laptop runs `npm ci` there. Needs a CLAUDE.md exception to "never create `node_modules`" (only inside `frameworks/<app>/`) and a step in "Working on Another Machine". Not built yet; asked before creating it.
+  - More CDN pages if wanted: Preact, Lit (also a stage in a shadow root), Solid, Alpine, htmx; Svelte 5 needs its compiler in the page.
+  - `docs/frameworks.html` (§12, step 5), written from what the pages show.

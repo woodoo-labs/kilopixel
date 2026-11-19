@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smoke: Vue 3</title>
+  <!-- Kilopixel as a plain script tag: the elements are defined before Vue mounts -->
+  <script src="/dist/pxl.min.js"></script>
+  <script src="smoke_checks.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 16px; background: #f8fafc; color: #0f172a; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 1200px; }
+    .card { background: #fff; border: 1px solid #e2e8f0; padding: 8px; }
+    .card h3 { margin: 4px 0 8px; font-size: 14px; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 13px; margin-top: 6px; }
+    .state { font: 12px monospace; white-space: pre-wrap; background: #f1f5f9; padding: 6px; margin-top: 6px; }
+    #checks { font: 13px monospace; white-space: pre-wrap; margin-top: 12px; max-width: 1200px; }
+  </style>
+</head>
+<body>
+  <h2>Kilopixel in Vue 3 (smoke page)</h2>
+  <p>Vue 3.5 from jsDelivr (the build with the template compiler), no build step. The scene of <code>smoke_checks.js</code>
+    in Vue's syntax: <code>:r="r"</code> sets properties (Vue sets a property when the element has one),
+    <code>@click</code>, <code>@click.stop</code>, <code>@pointerenter</code> / <code>@pointerleave</code> (direct listeners),
+    <code>:style</code>. The one setting Vue needs: <code>compilerOptions.isCustomElement</code> for <code>pxl-*</code>.
+    <button id="run">Run checks</button></p>
+  <div id="root"></div>
+  <div id="checks">checks: not run yet (button above, or window.runSceneChecks())</div>
+
+  <script type="module">
+    import { createApp, ref, reactive, useId, onMounted, onUnmounted } from 'https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.esm-browser.prod.js';
+
+    window.smoke = { framework: 'Vue 3.5.13', instances: {} };
+
+    const Scene = {
+      props: { title: String },
+      setup(props) {
+        // useId() gives ids like v-0: cleaned for ref.<id> (ids are global, so each instance needs its own)
+        const id = 'k' + useId().replace(/[^a-zA-Z0-9]/g, '');
+        const r = ref(60), hue = ref(200), label = ref('alert(1)'), dash = ref([20, 10]);
+        const data = ref([[100, 400], [300, 250], [500, 330], [700, 180], [900, 280]]);
+        const showMoon = ref(true);
+        const counts = reactive({ sunClicks: 0, lastTarget: '', stopClicks: 0, buttonClicks: 0, buttonHovered: false, cardClicks: 0 });
+        const stateEl = ref(null);
+        onMounted(() => {
+          window.smoke.instances[props.title] = {
+            id, stateElement: () => stateEl.value,
+            set: {
+              r: (v) => { r.value = v; }, hue: (v) => { hue.value = v; }, label: (v) => { label.value = v; },
+              dash: (v) => { dash.value = v; }, data: (v) => { data.value = v; }, showMoon: (v) => { showMoon.value = v; }
+            }
+          };
+        });
+        onUnmounted(() => delete window.smoke.instances[props.title]);
+        const onSun = (e) => { counts.sunClicks++; counts.lastTarget = e.target.id; };
+        return { id, r, hue, label, dash, data, showMoon, counts, stateEl, onSun, JSON };
+      },
+      template: `
+        <div class="card" @click="counts.cardClicks++">
+          <h3>{{ title }} (ids start with {{ id }})</h3>
+          <pxl-stage :id="id + 'stage'" :ratio="2" :alwaysrender="true">
+            <pxl-layer>
+              <pxl-circle :id="id + 'sun'" :x="300" :y="250" :r="r" :fill="'hsl(' + hue + ', 70%, 55%)'" @click="onSun"></pxl-circle>
+              <pxl-circle v-if="showMoon" :id="id + 'moon'" x="300 + cos(t * 1.5) * 140" y="250 + sin(t * 1.5) * 140" :r="16" fill="#94a3b8"></pxl-circle>
+              <pxl-circle :id="id + 'stop'" :x="560" :y="250" :r="40" fill="#f97316" @click.stop="counts.stopClicks++"></pxl-circle>
+              <pxl-group :id="id + 'button'" :x="820" :y="250" :style="{ cursor: 'pointer' }" @click="counts.buttonClicks++"
+                @pointerenter="counts.buttonHovered = true" @pointerleave="counts.buttonHovered = false">
+                <pxl-rect :w="200" :h="80" :r="12" :fill="counts.buttonHovered ? '#2563eb' : '#3b82f6'"></pxl-rect>
+                <pxl-text :id="id + 'label'" :text="label" :size="22" fill="#fff" align="center" baseline="middle"></pxl-text>
+              </pxl-group>
+              <pxl-line :id="id + 'dash'" :x1="80" :y1="470" :x2="920" :y2="470" stroke="#0f172a" :strokewidth="3" :linedash="dash"></pxl-line>
+              <pxl-polyline :id="id + 'chart'" :points="data" stroke="#16a34a" :strokewidth="4" fill="none"></pxl-polyline>
+            </pxl-layer>
+          </pxl-stage>
+          <div class="row" @click.stop>
+            <label>r <input type="range" min="10" max="120" v-model.number="r"></label>
+            <label>hue <input type="range" min="0" max="360" v-model.number="hue"></label>
+            <button @click="showMoon = !showMoon">{{ showMoon ? 'Unmount' : 'Mount' }} moon</button>
+            <button @click="label = label === 'alert(1)' ? 'Q1 - 2024' : 'alert(1)'">Change label</button>
+          </div>
+          <div class="state" ref="stateEl" :data-state="JSON.stringify(counts)">{{ JSON.stringify(counts) }}</div>
+        </div>`
+    };
+
+    const app = createApp({ components: { Scene }, template: '<div class="cards"><Scene title="A" /><Scene title="B" /></div>' });
+    app.config.compilerOptions.isCustomElement = (tag) => tag.startsWith('pxl-');
+    app.mount('#root');
+    document.getElementById('run').addEventListener('click', () => window.runSceneChecks());
+  </script>
+</body>
+</html>
