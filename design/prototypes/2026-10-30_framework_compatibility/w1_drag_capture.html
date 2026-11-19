@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Drag check</title>
+<style>body { margin: 0; } pxl-stage { width: 1000px; }</style>
+<script src="/dist/pxl.min.js"></script>
+</head>
+<body>
+<!-- A drag as drag libraries do it: setPointerCapture() on event.target in pointerdown, then the moves move the shape -->
+<pxl-stage id="s" ratio="2" alwaysrender>
+  <pxl-layer>
+    <pxl-circle id="knob" x="300" y="250" r="60" fill="ref.knob.isPressed ? '#f97316' : '#3b82f6'" style="cursor: grab"></pxl-circle>
+  </pxl-layer>
+</pxl-stage>
+<pre id="out"></pre>
+<script>
+const knob = document.getElementById('knob'), stage = document.getElementById('s');
+const log = window.dragLog = { events: [], movesPerFrame: [], errors: [], pressedDuring: null, mouseXDuring: null };
+let movesThisFrame = 0;
+(function count() { if (movesThisFrame) log.movesPerFrame.push(movesThisFrame); movesThisFrame = 0; requestAnimationFrame(count); })();
+addEventListener('error', (e) => log.errors.push(e.message));
+knob.addEventListener('pointerdown', (e) => {
+  e.target.setPointerCapture(e.pointerId);
+  log.events.push(`pointerdown trusted=${e.isTrusted} capture=${knob.hasPointerCapture(e.pointerId)}`);
+});
+knob.addEventListener('pointermove', (e) => {
+  movesThisFrame++;
+  if (!knob.hasPointerCapture(e.pointerId)) return;
+  log.pressedDuring = pxl.nodes.knob.isPressed;
+  log.mouseXDuring = Math.round(stage.attributeValues.mouseX);
+  const rect = stage.getBoundingClientRect();
+  knob.setAttribute('x', (e.clientX - rect.left) / stage.unit);
+});
+for (const type of ['pointerup', 'click', 'gotpointercapture', 'lostpointercapture']) {
+  knob.addEventListener(type, (e) => log.events.push(`${type} trusted=${e.isTrusted}`));
+}
+stage.addEventListener('click', (e) => log.events.push(`stage click target=${e.target.id || e.target.localName}`));
+</script>
+</body>
+</html>

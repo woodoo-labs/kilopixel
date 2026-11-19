@@ -15,13 +15,6 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     isHovered: false, isPressed: false
   };
 
-  // Handler attribute → its key in this.handlers. Not on…: onclick is the browser's own handler attribute, and
-  // frameworks treat on… names as their own listeners (design/2026-10-30_framework_compatibility_plan.md §4.3)
-  static HANDLER_EVENTS = {
-    'pxl-on-click': 'click', 'pxl-on-enter': 'enter', 'pxl-on-leave': 'leave',
-    'pxl-on-down': 'down', 'pxl-on-up': 'up', 'pxl-on-move': 'move'
-  };
-
   constructor() {
     super();
     this.stage = null; // set in connectedCallback
@@ -40,42 +33,13 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     this._lastDashU = 0;
     this._scaledDash = [];
 
-    // Compiled pxl-on-* handlers, called by the InteractionEngine
-    this.handlers = { click: null, enter: null, leave: null, down: null, up: null, move: null };
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (oldValue === newValue) return;
-
-    const event = pxl.Shape.HANDLER_EVENTS[name];
-    if (event) {
-      // Removed or empty: no handler
-      let compiled = null;
-      if (newValue) {
-        pxl.trackPressedRefs(newValue);
-        compiled = new Function('scope', 'ref', `
-          const { ${pxl.scopeKeys} } = scope;
-          return function() {
-            ${pxl.rewriteExpression(newValue)}
-          };
-        `)(pxl.scope, pxl.nodes).bind(this);
-      }
-      this.handlers[event] = compiled;
-      return;
-    }
-
-    super.attributeChangedCallback(name, oldValue, newValue);
+    // pxl-on-* listeners by DOM event type (PxlNode.setHandler())
+    this.handlers = pxl.createHandlers();
   }
 
   connectedCallback() {
     this.stage = this.closest('pxl-stage');
     super.connectedCallback();
-  }
-
-  // Hand cursor only for elements that react to clicks or presses
-  isClickable() {
-    const h = this.handlers;
-    return !!(h.click || h.down || h.up) || (!!this.id && pxl._pressableIds.has(this.id));
   }
 
   disconnectedCallback() {

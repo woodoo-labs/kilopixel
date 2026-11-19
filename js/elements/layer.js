@@ -81,6 +81,12 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     this.stage?.requestRender();
   }
 
+  // The cursor over this layer's canvas (InteractionEngine.updateCursor()). On the canvas in the shadow root, so
+  // the page's and frameworks' styles on the layer and stage are never overwritten; '' removes it.
+  setCursor(cursor) {
+    this._canvas.style.cursor = cursor;
+  }
+
   // Called by the stage on every resize (also when the window moves to a screen with another pixel ratio).
   // Setting the canvas size resets the context, so the DPR scale is applied again.
   resize(w, h, dpr) {

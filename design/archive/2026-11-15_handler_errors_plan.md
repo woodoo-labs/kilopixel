@@ -1,6 +1,6 @@
 # Handler Errors: A Throwing `on*` Handler Is Delivered Once
 
-- **Status**: ✅ **Implemented** (2026-11-15; 2 engine tests, 88/88 pass; bundle size unchanged at 57.46 KB minified)
+- **Status**: ⚪ **Superseded by** `design/2026-10-30_framework_compatibility_plan.md` (2026-11-19, §23.8: `pxl-on-*` handlers are listeners for DOM events, and each catches and logs its own error; `callHandler()` and the event flags of `process()` are gone. The goal holds: a throwing handler is logged and its event delivered once. Implemented 2026-11-15; 2 engine tests, 88/88 pass; bundle size unchanged at 57.46 KB minified)
 - **Date**: 2026-11-15
 - **Related**: `design/2026-11-07_safe_shape_render_plan.md` (its §5.2 left handler errors to the browser and expected the next frame to be normal; this plan corrects that), `design/2026-10-30_framework_compatibility_plan.md` (D1 renames the handlers, D4 changes when `click` / `pointerdown` / `pointerup` are hit-tested; §5 below)
 - **Target Implementation**: `js/interaction.js` (`callHandler`, `process`), `tests/index.html`, `.agents/KILOPIXEL.md`

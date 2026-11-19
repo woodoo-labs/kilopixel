@@ -1,6 +1,6 @@
 # Kilopixel Framework — Complete Technical Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~60KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~66KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes with custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, …); the engine compiles their attribute expressions and redraws a layer in every frame in which something in it changed or is animated.
 
@@ -79,7 +79,7 @@ graph TD
 ```
 Stage.requestRender() → requestAnimationFrame → Stage.render(t)
   ├─ pxl._frame++
-  ├─ interaction.process()  → pointer broadcast, hit testing, state updates, handlers (drawn in this frame)
+  ├─ interaction.process()  → pointer broadcast, hit testing, hover states, DOM events and handlers (drawn in this frame)
   ├─ Sort layers and stage-level variables by DOM position (if dirty)
   ├─ For each stage-level <pxl-var>: update(t); if one is animated → stage.requestRender()
   ├─ Update phase, for each layer (if isDirty || isAnimated): layer.update(t)
@@ -111,7 +111,7 @@ The framework compiles from these files (in build order):
 | 1 | `js/engine.js` | Global `pxl` namespace, reactivity pub-sub, attribute compilation bridge |
 | 2 | `js/matrix.js` | 2D affine matrices (Float64Array, written in place), `toLocal()` |
 | 3 | `js/compiler.js` | Multi-tier expression parser, built-in scope, time drivers |
-| 4 | `js/interaction.js` | InteractionEngine class, dummy context hit testing, pointer events |
+| 4 | `js/interaction.js` | InteractionEngine class, dummy context hit testing, DOM events on shapes and groups, `pxl-on-*` handlers, cursor |
 | 5 | `js/graphics.js` | Transform pipeline helper, anchor tables, points parser, radius resolver, arrowhead constants & record factory, line dash helper |
 | 6 | `js/monitor.js` | Performance telemetry (fps, renderAvg, renderMax) |
 | 7 | `js/elements/stage.js` | Root container, canvas host, rAF loop, resize, pointer routing |
@@ -630,15 +630,15 @@ The `time(unit)` driver reads the user's local clock. The values have decimals (
 
 **Source**: `js/interaction.js`
 
-### States and Handlers
+### States, Handlers and DOM Events
 
-Shapes offer interaction in two ways: states that expressions read, and handlers that run code.
+Shapes and groups offer interaction in three ways: states that expressions read, handlers that run code, and DOM events for JavaScript and frameworks (`design/2026-10-30_framework_compatibility_plan.md` §4, §22, §23).
 
 #### 1. States (for expressions)
 
-Two booleans on every shape, set by the engine:
-- `isHovered`: the pointer is over the shape
-- `isPressed`: the pointer was pressed on the shape and isn't released yet
+Two booleans on every shape and group, set by the engine:
+- `isHovered`: the pointer is over the shape; on a group, over any shape inside it (like CSS `:hover` on a parent)
+- `isPressed`: a press started on the shape (or a shape inside the group) and isn't released yet, wherever the pointer is now
 
 ```html
 <pxl-rect id="btn" w="100" h="40"
@@ -648,19 +648,53 @@ Two booleans on every shape, set by the engine:
 
 #### 2. Handlers (for code)
 
-JavaScript statements in an attribute, run when the event happens:
-- `pxl-on-click`: click
-- `pxl-on-enter`: the pointer enters the shape
-- `pxl-on-leave`: the pointer leaves the shape
-- `pxl-on-down`: a press starts on the shape
-- `pxl-on-up`: a press ends on the shape
-- `pxl-on-move`: the pointer moves over the shape
+JavaScript statements in an attribute of a shape or group. Each is a listener for a DOM event (`pxl.HANDLER_EVENTS`):
+
+| Attribute | DOM event | Runs when |
+|---|---|---|
+| `pxl-on-click` | `click` | a click on the shape; on a group, on any shape inside it |
+| `pxl-on-enter` | `pointerenter` | the pointer enters the shape, or the group as a whole |
+| `pxl-on-leave` | `pointerleave` | the pointer leaves the shape, or the group as a whole |
+| `pxl-on-down` | `pointerdown` | a press starts on the shape |
+| `pxl-on-up` | `pointerup` | a press ends over the shape |
+| `pxl-on-move` | `pointermove` | the pointer moves over the shape (at most once per frame) |
 
 ```html
-<pxl-circle pxl-on-click="ref.counter.set('value', ref.counter.value + 1)" ...></pxl-circle>
+<pxl-group pxl-on-click="ref.counter.set('value', ref.counter.value + 1)">
+  <pxl-rect w="120" h="40" fill="#333"></pxl-rect>
+  <pxl-text text="Add" fill="#fff" align="center" baseline="middle"></pxl-text>
+</pxl-group>
 ```
 
-Handlers are compiled with `new Function`, with the expression scope (`ref`, `Math` names, colors, gradients, filters; no `t` and no time drivers) and `this` bound to the shape; details in [Event Handling](#event-handling). The names start with `pxl-` and don't start with `on`: `onclick` is the browser's own handler attribute (run as page JavaScript, without `ref`), and frameworks treat `on…` names as their own listeners (`design/2026-10-30_framework_compatibility_plan.md` §4.3, D1). Until 2026-11-18 they were `onclick` … `onmove`; a plain `onclick` on a shape is not a Kilopixel handler.
+Because handlers are listeners, they run in the DOM's order: the shape's handler, then its group's, then the groups further out, together with framework listeners on the same elements (on one element in the order they were added). A framework listener's `stopPropagation()` also stops the handlers further out. Handlers get no event object. Details in [Event Handling](#event-handling). The names start with `pxl-` and don't start with `on`: `onclick` is the browser's own handler attribute (run as page JavaScript, without `ref`), and frameworks treat `on…` names as their own listeners (§4.3, D1). A plain `onclick` on a shape is not a Kilopixel handler; the browser runs it on Kilopixel's `click`.
+
+#### 3. DOM Events (for JavaScript and frameworks)
+
+The engine dispatches real DOM events on shapes, so `addEventListener()`, React `onClick` / `onPointerEnter` (delegated to the root), Vue `@click`, Angular `(click)`, Svelte, Solid, Lit, Alpine and htmx work on shapes and groups as on HTML elements:
+
+| Events | When | Notes |
+|---|---|---|
+| `pointerdown`, `mousedown`, `pointerup`, `mouseup`, `click`, `dblclick`, `contextmenu` | when the browser's event arrives (D4) | over a shape, the browser's event is stopped at the stage (capture phase) and the same event is dispatched on the shape: every listener sees one event, with the shape as `target`. Over empty space the browser's event passes unchanged (target: the layer) |
+| `pointerover`, `pointerout` (bubble), `pointerenter`, `pointerleave` (don't bubble), then `mouseover`, `mouseout`, `mouseenter`, `mouseleave` | when the hovered shape changes | enter / leave also on every group entered or left, from the outermost group in; `relatedTarget`: the shape left or entered, or the shape's layer for empty space (React builds `onPointerEnter` from `pointerover` / `pointerout` and `relatedTarget`) |
+| `pointermove`, `mousemove` | once per frame while the pointer moves over a shape | `movementX` / `movementY`: the browser's moves since the last one, summed. The stage's listeners also get the browser's own moves |
+
+- **Event objects:** a new `PointerEvent` / `MouseEvent` per dispatch (event fields are read-only, and frameworks may keep the object), `composed: true`, built from one reused init object with the browser event's fields (`clientX`, `screenX`, buttons, modifier keys, `pointerId`, `pointerType`, `isPrimary`, `pressure`, `width`, `tilt*`, …). `offsetX` / `offsetY` equal `clientX` / `clientY` (shapes are `display: none`): use `clientX`, or `ref.<stage>.mouseX` for stage units (D3: no extra fields).
+- **`preventDefault()`** on Kilopixel's event is passed on to the browser's (`pointerdown` without mouse events afterwards, `contextmenu` without the browser's menu).
+- **Click target (E7):** the nearest shape or group that holds both the press and the release. Pressed on one shape and released on another (outside a common group), Kilopixel sends no click and the browser's click passes to the stage. A click without a press on the stage (a synthetic click) goes to the shape under it.
+- **Order:** states are updated and broadcast first, then the events are dispatched. In `process()` the events are collected during the hit test and dispatched after it from a preallocated queue; a listener that causes more events (another dispatch, a frame) adds them to the queue, and the running loop dispatches them.
+- **Own events:** the stage ignores the event it is dispatching (`_dispatching`). The browser's events over a canvas arrive retargeted to their layer; events whose target is another element inside the stage (a shape that holds pointer capture, `shape.click()`, HTML content in a layer) pass unchanged.
+- **Pointer capture:** `setPointerCapture()` on a shape works (checked with a real drag, plan §23.8). The browser then sends its moves, the release and the click to the shape itself: the stage takes `mouseX` / `mouseY` from `clientX` and its own box, sends no `pointermove` of its own while a shape holds capture (`gotpointercapture` / `lostpointercapture`), and ends the press on the release.
+- **Multi-touch:** `mouseX`, hover and `isPressed` follow the primary pointer. Other touch points (`isPrimary: false` with a `pointerType`) get their own presses, releases and clicks, hit-tested at their position.
+- **Release outside the stage:** while a press is held, a capture listener on `window` ends it when the release happens outside the stage (checked with `composedPath()`, so a stage in a shadow root works). `pointercancel` (touch scrolling) ends it too, without a click (E8).
+- **Leaving the stage:** the browser's `pointerout` of the layer (capture phase, `relatedTarget` outside the stage) clears the hover and dispatches the leave events right away, before the page sees the layer's own `pointerout`.
+- **Known limits:** capture listeners above the stage (React `onClickCapture`) see the browser's click before Kilopixel's (E9). CSS `:hover` never matches a shape, `getBoundingClientRect()` of a shape is empty, shapes can't take keyboard focus, and test tools that click an element (Playwright `page.click('pxl-circle')`) need coordinates instead (§23.6).
+
+### Cursor
+
+The cursor is only CSS (E1). In every hit test the engine reads the hovered shape's computed `cursor` (inherited from its groups, layer and stage) and writes it on the layer canvases (`Layer.setCursor()`, inside their shadow roots, so no framework style binding overwrites it), only when it changes; over empty space, or for `auto`, it removes it. The stage never gets an inline `cursor`.
+
+- The hand for handlers is a rule of the default styles, like the browser's rule for links: `[pxl-on-click], [pxl-on-down], [pxl-on-up] { cursor: pointer }` in `@layer pxl`. A page overrides it with any rule, and the shapes inside a group with such a handler inherit the hand.
+- A framework listener gets the hand from CSS, as an HTML element does: `style="cursor: pointer"`, Tailwind `cursor-pointer`. Reading `isPressed` gives no hand.
 
 ### Hit Testing Algorithm
 
@@ -670,13 +704,13 @@ Hit testing uses a **dummy canvas context** (`pxl.dummyCtx`) whose `fill()` and 
 2. Its `fill` method is overridden to call `isPointInPath(hitX, hitY)`
 3. Its `stroke` method is overridden to call `isPointInStroke(hitX, hitY)`
 4. During hit testing (`InteractionEngine.findShapeAt(x, y)`), the engine:
-   - Walks the stage's layers and their children (`childList`, groups recursively) in **reverse drawing order**, so the topmost shape is tested first and no list of shapes is kept or sorted. A layer or group with `hidden` is skipped with everything inside it, and so is a layer that CSS takes out (`pointer-events: none`, `display: none`, `visibility: hidden`, read from its computed style)
+   - Walks the stage's layers and their children (`childList`, groups recursively) in **reverse drawing order**, so the topmost shape is tested first and no list of shapes is kept or sorted. A layer or group with `hidden` is skipped with everything inside it, and so is a layer that CSS hides (`display: none`, `visibility: hidden`, read from its computed style). A layer's `pointer-events` is not checked: its shapes inherit it, and a shape with `pointer-events: auto` inside a layer with `none` is hit, as in the DOM
    - **Box check** first (`Shape.mayContainPoint()`): the point is mapped into the shape's own space with the inverse of its global matrix (`getInverseGlobalMatrix()`, inverted again only when the matrix changed) and compared with `getBoundingBox()`, padded by what the stroke can reach (`hitPadding()`: half the width, a miter up to `miterlimit` × half the width, a square cap's corner, arrowheads). The box is read in every test, so a shape changed with `setAttribute()` is hit at its new size. Smooth polylines and custom shapes without their own `getBoundingBox()` skip the box check (`needsExactHitTest()`)
-   - Then the shape's CSS `pointer-events` (`cssStyle()`, the cached computed style; inherited from its groups and layer, so `pointer-events: none` on a group takes its shapes out, and `auto` on a shape inside it brings that shape back, as in the DOM)
+   - Then the shape's CSS `pointer-events` (`cssStyle()`, the cached computed style; inherited from its groups and layer, so `pointer-events: none` on a group or layer takes its shapes out, and `auto` on a shape inside it brings that shape back, as in the DOM)
    - Then the exact test: sets the shape's global matrix on the dummy context (translation × `u`) and calls the shape's optional **`hitTest(ctx, u)`** hook if it has one, otherwise its `draw()` method, inside `try / catch / finally`: a shape that throws counts as not hit, reports its error, and the dummy context is always restored. Alpha, blend, mask, filter and shadows don't affect `isPointInPath`
    - The intercepted fill/stroke methods check if the mouse point is inside
    - First hit wins (topmost element)
-   - Cost (`design/prototypes/2026-10-30_framework_compatibility/hit_walk_bench.html`, 2026-11-18, browser pane): about 0.4–0.8 µs per shape for a full walk, 1–4 exact tests per hit test
+   - Cost (`design/prototypes/2026-10-30_framework_compatibility/hit_walk_bench.html`, 2026-11-18, browser pane): about 0.4–0.8 µs per shape for a full walk, 1–4 exact tests per hit test. A layer with `pointer-events: none` costs the same as any other layer (measured 2026-11-19: 0.35–0.4 ms for 1,000 shapes, about 2.5 ms for 5,000)
 
 So the hit area is the shape's own path, the same one it draws: no separate collision geometry. Strokes count with their width (`isPointInStroke`).
 
@@ -684,13 +718,15 @@ So the hit area is the shape's own path, the same one it draws: no separate coll
 
 ### InteractionEngine Lifecycle
 
-- **Every shape is hit-tested**, like elements in the DOM: no registration, and no handler or reader needed (`design/2026-10-30_framework_compatibility_plan.md` §22, §23 step 2). `isHovered` / `isPressed` work for every shape. A shape that leaves the DOM while it is hovered or pressed gives up both states (`releaseElement()`).
-- **Out of hit testing:** CSS `pointer-events: none` on a shape, a group or a layer (inline style, class, Tailwind `pointer-events-none`); `hidden` shapes, groups and layers. The default styles give `pxl-grid` `pointer-events: none` (it covers the stage and would catch the pointer between its lines); a page can set `auto`. A decoration drawn on top of a clickable shape catches the pointer too, so it gets `pointer-events: none` (`examples/test37.html`, the icons on the nodes).
-- **Resting pointer:** while no pointer event arrives, `process()` tests again at most every `pxl.RESTING_HIT_INTERVAL` (100 ms): a shape that moves under a resting pointer is hovered within 100 ms, and any pointer event tests in its own frame. Measured with the bench above: a full walk costs about 0.4–0.6 ms for 1,000 shapes, `process()` with the pointer resting 0.03–0.16 ms per frame for 1,000–5,000 animated shapes.
-- Pointer events (`pointermove`, `pointerdown`, `pointerup`, `click`, `pointerenter`, `pointerleave`) are handled by the InteractionEngine via `handleEvent()`
-- Hit testing runs in `process()`, called at the **start** of each `stage.render()`, before the update phase: it first broadcasts the stage's pointer values (`mouseX`, `mouseY`, `isHovered`) if a pointer event arrived, then hit-tests against the values of the last update (the picture on screen), updates `isHovered` / `isPressed` and runs the handlers. Their readers (with or without `t`) and whatever a handler changes are drawn in the same frame. Called after drawing, all of these were one frame late (`design/2026-11-17_pointer_frame_order_plan.md`)
-- Mouse coordinates are converted to logical units: `offsetX / stage.unit`
-- **Cursor**: the stage shows `cursor = 'pointer'` only over **clickable** shapes (a `pxl-on-click` / `pxl-on-down` / `pxl-on-up` handler, or `isPressed` referenced somewhere — `pxl.trackPressedRefs()` collects the ids in `pxl._pressableIds`); hover-only shapes keep `'default'`. The DOM style is only written when the cursor actually changes. (Step 3 of the plan makes the cursor CSS only.)
+- **Every shape is hit-tested**, like elements in the DOM: no registration, and no handler or reader needed (§22, §23 step 2). `isHovered` / `isPressed` work for every shape and group.
+- **State:** the innermost hovered node and the innermost pressed node (`_hovered`, `_pressed`); their groups up to the layer share the state. A shape or group that leaves the DOM gives up its states (`releaseElement()`, from `disconnectedCallback()`), and the state passes to its nearest group still in the page, which stays hovered or pressed without new enter events. A stage that leaves the DOM clears everything (`reset()`).
+- **Out of hit testing:** CSS `pointer-events: none` on a shape, a group or a layer (inline style, class, Tailwind `pointer-events-none`); `hidden` shapes, groups and layers. The default styles give `pxl-grid` `pointer-events: none` (it covers the stage and would catch the pointer between its lines); a page can set `auto`. A decoration drawn on top of a clickable shape catches the pointer too: it gets `pointer-events: none`, or it goes into a group with the clickable shape, with the handler on the group (`examples/test37.html`).
+- **Resting pointer:** while no pointer event arrives, `process()` tests again at most every `pxl.RESTING_HIT_INTERVAL` (100 ms): a shape that moves under a resting pointer is hovered within 100 ms, and any pointer move tests in its own frame. Measured with the bench above: a full walk costs about 0.4–0.6 ms for 1,000 shapes, `process()` with the pointer resting 0.03–0.16 ms per frame for 1,000–5,000 animated shapes.
+- **Browser events** go to the stage's `handleEvent()`: `pointermove`, `pointerenter`, `pointerleave`, `gotpointercapture`, `lostpointercapture` in the bubble phase (`Stage.POINTER_EVENTS`); `pointerdown`, `pointerup`, `pointercancel`, `pointerout`, `mousedown`, `mouseup`, `click`, `dblclick`, `contextmenu` in the capture phase, when they arrive (`Stage.ARRIVING_EVENTS`). A press, release or click is hit-tested at its own position, so a tap without a move before it is hit too; its hover change (enter events) comes first. The hit result is kept for that position until the pointer moves or a frame runs: one click brings up to five browser events.
+- **`process()`** runs at the **start** of each `stage.render()`, before the update phase: it broadcasts the stage's pointer values (`mouseX`, `mouseY`, `isHovered`) if a pointer event arrived, hit-tests against the values of the last update (the picture on screen), updates `isHovered` with its boundary events, queues one `pointermove` / `mousemove` on the hovered shape if the pointer moved, and dispatches the queue. Readers of the states (with or without `t`) and whatever a listener changes are drawn in the same frame (`design/2026-11-17_pointer_frame_order_plan.md`).
+- **Idle layers stay idle:** events, cursor changes and states never invalidate a layer. A state change is broadcast only to the readers of that id, so only a layer with a reader redraws; a group without an id broadcasts nothing. A static page asks for one frame per browser move (to run `process()`) and none while the pointer rests.
+- Mouse coordinates are converted to logical units: `offsetX / stage.unit` over a canvas; for other targets (a captured shape) `clientX` minus the stage's box.
+- **Allocations:** none in the walk, the box check, the boundary walk (`contains()`) and the queue. One event object per dispatched event: while the pointer moves over a shape, two per frame (`pointermove`, `mousemove`, about 6 µs each); a hover change about 8 (pointer and mouse versions), plus 4 per group entered or left.
 
 ---
 
@@ -821,7 +857,7 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 ### Key Behavior
 
 - Creates no shadow DOM or internal canvas — layers each create their own
-- **Default styles** (`pxl.DEFAULT_STYLES` in `stage.js`): `pxl-stage { display: block; position: relative; width: 100% }`, `pxl-stage:state(fallback) { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0 }` and `display: none` for `pxl-var`, `pxl-group` and the built-in shapes (their content, e.g. `<pxl-text>{label}</pxl-text>` in JSX, would otherwise show as page text through the layer's `<slot>`; content placed directly in a layer stays visible; a custom shape element needs its own rule if it may get children), and `pxl-grid { pointer-events: none }` (out of hit testing, see [Interaction System](#interaction-system)), inside `@layer pxl { … }`. `pxl.addDefaultStyles(root)` adds them as one `<style data-pxl>` at the start of `<head>` when the script loads, and at the start of a shadow root when a stage connects inside one (document styles don't reach into it). The first cascade layer declared ranks lowest, so any page rule wins, also rules in the page's own layers (Tailwind v4); `adoptedStyleSheets` and `:where()` would beat layered page rules. Only `aspect-ratio` (from `ratio`) and `cursor` are written inline
+- **Default styles** (`pxl.DEFAULT_STYLES` in `stage.js`): `pxl-stage { display: block; position: relative; width: 100% }`, `pxl-stage:state(fallback) { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0 }` and `display: none` for `pxl-var`, `pxl-group` and the built-in shapes (their content, e.g. `<pxl-text>{label}</pxl-text>` in JSX, would otherwise show as page text through the layer's `<slot>`; content placed directly in a layer stays visible; a custom shape element needs its own rule if it may get children), and `pxl-grid { pointer-events: none }` (out of hit testing, see [Interaction System](#interaction-system)), and `[pxl-on-click], [pxl-on-down], [pxl-on-up] { cursor: pointer }` (the hand for handlers, inherited by a group's shapes; see [Cursor](#cursor)), inside `@layer pxl { … }`. `pxl.addDefaultStyles(root)` adds them as one `<style data-pxl>` at the start of `<head>` when the script loads, and at the start of a shadow root when a stage connects inside one (document styles don't reach into it). The first cascade layer declared ranks lowest, so any page rule wins, also rules in the page's own layers (Tailwind v4); `adoptedStyleSheets` and `:where()` would beat layered page rules. Only `aspect-ratio` (from `ratio`) is written inline (the cursor goes on the layer canvases)
 - **300 px fallback width**: a parent that sizes itself to its content (a centered flex or grid item, `inline-block`, an absolute card) asks the stage for its content width; the layers are absolutely positioned and give none, so the stage would be 0 × 0. `markFallbackWidth()` then adds the custom state `fallback` (`attachInternals()` on first use, field `_internals`): `contain-intrinsic-inline-size: 300px` answers 300 (like `<canvas>`), `min-width: 0` keeps the stage shrinkable as a flex or grid item. It is called from `resize()` when the width is 0 and once in the frame after `connectedCallback()` (a ResizeObserver needn't report an element that stays 0 × 0); a stage without a box (`display: none`) is skipped; `disconnectedCallback()` removes the state. Only such stages get it: on every stage, the 300 px would also be the minimum content width that keeps the cards and grid columns around a stage from shrinking. Older browsers without custom states keep the stage 0 × 0. Design: `design/2026-11-04_stage_sizing_plan.md`
 - `ResizeObserver` with `device-pixel-content-box` (fallback to `content-box`)
 - `unit = clientWidth / 1000`
@@ -881,12 +917,13 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 
 **Transforms only:** `<pxl-group>` groups elements and transforms them together. It has no compositing attributes (`alpha`, `blend`, `filter`, `shadow*`): for those, use a `<pxl-layer>` or set them on the shapes.
 
-### Observed Attributes (11)
+### Observed Attributes (17)
 
-Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `scalex`, `scaley`, `skewx`, `skewy`, `hidden`
+Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `scalex`, `scaley`, `skewx`, `skewy`, `hidden`; the handlers `pxl-on-click`, `pxl-on-enter`, `pxl-on-leave`, `pxl-on-down`, `pxl-on-up`, `pxl-on-move` (and `id`). Defaults also hold the states `isHovered: false`, `isPressed: false`.
 
 ### Key Behavior
 
+- **Interaction** (plan §23, E10): a group gets the DOM events of the shapes inside it by bubbling, and `pointerenter` / `pointerleave` of its own when the pointer enters or leaves it as a whole. Its handlers are listeners like a shape's: `pxl-on-click`, `-down`, `-up`, `-move` run for any shape inside it (after the shape's own handler, before outer groups'), `pxl-on-enter` / `-leave` only at the group's edge. `ref.<group>.isHovered` / `isPressed` are true while a shape inside it is hovered or pressed. A button made of a rect and a label is one group with the handler on the group; the label needs no `pointer-events: none`. Layers get no handlers or states (`ref.<stage>.isHovered` covers the stage)
 - Has no canvas of its own: draws into its layer's context
 - Groups can nest infinitely, each adding transforms to the stack
 - `update(t)` (update phase): sorts children by DOM position (if `_isOrderDirty`), evaluates its animations, and, unless hidden, calls `update(t)` on its children. A failing evaluation stores `_failedFrame` and skips the children.
@@ -906,7 +943,7 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `sca
 **Transform**: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `scalex`, `scaley`, `skewx`, `skewy`  
 **Style**: `fill`, `stroke`, `strokewidth`, `linecap`, `linejoin`, `miterlimit`, `linedash`, `dashoffset`  
 **Render**: `alpha`, `blend`, `mask`, `filter`, `shadowcolor`, `shadowblur`, `shadowx`, `shadowy`, `hidden`  
-**Events**: `pxl-on-click`, `pxl-on-enter`, `pxl-on-leave`, `pxl-on-down`, `pxl-on-up`, `pxl-on-move`
+**Events**: `pxl-on-click`, `pxl-on-enter`, `pxl-on-leave`, `pxl-on-down`, `pxl-on-up`, `pxl-on-move` (also on groups)
 
 ### Style Attributes Breakdown
 
@@ -959,15 +996,14 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `sca
 
 ### Event Handling
 
-When `attributeChangedCallback` receives an event attribute (`pxl-on-click`, `pxl-on-enter`, etc.):
-1. The string goes through `pxl.rewriteExpression()` like attribute expressions: `ref.a.b` → `ref.a?.b`, and `toLocal()` works (the caller is the shape)
-2. Compiled via `new Function` with full scope access
-3. Bound to the element via `.bind(this)`
-4. Stored in `this.handlers` (`handlers.click`, `handlers.enter`, …); the InteractionEngine calls them from there. Every shape is hit-tested, so nothing is registered
+Shapes and groups observe the handler attributes; `PxlNode.attributeChangedCallback` passes them to `setHandler()` (`node.js`):
+1. The string goes through `pxl.rewriteExpression()` like attribute expressions: `ref.a.b` → `ref.a?.b`, and `toLocal()` works (the caller is the element)
+2. `pxl.compileHandler()` compiles it via `new Function` with the expression scope and wraps it in a listener that calls it with `this` bound to the element
+3. The listener is added for the handler's DOM event (`pxl.HANDLER_EVENTS`: `pxl-on-click` → `click`, `pxl-on-enter` → `pointerenter`, `pxl-on-leave` → `pointerleave`, `pxl-on-down` → `pointerdown`, `pxl-on-up` → `pointerup`, `pxl-on-move` → `pointermove`) and kept in `this.handlers`, keyed by event type (`handlers.click`, `handlers.pointerenter`, …). Every shape is hit-tested, so nothing is registered
 
-A removed or empty handler (`removeAttribute('pxl-on-click')`, `pxl-on-click=""`) sets the compiled handler to `null`; a handler may remove itself while it runs.
+A removed or empty handler (`removeAttribute('pxl-on-click')`, `pxl-on-click=""`) removes the listener and sets `handlers.<type>` to `null`; a handler may remove itself while it runs. Any `click` on the element runs its handler, also one dispatched by code (`shape.click()`, Testing Library `fireEvent`).
 
-A handler that throws is caught by `InteractionEngine.callHandler()` and logged with `console.error` (`[pxl] <pxl-rect id="btn"> pxl-on-click failed:` plus the error with its stack trace). The rest of `process()` still runs: the event flags are reset and the hover list is updated, so the event is delivered once, and the other handlers of that frame are called (`design/2026-11-15_handler_errors_plan.md`).
+A handler that throws is caught by its listener and logged with `console.error` (`[pxl] <pxl-rect id="btn"> pxl-on-click failed:` plus the error with its stack trace). The other listeners of the event still run, and the event is delivered once (`design/archive/2026-11-15_handler_errors_plan.md`).
 
 ---
 
@@ -1428,8 +1464,8 @@ A slider then sets one value (`document.getElementById('x0').setAttribute('value
    ├─ Record performance: start = performance.now()
    ├─ pxl._frame++  ← per-frame state is stored as the frame it belongs to (_failedFrame, a layer's _updateFrame)
    ├─ interaction.process()  ← pointer first: broadcast mouseX / mouseY / isHovered of the stage, hit testing
-   │   against the picture on screen, isHovered / isPressed, pxl-on-* handlers; their readers update now and are
-   │   drawn in this frame
+   │   against the picture on screen, isHovered, the queued DOM events (with the pxl-on-* handlers); their readers
+   │   update now and are drawn in this frame. Presses, releases and clicks are handled when they arrive
    ├─ Sort layers and stage-level variables by DOM position (if _isOrderDirty)
    ├─ For each stage-level <pxl-var>: variable.update(t)  ← before the layers, so readers in every
    │   layer see this frame's value; if one is animated → stage.requestRender()
@@ -1632,13 +1668,20 @@ Shadows: shape shadows (`shadowcolor`, `shadowblur`, …) and filter helpers bot
 
 #### 7. Interactive Elements
 
+A button with a label is a group: the handler and the hover / press states go on the group, so the label on top is part of the button.
+
 ```html
-<!-- Declarative hover/press styling -->
-<pxl-rect id="btn" x="500" y="300" w="120" h="50" r="10"
-  fill="ref.btn.isPressed ? '#222' : (ref.btn.isHovered ? '#555' : '#888')"
-  zoom="ref.btn.isPressed ? 0.95 : (ref.btn.isHovered ? 1.05 : 1)"
-  pxl-on-click="ref.counter.set('value', ref.counter.value + 1)"></pxl-rect>
+<!-- Declarative hover/press styling; the hand cursor comes with pxl-on-click -->
+<pxl-group id="btn" x="500" y="300" zoom="ref.btn.isPressed ? 0.95 : (ref.btn.isHovered ? 1.05 : 1)"
+  pxl-on-click="ref.counter.set('value', ref.counter.value + 1)">
+  <pxl-rect w="120" h="50" r="10" fill="ref.btn.isPressed ? '#222' : (ref.btn.isHovered ? '#555' : '#888')"></pxl-rect>
+  <pxl-text text="'Add'" size="20" fill="#fff" align="center" baseline="middle"></pxl-text>
+</pxl-group>
 ```
+
+- Every visible shape catches the pointer. A decoration drawn on top of a clickable shape that isn't part of it gets `style="pointer-events: none"`.
+- In JavaScript or a framework, listen with DOM events on shapes or groups (`addEventListener('click', …)`, React `onClick`, Vue `@click`); they get no hand cursor by themselves: add `style="cursor: pointer"` (or Tailwind `cursor-pointer`).
+- Pointer position in stage units: `ref.<stage>.mouseX` / `mouseY`, not `event.offsetX`.
 
 #### 8. Performance Monitor Display
 

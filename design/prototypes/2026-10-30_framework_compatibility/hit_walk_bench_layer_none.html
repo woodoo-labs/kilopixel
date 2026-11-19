@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hit walk bench</title>
+  <script src="/dist/pxl.min.js"></script>
+</head>
+<body>
+<pre id="out">running…</pre>
+<div id="box" style="width: 1000px"></div>
+<script>
+// Copy of hit_walk_bench.html with pointer-events: none on the layer (plan §23.8, 2026-11-19): "walking the none layer"
+// is what the layer costs once its shapes decide pointer-events themselves. The original description:
+// Measurement gate of W1 step 2 (design/2026-10-30_framework_compatibility_plan.md §23.4): cost of hit testing every
+// shape in the engine, per frame, with the pointer resting over an animated stage. Frames are driven by hand
+// (stage.render(t)), so the page also works in a hidden tab; InteractionEngine.process() is timed on its own, and the
+// whole frame for scale. One hit test (findShapeAt) is timed too: process() repeats it only every
+// pxl.RESTING_HIT_INTERVAL ms while the pointer rests. Open it via the dev server; results in the <pre> and in
+// window.benchResult.
+let seed = 1;
+const rand = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+const pick = (a) => a[Math.floor(rand() * a.length)];
+
+// Groups rotating with t, each with a mix of shapes (as in hover_hit_every_shape.html)
+function buildScene(n, animated) {
+  seed = 7;
+  const groups = [];
+  for (let g = 0; g < 10; g++) {
+    const shapes = [];
+    for (let i = 0; i < n / 10; i++) {
+      const x = Math.round(rand() * 900 - 450), y = Math.round(rand() * 460 - 230);
+      const kind = pick(['circle', 'circle', 'rect', 'rect', 'line', 'text', 'polyline', 'ring']);
+      if (kind === 'circle') shapes.push(`<pxl-circle x="${x}" y="${y}" r="${4 + Math.round(rand() * 8)}" fill="#3b82f6"></pxl-circle>`);
+      if (kind === 'ring') shapes.push(`<pxl-circle x="${x}" y="${y}" r="${6 + Math.round(rand() * 8)}" stroke="#f97316" strokewidth="3"></pxl-circle>`);
+      if (kind === 'rect') shapes.push(`<pxl-rect x="${x}" y="${y}" w="${8 + Math.round(rand() * 16)}" h="${6 + Math.round(rand() * 10)}" rotate="${Math.round(rand() * 90)}" fill="#22c55e"></pxl-rect>`);
+      if (kind === 'line') shapes.push(`<pxl-line x="${x}" y="${y}" x2="${Math.round(rand() * 30 - 15)}" y2="${Math.round(rand() * 30 - 15)}" stroke="#334155" strokewidth="2"></pxl-line>`);
+      if (kind === 'text') shapes.push(`<pxl-text x="${x}" y="${y}" text="Ab" size="14" fill="#0f172a"></pxl-text>`);
+      if (kind === 'polyline') shapes.push(`<pxl-polyline x="${x}" y="${y}" points="0,0; 12,-10; 24,0" stroke="#a855f7" strokewidth="2"></pxl-polyline>`);
+    }
+    const rotate = animated ? `t * ${5 + g}` : `${g * 7}`;
+    groups.push(`<pxl-group x="500" y="250" rotate="${rotate}" zoom="${0.8 + g * 0.04}">${shapes.join('')}</pxl-group>`);
+  }
+  document.getElementById('box').innerHTML = `<pxl-stage alwaysrender ratio="2"><pxl-layer style="pointer-events: none">${groups.join('')}</pxl-layer></pxl-stage>`;
+  const stage = document.querySelector('#box pxl-stage');
+  stage.resize();
+  stage.render(1);
+  return stage;
+}
+
+function measure(n, animated) {
+  const stage = buildScene(n, animated);
+  const ix = stage.interaction;
+  const original = ix.process;
+  let processMs = 0;
+  ix.process = function() { const a = performance.now(); original.call(this); processMs += performance.now() - a; };
+  // The pointer enters and rests over the stage; process() hit-tests in every frame
+  stage.dispatchEvent(new PointerEvent('pointerenter'));
+  stage.attributeValues.mouseX = 520;
+  stage.attributeValues.mouseY = 240;
+  const FRAMES = 120, runs = [];
+  let t = 1;
+  for (let r = 0; r < 5; r++) {
+    processMs = 0;
+    const a = performance.now();
+    for (let i = 0; i < FRAMES; i++) {
+      t += 1 / 60;
+      stage.querySelector('pxl-layer').isDirty = true;
+      stage.render(t);
+    }
+    runs.push({ process: processMs / FRAMES, frame: (performance.now() - a) / FRAMES });
+  }
+  runs.sort((x, y) => x.process - y.process);
+  const median = runs[2];
+  // One full hit test (the walk over every shape), at the resting point and over empty space
+  const walk = (x, y) => {
+    const a = performance.now();
+    for (let i = 0; i < 200; i++) ix.findShapeAt(x, y);
+    return (performance.now() - a) / 200;
+  };
+  const walkMs = walk(520, 240), emptyMs = walk(2, 2);
+  const layer = stage.querySelector('pxl-layer');
+  // What the walk costs once the layer's shapes decide pointer-events themselves (they inherit none here)
+  const inner = (x, y) => { const a = performance.now(); for (let i = 0; i < 200; i++) { pxl._hitX = x * stage.unit; pxl._hitY = y * stage.unit; ix.findShapeIn(layer, x, y); } return (performance.now() - a) / 200; };
+  const walkInnerMs = inner(520, 240), emptyInnerMs = inner(2, 2);
+  document.getElementById('box').innerHTML = '';
+  return { shapes: n, animated, processMs: +median.process.toFixed(3), frameMs: +median.frame.toFixed(2),
+    walkMs: +walkMs.toFixed(3), emptyMs: +emptyMs.toFixed(3), usPerShape: +(emptyMs * 1000 / n).toFixed(3), walkInnerMs: +walkInnerMs.toFixed(3), emptyInnerMs: +emptyInnerMs.toFixed(3) };
+}
+
+measure(1000, true); // warm-up: the first scene would include the compiler's warm-up
+const results = [];
+for (const [n, animated] of [[1000, false], [1000, true], [5000, false], [5000, true]]) results.push(measure(n, animated));
+window.benchResult = results;
+document.getElementById('out').textContent = results.map((r) =>
+  `${String(r.shapes).padStart(5)} shapes, ${r.animated ? 'rotating' : 'static  '}: one hit test ${r.walkMs} ms at the point, ` +
+  `${r.emptyMs} ms over empty space (${r.usPerShape} µs per shape); process() with the pointer resting ${r.processMs} ms ` +
+  `per frame; whole frame ${r.frameMs} ms; walking the none layer ${r.walkInnerMs} / ${r.emptyInnerMs} ms`).join('\n');
+</script>
+</body>
+</html>

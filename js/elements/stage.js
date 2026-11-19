@@ -10,11 +10,14 @@ pxl._frame = 0;
 // (accessible text, buttons) stays visible.
 // The grid is out of hit testing: it covers the whole stage and would catch the pointer between its lines
 // (design/2026-10-30_framework_compatibility_plan.md §23, E4). A page can set pointer-events: auto on it.
+// Click and press handlers show the hand, like the browser's own rule for links (E1); the shapes inside a group
+// inherit it. The cursor is otherwise only CSS: a framework listener gets the hand from cursor: pointer.
 pxl.DEFAULT_STYLES = `@layer pxl {
   pxl-stage { display: block; position: relative; width: 100%; }
   pxl-stage:state(fallback) { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0; }
   pxl-var, pxl-group, pxl-circle, pxl-ellipse, pxl-rect, pxl-line, pxl-polyline, pxl-text, pxl-grid { display: none; }
   pxl-grid { pointer-events: none; }
+  [pxl-on-click], [pxl-on-down], [pxl-on-up] { cursor: pointer; }
 }`;
 
 // Once per document, and once per shadow root that holds a stage (document styles don't reach into it)
@@ -31,8 +34,13 @@ pxl.addDefaultStyles(document);
 pxl.Stage = class Stage extends HTMLElement {
   static get observedAttributes() { return ['ratio', 'alwaysrender', 'id']; }
 
-  // Pointer events handled by the stage's InteractionEngine (its handleEvent)
-  static POINTER_EVENTS = ['pointermove', 'pointerdown', 'pointerup', 'pointerenter', 'pointerleave', 'click'];
+  // Browser events handled by the stage's InteractionEngine (its handleEvent). The second list is handled in the
+  // capture phase, when the event arrives: over a shape, the browser's event is stopped there and dispatched on the
+  // shape instead (design/2026-10-30_framework_compatibility_plan.md §4.1, D4).
+  static POINTER_EVENTS = ['pointermove', 'pointerenter', 'pointerleave', 'gotpointercapture', 'lostpointercapture'];
+  static ARRIVING_EVENTS = [
+    'pointerdown', 'pointerup', 'pointercancel', 'pointerout', 'mousedown', 'mouseup', 'click', 'dblclick', 'contextmenu'
+  ];
 
   constructor() {
     super();
@@ -117,6 +125,7 @@ pxl.Stage = class Stage extends HTMLElement {
     }
 
     for (const type of pxl.Stage.POINTER_EVENTS) this.addEventListener(type, this.interaction);
+    for (const type of pxl.Stage.ARRIVING_EVENTS) this.addEventListener(type, this.interaction, true);
     pxl.perf.registerStage(this);
 
     if (!this.isAlwaysRender()) this.observeVisibility();
@@ -135,10 +144,12 @@ pxl.Stage = class Stage extends HTMLElement {
     this._resizeObserver.disconnect();
     this._resizeObserver = null;
     this._isUpdatePending = false;
+    this.interaction.reset(); // before the layers are dropped: it removes the cursor from their canvases
     this.layers = [];
     this._variables = [];
 
     for (const type of pxl.Stage.POINTER_EVENTS) this.removeEventListener(type, this.interaction);
+    for (const type of pxl.Stage.ARRIVING_EVENTS) this.removeEventListener(type, this.interaction, true);
     pxl.perf.unregisterStage(this);
 
     // Checked again in the new place

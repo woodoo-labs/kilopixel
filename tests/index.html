@@ -924,7 +924,7 @@
       return out;
     }
 
-    // design/2026-11-15_handler_errors_plan.md
+    // design/archive/2026-11-15_handler_errors_plan.md
     test('handler errors: a throwing pxl-on-click runs once per click, is logged with its element, and no other shape gets the click', () => {
       srClear();
       srAdd('srLayerA', `<pxl-rect id="srThrowClick" x="100" y="100" w="60" h="60" fill="#ff0000"
@@ -935,8 +935,8 @@
       values.isHovered = true;
       values.mouseX = 100; values.mouseY = 100; stage.interaction._isMouseDirty = true; // as a pointermove does
       const errors = captureErrors(() => {
-        interaction._lastClick = true;
         interaction.process();
+        pointerAt(stage, 'click', 100, 100); // dispatched on the shape when it arrives
         interaction.process(); // a pointer move inside the shape
         values.mouseX = 300; stage.interaction._isMouseDirty = true;
         interaction.process(); // a pointer move onto the other shape
@@ -1560,7 +1560,7 @@
       }));
 
     // ===================================================================
-    // Interaction: hover, press, click, handlers, registration, cursor (KILOPIXEL.md "Interaction System").
+    // Interaction: hover, press, click, handlers, groups, cursor, idle layers (KILOPIXEL.md "Interaction System").
     // Pointer events go to the layer canvas, as the browser sends them; hit testing runs at the start of render().
     // ===================================================================
     section('Interaction');
@@ -1760,15 +1760,18 @@
           </pxl-group>
           <pxl-circle id="peUnderLayer" x="800" y="300" r="80" fill="#000"></pxl-circle>
         </pxl-layer>
-        <pxl-layer style="pointer-events: none"><pxl-circle id="peInLayer" x="800" y="300" r="80" fill="#000"></pxl-circle></pxl-layer>
+        <pxl-layer style="pointer-events: none">
+          <pxl-circle id="peInLayer" x="800" y="300" r="80" fill="#000"></pxl-circle>
+          <pxl-circle id="peAutoInLayer" x="800" y="100" r="60" fill="#000" style="pointer-events: auto"></pxl-circle>
+        </pxl-layer>
       </pxl-stage></div>`, (stage) => {
         const hovered = (x, y) => {
           hover(stage, x, y);
-          return ['peBottom', 'peTop', 'peUnderGroup', 'peInGroup', 'peAutoInGroup', 'peUnderLayer', 'peInLayer']
+          return ['peBottom', 'peTop', 'peUnderGroup', 'peInGroup', 'peAutoInGroup', 'peUnderLayer', 'peInLayer', 'peAutoInLayer']
             .filter((id) => pxl.nodes[id].isHovered).join(',');
         };
-        const got = [hovered(200, 300), hovered(500, 300), hovered(500, 100), hovered(800, 300)].join(' | ');
-        if (got !== 'peBottom | peUnderGroup | peAutoInGroup | peUnderLayer') throw new Error(got);
+        const got = [hovered(200, 300), hovered(500, 300), hovered(500, 100), hovered(800, 300), hovered(800, 100)].join(' | ');
+        if (got !== 'peBottom | peUnderGroup | peAutoInGroup | peUnderLayer | peAutoInLayer') throw new Error(got);
       }));
 
     test('interaction: a layer hidden by CSS (display: none, visibility: hidden) is not hit', () =>
@@ -1841,17 +1844,122 @@
         }
       }));
 
-    test('interaction: hand cursor over clickable shapes (pxl-on-click or isPressed read), not over hover-only ones', () =>
+    // The cursor is only CSS (design/2026-10-30_framework_compatibility_plan.md §23, E1): the default styles give
+    // click and press handlers the hand, groups pass it on, page CSS overrides it; reading isPressed gives none
+    test('interaction: the hand cursor comes from the default styles for click and press handlers, also on a group; page CSS overrides it', () =>
       withStage(ixStage(`
-        <pxl-circle x="150" y="300" r="80" fill="#000" pxl-on-click="0"></pxl-circle>
-        <pxl-circle x="400" y="300" r="80" fill="#000" pxl-on-enter="0"></pxl-circle>
-        <pxl-circle id="ixPressRead" x="650" y="300" r="80" fill="#000"></pxl-circle>
+        <pxl-circle x="100" y="300" r="70" fill="#000" pxl-on-click="0"></pxl-circle>
+        <pxl-circle x="280" y="300" r="70" fill="#000" pxl-on-enter="0"></pxl-circle>
+        <pxl-group pxl-on-down="0"><pxl-circle x="460" y="300" r="70" fill="#000"></pxl-circle></pxl-group>
+        <pxl-circle x="640" y="300" r="70" fill="#000" pxl-on-up="0" style="cursor: default"></pxl-circle>
+        <pxl-circle id="ixPressRead" x="820" y="300" r="70" fill="#000"></pxl-circle>
         <pxl-circle x="900" y="50" r="5" fill="ref.ixPressRead.isPressed ? '#f00' : '#00f'"></pxl-circle>`), (stage) => {
-        const cursors = [150, 400, 650, 900].map((x) => {
+        const canvas = stage.querySelector('pxl-layer')._canvas;
+        const cursors = [100, 280, 460, 640, 820].map((x) => {
           hover(stage, x, 300);
-          return stage.style.cursor;
+          return canvas.style.cursor || 'none';
         });
-        if (cursors.join(',') !== 'pointer,default,pointer,default') throw new Error(`cursors: ${cursors}`);
+        if (cursors.join(',') !== 'pointer,none,pointer,default,none' || stage.style.cursor) throw new Error(`cursors: ${cursors}, stage: ${stage.style.cursor}`);
+      }));
+
+    // --- Groups: handlers and hover / press states (design/2026-10-30_framework_compatibility_plan.md §23, E10) ---
+
+    test('interaction: group handlers run after the shape\'s, inner group before outer; moving between a group\'s shapes fires nothing on it', () => {
+      ixLog = [];
+      return withStage(ixStage(`
+        <pxl-group id="ixOuter" pxl-on-click="ixLog.push('outer')" pxl-on-enter="ixLog.push('outer enter')" pxl-on-leave="ixLog.push('outer leave')">
+          <pxl-group id="ixInner" pxl-on-click="ixLog.push('inner')" pxl-on-down="ixLog.push('inner down')" pxl-on-up="ixLog.push('inner up')"
+            pxl-on-move="ixLog.push('inner move')">
+            <pxl-rect id="ixBtnRect" x="400" y="300" w="200" h="100" fill="#000" pxl-on-click="ixLog.push('shape')"></pxl-rect>
+            <pxl-circle id="ixBtnDot" x="580" y="300" r="40" fill="#000"></pxl-circle>
+          </pxl-group>
+        </pxl-group>`), (stage) => {
+        hover(stage, 400, 300);
+        input(stage, 'click');
+        hover(stage, 600, 300); // onto the other shape of the same groups
+        input(stage, 'pointerdown');
+        input(stage, 'pointerup');
+        input(stage, 'click');
+        hover(stage, 900, 100);
+        expectLog(['outer enter', 'inner move', 'shape', 'inner', 'outer', 'inner move', 'inner down', 'inner up', 'inner', 'outer', 'outer leave']);
+      });
+    });
+
+    test('interaction: a group is hovered and pressed while a shape inside it is, like :hover on a parent', () =>
+      withStage(ixStage(`
+        <pxl-group id="ixStGroup"><pxl-group id="ixStInner"><pxl-circle id="ixStShape" x="300" y="300" r="80" fill="#000"></pxl-circle></pxl-group>
+          <pxl-circle id="ixStOther" x="600" y="300" r="80" fill="#000"></pxl-circle></pxl-group>
+        <pxl-circle id="ixStReader" x="50" y="50" r="5" fill="ref.ixStGroup.isHovered ? '#f00' : '#00f'"></pxl-circle>`), (stage) => {
+        const states = () => ['ixStGroup', 'ixStInner', 'ixStShape', 'ixStOther']
+          .map((id) => `${pxl.nodes[id].isHovered ? 'h' : '-'}${pxl.nodes[id].isPressed ? 'p' : '-'}`).join(' ');
+        const seen = [];
+        hover(stage, 300, 300);
+        seen.push(states(), pxl.nodes.ixStReader.fill);
+        input(stage, 'pointerdown');
+        seen.push(states());
+        hover(stage, 600, 300);
+        input(stage, 'pointerup');
+        seen.push(states());
+        hover(stage, 900, 100);
+        seen.push(states(), pxl.nodes.ixStReader.fill);
+        const expected = ['h- h- h- --', '#f00', 'hp hp hp --', 'h- -- -- h-', '-- -- -- --', '#00f'];
+        if (seen.join(' | ') !== expected.join(' | ')) throw new Error(seen.join(' | '));
+      }));
+
+    test('interaction: a hovered shape removed from its group leaves the group hovered, without a new enter on the group', () => {
+      ixLog = [];
+      return withStage(ixStage(`<pxl-group id="ixKeepGroup" pxl-on-enter="ixLog.push('enter')" pxl-on-leave="ixLog.push('leave')">
+          <pxl-circle id="ixKeepGone" x="300" y="300" r="80" fill="#000"></pxl-circle>
+          <pxl-circle id="ixKeepOther" x="420" y="300" r="80" fill="#000"></pxl-circle></pxl-group>`), (stage) => {
+        hover(stage, 300, 300);
+        el('ixKeepGone').remove();
+        const kept = pxl.nodes.ixKeepGroup.isHovered;
+        hover(stage, 360, 300);
+        hover(stage, 900, 100);
+        if (!kept) throw new Error('the group lost its hover with the shape');
+        expectLog(['enter', 'leave']);
+      });
+    });
+
+    // Layers draw only when something in them changed (KILOPIXEL.md "Dirty-Flag Optimization"): interaction must
+    // not wake a layer that has no animations and no readers
+    test('interaction: a layer without animations or readers is neither updated nor drawn by pointer moves, presses, clicks and events', () =>
+      withStage(`<div style="width: 500px"><pxl-stage alwaysrender><pxl-layer id="ixIdle">
+          <pxl-group pxl-on-enter="0" pxl-on-click="0"><pxl-circle id="ixIdleBtn" x="500" y="300" r="80" fill="#000" pxl-on-down="0"></pxl-circle></pxl-group>
+          <pxl-circle x="200" y="300" r="80" fill="#000"></pxl-circle>
+        </pxl-layer></pxl-stage></div>`, (stage) => {
+        stage.render(1);
+        const layer = el('ixIdle'), calls = { update: 0, render: 0 };
+        layer.update = function(t) { calls.update++; return pxl.Layer.prototype.update.call(this, t); };
+        layer.render = function(u, t) { calls.render++; return pxl.Layer.prototype.render.call(this, u, t); };
+        for (const type of ['pointerover', 'pointermove', 'pointerdown', 'pointerup', 'click', 'mouseover', 'mousemove']) {
+          el('ixIdleBtn').addEventListener(type, () => {});
+        }
+        hover(stage, 500, 300);
+        hover(stage, 510, 300);
+        for (const type of ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']) input(stage, type);
+        hover(stage, 200, 300);
+        hover(stage, 950, 30);
+        leaveStage(stage);
+        stage._isUpdatePending = false;
+        stage.render(2); // a frame with the pointer gone asks for no further frame
+        if (calls.update || calls.render || stage._isUpdatePending) {
+          throw new Error(`layer updated ${calls.update}×, drawn ${calls.render}×, frame requested ${stage._isUpdatePending}`);
+        }
+      }));
+
+    test('interaction: pointercancel and a release outside the stage clear isPressed', () =>
+      withStage(ixStage('<pxl-circle id="ixCancel" x="500" y="300" r="80" fill="#000"></pxl-circle>'), (stage) => {
+        const seen = [];
+        hover(stage, 500, 300);
+        input(stage, 'pointerdown');
+        seen.push(pxl.nodes.ixCancel.isPressed);
+        input(stage, 'pointercancel');
+        seen.push(pxl.nodes.ixCancel.isPressed);
+        input(stage, 'pointerdown');
+        document.body.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+        seen.push(pxl.nodes.ixCancel.isPressed);
+        if (seen.join(',') !== 'true,false,false') throw new Error(seen.join(','));
       }));
 
     // The pointer is handled at the start of the frame, so its readers are drawn in the frame of the event

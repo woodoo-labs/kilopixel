@@ -1,6 +1,6 @@
 # Shape Authoring: Derived Attributes, Class Fields & Custom Animation
 
-- **Status**: 🟡 **Proposed** (2026-11-07, brought up to date with the engine, §0; no code changes yet)
+- **Status**: 🟡 **Proposed** (2026-11-19, §0: handler names and map after W1 of the framework plan; 2026-11-07, brought up to date with the engine, §0; no code changes yet)
 - **Date**: 2026-10-17
 - **Related**: `design/2026-10-17_bundle_scope_plan.md` (`pxl.Shape`, implemented), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, introduced `static defaults`), `design/2026-11-07_safe_shape_render_plan.md` (state isolation and error handling for foreign code, implemented), `design/2026-10-30_framework_compatibility_plan.md` (proposes renaming the `on*` handlers, §0), `design/2026-11-12_two_phase_frame_plan.md` (💬; its change-based dirty flags make §3.3 "`draw()` only reads `attributeValues`" a requirement, must keep §4 Pattern B working, and solve §4's "while stopped, the layer keeps redrawing"), `design/2026-10-27_engine_cleanup_inventory_note.md` (code style, §0), `.agents/TODO.md` §20
 - **Target Implementation**: `js/elements/node.js`, `js/elements/shape.js`, `js/elements/shapes/*.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/interaction.js`
@@ -20,6 +20,7 @@ Nothing in this plan was built. The engine changed around it:
 | `_` marks ownership (2026-10-28): `pointCount` → `_pointCount`, `flatCache` → `_flatCache`, and so on; compiled handlers moved into a `handlers` object; `Shape.HANDLER_EVENTS` maps each `on*` attribute to its event | Field names in §3.2 updated; §3.1 can take the handler names from `Shape.HANDLER_EVENTS` |
 | `build.js` refuses top-level `const` / `let` / `class` / `function` | §3.1's former `const EVENT_ATTRIBUTES` replaced (§3.1) |
 | Framework compatibility plan (`design/2026-10-30_framework_compatibility_plan.md`, TODO §30) proposes renaming the `on*` handlers (they collide with the browser's native `onclick` and framework rules) | The names `Shape` appends in §3.1 may change. Open: order of §20 and §30 |
+| W1 of the framework plan built (2026-11-18 / 2026-11-19, its §23.5–§23.8): the handlers are `pxl-on-click` … `pxl-on-move`, listeners for DOM events; the map is `pxl.HANDLER_EVENTS` (attribute → DOM event type), and `<pxl-group>` observes the same six attributes and has `isHovered` / `isPressed` in its defaults | §3.1 takes the names from `pxl.HANDLER_EVENTS` (example updated) and applies to `Group` as well as `Shape`. The rename order question above is settled |
 | `CLAUDE.md`: "Kilopixel has no JavaScript API for users" | Public custom shapes would make `attributeValues`, `applyStyle()`, `boundingBox`, `drawArrows()` and `reportError()` a user API. Open: product decision, needed before the "Custom Shapes" docs page, not for §3.1 / §3.3 |
 
 **Still true** (checked 2026-11-07): the attribute lists in §2 (comparison in the built engine), no `draw()` uses `t` as time (§3.3), `pxl.compileAttribute(element, name, value)` has the signature §4 uses. §4 pattern B itself was not run again.
@@ -96,9 +97,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   static get observedAttributes() { return Object.keys(this.defaults); }
 };
 
-// shape.js: the handler names come from the existing map (event attribute → key in this.handlers)
+// shape.js (and group.js): the handler names come from the existing map (handler attribute → DOM event type)
 pxl.Shape = class Shape extends pxl.PxlNode {
-  static get observedAttributes() { return [...super.observedAttributes, ...Object.keys(pxl.Shape.HANDLER_EVENTS)]; }
+  static get observedAttributes() { return [...super.observedAttributes, ...Object.keys(pxl.HANDLER_EVENTS)]; }
 };
 ```
 

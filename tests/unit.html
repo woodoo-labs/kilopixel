@@ -458,7 +458,7 @@
 
     const ELEMENTS = ['pxl-circle', 'pxl-ellipse', 'pxl-rect', 'pxl-line', 'pxl-polyline', 'pxl-text', 'pxl-grid',
       'pxl-group', 'pxl-layer', 'pxl-var'];
-    const HANDLERS = new Set(Object.keys(pxl.Shape.HANDLER_EVENTS));
+    const HANDLERS = new Set(Object.keys(pxl.HANDLER_EVENTS));
     // Attributes that are not stored as one value: polyline points become p0, p1, …; id only moves the registry entry
     const NOT_A_VALUE = new Set(['points', 'id']);
 
@@ -508,18 +508,25 @@
       }
     });
 
-    test('shape handlers: set, emptied and removed', () => {
-      const el = document.createElement('pxl-circle');
-      el.setAttribute('pxl-on-click', 'this.x = 1');
-      const set = typeof el.handlers.click;
-      el.setAttribute('pxl-on-click', '');
-      const empty = el.handlers.click;
-      el.setAttribute('pxl-on-enter', 'this.x = 2');
-      el.removeAttribute('pxl-on-enter');
-      if (set !== 'function' || empty !== null || el.handlers.enter !== null) {
-        throw new Error(`set ${set}, empty ${show(empty)}, removed ${show(el.handlers.enter)}`);
-      }
-    });
+    // A handler is a listener for its DOM event: it runs on a dispatched event, and is gone when emptied or removed
+    for (const tag of ['pxl-circle', 'pxl-group']) {
+      test(`${tag} handlers: set, emptied and removed`, () => {
+        const el = document.createElement(tag), calls = [];
+        window.unitHandlerCalls = calls;
+        el.setAttribute('pxl-on-click', 'unitHandlerCalls.push(this.localName)');
+        const set = typeof el.handlers.click;
+        el.dispatchEvent(new MouseEvent('click'));
+        el.setAttribute('pxl-on-click', '');
+        const empty = el.handlers.click;
+        el.dispatchEvent(new MouseEvent('click'));
+        el.setAttribute('pxl-on-enter', 'unitHandlerCalls.push(\'enter\')');
+        el.removeAttribute('pxl-on-enter');
+        el.dispatchEvent(new PointerEvent('pointerenter'));
+        if (set !== 'function' || empty !== null || el.handlers.pointerenter !== null || calls.join(',') !== tag) {
+          throw new Error(`set ${set}, empty ${show(empty)}, removed ${show(el.handlers.pointerenter)}, calls [${calls}]`);
+        }
+      });
+    }
 
     test('pxl-stage: bare or removed ratio → 16 / 9; bare alwaysrender → true', () => {
       const stage = document.createElement('pxl-stage');

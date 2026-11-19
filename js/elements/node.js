@@ -72,6 +72,11 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       if (this._isRegistered) pxl.renameNode(this, oldValue, newValue);
       return;
     }
+    // pxl-on-* handlers (shapes and groups observe them) are listeners, not values
+    if (pxl.HANDLER_EVENTS[name] !== undefined) {
+      this.setHandler(name, newValue);
+      return;
+    }
     pxl.compileAttribute(this, name, newValue);
     this.isAnimated = this.animatedAttributeKeys.length > 0;
     if (pxl.isSpatialKey(name)) {
@@ -196,6 +201,18 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this._errorCount++;
     const more = this._errorCount === 3 ? ' (further errors of this element are not shown)' : '';
     console.warn(`[pxl] <${this.localName}${this.id ? ` id="${this.id}"` : ''}> skipped: ${message}${more}`);
+  }
+
+  // --- Handlers ---
+
+  // A pxl-on-* attribute becomes a listener for its DOM event (pxl.HANDLER_EVENTS), so it runs in the DOM's order
+  // with framework listeners and bubbles from shapes to their groups. Removed or empty: no listener.
+  // Only shapes and groups observe these attributes; they keep the listeners in this.handlers.
+  setHandler(name, source) {
+    const type = pxl.HANDLER_EVENTS[name];
+    if (this.handlers[type] !== null) this.removeEventListener(type, this.handlers[type]);
+    this.handlers[type] = source ? pxl.compileHandler(this, name, source) : null;
+    if (this.handlers[type] !== null) this.addEventListener(type, this.handlers[type]);
   }
 
   // Filter string with the helpers' px values scaled by u (layers: CSS filter, shapes: ctx.filter)

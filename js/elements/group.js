@@ -1,14 +1,34 @@
 pxl.Group = class Group extends pxl.PxlNode {
   static get observedAttributes() {
-    return ['x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden', 'id'];
+    return [
+      'x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden',
+      'pxl-on-click', 'pxl-on-enter', 'pxl-on-leave', 'pxl-on-down', 'pxl-on-up', 'pxl-on-move', 'id'
+    ];
   }
 
-  static defaults = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false };
+  // isHovered / isPressed: true while a shape inside the group is hovered or pressed, like :hover on a parent
+  static defaults = {
+    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false,
+    isHovered: false, isPressed: false
+  };
 
   constructor() {
     super();
     this.childList = []; // groups and shapes
     this._isOrderDirty = false; // children need sorting by DOM position
+    this.stage = null; // set in connectedCallback
+    // pxl-on-* listeners by DOM event type (PxlNode.setHandler()): events from the shapes inside bubble up to them
+    this.handlers = pxl.createHandlers();
+  }
+
+  connectedCallback() {
+    this.stage = this.closest('pxl-stage');
+    super.connectedCallback();
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.stage?.interaction.releaseElement(this);
   }
 
   // Called once per connect (PxlNode.connectedCallback); no includes() check, which made inserting n children quadratic

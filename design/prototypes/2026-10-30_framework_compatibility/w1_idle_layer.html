@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Idle layer check</title>
+<style>body { margin: 0; } pxl-stage { width: 1000px; }</style>
+<script src="/dist/pxl.min.js"></script>
+</head>
+<body>
+<!-- A static layer with handlers, framework-style listeners and a group, but no readers and no animation:
+     real pointer input must not update or draw it -->
+<pxl-stage id="s" ratio="2">
+  <pxl-layer id="idle">
+    <pxl-group pxl-on-click="window.clicks = (window.clicks || 0) + 1" pxl-on-enter="0">
+      <pxl-rect id="btn" x="300" y="250" w="200" h="100" fill="#3b82f6" pxl-on-down="0"></pxl-rect>
+      <pxl-text x="300" y="250" text="Button" size="30" fill="#fff" align="center" baseline="middle"></pxl-text>
+    </pxl-group>
+    <pxl-circle x="700" y="250" r="80" fill="#22c55e" style="cursor: pointer"></pxl-circle>
+  </pxl-layer>
+</pxl-stage>
+<script>
+const stage = document.getElementById('s'), layer = document.getElementById('idle');
+window.counts = { frames: 0, updates: 0, renders: 0, events: 0 };
+const update = layer.update, render = layer.render, process = stage.interaction.process;
+layer.update = function(t) { counts.updates++; return update.call(this, t); };
+layer.render = function(u, t) { counts.renders++; return render.call(this, u, t); };
+stage.interaction.process = function() { counts.frames++; return process.call(this); };
+for (const type of ['pointerover', 'pointerenter', 'pointermove', 'pointerdown', 'pointerup', 'click', 'mouseover', 'mousemove']) {
+  document.getElementById('btn').addEventListener(type, () => counts.events++);
+}
+</script>
+</body>
+</html>

@@ -266,49 +266,50 @@
       stroke="hsla(185, 100, 70, 0.3)" strokewidth="0.3" fill="none"
       alpha="ref.s.isHovered ? 0.5 : 0"></pxl-circle>
 
-    <!-- ─── INTERACTIVE POWER NODES (4 corners): the icons on top have pointer-events: none, so clicks reach the node ─── -->
+    <!-- ─── INTERACTIVE POWER NODES (4 corners): each node is a group (rect + icon) with the handler and the hover / press
+         states on the group, so the icon on top is part of the button ─── -->
 
     <!-- [80-81] Top-left node: CYAN — uses bounce() driver -->
-    <pxl-rect id="nodeA" x="80" y="60" w="40" h="40" r="8"
-      fill="ref.nodeA.isPressed ? '#00ccdd' : (ref.nodeA.isHovered ? '#005566' : '#002233')"
-      stroke="ref.nodeA.isHovered ? '#00e5ff' : '#004455'" strokewidth="1"
-      zoom="ref.nodeA.isPressed ? 0.9 : (ref.nodeA.isHovered ? 1.15 : 1)"
-      filter="ref.nodeA.isHovered ? dropShadow(0, 0, 8, '#00e5ff') : 'none'"
-      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
-    <pxl-text x="80" y="60" text="'⬡'" size="16" fill="#00e5ff" align="center" baseline="middle" style="pointer-events: none"
-      alpha="0.5 + bounce(2) * 0.5"></pxl-text>
+    <pxl-group id="nodeA" x="80" y="60" zoom="ref.nodeA.isPressed ? 0.9 : (ref.nodeA.isHovered ? 1.15 : 1)"
+      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)">
+      <pxl-rect w="40" h="40" r="8"
+        fill="ref.nodeA.isPressed ? '#00ccdd' : (ref.nodeA.isHovered ? '#005566' : '#002233')"
+        stroke="ref.nodeA.isHovered ? '#00e5ff' : '#004455'" strokewidth="1"
+        filter="ref.nodeA.isHovered ? dropShadow(0, 0, 8, '#00e5ff') : 'none'"></pxl-rect>
+      <pxl-text text="'⬡'" size="16" fill="#00e5ff" align="center" baseline="middle" alpha="0.5 + bounce(2) * 0.5"></pxl-text>
+    </pxl-group>
 
     <!-- [82-83] Top-right node: MAGENTA — uses yoyo() driver -->
-    <pxl-rect id="nodeB" x="920" y="60" w="40" h="40" r="8"
-      fill="ref.nodeB.isPressed ? '#cc0088' : (ref.nodeB.isHovered ? '#550033' : '#220022')"
-      stroke="ref.nodeB.isHovered ? '#ff00aa' : '#440044'" strokewidth="1"
-      zoom="ref.nodeB.isPressed ? 0.9 : (ref.nodeB.isHovered ? 1.15 : 1)"
-      filter="ref.nodeB.isHovered ? dropShadow(0, 0, 8, '#ff00aa') : 'none'"
-      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
-    <pxl-text x="920" y="60" text="'◈'" size="16" fill="#ff00aa" align="center" baseline="middle" style="pointer-events: none"
-      alpha="0.5 + yoyo(2) * 0.5"></pxl-text>
+    <pxl-group id="nodeB" x="920" y="60" zoom="ref.nodeB.isPressed ? 0.9 : (ref.nodeB.isHovered ? 1.15 : 1)"
+      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)">
+      <pxl-rect w="40" h="40" r="8"
+        fill="ref.nodeB.isPressed ? '#cc0088' : (ref.nodeB.isHovered ? '#550033' : '#220022')"
+        stroke="ref.nodeB.isHovered ? '#ff00aa' : '#440044'" strokewidth="1"
+        filter="ref.nodeB.isHovered ? dropShadow(0, 0, 8, '#ff00aa') : 'none'"></pxl-rect>
+      <pxl-text text="'◈'" size="16" fill="#ff00aa" align="center" baseline="middle" alpha="0.5 + yoyo(2) * 0.5"></pxl-text>
+    </pxl-group>
 
     <!-- [84-85] Bottom-left node: GOLD — uses glide() driver -->
-    <pxl-rect id="nodeC" x="80" y="502" w="40" h="40" r="8"
-      fill="ref.nodeC.isPressed ? '#cc8800' : (ref.nodeC.isHovered ? '#553300' : '#221a00')"
-      stroke="ref.nodeC.isHovered ? '#ffbb00' : '#443300'" strokewidth="1"
-      zoom="ref.nodeC.isPressed ? 0.9 : (ref.nodeC.isHovered ? 1.15 : 1)"
-      filter="ref.nodeC.isHovered ? dropShadow(0, 0, 8, '#ffbb00') : 'none'"
-      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
-    <pxl-text x="80" y="502" text="'◇'" size="16" fill="#ffbb00" align="center" baseline="middle" style="pointer-events: none"
-      alpha="0.5 + glide(2) * 0.5"></pxl-text>
+    <pxl-group id="nodeC" x="80" y="502" zoom="ref.nodeC.isPressed ? 0.9 : (ref.nodeC.isHovered ? 1.15 : 1)"
+      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)">
+      <pxl-rect w="40" h="40" r="8"
+        fill="ref.nodeC.isPressed ? '#cc8800' : (ref.nodeC.isHovered ? '#553300' : '#221a00')"
+        stroke="ref.nodeC.isHovered ? '#ffbb00' : '#443300'" strokewidth="1"
+        filter="ref.nodeC.isHovered ? dropShadow(0, 0, 8, '#ffbb00') : 'none'"></pxl-rect>
+      <pxl-text text="'◇'" size="16" fill="#ffbb00" align="center" baseline="middle" alpha="0.5 + glide(2) * 0.5"></pxl-text>
+    </pxl-group>
 
     <!-- [86-87] Bottom-right node: VIOLET — uses glitch() driver -->
-    <pxl-rect id="nodeD" x="920" y="502" w="40" h="40" r="8"
-      fill="ref.nodeD.isPressed ? '#7700cc' : (ref.nodeD.isHovered ? '#330055' : '#1a0033')"
-      stroke="ref.nodeD.isHovered ? '#aa44ff' : '#330055'" strokewidth="1"
-      zoom="ref.nodeD.isPressed ? 0.9 : (ref.nodeD.isHovered ? 1.15 : 1)"
-      filter="ref.nodeD.isHovered ? dropShadow(0, 0, 8, '#aa44ff') : 'none'"
-      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)"></pxl-rect>
-    <pxl-text x="920" y="502" text="'✦'" size="16" fill="#aa44ff" align="center" baseline="middle" style="pointer-events: none"
-      alpha="0.3 + glitch(0.5) * 0.7"></pxl-text>
+    <pxl-group id="nodeD" x="920" y="502" zoom="ref.nodeD.isPressed ? 0.9 : (ref.nodeD.isHovered ? 1.15 : 1)"
+      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)">
+      <pxl-rect w="40" h="40" r="8"
+        fill="ref.nodeD.isPressed ? '#7700cc' : (ref.nodeD.isHovered ? '#330055' : '#1a0033')"
+        stroke="ref.nodeD.isHovered ? '#aa44ff' : '#330055'" strokewidth="1"
+        filter="ref.nodeD.isHovered ? dropShadow(0, 0, 8, '#aa44ff') : 'none'"></pxl-rect>
+      <pxl-text text="'✦'" size="16" fill="#aa44ff" align="center" baseline="middle" alpha="0.3 + glitch(0.5) * 0.7"></pxl-text>
+    </pxl-group>
 
-    <!-- [88-89] Connecting polylines with arrows — linking nodes to center (decorations: pointer-events: none, like the icons) -->
+    <!-- [88-89] Connecting polylines with arrows — linking nodes to center (decorations drawn on top: pointer-events: none) -->
     <pxl-polyline smooth="1" style="pointer-events: none"
       points="80,60; 200,150; 380,220; 500,281"
       stroke="hsla(185, 100, 60, 0.06)" strokewidth="0.5" fill="none"

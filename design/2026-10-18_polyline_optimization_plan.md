@@ -197,7 +197,7 @@ Taking coordinates out of `compileAttribute` means the polyline must do itself w
 | Engine behavior | Where | Polyline must… |
 |---|---|---|
 | Parse + classify (number / time function / reactive function) | `pxl.compileAttribute` → `pxl.parseAttributeValue` | call `pxl.parseAttributeValue(part)` and sort into `_animIdx` / `_reactIdx` |
-| Register `isHovered` / `isPressed` readers (`sticky` for time-dependent) | `pxl.trackInteractiveRefs` in `compileAttribute` | call `pxl.trackInteractiveRefs(part, isTimeDependent)` per coordinate |
+| Register `isHovered` / `isPressed` readers (`sticky` for time-dependent) | `pxl.trackInteractiveRefs` in `compileAttribute` | call `pxl.trackInteractiveRefs(part, isTimeDependent)` per coordinate (obsolete since 2026-11-18: every shape is hit-tested and nothing is registered, `design/2026-10-30_framework_compatibility_plan.md` §23.7) |
 | Subscribe reactive functions to `ref.*` | `compileAttribute` | `pxl.subscribeToVariable(dep, this)` per dependency |
 | Evaluate reactive functions only when connected | `compileAttribute`, `PxlNode.connectedCallback` | same in `setPoints()` and `connectedCallback()` |
 | Restore subscriptions after a DOM move | `pxl.restoreVariableSubscriptions` (only scans `reactiveAttributeKeys`) | re-subscribe point dependencies in `connectedCallback()` |

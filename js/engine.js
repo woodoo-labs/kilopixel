@@ -120,9 +120,6 @@ pxl.compileAttribute = function(element, name, newValue) {
     : pxl.parseAttributeValue(newValue);
   element.attributeExpressions[name] = parsed;
 
-  // A shape whose isPressed is read here shows the hand cursor
-  pxl.trackPressedRefs(newValue);
-
   if (typeof parsed === 'function') {
     if (parsed.isTimeDependent) {
       // Evaluated every frame (evaluateAnimations)

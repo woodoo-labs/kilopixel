@@ -312,113 +312,43 @@ customElements.define('docs-api-transforms', DocsApiTransforms);
 // Web Component: Docs API Events Tab
 class DocsApiEvents extends HTMLElement {
   connectedCallback() {
+    const item = (name, pills, desc) => `
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">${name}</code>
+                  <div class="api-meta">${pills.map(([kind, text]) => `
+                    <span class="api-pill ${kind}-pill">${text}</span>`).join('')}
+                  </div>
+                </div>
+                <div class="api-item-desc">
+                  ${desc}
+                </div>
+              </div>`;
+    const handler = (name, desc) => item(name, [['values', 'script'], ['default', 'default: null']], desc);
+    const event = (name, type, desc) => item(name, [['values', type]], desc);
     this.innerHTML = `
             <div class="api-list">
-              <div class="api-subheading">Interactive Event Handlers (HTML Attributes)</div>
-              <div class="api-item">
-                <div class="api-item-header">
-                  <code class="api-name">pxl-on-click</code>
-                  <div class="api-meta">
-                    <span class="api-pill values-pill">script</span>
-                    <span class="api-pill default-pill">default: null</span>
-                  </div>
-                </div>
-                <div class="api-item-desc">
-                  Fires when a complete click or tap sequence (down and release over the same shape) occurs. Works on mouse, touch, and stylus.
-                </div>
-              </div>
-
-              <div class="api-item">
-                <div class="api-item-header">
-                  <code class="api-name">pxl-on-enter</code>
-                  <div class="api-meta">
-                    <span class="api-pill values-pill">script</span>
-                    <span class="api-pill default-pill">default: null</span>
-                  </div>
-                </div>
-                <div class="api-item-desc">
-                  Fires once when the pointer enters the shape. Recommended over legacy hover handlers.
-                </div>
-              </div>
-
-              <div class="api-item">
-                <div class="api-item-header">
-                  <code class="api-name">pxl-on-leave</code>
-                  <div class="api-meta">
-                    <span class="api-pill values-pill">script</span>
-                    <span class="api-pill default-pill">default: null</span>
-                  </div>
-                </div>
-                <div class="api-item-desc">
-                  Fires once when the pointer exits the shape bounding area.
-                </div>
-              </div>
-
-              <div class="api-item">
-                <div class="api-item-header">
-                  <code class="api-name">pxl-on-move</code>
-                  <div class="api-meta">
-                    <span class="api-pill values-pill">script</span>
-                    <span class="api-pill default-pill">default: null</span>
-                  </div>
-                </div>
-                <div class="api-item-desc">
-                  Fires continuously as the pointer moves across the shape.
-                </div>
-              </div>
-
-              <div class="api-item">
-                <div class="api-item-header">
-                  <code class="api-name">pxl-on-down</code>
-                  <div class="api-meta">
-                    <span class="api-pill values-pill">script</span>
-                    <span class="api-pill default-pill">default: null</span>
-                  </div>
-                </div>
-                <div class="api-item-desc">
-                  Fires when the primary pointer button is pressed down while over the shape.
-                </div>
-              </div>
-
-              <div class="api-item">
-                <div class="api-item-header">
-                  <code class="api-name">pxl-on-up</code>
-                  <div class="api-meta">
-                    <span class="api-pill values-pill">script</span>
-                    <span class="api-pill default-pill">default: null</span>
-                  </div>
-                </div>
-                <div class="api-item-desc">
-                  Fires when the primary pointer button is released while over the shape.
-                </div>
-              </div>
+              <div class="api-subheading">Event Handlers (HTML Attributes, Also on &lt;pxl-group&gt;)</div>
+              ${handler('pxl-on-click', 'Runs on a click: pressed and released on the shape. On a <code>&lt;pxl-group&gt;</code>, runs for a click on any shape inside it, also when the press and the release hit different shapes of the group. Shows the hand cursor.')}
+              ${handler('pxl-on-enter', 'Runs when the pointer enters the shape. On a group: when the pointer enters the group as a whole; moving between its shapes doesn\'t run it again.')}
+              ${handler('pxl-on-leave', 'Runs when the pointer leaves the shape, or the group as a whole.')}
+              ${handler('pxl-on-move', 'Runs when the pointer moves over the shape (on a group: over any shape inside it), at most once per frame.')}
+              ${handler('pxl-on-down', 'Runs when a press starts on the shape: mouse button, finger or pen. Shows the hand cursor.')}
+              ${handler('pxl-on-up', 'Runs when a press ends over the shape. Shows the hand cursor.')}
+              ${item('Handler order', [['values', 'note']], 'Handlers are listeners for DOM events: a shape\'s handler runs first, then its group\'s, then the groups further out. The hand cursor comes from CSS (<code>[pxl-on-click] { cursor: pointer }</code> in the default styles), so a page can change it.')}
 
               <div class="api-subheading">Reactive Interaction Properties (Runtime Getters)</div>
-              <div class="api-item">
-                <div class="api-item-header">
-                  <code class="api-name">isHovered</code>
-                  <div class="api-meta">
-                    <span class="api-pill values-pill">read-only boolean</span>
-                    <span class="api-pill default-pill">default: false</span>
-                  </div>
-                </div>
-                <div class="api-item-desc">
-                  Hover State: Reactive boolean property that is <code>true</code> when the pointer is over the shape. Can be referenced in dynamic expressions (e.g. <code>fill="ref.id.isHovered ? '#38bdf8' : '#1e293b'"</code>).
-                </div>
-              </div>
+              ${item('isHovered', [['values', 'read-only boolean'], ['default', 'default: false']], 'Hover State: <code>true</code> while the pointer is over the shape, or over any shape inside a group. Can be referenced in dynamic expressions (e.g. <code>fill="ref.id.isHovered ? \'#38bdf8\' : \'#1e293b\'"</code>).')}
+              ${item('isPressed', [['values', 'read-only boolean'], ['default', 'default: false']], 'Press State: <code>true</code> from a press on the shape (or on a shape inside a group) until the release, wherever the pointer is then.')}
 
-              <div class="api-item">
-                <div class="api-item-header">
-                  <code class="api-name">isPressed</code>
-                  <div class="api-meta">
-                    <span class="api-pill values-pill">read-only boolean</span>
-                    <span class="api-pill default-pill">default: false</span>
-                  </div>
-                </div>
-                <div class="api-item-desc">
-                  Active Press State: Reactive boolean property that is <code>true</code> while the primary pointer button is held down over the shape.
-                </div>
-              </div>
+              <div class="api-subheading">DOM Events (JavaScript and Frameworks)</div>
+              ${event('click, dblclick, contextmenu', 'MouseEvent', 'Dispatched on the shape under the pointer, with the shape as <code>event.target</code>. They bubble through its groups, layer and stage to the page, once per action: <code>addEventListener()</code>, React <code>onClick</code>, Vue <code>@click</code> and Angular <code>(click)</code> work on shapes and groups. <code>preventDefault()</code> reaches the browser\'s event.')}
+              ${event('pointerdown, pointerup', 'PointerEvent', 'Dispatched on the shape where the press starts or ends, followed by <code>mousedown</code> / <code>mouseup</code>. <code>setPointerCapture()</code> on the shape works: the browser then sends the moves and the release to it.')}
+              ${event('pointerover, pointerout, pointerenter, pointerleave', 'PointerEvent', 'Dispatched when the pointer enters or leaves a shape, with <code>relatedTarget</code> (the shape left or entered, or the layer). <code>pointerenter</code> / <code>pointerleave</code> also reach the groups entered or left and don\'t bubble. The mouse versions (<code>mouseover</code> … <code>mouseleave</code>) follow.')}
+              ${event('pointermove, mousemove', 'PointerEvent', 'Dispatched on the shape under the moving pointer, once per frame; <code>movementX</code> / <code>movementY</code> add up the browser\'s moves since the last one. Listeners on the stage also get the browser\'s own moves.')}
+              ${item('Coordinates', [['values', 'note']], '<code>clientX</code> / <code>clientY</code> are the browser\'s. <code>offsetX</code> / <code>offsetY</code> equal them, because shapes have no box on the page: use <code>clientX</code>, or <code>ref.&lt;stage&gt;.mouseX</code> / <code>mouseY</code> for stage units.')}
+              ${item('Cursor and pointer-events', [['values', 'CSS']], 'A CSS <code>cursor</code> on a shape, group or layer shows over its shapes (<code>style="cursor: pointer"</code>, Tailwind <code>cursor-pointer</code>). <code>pointer-events: none</code> lets the pointer through to what is below, for decorations drawn on top; <code>pointer-events: auto</code> inside brings a shape back. Drags on touch screens need <code>touch-action: none</code> on the stage.')}
+              ${item('Known limits', [['values', 'note']], 'A capture listener above the stage (React <code>onClickCapture</code>) sees the browser\'s click with the layer as target, then the shape\'s click. CSS <code>:hover</code> and Tailwind <code>hover:</code> never match a shape; use <code>isHovered</code>.')}
             </div>
     `;
   }
