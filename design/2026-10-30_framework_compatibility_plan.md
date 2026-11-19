@@ -1,6 +1,6 @@
 # Framework Compatibility: Kilopixel as a Well-Behaved Custom Element
 
-- **Status**: 🟡 **Proposed** (2026-11-19, smoke pages for React, Vue and Tailwind built, §25; W3 built: properties for every attribute, §24; W1 built: step 3 (DOM events on shapes and groups, handlers as listeners, mouse events, cursor on the canvases, layer `pointer-events` fix) §23.8; 2026-11-18, W1 build plan decided, §23, step 1 (handler rename) built, §23.5, step 2 (every shape hit-tested) built, §23.7: three steps, E1–E10, E1 changes D5 (no listener counts, the cursor only CSS), E10 adds handlers and hover / press states to groups, React / Vue / Tailwind expectations and known limits §23.6, E2 settles §22.5 (hit walk over the layer tree); 2026-11-17, DOM-like event model decided, §22: every shape gets events, no `interactive`, D5, D10, D11 decided; `process()` moved to the start of the frame, §4.1 and §15; steps 1–2 of §19.4 built: quick fixes §20, conformance tests `tests/frameworks.html` §21; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 5–6 of §19.4 not built)
+- **Status**: 🟡 **Proposed** (2026-11-19, state and next steps §26 (§3 updated); smoke pages for React, Vue and Tailwind built, §25 (in `tests/smoke/`); W3 built: properties for every attribute, §24; W1 built: step 3 (DOM events on shapes and groups, handlers as listeners, mouse events, cursor on the canvases, layer `pointer-events` fix) §23.8; 2026-11-18, W1 build plan decided, §23, step 1 (handler rename) built, §23.5, step 2 (every shape hit-tested) built, §23.7: three steps, E1–E10, E1 changes D5 (no listener counts, the cursor only CSS), E10 adds handlers and hover / press states to groups, React / Vue / Tailwind expectations and known limits §23.6, E2 settles §22.5 (hit walk over the layer tree); 2026-11-17, DOM-like event model decided, §22: every shape gets events, no `interactive`, D5, D10, D11 decided; `process()` moved to the start of the frame, §4.1 and §15; steps 1–2 of §19.4 built: quick fixes §20, conformance tests `tests/frameworks.html` §21; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 5–6 of §19.4 not built)
 - **Date**: 2026-10-30
 - **Related**: `design/prototypes/2026-10-30_framework_compatibility/review_checks.html` (review §19); `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`, `design/2026-11-04_stage_sizing_plan.md` (builds W2)
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
@@ -43,6 +43,8 @@ Kilopixel should work in **any** framework (React, Preact, Vue, Svelte, Solid, A
 
 ## 3. Current State (Audit 2026-10-30)
 
+**State column updated 2026-11-19** (the dated entries); the Detail column keeps the audit of 2026-10-30. Overall assessment: §26.
+
 From the React 19 / Vue 3.5 prototypes (`design/prototypes/2026-10-30_framework_compatibility/FINDINGS.md`) and the code:
 
 | # | State | Detail |
@@ -51,18 +53,18 @@ From the React 19 / Vue 3.5 prototypes (`design/prototypes/2026-10-30_framework_
 | C2 | ✅ (2026-11-16, §20) | before: attributes after connect worked, **except `id`**: `id` isn't an observed attribute, so an `id` set or changed after connect is never registered in `pxl.nodes` (`node.js` `connectedCallback` reads it once). Measured 2026-11-15 (§19.1): a renamed element also keeps its **old** entry in `pxl.nodes` after it is removed (`disconnectedCallback()` deletes only the current id), so readers of the old id keep reading a removed element |
 | C3 | ✅ (2026-11-19, §24) | no properties: `el.r = 50` creates a plain JS property and changes nothing. React / Vue only worked because `r` isn't a property of `HTMLElement` and they fell back to attributes. Collisions with `HTMLElement` (checked in the browser over all 82 observed attribute names): `hidden` (harmless, it reflects to the attribute) and `onclick` (see C7) |
 | C4 | ✅ | Rule A; verified (`zoom={undefined}` → attribute removed → `1`) |
-| C5 | ❌ | Kilopixel dispatches no DOM events; `@click` never fires (the browser's click targets the layer canvas, which isn't inside `<pxl-circle>`) |
-| C6 | ❌ | same; React `onClick` never fires |
-| C7 | ❌ | `onclick`, `onenter`, `onleave`, `ondown`, `onup`, `onmove` are the declarative handlers. `onclick` is also a **native event handler content attribute**: the browser compiles it as global JavaScript on every HTML element. React 19 drops it (no attribute; `element.onclick` is React's noop). Vue keeps it (string `on*` values on native handler names stay attributes). Svelte 5 / Solid treat `onclick` as a listener prop (not verified here) |
-| C8 | ✅ (untested as a whole) | `disconnectedCallback` unregisters, `connectedCallback` re-registers; unmount / remount verified in both prototypes |
-| C9 | ⚠️ | each `<pxl-layer>` appends its `<canvas>` as a light-DOM child (`layer.js` `connectedCallback`). Frameworks keep nodes they didn't create in client rendering, but full child replacement (`innerHTML`, htmx swaps of a layer's content) removes it, and hydration sees an unexpected node. Confirmed 2026-11-05 (`scratch/gradient_stops/thin_shapes.html` (not kept), first version): after `layer.innerHTML = …` the engine keeps drawing into the removed canvas, so the new shapes are invisible and nothing is logged. A real case: `examples/test13.html` filled its layer with `innerHTML` and showed nothing since 2026-11-03 (the engine script moved into the head, so the canvas existed before the page script ran); fixed in the example with `insertAdjacentHTML()` on 2026-11-13 |
-| C10 | ⚠️ | inline styles written by the engine: stage (`display`, `position`, `width`, `aspect-ratio`), layer (`display`, `position`, `inset`), var (`display: none`), stage `cursor`. A framework binding `style` can overwrite them (Vue `:style` and React `style` set individual properties, Angular `[style]` and Lit `style=${…}` can replace the whole attribute) |
-| C11 | ⚠️ | server HTML has no canvases; the client adds them inside `<pxl-layer>` (C9) → hydration mismatch warnings in React / Vue |
-| C12 | ⚠️ | parents are found with `closest('pxl-layer')`, `parentElement.closest('pxl-group, pxl-layer')`, `closest('pxl-stage')`: they stop at a shadow root. Slotted children are fine (they stay in the light tree of the host) |
-| C13 | ⚠️ | `pxl.nodes` is one flat registry per document. Each instance needs unique ids; `useId()` values (React `:r0:`, Vue `v-0`) aren't valid in `ref.<id>` and must be cleaned (`'p' + id.replace(/[^a-zA-Z0-9]/g, '')`) |
-| C14 | ⚠️ | identical values are skipped (`oldValue === newValue`); numbers aren't compiled. But every distinct **expression** string is compiled and cached forever (`pxl.animationCache` / `pxl.staticCache`): 71 slider steps of a rebuilt `x="${base} + sin(t / 400) * 20"` grew `animationCache` from 4 to 74 entries |
+| C5 | ✅ (2026-11-19, W1, §23.5–§23.8; React and Vue verified, §25) | Kilopixel dispatches no DOM events; `@click` never fires (the browser's click targets the layer canvas, which isn't inside `<pxl-circle>`) |
+| C6 | ✅ (2026-11-19, W1, §23.8; React's delegated `onClick` and `onPointerEnter` verified, §25) | same; React `onClick` never fires |
+| C7 | ✅ (2026-11-18, `pxl-on-*`, §23.5) | `onclick`, `onenter`, `onleave`, `ondown`, `onup`, `onmove` are the declarative handlers. `onclick` is also a **native event handler content attribute**: the browser compiles it as global JavaScript on every HTML element. React 19 drops it (no attribute; `element.onclick` is React's noop). Vue keeps it (string `on*` values on native handler names stay attributes). Svelte 5 / Solid treat `onclick` as a listener prop (not verified here) |
+| C8 | ✅ (tested 2026-11-17, §21) | `disconnectedCallback` unregisters, `connectedCallback` re-registers; unmount / remount verified in both prototypes |
+| C9 | ✅ (2026-11-15, W2: the canvas in the layer's shadow root) | each `<pxl-layer>` appends its `<canvas>` as a light-DOM child (`layer.js` `connectedCallback`). Frameworks keep nodes they didn't create in client rendering, but full child replacement (`innerHTML`, htmx swaps of a layer's content) removes it, and hydration sees an unexpected node. Confirmed 2026-11-05 (`scratch/gradient_stops/thin_shapes.html` (not kept), first version): after `layer.innerHTML = …` the engine keeps drawing into the removed canvas, so the new shapes are invisible and nothing is logged. A real case: `examples/test13.html` filled its layer with `innerHTML` and showed nothing since 2026-11-03 (the engine script moved into the head, so the canvas existed before the page script ran); fixed in the example with `insertAdjacentHTML()` on 2026-11-13 |
+| C10 | ✅ (2026-11-15, W2: default styles in a stylesheet; only the stage's `aspect-ratio` is inline, D7) | inline styles written by the engine: stage (`display`, `position`, `width`, `aspect-ratio`), layer (`display`, `position`, `inset`), var (`display: none`), stage `cursor`. A framework binding `style` can overwrite them (Vue `:style` and React `style` set individual properties, Angular `[style]` and Lit `style=${…}` can replace the whole attribute) |
+| C11 | ✅ (2026-11-15, W2; T-H1 compares the markup; not tried with a real server-rendering setup, §26) | server HTML has no canvases; the client adds them inside `<pxl-layer>` (C9) → hydration mismatch warnings in React / Vue |
+| C12 | ✅ / ⚠️ (2026-11-17: a whole stage in a component's shadow root works, §21; a tree split across shadow roots doesn't, W6 on demand) | parents are found with `closest('pxl-layer')`, `parentElement.closest('pxl-group, pxl-layer')`, `closest('pxl-stage')`: they stop at a shadow root. Slotted children are fine (they stay in the light tree of the host) |
+| C13 | ⚠️ (2026-11-19: unchanged, D2 open, §26) | `pxl.nodes` is one flat registry per document. Each instance needs unique ids; `useId()` values (React `:r0:`, Vue `v-0`) aren't valid in `ref.<id>` and must be cleaned (`'p' + id.replace(/[^a-zA-Z0-9]/g, '')`) |
+| C14 | ✅ / ⚠️ (2026-11-19: numbers, colors, `text` and points cost no compiling, §24; caches bounded, §20; expression strings rebuilt per render still compile) | identical values are skipped (`oldValue === newValue`); numbers aren't compiled. But every distinct **expression** string is compiled and cached forever (`pxl.animationCache` / `pxl.staticCache`): 71 slider steps of a rebuilt `x="${base} + sin(t / 400) * 20"` grew `animationCache` from 4 to 74 entries |
 | C15 | ✅ (2026-11-19, §24) | upgrading after the markup works (attributes are read on upgrade). Properties set before the upgrade would shadow future accessors (only relevant once C3 exists) |
-| C16 | ⚠️ (guard built 2026-11-16, §20; npm and typings open) | (2026-11-15, §19.1) no npm package and no import entry point; the bundle starts with `window.pxl = …` and extends `HTMLElement`, so importing it on a server throws; a second copy replaces `window.pxl`, empties the registry and throws `TypeError`s on the elements of the first copy; no typings |
+| C16 | ⚠️ (guard built 2026-11-16, §20; typings next, the npm package later with publishing, §26) | (2026-11-15, §19.1) no npm package and no import entry point; the bundle starts with `window.pxl = …` and extends `HTMLElement`, so importing it on a server throws; a second copy replaces `window.pxl`, empties the registry and throws `TypeError`s on the elements of the first copy; no typings |
 | C17 | ✅ (2026-11-16, §20) | (2026-11-15, §19.1) a shape's children are slotted into the layer's shadow root (D6) and render as visible HTML text above the canvas |
 
 Test-environment notes from the prototypes (not framework problems): a hidden browser pane stops `ResizeObserver` and `requestAnimationFrame`, so stages stay unsized; real clicks in a scaled (emulated) viewport land at wrong coordinates. The conformance tests (§11) must dispatch synthetic events with exact coordinates and must not depend on the pane being visible where possible.
@@ -466,7 +468,7 @@ A review of this plan against the goal "Kilopixel works in the major frameworks 
 | 2 | Conformance tests (built 2026-11-17, §21) | `tests/frameworks.html` (§11), plus tests for step 1 | 1 session |
 | 3 | Events (W1), built 2026-11-18 / 2026-11-19 (§23.5–§23.8) | DOM events, `pxl-on-*` handlers (D1), D10 / D11 | 1–2 sessions |
 | 4 | Properties (W3), built 2026-11-19 (§24) | accessors, arrays (D8), values set before the upgrade | 1 session |
-| 5 | Distribution and docs (W8) | npm layout, typings generator, smoke pages, `docs/frameworks.html` | 1–2 sessions |
+| 5 | Distribution and docs (W8) | smoke pages (built 2026-11-19, §25), `docs/frameworks.html`, typings (also without npm, as a download), the Angular app; the npm package later, with publishing (§26) | 1–2 sessions |
 | 6 | Evaluation model | two-phase step 2, the per-frame prototype, its D1, scoped names (D2) in the same design | several sessions |
 
 Plans that assume the evaluation model (throttling `maxfps`, tweens, `<pxl-clip>`, `space`) come after step 6.
@@ -774,3 +776,38 @@ The conformance tests (§11, `tests/frameworks.html`) imitate what frameworks do
   - **Angular** needs a build. Agreed approach (2026-11-19): an npm app in `tests/smoke/angular/` (first planned as a top-level `frameworks/angular/`; moved with the pages) with its own `package.json` and committed `package-lock.json`; `node_modules` and build output ignored by git; each laptop runs `npm ci` there. Needs a CLAUDE.md exception to "never create `node_modules`" (only inside `tests/smoke/<app>/`) and a step in "Working on Another Machine". Not built yet; asked before creating it.
   - More CDN pages if wanted: Preact, Lit (also a stage in a shadow root), Solid, Alpine, htmx; Svelte 5 needs its compiler in the page.
   - `docs/frameworks.html` (§12, step 5), written from what the pages show.
+
+## 26. State 2026-11-19: Assessment and Next Steps
+
+At runtime, in the browser, Kilopixel now behaves like a well-made custom element: frameworks use it with their own syntax (properties, events, insert / move / remove, style, hydration), and for React, Vue and Tailwind that is tested, also with the real mouse (§25). What is missing is mostly around the runtime: installing it, TypeScript, server rendering, documentation, and a few things users expect from HTML elements. The DOM contract row by row: §3 (updated today).
+
+### 26.1 By Kind of Project
+
+| Project | State |
+|---|---|
+| Plain HTML, htmx, Alpine | ✅ the original use case; htmx and Alpine not smoke-tested yet |
+| React, Preact, Vue in the browser, Kilopixel as a script tag | ✅ React and Vue verified (21/21, real mouse, `tests/smoke/`); Preact follows React's rules |
+| Tailwind | ✅ verified (11/11); `hover:` variants never match a shape (known limit) |
+| Svelte, Solid, Lit | very likely ✅: they use the DOM operations `tests/frameworks.html` checks; not verified |
+| TypeScript projects (most React and Angular apps) | ⚠️ runs, but TypeScript rejects `<pxl-circle r={50}>` without typings: the biggest practical obstacle |
+| Next.js, Nuxt (server rendering) | ⚠️ the import is safe (guard, §20) and hydration should match (T-H1); untested |
+| Angular | ❓ untested; with zone.js every frame of an animated stage triggers change detection (a docs note, `runOutsideAngular()`) |
+
+### 26.2 What Framework Users Will Still Notice
+
+- No CSS `:hover` on shapes (use `isHovered`); `getBoundingClientRect()` of a shape is empty, so a tooltip at a shape needs a workaround.
+- No keyboard focus or accessibility for clickable shapes.
+- Ids are global: components generate unique ones (D2 open).
+- `offsetX` on shape events equals `clientX`; capture listeners above the stage see the browser's click first (E9).
+- String properties other than `text` are code, like attribute values: untrusted data must not go into them.
+- No `docs/frameworks.html` yet: all of this is only in `.agents/KILOPIXEL.md` and this plan.
+
+### 26.3 Next Steps, by Benefit for Users
+
+1. **`docs/frameworks.html`** (§12): short, and it makes everything above usable: the script tag in each framework, the one setting some need (Vue `isCustomElement`, Angular `CUSTOM_ELEMENTS_SCHEMA`), events, properties, the known limits.
+2. **Typings**, generated from `observedAttributes` and `static defaults` (§12, §19.2). Removes the TypeScript obstacle; they can be shipped without npm, as a downloadable `kilopixel.d.ts` next to `pxl.min.js`.
+3. **The Angular app** in `tests/smoke/angular/` (§25): verifies the largest untested framework and measures the zone.js cost. Needs `npm ci` and a CLAUDE.md exception; asked before creating it.
+4. **Smoke pages for Svelte and Lit** (cheap with the shared checks, §25).
+5. **Larger topics, each with its own plan:** scoped names (D2, with the evaluation model, §19.3), a way to get a shape's position on the page (§23.6), accessibility (keyboard, focus, roles).
+
+**Not now:** the npm package (decided 2026-11-19: later, together with publishing; nothing is published yet, CLAUDE.md "Pre-release").
