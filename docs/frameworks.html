@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Use Kilopixel in React, Vue, Angular, Svelte and other frameworks: standard custom elements with properties and DOM events, no adapter.">
+  <title>Frameworks | Kilopixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+</head>
+<body>
+
+  <docs-header></docs-header>
+
+  <div class="layout-container">
+
+    <docs-sidebar></docs-sidebar>
+
+    <main class="docs-content">
+      <div class="docs-inner">
+      <h1>Frameworks</h1>
+      <p class="lead">Kilopixel's elements are standard custom elements. A framework sets their attributes or properties and listens to their events with its own syntax: there is no adapter and no wrapper component. Kilopixel is tested with React 19, Vue 3.5 and Tailwind CSS 4; other frameworks use the same DOM operations.</p>
+
+      <h2>1. Setup</h2>
+      <p>Load <code>pxl.min.js</code> once, with a <code>&lt;script&gt;</code> tag in the <code>&lt;head&gt;</code> of the page that hosts the app (<code>index.html</code>), before the app's own script. The elements are then defined before the framework renders them.</p>
+      <pre><code class="language-html">&lt;!-- index.html of the app, in &lt;head&gt;, before the app's script --&gt;
+&lt;script src="pxl.min.js"&gt;&lt;/script&gt;</code></pre>
+      <p>Most frameworks need no further setup. The exceptions:</p>
+      <ul>
+        <li><strong>React and Preact:</strong> nothing to set up. Use React 19 or later: React 18 passes every value to a custom element as an attribute string, so arrays and objects arrive as text.</li>
+        <li><strong>Vue 3:</strong> tell the template compiler that tags starting with <code>pxl-</code> are custom elements. Without it, Vue still renders them but warns about unknown components.</li>
+        <li><strong>Angular:</strong> add <code>CUSTOM_ELEMENTS_SCHEMA</code> to the <code>schemas</code> of each component that uses Kilopixel's elements.</li>
+        <li><strong>Svelte, Solid, Lit, Alpine, htmx:</strong> nothing to set up.</li>
+        <li><strong>Tailwind CSS:</strong> nothing to set up; utilities work on stages, layers, groups and shapes (section 6).</li>
+      </ul>
+      <pre><code class="language-javascript">// Vue 3, with the in-browser build
+const app = createApp(App);
+app.config.compilerOptions.isCustomElement = (tag) =&gt; tag.startsWith('pxl-');
+
+// Vue 3 with Vite: vite.config.js
+export default {
+  plugins: [vue({
+    template: { compilerOptions: { isCustomElement: (tag) =&gt; tag.startsWith('pxl-') } }
+  })]
+};
+
+// Angular: the component that uses Kilopixel's elements
+@Component({
+  selector: 'app-chart', templateUrl: './chart.html', schemas: [CUSTOM_ELEMENTS_SCHEMA]
+})
+export class ChartComponent {}</code></pre>
+      <div class="callout-info">
+        <p class="callout-title">TypeScript</p>
+        <p class="callout-body">Kilopixel has no type definitions yet, so TypeScript rejects <code>&lt;pxl-circle r={50}&gt;</code> in JSX. Until it ships them, a declaration in the project allows the tags with any props. For React:</p>
+        <pre><code class="language-javascript">// kilopixel.d.ts
+import 'react';
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements { [tag: `pxl-${string}`]: any }
+  }
+}</code></pre>
+      </div>
+
+      <h2>2. Values: Properties and Attributes</h2>
+      <p>Every attribute of a Kilopixel element is also a JavaScript property. React 19, Vue, Preact and Svelte set the property when an element has one; Angular <code>[x]</code>, Lit <code>.x</code> and Solid <code>prop:x</code> always do. Numbers, arrays and objects then arrive as they are.</p>
+      <pre><code class="language-jsx">function Gauge({ value, data }) {
+  return (
+    &lt;pxl-stage ratio={5 / 3}&gt;
+      &lt;pxl-layer&gt;
+        {/* Left: Dial, a number from props */}
+        &lt;pxl-circle x={250} y={300} r={value} fill="#f97316"&gt;&lt;/pxl-circle&gt;
+
+        {/* Right: Chart, points as [x, y] pairs */}
+        &lt;pxl-polyline points={data} stroke="#3b82f6" strokewidth={4}&gt;&lt;/pxl-polyline&gt;
+
+        {/* Bottom: Label, shown as written */}
+        &lt;pxl-text x={500} y={550} size={27} align="center" text={`Value: ${value}`}&gt;&lt;/pxl-text&gt;
+      &lt;/pxl-layer&gt;
+    &lt;/pxl-stage&gt;
+  );
+}</code></pre>
+      <p>The same in a Vue template:</p>
+      <pre><code class="language-html">&lt;pxl-circle :x="250" :y="300" :r="value" fill="#f97316"&gt;&lt;/pxl-circle&gt;
+&lt;pxl-polyline :points="data" stroke="#3b82f6" :strokewidth="4"&gt;&lt;/pxl-polyline&gt;
+&lt;pxl-text :x="500" :y="550" :size="27" align="center" :text="`Value: ${value}`"&gt;&lt;/pxl-text&gt;</code></pre>
+      <ul>
+        <li><strong>Numbers, Arrays, Objects:</strong> stored as they are, without parsing: <code>r={value}</code>, <code>linedash={[20, 10]}</code>, <code>points={[[0, 0], [100, 50]]}</code> (flat <code>[x0, y0, x1, y1]</code> works too). To change an array, pass a new one: a change made to the same array in place isn't seen.</li>
+        <li><strong>Strings:</strong> read like attribute text, so <code>x="300 + sin(t) * 100"</code> animates and <code>fill="hsl(200, 50%, 40%)"</code> is a color.</li>
+        <li><strong>Text:</strong> a string set as <code>text</code> is shown exactly as written, never read as an expression. Expressions in <code>text</code> stay available in plain markup.</li>
+        <li><strong>Removing a Value:</strong> <code>undefined</code> or <code>null</code> sets the default, like a removed attribute.</li>
+        <li><strong>Last Change Wins:</strong> setting a property doesn't change the attribute in the markup. Set each value one way, not both.</li>
+        <li><strong>Reading Back:</strong> <code>el.x</code> returns the current value, also of an animated expression.</li>
+      </ul>
+      <div class="callout-info">
+        <p class="callout-title">Values That Change Every Frame</p>
+        <p class="callout-body">Numbers, colors, <code>text</code> and points cost almost nothing to update, even in every frame. A new expression string is compiled each time it changes: for continuous motion, write <code>t</code> into the markup (<code>rotate="t * 45"</code>), or pass numbers.</p>
+      </div>
+      <div class="callout-info">
+        <p class="callout-title">Strings Are Code</p>
+        <p class="callout-body">Except for <code>text</code>, a string value is read as an expression, as in an attribute. Never pass untrusted text, such as user input, to these values. Colors from data are safe when they are <code>#hex</code>, <code>rgb()</code>, or <code>hsl()</code> with percentages: they are not compiled.</p>
+      </div>
+
+      <h2>3. Events</h2>
+      <p>Shapes and groups get DOM events, like elements on the page: the shape under the pointer is the event's <code>target</code>, and the event bubbles through its groups, its layer and the stage to the page. A framework's own event syntax works on them, for direct listeners (Vue, Angular, Lit, Svelte) and for listeners at the root (React).</p>
+      <pre><code class="language-jsx">{/* Right: Button, a group with a rect and a label */}
+&lt;pxl-group x={700} y={300} style={{ cursor: 'pointer' }} onClick={() =&gt; setCount((c) =&gt; c + 1)}
+  onPointerEnter={() =&gt; setHover(true)} onPointerLeave={() =&gt; setHover(false)}&gt;
+  &lt;pxl-rect w={300} h={120} r={16} fill={hover ? '#2563eb' : '#3b82f6'}&gt;&lt;/pxl-rect&gt;
+  &lt;pxl-text size={27} fill="#ffffff" align="center" baseline="middle" text="Add"&gt;&lt;/pxl-text&gt;
+&lt;/pxl-group&gt;</code></pre>
+      <pre><code class="language-html">&lt;!-- Vue --&gt;
+&lt;pxl-group :x="700" :y="300" :style="{ cursor: 'pointer' }" @click="count++"
+  @pointerenter="hover = true" @pointerleave="hover = false"&gt;…&lt;/pxl-group&gt;
+
+&lt;!-- Angular --&gt;
+&lt;pxl-circle [x]="250" [y]="300" [r]="value" (click)="add()"&gt;&lt;/pxl-circle&gt;
+
+&lt;!-- Svelte --&gt;
+&lt;pxl-circle x={250} y={300} r={value} onclick={add}&gt;&lt;/pxl-circle&gt;</code></pre>
+      <ul>
+        <li><strong>Clicks and Presses:</strong> <code>click</code>, <code>dblclick</code>, <code>contextmenu</code>, <code>pointerdown</code>, <code>pointerup</code>, <code>mousedown</code>, <code>mouseup</code>. Each action arrives once, with the shape as <code>target</code>. Over empty space the browser's own event arrives unchanged, with the layer as <code>target</code>.</li>
+        <li><strong>Hover:</strong> <code>pointerover</code>, <code>pointerout</code>, <code>pointerenter</code>, <code>pointerleave</code> and their <code>mouse</code> versions, with <code>relatedTarget</code>. A group gets <code>pointerenter</code> and <code>pointerleave</code> only when the pointer crosses its edge, not when it moves between its shapes.</li>
+        <li><strong>Moves:</strong> <code>pointermove</code> and <code>mousemove</code> on the shape under the pointer, once per frame.</li>
+        <li><strong>Buttons:</strong> put the shapes of a button (a rect and its label) in a <code>&lt;pxl-group&gt;</code> and listen on the group. A click on the label then counts for the button.</li>
+        <li><strong>Propagation:</strong> <code>stopPropagation()</code> keeps the event from the groups and elements around the shape; <code>preventDefault()</code> reaches the browser, so on <code>contextmenu</code> it keeps the browser's menu closed.</li>
+        <li><strong>Declarative Handlers:</strong> <code>pxl-on-click</code> and the other <code>pxl-on-*</code> attributes are listeners for the same events, so they can be mixed with a framework's listeners.</li>
+      </ul>
+
+      <h2>4. Cursor and Pointer</h2>
+      <ul>
+        <li><strong>Cursor:</strong> comes from CSS, as for elements. Set <code>cursor</code> on a shape, a group or a layer (<code>style={{ cursor: 'pointer' }}</code>, Tailwind <code>cursor-pointer</code>); the shapes inside a group inherit it. A shape with a <code>pxl-on-click</code>, <code>pxl-on-down</code> or <code>pxl-on-up</code> handler shows the hand by default. A framework listener doesn't add one, like a <code>&lt;div&gt;</code> with a click listener.</li>
+        <li><strong>Decorations:</strong> every visible shape catches the pointer. A shape drawn on top of a button that shouldn't take its clicks gets <code>pointer-events: none</code>; <code>pointer-events: auto</code> on a shape inside brings that shape back.</li>
+        <li><strong>Pointer Position:</strong> <code>event.clientX</code> and <code>clientY</code> are the browser's. <code>offsetX</code> and <code>offsetY</code> equal them on shape events, because shapes have no box on the page. In stage units, read <code>ref.&lt;stage&gt;.mouseX</code> in an expression, or <code>stage.attributeValues.mouseX</code> in JavaScript.</li>
+        <li><strong>Dragging:</strong> drag code that calls <code>event.target.setPointerCapture()</code> works on shapes. On touch screens, set <code>touch-action: none</code> on the stage, or the browser scrolls instead.</li>
+      </ul>
+
+      <h2>5. Components</h2>
+      <ul>
+        <li><strong>Unique IDs:</strong> ids are global for the whole page (<code>ref.&lt;id&gt;</code>), so every instance of a component needs its own. Generated ids need cleaning: <code>ref</code> reads a hyphen as a minus sign.</li>
+        <li><strong>Hover Styling:</strong> CSS <code>:hover</code> never matches a shape. Use <code>isHovered</code> in an expression, or state from <code>pointerenter</code> and <code>pointerleave</code>.</li>
+        <li><strong>Mounting:</strong> shapes, layers and whole stages can be mounted, moved and unmounted at any time, also in keyed lists.</li>
+      </ul>
+      <pre><code class="language-jsx">function Planet() {
+  // React's useId() gives ids like «r1»: keep letters and digits only
+  const id = 'planet' + useId().replace(/[^a-zA-Z0-9]/g, '');
+  return (
+    &lt;pxl-circle id={id} x={500} y={300} r={80}
+      fill={`ref.${id}.isHovered ? '#2563eb' : '#3b82f6'`}&gt;
+    &lt;/pxl-circle&gt;
+  );
+}</code></pre>
+
+      <h2>6. Tailwind and CSS</h2>
+      <ul>
+        <li><strong>Utilities Win:</strong> Kilopixel's default styles have the lowest priority, so a class like <code>w-1/2</code> sizes a stage; the stage keeps its aspect ratio.</li>
+        <li><strong>Pointer and Cursor Classes:</strong> <code>cursor-pointer</code>, <code>cursor-default</code>, <code>pointer-events-none</code> and <code>pointer-events-auto</code> work on stages, layers, groups and shapes. <code>hidden</code> and <code>invisible</code> on a layer hide it and take it out of hit testing.</li>
+        <li><strong>No Hover Variants:</strong> <code>hover:</code> variants never match a shape; use <code>isHovered</code>.</li>
+        <li><strong>The Stage's Style:</strong> the stage keeps its aspect ratio in its inline style. Setting single style properties is fine (React <code>style</code>, Vue <code>:style</code>); replacing the whole <code>style</code> attribute removes the ratio, so use classes for the stage instead.</li>
+      </ul>
+
+      <h2>7. Server Rendering</h2>
+      <p>Server-rendered markup hydrates without warnings: the browser adds no nodes inside Kilopixel's elements (each layer keeps its canvas in a shadow root), and the stage measures itself once it is in the page. Loading Kilopixel during server rendering does nothing, and loading it twice keeps the first copy. Kilopixel isn't tested with Next.js or Nuxt yet.</p>
+
+      <h2>8. Known Limits</h2>
+      <ul>
+        <li><strong>Hover in CSS:</strong> <code>:hover</code> and Tailwind <code>hover:</code> never match a shape.</li>
+        <li><strong>Positions on the Page:</strong> <code>getBoundingClientRect()</code> of a shape is empty, so a tooltip at a shape needs its position computed from the stage.</li>
+        <li><strong>Keyboard:</strong> shapes can't take keyboard focus yet.</li>
+        <li><strong>Global IDs:</strong> every instance of a component needs its own ids (section 5).</li>
+        <li><strong>Capture Listeners:</strong> a capture listener above the stage (React <code>onClickCapture</code>) sees the browser's click, with the layer as <code>target</code>, before the shape's click.</li>
+        <li><strong>Angular with zone.js:</strong> every frame of an animated stage triggers change detection. Create animated stages outside Angular's zone (<code>NgZone.runOutsideAngular()</code>), or use zoneless change detection.</li>
+        <li><strong>Packages:</strong> no npm package and no type definitions yet (section 1).</li>
+      </ul>
+
+      <h2>9. Live Events Playground</h2>
+      <p>The stage below listens with plain <code>addEventListener()</code>, the way every framework does underneath, and logs each event as it arrives. Hover and click the circle and the button, and compare with the controls. The circle's radius is set as a property, as frameworks set it.</p>
+      <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Circle, its radius set as a property --&gt;
+    &lt;pxl-circle id="circle" x="250" y="300" fill="#ffedd566" stroke="#f97316" strokewidth="4"&gt;
+    &lt;/pxl-circle&gt;
+
+    &lt;!-- Right: Button, a group with a rect and a label --&gt;
+    &lt;pxl-group id="button" x="700" y="300" style="cursor: <mark id="sec9ButtonCursorCode">pointer</mark>"&gt;
+      &lt;pxl-rect w="300" h="120" r="16" stroke="#3b82f6" strokewidth="4"
+        fill="ref.button.isHovered ? '#bfdbfe' : '#dbeafe66'"&gt;&lt;/pxl-rect&gt;
+      &lt;pxl-text size="27" fill="#3b82f6" align="center" baseline="middle" text="Button"&gt;&lt;/pxl-text&gt;
+    &lt;/pxl-group&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;
+
+&lt;script&gt;
+  const circle = document.getElementById('circle');
+  circle.r = <mark id="sec9CircleRCode">100</mark>;
+  circle.addEventListener('click', (event) =&gt; { <mark id="sec9CircleStopCode">/* the click bubbles on */</mark> });
+  // Circle and button log click, pointerenter, pointerleave; the stage logs clicks
+&lt;/script&gt;</code></pre>
+      <div class="demo-container">
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <h3 class="demo-controls-title">Controls</h3>
+            <div class="demo-tabs">
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec9CircleTab')">Circle</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec9ButtonTab')">Button</button>
+            </div>
+          </div>
+          <div class="tab-content active" id="sec9CircleTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Radius (Property) <span id="sec9CircleRVal">100</span></label>
+                <input type="range" min="20" max="200" step="5" value="100" autocomplete="off"
+                  oninput="document.getElementById('sec9Circle').r = Number(this.value); document.getElementById('sec9CircleRVal').innerText = this.value; document.getElementById('sec9CircleRCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label>Click on the Circle</label>
+                <div class="toggle-group">
+                  <button class="toggle-btn active" onclick="sec9SetStop(false); pxlDocs.updateToggle(this, null, 'sec9CircleStopCode', '/* the click bubbles on */');">bubbles</button>
+                  <button class="toggle-btn" onclick="sec9SetStop(true); pxlDocs.updateToggle(this, null, 'sec9CircleStopCode', 'event.stopPropagation();');">stopPropagation()</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tab-content" id="sec9ButtonTab">
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label>Cursor</label>
+                <div class="toggle-group">
+                  <button class="toggle-btn active" onclick="document.getElementById('sec9Button').style.cursor = 'pointer'; pxlDocs.updateToggle(this, null, 'sec9ButtonCursorCode', 'pointer');">pointer</button>
+                  <button class="toggle-btn" onclick="document.getElementById('sec9Button').style.cursor = 'default'; pxlDocs.updateToggle(this, null, 'sec9ButtonCursorCode', 'default');">default</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <pxl-stage id="sec9Stage" ratio="5 / 3" class="demo-stage">
+          <pxl-layer>
+            <pxl-grid stroke="#f1f5f9" major="4"></pxl-grid>
+
+            <pxl-circle id="sec9Circle" x="250" y="300" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
+
+            <pxl-group id="sec9Button" x="700" y="300" style="cursor: pointer">
+              <pxl-rect w="300" h="120" r="16" stroke="#3b82f6" strokewidth="4"
+                fill="ref.sec9Button.isHovered ? '#bfdbfe' : '#dbeafe66'"></pxl-rect>
+              <pxl-text size="27" fill="#3b82f6" align="center" baseline="middle" text="Button"></pxl-text>
+            </pxl-group>
+          </pxl-layer>
+        </pxl-stage>
+      </div>
+      <pre><code id="sec9Log" class="language-none">Hover or click a shape: the events appear here.</code></pre>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Prism Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+
+  <!-- Section 9: the event log (Tier 3: state across controls) -->
+  <script>
+    const sec9Lines = [];
+    let sec9Stop = false;
+
+    function sec9SetStop(stop) {
+      sec9Stop = stop;
+    }
+
+    // One line per event: who logs it, the type, the target and, for hover events, where the pointer came from or went
+    function sec9Log(who, event) {
+      const name = (node) => (node ? (node.id || node.localName).replace('sec9', '').toLowerCase() : '—');
+      let line = `${who.padEnd(7)}${event.type.padEnd(14)}target: ${name(event.target)}`;
+      if (event.type === 'pointerenter' || event.type === 'pointerleave') line += `, relatedTarget: ${name(event.relatedTarget)}`;
+      sec9Lines.unshift(line);
+      sec9Lines.length = Math.min(sec9Lines.length, 10);
+      document.getElementById('sec9Log').textContent = sec9Lines.join('\n');
+    }
+
+    const sec9Circle = document.getElementById('sec9Circle');
+    sec9Circle.r = 100; // a property, as frameworks set it
+    for (const [who, element] of [['circle', sec9Circle], ['button', document.getElementById('sec9Button')]]) {
+      for (const type of ['pointerenter', 'pointerleave', 'click']) {
+        element.addEventListener(type, (event) => {
+          sec9Log(who, event);
+          if (who === 'circle' && type === 'click' && sec9Stop) event.stopPropagation();
+        });
+      }
+    }
+    document.getElementById('sec9Stage').addEventListener('click', (event) => sec9Log('stage', event));
+  </script>
+</body>
+</html>

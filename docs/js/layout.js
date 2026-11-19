@@ -51,6 +51,7 @@ class DocsSidebar extends HTMLElement {
           <ul>
             <li><a href="index.html" class="${currentPath === 'index.html' ? 'active' : ''}">Introduction</a></li>
             <li><a href="installation.html" class="${currentPath === 'installation.html' ? 'active' : ''}">Installation</a></li>
+            <li><a href="frameworks.html" class="${currentPath === 'frameworks.html' ? 'active' : ''}">Frameworks</a></li>
             <li><a href="walkthrough.html" class="${currentPath === 'walkthrough.html' ? 'active' : ''}">Walkthrough</a></li>
             <li><a href="gallery.html" class="${currentPath === 'gallery.html' ? 'active' : ''}">Gallery</a></li>
           </ul>

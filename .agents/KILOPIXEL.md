@@ -312,6 +312,8 @@ A bare attribute (`<pxl-polyline closed>`, `el.hidden = true`, `toggleAttribute`
 
 ### Properties (JavaScript and Frameworks)
 
+For users: `docs/frameworks.html` (setup per framework, values, events, cursor, components, Tailwind, server rendering, known limits, a live event log).
+
 Every observed attribute is also a JavaScript property (`design/2026-10-30_framework_compatibility_plan.md` §6, §24): `el.r = 50`, `el.x = '500 + sin(t) * 100'`, `el.r = undefined`. React 19, Vue, Preact and Svelte set a property when the element has one (`name in element`); Angular `[x]`, Lit `.x` and Solid `prop:x` always do.
 
 - **Accessors** (`pxl.defineAccessors()`, `engine.js`): a getter / setter per observed attribute on the class prototype, defined the first time an instance of the class is created (`pxl._accessorClasses`), so custom shapes get them too. Not for hyphenated names (the `pxl-on-*` handlers stay attribute-only), and not for names the prototype already has: `id` and `hidden` stay native (`hidden` reflects to the attribute), as would an attribute named like another `HTMLElement` property or a class's own getter.

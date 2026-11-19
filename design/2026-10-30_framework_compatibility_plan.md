@@ -1,6 +1,6 @@
 # Framework Compatibility: Kilopixel as a Well-Behaved Custom Element
 
-- **Status**: 🟡 **Proposed** (2026-11-19, state and next steps §26 (§3 updated); smoke pages for React, Vue and Tailwind built, §25 (in `tests/smoke/`); W3 built: properties for every attribute, §24; W1 built: step 3 (DOM events on shapes and groups, handlers as listeners, mouse events, cursor on the canvases, layer `pointer-events` fix) §23.8; 2026-11-18, W1 build plan decided, §23, step 1 (handler rename) built, §23.5, step 2 (every shape hit-tested) built, §23.7: three steps, E1–E10, E1 changes D5 (no listener counts, the cursor only CSS), E10 adds handlers and hover / press states to groups, React / Vue / Tailwind expectations and known limits §23.6, E2 settles §22.5 (hit walk over the layer tree); 2026-11-17, DOM-like event model decided, §22: every shape gets events, no `interactive`, D5, D10, D11 decided; `process()` moved to the start of the frame, §4.1 and §15; steps 1–2 of §19.4 built: quick fixes §20, conformance tests `tests/frameworks.html` §21; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 5–6 of §19.4 not built)
+- **Status**: 🟡 **Proposed** (2026-11-19, `docs/frameworks.html` built, §26.4; state and next steps §26 (§3 updated); smoke pages for React, Vue and Tailwind built, §25 (in `tests/smoke/`); W3 built: properties for every attribute, §24; W1 built: step 3 (DOM events on shapes and groups, handlers as listeners, mouse events, cursor on the canvases, layer `pointer-events` fix) §23.8; 2026-11-18, W1 build plan decided, §23, step 1 (handler rename) built, §23.5, step 2 (every shape hit-tested) built, §23.7: three steps, E1–E10, E1 changes D5 (no listener counts, the cursor only CSS), E10 adds handlers and hover / press states to groups, React / Vue / Tailwind expectations and known limits §23.6, E2 settles §22.5 (hit walk over the layer tree); 2026-11-17, DOM-like event model decided, §22: every shape gets events, no `interactive`, D5, D10, D11 decided; `process()` moved to the start of the frame, §4.1 and §15; steps 1–2 of §19.4 built: quick fixes §20, conformance tests `tests/frameworks.html` §21; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 5–6 of §19.4 not built)
 - **Date**: 2026-10-30
 - **Related**: `design/prototypes/2026-10-30_framework_compatibility/review_checks.html` (review §19); `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`, `design/2026-11-04_stage_sizing_plan.md` (builds W2)
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
@@ -304,7 +304,7 @@ Each test that needs rendering forces it (`stage.resize()` / `alwaysrender`) so 
 | Svelte 5 | needs the compiler (esm.sh `svelte/compiler` in the page, or `npx`) | `onclick` (delegated) |
 | Angular | needs a build (`npx @angular/cli`, not in the repo) | `(click)`, `[attr.x]`, `[x]`; optional |
 
-**Docs page** `docs/frameworks.html` ("Using Kilopixel with Frameworks"), after W1–W3:
+**Docs page** `docs/frameworks.html` (built 2026-11-19, §26.4; "Using Kilopixel with Frameworks"), after W1–W3:
 
 - The DOM contract in one paragraph: "Kilopixel elements are standard custom elements; your framework sets attributes or properties and listens to events."
 - Per framework: the one setting needed (Vue `isCustomElement`, Angular `CUSTOM_ELEMENTS_SCHEMA`, Svelte none, React none), the event syntax (no attribute is needed, also for delegating frameworks, since §22), and the cursor through CSS (`cursor: pointer`, Tailwind `cursor-pointer`).
@@ -468,7 +468,7 @@ A review of this plan against the goal "Kilopixel works in the major frameworks 
 | 2 | Conformance tests (built 2026-11-17, §21) | `tests/frameworks.html` (§11), plus tests for step 1 | 1 session |
 | 3 | Events (W1), built 2026-11-18 / 2026-11-19 (§23.5–§23.8) | DOM events, `pxl-on-*` handlers (D1), D10 / D11 | 1–2 sessions |
 | 4 | Properties (W3), built 2026-11-19 (§24) | accessors, arrays (D8), values set before the upgrade | 1 session |
-| 5 | Distribution and docs (W8) | smoke pages (built 2026-11-19, §25), `docs/frameworks.html`, typings (also without npm, as a download), the Angular app; the npm package later, with publishing (§26) | 1–2 sessions |
+| 5 | Distribution and docs (W8) | smoke pages (built 2026-11-19, §25), `docs/frameworks.html` (built 2026-11-19, §26.4), typings (also without npm, as a download), the Angular app; the npm package later, with publishing (§26) | 1–2 sessions |
 | 6 | Evaluation model | two-phase step 2, the per-frame prototype, its D1, scoped names (D2) in the same design | several sessions |
 
 Plans that assume the evaluation model (throttling `maxfps`, tweens, `<pxl-clip>`, `space`) come after step 6.
@@ -775,7 +775,7 @@ The conformance tests (§11, `tests/frameworks.html`) imitate what frameworks do
 - **Next:**
   - **Angular** needs a build. Agreed approach (2026-11-19): an npm app in `tests/smoke/angular/` (first planned as a top-level `frameworks/angular/`; moved with the pages) with its own `package.json` and committed `package-lock.json`; `node_modules` and build output ignored by git; each laptop runs `npm ci` there. Needs a CLAUDE.md exception to "never create `node_modules`" (only inside `tests/smoke/<app>/`) and a step in "Working on Another Machine". Not built yet; asked before creating it.
   - More CDN pages if wanted: Preact, Lit (also a stage in a shadow root), Solid, Alpine, htmx; Svelte 5 needs its compiler in the page.
-  - `docs/frameworks.html` (§12, step 5), written from what the pages show.
+  - `docs/frameworks.html` (§12, step 5), written from what the pages show (built 2026-11-19, §26.4).
 
 ## 26. State 2026-11-19: Assessment and Next Steps
 
@@ -800,7 +800,7 @@ At runtime, in the browser, Kilopixel now behaves like a well-made custom elemen
 - Ids are global: components generate unique ones (D2 open).
 - `offsetX` on shape events equals `clientX`; capture listeners above the stage see the browser's click first (E9).
 - String properties other than `text` are code, like attribute values: untrusted data must not go into them.
-- No `docs/frameworks.html` yet: all of this is only in `.agents/KILOPIXEL.md` and this plan.
+- (Done 2026-11-19, §26.4: `docs/frameworks.html`.) No `docs/frameworks.html` yet: all of this is only in `.agents/KILOPIXEL.md` and this plan.
 
 ### 26.3 Next Steps, by Benefit for Users
 
@@ -811,3 +811,10 @@ At runtime, in the browser, Kilopixel now behaves like a well-made custom elemen
 5. **Larger topics, each with its own plan:** scoped names (D2, with the evaluation model, §19.3), a way to get a shape's position on the page (§23.6), accessibility (keyboard, focus, roles).
 
 **Not now:** the npm package (decided 2026-11-19: later, together with publishing; nothing is published yet, CLAUDE.md "Pre-release").
+
+### 26.4 Step 1 Built 2026-11-19: `docs/frameworks.html`
+
+- **Page:** "Frameworks", in the sidebar under "Getting Started" after "Installation" (`docs/js/layout.js`). Sections: 1. Setup (script tag; the one setting for Vue and Angular; React 19 or later; a TypeScript declaration until typings ship), 2. Values (properties, strings as expressions, literal `text`, `undefined`, last change wins; callouts on per-frame values and "Strings Are Code"), 3. Events (React, Vue, Angular, Svelte; the event list; groups as buttons; propagation; `pxl-on-*` next to framework listeners), 4. Cursor and Pointer, 5. Components (unique ids with `useId()`, `isHovered` instead of `:hover`), 6. Tailwind and CSS, 7. Server Rendering, 8. Known Limits, 9. Live Events Playground.
+- **Playground:** plain `addEventListener()` on a circle, a button group and the stage logs every `pointerenter`, `pointerleave` and `click` with `target` and `relatedTarget`; controls set the circle's radius as a property, switch `stopPropagation()` and the group's cursor. Checked with the real mouse in the browser pane: enter, click and bubbling on the circle, a click on the button's label counted by the group, `stopPropagation()` keeps the click from the stage. A first version had a center dot and a label on top of the circle: the dot took the circle's events (the decoration case the page describes), so they were removed.
+- **Prism:** the JSX component (`components/prism-jsx.min.js`, 1.29.0) on this page only, for the React snippets.
+- **Not yet in the page:** typings (§26.3 step 2); the Angular app's results (step 3).
