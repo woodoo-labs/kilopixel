@@ -36,4 +36,5 @@ scene and calls `runSceneChecks()` from a classic script, so it also reports whe
 Copy `vue.html` (template-based) or `react.html` (JSX-like with htm), keep the ids, the initial state and the
 `data-state` element as described in `checks.js`, and register both instances. Candidates from plan §12: Preact, Lit
 (also a stage in a shadow root), Solid, Alpine, htmx; Svelte 5 needs its compiler in the page. Angular needs a build:
-planned as an npm app in `tests/smoke/angular/` (its `node_modules` ignored by git, `npm ci` on each laptop).
+an npm app in `tests/smoke/angular/` (its `node_modules` ignored by git, `npm ci` on each laptop), skipped on
+2026-11-19 for now (framework plan §28).

@@ -1,6 +1,6 @@
 # Framework Compatibility: Kilopixel as a Well-Behaved Custom Element
 
-- **Status**: 🟡 **Proposed** (2026-11-19, typings built, §27.2; `docs/frameworks.html` built, §26.4; state and next steps §26 (§3 updated); smoke pages for React, Vue and Tailwind built, §25 (in `tests/smoke/`); W3 built: properties for every attribute, §24; W1 built: step 3 (DOM events on shapes and groups, handlers as listeners, mouse events, cursor on the canvases, layer `pointer-events` fix) §23.8; 2026-11-18, W1 build plan decided, §23, step 1 (handler rename) built, §23.5, step 2 (every shape hit-tested) built, §23.7: three steps, E1–E10, E1 changes D5 (no listener counts, the cursor only CSS), E10 adds handlers and hover / press states to groups, React / Vue / Tailwind expectations and known limits §23.6, E2 settles §22.5 (hit walk over the layer tree); 2026-11-17, DOM-like event model decided, §22: every shape gets events, no `interactive`, D5, D10, D11 decided; `process()` moved to the start of the frame, §4.1 and §15; steps 1–2 of §19.4 built: quick fixes §20, conformance tests `tests/frameworks.html` §21; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 5–6 of §19.4 not built)
+- **Status**: 🟡 **Proposed** (2026-11-19, where to continue §28 (the Angular app skipped for now); typings built, §27.2; `docs/frameworks.html` built, §26.4; state and next steps §26 (§3 updated); smoke pages for React, Vue and Tailwind built, §25 (in `tests/smoke/`); W3 built: properties for every attribute, §24; W1 built: step 3 (DOM events on shapes and groups, handlers as listeners, mouse events, cursor on the canvases, layer `pointer-events` fix) §23.8; 2026-11-18, W1 build plan decided, §23, step 1 (handler rename) built, §23.5, step 2 (every shape hit-tested) built, §23.7: three steps, E1–E10, E1 changes D5 (no listener counts, the cursor only CSS), E10 adds handlers and hover / press states to groups, React / Vue / Tailwind expectations and known limits §23.6, E2 settles §22.5 (hit walk over the layer tree); 2026-11-17, DOM-like event model decided, §22: every shape gets events, no `interactive`, D5, D10, D11 decided; `process()` moved to the start of the frame, §4.1 and §15; steps 1–2 of §19.4 built: quick fixes §20, conformance tests `tests/frameworks.html` §21; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 5–6 of §19.4 not built)
 - **Date**: 2026-10-30
 - **Related**: `design/prototypes/2026-10-30_framework_compatibility/review_checks.html` (review §19); `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`, `design/2026-11-04_stage_sizing_plan.md` (builds W2)
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
@@ -773,7 +773,7 @@ The conformance tests (§11, `tests/frameworks.html`) imitate what frameworks do
 - **Not in the normal run:** they need the network (CDNs), so `node tools/run_tests.js` and CI leave them out; `node tools/run_tests.js --smoke` runs them headless on demand.
 - **Findings:** `design/prototypes/2026-10-30_framework_compatibility/FINDINGS.md` (second part, 2026-11-19).
 - **Next:**
-  - **Angular** needs a build. Agreed approach (2026-11-19): an npm app in `tests/smoke/angular/` (first planned as a top-level `frameworks/angular/`; moved with the pages) with its own `package.json` and committed `package-lock.json`; `node_modules` and build output ignored by git; each laptop runs `npm ci` there. Needs a CLAUDE.md exception to "never create `node_modules`" (only inside `tests/smoke/<app>/`) and a step in "Working on Another Machine". Not built yet; asked before creating it.
+  - (Skipped 2026-11-19 for now, §28.) **Angular** needs a build. Agreed approach (2026-11-19): an npm app in `tests/smoke/angular/` (first planned as a top-level `frameworks/angular/`; moved with the pages) with its own `package.json` and committed `package-lock.json`; `node_modules` and build output ignored by git; each laptop runs `npm ci` there. Needs a CLAUDE.md exception to "never create `node_modules`" (only inside `tests/smoke/<app>/`) and a step in "Working on Another Machine". Not built yet; asked before creating it.
   - More CDN pages if wanted: Preact, Lit (also a stage in a shadow root), Solid, Alpine, htmx; Svelte 5 needs its compiler in the page.
   - `docs/frameworks.html` (§12, step 5), written from what the pages show (built 2026-11-19, §26.4).
 
@@ -791,7 +791,7 @@ At runtime, in the browser, Kilopixel now behaves like a well-made custom elemen
 | Svelte, Solid, Lit | very likely ✅: they use the DOM operations `tests/frameworks.html` checks; not verified |
 | TypeScript projects (most React and Angular apps) | ⚠️ runs, but TypeScript rejects `<pxl-circle r={50}>` without typings: the biggest practical obstacle (2026-11-19: typings built, §27: ✅ for React 19, Preact 11, Solid 2, Vue 3, Svelte 5 and Angular, checked against their real types) |
 | Next.js, Nuxt (server rendering) | ⚠️ the import is safe (guard, §20) and hydration should match (T-H1); untested |
-| Angular | ❓ untested; with zone.js every frame of an animated stage triggers change detection (a docs note, `runOutsideAngular()`) |
+| Angular | ❓ untested; with zone.js every frame of an animated stage triggers change detection (a docs note, `runOutsideAngular()`); the Angular app is skipped for now (§28); its typings are the core file, checked in §27 |
 
 ### 26.2 What Framework Users Will Still Notice
 
@@ -806,7 +806,7 @@ At runtime, in the browser, Kilopixel now behaves like a well-made custom elemen
 
 1. **`docs/frameworks.html`** (§12): short, and it makes everything above usable: the script tag in each framework, the one setting some need (Vue `isCustomElement`, Angular `CUSTOM_ELEMENTS_SCHEMA`), events, properties, the known limits.
 2. **Typings** (built 2026-11-19, §27): generated from `observedAttributes` and `static defaults` (§12, §19.2). Removes the TypeScript obstacle; they can be shipped without npm, as a downloadable `kilopixel.d.ts` next to `pxl.min.js`.
-3. **The Angular app** in `tests/smoke/angular/` (§25): verifies the largest untested framework and measures the zone.js cost. Needs `npm ci` and a CLAUDE.md exception; asked before creating it.
+3. (Skipped 2026-11-19 for now, §28.) **The Angular app** in `tests/smoke/angular/` (§25): verifies the largest untested framework and measures the zone.js cost. Needs `npm ci` and a CLAUDE.md exception; asked before creating it.
 4. **Smoke pages for Svelte and Lit** (cheap with the shared checks, §25).
 5. **Larger topics, each with its own plan:** scoped names (D2, with the evaluation model, §19.3), a way to get a shape's position on the page (§23.6), accessibility (keyboard, focus, roles).
 
@@ -817,7 +817,7 @@ At runtime, in the browser, Kilopixel now behaves like a well-made custom elemen
 - **Page:** "Frameworks", in the sidebar under "Getting Started" after "Installation" (`docs/js/layout.js`). Sections: 1. Setup (script tag; the one setting for Vue and Angular; React 19 or later; a TypeScript declaration until typings ship), 2. Values (properties, strings as expressions, literal `text`, `undefined`, last change wins; callouts on per-frame values and "Strings Are Code"), 3. Events (React, Vue, Angular, Svelte; the event list; groups as buttons; propagation; `pxl-on-*` next to framework listeners), 4. Cursor and Pointer, 5. Components (unique ids with `useId()`, `isHovered` instead of `:hover`), 6. Tailwind and CSS, 7. Server Rendering, 8. Known Limits, 9. Live Events Playground.
 - **Playground:** plain `addEventListener()` on a circle, a button group and the stage logs every `pointerenter`, `pointerleave` and `click` with `target` and `relatedTarget`; controls set the circle's radius as a property, switch `stopPropagation()` and the group's cursor. Checked with the real mouse in the browser pane: enter, click and bubbling on the circle, a click on the button's label counted by the group, `stopPropagation()` keeps the click from the stage. A first version had a center dot and a label on top of the circle: the dot took the circle's events (the decoration case the page describes), so they were removed.
 - **Prism:** the JSX component (`components/prism-jsx.min.js`, 1.29.0) on this page only, for the React snippets.
-- **Not yet in the page:** typings (§26.3 step 2); the Angular app's results (step 3).
+- **Not yet in the page:** typings (§26.3 step 2; added 2026-11-19, §27.2); the Angular app's results (step 3; skipped, §28).
 
 ## 27. Typings (Decided 2026-11-19)
 
@@ -850,4 +850,23 @@ Step 2 of §26.3. TypeScript projects reject `<pxl-circle r={50}>` without type 
 - **Docs:** `docs/frameworks.html` section 1 (downloads per framework, a property example, "Inside the Project"; replaces the stopgap declaration), `docs/installation.html` (a pointer to the downloads), `.agents/KILOPIXEL.md` "Build System", `tests/types/README.md`; CLAUDE.md: the npm exception for `tests/types/` and `tests/smoke/<app>/`, `npm ci` in "Working on Another Machine", the `--types` flag.
 - **Size:** `pxl.min.js` unchanged; the definitions are separate downloads.
 - **Not covered:** custom shapes (user classes extending `pxl.Shape` with their own tags) get no types; Solid 1 and Preact 10 (older majors).
-- **Next:** §26.3 step 3, the Angular app in `tests/smoke/angular/`.
+- **Next:** where to continue: §28 (the Angular app, §26.3 step 3, skipped for now).
+
+## 28. Where to Continue (2026-11-19)
+
+The framework work paused here on 2026-11-19, with the Angular app (§26.3 step 3) skipped for now. A summary to pick it up later.
+
+**Done** (in §19.4's order): quick fixes (§20), conformance tests `tests/frameworks.html` (§21), events W1 (§23), properties W3 (§24), smoke pages for React, Vue and Tailwind (§25), `docs/frameworks.html` (§26.4), TypeScript definitions as downloads (§27). W2 was built with the stage sizing plan. The contract row by row: §3; by kind of project: §26.1.
+
+**Checks:**
+- `node tools/run_tests.js`: the full run (also CI).
+- `node tools/run_tests.js --smoke`: React, Vue and Tailwind in `tests/smoke/` (needs internet). After changes to interaction or properties, also one smoke page with the real mouse (CLAUDE.md "Tests").
+- `node tools/run_tests.js --types`: the TypeScript definitions against the real framework types; `npm ci` in `tests/types/` once per laptop.
+
+**Open, in the order of §26.3:**
+1. **Smoke pages for Svelte 5 and Lit** (cheap with the shared checks, `tests/smoke/README.md` "Adding a Framework"); Lit also with a stage in a shadow root.
+2. **Own plans:** scoped names (D2, with the evaluation model, §19.3), a shape's position on the page (tooltips, §23.6), accessibility (keyboard, focus, roles; Svelte's checks already warn about it).
+3. **A small engine change:** a layer's `alpha` / `blend` / `filter` changed by a property or attribute redraws all its shapes (§24.2, TODO §30).
+4. **The Angular app** (`tests/smoke/angular/`, npm): skipped 2026-11-19. Worth building when an Angular user appears, or to measure the zone.js cost (§26.2). Angular's typings already work (the core file, §27).
+5. **The npm package:** later, together with publishing (CLAUDE.md "Pre-release"); the typings then ship in it.
+6. **§19.4 step 6:** the evaluation model (TODO §29, §40), with D2.
