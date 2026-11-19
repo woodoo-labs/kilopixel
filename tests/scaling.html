@@ -142,6 +142,21 @@
       return ms;
     }, 1000), { timeout: 20000 });
 
+    // Properties store numbers without parsing or compiling (framework plan §24)
+    test('setting a property on shapes that have readers is linear', () => expectLinear((n) => {
+      const { layer, clear } = freshStage();
+      layer.insertAdjacentHTML('beforeend', shapesMarkup(n, true, 'sap'));
+      const shapes = [...layer.querySelectorAll('pxl-circle[id]')];
+      for (let i = 0; i < shapes.length; i++) shapes[i].x = i + 0.5; // warm-up: readers run once
+      const t0 = performance.now();
+      for (let round = 1; round <= 5; round++) {
+        for (let i = 0; i < shapes.length; i++) shapes[i].x = i + round * 0.37;
+      }
+      const ms = performance.now() - t0;
+      clear();
+      return ms;
+    }, 1000), { timeout: 20000 });
+
     // The readers share one expression: with one per reader, 4,000 compiled functions make memory effects, not the
     // broadcast, grow faster than linear (measured ratio up to 4.5)
     test('one variable read by n shapes: a change costs linear time', () => expectLinear((n) => {

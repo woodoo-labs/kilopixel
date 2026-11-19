@@ -5,9 +5,13 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
   constructor() {
     super();
+    // Before any field exists: own properties now were set before the upgrade (pxl.takeOwnProperties)
+    const ownKeys = Object.keys(this);
+    pxl.defineAccessors(this.constructor);
+
     this.attributeExpressions = {};
     this.attributeValues = {};
-    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
+    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
     Object.defineProperty(this.attributeValues, '$node', { value: this, enumerable: false, writable: false });
     // Drawn origin in the parent space: dx / dy are applied after rotate / scale / skew, so it's the local matrix translation
     Object.defineProperty(this.attributeValues, 'tx', { get: () => this.getLocalMatrix()[4], enumerable: false });
@@ -63,6 +67,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this._lastError = null;
     this._lastErrorMessage = null;
     this._errorCount = 0;
+
+    // Properties set before the upgrade, applied in connectedCallback: [name, value, …] or null
+    this._pendingProperties = ownKeys.length === 0 ? null : pxl.takeOwnProperties(this, ownKeys);
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -77,16 +84,40 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       this.setHandler(name, newValue);
       return;
     }
-    pxl.compileAttribute(this, name, newValue);
-    this.isAnimated = this.animatedAttributeKeys.length > 0;
-    if (pxl.isSpatialKey(name)) {
-      this.setLocalMatrixDirty();
+    this.setValue(name, newValue);
+  }
+
+  // --- Values ---
+
+  // One path for attributes and properties (the accessors of pxl.defineAccessors()). A string is compiled like an
+  // attribute (null: removed, the default); any other value is stored as it is, without parsing or compiling.
+  // The same parsed value again changes nothing: frameworks and hydration set unchanged values again.
+  setValue(name, value) {
+    if (value === this.attributeExpressions[name]) return;
+    if (typeof value === 'function') {
+      pxl.warnFunctionValue(this, name);
+      return;
     }
+    if (value === null || typeof value === 'string') pxl.compileAttribute(this, name, value);
+    else pxl.storeValue(this, name, value);
+    this.valueChanged(name);
+  }
+
+  // After a value changed: the animation state, the matrix, readers and the layer
+  valueChanged(name) {
+    this.isAnimated = this.animatedAttributeKeys.length > 0;
+    if (pxl.isSpatialKey(name)) this.setLocalMatrixDirty();
     if (this.refKey) pxl.broadcast(this.refKey);
     this.parentLayer?.invalidate();
   }
 
   connectedCallback() {
+    if (this._pendingProperties !== null) {
+      const pending = this._pendingProperties;
+      this._pendingProperties = null;
+      pxl.setPendingProperties(this, pending);
+    }
+
     this.parentLayer = this.closest('pxl-layer');
     this.parentContainer = this.parentElement.closest('pxl-group, pxl-layer');
     this._lastParentMatrixVersion = -1; // a new parent's version may equal the old one's

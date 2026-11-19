@@ -24,8 +24,9 @@ pxl.Variable = class Variable extends pxl.PxlNode {
     super.disconnectedCallback();
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    super.attributeChangedCallback(name, oldValue, newValue);
+  // From the attribute and the property (el.value = 5)
+  valueChanged(name) {
+    super.valueChanged(name);
     // No layer to invalidate: the stage starts its loop when the value becomes animated
     this.stage?.requestRender();
   }

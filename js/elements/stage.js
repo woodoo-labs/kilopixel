@@ -44,6 +44,8 @@ pxl.Stage = class Stage extends HTMLElement {
 
   constructor() {
     super();
+    // Before any field exists: own properties now were set before the upgrade (pxl.takeOwnProperties)
+    const ownKeys = Object.keys(this);
     this.layers = [];
     this._variables = []; // stage-level <pxl-var>: inside the stage, outside every layer
     this._isOrderDirty = false;
@@ -64,8 +66,11 @@ pxl.Stage = class Stage extends HTMLElement {
       mouseX: 500, mouseY: 500, isHovered: false, width: 1000, height: 1000 / this._parsedRatio,
       fps: 0, renderAvg: '0.00', renderMax: '0.00'
     };
-    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
+    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
     Object.defineProperty(this.attributeValues, '$node', { value: this, enumerable: false, writable: false });
+
+    // Properties set before the upgrade, applied in connectedCallback: [name, value, …] or null
+    this._pendingProperties = ownKeys.length === 0 ? null : pxl.takeOwnProperties(this, ownKeys);
 
     // Performance metrics
     this.perfFrames = 0;
@@ -78,6 +83,30 @@ pxl.Stage = class Stage extends HTMLElement {
     };
 
     this.interaction = new pxl.InteractionEngine(this);
+  }
+
+  // Properties for frameworks (design/2026-10-30_framework_compatibility_plan.md §24). Unlike the other elements', they
+  // write the attribute: a stage has two, set rarely, and the attribute path parses them. false, null and undefined
+  // remove the attribute.
+  get ratio() {
+    return this._parsedRatio;
+  }
+
+  set ratio(value) {
+    this.reflectAttribute('ratio', value);
+  }
+
+  get alwaysrender() {
+    return this.isAlwaysRender();
+  }
+
+  set alwaysrender(value) {
+    this.reflectAttribute('alwaysrender', value);
+  }
+
+  reflectAttribute(name, value) {
+    if (value === false || value === null || value === undefined) this.removeAttribute(name);
+    else this.setAttribute(name, value === true ? '' : String(value));
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -103,6 +132,11 @@ pxl.Stage = class Stage extends HTMLElement {
   }
 
   connectedCallback() {
+    if (this._pendingProperties !== null) {
+      const pending = this._pendingProperties;
+      this._pendingProperties = null;
+      pxl.setPendingProperties(this, pending);
+    }
     this._isVisible = true;
     if (this.id) {
       pxl.nodes[this.id] = this.attributeValues;

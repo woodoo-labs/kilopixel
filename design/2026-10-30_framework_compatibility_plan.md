@@ -1,6 +1,6 @@
 # Framework Compatibility: Kilopixel as a Well-Behaved Custom Element
 
-- **Status**: 🟡 **Proposed** (2026-11-19, W1 built: step 3 (DOM events on shapes and groups, handlers as listeners, mouse events, cursor on the canvases, layer `pointer-events` fix) §23.8; 2026-11-18, W1 build plan decided, §23, step 1 (handler rename) built, §23.5, step 2 (every shape hit-tested) built, §23.7: three steps, E1–E10, E1 changes D5 (no listener counts, the cursor only CSS), E10 adds handlers and hover / press states to groups, React / Vue / Tailwind expectations and known limits §23.6, E2 settles §22.5 (hit walk over the layer tree); 2026-11-17, DOM-like event model decided, §22: every shape gets events, no `interactive`, D5, D10, D11 decided; `process()` moved to the start of the frame, §4.1 and §15; steps 1–2 of §19.4 built: quick fixes §20, conformance tests `tests/frameworks.html` §21; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 4–6 of §19.4 not built)
+- **Status**: 🟡 **Proposed** (2026-11-19, W3 built: properties for every attribute, §24; W1 built: step 3 (DOM events on shapes and groups, handlers as listeners, mouse events, cursor on the canvases, layer `pointer-events` fix) §23.8; 2026-11-18, W1 build plan decided, §23, step 1 (handler rename) built, §23.5, step 2 (every shape hit-tested) built, §23.7: three steps, E1–E10, E1 changes D5 (no listener counts, the cursor only CSS), E10 adds handlers and hover / press states to groups, React / Vue / Tailwind expectations and known limits §23.6, E2 settles §22.5 (hit walk over the layer tree); 2026-11-17, DOM-like event model decided, §22: every shape gets events, no `interactive`, D5, D10, D11 decided; `process()` moved to the start of the frame, §4.1 and §15; steps 1–2 of §19.4 built: quick fixes §20, conformance tests `tests/frameworks.html` §21; D1, D4, D6, D7 decided; W2 built with the stage sizing plan; steps 5–6 of §19.4 not built)
 - **Date**: 2026-10-30
 - **Related**: `design/prototypes/2026-10-30_framework_compatibility/review_checks.html` (review §19); `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`, `design/2026-11-04_stage_sizing_plan.md` (builds W2)
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
@@ -49,7 +49,7 @@ From the React 19 / Vue 3.5 prototypes (`design/prototypes/2026-10-30_framework_
 |---|---|---|
 | C1 | ✅ | both prototypes: elements upgrade, stages size and animate (with the browser pane visible) |
 | C2 | ✅ (2026-11-16, §20) | before: attributes after connect worked, **except `id`**: `id` isn't an observed attribute, so an `id` set or changed after connect is never registered in `pxl.nodes` (`node.js` `connectedCallback` reads it once). Measured 2026-11-15 (§19.1): a renamed element also keeps its **old** entry in `pxl.nodes` after it is removed (`disconnectedCallback()` deletes only the current id), so readers of the old id keep reading a removed element |
-| C3 | ❌ | no properties: `el.r = 50` creates a plain JS property and changes nothing. React / Vue only worked because `r` isn't a property of `HTMLElement` and they fell back to attributes. Collisions with `HTMLElement` (checked in the browser over all 82 observed attribute names): `hidden` (harmless, it reflects to the attribute) and `onclick` (see C7) |
+| C3 | ✅ (2026-11-19, §24) | no properties: `el.r = 50` creates a plain JS property and changes nothing. React / Vue only worked because `r` isn't a property of `HTMLElement` and they fell back to attributes. Collisions with `HTMLElement` (checked in the browser over all 82 observed attribute names): `hidden` (harmless, it reflects to the attribute) and `onclick` (see C7) |
 | C4 | ✅ | Rule A; verified (`zoom={undefined}` → attribute removed → `1`) |
 | C5 | ❌ | Kilopixel dispatches no DOM events; `@click` never fires (the browser's click targets the layer canvas, which isn't inside `<pxl-circle>`) |
 | C6 | ❌ | same; React `onClick` never fires |
@@ -61,7 +61,7 @@ From the React 19 / Vue 3.5 prototypes (`design/prototypes/2026-10-30_framework_
 | C12 | ⚠️ | parents are found with `closest('pxl-layer')`, `parentElement.closest('pxl-group, pxl-layer')`, `closest('pxl-stage')`: they stop at a shadow root. Slotted children are fine (they stay in the light tree of the host) |
 | C13 | ⚠️ | `pxl.nodes` is one flat registry per document. Each instance needs unique ids; `useId()` values (React `:r0:`, Vue `v-0`) aren't valid in `ref.<id>` and must be cleaned (`'p' + id.replace(/[^a-zA-Z0-9]/g, '')`) |
 | C14 | ⚠️ | identical values are skipped (`oldValue === newValue`); numbers aren't compiled. But every distinct **expression** string is compiled and cached forever (`pxl.animationCache` / `pxl.staticCache`): 71 slider steps of a rebuilt `x="${base} + sin(t / 400) * 20"` grew `animationCache` from 4 to 74 entries |
-| C15 | ⚠️ | upgrading after the markup works (attributes are read on upgrade). Properties set before the upgrade would shadow future accessors (only relevant once C3 exists) |
+| C15 | ✅ (2026-11-19, §24) | upgrading after the markup works (attributes are read on upgrade). Properties set before the upgrade would shadow future accessors (only relevant once C3 exists) |
 | C16 | ⚠️ (guard built 2026-11-16, §20; npm and typings open) | (2026-11-15, §19.1) no npm package and no import entry point; the bundle starts with `window.pxl = …` and extends `HTMLElement`, so importing it on a server throws; a second copy replaces `window.pxl`, empties the registry and throws `TypeError`s on the elements of the first copy; no typings |
 | C17 | ✅ (2026-11-16, §20) | (2026-11-15, §19.1) a shape's children are slotted into the layer's shadow root (D6) and render as visible HTML text above the canvas |
 
@@ -159,6 +159,8 @@ The hand cursor (`isClickable()`) should also show for shapes that a framework l
 
 ### 6.1 Generated Accessors
 
+**Built 2026-11-19 (§24)** with these differences: one `setValue()` path for attributes and properties; any non-string value is stored as given (D8 for every attribute); a string set as `text` is literal; a function value warns; accessors are defined lazily per class.
+
 For every observed attribute of an element class, define a getter / setter on the prototype once (at class definition), named like the attribute:
 
 ```js
@@ -186,6 +188,8 @@ Object.defineProperty(Class.prototype, name, {
 - **Cost**: accessors live on the prototype (no per-instance cost). `pxl.setAttributeValue` for numbers is cheaper than today's string path (no `Number()` parse, no regex checks).
 
 ### 6.2 Properties Set Before the Upgrade (C15)
+
+**Built 2026-11-19 (§24, P7):** the constructor takes the own properties (`Object.keys(this)` before any field exists), `connectedCallback()` sets them again after the attributes.
 
 If a framework sets `el.r = 50` before `customElements.define` ran (library loaded later, code splitting), `r` becomes an own property of the element and shadows the accessor. Standard fix in the constructor or `connectedCallback`:
 
@@ -241,7 +245,7 @@ Today the Kilopixel tree must be connected through light DOM. Two steps:
 
 Mostly verification (§11), plus:
 
-- **`ref.<id>.set(name, …)` with an unknown attribute name** silently sets a DOM attribute that nothing observes. Found today: `examples/test32.html` still calls `set('scale', …)` 20 times after the `zoom` rename (fixed separately). A warning for names that aren't in the element's `observedAttributes` would have caught it. Only in `set()` (Kilopixel's API), not for DOM attributes in general (frameworks add `class`, `style`, `data-*`, `aria-*`).
+- **`ref.<id>.set(name, …)` with an unknown attribute name** silently sets a DOM attribute that nothing observes. Found today: `examples/test32.html` still calls `set('scale', …)` 20 times after the `zoom` rename (fixed separately). A warning for names that aren't in the element's `observedAttributes` would have caught it. Only in `set()` (Kilopixel's API), not for DOM attributes in general (frameworks add `class`, `style`, `data-*`, `aria-*`). **Built 2026-11-19 (§24, P6):** a warning once per element type and name.
 - **`pxl-stage` without size** (hidden containers, `display: none` parents, background tabs): document that the stage sizes itself when it becomes visible (`ResizeObserver`), and that frameworks rendering into hidden tabs see `unit = 0` until then.
 
 ## 11. Conformance Test Page (`tests/frameworks.html`)
@@ -320,7 +324,7 @@ Sidebar: a new entry under "Engine & Reactivity" or a new section "Integration".
 | D5 | Hand cursor for framework listeners | `interactive` implies pointer / separate `cursor` attribute (§4.4) / **the shape's CSS `cursor`** (§22.3) | **decided 2026-11-17:** the shape's CSS `cursor`, no `interactive` (§22.3); before: `interactive` implies pointer. **Changed 2026-11-18 (§23 E1):** no listener counts; the cursor is only CSS, and the hand for `pxl-on-click` / `-down` / `-up` comes from a rule of the default styles |
 | D6 | `<slot>` in the layer's shadow root | yes / no (§5) | **decided 2026-11-14:** yes |
 | D7 | Stage `aspect-ratio` | inline / CSS custom property (§5) | **decided 2026-11-14:** inline, documented ("set single properties on a stage's `style`, don't replace the whole attribute") |
-| D8 | Properties for array-valued attributes | direct arrays / strings only (§6.1) | direct where the parsed form is an array |
+| D8 | Properties for array-valued attributes | direct arrays / strings only (§6.1) | direct where the parsed form is an array. **Built 2026-11-19 (§24, P3):** every non-string value is stored as given, for every attribute |
 | D9 | Scope of the first implementation | all workstreams / W1 + W2 + W5.1 + tests first | W1, W2, W5.1, W4, tests (§14 phase 1); W3 next; W5.2 / W6 only on demand. **2026-11-15:** replaced by the order in §19.4 (quick fixes first, distribution W8 added) (closed) |
 | D10 | Clicks on shapes without `interactive` (§19.2) | `interactive` needed for every delegated listener (§4.2) / `click`, `pointerdown`, `pointerup` hit-test every shape of the stage when they arrive, `interactive` only for hover with delegated listeners | the second: React / Svelte / Solid `onClick` then works without an extra attribute; needs D11. **Decided 2026-11-17 (§22):** a third option, every shape hit-tested for clicks **and** hover with a bounding-box pre-check (measured 5–25× faster than testing every path): no `interactive` at all |
 | D11 | Shapes that should not catch clicks (with D10, a decorative shape on top catches the click, as in the DOM) | a `pointer-events`-like attribute / only shapes with a fill or stroke at the point count (as today) and nothing else / **CSS `pointer-events: none`** (§22.3) | **decided 2026-11-17:** CSS `pointer-events: none`, inherited, so a layer or group with it leaves its subtree out; read with `getComputedStyle()` for layers, groups and the box-check candidates only (§22.4) |
@@ -341,7 +345,7 @@ Sidebar: a new entry under "Engine & Reactivity" or a new section "Integration".
 
 **Phase 2: properties**
 
-7. W3 accessors + pre-upgrade properties (+ T-C3…, T-U1, T-K2). `feat(engine): attribute properties on all elements`.
+7. (Built 2026-11-19, §24.) W3 accessors + pre-upgrade properties (+ T-C3…, T-U1, T-K2). `feat(engine): attribute properties on all elements`.
 8. Re-run the smoke pages; React / Vue now pass numbers as properties.
 
 **Phase 3: docs and typings**
@@ -399,7 +403,7 @@ No per-frame cost for pages that don't use the new features; some paths get chea
 | `interactive` (W1) | only for shapes the user marks: hit-tested on pointer moves, like shapes with handlers today (2026-11-17, §22: every shape with a box pre-check instead, 0.1–0.4 µs per shape per pointer frame) | — | — |
 | Canvas in a shadow root (W2) | none: drawing and compositing unchanged | one shadow root and `<style>` per layer, once | canvas can't be removed by `innerHTML` or frameworks |
 | Stylesheet defaults (W2) | none | one `<style>` per page (or per shadow root with a stage), once | users override styles without `!important` |
-| Property accessors (W3) | none | defined once on the prototype; the pre-upgrade check runs once per element at creation (~80 `hasOwnProperty` checks) | numbers set as properties skip parsing and compiling |
+| Property accessors (W3) | none | defined once on the prototype; the pre-upgrade check runs once per element at creation (~80 `hasOwnProperty` checks) | numbers set as properties skip parsing and compiling (as built: one `Object.keys()` per element, §24) |
 | Cache bound (W4) | none | one size check per compile | bounded memory |
 | `id` observed (W5.1) | none | only when an `id` changes | — |
 
@@ -461,7 +465,7 @@ A review of this plan against the goal "Kilopixel works in the major frameworks 
 | 1 | Quick fixes (built 2026-11-16, §20) | removal cost, W5.1 (`id` observed, old key deleted), W8 guard in `build.js`, W4 cache bound and the growing sets, W9 hidden text children. Acceptance tests: the four `test.known()` in `tests/index.html`, section "Known bugs (framework review)" (2026-11-16, `design/2026-11-15_testing_plan.md` §14); the removal cost gets a scaling check there (step 6) | 1 session |
 | 2 | Conformance tests (built 2026-11-17, §21) | `tests/frameworks.html` (§11), plus tests for step 1 | 1 session |
 | 3 | Events (W1), built 2026-11-18 / 2026-11-19 (§23.5–§23.8) | DOM events, `pxl-on-*` handlers (D1), D10 / D11 | 1–2 sessions |
-| 4 | Properties (W3) | accessors, arrays (D8), values set before the upgrade | 1 session |
+| 4 | Properties (W3), built 2026-11-19 (§24) | accessors, arrays (D8), values set before the upgrade | 1 session |
 | 5 | Distribution and docs (W8) | npm layout, typings generator, smoke pages, `docs/frameworks.html` | 1–2 sessions |
 | 6 | Evaluation model | two-phase step 2, the per-frame prototype, its D1, scoped names (D2) in the same design | several sessions |
 
@@ -711,3 +715,41 @@ Built as decided in §23.1–§23.3, with five changes agreed before building (A
 - **Docs:** the events tab of the API reference (`docs/js/api-tabs.js`): the handlers (also on groups), the states, and a new part "DOM Events (JavaScript and Frameworks)" with the events, `offsetX` (use `clientX` or `ref.<stage>.mouseX`), cursor and `pointer-events`, `touch-action` for drags on touch screens, and the known limits (E9, `:hover`). `.agents/KILOPIXEL.md`: Interaction System (new parts States, Handlers and DOM Events; Cursor), Group reference, Event Handling, AI guide §7 (a button as a group).
 - **Found, not part of W1:** with zone.js (Angular before zoneless), every frame of an animated stage runs change detection, because the frames come from patched `requestAnimationFrame`; worth a docs note (`runOutsideAngular()`) with the framework docs (§19.4 step 5).
 - **Next:** §19.4 step 4, properties (W3).
+
+## 24. W3 Properties (Decided and Built 2026-11-19)
+
+Step 4 of §19.4. Built as proposed in §6, with the decisions and additions below (agreed before building, after a review of edge cases and of the cost of framework updates in every frame).
+
+### 24.1 Decisions
+
+| # | Decision | Why |
+|---|---|---|
+| P1 | **One path for attributes and properties:** `PxlNode.setValue(name, value)`, then `valueChanged(name)`. A string or `null` goes through `pxl.compileAttribute()`, any other value is stored as it is (`pxl.storeValue()`); the same parsed value again is skipped | Numbers, arrays and objects need no parsing; frameworks and hydration set unchanged values again |
+| P2 | **Accessors defined lazily per class** (`pxl.defineAccessors()`, the first instance of a class), for every observed attribute except hyphenated names and names the prototype already has | Custom shapes get them without calling anything; `id`, `hidden` and a class's own getters keep theirs |
+| P3 | **D8 for every attribute:** any non-string value is stored as given (arrays by reference, gradient descriptors), no per-attribute list | The parsed form of an attribute string is the same kind of value |
+| P4 | **`text` as a property is literal** (decision 1 of the review): a string set as `el.text` is never compiled | Frameworks bind data to it; compiling data runs it as code (`alert(1)`) or fails (`Q1 - 2024`) |
+| P5 | **A function value warns once per element** and leaves the value (decision 2) | `x={() => …}` would otherwise throw inside the framework's render; functions as values stay "later" (§6.1) |
+| P6 | **`ref.<id>.set()`** passes non-strings through the property; strings still compile; an unknown name warns once (T-N1, §10) (decision 3) | Handlers pass numbers without compiling, `set('linedash', [20, 10])` keeps the array |
+| P7 | **Values set before the upgrade** are taken in the constructor (`Object.keys(this)` before any field exists) and set again at the start of `connectedCallback()`, after the attributes | The framework's value wins over server HTML (§6.2 placed it in the constructor or `connectedCallback`) |
+| P8 | **Stage:** `ratio` and `alwaysrender` properties write the attribute | Two values, set rarely; the attribute path parses them |
+| A | **CSS colors stay text:** `hsl()` / `hsla()` with `%`, `hwb()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `color()` are not compiled, like `rgb()` | Measured: a new `hsl()` string compiled in about 90 µs and took a cache slot; a color animated through framework state on 100 shapes cost about 9 ms per frame and churned the cache |
+| B | **Points:** an array (flat or pairs) is read in place; with the same number of coordinates the keys and the buffer stay | Measured: 200 points by attribute about 150 µs and new objects per set |
+
+### 24.2 Built
+
+- **Engine** (`js/engine.js`: `pxl.storeValue()`, `pxl.defineAccessors()`, `pxl.takeOwnProperties()`, `pxl.setPendingProperties()`, `pxl.setFromRef()`, `pxl.warnFunctionValue()`; `js/elements/node.js`: `setValue()`, `valueChanged()`, the pending properties; `js/elements/shapes/polyline.js`: `points` accessor, `setValue()`, `setPoints()`, `resizePoints()` (replaces `clearPoints()`); `js/elements/shapes/text.js`: the literal `text` accessor; `js/elements/variable.js`: `valueChanged()` asks for a frame; `js/elements/stage.js`: `ratio`, `alwaysrender`, `reflectAttribute()`, pending properties, `set()`; `js/compiler.js`: `pxl.CSS_HSL_REGEX`, `pxl.CSS_COLOR_FUNCTION_REGEX`).
+- **Size:** 66.25 → 69.45 KB minified, gzipped 19.55 → about 20.5 KB (the docs say ~69KB and ~21KB); more than the estimate of about +2 KB: the warnings' messages and unmangled property names.
+- **Cost** (`design/prototypes/2026-10-30_framework_compatibility/w3_property_costs.html`, headless with `gc()`, per set, one reader of the shape):
+
+| Update | Before | Now |
+|---|---|---|
+| `x` as a number | 3.8–5.2 µs (`setAttribute()`) | 0.5 µs, 24 bytes (the boxed decimal number, as in any animation) |
+| `fill` with a new `hsl(…, 50%, 50%)` | about 90 µs, one cache entry | 0.7–1.3 µs, no cache entry |
+| `text` with a new string | compiled when it looked like code | 0.2–0.4 µs, nothing allocated |
+| 200 points | 110–176 µs (`setAttribute()`) | 20 µs as a number array, nothing allocated (a first version that copied the array: 51 µs and 2.2 KB per set) |
+
+- **Per frame:** nothing; the engine never calls the accessors while drawing. Per element: one `Object.keys()` on the fresh element and one field. Per class: about 40 `defineProperty()` once.
+- **Tests:** the seven W3 tests and T-N1 of `tests/frameworks.html` are ordinary tests (57, none known). New there: a property before the upgrade wins over the markup's attribute; the last change wins between property and attribute, the attribute is not written; properties on a detached tree, with a ref expression that follows its target and a `<pxl-var>` `value` property; arrays and gradient objects stored as given, 360 `hsl()` colors without cache growth; the same value again leaves the layer clean; `ref.<id>.set()` with numbers, arrays and strings. `tests/unit.html` (82): every attribute of every element is a property (number, `undefined`, `null`, no attribute written), generated like Rule A; `points` as a string, flat array, pairs and expression strings; the stage properties; literal `text`; the function warning; the CSS color fast path (and `hsl(120, 50, 40)` still compiled). `tests/scaling.html`: setting a property on n shapes with readers is linear.
+- **Docs:** `.agents/KILOPIXEL.md` (new section "Properties (JavaScript and Frameworks)", parser rules, `linedash`, `set()`, `points`, `<pxl-var>`, stage, text, `PxlNode` methods); the API reference (`docs/js/api-tabs.js`): a "Properties" item in the JavaScript and frameworks part of the events tab.
+- **Found, not part of W3:** a change of a layer's `alpha`, `blend` or `filter` (property or attribute) redraws all its shapes; only animated compositing values use the CSS-only fast path. A framework that fades a layer in every frame pays a full redraw (TODO §30).
+- **Next:** §19.4 step 5, distribution and docs (W8).

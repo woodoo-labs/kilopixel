@@ -42,6 +42,22 @@ pxl.Text = class Text extends pxl.Shape {
     this._hasInk = false; // true only if the last draw() painted something (used by hitTest)
   }
 
+  // The text property shows a string as it is, never as an expression: frameworks bind data to it (text={label}),
+  // and compiling data would run it as code ('alert(1)') or fail on it ('Q1 - 2024'). Expressions stay available
+  // through the attribute. Other values (numbers) go the usual way.
+  get text() {
+    return this.attributeValues.text;
+  }
+
+  set text(value) {
+    if (typeof value !== 'string') {
+      this.setValue('text', value === undefined ? null : value);
+    } else if (value !== this.attributeExpressions.text) {
+      pxl.storeValue(this, 'text', value);
+      this.valueChanged('text');
+    }
+  }
+
   // Three caches, each rebuilt only when its inputs change: font string → line layout → bounding box
   draw(ctx, u, t) {
     const {

@@ -235,6 +235,10 @@ pxl.checkToLocalProperties = function(str) {
 
 // Turns a non-empty attribute string into a static value (number, boolean, string)
 // or a compiled function. Cheap checks run first; most attributes never reach the compiler.
+// CSS hsl() / hsla() with % on saturation and lightness, comma or space syntax: "hsl(200, 50%, 40%)", "hsl(200deg 50% 40% / 0.5)"
+pxl.CSS_HSL_REGEX = /^hsla?\(\s*-?[\d.]+(?:deg)?(?:\s*,\s*|\s+)[\d.]+%(?:\s*,\s*|\s+)[\d.]+%(?:\s*[,/]\s*[\d.]+%?)?\s*\)$/i;
+pxl.CSS_COLOR_FUNCTION_REGEX = /^(?:hwb|lab|lch|oklab|oklch|color)\([^()]*\)$/i;
+
 pxl.parseAttributeValue = function(value) {
   const firstChar = value[0];
 
@@ -258,8 +262,11 @@ pxl.parseAttributeValue = function(value) {
       return value;
     }
 
-    // Static CSS colors: "rgba(124, 211, 15, 0.8)"
-    if (/^(rgb|rgba)\([\d\s.,%]+\)$/i.test(value)) {
+    // Static CSS colors, kept as text: compiling one costs about 90 µs, which a color that changes in every frame
+    // (fill={`hsl(${h}, 50%, 50%)`} from framework state) would pay each time, filling the expression cache.
+    // "rgba(124, 211, 15, 0.8)"; "hsl(200, 50%, 40%)" with % (Kilopixel's own hsl(200, 50, 40) is an expression);
+    // the CSS color functions Kilopixel doesn't define (oklch(), lab(), color(), …), without nested parentheses.
+    if (/^(rgb|rgba)\([\d\s.,%]+\)$/i.test(value) || pxl.CSS_HSL_REGEX.test(value) || pxl.CSS_COLOR_FUNCTION_REGEX.test(value)) {
       return value;
     }
   }

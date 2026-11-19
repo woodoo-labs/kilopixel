@@ -22,7 +22,7 @@
   <main class="docs-content">
     <div class="docs-inner">
       <h1>Framework Tests</h1>
-      <p>Level 4 of <code>design/2026-11-15_testing_plan.md</code>: the DOM contract that frameworks rely on (<code>design/2026-10-30_framework_compatibility_plan.md</code> §2, §11), tested with plain DOM calls and no framework. Each test does what React, Vue, Svelte, Solid, Angular, Lit, Alpine or htmx do to an element: create it detached, set attributes or properties, listen to events, insert, move and remove it. Tests marked "known" are features that are not built yet (properties W3, and T-N1); they are the acceptance tests of step 4 of the plan. The events (W1) are built (plan §23.8). Run with <code>node tools/run_tests.js --tests</code>, or here via the dev server (<code>?grep=</code> for a subset).</p>
+      <p>Level 4 of <code>design/2026-11-15_testing_plan.md</code>: the DOM contract that frameworks rely on (<code>design/2026-10-30_framework_compatibility_plan.md</code> §2, §11), tested with plain DOM calls and no framework. Each test does what React, Vue, Svelte, Solid, Angular, Lit, Alpine or htmx do to an element: create it detached, set attributes or properties, listen to events, insert, move and remove it. Tests marked "known" are features that are not built yet; there are none at the moment. The events (W1, plan §23.8) and the properties (W3, plan §24) are built. Run with <code>node tools/run_tests.js --tests</code>, or here via the dev server (<code>?grep=</code> for a subset).</p>
       <p>Covered elsewhere, not repeated here: an <code>id</code> set, renamed or removed after insertion (T-C2, T-C2b), a second copy of the script, text children of shapes (C17), moves between layers, into groups and to another stage, a stage inserted again, <code>layer.innerHTML</code> (T-M3), the stage styles (T-S1, T-S2), <code>mouseX</code> across the layer's shadow root (T-E5) and its light DOM after insertion are in <code>tests/index.html</code>; empty and removed values of every attribute (T-C4) in <code>tests/unit.html</code>; the bounded expression caches (T-K1) in <code>tests/scaling.html</code>; the import without a window (SSR) in the build checks (<code>tools/check_build.js</code>).</p>
       <p id="summary" class="test-summary">Running…</p>
       <table class="test-table"><tbody id="results"></tbody></table>
@@ -258,7 +258,7 @@
         }
       }));
 
-    test.known('T-C3: el.r = 50 stores the number without compiling and redraws the layer (W3)', () =>
+    test('T-C3: el.r = 50 stores the number without compiling and redraws the layer (W3)', () =>
       withStage(oneLayer('<pxl-circle id="fwPropR" x="500" y="300" r="20" fill="#000"></pxl-circle>'), (stage) => {
         const layer = stage.querySelector('pxl-layer'), circle = el('fwPropR');
         stage.render(1);
@@ -268,7 +268,7 @@
         if (state.r !== 50 || state.grown !== 0 || !state.dirty) throw new Error(JSON.stringify(state));
       }));
 
-    test.known('T-C3b: el.x = \'500 + sin(t) * 100\' is animated like the attribute (W3)', () =>
+    test('T-C3b: el.x = \'500 + sin(t) * 100\' is animated like the attribute (W3)', () =>
       withStage(oneLayer('<pxl-circle id="fwPropExpr" y="300" r="20" fill="#000"></pxl-circle>'), (stage) => {
         const circle = el('fwPropExpr');
         circle.x = '500 + sin(t) * 100';
@@ -278,7 +278,7 @@
         }
       }));
 
-    test.known('T-C3c: el.r = undefined or null gives the default, as a removed attribute does (W3)', () =>
+    test('T-C3c: el.r = undefined or null gives the default, as a removed attribute does (W3)', () =>
       withStage(oneLayer('<pxl-circle id="fwPropUndef" x="500" y="300" r="20" fill="#000"></pxl-circle>'), () => {
         const circle = el('fwPropUndef');
         circle.r = 50;
@@ -290,14 +290,14 @@
         if (set !== 50 || cleared !== 0 || circle.attributeValues.r !== 0) throw new Error(`set ${set}, undefined → ${cleared}, null → ${circle.attributeValues.r}`);
       }));
 
-    test.known('T-C3d: the getter returns the evaluated value, also of an expression (W3)', () =>
+    test('T-C3d: the getter returns the evaluated value, also of an expression (W3)', () =>
       withStage(oneLayer(`<pxl-var id="fwPropVar" value="21"></pxl-var>
         <pxl-circle id="fwPropGet" x="ref.fwPropVar.value * 2" y="150 * 2" r="5"></pxl-circle>`), () => {
         const circle = el('fwPropGet');
         if (circle.x !== 42 || circle.y !== 300) throw new Error(`el.x ${circle.x}, el.y ${circle.y}`);
       }));
 
-    test.known('an array property (el.linedash = [20, 10], JSX linedash={[20, 10]}) stays an array (W3, D8)', () =>
+    test('an array property (el.linedash = [20, 10], JSX linedash={[20, 10]}) stays an array (W3, D8)', () =>
       withStage(oneLayer('<pxl-line id="fwPropDash" x1="100" y1="100" x2="900" y2="100" stroke="#000" strokewidth="4"></pxl-line>'), () => {
         const line = el('fwPropDash');
         line.linedash = [20, 10];
@@ -305,7 +305,7 @@
         if (!Array.isArray(dash) || dash.join(',') !== '20,10') throw new Error(`linedash ${JSON.stringify(dash)}`);
       }));
 
-    test.known('T-K2: 1,000 numeric property sets leave the expression caches unchanged (W3)', () =>
+    test('T-K2: 1,000 numeric property sets leave the expression caches unchanged (W3)', () =>
       withStage(oneLayer('<pxl-circle id="fwPropMany" y="300" r="5" fill="#000"></pxl-circle>'), () => {
         const circle = el('fwPropMany');
         const before = cacheSize();
@@ -314,7 +314,7 @@
         if (circle.attributeValues.x !== 999 || grown !== 0) throw new Error(`x ${circle.attributeValues.x}, caches grew by ${grown}`);
       }));
 
-    test.known('T-U1: a property set before the element class is defined is applied when it upgrades (W3)', () =>
+    test('T-U1: a property set before the element class is defined is applied when it upgrades (W3)', () =>
       withStage(oneLayer('<pxl-fw-late-prop x="500" y="300" fill="#000"></pxl-fw-late-prop>'), (stage) => {
         const layer = stage.querySelector('pxl-layer'), late = layer.firstElementChild;
         late.r = 40; // a plain property of the not yet upgraded element
@@ -322,6 +322,86 @@
         stage.render(1);
         if (late.attributeValues.r !== 40 || alphaAt(layer, 500, 300) !== 255) {
           throw new Error(`r ${late.attributeValues.r}, alpha ${alphaAt(layer, 500, 300)}`);
+        }
+      }));
+
+    // --- W3 as built (plan §24) ---
+
+    // Server HTML has r="20"; Lit, Angular or Solid set the property before the script is loaded: the framework's value wins
+    test('a property set before the upgrade wins over the attribute in the markup (W3)', () =>
+      withStage(oneLayer('<pxl-fw-late-both x="500" y="300" r="20" fill="#000"></pxl-fw-late-both>'), (stage) => {
+        const late = stage.querySelector('pxl-layer').firstElementChild;
+        late.r = 40;
+        customElements.define('pxl-fw-late-both', class extends pxl.Circle {});
+        const state = { r: late.attributeValues.r, own: Object.prototype.hasOwnProperty.call(late, 'r'), attribute: late.getAttribute('r') };
+        if (state.r !== 40 || state.own || state.attribute !== '20') throw new Error(JSON.stringify(state));
+      }));
+
+    test('property and attribute: the last change wins; the attribute is not written (W3)', () =>
+      withStage(oneLayer('<pxl-circle id="fwLastWrite" x="500" y="300" r="20" fill="#000"></pxl-circle>'), () => {
+        const circle = el('fwLastWrite'), seen = [];
+        circle.r = 50;
+        seen.push(circle.r, circle.getAttribute('r'));
+        circle.setAttribute('r', '30');
+        seen.push(circle.r);
+        circle.r = 60;
+        seen.push(circle.r);
+        if (seen.join(',') !== '50,20,30,60') throw new Error(seen.join(','));
+      }));
+
+    test('properties set on a detached tree are drawn after insertion; a ref expression set as a property follows its target (W3)', () =>
+      withBox((box) => {
+        const variable = make('pxl-var', { id: 'fwPropVarB' });
+        const circle = make('pxl-circle', { id: 'fwPropTree' });
+        Object.assign(circle, { x: 'ref.fwPropVarB.value + 100', y: 300, r: 40, fill: '#000' });
+        variable.value = 400;
+        const layer = make('pxl-layer', {}, [variable, circle]);
+        const stage = make('pxl-stage', { alwaysrender: '' }, [layer]);
+        box.appendChild(stage);
+        stage.resize();
+        const first = pxl.nodes.fwPropTree.x, drawn = alphaAt(layer, 500, 300);
+        variable.value = 200;
+        stage.render(1);
+        if (first !== 500 || drawn !== 255 || circle.x !== 300 || alphaAt(layer, 300, 300) !== 255) {
+          throw new Error(`x ${first} → ${circle.x}, drawn at 500: ${drawn}, at 300: ${alphaAt(layer, 300, 300)}`);
+        }
+      }));
+
+    test('arrays and objects are stored as given; a CSS color string is not compiled (W3)', () =>
+      withStage(oneLayer(`<pxl-line id="fwPropArr" x1="100" y1="100" x2="900" y2="100" stroke="#000" strokewidth="4"></pxl-line>
+        <pxl-rect id="fwPropGrad" x="500" y="300" w="200" h="100"></pxl-rect>`), (stage) => {
+        const dash = [20, 10], gradient = pxl.scope.linear(0, ['#f00', '#00f']);
+        el('fwPropArr').linedash = dash;
+        el('fwPropGrad').fill = gradient;
+        const before = cacheSize();
+        for (let h = 0; h < 360; h++) el('fwPropArr').stroke = `hsl(${h}, 50%, 40%)`;
+        stage.render(1);
+        const layer = stage.querySelector('pxl-layer');
+        const state = { dash: pxl.nodes.fwPropArr.linedash === dash, gradient: pxl.nodes.fwPropGrad.fill === gradient,
+          cacheGrowth: cacheSize() - before, drawn: alphaAt(layer, 500, 300) };
+        if (!state.dash || !state.gradient || state.cacheGrowth !== 0 || state.drawn !== 255) throw new Error(JSON.stringify(state));
+      }));
+
+    test('setting the same value again changes nothing: no redraw (frameworks and hydration repeat values) (W3)', () =>
+      withStage(oneLayer('<pxl-circle id="fwPropSame" x="500" y="300" r="20" fill="#000"></pxl-circle>'), (stage) => {
+        const circle = el('fwPropSame'), layer = stage.querySelector('pxl-layer');
+        circle.r = 50;
+        stage.render(1);
+        circle.r = 50;
+        circle.fill = '#000';
+        if (layer.isDirty) throw new Error('the layer is dirty after setting the same values');
+      }));
+
+    test('ref.<id>.set() with a number or an array goes through the property; a string still compiles (W3)', () =>
+      withStage(oneLayer(`<pxl-line id="fwRefSet" x1="100" y1="100" x2="900" y2="100" stroke="#000"></pxl-line>`), () => {
+        const before = cacheSize(), values = pxl.nodes.fwRefSet;
+        for (let i = 0; i < 100; i++) values.set('x1', i);
+        values.set('linedash', [20, 10]);
+        const grown = cacheSize() - before;
+        values.set('x2', '400 + 100');
+        const state = { x1: values.x1, dash: values.linedash, grown, x2: values.x2, attribute: el('fwRefSet').getAttribute('x2') };
+        if (state.x1 !== 99 || !Array.isArray(state.dash) || state.grown !== 0 || state.x2 !== 500 || state.attribute !== '400 + 100') {
+          throw new Error(JSON.stringify(state));
         }
       }));
 
@@ -864,7 +944,7 @@
     // ===================================================================
     section('Small items (plan §10)');
 
-    test.known('T-N1: ref.<id>.set() with an unknown attribute name warns once; a known name doesn\'t', async () => {
+    test('T-N1: ref.<id>.set() with an unknown attribute name warns once; a known name doesn\'t', async () => {
       const warnings = await captureWarnings(() =>
         withStage(oneLayer('<pxl-circle id="fwSetTarget" r="5"></pxl-circle>'), () => {
           pxl.nodes.fwSetTarget.set('x', 5);

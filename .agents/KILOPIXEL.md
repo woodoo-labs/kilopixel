@@ -1,6 +1,6 @@
 # Kilopixel Framework — Complete Technical Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~66KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~69KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes with custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, …); the engine compiles their attribute expressions and redraws a layer in every frame in which something in it changed or is animated.
 
@@ -184,8 +184,9 @@ Every PxlNode has:
 - `parentContainer` — reference to closest `<pxl-group>` or `<pxl-layer>` parent
 
 **Key Methods**:
-- `attributeChangedCallback(name, old, new)` — compiles attribute via `pxl.compileAttribute()`, broadcasts ref changes, invalidates layer. `id` is observed too, but not compiled: once the element is registered (`isRegistered`, set at the end of `connectedCallback()`), an `id` that is set, changed or removed moves its entry in `pxl.nodes` (`pxl.renameNode()`: the old entry is deleted if it points to this element, `refKey` follows, both names are broadcast, so readers of the old name read `undefined`). Frameworks such as Angular and Alpine set `id` after insertion. During an upgrade the attributes arrive before `connectedCallback()`, which registers the id itself. A shape whose new id is read for `isHovered` / `isPressed` registers for hit testing (`Shape.attributeChangedCallback()`)
-- `connectedCallback()` — finds parentLayer/parentContainer, registers child (once per connect, no `includes()` check), restores subscriptions, registers in `pxl.nodes` if has `id`, sets `isRegistered`
+- `attributeChangedCallback(name, old, new)` — passes the value to `setValue()`; `pxl-on-*` handlers go to `setHandler()`. `id` is observed too, but not compiled: once the element is registered (`isRegistered`, set at the end of `connectedCallback()`), an `id` that is set, changed or removed moves its entry in `pxl.nodes` (`pxl.renameNode()`: the old entry is deleted if it points to this element, `refKey` follows, both names are broadcast, so readers of the old name read `undefined`). Frameworks such as Angular and Alpine set `id` after insertion. During an upgrade the attributes arrive before `connectedCallback()`, which registers the id itself. A shape whose new id is read for `isHovered` / `isPressed` registers for hit testing (`Shape.attributeChangedCallback()`)
+- `setValue(name, value)` — the one path for attributes and properties ([Properties](#properties-javascript-and-frameworks)): a string or `null` through `pxl.compileAttribute()`, any other value stored as it is (`pxl.storeValue()`), the same parsed value again skipped, a function warned; then `valueChanged(name)`: animation state, local matrix dirty for transform keys, broadcast, invalidate the layer (`Variable` also asks the stage for a frame)
+- `connectedCallback()` — first sets properties that were set before the upgrade (`_pendingProperties`), then finds parentLayer/parentContainer, registers child (once per connect, no `includes()` check), restores subscriptions, registers in `pxl.nodes` if has `id`, sets `isRegistered`
 - `disconnectedCallback()` — clears `isRegistered`, removes from `pxl.nodes`, clears its own subscriptions, unregisters from parent
 - `variableChangedCallback(varName)` — re-evaluates reactive attributes for a changed variable, unsubscribes if no longer needed
 - `evaluateAnimations(t)` — iterates `animatedAttributeKeys`, calls expression functions with time, broadcasts ref changes if values changed, marks local matrix dirty on transform changes
@@ -193,7 +194,7 @@ Every PxlNode has:
 
 **The `attributeValues` Object**:
 Has four hidden (non-enumerable) properties:
-- `set(key, value)` — calls `this.setAttribute(key, value)` on the element. Used by imperative event handlers: `ref.myVar.set('value', 100)`
+- `set(key, value)` — Kilopixel's setter for handlers (`pxl.setFromRef()`): a string goes to `setAttribute()` and is compiled like the attribute; any other value goes through the property (a number without compiling, an array stays an array). A name the element doesn't have warns once per element type and name. Used by imperative event handlers: `ref.myVar.set('value', 100)`
 - `$node` — back-reference to the DOM element itself
 - `tx` / `ty` — getters for the element's **drawn origin** in its parent space (the space of its own `x` / `y`): the local matrix translation, i.e. `x` / `y` plus the `dx` / `dy` offset turned by the element's own `rotate`, `zoom` / `scalex` / `scaley` and skew. Equal to `x + dx` / `y + dy` only without those. Same value as `toLocal(ref.el, 'tx' | 'ty')` for a reader in the same space
 
@@ -213,7 +214,7 @@ Has four hidden (non-enumerable) properties:
    - `"t"` → compiled as a time expression
    - `"true"` / `"false"` → boolean
    - names of `Math` constants (`"PI"`) → their number
-   - static `rgb(...)` / `rgba(...)` with numbers only → returned as a string
+   - static CSS colors → returned as a string, never compiled: `rgb(...)` / `rgba(...)` with numbers only; `hsl(...)` / `hsla(...)` with `%` on saturation and lightness (`hsl(200, 50%, 40%)`, also the space syntax; `pxl.CSS_HSL_REGEX`); the CSS color functions Kilopixel doesn't define, `hwb()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `color()`, without nested parentheses (`pxl.CSS_COLOR_FUNCTION_REGEX`). Kilopixel's own `hsl(200, 50, 40)` (no `%`) is compiled. Compiling a color costs about 90 µs and takes a cache slot, which a color changed in every frame would pay each time (`design/2026-10-30_framework_compatibility_plan.md` §24)
 4. **One quoted string** (`'Hello World'`) → the text between the quotes. Escapes aren't read: `'It\'s'` stays raw (write `It's` without quotes, or backticks); a written `\n` reaches the text shape, which breaks the line there (decided 2026-11-17, `design/2026-11-02_string_literals_in_expressions_plan.md` §7)
 5. **Numbers** (`"100"`, `"-50"`, `"0.25"`) → `Number`
 6. **Anything that looks like code** (a regex finds `t`, `ref.`, `toLocal(`, parentheses, brackets, operators next to numbers, or `+` next to a quote) → compiled
@@ -308,6 +309,29 @@ A bare attribute (`<pxl-polyline closed>`, `el.hidden = true`, `toggleAttribute`
 - Event handlers: see [Event Handling](#event-handling).
 - Not handled: whitespace-only values (`" "` parses to `0`) and invalid values (`miterlimit="abc"`).
 - Design: `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md`.
+
+### Properties (JavaScript and Frameworks)
+
+Every observed attribute is also a JavaScript property (`design/2026-10-30_framework_compatibility_plan.md` §6, §24): `el.r = 50`, `el.x = '500 + sin(t) * 100'`, `el.r = undefined`. React 19, Vue, Preact and Svelte set a property when the element has one (`name in element`); Angular `[x]`, Lit `.x` and Solid `prop:x` always do.
+
+- **Accessors** (`pxl.defineAccessors()`, `engine.js`): a getter / setter per observed attribute on the class prototype, defined the first time an instance of the class is created (`pxl._accessorClasses`), so custom shapes get them too. Not for hyphenated names (the `pxl-on-*` handlers stay attribute-only), and not for names the prototype already has: `id` and `hidden` stay native (`hidden` reflects to the attribute), as would an attribute named like another `HTMLElement` property or a class's own getter.
+- **Getter:** the evaluated value, the same as `ref.<id>.<name>` (`el.x` of an animated `x` is its value in the last update).
+- **Setter → `PxlNode.setValue(name, value)`**, the one path for attributes and properties (`attributeChangedCallback()` calls it too), then `valueChanged(name)` (animation state, matrix, broadcast, invalidate):
+
+| Value | Stored |
+|---|---|
+| number, boolean, array, object (a gradient descriptor) | as it is (`pxl.storeValue()`): no parsing, no compiling, no cache entry. Arrays are kept by reference and never changed by the engine: assign a new array to change one |
+| string | compiled like the attribute string (`el.x = 'sin(t) * 100'` animates; CSS colors stay text, see the parser above). Except `text`, below |
+| `undefined` / `null` | the default, as a removed attribute (Rule A); `''` works like a bare attribute |
+| a function | not supported (yet): warned once per element (`pxl.warnFunctionValue()`), the value stays |
+| the same parsed value again | nothing happens: no broadcast, no redraw (frameworks and hydration set unchanged values again) |
+
+- **No reflection:** a property doesn't write the attribute (as in Lit). Property and attribute: the last change wins; setting the attribute to the text it already has is no change, so a property set in between stays.
+- **`text` is literal:** a string set as `el.text` is shown as it is, never compiled (`Text`'s own accessor). Frameworks bind data to it, and compiling data would run it as code (`alert(1)`) or fail on it (`Q1 - 2024`). Expressions stay available through the attribute. Every other string property is code like an attribute value: never pass untrusted strings to them (colors from data: `#hex`, `rgb()` and the CSS color functions stay text).
+- **Values set before the upgrade** (a script loaded late, code splitting): such properties are own properties of the element that hide the accessors. The constructor reads `Object.keys(this)` before it adds any field and takes them out (`pxl.takeOwnProperties()`); `connectedCallback()` sets them again, after the attributes, so the framework's value wins over server HTML. An element upgraded without being connected (`customElements.upgrade()`) gets them when it is inserted.
+- **Special properties:** `<pxl-polyline>` `points` ([Points Syntax](#points-syntax)); `<pxl-var>` `value` also asks for a frame; `<pxl-stage>` `ratio` and `alwaysrender` write the attribute (`reflectAttribute()`; `false`, `null`, `undefined` remove it).
+- **`ref.<id>.set(name, value)`** (handlers): a string goes to `setAttribute()`, any other value through the property; an unknown name warns once per element type and name.
+- **Cost** (`design/prototypes/2026-10-30_framework_compatibility/w3_property_costs.html`, headless with `gc()`): a number property about 0.5 µs per set with one reader, `setAttribute()` about 4–5 µs; a new `hsl(…, 50%, 50%)` string 0.7–1.3 µs (compiled before: about 90 µs); `text` 0.2–0.4 µs. Nothing per frame: the engine never calls the accessors while drawing.
 
 ### Variable Change Propagation
 
@@ -434,7 +458,7 @@ hsl(h, s, l)       → "hsl(h,s%,l%)"      // numbers get a '%'
 hsla(h, s, l, a)   → "hsla(h,s%,l%,a)"
 ```
 
-A call with variables (`hsl(t * 36, 80, 50)`) is compiled like any expression. A static `rgb(…)` / `rgba(…)` with numbers only is passed to the canvas as a CSS string without compiling.
+A call with variables (`hsl(t * 36, 80, 50)`) is compiled like any expression. A static CSS color (`rgb(…)` / `rgba(…)` with numbers only, `hsl(…)` / `hsla(…)` with `%`, `oklch(…)` and the other CSS color functions) is passed to the canvas as a CSS string without compiling.
 
 ### Gradient Descriptors
 
@@ -856,6 +880,7 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 
 ### Key Behavior
 
+- **Properties** `ratio` and `alwaysrender` (frameworks): they write the attribute (`reflectAttribute()`; `false`, `null`, `undefined` remove it); the getters return the parsed ratio and `isAlwaysRender()`. Values set before the upgrade are applied in `connectedCallback()`, as on the other elements ([Properties](#properties-javascript-and-frameworks))
 - Creates no shadow DOM or internal canvas — layers each create their own
 - **Default styles** (`pxl.DEFAULT_STYLES` in `stage.js`): `pxl-stage { display: block; position: relative; width: 100% }`, `pxl-stage:state(fallback) { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0 }` and `display: none` for `pxl-var`, `pxl-group` and the built-in shapes (their content, e.g. `<pxl-text>{label}</pxl-text>` in JSX, would otherwise show as page text through the layer's `<slot>`; content placed directly in a layer stays visible; a custom shape element needs its own rule if it may get children), and `pxl-grid { pointer-events: none }` (out of hit testing, see [Interaction System](#interaction-system)), and `[pxl-on-click], [pxl-on-down], [pxl-on-up] { cursor: pointer }` (the hand for handlers, inherited by a group's shapes; see [Cursor](#cursor)), inside `@layer pxl { … }`. `pxl.addDefaultStyles(root)` adds them as one `<style data-pxl>` at the start of `<head>` when the script loads, and at the start of a shadow root when a stage connects inside one (document styles don't reach into it). The first cascade layer declared ranks lowest, so any page rule wins, also rules in the page's own layers (Tailwind v4); `adoptedStyleSheets` and `:where()` would beat layered page rules. Only `aspect-ratio` (from `ratio`) is written inline (the cursor goes on the layer canvases)
 - **300 px fallback width**: a parent that sizes itself to its content (a centered flex or grid item, `inline-block`, an absolute card) asks the stage for its content width; the layers are absolutely positioned and give none, so the stage would be 0 × 0. `markFallbackWidth()` then adds the custom state `fallback` (`attachInternals()` on first use, field `_internals`): `contain-intrinsic-inline-size: 300px` answers 300 (like `<canvas>`), `min-width: 0` keeps the stage shrinkable as a flex or grid item. It is called from `resize()` when the width is 0 and once in the frame after `connectedCallback()` (a ResizeObserver needn't report an element that stays 0 × 0); a stage without a box (`display: none`) is skipped; `disconnectedCallback()` removes the state. Only such stages get it: on every stage, the 300 px would also be the minimum content width that keeps the cards and grid columns around a stage from shrinking. Older browsers without custom states keep the stage 0 × 0. Design: `design/2026-11-04_stage_sizing_plan.md`
@@ -957,7 +982,7 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `sca
   - **Array** for several values: `linedash="[20, 10]"`. Brackets are required: `"20, 10"` without them is not a pattern (it stays a string). The array form also takes expressions without a change of syntax: `linedash="[wave(2) * 20, 10]"`.
   - **One number**: `linedash="20"` (dash and gap of equal length).
   - **Solid**: `linedash="none"`, `linedash="0"`, or the attribute removed (`removeAttribute('linedash')`).
-  - From JavaScript, pass the attribute text: `setAttribute('linedash', '[20, 10]')`. An array argument becomes the string `"20,10"` (no pattern), and `setAttribute('linedash', null)` stores `"null"`, which doesn't reset the dash.
+  - From JavaScript: the property takes the array (`el.linedash = [20, 10]`, JSX `linedash={[20, 10]}`, `ref.<id>.set('linedash', [20, 10])`); `el.linedash = null` resets it. With `setAttribute()` pass the attribute text (`setAttribute('linedash', '[20, 10]')`): an array argument becomes the string `"20,10"` (no pattern), and `setAttribute('linedash', null)` stores `"null"`, which doesn't reset the dash.
 
   `applyLineDash(ctx, u)` caches the scaled pattern per (`linedash`, `u`), so drawing allocates nothing.
 
@@ -1194,12 +1219,14 @@ points="0,0; 100,wave(2)*50; 200,0"
 
 The parser (`pxl.parsePointsIntoArray`) is parenthesis-aware, so functions like `min(a, b)` work within coordinates.
 
+**`points` property** (JavaScript and frameworks, `Polyline.setPoints()`): a string like the attribute, or an array, flat `[x0, y0, x1, y1, …]` or pairs `[[x0, y0], …]`; each coordinate a number or an expression string. An x without its y, or an incomplete pair, ends the list. The array is read in place, and with the same number of coordinates the keys `p0, p1, …` and the buffer stay: updating 200 number coordinates costs about 20 µs and allocates nothing (`setAttribute()` with the same points: about 110 µs, `design/prototypes/2026-10-30_framework_compatibility/w3_property_costs.html`). Reading `el.points` returns the evaluated coordinates, flat, in a new array.
+
 ### Per-Coordinate Animation
 
-When `points` attribute changes:
-1. `pxl.parsePointsIntoArray()` splits into individual coordinate strings
-2. `clearPoints(count)` removes the synthetic `p0`, `p1`, `p2`... keys from the animated / reactive lists. Only keys beyond the new count are deleted; the others keep their value until recompiled (animated coordinates are only evaluated in the next frame)
-3. Each coordinate is compiled independently as `pxl.compileAttribute(this, 'p0', coordString)`
+When `points` changes (attribute or property, `Polyline.setPoints()`):
+1. A string: `pxl.parsePointsIntoArray()` splits it into coordinate strings; an array is read in place (flat or pairs)
+2. Only when the number of coordinates changes, `resizePoints(count)` deletes the keys beyond the new count (and removes them from the animated / reactive / toLocal lists), adds new keys `p0`, `p1`, … and a new buffer. The other keys keep their value until set again (animated coordinates are only evaluated in the next frame)
+3. Each coordinate is set independently: a string compiled as `pxl.compileAttribute(this, 'p0', coordString)`, a number stored (written directly when the key holds no expression)
 4. `ref.<id>` is broadcast (like any other attribute change)
 5. At draw time, `_flatCache[i] = attributeValues[_pointKeys[i]] * u`
 
@@ -1268,7 +1295,7 @@ Iterates all point values (handling relative mode accumulation) to find min/max 
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
-| `text` | string/expression | Text content. Strings must be quoted in expressions: `text="'Hello'"` |
+| `text` | string/expression | Text content. Strings must be quoted in expressions: `text="'Hello'"`. The `text` property shows a string as it is, never compiled (frameworks bind data to it, [Properties](#properties-javascript-and-frameworks)) |
 | `size` | number | Font size in logical units |
 | `font` | string | Font family (e.g. `'sans-serif'`, `'monospace'`) |
 | `align` | string | `'start'`, `'end'`, `'left'`, `'right'`, `'center'` |
@@ -1424,7 +1451,7 @@ Mutating from event handlers:
 <pxl-circle pxl-on-click="ref.speed.set('value', ref.speed.value + 10)" ...></pxl-circle>
 ```
 
-The `set(key, value)` method on `attributeValues` calls `setAttribute()` on the element, triggering recompilation and broadcast.
+The `set(key, value)` method on `attributeValues` calls `setAttribute()` for a string (compiled like the attribute) and sets the property for other values; either way the value is broadcast. From JavaScript or a framework, the `value` property does the same without compiling numbers: `document.getElementById('speed').value = 20`, React `<pxl-var value={speed}>`. A stage-level variable asks for a frame on every change, from the attribute or the property.
 
 ### Several Inputs, One Attribute
 

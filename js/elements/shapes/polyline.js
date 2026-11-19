@@ -27,48 +27,80 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     this._split = new Float64Array(10);   // q0, r0, s, r1, q2
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'points') {
-      if (oldValue === newValue) return;
+  // --- Points ---
 
-      // Removed (null) or bare (''): no points
-      pxl.parsePointsIntoArray(newValue ?? '', this._rawParts);
-      const count = this._rawParts.length;
-      this.clearPoints(count);
-      this._pointCount = count;
-
-      this._flatCache = new Float64Array(this._pointCount);
-      this._pointKeys.length = this._pointCount;
-
-      for (let i = 0; i < this._pointCount; i++) {
-        const key = `p${i}`;
-        this._pointKeys[i] = key;
-        pxl.compileAttribute(this, key, this._rawParts[i]);
-      }
-
-      this.isAnimated = this.animatedAttributeKeys.length > 0;
-      // Readers of ref.<id>.pN update like for any other attribute
-      if (this.refKey) pxl.broadcast(this.refKey);
-      this.parentLayer?.invalidate();
-    } else {
-      super.attributeChangedCallback(name, oldValue, newValue);
-    }
+  // The property (frameworks): a points string like the attribute, or an array, flat [x0, y0, x1, y1, …] or pairs
+  // [[x0, y0], …], each coordinate a number or an expression string. Reading returns the evaluated coordinates,
+  // flat, in a new array.
+  get points() {
+    const out = new Array(this._pointCount);
+    for (let i = 0; i < this._pointCount; i++) out[i] = this.attributeValues[this._pointKeys[i]];
+    return out;
   }
 
-  // Keys below keepCount keep their value until recompiled: animated coordinates are only evaluated
-  // in the next frame, so ref.<id>.pN readers would otherwise see undefined in between.
-  clearPoints(keepCount) {
-    for (let i = 0; i < this._pointCount; i++) {
+  set points(value) {
+    this.setValue('points', value === undefined ? null : value);
+  }
+
+  setValue(name, value) {
+    if (name === 'points') this.setPoints(value);
+    else super.setValue(name, value);
+  }
+
+  // Each coordinate is its own value p0, p1, …: a number is stored, a string compiled like an attribute. An array is
+  // read in place (copying it would allocate in every update), and with the same number of coordinates the keys and
+  // the buffer stay: a chart whose points change in every frame allocates nothing for number coordinates.
+  setPoints(value) {
+    let count;
+    const isArray = Array.isArray(value);
+    const isPairs = isArray && Array.isArray(value[0]);
+    if (isPairs) {
+      count = 0; // up to the first incomplete pair, like an incomplete point in the string
+      while (count / 2 < value.length && Array.isArray(value[count / 2]) && value[count / 2].length >= 2) count += 2;
+    } else if (isArray) {
+      count = value.length - value.length % 2; // an x without its y is dropped
+    } else {
+      pxl.parsePointsIntoArray(typeof value === 'string' ? value : '', this._rawParts); // null or '': no points
+      count = this._rawParts.length;
+    }
+    if (count !== this._pointCount) this.resizePoints(count);
+
+    const expressions = this.attributeExpressions;
+    for (let i = 0; i < count; i++) {
+      const key = this._pointKeys[i];
+      const part = isPairs ? value[i >> 1][i & 1] : isArray ? value[i] : this._rawParts[i];
+      if (typeof part === 'string') {
+        pxl.compileAttribute(this, key, part);
+      } else if (typeof expressions[key] !== 'function') {
+        // A number over a value that is no expression: it is in none of the key lists, so it is just written
+        expressions[key] = part;
+        this.attributeValues[key] = part;
+      } else {
+        pxl.storeValue(this, key, part);
+      }
+    }
+
+    this.isAnimated = this.animatedAttributeKeys.length > 0;
+    // Readers of ref.<id>.pN update like for any other attribute
+    if (this.refKey) pxl.broadcast(this.refKey);
+    this.parentLayer?.invalidate();
+  }
+
+  // Keys beyond the new count go, new ones are added; keys below it keep their value until set again (animated
+  // coordinates are only evaluated in the next frame, so ref.<id>.pN readers would see undefined in between)
+  resizePoints(count) {
+    for (let i = count; i < this._pointCount; i++) {
       const key = this._pointKeys[i];
       pxl.removeFromArray(this.animatedAttributeKeys, key);
       pxl.removeFromArray(this.reactiveAttributeKeys, key);
       pxl.removeFromArray(this.toLocalAttributeKeys, key);
-      if (i >= keepCount) {
-        delete this.attributeExpressions[key];
-        delete this.attributeValues[key];
-      }
+      delete this.attributeExpressions[key];
+      delete this.attributeValues[key];
     }
-    this._pointCount = 0;
+    for (let i = this._pointCount; i < count; i++) this._pointKeys[i] = `p${i}`;
+    this._pointKeys.length = count;
+    this._flatCache = new Float64Array(count);
+    this._pointCount = count;
   }
 
   draw(ctx, u, t) {

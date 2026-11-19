@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>W3 property costs</title>
+  <script src="/dist/pxl.min.js"></script>
+</head>
+<body>
+<div id="box" style="width: 1000px"></div>
+<pre id="out">running…</pre>
+<script>
+// Cost and heap growth of setting values the way frameworks do, per set (design/2026-10-30_framework_compatibility_plan.md
+// §24): properties against setAttribute(). One shape with one reader of it, a polyline with 200 points.
+// Time: works anywhere. Heap: run headless with --js-flags=--expose-gc --enable-precise-memory-info (gc() and exact
+// heap sizes); without them the heap column says n/a. Results in the <pre> and in window.w3Costs.
+document.getElementById('box').innerHTML = `<pxl-stage id="cS" alwaysrender ratio="2"><pxl-layer>
+  <pxl-circle id="cC" x="300" y="300" r="5" fill="#000"></pxl-circle>
+  <pxl-circle x="ref.cC.x + 10" y="200" r="2" fill="#000"></pxl-circle>
+  <pxl-text id="cT" x="100" y="100" text="'start'"></pxl-text>
+  <pxl-polyline id="cP" stroke="#000"></pxl-polyline>
+</pxl-layer></pxl-stage>`;
+const stage = document.getElementById('cS');
+stage.resize();
+stage.render(0);
+const c = document.getElementById('cC'), text = document.getElementById('cT'), poly = document.getElementById('cP');
+const hasGc = typeof gc === 'function' && typeof performance.memory === 'object';
+
+// 200 points, as numbers (flat array) and as the attribute string, 60 variants each
+const flat = [], strings = [];
+for (let k = 0; k < 60; k++) {
+  const pts = [];
+  for (let i = 0; i < 200; i++) pts.push(i * 4, (i * 7 + k) % 300);
+  flat.push(pts);
+  strings.push(pts.reduce((s, v, i) => s + v + (i % 2 ? '; ' : ','), ''));
+}
+const hues = [];
+for (let i = 0; i < 3600; i++) hues.push(`hsl(${i % 360}, 50%, ${10 + (i / 360 | 0)}%)`);
+const labels = [];
+for (let i = 0; i < 3600; i++) labels.push(`Q${i % 4 + 1} - ${2000 + i}`);
+
+const scenarios = {
+  'x, setAttribute()': (i) => c.setAttribute('x', String(i % 900 + 0.5)),
+  'x, property (number)': (i) => { c.x = i % 900 + 0.25; },
+  'fill, property (new hsl() string)': (i) => { c.fill = hues[i % 3600]; },
+  'text, property (new string)': (i) => { text.text = labels[i % 3600]; },
+  'points, setAttribute() (200 points)': (i) => poly.setAttribute('points', strings[i % 60]),
+  'points, property (200 numbers, same count)': (i) => { poly.points = flat[i % 60]; }
+};
+
+const results = [];
+for (const [name, fn] of Object.entries(scenarios)) {
+  const n = name.startsWith('points') ? 600 : 3000;
+  for (let i = 0; i < n; i++) fn(i); // warm-up (also fills the caches once)
+  const cacheBefore = pxl.animationCache.size + pxl.staticCache.size;
+  if (hasGc) { gc(); gc(); }
+  const heapBefore = hasGc ? performance.memory.usedJSHeapSize : 0;
+  const start = performance.now();
+  for (let i = 0; i < n; i++) fn(i + 1);
+  const us = (performance.now() - start) * 1000 / n;
+  const heap = hasGc ? (performance.memory.usedJSHeapSize - heapBefore) / n : NaN;
+  results.push({ name, usPerSet: +us.toFixed(2), bytesPerSet: hasGc ? Math.round(heap) : 'n/a',
+    cacheGrowth: pxl.animationCache.size + pxl.staticCache.size - cacheBefore });
+}
+window.w3Costs = results;
+document.getElementById('out').textContent = results.map((r) =>
+  `${r.name.padEnd(46)} ${String(r.usPerSet).padStart(7)} µs, ${String(r.bytesPerSet).padStart(6)} bytes per set (heap growth before GC), cache +${r.cacheGrowth}`).join('\n');
+</script>
+</body>
+</html>

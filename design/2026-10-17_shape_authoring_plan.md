@@ -116,7 +116,7 @@ The three differences from §2 are resolved like this:
    }
    ```
    `attributeExpressions.isHovered` / `.isPressed` disappear; nothing reads them.
-3. **Polyline `points`** gets a default, `points: ''`. Polyline's own `attributeChangedCallback` keeps intercepting it (coordinates are compiled into `p0…pN`) and additionally stores the raw string, so `ref.poly.points` returns what was set instead of a stale default:
+3. **Polyline `points`** gets a default, `points: ''`. Polyline's own `attributeChangedCallback` keeps intercepting it (coordinates are compiled into `p0…pN`) and additionally stores the raw string, so `ref.poly.points` returns what was set instead of a stale default (2026-11-19: Polyline intercepts `points` in `setValue()` now, the one path for attributes and properties, and its `points` property returns the evaluated coordinates; `design/2026-10-30_framework_compatibility_plan.md` §24):
    ```javascript
    this.attributeValues.points = newValue ?? '';
    ```

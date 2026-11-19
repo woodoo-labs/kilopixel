@@ -121,47 +121,129 @@ pxl.resolveEmptyAttribute = function(element, name, newValue) {
   return value === undefined ? null : value;
 };
 
+// newValue: an attribute string, or null for a removed attribute
 pxl.compileAttribute = function(element, name, newValue) {
   const parsed = (newValue === null || newValue === '')
     ? pxl.resolveEmptyAttribute(element, name, newValue)
     : pxl.parseAttributeValue(newValue);
+  if (typeof parsed !== 'function') {
+    pxl.storeValue(element, name, parsed);
+    return;
+  }
   element.attributeExpressions[name] = parsed;
 
-  if (typeof parsed === 'function') {
-    if (parsed.isTimeDependent) {
-      // Evaluated every frame (evaluateAnimations)
-      if (!element.animatedAttributeKeys.includes(name)) element.animatedAttributeKeys.push(name);
-      pxl.removeFromArray(element.reactiveAttributeKeys, name);
-      pxl.removeFromArray(element.toLocalAttributeKeys, name);
-    } else {
-      // Evaluated when a ref.* dependency broadcasts. Functions are only compiled for time or refs,
-      // so a reactive function always has variableDependencies.
-      pxl.removeFromArray(element.animatedAttributeKeys, name);
-      if (!element.reactiveAttributeKeys.includes(name)) element.reactiveAttributeKeys.push(name);
-
-      // toLocal results also depend on the element's own space (re-evaluated by broadcastGlobalMatrixChange)
-      if (parsed.usesToLocal) {
-        if (!element.toLocalAttributeKeys.includes(name)) element.toLocalAttributeKeys.push(name);
-      } else {
-        pxl.removeFromArray(element.toLocalAttributeKeys, name);
-      }
-
-      const deps = parsed.variableDependencies;
-      for (let i = 0; i < deps.length; i++) {
-        pxl.subscribeToVariable(deps[i], element);
-      }
-
-      // Not connected yet: connectedCallback evaluates it
-      if (element.isConnected) {
-        element.attributeValues[name] = parsed.call(element, 0);
-      }
-    }
-  } else {
-    pxl.removeFromArray(element.animatedAttributeKeys, name);
+  if (parsed.isTimeDependent) {
+    // Evaluated every frame (evaluateAnimations)
+    if (!element.animatedAttributeKeys.includes(name)) element.animatedAttributeKeys.push(name);
     pxl.removeFromArray(element.reactiveAttributeKeys, name);
     pxl.removeFromArray(element.toLocalAttributeKeys, name);
-    element.attributeValues[name] = parsed;
+  } else {
+    // Evaluated when a ref.* dependency broadcasts. Functions are only compiled for time or refs,
+    // so a reactive function always has variableDependencies.
+    pxl.removeFromArray(element.animatedAttributeKeys, name);
+    if (!element.reactiveAttributeKeys.includes(name)) element.reactiveAttributeKeys.push(name);
+
+    // toLocal results also depend on the element's own space (re-evaluated by broadcastGlobalMatrixChange)
+    if (parsed.usesToLocal) {
+      if (!element.toLocalAttributeKeys.includes(name)) element.toLocalAttributeKeys.push(name);
+    } else {
+      pxl.removeFromArray(element.toLocalAttributeKeys, name);
+    }
+
+    const deps = parsed.variableDependencies;
+    for (let i = 0; i < deps.length; i++) {
+      pxl.subscribeToVariable(deps[i], element);
+    }
+
+    // Not connected yet: connectedCallback evaluates it
+    if (element.isConnected) {
+      element.attributeValues[name] = parsed.call(element, 0);
+    }
   }
+};
+
+// A value that needs no compiling, stored as it is: a parsed attribute string, or a property value (number, boolean,
+// array, gradient descriptor, …). Arrays are kept by reference and never changed by the engine.
+pxl.storeValue = function(element, name, value) {
+  element.attributeExpressions[name] = value;
+  pxl.removeFromArray(element.animatedAttributeKeys, name);
+  pxl.removeFromArray(element.reactiveAttributeKeys, name);
+  pxl.removeFromArray(element.toLocalAttributeKeys, name);
+  element.attributeValues[name] = value;
+};
+
+// =========================================================================
+// Properties: Every Attribute Is Also a JavaScript Property
+// =========================================================================
+// design/2026-10-30_framework_compatibility_plan.md §6, §24. React 19, Vue, Preact and Svelte set a property when the
+// element has one (`name in element`); Angular [x], Lit .x and Solid prop:x always do. A number set as a property is
+// stored without parsing or compiling; a string is compiled like the attribute. No reflection to the attribute.
+
+pxl._accessorClasses = new WeakSet();
+
+// Defines a getter / setter for every observed attribute on the class prototype, the first time an instance of the
+// class is created, so custom shapes (class Star extends pxl.Shape) get them too. Hyphenated names (pxl-on-*
+// handlers) stay attribute-only; names the prototype already has keep theirs: HTMLElement's id and hidden, an
+// attribute named like another HTMLElement property, a class's own getter (Text's text, Polyline's points).
+pxl.defineAccessors = function(Class) {
+  if (pxl._accessorClasses.has(Class)) return;
+  pxl._accessorClasses.add(Class);
+  const proto = Class.prototype;
+  for (const name of Class.observedAttributes) {
+    if (name.includes('-') || name in proto) continue;
+    Object.defineProperty(proto, name, {
+      get() { return this.attributeValues[name]; },
+      set(value) { this.setValue(name, value === undefined ? null : value); },
+      configurable: true
+    });
+  }
+};
+
+// Properties a framework set before the element was upgraded (code splitting, a script loaded late) are own
+// properties that hide the accessors. They are removed here and returned as [name, value, …] to be set again later
+// (connectedCallback, after the attributes, so a framework value wins over server HTML); null if there are none.
+// `keys` was read before the constructor added any field: a property set without a setter in the prototype chain.
+pxl.takeOwnProperties = function(element, keys) {
+  let pending = null;
+  const proto = Object.getPrototypeOf(element);
+  for (let i = 0; i < keys.length; i++) {
+    const name = keys[i];
+    if (!(name in proto)) continue;
+    pending ??= [];
+    pending.push(name, element[name]);
+    delete element[name];
+  }
+  return pending;
+};
+
+// A JavaScript function as a value (x={() => …}) is not supported (yet): warned once per element, the value stays.
+// Without the check, compileAttribute() would treat it as a compiled expression and throw in the framework's render.
+pxl._functionValueWarnings = new WeakSet();
+pxl.warnFunctionValue = function(element, name) {
+  if (pxl._functionValueWarnings.has(element)) return;
+  pxl._functionValueWarnings.add(element);
+  console.warn(`[pxl] <${element.localName}${element.id ? ` id="${element.id}"` : ''}> ${name}: a function can't be set as a value; use a number or an expression string`);
+};
+
+pxl.setPendingProperties = function(element, pending) {
+  for (let i = 0; i < pending.length; i += 2) element[pending[i]] = pending[i + 1];
+};
+
+// ref.<id>.set(name, value), Kilopixel's own setter for handlers: a string is compiled like the attribute (handlers
+// are trusted code); any other value goes through the property, so numbers aren't compiled and arrays stay arrays.
+// A name the element doesn't have warns once per element type and name (a typo, or a renamed attribute).
+pxl._unknownSetNames = new Set();
+pxl.setFromRef = function(element, name, value) {
+  const isKnown = name in element || name.includes('-');
+  if (!isKnown) {
+    const key = `${element.localName} ${name}`;
+    if (!pxl._unknownSetNames.has(key)) {
+      pxl._unknownSetNames.add(key);
+      console.warn(`[pxl] <${element.localName}${element.id ? ` id="${element.id}"` : ''}>: set('${name}', …) sets an attribute it doesn't have`);
+    }
+  }
+  if (typeof value === 'string' || !isKnown) element.setAttribute(name, value);
+  else element[name] = value;
 };
 
 // Re-evaluates toLocal() attributes after the element's own space moved (an ancestor's matrix changed).
@@ -581,6 +663,10 @@ pxl.checkToLocalProperties = function(str) {
 
 // Turns a non-empty attribute string into a static value (number, boolean, string)
 // or a compiled function. Cheap checks run first; most attributes never reach the compiler.
+// CSS hsl() / hsla() with % on saturation and lightness, comma or space syntax: "hsl(200, 50%, 40%)", "hsl(200deg 50% 40% / 0.5)"
+pxl.CSS_HSL_REGEX = /^hsla?\(\s*-?[\d.]+(?:deg)?(?:\s*,\s*|\s+)[\d.]+%(?:\s*,\s*|\s+)[\d.]+%(?:\s*[,/]\s*[\d.]+%?)?\s*\)$/i;
+pxl.CSS_COLOR_FUNCTION_REGEX = /^(?:hwb|lab|lch|oklab|oklch|color)\([^()]*\)$/i;
+
 pxl.parseAttributeValue = function(value) {
   const firstChar = value[0];
 
@@ -604,8 +690,11 @@ pxl.parseAttributeValue = function(value) {
       return value;
     }
 
-    // Static CSS colors: "rgba(124, 211, 15, 0.8)"
-    if (/^(rgb|rgba)\([\d\s.,%]+\)$/i.test(value)) {
+    // Static CSS colors, kept as text: compiling one costs about 90 µs, which a color that changes in every frame
+    // (fill={`hsl(${h}, 50%, 50%)`} from framework state) would pay each time, filling the expression cache.
+    // "rgba(124, 211, 15, 0.8)"; "hsl(200, 50%, 40%)" with % (Kilopixel's own hsl(200, 50, 40) is an expression);
+    // the CSS color functions Kilopixel doesn't define (oklch(), lab(), color(), …), without nested parentheses.
+    if (/^(rgb|rgba)\([\d\s.,%]+\)$/i.test(value) || pxl.CSS_HSL_REGEX.test(value) || pxl.CSS_COLOR_FUNCTION_REGEX.test(value)) {
       return value;
     }
   }
@@ -1583,6 +1672,8 @@ pxl.Stage = class Stage extends HTMLElement {
 
   constructor() {
     super();
+    // Before any field exists: own properties now were set before the upgrade (pxl.takeOwnProperties)
+    const ownKeys = Object.keys(this);
     this.layers = [];
     this._variables = []; // stage-level <pxl-var>: inside the stage, outside every layer
     this._isOrderDirty = false;
@@ -1603,8 +1694,11 @@ pxl.Stage = class Stage extends HTMLElement {
       mouseX: 500, mouseY: 500, isHovered: false, width: 1000, height: 1000 / this._parsedRatio,
       fps: 0, renderAvg: '0.00', renderMax: '0.00'
     };
-    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
+    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
     Object.defineProperty(this.attributeValues, '$node', { value: this, enumerable: false, writable: false });
+
+    // Properties set before the upgrade, applied in connectedCallback: [name, value, …] or null
+    this._pendingProperties = ownKeys.length === 0 ? null : pxl.takeOwnProperties(this, ownKeys);
 
     // Performance metrics
     this.perfFrames = 0;
@@ -1617,6 +1711,30 @@ pxl.Stage = class Stage extends HTMLElement {
     };
 
     this.interaction = new pxl.InteractionEngine(this);
+  }
+
+  // Properties for frameworks (design/2026-10-30_framework_compatibility_plan.md §24). Unlike the other elements', they
+  // write the attribute: a stage has two, set rarely, and the attribute path parses them. false, null and undefined
+  // remove the attribute.
+  get ratio() {
+    return this._parsedRatio;
+  }
+
+  set ratio(value) {
+    this.reflectAttribute('ratio', value);
+  }
+
+  get alwaysrender() {
+    return this.isAlwaysRender();
+  }
+
+  set alwaysrender(value) {
+    this.reflectAttribute('alwaysrender', value);
+  }
+
+  reflectAttribute(name, value) {
+    if (value === false || value === null || value === undefined) this.removeAttribute(name);
+    else this.setAttribute(name, value === true ? '' : String(value));
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -1642,6 +1760,11 @@ pxl.Stage = class Stage extends HTMLElement {
   }
 
   connectedCallback() {
+    if (this._pendingProperties !== null) {
+      const pending = this._pendingProperties;
+      this._pendingProperties = null;
+      pxl.setPendingProperties(this, pending);
+    }
     this._isVisible = true;
     if (this.id) {
       pxl.nodes[this.id] = this.attributeValues;
@@ -1834,9 +1957,13 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
   constructor() {
     super();
+    // Before any field exists: own properties now were set before the upgrade (pxl.takeOwnProperties)
+    const ownKeys = Object.keys(this);
+    pxl.defineAccessors(this.constructor);
+
     this.attributeExpressions = {};
     this.attributeValues = {};
-    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => this.setAttribute(k, v), enumerable: false, writable: false });
+    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
     Object.defineProperty(this.attributeValues, '$node', { value: this, enumerable: false, writable: false });
     // Drawn origin in the parent space: dx / dy are applied after rotate / scale / skew, so it's the local matrix translation
     Object.defineProperty(this.attributeValues, 'tx', { get: () => this.getLocalMatrix()[4], enumerable: false });
@@ -1892,6 +2019,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this._lastError = null;
     this._lastErrorMessage = null;
     this._errorCount = 0;
+
+    // Properties set before the upgrade, applied in connectedCallback: [name, value, …] or null
+    this._pendingProperties = ownKeys.length === 0 ? null : pxl.takeOwnProperties(this, ownKeys);
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -1906,16 +2036,40 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       this.setHandler(name, newValue);
       return;
     }
-    pxl.compileAttribute(this, name, newValue);
-    this.isAnimated = this.animatedAttributeKeys.length > 0;
-    if (pxl.isSpatialKey(name)) {
-      this.setLocalMatrixDirty();
+    this.setValue(name, newValue);
+  }
+
+  // --- Values ---
+
+  // One path for attributes and properties (the accessors of pxl.defineAccessors()). A string is compiled like an
+  // attribute (null: removed, the default); any other value is stored as it is, without parsing or compiling.
+  // The same parsed value again changes nothing: frameworks and hydration set unchanged values again.
+  setValue(name, value) {
+    if (value === this.attributeExpressions[name]) return;
+    if (typeof value === 'function') {
+      pxl.warnFunctionValue(this, name);
+      return;
     }
+    if (value === null || typeof value === 'string') pxl.compileAttribute(this, name, value);
+    else pxl.storeValue(this, name, value);
+    this.valueChanged(name);
+  }
+
+  // After a value changed: the animation state, the matrix, readers and the layer
+  valueChanged(name) {
+    this.isAnimated = this.animatedAttributeKeys.length > 0;
+    if (pxl.isSpatialKey(name)) this.setLocalMatrixDirty();
     if (this.refKey) pxl.broadcast(this.refKey);
     this.parentLayer?.invalidate();
   }
 
   connectedCallback() {
+    if (this._pendingProperties !== null) {
+      const pending = this._pendingProperties;
+      this._pendingProperties = null;
+      pxl.setPendingProperties(this, pending);
+    }
+
     this.parentLayer = this.closest('pxl-layer');
     this.parentContainer = this.parentElement.closest('pxl-group, pxl-layer');
     this._lastParentMatrixVersion = -1; // a new parent's version may equal the old one's
@@ -3212,48 +3366,80 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     this._split = new Float64Array(10);   // q0, r0, s, r1, q2
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'points') {
-      if (oldValue === newValue) return;
+  // --- Points ---
 
-      // Removed (null) or bare (''): no points
-      pxl.parsePointsIntoArray(newValue ?? '', this._rawParts);
-      const count = this._rawParts.length;
-      this.clearPoints(count);
-      this._pointCount = count;
-
-      this._flatCache = new Float64Array(this._pointCount);
-      this._pointKeys.length = this._pointCount;
-
-      for (let i = 0; i < this._pointCount; i++) {
-        const key = `p${i}`;
-        this._pointKeys[i] = key;
-        pxl.compileAttribute(this, key, this._rawParts[i]);
-      }
-
-      this.isAnimated = this.animatedAttributeKeys.length > 0;
-      // Readers of ref.<id>.pN update like for any other attribute
-      if (this.refKey) pxl.broadcast(this.refKey);
-      this.parentLayer?.invalidate();
-    } else {
-      super.attributeChangedCallback(name, oldValue, newValue);
-    }
+  // The property (frameworks): a points string like the attribute, or an array, flat [x0, y0, x1, y1, …] or pairs
+  // [[x0, y0], …], each coordinate a number or an expression string. Reading returns the evaluated coordinates,
+  // flat, in a new array.
+  get points() {
+    const out = new Array(this._pointCount);
+    for (let i = 0; i < this._pointCount; i++) out[i] = this.attributeValues[this._pointKeys[i]];
+    return out;
   }
 
-  // Keys below keepCount keep their value until recompiled: animated coordinates are only evaluated
-  // in the next frame, so ref.<id>.pN readers would otherwise see undefined in between.
-  clearPoints(keepCount) {
-    for (let i = 0; i < this._pointCount; i++) {
+  set points(value) {
+    this.setValue('points', value === undefined ? null : value);
+  }
+
+  setValue(name, value) {
+    if (name === 'points') this.setPoints(value);
+    else super.setValue(name, value);
+  }
+
+  // Each coordinate is its own value p0, p1, …: a number is stored, a string compiled like an attribute. An array is
+  // read in place (copying it would allocate in every update), and with the same number of coordinates the keys and
+  // the buffer stay: a chart whose points change in every frame allocates nothing for number coordinates.
+  setPoints(value) {
+    let count;
+    const isArray = Array.isArray(value);
+    const isPairs = isArray && Array.isArray(value[0]);
+    if (isPairs) {
+      count = 0; // up to the first incomplete pair, like an incomplete point in the string
+      while (count / 2 < value.length && Array.isArray(value[count / 2]) && value[count / 2].length >= 2) count += 2;
+    } else if (isArray) {
+      count = value.length - value.length % 2; // an x without its y is dropped
+    } else {
+      pxl.parsePointsIntoArray(typeof value === 'string' ? value : '', this._rawParts); // null or '': no points
+      count = this._rawParts.length;
+    }
+    if (count !== this._pointCount) this.resizePoints(count);
+
+    const expressions = this.attributeExpressions;
+    for (let i = 0; i < count; i++) {
+      const key = this._pointKeys[i];
+      const part = isPairs ? value[i >> 1][i & 1] : isArray ? value[i] : this._rawParts[i];
+      if (typeof part === 'string') {
+        pxl.compileAttribute(this, key, part);
+      } else if (typeof expressions[key] !== 'function') {
+        // A number over a value that is no expression: it is in none of the key lists, so it is just written
+        expressions[key] = part;
+        this.attributeValues[key] = part;
+      } else {
+        pxl.storeValue(this, key, part);
+      }
+    }
+
+    this.isAnimated = this.animatedAttributeKeys.length > 0;
+    // Readers of ref.<id>.pN update like for any other attribute
+    if (this.refKey) pxl.broadcast(this.refKey);
+    this.parentLayer?.invalidate();
+  }
+
+  // Keys beyond the new count go, new ones are added; keys below it keep their value until set again (animated
+  // coordinates are only evaluated in the next frame, so ref.<id>.pN readers would see undefined in between)
+  resizePoints(count) {
+    for (let i = count; i < this._pointCount; i++) {
       const key = this._pointKeys[i];
       pxl.removeFromArray(this.animatedAttributeKeys, key);
       pxl.removeFromArray(this.reactiveAttributeKeys, key);
       pxl.removeFromArray(this.toLocalAttributeKeys, key);
-      if (i >= keepCount) {
-        delete this.attributeExpressions[key];
-        delete this.attributeValues[key];
-      }
+      delete this.attributeExpressions[key];
+      delete this.attributeValues[key];
     }
-    this._pointCount = 0;
+    for (let i = this._pointCount; i < count; i++) this._pointKeys[i] = `p${i}`;
+    this._pointKeys.length = count;
+    this._flatCache = new Float64Array(count);
+    this._pointCount = count;
   }
 
   draw(ctx, u, t) {
@@ -3557,6 +3743,22 @@ pxl.Text = class Text extends pxl.Shape {
     this._totalChars = 0;
     this._startY = 0;
     this._hasInk = false; // true only if the last draw() painted something (used by hitTest)
+  }
+
+  // The text property shows a string as it is, never as an expression: frameworks bind data to it (text={label}),
+  // and compiling data would run it as code ('alert(1)') or fail on it ('Q1 - 2024'). Expressions stay available
+  // through the attribute. Other values (numbers) go the usual way.
+  get text() {
+    return this.attributeValues.text;
+  }
+
+  set text(value) {
+    if (typeof value !== 'string') {
+      this.setValue('text', value === undefined ? null : value);
+    } else if (value !== this.attributeExpressions.text) {
+      pxl.storeValue(this, 'text', value);
+      this.valueChanged('text');
+    }
   }
 
   // Three caches, each rebuilt only when its inputs change: font string → line layout → bounding box
@@ -3873,8 +4075,9 @@ pxl.Variable = class Variable extends pxl.PxlNode {
     super.disconnectedCallback();
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    super.attributeChangedCallback(name, oldValue, newValue);
+  // From the attribute and the property (el.value = 5)
+  valueChanged(name) {
+    super.valueChanged(name);
     // No layer to invalidate: the stage starts its loop when the value becomes animated
     this.stage?.requestRender();
   }

@@ -1,6 +1,6 @@
 # Polyline Optimization: Points Parser, Point Storage & Edge Cases
 
-- **Status**: 🟡 **Proposed** (low priority; 2026-10-19: measured gains are small, §2.3; the `ref.<id>.pN` fix is implemented, §2.3.4; priorities below)
+- **Status**: 🟡 **Proposed** (low priority; 2026-11-19: a `setPoints()` exists now, built with the `points` property of `design/2026-10-30_framework_compatibility_plan.md` §24: arrays read in place, keys and buffer kept when the count stays, `resizePoints()` replaces `clearPoints()`; phase 2 below builds on it; 2026-10-19: measured gains are small, §2.3; the `ref.<id>.pN` fix is implemented, §2.3.4; priorities below)
 - **Date**: 2026-10-18
 - **Related**: `design/archive/performance-analysis.md` (Issue #6, point key lookup), `design/2026-10-17_shape_authoring_plan.md` (Polyline `points: ''`, class fields, `draw(ctx, u)`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A), `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming), `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` (stroke gradients on flat shapes, implemented), `design/2026-10-23_smooth_polyline_spline_plan.md` (spline quality)
 - **Target Implementation**: `js/graphics.js` (parser), `js/elements/shapes/polyline.js`, `.agents/KILOPIXEL.md`

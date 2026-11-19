@@ -114,47 +114,129 @@ pxl.resolveEmptyAttribute = function(element, name, newValue) {
   return value === undefined ? null : value;
 };
 
+// newValue: an attribute string, or null for a removed attribute
 pxl.compileAttribute = function(element, name, newValue) {
   const parsed = (newValue === null || newValue === '')
     ? pxl.resolveEmptyAttribute(element, name, newValue)
     : pxl.parseAttributeValue(newValue);
+  if (typeof parsed !== 'function') {
+    pxl.storeValue(element, name, parsed);
+    return;
+  }
   element.attributeExpressions[name] = parsed;
 
-  if (typeof parsed === 'function') {
-    if (parsed.isTimeDependent) {
-      // Evaluated every frame (evaluateAnimations)
-      if (!element.animatedAttributeKeys.includes(name)) element.animatedAttributeKeys.push(name);
-      pxl.removeFromArray(element.reactiveAttributeKeys, name);
-      pxl.removeFromArray(element.toLocalAttributeKeys, name);
-    } else {
-      // Evaluated when a ref.* dependency broadcasts. Functions are only compiled for time or refs,
-      // so a reactive function always has variableDependencies.
-      pxl.removeFromArray(element.animatedAttributeKeys, name);
-      if (!element.reactiveAttributeKeys.includes(name)) element.reactiveAttributeKeys.push(name);
-
-      // toLocal results also depend on the element's own space (re-evaluated by broadcastGlobalMatrixChange)
-      if (parsed.usesToLocal) {
-        if (!element.toLocalAttributeKeys.includes(name)) element.toLocalAttributeKeys.push(name);
-      } else {
-        pxl.removeFromArray(element.toLocalAttributeKeys, name);
-      }
-
-      const deps = parsed.variableDependencies;
-      for (let i = 0; i < deps.length; i++) {
-        pxl.subscribeToVariable(deps[i], element);
-      }
-
-      // Not connected yet: connectedCallback evaluates it
-      if (element.isConnected) {
-        element.attributeValues[name] = parsed.call(element, 0);
-      }
-    }
-  } else {
-    pxl.removeFromArray(element.animatedAttributeKeys, name);
+  if (parsed.isTimeDependent) {
+    // Evaluated every frame (evaluateAnimations)
+    if (!element.animatedAttributeKeys.includes(name)) element.animatedAttributeKeys.push(name);
     pxl.removeFromArray(element.reactiveAttributeKeys, name);
     pxl.removeFromArray(element.toLocalAttributeKeys, name);
-    element.attributeValues[name] = parsed;
+  } else {
+    // Evaluated when a ref.* dependency broadcasts. Functions are only compiled for time or refs,
+    // so a reactive function always has variableDependencies.
+    pxl.removeFromArray(element.animatedAttributeKeys, name);
+    if (!element.reactiveAttributeKeys.includes(name)) element.reactiveAttributeKeys.push(name);
+
+    // toLocal results also depend on the element's own space (re-evaluated by broadcastGlobalMatrixChange)
+    if (parsed.usesToLocal) {
+      if (!element.toLocalAttributeKeys.includes(name)) element.toLocalAttributeKeys.push(name);
+    } else {
+      pxl.removeFromArray(element.toLocalAttributeKeys, name);
+    }
+
+    const deps = parsed.variableDependencies;
+    for (let i = 0; i < deps.length; i++) {
+      pxl.subscribeToVariable(deps[i], element);
+    }
+
+    // Not connected yet: connectedCallback evaluates it
+    if (element.isConnected) {
+      element.attributeValues[name] = parsed.call(element, 0);
+    }
   }
+};
+
+// A value that needs no compiling, stored as it is: a parsed attribute string, or a property value (number, boolean,
+// array, gradient descriptor, …). Arrays are kept by reference and never changed by the engine.
+pxl.storeValue = function(element, name, value) {
+  element.attributeExpressions[name] = value;
+  pxl.removeFromArray(element.animatedAttributeKeys, name);
+  pxl.removeFromArray(element.reactiveAttributeKeys, name);
+  pxl.removeFromArray(element.toLocalAttributeKeys, name);
+  element.attributeValues[name] = value;
+};
+
+// =========================================================================
+// Properties: Every Attribute Is Also a JavaScript Property
+// =========================================================================
+// design/2026-10-30_framework_compatibility_plan.md §6, §24. React 19, Vue, Preact and Svelte set a property when the
+// element has one (`name in element`); Angular [x], Lit .x and Solid prop:x always do. A number set as a property is
+// stored without parsing or compiling; a string is compiled like the attribute. No reflection to the attribute.
+
+pxl._accessorClasses = new WeakSet();
+
+// Defines a getter / setter for every observed attribute on the class prototype, the first time an instance of the
+// class is created, so custom shapes (class Star extends pxl.Shape) get them too. Hyphenated names (pxl-on-*
+// handlers) stay attribute-only; names the prototype already has keep theirs: HTMLElement's id and hidden, an
+// attribute named like another HTMLElement property, a class's own getter (Text's text, Polyline's points).
+pxl.defineAccessors = function(Class) {
+  if (pxl._accessorClasses.has(Class)) return;
+  pxl._accessorClasses.add(Class);
+  const proto = Class.prototype;
+  for (const name of Class.observedAttributes) {
+    if (name.includes('-') || name in proto) continue;
+    Object.defineProperty(proto, name, {
+      get() { return this.attributeValues[name]; },
+      set(value) { this.setValue(name, value === undefined ? null : value); },
+      configurable: true
+    });
+  }
+};
+
+// Properties a framework set before the element was upgraded (code splitting, a script loaded late) are own
+// properties that hide the accessors. They are removed here and returned as [name, value, …] to be set again later
+// (connectedCallback, after the attributes, so a framework value wins over server HTML); null if there are none.
+// `keys` was read before the constructor added any field: a property set without a setter in the prototype chain.
+pxl.takeOwnProperties = function(element, keys) {
+  let pending = null;
+  const proto = Object.getPrototypeOf(element);
+  for (let i = 0; i < keys.length; i++) {
+    const name = keys[i];
+    if (!(name in proto)) continue;
+    pending ??= [];
+    pending.push(name, element[name]);
+    delete element[name];
+  }
+  return pending;
+};
+
+// A JavaScript function as a value (x={() => …}) is not supported (yet): warned once per element, the value stays.
+// Without the check, compileAttribute() would treat it as a compiled expression and throw in the framework's render.
+pxl._functionValueWarnings = new WeakSet();
+pxl.warnFunctionValue = function(element, name) {
+  if (pxl._functionValueWarnings.has(element)) return;
+  pxl._functionValueWarnings.add(element);
+  console.warn(`[pxl] <${element.localName}${element.id ? ` id="${element.id}"` : ''}> ${name}: a function can't be set as a value; use a number or an expression string`);
+};
+
+pxl.setPendingProperties = function(element, pending) {
+  for (let i = 0; i < pending.length; i += 2) element[pending[i]] = pending[i + 1];
+};
+
+// ref.<id>.set(name, value), Kilopixel's own setter for handlers: a string is compiled like the attribute (handlers
+// are trusted code); any other value goes through the property, so numbers aren't compiled and arrays stay arrays.
+// A name the element doesn't have warns once per element type and name (a typo, or a renamed attribute).
+pxl._unknownSetNames = new Set();
+pxl.setFromRef = function(element, name, value) {
+  const isKnown = name in element || name.includes('-');
+  if (!isKnown) {
+    const key = `${element.localName} ${name}`;
+    if (!pxl._unknownSetNames.has(key)) {
+      pxl._unknownSetNames.add(key);
+      console.warn(`[pxl] <${element.localName}${element.id ? ` id="${element.id}"` : ''}>: set('${name}', …) sets an attribute it doesn't have`);
+    }
+  }
+  if (typeof value === 'string' || !isKnown) element.setAttribute(name, value);
+  else element[name] = value;
 };
 
 // Re-evaluates toLocal() attributes after the element's own space moved (an ancestor's matrix changed).

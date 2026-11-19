@@ -119,12 +119,16 @@
       ['PI', Math.PI], ['E', Math.E],
       ['rgb(10, 20, 30)', 'rgb(10, 20, 30)'], ['rgba(124, 211, 15, 0.8)', 'rgba(124, 211, 15, 0.8)'],
       ['RGB(1,2,3)', 'RGB(1,2,3)'],
+      // CSS colors stay text (design/2026-10-30_framework_compatibility_plan.md §24): no compiling, no cache entry
+      ['hsl(120, 50%, 40%)', 'hsl(120, 50%, 40%)'], ['hsla(120, 50%, 40%, 0.5)', 'hsla(120, 50%, 40%, 0.5)'],
+      ['hsl(120deg 50% 40% / 50%)', 'hsl(120deg 50% 40% / 50%)'], ['oklch(70% 0.1 200)', 'oklch(70% 0.1 200)'],
+      ['color(display-p3 1 0 0)', 'color(display-p3 1 0 0)'], ['lab(50% 40 59.5)', 'lab(50% 40 59.5)'],
       ["'Hello World'", 'Hello World'], ['"quoted"', 'quoted'], ["'Level 2-3'", 'Level 2-3']
     ], ([input, expected]) => [pxl.parseAttributeValue(input), expected]);
 
     table('parseAttributeValue: static expressions are evaluated once', [
       ['100 * 2', 200], ['[20, 10]', [20, 10]], ['10 / 4 + 1', 3.5],
-      ['hsl(120, 50%, 40%)', 'hsl(120,50%,40%)'], ['rgb(255, 0, 0)', 'rgb(255, 0, 0)'],
+      ['hsl(120, 50, 40)', 'hsl(120,50%,40%)'], ['hsl(120, 50%, 40)', 'hsl(120,50%,40%)'], ['rgb(255, 0, 0)', 'rgb(255, 0, 0)'],
       ['`a${1 + 1}`', 'a2'], ["'a' + 'b'", 'ab'],
       ['blur(5)', 'blur(5px)'], ['[blur(1), contrast(150)]', ['blur(1px)', 'contrast(150%)']]
     ], ([input, expected]) => [pxl.parseAttributeValue(input), expected]);
@@ -541,6 +545,98 @@
       const always = stage.isAlwaysRender();
       if (!same(bare, 562.5) || !same(set, 750) || !same(removed, 562.5) || !always) {
         throw new Error(`heights ${bare} / ${set} / ${removed}, alwaysrender ${always}`);
+      }
+    });
+
+    // ===================================================================
+    // Properties (design/2026-10-30_framework_compatibility_plan.md §6, §24): every attribute is also a property,
+    // generated like the Rule A tests above, so a new attribute is covered without a new test
+    // ===================================================================
+    section('Properties');
+
+    for (const tag of ELEMENTS) {
+      const Class = customElements.get(tag);
+      const names = Class.observedAttributes.filter((n) => !HANDLERS.has(n) && !NOT_A_VALUE.has(n) && n !== 'hidden');
+
+      test(`${tag}: every attribute is a property; a value is stored as it is, undefined and null give the default`, () => {
+        const el = document.createElement(tag), wrong = [];
+        for (const name of names) {
+          if (!(name in el)) {
+            wrong.push(`${name}: no property`);
+            continue;
+          }
+          const expected = Class.defaults[name] ?? null;
+          el[name] = 7;
+          if (el.attributeValues[name] !== 7 || el[name] !== 7) wrong.push(`${name} = 7: ${show(el.attributeValues[name])}`);
+          el[name] = undefined;
+          if (!same(el.attributeValues[name], expected)) wrong.push(`${name} = undefined: ${show(el.attributeValues[name])} instead of ${show(expected)}`);
+          el[name] = 8;
+          el[name] = null;
+          if (!same(el.attributeValues[name], expected)) wrong.push(`${name} = null: ${show(el.attributeValues[name])} instead of ${show(expected)}`);
+        }
+        if (el.getAttributeNames().length) wrong.push(`attributes written: ${el.getAttributeNames()}`);
+        if (wrong.length) throw new Error(wrong.join('; '));
+      });
+    }
+
+    test('pxl-polyline: the points property takes a string, a flat array or pairs; reading gives the evaluated coordinates', () => {
+      const el = document.createElement('pxl-polyline'), seen = [];
+      el.points = '1,2; 3,4';
+      seen.push(el.points.join(','));
+      el.points = [5, 6, 7, 8, 9]; // the last x has no y
+      seen.push(el.points.join(','));
+      el.points = [[1, 1], ['2 * 5', 3], [4]]; // an expression string; an incomplete pair ends the list
+      seen.push(el.points.join(','));
+      el.points = [10, 't * 0 + 2'];
+      const animated = el.isAnimated;
+      el.points = undefined;
+      seen.push(el.points.length);
+      if (seen.join(' | ') !== '1,2,3,4 | 5,6,7,8 | 1,1,10,3 | 0' || !animated || el.isAnimated || el.hasAttribute('points')) {
+        throw new Error(`${seen.join(' | ')}, animated with t: ${animated}, after undefined: ${el.isAnimated}`);
+      }
+    });
+
+    test('pxl-stage: the ratio and alwaysrender properties write the attribute; false, null and undefined remove it', () => {
+      const stage = document.createElement('pxl-stage'), seen = [];
+      stage.ratio = 2;
+      seen.push(stage.getAttribute('ratio'), stage.ratio, stage.attributeValues.height);
+      stage.ratio = undefined;
+      seen.push(stage.hasAttribute('ratio'), +stage.ratio.toFixed(3));
+      stage.alwaysrender = true;
+      seen.push(stage.getAttribute('alwaysrender'), stage.alwaysrender);
+      stage.alwaysrender = false;
+      seen.push(stage.hasAttribute('alwaysrender'), stage.alwaysrender);
+      if (seen.join(',') !== '2,2,500,false,1.778,,true,false,false') throw new Error(seen.join(','));
+    });
+
+    test('pxl-text: a string set as the text property is text, never an expression; the attribute still compiles', () => {
+      const el = document.createElement('pxl-text'), seen = [];
+      const before = pxl.animationCache.size + pxl.staticCache.size;
+      for (const value of ['alert(1)', 'Q1 - 2024', "'a' + 'b'", '']) {
+        el.text = value;
+        seen.push(el.attributeValues.text === value);
+      }
+      el.text = 42;
+      seen.push(el.attributeValues.text === 42);
+      const grown = pxl.animationCache.size + pxl.staticCache.size - before;
+      el.setAttribute('text', "'a' + 'b'");
+      if (seen.includes(false) || grown !== 0 || el.attributeValues.text !== 'ab') {
+        throw new Error(`stored as given: ${seen}, cache grew by ${grown}, attribute: ${show(el.attributeValues.text)}`);
+      }
+    });
+
+    test('a function set as a property warns once per element and leaves the value unchanged', () => {
+      const el = document.createElement('pxl-circle'), warnings = [], warn = console.warn;
+      console.warn = (...args) => warnings.push(args.join(' '));
+      try {
+        el.r = 5;
+        el.r = () => 10;
+        el.x = () => 10;
+      } finally {
+        console.warn = warn;
+      }
+      if (el.attributeValues.r !== 5 || el.attributeValues.x !== 0 || warnings.length !== 1) {
+        throw new Error(`r ${el.attributeValues.r}, x ${el.attributeValues.x}, ${warnings.length} warning(s)`);
       }
     });
 
