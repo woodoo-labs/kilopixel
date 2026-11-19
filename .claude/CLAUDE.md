@@ -40,6 +40,12 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
   3. **Implemented:** ✅ in the plan; remove the TODO item, or keep it with only what is left (e.g. docs).
   4. **Replaced or dropped:** ⚪ in the plan, move it to `design/archive/` and fix the links to it, remove the TODO item. An implemented plan is archived too once later work replaced its design (renamed attributes alone don't count).
   5. **Removing or merging a TODO item:** its number stays free; remove every reference to it (link the plan instead); move ideas that are still open into another item or plan.
+  6. **Housekeeping, with every built step and every status change:** nothing else may contradict the new state. Search for the names, attributes and decisions the change removed, renamed or settled (`git grep` over `.agents/`, `design/*.md`, `tests/`, `docs/`, `examples/`; not `design/archive/` or `design/prototypes/`) and fix, in the same change:
+     - the plan's own older sections that the build contradicts (decisions table, phases, estimates, risks, performance): a dated note pointing to the new section; the old text stays as history;
+     - open decisions the build settled: decided or built, in the plan and in its TODO item;
+     - other open plans and TODO items that describe the old code or design: a dated note or an update;
+     - implemented plans whose design the change replaced: archive them (rule 4) and fix the links to them;
+     - test page introductions and section comments, docs and examples that describe the old behavior (KILOPIXEL.md: "Keep the reference in sync").
 
   Then run `node tools/check_plans.js`; it must report no problems.
 - **Verify in the browser:** the dev server is `node tools/serve.js` (launch config `kilopixel`, http://localhost:8124, `/` redirects to `/docs/`). Check docs pages and `examples/` there, including the console. A hidden browser pane pauses animation frames and may not take screenshots: run tests with `node tools/run_tests.js`, check one page's console headless with `node tools/run_tests.js --page docs/x.html`, and use the pane for looking at pages.
