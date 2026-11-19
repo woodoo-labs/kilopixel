@@ -5,7 +5,8 @@
   <title>Smoke: React 19</title>
   <!-- Kilopixel as a plain script tag: the elements are defined before React renders -->
   <script src="/dist/pxl.min.js"></script>
-  <script src="smoke_checks.js"></script>
+  <script src="../runner.js"></script>
+  <script src="checks.js"></script>
   <style>
     body { font-family: sans-serif; margin: 16px; background: #f8fafc; color: #0f172a; }
     .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 1200px; }
@@ -13,17 +14,23 @@
     .card h3 { margin: 4px 0 8px; font-size: 14px; }
     .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 13px; margin-top: 6px; }
     .state { font: 12px monospace; white-space: pre-wrap; background: #f1f5f9; padding: 6px; margin-top: 6px; }
-    #checks { font: 13px monospace; white-space: pre-wrap; margin-top: 12px; max-width: 1200px; }
+    .test-summary { font-weight: 700; margin: 16px 0 8px; }
+    .test-passed { color: #15803d; }
+    .test-failed, .test-fixed { color: #b91c1c; }
+    .test-known { color: #b45309; }
+    .test-table { border-collapse: collapse; font-size: 13px; max-width: 1200px; }
+    .test-table td { border-bottom: 1px solid #e2e8f0; padding: 4px 8px; vertical-align: top; }
+    .test-section td { font-weight: 700; padding-top: 12px; }
   </style>
 </head>
 <body>
   <h2>Kilopixel in React 19 (smoke page)</h2>
-  <p>React 19 from esm.sh with <code>htm</code>, no build. The scene of <code>smoke_checks.js</code> in React's syntax: props
+  <p>React 19 from esm.sh with <code>htm</code>, no build. The scene of <code>checks.js</code> in React's syntax: props
     as properties (numbers, arrays, text), <code>onClick</code>, <code>onPointerEnter</code> / <code>onPointerLeave</code>
-    (React builds them from <code>pointerover</code> / <code>pointerout</code>), <code>style={{ cursor }}</code>.
-    <button id="run">Run checks</button></p>
+    (React builds them from <code>pointerover</code> / <code>pointerout</code>), <code>style={{ cursor }}</code>. The checks run when the page loads (<code>?grep=skip</code> skips them, to try the scene with the mouse).</p>
+  <p id="summary" class="test-summary">Running…</p>
+  <table class="test-table"><tbody id="results"></tbody></table>
   <div id="root"></div>
-  <div id="checks">checks: not run yet (button above, or window.runSceneChecks())</div>
 
   <script type="module">
     import React, { useState, useId, useEffect, useRef } from 'https://esm.sh/react@19.1.0';
@@ -85,7 +92,8 @@
     }
 
     createRoot(document.getElementById('root')).render(html`<div class="cards"><${Scene} title="A" /><${Scene} title="B" /></div>`);
-    document.getElementById('run').addEventListener('click', () => window.runSceneChecks());
   </script>
+  <!-- A classic script: it also runs when the framework can't load (no internet) and then reports that -->
+  <script>runSceneChecks();</script>
 </body>
 </html>

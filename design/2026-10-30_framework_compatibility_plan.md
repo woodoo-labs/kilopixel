@@ -761,15 +761,16 @@ The conformance tests (§11, `tests/frameworks.html`) imitate what frameworks do
 
 | Page | Framework | Checks | Real mouse |
 |---|---|---|---|
-| `design/prototypes/2026-10-30_framework_compatibility/smoke_react.html` | React 19.1.0 + htm from esm.sh | 21/21 (`smoke_checks.js`) | ✅ |
-| `design/prototypes/2026-10-30_framework_compatibility/smoke_vue.html` | Vue 3.5.13 with the template compiler, jsDelivr | 21/21 (`smoke_checks.js`) | ✅ |
-| `design/prototypes/2026-10-30_framework_compatibility/smoke_tailwind.html` | Tailwind CSS 4.1.7 browser build, plain HTML | 11/11 (own checks) | ✅ |
+| `tests/smoke/react.html` | React 19.1.0 + htm from esm.sh | 21/21 (`checks.js`) | ✅ |
+| `tests/smoke/vue.html` | Vue 3.5.13 with the template compiler, jsDelivr | 21/21 (`checks.js`) | ✅ |
+| `tests/smoke/tailwind.html` | Tailwind CSS 4.1.7 browser build, plain HTML | 11/11 (own checks) | ✅ |
 
-- **Shared checks** (`design/prototypes/2026-10-30_framework_compatibility/smoke_checks.js`): every framework page renders the same scene in its own syntax and registers each instance (`window.smoke.instances`); `window.runSceneChecks()` tests properties (numbers, arrays, literal text, expression strings, colors from state, points), events (clicks on shapes and groups, `stopPropagation()`, enter / leave from empty space and from another shape, the cursor), and mount / unmount. Results in the page and the tab title.
+- **Shared checks** (`tests/smoke/checks.js`, on `tests/runner.js`): every framework page renders the same scene in its own syntax and registers each instance (`window.smoke.instances`); `window.runSceneChecks()` tests properties (numbers, arrays, literal text, expression strings, colors from state, points), events (clicks on shapes and groups, `stopPropagation()`, enter / leave from empty space and from another shape, the cursor), and mount / unmount. Results in the page and the tab title.
 - **Real mouse:** each page was also driven with real mouse input in the browser pane (it must be visible: a hidden pane leaves stages unsized).
-- **Not in `node tools/run_tests.js`:** the pages need the network (CDNs). They run on demand.
+- **Where they live (moved 2026-11-19):** first in this plan's prototype folder, then moved to `tests/smoke/` (`tests/smoke/README.md`): they are tests to run again after engine changes, not the record of a decision. They report through `tests/runner.js` like the other test pages.
+- **Not in the normal run:** they need the network (CDNs), so `node tools/run_tests.js` and CI leave them out; `node tools/run_tests.js --smoke` runs them headless on demand.
 - **Findings:** `design/prototypes/2026-10-30_framework_compatibility/FINDINGS.md` (second part, 2026-11-19).
 - **Next:**
-  - **Angular** needs a build. Agreed approach (2026-11-19): an npm app in a top-level folder `frameworks/angular/` with its own `package.json` and committed `package-lock.json`; `node_modules` and build output ignored by git; each laptop runs `npm ci` there. Needs a CLAUDE.md exception to "never create `node_modules`" (only inside `frameworks/<app>/`) and a step in "Working on Another Machine". Not built yet; asked before creating it.
+  - **Angular** needs a build. Agreed approach (2026-11-19): an npm app in `tests/smoke/angular/` (first planned as a top-level `frameworks/angular/`; moved with the pages) with its own `package.json` and committed `package-lock.json`; `node_modules` and build output ignored by git; each laptop runs `npm ci` there. Needs a CLAUDE.md exception to "never create `node_modules`" (only inside `tests/smoke/<app>/`) and a step in "Working on Another Machine". Not built yet; asked before creating it.
   - More CDN pages if wanted: Preact, Lit (also a stage in a shadow root), Solid, Alpine, htmx; Svelte 5 needs its compiler in the page.
   - `docs/frameworks.html` (§12, step 5), written from what the pages show.

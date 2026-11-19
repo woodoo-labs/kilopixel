@@ -2,6 +2,7 @@
 
 Pages: `react.html` (React 19.1 + htm from esm.sh), `vue.html` (Vue 3.5.13 global build, `isCustomElement` for `pxl-*`), `vue_debug.html` (`vue.html` plus a log of `pxl.Stage` lifecycle calls, for the sizing problem).
 Each page renders two instances of a component with a stage, a sun, an orbiting moon and a click counter.
+These pages use the API from before W1 (`onclick` strings, no DOM events on shapes), so they no longer work as described here; they stay as history. The current framework pages are in `tests/smoke/` (second part below).
 
 | Scenario | React 19 | Vue 3.5 |
 |---|---|---|
@@ -27,7 +28,7 @@ Possible engine follow-ups:
 
 # Smoke Pages After W1 and W3 (2026-11-19)
 
-Pages: `smoke_react.html` (React 19.1.0 + htm 3.1.1 from esm.sh), `smoke_vue.html` (Vue 3.5.13, the ES module build with the template compiler, from jsDelivr), `smoke_tailwind.html` (Tailwind CSS 4.1.7, the browser build, plain HTML), all loading Kilopixel as a script tag (`/dist/pxl.min.js`) and no build step. React and Vue render the same scene and run the same checks from `smoke_checks.js` (`window.runSceneChecks()`); the Tailwind page has its own (`window.runTailwindChecks()`). Plan: `design/2026-10-30_framework_compatibility_plan.md` §25.
+Pages (moved on the same day to `tests/smoke/`: `react.html`, `vue.html`, `tailwind.html`, with `checks.js`; run with `node tools/run_tests.js --smoke`): `smoke_react.html` (React 19.1.0 + htm 3.1.1 from esm.sh), `smoke_vue.html` (Vue 3.5.13, the ES module build with the template compiler, from jsDelivr), `smoke_tailwind.html` (Tailwind CSS 4.1.7, the browser build, plain HTML), all loading Kilopixel as a script tag (`/dist/pxl.min.js`) and no build step. React and Vue render the same scene and run the same checks from `smoke_checks.js` (`window.runSceneChecks()`); the Tailwind page has its own (`window.runTailwindChecks()`). Plan: `design/2026-10-30_framework_compatibility_plan.md` §25.
 
 | Scenario | React 19 | Vue 3.5 |
 |---|---|---|
@@ -63,6 +64,6 @@ Found and fixed:
 Not a bug, but easy to trip over: a shape drawn later takes the pointer where it overlaps, also a thin line. The initial chart line has a corner exactly at the sun's center, so a click there goes to the chart, as it would in the DOM.
 
 Test-environment notes:
-- In a hidden browser pane `setTimeout` is throttled to about once per second; `smoke_checks.js` waits for renders with `MessageChannel` tasks instead. A hidden pane also leaves stages unsized for real mouse input; the scripted checks size the stage themselves.
+- In a hidden browser pane `setTimeout` is throttled to about once per second; `checks.js` waits for renders with `MessageChannel` tasks instead. A hidden pane also leaves stages unsized for real mouse input; the scripted checks size the stage themselves.
 
 Not covered yet: Angular (needs a build; planned as an npm app outside the CDN pages, plan §25), Preact, Lit, Solid, Svelte, Alpine, htmx.

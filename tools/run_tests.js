@@ -1,11 +1,13 @@
 // Runs the build checks (tools/check_build.js), the test pages in tests/ and the sweep of every docs and example
 // page for console messages, in headless Chrome or Edge, without npm packages (design/2026-11-15_testing_plan.md §5).
 //
-// Usage: node tools/run_tests.js [--tests] [--slow] [--sweep] [--page <path>] [--grep <text>] [--repeat <n>] [--verbose]
+// Usage: node tools/run_tests.js [--tests] [--slow] [--sweep] [--smoke] [--page <path>] [--grep <text>] [--repeat <n>] [--verbose]
 //   (no option)      everything: build checks, all test pages, the sweep (before a commit, and in CI)
 //   --tests          build checks and the quick test pages (after a build; without the slow pages)
 //   --slow           with --tests: also the slow test pages (tests/scaling.html, about 20 s)
 //   --sweep          only the page sweep
+//   --smoke          the framework smoke pages in tests/smoke/ (React, Vue, Tailwind, loaded from CDNs: needs
+//                    internet; never part of the other runs or CI). Alone: only them; with --tests: both
 //   --page <path>    sweep one page, e.g. docs/circle.html (can be repeated)
 //   --grep <text>    only tests whose name or section contains the text (passed to the pages as ?grep=)
 //   --repeat <n>     run the test pages n times (finds flaky tests)
@@ -42,9 +44,11 @@ const value = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : nu
 const values = (name) => args.flatMap((a, i) => (a === name && args[i + 1] ? [args[i + 1]] : []));
 const pagesToSweep = values('--page');
 const onlyTests = flag('--tests'), onlySweep = flag('--sweep') || pagesToSweep.length > 0;
+const onlySmoke = flag('--smoke') && !onlyTests && !onlySweep;
 const options = {
-  tests: onlyTests || !onlySweep,
-  sweep: onlySweep || !onlyTests,
+  tests: onlyTests || (!onlySweep && !onlySmoke),
+  sweep: onlySweep || (!onlyTests && !onlySmoke),
+  smoke: flag('--smoke'),
   // The slow pages run in the full run; with --tests only on request
   slow: !onlyTests || flag('--slow'),
   grep: value('--grep'),
@@ -298,11 +302,10 @@ function runBuildChecks() {
   return failures.length;
 }
 
-async function runTestPages() {
+// pages: the test pages in tests/ (without the slow ones unless asked), or the smoke pages in tests/smoke/
+async function runTestPages(pages) {
   let failures = 0;
   const query = options.grep ? `?grep=${encodeURIComponent(options.grep)}` : '';
-  const pages = htmlFiles('tests').filter((page) => options.slow || !SLOW_PAGES.has(page));
-  if (!options.slow) console.log(`  (left out: ${[...SLOW_PAGES].join(', ')}; add --slow, or run without --tests)`);
   for (let round = 1; round <= options.repeat; round++) {
     if (options.repeat > 1) console.log(`Round ${round} of ${options.repeat}`);
     for (const page of pages) {
@@ -382,7 +385,14 @@ async function main() {
     server = await ensureServer();
     console.log(`Kilopixel tests: ${path.basename(browserPath)}` + (server ? ', dev server started for this run' : ''));
     if (options.tests) failures += runBuildChecks();
-    if (options.tests) failures += await runTestPages();
+    if (options.tests) {
+      if (!options.slow) console.log(`  (left out: ${[...SLOW_PAGES].join(', ')}; add --slow, or run without --tests)`);
+      failures += await runTestPages(htmlFiles('tests').filter((page) => options.slow || !SLOW_PAGES.has(page)));
+    }
+    if (options.smoke) {
+      console.log('  Smoke pages (frameworks from CDNs, needs internet):');
+      failures += await runTestPages(htmlFiles('tests/smoke'));
+    }
     if (options.sweep) failures += await runSweep();
     console.log(failures === 0 ? 'All passed.' : `FAILED: ${failures} problem(s).`);
     process.exitCode = failures === 0 ? 0 : 1;

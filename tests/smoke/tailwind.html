@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smoke: Tailwind CSS 4</title>
+  <script src="/dist/pxl.min.js"></script>
+  <script src="../runner.js"></script>
+  <script src="checks.js"></script>
+  <!-- Tailwind v4's browser build: compiles the classes on the page, with Tailwind's base styles (preflight) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.7"></script>
+</head>
+<body class="bg-slate-50 p-4 font-sans text-slate-900">
+  <h2 class="text-xl font-bold">Kilopixel with Tailwind CSS 4 (smoke page)</h2>
+  <p class="my-2 max-w-4xl text-sm">Tailwind utilities on stages, layers, groups and shapes, with Tailwind's base styles on
+    the page. Kilopixel's default styles sit in the lowest cascade layer, so every utility wins over them. The checks run when the page loads (<code>?grep=skip</code> skips them, to try the stage with the mouse).</p>
+
+  <div id="box" class="max-w-4xl">
+    <!-- w-1/2 overrides the stage's default width: 100% -->
+    <pxl-stage id="twStage" class="w-1/2 rounded border border-slate-300 bg-white" ratio="2" alwaysrender>
+      <pxl-layer>
+        <!-- A button: the group gets the hand from cursor-pointer; the decoration on top lets the pointer through -->
+        <pxl-group id="twButton" class="cursor-pointer" x="250" y="250" pxl-on-click="window.twClicks = (window.twClicks || 0) + 1">
+          <pxl-rect w="300" h="120" r="16" fill="#3b82f6"></pxl-rect>
+        </pxl-group>
+        <pxl-circle id="twDecoration" class="pointer-events-none" x="250" y="250" r="40" fill="#fde047"></pxl-circle>
+        <!-- A click handler gives the hand by default; cursor-default overrides it -->
+        <pxl-circle id="twNoHand" class="cursor-default" x="600" y="250" r="60" fill="#f97316" pxl-on-click="0"></pxl-circle>
+        <!-- A class switched while hovered (a framework binding a class) -->
+        <pxl-circle id="twSwitch" class="cursor-pointer" x="850" y="250" r="60" fill="#22c55e"></pxl-circle>
+      </pxl-layer>
+      <!-- A layer out of hit testing, with one shape back in -->
+      <pxl-layer id="twOverlay" class="pointer-events-none">
+        <pxl-rect id="twOverlayRect" x="600" y="420" w="300" h="80" fill="rgba(15, 23, 42, 0.2)"></pxl-rect>
+        <pxl-circle id="twOverlayAuto" class="pointer-events-auto" x="900" y="430" r="40" fill="#a855f7"></pxl-circle>
+      </pxl-layer>
+      <!-- Layers hidden by CSS classes, above a shape: not drawn on the page, not hit, so the shape below is -->
+      <pxl-layer><pxl-circle id="twUnder" x="200" y="430" r="140" fill="#cbd5e1"></pxl-circle></pxl-layer>
+      <pxl-layer id="twHiddenLayer" class="hidden"><pxl-circle id="twInHidden" x="100" y="430" r="50" fill="#000"></pxl-circle></pxl-layer>
+      <pxl-layer id="twInvisibleLayer" class="invisible"><pxl-circle id="twInInvisible" x="300" y="430" r="50" fill="#000"></pxl-circle></pxl-layer>
+    </pxl-stage>
+  </div>
+  <p id="summary" class="test-summary mt-4 font-bold">Running…</p>
+  <table class="test-table max-w-4xl text-sm"><tbody id="results"></tbody></table>
+
+  <script>
+    window.smoke = { framework: 'Tailwind 4.1.7' };
+    const { settle, until, hover, clickAt, expect } = window.smokeHelpers;
+    const el = (id) => document.getElementById(id);
+    const stage = el('twStage');
+    const hitId = (x, y) => { const hit = stage.interaction.findShapeAt(x, y); return hit ? (hit.id || hit.closest('[id]').id) : null; };
+    const cursor = () => stage.querySelector('pxl-layer')._canvas.style.cursor || 'none';
+    // The browser build compiles classes after a DOM change: a check waits until the computed style shows them
+    const compiled = () => getComputedStyle(el('twDecoration')).pointerEvents === 'none';
+
+    section('Tailwind classes on stages, layers, groups and shapes');
+
+    test('Tailwind compiled the classes (pointer-events-none on a shape reads none)', async () => {
+      const ok = await until(compiled);
+      stage.resize(); // in a hidden tab the ResizeObserver doesn't report, so the stage is sized here
+      await settle();
+      expect(ok, `pointer-events ${getComputedStyle(el('twDecoration')).pointerEvents} (Tailwind comes from a CDN: no internet?)`);
+    });
+    test('w-1/2 beats the stage\'s default width: 100%; the ratio still holds', () => {
+      const box = el('box').getBoundingClientRect(), rect = stage.getBoundingClientRect();
+      expect(Math.abs(rect.width - box.width / 2) < 1 && Math.abs(rect.height - rect.width / 2) < 2,
+        `stage ${rect.width.toFixed(1)} × ${rect.height.toFixed(1)}, box ${box.width.toFixed(1)}`);
+    });
+    // The canvas fills the stage inside its border (border-box from the base styles, border class), as the unit does
+    test('the base styles (preflight) keep the layer canvas the size of the stage inside its border', () => {
+      const canvas = stage.querySelector('pxl-layer')._canvas.getBoundingClientRect();
+      expect(Math.abs(canvas.width - stage.clientWidth) < 1 && Math.abs(canvas.height - stage.clientHeight) < 1 &&
+        Math.abs(stage.unit - stage.clientWidth / 1000) < 1e-9,
+        `canvas ${canvas.width.toFixed(1)} × ${canvas.height.toFixed(1)}, inside the border ${stage.clientWidth} × ${stage.clientHeight}`);
+    });
+    test('pointer-events-none on a decoration: the click reaches the group below it', async () => {
+      window.twClicks = 0;
+      clickAt(stage, 250, 250);
+      await settle();
+      expect(window.twClicks === 1 && hitId(250, 250) === 'twButton', `clicks ${window.twClicks}, hit ${hitId(250, 250)}`);
+    });
+    test('pointer-events-none on a layer, pointer-events-auto on one shape in it', () =>
+      expect(hitId(700, 420) !== 'twOverlayRect' && hitId(900, 430) === 'twOverlayAuto', `rect area ${hitId(700, 420)}, auto shape ${hitId(900, 430)}`));
+    test('hidden (display: none) and invisible (visibility: hidden) layers are not hit', () =>
+      expect(hitId(100, 430) === 'twUnder' && hitId(300, 430) === 'twUnder', `hidden ${hitId(100, 430)}, invisible ${hitId(300, 430)}`));
+    test('hidden and invisible layers are not shown on the page', () => {
+      const hiddenCanvas = el('twHiddenLayer')._canvas, invisibleCanvas = el('twInvisibleLayer')._canvas;
+      expect(hiddenCanvas.getClientRects().length === 0 && getComputedStyle(invisibleCanvas).visibility === 'hidden',
+        `hidden canvas boxes ${hiddenCanvas.getClientRects().length}, invisible canvas ${getComputedStyle(invisibleCanvas).visibility}`);
+    });
+
+    section('Cursor classes');
+
+    test('cursor-pointer on a group shows the hand over its shape', () => {
+      hover(stage, 150, 220);
+      expect(cursor() === 'pointer', cursor());
+    });
+    test('cursor-default beats the hand that a click handler gets by default', () => {
+      hover(stage, 600, 250);
+      expect(cursor() === 'default', cursor());
+    });
+    test('a class switched while hovered shows in the next hit test', async () => {
+      hover(stage, 850, 250);
+      const before = cursor();
+      el('twSwitch').className = 'cursor-not-allowed';
+      await until(() => getComputedStyle(el('twSwitch')).cursor === 'not-allowed', 3000);
+      hover(stage, 851, 250);
+      expect(before === 'pointer' && cursor() === 'not-allowed', `${before} → ${cursor()}`);
+    });
+    test('known limit: hover: variants never match a shape (no :hover on drawn shapes)', async () => {
+      el('twUnder').className = 'hover:cursor-wait';
+      await until(() => [...document.styleSheets].some((sheet) => [...sheet.cssRules].some((r) => r.cssText.includes('cursor-wait'))), 3000);
+      hover(stage, 200, 500);
+      expect(cursor() !== 'wait', cursor());
+    });
+
+    runTests({ settle: 0 });
+  </script>
+</body>
+</html>
