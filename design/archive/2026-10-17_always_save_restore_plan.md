@@ -2,7 +2,7 @@
 
 - **Status**: ⚪ **Superseded by** `design/done/2026-11-07_safe_shape_render_plan.md` (2026-11-07: decided on 2026-10-17, merged with the draw errors plan before it was built; reasoning and revised criterion in §5.4)
 - **Date**: 2026-10-17
-- **Related**: `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, implemented; this plan was split off from its former §3), `design/2026-10-17_shape_authoring_plan.md` (custom shapes), `design/done/2026-11-01_isolated_shape_compositing_plan.md` (builds on this one: same `Shape.render()`, order in its §9)
+- **Related**: `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, implemented; this plan was split off from its former §3), `design/archive/2026-10-17_shape_authoring_plan.md` (custom shapes), `design/done/2026-11-01_isolated_shape_compositing_plan.md` (builds on this one: same `Shape.render()`, order in its §9)
 - **Target Implementation**: `js/elements/shape.js` (`render`, `drawArrows`), `js/elements/shapes/grid.js`
 - **Measurement Tools** (not kept): `scratch/save_restore_audit.js`, `scratch/save_restore_bench.html`, `scratch/save_restore/measure.html`, `design/prototypes/2026-10-17_shape_authoring/star_test.html`
 
@@ -17,7 +17,7 @@ All shapes in a layer share one canvas context, and context settings persist unt
 
 Rule 1 only works with valid values. Before Rule A, a removed `miterlimit` (`null`) was ignored by the canvas, so the previous shape's value leaked in. Rule A (defaults plan) fixed that: bare and removed attributes now resolve to valid defaults, so there is **no known leak in the built-in shapes today**.
 
-The open question is whether shapes should be isolated **structurally** as well, so that no future code path can leak state into the next shape. Custom shapes (`design/2026-10-17_shape_authoring_plan.md`) make this concrete: their `draw()` is foreign code that may change canvas state without resetting it (§5.2).
+The open question is whether shapes should be isolated **structurally** as well, so that no future code path can leak state into the next shape. Custom shapes (`design/archive/2026-10-17_shape_authoring_plan.md`) make this concrete: their `draw()` is foreign code that may change canvas state without resetting it (§5.2).
 
 ---
 

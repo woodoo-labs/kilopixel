@@ -61,7 +61,7 @@ Redraws that would disappear:
 | `text="floor(t)"` (a clock) | 60 redraws / s | 1 redraw / s |
 | `x="clamp(t * 100, 0, 300)"` (intro animation) | 60 redraws / s forever (`isAnimated` stays true) | stops redrawing after 3 s |
 | `fill="t > 5 ? 'red' : 'blue'"` | 60 redraws / s | 1 redraw, at the switch |
-| Pattern B pump while stopped (`design/2026-10-17_shape_authoring_plan.md` §4) | 60 redraws / s | none |
+| Pattern B pump while stopped (`design/archive/2026-10-17_shape_authoring_plan.md` §4) | 60 redraws / s | none |
 
 Conditions:
 
@@ -133,7 +133,7 @@ Plans whose per-frame design assumes today's single pass. Each has a pointer to 
 | §2 | `design/ideas/2026-09-29_pxl-clip_element_plan.md` | §6.1 `applyClip()` evaluates its children while drawing and §9 relies on the layer heartbeat; the clip's children must be evaluated in the update phase |
 | §28 | `design/2026-10-30_space_attribute_plan.md` | §3.5 "Draw Order" (one-frame lag, readers after targets) goes away: no lag since step 1 for readers without `t` |
 | §25 | `design/ideas/2026-10-25_refs_across_spaces_note.md` | the same lag for toLocal and plain `ref.*`; this plan is the general fix |
-| §20 | `design/2026-10-17_shape_authoring_plan.md` | §3.3 `draw(ctx, u)` without `t` becomes a requirement (§3.2); §4 Pattern B sets `isAnimated` by hand, which the update phase must keep working; its open point "while stopped, the layer keeps redrawing" is solved by §3.2 |
+| §20 | `design/archive/2026-10-17_shape_authoring_plan.md` | §3.3 `draw(ctx, u)` without `t` becomes a requirement (§3.2); §4 Pattern B sets `isAnimated` by hand, which the update phase must keep working; its open point "while stopped, the layer keeps redrawing" is solved by §3.2 |
 | §39 | `design/done/2026-11-12_reactive_propagation_plan.md` | no dependency: reactive propagation stays recursive (the cycle crash is fixed); this plan builds its own order for readers with `t` (§3.1.1). If §39 is built later, both could share the ordering code |
 | §31 | `design/done/2026-11-01_isolated_shape_compositing_plan.md` | no logical dependency, but both change `Shape.render()` (it the drawing, this plan the evaluation): build one after the other, not in parallel (2026-11-20: since step 1 `Shape.render()` only draws, and steps 2–4 change the update phase; any order, isolation plan §9) |
 | §14 | (no plan) `paintorder` | same draw path; only ordering, after §31 |

@@ -237,6 +237,7 @@ No change in the hot path for pages that don't use `space`.
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-20: `design/2026-11-20_custom_shapes_plan.md` §6.6 (one transform path: every shape drawn with its global matrix) is meant to be built together with this plan; it turns §3.2's extra transform into a different parent matrix.
 - 2026-11-20: the two-phase frame, reactive propagation and per-frame evaluation plans were merged into `design/2026-11-20_evaluation_model_plan.md` (TODO §46); its §6 says what changes for this plan.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
 - Status line until 2026-11-20: 🟡 **Proposed** (2026-11-13: the draw-order rule of §3.5 is gone with two-phase frame step 1; 2026-10-30, no code changes yet)

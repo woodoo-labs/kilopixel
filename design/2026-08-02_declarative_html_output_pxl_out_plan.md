@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (2026-11-17, §3.3 pointer timing)
 - **Date**: 2026-08-02 (revised 2026-10-17: based on `PxlNode`, Rule A, write-on-change, stage pause / `alwaysrender`, accessibility)
-- **Related**: `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, `static defaults`), `design/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`), `.agents/TODO.md` §5
+- **Related**: `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, `static defaults`), `design/archive/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`), `.agents/TODO.md` §5
 - **Target Implementation**: new `js/elements/out.js` (after `variable.js` in `build.js`)
 
 ---

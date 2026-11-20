@@ -39,7 +39,7 @@ Needed by both options of D1, by throttling and by tweens. Design: two-phase pla
 - **Which layers the update phase walks:** a fact per layer, "had animated content in the last walk", collected during the walk; plus dirty layers and layers with animated attributes of their own.
 - **Facts are recomputed during the walk, never kept as counters** that connect, disconnect and `setAttribute()` would have to update: every such change already invalidates the layer, so the next walk recomputes them (two-phase plan §7.3).
 - **R1 holds:** a change before the running frame's update phase requests no frame of its own; the `test.known()` becomes a test.
-- **Contract:** `draw()` only reads `attributeValues` (checked: no built-in `draw()` uses `t`); custom shapes inherit it (`design/2026-10-17_shape_authoring_plan.md`: `draw(ctx, u)` without `t`).
+- **Contract:** `draw()` only reads `attributeValues` (checked: no built-in `draw()` uses `t`); custom shapes inherit it (`design/archive/2026-10-17_shape_authoring_plan.md`: `draw(ctx, u)` without `t`).
 
 | Expression | Today | After step 2 |
 |---|---|---|
@@ -121,7 +121,7 @@ Speed is not the reason for either; B ends with less to understand and keep righ
 | — | `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked) | if it is picked up: its `applyClip()` evaluates children while drawing; they must be evaluated in the update phase (possible since step 1) |
 | §28 | `design/2026-10-30_space_attribute_plan.md` | its reactivity (§3.3) subscribes through broadcasts: rewrite after D1; its draw-order rule (§3.5) is gone since step 1 |
 | §5 | `design/2026-08-02_declarative_html_output_pxl_out_plan.md` | after D1: under A the propagation must be ordered first (no 210 before 220), under B it is a reader in part 3 |
-| §20 | `design/2026-10-17_shape_authoring_plan.md` | `draw(ctx, u)` without `t` becomes the contract with step 2; its Pattern B (`isAnimated` set by hand) must keep working |
+| §47 | `design/2026-11-20_custom_shapes_plan.md` | `draw(ctx, u)` without `t` becomes the contract with step 2; internal animated values (its §5.9) wait for D1 |
 
 Not affected: hit testing and event dispatch (both fit either option), isolation, `<pxl-plot>`, `<pxl-path>`.
 
@@ -143,5 +143,6 @@ Existing tests stay (two-phase frame, ref cycles, safe render, `toLocal`, layer 
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-20: the shape authoring plan was replaced by `design/2026-11-20_custom_shapes_plan.md` (TODO §47); §6 points to it.
 - 2026-11-20: `<pxl-clip>` parked in `design/ideas/`; §6 marks its row.
 - 2026-11-20: merged from the two-phase frame plan (open parts), the reactive propagation plan (option A) and the per-frame evaluation plan (option B). Their decision names map as follows: per-frame D1–D3, D5–D8 → D1, D2, D4, D5, D7, D8 here (its D4 had moved to C1); two-phase questions 6, 7, 9 → D6, D9, D10; reactive propagation D1–D4 → part of option A, D2, D3, D4.

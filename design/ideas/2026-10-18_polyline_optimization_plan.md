@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (2026-11-19, the real bugs are fixed, §1 "Priorities"; what is left gains little)
 - **Date**: 2026-10-18
-- **Related**: `design/archive/performance-analysis.md` (Issue #6, point key lookup), `design/2026-10-17_shape_authoring_plan.md` (Polyline `points: ''`, class fields, `draw(ctx, u)`), `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A), `design/done/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming), `design/done/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` (stroke gradients on flat shapes, implemented), `design/done/2026-10-23_smooth_polyline_spline_plan.md` (spline quality)
+- **Related**: `design/archive/performance-analysis.md` (Issue #6, point key lookup), `design/archive/2026-10-17_shape_authoring_plan.md` (Polyline `points: ''`, class fields, `draw(ctx, u)`), `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A), `design/done/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming), `design/done/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` (stroke gradients on flat shapes, implemented), `design/done/2026-10-23_smooth_polyline_spline_plan.md` (spline quality)
 - **Target Implementation**: `js/graphics.js` (parser), `js/elements/shapes/polyline.js`, `.agents/KILOPIXEL.md`
 - **Test Scripts**: `design/prototypes/2026-10-18_polyline_optimization/points_parser_cases.js` (today's parser), `design/prototypes/2026-10-18_polyline_optimization/points_parser_sketch.js` (§3.3 sketch)
 

@@ -3,7 +3,7 @@
 - **Status**: ✅ **Implemented** (2026-11-07, results in §4.6)
 - **Date**: 2026-11-07
 - **Supersedes**: `design/archive/2026-10-17_always_save_restore_plan.md` (decided, not built) and Part 2 of `design/archive/2026-11-05_draw_errors_plan.md` (its Part 1, the clamping of stop offsets and corner radii, was built on 2026-11-05 and stays)
-- **Related**: `design/done/2026-11-01_isolated_shape_compositing_plan.md` (builds on this one: same `Shape.render()`, order in its §9), `design/2026-10-17_shape_authoring_plan.md` (custom shapes need this before a docs page), `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, implemented), `design/ideas/2026-10-18_polyline_optimization_plan.md` (small fix "non-finite points + gradient", covered here)
+- **Related**: `design/done/2026-11-01_isolated_shape_compositing_plan.md` (builds on this one: same `Shape.render()`, order in its §9), `design/archive/2026-10-17_shape_authoring_plan.md` (custom shapes need this before a docs page), `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, implemented), `design/ideas/2026-10-18_polyline_optimization_plan.md` (small fix "non-finite points + gradient", covered here)
 - **Target Implementation**: `js/elements/shape.js` (`render`, `createGradient`, `drawArrows`), `js/elements/shapes/grid.js`, `js/elements/node.js` (`reportError`), `js/elements/group.js`, `js/elements/layer.js`, `js/elements/variable.js`, `js/interaction.js` (`process`), `tests/index.html`, `.agents/KILOPIXEL.md`
 - **Measurement tools** (not kept): `scratch/gradient_stops/try_finally_bench.html` (all variants, §4), `scratch/save_restore/measure.html` and `lines.html` (real pages, worst case), `design/prototypes/2026-10-17_shape_authoring/star_test.html` (leak test), `scratch/gradient_stops/overshoot.html` (frame aborted by an error), `scratch/safe_render/bench.html` (repeated errors, text, hidden shapes, §4.4), `scratch/safe_render/hidden_refs.html` (what `hidden` does to evaluation, §5.1), `scratch/safe_render/edge_cases.html` (errors in readers, at connect and in `setAttribute()`, messages with values, §4.5)
 
@@ -28,7 +28,7 @@ Built separately, the second would rewrite the first a few days later. Together 
 
 All shapes in a layer share one canvas context. Today a shape saves and restores only when it has transforms or compositing (`hasStateChanges`, a 15-term check in `Shape.render()`). The built-in shapes are safe, because they always set the state they use (Rule 1, made reliable by Rule A). Code that changes state without resetting it is not:
 
-- **Custom shapes** (`design/2026-10-17_shape_authoring_plan.md`): a `draw()` that sets `ctx.globalAlpha = 0.2` and forgets to reset it faded **every** shape in the layer to alpha 51 instead of 255, including shapes drawn before it (the state carries over into the next frame) and shapes that save (`save()` copies the leaked state). Measured in `design/prototypes/2026-10-17_shape_authoring/star_test.html`, 2026-10-17.
+- **Custom shapes** (`design/archive/2026-10-17_shape_authoring_plan.md`): a `draw()` that sets `ctx.globalAlpha = 0.2` and forgets to reset it faded **every** shape in the layer to alpha 51 instead of 255, including shapes drawn before it (the state carries over into the next frame) and shapes that save (`save()` copies the leaked state). Measured in `design/prototypes/2026-10-17_shape_authoring/star_test.html`, 2026-10-17.
 - **Engine code:** `hasStateChanges` must mirror `applyContextState()` exactly; if the two lists drift apart, a shape leaks silently. `drawArrows` and `Grid.draw` reset values by hand.
 
 ### 2.2 Errors While Drawing (Details: `design/archive/2026-11-05_draw_errors_plan.md` §1, §2)
@@ -464,7 +464,7 @@ Built as 12 tests ("safe render: …"): #1 leak; #2–#4 in one probe test (a te
   - Arrowhead System: `drawArrows()` is the last call of a shape's `draw()` (§3.6).
   - Hit Testing Algorithm: the `try / finally` around the hit-test draw.
   - `createGradient`: the kept error for a failed gradient (§3.5).
-- `docs/linear.html` line 78: after "numeric offsets (0 to 1)", note that values outside are clamped (decision 5). A future "Custom Shapes" page (`design/2026-10-17_shape_authoring_plan.md`) can then promise: "change any canvas setting you like, it only affects your shape".
+- `docs/linear.html` line 78: after "numeric offsets (0 to 1)", note that values outside are clamped (decision 5). A future "Custom Shapes" page (`design/archive/2026-10-17_shape_authoring_plan.md`) can then promise: "change any canvas setting you like, it only affects your shape".
 - Build: `node build.js`, then the `~NNKB` sizes (`docs/installation.html`, KILOPIXEL.md header).
 
 ---

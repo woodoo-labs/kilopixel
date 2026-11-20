@@ -1,0 +1,35 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><script src="patch.js"></script></head>
+<body>
+<iframe id="f" style="width:1200px;height:900px;border:0"></iframe>
+<script>
+window.runAll = async function(pages) {
+  const f = document.getElementById('f'), results = {};
+  for (const p of pages) {
+    await new Promise(r => { f.onload = r; f.src = p; });
+    await f.contentWindow.document.fonts.ready;
+    await new Promise(r => setTimeout(r, 700));
+    try { results[p] = comparePaths(f.contentWindow); } catch (e) { results[p] = 'ERROR ' + e.message; }
+  }
+  return results;
+};
+
+// All docs pages and example pages (benchmark.html excluded), then a summary. In the console: await runPages()
+window.runPages = async function() {
+  const docs = 'arrows blend caps circle conic dashes ellipse fill filter frameworks gallery index installation line linear mapping mask polyline radial rect shadow stroke text walkthrough'.split(' ').map(p => '/docs/' + p + '.html');
+  const ex = [];
+  for (let i = 1; i <= 54; i++) ex.push('/examples/test' + String(i).padStart(2, '0') + '.html');
+  ex.push('/examples/test_responsive_filters.html', '/examples/index.html');
+  const r = await runAll(docs.concat(ex));
+  let pages = 0, stages = 0, layers = 0, unstable = 0, px = 0, warnOld = 0, warnNew = 0;
+  const lines = [];
+  for (const [p, v] of Object.entries(r)) {
+    if (typeof v === 'string') { lines.push(p + ' ' + v); continue; }
+    pages++; stages += v.stages; layers += v.layers; unstable += v.unstable; px += v.pixels; warnOld += v.warnsOld; warnNew += v.warnsNew;
+    if (v.layersDiff) lines.push(`${p}: ${v.layersDiff} of ${v.layers} layers differ, max ${v.maxDiff.toFixed(1)}, values > 1: ${v.valuesOver1}`);
+  }
+  lines.unshift(`${pages} pages, ${stages} stages, ${layers} layers (${unstable} unstable), ${(px / 1e6).toFixed(1)} M pixels, warnings old ${warnOld} / new ${warnNew}`);
+  return lines.join('\n');
+};
+</script>
+</body></html>

@@ -2,7 +2,7 @@
 
 - **Status**: ✅ **Implemented** (2026-10-18, the pure namespace pattern of §3)
 - **Date**: 2026-10-17 (revised 2026-10-18)
-- **Related**: `design/2026-10-17_shape_authoring_plan.md` (custom shapes extend `pxl.Shape`)
+- **Related**: `design/archive/2026-10-17_shape_authoring_plan.md` (custom shapes extend `pxl.Shape`)
 - **Target Implementation**: `build.js`, `js/elements/node.js`, `js/elements/stage.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/variable.js`, `js/elements/shape.js`, `js/elements/shapes/*.js`
 
 ---

@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (2026-10-19, open decisions in §7)
 - **Date**: 2026-10-19
-- **Related**: `design/2026-10-17_shape_authoring_plan.md` (custom shape template, the Star example), `design/ideas/2026-10-18_polyline_optimization_plan.md` (closed polylines), `.agents/TODO.md` §23
+- **Related**: `design/archive/2026-10-17_shape_authoring_plan.md` (custom shape template, the Star example), `design/ideas/2026-10-18_polyline_optimization_plan.md` (closed polylines), `.agents/TODO.md` §23
 - **Target Implementation**: `js/elements/shapes/polygon.js` (new), `build.js`, `docs/polygon.html` (new), `docs/js/layout.js`, `.agents/KILOPIXEL.md`
 - **Prototypes**: `design/prototypes/2026-10-19_polygon_star_shape/test.html` (absolute `ir`), `design/prototypes/2026-10-19_polygon_star_shape/relative.html` (relative star amount, §3)
 
@@ -228,5 +228,6 @@ Sidebar: "Polygon" link back under Shapes & Paths, after "Polyline".
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-20: the shape authoring plan was replaced by `design/2026-11-20_custom_shapes_plan.md` (TODO §47), where this shape is the first one written as a path shape (`path(ctx)` in logical units).
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
 - Status line until 2026-11-20: 🟡 **Proposed** (no code changes yet; open decisions in §7)

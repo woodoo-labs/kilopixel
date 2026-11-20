@@ -3,7 +3,7 @@
 Planned work only, one short item each; the plan holds the details. Parked ideas are plans in `design/ideas/` (no item here), implemented plans are in `design/done/`, superseded and dropped ones in `design/archive/`. Workflow: `.claude/CLAUDE.md` → "Plans and TODO"; check: `node tools/check_plans.js`.
 
 - **Status words** (as in the plans): 💬 **Discussion** (ideas, nothing decided) · 🟡 **Proposed** (complete plan, waiting for a decision) · 🟢 **Decided** (agreed, not built yet).
-- **Numbers are stable:** other files refer to items as "TODO §46". A removed item leaves a gap; a new item gets the next free number (next: §47).
+- **Numbers are stable:** other files refer to items as "TODO §46". A removed item leaves a gap; a new item gets the next free number (next: §48).
 
 ## 1. SVG Paths and Icons (`<pxl-path>`)
 - **Status**: 🟡 **Proposed**
@@ -56,12 +56,6 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Status**: 💬 **Discussion** (no plan yet)
 - `paintorder="stroke"` like SVG `paint-order`: the stroke under the fill, so only its outer half shows (readable text on busy backgrounds). All path shapes; text draws all strokes, then all fills.
 - **Builds on** isolated compositing (built): with it, the order is a swap of two calls in the scratch canvas. Comparison: `design/prototypes/2026-11-01_isolated_shape_compositing/paint_order_text.html`.
-
-## 20. Shape Authoring
-- **Status**: 🟡 **Proposed**
-- **Plan**: `design/2026-10-17_shape_authoring_plan.md`
-- A shape (built-in or user-made, `class Star extends pxl.Shape`) needs only `static defaults`, `draw(ctx, u)` and `getBoundingBox()`: `observedAttributes` derived from the defaults, `draw()` without `t`.
-- **Open**: class fields against CLAUDE.md "Fields in the constructor"; public custom shapes make `attributeValues`, `applyStyle()` and friends a user API (a product decision before a "Custom Shapes" page).
 
 ## 23. Regular Polygons and Stars (`<pxl-polygon>`)
 - **Status**: 🟡 **Proposed**
@@ -117,3 +111,9 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Plan**: `design/2026-11-20_evaluation_model_plan.md` (merges the two-phase frame, reactive propagation and per-frame evaluation plans)
 - **Next**: step 2, change-based dirty flags with the keep-alive in the stage: a layer redraws only when a value changed (a `floor(t)` clock once per second). Then a prototype of option B (no broadcasts) and decision D1 between it and option A (ordered broadcasts).
 - **Also decided there**: scoped names instead of global ids (D8); B8 of `design/done/2026-10-27_engine_cleanup_inventory_note.md` (the evaluation loops either option rewrites).
+
+## 47. Custom Shapes
+- **Status**: 🟡 **Proposed**
+- **Plan**: `design/2026-11-20_custom_shapes_plan.md` (replaces shape authoring; the structure cleanup in plan §6 is discussed separately)
+- Custom shapes are written like built-in shapes: a class extending `pxl.Shape` and `customElements.define()` in a second script after `pxl.min.js`, no registration API. A clean template (`static defaults`, `path(ctx)` in logical units: the engine paints, hit-tests, isolates) or full freedom (`draw(ctx, u)`); booleans from defaults; a public contract.
+- **Open**: D1, D2, D3a–D9 (plan §11), e.g. renaming `attributeValues` to `values`.
