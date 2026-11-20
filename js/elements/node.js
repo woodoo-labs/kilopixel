@@ -58,7 +58,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     // The element's computed CSS (pointer-events, cursor), created on first use; the browser keeps it up to date
     this._cssStyle = null;
 
-    // Scaled filter string, cached per (filter, u) by resolveFilter() (layers and shapes)
+    // Scaled filter string, cached per (filter, scale) by resolveFilter() (layers and shapes)
     this._lastFilterRaw = null;
     this._lastFilterU = 0;
     this._cachedFilterScaled = 'none';
@@ -256,7 +256,8 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     if (this.handlers[type] !== null) this.addEventListener(type, this.handlers[type]);
   }
 
-  // Filter string with the helpers' px values scaled by u (layers: CSS filter, shapes: ctx.filter)
+  // Filter string with the helpers' px values scaled: by u for a layer's CSS filter (CSS pixels), by u × DPR for a
+  // shape's ctx.filter (bitmap pixels)
   resolveFilter(filter, u) {
     const filterStr = Array.isArray(filter) ? filter.join(' ') : filter;
     if (this._lastFilterRaw !== filterStr || this._lastFilterU !== u) {

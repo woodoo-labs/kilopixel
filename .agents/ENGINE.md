@@ -190,12 +190,12 @@ Nothing that throws breaks the frame (design: `design/done/2026-11-07_safe_shape
 
 ### 6.1 `Shape.render(ctx, u, t)`
 
-Skips a failed or hidden shape; `needsIsolation()` → `renderIsolated()`; otherwise `ctx.save()`, `pxl.applyContextState()` (= `pxl.applyTransformState()`, steps in language §2, each skipped at its default, + `pxl.applyCompositingState()`: alpha multiplied, mask or blend, `resolveFilter()`, shadow only with `shadowcolor`, `none` / `transparent` reset it), `draw(ctx, u, t)`, `ctx.restore()` in `finally`. Every shape draws in its own canvas state, so a custom shape can't leak state. Custom shapes override `draw()`, not `update()` or `render()`. Groups and layers apply only `applyTransformState()`, and only around their children when a transform isn't at its default.
+Skips a failed or hidden shape; `needsIsolation()` → `renderIsolated()`; otherwise `ctx.save()`, `pxl.applyContextState()` (= `pxl.applyTransformState()`, steps in language §2, each skipped at its default, + `pxl.applyCompositingState()`: alpha multiplied, mask or blend, `resolveFilter()`, shadow only with `shadowcolor`, `none` / `transparent` reset it; canvas shadows and filters ignore the canvas transform, so their lengths are scaled by `u` × the layer's `dpr`), `draw(ctx, u, t)`, `ctx.restore()` in `finally`. Every shape draws in its own canvas state, so a custom shape can't leak state. Custom shapes override `draw()`, not `update()` or `render()`. Groups and layers apply only `applyTransformState()`, and only around their children when a transform isn't at its default.
 
 - `applyStyle(ctx, u)`: `hasFill()` → `fillStyle` (gradient slot 0), `fill()`; `isStroked()` (stroke not none / transparent and `strokewidth > 0`) → `applyStrokeState()`, `stroke()`.
 - `applyStrokeState(ctx, u)`: `strokeStyle` (slot 1), `lineWidth`, caps, joins, miter limit, `applyLineDash()`. Every stroke goes through it (also text's `strokeText`): stroke state is set before stroking and never reset.
 - `applyLineDash(ctx, u)`: scaled pattern cached per (`linedash`, `u`) in `_scaledDash`; solid → `pxl._emptyDash`. `pxl.hasLineDash()`: not null, `'none'` or `'0'`.
-- `resolveFilter(filter, u)` (layers and shapes): an array joined with spaces, then `pxl.scaleResponsiveFilter()` multiplies every number before `px` by `u` (exponent notation included: JavaScript prints values near 0 as `1.2e-15`); cached per (string, `u`).
+- `resolveFilter(filter, scale)` (layers and shapes): an array joined with spaces, then `pxl.scaleResponsiveFilter()` multiplies every number before `px` by the scale (exponent notation included: JavaScript prints values near 0 as `1.2e-15`); cached per (string, scale). The scale is `u` for a layer's CSS `filter` (CSS pixels) and `u` × `dpr` for a shape's `ctx.filter` (bitmap pixels).
 
 ### 6.2 Isolation
 

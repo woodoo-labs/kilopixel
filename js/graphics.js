@@ -85,8 +85,11 @@ pxl.applyContextState = function(ctx, u, attributeValues, node) {
 
 // How a shape's pixels combine with the layer: alpha, mask / blend, filter, shadow. An isolated shape
 // (Shape.renderIsolated()) applies it once, when its finished bitmap is drawn onto the layer.
+// Canvas shadows and filters ignore the canvas transform, which holds the layer's device pixel ratio: their lengths
+// are bitmap pixels, so they are scaled by u and the DPR.
 pxl.applyCompositingState = function(ctx, u, attributeValues, node) {
   const { alpha, blend, mask, filter, shadowcolor, shadowblur, shadowx, shadowy } = attributeValues;
+  const k = u * node.parentLayer.dpr;
 
   if (alpha !== 1) ctx.globalAlpha *= alpha;
 
@@ -97,7 +100,7 @@ pxl.applyCompositingState = function(ctx, u, attributeValues, node) {
   }
 
   if (filter !== 'none') {
-    ctx.filter = node.resolveFilter(filter, u);
+    ctx.filter = node.resolveFilter(filter, k);
   }
 
   if (shadowcolor) {
@@ -108,9 +111,9 @@ pxl.applyCompositingState = function(ctx, u, attributeValues, node) {
       ctx.shadowOffsetY = 0;
     } else {
       ctx.shadowColor = shadowcolor;
-      ctx.shadowBlur = shadowblur * u;
-      ctx.shadowOffsetX = shadowx * u;
-      ctx.shadowOffsetY = shadowy * u;
+      ctx.shadowBlur = shadowblur * k;
+      ctx.shadowOffsetX = shadowx * k;
+      ctx.shadowOffsetY = shadowy * k;
     }
   }
 };

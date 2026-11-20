@@ -51,6 +51,19 @@
       }
     }
 
+    // draw() on a screen with another device pixel ratio: window.devicePixelRatio is replaced while the stage sizes
+    // its layers (headless tests run at 1, where a missing DPR factor doesn't show)
+    async function drawAtDPR(dpr, content, fn) {
+      const own = Object.getOwnPropertyDescriptor(window, 'devicePixelRatio');
+      Object.defineProperty(window, 'devicePixelRatio', { value: dpr, configurable: true });
+      try {
+        await draw(content, fn);
+      } finally {
+        if (own) Object.defineProperty(window, 'devicePixelRatio', own);
+        else delete window.devicePixelRatio;
+      }
+    }
+
     // [r, g, b, a] of the layer canvas at stage position (x, y)
     function pixel(layer, x, y) {
       const k = layer.stage.unit * layer.dpr;
@@ -309,6 +322,28 @@
     test('paint: a shadow is drawn at its offset in logical units', () =>
       draw(`<pxl-rect x="300" y="300" w="100" h="100" ${BLACK} shadowcolor="#000" shadowx="200"></pxl-rect>`, (layer) =>
         expectInk(layer, [[300, 300, true], [500, 300, true], [400, 300, false]])));
+
+    // Canvas shadows and filters ignore the canvas transform (bitmap pixels), so their sizes need the DPR as well
+    test('paint: a shadow keeps its offset on a screen with device pixel ratio 2', () =>
+      drawAtDPR(2, `<pxl-rect x="300" y="300" w="100" h="100" ${BLACK} shadowcolor="#000" shadowx="200"></pxl-rect>`, (layer) => {
+        if (layer.dpr !== 2) throw new Error(`layer dpr ${layer.dpr}`);
+        expectInk(layer, [[300, 300, true], [500, 300, true], [400, 300, false]]);
+      }));
+
+    test('paint: an isolated shape\'s shadow keeps its offset on a screen with device pixel ratio 2', () =>
+      drawAtDPR(2, `<pxl-rect x="300" y="300" w="100" h="100" ${BLACK} stroke="#000" strokewidth="4"
+        shadowcolor="#000" shadowx="200"></pxl-rect>`, (layer) => {
+        if (!layer.querySelector('pxl-rect').needsIsolation()) throw new Error('not isolated');
+        expectInk(layer, [[300, 300, true], [500, 300, true], [400, 300, false]]);
+      }));
+
+    test('paint: a shape filter blurs as far on a screen with device pixel ratio 2', async () => {
+      const shape = `<pxl-rect x="500" y="300" w="100" h="100" ${BLACK} filter="blur(20)"></pxl-rect>`;
+      let atOne = 0, atTwo = 0;
+      await draw(shape, (layer) => { atOne = pixel(layer, 570, 300)[3]; });
+      await drawAtDPR(2, shape, (layer) => { atTwo = pixel(layer, 570, 300)[3]; });
+      if (atOne < 30 || Math.abs(atOne - atTwo) > 20) throw new Error(`alpha 20 units beyond the edge: ${atOne} at DPR 1, ${atTwo} at DPR 2`);
+    });
 
     test('paint: a hidden shape is not drawn', () =>
       draw(`<pxl-rect x="500" y="300" w="100" h="100" ${BLACK} hidden="true"></pxl-rect>`, (layer) =>
