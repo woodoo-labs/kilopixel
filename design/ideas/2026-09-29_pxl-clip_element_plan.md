@@ -377,6 +377,7 @@ No special dirty logic is needed. The clip redraws every frame along with its pa
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-20: `design/2026-11-20_custom_shapes_plan.md` dropped `path()` again (one template, `draw(ctx)`); a path-only method would have to come back with this plan.
 - 2026-11-20: `design/2026-11-20_custom_shapes_plan.md` proposes `path(ctx)`, a path-only method for shapes: what this plan needed as `buildPath()`.
 - 2026-11-20: parked in `design/ideas/` (was TODO item 2). A shape with `mask="destination-in"` in its own layer clips that layer today, with soft edges and text masks that `ctx.clip()` can't do. Missing: clipping only part of a layer, and a clipped hit area. A route for clipping inside a layer that needs no `buildPath()` in every shape: group compositing through the isolation scratch canvas (a mask inside the group acts only on the group).
 - 2026-11-20: the two-phase frame, reactive propagation and per-frame evaluation plans were merged into `design/2026-11-20_evaluation_model_plan.md` (TODO §46); its §6 says what changes for this plan.

@@ -228,6 +228,7 @@ Sidebar: "Polygon" link back under Shapes & Paths, after "Polyline".
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-20: `design/2026-11-20_custom_shapes_plan.md` dropped `path()`: this shape would be written with the one template, `draw(ctx)` in logical units.
 - 2026-11-20: the shape authoring plan was replaced by `design/2026-11-20_custom_shapes_plan.md` (TODO §47), where this shape is the first one written as a path shape (`path(ctx)` in logical units).
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
 - Status line until 2026-11-20: 🟡 **Proposed** (no code changes yet; open decisions in §7)

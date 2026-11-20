@@ -1,0 +1,37 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Shadows and Filters at DPR 2 | Prototype</title>
+<script src="/dist/pxl.js"></script></head>
+<body style="margin:0">
+<pxl-stage id="main" ratio="2 / 1" alwaysrender style="width:1000px">
+  <pxl-layer id="shapes">
+    <!-- A black square at x 100–200 (logical) with a red shadow offset by 300 logical units, no blur -->
+    <pxl-rect id="box" x="100" y="100" w="100" h="100" anchor="top-left" fill="#000" shadowcolor="#f00" shadowx="300"></pxl-rect>
+    <!-- A square with a shape filter: blur(20) in logical units -->
+    <pxl-rect id="blurred" x="700" y="100" w="100" h="100" anchor="top-left" fill="#00f" filter="blur(20)"></pxl-rect>
+  </pxl-layer>
+  <!-- A layer filter (CSS on the canvas element) -->
+  <pxl-layer id="cssLayer" filter="blur(20)">
+    <pxl-rect x="100" y="320" w="100" h="100" anchor="top-left" fill="#0a0"></pxl-rect>
+  </pxl-layer>
+</pxl-stage>
+<script>
+// Measures, in CSS pixels, where the shadow and the blur end, for a given device pixel ratio
+window.measure = function(dpr) {
+  Object.defineProperty(window, 'devicePixelRatio', { value: dpr, configurable: true });
+  const stage = document.getElementById('main'); stage.resize();
+  const L = document.getElementById('shapes'), u = stage.unit, ctx = L._ctx, W = L._canvas.width;
+  const row = (yLogical) => ctx.getImageData(0, Math.round(yLogical * u * dpr), W, 1).data;
+  const r = row(150), red = [], blue = [];
+  for (let x = 0; x < W; x++) {
+    const i = x * 4;
+    if (r[i] > 200 && r[i + 1] < 60 && r[i + 2] < 60 && r[i + 3] > 200) red.push(x);
+    if (r[i + 2] > 10 && r[i] < 60 && r[i + 3] > 8) blue.push(x);
+  }
+  const css = (px) => +(px / dpr / u).toFixed(1); // bitmap px → logical units
+  return { dpr, unit: u, canvasWidth: W,
+    shadowFromTo: red.length ? [css(red[0]), css(red[red.length - 1])] : null,
+    blurFromTo: blue.length ? [css(blue[0]), css(blue[blue.length - 1])] : null,
+    expected: 'shadow at 400–500 (box 100–200 + 300); blur reaching about 40–60 units beyond 700–800' };
+};
+</script>
+</body></html>

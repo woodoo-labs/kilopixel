@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Star (Minimal) | Prototype</title>
+  <script src="/dist/pxl.js"></script>
+  <script src="proposal.js"></script> <!-- prototype only: the proposed API, part of pxl.min.js later -->
+  <script src="star.js"></script>     <!-- the custom shape, as a user writes it -->
+  <style>
+    body { margin: 24px; font-family: system-ui, sans-serif; background: #f8fafc; color: #0f172a; }
+    .row { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+    pxl-stage { width: 520px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; }
+    pre { margin: 0; padding: 16px; background: #0f172a; color: #e2e8f0; border-radius: 8px; font-size: 13px; line-height: 1.45; }
+    h1 { font-size: 20px; margin: 0 0 16px; }
+    p { max-width: 1100px; }
+  </style>
+</head>
+<body>
+  <h1>Custom shape: &lt;pxl-star&gt; (minimal)</h1>
+  <div class="row">
+    <pxl-stage id="main" ratio="5 / 3">
+      <pxl-layer>
+        <pxl-star x="500" y="300" r="220" ir="90" fill="gold" stroke="#b45309" strokewidth="8"></pxl-star>
+      </pxl-layer>
+    </pxl-stage>
+    <div>
+      <pre id="html"></pre>
+      <br>
+      <pre id="source"></pre>
+    </div>
+  </div>
+  <script>
+    document.getElementById('html').textContent = document.querySelector('pxl-layer').innerHTML.trim();
+    fetch('star.js').then(r => r.text()).then(t => { document.getElementById('source').textContent = '// star.js\n' + t; });
+  </script>
+</body>
+</html>

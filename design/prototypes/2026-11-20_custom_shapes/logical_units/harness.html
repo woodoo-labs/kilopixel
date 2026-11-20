@@ -1,0 +1,22 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Logical Units Sweep | Prototype</title><script src="patch.js"></script></head>
+<body>
+<iframe id="f" style="width:1200px;height:900px;border:0"></iframe>
+<script>
+window.runPages = async function() {
+  const docs = 'arrows blend caps circle conic dashes ellipse fill filter frameworks gallery index installation line linear mapping mask polyline radial rect shadow stroke text walkthrough'.split(' ').map(p => '/docs/' + p + '.html');
+  const ex = [];
+  for (let i = 1; i <= 54; i++) ex.push('/examples/test' + String(i).padStart(2, '0') + '.html');
+  ex.push('/examples/test_responsive_filters.html', '/examples/index.html');
+  const f = document.getElementById('f'), results = {};
+  for (const p of docs.concat(ex)) {
+    await new Promise(r => { f.onload = r; f.src = p; });
+    await f.contentWindow.document.fonts.ready;
+    await new Promise(r => setTimeout(r, 500));
+    try { results[p] = compareLogical(f.contentWindow); } catch (e) { results[p] = 'ERROR ' + e.message; }
+  }
+  window.lastResult = results;
+  return results;
+};
+</script>
+</body></html>

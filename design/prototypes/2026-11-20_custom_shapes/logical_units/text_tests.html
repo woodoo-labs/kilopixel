@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Text Under Scale | Prototype</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <style>body { margin: 12px; font: 13px system-ui; } canvas.show { border: 1px solid #ccc; image-rendering: pixelated; }</style>
+</head>
+<body>
+<div id="out"></div>
+<script>
+// Text as the engine draws it today (font size × u, positions × u, on a context scaled by the DPR) against text in
+// logical units (font size and positions as written, on a context scaled by u × DPR). Same device pixels expected.
+const SAMPLE = 'Kilopixel 2025: Wrap & Test, ½ ①';
+function render(mode, { font, weight, size, u, dpr, stroke }) {
+  const c = document.createElement('canvas');
+  c.width = Math.ceil(Math.max(200, size * u * 20) * dpr); c.height = Math.ceil(size * u * 2 * dpr + 8);
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  const x = 4, y = size * 1.4;   // logical position of the baseline
+  if (mode === 'today') {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.translate(x * u, y * u);
+    ctx.font = `${weight} ${size * u}px ${font}`;
+    ctx.lineWidth = 1.5 * u;
+  } else {
+    ctx.setTransform(dpr * u, 0, 0, dpr * u, 0, 0);
+    ctx.translate(x, y);
+    ctx.font = `${weight} ${size}px ${font}`;
+    ctx.lineWidth = 1.5;
+  }
+  if (stroke) ctx.strokeText(SAMPLE, 0, 0); else ctx.fillText(SAMPLE, 0, 0);
+  const width = ctx.measureText(SAMPLE).width * (mode === 'today' ? 1 : u); // in CSS px
+  return { canvas: c, data: ctx.getImageData(0, 0, c.width, c.height).data, width };
+}
+function compare(opts) {
+  const a = render('today', opts), b = render('logical', opts);
+  let ink = 0, visible = 0, max = 0, sum = 0;
+  for (let i = 3; i < a.data.length; i += 4) {
+    const d = Math.abs(a.data[i] - b.data[i]);
+    if (a.data[i] > 0 || b.data[i] > 0) ink++;
+    if (d > 64) visible++;
+    if (d > max) max = d;
+    sum += d;
+  }
+  return { ...opts, inkPixels: ink, over64: visible, max, meanOnInk: +(sum / Math.max(1, ink)).toFixed(2),
+           widthToday: +a.width.toFixed(3), widthLogical: +b.width.toFixed(3), a, b };
+}
+window.runTextTests = async function() {
+  await document.fonts.load('400 20px Inter'); await document.fonts.load('700 20px Inter');
+  const rows = [];
+  for (const font of ['monospace', 'system-ui', 'Inter', 'sans-serif', 'serif'])
+    for (const weight of [400, 700])
+      for (const size of [10, 14, 24, 64])
+        for (const u of [0.37, 0.52, 0.778, 1.23, 2])
+          for (const dpr of [1, 2])
+            for (const stroke of [false, true]) {
+              if (stroke && size < 24) continue;
+              rows.push(compare({ font, weight, size, u, dpr, stroke }));
+            }
+  window.textRows = rows;
+  const strip = ({ a, b, ...r }) => r;
+  const worst = rows.slice().sort((p, q) => q.over64 / (q.inkPixels || 1) - p.over64 / (p.inkPixels || 1)).slice(0, 8).map(strip);
+  const total = rows.reduce((s, r) => s + r.inkPixels, 0), vis = rows.reduce((s, r) => s + r.over64, 0);
+  const widthDev = Math.max(...rows.map(r => Math.abs(r.widthToday - r.widthLogical) / r.widthLogical));
+  const identical = rows.filter(r => r.max <= 1).length;
+  return { cases: rows.length, identicalCases: identical, inkPixels: total, pixelsOver64: vis, share: +(vis / total * 100).toFixed(3) + ' %',
+           maxRelativeWidthDifference: +(widthDev * 100).toFixed(3) + ' %', worst };
+};
+// Show one case enlarged: today on top, logical units below
+window.showCase = function(i, zoom = 4) {
+  const r = window.textRows[i], out = document.getElementById('out');
+  out.innerHTML = `<div>${r.font} ${r.weight} size ${r.size} u ${r.u} dpr ${r.dpr}${r.stroke ? ' outlined' : ''}: today (top), logical units (bottom)</div>`;
+  for (const src of [r.a.canvas, r.b.canvas]) {
+    const c = document.createElement('canvas'); c.className = 'show';
+    const w = Math.min(src.width, 360), h = src.height;
+    c.width = w * zoom; c.height = h * zoom; const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+    g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(src, 0, 0, w, h, 0, 0, w * zoom, h * zoom);
+    out.append(c, document.createElement('br'));
+  }
+};
+</script>
+</body>
+</html>

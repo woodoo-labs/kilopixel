@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Shapes (Richer) | Prototype</title>
+  <script src="/dist/pxl.js"></script>
+  <script src="proposal.js"></script> <!-- prototype only: the proposed API, part of pxl.min.js later -->
+  <script src="star.js"></script>     <!-- a custom shape, as a user writes it -->
+  <script src="gauge.js"></script>    <!-- a custom shape with its own drawing calls -->
+  <style>
+    body { margin: 24px; font-family: system-ui, sans-serif; background: #f8fafc; color: #0f172a; }
+    h1 { font-size: 20px; margin: 0 0 12px; }
+    .row { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+    .col { flex: 1 1 520px; min-width: 0; }
+    pxl-stage { background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; }
+    label { display: flex; gap: 12px; align-items: center; margin: 12px 0; font-size: 14px; }
+    pre { margin: 0 0 16px; padding: 14px; background: #0f172a; color: #e2e8f0; border-radius: 8px; font-size: 12px;
+          line-height: 1.45; overflow-x: auto; }
+    ul { font-size: 14px; line-height: 1.6; padding-left: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Custom shapes in logical units: &lt;pxl-star&gt; and &lt;pxl-gauge&gt;</h1>
+  <div class="row">
+    <div class="col">
+      <pxl-stage id="main" ratio="5 / 3">
+        <pxl-var id="points" value="5"></pxl-var>
+        <pxl-var id="clicks" value="0"></pxl-var>
+        <pxl-layer id="scene">
+          <!-- Star: gradient, animation, a ref, hover and a click handler, all inherited -->
+          <pxl-star id="bigStar" x="300" y="290" r="210" points="ref.points.value" ir="80 + wave(4) * 40"
+            rotate="t * 15" zoom="ref.bigStar.isHovered ? 1.06 : 1"
+            fill="radial([0.5, 0.45, 220], ['#fef3c7', '#f59e0b'])" stroke="#b45309" strokewidth="6" linejoin="round"
+            pxl-on-click="ref.clicks.set('value', min(10, ref.clicks.value + 1))">Hidden text</pxl-star>
+          <!-- The same class: dashes and a stroke in logical units, scaled once -->
+          <pxl-star x="820" y="150" points="8" r="95" ir="48" rotate="-t * 30"
+            stroke="#6366f1" strokewidth="6" linedash="[14, 10]"></pxl-star>
+          <!-- Gauge: its own drawing, the stroke as a gradient, the bare presence attribute ticks -->
+          <pxl-gauge id="gauge" x="780" y="510" r="170" strokewidth="26" ticks
+            value="ref.clicks.value / 10" label="`${ref.clicks.value} / 10`"
+            stroke="linear(0, ['#22c55e', '#f59e0b', '#ef4444'])" fill="#0f172a"
+            zoom="ref.gauge.isHovered ? 1.04 : 1" pxl-on-click="ref.clicks.set('value', 0)"></pxl-gauge>
+          <pxl-text x="300" y="565" text="Click the star; click the gauge to reset" size="22" fill="#64748b"
+            align="center"></pxl-text>
+        </pxl-layer>
+      </pxl-stage>
+      <label>Points <input type="range" min="3" max="12" value="5"
+        oninput="document.getElementById('points').value = +this.value; this.nextElementSibling.textContent = this.value"><span>5</span></label>
+      <ul>
+        <li>Both stars come from one class; the gauge is a second class. Each file is a plain script after <code>pxl.min.js</code>.</li>
+        <li>Everything not in the shape files is inherited: expressions, <code>t</code>, <code>ref.*</code>, gradients, dashes, hover, handlers, hit testing.</li>
+        <li><code>ticks</code> is written bare and is <code>true</code>, because its default is <code>false</code>.</li>
+        <li>The text "Hidden text" inside the big star doesn't appear on the page.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <pre id="starSource"></pre>
+      <pre id="gaugeSource"></pre>
+    </div>
+  </div>
+  <script>
+    for (const [id, file] of [['starSource', 'star.js'], ['gaugeSource', 'gauge.js']]) {
+      fetch(file).then(r => r.text()).then(t => { document.getElementById(id).textContent = `// ${file}\n${t}`; });
+    }
+  </script>
+</body>
+</html>

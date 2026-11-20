@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Canvas Under Scale | Prototype</title>
+</head>
+<body>
+<script>
+// Which canvas features follow the transform (CTM) and which don't. Each test draws the same thing at scale 1 and
+// at scale 2 (with sizes halved), on fresh canvases, and measures the result in device pixels.
+const W = 400, H = 200;
+const fresh = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c.getContext('2d'); };
+const alphaRow = (ctx, y) => { const d = ctx.getImageData(0, y, W, 1).data; const a = []; for (let i = 3; i < d.length; i += 4) a.push(d[i]); return a; };
+const firstLast = (row, min = 8) => { let f = -1, l = -1; row.forEach((v, i) => { if (v > min) { if (f < 0) f = i; l = i; } }); return [f, l]; };
+
+window.tests = {
+  // Shadow offset and blur: in device pixels whatever the transform?
+  shadow() {
+    const run = (s) => { const ctx = fresh(); ctx.scale(s, s); ctx.shadowColor = '#000'; ctx.shadowOffsetX = 60; ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.fillRect(40 / s, 50 / s, 40 / s, 100 / s); return firstLast(alphaRow(ctx, 100)); };
+    return { scale1: run(1), scale2: run(2), note: 'same range = offset ignores the transform' };
+  },
+  shadowBlur() {
+    const run = (s) => { const ctx = fresh(); ctx.scale(s, s); ctx.shadowColor = '#000'; ctx.shadowBlur = 20; ctx.shadowOffsetX = 200;
+      ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.fillRect(40 / s, 50 / s, 40 / s, 100 / s); return firstLast(alphaRow(ctx, 100), 2); };
+    return { scale1: run(1), scale2: run(2) };
+  },
+  // ctx.filter blur: device pixels or user units?
+  filterBlur() {
+    const run = (s) => { const ctx = fresh(); ctx.scale(s, s); ctx.filter = 'blur(8px)'; ctx.fillStyle = '#000';
+      ctx.fillRect(150 / s, 50 / s, 100 / s, 100 / s); return firstLast(alphaRow(ctx, 100), 2); };
+    return { scale1: run(1), scale2: run(2), note: 'same range = blur ignores the transform' };
+  },
+  // Line width, dashes and dash offset: user units?
+  dash() {
+    const run = (s) => { const ctx = fresh(); ctx.scale(s, s); ctx.lineWidth = 10 / s; ctx.setLineDash([40 / s, 20 / s]); ctx.lineDashOffset = 10 / s;
+      ctx.beginPath(); ctx.moveTo(0, 100 / s); ctx.lineTo(W / s, 100 / s); ctx.stroke();
+      const row = alphaRow(ctx, 100); const runs = []; let start = -1;
+      row.forEach((v, i) => { if (v > 128 && start < 0) start = i; if (v <= 128 && start >= 0) { runs.push([start, i]); start = -1; } });
+      const col = []; for (let y = 80; y < 120; y++) col.push(ctx.getImageData(70, y, 1, 1).data[3] > 128 ? 1 : 0);
+      return { dashes: runs.slice(0, 3), width: col.reduce((a, b) => a + b, 0) }; };
+    return { scale1: run(1), scale2: run(2) };
+  },
+  // Gradients: defined in user space at fill time?
+  gradient() {
+    const run = (s) => { const ctx = fresh(); ctx.scale(s, s); const g = ctx.createLinearGradient(0, 0, W / s, 0);
+      g.addColorStop(0, '#000'); g.addColorStop(1, '#fff'); ctx.fillStyle = g; ctx.fillRect(0, 0, W / s, H / s);
+      const d = ctx.getImageData(0, 100, W, 1).data; return [d[0], d[4 * 100], d[4 * 200], d[4 * 399]]; };
+    return { scale1: run(1), scale2: run(2) };
+  },
+  // isPointInStroke: line width in user units, point in device pixels?
+  pointInStroke() {
+    const run = (s) => { const ctx = fresh(); ctx.scale(s, s); ctx.lineWidth = 20 / s; ctx.beginPath(); ctx.moveTo(0, 100 / s); ctx.lineTo(W / s, 100 / s);
+      return [ctx.isPointInStroke(200, 109), ctx.isPointInStroke(200, 111), ctx.isPointInPath(200, 100)]; };
+    return { scale1: run(1), scale2: run(2), note: '[inside, outside, path]' };
+  },
+  // Text: rendering and measureText of a font in logical units under scale vs. the device size
+  text() {
+    const out = {};
+    for (const [label, s, size] of [['16px at scale 1', 1, 16], ['32px at scale 0.5', 0.5, 32], ['8px at scale 2', 2, 8], ['5px at scale 3.2', 3.2, 5]]) {
+      const ctx = fresh(); ctx.scale(s, s); ctx.font = `${size}px sans-serif`; ctx.textBaseline = 'alphabetic';
+      const m = ctx.measureText('Kilopixel Wrap Test');
+      ctx.fillText('Kilopixel Wrap Test', 10 / s, 100 / s);
+      const [f, l] = firstLast(alphaRow(ctx, 96), 40);
+      out[label] = { measureWidth: +m.width.toFixed(2), measureTimesScale: +(m.width * s).toFixed(2), inkFrom: f, inkTo: l };
+    }
+    return out;
+  },
+  // Text pixel difference: 16px font at scale 1 against 32px at 0.5 and 8px at 2
+  textPixels() {
+    const draw = (s, size) => { const ctx = fresh(); ctx.scale(s, s); ctx.font = `${size}px sans-serif`; ctx.fillText('Kilopixel Wrap Test', 10 / s, 100 / s); return ctx.getImageData(0, 0, W, H).data; };
+    const base = draw(1, 16);
+    const diff = (other) => { let n = 0, mx = 0; for (let i = 3; i < base.length; i += 4) { const d = Math.abs(base[i] - other[i]); if (d > 1) n++; if (d > mx) mx = d; } return { pixelsDiffering: n, max: mx }; };
+    return { '32px at 0.5': diff(draw(0.5, 32)), '8px at 2': diff(draw(2, 8)) };
+  },
+  // letterSpacing: user units?
+  letterSpacing() {
+    const run = (s) => { const ctx = fresh(); ctx.scale(s, s); ctx.font = `${16 / s}px sans-serif`; ctx.letterSpacing = `${10 / s}px`;
+      ctx.fillText('IIII', 10 / s, 100 / s); return firstLast(alphaRow(ctx, 95), 40); };
+    return { scale1: run(1), scale2: run(2) };
+  }
+};
+window.runAllTests = () => Object.fromEntries(Object.entries(window.tests).map(([k, f]) => { try { return [k, f()]; } catch (e) { return [k, 'ERROR ' + e.message]; } }));
+</script>
+</body>
+</html>

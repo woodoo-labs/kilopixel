@@ -1,0 +1,58 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Logical Units Bench | Prototype</title>
+<script src="/dist/pxl.js"></script><script src="patch.js"></script></head>
+<body style="margin:0">
+<pxl-stage id="main" ratio="16/9" alwaysrender style="width:1200px"><pxl-layer id="lay"></pxl-layer></pxl-stage>
+<script>
+// Layer.render() with today's drawing and with drawing in logical units (the patch), alternating frames, medians.
+// Also: what each path rebuilds after a stage resize (gradients, text layouts).
+function scene(kind) {
+  let html = '';
+  if (kind === 'circles') for (let i = 0; i < 5000; i++)
+    html += `<pxl-circle x="${(i * 37) % 1000}" y="${(i * 53) % 560}" r="4" fill="hsl(${i % 360}, 70%, 50%)" stroke="#fff" strokewidth="0.5"></pxl-circle>`;
+  if (kind === 'texts') for (let i = 0; i < 500; i++)
+    html += `<pxl-text x="${(i * 97) % 1000}" y="${20 + (i * 31) % 540}" text="Label ${i}" size="14" fill="#333"></pxl-text>`;
+  if (kind === 'gradients') for (let i = 0; i < 1000; i++)
+    html += `<pxl-rect x="${(i * 37) % 1000}" y="${(i * 53) % 560}" w="20" h="12" fill="linear(${i % 180}, ['red', 'blue'])" stroke="#000" strokewidth="1" linedash="[3, 2]"></pxl-rect>`;
+  if (kind === 'arrows') for (let i = 0; i < 1000; i++)
+    html += `<pxl-polyline points="${(i * 37) % 1000},${(i * 53) % 560}; ${(i * 37) % 1000 + 30},${(i * 53) % 560 + 10}; ${(i * 37) % 1000 + 50},${(i * 53) % 560 - 10}" smooth="true" stroke="#0a0" strokewidth="2" arrowend="auto"></pxl-polyline>`;
+  return html;
+}
+window.bench = function(kind, rounds = 21) {
+  const stage = document.getElementById('main'), lay = document.getElementById('lay');
+  lay.innerHTML = scene(kind);
+  stage.resize();
+  let t = 1;
+  const frame = () => { t += 0.016; pxl._frame++; lay.isDirty = true; lay.update(t); const t0 = performance.now(); lay.render(stage.unit, t); return performance.now() - t0; };
+  const oldT = [], newT = [];
+  for (let i = 0; i < 5; i++) frame();
+  for (let r = 0; r < rounds; r++) {
+    oldT.push(frame());
+    const un = installLogicalPatch(pxl);
+    try { newT.push(frame()); } finally { un(); }
+  }
+  const med = a => a.sort((x, y) => x - y)[a.length >> 1].toFixed(2);
+  return `${kind}: today ${med(oldT)} ms, logical units ${med(newT)} ms`;
+};
+// Rebuilds after a resize: count createLinearGradient and measureText calls in the first frame after it
+window.rebuilds = function(kind) {
+  const stage = document.getElementById('main'), lay = document.getElementById('lay'), ctx = lay._ctx;
+  const count = (logical) => {
+    lay.innerHTML = scene(kind); stage.style.width = '1200px'; stage.resize();
+    const un = logical ? installLogicalPatch(pxl) : () => {};
+    try {
+      pxl._frame++; lay.isDirty = true; lay.update(1); lay.render(stage.unit, 1); // warm caches
+      stage.style.width = '900px'; stage.resize(); // a new unit
+      let g = 0, m = 0;
+      const cg = ctx.createLinearGradient, mt = ctx.measureText;
+      ctx.createLinearGradient = function(...a) { g++; return cg.apply(this, a); };
+      ctx.measureText = function(...a) { m++; return mt.apply(this, a); };
+      pxl._frame++; lay.isDirty = true; lay.update(1.1); lay.render(stage.unit, 1.1);
+      ctx.createLinearGradient = cg; ctx.measureText = mt;
+      return { gradientsBuilt: g, measureTextCalls: m };
+    } finally { un(); stage.style.width = '1200px'; stage.resize(); }
+  };
+  return { kind, today: count(false), logicalUnits: count(true) };
+};
+</script>
+</body></html>
