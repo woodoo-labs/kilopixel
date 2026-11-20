@@ -142,20 +142,33 @@
       return ms;
     }, 1000), { timeout: 20000 });
 
-    // Properties store numbers without parsing or compiling (framework plan §24)
-    test('setting a property on shapes that have readers is linear', () => expectLinear((n) => {
-      const { layer, clear } = freshStage();
-      layer.insertAdjacentHTML('beforeend', shapesMarkup(n, true, 'sap'));
-      const shapes = [...layer.querySelectorAll('pxl-circle[id]')];
-      for (let i = 0; i < shapes.length; i++) shapes[i].x = i + 0.5; // warm-up: readers run once
-      const t0 = performance.now();
-      for (let round = 1; round <= 5; round++) {
-        for (let i = 0; i < shapes.length; i++) shapes[i].x = i + round * 0.37;
+    // Properties store numbers without parsing or compiling (framework plan §24). Starts at 8,000: between about
+    // 1,000 and 8,000 shapes the working set (2n elements, n compiled readers) outgrows the CPU caches and a set costs
+    // about twice as much (0.7 → 1.7 µs, measured 2026-11-20); past that step it is linear again (8,000 → 16,000:
+    // ratio 2.1). On GitHub's runners the step fell between 4,000 and 8,000, where the test compared (ratios 3.9–5.3).
+    // The five measurements of one size share a scene: building 32,000 shapes with readers for each took 14 s.
+    test('setting a property on shapes that have readers is linear', () => {
+      let scene = null;
+      try {
+        expectLinear((n) => {
+          if (scene === null || scene.n !== n) {
+            if (scene !== null) scene.clear();
+            const { layer, clear } = freshStage();
+            layer.insertAdjacentHTML('beforeend', shapesMarkup(n, true, 'sap'));
+            scene = { n, clear, shapes: [...layer.querySelectorAll('pxl-circle[id]')] };
+            for (let i = 0; i < scene.shapes.length; i++) scene.shapes[i].x = i + 0.5; // warm-up: readers run once
+          }
+          const shapes = scene.shapes;
+          const t0 = performance.now();
+          for (let round = 1; round <= 5; round++) {
+            for (let i = 0; i < shapes.length; i++) shapes[i].x = i + round * 0.37;
+          }
+          return performance.now() - t0;
+        }, 8000);
+      } finally {
+        if (scene !== null) scene.clear();
       }
-      const ms = performance.now() - t0;
-      clear();
-      return ms;
-    }, 1000), { timeout: 20000 });
+    }, { timeout: 30000 });
 
     // The readers share one expression: with one per reader, 4,000 compiled functions make memory effects, not the
     // broadcast, grow faster than linear (measured ratio up to 4.5)
