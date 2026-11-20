@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Move event bench</title>
+</head>
+<body>
+<pre id="out">running…</pre>
+<iframe id="page" src="/examples/test48.html" style="width: 900px; height: 1000px; border: 0"></iframe>
+<script>
+// Cost of the two events per frame that InteractionEngine.process() dispatches on the hovered shape while the pointer
+// moves (pointermove, mousemove), measured 2026-11-20 for design/2026-10-30_framework_compatibility_plan.md §23.9.
+// Runs on examples/test48.html (loaded in the iframe): each step 20,000 times after a warm-up, on the page's deepest
+// shape, through the engine's own dispatch() and through its parts. Needs no animation frames, so it also works in a
+// hidden tab. Open it via the dev server; results in the <pre> and in window.benchResult (µs per event).
+const N = 20000;
+const time = (f) => {
+  for (let i = 0; i < 2000; i++) f();
+  const t0 = performance.now();
+  for (let i = 0; i < N; i++) f();
+  return +((performance.now() - t0) / N * 1000).toFixed(2);
+};
+
+document.getElementById('page').addEventListener('load', () => setTimeout(() => {
+  const win = document.getElementById('page').contentWindow, doc = win.document;
+  const stage = doc.querySelector('pxl-stage');
+  const ix = stage.interaction;
+  let deep = stage, depth = 0;
+  for (const el of stage.querySelectorAll('*')) {
+    let d = 0;
+    for (let n = el; n !== stage; n = n.parentNode) d++;
+    if (d > depth) { depth = d; deep = el; }
+  }
+  // Stands in for the browser's event that process() copies its fields from
+  const source = new win.PointerEvent('pointermove', { clientX: 100, clientY: 100, pointerId: 1, pointerType: 'mouse', isPrimary: true });
+  const keys = win.pxl.EVENT_INIT_KEYS;
+  const init = {};
+  for (const k of keys) init[k] = source[k];
+  init.bubbles = init.cancelable = true;
+  const event = new win.PointerEvent('pointermove', { bubbles: true });
+  const div = doc.createElement('div');
+  let leaf = div;
+  for (let i = 0; i < depth; i++) leaf = leaf.appendChild(doc.createElement('div'));
+  doc.body.appendChild(div);
+
+  const result = window.benchResult = {
+    deepestShape: `${deep.localName}, ${depth} levels below the stage`,
+    'engine dispatch(), pointermove on the deepest shape': time(() => ix.dispatch('pointermove', deep, null, source, null)),
+    'engine dispatch(), mousemove on the deepest shape': time(() => ix.dispatch('mousemove', deep, null, source, null)),
+    'part: copy the event fields from the browser\'s event': time(() => { for (let i = 0; i < keys.length; i++) init[keys[i]] = source[keys[i]]; }),
+    'part: new PointerEvent': time(() => new win.PointerEvent('pointermove', init)),
+    'part: new MouseEvent': time(() => new win.MouseEvent('mousemove', init)),
+    'part: dispatchEvent on the deepest shape (the stage\'s listener included)': time(() => deep.dispatchEvent(event)),
+    'for scale: dispatchEvent on a plain div as deep': time(() => leaf.dispatchEvent(event))
+  };
+  div.remove();
+  document.getElementById('out').textContent = Object.entries(result)
+    .map(([k, v]) => typeof v === 'number' ? `${v.toFixed(2).padStart(6)} µs  ${k}` : `${k}: ${v}`).join('\n');
+}, 500));
+</script>
+</body>
+</html>
