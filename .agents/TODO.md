@@ -20,7 +20,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 ## 2. Compound Vector Clipping Element (`<pxl-clip>`)
 - **Status**: 🟡 **Proposed** (2026-09-29)
 - **Reference**: `design/2026-09-29_pxl-clip_element_plan.md`
-- **Problem Solved**: Fixes the Canvas 2D bug where applying a `mask` to a shape with both a `fill` and `stroke` obliterates the cutout (see also §31, which fixes `mask` on such shapes directly).
+- **Problem Solved**: restricts drawing to a geometric region. `mask` composites pixels: it can't clip a group of children as one unit without an offscreen buffer, and the masking shape must come after the content. `ctx.clip()` clips by geometry before any pixel is written, needs no buffer and no draw-order rule. (A `mask` on a shape with fill and stroke is fixed separately by isolated compositing, §31.)
 - **Core Features**:
   - Dedicated structural container element `<pxl-clip>` mapping to native `ctx.clip()`.
   - Supports compound path unions, `fillrule="evenodd"` boolean holes, and nested intersection clipping without offscreen canvas buffers.
@@ -108,12 +108,13 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Related**: build after §31 (`design/2026-11-01_isolated_shape_compositing_plan.md` §9). Without isolation, `paintorder="stroke"` has the same compositing bug as §31 (with a shadow, the fill's shadow falls onto the stroke drawn before it); with isolation it only swaps two draw calls. (2026-11-20: isolation is built, plan §10, so `paintorder` can build on it.)
 
 ## 20. Shape Authoring (Derived Attributes, Class Fields, Custom Animation)
-- **Status**: 🟡 **Proposed** (2026-10-17, no code changes yet)
+- **Status**: 🟡 **Proposed** (2026-11-20, plan §0: custom shapes and isolated compositing; 2026-11-19, handler names; no code changes yet)
 - **Reference**: `design/2026-10-17_shape_authoring_plan.md`
 - **Goal**: writing a shape (built-in or user-made, e.g. a separate `star.js` with `class Star extends pxl.Shape`) needs only `static defaults`, `draw(ctx, u)` and `getBoundingBox()`. A prototype Star already works with today's engine.
 - **Changes**: derive `observedAttributes` from `static defaults` (the handler attributes `pxl.HANDLER_EVENTS` appended by `Shape` and `Group`, `isHovered` / `isPressed` moved out of defaults, Polyline `points: ''`, lowercase-key warning); class fields instead of constructors (except Layer); `draw(ctx, u)` without `t` (hit testing calls `draw()` with `t = 0`).
 - **Custom animation (note)**: time belongs in attribute expressions. Pattern A: `spin="t * 180"` in the HTML. Pattern B: internal animated value via `pxl.compileAttribute` (internal API, a public helper like `this.animate()` later).
 - **Ready for custom shapes** (2026-11-07, `design/2026-11-07_safe_shape_render_plan.md`): every shape draws in its own canvas state and errors are caught, so a careless or failing custom shape can't fade or break the rest of the layer. A custom shape that draws arrowheads must call `drawArrows()` last.
+- **Isolated compositing** (2026-11-20, `design/2026-11-01_isolated_shape_compositing_plan.md` §10): a custom shape with `mask`, `blend`, `filter` or a shadow is drawn through the scratch canvas, because the default `drawsMoreThanOnce()` returns true. A shape that draws only once can override it to return false and skip the scratch canvas.
 
 ## 22. Polyline Optimization (Parser, Point Storage, Edge Cases)
 - **Status**: 🟡 **Proposed** (low priority; measured gains are small)

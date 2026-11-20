@@ -96,6 +96,8 @@ A method `needsIsolation()` on the shape answers this. Shapes compute it from th
 
 A custom shape (`design/2026-10-17_shape_authoring_plan.md`) overrides `draw()` and may call `fill()` and `stroke()`, so the engine can't count its draw calls from the outside. The base `needsIsolation()` therefore answers "has compositing state": always correct, and a custom shape that draws only once can override it. The built-in shapes override it with the exact rule of §3.1. Open decision §6.3.
 
+(2026-11-20, as built, §10: `needsIsolation()` is `hasCompositingState()` and `drawsMoreThanOnce()`. The built-in shapes override `drawsMoreThanOnce()`, not `needsIsolation()`; the base `drawsMoreThanOnce()` returns true, so a custom shape is isolated whenever it has compositing state, and one that draws only once overrides either method.)
+
 ## 4. Cost
 
 Measured with `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_bench.html` in the desktop app's browser pane: layer 1000 × 600 at DPR 2 (2000 × 1200 px), ellipse 180 × 120 with fill and stroke, `mask="xor"`, 20 shapes per frame, GPU work included.
