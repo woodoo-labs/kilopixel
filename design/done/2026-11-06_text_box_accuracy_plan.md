@@ -1,8 +1,8 @@
 # Text Box Accuracy: `maxwidth` and Late Web Fonts
 
-- **Status**: ✅ **Implemented** (2026-11-06; tests in §9 pass, no real pixel regressions on the docs pages, §6.2)
+- **Status**: ✅ **Implemented** (2026-11-06, tests in §9)
 - **Date**: 2026-11-06
-- **Related**: `design/2026-10-13_text_hit_testing_plan.md` (§3.4 and §4.c, where these limitations were first recorded), `.agents/TODO.md` §9 (images arrive late too, §7 below)
+- **Related**: `design/done/2026-10-13_text_hit_testing_plan.md` (§3.4 and §4.c, where these limitations were first recorded), `.agents/TODO.md` §9 (images arrive late too, §7 below)
 - **Target Implementation**: `js/elements/shapes/text.js`, `js/elements/stage.js`
 
 ---
@@ -134,7 +134,7 @@ document.fonts.addEventListener('loadingdone', () => {
 });
 ```
 
-- **`pxl.perf.stages`, not `querySelectorAll('pxl-layer')`:** it is the existing stage registry (`stage.js:83`). No DOM query and no new array, and it keeps working if layers ever live in a shadow root (`design/2026-10-30_framework_compatibility_plan.md` §9).
+- **`pxl.perf.stages`, not `querySelectorAll('pxl-layer')`:** it is the existing stage registry (`stage.js:83`). No DOM query and no new array, and it keeps working if layers ever live in a shadow root (`design/done/2026-10-30_framework_compatibility_plan.md` §9).
 - **A counter, not a loop over all texts:** a text that isn't drawn right now (hidden, off-screen, `reveal`) compares on its next draw. No registry of texts is needed.
 
 ---
@@ -297,7 +297,7 @@ Both end with `layer.invalidate()`, which exists, and a full redraw: besides the
 - If the user sets only one dimension, or uses `contain` / `cover`, the box isn't known until the image arrives.
 - The same `src` on several shapes: one shared image; each shape invalidates its own layer.
 - Natural size through `ref.*`: shapes in other layers then depend on the image, so invalidating one layer isn't enough. This is the one point that needs more thought.
-- Failed loads: connect to `design/2026-11-07_safe_shape_render_plan.md` (`reportError()`) if that plan fits.
+- Failed loads: connect to `design/done/2026-11-07_safe_shape_render_plan.md` (`reportError()`) if that plan fits.
 
 ---
 

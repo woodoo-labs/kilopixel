@@ -1,6 +1,6 @@
 # Technical Implementation Plan: Declarative `<pxl-plot>` Element
 
-- **Status**: 🟡 **Proposed** (2026-11-11, notes on sampling and smoothing in §10; uniform spline from `design/2026-11-11_polyline_smoothstyle_plan.md`)
+- **Status**: 🟡 **Proposed** (2026-11-11, notes on sampling and smoothing in §10)
 - **Date**: 2026-09-07
 - **Target Files**:
   - `js/compiler.js` (Expression compiler parameter injection & static-path guard)
@@ -245,7 +245,7 @@ Found while fixing the trace path in `docs/walkthrough.html` section 9 (a Lissaj
 
 ### 10.1 What went wrong in the walkthrough
 
-- The trace path was 100 hand-written points, `smooth="true"`, frequencies 1–10. Since the centripetal spline (`design/2026-10-23_smooth_polyline_spline_plan.md`, 2026-10-24) the tips looked pointed, and curves traced several times (frequencies with a common factor, e.g. 9 / 3) showed frayed double lines at the tips.
+- The trace path was 100 hand-written points, `smooth="true"`, frequencies 1–10. Since the centripetal spline (`design/done/2026-10-23_smooth_polyline_spline_plan.md`, 2026-10-24) the tips looked pointed, and curves traced several times (frequencies with a common factor, e.g. 9 / 3) showed frayed double lines at the tips.
 - Fixed for now with 120 points and frequencies 1–5: 120 is divisible by every frequency up to 5, so every pass of a repeated curve hits the same points. Over all 25 slider combinations the centripetal error is at most 1.6 (7.0 with 60 points), about a pixel; the markup is back to about 11 KB.
 - Starting the samples elsewhere doesn't help: shifting them by ¼, ½ or ¾ of a step raised the average error at 60 points from 1.96 to about 3.1. Starting at `v = 0` places the points symmetrically around the curve's axes, the best case (`design/prototypes/2026-11-11_polyline_smoothstyle/spline_offset.js`).
 
@@ -274,3 +274,10 @@ Largest distance from the drawn curve to the true curve (stage units, stage 1000
 - **Free ends** (open plots) still need a rule; uniform Catmull-Rom with clamped ends straightens out before the end (problem #1 of the 2026-10-23 plan). For a plot, the missing neighbour can be computed: one more sample just outside `domain`.
 - **Repeated curves** (a parametric curve traced several times over `domain`) are drawn identically on every pass only if the steps per pass are a whole number. With dense sampling the difference is below a pixel.
 - **Test case**: the walkthrough section 9 curve, frequencies 1–10 including 9 / 3 and 4 / 1. When `<pxl-plot>` exists, section 9 moves to it and its sliders go back to 1–10.
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
+- Status line until 2026-11-20: 🟡 **Proposed** (2026-11-11, notes on sampling and smoothing in §10; uniform spline from `design/2026-11-11_polyline_smoothstyle_plan.md`)

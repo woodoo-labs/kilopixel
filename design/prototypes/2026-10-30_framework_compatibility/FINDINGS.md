@@ -28,7 +28,7 @@ Possible engine follow-ups:
 
 # Smoke Pages After W1 and W3 (2026-11-19)
 
-Pages (moved on the same day to `tests/smoke/`: `react.html`, `vue.html`, `tailwind.html`, with `checks.js`; run with `node tools/run_tests.js --smoke`): `smoke_react.html` (React 19.1.0 + htm 3.1.1 from esm.sh), `smoke_vue.html` (Vue 3.5.13, the ES module build with the template compiler, from jsDelivr), `smoke_tailwind.html` (Tailwind CSS 4.1.7, the browser build, plain HTML), all loading Kilopixel as a script tag (`/dist/pxl.min.js`) and no build step. React and Vue render the same scene and run the same checks from `smoke_checks.js` (`window.runSceneChecks()`); the Tailwind page has its own (`window.runTailwindChecks()`). Plan: `design/2026-10-30_framework_compatibility_plan.md` §25.
+Pages (moved on the same day to `tests/smoke/`: `react.html`, `vue.html`, `tailwind.html`, with `checks.js`; run with `node tools/run_tests.js --smoke`): `smoke_react.html` (React 19.1.0 + htm 3.1.1 from esm.sh), `smoke_vue.html` (Vue 3.5.13, the ES module build with the template compiler, from jsDelivr), `smoke_tailwind.html` (Tailwind CSS 4.1.7, the browser build, plain HTML), all loading Kilopixel as a script tag (`/dist/pxl.min.js`) and no build step. React and Vue render the same scene and run the same checks from `smoke_checks.js` (`window.runSceneChecks()`); the Tailwind page has its own (`window.runTailwindChecks()`). Plan: `design/done/2026-10-30_framework_compatibility_plan.md` §25.
 
 | Scenario | React 19 | Vue 3.5 |
 |---|---|---|

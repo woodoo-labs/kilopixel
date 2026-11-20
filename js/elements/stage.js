@@ -9,7 +9,7 @@ pxl._frame = 0;
 // in JSX) would otherwise appear as page text through the layer's <slot>. Content placed directly in a layer
 // (accessible text, buttons) stays visible.
 // The grid is out of hit testing: it covers the whole stage and would catch the pointer between its lines
-// (design/2026-10-30_framework_compatibility_plan.md §23, E4). A page can set pointer-events: auto on it.
+// (design/done/2026-10-30_framework_compatibility_plan.md §23, E4). A page can set pointer-events: auto on it.
 // Click and press handlers show the hand, like the browser's own rule for links (E1); the shapes inside a group
 // inherit it. The cursor is otherwise only CSS: a framework listener gets the hand from cursor: pointer.
 pxl.DEFAULT_STYLES = `@layer pxl {
@@ -36,7 +36,7 @@ pxl.Stage = class Stage extends HTMLElement {
 
   // Browser events handled by the stage's InteractionEngine (its handleEvent). The second list is handled in the
   // capture phase, when the event arrives: over a shape, the browser's event is stopped there and dispatched on the
-  // shape instead (design/2026-10-30_framework_compatibility_plan.md §4.1, D4).
+  // shape instead (design/done/2026-10-30_framework_compatibility_plan.md §4.1, D4).
   static POINTER_EVENTS = ['pointermove', 'pointerenter', 'pointerleave', 'gotpointercapture', 'lostpointercapture'];
   static ARRIVING_EVENTS = [
     'pointerdown', 'pointerup', 'pointercancel', 'pointerout', 'mousedown', 'mouseup', 'click', 'dblclick', 'contextmenu'
@@ -85,7 +85,7 @@ pxl.Stage = class Stage extends HTMLElement {
     this.interaction = new pxl.InteractionEngine(this);
   }
 
-  // Properties for frameworks (design/2026-10-30_framework_compatibility_plan.md §24). Unlike the other elements', they
+  // Properties for frameworks (design/done/2026-10-30_framework_compatibility_plan.md §24). Unlike the other elements', they
   // write the attribute: a stage has two, set rarely, and the attribute path parses them. false, null and undefined
   // remove the attribute.
   get ratio() {
@@ -285,7 +285,7 @@ pxl.Stage = class Stage extends HTMLElement {
 
     // Pointer first: broadcast the stage's pointer values, hit-test against the picture on screen, update the
     // hover / press states and run the handlers. Their readers are then drawn in this frame, not the next one
-    // (design/2026-11-17_pointer_frame_order_plan.md).
+    // (design/done/2026-11-17_pointer_frame_order_plan.md).
     this.interaction.process();
 
     if (this._isOrderDirty) {

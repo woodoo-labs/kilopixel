@@ -1,6 +1,6 @@
 # Kilopixel — Performance Analysis & Framework Assessment
 
-- **Status**: ⚪ **Superseded by** `design/2026-10-27_engine_cleanup_inventory_note.md` (analysis of the July 2026 engine)
+- **Status**: ⚪ **Superseded by** `design/done/2026-10-27_engine_cleanup_inventory_note.md` (analysis of the July 2026 engine)
 
 > **Date**: 2026-07-12 | **Source**: Deep analysis of all 19 source files
 

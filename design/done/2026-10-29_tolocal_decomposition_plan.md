@@ -2,7 +2,7 @@
 
 - **Status**: ✅ **Implemented** (2026-10-30)
 - **Date**: 2026-10-29
-- **Related**: `design/2026-10-25_refs_across_spaces_note.md` (hub for `toLocal`, §2 and §3), `design/archive/coordinate_mapping_implementation_plan.md` (original property list), `design/2026-10-26_tolocal_fix_plan.md` (reactivity)
+- **Related**: `design/ideas/2026-10-25_refs_across_spaces_note.md` (hub for `toLocal`, §2 and §3), `design/archive/coordinate_mapping_implementation_plan.md` (original property list), `design/done/2026-10-26_tolocal_fix_plan.md` (reactivity)
 - **Target Implementation**: `js/matrix.js` (`pxl.toLocal`), `js/compiler.js` (warning for unknown `toLocal` names); for §5 (`zoom`) also `js/elements/node.js` (`getLocalMatrix`), `js/graphics.js` (`applyContextState`), `js/engine.js` (`isSpatialKey`), `js/elements/shape.js`, `group.js`, `layer.js` (attribute lists, defaults, `hasStateChanges`), and every page that uses `scale="…"`
 - **Check**: `design/prototypes/2026-10-29_tolocal_decomposition/decompose_check.js` (decompose and rebuild 100,000 random matrices, max error 7·10⁻¹⁴); `scratch/tolocal_bench.js` (not kept) (cost per toLocal call, §3.5); demo of the current limits: `scratch/tolocal_probe.html` (P4); `examples/test53.html` (four transformed layers, toLocal lines through the rects)
 
@@ -329,7 +329,7 @@ All 79 tracked `.html` files were searched (attributes, `setAttribute` calls, `t
   | Coordinate Mapping (`mapping.html`) | Coordinate Mapping (`mapping.html`) |
 
   Neither page exists yet; the sidebar links already point to planned pages. One label "Rotate, Zoom, Scale & Skew" was measured and wraps to two lines (50 px instead of 31 px at the sidebar width of 264 px); both new labels fit on one line.
-- `design/2026-10-25_refs_across_spaces_note.md`: §0 table row for this plan; §2 property list; `ref.c.r * toLocal(ref.c, 'scale')` → `'zoom'`.
+- `design/ideas/2026-10-25_refs_across_spaces_note.md`: §0 table row for this plan; §2 property list; `ref.c.r * toLocal(ref.c, 'scale')` → `'zoom'`.
 - `.agents/TODO.md`: the same example (line ~228); entry for this plan, closed when done.
 - Public docs for toLocal: nothing yet (no `mapping.html` page exists). The clone rule and the zoom usage rule belong on that page when it is written.
 

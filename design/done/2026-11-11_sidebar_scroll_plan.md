@@ -1,6 +1,6 @@
 # Docs Sidebar: Keep the Scroll Position Between Pages
 
-- **Status**: ✅ **Implemented** (2026-11-11, `docs/js/layout.js`; checks in §8)
+- **Status**: ✅ **Implemented** (2026-11-11, checks in §8)
 - **Date**: 2026-11-11
 - **Related**: `docs/js/layout.js` (`<docs-sidebar>`), `docs/css/docs.css` (`.sidebar`, mobile drawer)
 - **Target Implementation**: `docs/js/layout.js` only
@@ -119,4 +119,3 @@ No engine change, so no `tests/index.html` entry. Check on the dev server:
   6. Back: the page shows its active link at the stored position (the preview browser reloads instead of using the back / forward cache) ✓
   7. Console clean ✓
   8. No flicker: `design/prototypes/2026-11-11_sidebar_scroll/sidebar_paint_check.html` reads the sidebar right after `<docs-sidebar>` while the page is parsed: already at the stored position (600). Restoring happens before anything after the sidebar is drawn. A throttled-network visual check wasn't possible in this environment (no throttling in the browser tools); worth a quick look in a normal browser.
-

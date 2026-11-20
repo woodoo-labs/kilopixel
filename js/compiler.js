@@ -164,7 +164,7 @@ pxl.cacheExpression = function(cache, source, value) {
 };
 
 // Splits an expression into code and string literals, so rewrites and checks can skip quoted text
-// (design/2026-11-02_string_literals_in_expressions_plan.md). Even indices are code, odd indices are literals with
+// (design/done/2026-11-02_string_literals_in_expressions_plan.md). Even indices are code, odd indices are literals with
 // their quotes. In a template literal, the code inside ${…} is code again: 'a' + `b${x}c` → ['', "'a'", ' + ', '`b${',
 // 'x', '}c`', '']. Regex literals and comments aren't recognized; attribute expressions don't use them.
 // Compile time only: it runs once per distinct string, so its allocations don't matter.
@@ -306,7 +306,7 @@ pxl.compileExpression = function(str) {
     }
 
     const isAnimated = pxl.timeDriverRegex.test(unquoted);
-    // toLocal readers are also re-evaluated when their own space moves (design/2026-10-26_tolocal_fix_plan.md)
+    // toLocal readers are also re-evaluated when their own space moves (design/done/2026-10-26_tolocal_fix_plan.md)
     const usesToLocal = /\btoLocal\(/.test(unquoted);
     if (usesToLocal) pxl.checkToLocalProperties(str); // reads the full string: the property name is a string
     const source = pxl.rewriteExpression(parts.join(''));

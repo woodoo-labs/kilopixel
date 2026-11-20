@@ -9,7 +9,7 @@
 <div id="box" style="width: 1000px"></div>
 <pre id="out">running…</pre>
 <script>
-// Cost and heap growth of setting values the way frameworks do, per set (design/2026-10-30_framework_compatibility_plan.md
+// Cost and heap growth of setting values the way frameworks do, per set (design/done/2026-10-30_framework_compatibility_plan.md
 // §24): properties against setAttribute(). One shape with one reader of it, a polyline with 200 points.
 // Time: works anywhere. Heap: run headless with --js-flags=--expose-gc --enable-precise-memory-info (gc() and exact
 // heap sizes); without them the heap column says n/a. Results in the <pre> and in window.w3Costs.

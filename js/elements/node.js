@@ -281,7 +281,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       for (let i = 0; i < len; i++) {
         const child = this.childList[i];
 
-        // The child's own space moved: its toLocal() results are stale (design/2026-10-26_tolocal_fix_plan.md).
+        // The child's own space moved: its toLocal() results are stale (design/done/2026-10-26_tolocal_fix_plan.md).
         // If re-evaluating moves the child, setLocalMatrixDirty() has already walked its subtree.
         let walked = false;
         if (child.toLocalAttributeKeys.length > 0) {

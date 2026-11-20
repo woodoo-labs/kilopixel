@@ -1,8 +1,8 @@
 # Always `save()` / `restore()` per Shape
 
-- **Status**: ⚪ **Superseded by** `design/2026-11-07_safe_shape_render_plan.md` (2026-11-07: decided on 2026-10-17, merged with the draw errors plan before it was built; reasoning and revised criterion in §5.4)
+- **Status**: ⚪ **Superseded by** `design/done/2026-11-07_safe_shape_render_plan.md` (2026-11-07: decided on 2026-10-17, merged with the draw errors plan before it was built; reasoning and revised criterion in §5.4)
 - **Date**: 2026-10-17
-- **Related**: `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, implemented; this plan was split off from its former §3), `design/2026-10-17_shape_authoring_plan.md` (custom shapes), `design/2026-11-01_isolated_shape_compositing_plan.md` (builds on this one: same `Shape.render()`, order in its §9)
+- **Related**: `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, implemented; this plan was split off from its former §3), `design/2026-10-17_shape_authoring_plan.md` (custom shapes), `design/done/2026-11-01_isolated_shape_compositing_plan.md` (builds on this one: same `Shape.render()`, order in its §9)
 - **Target Implementation**: `js/elements/shape.js` (`render`, `drawArrows`), `js/elements/shapes/grid.js`
 - **Measurement Tools** (not kept): `scratch/save_restore_audit.js`, `scratch/save_restore_bench.html`, `scratch/save_restore/measure.html`, `design/prototypes/2026-10-17_shape_authoring/star_test.html`
 

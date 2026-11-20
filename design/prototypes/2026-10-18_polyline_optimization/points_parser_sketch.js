@@ -1,4 +1,4 @@
-// Simplified Phase 1 parser sketch (parentheses only + validation), see design/2026-10-18_polyline_optimization_plan.md §3.
+// Simplified Phase 1 parser sketch (parentheses only + validation), see design/ideas/2026-10-18_polyline_optimization_plan.md §3.
 // Usage: node design/prototypes/2026-10-18_polyline_optimization/points_parser_sketch.js
 const parse = function(str, targetArray) {
   targetArray.length = 0;

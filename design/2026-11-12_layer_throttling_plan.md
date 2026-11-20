@@ -1,9 +1,9 @@
 # Layer Throttling (`maxfps`), Stage-Level `<pxl-var>` and Performance Monitor
 
-- **Status**: 🟡 **Proposed** (2026-11-13, Part B built with D6 (b), §4.5; C1 built with D5 (a), §5.4; Part A, frame counting (D4) and C2 open, decisions D1–D4 and D7–D9 open, D9: build A after the two-phase frame?)
+- **Status**: 🟡 **Proposed** (2026-11-13, parts B and C1 built; part A, C2 and D1–D4, D7–D9 open)
 - **Date**: 2026-11-12
 - **Supersedes**: `design/archive/2026-09-14_stage_variables_and_layer_throttling_plan.md` (stage-level `<pxl-var>`, `maxfps`, per-layer metrics) and `design/archive/2026-09-14_layer_throttling_plan.md` (revised 2026-09-15: `maxfps` in detail, keep-alive, cross-layer variables, frame counting, monitor bug)
-- **Related**: `design/2026-11-07_safe_shape_render_plan.md` (error path in `Layer.render()`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: `maxfps` comes from `static defaults`), `design/2026-11-12_two_phase_frame_plan.md` (💬, TODO §29: an update phase before drawing would simplify Part A and absorb Part B, §1.1 and D9 here)
+- **Related**: `design/done/2026-11-07_safe_shape_render_plan.md` (error path in `Layer.render()`), `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: `maxfps` comes from `static defaults`), `design/2026-11-12_two_phase_frame_plan.md` (💬, TODO §29: an update phase before drawing would simplify Part A and absorb Part B, §1.1 and D9 here)
 - **Target Implementation**: `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/monitor.js`, `tests/index.html`, `.agents/KILOPIXEL.md` (Stage, Layer, Variable, Per-Frame Render Pipeline, Performance Monitor); docs: see D8
 
 ---
@@ -71,7 +71,7 @@ Why `maxfps` and not `fps`: it is a ceiling. A layer with `maxfps="30"` on a mac
 
 ### 3.2 What is throttled
 
-Everything that redraws the layer's canvas: animation, reactive `ref.*` broadcasts, `setAttribute()` on its children, its own CSS-only compositing animation (D3). Otherwise a fast producer (an animated variable in another layer) would defeat the throttle. (2026-11-20: a layer's own `alpha`, `blend` and `filter` set from outside (property, `setAttribute()`, a `ref`) take the CSS-only path too, `design/2026-10-30_framework_compatibility_plan.md` §29; D3 then covers them as well.)
+Everything that redraws the layer's canvas: animation, reactive `ref.*` broadcasts, `setAttribute()` on its children, its own CSS-only compositing animation (D3). Otherwise a fast producer (an animated variable in another layer) would defeat the throttle. (2026-11-20: a layer's own `alpha`, `blend` and `filter` set from outside (property, `setAttribute()`, a `ref`) take the CSS-only path too, `design/done/2026-10-30_framework_compatibility_plan.md` §29; D3 then covers them as well.)
 
 Not throttled:
 - **The first draw** after connect and **the draw after a resize** (the canvas was cleared).
@@ -205,7 +205,7 @@ Today every `stage.render()` counts, including pointer-move frames in which no l
 `ref.<layerId>.fps`, `.renderAvg`, `.renderMax`: how often *this* layer's canvas was redrawn and how long its own `render()` took. Needed to see that `maxfps` works (stage 60, layer 4) and to find the expensive layer.
 
 - The layer measures its own `render()` (two `performance.now()` calls per drawn frame, well under a microsecond) and counts only frames that drew.
-- Publishing: the monitor can't read `stage._layers`, so it calls a stage method that publishes the stage and its layers (one shared helper writes `fps` / `renderAvg` / `renderMax` from the counters). The counters can then become `_` fields of their classes.
+- Publishing: the monitor calls a stage method that publishes the stage and its layers (one shared helper writes `fps` / `renderAvg` / `renderMax` from the counters). The counters can then become `_` fields of their classes.
 - `ref.<layerId>` is broadcast once per second, only for layers with an `id`. Readers of a layer's position (`toLocal(ref.myLayer, …)`, `ref.myLayer.x`) are re-evaluated once per second as a side effect: negligible.
 
 ### 5.4 C1 Built 2026-11-13
@@ -251,3 +251,11 @@ A manual test page with all cases side by side (layers at full rate, `maxfps` 30
 - Variable: the placement rule from §3.6 (evaluation by the stage done with Part B).
 - Per-Frame Render Pipeline and Per-Frame Data Flow: the gate and the keep-alive of a skipped layer (the heartbeat itself was corrected there on 2026-11-12).
 - Performance Monitor: frame counting, per-layer metrics (the timer and per-second `fps` done with C1).
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
+- 2026-11-20: §5.3 no longer says the monitor can't read the stage's layers (the field is the public `layers` now).
+- Status line until 2026-11-20: 🟡 **Proposed** (2026-11-13, Part B built with D6 (b), §4.5; C1 built with D5 (a), §5.4; Part A, frame counting (D4) and C2 open, decisions D1–D4 and D7–D9 open, D9: build A after the two-phase frame?)

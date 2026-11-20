@@ -1,6 +1,6 @@
 # Stroke Gradient Zero-Dimension Hardening & Degeneracy Prevention Plan
 
-- **Status**: ✅ **Implemented** (2026-11-05, revised approach of §3–4; 6 tests in `tests/index.html` fail on the old build and pass on the new one; 160 docs canvases pixel-identical before and after)
+- **Status**: ✅ **Implemented** (2026-11-05, the revised approach of §3–4)
 - **Date**: 2026-10-11 (revised 2026-11-05)
 - **Target Component**: `js/elements/shape.js` (`Shape.prototype.createGradient`, `this._gradCache`)
 - **Related**: `design/archive/2026-11-05_draw_errors_plan.md` §3.1 (stop offset clamping in the same function; built together, §7)
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary & Problem Statement
 
-During interactive documentation authoring for [`docs/line.html`](../docs/line.html) (Section 2: Line Styles), an engine bug was observed:
+During interactive documentation authoring for [`docs/line.html`](../../docs/line.html) (Section 2: Line Styles), an engine bug was observed:
 > When applying a linear gradient to the `stroke` attribute of `<pxl-line>` (e.g. `stroke="linear(angle, ['#3b82f6', '#ec4899'])"`), the line completely vanishes whenever `angle` is set to $90^\circ$ or $270^\circ$.
 
 The identical defect also occurs for vertical lines when `angle` is set to $0^\circ$ or $180^\circ$, or for flat horizontal/vertical polylines (`<pxl-polyline>`).

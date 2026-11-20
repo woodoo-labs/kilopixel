@@ -1,6 +1,6 @@
 # Design Plan: `<pxl-path>` — Native SVG Path2D Element & Vector Sprites
 
-- **Status**: 🟡 **Proposed** (2026-11-12: idea still open, but the code sketches predate today's engine: zero allocations per frame, no defensive fallbacks, `hasFill()` / `isStroked()`, `applyLineDash()` as a method, safe render; bring them up to date before implementing. First draft 2026-09-30)
+- **Status**: 🟡 **Proposed** (2026-11-12, the code sketches predate today's engine: update them before building)
 - **Date**: 2026-09-30
 - **Files affected**: `js/elements/shapes/path.js` (new), `js/elements/shape.js`, `js/interaction.js`, `build.js`
 
@@ -362,3 +362,10 @@ const files = [
 ### Test Case 8: Multi-Path & Duotone Composition
 * **Setup**: Assemble Bootstrap `chat-dots` or `bell-fill` using 2 `<pxl-path>` elements sharing `viewbox="0 0 16 16"` inside a `<pxl-group>`.
 * **Expectation**: Primary body and inner details align with 100% precision. Sub-parts can have independent fills/animations while rotating together as a unit. Also test string-concatenation (`M... Z M... Z`) into a single `<pxl-path>` element.
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
+- Status line until 2026-11-20: 🟡 **Proposed** (2026-11-12: idea still open, but the code sketches predate today's engine: zero allocations per frame, no defensive fallbacks, `hasFill()` / `isStroked()`, `applyLineDash()` as a method, safe render; bring them up to date before implementing. First draft 2026-09-30)

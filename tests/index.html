@@ -35,7 +35,7 @@
       <!-- ================================================================= -->
       <div class="test-stages">
 
-        <!-- toLocal: reader inside a rotating, scaled layer (design/2026-10-26_tolocal_fix_plan.md) -->
+        <!-- toLocal: reader inside a rotating, scaled layer (design/done/2026-10-26_tolocal_fix_plan.md) -->
         <pxl-stage id="tlStage1" ratio="5 / 3" alwaysrender>
           <pxl-layer>
             <pxl-circle id="tlSun1" x="150" y="150" r="18" fill="#fb923c"></pxl-circle>
@@ -104,7 +104,7 @@
           </pxl-layer>
         </pxl-stage>
 
-        <!-- toLocal decomposition and zoom (design/2026-10-29_tolocal_decomposition_plan.md) -->
+        <!-- toLocal decomposition and zoom (design/done/2026-10-29_tolocal_decomposition_plan.md) -->
         <pxl-stage id="dcStage" ratio="5 / 3" alwaysrender>
           <pxl-layer>
             <pxl-circle id="dcReader" r="1"></pxl-circle>
@@ -135,7 +135,7 @@
           </pxl-layer>
         </pxl-stage>
 
-        <!-- Engine cleanup fixes (design/2026-10-27_engine_cleanup_inventory_note.md §3 A) -->
+        <!-- Engine cleanup fixes (design/done/2026-10-27_engine_cleanup_inventory_note.md §3 A) -->
         <pxl-stage id="ecStage" ratio="5 / 3" alwaysrender>
           <pxl-layer>
             <pxl-var id="ecVar" value="0"></pxl-var>
@@ -152,7 +152,7 @@
         </pxl-stage>
 
         <!-- Stroke gradients on thin shapes, stop offsets, corner radii
-             (design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md, design/2026-11-05_draw_errors_plan.md §3.1) -->
+             (design/done/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md, design/2026-11-05_draw_errors_plan.md §3.1) -->
         <pxl-stage id="gsStage" ratio="5 / 3" alwaysrender>
           <pxl-layer id="gsLayer">
             <!-- The line from docs/line.html section 2 -->
@@ -184,7 +184,7 @@
           </pxl-layer>
         </pxl-stage>
 
-        <!-- Text box: maxwidth and late web fonts (design/2026-11-06_text_box_accuracy_plan.md) -->
+        <!-- Text box: maxwidth and late web fonts (design/done/2026-11-06_text_box_accuracy_plan.md) -->
         <pxl-stage id="tbStage" ratio="5 / 3" alwaysrender>
           <pxl-layer id="tbLayer">
             <pxl-text id="tbText" x="500" y="150" size="48" font="Arial" fill="#0f172a" align="center" baseline="middle"
@@ -203,7 +203,7 @@
           </pxl-layer>
         </pxl-stage>
 
-        <!-- Safe shape render: each test adds its elements and removes them (design/2026-11-07_safe_shape_render_plan.md) -->
+        <!-- Safe shape render: each test adds its elements and removes them (design/done/2026-11-07_safe_shape_render_plan.md) -->
         <pxl-stage id="srStage" ratio="5 / 3" alwaysrender>
           <pxl-layer id="srLayerA"></pxl-layer>
           <pxl-layer id="srLayerB"></pxl-layer>
@@ -220,7 +220,7 @@
           <pxl-layer id="fpMoving" alpha="0.5 + wave(2) * 0.5">
             <pxl-circle id="fpMovingCircle" x="750" y="300" r="80" dx="wave(1) * 20" fill="#38bdf8"></pxl-circle>
           </pxl-layer>
-          <!-- Compositing set from outside: nothing animated (design/2026-10-30_framework_compatibility_plan.md §29) -->
+          <!-- Compositing set from outside: nothing animated (design/done/2026-10-30_framework_compatibility_plan.md §29) -->
           <pxl-var id="fpAlphaSource" value="0.8"></pxl-var>
           <pxl-layer id="fpStatic" alpha="0.8">
             <pxl-circle id="fpStaticCircle" x="450" y="120" r="60" fill="#38bdf8"></pxl-circle>
@@ -261,7 +261,7 @@
     }
 
     // ===================================================================
-    // toLocal (design/2026-10-26_tolocal_fix_plan.md)
+    // toLocal (design/done/2026-10-26_tolocal_fix_plan.md)
     // ===================================================================
     section('toLocal');
 
@@ -377,7 +377,7 @@
     });
 
     // ===================================================================
-    // toLocal decomposition and zoom (design/2026-10-29_tolocal_decomposition_plan.md)
+    // toLocal decomposition and zoom (design/done/2026-10-29_tolocal_decomposition_plan.md)
     // ===================================================================
     section('toLocal decomposition and zoom');
 
@@ -453,7 +453,7 @@
     });
 
     // ===================================================================
-    // Engine cleanup fixes (design/2026-10-27_engine_cleanup_inventory_note.md §3 A)
+    // Engine cleanup fixes (design/done/2026-10-27_engine_cleanup_inventory_note.md §3 A)
     // ===================================================================
     section('Engine cleanup fixes');
 
@@ -512,7 +512,7 @@
     });
 
     // ===================================================================
-    // Stroke gradients on thin shapes (design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md)
+    // Stroke gradients on thin shapes (design/done/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md)
     // and stop offsets / corner radii (design/2026-11-05_draw_errors_plan.md §3.1)
     // ===================================================================
     section('Stroke gradients, stops and radii');
@@ -601,7 +601,7 @@
     });
 
     // ===================================================================
-    // Text box: maxwidth and late web fonts (design/2026-11-06_text_box_accuracy_plan.md)
+    // Text box: maxwidth and late web fonts (design/done/2026-11-06_text_box_accuracy_plan.md)
     // ===================================================================
     section('Text box');
 
@@ -758,7 +758,7 @@
     });
 
     // ===================================================================
-    // Safe shape render: always save / restore, draw errors (design/2026-11-07_safe_shape_render_plan.md)
+    // Safe shape render: always save / restore, draw errors (design/done/2026-11-07_safe_shape_render_plan.md)
     // ===================================================================
     section('Safe shape render');
 
@@ -1130,7 +1130,7 @@
 
     // A layer's alpha, blend and filter are CSS on its canvas. Set from outside (a property, setAttribute(), a ref)
     // they used to mark the layer dirty, which redrew every shape in it: 3 ms per frame for 1,000 shapes
-    // (design/2026-10-30_framework_compatibility_plan.md §29).
+    // (design/done/2026-10-30_framework_compatibility_plan.md §29).
     test('layer compositing: alpha, blend and filter set from outside update the CSS and keep the pixels', () => {
       const layer = el('fpStatic'), canvas = layer._canvas;
       fpRender(60, 1);
@@ -1236,7 +1236,7 @@
       }));
 
     // ===================================================================
-    // Isolated compositing (design/2026-11-01_isolated_shape_compositing_plan.md)
+    // Isolated compositing (design/done/2026-11-01_isolated_shape_compositing_plan.md)
     // ===================================================================
     // A shape that draws more than once (fill and stroke, arrowheads, text lines) and has mask, blend, filter or a
     // shadow draws into a scratch canvas and is composited onto its layer once, like an SVG group.
@@ -1689,7 +1689,7 @@
       srClear();
     });
 
-    // --- Stage sizing and layer canvas (design/2026-11-04_stage_sizing_plan.md) ---
+    // --- Stage sizing and layer canvas (design/done/2026-11-04_stage_sizing_plan.md) ---
     section('Stage sizing and layer canvas');
 
     // Adds `html` (with a stage) at the end of the page, sizes the stage without waiting for its ResizeObserver
@@ -1833,7 +1833,7 @@
       }));
 
     // ===================================================================
-    // Interaction: hover, press, click, handlers, groups, cursor, idle layers (KILOPIXEL.md "Interaction System").
+    // Interaction: hover, press, click, handlers, groups, cursor, idle layers (KILOPIXEL.md §8, ENGINE.md §8).
     // Pointer events go to the layer canvas, as the browser sends them; hit testing runs at the start of render().
     // ===================================================================
     section('Interaction');
@@ -1971,7 +1971,7 @@
         if (a !== '#f00' || b !== '#f00') throw new Error(`reader before: ${a}, reader added after: ${b}`);
       }));
 
-    // --- Every shape is hit-tested (design/2026-10-30_framework_compatibility_plan.md §23, step 2) ---
+    // --- Every shape is hit-tested (design/done/2026-10-30_framework_compatibility_plan.md §23, step 2) ---
 
     test('interaction: every shape is hit-tested, with or without handlers or readers, also after its reader is removed', () =>
       withStage(ixStage(`
@@ -2161,7 +2161,7 @@
         }
       }));
 
-    // The cursor is only CSS (design/2026-10-30_framework_compatibility_plan.md §23, E1): the default styles give
+    // The cursor is only CSS (design/done/2026-10-30_framework_compatibility_plan.md §23, E1): the default styles give
     // click and press handlers the hand, groups pass it on, page CSS overrides it; reading isPressed gives none
     test('interaction: the hand cursor comes from the default styles for click and press handlers, also on a group; page CSS overrides it', () =>
       withStage(ixStage(`
@@ -2179,7 +2179,7 @@
         if (cursors.join(',') !== 'pointer,none,pointer,default,none' || stage.style.cursor) throw new Error(`cursors: ${cursors}, stage: ${stage.style.cursor}`);
       }));
 
-    // --- Groups: handlers and hover / press states (design/2026-10-30_framework_compatibility_plan.md §23, E10) ---
+    // --- Groups: handlers and hover / press states (design/done/2026-10-30_framework_compatibility_plan.md §23, E10) ---
 
     test('interaction: group handlers run after the shape\'s, inner group before outer; moving between a group\'s shapes fires nothing on it', () => {
       ixLog = [];
@@ -2238,7 +2238,7 @@
       });
     });
 
-    // Layers draw only when something in them changed (KILOPIXEL.md "Dirty-Flag Optimization"): interaction must
+    // Layers draw only when something in them changed (ENGINE.md §5.2): interaction must
     // not wake a layer that has no animations and no readers
     test('interaction: a layer without animations or readers is neither updated nor drawn by pointer moves, presses, clicks and events', () =>
       withStage(`<div style="width: 500px"><pxl-stage alwaysrender><pxl-layer id="ixIdle">
@@ -2280,7 +2280,7 @@
       }));
 
     // The pointer is handled at the start of the frame, so its readers are drawn in the frame of the event
-    // (design/2026-11-17_pointer_frame_order_plan.md). Handled after drawing, they were one frame late.
+    // (design/done/2026-11-17_pointer_frame_order_plan.md). Handled after drawing, they were one frame late.
     test('interaction: readers of the stage pointer are drawn at the new position in the frame of the move, with and without t', () =>
       withStage(`<div style="width: 500px"><pxl-stage id="ixPtrStage" alwaysrender><pxl-layer>
         <pxl-line id="ixPtrLine" x1="ref.ixPtrStage.mouseX" y1="0" x2="500" y2="300" stroke="#000"></pxl-line>
@@ -2412,7 +2412,7 @@
       }));
 
     // ===================================================================
-    // Fixes from the framework review (design/2026-10-30_framework_compatibility_plan.md §19.1, fixed in §19.4 step 1)
+    // Fixes from the framework review (design/done/2026-10-30_framework_compatibility_plan.md §19.1, fixed in §19.4 step 1)
     // ===================================================================
     section('Framework review fixes');
 

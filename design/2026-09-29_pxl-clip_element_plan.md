@@ -373,3 +373,8 @@ No special dirty logic is needed. The clip redraws every frame along with its pa
 
 2. **Should `text.js` and `grid.js` silently skip or emit a `console.warn`** when used as a clip child? A warning on first use would help developers who accidentally put a `<pxl-text>` inside a `<pxl-clip>`. Proposed: **warn once** using a `_warnedClip` flag on the shape instance.
 
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- Status line until 2026-11-20: 🟡 **Proposed** (2026-09-29)

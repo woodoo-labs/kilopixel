@@ -202,7 +202,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     return true;
   }
 
-  // Centripetal Catmull-Rom through points first..last (design/2026-10-23_smooth_polyline_spline_plan.md).
+  // Centripetal Catmull-Rom through points first..last (design/done/2026-10-23_smooth_polyline_spline_plan.md).
   // `k3` is smooth / 3. Arrows imply an open path with >= 2 segments between first and last.
   traceSmooth(ctx, len, closed, k3, hasStart, hasEnd, first, last) {
     const pts = this._flatCache;

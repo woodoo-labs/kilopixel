@@ -1,6 +1,6 @@
 # String Literals in Expressions
 
-- **Status**: ✅ **Implemented** (2026-11-17, §3.1–3.3 built, escapes §3.4 left out; decisions §7, results §8; the docs ideas of §5 stay in TODO §34)
+- **Status**: ✅ **Implemented** (2026-11-17, §3.1–3.3 built, §8; the docs ideas are TODO §34)
 - **Date**: 2026-11-02
 - **Related**: `design/archive/quote-aware-percent-sanitizer.md` (2026-07-13, never implemented; this plan covers its case), `docs/text.html` (`text` attribute: when to quote)
 - **Target Implementation**: `js/compiler.js` (`rewriteExpression`, `compileExpression`, `parseAttributeValue`)
@@ -138,7 +138,7 @@ Split once at the start and build `unquoted`, the code parts joined with spaces 
     }
 
     const isAnimated = pxl.timeDriverRegex.test(unquoted);
-    // toLocal readers are also re-evaluated when their own space moves (design/2026-10-26_tolocal_fix_plan.md)
+    // toLocal readers are also re-evaluated when their own space moves (design/done/2026-10-26_tolocal_fix_plan.md)
     const usesToLocal = /\btoLocal\(/.test(unquoted);
     if (usesToLocal) pxl.checkToLocalProperties(str);
     const source = pxl.rewriteExpression(parts.join(''));

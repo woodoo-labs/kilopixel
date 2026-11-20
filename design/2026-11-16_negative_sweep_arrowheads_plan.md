@@ -1,8 +1,8 @@
 # Negative Sweep and Arrowheads That Shrink on Short Paths
 
-- **Status**: 🟡 **Proposed** (2026-11-16, direction and head behavior chosen with the prototype: the sign of `sweep` is the direction, heads shrink while the path is shorter than them, ellipses measure the arc length; D1–D5 open)
+- **Status**: 🟡 **Proposed** (2026-11-16, direction and head behavior chosen with the prototype; D1–D5 open)
 - **Date**: 2026-11-16
-- **Related**: `design/2026-10-14_unified_arrowhead_geometry_plan.md` (its D9, "insets longer than the path", is replaced by §3.2), `design/archive/2026-09-23_circle_geometry_hardening_and_annular_sector_plan.md` §4.4 (assumed a sweep can swing through zero, `sweep="sin(t) * 90"`), `design/2026-10-15_arrowcap_arrowjoin_plan.md` (arrowhead look), `design/2026-11-15_testing_plan.md` §15 (where this was found), TODO §12 (`docs/arrows.html`, "Rules & Edge Cases")
+- **Related**: `design/done/2026-10-14_unified_arrowhead_geometry_plan.md` (its D9, "insets longer than the path", is replaced by §3.2), `design/archive/2026-09-23_circle_geometry_hardening_and_annular_sector_plan.md` §4.4 (assumed a sweep can swing through zero, `sweep="sin(t) * 90"`), `design/ideas/2026-10-15_arrowcap_arrowjoin_plan.md` (arrowhead look), `design/done/2026-11-15_testing_plan.md` §15 (where this was found), TODO §12 (`docs/arrows.html`, "Rules & Edge Cases")
 - **Target Implementation**: `js/graphics.js` (`pxl.arcEndRadians`), `js/elements/shapes/circle.js`, `js/elements/shapes/ellipse.js`, `js/elements/shape.js` (`resolveArrow`), `js/elements/shapes/line.js`, `js/elements/shapes/polyline.js`, `tests/render.html`, `tests/unit.html`, `.agents/KILOPIXEL.md`, `docs/circle.html`, `docs/ellipse.html`, `docs/arrows.html`
 - **Prototype**: `design/prototypes/2026-11-16_negative_sweep_arrowheads/index.html` (real `<pxl-circle>` / `<pxl-ellipse>` arcs: today's behavior B and the variants A1 / A2 side by side, animated through zero and at fixed sweeps; `?endOnly` for a single arrowhead; A2 for ellipses by arc length and by `r × |sweep|`). It loads `/dist/pxl.min.js`: column B shows today's behavior only until this plan is built; the engine it was made with is commit `7d12daf` (`git show 7d12daf:dist/pxl.js`)
 
@@ -113,3 +113,10 @@ Pages that rely on a negative sweep drawing the long way: none known (to check i
 2. §3.1 direction in `pxl.arcEndRadians()`, `circle.js`, `ellipse.js`; render tests; KILOPIXEL.md and the circle / ellipse docs.
 3. §3.2 / §3.3 shrinking in `resolveArrow()` and the four shapes; render and unit tests; measure the ellipse cost against the frame budget (`examples/benchmark.html` or a bench in the prototype folder).
 4. `docs/arrows.html` rules section (TODO §12).
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
+- Status line until 2026-11-20: 🟡 **Proposed** (2026-11-16, direction and head behavior chosen with the prototype: the sign of `sweep` is the direction, heads shrink while the path is shorter than them, ellipses measure the arc length; D1–D5 open)

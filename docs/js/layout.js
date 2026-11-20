@@ -138,7 +138,7 @@ class DocsSidebar extends HTMLElement {
     const backdrop = this.querySelector('.sidebar-backdrop');
     const sidebar = this.querySelector('.sidebar');
 
-    // Keep the sidebar's scroll position between pages (design/2026-11-11_sidebar_scroll_plan.md).
+    // Keep the sidebar's scroll position between pages (design/done/2026-11-11_sidebar_scroll_plan.md).
     // This runs while the page is parsed, before the first paint, so the list never shows its top first.
     // Storage can be blocked (private windows); then only the active link is kept in view.
     const SCROLL_KEY = 'kilopixel-docs-sidebar';

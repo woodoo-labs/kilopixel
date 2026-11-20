@@ -1,8 +1,8 @@
 # toLocal Fix: Readers in a Moving Space
 
-- **Status**: ✅ **Implemented** (2026-10-26). Tests in §7 pass.
+- **Status**: ✅ **Implemented** (2026-10-26, tests in §7)
 - **Date**: 2026-10-26
-- **Related**: `design/2026-10-25_refs_across_spaces_note.md` (what `toLocal` maps), `design/archive/coordinate_mapping_implementation_plan.md` (original `toLocal` design), `.agents/TODO.md` §25
+- **Related**: `design/ideas/2026-10-25_refs_across_spaces_note.md` (what `toLocal` maps), `design/archive/coordinate_mapping_implementation_plan.md` (original `toLocal` design), `design/ideas/2026-10-25_refs_across_spaces_note.md`
 - **Target Implementation**: `js/compiler.js` (`compileExpression`), `js/engine.js` (`compileAttribute`, new `evaluateToLocalAttributes`), `js/elements/node.js` (constructor, `broadcastGlobalMatrixChange`)
 - **Demo**: `design/prototypes/2026-10-26_tolocal_fix/tolocal_numbers.html`
 - **Tests** (committed): `tests/index.html`, the `toLocal:` tests (10, added 2026-10-26)
@@ -174,7 +174,7 @@ Tests 2–4 run in `design/prototypes/2026-10-26_tolocal_fix/tolocal_fix_tests.h
 ## 8. Docs
 
 - `.agents/KILOPIXEL.md`, Coordinate Mapping → **Reactivity**: readers now also update when their own space moves (walk from the moving container).
-- `design/2026-10-25_refs_across_spaces_note.md`: link this plan; the point form (`toLocal(ref.zig, 'x3')`) builds on the same reactivity.
+- `design/ideas/2026-10-25_refs_across_spaces_note.md`: link this plan; the point form (`toLocal(ref.zig, 'x3')`) builds on the same reactivity.
 - `.agents/TODO.md`: entry for the fix, closed when done.
 - Public docs: nothing to change; `toLocal` simply behaves as documented.
 

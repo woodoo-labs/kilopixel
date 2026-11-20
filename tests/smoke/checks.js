@@ -1,4 +1,4 @@
-// Shared checks of the framework smoke pages (tests/smoke/README.md; design/2026-10-30_framework_compatibility_plan.md
+// Shared checks of the framework smoke pages (tests/smoke/README.md; design/done/2026-10-30_framework_compatibility_plan.md
 // §12, §25). Load after tests/runner.js. Every framework page renders the same scene with its own syntax and registers
 // each instance in window.smoke.instances; registerSceneChecks() registers the same tests for every framework, and the
 // page calls runTests() once both instances are mounted (smokeHelpers.until()).

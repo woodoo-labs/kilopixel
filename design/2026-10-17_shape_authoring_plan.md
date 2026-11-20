@@ -1,8 +1,8 @@
 # Shape Authoring: Derived Attributes, Class Fields & Custom Animation
 
-- **Status**: 🟡 **Proposed** (2026-11-20, §0: custom shapes and isolated compositing; 2026-11-19, §0: handler names and map after W1 of the framework plan; 2026-11-07, brought up to date with the engine, §0; no code changes yet)
+- **Status**: 🟡 **Proposed** (2026-11-20, §0 lists the engine changes since the plan; nothing built)
 - **Date**: 2026-10-17
-- **Related**: `design/2026-10-17_bundle_scope_plan.md` (`pxl.Shape`, implemented), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, introduced `static defaults`), `design/2026-11-07_safe_shape_render_plan.md` (state isolation and error handling for foreign code, implemented), `design/2026-10-30_framework_compatibility_plan.md` (proposes renaming the `on*` handlers, §0), `design/2026-11-12_two_phase_frame_plan.md` (💬; its change-based dirty flags make §3.3 "`draw()` only reads `attributeValues`" a requirement, must keep §4 Pattern B working, and solve §4's "while stopped, the layer keeps redrawing"), `design/2026-10-27_engine_cleanup_inventory_note.md` (code style, §0), `.agents/TODO.md` §20
+- **Related**: `design/done/2026-10-17_bundle_scope_plan.md` (`pxl.Shape`, implemented), `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, introduced `static defaults`), `design/done/2026-11-07_safe_shape_render_plan.md` (state isolation and error handling for foreign code, implemented), `design/done/2026-10-30_framework_compatibility_plan.md` (proposes renaming the `on*` handlers, §0), `design/2026-11-12_two_phase_frame_plan.md` (💬; its change-based dirty flags make §3.3 "`draw()` only reads `attributeValues`" a requirement, must keep §4 Pattern B working, and solve §4's "while stopped, the layer keeps redrawing"), `design/done/2026-10-27_engine_cleanup_inventory_note.md` (code style, §0), `.agents/TODO.md` §20
 - **Target Implementation**: `js/elements/node.js`, `js/elements/shape.js`, `js/elements/shapes/*.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/interaction.js`
 - **Prototype**: `design/prototypes/2026-10-17_shape_authoring/star.js`, `design/prototypes/2026-10-17_shape_authoring/star_test.html` (updated 2026-11-12 for `_ctx` / `_dpr`, 2026-11-20 for `layer.dpr`; all checks pass with today's engine, both lines after the careless star stay at full alpha)
 
@@ -15,13 +15,13 @@ Nothing in this plan was built. The engine changed around it:
 | Change | Effect on this plan |
 |---|---|
 | Bundle scope plan implemented: every class lives on `pxl` (`pxl.Shape`, `pxl.Line = class Line extends pxl.Shape`) | The template in §1 works as written; code examples now use the namespace form (§3.1) |
-| Always save / restore and draw errors implemented (`design/2026-11-07_safe_shape_render_plan.md`) | A careless or failing custom shape can't affect the rest of the layer any more. §7 step 8 (the "Custom Shapes" docs page) is no longer blocked by it. New rule for custom shapes: `drawArrows()` is the last call of `draw()` |
+| Always save / restore and draw errors implemented (`design/done/2026-11-07_safe_shape_render_plan.md`) | A careless or failing custom shape can't affect the rest of the layer any more. §7 step 8 (the "Custom Shapes" docs page) is no longer blocked by it. New rule for custom shapes: `drawArrows()` is the last call of `draw()` |
 | Code style decided 2026-10-27 (`CLAUDE.md`, "Fields in the constructor"): every field an object will ever have is set in its constructor | **Conflicts with §3.2** (class fields instead of constructors). Open: decide which one applies before implementing §3.2 |
 | `_` marks ownership (2026-10-28): `pointCount` → `_pointCount`, `flatCache` → `_flatCache`, and so on; compiled handlers moved into a `handlers` object; `Shape.HANDLER_EVENTS` maps each `on*` attribute to its event | Field names in §3.2 updated; §3.1 can take the handler names from `Shape.HANDLER_EVENTS` |
 | `build.js` refuses top-level `const` / `let` / `class` / `function` | §3.1's former `const EVENT_ATTRIBUTES` replaced (§3.1) |
-| Framework compatibility plan (`design/2026-10-30_framework_compatibility_plan.md`, TODO §30) proposes renaming the `on*` handlers (they collide with the browser's native `onclick` and framework rules) | The names `Shape` appends in §3.1 may change. Open: order of §20 and §30 |
+| Framework compatibility plan (`design/done/2026-10-30_framework_compatibility_plan.md`) proposes renaming the `on*` handlers (they collide with the browser's native `onclick` and framework rules) | The names `Shape` appends in §3.1 may change. Open: order of §20 and §30 |
 | W1 of the framework plan built (2026-11-18 / 2026-11-19, its §23.5–§23.8): the handlers are `pxl-on-click` … `pxl-on-move`, listeners for DOM events; the map is `pxl.HANDLER_EVENTS` (attribute → DOM event type), and `<pxl-group>` observes the same six attributes and has `isHovered` / `isPressed` in its defaults | §3.1 takes the names from `pxl.HANDLER_EVENTS` (example updated) and applies to `Group` as well as `Shape`. The rename order question above is settled |
-| Isolated compositing built (2026-11-20, `design/2026-11-01_isolated_shape_compositing_plan.md` §10): a shape that draws more than once and has `mask`, `blend`, `filter` or a shadow is drawn into a scratch canvas and composited onto the layer in one step. `Shape.needsIsolation()` = `hasCompositingState()` and `drawsMoreThanOnce()`; the base `drawsMoreThanOnce()` returns true | A custom shape works without changes: with compositing state it is always isolated (correct, at most a little slower). One that draws only once can override `drawsMoreThanOnce()` to return false. If `needsIsolation()` / `drawsMoreThanOnce()` become part of a public custom-shape API, the "Custom Shapes" docs page must explain them (§7 step 8) |
+| Isolated compositing built (2026-11-20, `design/done/2026-11-01_isolated_shape_compositing_plan.md` §10): a shape that draws more than once and has `mask`, `blend`, `filter` or a shadow is drawn into a scratch canvas and composited onto the layer in one step. `Shape.needsIsolation()` = `hasCompositingState()` and `drawsMoreThanOnce()`; the base `drawsMoreThanOnce()` returns true | A custom shape works without changes: with compositing state it is always isolated (correct, at most a little slower). One that draws only once can override `drawsMoreThanOnce()` to return false. If `needsIsolation()` / `drawsMoreThanOnce()` become part of a public custom-shape API, the "Custom Shapes" docs page must explain them (§7 step 8) |
 | `CLAUDE.md`: "Kilopixel has no JavaScript API for users" | Public custom shapes would make `attributeValues`, `applyStyle()`, `boundingBox`, `drawArrows()` and `reportError()` a user API. Open: product decision, needed before the "Custom Shapes" docs page, not for §3.1 / §3.3 |
 
 **Still true** (checked 2026-11-07): the attribute lists in §2 (comparison in the built engine), no `draw()` uses `t` as time (§3.3), `pxl.compileAttribute(element, name, value)` has the signature §4 uses. §4 pattern B itself was not run again.
@@ -61,7 +61,7 @@ class Star extends pxl.Shape {
 customElements.define('pxl-star', Star);
 ```
 
-One list of attributes (`defaults`), no `observedAttributes`, no constructor, no Kilopixel-specific registration. User shapes extend `pxl.Shape`, exactly like the built-in shapes (`pxl.Line = class Line extends pxl.Shape`; all classes live on the `pxl` namespace, see `design/2026-10-17_bundle_scope_plan.md`), so the built-ins are the template. Everything else is inherited: expressions, animation, `ref.*`, Rule A, transforms, styling, gradients, hit testing, events, and (since 2026-11-07) a clean canvas state per shape and caught errors.
+One list of attributes (`defaults`), no `observedAttributes`, no constructor, no Kilopixel-specific registration. User shapes extend `pxl.Shape`, exactly like the built-in shapes (`pxl.Line = class Line extends pxl.Shape`; all classes live on the `pxl` namespace, see `design/done/2026-10-17_bundle_scope_plan.md`), so the built-ins are the template. Everything else is inherited: expressions, animation, `ref.*`, Rule A, transforms, styling, gradients, hit testing, events, and (since 2026-11-07) a clean canvas state per shape and caught errors.
 
 **Prototype result (2026-10-17):** the same `Star` (with today's extra `observedAttributes` line) already works with the current engine, loaded as a separate file: drawing, gradient fill, `rotate="t * 30"`, reactive `points="ref.pts.value"`, Rule A defaults for its own attributes, hit testing and `onclick`. No engine change was needed; this plan only removes the boilerplate.
 
@@ -117,7 +117,7 @@ The three differences from §2 are resolved like this:
    }
    ```
    `attributeExpressions.isHovered` / `.isPressed` disappear; nothing reads them.
-3. **Polyline `points`** gets a default, `points: ''`. Polyline's own `attributeChangedCallback` keeps intercepting it (coordinates are compiled into `p0…pN`) and additionally stores the raw string, so `ref.poly.points` returns what was set instead of a stale default (2026-11-19: Polyline intercepts `points` in `setValue()` now, the one path for attributes and properties, and its `points` property returns the evaluated coordinates; `design/2026-10-30_framework_compatibility_plan.md` §24):
+3. **Polyline `points`** gets a default, `points: ''`. Polyline's own `attributeChangedCallback` keeps intercepting it (coordinates are compiled into `p0…pN`) and additionally stores the raw string, so `ref.poly.points` returns what was set instead of a stale default (2026-11-19: Polyline intercepts `points` in `setValue()` now, the one path for attributes and properties, and its `points` property returns the evaluated coordinates; `design/done/2026-10-30_framework_compatibility_plan.md` §24):
    ```javascript
    this.attributeValues.points = newValue ?? '';
    ```
@@ -214,7 +214,7 @@ Verified 2026-10-17 (frames driven by hand; not run again after the 2026-11-07 r
 | Lowercase check | ✅ one `console.warn` per class at `define()` | Silent mismatch is the most likely user mistake; costs nothing per frame |
 | Class fields | ✅ everywhere except Layer (2026-10-17; conflicts with the code style rule of 2026-10-27, open, §0) | No `super()` boilerplate; Layer's DOM setup stays readable in a constructor |
 | `draw(ctx, u)` | ✅ remove `t` | Documents "draw only reads values"; avoids hit-testing bugs |
-| `pxl.Shape` | ✅ done (bundle scope plan, implemented) | All engine classes live on the `pxl` namespace; global class names break user scripts (`design/2026-10-17_bundle_scope_plan.md`) |
+| `pxl.Shape` | ✅ done (bundle scope plan, implemented) | All engine classes live on the `pxl` namespace; global class names break user scripts (`design/done/2026-10-17_bundle_scope_plan.md`) |
 | `pxl.defineShape()`, `this.animate()` | ⏸️ later | Not needed for the template |
 | Hiding `u` from shape authors | ⏸️ later | Possible (scale the context while building the path), but a separate API decision |
 
@@ -238,7 +238,7 @@ Verified 2026-10-17 (frames driven by hand; not run again after the 2026-11-07 r
 5. `js/interaction.js` — `el.draw(ctx, this.stage.unit)`.
 6. `node build.js`.
 7. `.agents/KILOPIXEL.md` — element reference (observed attributes = default keys), PxlNode section, shape authoring rules (lowercase keys, `draw(ctx, u)` only reads values, class fields), custom animation patterns A / B.
-8. Later: a docs page "Custom Shapes" with the Star template. Always save / restore and error handling, which it needed, are built (2026-11-07). Still open before it: whether custom shapes become a public API (§0), and the `on*` handler names (TODO §30).
+8. Later: a docs page "Custom Shapes" with the Star template. Always save / restore and error handling, which it needed, are built (2026-11-07). Still open before it: whether custom shapes become a public API (§0), and the `on*` handler names (renamed to `pxl-on-*`, §0).
 
 ---
 
@@ -256,3 +256,10 @@ Verified 2026-10-17 (frames driven by hand; not run again after the 2026-11-07 r
 | 8 | Rule A unit tests (`design/prototypes/2026-10-17_shape_authoring/rule_a_unit.html`) | 20 / 20 still pass |
 
 **Regression:** `design/prototypes/2026-10-17_shape_authoring/rule_a_regress.html` (old vs. new bundle on all docs / examples pages): expected differences only in key order (`isHovered` / `isPressed`) and the new Polyline `points` key; no new console errors.
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
+- Status line until 2026-11-20: 🟡 **Proposed** (2026-11-20, §0: custom shapes and isolated compositing; 2026-11-19, §0: handler names and map after W1 of the framework plan; 2026-11-07, brought up to date with the engine, §0; no code changes yet)

@@ -1,8 +1,8 @@
 # Stage Sizing and Layer Canvas: Overridable Defaults, Fallback Width, Canvas in a Shadow Root
 
-- **Status**: ✅ **Implemented** (2026-11-15; includes workstream W2 of the framework plan; the 300 px fallback width applies only to stages measured at 0 width, §4.2; results in §10)
+- **Status**: ✅ **Implemented** (2026-11-15, results in §10)
 - **Date**: 2026-11-04 (extended 2026-11-14, built 2026-11-15)
-- **Related**: `design/2026-10-30_framework_compatibility_plan.md` (W2 §5, C9–C11: this plan builds that workstream), `design/2026-10-17_bundle_scope_plan.md` (classic script in `<head>`), `docs/installation.html` (script in `<head>` since 5891224)
+- **Related**: `design/done/2026-10-30_framework_compatibility_plan.md` (W2 §5, C9–C11: this plan builds that workstream), `design/done/2026-10-17_bundle_scope_plan.md` (classic script in `<head>`), `docs/installation.html` (script in `<head>` since 5891224)
 - **Target Implementation**: `js/elements/stage.js` (default styles), `js/elements/layer.js` (shadow root), `js/elements/variable.js` (`display: none`), `tests/index.html`, `docs/installation.html`, `.agents/KILOPIXEL.md` (Stage, Layer, Variable)
 - **Prototypes** in `design/prototypes/2026-11-04_stage_sizing/`:
   - `stage_width_check.html` (today, eight layouts);
@@ -260,14 +260,14 @@ In `tests/index.html` (IDs from the framework plan §11 where they exist):
 3. `node build.js`, update the sizes (CLAUDE.md "File size after a build").
 4. Tests (§7); `tests/index.html` all passing.
 5. Check the examples in §5, all docs pages and the console.
-6. Docs (§6) and KILOPIXEL.md; the framework plan's W2 and TODO §30 marked as built.
+6. Docs (§6) and KILOPIXEL.md; the framework plan's W2 marked as built.
 
 Commit: `refactor(engine): default styles in a cascade layer, 300 px fallback width, layer canvas in a shadow root`.
 
 ## 9. Out of Scope
 
 - **Explicit CSS height:** with `width` and `height` both set, `aspect-ratio` is ignored and the box no longer matches `ratio`, while `ref.<stage>.height` still reports `1000 / ratio`. It happens today already in `test40`–`42` and `test48`–`52` (`height: 100%` beside the inline `width: 100%`); §5 adds `test15`, `21`, `22`, `23`, `28` and `47` (`100vw` / `100vh`). A fix would compute `height` from `clientHeight / unit`; separate TODO entry if wanted.
-- **The rest of the framework plan's phase 1** (DOM events, `pxl-on-*` handler names, observing `id`, the cache bound): stays in `design/2026-10-30_framework_compatibility_plan.md`.
+- **The rest of the framework plan's phase 1** (DOM events, `pxl-on-*` handler names, observing `id`, the cache bound): stays in `design/done/2026-10-30_framework_compatibility_plan.md`.
 
 ## 10. Built 2026-11-15
 

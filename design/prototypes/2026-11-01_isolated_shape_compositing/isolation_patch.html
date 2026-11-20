@@ -14,7 +14,7 @@
 <div class="box" id="checkBox"></div>
 <div class="box" id="benchBox"></div>
 <script>
-// Prototype of design/2026-11-01_isolated_shape_compositing_plan.md (2026-11-20) as a patch over today's engine:
+// Prototype of design/done/2026-11-01_isolated_shape_compositing_plan.md (2026-11-20) as a patch over today's engine:
 // Shape.render() draws a shape with compositing state and more than one draw call into a shared scratch canvas,
 // then composites it once onto the layer. window.ISO: 'direct' (today), 'full' (scratch of the layer's size),
 // 'bbox' (only the shape's device box), 'force' (full, also without compositing state: for the transform check).

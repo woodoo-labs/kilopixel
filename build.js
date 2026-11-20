@@ -44,7 +44,7 @@ function checkSources(sources, fileList = files) {
   const problems = [];
 
   // Only `pxl` may be global: a top-level declaration would leak into every script on the page
-  // (design/2026-10-17_bundle_scope_plan.md). Define it on pxl (public) or pxl._ (internal) instead.
+  // (design/done/2026-10-17_bundle_scope_plan.md). Define it on pxl (public) or pxl._ (internal) instead.
   const code = fileList.map(f => sources[f] + '\n').join('');
   const leak = code.match(/^(?:async\s+)?(?:class|const|let|var|function\*?)\s+([A-Za-z_$][\w$]*)/m);
   if (leak) problems.push(`top-level declaration "${leak[1]}" would become a global name. Define it on pxl instead.`);
@@ -78,7 +78,7 @@ function checkSources(sources, fileList = files) {
 }
 
 // The unminified bundle (dist/pxl.js): the sources in build order, with the version injected, inside a function that
-// stops early in two cases (design/2026-10-30_framework_compatibility_plan.md §19.2, W8):
+// stops early in two cases (design/done/2026-10-30_framework_compatibility_plan.md §19.2, W8):
 // - no browser (an import during server-side rendering in Next.js, Nuxt, SvelteKit, Astro): nothing to define;
 // - <pxl-stage> already defined (the script loaded twice, e.g. a script tag and an import): a second copy would
 //   replace window.pxl, and the first copy's elements would lose their registry.

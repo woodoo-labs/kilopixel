@@ -1,8 +1,8 @@
 # The `space` Attribute: Draw an Element in Another Element's Space
 
-- **Status**: 🟡 **Proposed** (2026-11-13: the draw-order rule of §3.5 is gone with two-phase frame step 1; 2026-10-30, no code changes yet)
+- **Status**: 🟡 **Proposed** (2026-11-13, §3.5 is obsolete since two-phase step 1; nothing built)
 - **Date**: 2026-10-30
-- **Related**: `design/2026-10-29_tolocal_decomposition_plan.md` (§7 "Later idea", the clone rule this replaces for exact copies), `design/2026-10-25_refs_across_spaces_note.md` (hub for refs across spaces; §4 anchors), `design/2026-10-26_tolocal_fix_plan.md` (reactivity walk), `design/2026-11-07_safe_shape_render_plan.md` (same render path, §10), `design/2026-11-12_two_phase_frame_plan.md` (💬; its step 1, built 2026-11-13, removed the one-frame lag of §3.5 here)
+- **Related**: `design/done/2026-10-29_tolocal_decomposition_plan.md` (§7 "Later idea", the clone rule this replaces for exact copies), `design/ideas/2026-10-25_refs_across_spaces_note.md` (hub for refs across spaces; §4 anchors), `design/done/2026-10-26_tolocal_fix_plan.md` (reactivity walk), `design/done/2026-11-07_safe_shape_render_plan.md` (same render path, §10), `design/2026-11-12_two_phase_frame_plan.md` (💬; its step 1, built 2026-11-13, removed the one-frame lag of §3.5 here)
 - **Target Implementation**: `js/elements/node.js` (`getParentMatrix`, `getGlobalMatrix`, space resolution), `js/graphics.js` (`applyTransformState`), `js/matrix.js` (`pxl.toLocal` uses the parent matrix), `js/elements/shape.js` and `group.js` (attribute, state check), `js/engine.js` (spatial key, reactivity); hit testing in `js/interaction.js` needs no change (§3.2)
 - **Demo**: `examples/test53.html` (the corner helpers become one attribute each)
 
@@ -211,8 +211,8 @@ No change in the hot path for pages that don't use `space`.
 ## 8. Docs
 
 - `.agents/KILOPIXEL.md`: attribute tables for shapes and groups (`space`), Coordinate System (parent space can be another element's frame), Coordinate Mapping (`getParentMatrix`, clone rule vs. `space`), AI guide (when to use `space` vs. toLocal).
-- `design/2026-10-29_tolocal_decomposition_plan.md` §7: link to this plan.
-- `design/2026-10-25_refs_across_spaces_note.md`: §0 row, §4 pattern "draw in the target's space".
+- `design/done/2026-10-29_tolocal_decomposition_plan.md` §7: link to this plan.
+- `design/ideas/2026-10-25_refs_across_spaces_note.md`: §0 row, §4 pattern "draw in the target's space".
 - `.agents/TODO.md`: entry.
 - Public docs: the planned `mapping.html` (Coordinate Mapping) gets a section "Drawing in another element's space"; until then nothing.
 - `examples/test53.html`: corner helpers with `space`.
@@ -227,8 +227,15 @@ No change in the hot path for pages that don't use `space`.
 ## 10. Steps
 
 1. Agree on this plan and the open decisions (§9).
-   - **Implementation order:** implement always save / restore (`design/2026-11-07_safe_shape_render_plan.md`, built 2026-11-07) first if possible. It removes the `hasStateChanges` check from `Shape.render()`, so `space` needs no new term there; the shape is always inside `save()` / `restore()`, and `space` only adds its extra transform in `applyTransformState` (§3.2). If `space` comes first, add `spaceNode !== null` to `hasStateChanges` in `shape.js` and `group.js`; always save / restore later removes it again from `shape.js`.
+   - **Implementation order:** implement always save / restore (`design/done/2026-11-07_safe_shape_render_plan.md`, built 2026-11-07) first if possible. It removes the `hasStateChanges` check from `Shape.render()`, so `space` needs no new term there; the shape is always inside `save()` / `restore()`, and `space` only adds its extra transform in `applyTransformState` (§3.2). If `space` comes first, add `spaceNode !== null` to `hasStateChanges` in `shape.js` and `group.js`; always save / restore later removes it again from `shape.js`.
 2. Implement §3 (node.js, graphics.js, matrix.js, shape.js / group.js, engine.js), `node build.js`, update the `pxl.min.js` size if it changes.
 3. Add the tests (§7); all pass, console clean.
 4. Simplify the test53 corner helpers; update the docs (§8).
 5. Review the diff, then commit (`feat(engine): space attribute draws an element in another element's space`).
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
+- Status line until 2026-11-20: 🟡 **Proposed** (2026-11-13: the draw-order rule of §3.5 is gone with two-phase frame step 1; 2026-10-30, no code changes yet)

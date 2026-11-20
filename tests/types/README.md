@@ -1,7 +1,7 @@
 # TypeScript Definition Tests
 
 Checks the generated definitions in `dist/types/` (made by `tools/build_types.js` during `node build.js`) against the
-real types of each framework. Plan: `design/2026-10-30_framework_compatibility_plan.md` §27.
+real types of each framework. Plan: `design/done/2026-10-30_framework_compatibility_plan.md` §27.
 
 ## Setup, Once per Laptop
 

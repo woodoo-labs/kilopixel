@@ -1,4 +1,4 @@
-// Prototype for design/2026-11-15_testing_plan.md: runs the engine tests and sweeps all docs and example pages
+// Prototype for design/done/2026-11-15_testing_plan.md: runs the engine tests and sweeps all docs and example pages
 // in headless Chrome, without npm packages. Needs the dev server (node tools/serve.js) and a local Chrome or Edge.
 // Usage: node design/prototypes/2026-11-15_testing/headless_probe.js
 const { spawnSync } = require('child_process');

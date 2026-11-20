@@ -1,8 +1,8 @@
 # Polyline Optimization: Points Parser, Point Storage & Edge Cases
 
-- **Status**: 🟡 **Proposed** (low priority; 2026-11-19: a `setPoints()` exists now, built with the `points` property of `design/2026-10-30_framework_compatibility_plan.md` §24: arrays read in place, keys and buffer kept when the count stays, `resizePoints()` replaces `clearPoints()`; phase 2 below builds on it; 2026-10-19: measured gains are small, §2.3; the `ref.<id>.pN` fix is implemented, §2.3.4; priorities below)
+- **Status**: 🟡 **Proposed** (2026-11-19, the real bugs are fixed, §1 "Priorities"; what is left gains little)
 - **Date**: 2026-10-18
-- **Related**: `design/archive/performance-analysis.md` (Issue #6, point key lookup), `design/2026-10-17_shape_authoring_plan.md` (Polyline `points: ''`, class fields, `draw(ctx, u)`), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A), `design/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming), `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` (stroke gradients on flat shapes, implemented), `design/2026-10-23_smooth_polyline_spline_plan.md` (spline quality)
+- **Related**: `design/archive/performance-analysis.md` (Issue #6, point key lookup), `design/2026-10-17_shape_authoring_plan.md` (Polyline `points: ''`, class fields, `draw(ctx, u)`), `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A), `design/done/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming), `design/done/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` (stroke gradients on flat shapes, implemented), `design/done/2026-10-23_smooth_polyline_spline_plan.md` (spline quality)
 - **Target Implementation**: `js/graphics.js` (parser), `js/elements/shapes/polyline.js`, `.agents/KILOPIXEL.md`
 - **Test Scripts**: `design/prototypes/2026-10-18_polyline_optimization/points_parser_cases.js` (today's parser), `design/prototypes/2026-10-18_polyline_optimization/points_parser_sketch.js` (§3.3 sketch)
 
@@ -28,7 +28,7 @@ All existing docs and examples work. Nothing here blocks the polyline docs page.
 |---|---|---|---|
 | `setAttribute('points', …)` updates `ref.<id>.pN` readers | ✅ | 1 line + key handling | ✅ **done** (2026-10-19) |
 | Arrowhead points right when the first or last two points are identical (§5 #7) | ✅ visual, rare input | ~10 lines | ✅ **done** (2026-10-24, smooth spline plan §5.3) |
-| All X (or all Y) non-finite + gradient → exception in `createGradient` (§5 #5) | ✅ very rare | — | ✅ **done** (2026-11-07, `design/2026-11-07_safe_shape_render_plan.md`: the polyline is skipped with one warning, the frame goes on); since the next row it can't happen any more |
+| All X (or all Y) non-finite + gradient → exception in `createGradient` (§5 #5) | ✅ very rare | — | ✅ **done** (2026-11-07, `design/done/2026-11-07_safe_shape_render_plan.md`: the polyline is skipped with one warning, the frame goes on); since the next row it can't happen any more |
 | Non-finite coordinate → polyline not drawn (§5 #4), taken out of phase 2 | ✅ visual (dropped vertex, broken smooth curve) | 4 lines | ✅ **done** (2026-11-07): checked in the existing flattening loop in `draw()`, one test |
 | Phase 1: warnings for typos in `points` (§3) | no, developer experience | ~30 lines | low |
 | Phase 2: point storage (§4) | no | large, touches reactivity | deferred: ≈ 8 µs per frame for 500 points |
@@ -197,7 +197,7 @@ Taking coordinates out of `compileAttribute` means the polyline must do itself w
 | Engine behavior | Where | Polyline must… |
 |---|---|---|
 | Parse + classify (number / time function / reactive function) | `pxl.compileAttribute` → `pxl.parseAttributeValue` | call `pxl.parseAttributeValue(part)` and sort into `_animIdx` / `_reactIdx` |
-| Register `isHovered` / `isPressed` readers (`sticky` for time-dependent) | `pxl.trackInteractiveRefs` in `compileAttribute` | call `pxl.trackInteractiveRefs(part, isTimeDependent)` per coordinate (obsolete since 2026-11-18: every shape is hit-tested and nothing is registered, `design/2026-10-30_framework_compatibility_plan.md` §23.7) |
+| Register `isHovered` / `isPressed` readers (`sticky` for time-dependent) | `pxl.trackInteractiveRefs` in `compileAttribute` | call `pxl.trackInteractiveRefs(part, isTimeDependent)` per coordinate (obsolete since 2026-11-18: every shape is hit-tested and nothing is registered, `design/done/2026-10-30_framework_compatibility_plan.md` §23.7) |
 | Subscribe reactive functions to `ref.*` | `compileAttribute` | `pxl.subscribeToVariable(dep, this)` per dependency |
 | Evaluate reactive functions only when connected | `compileAttribute`, `PxlNode.connectedCallback` | same in `setPoints()` and `connectedCallback()` |
 | Restore subscriptions after a DOM move | `pxl.restoreVariableSubscriptions` (only scans `reactiveAttributeKeys`) | re-subscribe point dependencies in `connectedCallback()` |
@@ -288,7 +288,7 @@ Behavior spec for phase 1 + 2. "Today" is verified in code or with the test scri
 | 2 | `points` removed or bare | works by accident (`"null;"` has no comma) | explicit: no points, `ref.poly.points === ''` |
 | 3 | Malformed string (§2.4) | silent loss or wrong points | §3.1: rejected or point skipped, one warning |
 | 4 | Non-finite coordinate: failed compile, non-numeric string, `ref.x.value` before `x` connects (`undefined`), division by zero | ✅ 2026-11-07: **polyline not drawn and not hittable** until all coordinates are finite; no warning. Checked with `probe += value * 0` in the flattening loop of `draw()`. Before: the canvas silently dropped that vertex; smooth: neighbouring segments vanished | same; phase 2 moves the check into its geometry cache (`_isFinite`, §4.2) |
-| 5 | All X (or all Y) non-finite **and** a gradient fill/stroke | bounding box `±Infinity` → gradient arguments `NaN` → `createLinearGradient` etc. **throw** (WebIDL `double`). Since 2026-11-07 it can't happen: `draw()` returns before `applyStyle` (#4). Any other gradient error is caught by `design/2026-11-07_safe_shape_render_plan.md`; before, the exception left `stage.render()` | same |
+| 5 | All X (or all Y) non-finite **and** a gradient fill/stroke | bounding box `±Infinity` → gradient arguments `NaN` → `createLinearGradient` etc. **throw** (WebIDL `double`). Since 2026-11-07 it can't happen: `draw()` returns before `applyStyle` (#4). Any other gradient error is caught by `design/done/2026-11-07_safe_shape_render_plan.md`; before, the exception left `stage.render()` | same |
 | 6 | Expression that throws at runtime (`ref.a.value.b` with `value` undefined) | exception in `evaluateAnimations` | unchanged — engine-wide issue for all attributes, out of scope |
 | 7 | Two identical consecutive end points + arrowhead | straight: `aimArrow` gets a zero vector → falls back to direction `(1, 0)`, head points right; smooth: chord 0 → `len / chord = Infinity` → whole first segment trimmed, same wrong direction | straight: walk inward to the first distinct point for the direction; if all points are identical, no arrowheads. Smooth: direction from the first distinct point, no trim on a zero-length end segment. Verify visually |
 | 8 | Duplicate points inside a **smooth** polyline | Catmull-Rom makes a cusp / small loop | ✅ 2026-10-24: a duplicate point makes a corner (smooth spline plan §4.1); document it as a feature |
@@ -300,9 +300,9 @@ Behavior spec for phase 1 + 2. "Today" is verified in code or with the test scri
 | 14 | `mode="relative"` + `closed` | closes to the first (absolute) point | same; document |
 | 15 | Arrowheads on `closed` | ignored | same |
 | 16 | Arrow inset longer than the first/last segment (> 2 points) | inset clamped to that segment; head may overlap the next segment | same (documented in arrows plan) |
-| 17 | All points identical / flat polyline + linear gradient at 90° | zero-size gradient paints nothing | fixed 2026-11-05: the stroke gradient spans at least `strokewidth` (`design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`) |
+| 17 | All points identical / flat polyline + linear gradient at 90° | zero-size gradient paints nothing | fixed 2026-11-05: the stroke gradient spans at least `strokewidth` (`design/done/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`) |
 | 18 | `points` changed every frame by JavaScript | reparse + recompile + reallocate + `delete` (dictionary mode) | reparse + recompile; buffers reused if the count is unchanged; no `delete` |
-| 19 | Many distinct expression strings over time (streamed `points` with embedded numbers) | `pxl.staticCache` / `pxl.animationCache` grow without limit | engine-wide compiler cache issue, out of scope here; plain numbers never reach the cache. Since 2026-11-16 each cache keeps at most 2,000 entries (`pxl.COMPILE_CACHE_LIMIT`, `design/2026-10-30_framework_compatibility_plan.md` §20) |
+| 19 | Many distinct expression strings over time (streamed `points` with embedded numbers) | `pxl.staticCache` / `pxl.animationCache` grow without limit | engine-wide compiler cache issue, out of scope here; plain numbers never reach the cache. Since 2026-11-16 each cache keeps at most 2,000 entries (`pxl.COMPILE_CACHE_LIMIT`, `design/done/2026-10-30_framework_compatibility_plan.md` §20) |
 | 20 | `points` set before the element connects; polyline moved to another layer | works via `compileAttribute` / `restoreVariableSubscriptions` | works via `setPoints` / `connectedCallback` override (§4.3) |
 | 21 | Animated points + `hidden` | all coordinates evaluated every frame | point evaluation skipped while hidden |
 | 22 | Same `points` string on two polylines (benchmark `nebula` + `glow`) | compiled functions shared via the compiler cache, separate values | same |
@@ -391,3 +391,10 @@ Build the path once per (`u`, points, `smooth`, `closed`, arrows) and reuse it. 
 4. `.agents/KILOPIXEL.md` — Polyline section (points syntax rules, no `p0…pN`, geometry cache, edge cases), parser line (parentheses-aware, warns on malformed points), Shape defaults list. `design/archive/performance-analysis.md` — mark Issue #6 resolved.
 5. Later: the polyline docs page documents the points syntax (expressions, ternaries, `;` and `,`), `closed` without repeating the first point, and duplicate points with `smooth`.
 6. Coordinate with the shape-authoring plan: `points: ''` is already in `defaults` here; constructor fields become class fields when that plan lands.
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
+- Status line until 2026-11-20: 🟡 **Proposed** (low priority; 2026-11-19: a `setPoints()` exists now, built with the `points` property of `design/done/2026-10-30_framework_compatibility_plan.md` §24: arrays read in place, keys and buffer kept when the count stays, `resizePoints()` replaces `clearPoints()`; phase 2 below builds on it; 2026-10-19: measured gains are small, §2.3; the `ref.<id>.pN` fix is implemented, §2.3.4; priorities below)

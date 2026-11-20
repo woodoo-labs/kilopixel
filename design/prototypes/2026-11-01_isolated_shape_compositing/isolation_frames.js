@@ -1,4 +1,4 @@
-// Measured 2026-11-20 for design/2026-11-01_isolated_shape_compositing_plan.md §3.4 and §4: the isolation patch
+// Measured 2026-11-20 for design/done/2026-11-01_isolated_shape_compositing_plan.md §3.4 and §4: the isolation patch
 // (isolation_patch.html) in real frames. Prints the transform check, then fps and CPU time per frame of
 // Stage.render() for each mode (direct, full scratch canvas, bounding box) with n animated masked ellipses.
 // Usage: node design/prototypes/2026-11-01_isolated_shape_compositing/isolation_frames.js [headful|headless]

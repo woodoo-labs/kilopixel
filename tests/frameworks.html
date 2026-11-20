@@ -22,7 +22,7 @@
   <main class="docs-content">
     <div class="docs-inner">
       <h1>Framework Tests</h1>
-      <p>Level 4 of <code>design/2026-11-15_testing_plan.md</code>: the DOM contract that frameworks rely on (<code>design/2026-10-30_framework_compatibility_plan.md</code> §2, §11), tested with plain DOM calls and no framework. Each test does what React, Vue, Svelte, Solid, Angular, Lit, Alpine or htmx do to an element: create it detached, set attributes or properties, listen to events, insert, move and remove it. Tests marked "known" are features that are not built yet; there are none at the moment. The events (W1, plan §23.8) and the properties (W3, plan §24) are built. Run with <code>node tools/run_tests.js --tests</code>, or here via the dev server (<code>?grep=</code> for a subset).</p>
+      <p>Level 4 of <code>design/done/2026-11-15_testing_plan.md</code>: the DOM contract that frameworks rely on (<code>design/done/2026-10-30_framework_compatibility_plan.md</code> §2, §11), tested with plain DOM calls and no framework. Each test does what React, Vue, Svelte, Solid, Angular, Lit, Alpine or htmx do to an element: create it detached, set attributes or properties, listen to events, insert, move and remove it. Tests marked "known" are features that are not built yet; there are none at the moment. The events (W1, plan §23.8) and the properties (W3, plan §24) are built. Run with <code>node tools/run_tests.js --tests</code>, or here via the dev server (<code>?grep=</code> for a subset).</p>
       <p>Covered elsewhere, not repeated here: an <code>id</code> set, renamed or removed after insertion (T-C2, T-C2b), a second copy of the script, text children of shapes (C17), moves between layers, into groups and to another stage, a stage inserted again, <code>layer.innerHTML</code> (T-M3), the stage styles (T-S1, T-S2), <code>mouseX</code> across the layer's shadow root (T-E5) and its light DOM after insertion are in <code>tests/index.html</code>; empty and removed values of every attribute (T-C4) in <code>tests/unit.html</code>; the bounded expression caches (T-K1) in <code>tests/scaling.html</code>; the import without a window (SSR) in the build checks (<code>tools/check_build.js</code>). This page imitates frameworks; Kilopixel in real frameworks (React, Vue, Tailwind) is tested in <code>tests/smoke/</code> (<code>node tools/run_tests.js --smoke</code>, needs internet).</p>
       <p id="summary" class="test-summary">Running…</p>
       <table class="test-table"><tbody id="results"></tbody></table>
@@ -562,7 +562,7 @@
       if (wrong.length) throw new Error(wrong.join(', '));
     });
 
-    // Hover events come from process() at the start of the frame (design/2026-11-17_pointer_frame_order_plan.md), so
+    // Hover events come from process() at the start of the frame (design/done/2026-11-17_pointer_frame_order_plan.md), so
     // a listener's change is drawn in the frame of the event
     test('T-E7: a listener that changes another shape during dispatch causes no error; the change is drawn in the same frame (W1)', () =>
       withStage(oneLayer(`${CIRCLE('fwChanger')}<pxl-rect id="fwChanged" x="50" y="50" w="60" h="60" fill="#00f"></pxl-rect>`), (stage) => {

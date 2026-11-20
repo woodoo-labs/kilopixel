@@ -1,4 +1,4 @@
-// Build checks (design/2026-11-15_testing_plan.md, step 6), no dependencies:
+// Build checks (design/done/2026-11-15_testing_plan.md, step 6), no dependencies:
 // - the checks build.js runs before building (top-level declarations, trailing whitespace, the underscore rule)
 //   refuse what they should, tested with small examples kept in memory;
 // - the committed build output matches the sources (catches a forgotten `node build.js`, e.g. on the other laptop);
@@ -124,7 +124,7 @@ check('the starter kit zip contains the current pxl.min.js and index.html', () =
   if (wrong.length > 0) throw new Error(`${wrong.join('; ')} (run node build.js and commit the zip)`);
 });
 
-// --- TypeScript definitions (design/2026-10-30_framework_compatibility_plan.md §27) ---
+// --- TypeScript definitions (design/done/2026-10-30_framework_compatibility_plan.md §27) ---
 
 // build.js generates them from the bundle; they must match the current engine in dist/types/ and in the download
 check('the TypeScript definitions in dist/types/ and docs/download/types/ match the engine', () => {

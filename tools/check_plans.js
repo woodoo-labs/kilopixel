@@ -21,15 +21,19 @@ const NAME = /^\d{4}-\d{2}-\d{2}_[a-z0-9_-]+_(plan|note)\.md$/;
 // line dates the implementation before the rule are exempt: their builds are in git and KILOPIXEL.md.
 const BUILT_RULE_DATE = '2026-11-21';
 const BUILT_HEADING = /^##+ .*\bBuilt\b/m;
+const STATUS_MAX = 200; // characters after "**Status**: "
+const TODO_ITEM_MAX = 800; // characters per TODO item, heading included
 
-const planFiles = [
-  ...fs.readdirSync(path.join(root, 'design')).filter(f => f.endsWith('.md')).map(f => `design/${f}`),
-  ...fs.readdirSync(path.join(root, 'design/archive')).filter(f => f.endsWith('.md')).map(f => `design/archive/${f}`)
-];
+// design/: active plans (each with a TODO item); design/ideas/: parked ideas (open, no TODO item);
+// design/done/: implemented plans that still describe the engine; design/archive/: superseded, dropped, replaced
+const FOLDERS = ['design', 'design/ideas', 'design/done', 'design/archive'];
+const planFiles = FOLDERS.flatMap(dir => fs.readdirSync(path.join(root, dir)).filter(f => f.endsWith('.md')).map(f => `${dir}/${f}`));
+const folderOf = (file) => path.dirname(file);
 
 const planStatus = {}; // file → 'open' | 'closed'
 for (const file of planFiles) {
   const archived = file.startsWith('design/archive/');
+  const folder = folderOf(file);
   const header = read(file).split('\n').slice(0, 15);
   const lines = header.map((text, i) => ({ text, n: i + 1 })).filter(l => l.text.includes('**Status**'));
 
@@ -44,6 +48,11 @@ for (const file of planFiles) {
     continue;
   }
   planStatus[file] = OPEN.includes(word) ? 'open' : 'closed';
+  // History goes into the plan's "## Log", not into the status line (archived plans are history and exempt)
+  const statusText = text.replace(/^- \*\*Status\*\*: /, '');
+  if (!archived && statusText.length > STATUS_MAX) {
+    report(file, n, `status line has ${statusText.length} characters (at most ${STATUS_MAX}): move the history into "## Log"`);
+  }
 
   if (word === '⚪ **Superseded by**') {
     const target = (text.match(/Superseded by\*\* `([^`]+)`/) || [])[1];
@@ -57,7 +66,12 @@ for (const file of planFiles) {
     }
   }
   if (word.startsWith('⚪') && !archived) report(file, n, 'superseded or dropped plans belong in design/archive/');
-  if (OPEN.includes(word) && archived) report(file, n, 'open plans belong in design/, not in the archive');
+  if (word === '✅ **Implemented**' && (folder === 'design' || folder === 'design/ideas')) {
+    report(file, n, 'implemented plans belong in design/done/');
+  }
+  if (OPEN.includes(word) && (archived || folder === 'design/done')) {
+    report(file, n, 'open plans belong in design/ (or design/ideas/ when parked)');
+  }
   if (!archived && !NAME.test(path.basename(file))) report(file, null, 'name should be YYYY-MM-DD_<topic>_plan.md (or _note.md)');
 }
 
@@ -84,6 +98,8 @@ for (const [num, text] of Object.entries(items)) {
   const status = text.match(/\*\*Status\*\*: (.*)/);
   if (!status) report(TODO, null, `§${num} has no status line`);
   else if (!OPEN.some(w => status[1].startsWith(w))) report(TODO, null, `§${num}: status must start with 💬, 🟡 or 🟢 (open work only)`);
+  const length = text.trimEnd().length;
+  if (length > TODO_ITEM_MAX) report(TODO, null, `§${num} has ${length} characters (at most ${TODO_ITEM_MAX}): the details belong in the plan`);
 }
 
 const numbers = Object.keys(items).map(Number);
@@ -91,8 +107,9 @@ const nextFree = Number((todo.match(/next: §(\d+)/) || [])[1]);
 if (!nextFree) report(TODO, null, 'header has no "next: §N"');
 else if (numbers.some(n => n >= nextFree)) report(TODO, null, `"next: §${nextFree}" is not above the highest item (§${Math.max(...numbers)})`);
 
+// Active plans have a TODO item; parked ideas (design/ideas/) don't need one
 for (const [file, state] of Object.entries(planStatus)) {
-  if (state === 'open' && !todo.includes(file)) report(file, null, 'open plan without a TODO item');
+  if (state === 'open' && folderOf(file) === 'design' && !todo.includes(file)) report(file, null, 'open plan without a TODO item');
 }
 
 // A bare §N in TODO.md is another item, unless it is a section of a plan ("plan §6", "note §7",
@@ -109,7 +126,7 @@ todoLines.forEach((text, i) => {
 // Paths, links and TODO numbers in all documents
 // =========================================================================
 
-const documents = [TODO, '.agents/KILOPIXEL.md', '.claude/CLAUDE.md', 'docs/DOCS_STANDARDS.md', ...planFiles];
+const documents = [TODO, '.agents/KILOPIXEL.md', '.agents/ENGINE.md', '.claude/CLAUDE.md', 'docs/DOCS_STANDARDS.md', ...planFiles];
 // Live documents: plans, agent and Claude files, tools. Archived plans are history, so only their
 // links to other plans are checked. js/ and docs/ paths aren't checked: plans name files that don't exist yet.
 const LIVE_PATH = /(?:^|[\s`(\[])((?:design|\.agents|\.claude|tools)\/[A-Za-z0-9_.\/-]+)/g;
@@ -150,6 +167,34 @@ for (const file of documents) {
 }
 
 // =========================================================================
+// KILOPIXEL.md and ENGINE.md describe the current engine: no dates, no names the code doesn't have
+// =========================================================================
+
+const REFERENCES = ['.agents/KILOPIXEL.md', '.agents/ENGINE.md'];
+const walk = (dir) => fs.readdirSync(path.join(root, dir), { withFileTypes: true }).flatMap(e => {
+  const p = `${dir}/${e.name}`;
+  if (e.isDirectory()) return e.name === 'node_modules' ? [] : walk(p);
+  return /\.(js|html)$/.test(e.name) ? [p] : [];
+});
+const code = ['js', 'tools', 'tests'].flatMap(walk).map(read).join('\n') + read('build.js');
+const inCode = (name) => new RegExp(`\\b${name.replace(/\$/g, '\\$')}\\b`).test(code);
+
+for (const REFERENCE of REFERENCES) read(REFERENCE).split('\n').forEach((text, i) => {
+  // Dates belong in the plans; a date inside a file name (design/2026-…_plan.md) is fine
+  const date = text.replace(/[\w\/.-]*\d{4}-\d{2}-\d{2}_[\w.\/-]*/g, '').match(/\b20\d{2}-\d{2}-\d{2}\b/);
+  if (date) report(REFERENCE, i + 1, `date ${date[0]}: history and measurements belong in the plans`);
+
+  // Engine names in backticks (pxl.name, _field, name()) must exist in the code
+  for (const m of text.matchAll(/`([^`]+)`/g)) {
+    if (m[1].includes('/')) continue; // a file path
+    for (const n of m[1].matchAll(/\bpxl\.(_?[A-Za-z]\w*)|(?<![\w.])(_[A-Za-z]\w*)|\b([A-Za-z]\w*)\(\)/g)) {
+      const name = n[1] || n[2] || n[3];
+      if (name.length > 3 && !inCode(name)) report(REFERENCE, i + 1, `\`${name}\` doesn't exist in js/, tools/ or tests/`);
+    }
+  }
+});
+
+// =========================================================================
 // Prototypes: one folder per plan, named like the plan without _plan / _note
 // =========================================================================
 
@@ -157,7 +202,7 @@ const PROTOTYPES = 'design/prototypes';
 if (exists(PROTOTYPES)) {
   const planNames = new Set(planFiles.map(f => path.basename(f).replace(/_(plan|note)\.md$/, '')));
   for (const dir of fs.readdirSync(path.join(root, PROTOTYPES))) {
-    if (!planNames.has(dir)) report(`${PROTOTYPES}/${dir}`, null, 'no plan with this name in design/ or design/archive/');
+    if (!planNames.has(dir)) report(`${PROTOTYPES}/${dir}`, null, `no plan with this name in ${FOLDERS.join('/, ')}/`);
   }
 }
 

@@ -1,10 +1,10 @@
 # Text Hit Testing (`<pxl-text>` Pointer Events) Implementation Plan
 
-- **Status**: ✅ **Implemented** (2026-10-15; tests in §8 passed; regression: docs pages + test24 load without errors)
+- **Status**: ✅ **Implemented** (2026-10-15, tests in §8)
 - **Date**: 2026-10-13
 - **Target Components**: `js/interaction.js` (`InteractionEngine.process`), `js/elements/shapes/text.js` (`Text`)
 - **Related Components**: `js/elements/shape.js` (event registration), `.agents/KILOPIXEL.md`
-- **Test File**: [`examples/test52.html`](../examples/test52.html)
+- **Test File**: [`examples/test52.html`](../../examples/test52.html)
 
 ---
 
@@ -20,7 +20,7 @@ All other shapes (rect, circle, ellipse, line, polyline, grid) work correctly.
 
 ### 1.1 Verification
 
-Reproduced with [`examples/test52.html`](../examples/test52.html) (a `<pxl-rect>` and a `<pxl-text>`, both switching `fill` on `isHovered`):
+Reproduced with [`examples/test52.html`](../../examples/test52.html) (a `<pxl-rect>` and a `<pxl-text>`, both switching `fill` on `isHovered`):
 
 | Check | Rect | Text |
 |---|---|---|
@@ -35,7 +35,7 @@ Confirmed both by an automated headless run (`scratch/run_test52_hover.html` (no
 
 ## 2. Root Cause Analysis
 
-Hit testing uses a **dummy-context interception** technique ([`interaction.js`](../js/interaction.js)):
+Hit testing uses a **dummy-context interception** technique ([`interaction.js`](../../js/interaction.js)):
 
 ```javascript
 // js/interaction.js (L13-14)
@@ -120,7 +120,7 @@ hitTest(ctx, u) {
 - `this.boundingBox` is computed in **Tier 3** of `Text.draw()` using `ctx.measureText()` (`actualBoundingBoxLeft/Right/Ascent/Descent`), in logical units relative to the text anchor (respects `align`, `baseline`, multi-line `lineheight`, word-wrap `width`, `letterspacing`, `direction`).
 - `interaction.process()` runs at the **end of `stage.render()`**, i.e. after the text has been drawn in the same frame → the box and `_hasInk` are fresh.
 - Hidden elements (`hidden` on the element or any ancestor) are already skipped by the engine before the hook is called.
-- Known limitation (out of scope): web fonts loading after the first measurement keep the fallback font metrics until the text changes; see `design/2026-11-06_text_box_accuracy_plan.md`.
+- Known limitation (out of scope): web fonts loading after the first measurement keep the fallback font metrics until the text changes; see `design/done/2026-11-06_text_box_accuracy_plan.md`.
 
 ### 3.5 Performance & GC
 
@@ -179,7 +179,7 @@ With `linejoin="miter"`, glyph corners can extend slightly further than `strokew
 
 **Problem:** `measureText()` ignores the `maxWidth` argument of `fillText()`. When a line is horizontally compressed by `maxwidth`, the computed box is wider than the drawn text. This affects hit testing **and** gradient placement (pre-existing).
 
-**Tracked separately** (a bounding-box accuracy issue, not a hit-testing issue): `design/2026-11-06_text_box_accuracy_plan.md`.
+**Tracked separately** (a bounding-box accuracy issue, not a hit-testing issue): `design/done/2026-11-06_text_box_accuracy_plan.md`.
 
 ---
 
@@ -202,7 +202,7 @@ With `linejoin="miter"`, glyph corners can extend slightly further than `strokew
 **Documented behaviour** (`.agents/KILOPIXEL.md`, Interaction System → InteractionEngine Lifecycle):
 > Elements with event handlers (`onclick`, `onenter`, etc.) **or that use `isHovered`/`isPressed` in expressions** are registered with `stage.interaction.registerElement(el)`.
 
-**Actual behaviour:** registration happens only when an `on*` handler is compiled or present on connect ([`shape.js`](../js/elements/shape.js) L47, L59). An expression like `fill="ref.box.isHovered ? 'red' : 'blue'"` without any `on*` attribute does **nothing** — which is why all examples (and `test52.html`) add an `onclick`.
+**Actual behaviour:** registration happens only when an `on*` handler is compiled or present on connect ([`shape.js`](../../js/elements/shape.js) L47, L59). An expression like `fill="ref.box.isHovered ? 'red' : 'blue'"` without any `on*` attribute does **nothing** — which is why all examples (and `test52.html`) add an `onclick`.
 
 **Options (separate decision, not part of this plan's scope):**
 1. Correct the documentation (state that an `on*` handler is required).
@@ -226,7 +226,7 @@ With `linejoin="miter"`, glyph corners can extend slightly further than `strokew
 
 ## 8. Test Plan
 
-**Manual:** [`examples/test52.html`](../examples/test52.html) — hover/click rect and text; fill turns yellow, cursor becomes `pointer`, `onclick` logs to the console.
+**Manual:** [`examples/test52.html`](../../examples/test52.html) — hover/click rect and text; fill turns yellow, cursor becomes `pointer`, `onclick` logs to the console.
 
 > [!NOTE]
 > In `test52.html` the `onclick` handlers currently double as a workaround for §6 (they force registration). Keep them for this plan; once auto-registration (§6 decision) is implemented, remove them so test52 covers both fixes.

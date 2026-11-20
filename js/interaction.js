@@ -15,7 +15,7 @@ pxl.dummyCtx.stroke = function() { if (this.isPointInStroke(pxl._hitX, pxl._hitY
 // Handlers: pxl-on-* Attributes Are Listeners
 // =========================================================================
 // Handler attribute → the DOM event it listens to. Not on…: onclick is the browser's own handler attribute, and
-// frameworks treat on… names as their own listeners (design/2026-10-30_framework_compatibility_plan.md §4.3).
+// frameworks treat on… names as their own listeners (design/done/2026-10-30_framework_compatibility_plan.md §4.3).
 // A handler is an ordinary listener on its shape or group: the engine only dispatches DOM events.
 pxl.HANDLER_EVENTS = {
   'pxl-on-click': 'click', 'pxl-on-enter': 'pointerenter', 'pxl-on-leave': 'pointerleave',
@@ -70,7 +70,7 @@ pxl.isShapeOrGroup = function(node) {
 // =========================================================================
 // InteractionEngine: hit testing, hover / press states, DOM events
 // =========================================================================
-// Every shape is hit-tested, like elements in the DOM (design/2026-10-30_framework_compatibility_plan.md §22, §23).
+// Every shape is hit-tested, like elements in the DOM (design/done/2026-10-30_framework_compatibility_plan.md §22, §23).
 // CSS pointer-events: none takes a shape, or a group or layer with everything inside it, out of hit testing.
 // While the pointer rests, the hit test runs at most this often (ms); any pointer event tests at once
 pxl.RESTING_HIT_INTERVAL = 100;

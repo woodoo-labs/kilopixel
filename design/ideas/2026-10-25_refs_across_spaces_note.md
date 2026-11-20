@@ -1,9 +1,9 @@
 # Refs Across Coordinate Spaces (Points, Variables, `toLocal`)
 
-- **Status**: 💬 **Discussion** (living note, no decisions yet; started 2026-10-25, ideas added 2026-10-26). This is the hub for refs, points and `toLocal`; start here.
+- **Status**: 💬 **Discussion** (2026-10-26, no decisions; next step: a plan with one real use case, §7.8)
 - **Context**: polyline docs (section 8 and the planned Element Reference). Question: should `ref.<id>.pN` be documented, and how do readers attach to a polyline point from another layer?
-- **TODO**: `.agents/TODO.md` §25
-- **Related**: `design/2026-10-26_tolocal_fix_plan.md` (implemented 2026-10-26): `toLocal` readers now also update when their own space moves. Any point form (§5.1, §5.2, §7) builds on that reactivity.
+- **TODO**: none (parked in `design/ideas/`; picked up together with TODO §28)
+- **Related**: `design/done/2026-10-26_tolocal_fix_plan.md` (implemented 2026-10-26): `toLocal` readers now also update when their own space moves. Any point form (§5.1, §5.2, §7) builds on that reactivity.
 
 ## 0. Related Documents
 
@@ -15,10 +15,10 @@ All documents on this topic, oldest first. Older plans are kept unchanged as his
 | `design/archive/variable_implementation_plan.md` | 2026-07 | Explicit `ref.*` everywhere, `<pxl-var>`, flat ID namespace | ✅ Implemented (history) |
 | `design/archive/local_coordinates_implementation_plan.md` | 2026-07 | Map **raw** global points (e.g. the mouse) into a group: `toLocal(ref.main.mouseX, ref.main.mouseY, 'x')` | ⚪ Superseded by this note (never implemented; the idea continues as the point form, §5.1) |
 | `design/archive/coordinate_mapping_implementation_plan.md` | 2026-07 | The original `toLocal` (`x`, `y`, `dx`, `dy`, `tx`, `ty`, `rotate`, `scale*`), `ref.<id>.tx` / `ty` getters, lowercase attribute names | ⚪ Superseded by the `toLocal` fix and decomposition plans below (implemented as the original `toLocal`) |
-| `design/2026-10-18_polyline_optimization_plan.md` §2.3.4 | 2026-10-18 | `ref.<id>.pN` readers update when `points` is replaced | ✅ Implemented |
+| `design/ideas/2026-10-18_polyline_optimization_plan.md` §2.3.4 | 2026-10-18 | `ref.<id>.pN` readers update when `points` is replaced | ✅ Implemented |
 | **This note** | 2026-10-25 | Refs are values, not positions; patterns that work today; possible additions | ⚪ Open ideas |
-| `design/2026-10-26_tolocal_fix_plan.md` | 2026-10-26 | Readers update when their **own** space moves | ✅ Implemented |
-| `design/2026-10-29_tolocal_decomposition_plan.md` | 2026-10-29 | Frame decomposition (`skewx`, signed `scaley`, `zoom`), warning for unknown names; the `scale` attribute becomes `zoom` (multiplier) | ✅ Implemented |
+| `design/done/2026-10-26_tolocal_fix_plan.md` | 2026-10-26 | Readers update when their **own** space moves | ✅ Implemented |
+| `design/done/2026-10-29_tolocal_decomposition_plan.md` | 2026-10-29 | Frame decomposition (`skewx`, signed `scaley`, `zoom`), warning for unknown names; the `scale` attribute becomes `zoom` (multiplier) | ✅ Implemented |
 | `design/2026-10-30_space_attribute_plan.md` | 2026-10-30 | `space="ref.A"`: draw an element in another element's space (exact overlays, points inside the target, attachments) | 🟡 Proposed |
 | `design/2026-11-12_two_phase_frame_plan.md` | 2026-11-12 | Evaluate every element before drawing: removes the one-frame lag of readers drawn before their targets (toLocal, `space`, `ref.*`) | 💬 Discussion; step 1 built 2026-11-13 (no lag for readers without `t`) |
 
@@ -38,7 +38,7 @@ Only `toLocal()` crosses spaces, because only it knows both sides (target global
 ## 2. What `toLocal` Supports Today
 
 - **Targets**: every `pxl.PxlNode` with a frame: all shapes, `pxl-group`, `pxl-layer`. Not `pxl-stage` (not a PxlNode, returns 0). Not `pxl-var` (a PxlNode, but it observes only `value`; `x` / `y` attributes are ignored, so the matrix is built from `undefined` and the result is `NaN`).
-- **Properties** (same for every target): `x`, `y`, `dx`, `dy`, `tx`, `ty`, `rotate`, `scalex`, `scaley` (signed), `skewx`, `zoom` (since 2026-10-30, `design/2026-10-29_tolocal_decomposition_plan.md`). Anything else returns 0, and a literal unknown name warns at compile time.
+- **Properties** (same for every target): `x`, `y`, `dx`, `dy`, `tx`, `ty`, `rotate`, `scalex`, `scaley` (signed), `skewx`, `zoom` (since 2026-10-30, `design/done/2026-10-29_tolocal_decomposition_plan.md`). Anything else returns 0, and a literal unknown name warns at compile time.
 - All of them describe the element's **frame** (origin, rotation, scale, skew), never the geometry inside it (`r`, `w`, `x2`, points).
 - A single number can't be mapped: rotation mixes x and y, so mapping needs a full (x, y) pair.
 
@@ -182,3 +182,10 @@ Before the 2026-10-26 fix, and still useful as a pattern: let the element in the
 - **The goal (§7.5) is not over-engineering**: it removes the hardest rule to explain (§7.4: "only if your own center is `(0, 0)` without rotation") and replaces it with "refer to a point, hit the point". Pre-release is the cheapest time to set what `toLocal` means.
 - **Over-engineering would be** covering everything (§7.5 limits) without a use case.
 - **Before building**: write a design plan with **one real use case** (a connector line between two rotating groups, or a robot arm whose gripper follows a target), then decide.
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
+- Status line until 2026-11-20: 💬 **Discussion** (living note, no decisions yet; started 2026-10-25, ideas added 2026-10-26). This is the hub for refs, points and `toLocal`; start here.

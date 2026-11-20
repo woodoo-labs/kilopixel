@@ -9,7 +9,7 @@
 <iframe id="page" src="/examples/test48.html" style="width: 900px; height: 1000px; border: 0"></iframe>
 <script>
 // Cost of the two events per frame that InteractionEngine.process() dispatches on the hovered shape while the pointer
-// moves (pointermove, mousemove), measured 2026-11-20 for design/2026-10-30_framework_compatibility_plan.md §23.9.
+// moves (pointermove, mousemove), measured 2026-11-20 for design/done/2026-10-30_framework_compatibility_plan.md §23.9.
 // Runs on examples/test48.html (loaded in the iframe): each step 20,000 times after a warm-up, on the page's deepest
 // shape, through the engine's own dispatch() and through its parts. Needs no animation frames, so it also works in a
 // hidden tab. Open it via the dev server; results in the <pre> and in window.benchResult (µs per event).

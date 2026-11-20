@@ -1,9 +1,9 @@
 # Safe Shape Render: Always `save()` / `restore()` and Draw Errors
 
-- **Status**: ✅ **Implemented** (2026-11-07; 12 engine tests, 54/54 pass; 79 docs and example pages pixel-identical with the previous engine, except 3 layers that also differ between two runs of the same engine; results in §4.6)
+- **Status**: ✅ **Implemented** (2026-11-07, results in §4.6)
 - **Date**: 2026-11-07
 - **Supersedes**: `design/archive/2026-10-17_always_save_restore_plan.md` (decided, not built) and Part 2 of `design/archive/2026-11-05_draw_errors_plan.md` (its Part 1, the clamping of stop offsets and corner radii, was built on 2026-11-05 and stays)
-- **Related**: `design/2026-11-01_isolated_shape_compositing_plan.md` (builds on this one: same `Shape.render()`, order in its §9), `design/2026-10-17_shape_authoring_plan.md` (custom shapes need this before a docs page), `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, implemented), `design/2026-10-18_polyline_optimization_plan.md` (small fix "non-finite points + gradient", covered here)
+- **Related**: `design/done/2026-11-01_isolated_shape_compositing_plan.md` (builds on this one: same `Shape.render()`, order in its §9), `design/2026-10-17_shape_authoring_plan.md` (custom shapes need this before a docs page), `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, implemented), `design/ideas/2026-10-18_polyline_optimization_plan.md` (small fix "non-finite points + gradient", covered here)
 - **Target Implementation**: `js/elements/shape.js` (`render`, `createGradient`, `drawArrows`), `js/elements/shapes/grid.js`, `js/elements/node.js` (`reportError`), `js/elements/group.js`, `js/elements/layer.js`, `js/elements/variable.js`, `js/interaction.js` (`process`), `tests/index.html`, `.agents/KILOPIXEL.md`
 - **Measurement tools** (not kept): `scratch/gradient_stops/try_finally_bench.html` (all variants, §4), `scratch/save_restore/measure.html` and `lines.html` (real pages, worst case), `design/prototypes/2026-10-17_shape_authoring/star_test.html` (leak test), `scratch/gradient_stops/overshoot.html` (frame aborted by an error), `scratch/safe_render/bench.html` (repeated errors, text, hidden shapes, §4.4), `scratch/safe_render/hidden_refs.html` (what `hidden` does to evaluation, §5.1), `scratch/safe_render/edge_cases.html` (errors in readers, at connect and in `setAttribute()`, messages with values, §4.5)
 
@@ -410,7 +410,7 @@ A hidden shape evaluates before it checks `hidden`; a hidden group or layer skip
 6. `tests/index.html`: tests from §8. `node build.js`, update the `~NNKB` sizes, all tests pass.
 7. Regression: all `docs/*.html` and `examples/*.html` without new console warnings, pixels compared with the old engine (`scratch/text_box/regress.html` (not kept) adapted), `design/prototypes/2026-10-17_shape_authoring/star_test.html` with the built engine, `scratch/save_restore/measure.html` with the built engine as A (A and B must be equal, B's patch is then a no-op), `scratch/safe_render/bench.html` against the old engine (hidden first faster or equal; repeated errors as in §4.4).
 8. `.agents/KILOPIXEL.md` and docs (§9).
-9. Plan status → ✅, TODO item removed; remove the small fix "non-finite points + gradient" from `design/2026-10-18_polyline_optimization_plan.md` and from the polyline item in the TODO.
+9. Plan status → ✅, TODO item removed; remove the small fix "non-finite points + gradient" from `design/ideas/2026-10-18_polyline_optimization_plan.md` and from the polyline item in the TODO.
 
 ---
 
@@ -473,4 +473,4 @@ Built as 12 tests ("safe render: …"): #1 leak; #2–#4 in one probe test (a te
 
 - **Undoing translations instead of save / restore** for shapes whose only state is `x` / `y`: about 0.6 µs faster per shape, but with float drift and two code paths again. Not pursued (old always-save plan §4.4).
 - **Parsing gradient stops in `createGradient`** (the allocation part of the old gradient plan): about 0.1 µs per animated gradient against 0.9 µs for the canvas gradient itself. Dropped (old draw-errors plan §7).
-- **Isolated compositing** (fill and stroke composite as one): `design/2026-11-01_isolated_shape_compositing_plan.md`, built on top of this plan.
+- **Isolated compositing** (fill and stroke composite as one): `design/done/2026-11-01_isolated_shape_compositing_plan.md`, built on top of this plan.

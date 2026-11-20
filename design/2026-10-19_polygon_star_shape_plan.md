@@ -1,8 +1,8 @@
 # Regular Polygon & Star Shape (`<pxl-polygon>`)
 
-- **Status**: 🟡 **Proposed** (no code changes yet; open decisions in §7)
+- **Status**: 🟡 **Proposed** (2026-10-19, open decisions in §7)
 - **Date**: 2026-10-19
-- **Related**: `design/2026-10-17_shape_authoring_plan.md` (custom shape template, the Star example), `design/2026-10-18_polyline_optimization_plan.md` (closed polylines), `.agents/TODO.md` §23
+- **Related**: `design/2026-10-17_shape_authoring_plan.md` (custom shape template, the Star example), `design/ideas/2026-10-18_polyline_optimization_plan.md` (closed polylines), `.agents/TODO.md` §23
 - **Target Implementation**: `js/elements/shapes/polygon.js` (new), `build.js`, `docs/polygon.html` (new), `docs/js/layout.js`, `.agents/KILOPIXEL.md`
 - **Prototypes**: `design/prototypes/2026-10-19_polygon_star_shape/test.html` (absolute `ir`), `design/prototypes/2026-10-19_polygon_star_shape/relative.html` (relative star amount, §3)
 
@@ -143,7 +143,7 @@ customElements.define('pxl-polygon', pxl.Polygon);
 
 **Notes:**
 - **Plain polygon draws `n` corners, not `2n`:** with `indent = 0` the inner corners would lie exactly on the edges. Skipping them keeps the path minimal and avoids extra (straight) join points for `linejoin` and dashes.
-- **Performance:** `2n` `cos` / `sin` per draw (10 for a pentagon, 16 for an 8-pointed star). No allocations. No vertex cache: per the polyline measurements (`design/2026-10-18_polyline_optimization_plan.md` §2.3) this is far below anything measurable; a cache would add code without benefit.
+- **Performance:** `2n` `cos` / `sin` per draw (10 for a pentagon, 16 for an 8-pointed star). No allocations. No vertex cache: per the polyline measurements (`design/ideas/2026-10-18_polyline_optimization_plan.md` §2.3) this is far below anything measurable; a cache would add code without benefit.
 - **Bounding box:** the circle around the shape, like `<pxl-circle>`, using the larger of the two radii. Gradients stay centered when the shape rotates or `sides` / `indent` animate, instead of jumping with a tight box.
 - **Hit testing:** automatic (the dummy context runs `draw()`).
 - **Dashes:** start at the first corner (`start`).
@@ -223,3 +223,10 @@ Sidebar: "Polygon" link back under Shapes & Paths, after "Polyline".
 | 8 | Hover / `onclick` on a star | hit only inside the star outline, not between the tips |
 | 9 | Bare / removed `indent`, `sides`, `start` | class defaults (Rule A) |
 | 10 | Regression: all docs / examples pages | unchanged (new element only) |
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
+- Status line until 2026-11-20: 🟡 **Proposed** (no code changes yet; open decisions in §7)

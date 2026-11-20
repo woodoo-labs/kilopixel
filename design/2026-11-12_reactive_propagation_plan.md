@@ -1,8 +1,8 @@
 # Reactive Propagation in Dependency Order
 
-- **Status**: 💬 **Discussion** (2026-11-18: aligned with the two-phase plan §9, option B's rebuild and the cycle rule; 2026-11-13, the crash of cycles that never settle is fixed with a nesting counter (§2); the full design waits until a feature needs values without half-updated states (§3); review of cost, GC and code size in §5)
+- **Status**: 💬 **Discussion** (2026-11-18, the cycle crash is fixed, §2; the rest waits for a feature that needs it, §3)
 - **Date**: 2026-11-12
-- **Related**: `design/2026-11-15_per_frame_evaluation_plan.md` (the alternative: no broadcasts at all; if it is built, this plan is superseded), `design/2026-11-12_two_phase_frame_plan.md` (§3.1.1: its update phase orders readers with `t`; could share the ordering code), `design/2026-10-26_tolocal_fix_plan.md` (toLocal readers and `broadcastGlobalMatrixChange()`), `design/2026-11-07_safe_shape_render_plan.md` (a reader's error is its own), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (`isHovered` / `isPressed` broadcasts)
+- **Related**: `design/2026-11-15_per_frame_evaluation_plan.md` (the alternative: no broadcasts at all; if it is built, this plan is superseded), `design/2026-11-12_two_phase_frame_plan.md` (§3.1.1: its update phase orders readers with `t`; could share the ordering code), `design/done/2026-10-26_tolocal_fix_plan.md` (toLocal readers and `broadcastGlobalMatrixChange()`), `design/done/2026-11-07_safe_shape_render_plan.md` (a reader's error is its own), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (`isHovered` / `isPressed` broadcasts)
 - **Target Implementation** (if built): `js/engine.js` (`pxl.broadcast()`), `js/elements/node.js` (`variableChangedCallback()`, new fields), `tests/index.html`, `.agents/KILOPIXEL.md` (Variable Change Propagation)
 - **Prototypes**: `design/prototypes/2026-11-12_reactive_propagation/chains_and_diamonds.html` (long chain, stacked diamonds, half-updated values; `?lib=` compares builds), `design/prototypes/2026-11-12_reactive_propagation/ref_cycles.html` (cycles that settle, never settle, self-reference with `t`, animated chain in the wrong DOM order), `design/prototypes/2026-11-12_reactive_propagation/propagation_cost_bench.html` (today's broadcast cost in the engine, and the algorithms of §4 on plain objects)
 
@@ -81,7 +81,7 @@ Measured with `propagation_cost_bench.html` (Chrome, this laptop):
 | 14 stacked diamonds | 0.76 ms, 65,532 evaluations | ~2 µs, 42 evaluations | same |
 
 - **Performance:** about +20 ns per reader, 15–20 % of a broadcast. 1,000 readers take 0.15–0.18 ms today and about 0.02 ms more: 0.1 % of a 16.7 ms frame. Diamonds go from exponential to linear.
-- **GC:** zero per broadcast with stamps and reused arrays. B allocates on graph rebuilds unless written carefully. Found while reviewing, unrelated to this plan: `pxl.clearAllVariableSubscriptions()` allocates an `Object.keys()` copy and walks every key on every disconnect; a list of sources per element would make it a loop over its own dependencies. Fixed 2026-11-16 that way (`pxl._subscribedKeys`, `design/2026-10-30_framework_compatibility_plan.md` §20).
+- **GC:** zero per broadcast with stamps and reused arrays. B allocates on graph rebuilds unless written carefully. Found while reviewing, unrelated to this plan: `pxl.clearAllVariableSubscriptions()` allocates an `Object.keys()` copy and walks every key on every disconnect; a list of sources per element would make it a loop over its own dependencies. Fixed 2026-11-16 that way (`pxl._subscribedKeys`, `design/done/2026-10-30_framework_compatibility_plan.md` §20).
 - **Code:** A about 90 lines (+1 KB minified), B about 170 lines (+2.5 KB, about 5 % of the engine). Nearly all in `js/engine.js`, plus the fields and a shorter `variableChangedCallback()` in `js/elements/node.js`.
 
 ## 6. Tests (for the Full Design)
@@ -98,3 +98,10 @@ The cycle tests of §2 stay. New:
 2. Measure today's broadcast cost on the hot paths: `docs/walkthrough.html` section 9, `docs/mapping.html`, and the bench of two-phase plan §5.1.
 3. Tests 1–3 failing first, then the propagation (§4); all tests pass; measure again.
 4. KILOPIXEL.md "Variable Change Propagation".
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
+- Status line until 2026-11-20: 💬 **Discussion** (2026-11-18: aligned with the two-phase plan §9, option B's rebuild and the cycle rule; 2026-11-13, the crash of cycles that never settle is fixed with a nesting counter (§2); the full design waits until a feature needs values without half-updated states (§3); review of cost, GC and code size in §5)

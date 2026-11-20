@@ -1,8 +1,8 @@
 # Per-Frame Evaluation in Dependency Order (No Broadcasts)
 
-- **Status**: 🟡 **Proposed** (2026-11-18, aligned with the two-phase plan §9: stage-level variables in §3.2, self-reads in §3.4, no frame request inside the running frame in §3.6, D4 moved to its C1; 2026-11-17, §3.7 follows the pointer frame order; 2026-11-15, design and measurements; nothing built; D1 decides between this plan and the path of the two related plans)
+- **Status**: 🟡 **Proposed** (2026-11-20, nothing built; D1 decides between this plan and the two-phase path)
 - **Date**: 2026-11-15
-- **Related**: `design/2026-11-12_two_phase_frame_plan.md` (TODO §29: step 1 built; its steps 2 and 3 are the first steps of this plan too, §8), `design/2026-11-12_reactive_propagation_plan.md` (TODO §39: orders the broadcasts instead of removing them; this plan is the alternative, §7), `design/2026-10-26_tolocal_fix_plan.md` (the matrix walk this plan removes), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (sticky ids and lazy unregistering, §3.7), `design/2026-11-07_safe_shape_render_plan.md` (error rules, kept)
+- **Related**: `design/2026-11-12_two_phase_frame_plan.md` (TODO §29: step 1 built; its steps 2 and 3 are the first steps of this plan too, §8), `design/2026-11-12_reactive_propagation_plan.md` (TODO §39: orders the broadcasts instead of removing them; this plan is the alternative, §7), `design/done/2026-10-26_tolocal_fix_plan.md` (the matrix walk this plan removes), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (sticky ids and lazy unregistering, §3.7), `design/done/2026-11-07_safe_shape_render_plan.md` (error rules, kept)
 - **Target Implementation** (if decided): `js/engine.js`, `js/elements/node.js`, `js/elements/stage.js`, `js/elements/layer.js`, `js/interaction.js`, `js/monitor.js`, `tests/index.html`, `.agents/KILOPIXEL.md` (Reactivity Engine, Per-Frame Render Pipeline)
 - **Prototype**: `design/prototypes/2026-11-15_per_frame_evaluation/pull_bench.html` (today's broadcast against a per-frame loop, on the engine's own compiled expressions; cost of ordering a graph)
 
@@ -22,7 +22,7 @@ Each mechanism has its own bookkeeping, and most open problems sit where two of 
 
 - **Subscriptions** (`pxl._subscriptions`): subscribe at compile time, restore on connect, clear on disconnect, unsubscribe lazily when a reader no longer needs a key.
 - **Recursion:** diamonds are evaluated once per path and see half-updated values; a cycle needs a nesting counter (`design/2026-11-12_reactive_propagation_plan.md` §1, §2).
-- **Readers with `t` don't subscribe**, so they lag one frame per reader that comes before its source in the DOM (`design/2026-11-12_two_phase_frame_plan.md` §3.1). The same fact makes their references to `isHovered` / `isPressed` "sticky" (`pxl._stickyIds`, `releaseIfUnused()`).
+- **Readers with `t` don't subscribe**, so they lag one frame per reader that comes before its source in the DOM (`design/2026-11-12_two_phase_frame_plan.md` §3.1).
 - **`toLocal` readers** need a third key list (`toLocalAttributeKeys`) and a walk over the subtree on every matrix change.
 - **`isDirty` means two things**, "pixels out of date" and "keep the loop running" (two-phase plan §1).
 
@@ -52,7 +52,7 @@ The update phase of `Stage.render()` gets three parts; the draw phase stays as b
 
 1. **Ordered sources** (§3.3): the few elements that are read by others and have expressions of their own, in dependency order. Expressions with `t` are evaluated; reactive ones when a source's version is newer.
 2. **The walk**, as today: every other expression with `t`, layer by layer, top-down. Their sources are final after part 1.
-3. **Readers that nobody reads:** a flat list per stage of elements with reactive expressions (kept like `_interactiveElements`: added on connect, removed on disconnect, sorted by DOM position when it changed). Each one compares versions and evaluates only when it is out of date. `toLocal` readers are in this list and evaluate in every frame that runs (§3.5).
+3. **Readers that nobody reads:** a flat list per stage of elements with reactive expressions (added on connect, removed on disconnect, sorted by DOM position when it changed). Each one compares versions and evaluates only when it is out of date. `toLocal` readers are in this list and evaluate in every frame that runs (§3.5).
 
 An element whose value changed marks itself changed (for later readers in the same frame) and its layer dirty. The stage asks for the next frame when anything with `t` was evaluated (two-phase plan §3.3).
 
@@ -79,19 +79,19 @@ A `toLocal()` result depends on the target's global matrix and on the matrix of 
 - **Evaluate `toLocal` expressions in every frame that runs**, without a version check. They are few, and an evaluation costs about as much as a check plus two lazy matrix lookups. They don't keep the stage awake: an idle page stays idle.
 - **They run in part 3**, after the walk, so every ancestor that moves with `t` is final. Part 3 is in DOM order, so a reader's own ancestors come before it.
 - **`toLocalAttributeKeys`, `pxl.evaluateToLocalAttributes()` and the walk in `broadcastGlobalMatrixChange()` go away.** `setLocalMatrixDirty()` only sets the flag.
-- **The hard case:** a `toLocal` reader that is itself read by others is an ordered source (part 1) and is evaluated before the walk. Its edges must then include the ancestors of its target and its own; an ancestor with expressions on its transform becomes a node too. This is the part of the design to prototype first (§8 step 2): `toLocal` has needed the most fixes so far (`design/2026-10-26_tolocal_fix_plan.md`, `design/2026-10-29_tolocal_decomposition_plan.md`).
+- **The hard case:** a `toLocal` reader that is itself read by others is an ordered source (part 1) and is evaluated before the walk. Its edges must then include the ancestors of its target and its own; an ancestor with expressions on its transform becomes a node too. This is the part of the design to prototype first (§8 step 2): `toLocal` has needed the most fixes so far (`design/done/2026-10-26_tolocal_fix_plan.md`, `design/done/2026-10-29_tolocal_decomposition_plan.md`).
 
 ### 3.6 Waking a Stage
 
 - `pxl.markChanged(node)` asks every stage that is in view for a frame (D7). A frame in which nothing is out of date costs the version checks of part 3 (about 20 ns per reader, §5) and draws nothing.
 - **Not the running frame:** a change before the update phase of the stage's running frame (in `interaction.process()`, by a stage-level variable, or by an ordered source for a later reader) is evaluated and drawn in that frame, so `markChanged()` requests no frame from that stage, only from the others (two-phase plan §9 R1). Today's engine doesn't do this: a pointer reader adds an empty frame after each move (measured 2026-11-18, `test.known()` in `tests/index.html`).
-- **Only when someone reads the source:** the compiler adds every id it sees in an expression to a set (`pxl._readIds`, never shrinks, like `pxl._interactiveIds` today). A change to an element whose id isn't in the set wakes nobody. This keeps a page idle while the performance monitor publishes `fps` once per second and nobody shows it.
+- **Only when someone reads the source:** the compiler adds every id it sees in an expression to a set (`pxl._readIds`, never shrinks). A change to an element whose id isn't in the set wakes nobody. This keeps a page idle while the performance monitor publishes `fps` once per second and nobody shows it.
 - `setAttribute()`, resize and font arrival invalidate their layer as today.
 
 ### 3.7 Interactive States
 
-- `InteractionEngine.process()` runs at the start of the frame, before the update phase, as today (since 2026-11-17, `design/2026-11-17_pointer_frame_order_plan.md`). Where it broadcasts the stage's pointer values or sets `isHovered` / `isPressed`, it calls `pxl.markChanged()` instead. Readers then update in the update phase of the same frame and are drawn in it, as today. A `markChanged()` for the pointer must stay in `process()` (or come earlier): marked after the update phase, readers would be drawn one frame late, as they were before 2026-11-17.
-- **Which shapes are hit-tested:** as today, a shape with handlers or one whose states are named in an expression (`pxl._interactiveIds`). The lazy unregistering (`releaseIfUnused()`, `pxl._stickyIds`) goes away: it exists because subscriptions can tell when the last reader left, and only for readers without `t`. A shape whose last reader was removed stays hit-tested; that costs one `isPointInPath()` per pointer frame.
+- `InteractionEngine.process()` runs at the start of the frame, before the update phase, as today (since 2026-11-17, `design/done/2026-11-17_pointer_frame_order_plan.md`). Where it broadcasts the stage's pointer values or sets `isHovered` / `isPressed`, it calls `pxl.markChanged()` instead. Readers then update in the update phase of the same frame and are drawn in it, as today. A `markChanged()` for the pointer must stay in `process()` (or come earlier): marked after the update phase, readers would be drawn one frame late, as they were before 2026-11-17.
+- **Hit testing is unchanged:** every shape is hit-tested (`design/done/2026-10-30_framework_compatibility_plan.md` §23.7), so readers of `isHovered` / `isPressed` register nothing.
 
 ### 3.8 Hidden Subtrees
 
@@ -99,7 +99,7 @@ Answers question 6 of the two-phase plan with its "middle way", without extra co
 
 ### 3.9 Errors
 
-The rules of `design/2026-11-07_safe_shape_render_plan.md` stay: an element whose evaluation throws reports its own error, keeps its previous values and is skipped in the draw phase of that frame (`_failedFrame`). The special cases for readers that fail inside someone else's broadcast or matrix walk disappear, because no element evaluates inside another one's call any more.
+The rules of `design/done/2026-11-07_safe_shape_render_plan.md` stay: an element whose evaluation throws reports its own error, keeps its previous values and is skipped in the draw phase of that frame (`_failedFrame`). The special cases for readers that fail inside someone else's broadcast or matrix walk disappear, because no element evaluates inside another one's call any more.
 
 ## 4. What Changes in Behavior
 
@@ -143,7 +143,6 @@ Estimates from reading the source; nothing is built.
 | `pxl._subscriptions`, `pxl._subscribedKeys` (since 2026-11-16), `broadcast()`, `subscribeToVariable()`, `unsubscribeFromVariable()`, `clearAllVariableSubscriptions()`, `restoreVariableSubscriptions()` (`engine.js`) | 65 |
 | `evaluateAttributesForVariable()`, `evaluateToLocalAttributes()`, the subscription part of `compileAttribute()` (`engine.js`) | 55 |
 | `variableChangedCallback()`, `broadcastGlobalMatrixChange()`, `_broadcastNesting`, `toLocalAttributeKeys` (`node.js`) | 65 |
-| `releaseIfUnused()`, `pxl._stickyIds` (`interaction.js`) | 15 |
 | The layer heartbeat: `_wasDirty`, `_keepAlive`, `parentLayer.invalidate()` in `evaluateAnimations()` (`layer.js`, `node.js`) | 20 |
 
 | Comes | Lines (about) |
@@ -152,7 +151,7 @@ Estimates from reading the source; nothing is built.
 | The stage's reader list and part 3 of the update phase | 40 |
 | The order (nodes, edges, Kahn, cycle rule and warning) | 90 |
 
-About 220 lines out, 170 in. The engine doesn't get much smaller; it gets one mechanism instead of three, and the five problems of §1 have no place left to occur.
+About 205 lines out, 170 in. The engine doesn't get much smaller; it gets one mechanism instead of three, and the five problems of §1 have no place left to occur.
 
 ## 7. Compared With the Path of the Two Related Plans
 
@@ -199,4 +198,12 @@ The existing tests stay (ref cycles, two-phase frame, safe render, toLocal, laye
 | D5 | Derived values right after `setAttribute()`: accept the next frame, or evaluate on demand when a stale value is read? | Accept the next frame, if step 1 finds no page that relies on it |
 | D6 | Granularity: element, or attribute (`ref.orb.stroke` as its own source)? | Element, as today |
 | D7 | Wake every stage in view, or only stages with readers of the changed source? | Every stage in view; the check costs about 20 ns per reader |
-| D8 | Scoped names (`design/2026-10-30_framework_compatibility_plan.md` D2): resolve `ref` per stage? | Design it with D1: compiled functions would receive `ref` at call time instead of binding the global `pxl.nodes`, so component instances share their compiled expressions (framework plan §19.3, added 2026-11-15) |
+| D8 | Scoped names (`design/done/2026-10-30_framework_compatibility_plan.md` D2): resolve `ref` per stage? | Design it with D1: compiled functions would receive `ref` at call time instead of binding the global `pxl.nodes`, so component instances share their compiled expressions (framework plan §19.3, added 2026-11-15) |
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
+- 2026-11-20: §1, §3.2, §3.6, §3.7 and §6 no longer name the reader registration for hit testing (`pxl._stickyIds`, `releaseIfUnused()`, `_interactiveIds`), removed on 2026-11-18 when every shape became hit-tested.
+- Status line until 2026-11-20: 🟡 **Proposed** (2026-11-18, aligned with the two-phase plan §9: stage-level variables in §3.2, self-reads in §3.4, no frame request inside the running frame in §3.6, D4 moved to its C1; 2026-11-17, §3.7 follows the pointer frame order; 2026-11-15, design and measurements; nothing built; D1 decides between this plan and the path of the two related plans)

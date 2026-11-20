@@ -1,5 +1,5 @@
 // Cost of the hit walk inside real animation frames, measured 2026-11-20 for
-// design/2026-10-30_framework_compatibility_plan.md §23.9 on examples/test49.html.
+// design/done/2026-10-30_framework_compatibility_plan.md §23.9 on examples/test49.html.
 // Usage: node design/prototypes/2026-10-30_framework_compatibility/hit_walk_in_frame.js [headful|headless] [page]
 //   page: a path below the repo (default examples/test49.html); NOFILL=1 makes fillStyle / strokeStyle no-ops on
 //   pxl.dummyCtx (the exact test without parsing colors).

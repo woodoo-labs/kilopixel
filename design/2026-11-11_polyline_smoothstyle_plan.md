@@ -1,8 +1,8 @@
 # Polyline `smoothstyle`: Uniform or Centripetal Spline
 
-- **Status**: 🟡 **Proposed** (2026-11-11, decisions D1–D3 open)
+- **Status**: 🟡 **Proposed** (2026-11-11, D1–D3 open)
 - **Date**: 2026-11-11
-- **Related**: `design/2026-10-23_smooth_polyline_spline_plan.md` (the centripetal spline, implemented 2026-10-24), `design/2026-09-07_plot_element_plan.md` §10 (`<pxl-plot>` needs the uniform spline and reuses this code, §6)
+- **Related**: `design/done/2026-10-23_smooth_polyline_spline_plan.md` (the centripetal spline, implemented 2026-10-24), `design/2026-09-07_plot_element_plan.md` §10 (`<pxl-plot>` needs the uniform spline and reuses this code, §6)
 - **Target Implementation**: `js/elements/shapes/polyline.js`, `tests/index.html`, `.agents/KILOPIXEL.md` (Smoothing), `docs/polyline.html` (new section 5), `docs/walkthrough.html` section 9 (D3)
 - **Prototypes**: `design/prototypes/2026-11-11_polyline_smoothstyle/smoothstyle_examples.html` (both splines on 6 candidate examples, plain canvas), `design/prototypes/2026-11-11_polyline_smoothstyle/spline_error.js`, `design/prototypes/2026-11-11_polyline_smoothstyle/spline_uniform_sec9.js`, `design/prototypes/2026-11-11_polyline_smoothstyle/smoothstyle_search.js` (error against the true curve)
 
@@ -25,7 +25,7 @@ The uniform spline assumes what a sampled curve is: equal parameter steps betwee
 ## 2. Use Cases
 
 - **Curves from formulas** written as points: math curves, Lissajous figures, spirals (walkthrough section 9).
-- **Data at regular times**: sensor values, a recorded mouse path, an audio envelope. With the framework plan (`design/2026-10-30_framework_compatibility_plan.md`), a React or Vue component that builds `points` from an array of samples is the typical case.
+- **Data at regular times**: sensor values, a recorded mouse path, an audio envelope. With the framework plan (`design/done/2026-10-30_framework_compatibility_plan.md`), a React or Vue component that builds `points` from an array of samples is the typical case.
 - **`<pxl-plot>`** samples at equal steps by definition and needs the uniform spline (§6).
 
 Points placed by hand (paths, arrows, shapes with corners) stay with the default.
@@ -131,3 +131,10 @@ The points of the figure eight are written as rounded numbers. Candidates that s
 3. KILOPIXEL.md, `docs/polyline.html` section 5 with the renumbering, walkthrough section 9 (D3).
 4. Browser check: polyline page (both shapes, both styles, arrowheads, console), walkthrough section 9, tests.
 5. Plan to ✅, TODO item removed; plot plan §10 and TODO §7 point to the shared code.
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
+- Status line until 2026-11-20: 🟡 **Proposed** (2026-11-11, decisions D1–D3 open)

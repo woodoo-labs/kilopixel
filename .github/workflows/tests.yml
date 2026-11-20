@@ -1,4 +1,4 @@
-# Runs the engine tests and the page sweep on every push and pull request (design/2026-11-15_testing_plan.md D4).
+# Runs the engine tests and the page sweep on every push and pull request (design/done/2026-11-15_testing_plan.md D4).
 # The same command as on the laptops; no packages: Chrome is preinstalled on GitHub's Ubuntu machines, and the
 # built bundle (dist/) is committed.
 name: Tests

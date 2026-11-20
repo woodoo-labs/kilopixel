@@ -1,4 +1,4 @@
-// Shared test runner for the pages in tests/ (design/2026-11-15_testing_plan.md §4). No dependencies.
+// Shared test runner for the pages in tests/ (design/done/2026-11-15_testing_plan.md §4). No dependencies.
 // A page loads this file after the engine, registers tests with test() / test.known() / section(), and calls
 // runTests() at the end. Results: a table (#results), a summary (#summary) and the tab title
 // ("Tests: N/N passed"), window.kilopixelTests, and a JSON copy in <script id="test-results"> for tools/run_tests.js.

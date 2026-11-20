@@ -3,7 +3,7 @@
 Kilopixel in real frameworks, loaded the way a page without a build step loads it: Kilopixel as a script tag
 (`/dist/pxl.min.js`), the framework from a CDN. They complement `tests/frameworks.html`, which tests the DOM contract
 with plain DOM calls: a framework can have its own rules that no contract test knows (React builds `onPointerEnter`
-only from `pointerout`, found here on 2026-11-19). Plan: `design/2026-10-30_framework_compatibility_plan.md` §12, §25;
+only from `pointerout`, found here on 2026-11-19). Plan: `design/done/2026-10-30_framework_compatibility_plan.md` §12, §25;
 results and history: `design/prototypes/2026-10-30_framework_compatibility/FINDINGS.md`.
 
 | Page | Framework | Tests |

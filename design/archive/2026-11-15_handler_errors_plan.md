@@ -1,8 +1,8 @@
 # Handler Errors: A Throwing `on*` Handler Is Delivered Once
 
-- **Status**: ⚪ **Superseded by** `design/2026-10-30_framework_compatibility_plan.md` (2026-11-19, §23.8: `pxl-on-*` handlers are listeners for DOM events, and each catches and logs its own error; `callHandler()` and the event flags of `process()` are gone. The goal holds: a throwing handler is logged and its event delivered once. Implemented 2026-11-15; 2 engine tests, 88/88 pass; bundle size unchanged at 57.46 KB minified)
+- **Status**: ⚪ **Superseded by** `design/done/2026-10-30_framework_compatibility_plan.md` (2026-11-19, §23.8: `pxl-on-*` handlers are listeners for DOM events, and each catches and logs its own error; `callHandler()` and the event flags of `process()` are gone. The goal holds: a throwing handler is logged and its event delivered once. Implemented 2026-11-15; 2 engine tests, 88/88 pass; bundle size unchanged at 57.46 KB minified)
 - **Date**: 2026-11-15
-- **Related**: `design/2026-11-07_safe_shape_render_plan.md` (its §5.2 left handler errors to the browser and expected the next frame to be normal; this plan corrects that), `design/2026-10-30_framework_compatibility_plan.md` (D1 renames the handlers, D4 changes when `click` / `pointerdown` / `pointerup` are hit-tested; §5 below)
+- **Related**: `design/done/2026-11-07_safe_shape_render_plan.md` (its §5.2 left handler errors to the browser and expected the next frame to be normal; this plan corrects that), `design/done/2026-10-30_framework_compatibility_plan.md` (D1 renames the handlers, D4 changes when `click` / `pointerdown` / `pointerup` are hit-tested; §5 below)
 - **Target Implementation**: `js/interaction.js` (`callHandler`, `process`), `tests/index.html`, `.agents/KILOPIXEL.md`
 - **Prototype**: `design/prototypes/2026-11-15_handler_errors/throwing_handler.html`
 
@@ -51,7 +51,7 @@ callHandler(el, event) {
 
 After a failing handler, `process()` goes on as if the handler had returned: the hover list and the states are updated, the cursor is set, the other handlers of that frame run, and the flags are reset.
 
-No per-frame cost: `try` / `catch` without a throw is free in today's engines (measured for the draw path in `design/2026-11-07_safe_shape_render_plan.md` §4), and handlers only run on pointer events.
+No per-frame cost: `try` / `catch` without a throw is free in today's engines (measured for the draw path in `design/done/2026-11-07_safe_shape_render_plan.md` §4), and handlers only run on pointer events.
 
 ---
 
@@ -77,5 +77,5 @@ No per-frame cost: `try` / `catch` without a throw is free in today's engines (m
 
 ## 5. Not Part of This Plan
 
-- **Hit position of `click` / `pointerdown` without a pointer move before it** (observed 2026-11-15, not confirmed on a touch device): `handleEvent` reads the pointer position only on `pointermove`, so these events are hit-tested at the last known position. A mouse always moves first; a tap on a touch screen may not. D4 of `design/2026-10-30_framework_compatibility_plan.md` (hit-test when the event arrives) reads the position from the event itself and would cover it. Test on a touch device when D4 is built.
+- **Hit position of `click` / `pointerdown` without a pointer move before it** (observed 2026-11-15, not confirmed on a touch device): `handleEvent` reads the pointer position only on `pointermove`, so these events are hit-tested at the last known position. A mouse always moves first; a tap on a touch screen may not. D4 of `design/done/2026-10-30_framework_compatibility_plan.md` (hit-test when the event arrives) reads the position from the event itself and would cover it. Test on a touch device when D4 is built.
 - **Renamed handlers** (`pxl-on-click` …, D1 of the same plan): `callHandler()` builds the name in its message from the event (`on${event}`); change it with the rename.

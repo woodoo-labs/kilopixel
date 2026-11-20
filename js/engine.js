@@ -51,7 +51,7 @@ pxl.broadcast = function(fullKey) {
 
 // The keys each element is subscribed to (element → Set), the other side of pxl._subscriptions: removing an
 // element then touches only its own keys. Scanning every key for every removed element was quadratic (2,000 shapes
-// with 2,000 readers took 380 ms to remove, design/2026-10-30_framework_compatibility_plan.md §19.1).
+// with 2,000 readers took 380 ms to remove, design/done/2026-10-30_framework_compatibility_plan.md §19.1).
 pxl._subscribedKeys = new WeakMap();
 
 pxl.subscribeToVariable = function(fullKey, element) {
@@ -104,7 +104,7 @@ pxl.renameNode = function(element, oldId, newId) {
 pxl.BOOLEAN_ATTRIBUTES = new Set(['hidden', 'closed', 'smooth', 'pie', 'anticlockwise', 'labels']);
 
 // Resolves a bare ('') or removed (null) attribute: bare boolean = true, bare <pxl-var> value = '',
-// otherwise the class default (design/2026-10-17_attribute_defaults_and_state_isolation_plan.md)
+// otherwise the class default (design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md)
 pxl.resolveEmptyAttribute = function(element, name, newValue) {
   if (newValue === '') {
     if (pxl.BOOLEAN_ATTRIBUTES.has(name)) return true;
@@ -168,7 +168,7 @@ pxl.storeValue = function(element, name, value) {
 // =========================================================================
 // Properties: Every Attribute Is Also a JavaScript Property
 // =========================================================================
-// design/2026-10-30_framework_compatibility_plan.md §6, §24. React 19, Vue, Preact and Svelte set a property when the
+// design/done/2026-10-30_framework_compatibility_plan.md §6, §24. React 19, Vue, Preact and Svelte set a property when the
 // element has one (`name in element`); Angular [x], Lit .x and Solid prop:x always do. A number set as a property is
 // stored without parsing or compiling; a string is compiled like the attribute. No reflection to the attribute.
 

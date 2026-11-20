@@ -76,7 +76,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   // --- Isolated Compositing ---
-  // (design/2026-11-01_isolated_shape_compositing_plan.md)
+  // (design/done/2026-11-01_isolated_shape_compositing_plan.md)
   // The canvas composites every draw call on its own, so a shape that draws more than once (fill and stroke,
   // arrowheads, text lines) would mask, blend, filter or shadow its own earlier parts. Such a shape draws into the
   // scratch canvas instead, which then goes onto the layer once, with the shape's compositing state.
@@ -152,7 +152,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   // --- Hit Testing ---
-  // (design/2026-10-30_framework_compatibility_plan.md §23, E5)
+  // (design/done/2026-10-30_framework_compatibility_plan.md §23, E5)
 
   // Quick test before the exact one: is the point (x, y) in stage units inside the box of what this shape paints?
   // The box is read in every test: a cached box would miss setAttribute('r', …) on a static shape, which doesn't
@@ -231,7 +231,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   buildGradient(ctx, u, styleValue, slot, box, sw) {
     // A stroke is at least strokewidth thick: a line's box has a zero side, and a gradient across it would
     // have zero length and paint nothing. For the stroke, each side spans at least strokewidth around the center.
-    // (design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md)
+    // (design/done/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md)
     const width = slot === 1 ? Math.max(box.right - box.left, sw) : box.right - box.left;
     const height = slot === 1 ? Math.max(box.bottom - box.top, sw) : box.bottom - box.top;
     const cx = (box.left + box.right) / 2;
@@ -357,7 +357,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   // --- Arrowheads ---
-  // Geometry: design/2026-10-14_unified_arrowhead_geometry_plan.md
+  // Geometry: design/done/2026-10-14_unified_arrowhead_geometry_plan.md
   // All distances are in context units (logical value × u).
 
   // Resolves one arrow end into distances along the path and writes them into the pre-allocated rec.

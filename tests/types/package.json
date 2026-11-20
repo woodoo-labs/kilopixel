@@ -1,7 +1,7 @@
 {
   "name": "kilopixel-type-tests",
   "private": true,
-  "description": "Checks Kilopixel's TypeScript definitions (dist/types/) against the real framework types. Install with npm ci; run with node tools/run_tests.js --types (design/2026-10-30_framework_compatibility_plan.md §27).",
+  "description": "Checks Kilopixel's TypeScript definitions (dist/types/) against the real framework types. Install with npm ci; run with node tools/run_tests.js --types (design/done/2026-10-30_framework_compatibility_plan.md §27).",
   "license": "UNLICENSED",
   "devDependencies": {
     "@solidjs/web": "2.0.3",

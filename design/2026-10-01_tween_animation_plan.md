@@ -1,6 +1,6 @@
 # Tween Animation Plan (Unified Specification)
 
-- **Status**: 🟡 **Proposed** (2026-11-12: idea still open, but the design predates today's engine: compiler changes, Rule A, the stage's own idle logic (`isAnimated`, `requestRender()`) that §7 must fit into; bring it up to date before implementing. First draft 2026-10-01)
+- **Status**: 🟡 **Proposed** (2026-11-12, the design predates today's engine: update it before building)
 - **Date**: 2026-10-01
 - **Related**: `design/2026-11-12_two_phase_frame_plan.md` (💬; with a two-phase frame the stage decides from the update phase whether to keep running, and change-based dirty flags stop redrawing a finished tween: §7 here would be rewritten on that model; see its §3.2, §3.3, §6)
 - **Files affected**: `js/compiler.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `.agents/KILOPIXEL.md`
@@ -391,3 +391,10 @@ The stage and layer automatically awaken on:
    Mount a stage with a 1-second tween. Verify that after $t = 1.05\text{s}$, `stage.render()` stops firing and browser CPU drops to 0%.
 4. **Reactive Wake-Up**:
    Mutate `ref.test.val` on a sleeping stage. Verify the stage wakes up, animates to the new state, and returns to sleep.
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
+- Status line until 2026-11-20: 🟡 **Proposed** (2026-11-12: idea still open, but the design predates today's engine: compiler changes, Rule A, the stage's own idle logic (`isAnimated`, `requestRender()`) that §7 must fit into; bring it up to date before implementing. First draft 2026-10-01)

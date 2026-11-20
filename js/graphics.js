@@ -115,7 +115,7 @@ pxl.applyCompositingState = function(ctx, u, attributeValues, node) {
   }
 };
 
-// The scratch canvas of isolated shapes (design/2026-11-01_isolated_shape_compositing_plan.md §3.2): one for the
+// The scratch canvas of isolated shapes (design/done/2026-11-01_isolated_shape_compositing_plan.md §3.2): one for the
 // page, created on first use. It only grows, to the largest layer canvas it served, so it never resizes back and
 // forth between layers of different sizes. Isolation never nests: groups have no compositing state.
 pxl._isolationContext = null;
@@ -147,7 +147,7 @@ pxl.isFullTurn = function(startRadians, endRadians) {
 };
 
 // =========================================================================
-// Arrowhead Geometry (design/2026-10-14_unified_arrowhead_geometry_plan.md)
+// Arrowhead Geometry (design/done/2026-10-14_unified_arrowhead_geometry_plan.md)
 // =========================================================================
 pxl.ARROW_COS30 = Math.cos(Math.PI / 6); // arrowhead half-angle is 30°
 pxl.ARROW_SIN30 = 0.5;

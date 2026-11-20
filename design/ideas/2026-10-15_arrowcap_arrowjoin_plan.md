@@ -1,8 +1,8 @@
 # Arrowhead Look: `arrowcap` & `arrowjoin` (Separating Arrow Style from Shape Style)
 
-- **Status**: 💬 **Discussion** (direction agreed, open decisions listed in §6)
+- **Status**: 💬 **Discussion** (2026-10-15, direction agreed, open decisions in §6)
 - **Date**: 2026-10-15
-- **Builds on**: `design/2026-10-14_unified_arrowhead_geometry_plan.md` (geometry, insets, zero-GC records)
+- **Builds on**: `design/done/2026-10-14_unified_arrowhead_geometry_plan.md` (geometry, insets, zero-GC records)
 - **Target Implementation**: `js/elements/shape.js`, `js/elements/shapes/line.js`, `polyline.js`, `circle.js`, `ellipse.js`
 - **Docs Impact**: `docs/arrows.html` (sections 2–4), `.agents/KILOPIXEL.md`
 - **Context**: Kilopixel is pre-release, so backwards compatibility is not required.
@@ -110,3 +110,10 @@ Case 3 is the critical one: it needs `arrowjoin="miter"` for a sharp tip on a ro
 - [ ] Test page in `scratch/`: all four cases from §4 × both styles × relevant overrides.
 - [ ] Implement, `node build.js`, regression check with `design/prototypes/2026-10-15_arrowcap_arrowjoin/arrow_grid.html` and `examples/test24.html`.
 - [ ] Docs: `arrows.html` (section 4 Line Joins becomes "Arrow Joins & Caps" or similar, callout "Sharp Tips on Rounded Paths" replaced by `arrowjoin`), `KILOPIXEL.md` Arrowhead System.
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
+- Status line until 2026-11-20: 💬 **Discussion** (direction agreed, open decisions listed in §6)

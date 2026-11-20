@@ -1,5 +1,5 @@
 // Checks Kilopixel's TypeScript definitions (dist/types/) against the real framework types
-// (design/2026-10-30_framework_compatibility_plan.md §27). Run by node tools/run_tests.js --types, or directly:
+// (design/done/2026-10-30_framework_compatibility_plan.md §27). Run by node tools/run_tests.js --types, or directly:
 // node tests/types/check.js. Needs the packages of this folder: npm ci in tests/types (once per laptop).
 //
 // The definitions are copied into kilopixel/ here first (ignored by git): TypeScript resolves 'react', 'vue', … from

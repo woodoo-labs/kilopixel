@@ -1,5 +1,5 @@
 // Runs the build checks (tools/check_build.js), the test pages in tests/ and the sweep of every docs and example
-// page for console messages, in headless Chrome or Edge, without npm packages (design/2026-11-15_testing_plan.md §5).
+// page for console messages, in headless Chrome or Edge, without npm packages (design/done/2026-11-15_testing_plan.md §5).
 //
 // Usage: node tools/run_tests.js [--tests] [--slow] [--sweep] [--smoke] [--types] [--page <path>] [--grep <text>] [--repeat <n>] [--verbose]
 //   (no option)      everything: build checks, all test pages, the sweep (before a commit, and in CI)

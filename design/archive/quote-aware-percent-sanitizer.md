@@ -1,6 +1,6 @@
 # Implementation Plan: Quote-Aware CSS Percentage Sanitizer
 
-- **Status**: ⚪ **Superseded by** `design/2026-11-02_string_literals_in_expressions_plan.md`
+- **Status**: ⚪ **Superseded by** `design/done/2026-11-02_string_literals_in_expressions_plan.md`
 
 > **Date**: 2026-07-13  
 > **File**: `js/compiler.js` (lines 193-197)  

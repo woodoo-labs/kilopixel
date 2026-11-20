@@ -1,4 +1,4 @@
-// Generates Kilopixel's TypeScript definitions from the built engine (design/2026-10-30_framework_compatibility_plan.md
+// Generates Kilopixel's TypeScript definitions from the built engine (design/done/2026-10-30_framework_compatibility_plan.md
 // §27): a core file with the element types and one file per framework that declares the tags for its templates or JSX.
 // Called by build.js (written to dist/types/ and docs/download/types/) and by tools/check_build.js (up to date).
 // The engine runs in a Node vm with a stubbed DOM, so the build needs no browser: every element's observedAttributes

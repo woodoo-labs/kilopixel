@@ -58,7 +58,7 @@ pxl.broadcast = function(fullKey) {
 
 // The keys each element is subscribed to (element → Set), the other side of pxl._subscriptions: removing an
 // element then touches only its own keys. Scanning every key for every removed element was quadratic (2,000 shapes
-// with 2,000 readers took 380 ms to remove, design/2026-10-30_framework_compatibility_plan.md §19.1).
+// with 2,000 readers took 380 ms to remove, design/done/2026-10-30_framework_compatibility_plan.md §19.1).
 pxl._subscribedKeys = new WeakMap();
 
 pxl.subscribeToVariable = function(fullKey, element) {
@@ -111,7 +111,7 @@ pxl.renameNode = function(element, oldId, newId) {
 pxl.BOOLEAN_ATTRIBUTES = new Set(['hidden', 'closed', 'smooth', 'pie', 'anticlockwise', 'labels']);
 
 // Resolves a bare ('') or removed (null) attribute: bare boolean = true, bare <pxl-var> value = '',
-// otherwise the class default (design/2026-10-17_attribute_defaults_and_state_isolation_plan.md)
+// otherwise the class default (design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md)
 pxl.resolveEmptyAttribute = function(element, name, newValue) {
   if (newValue === '') {
     if (pxl.BOOLEAN_ATTRIBUTES.has(name)) return true;
@@ -175,7 +175,7 @@ pxl.storeValue = function(element, name, value) {
 // =========================================================================
 // Properties: Every Attribute Is Also a JavaScript Property
 // =========================================================================
-// design/2026-10-30_framework_compatibility_plan.md §6, §24. React 19, Vue, Preact and Svelte set a property when the
+// design/done/2026-10-30_framework_compatibility_plan.md §6, §24. React 19, Vue, Preact and Svelte set a property when the
 // element has one (`name in element`); Angular [x], Lit .x and Solid prop:x always do. A number set as a property is
 // stored without parsing or compiling; a string is compiled like the attribute. No reflection to the attribute.
 
@@ -594,7 +594,7 @@ pxl.cacheExpression = function(cache, source, value) {
 };
 
 // Splits an expression into code and string literals, so rewrites and checks can skip quoted text
-// (design/2026-11-02_string_literals_in_expressions_plan.md). Even indices are code, odd indices are literals with
+// (design/done/2026-11-02_string_literals_in_expressions_plan.md). Even indices are code, odd indices are literals with
 // their quotes. In a template literal, the code inside ${…} is code again: 'a' + `b${x}c` → ['', "'a'", ' + ', '`b${',
 // 'x', '}c`', '']. Regex literals and comments aren't recognized; attribute expressions don't use them.
 // Compile time only: it runs once per distinct string, so its allocations don't matter.
@@ -736,7 +736,7 @@ pxl.compileExpression = function(str) {
     }
 
     const isAnimated = pxl.timeDriverRegex.test(unquoted);
-    // toLocal readers are also re-evaluated when their own space moves (design/2026-10-26_tolocal_fix_plan.md)
+    // toLocal readers are also re-evaluated when their own space moves (design/done/2026-10-26_tolocal_fix_plan.md)
     const usesToLocal = /\btoLocal\(/.test(unquoted);
     if (usesToLocal) pxl.checkToLocalProperties(str); // reads the full string: the property name is a string
     const source = pxl.rewriteExpression(parts.join(''));
@@ -806,7 +806,7 @@ pxl.dummyCtx.stroke = function() { if (this.isPointInStroke(pxl._hitX, pxl._hitY
 // Handlers: pxl-on-* Attributes Are Listeners
 // =========================================================================
 // Handler attribute → the DOM event it listens to. Not on…: onclick is the browser's own handler attribute, and
-// frameworks treat on… names as their own listeners (design/2026-10-30_framework_compatibility_plan.md §4.3).
+// frameworks treat on… names as their own listeners (design/done/2026-10-30_framework_compatibility_plan.md §4.3).
 // A handler is an ordinary listener on its shape or group: the engine only dispatches DOM events.
 pxl.HANDLER_EVENTS = {
   'pxl-on-click': 'click', 'pxl-on-enter': 'pointerenter', 'pxl-on-leave': 'pointerleave',
@@ -861,7 +861,7 @@ pxl.isShapeOrGroup = function(node) {
 // =========================================================================
 // InteractionEngine: hit testing, hover / press states, DOM events
 // =========================================================================
-// Every shape is hit-tested, like elements in the DOM (design/2026-10-30_framework_compatibility_plan.md §22, §23).
+// Every shape is hit-tested, like elements in the DOM (design/done/2026-10-30_framework_compatibility_plan.md §22, §23).
 // CSS pointer-events: none takes a shape, or a group or layer with everything inside it, out of hit testing.
 // While the pointer rests, the hit test runs at most this often (ms); any pointer event tests at once
 pxl.RESTING_HIT_INTERVAL = 100;
@@ -1511,7 +1511,7 @@ pxl.applyCompositingState = function(ctx, u, attributeValues, node) {
   }
 };
 
-// The scratch canvas of isolated shapes (design/2026-11-01_isolated_shape_compositing_plan.md §3.2): one for the
+// The scratch canvas of isolated shapes (design/done/2026-11-01_isolated_shape_compositing_plan.md §3.2): one for the
 // page, created on first use. It only grows, to the largest layer canvas it served, so it never resizes back and
 // forth between layers of different sizes. Isolation never nests: groups have no compositing state.
 pxl._isolationContext = null;
@@ -1543,7 +1543,7 @@ pxl.isFullTurn = function(startRadians, endRadians) {
 };
 
 // =========================================================================
-// Arrowhead Geometry (design/2026-10-14_unified_arrowhead_geometry_plan.md)
+// Arrowhead Geometry (design/done/2026-10-14_unified_arrowhead_geometry_plan.md)
 // =========================================================================
 pxl.ARROW_COS30 = Math.cos(Math.PI / 6); // arrowhead half-angle is 30°
 pxl.ARROW_SIN30 = 0.5;
@@ -1667,7 +1667,7 @@ pxl._frame = 0;
 // in JSX) would otherwise appear as page text through the layer's <slot>. Content placed directly in a layer
 // (accessible text, buttons) stays visible.
 // The grid is out of hit testing: it covers the whole stage and would catch the pointer between its lines
-// (design/2026-10-30_framework_compatibility_plan.md §23, E4). A page can set pointer-events: auto on it.
+// (design/done/2026-10-30_framework_compatibility_plan.md §23, E4). A page can set pointer-events: auto on it.
 // Click and press handlers show the hand, like the browser's own rule for links (E1); the shapes inside a group
 // inherit it. The cursor is otherwise only CSS: a framework listener gets the hand from cursor: pointer.
 pxl.DEFAULT_STYLES = `@layer pxl {
@@ -1694,7 +1694,7 @@ pxl.Stage = class Stage extends HTMLElement {
 
   // Browser events handled by the stage's InteractionEngine (its handleEvent). The second list is handled in the
   // capture phase, when the event arrives: over a shape, the browser's event is stopped there and dispatched on the
-  // shape instead (design/2026-10-30_framework_compatibility_plan.md §4.1, D4).
+  // shape instead (design/done/2026-10-30_framework_compatibility_plan.md §4.1, D4).
   static POINTER_EVENTS = ['pointermove', 'pointerenter', 'pointerleave', 'gotpointercapture', 'lostpointercapture'];
   static ARRIVING_EVENTS = [
     'pointerdown', 'pointerup', 'pointercancel', 'pointerout', 'mousedown', 'mouseup', 'click', 'dblclick', 'contextmenu'
@@ -1743,7 +1743,7 @@ pxl.Stage = class Stage extends HTMLElement {
     this.interaction = new pxl.InteractionEngine(this);
   }
 
-  // Properties for frameworks (design/2026-10-30_framework_compatibility_plan.md §24). Unlike the other elements', they
+  // Properties for frameworks (design/done/2026-10-30_framework_compatibility_plan.md §24). Unlike the other elements', they
   // write the attribute: a stage has two, set rarely, and the attribute path parses them. false, null and undefined
   // remove the attribute.
   get ratio() {
@@ -1943,7 +1943,7 @@ pxl.Stage = class Stage extends HTMLElement {
 
     // Pointer first: broadcast the stage's pointer values, hit-test against the picture on screen, update the
     // hover / press states and run the handlers. Their readers are then drawn in this frame, not the next one
-    // (design/2026-11-17_pointer_frame_order_plan.md).
+    // (design/done/2026-11-17_pointer_frame_order_plan.md).
     this.interaction.process();
 
     if (this._isOrderDirty) {
@@ -2263,7 +2263,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       for (let i = 0; i < len; i++) {
         const child = this.childList[i];
 
-        // The child's own space moved: its toLocal() results are stale (design/2026-10-26_tolocal_fix_plan.md).
+        // The child's own space moved: its toLocal() results are stale (design/done/2026-10-26_tolocal_fix_plan.md).
         // If re-evaluating moves the child, setLocalMatrixDirty() has already walked its subtree.
         let walked = false;
         if (child.toLocalAttributeKeys.length > 0) {
@@ -2737,7 +2737,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   // --- Isolated Compositing ---
-  // (design/2026-11-01_isolated_shape_compositing_plan.md)
+  // (design/done/2026-11-01_isolated_shape_compositing_plan.md)
   // The canvas composites every draw call on its own, so a shape that draws more than once (fill and stroke,
   // arrowheads, text lines) would mask, blend, filter or shadow its own earlier parts. Such a shape draws into the
   // scratch canvas instead, which then goes onto the layer once, with the shape's compositing state.
@@ -2813,7 +2813,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   // --- Hit Testing ---
-  // (design/2026-10-30_framework_compatibility_plan.md §23, E5)
+  // (design/done/2026-10-30_framework_compatibility_plan.md §23, E5)
 
   // Quick test before the exact one: is the point (x, y) in stage units inside the box of what this shape paints?
   // The box is read in every test: a cached box would miss setAttribute('r', …) on a static shape, which doesn't
@@ -2892,7 +2892,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   buildGradient(ctx, u, styleValue, slot, box, sw) {
     // A stroke is at least strokewidth thick: a line's box has a zero side, and a gradient across it would
     // have zero length and paint nothing. For the stroke, each side spans at least strokewidth around the center.
-    // (design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md)
+    // (design/done/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md)
     const width = slot === 1 ? Math.max(box.right - box.left, sw) : box.right - box.left;
     const height = slot === 1 ? Math.max(box.bottom - box.top, sw) : box.bottom - box.top;
     const cx = (box.left + box.right) / 2;
@@ -3018,7 +3018,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   // --- Arrowheads ---
-  // Geometry: design/2026-10-14_unified_arrowhead_geometry_plan.md
+  // Geometry: design/done/2026-10-14_unified_arrowhead_geometry_plan.md
   // All distances are in context units (logical value × u).
 
   // Resolves one arrow end into distances along the path and writes them into the pre-allocated rec.
@@ -3690,7 +3690,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     return true;
   }
 
-  // Centripetal Catmull-Rom through points first..last (design/2026-10-23_smooth_polyline_spline_plan.md).
+  // Centripetal Catmull-Rom through points first..last (design/done/2026-10-23_smooth_polyline_spline_plan.md).
   // `k3` is smooth / 3. Arrows imply an open path with >= 2 segments between first and last.
   traceSmooth(ctx, len, closed, k3, hasStart, hasEnd, first, last) {
     const pts = this._flatCache;

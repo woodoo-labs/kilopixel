@@ -1,9 +1,9 @@
 # Draw Errors: One Bad Value Must Not Break the Layer
 
-- **Status**: ⚪ **Superseded by** `design/2026-11-07_safe_shape_render_plan.md` (2026-11-07: Part 2 moved there; Part 1 implemented 2026-11-05 together with `design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`: stop offsets clamped, rect radii clamped in the `roundRect` branch, 2 tests)
+- **Status**: ⚪ **Superseded by** `design/done/2026-11-07_safe_shape_render_plan.md` (2026-11-07: Part 2 moved there; Part 1 implemented 2026-11-05 together with `design/done/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`: stop offsets clamped, rect radii clamped in the `roundRect` branch, 2 tests)
 - **Date**: 2026-11-05
 - **Supersedes**: `design/archive/2026-08-25_gradient_optimization_plan.md` (stop clamping, never built; its allocation part is dropped, §7)
-- **Related**: `design/archive/2026-10-17_always_save_restore_plan.md` (same lines in `Shape.render()`), `design/2026-10-18_polyline_optimization_plan.md` (small fix "non-finite points + gradient")
+- **Related**: `design/archive/2026-10-17_always_save_restore_plan.md` (same lines in `Shape.render()`), `design/ideas/2026-10-18_polyline_optimization_plan.md` (small fix "non-finite points + gradient")
 - **Target Implementation**: `js/elements/shape.js` (`createGradient`, `render`), `js/elements/shapes/rect.js`, `js/elements/node.js` (`reportError`), `js/elements/group.js`, `js/elements/layer.js`, `js/elements/variable.js`, `js/interaction.js` (`process`), `tests/index.html`, `.agents/KILOPIXEL.md`
 - **Prototypes** (not kept): `scratch/gradient_stops/overshoot.html` (stop offset leaves 0–1), `scratch/gradient_stops/try_finally_bench.html` (cost of `try` per shape)
 
@@ -79,7 +79,7 @@ Two parts. Part 1 makes values that animations legitimately produce draw sensibl
     }
 ```
 
-Cost: one or two comparisons per stop (only when a gradient is created, not on a cache hit) and per rounded corner. Measured: clamping 3 offsets 0.03 µs; creating the gradient itself 0.9 µs (`overshoot.html` session, 2026-11-05). The full `createGradient` with this clamp and the stroke-gradient change: within noise of today's on all three paths (`design/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` §6).
+Cost: one or two comparisons per stop (only when a gradient is created, not on a cache hit) and per rounded corner. Measured: clamping 3 offsets 0.03 µs; creating the gradient itself 0.9 µs (`overshoot.html` session, 2026-11-05). The full `createGradient` with this clamp and the stroke-gradient change: within noise of today's on all three paths (`design/done/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md` §6).
 
 ### 3.2 Part 2: Skip the Element, Warn Once, Always Restore
 
@@ -209,4 +209,4 @@ Then all tests pass, and the docs pages and `examples/` show no new console warn
 2. Part 2 (with always save / restore if decided so): `reportError`, `Shape.render`, `Group` / `Layer` / `Variable` evaluation, `InteractionEngine.process`; the remaining tests.
 3. Confirm the benchmark with the pane visible (§4).
 4. KILOPIXEL.md and docs (§6), sizes after the build.
-5. Plan status → ✅, TODO item removed; remove the "non-finite points + gradient" small fix from `design/2026-10-18_polyline_optimization_plan.md` and TODO §22.
+5. Plan status → ✅, TODO item removed; remove the "non-finite points + gradient" small fix from `design/ideas/2026-10-18_polyline_optimization_plan.md`.

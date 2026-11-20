@@ -22,7 +22,7 @@
   <main class="docs-content">
     <div class="docs-inner">
       <h1>Scaling Tests</h1>
-      <p>Level 6 of <code>design/2026-11-15_testing_plan.md</code>: tests that time an operation at two sizes and compare the times. Ratios are the same on every machine, unlike absolute times. Each size is measured five times and the median counts.</p>
+      <p>Level 6 of <code>design/done/2026-11-15_testing_plan.md</code>: tests that time an operation at two sizes and compare the times. Ratios are the same on every machine, unlike absolute times. Each size is measured five times and the median counts.</p>
       <ul>
         <li><strong>Linear work</strong> (most tests): n against 2n. Linear work takes about twice as long (ratio 2), quadratic work about four times as long; a test fails above 3.5. n grows until the smaller time is at least 5 ms (shorter times are mostly noise). Over the limit, both sizes are measured again, then 2n against 4n: a step where the elements outgrow the CPU caches makes only one pair look quadratic.</li>
         <li><strong>Work that must not depend on the scene&#39;s size</strong> (setting a property): the same work in a scene of n and of 4n elements; fails above ratio 2.</li>
@@ -144,7 +144,7 @@
       return ms;
     }, 2000), { timeout: 20000 });
 
-    // design/2026-10-30_framework_compatibility_plan.md §19.1: clearAllVariableSubscriptions() scanned every subscription
+    // design/done/2026-10-30_framework_compatibility_plan.md §19.1: clearAllVariableSubscriptions() scanned every subscription
     // key for every removed element (ratio 5–9); fixed with per-element keys (pxl._subscribedKeys)
     test('removing shapes with readers is linear', () => expectLinear((n) => {
       const { layer, clear } = freshStage();
@@ -239,7 +239,7 @@
       return ms;
     }, 1000), { timeout: 20000 });
 
-    // Every shape is hit-tested (design/2026-10-30_framework_compatibility_plan.md §23, step 2). The walk is timed
+    // Every shape is hit-tested (design/done/2026-10-30_framework_compatibility_plan.md §23, step 2). The walk is timed
     // directly: process() repeats it only every pxl.RESTING_HIT_INTERVAL ms while the pointer rests.
     test('hit testing n shapes is linear (pointer over empty space)', () => expectLinear((n) => {
       const { stage, layer, clear } = freshStage();

@@ -22,7 +22,7 @@
   <main class="docs-content">
     <div class="docs-inner">
       <h1>Unit Tests</h1>
-      <p>Level 1 of <code>design/2026-11-15_testing_plan.md</code>: the engine's pure functions, as tables of inputs and expected results, and the empty / removed attribute rule for every attribute of every element. No stage is drawn. Run with <code>node tools/run_tests.js --tests</code>, or here via the dev server (<code>?grep=</code> for a subset).</p>
+      <p>Level 1 of <code>design/done/2026-11-15_testing_plan.md</code>: the engine's pure functions, as tables of inputs and expected results, and the empty / removed attribute rule for every attribute of every element. No stage is drawn. Run with <code>node tools/run_tests.js --tests</code>, or here via the dev server (<code>?grep=</code> for a subset).</p>
       <p id="summary" class="test-summary">Running…</p>
       <table class="test-table"><tbody id="results"></tbody></table>
     </div>
@@ -107,7 +107,7 @@
     };
 
     // ===================================================================
-    // Compiler: how an attribute string is classified (KILOPIXEL.md "The Expression Compiler")
+    // Compiler: how an attribute string is classified (KILOPIXEL.md §3.1, ENGINE.md §3)
     // ===================================================================
     section('Compiler: classification');
 
@@ -119,7 +119,7 @@
       ['PI', Math.PI], ['E', Math.E],
       ['rgb(10, 20, 30)', 'rgb(10, 20, 30)'], ['rgba(124, 211, 15, 0.8)', 'rgba(124, 211, 15, 0.8)'],
       ['RGB(1,2,3)', 'RGB(1,2,3)'],
-      // CSS colors stay text (design/2026-10-30_framework_compatibility_plan.md §24): no compiling, no cache entry
+      // CSS colors stay text (design/done/2026-10-30_framework_compatibility_plan.md §24): no compiling, no cache entry
       ['hsl(120, 50%, 40%)', 'hsl(120, 50%, 40%)'], ['hsla(120, 50%, 40%, 0.5)', 'hsla(120, 50%, 40%, 0.5)'],
       ['hsl(120deg 50% 40% / 50%)', 'hsl(120deg 50% 40% / 50%)'], ['oklch(70% 0.1 200)', 'oklch(70% 0.1 200)'],
       ['color(display-p3 1 0 0)', 'color(display-p3 1 0 0)'], ['lab(50% 40 59.5)', 'lab(50% 40 59.5)'],
@@ -179,7 +179,7 @@
 
     // ===================================================================
     // Compiler: quoted text in expressions is text, not code
-    // (design/2026-11-02_string_literals_in_expressions_plan.md)
+    // (design/done/2026-11-02_string_literals_in_expressions_plan.md)
     // ===================================================================
     section('Compiler: string literals');
 
@@ -246,7 +246,7 @@
     });
 
     // ===================================================================
-    // Time drivers (KILOPIXEL.md "Time Drivers")
+    // Time drivers (KILOPIXEL.md §3.4)
     // ===================================================================
     section('Time drivers');
 
@@ -328,7 +328,7 @@
     ], ([start, end, expected]) => [pxl.isFullTurn(start, end), expected], ([start, end]) => `${start} → ${end.toFixed(4)}`);
 
     // ===================================================================
-    // Gradients: descriptors, stops, radii (KILOPIXEL.md "Color & Gradient System")
+    // Gradients: descriptors, stops, radii (KILOPIXEL.md §5.2, ENGINE.md §6.3)
     // ===================================================================
     section('Gradients');
 
@@ -397,7 +397,7 @@
     });
 
     // ===================================================================
-    // Matrices and toLocal on fixed matrices (KILOPIXEL.md "Matrix Engine & Coordinate Mapping")
+    // Matrices and toLocal on fixed matrices (ENGINE.md §7)
     // ===================================================================
     section('Matrices and toLocal');
 
@@ -455,7 +455,7 @@
     ], ([, target, prop = 'x']) => [pxl.toLocal(readerIn(IDENTITY), target, prop), 0], ([name]) => name);
 
     // ===================================================================
-    // Empty and removed attributes, every attribute of every element (Rule A, KILOPIXEL.md "Empty & Removed Attributes").
+    // Empty and removed attributes, every attribute of every element (Rule A, KILOPIXEL.md §3.5).
     // Generated from observedAttributes and static defaults, so a new attribute is covered without a new test.
     // ===================================================================
     section('Rule A: empty and removed attributes');
@@ -549,7 +549,7 @@
     });
 
     // ===================================================================
-    // Properties (design/2026-10-30_framework_compatibility_plan.md §6, §24): every attribute is also a property,
+    // Properties (design/done/2026-10-30_framework_compatibility_plan.md §6, §24): every attribute is also a property,
     // generated like the Rule A tests above, so a new attribute is covered without a new test
     // ===================================================================
     section('Properties');

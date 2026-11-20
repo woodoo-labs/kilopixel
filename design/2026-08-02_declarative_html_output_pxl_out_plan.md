@@ -1,8 +1,8 @@
 # Declarative HTML Output Element (`<pxl-out>`)
 
-- **Status**: 🟡 **Proposed** (2026-11-17, §3.3 pointer timing; revised 2026-10-17, first draft 2026-08-02)
+- **Status**: 🟡 **Proposed** (2026-11-17, §3.3 pointer timing)
 - **Date**: 2026-08-02 (revised 2026-10-17: based on `PxlNode`, Rule A, write-on-change, stage pause / `alwaysrender`, accessibility)
-- **Related**: `design/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, `static defaults`), `design/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`), `.agents/TODO.md` §5
+- **Related**: `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, `static defaults`), `design/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`), `.agents/TODO.md` §5
 - **Target Implementation**: new `js/elements/out.js` (after `variable.js` in `build.js`)
 
 ---
@@ -104,7 +104,7 @@ The class is named `Output`, not `Out`: engine classes are global names (`Shape`
 | `<pxl-var>` with a static / reactive value, slider-driven attributes | on change |
 | Animated attribute (`ref.spinner.rotate` with `rotate="t * 90"`) | every frame **while its stage renders** |
 | `ref.<stage>.fps`, `renderAvg`, `renderMax` | once per second **while the stage renders** |
-| `ref.<stage>.mouseX`, `mouseY`, `isHovered` | at the start of the frame after a pointer event, **while the stage renders** (`design/2026-11-17_pointer_frame_order_plan.md`) |
+| `ref.<stage>.mouseX`, `mouseY`, `isHovered` | at the start of the frame after a pointer event, **while the stage renders** (`design/done/2026-11-17_pointer_frame_order_plan.md`) |
 
 **Write-on-change:** an animated source broadcasts every frame. `writeText()` compares strings and only touches the DOM when the text differs. Rounding in the expression (`round(ref.spinner.rotate)`) reduces DOM writes further and makes the output readable.
 
@@ -171,3 +171,10 @@ The text is real DOM text, so screen readers can read it. `<pxl-out>` does **not
 | 9 | Remove the `<pxl-out>` element, then change the source | no errors, subscription cleaned up |
 | 10 | `<pxl-out>` inside a `<pxl-layer>` | layer renders without errors |
 | 11 | Static `value="Hello"` | shows "Hello" |
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
+- Status line until 2026-11-20: 🟡 **Proposed** (2026-11-17, §3.3 pointer timing; revised 2026-10-17, first draft 2026-08-02)
