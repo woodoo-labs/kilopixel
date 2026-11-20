@@ -28,7 +28,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     this._wasDirty = false;
     this._keepAlive = false;
     this.stage = null;
-    this._dpr = 1; // set by the stage
+    this.dpr = 1; // set by the stage; isolated shapes read it (Shape.renderIsolated())
 
     // The canvas lives in the layer's shadow root: replacing the layer's children (innerHTML, htmx, frameworks)
     // can't remove it, and the light DOM holds only what the page wrote. The slot shows the light-DOM children;
@@ -102,7 +102,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
   // Called by the stage on every resize (also when the window moves to a screen with another pixel ratio).
   // Setting the canvas size resets the context, so the DPR scale is applied again.
   resize(w, h, dpr) {
-    this._dpr = dpr;
+    this.dpr = dpr;
     this._canvas.width = Math.floor(w * dpr);
     this._canvas.height = Math.floor(h * dpr);
     this._ctx.scale(dpr, dpr);
@@ -194,7 +194,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     }
 
     const ctx = this._ctx;
-    ctx.clearRect(0, 0, this._canvas.width / this._dpr, this._canvas.height / this._dpr);
+    ctx.clearRect(0, 0, this._canvas.width / this.dpr, this._canvas.height / this.dpr);
     // Drawn with this frame's values: only the heartbeat survives into the next frame
     this.isDirty = isUpdated && this._keepAlive;
 

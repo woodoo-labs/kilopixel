@@ -61,7 +61,7 @@
       await nextFrame();
       results.canvasStillInShadowRoot = root.contains(canvas);
       results.lightDomAfterInnerHTML = layer.innerHTML;
-      results.expectedCenter = [500, 300].map((v) => Math.round(v * stage.unit * layer._dpr));
+      results.expectedCenter = [500, 300].map((v) => Math.round(v * stage.unit * layer.dpr));
       results.painted = paintedArea(canvas);
 
       document.getElementById('out').textContent = JSON.stringify(results, null, 1);

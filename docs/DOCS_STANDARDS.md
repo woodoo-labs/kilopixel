@@ -40,7 +40,6 @@ Colors separate context (the stage and its layers) from content (the shapes). Ev
 * **Shapes:** the first shape is orange, the second blue, the third green. Several shapes in one layer each keep their own hue.
 * **Active point:** the one defining point the controls move (a slider-driven polyline vertex, the start of a line) uses `700`. Centers stay `400` even when controls move them.
 * **Points on a thick stroke:** when a thick stroke is the subject (`caps.html`), a `400` dot on it almost disappears. All defining points use `700` there, and the centerline on the stroke is white (`#ffffff`, `strokewidth="2"`, `linedash="[5, 5]"`).
-* **Ghosts of fill-only shapes** (`mask.html`): a colored outline would look like the shape's own stroke, so these ghosts are slate (`#94a3b8`, `strokewidth="2"`, `linedash="[5, 5]"`).
 * **Stage (sky):** origin dot `#0284c7` (`600`, label `Stage Origin (0, 0)`); dimension arrows (`width = 1000 (fixed)`) and helper lines `#0ea5e9` (`500`); other corners and their labels (`(1000, 0)`) `#7dd3fc` (`300`).
 * **One layer (violet):** helper lines and labels `#c4b5fd` (`300`), Layer Center dot and label `#a78bfa` (`400`), offset helpers `#7c3aed` (`600`), offset point `#6d28d9` (`700`).
 * **Two or more layers:** as soon as a demo shows the centers of two or more layers, each layer takes the hue of its shapes instead of violet, one step below them: crosshairs and helpers `200`, Layer Center dot and label `300`. A layer that shows no center or crosshairs (e.g. an untransformed layer that only holds a reader) doesn't count.

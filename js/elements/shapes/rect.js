@@ -35,6 +35,11 @@ pxl.Rect = class Rect extends pxl.Shape {
     this.applyStyle(ctx, u);
   }
 
+  // Fill and stroke, or arrowheads: more than one draw call, isolated when it has compositing state (Shape.render())
+  drawsMoreThanOnce() {
+    return this.fillsAndStrokesOrHasArrows();
+  }
+
   getBoundingBox() {
     const { w, h, anchor } = this.attributeValues;
     const ax = pxl.anchorX[anchor];

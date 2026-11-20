@@ -80,7 +80,12 @@ pxl.scaleResponsiveFilter = function(filterStr, u) {
 
 pxl.applyContextState = function(ctx, u, attributeValues, node) {
   pxl.applyTransformState(ctx, u, attributeValues);
+  pxl.applyCompositingState(ctx, u, attributeValues, node);
+};
 
+// How a shape's pixels combine with the layer: alpha, mask / blend, filter, shadow. An isolated shape
+// (Shape.renderIsolated()) applies it once, when its finished bitmap is drawn onto the layer.
+pxl.applyCompositingState = function(ctx, u, attributeValues, node) {
   const { alpha, blend, mask, filter, shadowcolor, shadowblur, shadowx, shadowy } = attributeValues;
 
   if (alpha !== 1) ctx.globalAlpha *= alpha;
@@ -108,6 +113,22 @@ pxl.applyContextState = function(ctx, u, attributeValues, node) {
       ctx.shadowOffsetY = shadowy * u;
     }
   }
+};
+
+// The scratch canvas of isolated shapes (design/2026-11-01_isolated_shape_compositing_plan.md §3.2): one for the
+// page, created on first use. It only grows, to the largest layer canvas it served, so it never resizes back and
+// forth between layers of different sizes. Isolation never nests: groups have no compositing state.
+pxl._isolationContext = null;
+
+pxl.getIsolationContext = function(width, height) {
+  let ctx = pxl._isolationContext;
+  if (ctx === null) {
+    ctx = pxl._isolationContext = document.createElement('canvas').getContext('2d');
+  }
+  const canvas = ctx.canvas;
+  if (canvas.width < width) canvas.width = width;
+  if (canvas.height < height) canvas.height = height;
+  return ctx;
 };
 
 // =========================================================================

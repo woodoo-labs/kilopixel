@@ -224,6 +224,14 @@ pxl.Text = class Text extends pxl.Shape {
     }
   }
 
+  // Fill and stroke, or more than one line (one call per line). Decided from the attributes: the line count is only
+  // known after the layout in draw(). A wrap width counts even if the text fits on one line.
+  drawsMoreThanOnce() {
+    const { text, width } = this.attributeValues;
+    return (this.hasFill() && this.isStroked()) || width > 0 ||
+           (typeof text === 'string' && (text.includes('\n') || text.includes('\\n')));
+  }
+
   getBoundingBox() {
     return this.boundingBox;
   }

@@ -44,7 +44,7 @@ addEventListener('error', e => errors.push(e.message));
 
 // Alpha of the layer canvas at a logical point
 function ink(layerId, x, y) {
-  const layer = $(layerId), u = layer.stage.unit, dpr = layer._dpr;
+  const layer = $(layerId), u = layer.stage.unit, dpr = layer.dpr;
   return layer._ctx.getImageData(Math.round(x * u * dpr), Math.round(y * u * dpr), 1, 1).data[3];
 }
 

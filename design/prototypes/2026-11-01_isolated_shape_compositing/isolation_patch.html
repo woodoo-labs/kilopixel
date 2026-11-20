@@ -18,6 +18,8 @@
 // Shape.render() draws a shape with compositing state and more than one draw call into a shared scratch canvas,
 // then composites it once onto the layer. window.ISO: 'direct' (today), 'full' (scratch of the layer's size),
 // 'bbox' (only the shape's device box), 'force' (full, also without compositing state: for the transform check).
+// Measured against the engine before isolation was built (git show 2462f39:dist/pxl.js). With a later engine,
+// 'direct' calls the built Shape.render(), which isolates as well; the transform check still compares both paths.
 window.ISO = 'direct';
 const scratch = document.createElement('canvas');
 const sctx = scratch.getContext('2d');
@@ -52,7 +54,7 @@ pxl.Shape.prototype.render = function(ctx, u, t) {
       (mode !== 'force' && !(hasCompositing(av) && this.hasFill() && this.isStroked()))) {
     return directRender.call(this, ctx, u, t);
   }
-  const canvas = ctx.canvas, dpr = this.parentLayer._dpr;
+  const canvas = ctx.canvas, dpr = this.parentLayer.dpr;
   if (scratch.width < canvas.width || scratch.height < canvas.height) {
     scratch.width = Math.max(scratch.width, canvas.width);
     scratch.height = Math.max(scratch.height, canvas.height);
@@ -116,7 +118,7 @@ function transformCheck() {
     if (d > maxDiff) maxDiff = d;
     if (d > 2) diffPixels++;
   }
-  return { dpr: layer._dpr, pixels: a.length / 4, maxChannelDiff: maxDiff, pixelsDifferingMoreThan2: diffPixels };
+  return { dpr: layer.dpr, pixels: a.length / 4, maxChannelDiff: maxDiff, pixelsDifferingMoreThan2: diffPixels };
 }
 
 // --- 2. Cost scene: n animated ellipses with fill, stroke and mask="xor" over a rect (the plan's bench, in the engine) ---

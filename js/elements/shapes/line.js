@@ -48,6 +48,11 @@ pxl.Line = class Line extends pxl.Shape {
     this.drawArrows(ctx, u, arrowStart, arrowEnd);
   }
 
+  // Fill and stroke, or arrowheads: more than one draw call, isolated when it has compositing state (Shape.render())
+  drawsMoreThanOnce() {
+    return this.fillsAndStrokesOrHasArrows();
+  }
+
   getBoundingBox() {
     const { x1, y1, x2, y2 } = this.attributeValues;
     this.boundingBox.left = Math.min(x1, x2);

@@ -365,6 +365,11 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     out[8] = q2x; out[9] = q2y;
   }
 
+  // Fill and stroke, or arrowheads: more than one draw call, isolated when it has compositing state (Shape.render())
+  drawsMoreThanOnce() {
+    return this.fillsAndStrokesOrHasArrows();
+  }
+
   getBoundingBox() {
     if (this._pointCount < 4) {
       this.boundingBox.left = 0;

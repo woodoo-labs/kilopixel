@@ -91,6 +91,11 @@ pxl.Grid = class Grid extends pxl.Shape {
     }
   }
 
+  // Major lines are a second stroke (and bring the labels); a fill and a stroke are two calls too
+  drawsMoreThanOnce() {
+    return this.attributeValues.major > 0 || (this.hasFill() && this.isStroked());
+  }
+
   // Set in draw(): the visible area
   getBoundingBox() {
     return this.boundingBox;

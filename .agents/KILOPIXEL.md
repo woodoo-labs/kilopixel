@@ -1,6 +1,6 @@
 # Kilopixel Framework — Complete Technical Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~71KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~73KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes with custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, …); the engine compiles their attribute expressions and redraws a layer in every frame in which something in it changed or is animated.
 
@@ -94,7 +94,8 @@ Stage.requestRender() → requestAnimationFrame → Stage.render(t)
   │   ├─ For each child: child.render(ctx, u, t)
   │   │   ├─ ctx.save() + applyContextState()
   │   │   ├─ shape.draw(ctx, u, t) → _buildPath + applyStyle
-  │   │   └─ ctx.restore()
+  │   │   ├─ ctx.restore()
+  │   │   └─ isolated (needsIsolation()): draw() into the scratch canvas, then one drawImage() with applyCompositingState()
   │   ├─ ctx.restore()
   │   └─ Heartbeat: if the layer's own attributes are animated → stage.requestRender()
   └─ Performance metrics accumulation (published by pxl.perf's own 1-second timer, not here)
@@ -379,7 +380,7 @@ Every element (layer, group, shape) has the same coordinate model:
 
 ### Transform Order
 
-Shapes go through `pxl.applyContextState()`, which calls `pxl.applyTransformState()` (steps 1–5, also used by layers, groups and hit testing) and then sets the compositing (steps 6–9):
+Shapes go through `pxl.applyContextState()`, which calls `pxl.applyTransformState()` (steps 1–5, also used by layers, groups and hit testing) and then `pxl.applyCompositingState()` (steps 6–9). An isolated shape ([Isolated Shapes](#isolated-shapes)) gets steps 1–5 as its global matrix on the scratch canvas and steps 6–9 when its bitmap is drawn onto the layer:
 
 ```
 1. ctx.translate(x * u, y * u)                     ← move to the center (transform origin)
@@ -428,6 +429,15 @@ On a shape, both set `ctx.globalCompositeOperation`; they are two attributes bec
 - **`mask`** (shapes only): alpha compositing and clipping (`destination-in`, `destination-out`, `source-atop`, …). CSS `mix-blend-mode` has no such modes, so layers don't have `mask`.
 
 If a shape sets both, `mask` wins.
+
+### Isolated Shapes
+
+The canvas composites every draw call on its own. A shape that draws more than once (fill and stroke, arrowheads, the lines of a text, a grid's major lines and labels) would mask, blend, filter or shadow its own earlier parts: `mask="source-in"` erased its fill, the stroke cast a shadow onto the fill. Such a shape is **isolated** (`design/2026-11-01_isolated_shape_compositing_plan.md`, built 2026-11-20), like an SVG group:
+
+- **When:** `Shape.needsIsolation()` = `hasCompositingState()` (`mask`, `blend`, `filter` or a visible `shadowcolor`; not `alpha`, which stays per draw call, plan §6.1) and `drawsMoreThanOnce()`. The built-in shapes answer from their values: path shapes `fillsAndStrokesOrHasArrows()` (fill and stroke, or `hasArrowheads()`), text fill and stroke or more than one line (a line break in `text`, or a wrap `width`), grid `major > 0` or fill and stroke. The base `drawsMoreThanOnce()` returns true: a custom shape's `draw()` is unknown, so it is isolated whenever it has compositing state, unless it overrides `needsIsolation()` or `drawsMoreThanOnce()`.
+- **How:** `Shape.renderIsolated()` draws the shape into the shared scratch canvas (`pxl.getIsolationContext(w, h)`: one per page, created on first use, grows to the largest layer canvas and never shrinks) with `setTransform()` of its global matrix (linear part × `layer.dpr`, translation × `u` × `layer.dpr`; the same pixels as the layer's transform chain, checked to 1 / 255), then draws the whole scratch area onto the layer with an identity transform and `pxl.applyCompositingState()`. Canvas shadows and filters ignore the transform, so offsets and blur sizes stay as on the direct path; a bitmap's shadow blurs its soft edge slightly differently from a path's (up to 16 / 255).
+- **Cost** (plan §4.1, real frames, DPR 2): about 0.3 ms of CPU per frame for the first isolated shape, about 1 ms for 5–20, at 60 fps; from about 50 per frame the GPU limits it (100: 26 fps). A bounding-box scratch region is decided as step 2 (TODO §31). Hit testing doesn't isolate: it calls `draw()` on `pxl.dummyCtx` directly.
+- **Not handled:** an isolated text with `direction` unset draws left-to-right on the scratch canvas, which is outside the document, even on a right-to-left page.
 
 ---
 
@@ -1004,7 +1014,7 @@ Same geometric transforms as Layer: `x`, `y`, `dx`, `dy`, `rotate`, `zoom`, `sca
 
 **`update(t)`** (update phase): evaluates animations, also for a hidden shape (so `ref.*` to it stays current). A failing evaluation is reported and stores `_failedFrame`.
 
-**`render(ctx, u, t)`** (draw phase): stops if the update failed in this frame or the shape is hidden, then draws inside `ctx.save()` / `ctx.restore()`: `applyContextState()` and `this.draw(ctx, u, t)`. Every shape draws in its own canvas state, so whatever a shape (also a custom one) changes, the next shape starts clean. Errors are caught and reported ([Errors While Rendering](#errors-while-rendering)). Custom shapes override `draw()`, not `update()` or `render()`.
+**`render(ctx, u, t)`** (draw phase): stops if the update failed in this frame or the shape is hidden; a shape that `needsIsolation()` goes to `renderIsolated()` ([Isolated Shapes](#isolated-shapes)); otherwise it draws inside `ctx.save()` / `ctx.restore()`: `applyContextState()` and `this.draw(ctx, u, t)`. Every shape draws in its own canvas state, so whatever a shape (also a custom one) changes, the next shape starts clean. Errors are caught and reported ([Errors While Rendering](#errors-while-rendering)). Custom shapes override `draw()`, not `update()` or `render()`.
 
 **`applyStyle(ctx, u)`**: After a path is built:
 1. If `fill` is set (not `none`/`transparent`): resolve gradient, `ctx.fill()`
@@ -1529,6 +1539,7 @@ A slider then sets one value (`document.getElementById('x0').setAttribute('value
    │       │   └─ child.render(ctx, u, t)
    │       │       ├─ group: (_failedFrame or hidden: stop) → transforms → children
    │       │       ├─ shape: (_failedFrame or hidden: stop) → save → applyContextState → draw() → restore
+   │       │       │   (needsIsolation(): draw() into the scratch canvas → one drawImage() onto the layer)
    │       │       └─ variable: nothing
    │       ├─ if has transforms: ctx.restore()
    │       └─ HEARTBEAT: if layer.isAnimated → stage.requestRender()  (without isDirty)

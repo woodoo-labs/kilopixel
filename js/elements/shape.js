@@ -60,10 +60,80 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // Draw phase. Every shape draws in its own canvas state: whatever it changes or throws, the next shape starts clean.
   render(ctx, u, t) {
     if (this._failedFrame === pxl._frame || this.attributeValues.hidden) return;
+    if (this.needsIsolation()) {
+      this.renderIsolated(ctx, u, t);
+      return;
+    }
     ctx.save();
     try {
       pxl.applyContextState(ctx, u, this.attributeValues, this);
       this.draw(ctx, u, t);
+    } catch (error) {
+      this.reportError(error);
+    } finally {
+      ctx.restore();
+    }
+  }
+
+  // --- Isolated Compositing ---
+  // (design/2026-11-01_isolated_shape_compositing_plan.md)
+  // The canvas composites every draw call on its own, so a shape that draws more than once (fill and stroke,
+  // arrowheads, text lines) would mask, blend, filter or shadow its own earlier parts. Such a shape draws into the
+  // scratch canvas instead, which then goes onto the layer once, with the shape's compositing state.
+
+  // State that acts on the whole shape. alpha is left out: fades are common and isolating them costs a frame time
+  // the per-call result hardly shows (plan §6.1).
+  hasCompositingState() {
+    const { mask, blend, filter, shadowcolor } = this.attributeValues;
+    return mask !== 'none' || blend !== 'source-over' || filter !== 'none' ||
+           (!!shadowcolor && shadowcolor !== 'none' && shadowcolor !== 'transparent');
+  }
+
+  needsIsolation() {
+    return this.hasCompositingState() && this.drawsMoreThanOnce();
+  }
+
+  // The built-in shapes answer from the values they draw with. A custom shape's draw() is unknown, so it counts as
+  // drawing more than once; one that draws once can override this or needsIsolation() (plan §3.5).
+  drawsMoreThanOnce() {
+    return true;
+  }
+
+  // The rule of the path shapes: a fill and a stroke, or arrowheads (one more call in drawArrows())
+  fillsAndStrokesOrHasArrows() {
+    return (this.hasFill() && this.isStroked()) || this.hasArrowheads();
+  }
+
+  // Only lines, polylines, circles and ellipses have arrowstart
+  hasArrowheads() {
+    const { arrowstart, arrowend, strokewidth } = this.attributeValues;
+    return arrowstart !== undefined && this.isStroked() &&
+           (pxl.arrowSize(arrowstart, strokewidth) > 0 || pxl.arrowSize(arrowend, strokewidth) > 0);
+  }
+
+  // Draws with the shape's global matrix (the same pixels as the layer's transform chain, plan §3.4) into the whole
+  // scratch area of the layer's size, then composites it with an identity transform: canvas shadows and filters
+  // ignore the transform, so offsets and blur sizes stay as on the direct path.
+  renderIsolated(ctx, u, t) {
+    const canvas = ctx.canvas, w = canvas.width, h = canvas.height, d = this.parentLayer.dpr;
+    const scratch = pxl.getIsolationContext(w, h);
+    scratch.clearRect(0, 0, w, h);
+    scratch.save();
+    try {
+      const m = this.getGlobalMatrix();
+      scratch.setTransform(m[0] * d, m[1] * d, m[2] * d, m[3] * d, m[4] * u * d, m[5] * u * d);
+      this.draw(scratch, u, t);
+    } catch (error) {
+      this.reportError(error);
+      return;
+    } finally {
+      scratch.restore();
+    }
+    ctx.save();
+    try {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      pxl.applyCompositingState(ctx, u, this.attributeValues, this);
+      ctx.drawImage(scratch.canvas, 0, 0, w, h, 0, 0, w, h);
     } catch (error) {
       this.reportError(error);
     } finally {

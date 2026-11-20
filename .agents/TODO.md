@@ -105,7 +105,7 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
   - Semi-transparent fills will show the stroke underneath (expected, same as SVG).
   - Arrowheads (`drawArrows`) use the stroke style; check how they should behave with `paintorder="stroke"`.
   - Add a docs section/example following `docs/DOCS_STANDARDS.md`.
-- **Related**: build after §31 (`design/2026-11-01_isolated_shape_compositing_plan.md` §9). Without isolation, `paintorder="stroke"` has the same compositing bug as §31 (with a shadow, the fill's shadow falls onto the stroke drawn before it); with isolation it only swaps two draw calls.
+- **Related**: build after §31 (`design/2026-11-01_isolated_shape_compositing_plan.md` §9). Without isolation, `paintorder="stroke"` has the same compositing bug as §31 (with a shadow, the fill's shadow falls onto the stroke drawn before it); with isolation it only swaps two draw calls. (2026-11-20: isolation is built, plan §10, so `paintorder` can build on it.)
 
 ## 20. Shape Authoring (Derived Attributes, Class Fields, Custom Animation)
 - **Status**: 🟡 **Proposed** (2026-10-17, no code changes yet)
@@ -171,17 +171,12 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Open**: D2 scoped names instead of global ids (a recommendation in plan §13, not confirmed yet). D3 (no coordinates on events) is built as recommended (plan §23.8); D8 is built for every attribute (plan §24); D9 was replaced by the order of plan §19.4.
 - **Related**: `design/2026-11-04_stage_sizing_plan.md` (✅ 2026-11-15) built W2 together with overridable stage sizes and a 300 px fallback width.
 
-## 31. Isolated Shape Compositing (Fill and Stroke Composite as One)
-- **Status**: 🟢 **Decided** (2026-11-20, open points decided as recommended, plan §6; checked against today's engine: transform copy works, cost measured again in real frames, custom shapes added as §6.3; 2026-11-01)
-- **Reference**: `design/2026-11-01_isolated_shape_compositing_plan.md`; prototypes `design/prototypes/2026-11-01_isolated_shape_compositing/mask_fill_stroke.html`, `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_bench.html`, `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_patch.html` and `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_frames.js` (2026-11-20, real frames)
-- **Problem**: a shape that draws more than once (fill + stroke, arrowheads, multi-line text, grid major lines or labels) composites each draw call separately. With `mask` 7 of 9 modes are wrong (`source-in` erases the fill, `xor` cuts the stroke into the fill); with `shadowcolor` the stroke casts a shadow onto the shape's own fill (visible in `shadow.html` §1); `filter` and `blend` are affected too.
-- **Shadows on arrowheads** (noted 2026-10-15): the shaft (`stroke()`) and the heads (`drawArrows`) are separate calls, so a dark band shows where the shaft enters the head. Overlaps within one path (polyline corners) cast one shadow and are fine. Workaround today: `filter="dropShadow(...)"` on the `<pxl-layer>` instead of `shadowcolor` on the shape (one shadow of the combined silhouette).
-- **Idea**: draw such a shape normally into one shared scratch canvas, then composite it onto the layer once with its alpha / mask / blend / filter / shadow. Single-draw shapes keep the direct path.
-- **Alternative for shadows only** (noted 2026-10-15): two passes only when a shadow is set: draw all parts with the shadow, then draw them again without the shadow on top, so the shadows end up underneath everything. Doubles the draw calls, but only for shapes with a shadow; doesn't help `mask`, `blend` or `filter`.
-- **Measured** (2026-11-20, real frames, DPR 2, plan §4.1): about 0.3 ms of CPU per frame for the first isolated shape and about 1 ms for 5–20, at 60 fps; at 100 the GPU limits it (26 fps full canvas, 35 fps bounding box). The earlier 0.75–0.9 ms per shape (plain canvas with a GPU readback) overstated it.
-- **Decided 2026-11-20** (plan §6): `alpha` not isolated for now; the bounding box as step 2 (it pays off from about 50 isolated shapes); custom shapes isolated when they have compositing state, unless they override `needsIsolation()`. Settled 2026-11-20: the transform copy from `getGlobalMatrix()` without `getTransform()` (same pixels, plan §3.4).
-- **Docs**: afterwards `mask.html` shapes get fill + stroke and the standard ghosts; the "Ghosts of fill-only shapes" note in DOCS_STANDARDS.md goes.
-- **Related**: builds on always save / restore (`design/2026-11-07_safe_shape_render_plan.md`, built 2026-11-07); build before §14 (`paintorder`); plan §9 (also: no shared code with the two-phase frame since its step 1, any order; `<pxl-clip>` clips the composite step).
+## 31. Isolated Shape Compositing: Step 2, the Bounding Box
+- **Status**: 🟢 **Decided** (2026-11-20, step 1 built: shapes that draw more than once and have mask, blend, filter or a shadow are isolated, the plan is ✅, plan §10; step 2 left)
+- **Reference**: `design/2026-11-01_isolated_shape_compositing_plan.md` (§4.1, §6.2, §8 step 6); prototypes `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_patch.html` (has a bounding-box mode) and `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_frames.js` (real frames)
+- **Left**: clear and composite only the shape's device box (its `getBoundingBox()` plus `hitPadding()` through the global matrix) instead of the whole layer-sized scratch area. Measured 2026-11-20 at DPR 2: with 100 isolated shapes per frame 35 instead of 26 fps; under about 50 per frame no difference. Build it when a page needs it.
+- **Known limit** (plan §10): an isolated text with `direction` unset draws left-to-right on the scratch canvas, also on a right-to-left page.
+- **Related**: `paintorder` (§14) builds on the isolated path: with it, the stroke drawn under the fill is a swap of two calls in the scratch canvas (plan §9).
 
 ## 34. String Literals in Expressions: Docs Left
 - **Status**: 💬 **Discussion** (2026-11-17: the compiler fix is built, plan ✅; only docs ideas are left)

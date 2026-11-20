@@ -114,6 +114,11 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
     return (lo + hi) / 2;
   }
 
+  // Fill and stroke, or arrowheads: more than one draw call, isolated when it has compositing state (Shape.render())
+  drawsMoreThanOnce() {
+    return this.fillsAndStrokesOrHasArrows();
+  }
+
   getBoundingBox() {
     const { rx, ry } = this.attributeValues;
     this.boundingBox.left = -rx;

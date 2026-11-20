@@ -77,7 +77,7 @@
 
     // RGBA of the layer canvas pixel under stage coordinates (x, y)
     function pixelAt(layer, x, y) {
-      const k = layer.stage.unit * layer._dpr;
+      const k = layer.stage.unit * layer.dpr;
       return [...layer._ctx.getImageData(Math.round(x * k), Math.round(y * k), 1, 1).data];
     }
     const alphaAt = (layer, x, y) => pixelAt(layer, x, y)[3];

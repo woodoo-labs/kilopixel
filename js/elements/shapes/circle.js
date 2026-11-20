@@ -99,6 +99,11 @@ pxl.Circle = class Circle extends pxl.Shape {
     return 2 * Math.asin(Math.min(rec.inset, 2 * radius) / (2 * radius));
   }
 
+  // Fill and stroke, or arrowheads: more than one draw call, isolated when it has compositing state (Shape.render())
+  drawsMoreThanOnce() {
+    return this.fillsAndStrokesOrHasArrows();
+  }
+
   getBoundingBox() {
     const { r } = this.attributeValues;
     this.boundingBox.left = -r;

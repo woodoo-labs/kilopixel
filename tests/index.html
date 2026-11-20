@@ -1235,6 +1235,186 @@
         if (state.hidden !== false || requests === 0 || state.alpha === 0) throw new Error(JSON.stringify(state));
       }));
 
+    // ===================================================================
+    // Isolated compositing (design/2026-11-01_isolated_shape_compositing_plan.md)
+    // ===================================================================
+    // A shape that draws more than once (fill and stroke, arrowheads, text lines) and has mask, blend, filter or a
+    // shadow draws into a scratch canvas and is composited onto its layer once, like an SVG group.
+    section('Isolated compositing');
+
+    // A stage of one layer with `html` in it, rendered once; fn gets the layer and the first element in it
+    const isoStage = (html, fn) => withStage(
+      `<div style="width: 500px"><pxl-stage ratio="2 / 1" alwaysrender><pxl-layer>${html}</pxl-layer></pxl-stage></div>`,
+      (stage) => {
+        const layer = stage.querySelector('pxl-layer');
+        isoRender(layer);
+        return fn(layer, layer.querySelector('[id]') || layer.lastElementChild);
+      });
+    function isoRender(layer) {
+      layer.isDirty = true;
+      layer.stage.render(1);
+    }
+    // The pixel at (x, y) in stage units, or every pixel of the layer
+    function isoPixel(layer, x, y) {
+      const k = layer.stage.unit * layer.dpr;
+      return [...layer._ctx.getImageData(Math.round(x * k), Math.round(y * k), 1, 1).data];
+    }
+    const isoPixels = (layer) => layer._ctx.getImageData(0, 0, layer._canvas.width, layer._canvas.height).data;
+    // Opaque pixels within a box in stage units
+    function isoOpaqueIn(layer, x0, y0, x1, y1) {
+      const k = layer.stage.unit * layer.dpr;
+      const data = layer._ctx.getImageData(Math.round(x0 * k), Math.round(y0 * k), Math.round((x1 - x0) * k), Math.round((y1 - y0) * k)).data;
+      let n = 0;
+      for (let i = 3; i < data.length; i += 4) if (data[i] > 200) n++;
+      return n;
+    }
+    // A shadow lies under the shape: where the shape without its shadow is opaque, the shadow changes nothing
+    function isoShadowStaysUnder(layer, shape) {
+      const shadow = shape.getAttribute('shadowcolor');
+      shape.removeAttribute('shadowcolor');
+      isoRender(layer);
+      const plain = isoPixels(layer);
+      shape.setAttribute('shadowcolor', shadow);
+      isoRender(layer);
+      const withShadow = isoPixels(layer);
+      let changed = 0;
+      for (let i = 0; i < plain.length; i += 4) {
+        if (plain[i + 3] < 255) continue;
+        if (Math.abs(plain[i] - withShadow[i]) > 8 || Math.abs(plain[i + 1] - withShadow[i + 1]) > 8 ||
+            Math.abs(plain[i + 2] - withShadow[i + 2]) > 8) changed++;
+      }
+      return changed;
+    }
+    // A custom shape that fills and strokes a rectangle, as a custom shape would be written
+    customElements.define('test-iso-badge', class extends pxl.Shape {
+      draw(ctx, u) {
+        ctx.beginPath();
+        ctx.rect(-100 * u, -60 * u, 200 * u, 120 * u);
+        this.applyStyle(ctx, u);
+      }
+      getBoundingBox() {
+        Object.assign(this.boundingBox, { left: -100, right: 100, top: -60, bottom: 60 });
+        return this.boundingBox;
+      }
+    });
+
+    test('isolated compositing: mask="source-in" keeps the fill of a shape with fill and stroke', () => isoStage(
+      `<pxl-rect x="500" y="250" w="300" h="300" fill="#fb923c"></pxl-rect>
+       <pxl-ellipse id="isoIn" x="500" y="250" rx="200" ry="110" fill="#1d4ed8" stroke="#0f172a" strokewidth="20" mask="source-in"></pxl-ellipse>`,
+      (layer) => {
+        const p = isoPixel(layer, 500, 250);
+        // Before: the stroke, composited on its own, erased the fill (transparent)
+        if (p[3] !== 255 || !isBlueish(p)) throw new Error(`the fill inside the rect is ${rgba(p)}`);
+        if (isoPixel(layer, 700, 250)[3] !== 0) throw new Error('drawn outside the rect');
+      }));
+
+    test('isolated compositing: mask="xor" keeps the inner half of the stroke', () => isoStage(
+      `<pxl-rect x="350" y="250" w="300" h="300" fill="#fb923c"></pxl-rect>
+       <pxl-ellipse id="isoXor" x="500" y="250" rx="200" ry="110" fill="#bfdbfe" stroke="#0f172a" strokewidth="20" mask="xor"></pxl-ellipse>`,
+      (layer) => {
+        // The stroke's inner half on the right, outside the rect. Before: cut out of the shape's own fill.
+        const p = isoPixel(layer, 694, 250);
+        if (p[3] !== 255 || p[0] > 60 || p[2] > 60) throw new Error(`the inner half of the stroke is ${rgba(p)}`);
+        if (isoPixel(layer, 300, 250)[3] !== 0) throw new Error('the rect under the ellipse is not cut out');
+      }));
+
+    test('isolated compositing: the shadow of a shape with fill and stroke falls only outside it', () => isoStage(
+      `<pxl-circle id="isoShadow" x="500" y="250" r="150" fill="#bfdbfe" stroke="#1d4ed8" strokewidth="20"
+         shadowcolor="#000000" shadowblur="0" shadowy="20"></pxl-circle>`,
+      (layer, shape) => {
+        // Before: the stroke's shadow fell onto the shape's own fill, a dark band inside the upper edge
+        const changed = isoShadowStaysUnder(layer, shape);
+        if (changed !== 0) throw new Error(`the shadow changed ${changed} pixels of the shape`);
+        if (isoPixel(layer, 500, 418)[3] === 0) throw new Error('no shadow below the shape');
+      }));
+
+    test('isolated compositing: multi-line text with mask="source-in" keeps every line', () => isoStage(
+      `<pxl-rect x="500" y="250" w="600" h="400" fill="#fb923c"></pxl-rect>
+       <pxl-text id="isoText" x="500" y="250" text="'MMMM\\nMMMM'" size="110" weight="bold" fill="#1d4ed8" align="center"
+         baseline="middle" mask="source-in"></pxl-text>`,
+      (layer) => {
+        // Before: each line was masked against the lines drawn before it, so the second erased the first
+        const top = isoOpaqueIn(layer, 200, 50, 800, 250), bottom = isoOpaqueIn(layer, 200, 250, 800, 450);
+        if (top < 100 || bottom < 100) throw new Error(`opaque pixels: first line ${top}, second line ${bottom}`);
+      }));
+
+    test('isolated compositing: only shapes with compositing state that draw more than once are isolated', () => isoStage(
+      `<pxl-ellipse id="isoE1" rx="10" ry="10" fill="#000" mask="xor"></pxl-ellipse>
+       <pxl-ellipse id="isoE2" rx="10" ry="10" fill="#000" stroke="#fff" mask="xor"></pxl-ellipse>
+       <pxl-ellipse id="isoE3" rx="10" ry="10" fill="#000" stroke="#fff" alpha="0.5"></pxl-ellipse>
+       <pxl-ellipse id="isoE4" rx="10" ry="10" fill="#000" stroke="#fff"></pxl-ellipse>
+       <pxl-rect id="isoR1" w="10" h="10" fill="#000" stroke="#fff" shadowcolor="none"></pxl-rect>
+       <pxl-rect id="isoR2" w="10" h="10" fill="#000" stroke="#fff" blend="multiply"></pxl-rect>
+       <pxl-line id="isoL1" x2="100" stroke="#000" strokewidth="4" arrowend="auto" shadowcolor="#000"></pxl-line>
+       <pxl-line id="isoL2" x2="100" stroke="#000" strokewidth="4" shadowcolor="#000"></pxl-line>
+       <pxl-line id="isoL3" x2="100" stroke="none" arrowend="auto" shadowcolor="#000"></pxl-line>
+       <pxl-text id="isoT1" text="'one'" fill="#000" shadowcolor="#000"></pxl-text>
+       <pxl-text id="isoT2" text="'one\\ntwo'" fill="#000" shadowcolor="#000"></pxl-text>
+       <pxl-text id="isoT3" text="'one'" fill="#000" stroke="#fff" filter="blur(1)"></pxl-text>
+       <pxl-text id="isoT4" text="'one'" width="200" fill="#000" shadowcolor="#000"></pxl-text>
+       <pxl-grid id="isoG1" stroke="#000" major="4" shadowcolor="#000"></pxl-grid>
+       <pxl-grid id="isoG2" stroke="#000" shadowcolor="#000"></pxl-grid>
+       <test-iso-badge id="isoC1" fill="#000" mask="xor"></test-iso-badge>
+       <test-iso-badge id="isoC2" fill="#000"></test-iso-badge>`,
+      () => {
+        const expected = { isoE1: false, isoE2: true, isoE3: false, isoE4: false, isoR1: false, isoR2: true,
+          isoL1: true, isoL2: false, isoL3: false, isoT1: false, isoT2: true, isoT3: true, isoT4: true,
+          isoG1: true, isoG2: false, isoC1: true, isoC2: false };
+        const wrong = Object.keys(expected).filter((id) => el(id).needsIsolation() !== expected[id]);
+        if (wrong.length) throw new Error(`needsIsolation() wrong for ${wrong.map((id) => `${id} (${!expected[id]})`).join(', ')}`);
+      }));
+
+    test('isolated compositing: a shape drawn through the scratch canvas lands on the same pixels in nested transforms', () =>
+      withStage(`<div style="width: 500px"><pxl-stage ratio="2 / 1" alwaysrender>
+          <pxl-layer x="40" y="20" rotate="7" zoom="0.9">
+            <pxl-group x="300" y="200" rotate="-20" skewx="15" scalex="1.3" scaley="0.8" dx="10" dy="-5">
+              <pxl-group zoom="1.2" rotate="35" x="60">
+                <pxl-ellipse rx="90" ry="50" fill="#dbeafe" stroke="#3b82f6" strokewidth="12"></pxl-ellipse>
+                <pxl-polyline points="-200,80; -120,140; -40,90" stroke="#0f766e" strokewidth="8" arrowend="auto"></pxl-polyline>
+                <pxl-text x="-60" y="-120" text="'Two\\nlines'" size="40" fill="#111" stroke="#f43f5e" strokewidth="2"></pxl-text>
+              </pxl-group>
+            </pxl-group>
+          </pxl-layer>
+        </pxl-stage></div>`, (stage) => {
+        const layer = stage.querySelector('pxl-layer');
+        const shapes = [...layer.querySelectorAll('pxl-ellipse, pxl-polyline, pxl-text')];
+        isoRender(layer);
+        const direct = isoPixels(layer);
+        // Without compositing state the shapes take the direct path; forced through the isolated path they must match
+        for (const shape of shapes) shape.needsIsolation = () => true;
+        isoRender(layer);
+        const isolated = isoPixels(layer);
+        let off = 0, maxDiff = 0;
+        for (let i = 0; i < direct.length; i++) {
+          const d = Math.abs(direct[i] - isolated[i]);
+          if (d > maxDiff) maxDiff = d;
+          if (d > 2) off++;
+        }
+        if (off !== 0) throw new Error(`${off} channel values differ by more than 2 (largest ${maxDiff})`);
+      }));
+
+    test('isolated compositing: a custom shape with compositing state is isolated unless it overrides needsIsolation()', () => isoStage(
+      `<pxl-rect x="500" y="250" w="300" h="300" fill="#fb923c"></pxl-rect>
+       <test-iso-badge id="isoBadge" x="500" y="250" zoom="1.5" fill="#1d4ed8" stroke="#0f172a" strokewidth="16" mask="source-in"></test-iso-badge>`,
+      (layer, badge) => {
+        const p = isoPixel(layer, 500, 250);
+        if (p[3] !== 255 || !isBlueish(p)) throw new Error(`the custom shape's fill inside the rect is ${rgba(p)}`);
+        let isolated = 0;
+        badge.renderIsolated = function(...args) { isolated++; return pxl.Shape.prototype.renderIsolated.apply(this, args); };
+        badge.needsIsolation = () => false; // a custom shape that knows it draws once
+        isoRender(layer);
+        if (isolated !== 0) throw new Error('isolated although needsIsolation() returns false');
+      }));
+
+    test('isolated compositing: an arrowhead\'s shadow doesn\'t fall onto its own shaft', () => isoStage(
+      `<pxl-line id="isoArrow" x1="100" y1="250" x2="800" y2="250" stroke="#0f766e" strokewidth="24" arrowend="auto"
+         shadowcolor="#000000" shadowblur="0" shadowx="-30" shadowy="18"></pxl-line>`,
+      (layer, shape) => {
+        // Before: the head, drawn after the shaft, cast its shadow onto the shaft
+        const changed = isoShadowStaysUnder(layer, shape);
+        if (changed !== 0) throw new Error(`the shadow changed ${changed} pixels of the line`);
+      }));
+
     // --- Reference cycles (design/2026-11-12_reactive_propagation_plan.md) ---
     section('Reference cycles');
 
@@ -1622,7 +1802,7 @@
 
     // Alpha of the layer canvas pixel under stage coordinates (x, y)
     function alphaAt(layer, x, y) {
-      const k = layer.stage.unit * layer._dpr;
+      const k = layer.stage.unit * layer.dpr;
       return layer._ctx.getImageData(Math.round(x * k), Math.round(y * k), 1, 1).data[3];
     }
 

@@ -39,8 +39,8 @@
         </div>
 
         <div class="callout-info">
-          <p class="callout-title">Don't Mix Fill and Stroke</p>
-          <p class="callout-body">Masks work best on shapes that have only a <code>fill</code> or only a <code>stroke</code>. On a shape with <strong>both</strong>, the stroke is also masked against the shape's own fill, which leaves visible overlaps. For clean cutouts, give the mask shape a fill or a stroke, not both.</p>
+          <p class="callout-title">Fill and Stroke Mask as One</p>
+          <p class="callout-body">A shape with both a <code>fill</code> and a <code>stroke</code> is masked as a whole: its stroke is never masked against its own fill. The same holds for its arrowheads and for the lines of a multi-line text.</p>
         </div>
 
         <!-- ================================================================= -->
@@ -52,12 +52,12 @@
         <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
   &lt;pxl-layer&gt;
     &lt;!-- Left: Rect, the destination --&gt;
-    &lt;pxl-rect w="400" h="300" fill="darkorange"
+    &lt;pxl-rect w="400" h="300" fill="#ffedd5" stroke="#f97316" strokewidth="4"
       x="<mark id="sec1RectXCode">350</mark>" y="<mark id="sec1RectYCode">300</mark>" rotate="<mark id="sec1RectRotateCode">0</mark>" alpha="<mark id="sec1RectAlphaCode">1</mark>"&gt;
     &lt;/pxl-rect&gt;
 
     &lt;!-- Right: Ellipse, the source with the mask --&gt;
-    &lt;pxl-ellipse rx="200" ry="150" fill="dodgerblue"
+    &lt;pxl-ellipse rx="200" ry="150" fill="#dbeafe" stroke="#3b82f6" strokewidth="4"
       x="<mark id="sec1EllipseXCode">650</mark>" y="<mark id="sec1EllipseYCode">300</mark>" rotate="<mark id="sec1EllipseRotateCode">0</mark>" alpha="<mark id="sec1EllipseAlphaCode">1</mark>"
       mask="<mark id="sec1MaskCode">xor</mark>"&gt;
     &lt;/pxl-ellipse&gt;
@@ -145,16 +145,16 @@
             <pxl-layer id="sec1BgLayer">
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
               <!-- Ghost Outlines (Background) -->
-              <pxl-rect x="ref.sec1Rect.x" y="ref.sec1Rect.y" w="400" h="300" stroke="#94a3b8" strokewidth="2" linedash="[5, 5]" fill="none" rotate="ref.sec1Rect.rotate" alpha="ref.sec1Rect.alpha"></pxl-rect>
-              <pxl-ellipse x="ref.sec1Ellipse.x" y="ref.sec1Ellipse.y" rx="200" ry="150" stroke="#94a3b8" strokewidth="2" linedash="[5, 5]" fill="none" rotate="ref.sec1Ellipse.rotate" alpha="ref.sec1Ellipse.alpha"></pxl-ellipse>
+              <pxl-rect x="ref.sec1Rect.x" y="ref.sec1Rect.y" w="400" h="300" stroke="#fdba74" strokewidth="2" fill="none" rotate="ref.sec1Rect.rotate" alpha="ref.sec1Rect.alpha"></pxl-rect>
+              <pxl-ellipse x="ref.sec1Ellipse.x" y="ref.sec1Ellipse.y" rx="200" ry="150" stroke="#93c5fd" strokewidth="2" fill="none" rotate="ref.sec1Ellipse.rotate" alpha="ref.sec1Ellipse.alpha"></pxl-ellipse>
             </pxl-layer>
 
             <!-- MASKING LAYER -->
             <pxl-layer>
               <!-- The Destination Shapes -->
-              <pxl-rect id="sec1Rect" x="350" y="300" w="400" h="300" fill="darkorange" rotate="0" alpha="1"></pxl-rect>
+              <pxl-rect id="sec1Rect" x="350" y="300" w="400" h="300" fill="#ffedd5" stroke="#f97316" strokewidth="4" rotate="0" alpha="1"></pxl-rect>
               <!-- Source -->
-              <pxl-ellipse id="sec1Ellipse" x="650" y="300" rx="200" ry="150" fill="dodgerblue" rotate="0" alpha="1" mask="xor"></pxl-ellipse>
+              <pxl-ellipse id="sec1Ellipse" x="650" y="300" rx="200" ry="150" fill="#dbeafe" stroke="#3b82f6" strokewidth="4" rotate="0" alpha="1" mask="xor"></pxl-ellipse>
             </pxl-layer>
 
             <!-- FOREGROUND LABELS -->

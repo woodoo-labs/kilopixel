@@ -53,7 +53,7 @@
 
     // [r, g, b, a] of the layer canvas at stage position (x, y)
     function pixel(layer, x, y) {
-      const k = layer.stage.unit * layer._dpr;
+      const k = layer.stage.unit * layer.dpr;
       return Array.from(layer._ctx.getImageData(Math.round(x * k), Math.round(y * k), 1, 1).data);
     }
 
