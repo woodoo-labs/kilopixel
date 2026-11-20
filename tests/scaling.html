@@ -22,7 +22,7 @@
   <main class="docs-content">
     <div class="docs-inner">
       <h1>Scaling Tests</h1>
-      <p>Level 6 of <code>design/2026-11-15_testing_plan.md</code>: each test measures an operation with n and with 2n elements and compares the two times. Linear work takes about twice as long (ratio 2), quadratic work about four times as long; a test fails above ratio 3.5. Ratios are the same on every machine, unlike absolute times. Each size is measured five times, the median counts, and n grows until the smaller measurement takes at least 5 ms (shorter times are mostly noise). Run with <code>node tools/run_tests.js --tests</code>, or here via the dev server.</p>
+      <p>Level 6 of <code>design/2026-11-15_testing_plan.md</code>: each test measures an operation with n and with 2n elements and compares the two times. Linear work takes about twice as long (ratio 2), quadratic work about four times as long; a test fails above ratio 3.5. Ratios are the same on every machine, unlike absolute times. Each size is measured five times, the median counts, and n grows until the smaller measurement takes at least 5 ms (shorter times are mostly noise). Work that must not depend on the scene's size is timed with n and with 4n elements in the scene and fails above ratio 2. Run with <code>node tools/run_tests.js --tests</code>, or here via the dev server.</p>
       <p id="summary" class="test-summary">Running…</p>
       <table class="test-table"><tbody id="results"></tbody></table>
       <div id="host" style="width: 1000px"></div>
@@ -76,6 +76,23 @@
         ratio = Math.min(ratio, ratio2);
       }
       if (ratio > LIMIT) throw new Error(`${message} (limit ${LIMIT})`);
+    }
+
+    // For work that must not depend on the scene's size: measure(n) times the same fixed work in a scene of n
+    // elements. Fails when time(4n) / time(n) is above CONSTANT_LIMIT: constant work gives about 1, work that scans
+    // something of size n about 4. Same retry as expectLinear().
+    const CONSTANT_LIMIT = 2;
+    function expectConstant(measure, n) {
+      const small = median(measure, n), large = median(measure, 4 * n);
+      let ratio = large / Math.max(small, 0.01);
+      let message = `${n}: ${small.toFixed(1)} ms, ${4 * n}: ${large.toFixed(1)} ms, ratio ${ratio.toFixed(1)}`;
+      if (ratio > CONSTANT_LIMIT) {
+        const small2 = median(measure, n), large2 = median(measure, 4 * n);
+        const ratio2 = large2 / Math.max(small2, 0.01);
+        message += `; again: ${small2.toFixed(1)} ms, ${large2.toFixed(1)} ms, ratio ${ratio2.toFixed(1)}`;
+        ratio = Math.min(ratio, ratio2);
+      }
+      if (ratio > CONSTANT_LIMIT) throw new Error(`${message} (limit ${CONSTANT_LIMIT})`);
     }
 
     // n shapes with ids, and optionally one reader of each (x="ref.<id>.x")
@@ -142,29 +159,31 @@
       return ms;
     }, 1000), { timeout: 20000 });
 
-    // Properties store numbers without parsing or compiling (framework plan §24). Starts at 8,000: between about
-    // 1,000 and 8,000 shapes the working set (2n elements, n compiled readers) outgrows the CPU caches and a set costs
-    // about twice as much (0.7 → 1.7 µs, measured 2026-11-20); past that step it is linear again (8,000 → 16,000:
-    // ratio 2.1). On GitHub's runners the step fell between 4,000 and 8,000, where the test compared (ratios 3.9–5.3).
-    // The five measurements of one size share a scene: building 32,000 shapes with readers for each took 14 s.
-    test('setting a property on shapes that have readers is linear', () => {
+    // Properties store numbers without parsing or compiling (framework plan §24). The timed part always sets the same
+    // 2,000 shapes; only the scene around them grows. Setting all n shapes made the working set outgrow the CPU caches
+    // somewhere between 1,000 and 16,000 shapes, depending on the machine: a set then cost about twice as much, which
+    // failed the n vs. 2n comparison on GitHub's runners (ratios 3.9–5.8). With a fixed subset the ratio stays about 1
+    // (0.84–1.09 for 2,000 to 32,000 shapes, measured 2026-11-20).
+    test('setting a property costs the same with 4× as many shapes that have readers', () => {
+      const SETS = 2000;
       let scene = null;
       try {
-        expectLinear((n) => {
+        expectConstant((n) => {
+          // The five measurements of one size share a scene: setting x again leaves it as it was
           if (scene === null || scene.n !== n) {
             if (scene !== null) scene.clear();
             const { layer, clear } = freshStage();
             layer.insertAdjacentHTML('beforeend', shapesMarkup(n, true, 'sap'));
-            scene = { n, clear, shapes: [...layer.querySelectorAll('pxl-circle[id]')] };
-            for (let i = 0; i < scene.shapes.length; i++) scene.shapes[i].x = i + 0.5; // warm-up: readers run once
+            scene = { n, clear, shapes: [...layer.querySelectorAll('pxl-circle[id]')].slice(0, SETS) };
+            for (let i = 0; i < SETS; i++) scene.shapes[i].x = i + 0.5; // warm-up: readers run once
           }
           const shapes = scene.shapes;
           const t0 = performance.now();
           for (let round = 1; round <= 5; round++) {
-            for (let i = 0; i < shapes.length; i++) shapes[i].x = i + round * 0.37;
+            for (let i = 0; i < SETS; i++) shapes[i].x = i + round * 0.37;
           }
           return performance.now() - t0;
-        }, 8000);
+        }, 4000);
       } finally {
         if (scene !== null) scene.clear();
       }
