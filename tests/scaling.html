@@ -22,7 +22,13 @@
   <main class="docs-content">
     <div class="docs-inner">
       <h1>Scaling Tests</h1>
-      <p>Level 6 of <code>design/2026-11-15_testing_plan.md</code>: each test measures an operation with n and with 2n elements and compares the two times. Linear work takes about twice as long (ratio 2), quadratic work about four times as long; a test fails above ratio 3.5. Ratios are the same on every machine, unlike absolute times. Each size is measured five times, the median counts, and n grows until the smaller measurement takes at least 5 ms (shorter times are mostly noise). Over the limit, both sizes are measured again, then 2n against 4n: a step where the elements outgrow the CPU caches makes only one pair look quadratic. Work that must not depend on the scene's size is timed with n and with 4n elements in the scene and fails above ratio 2. Run with <code>node tools/run_tests.js --tests</code>, or here via the dev server.</p>
+      <p>Level 6 of <code>design/2026-11-15_testing_plan.md</code>: tests that time an operation at two sizes and compare the times. Ratios are the same on every machine, unlike absolute times. Each size is measured five times and the median counts.</p>
+      <ul>
+        <li><strong>Linear work</strong> (most tests): n against 2n. Linear work takes about twice as long (ratio 2), quadratic work about four times as long; a test fails above 3.5. n grows until the smaller time is at least 5 ms (shorter times are mostly noise). Over the limit, both sizes are measured again, then 2n against 4n: a step where the elements outgrow the CPU caches makes only one pair look quadratic.</li>
+        <li><strong>Work that must not depend on the scene&#39;s size</strong> (setting a property): the same work in a scene of n and of 4n elements; fails above ratio 2.</li>
+        <li><strong>Bounded memory:</strong> counts cache entries instead of timing.</li>
+      </ul>
+      <p>Slow, so <code>node tools/run_tests.js --tests</code> leaves this page out: run <code>node tools/run_tests.js</code> (or <code>--tests --slow</code>), or open it here via the dev server.</p>
       <p id="summary" class="test-summary">Running…</p>
       <table class="test-table"><tbody id="results"></tbody></table>
       <div id="host" style="width: 1000px"></div>
