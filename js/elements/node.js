@@ -108,8 +108,17 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this.isAnimated = this.animatedAttributeKeys.length > 0;
     if (pxl.isSpatialKey(name)) this.setLocalMatrixDirty();
     if (this.refKey) pxl.broadcast(this.refKey);
-    this.parentLayer?.invalidate();
+    if (this.isCompositingKey(name)) this.compositingChanged();
+    else this.parentLayer?.invalidate();
   }
+
+  // A value that is only CSS on the layer's canvas and leaves its pixels as they are. Only a layer has such values
+  // (its alpha, blend and filter); it overrides both methods.
+  isCompositingKey(key) {
+    return false;
+  }
+
+  compositingChanged() {}
 
   connectedCallback() {
     if (this._pendingProperties !== null) {
@@ -183,7 +192,8 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
         pxl.broadcast(this.refKey);
         this._broadcastNesting--;
       }
-      this.parentLayer?.invalidate();
+      if ((result & 4) !== 0) this.parentLayer?.invalidate();
+      else this.compositingChanged();
     }
   }
 

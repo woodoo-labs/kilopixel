@@ -1,6 +1,6 @@
 # Kilopixel Framework — Complete Technical Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~70KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~71KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 Kilopixel is a **declarative, reactive animation engine for HTML5 Canvas** built on Web Components. Users describe canvas scenes with custom HTML elements (`<pxl-stage>`, `<pxl-layer>`, `<pxl-circle>`, …); the engine compiles their attribute expressions and redraws a layer in every frame in which something in it changed or is animated.
 
@@ -185,7 +185,7 @@ Every PxlNode has:
 
 **Key Methods**:
 - `attributeChangedCallback(name, old, new)` — passes the value to `setValue()`; `pxl-on-*` handlers go to `setHandler()`. `id` is observed too, but not compiled: once the element is registered (`isRegistered`, set at the end of `connectedCallback()`), an `id` that is set, changed or removed moves its entry in `pxl.nodes` (`pxl.renameNode()`: the old entry is deleted if it points to this element, `refKey` follows, both names are broadcast, so readers of the old name read `undefined`). Frameworks such as Angular and Alpine set `id` after insertion. During an upgrade the attributes arrive before `connectedCallback()`, which registers the id itself. A shape whose new id is read for `isHovered` / `isPressed` registers for hit testing (`Shape.attributeChangedCallback()`)
-- `setValue(name, value)` — the one path for attributes and properties ([Properties](#properties-javascript-and-frameworks)): a string or `null` through `pxl.compileAttribute()`, any other value stored as it is (`pxl.storeValue()`), the same parsed value again skipped, a function warned; then `valueChanged(name)`: animation state, local matrix dirty for transform keys, broadcast, invalidate the layer (`Variable` also asks the stage for a frame)
+- `setValue(name, value)` — the one path for attributes and properties ([Properties](#properties-javascript-and-frameworks)): a string or `null` through `pxl.compileAttribute()`, any other value stored as it is (`pxl.storeValue()`), the same parsed value again skipped, a function warned; then `valueChanged(name)`: animation state, local matrix dirty for transform keys, broadcast, invalidate the layer (`Variable` also asks the stage for a frame; a layer's own `alpha`, `blend`, `filter` call `compositingChanged()` instead, so the layer keeps its pixels: [CSS-Only Fast Path](#element-reference--layer))
 - `connectedCallback()` — first sets properties that were set before the upgrade (`_pendingProperties`), then finds parentLayer/parentContainer, registers child (once per connect, no `includes()` check), restores subscriptions, registers in `pxl.nodes` if has `id`, sets `isRegistered`
 - `disconnectedCallback()` — clears `isRegistered`, removes from `pxl.nodes`, clears its own subscriptions, unregisters from parent
 - `variableChangedCallback(varName)` — re-evaluates reactive attributes for a changed variable, unsubscribes if no longer needed
@@ -343,9 +343,10 @@ pxl.broadcast('ref.myVar')
       → element.variableChangedCallback('ref.myVar')
         → pxl.evaluateAttributesForVariable(element, 'ref.myVar')
           → re-evaluate all reactive attributes that depend on 'ref.myVar'
-          → returns bitmask: bit 1 = var still needed, bit 2 = values changed
+          → returns bitmask: bit 1 = var still needed, bit 2 = values changed,
+            bit 4 = a changed value changes the pixels (not only a layer's alpha / blend / filter)
         → if bit 1 is 0: unsubscribe (self-cleaning)
-        → if bit 2 is 1: broadcast own ref key + invalidate layer
+        → if bit 2 is 1: broadcast own ref key, then invalidate layer (bit 4) or compositingChanged() (a layer)
 ```
 
 Propagation is recursive and depth first. Known limits, accepted for now (`design/2026-11-12_reactive_propagation_plan.md`):
@@ -929,7 +930,7 @@ Like on every element, `attributeValues` also has the hidden `set(key, value)` a
 - Hidden optimization: if `hidden` (its current value in `attributeValues`, so a reactive `hidden` that turns false asks for a frame again) AND `_isCanvasEmpty`, `invalidate()` returns early without scheduling rAF
 - Layer compositing uses **CSS DOM properties** (`canvas.style.opacity`, `canvas.style.mixBlendMode`, `canvas.style.filter`) — not Canvas context state. The `'source-over'` blend mode maps to CSS `'normal'`.
 - Layer transforms use `pxl.applyTransformState()` (spatial only), NOT `pxl.applyContextState()` (which adds compositing). This enforces the dual architecture.
-- **CSS-Only Fast Path**: When all of a layer's animated attributes are compositing properties (`alpha`, `blend`, `filter`; not transforms, not `hidden`) and the layer isn't dirty (nothing inside it is animated or changed), the layer skips canvas clearing and child re-rendering entirely — it only updates CSS DOM properties and requests the next frame. This works because a layer, which is its own `parentLayer` (`closest('pxl-layer')` includes the element), doesn't invalidate itself in `evaluateAnimations()`; a layer's own `setAttribute()` still invalidates it (fixed 2026-11-12, `design/2026-11-12_two_phase_frame_plan.md` §7.1).
+- **CSS-Only Fast Path**: When all of a layer's animated attributes are compositing properties (`alpha`, `blend`, `filter`; not transforms, not `hidden`) and the layer isn't dirty (nothing inside it is animated or changed), the layer skips canvas clearing and child re-rendering entirely — it only updates CSS DOM properties and requests the next frame. This works because a layer, which is its own `parentLayer` (`closest('pxl-layer')` includes the element), doesn't invalidate itself in `evaluateAnimations()` (fixed 2026-11-12, `design/2026-11-12_two_phase_frame_plan.md` §7.1). The same path takes compositing values changed from outside (a property, `setAttribute()`, a `ref` the value reads): `valueChanged()` and `variableChangedCallback()` call `compositingChanged()` instead of `parentLayer.invalidate()` for a key where `isCompositingKey()` is true (only a layer's `alpha`, `blend`, `filter`; `pxl.evaluateAttributesForVariable()` reports other changed keys with bit 4). The layer sets `_isCompositingDirty` (which `needsRender()` checks), and `render()` writes the CSS and keeps its pixels. Any other change in the same frame (a transform, `hidden`, a shape) still redraws. Before 2026-11-20 such a change redrew every shape: 3 ms per frame for 1,000 shapes (`design/2026-10-30_framework_compatibility_plan.md` §29).
 - **Heartbeat**: animated layers call `this.stage?.requestRender()` at the end of `render()` (deliberately without setting `isDirty`, enabling the CSS-Only Fast Path)
 - Children (groups and shapes) sorted by DOM position when `_isOrderDirty`
 - `resize(w, h, dpr)` — called by stage, resizes canvas to physical pixels, scales context by DPR
@@ -1513,12 +1514,13 @@ A slider then sets one value (`document.getElementById('x0').setAttribute('value
    │       └─ _keepAlive = isDirty  ← the heartbeat of this frame
    │
    ├─ DRAW PHASE, for each layer where needsRender():
-   │   │   needsRender = (updated this frame && _wasDirty) || isDirty || isAnimated
+   │   │   needsRender = (updated this frame && _wasDirty) || isDirty || isAnimated || _isCompositingDirty
    │   │   (isDirty also catches a later layer's broadcast after this layer's update)
    │   └─ layer.render(u, t)
    │       ├─ _failedFrame === pxl._frame → return (keeps its old pixels)
-   │       ├─ update CSS compositing (opacity, mix-blend-mode, filter) if changed
-   │       ├─ CSS-only fast path: only compositing animated (no transform, no hidden) and nothing changed → heartbeat, return
+   │       ├─ update CSS compositing (opacity, mix-blend-mode, filter) if changed; _isCompositingDirty = false
+   │       ├─ CSS-only fast path: nothing but compositing animated (no transform, no hidden) and nothing changed
+   │       │   (also a compositing value set from outside) → heartbeat if animated, return
    │       ├─ ctx.clearRect(full canvas)
    │       ├─ isDirty = (updated this frame && _keepAlive)  ← only the heartbeat survives into the next frame
    │       ├─ if hidden: mark canvas empty, heartbeat, return

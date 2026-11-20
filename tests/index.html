@@ -220,6 +220,14 @@
           <pxl-layer id="fpMoving" alpha="0.5 + wave(2) * 0.5">
             <pxl-circle id="fpMovingCircle" x="750" y="300" r="80" dx="wave(1) * 20" fill="#38bdf8"></pxl-circle>
           </pxl-layer>
+          <!-- Compositing set from outside: nothing animated (design/2026-10-30_framework_compatibility_plan.md §29) -->
+          <pxl-var id="fpAlphaSource" value="0.8"></pxl-var>
+          <pxl-layer id="fpStatic" alpha="0.8">
+            <pxl-circle id="fpStaticCircle" x="450" y="120" r="60" fill="#38bdf8"></pxl-circle>
+          </pxl-layer>
+          <pxl-layer id="fpReactive" alpha="ref.fpAlphaSource.value">
+            <pxl-circle x="750" y="120" r="60" fill="#38bdf8"></pxl-circle>
+          </pxl-layer>
         </pxl-stage>
 
       </div>
@@ -1118,6 +1126,91 @@
       el('fpAdded').remove();
       el('fpFadeCircle').setAttribute('fill', '#38bdf8');
       fpRender(50.4, 1);
+    });
+
+    // A layer's alpha, blend and filter are CSS on its canvas. Set from outside (a property, setAttribute(), a ref)
+    // they used to mark the layer dirty, which redrew every shape in it: 3 ms per frame for 1,000 shapes
+    // (design/2026-10-30_framework_compatibility_plan.md §29).
+    test('layer compositing: alpha, blend and filter set from outside update the CSS and keep the pixels', () => {
+      const layer = el('fpStatic'), canvas = layer._canvas;
+      fpRender(60, 1);
+      const changes = [
+        ['property alpha', () => { layer.alpha = 0.4; }, () => canvas.style.opacity === '0.4'],
+        ['setAttribute alpha', () => layer.setAttribute('alpha', '0.6'), () => canvas.style.opacity === '0.6'],
+        ['removed alpha', () => layer.removeAttribute('alpha'), () => canvas.style.opacity === '1'],
+        ['property blend', () => { layer.blend = 'multiply'; }, () => canvas.style.mixBlendMode === 'multiply'],
+        ['property filter', () => { layer.filter = 'blur(2)'; }, () => canvas.style.filter.startsWith('blur(')],
+        ['empty filter', () => layer.setAttribute('filter', ''), () => canvas.style.filter === 'none']
+      ];
+      let requests = 0;
+      layer.stage.requestRender = function() { requests++; return pxl.Stage.prototype.requestRender.call(this); };
+      try {
+        for (const [name, change, check] of changes) {
+          requests = 0;
+          change();
+          if (requests === 0) throw new Error(`${name}: no frame requested`);
+          const clears = countClears('fpStatic', () => fpRender(60.1, 1));
+          if (clears !== 0) throw new Error(`${name}: the canvas was cleared and redrawn`);
+          if (!check()) throw new Error(`${name}: CSS opacity ${canvas.style.opacity}, blend ${canvas.style.mixBlendMode}, filter ${canvas.style.filter}`);
+          if (pixelAt('fpStatic', 450, 120)[3] === 0) throw new Error(`${name}: the circle is gone`);
+        }
+      } finally {
+        delete layer.stage.requestRender;
+        // Values set as properties are restored as properties: they wrote no attribute that could be removed
+        layer.alpha = 0.8;
+        layer.blend = 'source-over';
+        layer.filter = 'none';
+        fpRender(60.2, 1);
+      }
+    });
+
+    test('layer compositing: a ref that changes alpha updates the CSS and keeps the pixels', () => {
+      fpRender(70, 1);
+      el('fpAlphaSource').setAttribute('value', '0.3');
+      const clears = countClears('fpReactive', () => fpRender(70.1, 1));
+      const opacity = el('fpReactive')._canvas.style.opacity;
+      el('fpAlphaSource').setAttribute('value', '0.8');
+      fpRender(70.2, 1);
+      if (clears !== 0) throw new Error('the canvas was cleared and redrawn');
+      if (opacity !== '0.3') throw new Error(`opacity ${opacity}`);
+      if (pixelAt('fpReactive', 750, 120)[3] === 0) throw new Error('the circle is gone');
+    });
+
+    test('layer compositing: alpha changed with a transform or a shape in the same frame still redraws', () => {
+      const layer = el('fpStatic');
+      fpRender(80, 1);
+      layer.alpha = 0.5;
+      layer.x = 100;
+      const withTransform = countClears('fpStatic', () => fpRender(80.1, 1));
+      const moved = pixelAt('fpStatic', 550, 120)[3];
+      layer.alpha = 0.7;
+      el('fpStaticCircle').setAttribute('fill', '#ff0000');
+      const withShape = countClears('fpStatic', () => fpRender(80.2, 1));
+      const red = isPinkish(pixelAt('fpStatic', 550, 120));
+      layer.x = 0;
+      layer.alpha = 0.8;
+      el('fpStaticCircle').setAttribute('fill', '#38bdf8');
+      fpRender(80.3, 1);
+      if (withTransform !== 1 || moved === 0) throw new Error(`with x: ${withTransform} clears, circle at its new place: ${moved !== 0}`);
+      if (withShape !== 1 || !red) throw new Error(`with a shape's fill: ${withShape} clears, new fill drawn: ${red}`);
+    });
+
+    test('layer compositing: a hidden layer takes a new alpha and stays empty until shown', () => {
+      const layer = el('fpStatic');
+      fpRender(90, 1);
+      layer.hidden = true;
+      fpRender(90.1, 1);
+      layer.alpha = 0.5;
+      fpRender(90.2, 1);
+      const hiddenPixel = pixelAt('fpStatic', 450, 120)[3], opacity = layer._canvas.style.opacity;
+      layer.hidden = false;
+      fpRender(90.3, 1);
+      const shownPixel = pixelAt('fpStatic', 450, 120)[3];
+      layer.alpha = 0.8;
+      fpRender(90.4, 1);
+      if (hiddenPixel !== 0) throw new Error('drawn while hidden');
+      if (opacity !== '0.5') throw new Error(`opacity ${opacity} while hidden`);
+      if (shownPixel === 0) throw new Error('not drawn again when shown');
     });
 
     // A hidden layer with an empty canvas asks for no frames. It must check the current value of hidden: for a reactive

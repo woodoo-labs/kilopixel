@@ -268,7 +268,8 @@ pxl.evaluateToLocalAttributes = function(element) {
 };
 
 // Re-evaluates the reactive attributes that depend on varName.
-// Returns a bitmask: 1 = varName is still needed, 2 = values changed.
+// Returns a bitmask: 1 = varName is still needed, 2 = values changed, 4 = a changed value changes the pixels (not
+// only a layer's compositing, see PxlNode.isCompositingKey()).
 pxl.evaluateAttributesForVariable = function(element, varName) {
   let result = 0;
   let matrixDirtied = false;
@@ -284,6 +285,7 @@ pxl.evaluateAttributesForVariable = function(element, varName) {
       if (element.attributeValues[key] !== newVal) {
         element.attributeValues[key] = newVal;
         result |= 2;
+        if (!element.isCompositingKey(key)) result |= 4;
         if (pxl.isSpatialKey(key)) matrixDirtied = true;
       }
     }
@@ -2067,8 +2069,17 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this.isAnimated = this.animatedAttributeKeys.length > 0;
     if (pxl.isSpatialKey(name)) this.setLocalMatrixDirty();
     if (this.refKey) pxl.broadcast(this.refKey);
-    this.parentLayer?.invalidate();
+    if (this.isCompositingKey(name)) this.compositingChanged();
+    else this.parentLayer?.invalidate();
   }
+
+  // A value that is only CSS on the layer's canvas and leaves its pixels as they are. Only a layer has such values
+  // (its alpha, blend and filter); it overrides both methods.
+  isCompositingKey(key) {
+    return false;
+  }
+
+  compositingChanged() {}
 
   connectedCallback() {
     if (this._pendingProperties !== null) {
@@ -2142,7 +2153,8 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
         pxl.broadcast(this.refKey);
         this._broadcastNesting--;
       }
-      this.parentLayer?.invalidate();
+      if ((result & 4) !== 0) this.parentLayer?.invalidate();
+      else this.compositingChanged();
     }
   }
 
@@ -2356,6 +2368,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     this._lastAlpha = null;
     this._lastBlend = null;
     this._lastAppliedFilter = 'none';
+    this._isCompositingDirty = false; // alpha, blend or filter changed from outside: new CSS, same pixels
   }
 
   connectedCallback() {
@@ -2391,6 +2404,17 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     // A hidden layer renders once more to clear its canvas, then stays idle. The current value, not the expression:
     // a reactive hidden is a function, which would keep the layer idle after it turned false.
     if (this.attributeValues.hidden && this._isCanvasEmpty) return;
+    this.stage?.requestRender();
+  }
+
+  // A property, setAttribute() or a ref changed alpha, blend or filter: render() writes the CSS in the next frame and
+  // keeps the pixels, like an animated compositing value (the CSS-only path)
+  isCompositingKey(key) {
+    return key === 'alpha' || key === 'blend' || key === 'filter';
+  }
+
+  compositingChanged() {
+    this._isCompositingDirty = true;
     this.stage?.requestRender();
   }
 
@@ -2447,9 +2471,10 @@ pxl.Layer = class Layer extends pxl.PxlNode {
   }
 
   // Draw in this frame: dirty before the update or since (a later layer's broadcast reaches it after its update;
-  // the broadcast has already set its values), or animated itself
+  // the broadcast has already set its values), animated itself, or new compositing CSS to write
   needsRender() {
-    return (this._updateFrame === pxl._frame && this._wasDirty) || this.isDirty || this.isAnimated;
+    return (this._updateFrame === pxl._frame && this._wasDirty) || this.isDirty || this.isAnimated ||
+           this._isCompositingDirty;
   }
 
   // Draw phase
@@ -2476,20 +2501,20 @@ pxl.Layer = class Layer extends pxl.PxlNode {
       this._canvas.style.filter = filterStr;
       this._lastAppliedFilter = filterStr;
     }
+    this._isCompositingDirty = false;
 
-    // CSS-only fast path: only compositing is animated (no transform, no hidden) and nothing in the layer changed,
-    // so the pixels stay the same
-    let onlyCompositingAnimated = this.isAnimated;
+    // CSS-only path: nothing in the layer changed and nothing but compositing is animated (no transform, no hidden),
+    // so the pixels stay the same. Also for compositing changed from outside (compositingChanged()).
+    let onlyCompositingAnimated = true;
     for (let i = 0; i < this.animatedAttributeKeys.length; i++) {
-      const k = this.animatedAttributeKeys[i];
-      if (k !== 'alpha' && k !== 'blend' && k !== 'filter') {
+      if (!this.isCompositingKey(this.animatedAttributeKeys[i])) {
         onlyCompositingAnimated = false;
         break;
       }
     }
 
     if (onlyCompositingAnimated && !hasChanged) {
-      this.stage.requestRender();
+      if (this.isAnimated) this.stage.requestRender();
       return;
     }
 

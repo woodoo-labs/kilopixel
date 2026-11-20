@@ -261,7 +261,8 @@ pxl.evaluateToLocalAttributes = function(element) {
 };
 
 // Re-evaluates the reactive attributes that depend on varName.
-// Returns a bitmask: 1 = varName is still needed, 2 = values changed.
+// Returns a bitmask: 1 = varName is still needed, 2 = values changed, 4 = a changed value changes the pixels (not
+// only a layer's compositing, see PxlNode.isCompositingKey()).
 pxl.evaluateAttributesForVariable = function(element, varName) {
   let result = 0;
   let matrixDirtied = false;
@@ -277,6 +278,7 @@ pxl.evaluateAttributesForVariable = function(element, varName) {
       if (element.attributeValues[key] !== newVal) {
         element.attributeValues[key] = newVal;
         result |= 2;
+        if (!element.isCompositingKey(key)) result |= 4;
         if (pxl.isSpatialKey(key)) matrixDirtied = true;
       }
     }

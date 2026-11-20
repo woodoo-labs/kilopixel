@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Layer compositing bench</title>
+  <script src="/dist/pxl.js"></script>
+</head>
+<body>
+<pre id="out">running…</pre>
+<div id="box" style="width: 1000px"></div>
+<script>
+// Measured 2026-11-20 for design/2026-10-30_framework_compatibility_plan.md §29: cost per frame of changing a
+// layer's alpha / blend / filter from outside (property, setAttribute, a ref to a <pxl-var>), against an animated
+// alpha expression (the CSS-only fast path) and no change at all, with the number of shapes drawn per frame. Frames
+// are driven by hand (stage.render(t)), so the page also works in a hidden tab. Open it via the dev server; results
+// in the <pre> and window.benchResult. Before the fix (commit 5b620fc) every change redrew all shapes.
+let seed = 1;
+const rand = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+
+function buildScene(n, alphaAttr) {
+  seed = 7;
+  const shapes = [];
+  for (let i = 0; i < n; i++) {
+    const x = Math.round(rand() * 1000), y = Math.round(rand() * 500);
+    shapes.push(i % 2 ? `<pxl-circle x="${x}" y="${y}" r="${4 + Math.round(rand() * 10)}" fill="#3b82f6" stroke="#1e3a8a" strokewidth="1"></pxl-circle>`
+                      : `<pxl-rect x="${x}" y="${y}" w="${8 + Math.round(rand() * 16)}" h="${6 + Math.round(rand() * 10)}" rotate="${Math.round(rand() * 90)}" fill="#22c55e"></pxl-rect>`);
+  }
+  document.getElementById('box').innerHTML =
+    `<pxl-stage ratio="2"><pxl-var id="fade" value="1"></pxl-var>` +
+    `<pxl-layer id="fx" ${alphaAttr}>${shapes.join('')}</pxl-layer></pxl-stage>`;
+  const stage = document.querySelector('#box pxl-stage');
+  stage.resize();
+  stage.render(0);
+  return stage;
+}
+
+// Each case: the layer's alpha attribute, and what happens before each frame
+const CASES = {
+  'no change': ['alpha="0.8"', () => {}],
+  'property layer.alpha = v': ['alpha="0.8"', (layer, v) => { layer.alpha = v; }],
+  'setAttribute(\'alpha\', v)': ['alpha="0.8"', (layer, v) => { layer.setAttribute('alpha', String(v)); }],
+  'property layer.filter = blur': ['alpha="0.8"', (layer, v) => { layer.filter = `blur(${(v * 4).toFixed(2)})`; }],
+  'reactive alpha="ref.fade.value", the var changes': ['alpha="ref.fade.value"', (layer, v, stage) => { stage.querySelector('pxl-var').setAttribute('value', String(v)); }],
+  'animated alpha="0.5 + 0.5 * sin(t)" (CSS-only path)': ['alpha="0.5 + 0.5 * sin(t)"', () => {}]
+};
+
+function measure(n, name) {
+  const [attr, change] = CASES[name];
+  const stage = buildScene(n, attr);
+  const layer = stage.querySelector('pxl-layer');
+  const FRAMES = 60, runs = [];
+  let redraws = 0;
+  const render = layer.constructor.prototype.render;
+  const childRender = layer.childList[0].constructor.prototype.render;
+  let drawnShapes = 0;
+  for (const C of new Set(layer.childList.map((c) => c.constructor))) {
+    const r = C.prototype.render;
+    C.prototype.render = function(...a) { drawnShapes++; return r.apply(this, a); };
+    C.prototype._orig = r;
+  }
+  let t = 1, k = 0;
+  for (let r = 0; r < 5; r++) {
+    drawnShapes = 0;
+    const a = performance.now();
+    for (let i = 0; i < FRAMES; i++) {
+      t += 1 / 60;
+      change(layer, +(0.5 + 0.4 * Math.sin(++k * 0.1)).toFixed(3), stage);
+      stage.render(t);
+    }
+    runs.push({ frame: (performance.now() - a) / FRAMES, shapes: drawnShapes / FRAMES });
+  }
+  for (const C of new Set(layer.childList.map((c) => c.constructor))) { C.prototype.render = C.prototype._orig; delete C.prototype._orig; }
+  runs.sort((x, y) => x.frame - y.frame);
+  const result = { case: name, shapes: n, frameMs: +runs[2].frame.toFixed(3), shapesDrawnPerFrame: runs[2].shapes,
+    opacity: layer.shadowRoot.querySelector('canvas').style.opacity, filter: layer.shadowRoot.querySelector('canvas').style.filter };
+  document.getElementById('box').innerHTML = '';
+  return result;
+}
+
+setTimeout(() => {
+  measure(500, 'property layer.alpha = v'); // warm-up
+  const results = [];
+  for (const n of [1000, 5000]) for (const name of Object.keys(CASES)) results.push(measure(n, name));
+  window.benchResult = results;
+  document.getElementById('out').textContent = results.map((r) =>
+    `${String(r.shapes).padStart(5)} shapes  ${r.case.padEnd(52)} ${r.frameMs.toFixed(3).padStart(7)} ms/frame, ` +
+    `${String(r.shapesDrawnPerFrame).padStart(5)} shapes drawn per frame (canvas opacity ${r.opacity}, filter ${r.filter})`).join('\n');
+}, 300);
+</script>
+</body>
+</html>

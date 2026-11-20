@@ -71,7 +71,7 @@ Why `maxfps` and not `fps`: it is a ceiling. A layer with `maxfps="30"` on a mac
 
 ### 3.2 What is throttled
 
-Everything that redraws the layer's canvas: animation, reactive `ref.*` broadcasts, `setAttribute()` on its children, its own CSS-only compositing animation (D3). Otherwise a fast producer (an animated variable in another layer) would defeat the throttle.
+Everything that redraws the layer's canvas: animation, reactive `ref.*` broadcasts, `setAttribute()` on its children, its own CSS-only compositing animation (D3). Otherwise a fast producer (an animated variable in another layer) would defeat the throttle. (2026-11-20: a layer's own `alpha`, `blend` and `filter` set from outside (property, `setAttribute()`, a `ref`) take the CSS-only path too, `design/2026-10-30_framework_compatibility_plan.md` §29; D3 then covers them as well.)
 
 Not throttled:
 - **The first draw** after connect and **the draw after a resize** (the canvas was cleared).
