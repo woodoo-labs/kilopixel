@@ -11,12 +11,6 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - SVG path data through the browser's `Path2D`: icons copied from Figma, Lucide or Heroicons, `viewbox` (animated for sprite sheets), non-scaling stroke, 9-point anchor.
 - **Next**: bring the code sketches up to date with today's engine.
 
-## 2. Clipping (`<pxl-clip>`)
-- **Status**: 🟡 **Proposed**
-- **Plan**: `design/2026-09-29_pxl-clip_element_plan.md`
-- A container that clips its children to a path with `ctx.clip()`: compound paths, `fillrule="evenodd"` holes, nested clips, no offscreen buffer (unlike `mask`).
-- **Next**: decide; its children must be evaluated in the update phase (`design/2026-11-20_evaluation_model_plan.md` §6).
-
 ## 3. One-Shot Animation, Easing, Springs (`tween`, `ease`, `spring`)
 - **Status**: 🟡 **Proposed** (`tween`; easing, springs and angle helpers are 💬)
 - **Plan**: `design/2026-10-01_tween_animation_plan.md`
