@@ -17,6 +17,10 @@ const report = (file, line, message) => problems.push(`${file}${line ? ':' + lin
 const OPEN = ['💬 **Discussion**', '🟡 **Proposed**', '🟢 **Decided**'];
 const CLOSED = ['✅ **Implemented**', '⚪ **Superseded by**', '⚪ **Dropped**'];
 const NAME = /^\d{4}-\d{2}-\d{2}_[a-z0-9_-]+_(plan|note)\.md$/;
+// An implemented plan records what was really built in a "## N. Built (date)" section (rule 3). Plans whose status
+// line dates the implementation before the rule are exempt: their builds are in git and KILOPIXEL.md.
+const BUILT_RULE_DATE = '2026-11-21';
+const BUILT_HEADING = /^##+ .*\bBuilt\b/m;
 
 const planFiles = [
   ...fs.readdirSync(path.join(root, 'design')).filter(f => f.endsWith('.md')).map(f => `design/${f}`),
@@ -44,6 +48,13 @@ for (const file of planFiles) {
   if (word === '⚪ **Superseded by**') {
     const target = (text.match(/Superseded by\*\* `([^`]+)`/) || [])[1];
     if (!target || !exists(target)) report(file, n, `"Superseded by" needs an existing plan in backticks (found: ${target || 'none'})`);
+  }
+  if (word === '✅ **Implemented**' && !archived) {
+    const date = (text.match(/\d{4}-\d{2}-\d{2}/) || [])[0];
+    if (date === undefined) report(file, n, 'implemented without a date in the status line');
+    else if (date >= BUILT_RULE_DATE && !BUILT_HEADING.test(read(file))) {
+      report(file, null, 'implemented, but no "## N. Built (date)" section that records what was built');
+    }
   }
   if (word.startsWith('⚪') && !archived) report(file, n, 'superseded or dropped plans belong in design/archive/');
   if (OPEN.includes(word) && archived) report(file, n, 'open plans belong in design/, not in the archive');

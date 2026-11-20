@@ -1,6 +1,6 @@
 # Unified Arrowhead Geometry Plan (Exact Insets, Zero-GC, Vector API)
 
-- **Status**: ✅ **Implemented** (engine; the docs page `docs/arrows.html` is still open, TODO §12)
+- **Status**: ✅ **Implemented** (2026-10-14, engine, commit `9a956bd`; the docs page `docs/arrows.html` is still open, TODO §12)
 - **Date**: 2026-10-14
 - **Supersedes**: `design/archive/2026-10-12_centralized_arrowhead_geometry_plan.md`, `design/archive/2026-10-13_simplified_arrowhead_geometry_plan.md`, `design/archive/2026-10-13_arrowhead_linecap_alignment_and_spline_integrity_plan.md` (kept as history)
 - **Target Implementation**: `js/elements/shape.js`, `js/elements/shapes/line.js`, `js/elements/shapes/polyline.js`, `js/elements/shapes/circle.js`, `js/elements/shapes/ellipse.js`
