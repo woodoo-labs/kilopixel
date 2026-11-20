@@ -736,7 +736,7 @@ Hit testing uses a **dummy canvas context** (`pxl.dummyCtx`) whose `fill()` and 
    - Then the exact test: sets the shape's global matrix on the dummy context (translation × `u`) and calls the shape's optional **`hitTest(ctx, u)`** hook if it has one, otherwise its `draw()` method, inside `try / catch / finally`: a shape that throws counts as not hit, reports its error, and the dummy context is always restored. Alpha, blend, mask, filter and shadows don't affect `isPointInPath`
    - The intercepted fill/stroke methods check if the mouse point is inside
    - First hit wins (topmost element)
-   - Cost (`design/prototypes/2026-10-30_framework_compatibility/hit_walk_bench.html`, 2026-11-18, browser pane): about 0.4–0.8 µs per shape for a full walk, 1–4 exact tests per hit test. A layer with `pointer-events: none` costs the same as any other layer (measured 2026-11-19: 0.35–0.4 ms for 1,000 shapes, about 2.5 ms for 5,000)
+   - Cost (`design/prototypes/2026-10-30_framework_compatibility/hit_walk_bench.html`, 2026-11-18, browser pane): about 0.4–0.8 µs per shape for a full walk, 1–4 exact tests per hit test. A layer with `pointer-events: none` costs the same as any other layer (measured 2026-11-19: 0.35–0.4 ms for 1,000 shapes, about 2.5 ms for 5,000). In a real frame a small walk runs with cold caches and costs about 10× more per shape: on `examples/test49.html` 0.15–0.2 ms per walk, an exact test about 33 µs (2026-11-20, `design/prototypes/2026-10-30_framework_compatibility/hit_walk_in_frame.js`, plan §23.9).
 
 So the hit area is the shape's own path, the same one it draws: no separate collision geometry. Strokes count with their width (`isPointInStroke`).
 
