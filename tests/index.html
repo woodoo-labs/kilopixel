@@ -1714,7 +1714,8 @@
       }));
 
     // The box check rules out shapes before the exact test; it must never rule out a shape the exact test would hit
-    // (strokes, miter corners, square caps, arrowheads, rotated / skewed / mirrored groups, text, smooth curves)
+    // (strokes, miter corners, square caps, arrowheads, rotated / skewed / mirrored groups, text, smooth curves that
+    // leave the box of their points: smooth 2 and -1, closed, relative with an arrow in a mirrored group)
     test('interaction: the box check finds the same shape as the exact test of every shape, at 2,000 points', () =>
       withStage(ixStage(`
         <pxl-group x="250" y="150" rotate="30" zoom="1.3">
@@ -1730,7 +1731,13 @@
           <pxl-ellipse rx="80" ry="40" start="0" sweep="250" stroke="#000" strokewidth="8" arrowend="auto"></pxl-ellipse>
           <pxl-text y="10" size="30" text="Mirrored" fill="#000"></pxl-text>
         </pxl-group>
-        <pxl-text x="700" y="450" size="36" text="Hit" stroke="#000" strokewidth="6" align="center"></pxl-text>`), (stage) => {
+        <pxl-text x="700" y="450" size="36" text="Hit" stroke="#000" strokewidth="6" align="center"></pxl-text>
+        <pxl-polyline points="830,20; 870,160; 910,20; 950,160" smooth="2" stroke="#000" strokewidth="6"></pxl-polyline>
+        <pxl-polyline points="30,470; 230,480; 40,510; 240,540" smooth="-1" stroke="#000" strokewidth="6"></pxl-polyline>
+        <pxl-polyline points="870,380; 990,420; 960,540; 860,500" smooth="true" closed="true" fill="#000"></pxl-polyline>
+        <pxl-group x="330" y="500" rotate="-20" skewx="20" scalex="-1">
+          <pxl-polyline mode="relative" points="-80,0; 40,-50; 40,80; 40,-60" smooth="1.5" stroke="#000" strokewidth="8" arrowend="auto"></pxl-polyline>
+        </pxl-group>`), (stage) => {
         stage.render(1);
         const ix = stage.interaction, proto = pxl.Shape.prototype, boxCheck = proto.mayContainPoint;
         const names = (shape) => (shape ? `${shape.localName}#${[...shape.parentElement.children].indexOf(shape)}` : 'none');
@@ -1746,6 +1753,43 @@
           if (withBox !== exact) wrong.push(`(${x}, ${y}): box ${names(withBox)}, exact ${names(exact)}`);
         }
         if (wrong.length || hits < 100) throw new Error(`${hits} points on a shape; ${wrong.slice(0, 5).join('; ')}`);
+      }));
+
+    // A smooth polyline used to skip the box check (every pointer frame drew its path for the exact test). Its hit box
+    // adds the Bézier handles, so the curve's bulge beyond its points is still hit, and it is read from the current
+    // values, so a click right after setAttribute() hits the new curve.
+    test('interaction: a smooth polyline gets the box check, with its handles, from its current points', () =>
+      withStage(ixStage(`<pxl-polyline id="ixSmooth" points="200,300; 300,100; 330,300; 450,250" smooth="2" stroke="#000" strokewidth="6" linejoin="round"></pxl-polyline>`), (stage) => {
+        stage.render(1);
+        const ix = stage.interaction, s = stage.querySelector('#ixSmooth');
+        if (s.mayContainPoint(800, 450)) throw new Error('a point far from the curve passes the box check');
+        // Points on the curve outside the box of its points (padded like the box check): the handles' part of the box
+        const exactHit = (x, y) => {
+          s.mayContainPoint = () => true;
+          try { return ix.findShapeAt(x, y) === s; } finally { delete s.mayContainPoint; }
+        };
+        const pad = s.hitPadding();
+        const outside = (x, y, b) => x < b.left - pad || x > b.right + pad || y < b.top - pad || y > b.bottom + pad;
+        const bulge = [];
+        let b = s.getBoundingBox();
+        for (let y = 0; y < 560; y += 2) for (let x = 100; x < 560; x += 2) {
+          if (outside(x, y, b) && exactHit(x, y)) bulge.push([x, y]);
+        }
+        if (bulge.length < 10) throw new Error(`only ${bulge.length} points of the curve outside the box of its points`);
+        const missed = bulge.filter(([x, y]) => ix.findShapeAt(x, y) !== s);
+        if (missed.length) throw new Error(`bulge not hit at ${missed.slice(0, 3).join(' ')}`);
+        // Moved without a frame: the box check uses the new points
+        s.setAttribute('points', '600,300; 700,100; 730,300; 850,250');
+        b = s.getBoundingBox();
+        const moved = [];
+        for (let y = 0; y < 560; y += 2) for (let x = 500; x < 960; x += 2) {
+          if (outside(x, y, b) && exactHit(x, y)) moved.push([x, y]);
+        }
+        const missedMoved = moved.filter(([x, y]) => ix.findShapeAt(x, y) !== s);
+        if (moved.length < 10 || missedMoved.length) {
+          throw new Error(`after setAttribute: ${moved.length} bulge points, missed ${missedMoved.slice(0, 3).join(' ')}`);
+        }
+        if (s.mayContainPoint(300, 200)) throw new Error('the old place still passes the box check');
       }));
 
     test('interaction: CSS pointer-events: none on a shape, a group or a layer lets the pointer through, as in the DOM', () =>

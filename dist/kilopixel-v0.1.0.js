@@ -2707,10 +2707,16 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     const m = this.getInverseGlobalMatrix();
     const lx = m[0] * x + m[2] * y + m[4];
     const ly = m[1] * x + m[3] * y + m[5];
-    const box = this.getBoundingBox();
+    const box = this.getHitBox();
     const pad = this.hitPadding();
     return lx >= Math.min(box.left, box.right) - pad && lx <= Math.max(box.left, box.right) + pad &&
            ly >= Math.min(box.top, box.bottom) - pad && ly <= Math.max(box.top, box.bottom) + pad;
+  }
+
+  // The box that contains the shape's path, in its own units. Usually the bounding box; a shape whose path can leave
+  // its bounding box (a smooth polyline's curve) returns a larger one. A NaN box rules the shape out.
+  getHitBox() {
+    return this.getBoundingBox();
   }
 
   // A custom shape without its own getBoundingBox() always gets the exact test (the base method warns on every call)
@@ -3360,10 +3366,11 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     this._rawParts = []; // parser output, reused
 
     // Each coordinate is its own attribute p0, p1, … (keys built once per points change);
-    // draw() copies their values, scaled by u, into flatCache. Float64 like the matrices: relative mode adds the
-    // points up, and Float32 rounding would add up with them.
+    // loadPoints() copies their values, scaled by u, into flatCache, for draw() and for getHitBox(). Float64 like the
+    // matrices: relative mode adds the points up, and Float32 rounding would add up with them.
     this._flatCache = new Float64Array(0);
     this._pointKeys = [];
+    this._hitBox = { left: 0, right: 0, top: 0, bottom: 0 }; // a smooth curve's box with its handles
 
     this._arrowStart = pxl.createArrowRecord();
     this._arrowEnd = pxl.createArrowRecord();
@@ -3452,25 +3459,11 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   draw(ctx, u, t) {
     if (this._pointCount < 4) return;
 
+    if (!this.loadPoints(u)) return;
+
     const { smooth, arrowstart, arrowend } = this.attributeValues;
     const closed = this.attributeValues.closed === true;
-    const pts = this._flatCache;
     const len = this._pointCount / 2;
-
-    // A coordinate that isn't a finite number (a ref that isn't connected yet, a division by zero) would make
-    // the canvas drop that vertex, or bend a smooth curve: draw nothing until all coordinates are valid
-    let probe = 0;
-    for (let i = 0; i < this._pointCount; i++) {
-      pts[i] = this.attributeValues[this._pointKeys[i]] * u;
-      probe += pts[i] * 0;   // 0 for a finite value, NaN for NaN or ±Infinity
-    }
-    if (probe !== 0) return;
-
-    if (this.attributeValues.mode === 'relative') {
-      for (let i = 2; i < this._pointCount; i++) {
-        pts[i] += pts[i - 2];
-      }
-    }
 
     // Arrowheads only apply to open strokes
     const arrowStart = this._arrowStart, arrowEnd = this._arrowEnd;
@@ -3504,6 +3497,26 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     }
 
     if (hasStart || hasEnd) this.drawArrows(ctx, u, arrowStart, arrowEnd);
+  }
+
+  // Fills flatCache with the absolute coordinates, scaled by u. Returns false if a coordinate isn't a finite number
+  // (a ref that isn't connected yet, a division by zero): the canvas would drop that vertex or bend a smooth curve,
+  // so the polyline draws nothing until all coordinates are valid.
+  loadPoints(u) {
+    const pts = this._flatCache;
+    let probe = 0;
+    for (let i = 0; i < this._pointCount; i++) {
+      pts[i] = this.attributeValues[this._pointKeys[i]] * u;
+      probe += pts[i] * 0;   // 0 for a finite value, NaN for NaN or ±Infinity
+    }
+    if (probe !== 0) return false;
+
+    if (this.attributeValues.mode === 'relative') {
+      for (let i = 2; i < this._pointCount; i++) {
+        pts[i] += pts[i - 2];
+      }
+    }
+    return true;
   }
 
   // Draws points first..last. Returns false if the shaft is skipped (single segment shorter than both arrow insets).
@@ -3641,10 +3654,44 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     return (lo + hi) / 2;
   }
 
-  // A smooth curve can leave the box of its points, so hit testing skips the box check for it
-  needsExactHitTest() {
-    const { smooth } = this.attributeValues;
-    return smooth !== false && smooth !== null;
+  // A smooth curve can leave the box of its points, but each Bézier segment stays inside the box of its four control
+  // points: the hit box adds the handles (also for smooth > 1 or < 0, and closed paths). Arrow trims only shorten
+  // the curve, and arrowheads are in hitPadding(). From the current values, like getBoundingBox(), so a shape
+  // changed with setAttribute() is hit at its new place.
+  getHitBox() {
+    const smooth = this.attributeValues.smooth;
+    if (smooth === false || smooth === null || this._pointCount < 6) return this.getBoundingBox();
+
+    const box = this._hitBox;
+    if (!this.loadPoints(1)) {
+      box.left = box.right = box.top = box.bottom = NaN; // draws nothing, so nothing to hit
+      return box;
+    }
+    const pts = this._flatCache, segment = this._segment;
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (let i = 0; i < this._pointCount; i += 2) {
+      if (pts[i] < minX) minX = pts[i];
+      if (pts[i] > maxX) maxX = pts[i];
+      if (pts[i + 1] < minY) minY = pts[i + 1];
+      if (pts[i + 1] > maxY) maxY = pts[i + 1];
+    }
+    const len = this._pointCount / 2, closed = this.attributeValues.closed === true;
+    const k3 = (typeof smooth === 'number' ? smooth : 1) / 3;
+    const count = closed ? len : len - 1;
+    for (let i = 0; i < count; i++) {
+      this.loadSegment(i, len, closed, k3);
+      for (let j = 2; j < 6; j += 2) {
+        if (segment[j] < minX) minX = segment[j];
+        if (segment[j] > maxX) maxX = segment[j];
+        if (segment[j + 1] < minY) minY = segment[j + 1];
+        if (segment[j + 1] > maxY) maxY = segment[j + 1];
+      }
+    }
+    box.left = minX;
+    box.right = maxX;
+    box.top = minY;
+    box.bottom = maxY;
+    return box;
   }
 
   // Points closer than 0.01 px count as the same (zero-length end segments for arrows)

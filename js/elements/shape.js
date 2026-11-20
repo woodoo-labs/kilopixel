@@ -92,10 +92,16 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     const m = this.getInverseGlobalMatrix();
     const lx = m[0] * x + m[2] * y + m[4];
     const ly = m[1] * x + m[3] * y + m[5];
-    const box = this.getBoundingBox();
+    const box = this.getHitBox();
     const pad = this.hitPadding();
     return lx >= Math.min(box.left, box.right) - pad && lx <= Math.max(box.left, box.right) + pad &&
            ly >= Math.min(box.top, box.bottom) - pad && ly <= Math.max(box.top, box.bottom) + pad;
+  }
+
+  // The box that contains the shape's path, in its own units. Usually the bounding box; a shape whose path can leave
+  // its bounding box (a smooth polyline's curve) returns a larger one. A NaN box rules the shape out.
+  getHitBox() {
+    return this.getBoundingBox();
   }
 
   // A custom shape without its own getBoundingBox() always gets the exact test (the base method warns on every call)
