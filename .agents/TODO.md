@@ -172,16 +172,16 @@ Open work only. Done items are removed: the plan's status line, `.agents/KILOPIX
 - **Related**: `design/2026-11-04_stage_sizing_plan.md` (✅ 2026-11-15) built W2 together with overridable stage sizes and a 300 px fallback width.
 
 ## 31. Isolated Shape Compositing (Fill and Stroke Composite as One)
-- **Status**: 🟡 **Proposed** (2026-11-01)
-- **Reference**: `design/2026-11-01_isolated_shape_compositing_plan.md`; prototypes `design/prototypes/2026-11-01_isolated_shape_compositing/mask_fill_stroke.html`, `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_bench.html`
+- **Status**: 🟢 **Decided** (2026-11-20, open points decided as recommended, plan §6; checked against today's engine: transform copy works, cost measured again in real frames, custom shapes added as §6.3; 2026-11-01)
+- **Reference**: `design/2026-11-01_isolated_shape_compositing_plan.md`; prototypes `design/prototypes/2026-11-01_isolated_shape_compositing/mask_fill_stroke.html`, `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_bench.html`, `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_patch.html` and `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_frames.js` (2026-11-20, real frames)
 - **Problem**: a shape that draws more than once (fill + stroke, arrowheads, multi-line text, grid major lines or labels) composites each draw call separately. With `mask` 7 of 9 modes are wrong (`source-in` erases the fill, `xor` cuts the stroke into the fill); with `shadowcolor` the stroke casts a shadow onto the shape's own fill (visible in `shadow.html` §1); `filter` and `blend` are affected too.
 - **Shadows on arrowheads** (noted 2026-10-15): the shaft (`stroke()`) and the heads (`drawArrows`) are separate calls, so a dark band shows where the shaft enters the head. Overlaps within one path (polyline corners) cast one shadow and are fine. Workaround today: `filter="dropShadow(...)"` on the `<pxl-layer>` instead of `shadowcolor` on the shape (one shadow of the combined silhouette).
 - **Idea**: draw such a shape normally into one shared scratch canvas, then composite it onto the layer once with its alpha / mask / blend / filter / shadow. Single-draw shapes keep the direct path.
 - **Alternative for shadows only** (noted 2026-10-15): two passes only when a shadow is set: draw all parts with the shadow, then draw them again without the shadow on top, so the shadows end up underneath everything. Doubles the draw calls, but only for shapes with a shadow; doesn't help `mask`, `blend` or `filter`.
-- **Measured**: 0.75–0.9 ms per isolated shape with the full scratch canvas, 0.35 ms with the bounding box (DPR 2); direct 0.01 ms.
-- **Open**: `alpha` (recommended: not isolated for now), bounding box in step 1 or 2 (recommended: step 2), transform copy without `getTransform()` allocation.
+- **Measured** (2026-11-20, real frames, DPR 2, plan §4.1): about 0.3 ms of CPU per frame for the first isolated shape and about 1 ms for 5–20, at 60 fps; at 100 the GPU limits it (26 fps full canvas, 35 fps bounding box). The earlier 0.75–0.9 ms per shape (plain canvas with a GPU readback) overstated it.
+- **Decided 2026-11-20** (plan §6): `alpha` not isolated for now; the bounding box as step 2 (it pays off from about 50 isolated shapes); custom shapes isolated when they have compositing state, unless they override `needsIsolation()`. Settled 2026-11-20: the transform copy from `getGlobalMatrix()` without `getTransform()` (same pixels, plan §3.4).
 - **Docs**: afterwards `mask.html` shapes get fill + stroke and the standard ghosts; the "Ghosts of fill-only shapes" note in DOCS_STANDARDS.md goes.
-- **Related**: builds on always save / restore (`design/2026-11-07_safe_shape_render_plan.md`, built 2026-11-07); build before §14 (`paintorder`); plan §9.
+- **Related**: builds on always save / restore (`design/2026-11-07_safe_shape_render_plan.md`, built 2026-11-07); build before §14 (`paintorder`); plan §9 (also: no shared code with the two-phase frame since its step 1, any order; `<pxl-clip>` clips the composite step).
 
 ## 34. String Literals in Expressions: Docs Left
 - **Status**: 💬 **Discussion** (2026-11-17: the compiler fix is built, plan ✅; only docs ideas are left)

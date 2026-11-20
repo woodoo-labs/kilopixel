@@ -1,10 +1,10 @@
 # Isolated Shape Compositing: Fill and Stroke Composite as One
 
-- **Status**: 🟡 **Proposed** (2026-11-01, no code changes yet)
+- **Status**: 🟢 **Decided** (2026-11-20, §6.1–§6.3 decided as recommended: `alpha` not isolated, the bounding box as step 2, custom shapes isolated unless they override `needsIsolation()`; checked against today's engine: the transform copy works, §3.4; cost measured again in real frames, §4; custom shapes, §3.5 and §6.3; build order, §9; no code changes yet)
 - **Date**: 2026-11-01
-- **Related**: `design/2026-11-07_safe_shape_render_plan.md` (built 2026-11-07, same function `Shape.render()`; the base for this plan, §9), TODO §14 `paintorder` (changes the order of the same draw calls; build it after this plan, §9), `docs/DOCS_STANDARDS.md` §2 ("Ghosts of fill-only shapes", the docs rule this removes), `design/2026-11-12_two_phase_frame_plan.md` (💬; also changes `Shape.render()`, the evaluation part: build one after the other, not in parallel)
+- **Related**: `design/2026-11-07_safe_shape_render_plan.md` (built 2026-11-07, same function `Shape.render()`; the base for this plan, §9), TODO §14 `paintorder` (changes the order of the same draw calls; build it after this plan, §9), `docs/DOCS_STANDARDS.md` §2 ("Ghosts of fill-only shapes", the docs rule this removes), `design/2026-11-12_two_phase_frame_plan.md` and `design/2026-11-15_per_frame_evaluation_plan.md` (no shared code since 2026-11-13, §9), `design/2026-10-17_shape_authoring_plan.md` (TODO §20, custom shapes, §3.5), `design/2026-09-29_pxl-clip_element_plan.md` (TODO §2, a clip on the layer also clips the composite step, §9)
 - **Target Implementation**: `js/elements/shape.js` (`render()`), `js/graphics.js` (`applyContextState` split), `js/elements/stage.js` (scratch canvas size), `js/elements/shapes/text.js` and `grid.js` (draw count)
-- **Prototypes**: `design/prototypes/2026-11-01_isolated_shape_compositing/mask_fill_stroke.html` (today vs isolated, every mask mode plus alpha, blend, shadow, multi-line text), `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_bench.html` (cost), `design/prototypes/2026-11-01_isolated_shape_compositing/paint_order_text.html` (`paintorder` for text, §9)
+- **Prototypes**: `design/prototypes/2026-11-01_isolated_shape_compositing/mask_fill_stroke.html` (today vs isolated, every mask mode plus alpha, blend, shadow, multi-line text), `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_bench.html` (cost, 2026-11-01, plain canvas), `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_patch.html` (2026-11-20: the isolated `Shape.render()` as a patch over the engine, with the transform check of §3.4), `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_frames.js` (2026-11-20: that patch in real frames, §4), `design/prototypes/2026-11-01_isolated_shape_compositing/paint_order_text.html` (`paintorder` for text, §9)
 
 ---
 
@@ -67,7 +67,7 @@ Every other shape keeps today's direct path. A single draw call already composit
 | text | `hasFill()` and `isStroked()`, or more than one visible line |
 | grid | major lines (`major > 0`, a second stroke) or labels are drawn |
 
-A method `needsIsolation()` on the shape answers this. Shapes compute it from the same values they draw with, so the condition can't drift from the drawing code.
+A method `needsIsolation()` on the shape answers this. Shapes compute it from the same values they draw with, so the condition can't drift from the drawing code. Custom shapes: §3.5.
 
 ### 3.2 Scratch Canvas
 
@@ -88,7 +88,13 @@ A method `needsIsolation()` on the shape answers this. Shapes compute it from th
 - **(a)** Read the shape's cached global matrix (`getGlobalMatrix()`, pre-allocated in `node.js`) and set it on the scratch with `setTransform(a, b, c, d, e, f)`, scaled by the unit `u` and the DPR. Needs a check that the global matrix uses the same units as the canvas transform (it's built for `toLocal` and hit testing).
 - **(b)** Replay the transform chain on the scratch: the layer's and groups' `applyTransformState`, then the shape's. Exact by construction, but needs the ancestors at hand.
 
-Recommendation: (a), with an engine test that compares it against `ctx.getTransform()` for nested, rotated, skewed and zoomed layers and groups.
+**Decided 2026-11-20: (a)**, with an engine test that compares it against `ctx.getTransform()` for nested, rotated, skewed and zoomed layers and groups.
+
+**Checked 2026-11-20:** (a) works. The global matrix has unitless linear parts and its translation in stage units, so the canvas transform is `setTransform(m[0]·d, m[1]·d, m[2]·d, m[3]·d, m[4]·u·d, m[5]·u·d)` with the layer's DPR `d`. The hit test already sets it this way on `pxl.dummyCtx` (`InteractionEngine.hitsShape()`, without `d`). In `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_patch.html` a layer and two groups (rotated, skewed, scaled, zoomed, `dx` / `dy`) hold an ellipse, a rect, a polyline with an arrowhead and two-line text with a stroke; drawn through the scratch canvas they land on the same pixels as drawn directly: largest channel difference 1 (antialiasing), no pixel off by more than 2, at DPR 1 (320,000 pixels) and DPR 2 (1.28 million).
+
+### 3.5 Custom Shapes
+
+A custom shape (`design/2026-10-17_shape_authoring_plan.md`) overrides `draw()` and may call `fill()` and `stroke()`, so the engine can't count its draw calls from the outside. The base `needsIsolation()` therefore answers "has compositing state": always correct, and a custom shape that draws only once can override it. The built-in shapes override it with the exact rule of §3.1. Open decision §6.3.
 
 ## 4. Cost
 
@@ -101,8 +107,23 @@ Measured with `design/prototypes/2026-11-01_isolated_shape_compositing/isolation
 | Isolated, bounding box only (≈ 380 × 260 px) | 0.35–0.37 ms |
 
 - **Real pages:** `mask.html` has one masked shape, `shadow.html` a few shadowed ones: under 1 ms per frame, and only on frames where the layer redraws.
-- **Worst case:** 20 animated, masked, stroked shapes cost 15–18 ms per frame with the full canvas (over budget) and 7 ms with the bounding box.
+- **Worst case:** 20 animated, masked, stroked shapes cost 15–18 ms per frame with the full canvas (over budget) and 7 ms with the bounding box. (2026-11-20: in real frames 20 shapes stay at 60 fps with about 1 ms of CPU per frame, §4.1.)
 - **Plan:** implement the full-canvas version first (simplest, always correct), then the bounding-box version as step 2. The bounding box is the shape's `getBoundingBox()` transformed to device space, plus half the stroke width, the miter and the arrowheads. Shadows and filters don't need margin: they are applied at the composite step, outside the scratch.
+
+### 4.1 Measured Again in Real Frames (2026-11-20)
+
+The table above draws in one long loop and ends each run with `getImageData()`, which makes the CPU wait for the GPU. In a real frame the GPU works on its own, and the cost splits into CPU time in the frame and GPU time, which shows only as a lower frame rate. Measured with the patch over today's engine (`design/prototypes/2026-11-01_isolated_shape_compositing/isolation_patch.html`, run by `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_frames.js`): a visible Chrome on this laptop, DPR 2, a stage 800 px wide (1,600 × 800 device pixels), n animated ellipses with fill, stroke and `mask="xor"` over a rect; CPU time of `Stage.render()` with a 5 µs timer, two runs each.
+
+| Isolated shapes | Direct (today) | Full scratch canvas | Bounding box |
+|---|---|---|---|
+| 1 | 0.26–0.27 ms, 60 fps | 0.49–0.62 ms, 60 fps | 0.47–0.56 ms, 60 fps |
+| 5 | 0.33–0.38 ms, 60 fps | 1.21–1.38 ms, 60 fps | 1.23–1.32 ms, 60 fps |
+| 20 | 0.65–0.72 ms, 60 fps | 1.64–1.72 ms, 59–63 fps | 1.45–1.91 ms, 58–60 fps |
+| 100 | 0.65–0.68 ms, 60 fps | 4.2–4.3 ms, **26 fps** | 3.0 ms, **34–36 fps** |
+
+- **Typical pages** (a few isolated shapes): about 0.3–1 ms of CPU per frame in which the layer redraws, nothing visible on the GPU. Far less than the 15–18 ms the plain-canvas bench above suggested for 20 shapes.
+- **Many isolated shapes:** the GPU becomes the limit. From the frame rates at 100 shapes, about 0.22 ms of GPU time per shape with the full canvas and 0.12 ms with the bounding box, so the bounding box (step 2) matters from about 50 isolated shapes in one frame.
+- Measured on one laptop's GPU; a weaker GPU reaches the limit earlier.
 
 ## 5. What Changes for Users
 
@@ -117,11 +138,19 @@ Measured with `design/prototypes/2026-11-01_isolated_shape_compositing/isolation
 
 Isolating `alpha` is correct (SVG `opacity` is isolated too), but fades are common, and every stroked, filled shape that fades would pay §4 per frame. The artifact is subtle (`design/prototypes/2026-11-01_isolated_shape_compositing/mask_fill_stroke.html`, row "alpha 0.5").
 
-Recommendation: leave `alpha` out for now. It keeps today's per-call behavior, like SVG `fill-opacity` / `stroke-opacity`. Revisit if users notice it.
+**Decided 2026-11-20: `alpha` is not isolated** for now. It keeps today's per-call behavior, like SVG `fill-opacity` / `stroke-opacity`. Revisit if users notice it.
 
 ### 6.2 Bounding Box in Step 1 or Step 2
 
-Recommendation: step 2. The full-canvas version is enough for every docs page and has no margin bugs; step 2 is a measured optimization.
+**Decided 2026-11-20: step 2.** The full-canvas version is enough for every docs page and has no margin bugs; step 2 is a measured optimization. (2026-11-20: confirmed by §4.1; the bounding box only pays off from about 50 isolated shapes per frame. The patch's bounding box, `getBoundingBox()` plus `hitPadding()` through the global matrix, already reuses the hit test's padding.)
+
+### 6.3 Custom Shapes
+
+Options for a custom shape with compositing state (§3.5):
+- **(a)** Always isolate it, unless it overrides `needsIsolation()`: always correct; a custom shape that draws once pays §4.1 for nothing (about 0.3 ms per frame for the first such shape).
+- **(b)** Never isolate it unless it overrides `needsIsolation()`: no cost, but a custom shape with fill and stroke keeps the bug until its author notices.
+
+**Decided 2026-11-20: (a)**, isolated unless the shape overrides `needsIsolation()`. Custom shapes with `mask`, `shadowcolor`, `filter` or `blend` are rare, and a correct picture is the better default; the shape authoring docs then mention the override.
 
 ## 7. Tests (`tests/index.html`)
 
@@ -132,16 +161,18 @@ Pixel reads on a small stage, one test per row:
 3. `shadowcolor` with fill and stroke: a pixel just inside the stroke, where the stroke's shadow fell, has the fill color.
 4. Multi-line text with `mask="source-in"` over a rect: both lines are visible inside the rect.
 5. Fill-only shape with `mask`: same pixels as before (direct path).
-6. Transform copy (§3.4): nested rotated / skewed / zoomed layer and group, isolated shape lands on the same pixels as a direct one.
+6. Transform copy (§3.4): nested rotated / skewed / zoomed layer and group, isolated shape lands on the same pixels as a direct one (as in `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_patch.html`).
+7. Custom shape (§3.5, if §6.3 (a)): a custom shape whose `draw()` fills and strokes, with `mask="source-in"`, keeps its fill; one that overrides `needsIsolation()` takes the direct path.
+8. Arrowheads with `shadowcolor`: no dark band where the shaft meets the head (the shaft's shadow under the head).
 
 ## 8. Steps
 
-1. Agree on this plan (§6.1, §6.2). Always save / restore, which comes first (§9), was built on 2026-11-07.
+1. Agree on this plan (§6.1, §6.2, §6.3): decided 2026-11-20. Always save / restore, which comes first (§9), was built on 2026-11-07.
 2. Split `applyContextState`; add `needsIsolation()` and the isolated path in `Shape.render()`; scratch canvas sized by the layers.
 3. Tests §7; `node build.js`; all tests pass.
 4. KILOPIXEL.md, TODO.md entry.
 5. Docs: `mask.html` shapes with fill and stroke and the standard ghosts; remove the "Ghosts of fill-only shapes" note; check `shadow.html` §1, `blend.html` and `fill.html`.
-6. Step 2: bounding-box scratch region, measured with `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_bench.html` again.
+6. Step 2: bounding-box scratch region, measured with `design/prototypes/2026-11-01_isolated_shape_compositing/isolation_frames.js` (real frames, §4.1; `isolation_bench.html` forces a GPU readback and overstates the cost).
 
 ## 9. Build Order with Related Plans
 
@@ -150,3 +181,8 @@ Three plans change how a shape's draw calls (fill, stroke, arrowheads, text line
 1. **Always `save()` / `restore()` per shape** (`design/2026-11-07_safe_shape_render_plan.md`, built 2026-11-07): `Shape.render()` gets one path, save → transform → draw → restore, instead of the `hasStateChanges` check. The isolated path then only swaps the target of `draw()` (the scratch canvas) instead of adding a third path. The shared scratch canvas also needs the same protection against custom shapes that change canvas state and don't reset it (the `GhostStar` test, `design/archive/2026-10-17_always_save_restore_plan.md` §5.2): a leak there would reach every isolated shape after it.
 2. **This plan** (TODO §31).
 3. **`paintorder`** (TODO §14, concept): `paintorder="stroke"` draws the stroke first and the fill on top. Without isolation it has the same compositing bug: with a shadow, the fill's shadow falls onto the stroke drawn just before it. With isolation it only swaps two calls inside the scratch canvas, and shadow, mask and filter apply to the finished shape. Shared open questions: arrowheads (§3.1 counts them as an extra draw call; §14 asks how they paint with `paintorder="stroke"`) and semi-transparent fills (§14 "fills show the stroke underneath", here §6.1 `alpha`). Prototype for text: `design/prototypes/2026-11-01_isolated_shape_compositing/paint_order_text.html` (plain canvas: per line as today, all fills then all strokes, strokes under the fills; overlapping lines and a label on a busy background).
+
+**Other plans** (checked 2026-11-20):
+- **Two-phase frame and per-frame evaluation** (`design/2026-11-12_two_phase_frame_plan.md` §6 and §7, `design/2026-11-15_per_frame_evaluation_plan.md`): the two-phase plan asks to build this plan and its own one after the other, because both changed `Shape.render()`. Since its step 1 (built 2026-11-13) evaluation happens in `update()`, and `Shape.render()` only draws (save, `applyContextState()`, `draw()`, restore). The remaining steps of both plans change the update phase (dirty flags, the heartbeat, broadcasts), this plan only the draw phase, so they can be built in any order.
+- **`<pxl-clip>`** (`design/2026-09-29_pxl-clip_element_plan.md`, TODO §2, not built): the clip is set on the layer's context with `ctx.clip()`; the composite step draws onto that context, so `drawImage()` is clipped like a direct draw. The scratch canvas carries no clip. A test belongs to whichever of the two plans is built second.
+- **Layer compositing** (`design/2026-10-30_framework_compatibility_plan.md` §29): a layer's `alpha`, `blend` and `filter` are CSS on its canvas and already apply to the layer as a whole; this plan is only about shapes.

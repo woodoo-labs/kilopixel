@@ -135,7 +135,7 @@ Plans whose per-frame design assumes today's single pass. Each has a pointer to 
 | §25 | `design/2026-10-25_refs_across_spaces_note.md` | the same lag for toLocal and plain `ref.*`; this plan is the general fix |
 | §20 | `design/2026-10-17_shape_authoring_plan.md` | §3.3 `draw(ctx, u)` without `t` becomes a requirement (§3.2); §4 Pattern B sets `isAnimated` by hand, which the update phase must keep working; its open point "while stopped, the layer keeps redrawing" is solved by §3.2 |
 | §39 | `design/2026-11-12_reactive_propagation_plan.md` | no dependency: reactive propagation stays recursive (the cycle crash is fixed); this plan builds its own order for readers with `t` (§3.1.1). If §39 is built later, both could share the ordering code |
-| §31 | `design/2026-11-01_isolated_shape_compositing_plan.md` | no logical dependency, but both change `Shape.render()` (it the drawing, this plan the evaluation): build one after the other, not in parallel |
+| §31 | `design/2026-11-01_isolated_shape_compositing_plan.md` | no logical dependency, but both change `Shape.render()` (it the drawing, this plan the evaluation): build one after the other, not in parallel (2026-11-20: since step 1 `Shape.render()` only draws, and steps 2–4 change the update phase; any order, isolation plan §9) |
 | §14 | (no plan) `paintorder` | same draw path; only ordering, after §31 |
 
 Not affected: TODO §30 (`design/2026-10-30_framework_compatibility_plan.md`: its event dispatch fits both models), `<pxl-out>` (TODO §5: updates through broadcasts, independent of draw order), `<pxl-plot>` (TODO §7), stage sizing (`design/2026-11-04_stage_sizing_plan.md`). TODO §9 (`<pxl-image>`) only adds an external invalidation source (§3.2).
@@ -146,7 +146,7 @@ Not affected: TODO §30 (`design/2026-10-30_framework_compatibility_plan.md`: it
 2. **This plan:** step 1 measured and built (§7.4); answer the rest of §4, then 🟡 for steps 2–4.
 3. **Build it in steps** (§7.2): step 1 done; step 2 when a measurement shows that the saved redraws matter, or with throttling or tweens.
 4. **Update the dependent plans to the new model, then build them:** throttling Part A (much simpler), tween §7, `<pxl-clip>`, `space` (without §3.5).
-5. **Isolated compositing (TODO §31)** before or after item 3, not in parallel; `paintorder` after it.
+5. **Isolated compositing (TODO §31)** before or after item 3, not in parallel; `paintorder` after it. (2026-11-20: no shared code any more, any order; isolation plan §9.)
 6. **Docs cleanup** (§8): already with step 1 of §7.2.
 
 ### 7.1 Found While Checking: The CSS-Only Fast Path Never Ran (Fixed 2026-11-12)
