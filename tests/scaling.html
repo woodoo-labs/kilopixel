@@ -22,7 +22,7 @@
   <main class="docs-content">
     <div class="docs-inner">
       <h1>Scaling Tests</h1>
-      <p>Level 6 of <code>design/2026-11-15_testing_plan.md</code>: each test measures an operation with n and with 2n elements and compares the two times. Linear work takes about twice as long (ratio 2), quadratic work about four times as long; a test fails above ratio 3.5. Ratios are the same on every machine, unlike absolute times. Each size is measured five times, the median counts, and n grows until the smaller measurement takes at least 5 ms (shorter times are mostly noise). Work that must not depend on the scene's size is timed with n and with 4n elements in the scene and fails above ratio 2. Run with <code>node tools/run_tests.js --tests</code>, or here via the dev server.</p>
+      <p>Level 6 of <code>design/2026-11-15_testing_plan.md</code>: each test measures an operation with n and with 2n elements and compares the two times. Linear work takes about twice as long (ratio 2), quadratic work about four times as long; a test fails above ratio 3.5. Ratios are the same on every machine, unlike absolute times. Each size is measured five times, the median counts, and n grows until the smaller measurement takes at least 5 ms (shorter times are mostly noise). Over the limit, both sizes are measured again, then 2n against 4n: a step where the elements outgrow the CPU caches makes only one pair look quadratic. Work that must not depend on the scene's size is timed with n and with 4n elements in the scene and fails above ratio 2. Run with <code>node tools/run_tests.js --tests</code>, or here via the dev server.</p>
       <p id="summary" class="test-summary">Running…</p>
       <table class="test-table"><tbody id="results"></tbody></table>
       <div id="host" style="width: 1000px"></div>
@@ -74,6 +74,16 @@
         const ratio2 = large2 / Math.max(small2, 0.01);
         message += `; again: ${small2.toFixed(1)} ms, ${large2.toFixed(1)} ms, ratio ${ratio2.toFixed(1)}`;
         ratio = Math.min(ratio, ratio2);
+      }
+      // Still over: compare the next pair, 2n with 4n. When the working set outgrows the CPU caches, the cost per
+      // element doubles once and is linear again after it (hit testing 2026-11-20: 134 ns per shape at 4,000, 273 at
+      // 8,000, 261 at 16,000; on GitHub's runners the step lay between 8,000 and 16,000). That step makes one pair look
+      // quadratic; quadratic work makes every pair look quadratic.
+      if (ratio > LIMIT && 4 * n <= 64000) {
+        const larger = median(measure, 4 * n), large3 = median(measure, 2 * n);
+        const ratio3 = larger / Math.max(large3, 0.01);
+        message += `; next pair: ${2 * n}: ${large3.toFixed(1)} ms, ${4 * n}: ${larger.toFixed(1)} ms, ratio ${ratio3.toFixed(1)}`;
+        ratio = Math.min(ratio, ratio3);
       }
       if (ratio > LIMIT) throw new Error(`${message} (limit ${LIMIT})`);
     }
