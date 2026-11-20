@@ -3,7 +3,7 @@
 Planned work only, one short item each; the plan holds the details. Parked ideas are plans in `design/ideas/` (no item here), implemented plans are in `design/done/`, superseded and dropped ones in `design/archive/`. Workflow: `.claude/CLAUDE.md` → "Plans and TODO"; check: `node tools/check_plans.js`.
 
 - **Status words** (as in the plans): 💬 **Discussion** (ideas, nothing decided) · 🟡 **Proposed** (complete plan, waiting for a decision) · 🟢 **Decided** (agreed, not built yet).
-- **Numbers are stable:** other files refer to items as "TODO §29". A removed item leaves a gap; a new item gets the next free number (next: §46).
+- **Numbers are stable:** other files refer to items as "TODO §46". A removed item leaves a gap; a new item gets the next free number (next: §47).
 
 ## 1. SVG Paths and Icons (`<pxl-path>`)
 - **Status**: 🟡 **Proposed**
@@ -15,7 +15,7 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Status**: 🟡 **Proposed**
 - **Plan**: `design/2026-09-29_pxl-clip_element_plan.md`
 - A container that clips its children to a path with `ctx.clip()`: compound paths, `fillrule="evenodd"` holes, nested clips, no offscreen buffer (unlike `mask`).
-- **Next**: decide; its children must be evaluated in the update phase (`design/2026-11-12_two_phase_frame_plan.md` §6).
+- **Next**: decide; its children must be evaluated in the update phase (`design/2026-11-20_evaluation_model_plan.md` §6).
 
 ## 3. One-Shot Animation, Easing, Springs (`tween`, `ease`, `spring`)
 - **Status**: 🟡 **Proposed** (`tween`; easing, springs and angle helpers are 💬)
@@ -27,7 +27,7 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Status**: 🟡 **Proposed**
 - **Plan**: `design/2026-08-02_declarative_html_output_pxl_out_plan.md`
 - An element outside the stage that shows a `ref` value as DOM text (`ref.main.fps`, coordinates) without JavaScript; writes only when the text changes.
-- **Note**: it is the feature that needs readers to see no half-updated values (§39).
+- **Note**: it needs readers to see no half-updated values: build it after D1 of the evaluation model (§46).
 
 ## 7. Math Plots (`<pxl-plot>`)
 - **Status**: 🟡 **Proposed**
@@ -39,7 +39,7 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Status**: 🟡 **Proposed**
 - **Plan**: `design/2026-11-12_layer_throttling_plan.md`
 - Built: stage-level `<pxl-var>` (part B), the monitor fix (C1). Open: `maxfps` on layers (part A) and `ref.<layer>.fps` (C2).
-- **Next**: after two-phase step 2 (§29), which makes part A much simpler (plan D9).
+- **Next**: after step 2 of the evaluation model (§46), which makes part A much simpler.
 
 ## 9. Images (`<pxl-image>`)
 - **Status**: 💬 **Discussion** (no plan yet)
@@ -81,12 +81,6 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - `space="ref.A"` makes A's frame the element's parent space: exact overlays and labels on moving shapes without the `toLocal()` clone rule.
 - **Open**: the name (`space` / `frame`), the origin, the scope, a hidden target. Pick up together with the parked note `design/ideas/2026-10-25_refs_across_spaces_note.md`.
 
-## 29. Two-Phase Frame
-- **Status**: 💬 **Discussion** (step 1 built)
-- **Plan**: `design/2026-11-12_two_phase_frame_plan.md`
-- **Next**: step 2, change-based dirty flags and the keep-alive in the stage: a layer redraws only when a value changed (a `floor(t)` clock once per second). Both paths of §40 need it.
-- **Open**: steps 3–4, the rule for cycles without `t` (plan §9.1).
-
 ## 31. Isolated Compositing, Step 2: the Bounding Box
 - **Status**: 🟢 **Decided**
 - **Plan**: `design/done/2026-11-01_isolated_shape_compositing_plan.md` (step 1 built, plan §10)
@@ -103,19 +97,6 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - `smoothstyle="centripetal"` (default) or `"uniform"`: the uniform spline follows points sampled at equal steps (walkthrough section 9: 60 points instead of 120). `<pxl-plot>` (§7) reuses it.
 - **Open**: D1–D3.
 
-## 39. Reactive Propagation in Dependency Order
-- **Status**: 💬 **Discussion** (the cycle crash is fixed)
-- **Plan**: `design/2026-11-12_reactive_propagation_plan.md`
-- Evaluate every affected reader once, sources first: no repeated diamonds, no half-updated values.
-- **When**: with `<pxl-out>` (§5); decided together with D1 of §40, which may replace it.
-
-## 40. Per-Frame Evaluation (No Broadcasts)
-- **Status**: 🟡 **Proposed**
-- **Plan**: `design/2026-11-15_per_frame_evaluation_plan.md`
-- One mechanism instead of three (broadcasts, the frame loop for `t`, the `toLocal` matrix walk): a change raises a version, the frame evaluates what is out of date, sources first.
-- **Next**: §29 step 2, then a prototype as a patch over the engine and a page sweep, then D1.
-- **Also decided here**: scoped names instead of global ids (plan D8, `design/done/2026-10-30_framework_compatibility_plan.md` D2); B8 of `design/done/2026-10-27_engine_cleanup_inventory_note.md` (the four evaluation loops this plan rewrites).
-
 ## 42. Negative Sweep and Shrinking Arrowheads
 - **Status**: 🟡 **Proposed**
 - **Plan**: `design/2026-11-16_negative_sweep_arrowheads_plan.md`
@@ -123,9 +104,9 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Open**: D1–D5 (plan §7).
 
 ## 43. AI Discoverability (`llms.txt`)
-- **Status**: 💬 **Discussion** (no plan yet)
-- `docs/llms.txt` (written by hand, or generated from `.agents/KILOPIXEL.md`, the language reference), a "Using Kilopixel with AI" page, README and typings with the npm package (§44).
-- **Open**: what of KILOPIXEL.md goes public (it marks some behavior as internal, e.g. `ref.<id>.pN`; the engine internals are in `.agents/ENGINE.md`).
+- **Status**: 🟢 **Decided** (one source, no plan yet; build it with the first release)
+- `docs/llms-full.txt` generated by `build.js` from `.agents/KILOPIXEL.md`: lines marked internal (e.g. `ref.<id>.pN`) left out, repo links turned into docs links; `tools/check_build.js` checks it is up to date. `docs/llms.txt` is a short hand-written index (what Kilopixel is, links to `llms-full.txt`, installation and element pages). No second hand-written guide.
+- **Later**: a "Using Kilopixel with AI" page; README and typings with the npm package (§44).
 
 ## 44. Distribution and More Framework Smoke Pages
 - **Status**: 🟢 **Decided**
@@ -136,3 +117,9 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Status**: 💬 **Discussion** (no plan yet)
 - `getBoundingClientRect()` of a shape is empty (tooltips need a workaround); clickable shapes get no keyboard focus or roles; CSS `:hover` never matches a shape (a custom state?). Each needs its own plan.
 - **Background**: `design/done/2026-10-30_framework_compatibility_plan.md` §23.6, §26.2.
+
+## 46. Evaluation Model
+- **Status**: 🟡 **Proposed**
+- **Plan**: `design/2026-11-20_evaluation_model_plan.md` (merges the two-phase frame, reactive propagation and per-frame evaluation plans)
+- **Next**: step 2, change-based dirty flags with the keep-alive in the stage: a layer redraws only when a value changed (a `floor(t)` clock once per second). Then a prototype of option B (no broadcasts) and decision D1 between it and option A (ordered broadcasts).
+- **Also decided there**: scoped names instead of global ids (D8); B8 of `design/done/2026-10-27_engine_cleanup_inventory_note.md` (the evaluation loops either option rewrites).

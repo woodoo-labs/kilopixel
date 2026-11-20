@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (2026-11-20, §0 lists the engine changes since the plan; nothing built)
 - **Date**: 2026-10-17
-- **Related**: `design/done/2026-10-17_bundle_scope_plan.md` (`pxl.Shape`, implemented), `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, introduced `static defaults`), `design/done/2026-11-07_safe_shape_render_plan.md` (state isolation and error handling for foreign code, implemented), `design/done/2026-10-30_framework_compatibility_plan.md` (proposes renaming the `on*` handlers, §0), `design/2026-11-12_two_phase_frame_plan.md` (💬; its change-based dirty flags make §3.3 "`draw()` only reads `attributeValues`" a requirement, must keep §4 Pattern B working, and solve §4's "while stopped, the layer keeps redrawing"), `design/done/2026-10-27_engine_cleanup_inventory_note.md` (code style, §0), `.agents/TODO.md` §20
+- **Related**: `design/done/2026-10-17_bundle_scope_plan.md` (`pxl.Shape`, implemented), `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, introduced `static defaults`), `design/done/2026-11-07_safe_shape_render_plan.md` (state isolation and error handling for foreign code, implemented), `design/done/2026-10-30_framework_compatibility_plan.md` (proposes renaming the `on*` handlers, §0), `design/done/2026-11-12_two_phase_frame_plan.md` (💬; its change-based dirty flags make §3.3 "`draw()` only reads `attributeValues`" a requirement, must keep §4 Pattern B working, and solve §4's "while stopped, the layer keeps redrawing"), `design/done/2026-10-27_engine_cleanup_inventory_note.md` (code style, §0), `.agents/TODO.md` §20
 - **Target Implementation**: `js/elements/node.js`, `js/elements/shape.js`, `js/elements/shapes/*.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/interaction.js`
 - **Prototype**: `design/prototypes/2026-10-17_shape_authoring/star.js`, `design/prototypes/2026-10-17_shape_authoring/star_test.html` (updated 2026-11-12 for `_ctx` / `_dpr`, 2026-11-20 for `layer.dpr`; all checks pass with today's engine, both lines after the careless star stay at full alpha)
 
@@ -261,5 +261,6 @@ Verified 2026-10-17 (frames driven by hand; not run again after the 2026-11-07 r
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-20: the two-phase frame, reactive propagation and per-frame evaluation plans were merged into `design/2026-11-20_evaluation_model_plan.md` (TODO §46); its §6 says what changes for this plan.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
 - Status line until 2026-11-20: 🟡 **Proposed** (2026-11-20, §0: custom shapes and isolated compositing; 2026-11-19, §0: handler names and map after W1 of the framework plan; 2026-11-07, brought up to date with the engine, §0; no code changes yet)

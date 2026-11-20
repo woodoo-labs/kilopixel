@@ -1,8 +1,8 @@
 # Reactive Propagation in Dependency Order
 
-- **Status**: 💬 **Discussion** (2026-11-18, the cycle crash is fixed, §2; the rest waits for a feature that needs it, §3)
+- **Status**: ✅ **Implemented** (2026-11-13, the cycle stop of §2; the full design is option A of `design/2026-11-20_evaluation_model_plan.md`)
 - **Date**: 2026-11-12
-- **Related**: `design/2026-11-15_per_frame_evaluation_plan.md` (the alternative: no broadcasts at all; if it is built, this plan is superseded), `design/2026-11-12_two_phase_frame_plan.md` (§3.1.1: its update phase orders readers with `t`; could share the ordering code), `design/done/2026-10-26_tolocal_fix_plan.md` (toLocal readers and `broadcastGlobalMatrixChange()`), `design/done/2026-11-07_safe_shape_render_plan.md` (a reader's error is its own), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (`isHovered` / `isPressed` broadcasts)
+- **Related**: `design/archive/2026-11-15_per_frame_evaluation_plan.md` (the alternative: no broadcasts at all; if it is built, this plan is superseded), `design/done/2026-11-12_two_phase_frame_plan.md` (§3.1.1: its update phase orders readers with `t`; could share the ordering code), `design/done/2026-10-26_tolocal_fix_plan.md` (toLocal readers and `broadcastGlobalMatrixChange()`), `design/done/2026-11-07_safe_shape_render_plan.md` (a reader's error is its own), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (`isHovered` / `isPressed` broadcasts)
 - **Target Implementation** (if built): `js/engine.js` (`pxl.broadcast()`), `js/elements/node.js` (`variableChangedCallback()`, new fields), `tests/index.html`, `.agents/KILOPIXEL.md` (Variable Change Propagation)
 - **Prototypes**: `design/prototypes/2026-11-12_reactive_propagation/chains_and_diamonds.html` (long chain, stacked diamonds, half-updated values; `?lib=` compares builds), `design/prototypes/2026-11-12_reactive_propagation/ref_cycles.html` (cycles that settle, never settle, self-reference with `t`, animated chain in the wrong DOM order), `design/prototypes/2026-11-12_reactive_propagation/propagation_cost_bench.html` (today's broadcast cost in the engine, and the algorithms of §4 on plain objects)
 
@@ -51,14 +51,14 @@ Goal: find every affected reader first, then evaluate each one **once**, sources
 Two ways to get the order (D1):
 
 - **A. Per broadcast, no lasting graph (recommended):** pass 1 marks the affected readers and counts their affected inputs (an explicit stack, stamps on the elements); pass 2 evaluates a reader when all its affected inputs are done, and only if one of them changed (Kahn's algorithm on the affected part only). Readers left with inputs pending are in a cycle or behind one; they use the cycle rule. Nothing to rebuild when elements connect or disconnect.
-- **B. A lasting graph:** a topological rank per element from Tarjan's algorithm (iterative: a recursive one would hit the stack on long chains), rebuilt after subscriptions change, and a heap ordered by rank per broadcast. Same cost per broadcast as A, but about 70 more lines, and a page that adds particles reading `ref.mouse` in every frame would rebuild the graph in every frame. (Aligned 2026-11-18: that holds only if every subscriber gets a rank. With nodes limited to elements that are read by others and have expressions of their own, as in `design/2026-11-12_two_phase_frame_plan.md` §9 R4, a reader that is no node comes after its sources and needs no rebuild; B then differs from A only in code size.)
+- **B. A lasting graph:** a topological rank per element from Tarjan's algorithm (iterative: a recursive one would hit the stack on long chains), rebuilt after subscriptions change, and a heap ordered by rank per broadcast. Same cost per broadcast as A, but about 70 more lines, and a page that adds particles reading `ref.mouse` in every frame would rebuild the graph in every frame. (Aligned 2026-11-18: that holds only if every subscriber gets a rank. With nodes limited to elements that are read by others and have expressions of their own, as in `design/done/2026-11-12_two_phase_frame_plan.md` §9 R4, a reader that is no node comes after its sources and needs no rebuild; B then differs from A only in code size.)
 
 Common to both:
 
 - **Nested broadcasts** (a matrix walk while propagating) only add to the running propagation; only the outermost call runs the loop.
 - **Zero allocation:** stamps instead of sets, pre-allocated arrays reused for every propagation.
 - **Errors:** a reader whose evaluation throws reports its own error and counts as unchanged.
-- **Cycles:** members evaluated in DOM order, repeated while values change, at most `pxl.MAX_CYCLE_ROUNDS` rounds, one warning. An element that reads itself settles inside the element. This is option (b) of the open decision C1 in `design/2026-11-12_two_phase_frame_plan.md` §9.1, one rule for cycles without `t` on both paths (aligned 2026-11-18).
+- **Cycles:** members evaluated in DOM order, repeated while values change, at most `pxl.MAX_CYCLE_ROUNDS` rounds, one warning. An element that reads itself settles inside the element. This is option (b) of the open decision C1 in `design/done/2026-11-12_two_phase_frame_plan.md` §9.1, one rule for cycles without `t` on both paths (aligned 2026-11-18).
 - **No fast path** for readers that nobody reads: it would save about 0.02 ms per 1,000 readers (§5), and with A it would need extra bookkeeping.
 
 Open decisions:

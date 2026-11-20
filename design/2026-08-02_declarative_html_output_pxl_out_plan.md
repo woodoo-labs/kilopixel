@@ -176,5 +176,6 @@ The text is real DOM text, so screen readers can read it. `<pxl-out>` does **not
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-20: the two-phase frame, reactive propagation and per-frame evaluation plans were merged into `design/2026-11-20_evaluation_model_plan.md` (TODO §46); its §6 says what changes for this plan.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
 - Status line until 2026-11-20: 🟡 **Proposed** (2026-11-17, §3.3 pointer timing; revised 2026-10-17, first draft 2026-08-02)

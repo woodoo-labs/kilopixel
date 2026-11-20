@@ -376,7 +376,7 @@ Reader updates per animation frame on real pages, counted with a wrapper around 
 | inside a hidden layer | **frozen** | updates |
 | of a `<pxl-var>` inside a hidden group | **frozen** | — |
 
-A hidden shape evaluates before it checks `hidden`; a hidden group or layer skips its children, so their `t` expressions don't run. Values that follow another `ref.*` update through broadcasts, which don't go through drawing. When the group or layer is shown again, its values are correct in the next frame, because expressions depend only on `t`. This plan keeps the behavior; whether a two-phase frame should evaluate hidden subtrees is an open question in TODO §29.
+A hidden shape evaluates before it checks `hidden`; a hidden group or layer skips its children, so their `t` expressions don't run. Values that follow another `ref.*` update through broadcasts, which don't go through drawing. When the group or layer is shown again, its values are correct in the next frame, because expressions depend only on `t`. This plan keeps the behavior; whether a two-phase frame should evaluate hidden subtrees is an open question in TODO §46.
 
 ### 5.2 Other Cases
 

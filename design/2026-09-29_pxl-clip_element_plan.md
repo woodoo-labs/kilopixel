@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (2026-09-29)
 - **Date**: 2026-09-29
-- **Related**: `design/2026-11-12_two_phase_frame_plan.md` (💬; with a two-phase frame the clip's children are evaluated in the update phase, not in `applyClip()` (§6.1 here), and the layer heartbeat (§9 here) goes away; see its §3.3, §6)
+- **Related**: `design/done/2026-11-12_two_phase_frame_plan.md` (💬; with a two-phase frame the clip's children are evaluated in the update phase, not in `applyClip()` (§6.1 here), and the layer heartbeat (§9 here) goes away; see its §3.3, §6)
 - **Files affected**: `js/elements/clip.js` (new), `js/elements/node.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/shape.js`, all 7 shape classes, `build.js`
 
 ---
@@ -377,4 +377,5 @@ No special dirty logic is needed. The clip redraws every frame along with its pa
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-20: the two-phase frame, reactive propagation and per-frame evaluation plans were merged into `design/2026-11-20_evaluation_model_plan.md` (TODO §46); its §6 says what changes for this plan.
 - Status line until 2026-11-20: 🟡 **Proposed** (2026-09-29)

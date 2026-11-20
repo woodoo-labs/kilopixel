@@ -320,7 +320,7 @@ Sidebar: a new entry under "Engine & Reactivity" or a new section "Integration".
 | # | Decision | Options | Recommendation |
 |---|---|---|---|
 | D1 | Names of the declarative handlers | `pxl-on-click` / `pxl-click` / `pxl-onclick` / other (§4.3) | **decided 2026-11-09:** `pxl-on-click`, `pxl-on-enter`, `pxl-on-leave`, `pxl-on-down`, `pxl-on-up`, `pxl-on-move`; attribute-only |
-| D2 | Scoped names | A global ids / B stage-scoped ids / C `name` attribute (§8.2) | decide later; A for now, C if components need it. **2026-11-15 (§19.3):** design it together with the evaluation model (`design/2026-11-15_per_frame_evaluation_plan.md` D1), because both change how `ref` is resolved |
+| D2 | Scoped names | A global ids / B stage-scoped ids / C `name` attribute (§8.2) | decide later; A for now, C if components need it. **2026-11-15 (§19.3):** design it together with the evaluation model (`design/archive/2026-11-15_per_frame_evaluation_plan.md` D1), because both change how `ref` is resolved |
 | D3 | Logical coordinates on events | extra fields / none (§4.1) | none; `ref.<stage>.mouseX`. **Built 2026-11-19** as recommended (§23.8); `offsetX` equals `clientX` on shape events, documented in the events tab of the API reference |
 | D4 | Native canvas `click` next to the synthetic shape `click` | (a) accept both / (b) hit-test when the event arrives and stop the native event over a shape / (c) Kilopixel owns every click in the stage (§4.1) | **decided 2026-11-10: (b)** for `click`, `pointerdown`, `pointerup`; `pointermove` keeps both (prototype `d4_clicks.html`) |
 | D5 | Hand cursor for framework listeners | `interactive` implies pointer / separate `cursor` attribute (§4.4) / **the shape's CSS `cursor`** (§22.3) | **decided 2026-11-17:** the shape's CSS `cursor`, no `interactive` (§22.3); before: `interactive` implies pointer. **Changed 2026-11-18 (§23 E1):** no listener counts; the cursor is only CSS, and the hand for `pxl-on-click` / `-down` / `-up` comes from a rule of the default styles |
@@ -364,7 +364,7 @@ Every engine step: `node build.js`, update the `pxl.min.js` size, `tests/index.h
 - **Stage sizing** (`2026-11-04_stage_sizing_plan.md`, ✅ 2026-11-15): built W2 (§5) together with overridable stage sizes and a 300 px fallback width.
 - **Always save / restore** (`2026-11-07_safe_shape_render_plan.md`, built 2026-11-07): independent; both touch `Shape.render()` only lightly (W1 doesn't change rendering).
 - **`space` attribute** (`2026-10-30_space_attribute_plan.md`): hit testing of space elements is unchanged; DOM events work the same for them. W3 accessors would include `space` (its value is a ref object, set as a property it could be the element itself: `el.space = otherEl` is a natural framework API; note for that plan).
-- **Two-phase frame** (TODO §29): event dispatch at the end of `process()` fits the update / draw split (step 1 built 2026-11-13). Since 2026-11-17 `process()` runs at the start of the frame (`design/done/2026-11-17_pointer_frame_order_plan.md`): hover and move events are hit-tested against the picture on screen, the same one D4 uses for clicks when they arrive.
+- **Two-phase frame** (TODO §46): event dispatch at the end of `process()` fits the update / draw split (step 1 built 2026-11-13). Since 2026-11-17 `process()` runs at the start of the frame (`design/done/2026-11-17_pointer_frame_order_plan.md`): hover and move events are hit-tested against the picture on screen, the same one D4 uses for clicks when they arrive.
 - **Interactive state auto-registration** (`design/archive/2026-10-15_interactive_state_auto_registration_plan.md`, ⚪): was to be extended by §4.2 (listener counts, `interactive`); since §23 step 2 every shape is hit-tested and nothing is registered, so the plan is archived.
 
 ## 16. Risks
@@ -452,9 +452,9 @@ A review of this plan against the goal "Kilopixel works in the major frameworks 
 
 **Sets that only grow** (W4 extended): `pxl._interactiveIds`, `pxl._pressableIds` and `pxl._stickyIds` keep every id ever read; with framework-generated ids that change on remount, they grow slowly. Bound or clean them with the caches. (Resolved 2026-11-19, §20.)
 
-### 19.3 Relation to the Evaluation Model (TODO §29, §39, §40)
+### 19.3 Relation to the Evaluation Model (TODO §46, §39, §40)
 
-- **Not on the critical path.** Events (W1), properties (W3), ids (W5.1), the cache bound (W4) and distribution (W8) work with today's broadcasts and with `design/2026-11-15_per_frame_evaluation_plan.md`. Where they broadcast (the `setAttribute` path, `id` changes), the per-frame plan replaces the call with `pxl.markChanged()`.
+- **Not on the critical path.** Events (W1), properties (W3), ids (W5.1), the cache bound (W4) and distribution (W8) work with today's broadcasts and with `design/archive/2026-11-15_per_frame_evaluation_plan.md`. Where they broadcast (the `setAttribute` path, `id` changes), the per-frame plan replaces the call with `pxl.markChanged()`.
 - **Framework work first** gives the per-frame plan a safety net: `tests/frameworks.html` covers insert, move, remove and late ids, the lifecycle paths a core rewrite is most likely to break.
 - **Scoped names (D2) belong to the evaluation model.** Compiled functions are shared by source string and bound to the global `pxl.nodes`, and subscription keys are global `'ref.<id>'` strings; N component instances with their own ids therefore compile N copies of each expression. Resolving `ref` per stage changes exactly the code the per-frame plan rewrites (`ref` passed at call time, lookups by id at check time), so D2 is designed together with that plan's D1.
 - **Timing:** with the per-frame plan, a reactive value is updated in the next frame, not inside `setAttribute()`. A framework that reads a derived value back through a W3 getter right after setting its source would see the old value; the same question as the per-frame plan's D5.
@@ -493,7 +493,7 @@ All six framework-review bugs that were `test.known()` (testing plan §14, §16)
 | Text children (C17, W9, D12) | `pxl.DEFAULT_STYLES`: `display: none` for `pxl-var`, `pxl-group` and the built-in shapes, in `@layer pxl` | test: `<pxl-text>` content is not visible |
 
 - **File size:** `pxl.min.js` 57.46 → 58.70 KB (the docs say ~59KB; gzipped 17.43 KB, still ~17KB). The build check caught the outdated sizes.
-- **Not done: the sets that only grow** (`pxl._interactiveIds`, `pxl._pressableIds`, `pxl._stickyIds`, §19.2). They record that some expression reads an id's `isHovered` / `isPressed`; removing an id is only safe once no reader exists, and readers are not tracked per id. They hold strings, one per distinct id ever read: small. Revisit with the per-frame plan (`design/2026-11-15_per_frame_evaluation_plan.md`), whose `pxl._readIds` has the same question. **Resolved 2026-11-19:** all three sets are gone (`pxl._interactiveIds` and `pxl._stickyIds` in §23.7, `pxl._pressableIds` in §23.8).
+- **Not done: the sets that only grow** (`pxl._interactiveIds`, `pxl._pressableIds`, `pxl._stickyIds`, §19.2). They record that some expression reads an id's `isHovered` / `isPressed`; removing an id is only safe once no reader exists, and readers are not tracked per id. They hold strings, one per distinct id ever read: small. Revisit with the per-frame plan (`design/archive/2026-11-15_per_frame_evaluation_plan.md`), whose `pxl._readIds` has the same question. **Resolved 2026-11-19:** all three sets are gone (`pxl._interactiveIds` and `pxl._stickyIds` in §23.7, `pxl._pressableIds` in §23.8).
 - **Custom shapes** (`class Star extends pxl.Shape`, own tag): their content is not hidden by the default rule; a page that writes content into them adds `star-shape { display: none }`. Noted in KILOPIXEL.md.
 - **Next:** §19.4 step 2, `tests/frameworks.html` (built 2026-11-17, §21).
 
@@ -887,11 +887,11 @@ The framework work paused here on 2026-11-19, with the Angular app (§26.3 step 
 3. **A small engine change:** a layer's `alpha` / `blend` / `filter` changed by a property or attribute redraws all its shapes (§24.2). (Built 2026-11-20, §29.)
 4. **The Angular app** (`tests/smoke/angular/`, npm): skipped 2026-11-19. Worth building when an Angular user appears, or to measure the zone.js cost (§26.2). Angular's typings already work (the core file, §27).
 5. **The npm package:** later, together with publishing (CLAUDE.md "Pre-release"); the typings then ship in it.
-6. **§19.4 step 6:** the evaluation model (TODO §29, §40), with D2.
+6. **§19.4 step 6:** the evaluation model (TODO §46, §40), with D2.
 
 ## 29. Layer Compositing Without Redraw (Built 2026-11-20)
 
-Item 3 of §28, found with W3 (§24.2). A layer's `alpha`, `blend` and `filter` are CSS on its canvas (`opacity`, `mix-blend-mode`, `filter`). Animated by an expression they already took the CSS-only path (`design/2026-11-12_two_phase_frame_plan.md` §7.1): the layer writes the CSS and keeps its pixels. Changed from outside, they redrew every shape in the layer.
+Item 3 of §28, found with W3 (§24.2). A layer's `alpha`, `blend` and `filter` are CSS on its canvas (`opacity`, `mix-blend-mode`, `filter`). Animated by an expression they already took the CSS-only path (`design/done/2026-11-12_two_phase_frame_plan.md` §7.1): the layer writes the CSS and keeps its pixels. Changed from outside, they redrew every shape in the layer.
 
 - **Cause:** `PxlNode.valueChanged()` (attributes and properties) and `variableChangedCallback()` (a `ref` the value reads) call `parentLayer.invalidate()`; for a layer's own value that is the layer itself, so `render()` cleared the canvas and drew every child again.
 - **Measured before** (`design/prototypes/2026-10-30_framework_compatibility/layer_compositing_bench.html`, frames driven by hand, browser pane), one change before every frame:
@@ -916,4 +916,4 @@ Steps 1–5 of §19.4 are built (§20–§29); the DOM contract row by row is in
 
 - **Smoke pages for Svelte 5 and Lit, the Angular app, the npm package** (§26.3, §28 items 1, 4, 5): TODO §44.
 - **A shape's position on the page, keyboard focus, accessibility, `:hover` on shapes** (§23.6, §26.2): TODO §45.
-- **Scoped names (D2)** (§8.2, §19.3): with the evaluation model, TODO §40 (`design/2026-11-15_per_frame_evaluation_plan.md` D8).
+- **Scoped names (D2)** (§8.2, §19.3): with the evaluation model, TODO §46 (`design/archive/2026-11-15_per_frame_evaluation_plan.md` D8).

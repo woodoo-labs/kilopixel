@@ -1,8 +1,8 @@
 # Per-Frame Evaluation in Dependency Order (No Broadcasts)
 
-- **Status**: 🟡 **Proposed** (2026-11-20, nothing built; D1 decides between this plan and the two-phase path)
+- **Status**: ⚪ **Superseded by** `design/2026-11-20_evaluation_model_plan.md` (2026-11-20, option B there)
 - **Date**: 2026-11-15
-- **Related**: `design/2026-11-12_two_phase_frame_plan.md` (TODO §29: step 1 built; its steps 2 and 3 are the first steps of this plan too, §8), `design/2026-11-12_reactive_propagation_plan.md` (TODO §39: orders the broadcasts instead of removing them; this plan is the alternative, §7), `design/done/2026-10-26_tolocal_fix_plan.md` (the matrix walk this plan removes), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (sticky ids and lazy unregistering, §3.7), `design/done/2026-11-07_safe_shape_render_plan.md` (error rules, kept)
+- **Related**: `design/done/2026-11-12_two_phase_frame_plan.md` (TODO §46: step 1 built; its steps 2 and 3 are the first steps of this plan too, §8), `design/done/2026-11-12_reactive_propagation_plan.md` (TODO §46: orders the broadcasts instead of removing them; this plan is the alternative, §7), `design/done/2026-10-26_tolocal_fix_plan.md` (the matrix walk this plan removes), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (sticky ids and lazy unregistering, §3.7), `design/done/2026-11-07_safe_shape_render_plan.md` (error rules, kept)
 - **Target Implementation** (if decided): `js/engine.js`, `js/elements/node.js`, `js/elements/stage.js`, `js/elements/layer.js`, `js/interaction.js`, `js/monitor.js`, `tests/index.html`, `.agents/KILOPIXEL.md` (Reactivity Engine, Per-Frame Render Pipeline)
 - **Prototype**: `design/prototypes/2026-11-15_per_frame_evaluation/pull_bench.html` (today's broadcast against a per-frame loop, on the engine's own compiled expressions; cost of ordering a graph)
 
@@ -21,8 +21,8 @@ An attribute expression is re-evaluated in one of three ways, depending on what 
 Each mechanism has its own bookkeeping, and most open problems sit where two of them meet:
 
 - **Subscriptions** (`pxl._subscriptions`): subscribe at compile time, restore on connect, clear on disconnect, unsubscribe lazily when a reader no longer needs a key.
-- **Recursion:** diamonds are evaluated once per path and see half-updated values; a cycle needs a nesting counter (`design/2026-11-12_reactive_propagation_plan.md` §1, §2).
-- **Readers with `t` don't subscribe**, so they lag one frame per reader that comes before its source in the DOM (`design/2026-11-12_two_phase_frame_plan.md` §3.1).
+- **Recursion:** diamonds are evaluated once per path and see half-updated values; a cycle needs a nesting counter (`design/done/2026-11-12_reactive_propagation_plan.md` §1, §2).
+- **Readers with `t` don't subscribe**, so they lag one frame per reader that comes before its source in the DOM (`design/done/2026-11-12_two_phase_frame_plan.md` §3.1).
 - **`toLocal` readers** need a third key list (`toLocalAttributeKeys`) and a walk over the subtree on every matrix change.
 - **`isDirty` means two things**, "pixels out of date" and "keep the loop running" (two-phase plan §1).
 
@@ -69,7 +69,7 @@ Before these three parts, as in today's engine: `interaction.process()` (pointer
 ### 3.4 Cycles
 
 - **With `t`** (`x="ref.me.x + (100 - ref.me.x) * 0.1 + t * 0"`, shapes chasing each other): members are evaluated once per frame in DOM order; a member that reads a later one gets the previous frame's value. This is the rule of the two-phase plan §3.1.1, and what such pages do today.
-- **Without `t`** (`a = b + 1`, `b = a + 1`, by mistake): today 100 rounds and a warning. Proposed (D4): one warning when the order is built, naming the elements; the members are evaluated in DOM order, and the edge that closes the cycle doesn't count as "source changed". The cycle then stops after one pass instead of counting up in every frame. **Aligned 2026-11-18:** the rule for cycles without `t` is one decision for both paths, C1 in `design/2026-11-12_two_phase_frame_plan.md` §9.1; it recommends repeated rounds (at most `pxl.MAX_CYCLE_ROUNDS`) with this plan's "closing edge" rule, because one pass changes the result of cycles that converge over several rounds.
+- **Without `t`** (`a = b + 1`, `b = a + 1`, by mistake): today 100 rounds and a warning. Proposed (D4): one warning when the order is built, naming the elements; the members are evaluated in DOM order, and the edge that closes the cycle doesn't count as "source changed". The cycle then stops after one pass instead of counting up in every frame. **Aligned 2026-11-18:** the rule for cycles without `t` is one decision for both paths, C1 in `design/done/2026-11-12_two_phase_frame_plan.md` §9.1; it recommends repeated rounds (at most `pxl.MAX_CYCLE_ROUNDS`) with this plan's "closing edge" rule, because one pass changes the result of cycles that converge over several rounds.
 - **An element that reads itself** (walkthrough section 9, `shadowcolor="ref.sec9FlyingOrb.stroke"`) is not a cycle: inside one element, expressions with `t` are evaluated before the reactive ones, and its own reactive expressions are evaluated once more when one of its values changed and another one reads the element (two-phase plan §9 R3). Without that extra round, two reactive attributes in the wrong key order would lag a frame.
 
 ### 3.5 `toLocal`
@@ -172,7 +172,7 @@ The other path is safer and keeps today's timing. This plan ends with less to un
 1. **Change-based dirty flags and the keep-alive in the stage** (two-phase plan §7.2 step 2). Needed on both paths; builds on today's broadcasts. While doing it, count the engine tests and docs pages that read a derived value right after `setAttribute()` (for D5).
 2. **Prototype the rest as a patch over the running engine** (as step 1 of the two-phase plan was): versions, the reader list, the order, `toLocal` in part 3 and the hard case of §3.5. Run the page sweep of the two-phase plan §7.4 (all docs and example pages, 60 frames by hand, compare the pixels and the number of canvas clears) and the frame bench. Decide D1 on the result.
 3. **Build it:** tests first (§9), then replace the broadcasts.
-4. **Update the plans that assume broadcasts:** `<pxl-out>` (TODO §5), tweens and springs (TODO §3: a spring is a reader with state, evaluated once per frame in the order), `space` (TODO §28), throttling (TODO §8). Archive `design/2026-11-12_reactive_propagation_plan.md` as superseded.
+4. **Update the plans that assume broadcasts:** `<pxl-out>` (TODO §5), tweens and springs (TODO §3: a spring is a reader with state, evaluated once per frame in the order), `space` (TODO §28), throttling (TODO §8). Archive `design/done/2026-11-12_reactive_propagation_plan.md` as superseded.
 5. **KILOPIXEL.md:** Reactivity Engine, Variable Change Propagation, Per-Frame Render Pipeline, Interaction System.
 
 ## 9. Tests
@@ -194,7 +194,7 @@ The existing tests stay (ref cycles, two-phase frame, safe render, toLocal, laye
 | D1 | This plan, or the two related plans' path (§7)? | Build step 1, prototype step 2, then decide |
 | D2 | Reactive readers: version check, or evaluate all of them in every frame that runs? | Version check (§5: 0.11 ms instead of 1 ms per 5,000 readers) |
 | D3 | `toLocal`: every frame that runs, or compare matrix versions? | Every frame that runs; versions only if a measurement asks for it |
-| D4 | Cycles without `t`: warn when the order is built and stop after one pass, or keep the 100 rounds? | Moved 2026-11-18 to C1 in `design/2026-11-12_two_phase_frame_plan.md` §9.1 (one rule for both paths; recommended there: repeated rounds with this plan's closing-edge rule) |
+| D4 | Cycles without `t`: warn when the order is built and stop after one pass, or keep the 100 rounds? | Moved 2026-11-18 to C1 in `design/done/2026-11-12_two_phase_frame_plan.md` §9.1 (one rule for both paths; recommended there: repeated rounds with this plan's closing-edge rule) |
 | D5 | Derived values right after `setAttribute()`: accept the next frame, or evaluate on demand when a stale value is read? | Accept the next frame, if step 1 finds no page that relies on it |
 | D6 | Granularity: element, or attribute (`ref.orb.stroke` as its own source)? | Element, as today |
 | D7 | Wake every stage in view, or only stages with readers of the changed source? | Every stage in view; the check costs about 20 ns per reader |

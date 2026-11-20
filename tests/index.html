@@ -209,7 +209,7 @@
           <pxl-layer id="srLayerB"></pxl-layer>
         </pxl-stage>
 
-        <!-- Layer CSS-only fast path (design/2026-11-12_two_phase_frame_plan.md §7.1) -->
+        <!-- Layer CSS-only fast path (design/done/2026-11-12_two_phase_frame_plan.md §7.1) -->
         <pxl-stage id="fpStage" ratio="5 / 3" alwaysrender>
           <pxl-layer id="fpFade" alpha="0.5 + wave(2) * 0.5">
             <pxl-circle id="fpFadeCircle" x="150" y="300" r="80" fill="#38bdf8"></pxl-circle>
@@ -1062,7 +1062,7 @@
     });
 
     // ===================================================================
-    // Layer CSS-only fast path (design/2026-11-12_two_phase_frame_plan.md §7.1)
+    // Layer CSS-only fast path (design/done/2026-11-12_two_phase_frame_plan.md §7.1)
     // ===================================================================
     section('Layer fast path');
 
@@ -1415,7 +1415,7 @@
         if (changed !== 0) throw new Error(`the shadow changed ${changed} pixels of the line`);
       }));
 
-    // --- Reference cycles (design/2026-11-12_reactive_propagation_plan.md) ---
+    // --- Reference cycles (design/done/2026-11-12_reactive_propagation_plan.md) ---
     section('Reference cycles');
 
     test('ref cycles: a cycle whose values never settle stops instead of overflowing the stack, and warns once', () => {
@@ -1593,7 +1593,7 @@
       }
     });
 
-    // --- Two-phase frame, step 1 (design/2026-11-12_two_phase_frame_plan.md §7.2) ---
+    // --- Two-phase frame, step 1 (design/done/2026-11-12_two_phase_frame_plan.md §7.2) ---
     section('Two-phase frame');
 
     // Records the value of key each time the element is drawn (read after render(), which may evaluate first)
@@ -2323,7 +2323,7 @@
       }));
 
     // A change before the update phase of the running frame (here: the pointer reader's invalidate() in process()) is
-    // drawn in that frame, so it must not ask for another one (design/2026-11-12_two_phase_frame_plan.md §9, R1).
+    // drawn in that frame, so it must not ask for another one (design/done/2026-11-12_two_phase_frame_plan.md §9, R1).
     // The stage's frames are queued and run by hand; other stages keep the browser's requestAnimationFrame.
     test.known('interaction: one pointer move with a reader of the pointer runs one frame, not an extra empty one', () =>
       withStage(`<div style="width: 500px"><pxl-stage id="ixOneFrame" alwaysrender><pxl-layer>

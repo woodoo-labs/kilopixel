@@ -114,7 +114,7 @@ pxl.broadcast('ref.a')                         subscribers walked backwards (one
 
 - Recursive and depth first. A reader's own error is reported by the reader; the element that changed isn't blamed, the other readers still update.
 - **Cycles:** a cycle whose values keep changing re-enters an element from inside its own broadcast. `_broadcastNesting` counts that and stops at `pxl.MAX_CYCLE_ROUNDS` (100) with `pxl.CYCLE_MESSAGE` through `reportError()`. Chains, diamonds and elements with many inputs are entered one after the other, so the count doesn't grow for them. A cycle of n elements nests n × 100 calls, below the stack limit up to about 200 elements. An attribute reading another attribute of its own element follows after one extra round.
-- **Diamonds:** a reader reached on two paths is evaluated once per path and may first see one new and one old input; only final values are drawn. Design: `design/2026-11-12_reactive_propagation_plan.md`.
+- **Diamonds:** a reader reached on two paths is evaluated once per path and may first see one new and one old input; only final values are drawn. Design: `design/done/2026-11-12_reactive_propagation_plan.md`.
 
 ### 4.4 `toLocal` Reactivity
 
@@ -167,7 +167,7 @@ DRAW PHASE, layers where needsRender():       (updated && _wasDirty) || isDirty 
 perf counters (hit testing included)
 ```
 
-Static layers cost nothing per frame. Design: `design/2026-11-12_two_phase_frame_plan.md` (evaluation before drawing: readers drawn before their targets see this frame's values; readers with `t` excepted).
+Static layers cost nothing per frame. Design: `design/done/2026-11-12_two_phase_frame_plan.md` (evaluation before drawing: readers drawn before their targets see this frame's values; readers with `t` excepted).
 
 ### 5.3 CSS-Only Fast Path
 

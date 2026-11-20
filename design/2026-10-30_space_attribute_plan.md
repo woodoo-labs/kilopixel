@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (2026-11-13, §3.5 is obsolete since two-phase step 1; nothing built)
 - **Date**: 2026-10-30
-- **Related**: `design/done/2026-10-29_tolocal_decomposition_plan.md` (§7 "Later idea", the clone rule this replaces for exact copies), `design/ideas/2026-10-25_refs_across_spaces_note.md` (hub for refs across spaces; §4 anchors), `design/done/2026-10-26_tolocal_fix_plan.md` (reactivity walk), `design/done/2026-11-07_safe_shape_render_plan.md` (same render path, §10), `design/2026-11-12_two_phase_frame_plan.md` (💬; its step 1, built 2026-11-13, removed the one-frame lag of §3.5 here)
+- **Related**: `design/done/2026-10-29_tolocal_decomposition_plan.md` (§7 "Later idea", the clone rule this replaces for exact copies), `design/ideas/2026-10-25_refs_across_spaces_note.md` (hub for refs across spaces; §4 anchors), `design/done/2026-10-26_tolocal_fix_plan.md` (reactivity walk), `design/done/2026-11-07_safe_shape_render_plan.md` (same render path, §10), `design/done/2026-11-12_two_phase_frame_plan.md` (💬; its step 1, built 2026-11-13, removed the one-frame lag of §3.5 here)
 - **Target Implementation**: `js/elements/node.js` (`getParentMatrix`, `getGlobalMatrix`, space resolution), `js/graphics.js` (`applyTransformState`), `js/matrix.js` (`pxl.toLocal` uses the parent matrix), `js/elements/shape.js` and `group.js` (attribute, state check), `js/engine.js` (spatial key, reactivity); hit testing in `js/interaction.js` needs no change (§3.2)
 - **Demo**: `examples/test53.html` (the corner helpers become one attribute each)
 
@@ -159,7 +159,7 @@ When `space` is evaluated:
 
 ### 3.5 Draw Order
 
-No rule needed since 2026-11-13. Every frame now evaluates all layers before any of them draws (two-phase frame step 1, `design/2026-11-12_two_phase_frame_plan.md` §7.4). B reads A's matrix while it is drawn, and matrices are computed lazily from the current values, so B uses A's matrix of this frame whatever the order of their layers or of B and A within one layer.
+No rule needed since 2026-11-13. Every frame now evaluates all layers before any of them draws (two-phase frame step 1, `design/done/2026-11-12_two_phase_frame_plan.md` §7.4). B reads A's matrix while it is drawn, and matrices are computed lazily from the current values, so B uses A's matrix of this frame whatever the order of their layers or of B and A within one layer.
 
 Before step 1, B drawn before an animated A used A's matrix from the previous frame, and the rule was to put readers in a layer after their target. The lag of readers that also use `t` (two-phase plan §3.1.1) doesn't apply here: `space` reads a matrix, not an expression value.
 
@@ -237,5 +237,6 @@ No change in the hot path for pages that don't use `space`.
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-20: the two-phase frame, reactive propagation and per-frame evaluation plans were merged into `design/2026-11-20_evaluation_model_plan.md` (TODO §46); its §6 says what changes for this plan.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
 - Status line until 2026-11-20: 🟡 **Proposed** (2026-11-13: the draw-order rule of §3.5 is gone with two-phase frame step 1; 2026-10-30, no code changes yet)
