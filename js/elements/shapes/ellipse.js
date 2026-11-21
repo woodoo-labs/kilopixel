@@ -12,7 +12,7 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
   }
 
   draw(ctx, u) {
-    const { rx, ry, irx, iry, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.attributeValues;
+    const { rx, ry, irx, iry, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.values;
 
     const safeRX = Math.max(0, rx);
     const safeRY = Math.max(0, ry);
@@ -112,7 +112,7 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
   }
 
   getBoundingBox() {
-    const { rx, ry } = this.attributeValues;
+    const { rx, ry } = this.values;
     this.boundingBox.left = -rx;
     this.boundingBox.right = rx;
     this.boundingBox.top = -ry;

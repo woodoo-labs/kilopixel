@@ -1,11 +1,11 @@
 # Custom Shapes and Element Structure
 
-- **Status**: 🟡 **Proposed** (2026-11-21, steps 2 and 3 built (§12, §13): attribute lists from `defaults`, logical units phase 1; D2, D3 decided; Safari test and D4–D9 open)
+- **Status**: 🟡 **Proposed** (2026-11-21, steps 2–4 built (§12–§14): lists from `defaults`, logical units phase 1, `values`; D2–D4 decided; Safari test and D5–D9 open)
 - **Date**: 2026-11-20
 - **Replaces**: `design/archive/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`, `draw()` without `t`, custom animation patterns, verified 2026-10-17 and 2026-11-07) and the structure cleanup draft of 2026-11-20 (`scratch/2026-11-20_engine_structure_cleanup_plan.md` (not kept); its steps and measurements are §6 here)
 - **Related**: `design/2026-11-20_evaluation_model_plan.md` (step 2 makes "`draw()` only reads values" a contract), `design/2026-10-19_polygon_star_shape_plan.md` (the first new shape in this form), `design/done/2026-11-01_isolated_shape_compositing_plan.md` (`drawsMoreThanOnce()`), `design/done/2026-11-07_safe_shape_render_plan.md` (a careless shape can't break the layer), `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked), `design/2026-10-30_space_attribute_plan.md` (with step 6.6)
 - **Target Implementation**: `js/elements/shape.js`, `js/elements/shapes/*.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/stage.js`, `js/graphics.js`, `js/interaction.js`, `js/engine.js`; `tools/build_types.js`; `tests/`; a new docs page `docs/custom-shapes.html`; `.agents/KILOPIXEL.md`, `.agents/ENGINE.md`
-- **Prototypes** (`design/prototypes/2026-11-20_custom_shapes/`): `template/` (the template as a patch over the engine: `proposal.js`, a Star, a Gauge, `minimal.html`, `rich.html`), `logical_units/` (the canvas, text and shadow tests and the page sweep of §5.3), `firefox/` (the same in Firefox: a driver over WebDriver BiDi, a text viewer and a page that switches between today and logical units), `transform_path/` (§6.6); older: `design/prototypes/2026-10-17_shape_authoring/` (Rule A tests)
+- **Prototypes** (`design/prototypes/2026-11-20_custom_shapes/`): `template/` (the template as a patch over the engine: `proposal.js`, a Star, a Gauge, `minimal.html`, `rich.html`), `logical_units/` (the canvas, text and shadow tests and the page sweep of §5.3), `firefox/` (the same in Firefox: a driver over WebDriver BiDi, a text viewer and a page that switches between today and logical units), `transform_path/` (§6.6). `template/` and `logical_units/` patch the engine of commit `5ff5ea6` (`git show 5ff5ea6:dist/pxl.js`): they use `attributeValues`, renamed in step 4. Older: `design/prototypes/2026-10-17_shape_authoring/` (Rule A tests)
 
 ---
 
@@ -166,7 +166,7 @@ From the shape authoring plan §3.3: the 7 shape signatures, `Shape.render()`, `
 
 ### 5.6 `values` and `expressions`
 
-`attributeValues` → `values`, `attributeExpressions` → `expressions`. The template reads `this.values`; `ref.<id>` is the same object. Pre-release, so no alias. About 0.8 KB less in `pxl.min.js` (102 uses in `js/`, 101 in `tests/`, 6 in docs and examples).
+`attributeValues` → `values`, `attributeExpressions` → `expressions`. The template reads `this.values`; `ref.<id>` is the same object. Pre-release, so no alias. About 0.8 KB less in `pxl.min.js` (102 uses in `js/`, 101 in `tests/`, 6 in docs and examples). *2026-11-21: built, −1.0 KB (§14).*
 
 ### 5.7 Box Helper and Warnings
 
@@ -218,7 +218,7 @@ From the cleanup draft of 2026-11-20. **Not part of the custom-shape steps (§9)
 1. **Test phase 1 in Firefox and Safari:** `logical_units/text_tests.html`, the page sweep, `template/rich.html`. Firefox done 2026-11-21 (§5.3); Safari open.
 2. §5.1 and §5.2 (derived attribute lists and presence attributes; `isHovered` / `isPressed` out of `defaults`; `points: ''`). Built 2026-11-21 (§12), `points` without a default.
 3. §5.3 phase 1 and §5.4: the calling convention, `draw(ctx)` without `t`. Built 2026-11-21 (§13).
-4. §5.6 rename, if decided (D4).
+4. §5.6 rename, if decided (D4). Built 2026-11-21 (§14).
 5. §5.5 and §5.7: defining the tag, `setBoundingBox()`, `paint()`, the checks once per class; the Star and the Gauge as tests, loaded as a second script.
 6. Docs (§8), KILOPIXEL.md and ENGINE.md.
 7. `<pxl-polygon>` (`design/2026-10-19_polygon_star_shape_plan.md`) as the first new shape in this form.
@@ -250,7 +250,7 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 | D1 | One template, `draw(ctx)` | **decided 2026-11-20** (the two levels `path()` / `draw(ctx, u)` dropped) |
 | D2 | Logical units for every shape, in two phases (§5.3) | **decided 2026-11-21**, phase 1 built before the Safari test (Chrome and Firefox passed); Safari is checked afterwards |
 | D3 | Defining the tag: `pxl.defineShape()` for all shapes, or plain `customElements.define()` (§5.5) | **decided 2026-11-21**: `pxl.defineShape()` (the proven CSS rule hides content, checks run at define time) |
-| D4 | Rename `attributeValues` → `values`, `attributeExpressions` → `expressions` | yes, before the API is public |
+| D4 | Rename `attributeValues` → `values`, `attributeExpressions` → `expressions` | **decided and built 2026-11-21** (§14) |
 | D5 | Class fields for built-ins | no: the engine keeps constructors; authors choose |
 | D6 | The public helpers of §4 (`applyStyle`, `applyStrokeState`, `paint`, `hasFill`, `isStroked`, `setBoundingBox`) | yes; arrowheads stay internal (§5.9) |
 | D7 | The transform path (§6.6) | with `space`, not alone (the cleanup is discussed separately) |
@@ -295,10 +295,21 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 
 **Left:** the Safari test (§9 step 1); phase 2 (§5.3).
 
+## 14. Step 4 Built (2026-11-21)
+
+**What changed** (§5.6): `attributeValues` → `values` and `attributeExpressions` → `expressions`, the identifiers only (prose like "attribute values" stays), in `js/` (17 files), `tests/index.html`, `unit.html`, `frameworks.html`, `tests/smoke/checks.js`, `tests/types/fixtures/core.ts`, `tools/build_types.js` (the typings now declare `readonly values`), `docs/frameworks.html` (`stage.values.mouseX` in JavaScript), `examples/test47.html`, `examples/benchmark.html` and `.agents/ENGINE.md`. No alias. No field of that name existed before.
+
+**Prototypes:** `template/` and `logical_units/` keep the old name; they patch the engine of commit `5ff5ea6`. `template/proposal.js` defines a read-only `values` on `PxlNode.prototype`, which would collide with the field. Step 5 builds the template API in the engine, with the Star and the Gauge as tests.
+
+**Tests:** no new test (no behavior changed). `node tools/run_tests.js`, `--smoke` and `--types`: all passed.
+
+**Size:** `pxl.min.js` 72,805 → 71,806 bytes (−1.0 KB; estimated −0.8 KB).
+
 ## Log
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-21: step 4 built (§14): `attributeValues` → `values`, `attributeExpressions` → `expressions` (D4 decided); −1.0 KB. `template/` and `logical_units/` run with commit `5ff5ea6`.
 - 2026-11-21: step 3 built (§13): drawing in logical units, phase 1 (`ctx.scale(u, u)`, `draw(ctx, 1)`), `draw()` without `t`; D2 decided, the Safari test becomes a check afterwards.
 - 2026-11-21: step 2 built (§12): `observedAttributes` from `defaults`, presence attributes from boolean defaults, `pxl.BOOLEAN_ATTRIBUTES` removed; `points` without a default, the lowercase warning moved to step 5. −1.4 KB.
 - 2026-11-21: D3 decided: `pxl.defineShape(tag, Class)` for built-in and custom shapes (§5.5). Phase 1 tested in Firefox 160 (§5.3): the same as in Chrome except text spacing (lines up to 10 device pixels shorter, wrapping unchanged); scripts in `firefox/`. Safari still open.

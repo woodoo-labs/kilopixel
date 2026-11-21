@@ -62,12 +62,12 @@ pxl.Stage = class Stage extends HTMLElement {
     this._isRegistered = false; // connectedCallback has run: id changes from now on move the registry entry
 
     // Published as ref.<id>.* once per second by pxl.perf's timer; renderAvg / renderMax are strings with 2 decimals
-    this.attributeValues = {
+    this.values = {
       mouseX: 500, mouseY: 500, isHovered: false, width: 1000, height: 1000 / this._parsedRatio,
       fps: 0, renderAvg: '0.00', renderMax: '0.00'
     };
-    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
-    Object.defineProperty(this.attributeValues, '$node', { value: this, enumerable: false, writable: false });
+    Object.defineProperty(this.values, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
+    Object.defineProperty(this.values, '$node', { value: this, enumerable: false, writable: false });
 
     // Properties set before the upgrade, applied in connectedCallback: [name, value, …] or null
     this._pendingProperties = ownKeys.length === 0 ? null : pxl.takeOwnProperties(this, ownKeys);
@@ -117,7 +117,7 @@ pxl.Stage = class Stage extends HTMLElement {
       // Bare or removed ratio falls back to the default 16 / 9
       this._parsedRatio = (newValue === null || newValue === '') ? 16 / 9 : pxl.parseAttributeValue(newValue);
       this.style.aspectRatio = this._parsedRatio;
-      this.attributeValues.height = 1000 / this._parsedRatio;
+      this.values.height = 1000 / this._parsedRatio;
       if (this.refKey) pxl.broadcast(this.refKey);
     } else if (name === 'alwaysrender') {
       if (this.isAlwaysRender()) {
@@ -139,7 +139,7 @@ pxl.Stage = class Stage extends HTMLElement {
     }
     this._isVisible = true;
     if (this.id) {
-      pxl.nodes[this.id] = this.attributeValues;
+      pxl.nodes[this.id] = this.values;
       this.refKey = `ref.${this.id}`;
       pxl.broadcast(this.refKey);
     }
@@ -172,7 +172,7 @@ pxl.Stage = class Stage extends HTMLElement {
 
   disconnectedCallback() {
     this._isRegistered = false;
-    if (this.id && pxl.nodes[this.id] === this.attributeValues) delete pxl.nodes[this.id];
+    if (this.id && pxl.nodes[this.id] === this.values) delete pxl.nodes[this.id];
     this._intersectionObserver?.disconnect();
     this._intersectionObserver = null;
     this._resizeObserver.disconnect();
@@ -254,7 +254,7 @@ pxl.Stage = class Stage extends HTMLElement {
     }
 
     this.unit = w / 1000;
-    this.attributeValues.height = 1000 / this._parsedRatio;
+    this.values.height = 1000 / this._parsedRatio;
     if (this.refKey) pxl.broadcast(this.refKey);
 
     this._dpr = window.devicePixelRatio;

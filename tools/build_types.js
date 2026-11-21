@@ -132,7 +132,7 @@ declare global {
 
   /** Values an element publishes as ref.<id>.<name>; for a stage also mouseX, mouseY, width, height, fps */
   interface PxlElement extends HTMLElement {
-    readonly attributeValues: { readonly [name: string]: unknown };
+    readonly values: { readonly [name: string]: unknown };
   }
 `];
   for (const { tag, attributes, defaults } of elements) {

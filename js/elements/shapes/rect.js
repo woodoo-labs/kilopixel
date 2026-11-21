@@ -7,7 +7,7 @@ pxl.Rect = class Rect extends pxl.Shape {
   }
 
   draw(ctx, u) {
-    const { w, h, r, r1, r2, r3, r4, anchor } = this.attributeValues;
+    const { w, h, r, r1, r2, r3, r4, anchor } = this.values;
 
     const startX = -w * pxl.anchorX[anchor] * u;
     const startY = -h * pxl.anchorY[anchor] * u;
@@ -39,7 +39,7 @@ pxl.Rect = class Rect extends pxl.Shape {
   }
 
   getBoundingBox() {
-    const { w, h, anchor } = this.attributeValues;
+    const { w, h, anchor } = this.values;
     const ax = pxl.anchorX[anchor];
     const ay = pxl.anchorY[anchor];
 

@@ -12,8 +12,8 @@ pxl.Group = class Group extends pxl.PxlNode {
     super();
     // Runtime state written by the interaction engine: true while a shape inside the group is hovered or pressed,
     // like :hover on a parent. Values (ref.<id>.isHovered), but not attributes
-    this.attributeValues.isHovered = false;
-    this.attributeValues.isPressed = false;
+    this.values.isHovered = false;
+    this.values.isPressed = false;
 
     this.childList = []; // groups and shapes
     this._isOrderDirty = false; // children need sorting by DOM position
@@ -60,7 +60,7 @@ pxl.Group = class Group extends pxl.PxlNode {
       return;
     }
 
-    if (this.attributeValues.hidden) return;
+    if (this.values.hidden) return;
     for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].update(t);
     }
@@ -68,16 +68,16 @@ pxl.Group = class Group extends pxl.PxlNode {
 
   // Draw phase, into the parent layer's canvas
   render(ctx, u) {
-    if (this._failedFrame === pxl._frame || this.attributeValues.hidden) return;
+    if (this._failedFrame === pxl._frame || this.values.hidden) return;
 
-    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.attributeValues;
+    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.values;
     const hasStateChanges = x || y || dx || dy || rotate ||
                             zoom !== 1 || scalex !== 1 || scaley !== 1 ||
                             skewx || skewy;
 
     if (hasStateChanges) {
       ctx.save();
-      pxl.applyTransformState(ctx, u, this.attributeValues);
+      pxl.applyTransformState(ctx, u, this.values);
     }
     for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].render(ctx, u);

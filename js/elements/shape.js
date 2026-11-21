@@ -13,8 +13,8 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   constructor() {
     super();
     // Runtime state written by the interaction engine, read as ref.<id>.isHovered: values, but not attributes
-    this.attributeValues.isHovered = false;
-    this.attributeValues.isPressed = false;
+    this.values.isHovered = false;
+    this.values.isPressed = false;
 
     this.stage = null; // set in connectedCallback
 
@@ -62,14 +62,14 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // themselves). The built-in shapes still multiply their lengths by draw()'s second argument, which is always 1.
   // draw() gets no time: time-dependent values are evaluated in update(), so the hit test sees what is drawn.
   render(ctx, u) {
-    if (this._failedFrame === pxl._frame || this.attributeValues.hidden) return;
+    if (this._failedFrame === pxl._frame || this.values.hidden) return;
     if (this.needsIsolation()) {
       this.renderIsolated(ctx, u);
       return;
     }
     ctx.save();
     try {
-      pxl.applyContextState(ctx, u, this.attributeValues, this);
+      pxl.applyContextState(ctx, u, this.values, this);
       ctx.scale(u, u);
       this.draw(ctx, 1);
     } catch (error) {
@@ -88,7 +88,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // State that acts on the whole shape. alpha is left out: fades are common and isolating them costs a frame time
   // the per-call result hardly shows (plan §6.1).
   hasCompositingState() {
-    const { mask, blend, filter, shadowcolor } = this.attributeValues;
+    const { mask, blend, filter, shadowcolor } = this.values;
     return mask !== 'none' || blend !== 'source-over' || filter !== 'none' ||
            (!!shadowcolor && shadowcolor !== 'none' && shadowcolor !== 'transparent');
   }
@@ -110,7 +110,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
   // Only lines, polylines, circles and ellipses have arrowstart
   hasArrowheads() {
-    const { arrowstart, arrowend, strokewidth } = this.attributeValues;
+    const { arrowstart, arrowend, strokewidth } = this.values;
     return arrowstart !== undefined && this.isStroked() &&
            (pxl.arrowSize(arrowstart, strokewidth) > 0 || pxl.arrowSize(arrowend, strokewidth) > 0);
   }
@@ -136,7 +136,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     ctx.save();
     try {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      pxl.applyCompositingState(ctx, u, this.attributeValues, this);
+      pxl.applyCompositingState(ctx, u, this.values, this);
       ctx.drawImage(scratch.canvas, 0, 0, w, h, 0, 0, w, h);
     } catch (error) {
       this.reportError(error);
@@ -187,7 +187,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // stroke, the corner of a square cap, arrowheads (only lines, polylines, circles and ellipses have arrowstart)
   hitPadding() {
     if (!this.isStroked()) return 0;
-    const { strokewidth, linejoin, miterlimit, linecap, arrowstart, arrowend } = this.attributeValues;
+    const { strokewidth, linejoin, miterlimit, linecap, arrowstart, arrowend } = this.values;
     let pad = strokewidth / 2 * (linejoin === 'miter' ? Math.max(1, miterlimit) : 1);
     if (linecap === 'square') pad = Math.max(pad, strokewidth * Math.SQRT1_2);
     if (arrowstart !== undefined) pad += Math.max(pxl.arrowSize(arrowstart, strokewidth), pxl.arrowSize(arrowend, strokewidth));
@@ -201,7 +201,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
     const box = this.getBoundingBox();
     const c = this._gradCache[slot];
-    const sw = this.attributeValues.strokewidth;
+    const sw = this.values.strokewidth;
 
     // Reuse while the descriptor, the unit, the bounding box and the stroke width are unchanged
     if (c.config === styleValue && c.u === u &&
@@ -297,7 +297,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // Sets all stroke-related context state (style, width, caps, joins, dash).
   // Shared by path-based shapes (via applyStyle) and non-path shapes like Text (strokeText).
   applyStrokeState(ctx, u = 1) {
-    const { stroke, strokewidth, linecap, linejoin, miterlimit } = this.attributeValues;
+    const { stroke, strokewidth, linecap, linejoin, miterlimit } = this.values;
 
     ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
 
@@ -311,7 +311,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
   // Dash pattern scaled by u; the scaled array is cached per (linedash, u)
   applyLineDash(ctx, u) {
-    const { linedash, dashoffset } = this.attributeValues;
+    const { linedash, dashoffset } = this.values;
     if (!pxl.hasLineDash(linedash)) {
       ctx.setLineDash(pxl._emptyDash);
       ctx.lineDashOffset = 0;
@@ -339,18 +339,18 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   hasFill() {
-    const { fill } = this.attributeValues;
+    const { fill } = this.values;
     return !!fill && fill !== 'none' && fill !== 'transparent';
   }
 
   isStroked() {
-    const { stroke, strokewidth } = this.attributeValues;
+    const { stroke, strokewidth } = this.values;
     return !!stroke && stroke !== 'none' && stroke !== 'transparent' && strokewidth > 0;
   }
 
   applyStyle(ctx, u = 1) {
     if (this.hasFill()) {
-      ctx.fillStyle = this.createGradient(ctx, u, this.attributeValues.fill, 0);
+      ctx.fillStyle = this.createGradient(ctx, u, this.values.fill, 0);
       ctx.fill();
     }
 
@@ -367,7 +367,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // Resolves one arrow end into distances along the path and writes them into the pre-allocated rec.
   // Returns true if this end has an arrowhead.
   resolveArrow(rec, attrValue, u) {
-    const { strokewidth, linecap, linejoin, arrowstyle } = this.attributeValues;
+    const { strokewidth, linecap, linejoin, arrowstyle } = this.values;
     const size = pxl.arrowSize(attrValue, strokewidth) * u;
 
     if (!(size > 0)) {
@@ -418,7 +418,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // Always the last call of a shape's draw(): it changes the miter limit, the dash and fillStyle without
   // resetting them, and render() restores the state afterwards.
   drawArrows(ctx, u, recA, recB) {
-    const isLine = this.attributeValues.arrowstyle === 'line';
+    const isLine = this.values.arrowstyle === 'line';
 
     ctx.beginPath();
     if (recA.size > 0) this.traceArrow(ctx, recA, isLine);
@@ -430,7 +430,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
       if (ctx.miterLimit < 4) ctx.miterLimit = 4;
 
       // Chevrons are always solid
-      if (pxl.hasLineDash(this.attributeValues.linedash)) ctx.setLineDash(pxl._emptyDash);
+      if (pxl.hasLineDash(this.values.linedash)) ctx.setLineDash(pxl._emptyDash);
       ctx.stroke();
     } else {
       ctx.fillStyle = ctx.strokeStyle;

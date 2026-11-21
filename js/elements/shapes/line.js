@@ -8,7 +8,7 @@ pxl.Line = class Line extends pxl.Shape {
   }
 
   draw(ctx, u) {
-    const { x1, y1, x2, y2, arrowstart, arrowend } = this.attributeValues;
+    const { x1, y1, x2, y2, arrowstart, arrowend } = this.values;
     const startX = x1 * u, startY = y1 * u;
     const endX = x2 * u, endY = y2 * u;
 
@@ -52,7 +52,7 @@ pxl.Line = class Line extends pxl.Shape {
   }
 
   getBoundingBox() {
-    const { x1, y1, x2, y2 } = this.attributeValues;
+    const { x1, y1, x2, y2 } = this.values;
     this.boundingBox.left = Math.min(x1, x2);
     this.boundingBox.right = Math.max(x1, x2);
     this.boundingBox.top = Math.min(y1, y2);

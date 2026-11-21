@@ -53,8 +53,8 @@ pxl.resolveRadius = function(r, x, y, w, h, u) {
 };
 
 // Same order as pxl.Matrix.updateLocal: translate(x, y) → rotate → scale → skew → translate(dx, dy)
-pxl.applyTransformState = function(ctx, u, attributeValues) {
-  const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = attributeValues;
+pxl.applyTransformState = function(ctx, u, values) {
+  const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = values;
 
   if (x || y) ctx.translate(x * u, y * u);
   if (rotate) ctx.rotate(rotate * Math.PI / 180);
@@ -78,17 +78,17 @@ pxl.scaleResponsiveFilter = function(filterStr, u) {
   return filterStr.replace(/(-?\d*\.?\d+(?:e[-+]?\d+)?)px/g, (match, val) => (parseFloat(val) * u) + 'px');
 };
 
-pxl.applyContextState = function(ctx, u, attributeValues, node) {
-  pxl.applyTransformState(ctx, u, attributeValues);
-  pxl.applyCompositingState(ctx, u, attributeValues, node);
+pxl.applyContextState = function(ctx, u, values, node) {
+  pxl.applyTransformState(ctx, u, values);
+  pxl.applyCompositingState(ctx, u, values, node);
 };
 
 // How a shape's pixels combine with the layer: alpha, mask / blend, filter, shadow. An isolated shape
 // (Shape.renderIsolated()) applies it once, when its finished bitmap is drawn onto the layer.
 // Canvas shadows and filters ignore the canvas transform, which holds the layer's device pixel ratio: their lengths
 // are bitmap pixels, so they are scaled by u and the DPR.
-pxl.applyCompositingState = function(ctx, u, attributeValues, node) {
-  const { alpha, blend, mask, filter, shadowcolor, shadowblur, shadowx, shadowy } = attributeValues;
+pxl.applyCompositingState = function(ctx, u, values, node) {
+  const { alpha, blend, mask, filter, shadowcolor, shadowblur, shadowx, shadowy } = values;
   const k = u * node.parentLayer.dpr;
 
   if (alpha !== 1) ctx.globalAlpha *= alpha;

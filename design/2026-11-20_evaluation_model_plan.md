@@ -143,6 +143,7 @@ Existing tests stay (two-phase frame, ref cycles, safe render, `toLocal`, layer 
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-21: `design/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; the contract "`draw()` only reads values" holds in the code (line 42 and the §47 row describe it as planned).
 - 2026-11-20: the shape authoring plan was replaced by `design/2026-11-20_custom_shapes_plan.md` (TODO §47); §6 points to it.
 - 2026-11-20: `<pxl-clip>` parked in `design/ideas/`; §6 marks its row.

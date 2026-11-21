@@ -427,7 +427,7 @@
 
     // A reader whose parent has the global matrix `parent`, and a target with global matrix `target` and offset dx / dy
     const readerIn = (parent) => ({ parentContainer: { getGlobalMatrix: () => parent } });
-    const targetAt = (target, dx = 0, dy = 0) => ({ $node: { getGlobalMatrix: () => target, attributeValues: { dx, dy } } });
+    const targetAt = (target, dx = 0, dy = 0) => ({ $node: { getGlobalMatrix: () => target, values: { dx, dy } } });
     const IDENTITY = local(0, 0, 0, 0, 0, 1, 1, 0, 0);
 
     table('toLocal: position, offset and frame of a target seen from a reader', [
@@ -480,7 +480,7 @@
         for (const name of names) {
           el.setAttribute(name, '');
           const expected = typeof Class.defaults[name] === 'boolean' ? true : name === 'value' ? '' : (Class.defaults[name] ?? null);
-          if (!same(el.attributeValues[name], expected)) wrong.push(`${name}: ${show(el.attributeValues[name])} instead of ${show(expected)}`);
+          if (!same(el.values[name], expected)) wrong.push(`${name}: ${show(el.values[name])} instead of ${show(expected)}`);
         }
         if (wrong.length) throw new Error(wrong.join('; '));
       });
@@ -491,7 +491,7 @@
           el.setAttribute(name, typeof Class.defaults[name] === 'boolean' ? 'true' : 't * 0 + 7');
           el.removeAttribute(name);
           const expected = Class.defaults[name] ?? null;
-          if (!same(el.attributeValues[name], expected)) wrong.push(`${name}: ${show(el.attributeValues[name])} instead of ${show(expected)}`);
+          if (!same(el.values[name], expected)) wrong.push(`${name}: ${show(el.values[name])} instead of ${show(expected)}`);
           if (el.animatedAttributeKeys.includes(name)) wrong.push(`${name}: still animated`);
         }
         if (el.isAnimated) wrong.push('element still animated');
@@ -536,11 +536,11 @@
       const stage = document.createElement('pxl-stage');
       stage.setAttribute('ratio', '2');
       stage.setAttribute('ratio', '');
-      const bare = stage.attributeValues.height;
+      const bare = stage.values.height;
       stage.setAttribute('ratio', '4 / 3');
-      const set = stage.attributeValues.height;
+      const set = stage.values.height;
       stage.removeAttribute('ratio');
-      const removed = stage.attributeValues.height;
+      const removed = stage.values.height;
       stage.setAttribute('alwaysrender', '');
       const always = stage.isAlwaysRender();
       if (!same(bare, 562.5) || !same(set, 750) || !same(removed, 562.5) || !always) {
@@ -587,7 +587,7 @@
       for (const tag of ['pxl-circle', 'pxl-group']) {
         const Class = customElements.get(tag), el = document.createElement(tag);
         for (const name of ['isHovered', 'isPressed']) {
-          if (el.attributeValues[name] !== false) wrong.push(`${tag} ${name}: ${show(el.attributeValues[name])}`);
+          if (el.values[name] !== false) wrong.push(`${tag} ${name}: ${show(el.values[name])}`);
           if (name in Class.defaults || Class.observedAttributes.includes(name.toLowerCase())) wrong.push(`${tag} ${name}: an attribute`);
           if (name in el) wrong.push(`${tag} ${name}: a property`);
         }
@@ -613,14 +613,14 @@
     test('custom shape: a false default makes a presence attribute (bare true, "false" false, removed false)', () => {
       const el = document.createElement('pxl-unit-pump'), seen = [];
       el.setAttribute('running', '');
-      seen.push(el.attributeValues.running);
+      seen.push(el.values.running);
       el.setAttribute('running', 'false');
-      seen.push(el.attributeValues.running);
+      seen.push(el.values.running);
       el.setAttribute('running', 'true');
       el.removeAttribute('running');
-      seen.push(el.attributeValues.running);
+      seen.push(el.values.running);
       el.setAttribute('speed', '');
-      seen.push(el.attributeValues.speed);
+      seen.push(el.values.speed);
       if (!same(seen, [true, false, false, 1])) throw new Error(`running ${seen.slice(0, 3)}, bare speed ${seen[3]}`);
     });
 
@@ -628,8 +628,8 @@
       const el = document.createElement('pxl-unit-pump');
       el.running = true;
       el.speed = 3;
-      if (el.attributeValues.running !== true || el.speed !== 3) {
-        throw new Error(`running ${show(el.attributeValues.running)}, speed ${show(el.speed)}`);
+      if (el.values.running !== true || el.speed !== 3) {
+        throw new Error(`running ${show(el.values.running)}, speed ${show(el.speed)}`);
       }
     });
 
@@ -653,12 +653,12 @@
           }
           const expected = Class.defaults[name] ?? null;
           el[name] = 7;
-          if (el.attributeValues[name] !== 7 || el[name] !== 7) wrong.push(`${name} = 7: ${show(el.attributeValues[name])}`);
+          if (el.values[name] !== 7 || el[name] !== 7) wrong.push(`${name} = 7: ${show(el.values[name])}`);
           el[name] = undefined;
-          if (!same(el.attributeValues[name], expected)) wrong.push(`${name} = undefined: ${show(el.attributeValues[name])} instead of ${show(expected)}`);
+          if (!same(el.values[name], expected)) wrong.push(`${name} = undefined: ${show(el.values[name])} instead of ${show(expected)}`);
           el[name] = 8;
           el[name] = null;
-          if (!same(el.attributeValues[name], expected)) wrong.push(`${name} = null: ${show(el.attributeValues[name])} instead of ${show(expected)}`);
+          if (!same(el.values[name], expected)) wrong.push(`${name} = null: ${show(el.values[name])} instead of ${show(expected)}`);
         }
         if (el.getAttributeNames().length) wrong.push(`attributes written: ${el.getAttributeNames()}`);
         if (wrong.length) throw new Error(wrong.join('; '));
@@ -685,7 +685,7 @@
     test('pxl-stage: the ratio and alwaysrender properties write the attribute; false, null and undefined remove it', () => {
       const stage = document.createElement('pxl-stage'), seen = [];
       stage.ratio = 2;
-      seen.push(stage.getAttribute('ratio'), stage.ratio, stage.attributeValues.height);
+      seen.push(stage.getAttribute('ratio'), stage.ratio, stage.values.height);
       stage.ratio = undefined;
       seen.push(stage.hasAttribute('ratio'), +stage.ratio.toFixed(3));
       stage.alwaysrender = true;
@@ -700,14 +700,14 @@
       const before = pxl.animationCache.size + pxl.staticCache.size;
       for (const value of ['alert(1)', 'Q1 - 2024', "'a' + 'b'", '']) {
         el.text = value;
-        seen.push(el.attributeValues.text === value);
+        seen.push(el.values.text === value);
       }
       el.text = 42;
-      seen.push(el.attributeValues.text === 42);
+      seen.push(el.values.text === 42);
       const grown = pxl.animationCache.size + pxl.staticCache.size - before;
       el.setAttribute('text', "'a' + 'b'");
-      if (seen.includes(false) || grown !== 0 || el.attributeValues.text !== 'ab') {
-        throw new Error(`stored as given: ${seen}, cache grew by ${grown}, attribute: ${show(el.attributeValues.text)}`);
+      if (seen.includes(false) || grown !== 0 || el.values.text !== 'ab') {
+        throw new Error(`stored as given: ${seen}, cache grew by ${grown}, attribute: ${show(el.values.text)}`);
       }
     });
 
@@ -721,8 +721,8 @@
       } finally {
         console.warn = warn;
       }
-      if (el.attributeValues.r !== 5 || el.attributeValues.x !== 0 || warnings.length !== 1) {
-        throw new Error(`r ${el.attributeValues.r}, x ${el.attributeValues.x}, ${warnings.length} warning(s)`);
+      if (el.values.r !== 5 || el.values.x !== 0 || warnings.length !== 1) {
+        throw new Error(`r ${el.values.r}, x ${el.values.x}, ${warnings.length} warning(s)`);
       }
     });
 

@@ -96,14 +96,14 @@
     }
     // The pointer enters the stage and moves to (x, y); the next frame hit-tests at its start, then draws
     function hover(stage, x, y) {
-      if (!stage.attributeValues.isHovered) stage.dispatchEvent(new PointerEvent('pointerenter'));
+      if (!stage.values.isHovered) stage.dispatchEvent(new PointerEvent('pointerenter'));
       pointerAt(stage, 'pointermove', x, y);
       stage.render(1);
     }
     // down / up / click at the current pointer position. A frame runs after it, so the test holds whether the event
     // is dispatched when it arrives (D4) or at the start of the next frame.
     function input(stage, type, init) {
-      const event = pointerAt(stage, type, stage.attributeValues.mouseX, stage.attributeValues.mouseY, init);
+      const event = pointerAt(stage, type, stage.values.mouseX, stage.values.mouseY, init);
       stage.render(1);
       return event;
     }
@@ -149,7 +149,7 @@
         stage.resize();
         stage.render(1);
         const state = {
-          registered: pxl.nodes.fwBuilt === circle.attributeValues, x: circle.attributeValues.x,
+          registered: pxl.nodes.fwBuilt === circle.values, x: circle.values.x,
           inLayer: layer.childList.includes(circle), stageVariable: stage._variables.includes(variable), alpha: alphaAt(layer, 400, 300)
         };
         if (!state.registered || state.x !== 400 || !state.inLayer || !state.stageVariable || state.alpha !== 255) {
@@ -196,7 +196,7 @@
         const reader = make('pxl-circle', { id: 'fwEarlyReader', x: 'ref.fwLateTarget.x + 1', r: '5' });
         const target = make('pxl-circle', { id: 'fwLateTarget', x: '60', r: '5' });
         box.appendChild(make('pxl-stage', { alwaysrender: '' }, [make('pxl-layer', {}, [make('pxl-group', {}, [reader]), target])]));
-        if (reader.attributeValues.x !== 61) throw new Error(`reader x ${reader.attributeValues.x}`);
+        if (reader.values.x !== 61) throw new Error(`reader x ${reader.values.x}`);
       }));
 
     // ===================================================================
@@ -240,11 +240,11 @@
         const layer = stage.querySelector('pxl-layer'), circle = el('fwHiddenProp');
         circle.hidden = true;
         stage.render(1);
-        const hiddenAlpha = alphaAt(layer, 500, 300), hiddenValue = circle.attributeValues.hidden;
+        const hiddenAlpha = alphaAt(layer, 500, 300), hiddenValue = circle.values.hidden;
         circle.hidden = false;
         stage.render(2);
-        if (hiddenValue !== true || hiddenAlpha !== 0 || circle.attributeValues.hidden !== false || alphaAt(layer, 500, 300) !== 255) {
-          throw new Error(`hidden ${hiddenValue}, alpha ${hiddenAlpha}; shown again: hidden ${circle.attributeValues.hidden}, alpha ${alphaAt(layer, 500, 300)}`);
+        if (hiddenValue !== true || hiddenAlpha !== 0 || circle.values.hidden !== false || alphaAt(layer, 500, 300) !== 255) {
+          throw new Error(`hidden ${hiddenValue}, alpha ${hiddenAlpha}; shown again: hidden ${circle.values.hidden}, alpha ${alphaAt(layer, 500, 300)}`);
         }
       }));
 
@@ -253,8 +253,8 @@
         const layer = stage.querySelector('pxl-layer'), late = layer.firstElementChild;
         customElements.define('pxl-fw-late-attrs', class extends pxl.Circle {});
         stage.render(1);
-        if (late.attributeValues?.r !== 40 || !layer.childList.includes(late) || alphaAt(layer, 500, 300) !== 255) {
-          throw new Error(`r ${late.attributeValues?.r}, in the layer ${layer.childList.includes(late)}, alpha ${alphaAt(layer, 500, 300)}`);
+        if (late.values?.r !== 40 || !layer.childList.includes(late) || alphaAt(layer, 500, 300) !== 255) {
+          throw new Error(`r ${late.values?.r}, in the layer ${layer.childList.includes(late)}, alpha ${alphaAt(layer, 500, 300)}`);
         }
       }));
 
@@ -264,7 +264,7 @@
         stage.render(1);
         const before = cacheSize();
         circle.r = 50;
-        const state = { r: circle.attributeValues.r, grown: cacheSize() - before, dirty: layer.isDirty };
+        const state = { r: circle.values.r, grown: cacheSize() - before, dirty: layer.isDirty };
         if (state.r !== 50 || state.grown !== 0 || !state.dirty) throw new Error(JSON.stringify(state));
       }));
 
@@ -273,8 +273,8 @@
         const circle = el('fwPropExpr');
         circle.x = '500 + sin(t) * 100';
         stage.render(Math.PI / 2);
-        if (!circle.isAnimated || Math.abs(circle.attributeValues.x - 600) > 0.01) {
-          throw new Error(`animated ${circle.isAnimated}, x at t = π/2: ${circle.attributeValues.x}`);
+        if (!circle.isAnimated || Math.abs(circle.values.x - 600) > 0.01) {
+          throw new Error(`animated ${circle.isAnimated}, x at t = π/2: ${circle.values.x}`);
         }
       }));
 
@@ -282,12 +282,12 @@
       withStage(oneLayer('<pxl-circle id="fwPropUndef" x="500" y="300" r="20" fill="#000"></pxl-circle>'), () => {
         const circle = el('fwPropUndef');
         circle.r = 50;
-        const set = circle.attributeValues.r;
+        const set = circle.values.r;
         circle.r = undefined;
-        const cleared = circle.attributeValues.r;
+        const cleared = circle.values.r;
         circle.r = 50;
         circle.r = null;
-        if (set !== 50 || cleared !== 0 || circle.attributeValues.r !== 0) throw new Error(`set ${set}, undefined → ${cleared}, null → ${circle.attributeValues.r}`);
+        if (set !== 50 || cleared !== 0 || circle.values.r !== 0) throw new Error(`set ${set}, undefined → ${cleared}, null → ${circle.values.r}`);
       }));
 
     test('T-C3d: the getter returns the evaluated value, also of an expression (W3)', () =>
@@ -301,7 +301,7 @@
       withStage(oneLayer('<pxl-line id="fwPropDash" x1="100" y1="100" x2="900" y2="100" stroke="#000" strokewidth="4"></pxl-line>'), () => {
         const line = el('fwPropDash');
         line.linedash = [20, 10];
-        const dash = line.attributeValues.linedash;
+        const dash = line.values.linedash;
         if (!Array.isArray(dash) || dash.join(',') !== '20,10') throw new Error(`linedash ${JSON.stringify(dash)}`);
       }));
 
@@ -311,7 +311,7 @@
         const before = cacheSize();
         for (let i = 0; i < 1000; i++) circle.x = i;
         const grown = cacheSize() - before;
-        if (circle.attributeValues.x !== 999 || grown !== 0) throw new Error(`x ${circle.attributeValues.x}, caches grew by ${grown}`);
+        if (circle.values.x !== 999 || grown !== 0) throw new Error(`x ${circle.values.x}, caches grew by ${grown}`);
       }));
 
     test('T-U1: a property set before the element class is defined is applied when it upgrades (W3)', () =>
@@ -320,8 +320,8 @@
         late.r = 40; // a plain property of the not yet upgraded element
         customElements.define('pxl-fw-late-prop', class extends pxl.Circle {});
         stage.render(1);
-        if (late.attributeValues.r !== 40 || alphaAt(layer, 500, 300) !== 255) {
-          throw new Error(`r ${late.attributeValues.r}, alpha ${alphaAt(layer, 500, 300)}`);
+        if (late.values.r !== 40 || alphaAt(layer, 500, 300) !== 255) {
+          throw new Error(`r ${late.values.r}, alpha ${alphaAt(layer, 500, 300)}`);
         }
       }));
 
@@ -333,7 +333,7 @@
         const late = stage.querySelector('pxl-layer').firstElementChild;
         late.r = 40;
         customElements.define('pxl-fw-late-both', class extends pxl.Circle {});
-        const state = { r: late.attributeValues.r, own: Object.prototype.hasOwnProperty.call(late, 'r'), attribute: late.getAttribute('r') };
+        const state = { r: late.values.r, own: Object.prototype.hasOwnProperty.call(late, 'r'), attribute: late.getAttribute('r') };
         if (state.r !== 40 || state.own || state.attribute !== '20') throw new Error(JSON.stringify(state));
       }));
 
@@ -701,7 +701,7 @@
         pointerAt(stage, 'pointermove', 200, 300, touch);
         pointerAt(stage, 'pointerdown', 200, 300, touch);
         stage.render(2);
-        const state = { mouseX: Math.round(stage.attributeValues.mouseX), first: pxl.nodes.fwFirst.isHovered,
+        const state = { mouseX: Math.round(stage.values.mouseX), first: pxl.nodes.fwFirst.isHovered,
           second: pxl.nodes.fwSecond.isHovered, pressed: pxl.nodes.fwSecond.isPressed };
         if (state.mouseX !== 500 || !state.first || state.second || state.pressed) throw new Error(JSON.stringify(state));
         expectLog(log, ['pointerdown:fwSecond']);
@@ -722,7 +722,7 @@
         send('gotpointercapture', 500);
         send('pointermove', 560);
         stage.render(2);
-        const mouseX = stage.attributeValues.mouseX, pressed = pxl.nodes.fwCaptured.isPressed;
+        const mouseX = stage.values.mouseX, pressed = pxl.nodes.fwCaptured.isPressed;
         send('pointerup', 560);
         send('lostpointercapture', 560);
         send('click', 560);
@@ -775,7 +775,7 @@
       withStage(oneLayer(CIRCLE('fwOwn')), (stage) => {
         hover(stage, 520, 310);
         hover(stage, 530, 320); // Kilopixel's pointermove on the shape: its offsetX equals clientX
-        const { mouseX, mouseY } = stage.attributeValues;
+        const { mouseX, mouseY } = stage.values;
         if (Math.round(mouseX) !== 530 || Math.round(mouseY) !== 320) throw new Error(`mouseX ${mouseX}, mouseY ${mouseY}`);
       }));
 
@@ -829,7 +829,7 @@
         } finally {
           window.removeEventListener('error', onError);
         }
-        const values = circle.attributeValues;
+        const values = circle.values;
         if (errors.length || values.isHovered || values.isPressed) throw new Error(`errors [${errors}], hovered ${values.isHovered}, pressed ${values.isPressed}`);
       }));
 

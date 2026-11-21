@@ -15,15 +15,15 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     const ownKeys = Object.keys(this);
     pxl.defineAccessors(this.constructor);
 
-    this.attributeExpressions = {};
-    this.attributeValues = {};
-    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
-    Object.defineProperty(this.attributeValues, '$node', { value: this, enumerable: false, writable: false });
+    this.expressions = {};
+    this.values = {};
+    Object.defineProperty(this.values, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
+    Object.defineProperty(this.values, '$node', { value: this, enumerable: false, writable: false });
     // Drawn origin in the parent space: dx / dy are applied after rotate / scale / skew, so it's the local matrix translation
-    Object.defineProperty(this.attributeValues, 'tx', { get: () => this.getLocalMatrix()[4], enumerable: false });
-    Object.defineProperty(this.attributeValues, 'ty', { get: () => this.getLocalMatrix()[5], enumerable: false });
-    Object.assign(this.attributeExpressions, this.constructor.defaults);
-    Object.assign(this.attributeValues, this.constructor.defaults);
+    Object.defineProperty(this.values, 'tx', { get: () => this.getLocalMatrix()[4], enumerable: false });
+    Object.defineProperty(this.values, 'ty', { get: () => this.getLocalMatrix()[5], enumerable: false });
+    Object.assign(this.expressions, this.constructor.defaults);
+    Object.assign(this.values, this.constructor.defaults);
 
     this.animatedAttributeKeys = [];
     this.reactiveAttributeKeys = [];
@@ -99,7 +99,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   // attribute (null: removed, the default); any other value is stored as it is, without parsing or compiling.
   // The same parsed value again changes nothing: frameworks and hydration set unchanged values again.
   setValue(name, value) {
-    if (value === this.attributeExpressions[name]) return;
+    if (value === this.expressions[name]) return;
     if (typeof value === 'function') {
       pxl.warnFunctionValue(this, name);
       return;
@@ -144,9 +144,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     let matrixDirtied = false;
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      const newVal = this.attributeExpressions[key].call(this, 0);
-      if (this.attributeValues[key] !== newVal) {
-        this.attributeValues[key] = newVal;
+      const newVal = this.expressions[key].call(this, 0);
+      if (this.values[key] !== newVal) {
+        this.values[key] = newVal;
         if (pxl.isSpatialKey(key)) matrixDirtied = true;
       }
     }
@@ -156,7 +156,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     }
 
     if (this.id) {
-      pxl.nodes[this.id] = this.attributeValues;
+      pxl.nodes[this.id] = this.values;
       this.refKey = `ref.${this.id}`;
       // Broadcast arrival so any elements initialized earlier can successfully re-evaluate
       pxl.broadcast(this.refKey);
@@ -166,7 +166,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
   disconnectedCallback() {
     this._isRegistered = false;
-    if (this.id && pxl.nodes[this.id] === this.attributeValues) {
+    if (this.id && pxl.nodes[this.id] === this.values) {
       delete pxl.nodes[this.id];
     }
     pxl.clearAllVariableSubscriptions(this);
@@ -209,9 +209,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     const keys = this.animatedAttributeKeys;
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      const newVal = this.attributeExpressions[key].call(this, t);
-      if (this.attributeValues[key] !== newVal) {
-        this.attributeValues[key] = newVal;
+      const newVal = this.expressions[key].call(this, t);
+      if (this.values[key] !== newVal) {
+        this.values[key] = newVal;
         animatedValuesChanged = true;
         if (pxl.isSpatialKey(key)) matrixDirtied = true;
       }
@@ -315,7 +315,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
   getLocalMatrix() {
     if (this._isLocalMatrixDirty) {
-      const v = this.attributeValues;
+      const v = this.values;
       const sX = v.zoom * v.scalex;
       const sY = v.zoom * v.scaley;
       pxl.Matrix.updateLocal(this._localMatrix, v.x, v.y, v.dx, v.dy, v.rotate, sX, sY, v.skewx, v.skewy);

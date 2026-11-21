@@ -136,6 +136,7 @@ The points of the figure eight are written as rounded numbers. Candidates that s
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-21: `observedAttributes` is derived from `static defaults` and presence attributes come from boolean defaults (`design/2026-11-20_custom_shapes_plan.md` step 2): `smoothstyle` only goes into `defaults`.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
 - Status line until 2026-11-20: 🟡 **Proposed** (2026-11-11, decisions D1–D3 open)

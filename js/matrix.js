@@ -95,7 +95,7 @@ pxl.toLocal = function(caller, targetObj, prop) {
   const d = pxl.Matrix.multiply(pxl._scratchMatrixB, pxl._scratchMatrixA, targetNode.getGlobalMatrix());
 
   // The target's offset (dx, dy) in the caller's space; the translation d[4], d[5] already includes it
-  const { dx, dy } = targetNode.attributeValues;
+  const { dx, dy } = targetNode.values;
   const tdx = d[0] * dx + d[2] * dy;
   const tdy = d[1] * dx + d[3] * dy;
 

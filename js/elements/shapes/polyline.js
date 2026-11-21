@@ -36,7 +36,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   // flat, in a new array.
   get points() {
     const out = new Array(this._pointCount);
-    for (let i = 0; i < this._pointCount; i++) out[i] = this.attributeValues[this._pointKeys[i]];
+    for (let i = 0; i < this._pointCount; i++) out[i] = this.values[this._pointKeys[i]];
     return out;
   }
 
@@ -67,7 +67,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     }
     if (count !== this._pointCount) this.resizePoints(count);
 
-    const expressions = this.attributeExpressions;
+    const expressions = this.expressions;
     for (let i = 0; i < count; i++) {
       const key = this._pointKeys[i];
       const part = isPairs ? value[i >> 1][i & 1] : isArray ? value[i] : this._rawParts[i];
@@ -76,7 +76,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
       } else if (typeof expressions[key] !== 'function') {
         // A number over a value that is no expression: it is in none of the key lists, so it is just written
         expressions[key] = part;
-        this.attributeValues[key] = part;
+        this.values[key] = part;
       } else {
         pxl.storeValue(this, key, part);
       }
@@ -96,8 +96,8 @@ pxl.Polyline = class Polyline extends pxl.Shape {
       pxl.removeFromArray(this.animatedAttributeKeys, key);
       pxl.removeFromArray(this.reactiveAttributeKeys, key);
       pxl.removeFromArray(this.toLocalAttributeKeys, key);
-      delete this.attributeExpressions[key];
-      delete this.attributeValues[key];
+      delete this.expressions[key];
+      delete this.values[key];
     }
     for (let i = this._pointCount; i < count; i++) this._pointKeys[i] = `p${i}`;
     this._pointKeys.length = count;
@@ -110,8 +110,8 @@ pxl.Polyline = class Polyline extends pxl.Shape {
 
     if (!this.loadPoints(u)) return;
 
-    const { smooth, arrowstart, arrowend } = this.attributeValues;
-    const closed = this.attributeValues.closed === true;
+    const { smooth, arrowstart, arrowend } = this.values;
+    const closed = this.values.closed === true;
     const len = this._pointCount / 2;
 
     // Arrowheads only apply to open strokes
@@ -155,12 +155,12 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     const pts = this._flatCache;
     let probe = 0;
     for (let i = 0; i < this._pointCount; i++) {
-      pts[i] = this.attributeValues[this._pointKeys[i]] * u;
+      pts[i] = this.values[this._pointKeys[i]] * u;
       probe += pts[i] * 0;   // 0 for a finite value, NaN for NaN or ±Infinity
     }
     if (probe !== 0) return false;
 
-    if (this.attributeValues.mode === 'relative') {
+    if (this.values.mode === 'relative') {
       for (let i = 2; i < this._pointCount; i++) {
         pts[i] += pts[i - 2];
       }
@@ -308,7 +308,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   // the curve, and arrowheads are in hitPadding(). From the current values, like getBoundingBox(), so a shape
   // changed with setAttribute() is hit at its new place.
   getHitBox() {
-    const smooth = this.attributeValues.smooth;
+    const smooth = this.values.smooth;
     if (smooth === false || smooth === null || this._pointCount < 6) return this.getBoundingBox();
 
     const box = this._hitBox;
@@ -324,7 +324,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
       if (pts[i + 1] < minY) minY = pts[i + 1];
       if (pts[i + 1] > maxY) maxY = pts[i + 1];
     }
-    const len = this._pointCount / 2, closed = this.attributeValues.closed === true;
+    const len = this._pointCount / 2, closed = this.values.closed === true;
     const k3 = (typeof smooth === 'number' ? smooth : 1) / 3;
     const count = closed ? len : len - 1;
     for (let i = 0; i < count; i++) {
@@ -381,11 +381,11 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     }
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     let currentX = 0, currentY = 0;
-    const isRelative = this.attributeValues.mode === 'relative';
+    const isRelative = this.values.mode === 'relative';
 
     for (let i = 0; i < this._pointCount; i += 2) {
-      const px = this.attributeValues[this._pointKeys[i]];
-      const py = this.attributeValues[this._pointKeys[i + 1]];
+      const px = this.values[this._pointKeys[i]];
+      const py = this.values[this._pointKeys[i + 1]];
 
       if (isRelative && i > 0) {
         currentX += px;

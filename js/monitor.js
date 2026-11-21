@@ -33,7 +33,7 @@ pxl.perf = {
 
     for (let i = 0; i < pxl.perf.stages.length; i++) {
       const stage = pxl.perf.stages[i];
-      const values = stage.attributeValues;
+      const values = stage.values;
       const frames = stage.perfFrames;
       values.fps = seconds > 0 ? Math.round(frames / seconds) : 0;
       values.renderAvg = (frames > 0 ? stage.perfAccumulated / frames : 0).toFixed(2);

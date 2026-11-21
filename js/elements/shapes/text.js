@@ -38,13 +38,13 @@ pxl.Text = class Text extends pxl.Shape {
   // and compiling data would run it as code ('alert(1)') or fail on it ('Q1 - 2024'). Expressions stay available
   // through the attribute. Other values (numbers) go the usual way.
   get text() {
-    return this.attributeValues.text;
+    return this.values.text;
   }
 
   set text(value) {
     if (typeof value !== 'string') {
       this.setValue('text', value === undefined ? null : value);
-    } else if (value !== this.attributeExpressions.text) {
+    } else if (value !== this.expressions.text) {
       pxl.storeValue(this, 'text', value);
       this.valueChanged('text');
     }
@@ -55,7 +55,7 @@ pxl.Text = class Text extends pxl.Shape {
     const {
       text, size, font, align, baseline, weight, fontstyle, maxwidth,
       direction, width, lineheight, letterspacing, reveal
-    } = this.attributeValues;
+    } = this.values;
 
     this._hasInk = false;
 
@@ -186,7 +186,7 @@ pxl.Text = class Text extends pxl.Shape {
     const hasStroke = this.isStroked();
     if (!hasFill && !hasStroke) return;
 
-    if (hasFill) ctx.fillStyle = this.createGradient(ctx, u, this.attributeValues.fill, 0);
+    if (hasFill) ctx.fillStyle = this.createGradient(ctx, u, this.values.fill, 0);
     if (hasStroke) this.applyStrokeState(ctx, u);
 
     this._hasInk = true;
@@ -219,7 +219,7 @@ pxl.Text = class Text extends pxl.Shape {
   // Fill and stroke, or more than one line (one call per line). Decided from the attributes: the line count is only
   // known after the layout in draw(). A wrap width counts even if the text fits on one line.
   drawsMoreThanOnce() {
-    const { text, width } = this.attributeValues;
+    const { text, width } = this.values;
     return (this.hasFill() && this.isStroked()) || width > 0 ||
            (typeof text === 'string' && (text.includes('\n') || text.includes('\\n')));
   }
@@ -233,7 +233,7 @@ pxl.Text = class Text extends pxl.Shape {
     if (!this._hasInk) return; // nothing visible: empty text, reveal hides all, no fill and no stroke
 
     const b = this.boundingBox;
-    const pad = this.isStroked() ? this.attributeValues.strokewidth / 2 : 0;
+    const pad = this.isStroked() ? this.values.strokewidth / 2 : 0;
     ctx.rect((b.left - pad) * u, (b.top - pad) * u, (b.right - b.left + 2 * pad) * u, (b.bottom - b.top + 2 * pad) * u);
     ctx.fill(); // intercepted on pxl.dummyCtx (isPointInPath)
   }

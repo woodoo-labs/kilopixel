@@ -31,7 +31,7 @@ pxl.isSpatialKey = function(key) {
 // Subscribers per ref key: { 'ref.id': [element, …] }
 pxl._subscriptions = {};
 
-// Element id → its attributeValues, read by expressions as ref.<id>.<name>
+// Element id → its values, read by expressions as ref.<id>.<name>
 pxl.nodes = {};
 
 // A ref.* cycle whose values keep changing stops after this many rounds (PxlNode.variableChangedCallback).
@@ -85,13 +85,13 @@ pxl.clearAllVariableSubscriptions = function(element) {
 // An element's id was set, changed or removed after it connected (connectedCallback reads the id once): move its
 // registry entry, and tell the readers of both names (readers of the old name now read undefined)
 pxl.renameNode = function(element, oldId, newId) {
-  if (oldId && pxl.nodes[oldId] === element.attributeValues) {
+  if (oldId && pxl.nodes[oldId] === element.values) {
     delete pxl.nodes[oldId];
     pxl.broadcast(`ref.${oldId}`);
   }
   element.refKey = newId ? `ref.${newId}` : null;
   if (newId) {
-    pxl.nodes[newId] = element.attributeValues;
+    pxl.nodes[newId] = element.values;
     pxl.broadcast(element.refKey);
   }
 };
@@ -121,7 +121,7 @@ pxl.compileAttribute = function(element, name, newValue) {
     pxl.storeValue(element, name, parsed);
     return;
   }
-  element.attributeExpressions[name] = parsed;
+  element.expressions[name] = parsed;
 
   if (parsed.isTimeDependent) {
     // Evaluated every frame (evaluateAnimations)
@@ -148,7 +148,7 @@ pxl.compileAttribute = function(element, name, newValue) {
 
     // Not connected yet: connectedCallback evaluates it
     if (element.isConnected) {
-      element.attributeValues[name] = parsed.call(element, 0);
+      element.values[name] = parsed.call(element, 0);
     }
   }
 };
@@ -156,11 +156,11 @@ pxl.compileAttribute = function(element, name, newValue) {
 // A value that needs no compiling, stored as it is: a parsed attribute string, or a property value (number, boolean,
 // array, gradient descriptor, …). Arrays are kept by reference and never changed by the engine.
 pxl.storeValue = function(element, name, value) {
-  element.attributeExpressions[name] = value;
+  element.expressions[name] = value;
   pxl.removeFromArray(element.animatedAttributeKeys, name);
   pxl.removeFromArray(element.reactiveAttributeKeys, name);
   pxl.removeFromArray(element.toLocalAttributeKeys, name);
-  element.attributeValues[name] = value;
+  element.values[name] = value;
 };
 
 // =========================================================================
@@ -183,7 +183,7 @@ pxl.defineAccessors = function(Class) {
   for (const name of Class.observedAttributes) {
     if (name.includes('-') || name in proto) continue;
     Object.defineProperty(proto, name, {
-      get() { return this.attributeValues[name]; },
+      get() { return this.values[name]; },
       set(value) { this.setValue(name, value === undefined ? null : value); },
       configurable: true
     });
@@ -245,9 +245,9 @@ pxl.evaluateToLocalAttributes = function(element) {
 
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
-    const newVal = element.attributeExpressions[key].call(element, 0);
-    if (element.attributeValues[key] !== newVal) {
-      element.attributeValues[key] = newVal;
+    const newVal = element.expressions[key].call(element, 0);
+    if (element.values[key] !== newVal) {
+      element.values[key] = newVal;
       result |= 1;
       if (pxl.isSpatialKey(key)) result |= 2;
     }
@@ -268,13 +268,13 @@ pxl.evaluateAttributesForVariable = function(element, varName) {
 
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
-    const fn = element.attributeExpressions[key];
+    const fn = element.expressions[key];
 
     if (fn.variableDependencies.includes(varName)) {
       result |= 1;
       const newVal = fn.call(element, 0);
-      if (element.attributeValues[key] !== newVal) {
-        element.attributeValues[key] = newVal;
+      if (element.values[key] !== newVal) {
+        element.values[key] = newVal;
         result |= 2;
         if (!element.isCompositingKey(key)) result |= 4;
         if (pxl.isSpatialKey(key)) matrixDirtied = true;
@@ -289,7 +289,7 @@ pxl.evaluateAttributesForVariable = function(element, varName) {
 pxl.restoreVariableSubscriptions = function(element) {
   const keys = element.reactiveAttributeKeys;
   for (let i = 0; i < keys.length; i++) {
-    const deps = element.attributeExpressions[keys[i]].variableDependencies;
+    const deps = element.expressions[keys[i]].variableDependencies;
     for (let j = 0; j < deps.length; j++) {
       pxl.subscribeToVariable(deps[j], element);
     }

@@ -12,7 +12,7 @@ pxl.Circle = class Circle extends pxl.Shape {
   }
 
   draw(ctx, u) {
-    const { r, ir, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.attributeValues;
+    const { r, ir, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.values;
 
     const safeR = Math.max(0, r);
     const safeIR = Math.max(0, ir);
@@ -97,7 +97,7 @@ pxl.Circle = class Circle extends pxl.Shape {
   }
 
   getBoundingBox() {
-    const { r } = this.attributeValues;
+    const { r } = this.values;
     this.boundingBox.left = -r;
     this.boundingBox.right = r;
     this.boundingBox.top = -r;

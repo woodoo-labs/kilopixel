@@ -711,13 +711,13 @@
 
     // --- Telemetry Polling (FPS & Cursor Coordinates) ---
     setInterval(() => {
-      if (stage && stage.attributeValues) {
+      if (stage && stage.values) {
         if (fpsDisplay) {
-          fpsDisplay.innerText = stage.attributeValues.fps || 60;
+          fpsDisplay.innerText = stage.values.fps || 60;
         }
         if (coordsDisplay) {
-          const mx = Math.round(stage.attributeValues.mouseX || 500);
-          const my = Math.round(stage.attributeValues.mouseY || 500);
+          const mx = Math.round(stage.values.mouseX || 500);
+          const my = Math.round(stage.values.mouseY || 500);
           coordsDisplay.innerText = `${mx}, ${my}`;
         }
       }

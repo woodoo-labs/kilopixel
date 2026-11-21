@@ -40,8 +40,8 @@ Base of layers, groups, shapes and variables.
 
 **State**
 
-- `static defaults`: per class, read-only, extended by spreading (`{ ...pxl.Shape.defaults, r: 0 }`). The constructor copies them into `attributeExpressions` and `attributeValues`; `pxl.resolveEmptyAttribute` reads them for bare and removed attributes (language §3.5).
-- `attributeExpressions`: per name the compiled function or the static value. `attributeValues`: the current values, read by drawing and by `ref.<id>` (`pxl.nodes[id]` is this object). Hidden (non-enumerable) properties on it: `set(key, value)` (→ `pxl.setFromRef()`), `$node` (the element), getters `tx` / `ty` (the local matrix translation).
+- `static defaults`: per class, read-only, extended by spreading (`{ ...pxl.Shape.defaults, r: 0 }`). The constructor copies them into `expressions` and `values`; `pxl.resolveEmptyAttribute` reads them for bare and removed attributes (language §3.5).
+- `expressions`: per name the compiled function or the static value. `values`: the current values, read by drawing and by `ref.<id>` (`pxl.nodes[id]` is this object). Hidden (non-enumerable) properties on it: `set(key, value)` (→ `pxl.setFromRef()`), `$node` (the element), getters `tx` / `ty` (the local matrix translation).
 - Key lists: `animatedAttributeKeys` (use `t`, evaluated every frame), `reactiveAttributeKeys` (read `ref.*`, evaluated on change), `toLocalAttributeKeys` (reactive keys using `toLocal()`, also re-evaluated when the element's own space moves). `isAnimated` = animated keys exist.
 - `parentLayer` (`closest('pxl-layer')`; a layer is its own), `parentContainer` (closest group or layer above), `childList` (layers and groups; `null` for shapes and variables, an own field so walks don't search the prototype chain).
 - Matrices (§7.2), `_failedFrame` (§5.5), `_broadcastNesting` (§4.3), `_cssStyle` (computed style, created on first use), filter cache, error dedup fields.
@@ -85,7 +85,7 @@ Flags on the function: `isTimeDependent`, `variableDependencies` (only when ther
 
 ### 4.1 Registry
 
-- `pxl.nodes`: `{ id: attributeValues }`, the `ref` object of every compiled function. Connect registers and broadcasts `ref.<id>`, so readers written before the element re-evaluate.
+- `pxl.nodes`: `{ id: values }`, the `ref` object of every compiled function. Connect registers and broadcasts `ref.<id>`, so readers written before the element re-evaluate.
 - `id` is observed: once registered (`_isRegistered`, set at the end of `connectedCallback()`), a changed id moves the entry (`pxl.renameNode()`: the old entry is removed only if it points to this element, `refKey` follows, both names are broadcast, readers of the old name read `undefined`). Frameworks such as Angular and Alpine set `id` after insertion; during an upgrade the attributes arrive before `connectedCallback()`, which registers the id itself.
 
 ### 4.2 Classification and Subscriptions
@@ -94,7 +94,7 @@ Flags on the function: `isTimeDependent`, `variableDependencies` (only when ther
 
 | Result | Storage | Evaluated |
 |---|---|---|
-| static value | `pxl.storeValue()`: `attributeValues[name]`, removed from all key lists | never again |
+| static value | `pxl.storeValue()`: `values[name]`, removed from all key lists | never again |
 | function with `isTimeDependent` | `animatedAttributeKeys` | every frame (`evaluateAnimations`) |
 | function with `variableDependencies` only | `reactiveAttributeKeys` (+ `toLocalAttributeKeys` if `usesToLocal`), subscribed to each dependency, evaluated at once if connected | when a dependency broadcasts |
 
@@ -323,11 +323,11 @@ None in the walk, box check, boundary walk and queue; one event object per dispa
 - **Sizing:** a `ResizeObserver` with `device-pixel-content-box` (fallback `content-box`, Safari) → `resize()`: `unit`, height broadcast, every layer resized, an immediate render. Width 0 → `markFallbackWidth()` (the custom state through `attachInternals()`, field `_internals`; skipped without a box; older browsers without custom states stay 0). Also checked once in the frame after connect (an observer needn't report a box that stays 0); `disconnectedCallback()` removes the state. Design: `design/done/2026-11-04_stage_sizing_plan.md`.
 - **Visibility:** an `IntersectionObserver` pauses rendering out of view unless `isAlwaysRender()`.
 - **Lists:** `layers` and `_variables` (stage-level `<pxl-var>`, registered when a variable has no `parentLayer`), sorted by DOM position when `_isOrderDirty` (`pxl.sortByDOMPosition`). Layers and groups keep `childList` sorted the same way, in their update.
-- `attributeValues` is created in the constructor and kept on reconnect (pointer and stats survive a move). `id` is observed like on nodes.
+- `values` is created in the constructor and kept on reconnect (pointer and stats survive a move). `id` is observed like on nodes.
 
 ## 10. Performance Monitor (`js/monitor.js`)
 
-`pxl.perf.stages`; a stage registers on connect. Each `Stage.render()` adds to `perfFrames`, `perfAccumulated`, `perfMax`. A 1-second `setInterval` (`_timer`, running while any stage is registered) publishes `fps = round(frames / seconds since the last publish)` (timers fire late in background tabs), `renderAvg`, `renderMax`, into the stage's `attributeValues`, broadcasts `ref.<stage>`, and resets the counters. Not from `render()`: an idle page would freeze at its last values. Frame counting (only frames that drew) and per-layer metrics: `design/2026-11-12_layer_throttling_plan.md` (D4, C2).
+`pxl.perf.stages`; a stage registers on connect. Each `Stage.render()` adds to `perfFrames`, `perfAccumulated`, `perfMax`. A 1-second `setInterval` (`_timer`, running while any stage is registered) publishes `fps = round(frames / seconds since the last publish)` (timers fire late in background tabs), `renderAvg`, `renderMax`, into the stage's `values`, broadcasts `ref.<stage>`, and resets the counters. Not from `render()`: an idle page would freeze at its last values. Frame counting (only frames that drew) and per-layer metrics: `design/2026-11-12_layer_throttling_plan.md` (D4, C2).
 
 ## 11. Build (`build.js`)
 
@@ -340,7 +340,7 @@ None in the walk, box check, boundary walk and queue; one event object per dispa
 ## 12. Adding an Attribute
 
 1. `static defaults` of the class, grouped like the tables in `.agents/KILOPIXEL.md`. Every attribute starts there (no defensive fallbacks), and every key is observed: `PxlNode`'s `observedAttributes` getter returns the keys plus `id`, `Shape` and `Group` add the `pxl-on-*` handlers, Polyline adds `points` (stored as `p0`, `p1`, …, so it has no default). Keys are lowercase (HTML lowercases attribute names). Runtime state that isn't an attribute (`isHovered`, `isPressed`) is set in the constructor instead.
-2. Use it from `attributeValues` in `draw()` (and `getBoundingBox()` / `hitPadding()` / `drawsMoreThanOnce()` if it changes them). A `false` / `true` default makes a presence attribute (`pxl.resolveEmptyAttribute()`: bare = `true`); a transform key goes into `pxl.isSpatialKey`.
+2. Use it from `values` in `draw()` (and `getBoundingBox()` / `hitPadding()` / `drawsMoreThanOnce()` if it changes them). A `false` / `true` default makes a presence attribute (`pxl.resolveEmptyAttribute()`: bare = `true`); a transform key goes into `pxl.isSpatialKey`.
 3. `tools/build_types.js`: a table entry if the default doesn't tell the type (keywords, colors, arrays, `null`).
 4. Tests: default, empty value, removed value, main effect (Rule A, `tests/unit.html` and `tests/index.html`).
 5. `.agents/KILOPIXEL.md` table, the docs page and its API table, `node build.js`, sizes (CLAUDE.md "File size after a build").

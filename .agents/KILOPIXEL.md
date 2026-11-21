@@ -1,6 +1,6 @@
 # Kilopixel — Language Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~71KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~70KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 How to write Kilopixel: elements, attributes, expressions, interaction. Each fact is stated once; sections link each other. How the engine does it (source files, frame, reactivity, hit testing, drawing): `.agents/ENGINE.md`. Docs pages also follow `docs/DOCS_STANDARDS.md`.
 

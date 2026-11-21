@@ -2,12 +2,12 @@ pxl.Grid = class Grid extends pxl.Shape {
   static defaults = { ...pxl.Shape.defaults, step: 50, major: 0, labels: false, labelsize: 12 };
 
   draw(ctx, u) {
-    const { step, major, labels, labelsize, strokewidth } = this.attributeValues;
+    const { step, major, labels, labelsize, strokewidth } = this.values;
     if (step <= 0) return; // the line loops would never end
 
     // Visible area: the four stage corners mapped into the grid's own space
     const m = pxl.Matrix.invert(pxl._scratchMatrixA, this.getGlobalMatrix());
-    const w = this.stage.attributeValues.width, h = this.stage.attributeValues.height;
+    const w = this.stage.values.width, h = this.stage.values.height;
     const x0 = m[4], y0 = m[5];                                       // (0, 0)
     const x1 = m[0] * w + m[4], y1 = m[1] * w + m[5];                 // (w, 0)
     const x2 = m[2] * h + m[4], y2 = m[3] * h + m[5];                 // (0, h)
@@ -67,7 +67,7 @@ pxl.Grid = class Grid extends pxl.Shape {
     // Coordinates at the major intersections, in the fill color (or the stroke color without fill; neither: no labels)
     const hasFill = this.hasFill();
     if (labels && major > 0 && (hasFill || isStroked)) {
-      ctx.fillStyle = hasFill ? this.createGradient(ctx, u, this.attributeValues.fill, 0) : ctx.strokeStyle;
+      ctx.fillStyle = hasFill ? this.createGradient(ctx, u, this.values.fill, 0) : ctx.strokeStyle;
       ctx.font = `${labelsize * u}px monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -89,7 +89,7 @@ pxl.Grid = class Grid extends pxl.Shape {
 
   // Major lines are a second stroke (and bring the labels); a fill and a stroke are two calls too
   drawsMoreThanOnce() {
-    return this.attributeValues.major > 0 || (this.hasFill() && this.isStroked());
+    return this.values.major > 0 || (this.hasFill() && this.isStroked());
   }
 
   // Set in draw(): the visible area

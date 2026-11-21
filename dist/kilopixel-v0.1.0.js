@@ -38,7 +38,7 @@ pxl.isSpatialKey = function(key) {
 // Subscribers per ref key: { 'ref.id': [element, …] }
 pxl._subscriptions = {};
 
-// Element id → its attributeValues, read by expressions as ref.<id>.<name>
+// Element id → its values, read by expressions as ref.<id>.<name>
 pxl.nodes = {};
 
 // A ref.* cycle whose values keep changing stops after this many rounds (PxlNode.variableChangedCallback).
@@ -92,13 +92,13 @@ pxl.clearAllVariableSubscriptions = function(element) {
 // An element's id was set, changed or removed after it connected (connectedCallback reads the id once): move its
 // registry entry, and tell the readers of both names (readers of the old name now read undefined)
 pxl.renameNode = function(element, oldId, newId) {
-  if (oldId && pxl.nodes[oldId] === element.attributeValues) {
+  if (oldId && pxl.nodes[oldId] === element.values) {
     delete pxl.nodes[oldId];
     pxl.broadcast(`ref.${oldId}`);
   }
   element.refKey = newId ? `ref.${newId}` : null;
   if (newId) {
-    pxl.nodes[newId] = element.attributeValues;
+    pxl.nodes[newId] = element.values;
     pxl.broadcast(element.refKey);
   }
 };
@@ -128,7 +128,7 @@ pxl.compileAttribute = function(element, name, newValue) {
     pxl.storeValue(element, name, parsed);
     return;
   }
-  element.attributeExpressions[name] = parsed;
+  element.expressions[name] = parsed;
 
   if (parsed.isTimeDependent) {
     // Evaluated every frame (evaluateAnimations)
@@ -155,7 +155,7 @@ pxl.compileAttribute = function(element, name, newValue) {
 
     // Not connected yet: connectedCallback evaluates it
     if (element.isConnected) {
-      element.attributeValues[name] = parsed.call(element, 0);
+      element.values[name] = parsed.call(element, 0);
     }
   }
 };
@@ -163,11 +163,11 @@ pxl.compileAttribute = function(element, name, newValue) {
 // A value that needs no compiling, stored as it is: a parsed attribute string, or a property value (number, boolean,
 // array, gradient descriptor, …). Arrays are kept by reference and never changed by the engine.
 pxl.storeValue = function(element, name, value) {
-  element.attributeExpressions[name] = value;
+  element.expressions[name] = value;
   pxl.removeFromArray(element.animatedAttributeKeys, name);
   pxl.removeFromArray(element.reactiveAttributeKeys, name);
   pxl.removeFromArray(element.toLocalAttributeKeys, name);
-  element.attributeValues[name] = value;
+  element.values[name] = value;
 };
 
 // =========================================================================
@@ -190,7 +190,7 @@ pxl.defineAccessors = function(Class) {
   for (const name of Class.observedAttributes) {
     if (name.includes('-') || name in proto) continue;
     Object.defineProperty(proto, name, {
-      get() { return this.attributeValues[name]; },
+      get() { return this.values[name]; },
       set(value) { this.setValue(name, value === undefined ? null : value); },
       configurable: true
     });
@@ -252,9 +252,9 @@ pxl.evaluateToLocalAttributes = function(element) {
 
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
-    const newVal = element.attributeExpressions[key].call(element, 0);
-    if (element.attributeValues[key] !== newVal) {
-      element.attributeValues[key] = newVal;
+    const newVal = element.expressions[key].call(element, 0);
+    if (element.values[key] !== newVal) {
+      element.values[key] = newVal;
       result |= 1;
       if (pxl.isSpatialKey(key)) result |= 2;
     }
@@ -275,13 +275,13 @@ pxl.evaluateAttributesForVariable = function(element, varName) {
 
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
-    const fn = element.attributeExpressions[key];
+    const fn = element.expressions[key];
 
     if (fn.variableDependencies.includes(varName)) {
       result |= 1;
       const newVal = fn.call(element, 0);
-      if (element.attributeValues[key] !== newVal) {
-        element.attributeValues[key] = newVal;
+      if (element.values[key] !== newVal) {
+        element.values[key] = newVal;
         result |= 2;
         if (!element.isCompositingKey(key)) result |= 4;
         if (pxl.isSpatialKey(key)) matrixDirtied = true;
@@ -296,7 +296,7 @@ pxl.evaluateAttributesForVariable = function(element, varName) {
 pxl.restoreVariableSubscriptions = function(element) {
   const keys = element.reactiveAttributeKeys;
   for (let i = 0; i < keys.length; i++) {
-    const deps = element.attributeExpressions[keys[i]].variableDependencies;
+    const deps = element.expressions[keys[i]].variableDependencies;
     for (let j = 0; j < deps.length; j++) {
       pxl.subscribeToVariable(deps[j], element);
     }
@@ -400,7 +400,7 @@ pxl.toLocal = function(caller, targetObj, prop) {
   const d = pxl.Matrix.multiply(pxl._scratchMatrixB, pxl._scratchMatrixA, targetNode.getGlobalMatrix());
 
   // The target's offset (dx, dy) in the caller's space; the translation d[4], d[5] already includes it
-  const { dx, dy } = targetNode.attributeValues;
+  const { dx, dy } = targetNode.values;
   const tdx = d[0] * dx + d[2] * dy;
   const tdy = d[1] * dx + d[3] * dy;
 
@@ -951,12 +951,12 @@ pxl.InteractionEngine = class InteractionEngine {
         this.stage.requestRender();
         return;
       case 'pointerenter':
-        this.stage.attributeValues.isHovered = true;
+        this.stage.values.isHovered = true;
         this._isMouseDirty = true;
         this.stage.requestRender();
         return;
       case 'pointerleave':
-        this.stage.attributeValues.isHovered = false;
+        this.stage.values.isHovered = false;
         this._isMouseDirty = true;
         this.stage.requestRender();
         return;
@@ -966,7 +966,7 @@ pxl.InteractionEngine = class InteractionEngine {
         const to = e.relatedTarget;
         if (isSecondary || !isFromCanvas || (to !== null && this.stage.contains(to))) return;
         this._native = e;
-        this.stage.attributeValues.isHovered = false;
+        this.stage.values.isHovered = false;
         this._isMouseDirty = true;
         this.hover(null);
         this.updateCursor();
@@ -1049,7 +1049,7 @@ pxl.InteractionEngine = class InteractionEngine {
   // Moves the stage's pointer (mouseX / mouseY) to the event; true if it changed
   setPointer(e, isFromCanvas) {
     if (!this.readPosition(e, isFromCanvas)) return false;
-    const values = this.stage.attributeValues;
+    const values = this.stage.values;
     if (values.mouseX === this._x && values.mouseY === this._y) return false;
     values.mouseX = this._x;
     values.mouseY = this._y;
@@ -1075,8 +1075,8 @@ pxl.InteractionEngine = class InteractionEngine {
   // --- States ---
 
   setState(node, key, value) {
-    if (node.attributeValues[key] === value) return;
-    node.attributeValues[key] = value;
+    if (node.values[key] === value) return;
+    node.values[key] = value;
     if (node.refKey) pxl.broadcast(node.refKey);
   }
 
@@ -1289,7 +1289,7 @@ pxl.InteractionEngine = class InteractionEngine {
     const layers = this.stage.layers;
     for (let i = layers.length - 1; i >= 0; i--) {
       const layer = layers[i];
-      if (layer.attributeValues.hidden) continue;
+      if (layer.values.hidden) continue;
       // A layer is a real box on the page: CSS can hide it (display, visibility). Few layers, so reading them costs
       // little. Its pointer-events is not checked here: the shapes inherit it, and a shape with pointer-events: auto
       // inside a layer with none is hit, as in the DOM. Shapes are only read when they could be hit.
@@ -1305,7 +1305,7 @@ pxl.InteractionEngine = class InteractionEngine {
     const children = container.childList;
     for (let i = children.length - 1; i >= 0; i--) {
       const child = children[i];
-      if (child.attributeValues.hidden) continue;
+      if (child.values.hidden) continue;
       if (child.childList !== null) {
         // A group (also a layer nested in a layer, which the engine doesn't really support)
         const hit = this.findShapeIn(child, x, y);
@@ -1354,7 +1354,7 @@ pxl.InteractionEngine = class InteractionEngine {
   // boundary events, and one move event on the shape under a moving pointer. Presses, releases and clicks are
   // handled when they arrive (handleEvent()). Touches no layer: only readers of a changed state redraw.
   process() {
-    const values = this.stage.attributeValues;
+    const values = this.stage.values;
     const isPointerChanged = this._isMouseDirty;
     if (isPointerChanged) {
       if (this.stage.refKey) pxl.broadcast(this.stage.refKey);
@@ -1448,8 +1448,8 @@ pxl.resolveRadius = function(r, x, y, w, h, u) {
 };
 
 // Same order as pxl.Matrix.updateLocal: translate(x, y) → rotate → scale → skew → translate(dx, dy)
-pxl.applyTransformState = function(ctx, u, attributeValues) {
-  const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = attributeValues;
+pxl.applyTransformState = function(ctx, u, values) {
+  const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = values;
 
   if (x || y) ctx.translate(x * u, y * u);
   if (rotate) ctx.rotate(rotate * Math.PI / 180);
@@ -1473,17 +1473,17 @@ pxl.scaleResponsiveFilter = function(filterStr, u) {
   return filterStr.replace(/(-?\d*\.?\d+(?:e[-+]?\d+)?)px/g, (match, val) => (parseFloat(val) * u) + 'px');
 };
 
-pxl.applyContextState = function(ctx, u, attributeValues, node) {
-  pxl.applyTransformState(ctx, u, attributeValues);
-  pxl.applyCompositingState(ctx, u, attributeValues, node);
+pxl.applyContextState = function(ctx, u, values, node) {
+  pxl.applyTransformState(ctx, u, values);
+  pxl.applyCompositingState(ctx, u, values, node);
 };
 
 // How a shape's pixels combine with the layer: alpha, mask / blend, filter, shadow. An isolated shape
 // (Shape.renderIsolated()) applies it once, when its finished bitmap is drawn onto the layer.
 // Canvas shadows and filters ignore the canvas transform, which holds the layer's device pixel ratio: their lengths
 // are bitmap pixels, so they are scaled by u and the DPR.
-pxl.applyCompositingState = function(ctx, u, attributeValues, node) {
-  const { alpha, blend, mask, filter, shadowcolor, shadowblur, shadowx, shadowy } = attributeValues;
+pxl.applyCompositingState = function(ctx, u, values, node) {
+  const { alpha, blend, mask, filter, shadowcolor, shadowblur, shadowx, shadowy } = values;
   const k = u * node.parentLayer.dpr;
 
   if (alpha !== 1) ctx.globalAlpha *= alpha;
@@ -1643,7 +1643,7 @@ pxl.perf = {
 
     for (let i = 0; i < pxl.perf.stages.length; i++) {
       const stage = pxl.perf.stages[i];
-      const values = stage.attributeValues;
+      const values = stage.values;
       const frames = stage.perfFrames;
       values.fps = seconds > 0 ? Math.round(frames / seconds) : 0;
       values.renderAvg = (frames > 0 ? stage.perfAccumulated / frames : 0).toFixed(2);
@@ -1722,12 +1722,12 @@ pxl.Stage = class Stage extends HTMLElement {
     this._isRegistered = false; // connectedCallback has run: id changes from now on move the registry entry
 
     // Published as ref.<id>.* once per second by pxl.perf's timer; renderAvg / renderMax are strings with 2 decimals
-    this.attributeValues = {
+    this.values = {
       mouseX: 500, mouseY: 500, isHovered: false, width: 1000, height: 1000 / this._parsedRatio,
       fps: 0, renderAvg: '0.00', renderMax: '0.00'
     };
-    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
-    Object.defineProperty(this.attributeValues, '$node', { value: this, enumerable: false, writable: false });
+    Object.defineProperty(this.values, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
+    Object.defineProperty(this.values, '$node', { value: this, enumerable: false, writable: false });
 
     // Properties set before the upgrade, applied in connectedCallback: [name, value, …] or null
     this._pendingProperties = ownKeys.length === 0 ? null : pxl.takeOwnProperties(this, ownKeys);
@@ -1777,7 +1777,7 @@ pxl.Stage = class Stage extends HTMLElement {
       // Bare or removed ratio falls back to the default 16 / 9
       this._parsedRatio = (newValue === null || newValue === '') ? 16 / 9 : pxl.parseAttributeValue(newValue);
       this.style.aspectRatio = this._parsedRatio;
-      this.attributeValues.height = 1000 / this._parsedRatio;
+      this.values.height = 1000 / this._parsedRatio;
       if (this.refKey) pxl.broadcast(this.refKey);
     } else if (name === 'alwaysrender') {
       if (this.isAlwaysRender()) {
@@ -1799,7 +1799,7 @@ pxl.Stage = class Stage extends HTMLElement {
     }
     this._isVisible = true;
     if (this.id) {
-      pxl.nodes[this.id] = this.attributeValues;
+      pxl.nodes[this.id] = this.values;
       this.refKey = `ref.${this.id}`;
       pxl.broadcast(this.refKey);
     }
@@ -1832,7 +1832,7 @@ pxl.Stage = class Stage extends HTMLElement {
 
   disconnectedCallback() {
     this._isRegistered = false;
-    if (this.id && pxl.nodes[this.id] === this.attributeValues) delete pxl.nodes[this.id];
+    if (this.id && pxl.nodes[this.id] === this.values) delete pxl.nodes[this.id];
     this._intersectionObserver?.disconnect();
     this._intersectionObserver = null;
     this._resizeObserver.disconnect();
@@ -1914,7 +1914,7 @@ pxl.Stage = class Stage extends HTMLElement {
     }
 
     this.unit = w / 1000;
-    this.attributeValues.height = 1000 / this._parsedRatio;
+    this.values.height = 1000 / this._parsedRatio;
     if (this.refKey) pxl.broadcast(this.refKey);
 
     this._dpr = window.devicePixelRatio;
@@ -1999,15 +1999,15 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     const ownKeys = Object.keys(this);
     pxl.defineAccessors(this.constructor);
 
-    this.attributeExpressions = {};
-    this.attributeValues = {};
-    Object.defineProperty(this.attributeValues, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
-    Object.defineProperty(this.attributeValues, '$node', { value: this, enumerable: false, writable: false });
+    this.expressions = {};
+    this.values = {};
+    Object.defineProperty(this.values, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
+    Object.defineProperty(this.values, '$node', { value: this, enumerable: false, writable: false });
     // Drawn origin in the parent space: dx / dy are applied after rotate / scale / skew, so it's the local matrix translation
-    Object.defineProperty(this.attributeValues, 'tx', { get: () => this.getLocalMatrix()[4], enumerable: false });
-    Object.defineProperty(this.attributeValues, 'ty', { get: () => this.getLocalMatrix()[5], enumerable: false });
-    Object.assign(this.attributeExpressions, this.constructor.defaults);
-    Object.assign(this.attributeValues, this.constructor.defaults);
+    Object.defineProperty(this.values, 'tx', { get: () => this.getLocalMatrix()[4], enumerable: false });
+    Object.defineProperty(this.values, 'ty', { get: () => this.getLocalMatrix()[5], enumerable: false });
+    Object.assign(this.expressions, this.constructor.defaults);
+    Object.assign(this.values, this.constructor.defaults);
 
     this.animatedAttributeKeys = [];
     this.reactiveAttributeKeys = [];
@@ -2083,7 +2083,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   // attribute (null: removed, the default); any other value is stored as it is, without parsing or compiling.
   // The same parsed value again changes nothing: frameworks and hydration set unchanged values again.
   setValue(name, value) {
-    if (value === this.attributeExpressions[name]) return;
+    if (value === this.expressions[name]) return;
     if (typeof value === 'function') {
       pxl.warnFunctionValue(this, name);
       return;
@@ -2128,9 +2128,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     let matrixDirtied = false;
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      const newVal = this.attributeExpressions[key].call(this, 0);
-      if (this.attributeValues[key] !== newVal) {
-        this.attributeValues[key] = newVal;
+      const newVal = this.expressions[key].call(this, 0);
+      if (this.values[key] !== newVal) {
+        this.values[key] = newVal;
         if (pxl.isSpatialKey(key)) matrixDirtied = true;
       }
     }
@@ -2140,7 +2140,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     }
 
     if (this.id) {
-      pxl.nodes[this.id] = this.attributeValues;
+      pxl.nodes[this.id] = this.values;
       this.refKey = `ref.${this.id}`;
       // Broadcast arrival so any elements initialized earlier can successfully re-evaluate
       pxl.broadcast(this.refKey);
@@ -2150,7 +2150,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
   disconnectedCallback() {
     this._isRegistered = false;
-    if (this.id && pxl.nodes[this.id] === this.attributeValues) {
+    if (this.id && pxl.nodes[this.id] === this.values) {
       delete pxl.nodes[this.id];
     }
     pxl.clearAllVariableSubscriptions(this);
@@ -2193,9 +2193,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     const keys = this.animatedAttributeKeys;
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      const newVal = this.attributeExpressions[key].call(this, t);
-      if (this.attributeValues[key] !== newVal) {
-        this.attributeValues[key] = newVal;
+      const newVal = this.expressions[key].call(this, t);
+      if (this.values[key] !== newVal) {
+        this.values[key] = newVal;
         animatedValuesChanged = true;
         if (pxl.isSpatialKey(key)) matrixDirtied = true;
       }
@@ -2299,7 +2299,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
   getLocalMatrix() {
     if (this._isLocalMatrixDirty) {
-      const v = this.attributeValues;
+      const v = this.values;
       const sX = v.zoom * v.scalex;
       const sY = v.zoom * v.scaley;
       pxl.Matrix.updateLocal(this._localMatrix, v.x, v.y, v.dx, v.dy, v.rotate, sX, sY, v.skewx, v.skewy);
@@ -2426,7 +2426,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     this.isDirty = true;
     // A hidden layer renders once more to clear its canvas, then stays idle. The current value, not the expression:
     // a reactive hidden is a function, which would keep the layer idle after it turned false.
-    if (this.attributeValues.hidden && this._isCanvasEmpty) return;
+    if (this.values.hidden && this._isCanvasEmpty) return;
     this.stage?.requestRender();
   }
 
@@ -2485,7 +2485,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     }
 
     // A hidden layer doesn't evaluate its children: their values that follow t stay as they are until it is shown
-    if (!this.attributeValues.hidden) {
+    if (!this.values.hidden) {
       for (let i = 0; i < this.childList.length; i++) {
         this.childList[i].update(t);
       }
@@ -2506,7 +2506,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     const isUpdated = this._updateFrame === pxl._frame;
     const hasChanged = (isUpdated && this._wasDirty) || this.isDirty;
 
-    const { alpha, blend, filter, hidden } = this.attributeValues;
+    const { alpha, blend, filter, hidden } = this.values;
 
     if (this._lastAlpha !== alpha) {
       this._canvas.style.opacity = alpha;
@@ -2554,14 +2554,14 @@ pxl.Layer = class Layer extends pxl.PxlNode {
 
     this._isCanvasEmpty = false;
 
-    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.attributeValues;
+    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.values;
     const hasTransformChanges = x || y || dx || dy || rotate ||
                                 zoom !== 1 || scalex !== 1 || scaley !== 1 ||
                                 skewx || skewy;
 
     if (hasTransformChanges) {
       ctx.save();
-      pxl.applyTransformState(ctx, u, this.attributeValues);
+      pxl.applyTransformState(ctx, u, this.values);
     }
     for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].render(ctx, u);
@@ -2587,8 +2587,8 @@ pxl.Group = class Group extends pxl.PxlNode {
     super();
     // Runtime state written by the interaction engine: true while a shape inside the group is hovered or pressed,
     // like :hover on a parent. Values (ref.<id>.isHovered), but not attributes
-    this.attributeValues.isHovered = false;
-    this.attributeValues.isPressed = false;
+    this.values.isHovered = false;
+    this.values.isPressed = false;
 
     this.childList = []; // groups and shapes
     this._isOrderDirty = false; // children need sorting by DOM position
@@ -2635,7 +2635,7 @@ pxl.Group = class Group extends pxl.PxlNode {
       return;
     }
 
-    if (this.attributeValues.hidden) return;
+    if (this.values.hidden) return;
     for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].update(t);
     }
@@ -2643,16 +2643,16 @@ pxl.Group = class Group extends pxl.PxlNode {
 
   // Draw phase, into the parent layer's canvas
   render(ctx, u) {
-    if (this._failedFrame === pxl._frame || this.attributeValues.hidden) return;
+    if (this._failedFrame === pxl._frame || this.values.hidden) return;
 
-    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.attributeValues;
+    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.values;
     const hasStateChanges = x || y || dx || dy || rotate ||
                             zoom !== 1 || scalex !== 1 || scaley !== 1 ||
                             skewx || skewy;
 
     if (hasStateChanges) {
       ctx.save();
-      pxl.applyTransformState(ctx, u, this.attributeValues);
+      pxl.applyTransformState(ctx, u, this.values);
     }
     for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].render(ctx, u);
@@ -2677,8 +2677,8 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   constructor() {
     super();
     // Runtime state written by the interaction engine, read as ref.<id>.isHovered: values, but not attributes
-    this.attributeValues.isHovered = false;
-    this.attributeValues.isPressed = false;
+    this.values.isHovered = false;
+    this.values.isPressed = false;
 
     this.stage = null; // set in connectedCallback
 
@@ -2726,14 +2726,14 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // themselves). The built-in shapes still multiply their lengths by draw()'s second argument, which is always 1.
   // draw() gets no time: time-dependent values are evaluated in update(), so the hit test sees what is drawn.
   render(ctx, u) {
-    if (this._failedFrame === pxl._frame || this.attributeValues.hidden) return;
+    if (this._failedFrame === pxl._frame || this.values.hidden) return;
     if (this.needsIsolation()) {
       this.renderIsolated(ctx, u);
       return;
     }
     ctx.save();
     try {
-      pxl.applyContextState(ctx, u, this.attributeValues, this);
+      pxl.applyContextState(ctx, u, this.values, this);
       ctx.scale(u, u);
       this.draw(ctx, 1);
     } catch (error) {
@@ -2752,7 +2752,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // State that acts on the whole shape. alpha is left out: fades are common and isolating them costs a frame time
   // the per-call result hardly shows (plan §6.1).
   hasCompositingState() {
-    const { mask, blend, filter, shadowcolor } = this.attributeValues;
+    const { mask, blend, filter, shadowcolor } = this.values;
     return mask !== 'none' || blend !== 'source-over' || filter !== 'none' ||
            (!!shadowcolor && shadowcolor !== 'none' && shadowcolor !== 'transparent');
   }
@@ -2774,7 +2774,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
   // Only lines, polylines, circles and ellipses have arrowstart
   hasArrowheads() {
-    const { arrowstart, arrowend, strokewidth } = this.attributeValues;
+    const { arrowstart, arrowend, strokewidth } = this.values;
     return arrowstart !== undefined && this.isStroked() &&
            (pxl.arrowSize(arrowstart, strokewidth) > 0 || pxl.arrowSize(arrowend, strokewidth) > 0);
   }
@@ -2800,7 +2800,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     ctx.save();
     try {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      pxl.applyCompositingState(ctx, u, this.attributeValues, this);
+      pxl.applyCompositingState(ctx, u, this.values, this);
       ctx.drawImage(scratch.canvas, 0, 0, w, h, 0, 0, w, h);
     } catch (error) {
       this.reportError(error);
@@ -2851,7 +2851,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // stroke, the corner of a square cap, arrowheads (only lines, polylines, circles and ellipses have arrowstart)
   hitPadding() {
     if (!this.isStroked()) return 0;
-    const { strokewidth, linejoin, miterlimit, linecap, arrowstart, arrowend } = this.attributeValues;
+    const { strokewidth, linejoin, miterlimit, linecap, arrowstart, arrowend } = this.values;
     let pad = strokewidth / 2 * (linejoin === 'miter' ? Math.max(1, miterlimit) : 1);
     if (linecap === 'square') pad = Math.max(pad, strokewidth * Math.SQRT1_2);
     if (arrowstart !== undefined) pad += Math.max(pxl.arrowSize(arrowstart, strokewidth), pxl.arrowSize(arrowend, strokewidth));
@@ -2865,7 +2865,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
     const box = this.getBoundingBox();
     const c = this._gradCache[slot];
-    const sw = this.attributeValues.strokewidth;
+    const sw = this.values.strokewidth;
 
     // Reuse while the descriptor, the unit, the bounding box and the stroke width are unchanged
     if (c.config === styleValue && c.u === u &&
@@ -2961,7 +2961,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // Sets all stroke-related context state (style, width, caps, joins, dash).
   // Shared by path-based shapes (via applyStyle) and non-path shapes like Text (strokeText).
   applyStrokeState(ctx, u = 1) {
-    const { stroke, strokewidth, linecap, linejoin, miterlimit } = this.attributeValues;
+    const { stroke, strokewidth, linecap, linejoin, miterlimit } = this.values;
 
     ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
 
@@ -2975,7 +2975,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
   // Dash pattern scaled by u; the scaled array is cached per (linedash, u)
   applyLineDash(ctx, u) {
-    const { linedash, dashoffset } = this.attributeValues;
+    const { linedash, dashoffset } = this.values;
     if (!pxl.hasLineDash(linedash)) {
       ctx.setLineDash(pxl._emptyDash);
       ctx.lineDashOffset = 0;
@@ -3003,18 +3003,18 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   hasFill() {
-    const { fill } = this.attributeValues;
+    const { fill } = this.values;
     return !!fill && fill !== 'none' && fill !== 'transparent';
   }
 
   isStroked() {
-    const { stroke, strokewidth } = this.attributeValues;
+    const { stroke, strokewidth } = this.values;
     return !!stroke && stroke !== 'none' && stroke !== 'transparent' && strokewidth > 0;
   }
 
   applyStyle(ctx, u = 1) {
     if (this.hasFill()) {
-      ctx.fillStyle = this.createGradient(ctx, u, this.attributeValues.fill, 0);
+      ctx.fillStyle = this.createGradient(ctx, u, this.values.fill, 0);
       ctx.fill();
     }
 
@@ -3031,7 +3031,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // Resolves one arrow end into distances along the path and writes them into the pre-allocated rec.
   // Returns true if this end has an arrowhead.
   resolveArrow(rec, attrValue, u) {
-    const { strokewidth, linecap, linejoin, arrowstyle } = this.attributeValues;
+    const { strokewidth, linecap, linejoin, arrowstyle } = this.values;
     const size = pxl.arrowSize(attrValue, strokewidth) * u;
 
     if (!(size > 0)) {
@@ -3082,7 +3082,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // Always the last call of a shape's draw(): it changes the miter limit, the dash and fillStyle without
   // resetting them, and render() restores the state afterwards.
   drawArrows(ctx, u, recA, recB) {
-    const isLine = this.attributeValues.arrowstyle === 'line';
+    const isLine = this.values.arrowstyle === 'line';
 
     ctx.beginPath();
     if (recA.size > 0) this.traceArrow(ctx, recA, isLine);
@@ -3094,7 +3094,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
       if (ctx.miterLimit < 4) ctx.miterLimit = 4;
 
       // Chevrons are always solid
-      if (pxl.hasLineDash(this.attributeValues.linedash)) ctx.setLineDash(pxl._emptyDash);
+      if (pxl.hasLineDash(this.values.linedash)) ctx.setLineDash(pxl._emptyDash);
       ctx.stroke();
     } else {
       ctx.fillStyle = ctx.strokeStyle;
@@ -3136,7 +3136,7 @@ pxl.Circle = class Circle extends pxl.Shape {
   }
 
   draw(ctx, u) {
-    const { r, ir, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.attributeValues;
+    const { r, ir, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.values;
 
     const safeR = Math.max(0, r);
     const safeIR = Math.max(0, ir);
@@ -3221,7 +3221,7 @@ pxl.Circle = class Circle extends pxl.Shape {
   }
 
   getBoundingBox() {
-    const { r } = this.attributeValues;
+    const { r } = this.values;
     this.boundingBox.left = -r;
     this.boundingBox.right = r;
     this.boundingBox.top = -r;
@@ -3245,7 +3245,7 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
   }
 
   draw(ctx, u) {
-    const { rx, ry, irx, iry, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.attributeValues;
+    const { rx, ry, irx, iry, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.values;
 
     const safeRX = Math.max(0, rx);
     const safeRY = Math.max(0, ry);
@@ -3345,7 +3345,7 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
   }
 
   getBoundingBox() {
-    const { rx, ry } = this.attributeValues;
+    const { rx, ry } = this.values;
     this.boundingBox.left = -rx;
     this.boundingBox.right = rx;
     this.boundingBox.top = -ry;
@@ -3364,7 +3364,7 @@ pxl.Rect = class Rect extends pxl.Shape {
   }
 
   draw(ctx, u) {
-    const { w, h, r, r1, r2, r3, r4, anchor } = this.attributeValues;
+    const { w, h, r, r1, r2, r3, r4, anchor } = this.values;
 
     const startX = -w * pxl.anchorX[anchor] * u;
     const startY = -h * pxl.anchorY[anchor] * u;
@@ -3396,7 +3396,7 @@ pxl.Rect = class Rect extends pxl.Shape {
   }
 
   getBoundingBox() {
-    const { w, h, anchor } = this.attributeValues;
+    const { w, h, anchor } = this.values;
     const ax = pxl.anchorX[anchor];
     const ay = pxl.anchorY[anchor];
 
@@ -3419,7 +3419,7 @@ pxl.Line = class Line extends pxl.Shape {
   }
 
   draw(ctx, u) {
-    const { x1, y1, x2, y2, arrowstart, arrowend } = this.attributeValues;
+    const { x1, y1, x2, y2, arrowstart, arrowend } = this.values;
     const startX = x1 * u, startY = y1 * u;
     const endX = x2 * u, endY = y2 * u;
 
@@ -3463,7 +3463,7 @@ pxl.Line = class Line extends pxl.Shape {
   }
 
   getBoundingBox() {
-    const { x1, y1, x2, y2 } = this.attributeValues;
+    const { x1, y1, x2, y2 } = this.values;
     this.boundingBox.left = Math.min(x1, x2);
     this.boundingBox.right = Math.max(x1, x2);
     this.boundingBox.top = Math.min(y1, y2);
@@ -3511,7 +3511,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   // flat, in a new array.
   get points() {
     const out = new Array(this._pointCount);
-    for (let i = 0; i < this._pointCount; i++) out[i] = this.attributeValues[this._pointKeys[i]];
+    for (let i = 0; i < this._pointCount; i++) out[i] = this.values[this._pointKeys[i]];
     return out;
   }
 
@@ -3542,7 +3542,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     }
     if (count !== this._pointCount) this.resizePoints(count);
 
-    const expressions = this.attributeExpressions;
+    const expressions = this.expressions;
     for (let i = 0; i < count; i++) {
       const key = this._pointKeys[i];
       const part = isPairs ? value[i >> 1][i & 1] : isArray ? value[i] : this._rawParts[i];
@@ -3551,7 +3551,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
       } else if (typeof expressions[key] !== 'function') {
         // A number over a value that is no expression: it is in none of the key lists, so it is just written
         expressions[key] = part;
-        this.attributeValues[key] = part;
+        this.values[key] = part;
       } else {
         pxl.storeValue(this, key, part);
       }
@@ -3571,8 +3571,8 @@ pxl.Polyline = class Polyline extends pxl.Shape {
       pxl.removeFromArray(this.animatedAttributeKeys, key);
       pxl.removeFromArray(this.reactiveAttributeKeys, key);
       pxl.removeFromArray(this.toLocalAttributeKeys, key);
-      delete this.attributeExpressions[key];
-      delete this.attributeValues[key];
+      delete this.expressions[key];
+      delete this.values[key];
     }
     for (let i = this._pointCount; i < count; i++) this._pointKeys[i] = `p${i}`;
     this._pointKeys.length = count;
@@ -3585,8 +3585,8 @@ pxl.Polyline = class Polyline extends pxl.Shape {
 
     if (!this.loadPoints(u)) return;
 
-    const { smooth, arrowstart, arrowend } = this.attributeValues;
-    const closed = this.attributeValues.closed === true;
+    const { smooth, arrowstart, arrowend } = this.values;
+    const closed = this.values.closed === true;
     const len = this._pointCount / 2;
 
     // Arrowheads only apply to open strokes
@@ -3630,12 +3630,12 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     const pts = this._flatCache;
     let probe = 0;
     for (let i = 0; i < this._pointCount; i++) {
-      pts[i] = this.attributeValues[this._pointKeys[i]] * u;
+      pts[i] = this.values[this._pointKeys[i]] * u;
       probe += pts[i] * 0;   // 0 for a finite value, NaN for NaN or ±Infinity
     }
     if (probe !== 0) return false;
 
-    if (this.attributeValues.mode === 'relative') {
+    if (this.values.mode === 'relative') {
       for (let i = 2; i < this._pointCount; i++) {
         pts[i] += pts[i - 2];
       }
@@ -3783,7 +3783,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   // the curve, and arrowheads are in hitPadding(). From the current values, like getBoundingBox(), so a shape
   // changed with setAttribute() is hit at its new place.
   getHitBox() {
-    const smooth = this.attributeValues.smooth;
+    const smooth = this.values.smooth;
     if (smooth === false || smooth === null || this._pointCount < 6) return this.getBoundingBox();
 
     const box = this._hitBox;
@@ -3799,7 +3799,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
       if (pts[i + 1] < minY) minY = pts[i + 1];
       if (pts[i + 1] > maxY) maxY = pts[i + 1];
     }
-    const len = this._pointCount / 2, closed = this.attributeValues.closed === true;
+    const len = this._pointCount / 2, closed = this.values.closed === true;
     const k3 = (typeof smooth === 'number' ? smooth : 1) / 3;
     const count = closed ? len : len - 1;
     for (let i = 0; i < count; i++) {
@@ -3856,11 +3856,11 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     }
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     let currentX = 0, currentY = 0;
-    const isRelative = this.attributeValues.mode === 'relative';
+    const isRelative = this.values.mode === 'relative';
 
     for (let i = 0; i < this._pointCount; i += 2) {
-      const px = this.attributeValues[this._pointKeys[i]];
-      const py = this.attributeValues[this._pointKeys[i + 1]];
+      const px = this.values[this._pointKeys[i]];
+      const py = this.values[this._pointKeys[i + 1]];
 
       if (isRelative && i > 0) {
         currentX += px;
@@ -3924,13 +3924,13 @@ pxl.Text = class Text extends pxl.Shape {
   // and compiling data would run it as code ('alert(1)') or fail on it ('Q1 - 2024'). Expressions stay available
   // through the attribute. Other values (numbers) go the usual way.
   get text() {
-    return this.attributeValues.text;
+    return this.values.text;
   }
 
   set text(value) {
     if (typeof value !== 'string') {
       this.setValue('text', value === undefined ? null : value);
-    } else if (value !== this.attributeExpressions.text) {
+    } else if (value !== this.expressions.text) {
       pxl.storeValue(this, 'text', value);
       this.valueChanged('text');
     }
@@ -3941,7 +3941,7 @@ pxl.Text = class Text extends pxl.Shape {
     const {
       text, size, font, align, baseline, weight, fontstyle, maxwidth,
       direction, width, lineheight, letterspacing, reveal
-    } = this.attributeValues;
+    } = this.values;
 
     this._hasInk = false;
 
@@ -4072,7 +4072,7 @@ pxl.Text = class Text extends pxl.Shape {
     const hasStroke = this.isStroked();
     if (!hasFill && !hasStroke) return;
 
-    if (hasFill) ctx.fillStyle = this.createGradient(ctx, u, this.attributeValues.fill, 0);
+    if (hasFill) ctx.fillStyle = this.createGradient(ctx, u, this.values.fill, 0);
     if (hasStroke) this.applyStrokeState(ctx, u);
 
     this._hasInk = true;
@@ -4105,7 +4105,7 @@ pxl.Text = class Text extends pxl.Shape {
   // Fill and stroke, or more than one line (one call per line). Decided from the attributes: the line count is only
   // known after the layout in draw(). A wrap width counts even if the text fits on one line.
   drawsMoreThanOnce() {
-    const { text, width } = this.attributeValues;
+    const { text, width } = this.values;
     return (this.hasFill() && this.isStroked()) || width > 0 ||
            (typeof text === 'string' && (text.includes('\n') || text.includes('\\n')));
   }
@@ -4119,7 +4119,7 @@ pxl.Text = class Text extends pxl.Shape {
     if (!this._hasInk) return; // nothing visible: empty text, reveal hides all, no fill and no stroke
 
     const b = this.boundingBox;
-    const pad = this.isStroked() ? this.attributeValues.strokewidth / 2 : 0;
+    const pad = this.isStroked() ? this.values.strokewidth / 2 : 0;
     ctx.rect((b.left - pad) * u, (b.top - pad) * u, (b.right - b.left + 2 * pad) * u, (b.bottom - b.top + 2 * pad) * u);
     ctx.fill(); // intercepted on pxl.dummyCtx (isPointInPath)
   }
@@ -4136,12 +4136,12 @@ pxl.Grid = class Grid extends pxl.Shape {
   static defaults = { ...pxl.Shape.defaults, step: 50, major: 0, labels: false, labelsize: 12 };
 
   draw(ctx, u) {
-    const { step, major, labels, labelsize, strokewidth } = this.attributeValues;
+    const { step, major, labels, labelsize, strokewidth } = this.values;
     if (step <= 0) return; // the line loops would never end
 
     // Visible area: the four stage corners mapped into the grid's own space
     const m = pxl.Matrix.invert(pxl._scratchMatrixA, this.getGlobalMatrix());
-    const w = this.stage.attributeValues.width, h = this.stage.attributeValues.height;
+    const w = this.stage.values.width, h = this.stage.values.height;
     const x0 = m[4], y0 = m[5];                                       // (0, 0)
     const x1 = m[0] * w + m[4], y1 = m[1] * w + m[5];                 // (w, 0)
     const x2 = m[2] * h + m[4], y2 = m[3] * h + m[5];                 // (0, h)
@@ -4201,7 +4201,7 @@ pxl.Grid = class Grid extends pxl.Shape {
     // Coordinates at the major intersections, in the fill color (or the stroke color without fill; neither: no labels)
     const hasFill = this.hasFill();
     if (labels && major > 0 && (hasFill || isStroked)) {
-      ctx.fillStyle = hasFill ? this.createGradient(ctx, u, this.attributeValues.fill, 0) : ctx.strokeStyle;
+      ctx.fillStyle = hasFill ? this.createGradient(ctx, u, this.values.fill, 0) : ctx.strokeStyle;
       ctx.font = `${labelsize * u}px monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -4223,7 +4223,7 @@ pxl.Grid = class Grid extends pxl.Shape {
 
   // Major lines are a second stroke (and bring the labels); a fill and a stroke are two calls too
   drawsMoreThanOnce() {
-    return this.attributeValues.major > 0 || (this.hasFill() && this.isStroked());
+    return this.values.major > 0 || (this.hasFill() && this.isStroked());
   }
 
   // Set in draw(): the visible area

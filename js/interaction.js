@@ -162,12 +162,12 @@ pxl.InteractionEngine = class InteractionEngine {
         this.stage.requestRender();
         return;
       case 'pointerenter':
-        this.stage.attributeValues.isHovered = true;
+        this.stage.values.isHovered = true;
         this._isMouseDirty = true;
         this.stage.requestRender();
         return;
       case 'pointerleave':
-        this.stage.attributeValues.isHovered = false;
+        this.stage.values.isHovered = false;
         this._isMouseDirty = true;
         this.stage.requestRender();
         return;
@@ -177,7 +177,7 @@ pxl.InteractionEngine = class InteractionEngine {
         const to = e.relatedTarget;
         if (isSecondary || !isFromCanvas || (to !== null && this.stage.contains(to))) return;
         this._native = e;
-        this.stage.attributeValues.isHovered = false;
+        this.stage.values.isHovered = false;
         this._isMouseDirty = true;
         this.hover(null);
         this.updateCursor();
@@ -260,7 +260,7 @@ pxl.InteractionEngine = class InteractionEngine {
   // Moves the stage's pointer (mouseX / mouseY) to the event; true if it changed
   setPointer(e, isFromCanvas) {
     if (!this.readPosition(e, isFromCanvas)) return false;
-    const values = this.stage.attributeValues;
+    const values = this.stage.values;
     if (values.mouseX === this._x && values.mouseY === this._y) return false;
     values.mouseX = this._x;
     values.mouseY = this._y;
@@ -286,8 +286,8 @@ pxl.InteractionEngine = class InteractionEngine {
   // --- States ---
 
   setState(node, key, value) {
-    if (node.attributeValues[key] === value) return;
-    node.attributeValues[key] = value;
+    if (node.values[key] === value) return;
+    node.values[key] = value;
     if (node.refKey) pxl.broadcast(node.refKey);
   }
 
@@ -500,7 +500,7 @@ pxl.InteractionEngine = class InteractionEngine {
     const layers = this.stage.layers;
     for (let i = layers.length - 1; i >= 0; i--) {
       const layer = layers[i];
-      if (layer.attributeValues.hidden) continue;
+      if (layer.values.hidden) continue;
       // A layer is a real box on the page: CSS can hide it (display, visibility). Few layers, so reading them costs
       // little. Its pointer-events is not checked here: the shapes inherit it, and a shape with pointer-events: auto
       // inside a layer with none is hit, as in the DOM. Shapes are only read when they could be hit.
@@ -516,7 +516,7 @@ pxl.InteractionEngine = class InteractionEngine {
     const children = container.childList;
     for (let i = children.length - 1; i >= 0; i--) {
       const child = children[i];
-      if (child.attributeValues.hidden) continue;
+      if (child.values.hidden) continue;
       if (child.childList !== null) {
         // A group (also a layer nested in a layer, which the engine doesn't really support)
         const hit = this.findShapeIn(child, x, y);
@@ -565,7 +565,7 @@ pxl.InteractionEngine = class InteractionEngine {
   // boundary events, and one move event on the shape under a moving pointer. Presses, releases and clicks are
   // handled when they arrive (handleEvent()). Touches no layer: only readers of a changed state redraw.
   process() {
-    const values = this.stage.attributeValues;
+    const values = this.stage.values;
     const isPointerChanged = this._isMouseDirty;
     if (isPointerChanged) {
       if (this.stage.refKey) pxl.broadcast(this.stage.refKey);

@@ -243,7 +243,7 @@
     function expectMapped(readerId, targetId, pairs) {
       const reader = el(readerId), target = pxl.nodes[targetId];
       for (const [attr, prop] of pairs) {
-        const stored = reader.attributeValues[attr];
+        const stored = reader.values[attr];
         const fresh = pxl.toLocal(reader, target, prop);
         if (!(Math.abs(stored - fresh) < 0.01)) {
           throw new Error(`${readerId}.${attr} is ${round(stored)}, toLocal(${targetId}, '${prop}') is ${round(fresh)}`);
@@ -502,12 +502,12 @@
       const poly = el('ecPoly');
       poly.removeAttribute('points');
       if (poly._pointCount !== 0) throw new Error(`pointCount is ${poly._pointCount}`);
-      if ('p0' in poly.attributeValues) throw new Error('p0 is still set');
+      if ('p0' in poly.values) throw new Error('p0 is still set');
     });
 
     test('stage: renderAvg / renderMax are strings from the start; toLocal(stage) is 0', () => {
       const stage = document.createElement('pxl-stage');
-      const { renderAvg, renderMax } = stage.attributeValues;
+      const { renderAvg, renderMax } = stage.values;
       if (renderAvg !== '0.00' || renderMax !== '0.00') throw new Error(`renderAvg ${JSON.stringify(renderAvg)}, renderMax ${JSON.stringify(renderMax)}`);
       const result = pxl.toLocal(el('ecTarget'), pxl.nodes.ecStage, 'x');
       if (result !== 0) throw new Error(`toLocal(stage) is ${result}`);
@@ -675,14 +675,14 @@
 
     test('text box: moving text with a static maxwidth never measures', () => {
       const stage = el('tbMovingStage'), text = el('tbMoving');
-      const first = text.attributeValues.dx;
+      const first = text.values.dx;
       let moved = false, t = 1;
       stage.resize();
       stage.render(t);
       const calls = countMeasureText(() => {
         for (let i = 0; i < 10; i++) {
           stage.render(t += 0.1);
-          if (text.attributeValues.dx !== first) moved = true;
+          if (text.values.dx !== first) moved = true;
         }
       });
       if (!moved) throw new Error('the text did not move');
@@ -895,7 +895,7 @@
       captureWarnings(() => srRender(1));
       if (!el('srLayerA').isDirty) throw new Error('the layer stopped asking for frames');
       srRender(3);
-      if (el('srLate').attributeValues.x !== 300) throw new Error(`x is ${el('srLate').attributeValues.x}`);
+      if (el('srLate').values.x !== 300) throw new Error(`x is ${el('srLate').values.x}`);
       const p = pixelAt('srLayerA', 300, 300);
       if (p[2] !== 255) throw new Error(`the circle is ${rgba(p)}`);
       srClear();
@@ -918,7 +918,7 @@
       srClear();
       srAdd('srLayerA', `<pxl-rect id="srHitTypo" x="100" y="100" w="60" h="60" fill="linear(0, ['red', 'blu'])" pxl-on-click="0"></pxl-rect>
         <pxl-rect id="srHitOk" x="300" y="100" w="60" h="60" fill="#00ff00" pxl-on-click="0"></pxl-rect>`);
-      const stage = el('srStage'), values = stage.attributeValues;
+      const stage = el('srStage'), values = stage.values;
       captureWarnings(() => {
         srRender(1);
         values.isHovered = true;
@@ -929,7 +929,7 @@
       if (pxl.dummyCtx.getTransform().toString() !== identity) throw new Error(`hit-test context left at ${pxl.dummyCtx.getTransform()}`);
       values.mouseX = 300; stage.interaction._isMouseDirty = true;
       stage.interaction.process();
-      const hovered = el('srHitOk').attributeValues.isHovered;
+      const hovered = el('srHitOk').values.isHovered;
       values.isHovered = false;
       stage.interaction.process();
       if (!hovered) throw new Error('the working shape was not hovered');
@@ -950,7 +950,7 @@
       srAdd('srLayerA', `<pxl-rect id="srThrowClick" x="100" y="100" w="60" h="60" fill="#ff0000"
           pxl-on-click="this.calls = (this.calls || 0) + 1; throw new Error('handler failed')"></pxl-rect>
         <pxl-rect id="srOtherClick" x="300" y="100" w="60" h="60" fill="#00ff00" pxl-on-click="this.calls = (this.calls || 0) + 1"></pxl-rect>`);
-      const stage = el('srStage'), values = stage.attributeValues, interaction = stage.interaction;
+      const stage = el('srStage'), values = stage.values, interaction = stage.interaction;
       srRender(1);
       values.isHovered = true;
       values.mouseX = 100; values.mouseY = 100; stage.interaction._isMouseDirty = true; // as a pointermove does
@@ -975,7 +975,7 @@
       srAdd('srLayerA', `<pxl-rect id="srThrowLeave" x="100" y="100" w="60" h="60" fill="#ff0000"
           pxl-on-leave="this.calls = (this.calls || 0) + 1; throw new Error('handler failed')"></pxl-rect>
         <pxl-rect id="srEnterAfter" x="300" y="100" w="60" h="60" fill="#00ff00" pxl-on-enter="this.calls = (this.calls || 0) + 1"></pxl-rect>`);
-      const stage = el('srStage'), values = stage.attributeValues, interaction = stage.interaction;
+      const stage = el('srStage'), values = stage.values, interaction = stage.interaction;
       srRender(1);
       values.isHovered = true;
       values.mouseX = 100; values.mouseY = 100; stage.interaction._isMouseDirty = true; // as a pointermove does
@@ -986,7 +986,7 @@
         interaction.process();
       });
       const calls = el('srThrowLeave').calls, enterCalls = el('srEnterAfter').calls;
-      const stillHovered = el('srThrowLeave').attributeValues.isHovered;
+      const stillHovered = el('srThrowLeave').values.isHovered;
       values.isHovered = false;
       interaction.process();
       if (calls !== 1) throw new Error(`pxl-on-leave ran ${calls} times for one leave`);
@@ -1017,7 +1017,7 @@
       ctx.save = function() { saves++; return save.call(this); };
       try { srRender(2); } finally { delete ctx.save; }
       if (saves !== 0) throw new Error(`${saves} save() calls for a hidden shape`);
-      if (el('srHiddenReader').attributeValues.text !== 200) throw new Error(`reader shows ${el('srHiddenReader').attributeValues.text}`);
+      if (el('srHiddenReader').values.text !== 200) throw new Error(`reader shows ${el('srHiddenReader').values.text}`);
       srClear();
     });
 
@@ -1027,8 +1027,8 @@
         <pxl-circle id="srBadReader" x="ref.srClock.value > 0.5 ? missingFunction() : 100" r="5"></pxl-circle>
         <pxl-circle id="srGoodReader" x="ref.srClock.value * 10" r="5"></pxl-circle>`);
       const warnings = captureWarnings(() => srRender(1));
-      if (el('srClock').attributeValues.value !== 1) throw new Error(`the variable is ${el('srClock').attributeValues.value}`);
-      if (el('srGoodReader').attributeValues.x !== 10) throw new Error(`the other reader is at ${el('srGoodReader').attributeValues.x}`);
+      if (el('srClock').values.value !== 1) throw new Error(`the variable is ${el('srClock').values.value}`);
+      if (el('srGoodReader').values.x !== 10) throw new Error(`the other reader is at ${el('srGoodReader').values.x}`);
       if (warnings.some((w) => w.includes('id="srClock"')) || !warnings.some((w) => w.includes('id="srBadReader"'))) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
       srClear();
     });
@@ -1226,7 +1226,7 @@
     });
 
     // A hidden layer with an empty canvas asks for no frames. It must check the current value of hidden: for a reactive
-    // hidden, attributeExpressions.hidden is the compiled function, which is always truthy, so the layer never came back
+    // hidden, expressions.hidden is the compiled function, which is always truthy, so the layer never came back
     // when nothing else asked for a frame (here: its source is outside the stage).
     test('layer hidden: a reactive hidden that turns false asks for a frame, also when its source is outside the stage', () =>
       withStage(`<pxl-var id="lhSource" value="1"></pxl-var>
@@ -1243,7 +1243,7 @@
           delete stage.requestRender;
         }
         stage.render(2);
-        const state = { hidden: layer.attributeValues.hidden, requests, alpha: alphaAt(layer, 500, 300) };
+        const state = { hidden: layer.values.hidden, requests, alpha: alphaAt(layer, 500, 300) };
         if (state.hidden !== false || requests === 0 || state.alpha === 0) throw new Error(JSON.stringify(state));
       }));
 
@@ -1442,7 +1442,7 @@
         } catch (e) { error = e; }
       });
       if (error) throw new Error(`setAttribute threw: ${error}`);
-      const a = el('rcA').attributeValues.value, b = el('rcB').attributeValues.value;
+      const a = el('rcA').values.value, b = el('rcB').values.value;
       if (!(a < 1000 && b < 1000)) throw new Error(`values ran away: a = ${a}, b = ${b}`);
       if (el('rcA')._broadcastNesting !== 0 || el('rcB')._broadcastNesting !== 0) throw new Error('broadcast nesting not reset');
       if (warnings.length !== 1 || !warnings[0].includes('never settles')) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
@@ -1455,7 +1455,7 @@
       srAdd('srLayerA', `<pxl-var id="rcHue" value="10"></pxl-var>
         <pxl-circle id="rcSelf" x="100" y="100" r="10" stroke="hsl(ref.rcHue.value, 100, 60)" shadowcolor="ref.rcSelf.stroke"></pxl-circle>`);
       const warnings = captureWarnings(() => el('rcHue').setAttribute('value', '200'));
-      const { stroke, shadowcolor } = el('rcSelf').attributeValues;
+      const { stroke, shadowcolor } = el('rcSelf').values;
       if (shadowcolor !== stroke) throw new Error(`shadowcolor ${shadowcolor} lags behind stroke ${stroke}`);
       if (warnings.length !== 0) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
       srClear();
@@ -1466,8 +1466,8 @@
       srAdd('srLayerA', `<pxl-var id="rcC" value="5"></pxl-var>
         <pxl-var id="rcD" value="ref.rcC.value"></pxl-var>`);
       const warnings = captureWarnings(() => el('rcC').setAttribute('value', 'ref.rcD.value'));
-      if (el('rcC').attributeValues.value !== 5 || el('rcD').attributeValues.value !== 5) {
-        throw new Error(`c = ${el('rcC').attributeValues.value}, d = ${el('rcD').attributeValues.value}`);
+      if (el('rcC').values.value !== 5 || el('rcD').values.value !== 5) {
+        throw new Error(`c = ${el('rcC').values.value}, d = ${el('rcD').values.value}`);
       }
       if (warnings.length !== 0) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
       srClear();
@@ -1478,9 +1478,9 @@
       srAdd('srLayerA', `<pxl-var id="rcFollow" value="ref.rcFollow.value + (100 - ref.rcFollow.value) * 0.1 + t * 0"></pxl-var>`);
       srRender(1);
       for (let i = 0; i < 3; i++) {
-        const before = el('rcFollow').attributeValues.value;
+        const before = el('rcFollow').values.value;
         srRender(1 + (i + 1) / 60);
-        const after = el('rcFollow').attributeValues.value;
+        const after = el('rcFollow').values.value;
         if (Math.abs(after - (before + (100 - before) * 0.1)) > 1e-9) throw new Error(`step ${i}: ${before} → ${after}`);
       }
       srClear();
@@ -1498,7 +1498,7 @@
         } catch (e) { error = e; }
       });
       if (error) throw new Error(`threw: ${error}`);
-      const a = el('rcTlA').attributeValues.x, b = el('rcTlB').attributeValues.x;
+      const a = el('rcTlA').values.x, b = el('rcTlB').values.x;
       if (!(a < 5000 && b < 5000)) throw new Error(`values ran away: a = ${a}, b = ${b}`);
       if (!warnings.some((w) => w.includes('never settles'))) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
       srClear();
@@ -1514,10 +1514,10 @@
       html += `<pxl-var id="rcSum" value="${sum}"></pxl-var>`;
       srAdd('srLayerA', html);
       const warnings = captureWarnings(() => el('rcCh0').setAttribute('value', '1000'));
-      const end = el('rcCh150').attributeValues.value;
+      const end = el('rcCh150').values.value;
       if (end !== 1150) throw new Error(`chain end = ${end}, expected 1150`);
       const expectedSum = 150 * 1000 + 150 * 151 / 2;
-      if (el('rcSum').attributeValues.value !== expectedSum) throw new Error(`sum = ${el('rcSum').attributeValues.value}, expected ${expectedSum}`);
+      if (el('rcSum').values.value !== expectedSum) throw new Error(`sum = ${el('rcSum').values.value}, expected ${expectedSum}`);
       if (warnings.length !== 0) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
       srClear();
     });
@@ -1532,7 +1532,7 @@
       srAdd('srLayerB', '<pxl-circle id="svReaderB" x="ref.svHue.value * 2" y="50" r="5"></pxl-circle>');
       srAdd('srStage', '<pxl-var id="svHue" value="t * 10"></pxl-var>');
       srRender(2);
-      const v = el('svHue').attributeValues.value, a = el('svReaderA').attributeValues.x, b = el('svReaderB').attributeValues.x;
+      const v = el('svHue').values.value, a = el('svReaderA').values.x, b = el('svReaderB').values.x;
       if (v !== 20 || a !== 20 || b !== 40) throw new Error(`value ${v}, reader A ${a}, reader B ${b}`);
       srClear();
     });
@@ -1555,7 +1555,7 @@
       const calls = countRenderRequests(() => el('svStart').setAttribute('value', 't * 2'));
       if (calls === 0) throw new Error('no frame requested');
       srRender(5);
-      if (el('svStart').attributeValues.value !== 10) throw new Error(`value ${el('svStart').attributeValues.value}`);
+      if (el('svStart').values.value !== 10) throw new Error(`value ${el('svStart').values.value}`);
       srClear();
     });
 
@@ -1567,7 +1567,7 @@
       el('srLayerA').appendChild(variable);
       if (stage._variables.includes(variable) || variable.stage !== null) throw new Error('still registered after moving into a layer');
       srRender(7);
-      if (variable.attributeValues.value !== 7) throw new Error(`the layer did not evaluate it: ${variable.attributeValues.value}`);
+      if (variable.values.value !== 7) throw new Error(`the layer did not evaluate it: ${variable.values.value}`);
       stage.appendChild(variable);
       if (!stage._variables.includes(variable)) throw new Error('not registered after moving back');
       variable.remove();
@@ -1585,7 +1585,7 @@
       stage.perfMax = 4;
       pxl.perf._lastPublish = performance.now() - 2000; // a timer that fired a second late
       pxl.perf.publish();
-      const { fps, renderAvg, renderMax } = stage.attributeValues;
+      const { fps, renderAvg, renderMax } = stage.values;
       if (fps !== 15 || renderAvg !== '2.00' || renderMax !== '4.00') throw new Error(`fps ${fps}, renderAvg ${renderAvg}, renderMax ${renderMax}`);
     });
 
@@ -1618,7 +1618,7 @@
     function recordDrawn(id, key) {
       const node = el(id), original = node.render;
       node.drawn = [];
-      node.render = function(...args) { const r = original.apply(this, args); node.drawn.push(node.attributeValues[key]); return r; };
+      node.render = function(...args) { const r = original.apply(this, args); node.drawn.push(node.values[key]); return r; };
     }
     // Clears of a layer's canvas while fn runs
     function countClears(layerId, fn) {
@@ -1843,7 +1843,7 @@
         const rect = stage.getBoundingClientRect();
         for (const [px, py] of [[100, 50], [400, 200]]) {
           canvas.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, composed: true, clientX: rect.left + px, clientY: rect.top + py }));
-          const { mouseX, mouseY } = stage.attributeValues;
+          const { mouseX, mouseY } = stage.values;
           if (Math.abs(mouseX * stage.unit - px) > 0.01 || Math.abs(mouseY * stage.unit - py) > 0.01) {
             throw new Error(`pointer at ${px}, ${py} px: mouse ${round(mouseX * stage.unit)}, ${round(mouseY * stage.unit)} px`);
           }
@@ -1872,12 +1872,12 @@
     }
     // The pointer enters the stage and moves to (x, y); the next frame hit-tests at its start, then draws
     function hover(stage, x, y) {
-      if (!stage.attributeValues.isHovered) stage.dispatchEvent(new PointerEvent('pointerenter'));
+      if (!stage.values.isHovered) stage.dispatchEvent(new PointerEvent('pointerenter'));
       pointerAt(stage, 'pointermove', x, y);
       stage.render(1);
     }
     function input(stage, type) {
-      pointerAt(stage, type, stage.attributeValues.mouseX, stage.attributeValues.mouseY);
+      pointerAt(stage, type, stage.values.mouseX, stage.values.mouseY);
       stage.render(1);
     }
     function leaveStage(stage) {
@@ -2169,7 +2169,7 @@
         <pxl-circle id="ixGoneReader" x="50" y="50" r="5" fill="ref.ixGone.isHovered ? '#f00' : '#00f'"></pxl-circle>`), (stage) => {
         hover(stage, 500, 300);
         input(stage, 'pointerdown');
-        const shape = el('ixGone'), values = shape.attributeValues;
+        const shape = el('ixGone'), values = shape.values;
         const before = `${values.isHovered},${values.isPressed}`;
         shape.remove();
         stage.render(2);
@@ -2309,7 +2309,7 @@
         recordDrawn('ixPtrDot', 'x');
         for (const x of [200, 700, 300]) {
           hover(stage, x, 300);
-          const mouseX = stage.attributeValues.mouseX, line = el('ixPtrLine').drawn.at(-1), dot = el('ixPtrDot').drawn.at(-1);
+          const mouseX = stage.values.mouseX, line = el('ixPtrLine').drawn.at(-1), dot = el('ixPtrDot').drawn.at(-1);
           if (Math.abs(mouseX - x) > 1 || line !== mouseX || dot !== mouseX) {
             throw new Error(`pointer moved to ${x} (mouseX ${mouseX}): line drawn from ${line}, dot drawn at ${dot}`);
           }
@@ -2466,7 +2466,7 @@
       try {
         await new Promise((resolve) => frame.addEventListener('load', resolve));
         const w = frame.contentWindow;
-        const x = w.document.getElementById('b').attributeValues.x;
+        const x = w.document.getElementById('b').values.x;
         const loadedTwice = w.warnings.filter((m) => m.includes('already loaded')).length;
         if (w.pxl !== w.first || w.errors.length || x !== 41 || loadedTwice !== 1) {
           throw new Error(`pxl replaced ${w.pxl !== w.first}, ${w.errors.length} errors, reader ${x}, ${loadedTwice} "already loaded" warnings`);

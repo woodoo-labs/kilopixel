@@ -26,7 +26,7 @@ const stage = document.querySelector('pxl-stage')!;
 stage.ratio = 2;
 stage.alwaysrender = true;
 const ratio: number = stage.ratio;
-const mouseX: unknown = stage.attributeValues.mouseX;
+const mouseX: unknown = stage.values.mouseX;
 
 const variable = document.createElement('pxl-var');
 variable.value = [1, 2, 3];

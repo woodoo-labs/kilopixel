@@ -377,6 +377,7 @@ No special dirty logic is needed. The clip redraws every frame along with its pa
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-21: `design/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; `render(ctx, u, t)` and `draw(ctx, u, t)` with `* u` here are the old form.
 - 2026-11-20: `design/2026-11-20_custom_shapes_plan.md` dropped `path()` again (one template, `draw(ctx)`); a path-only method would have to come back with this plan.
 - 2026-11-20: `design/2026-11-20_custom_shapes_plan.md` proposes `path(ctx)`, a path-only method for shapes: what this plan needed as `buildPath()`.

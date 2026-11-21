@@ -45,7 +45,7 @@ window.smokeHelpers = (() => {
     }));
   }
   function hover(stage, x, y) {
-    if (!stage.attributeValues.isHovered) stage.dispatchEvent(new PointerEvent('pointerenter'));
+    if (!stage.values.isHovered) stage.dispatchEvent(new PointerEvent('pointerenter'));
     pointerAt(stage, 'pointermove', x, y);
     stage.render(performance.now() / 1000);
   }
@@ -79,15 +79,15 @@ window.registerSceneChecks = function() {
     expect(a().id !== b.id && pxl.nodes[`${a().id}sun`] && pxl.nodes[`${b.id}sun`], `${a().id} / ${b.id}`);
   });
   test('r is a number property, no attribute written', () =>
-    expect(sun().attributeValues.r === 60 && !sun().hasAttribute('r'), `r ${sun().attributeValues.r}, attribute ${sun().getAttribute('r')}`));
+    expect(sun().values.r === 60 && !sun().hasAttribute('r'), `r ${sun().values.r}, attribute ${sun().getAttribute('r')}`));
   test('ratio 2 and alwaysrender true on the stage', () =>
     expect(stage().ratio === 2 && stage().alwaysrender === true, `ratio ${stage().ratio}, alwaysrender ${stage().alwaysrender}`));
   test('linedash [20, 10] stays an array', () => {
-    const dash = el(`${a().id}dash`).attributeValues.linedash;
+    const dash = el(`${a().id}dash`).values.linedash;
     expect(Array.isArray(dash) && dash.join(',') === '20,10', JSON.stringify(dash));
   });
   test('text "alert(1)" is shown as text, not run', () =>
-    expect(label().attributeValues.text === 'alert(1)', JSON.stringify(label().attributeValues.text)));
+    expect(label().values.text === 'alert(1)', JSON.stringify(label().values.text)));
   test('expression strings animate (moon x, y)', () => expect(el(`${a().id}moon`)?.isAnimated === true, 'not animated'));
   test('points as pairs from state', () => {
     const points = el(`${a().id}chart`).points.join(',');
@@ -96,21 +96,21 @@ window.registerSceneChecks = function() {
   test('changing state updates the property (r 60 → 90)', async () => {
     a().set.r(90);
     await settle();
-    expect(sun().attributeValues.r === 90, `r ${sun().attributeValues.r}`);
+    expect(sun().values.r === 90, `r ${sun().values.r}`);
   });
   test('120 color changes through state compile nothing', async () => {
     const before = cacheSize();
     for (let h = 0; h < 120; h++) { a().set.hue(h * 3); await settle(); }
-    expect(cacheSize() === before, `cache ${before} → ${cacheSize()}, fill ${sun().attributeValues.fill}`);
+    expect(cacheSize() === before, `cache ${before} → ${cacheSize()}, fill ${sun().values.fill}`);
   });
   test('new points, dash and label from state', async () => {
     a().set.data([[100, 300], [500, 100], [900, 300]]);
     a().set.dash([5, 5]);
     a().set.label('Q1 - 2024');
     await settle();
-    const points = el(`${a().id}chart`).points.join(','), dash = el(`${a().id}dash`).attributeValues.linedash;
-    expect(points === '100,300,500,100,900,300' && dash.join(',') === '5,5' && label().attributeValues.text === 'Q1 - 2024',
-      `points ${points}, dash ${dash}, label ${label().attributeValues.text}`);
+    const points = el(`${a().id}chart`).points.join(','), dash = el(`${a().id}dash`).values.linedash;
+    expect(points === '100,300,500,100,900,300' && dash.join(',') === '5,5' && label().values.text === 'Q1 - 2024',
+      `points ${points}, dash ${dash}, label ${label().values.text}`);
   });
 
   section(`Events in ${window.smoke.framework}'s syntax (W1)`);
@@ -141,7 +141,7 @@ window.registerSceneChecks = function() {
     expect(state().buttonHovered === true && cursor === 'pointer', `${show()}, canvas cursor "${cursor}"`);
   });
   test('the rect\'s fill follows the hover state (a re-render)', () => {
-    const fill = el(`${a().id}button`).querySelector('pxl-rect').attributeValues.fill;
+    const fill = el(`${a().id}button`).querySelector('pxl-rect').values.fill;
     expect(fill === '#2563eb', fill);
   });
   test('a click handler on a group runs for a click on its rect', async () => {

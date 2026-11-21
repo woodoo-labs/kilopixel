@@ -71,7 +71,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     this.isDirty = true;
     // A hidden layer renders once more to clear its canvas, then stays idle. The current value, not the expression:
     // a reactive hidden is a function, which would keep the layer idle after it turned false.
-    if (this.attributeValues.hidden && this._isCanvasEmpty) return;
+    if (this.values.hidden && this._isCanvasEmpty) return;
     this.stage?.requestRender();
   }
 
@@ -130,7 +130,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     }
 
     // A hidden layer doesn't evaluate its children: their values that follow t stay as they are until it is shown
-    if (!this.attributeValues.hidden) {
+    if (!this.values.hidden) {
       for (let i = 0; i < this.childList.length; i++) {
         this.childList[i].update(t);
       }
@@ -151,7 +151,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     const isUpdated = this._updateFrame === pxl._frame;
     const hasChanged = (isUpdated && this._wasDirty) || this.isDirty;
 
-    const { alpha, blend, filter, hidden } = this.attributeValues;
+    const { alpha, blend, filter, hidden } = this.values;
 
     if (this._lastAlpha !== alpha) {
       this._canvas.style.opacity = alpha;
@@ -199,14 +199,14 @@ pxl.Layer = class Layer extends pxl.PxlNode {
 
     this._isCanvasEmpty = false;
 
-    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.attributeValues;
+    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.values;
     const hasTransformChanges = x || y || dx || dy || rotate ||
                                 zoom !== 1 || scalex !== 1 || scaley !== 1 ||
                                 skewx || skewy;
 
     if (hasTransformChanges) {
       ctx.save();
-      pxl.applyTransformState(ctx, u, this.attributeValues);
+      pxl.applyTransformState(ctx, u, this.values);
     }
     for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].render(ctx, u);
