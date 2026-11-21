@@ -113,11 +113,7 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
 
   getBoundingBox() {
     const { rx, ry } = this.values;
-    this.boundingBox.left = -rx;
-    this.boundingBox.right = rx;
-    this.boundingBox.top = -ry;
-    this.boundingBox.bottom = ry;
-    return this.boundingBox;
+    return this.setBoundingBox(-rx, -ry, rx, ry);
   }
 };
-customElements.define('pxl-ellipse', pxl.Ellipse);
+pxl.defineShape('pxl-ellipse', pxl.Ellipse);

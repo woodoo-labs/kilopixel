@@ -7,7 +7,7 @@ pxl.Variable = class Variable extends pxl.PxlNode {
     this.stage = null;
   }
 
-  // display: none comes from pxl.DEFAULT_STYLES
+  // display: none comes from pxl.defaultStyles()
   connectedCallback() {
     super.connectedCallback();
     if (!this.parentLayer) {

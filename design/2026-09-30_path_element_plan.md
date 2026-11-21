@@ -367,6 +367,7 @@ const files = [
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-21: `design/2026-11-20_custom_shapes_plan.md` step 5 built: shapes are defined with `pxl.defineShape(tag, Class)` and write their box with `setBoundingBox(left, top, right, bottom)`; the four `boundingBox` assignments in §5.1 are the old form.
 - 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-21: `design/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; `Path.draw(ctx, u, t)` with its `* u` in §5.1 is the old form.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.

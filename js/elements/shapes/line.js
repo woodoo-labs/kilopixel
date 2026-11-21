@@ -53,11 +53,7 @@ pxl.Line = class Line extends pxl.Shape {
 
   getBoundingBox() {
     const { x1, y1, x2, y2 } = this.values;
-    this.boundingBox.left = Math.min(x1, x2);
-    this.boundingBox.right = Math.max(x1, x2);
-    this.boundingBox.top = Math.min(y1, y2);
-    this.boundingBox.bottom = Math.max(y1, y2);
-    return this.boundingBox;
+    return this.setBoundingBox(Math.min(x1, x2), Math.min(y1, y2), Math.max(x1, x2), Math.max(y1, y2));
   }
 };
-customElements.define('pxl-line', pxl.Line);
+pxl.defineShape('pxl-line', pxl.Line);

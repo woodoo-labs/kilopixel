@@ -372,13 +372,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   }
 
   getBoundingBox() {
-    if (this._pointCount < 4) {
-      this.boundingBox.left = 0;
-      this.boundingBox.right = 0;
-      this.boundingBox.top = 0;
-      this.boundingBox.bottom = 0;
-      return this.boundingBox;
-    }
+    if (this._pointCount < 4) return this.setBoundingBox(0, 0, 0, 0);
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     let currentX = 0, currentY = 0;
     const isRelative = this.values.mode === 'relative';
@@ -400,11 +394,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
       if (currentY < minY) minY = currentY;
       if (currentY > maxY) maxY = currentY;
     }
-    this.boundingBox.left = minX;
-    this.boundingBox.right = maxX;
-    this.boundingBox.top = minY;
-    this.boundingBox.bottom = maxY;
-    return this.boundingBox;
+    return this.setBoundingBox(minX, minY, maxX, maxY);
   }
 };
-customElements.define('pxl-polyline', pxl.Polyline);
+pxl.defineShape('pxl-polyline', pxl.Polyline);

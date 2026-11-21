@@ -7,26 +7,40 @@ pxl._frame = 0;
 // :state(fallback): see Stage.markFallbackWidth().
 // Shapes and groups draw on the canvas, not as elements: content written inside them (<pxl-text>{label}</pxl-text>
 // in JSX) would otherwise appear as page text through the layer's <slot>. Content placed directly in a layer
-// (accessible text, buttons) stays visible.
+// (accessible text, buttons) stays visible. The shape tags come from pxl.defineShape(), built-in and custom alike.
 // The grid is out of hit testing: it covers the whole stage and would catch the pointer between its lines
 // (design/done/2026-10-30_framework_compatibility_plan.md §23, E4). A page can set pointer-events: auto on it.
 // Click and press handlers show the hand, like the browser's own rule for links (E1); the shapes inside a group
 // inherit it. The cursor is otherwise only CSS: a framework listener gets the hand from cursor: pointer.
-pxl.DEFAULT_STYLES = `@layer pxl {
+pxl.defaultStyles = function() {
+  return `@layer pxl {
   pxl-stage { display: block; position: relative; width: 100%; }
   pxl-stage:state(fallback) { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0; }
-  pxl-var, pxl-group, pxl-circle, pxl-ellipse, pxl-rect, pxl-line, pxl-polyline, pxl-text, pxl-grid { display: none; }
+  ${['pxl-var', 'pxl-group', ...pxl._shapeTags].join(', ')} { display: none; }
   pxl-grid { pointer-events: none; }
   [pxl-on-click], [pxl-on-down], [pxl-on-up] { cursor: pointer; }
 }`;
+};
+
+// The tags defined by pxl.defineShape(), and every <style data-pxl> written so far
+pxl._shapeTags = [];
+pxl._styleElements = [];
 
 // Once per document, and once per shadow root that holds a stage (document styles don't reach into it)
 pxl.addDefaultStyles = function(root) {
   if (root.querySelector('style[data-pxl]')) return;
   const style = document.createElement('style');
   style.setAttribute('data-pxl', '');
-  style.textContent = pxl.DEFAULT_STYLES;
+  style.textContent = pxl.defaultStyles();
   (root === document ? document.head : root).prepend(style);
+  pxl._styleElements.push(style);
+};
+
+// A shape tag defined later (a custom shape's script) is hidden in every style written so far, too
+pxl.hideShapeTag = function(tag) {
+  pxl._shapeTags.push(tag);
+  const text = pxl.defaultStyles();
+  for (let i = 0; i < pxl._styleElements.length; i++) pxl._styleElements[i].textContent = text;
 };
 
 pxl.addDefaultStyles(document);
@@ -145,7 +159,7 @@ pxl.Stage = class Stage extends HTMLElement {
     }
     this._isRegistered = true;
 
-    // display, position and width come from pxl.DEFAULT_STYLES; the aspect ratio stays inline, because the
+    // display, position and width come from pxl.defaultStyles(); the aspect ratio stays inline, because the
     // coordinate system depends on it
     const root = this.getRootNode();
     if (root instanceof ShadowRoot) pxl.addDefaultStyles(root);

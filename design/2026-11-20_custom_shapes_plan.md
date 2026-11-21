@@ -1,6 +1,6 @@
 # Custom Shapes and Element Structure
 
-- **Status**: 🟡 **Proposed** (2026-11-21, steps 2–4 built (§12–§14): lists from `defaults`, logical units phase 1, `values`; D2–D4 decided; Safari test and D5–D9 open)
+- **Status**: 🟡 **Proposed** (2026-11-21, steps 2–5 built (§12–§15): the template works; docs (step 6), the Safari test and D5, D7–D9 open)
 - **Date**: 2026-11-20
 - **Replaces**: `design/archive/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`, `draw()` without `t`, custom animation patterns, verified 2026-10-17 and 2026-11-07) and the structure cleanup draft of 2026-11-20 (`scratch/2026-11-20_engine_structure_cleanup_plan.md` (not kept); its steps and measurements are §6 here)
 - **Related**: `design/2026-11-20_evaluation_model_plan.md` (step 2 makes "`draw()` only reads values" a contract), `design/2026-10-19_polygon_star_shape_plan.md` (the first new shape in this form), `design/done/2026-11-01_isolated_shape_compositing_plan.md` (`drawsMoreThanOnce()`), `design/done/2026-11-07_safe_shape_render_plan.md` (a careless shape can't break the layer), `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked), `design/2026-10-30_space_attribute_plan.md` (with step 6.6)
@@ -161,7 +161,7 @@ From the shape authoring plan §3.3: the 7 shape signatures, `Shape.render()`, `
 
 **Decided 2026-11-21: `pxl.defineShape(tag, Class)`**, in a script after `pxl.min.js`. The two options as weighed:
 
-- **`pxl.defineShape(tag, Class)`** (chosen) for built-in and custom shapes alike: `customElements.define()` plus a `tag { display: none; }` rule in the default styles (the mechanism used today, so content inside a shape never shows), the checks at define time (uppercase keys, no `draw()`, no `getBoundingBox()`), and a warning instead of the browser's `NotSupportedError` when a script is loaded twice. The hand-written tag list in `pxl.DEFAULT_STYLES` goes.
+- **`pxl.defineShape(tag, Class)`** (chosen) for built-in and custom shapes alike: `customElements.define()` plus a `tag { display: none; }` rule in the default styles (the mechanism used today, so content inside a shape never shows), the checks at define time (uppercase keys, no `draw()`, no `getBoundingBox()`), and a warning instead of the browser's `NotSupportedError` when a script is loaded twice. The hand-written tag list in `pxl.DEFAULT_STYLES` goes. *2026-11-21: built (§15); `pxl-var` and `pxl-group` stay in the default styles, since they aren't shapes.*
 - **Plain `customElements.define()`** (not chosen: the slot assignment is more code and unproven, while the CSS rule works today): nothing Kilopixel-specific to learn. The engine then hides content without a tag list: the layer's shadow root uses manual slot assignment (`slotAssignment: 'manual'`) and assigns to its `<slot>` only children that aren't Kilopixel elements, re-assigning when children change or upgrade (Chrome 86, Firefox 92, Safari 16.4); the checks run once per class at the first instance. To prototype: assigning on pages with thousands of shapes, and a tag defined late.
 
 ### 5.6 `values` and `expressions`
@@ -170,7 +170,7 @@ From the shape authoring plan §3.3: the 7 shape signatures, `Shape.render()`, `
 
 ### 5.7 Box Helper and Warnings
 
-`setBoundingBox(left, top, right, bottom)` writes `this.boundingBox` and returns it. The base `getBoundingBox()` no longer warns on every call (§5.5 warns once per class).
+`setBoundingBox(left, top, right, bottom)` writes `this.boundingBox` and returns it. The base `getBoundingBox()` no longer warns on every call (§5.5 warns once per class). *2026-11-21: built (§15).*
 
 ### 5.8 Fields
 
@@ -219,7 +219,7 @@ From the cleanup draft of 2026-11-20. **Not part of the custom-shape steps (§9)
 2. §5.1 and §5.2 (derived attribute lists and presence attributes; `isHovered` / `isPressed` out of `defaults`; `points: ''`). Built 2026-11-21 (§12), `points` without a default.
 3. §5.3 phase 1 and §5.4: the calling convention, `draw(ctx)` without `t`. Built 2026-11-21 (§13).
 4. §5.6 rename, if decided (D4). Built 2026-11-21 (§14).
-5. §5.5 and §5.7: defining the tag, `setBoundingBox()`, `paint()`, the checks once per class; the Star and the Gauge as tests, loaded as a second script.
+5. §5.5 and §5.7: defining the tag, `setBoundingBox()`, `paint()`, the checks once per class; the Star and the Gauge as tests, loaded as a second script. Built 2026-11-21 (§15).
 6. Docs (§8), KILOPIXEL.md and ENGINE.md.
 7. `<pxl-polygon>` (`design/2026-10-19_polygon_star_shape_plan.md`) as the first new shape in this form.
 8. Later: §5.3 phase 2; the structure cleanup (§6), discussed separately; §6.6 waits for `space`.
@@ -252,7 +252,7 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 | D3 | Defining the tag: `pxl.defineShape()` for all shapes, or plain `customElements.define()` (§5.5) | **decided 2026-11-21**: `pxl.defineShape()` (the proven CSS rule hides content, checks run at define time) |
 | D4 | Rename `attributeValues` → `values`, `attributeExpressions` → `expressions` | **decided and built 2026-11-21** (§14) |
 | D5 | Class fields for built-ins | no: the engine keeps constructors; authors choose |
-| D6 | The public helpers of §4 (`applyStyle`, `applyStrokeState`, `paint`, `hasFill`, `isStroked`, `setBoundingBox`) | yes; arrowheads stay internal (§5.9) |
+| D6 | The public helpers of §4 (`applyStyle`, `applyStrokeState`, `paint`, `hasFill`, `isStroked`, `setBoundingBox`) | **decided and built 2026-11-21** (§15); arrowheads stay internal (§5.9) |
 | D7 | The transform path (§6.6) | with `space`, not alone (the cleanup is discussed separately) |
 | D8 | Typings for custom shapes | a declaration to copy on the docs page; generated typings later |
 | D9 | Internal animated values (§5.9) | after the evaluation model |
@@ -305,10 +305,32 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 
 **Size:** `pxl.min.js` 72,805 → 71,806 bytes (−1.0 KB; estimated −0.8 KB).
 
+## 15. Step 5 Built (2026-11-21)
+
+**What changed** (§5.5, §5.7):
+
+- `js/elements/shape.js`: `pxl.defineShape(tag, Class)` warns once per class at define time (a `defaults` key with capitals, moved here from step 2; no `draw()`; no own `getBoundingBox()`), warns instead of throwing when the tag is already defined (a script loaded twice), then calls `pxl.hideShapeTag()` and `customElements.define()`. `setBoundingBox(left, top, right, bottom)` writes the box and returns it. `paint(ctx, 'fill' | 'stroke')` returns the attribute as a canvas style through the gradient cache. The base `getBoundingBox()` returns an empty box without a warning.
+- `js/elements/stage.js`: `pxl.DEFAULT_STYLES` became `pxl.defaultStyles()`, which builds the `display: none` rule from `pxl-var`, `pxl-group` and `pxl._shapeTags`. `pxl.addDefaultStyles()` keeps each `<style data-pxl>` in `pxl._styleElements`; `pxl.hideShapeTag(tag)` adds the tag and rewrites them, so a shape defined later is hidden in shadow roots written before it too.
+- The 7 built-in shapes call `pxl.defineShape()`; circle, ellipse, rect, line, polyline and grid write their box with `setBoundingBox()` (text writes its box in parts and keeps that).
+
+**Deviations and decisions:**
+
+- `pxl-var` and `pxl-group` stay in the default styles' rule: they aren't shapes and keep `customElements.define()`.
+- The Gauge's box (§3, `template/gauge.js`) leaves out the stroke, like the built-in shapes: gradients span the shape, and the stroke is added by `hitPadding()` and, for its own hit area, in its `hitTest()`.
+- Content inside a custom shape tag shows until its script has defined the tag (the tag isn't known before; accepted).
+- D6 decided with the build.
+
+**Tests:** `tests/shapes/star.js` and `tests/shapes/gauge.js`, written with the real API, are loaded as a second script by `tests/index.html` and `tests/render.html`. `tests/index.html`, section "Custom shapes": both defined with their attributes; hits along the Star's outline and on the Gauge's half disc through `hitTest()`; the bare `ticks`; the Star's `drawsMoreThanOnce()` deciding isolation with `mask`; `setBoundingBox()` returning the own box; `paint()` with a color and a gradient; content hidden in a shape tag, also defined later and inside a shadow root; one warning each for a capital key, no `draw()` and no `getBoundingBox()`, none in five frames and a hit test; a tag defined twice warns and keeps the first class. `tests/render.html`: the Star at stage widths 500 and 1000; the Gauge's gradient value arc, the track after it and the label in its fill. `node tools/run_tests.js`, `--smoke` and `--types`: all passed; the typings still list all 7 shapes.
+
+**Size:** `pxl.min.js` 71,806 → 72,093 bytes (+0.3 KB, as estimated).
+
+**Left:** step 6 (docs page, KILOPIXEL.md section "Custom Shapes"), the Safari check, step 7 (`<pxl-polygon>`).
+
 ## Log
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-21: step 5 built (§15): `pxl.defineShape()` with the checks once per class and the tag hidden by the default styles, `setBoundingBox()`, `paint()`; the Star and the Gauge as test shapes in `tests/shapes/`. D6 decided. +0.3 KB.
 - 2026-11-21: step 4 built (§14): `attributeValues` → `values`, `attributeExpressions` → `expressions` (D4 decided); −1.0 KB. `template/` and `logical_units/` run with commit `5ff5ea6`.
 - 2026-11-21: step 3 built (§13): drawing in logical units, phase 1 (`ctx.scale(u, u)`, `draw(ctx, 1)`), `draw()` without `t`; D2 decided, the Safari test becomes a check afterwards.
 - 2026-11-21: step 2 built (§12): `observedAttributes` from `defaults`, presence attributes from boolean defaults, `pxl.BOOLEAN_ATTRIBUTES` removed; `points` without a default, the lowercase warning moved to step 5. −1.4 KB.

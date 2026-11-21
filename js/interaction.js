@@ -416,7 +416,7 @@ pxl.InteractionEngine = class InteractionEngine {
   }
 
   // The hovered shape's CSS cursor (inherited from its groups and layer; [pxl-on-click] gives the hand, see
-  // pxl.DEFAULT_STYLES), read in every hit test, so a class change shows while the pointer rests on the shape.
+  // pxl.defaultStyles()), read in every hit test, so a class change shows while the pointer rests on the shape.
   // Written on the layer canvases, in their shadow roots, where no framework style binding overwrites it; '' (empty
   // space, or auto) removes it, so page CSS applies.
   updateCursor() {

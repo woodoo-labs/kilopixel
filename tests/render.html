@@ -16,6 +16,9 @@
   </style>
   <!-- The built bundle: run `node build.js` before opening this page -->
   <script src="../dist/pxl.min.js"></script>
+  <!-- Custom shapes, loaded as a second script like a page would (tests/shapes/) -->
+  <script src="shapes/star.js"></script>
+  <script src="shapes/gauge.js"></script>
   <script src="runner.js"></script>
 </head>
 <body>
@@ -351,6 +354,27 @@
       }
       if (seen[0] !== seen[1]) throw new Error(`width 500: ${seen[0]}; width 1000: ${seen[1]}`);
     });
+
+    // The Star and the Gauge from tests/shapes/ (design/2026-11-20_custom_shapes_plan.md §3), loaded as a second script
+    for (const width of [500, 1000]) {
+      test(`custom shapes: the Star at stage width ${width}: its points painted, the space between them empty`, () =>
+        draw('<pxl-star x="300" y="300" r="200" ir="80" fill="#000" stroke="#000" strokewidth="10"></pxl-star>', (layer) =>
+          expectInk(layer, [[300, 300, true], [300, 110, true], [388, 179, false], [300, 80, false]]), 1, width));
+    }
+
+    test('custom shapes: the Gauge\'s value arc in its gradient stroke, the track after it, the label in its fill', () =>
+      draw(`<pxl-gauge x="500" y="450" r="300" strokewidth="40" value="0.75" label="WWW" fill="#ff0000"
+        stroke="linear(0, ['#00ff00', '#0000ff'])"></pxl-gauge>`, (layer) => {
+        const start = pixel(layer, 200, 445), end = pixel(layer, 676, 207), track = pixel(layer, 795, 400);
+        let red = 0;
+        for (let x = 400; x < 600; x += 2) for (let y = 360; y < 420; y += 2) { const p = pixel(layer, x, y); if (p[0] > 200 && p[1] < 60 && p[3] > 200) red++; }
+        const wrong = [];
+        if (!(start[1] > 180 && start[2] < 80)) wrong.push(`arc start ${start}, expected green`);
+        if (!(end[2] > 100 && end[1] < 150)) wrong.push(`arc at 0.7 ${end}, expected towards blue`);
+        if (!(track[0] > 200 && track[1] > 200 && track[2] > 200 && track[3] > 200)) wrong.push(`track ${track}, expected light grey`);
+        if (red < 50) wrong.push(`${red} red label pixels`);
+        if (wrong.length) throw new Error(wrong.join('; '));
+      }));
 
     // ===================================================================
     // Paint: fill, stroke, alpha, gradients, dashes, compositing, shadows

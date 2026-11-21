@@ -18,6 +18,9 @@
   </style>
   <!-- The built bundle: run `node build.js` before opening this page -->
   <script src="../dist/pxl.min.js"></script>
+  <!-- Custom shapes, loaded as a second script like a page would (tests/shapes/) -->
+  <script src="shapes/star.js"></script>
+  <script src="shapes/gauge.js"></script>
   <script src="runner.js"></script>
 </head>
 <body>
@@ -1426,6 +1429,129 @@
         const changed = isoShadowStaysUnder(layer, shape);
         if (changed !== 0) throw new Error(`the shadow changed ${changed} pixels of the line`);
       }));
+
+    // ===================================================================
+    // Custom shapes (design/2026-11-20_custom_shapes_plan.md §5.5, §5.7): pxl.defineShape(), setBoundingBox(), paint().
+    // The Star and the Gauge are loaded as a second script (tests/shapes/), like a page loads a custom shape.
+    // ===================================================================
+    section('Custom shapes');
+
+    // A minimal shape class: draws nothing, has a box
+    const plainShape = () => class extends pxl.Shape {
+      draw() {}
+      getBoundingBox() { return this.setBoundingBox(0, 0, 0, 0); }
+    };
+
+    test('custom shapes: the Star and the Gauge from a second script are defined, with their attributes', () => {
+      const star = customElements.get('pxl-star'), gauge = customElements.get('pxl-gauge');
+      const missing = [[star, 'points'], [star, 'ir'], [gauge, 'value'], [gauge, 'ticks'], [gauge, 'pxl-on-click']]
+        .filter(([Class, name]) => !Class || !Class.observedAttributes.includes(name)).map(([, name]) => name);
+      if (star !== pxl.Star || gauge !== pxl.Gauge || missing.length) throw new Error(`classes defined: ${star === pxl.Star}, ${gauge === pxl.Gauge}; not observed: ${missing}`);
+    });
+
+    test('custom shapes: hit along the Star\'s outline; the Gauge on its whole half disc through hitTest()', () => {
+      srClear();
+      srAdd('srLayerA', '<pxl-star id="csStar" x="300" y="300" r="200" ir="80" fill="#000"></pxl-star>');
+      srAdd('srLayerA', '<pxl-gauge id="csGauge" x="700" y="400" r="150" strokewidth="30" stroke="#000" fill="#000" value="0.2"></pxl-gauge>');
+      srRender(1);
+      const stage = el('srStage'), hit = (x, y) => stage.interaction.findShapeAt(x, y)?.id || 'none';
+      // Star: center, near the top tip, between two tips (inner radius 80 there); Gauge: inside the unpainted half
+      // disc, inside the stroke padding, below the center line, above the arc
+      const got = [hit(300, 300), hit(300, 110), hit(388, 179), hit(700, 330), hit(860, 395), hit(700, 430), hit(700, 230)];
+      srClear();
+      const expected = ['csStar', 'csStar', 'none', 'csGauge', 'csGauge', 'none', 'none'];
+      if (got.join() !== expected.join()) throw new Error(`hits ${got}, expected ${expected}`);
+    });
+
+    test('custom shapes: a false default is a presence attribute (<pxl-gauge ticks>)', () => {
+      const gauge = document.createElement('pxl-gauge'), seen = [gauge.values.ticks];
+      gauge.setAttribute('ticks', '');
+      seen.push(gauge.values.ticks);
+      gauge.removeAttribute('ticks');
+      seen.push(gauge.values.ticks);
+      if (seen.join() !== 'false,true,false') throw new Error(`ticks ${seen}`);
+    });
+
+    test('custom shapes: the Star\'s drawsMoreThanOnce() decides isolation (mask with fill only, with fill and stroke)', () => {
+      const star = document.createElement('pxl-star');
+      star.setAttribute('mask', 'destination-out');
+      star.setAttribute('fill', '#000');
+      const fillOnly = star.needsIsolation();
+      star.setAttribute('stroke', '#fff');
+      if (fillOnly || !star.needsIsolation()) throw new Error(`isolated with fill only: ${fillOnly}, with fill and stroke: ${star.needsIsolation()}`);
+    });
+
+    test('custom shapes: setBoundingBox() writes and returns the shape\'s own box', () => {
+      const star = document.createElement('pxl-star');
+      star.setAttribute('r', '40');
+      const box = star.getBoundingBox();
+      if (box !== star.boundingBox || [box.left, box.top, box.right, box.bottom].join() !== '-40,-40,40,40') {
+        throw new Error(`own box: ${box === star.boundingBox}, sides ${[box.left, box.top, box.right, box.bottom]}`);
+      }
+    });
+
+    test('custom shapes: paint() gives the fill or stroke as a canvas style, a gradient in the shape\'s box', () => {
+      const star = document.createElement('pxl-star'), ctx = document.createElement('canvas').getContext('2d');
+      star.setAttribute('fill', '#ff0000');
+      star.setAttribute('stroke', 'linear(0, [\'red\', \'blue\'])');
+      const fill = star.paint(ctx, 'fill'), stroke = star.paint(ctx, 'stroke');
+      if (fill !== '#ff0000' || !(stroke instanceof CanvasGradient)) throw new Error(`fill ${fill}, stroke ${stroke}`);
+    });
+
+    test('custom shapes: content inside a shape tag is hidden, also when the tag is defined later and in a shadow root', () => {
+      srClear();
+      srAdd('srLayerA', '<pxl-star>Star text</pxl-star><pxl-test-late>Late text</pxl-test-late>');
+      const host = document.createElement('div');
+      document.querySelector('.docs-inner').append(host);
+      const root = host.attachShadow({ mode: 'open' });
+      root.innerHTML = '<pxl-stage><pxl-layer><pxl-test-late>Late text</pxl-test-late></pxl-layer></pxl-stage>';
+      try {
+        const display = (node) => getComputedStyle(node).display;
+        const late = el('srLayerA').querySelector('pxl-test-late'), lateInShadow = root.querySelector('pxl-test-late');
+        const before = [display(el('srLayerA').querySelector('pxl-star')), display(late), display(lateInShadow)];
+        pxl.defineShape('pxl-test-late', plainShape());
+        const after = [display(late), display(lateInShadow)];
+        if (before.join() !== 'none,inline,inline' || after.join() !== 'none,none') throw new Error(`before ${before}, after ${after}`);
+      } finally {
+        host.remove();
+        srClear();
+      }
+    });
+
+    test('custom shapes: pxl.defineShape() warns once per class (uppercase key, no draw(), no getBoundingBox()), not per frame', () => {
+      const atDefine = captureWarnings(() => {
+        pxl.defineShape('pxl-test-upper', class Upper extends pxl.Shape {
+          static defaults = { ...pxl.Shape.defaults, pumpSpeed: 1 };
+          draw() {}
+          getBoundingBox() { return this.setBoundingBox(0, 0, 0, 0); }
+        });
+        pxl.defineShape('pxl-test-nodraw', class NoDraw extends pxl.Shape {
+          getBoundingBox() { return this.setBoundingBox(0, 0, 0, 0); }
+        });
+        pxl.defineShape('pxl-test-nobox', class NoBox extends pxl.Shape {
+          draw(ctx) { ctx.beginPath(); ctx.rect(0, 0, 10, 10); this.applyStyle(ctx); }
+        });
+      });
+      srClear();
+      srAdd('srLayerA', '<pxl-test-nobox x="100" y="100" fill="linear(0, [\'red\', \'blue\'])"></pxl-test-nobox>');
+      const perFrame = captureWarnings(() => {
+        for (let i = 0; i < 5; i++) srRender(1 + i * 0.1);
+        el('srStage').interaction.findShapeAt(105, 105);
+      });
+      srClear();
+      const expected = [['Upper', 'pumpSpeed'], ['NoDraw', 'draw(ctx)'], ['NoBox', 'getBoundingBox()']];
+      const missing = expected.filter(([cls, what]) => !atDefine.some((w) => w.includes(cls) && w.includes(what)));
+      if (atDefine.length !== 3 || missing.length || perFrame.length) {
+        throw new Error(`at define: ${JSON.stringify(atDefine)}; per frame: ${JSON.stringify(perFrame)}`);
+      }
+    });
+
+    test('custom shapes: a tag defined twice (a script loaded twice) warns and keeps the first class', () => {
+      const warnings = captureWarnings(() => pxl.defineShape('pxl-star', plainShape()));
+      if (warnings.length !== 1 || !warnings[0].includes('<pxl-star> is already defined') || customElements.get('pxl-star') !== pxl.Star) {
+        throw new Error(`warnings ${JSON.stringify(warnings)}, class kept: ${customElements.get('pxl-star') === pxl.Star}`);
+      }
+    });
 
     // --- Reference cycles (design/done/2026-11-12_reactive_propagation_plan.md) ---
     section('Reference cycles');

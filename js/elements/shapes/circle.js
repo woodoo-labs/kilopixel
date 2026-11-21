@@ -98,11 +98,7 @@ pxl.Circle = class Circle extends pxl.Shape {
 
   getBoundingBox() {
     const { r } = this.values;
-    this.boundingBox.left = -r;
-    this.boundingBox.right = r;
-    this.boundingBox.top = -r;
-    this.boundingBox.bottom = r;
-    return this.boundingBox;
+    return this.setBoundingBox(-r, -r, r, r);
   }
 };
-customElements.define('pxl-circle', pxl.Circle);
+pxl.defineShape('pxl-circle', pxl.Circle);

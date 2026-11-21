@@ -42,12 +42,7 @@ pxl.Rect = class Rect extends pxl.Shape {
     const { w, h, anchor } = this.values;
     const ax = pxl.anchorX[anchor];
     const ay = pxl.anchorY[anchor];
-
-    this.boundingBox.left = -w * ax;
-    this.boundingBox.right = w * (1 - ax);
-    this.boundingBox.top = -h * ay;
-    this.boundingBox.bottom = h * (1 - ay);
-    return this.boundingBox;
+    return this.setBoundingBox(-w * ax, -h * ay, w * (1 - ax), h * (1 - ay));
   }
 };
-customElements.define('pxl-rect', pxl.Rect);
+pxl.defineShape('pxl-rect', pxl.Rect);

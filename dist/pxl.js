@@ -1205,7 +1205,7 @@ pxl.InteractionEngine = class InteractionEngine {
   }
 
   // The hovered shape's CSS cursor (inherited from its groups and layer; [pxl-on-click] gives the hand, see
-  // pxl.DEFAULT_STYLES), read in every hit test, so a class change shows while the pointer rests on the shape.
+  // pxl.defaultStyles()), read in every hit test, so a class change shows while the pointer rests on the shape.
   // Written on the layer canvases, in their shadow roots, where no framework style binding overwrites it; '' (empty
   // space, or auto) removes it, so page CSS applies.
   updateCursor() {
@@ -1667,26 +1667,40 @@ pxl._frame = 0;
 // :state(fallback): see Stage.markFallbackWidth().
 // Shapes and groups draw on the canvas, not as elements: content written inside them (<pxl-text>{label}</pxl-text>
 // in JSX) would otherwise appear as page text through the layer's <slot>. Content placed directly in a layer
-// (accessible text, buttons) stays visible.
+// (accessible text, buttons) stays visible. The shape tags come from pxl.defineShape(), built-in and custom alike.
 // The grid is out of hit testing: it covers the whole stage and would catch the pointer between its lines
 // (design/done/2026-10-30_framework_compatibility_plan.md §23, E4). A page can set pointer-events: auto on it.
 // Click and press handlers show the hand, like the browser's own rule for links (E1); the shapes inside a group
 // inherit it. The cursor is otherwise only CSS: a framework listener gets the hand from cursor: pointer.
-pxl.DEFAULT_STYLES = `@layer pxl {
+pxl.defaultStyles = function() {
+  return `@layer pxl {
   pxl-stage { display: block; position: relative; width: 100%; }
   pxl-stage:state(fallback) { contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0; }
-  pxl-var, pxl-group, pxl-circle, pxl-ellipse, pxl-rect, pxl-line, pxl-polyline, pxl-text, pxl-grid { display: none; }
+  ${['pxl-var', 'pxl-group', ...pxl._shapeTags].join(', ')} { display: none; }
   pxl-grid { pointer-events: none; }
   [pxl-on-click], [pxl-on-down], [pxl-on-up] { cursor: pointer; }
 }`;
+};
+
+// The tags defined by pxl.defineShape(), and every <style data-pxl> written so far
+pxl._shapeTags = [];
+pxl._styleElements = [];
 
 // Once per document, and once per shadow root that holds a stage (document styles don't reach into it)
 pxl.addDefaultStyles = function(root) {
   if (root.querySelector('style[data-pxl]')) return;
   const style = document.createElement('style');
   style.setAttribute('data-pxl', '');
-  style.textContent = pxl.DEFAULT_STYLES;
+  style.textContent = pxl.defaultStyles();
   (root === document ? document.head : root).prepend(style);
+  pxl._styleElements.push(style);
+};
+
+// A shape tag defined later (a custom shape's script) is hidden in every style written so far, too
+pxl.hideShapeTag = function(tag) {
+  pxl._shapeTags.push(tag);
+  const text = pxl.defaultStyles();
+  for (let i = 0; i < pxl._styleElements.length; i++) pxl._styleElements[i].textContent = text;
 };
 
 pxl.addDefaultStyles(document);
@@ -1805,7 +1819,7 @@ pxl.Stage = class Stage extends HTMLElement {
     }
     this._isRegistered = true;
 
-    // display, position and width come from pxl.DEFAULT_STYLES; the aspect ratio stays inline, because the
+    // display, position and width come from pxl.defaultStyles(); the aspect ratio stays inline, because the
     // coordinate system depends on it
     const root = this.getRootNode();
     if (root instanceof ShadowRoot) pxl.addDefaultStyles(root);
@@ -2809,14 +2823,20 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     }
   }
 
-  // Custom shapes override this (gradients are sized to it); without it, gradients collapse to a point
+  // Custom shapes override this (gradients are sized to it); without it, gradients collapse to a point and hit
+  // testing skips its box check. pxl.defineShape() warns once for such a class.
   getBoundingBox() {
-    console.warn(`[pxl] Warning: Subclass ${this.constructor.name} does not implement getBoundingBox(). Fallback to zeroed bounding box.`);
-    this.boundingBox.left = 0;
-    this.boundingBox.right = 0;
-    this.boundingBox.top = 0;
-    this.boundingBox.bottom = 0;
-    return this.boundingBox;
+    return this.setBoundingBox(0, 0, 0, 0);
+  }
+
+  // Writes the box (in the shape's own units, without the stroke) and returns it: no allocation per frame
+  setBoundingBox(left, top, right, bottom) {
+    const box = this.boundingBox;
+    box.left = left;
+    box.top = top;
+    box.right = right;
+    box.bottom = bottom;
+    return box;
   }
 
   // --- Hit Testing ---
@@ -2856,6 +2876,12 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     if (linecap === 'square') pad = Math.max(pad, strokewidth * Math.SQRT1_2);
     if (arrowstart !== undefined) pad += Math.max(pxl.arrowSize(arrowstart, strokewidth), pxl.arrowSize(arrowend, strokewidth));
     return pad;
+  }
+
+  // The fill or stroke as a canvas style, for a shape that paints with it in its own way (fillText(), a second
+  // path): a color string as it is, a gradient built in the shape's box
+  paint(ctx, which) {
+    return which === 'stroke' ? this.createGradient(ctx, 1, this.values.stroke, 1) : this.createGradient(ctx, 1, this.values.fill, 0);
   }
 
   createGradient(ctx, u, styleValue, slot) {
@@ -3122,6 +3148,32 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     }
   }
 };
+
+// =========================================================================
+// Defining a Shape's Tag
+// =========================================================================
+// For built-in and custom shapes alike (design/2026-11-20_custom_shapes_plan.md §5.5), in a script after pxl.min.js.
+// The checks run once per class, here, instead of in every frame; the tag joins the default styles' display: none,
+// so content written inside a shape never shows as page text.
+pxl.defineShape = function(tag, Class) {
+  if (customElements.get(tag)) {
+    console.warn(`[pxl] <${tag}> is already defined; this definition is ignored (is the script loaded twice?).`);
+    return;
+  }
+  const name = Class.name || tag;
+  for (const key of Object.keys(Class.defaults)) {
+    if (key !== key.toLowerCase()) {
+      console.warn(`[pxl] ${name}: the attribute "${key}" must be lowercase. HTML lowercases attribute names, so it never arrives.`);
+    }
+  }
+  if (typeof Class.prototype.draw !== 'function') console.warn(`[pxl] ${name} has no draw(ctx): <${tag}> draws nothing.`);
+  if (Class.prototype.getBoundingBox === pxl.Shape.prototype.getBoundingBox) {
+    console.warn(`[pxl] ${name} has no getBoundingBox(): its gradients collapse to a point, and hit testing can't skip it early.`);
+  }
+  pxl.hideShapeTag(tag);
+  customElements.define(tag, Class);
+};
+
 pxl.Circle = class Circle extends pxl.Shape {
   static defaults = {
     ...pxl.Shape.defaults,
@@ -3222,14 +3274,10 @@ pxl.Circle = class Circle extends pxl.Shape {
 
   getBoundingBox() {
     const { r } = this.values;
-    this.boundingBox.left = -r;
-    this.boundingBox.right = r;
-    this.boundingBox.top = -r;
-    this.boundingBox.bottom = r;
-    return this.boundingBox;
+    return this.setBoundingBox(-r, -r, r, r);
   }
 };
-customElements.define('pxl-circle', pxl.Circle);
+pxl.defineShape('pxl-circle', pxl.Circle);
 
 pxl.Ellipse = class Ellipse extends pxl.Shape {
   static defaults = {
@@ -3346,14 +3394,10 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
 
   getBoundingBox() {
     const { rx, ry } = this.values;
-    this.boundingBox.left = -rx;
-    this.boundingBox.right = rx;
-    this.boundingBox.top = -ry;
-    this.boundingBox.bottom = ry;
-    return this.boundingBox;
+    return this.setBoundingBox(-rx, -ry, rx, ry);
   }
 };
-customElements.define('pxl-ellipse', pxl.Ellipse);
+pxl.defineShape('pxl-ellipse', pxl.Ellipse);
 
 pxl.Rect = class Rect extends pxl.Shape {
   static defaults = { ...pxl.Shape.defaults, w: 0, h: 0, r: null, r1: null, r2: null, r3: null, r4: null, anchor: 'center' };
@@ -3399,15 +3443,10 @@ pxl.Rect = class Rect extends pxl.Shape {
     const { w, h, anchor } = this.values;
     const ax = pxl.anchorX[anchor];
     const ay = pxl.anchorY[anchor];
-
-    this.boundingBox.left = -w * ax;
-    this.boundingBox.right = w * (1 - ax);
-    this.boundingBox.top = -h * ay;
-    this.boundingBox.bottom = h * (1 - ay);
-    return this.boundingBox;
+    return this.setBoundingBox(-w * ax, -h * ay, w * (1 - ax), h * (1 - ay));
   }
 };
-customElements.define('pxl-rect', pxl.Rect);
+pxl.defineShape('pxl-rect', pxl.Rect);
 
 pxl.Line = class Line extends pxl.Shape {
   static defaults = { ...pxl.Shape.defaults, x1: 0, y1: 0, x2: 0, y2: 0, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
@@ -3464,14 +3503,10 @@ pxl.Line = class Line extends pxl.Shape {
 
   getBoundingBox() {
     const { x1, y1, x2, y2 } = this.values;
-    this.boundingBox.left = Math.min(x1, x2);
-    this.boundingBox.right = Math.max(x1, x2);
-    this.boundingBox.top = Math.min(y1, y2);
-    this.boundingBox.bottom = Math.max(y1, y2);
-    return this.boundingBox;
+    return this.setBoundingBox(Math.min(x1, x2), Math.min(y1, y2), Math.max(x1, x2), Math.max(y1, y2));
   }
 };
-customElements.define('pxl-line', pxl.Line);
+pxl.defineShape('pxl-line', pxl.Line);
 
 pxl.Polyline = class Polyline extends pxl.Shape {
   // points has no default: it is stored as one value per coordinate (p0, p1, …, see setPoints())
@@ -3847,13 +3882,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
   }
 
   getBoundingBox() {
-    if (this._pointCount < 4) {
-      this.boundingBox.left = 0;
-      this.boundingBox.right = 0;
-      this.boundingBox.top = 0;
-      this.boundingBox.bottom = 0;
-      return this.boundingBox;
-    }
+    if (this._pointCount < 4) return this.setBoundingBox(0, 0, 0, 0);
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     let currentX = 0, currentY = 0;
     const isRelative = this.values.mode === 'relative';
@@ -3875,14 +3904,10 @@ pxl.Polyline = class Polyline extends pxl.Shape {
       if (currentY < minY) minY = currentY;
       if (currentY > maxY) maxY = currentY;
     }
-    this.boundingBox.left = minX;
-    this.boundingBox.right = maxX;
-    this.boundingBox.top = minY;
-    this.boundingBox.bottom = maxY;
-    return this.boundingBox;
+    return this.setBoundingBox(minX, minY, maxX, maxY);
   }
 };
-customElements.define('pxl-polyline', pxl.Polyline);
+pxl.defineShape('pxl-polyline', pxl.Polyline);
 
 // Raised when web fonts arrive. The font string doesn't change then, so each text compares this number instead.
 pxl._fontGeneration = 0;
@@ -4124,7 +4149,7 @@ pxl.Text = class Text extends pxl.Shape {
     ctx.fill(); // intercepted on pxl.dummyCtx (isPointInPath)
   }
 };
-customElements.define('pxl-text', pxl.Text);
+pxl.defineShape('pxl-text', pxl.Text);
 
 // All layers, because a custom shape can draw text too. Hidden or off-screen stages catch up when they next render.
 document.fonts.addEventListener('loadingdone', () => {
@@ -4150,10 +4175,7 @@ pxl.Grid = class Grid extends pxl.Shape {
     let minY = Math.min(y0, y1, y2, y3), maxY = Math.max(y0, y1, y2, y3);
 
     // The visible area is the bounding box (gradients span what is visible)
-    this.boundingBox.left = minX;
-    this.boundingBox.right = maxX;
-    this.boundingBox.top = minY;
-    this.boundingBox.bottom = maxY;
+    this.setBoundingBox(minX, minY, maxX, maxY);
 
     // One extra step on every side, then snapped to the grid
     minX -= step; maxX += step;
@@ -4231,7 +4253,7 @@ pxl.Grid = class Grid extends pxl.Shape {
     return this.boundingBox;
   }
 };
-customElements.define('pxl-grid', pxl.Grid);
+pxl.defineShape('pxl-grid', pxl.Grid);
 
 pxl.Variable = class Variable extends pxl.PxlNode {
   static defaults = { value: 0 };
@@ -4242,7 +4264,7 @@ pxl.Variable = class Variable extends pxl.PxlNode {
     this.stage = null;
   }
 
-  // display: none comes from pxl.DEFAULT_STYLES
+  // display: none comes from pxl.defaultStyles()
   connectedCallback() {
     super.connectedCallback();
     if (!this.parentLayer) {

@@ -16,10 +16,7 @@ pxl.Grid = class Grid extends pxl.Shape {
     let minY = Math.min(y0, y1, y2, y3), maxY = Math.max(y0, y1, y2, y3);
 
     // The visible area is the bounding box (gradients span what is visible)
-    this.boundingBox.left = minX;
-    this.boundingBox.right = maxX;
-    this.boundingBox.top = minY;
-    this.boundingBox.bottom = maxY;
+    this.setBoundingBox(minX, minY, maxX, maxY);
 
     // One extra step on every side, then snapped to the grid
     minX -= step; maxX += step;
@@ -97,4 +94,4 @@ pxl.Grid = class Grid extends pxl.Shape {
     return this.boundingBox;
   }
 };
-customElements.define('pxl-grid', pxl.Grid);
+pxl.defineShape('pxl-grid', pxl.Grid);

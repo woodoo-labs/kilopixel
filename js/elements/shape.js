@@ -145,14 +145,20 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     }
   }
 
-  // Custom shapes override this (gradients are sized to it); without it, gradients collapse to a point
+  // Custom shapes override this (gradients are sized to it); without it, gradients collapse to a point and hit
+  // testing skips its box check. pxl.defineShape() warns once for such a class.
   getBoundingBox() {
-    console.warn(`[pxl] Warning: Subclass ${this.constructor.name} does not implement getBoundingBox(). Fallback to zeroed bounding box.`);
-    this.boundingBox.left = 0;
-    this.boundingBox.right = 0;
-    this.boundingBox.top = 0;
-    this.boundingBox.bottom = 0;
-    return this.boundingBox;
+    return this.setBoundingBox(0, 0, 0, 0);
+  }
+
+  // Writes the box (in the shape's own units, without the stroke) and returns it: no allocation per frame
+  setBoundingBox(left, top, right, bottom) {
+    const box = this.boundingBox;
+    box.left = left;
+    box.top = top;
+    box.right = right;
+    box.bottom = bottom;
+    return box;
   }
 
   // --- Hit Testing ---
@@ -192,6 +198,12 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     if (linecap === 'square') pad = Math.max(pad, strokewidth * Math.SQRT1_2);
     if (arrowstart !== undefined) pad += Math.max(pxl.arrowSize(arrowstart, strokewidth), pxl.arrowSize(arrowend, strokewidth));
     return pad;
+  }
+
+  // The fill or stroke as a canvas style, for a shape that paints with it in its own way (fillText(), a second
+  // path): a color string as it is, a gradient built in the shape's box
+  paint(ctx, which) {
+    return which === 'stroke' ? this.createGradient(ctx, 1, this.values.stroke, 1) : this.createGradient(ctx, 1, this.values.fill, 0);
   }
 
   createGradient(ctx, u, styleValue, slot) {
@@ -457,4 +469,29 @@ pxl.Shape = class Shape extends pxl.PxlNode {
       ctx.closePath();
     }
   }
+};
+
+// =========================================================================
+// Defining a Shape's Tag
+// =========================================================================
+// For built-in and custom shapes alike (design/2026-11-20_custom_shapes_plan.md §5.5), in a script after pxl.min.js.
+// The checks run once per class, here, instead of in every frame; the tag joins the default styles' display: none,
+// so content written inside a shape never shows as page text.
+pxl.defineShape = function(tag, Class) {
+  if (customElements.get(tag)) {
+    console.warn(`[pxl] <${tag}> is already defined; this definition is ignored (is the script loaded twice?).`);
+    return;
+  }
+  const name = Class.name || tag;
+  for (const key of Object.keys(Class.defaults)) {
+    if (key !== key.toLowerCase()) {
+      console.warn(`[pxl] ${name}: the attribute "${key}" must be lowercase. HTML lowercases attribute names, so it never arrives.`);
+    }
+  }
+  if (typeof Class.prototype.draw !== 'function') console.warn(`[pxl] ${name} has no draw(ctx): <${tag}> draws nothing.`);
+  if (Class.prototype.getBoundingBox === pxl.Shape.prototype.getBoundingBox) {
+    console.warn(`[pxl] ${name} has no getBoundingBox(): its gradients collapse to a point, and hit testing can't skip it early.`);
+  }
+  pxl.hideShapeTag(tag);
+  customElements.define(tag, Class);
 };

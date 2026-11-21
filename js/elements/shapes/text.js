@@ -238,7 +238,7 @@ pxl.Text = class Text extends pxl.Shape {
     ctx.fill(); // intercepted on pxl.dummyCtx (isPointInPath)
   }
 };
-customElements.define('pxl-text', pxl.Text);
+pxl.defineShape('pxl-text', pxl.Text);
 
 // All layers, because a custom shape can draw text too. Hidden or off-screen stages catch up when they next render.
 document.fonts.addEventListener('loadingdone', () => {
