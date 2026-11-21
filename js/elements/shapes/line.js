@@ -7,7 +7,7 @@ pxl.Line = class Line extends pxl.Shape {
     this._arrowEnd = pxl.createArrowRecord();
   }
 
-  draw(ctx, u, t) {
+  draw(ctx, u) {
     const { x1, y1, x2, y2, arrowstart, arrowend } = this.attributeValues;
     const startX = x1 * u, startY = y1 * u;
     const endX = x2 * u, endY = y2 * u;

@@ -1,6 +1,6 @@
 # Custom Shapes and Element Structure
 
-- **Status**: 🟡 **Proposed** (2026-11-21, step 2 built (§12): attribute lists from `defaults`; D3 decided; the test in Safari and D2, D4–D9 open)
+- **Status**: 🟡 **Proposed** (2026-11-21, steps 2 and 3 built (§12, §13): attribute lists from `defaults`, logical units phase 1; D2, D3 decided; Safari test and D4–D9 open)
 - **Date**: 2026-11-20
 - **Replaces**: `design/archive/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`, `draw()` without `t`, custom animation patterns, verified 2026-10-17 and 2026-11-07) and the structure cleanup draft of 2026-11-20 (`scratch/2026-11-20_engine_structure_cleanup_plan.md` (not kept); its steps and measurements are §6 here)
 - **Related**: `design/2026-11-20_evaluation_model_plan.md` (step 2 makes "`draw()` only reads values" a contract), `design/2026-10-19_polygon_star_shape_plan.md` (the first new shape in this form), `design/done/2026-11-01_isolated_shape_compositing_plan.md` (`drawsMoreThanOnce()`), `design/done/2026-11-07_safe_shape_render_plan.md` (a careless shape can't break the layer), `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked), `design/2026-10-30_space_attribute_plan.md` (with step 6.6)
@@ -146,7 +146,7 @@ From the shape authoring plan §3.1: `PxlNode`'s static getter returns `Object.k
 - Thresholds that are device pixels today become logical units: the polyline's "same point" (0.01), text `maxwidth`, the minimum radial-gradient radius (0.001).
 - `getImageData()` / `putImageData()` ignore the transform: a free shape using them reads `this.stage.unit`.
 - **Firefox** (160, headless, 2026-11-21; `firefox/bidi.js` runs the same pages over WebDriver BiDi, `firefox/text_view.html` and `firefox/compare.html` show them in any browser): the canvas rules are those of Chrome. The page sweep, at DPR 1 and 2: no console messages; 143 and 120 of 300 layers identical, the rest anti-aliasing (at most 21 / 255 on polylines, 1–3 on circles and rects) and text; hit testing differs at 598 and 602 of 525,146 points. `template/rich.html`: the hits, three real clicks and the label as in Chrome. Text differs more than in Chrome: about 23 % of the ink pixels by more than 64 / 255 (23–30 of 600 cases identical, varying between runs), because Firefox sets the glyphs a little closer at the unscaled font size, so a line ends up to 10 device pixels earlier (254 cases not at all); the glyphs are equally sharp, widths differ by up to 0.68 % (Chrome 0.72 %), and the wrapped line counts on `examples/test15.html` and `examples/test23.html` are the same in both modes.
-- **Not tested:** Safari. Text rendering differs most between browsers, so `logical_units/text_tests.html` and the page sweep run there before phase 1 is built.
+- **Not tested:** Safari. Text rendering differs most between browsers, so `logical_units/text_tests.html` and the page sweep run there before phase 1 is built. *2026-11-21: phase 1 built before the Safari test (§13); the test is now a check afterwards.*
 
 **Two phases, so that no step risks the built-ins:**
 
@@ -217,7 +217,7 @@ From the cleanup draft of 2026-11-20. **Not part of the custom-shape steps (§9)
 
 1. **Test phase 1 in Firefox and Safari:** `logical_units/text_tests.html`, the page sweep, `template/rich.html`. Firefox done 2026-11-21 (§5.3); Safari open.
 2. §5.1 and §5.2 (derived attribute lists and presence attributes; `isHovered` / `isPressed` out of `defaults`; `points: ''`). Built 2026-11-21 (§12), `points` without a default.
-3. §5.3 phase 1 and §5.4: the calling convention, `draw(ctx)` without `t`.
+3. §5.3 phase 1 and §5.4: the calling convention, `draw(ctx)` without `t`. Built 2026-11-21 (§13).
 4. §5.6 rename, if decided (D4).
 5. §5.5 and §5.7: defining the tag, `setBoundingBox()`, `paint()`, the checks once per class; the Star and the Gauge as tests, loaded as a second script.
 6. Docs (§8), KILOPIXEL.md and ENGINE.md.
@@ -248,7 +248,7 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 | | Question | Recommended |
 |---|---|---|
 | D1 | One template, `draw(ctx)` | **decided 2026-11-20** (the two levels `path()` / `draw(ctx, u)` dropped) |
-| D2 | Logical units for every shape, in two phases (§5.3) | yes, after the test in Safari (§9 step 1); Firefox passed 2026-11-21 |
+| D2 | Logical units for every shape, in two phases (§5.3) | **decided 2026-11-21**, phase 1 built before the Safari test (Chrome and Firefox passed); Safari is checked afterwards |
 | D3 | Defining the tag: `pxl.defineShape()` for all shapes, or plain `customElements.define()` (§5.5) | **decided 2026-11-21**: `pxl.defineShape()` (the proven CSS rule hides content, checks run at define time) |
 | D4 | Rename `attributeValues` → `values`, `attributeExpressions` → `expressions` | yes, before the API is public |
 | D5 | Class fields for built-ins | no: the engine keeps constructors; authors choose |
@@ -278,10 +278,28 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 
 **Left:** the lowercase warning (step 5).
 
+## 13. Step 3 Built (2026-11-21)
+
+**What changed** (§5.3 phase 1, §5.4):
+
+- `js/elements/shape.js`: `render(ctx, u)` applies the transform and compositing state as before, then `ctx.scale(u, u)` and `draw(ctx, 1)`; `renderIsolated(ctx, u)` sets the global matrix × `u` × `dpr` on the scratch canvas and calls `draw(scratch, 1)`. `applyStyle(ctx, u = 1)` and `applyStrokeState(ctx, u = 1)`, so a custom shape writes `this.applyStyle(ctx)`.
+- `js/interaction.js`: `hitsShape()` sets the global matrix × `u` on `pxl.dummyCtx` and calls `hitTest(ctx, 1)` or `draw(ctx, 1)`.
+- `t` left the drawing chain: `draw(ctx, u)` in the 7 built-in shapes, `Shape.render(ctx, u)`, `renderIsolated(ctx, u)`, `Group.render(ctx, u)`, `Layer.render(u)` and its call in `Stage`.
+- The built-in shapes keep their `* u` code, called with `u = 1` (phase 2 removes it).
+
+**Decision:** built before the Safari test (D2 decided): Chrome and Firefox passed, and the change is small enough to take back if Safari shows a problem.
+
+**Tests:** `tests/render.html`, section "Logical units": a custom shape written without `u` (a stroked line with `strokewidth` and `linedash`, a box with a `linear()` gradient) at stage widths 500 and 1000: the same ink at the same logical points, the gradient across the box, hits along the stroke and on the isolated box; `draw()` receives `(ctx, 1)` in the normal render, the isolated render and the hit test; a wrapped text has the same lines and box at both widths (before: the box differed by 1 unit). `tests/index.html`: the polyline Float64 test expects the values as written; `test-iso-badge` is written without `u`. The 8 new tests fail with the engine of commit `82eb93d` (checked). `node tools/run_tests.js` and `--smoke`: all passed.
+
+**Size:** `pxl.min.js` 72,818 → 72,805 bytes (estimated +0.1 KB).
+
+**Left:** the Safari test (§9 step 1); phase 2 (§5.3).
+
 ## Log
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-21: step 3 built (§13): drawing in logical units, phase 1 (`ctx.scale(u, u)`, `draw(ctx, 1)`), `draw()` without `t`; D2 decided, the Safari test becomes a check afterwards.
 - 2026-11-21: step 2 built (§12): `observedAttributes` from `defaults`, presence attributes from boolean defaults, `pxl.BOOLEAN_ATTRIBUTES` removed; `points` without a default, the lowercase warning moved to step 5. −1.4 KB.
 - 2026-11-21: D3 decided: `pxl.defineShape(tag, Class)` for built-in and custom shapes (§5.5). Phase 1 tested in Firefox 160 (§5.3): the same as in Chrome except text spacing (lines up to 10 device pixels shorter, wrapping unchanged); scripts in `firefox/`. Safari still open.
 - 2026-11-20: one template, `draw(ctx)` in logical units (D1 decided): the engine scales the canvas by `u`, in two phases (§5.3) with the measurements of `logical_units/`; `path()` and the two levels dropped. D3 reopened (`pxl.defineShape()` or plain `define()`). The investigation found shape shadows and filters at 1/DPR of their size on HiDPI screens: fixed in commit `7cbb439`. Prototypes moved into `template/`, `logical_units/`, `transform_path/`.

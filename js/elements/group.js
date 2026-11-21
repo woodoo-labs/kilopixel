@@ -67,7 +67,7 @@ pxl.Group = class Group extends pxl.PxlNode {
   }
 
   // Draw phase, into the parent layer's canvas
-  render(ctx, u, t) {
+  render(ctx, u) {
     if (this._failedFrame === pxl._frame || this.attributeValues.hidden) return;
 
     const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.attributeValues;
@@ -80,7 +80,7 @@ pxl.Group = class Group extends pxl.PxlNode {
       pxl.applyTransformState(ctx, u, this.attributeValues);
     }
     for (let i = 0; i < this.childList.length; i++) {
-      this.childList[i].render(ctx, u, t);
+      this.childList[i].render(ctx, u);
     }
     if (hasStateChanges) ctx.restore();
   }

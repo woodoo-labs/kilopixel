@@ -116,4 +116,4 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Status**: 🟡 **Proposed**
 - **Plan**: `design/2026-11-20_custom_shapes_plan.md` (replaces shape authoring; the structure cleanup in plan §6 is discussed separately)
 - Custom shapes are written like built-in shapes, in a second script after `pxl.min.js`: one template, `static defaults` and `draw(ctx)` in logical units (the engine scales the canvas by `u`, in two phases), the tag defined with `pxl.defineShape()` (D3 decided); booleans from defaults; a public contract.
-- **Next**: test phase 1 in Safari (plan §9; Firefox passed), then step 3 (logical units, `draw(ctx)` without `t`). Step 2 built (plan §12). **Open**: D2, D4–D9.
+- **Next**: step 4 (D4: `attributeValues` → `values`), then step 5 (`pxl.defineShape()`, `setBoundingBox()`). Steps 2 and 3 built (plan sections "Step 2 Built", "Step 3 Built"). Check phase 1 in Safari. **Open**: D4–D9.

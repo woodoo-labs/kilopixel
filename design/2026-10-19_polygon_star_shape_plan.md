@@ -228,6 +228,7 @@ Sidebar: "Polygon" link back under Shapes & Paths, after "Polyline".
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-21: `design/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; this plan's `draw(ctx, u, t)` with `* u` is the old form.
 - 2026-11-21: `observedAttributes` is derived from `static defaults` and presence attributes come from boolean defaults (`design/2026-11-20_custom_shapes_plan.md` step 2): the hand-written `observedAttributes` in this plan's code is the old form.
 - 2026-11-21: `design/2026-11-20_custom_shapes_plan.md` D3 decided: shapes define their tag with `pxl.defineShape()`; the `customElements.define()` line in this plan's code is the old form.
 - 2026-11-20: `design/2026-11-20_custom_shapes_plan.md` dropped `path()`: this shape would be written with the one template, `draw(ctx)` in logical units.

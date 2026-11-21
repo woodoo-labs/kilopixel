@@ -374,14 +374,14 @@
       }
     });
 
-    test('polyline: drawn coordinates are value × u without Float32 rounding, also summed in relative mode', () => {
+    // Drawn in logical units (design/2026-11-20_custom_shapes_plan.md §5.3): the coordinates as written, the canvas scaled
+    test('polyline: drawn coordinates are the values without Float32 rounding, also summed in relative mode', () => {
       srClear();
       srAdd('srLayerA', '<pxl-polyline id="f64Abs" points="333.3,150.7; 400,200" stroke="#000"></pxl-polyline>');
       srAdd('srLayerA', '<pxl-polyline id="f64Rel" mode="relative" points="100.1,0; 50.2,80.3; 33.3,-0.7" stroke="#000"></pxl-polyline>');
       srRender(1);
-      const u = el('srStage').unit;
       const abs = el('f64Abs')._flatCache, rel = el('f64Rel')._flatCache;
-      const expected = { 'absolute x0': [abs[0], 333.3 * u], 'relative x2': [rel[4], 100.1 * u + 50.2 * u + 33.3 * u] };
+      const expected = { 'absolute x0': [abs[0], 333.3], 'relative x2': [rel[4], 100.1 + 50.2 + 33.3] };
       srClear();
       for (const [name, [value, want]] of Object.entries(expected)) {
         if (value !== want) throw new Error(`${name} is ${value}, expected ${want}`);
@@ -1299,10 +1299,10 @@
     }
     // A custom shape that fills and strokes a rectangle, as a custom shape would be written
     customElements.define('test-iso-badge', class extends pxl.Shape {
-      draw(ctx, u) {
+      draw(ctx) {
         ctx.beginPath();
-        ctx.rect(-100 * u, -60 * u, 200 * u, 120 * u);
-        this.applyStyle(ctx, u);
+        ctx.rect(-100, -60, 200, 120);
+        this.applyStyle(ctx);
       }
       getBoundingBox() {
         Object.assign(this.boundingBox, { left: -100, right: 100, top: -60, bottom: 60 });

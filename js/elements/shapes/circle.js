@@ -11,7 +11,7 @@ pxl.Circle = class Circle extends pxl.Shape {
     this._arrowEnd = pxl.createArrowRecord();
   }
 
-  draw(ctx, u, t) {
+  draw(ctx, u) {
     const { r, ir, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.attributeValues;
 
     const safeR = Math.max(0, r);

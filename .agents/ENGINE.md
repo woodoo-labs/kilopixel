@@ -156,13 +156,13 @@ UPDATE PHASE, layers with isDirty || isAnimated:
                                               animated children call parentLayer.invalidate(): isDirty again
     _keepAlive = isDirty                      the heartbeat of this frame
 DRAW PHASE, layers where needsRender():       (updated && _wasDirty) || isDirty || isAnimated || _isCompositingDirty
-  layer.render(u, t)                          isDirty also catches a later layer's broadcast after this update
+  layer.render(u)                             isDirty also catches a later layer's broadcast after this update
     failed this frame → return (keeps its pixels)
     write CSS opacity / mix-blend-mode / filter if changed; _isCompositingDirty = false
     CSS-only path (§5.3) → heartbeat if animated, return
     clearRect; isDirty = updated && _keepAlive   only the heartbeat survives into the next frame
     hidden → canvas empty, heartbeat, return
-    transforms → save + applyTransformState; children render(ctx, u, t); restore
+    transforms → save + applyTransformState; children render(ctx, u); restore
     animated layer → requestRender()          its own heartbeat, without isDirty
 perf counters (hit testing included)
 ```
@@ -188,12 +188,14 @@ Nothing that throws breaks the frame (design: `design/done/2026-11-07_safe_shape
 
 ## 6. Drawing
 
-### 6.1 `Shape.render(ctx, u, t)`
+### 6.1 `Shape.render(ctx, u)`
 
-Skips a failed or hidden shape; `needsIsolation()` → `renderIsolated()`; otherwise `ctx.save()`, `pxl.applyContextState()` (= `pxl.applyTransformState()`, steps in language §2, each skipped at its default, + `pxl.applyCompositingState()`: alpha multiplied, mask or blend, `resolveFilter()`, shadow only with `shadowcolor`, `none` / `transparent` reset it; canvas shadows and filters ignore the canvas transform, so their lengths are scaled by `u` × the layer's `dpr`), `draw(ctx, u, t)`, `ctx.restore()` in `finally`. Every shape draws in its own canvas state, so a custom shape can't leak state. Custom shapes override `draw()`, not `update()` or `render()`. Groups and layers apply only `applyTransformState()`, and only around their children when a transform isn't at its default.
+Skips a failed or hidden shape; `needsIsolation()` → `renderIsolated()`; otherwise `ctx.save()`, `pxl.applyContextState()` (= `pxl.applyTransformState()`, steps in language §2, each skipped at its default, + `pxl.applyCompositingState()`: alpha multiplied, mask or blend, `resolveFilter()`, shadow only with `shadowcolor`, `none` / `transparent` reset it; canvas shadows and filters ignore the canvas transform, so their lengths are scaled by `u` × the layer's `dpr`), `ctx.scale(u, u)`, `draw(ctx, 1)`, `ctx.restore()` in `finally`. Every shape draws in its own canvas state, so a custom shape can't leak state. Custom shapes override `draw()`, not `update()` or `render()`. Groups and layers apply only `applyTransformState()`, and only around their children when a transform isn't at its default.
 
-- `applyStyle(ctx, u)`: `hasFill()` → `fillStyle` (gradient slot 0), `fill()`; `isStroked()` (stroke not none / transparent and `strokewidth > 0`) → `applyStrokeState()`, `stroke()`.
-- `applyStrokeState(ctx, u)`: `strokeStyle` (slot 1), `lineWidth`, caps, joins, miter limit, `applyLineDash()`. Every stroke goes through it (also text's `strokeText`): stroke state is set before stroking and never reset.
+**Logical units:** `draw()` works in the units of the HTML: the context is scaled by `u` before it (in `render()`, `renderIsolated()` and the hit test), so a path, a line width, a dash, a gradient or a font size is written as the attribute says, and nothing that `draw()` measures depends on the stage size. The built-in shapes still multiply their lengths by `draw()`'s second argument and the helpers' `u`, which is always 1. What ignores the canvas transform is scaled by the engine before `draw()`: shadows and `ctx.filter` (`u` × `dpr`, above). Pixel access ignores it too (`getImageData()`): a shape that reads or writes pixels uses `this.stage.unit`. `draw()` gets no time: time-dependent values are evaluated in `update()`, so a hit test sees what is drawn. Design: `design/2026-11-20_custom_shapes_plan.md` §5.3, §5.4.
+
+- `applyStyle(ctx, u = 1)`: `hasFill()` → `fillStyle` (gradient slot 0), `fill()`; `isStroked()` (stroke not none / transparent and `strokewidth > 0`) → `applyStrokeState()`, `stroke()`.
+- `applyStrokeState(ctx, u = 1)`: `strokeStyle` (slot 1), `lineWidth`, caps, joins, miter limit, `applyLineDash()`. Every stroke goes through it (also text's `strokeText`): stroke state is set before stroking and never reset.
 - `applyLineDash(ctx, u)`: scaled pattern cached per (`linedash`, `u`) in `_scaledDash`; solid → `pxl._emptyDash`. `pxl.hasLineDash()`: not null, `'none'` or `'0'`.
 - `resolveFilter(filter, scale)` (layers and shapes): an array joined with spaces, then `pxl.scaleResponsiveFilter()` multiplies every number before `px` by the scale (exponent notation included: JavaScript prints values near 0 as `1.2e-15`); cached per (string, scale). The scale is `u` for a layer's CSS `filter` (CSS pixels) and `u` × `dpr` for a shape's `ctx.filter` (bitmap pixels).
 
@@ -202,7 +204,7 @@ Skips a failed or hidden shape; `needsIsolation()` → `renderIsolated()`; other
 Design: `design/done/2026-11-01_isolated_shape_compositing_plan.md`.
 
 - `needsIsolation()` = `hasCompositingState()` (`mask`, `blend`, `filter`, or a visible `shadowcolor`; not `alpha`) and `drawsMoreThanOnce()`. Path shapes: `fillsAndStrokesOrHasArrows()` (fill and stroke, or `hasArrowheads()`); text: fill and stroke, a wrap `width`, or a line break in `text`; grid: `major > 0` or fill and stroke; the base class (custom shapes): `true`.
-- `renderIsolated()`: draws into the shared scratch canvas (`pxl.getIsolationContext(w, h)`: one per page, grows to the largest layer canvas, never shrinks) with `setTransform()` of the global matrix (linear part × `layer.dpr`, translation × `u` × `layer.dpr`; same pixels as the transform chain to 1 / 255), then draws the whole scratch area onto the layer with an identity transform and `applyCompositingState()`. Shadows and filters ignore the transform, so sizes match the direct path; a bitmap's shadow blurs its soft edge slightly differently (up to 16 / 255). Isolation never nests (groups have no compositing). Hit testing doesn't isolate.
+- `renderIsolated()`: draws into the shared scratch canvas (`pxl.getIsolationContext(w, h)`: one per page, grows to the largest layer canvas, never shrinks) with `setTransform()` of the global matrix × `u` × `layer.dpr` (same pixels as the transform chain to 1 / 255), then `draw(scratch, 1)`, then draws the whole scratch area onto the layer with an identity transform and `applyCompositingState()`. Shadows and filters ignore the transform, so sizes match the direct path; a bitmap's shadow blurs its soft edge slightly differently (up to 16 / 255). Isolation never nests (groups have no compositing). Hit testing doesn't isolate.
 
 ### 6.3 Gradients
 
@@ -210,7 +212,7 @@ Design: `design/done/2026-11-01_isolated_shape_compositing_plan.md`.
 
 ### 6.4 Arrowheads
 
-Design (derivations): `design/done/2026-10-14_unified_arrowhead_geometry_plan.md`. All distances in context units (logical × `u`).
+Design (derivations): `design/done/2026-10-14_unified_arrowhead_geometry_plan.md`. All distances in logical units × the `u` passed down from `draw()`, which is always 1 (§6.1).
 
 - `pxl.arrowSize(value, strokewidth)`: `'auto'` = 3.6 × width; ≤ 0 → 0.
 - `resolveArrow(rec, value, u)` writes `size`, `len` (= size × `pxl.ARROW_COS30`), `tipAdvance` and `inset` into a pre-allocated record (`pxl.createArrowRecord()`, all fields doubles: one hidden class). Cap extension `capExt` = 0 (butt) or sw / 2.
@@ -227,7 +229,7 @@ Design (derivations): `design/done/2026-10-14_unified_arrowhead_geometry_plan.md
 - **Line:** without arrows `moveTo` / `lineTo`; with arrows one `sqrt`, the shaft trimmed by each inset, only heads if the insets exceed the length.
 - **Polyline:**
   - `setPoints(value)` (attribute and property): a string through `pxl.parsePointsIntoArray()` (parenthesis-aware split into coordinate strings), an array read in place. Only when the count changes, `resizePoints()` removes keys beyond it (from all key lists) and adds `p0, p1, …` and a new `Float64Array` buffer; kept keys keep their value until set again. Each coordinate: a string → `pxl.compileAttribute(this, 'pN', s)`, a number stored (written directly when the key holds no expression). Then `isAnimated`, broadcast, invalidate.
-  - `loadPoints(u)` fills `_flatCache` (Float64 like the matrices, so relative sums carry no Float32 error) with `value × u`, accumulates relative mode, and returns false if any value isn't finite (`probe += v * 0`, no extra loop).
+  - `loadPoints(u)` fills `_flatCache` (Float64 like the matrices, so relative sums carry no Float32 error) with `value × u` (`u` from `draw()`, always 1; `getHitBox()` passes 1 too), accumulates relative mode, and returns false if any value isn't finite (`probe += v * 0`, no extra loop).
   - Smooth: `loadSegment()` serves drawing, arrow trimming and the hit box, so they always agree (6 `sqrt` per segment, no allocation). Handles at P with incoming Δin (length dIn), outgoing Δout (dOut), `aIn = √dIn`, `aOut = √dOut`: tangent `T = dIn·Δout + dOut·Δin`, outgoing handle `k·T / (3·aIn·(aIn + aOut))`, incoming `−k·T / (3·aOut·(aIn + aOut))` (`k` = `smooth`); evenly spaced points give `(pNext − pPrev)·k/6`. Design: `design/done/2026-10-23_smooth_polyline_spline_plan.md`.
   - Arrows skip end segments shorter than 0.01 px.
 - **Text:** three caches, each rebuilt only when its inputs change: (1) the font string and letter spacing (size, `u`, font, weight, style, letter spacing, `pxl._fontGeneration`); (2) the lines (`_lines`, `_totalChars`; word wrap with `measureText()` when `width > 0`; `\n` written as text becomes a line break); (3) the box and first baseline (`_startY`; align, baseline, line height, direction, `maxwidth`): `measureText()` ignores `maxWidth`, so a line wider than `maxwidth` has both box sides scaled by `maxwidth·u / width`. An animated `maxwidth` measures every line every frame (accepted). Context state (font, letter spacing, align, baseline, direction) is set on every draw. `_hasInk` is true only when something was painted; `hitTest(ctx, u)` adds the box (padded by half the stroke) and calls the intercepted `fill()`. **Late web fonts:** the `loadingdone` listener of `document.fonts` raises `pxl._fontGeneration` and calls `invalidateLayers()` on every stage in `pxl.perf.stages`; it fires when a whole batch has loaded. Design: `design/done/2026-11-06_text_box_accuracy_plan.md`.
@@ -282,7 +284,7 @@ The stage passes them to its `InteractionEngine` (`handleEvent`): `Stage.POINTER
 
 - `pxl.dummyCtx`: a 1×1 canvas context whose `fill()` / `stroke()` set `pxl._hitResult` from `isPointInPath` / `isPointInStroke` at (`pxl._hitX`, `pxl._hitY`): a shape's own `draw()` is its hit test.
 - `findShapeAt(x, y)`: layers in reverse, skipping `hidden` ones and ones CSS hides (`display: none`, `visibility: hidden` from `cssStyle()`); `findShapeIn()` walks `childList` backwards, recursing into groups, skipping `hidden`. A layer's `pointer-events` isn't read (its shapes inherit it).
-- `hitsShape()`: (1) `mayContainPoint()`: the point mapped through `getInverseGlobalMatrix()`, compared with `getHitBox()` (`getBoundingBox()`, or for a smooth polyline its points plus all Bézier handles via `loadSegment()`) padded by `hitPadding()` (half the stroke, a miter up to `miterlimit` × half, a square cap's corner, arrowheads); min / max for mirrored rects; `needsExactHitTest()` (no own `getBoundingBox()`) skips the check. (2) `cssStyle().pointerEvents !== 'none'`. (3) the exact test: global matrix on `pxl.dummyCtx` (translation × `u`), `hitTest(ctx, u)` if the shape has one, else `draw(ctx, u, 0)`, in `try` / `finally` with `save` / `restore` (a throwing shape counts as not hit). The box is read from current values every time, so a shape changed by `setAttribute()` is hit at its new place.
+- `hitsShape()`: (1) `mayContainPoint()`: the point mapped through `getInverseGlobalMatrix()`, compared with `getHitBox()` (`getBoundingBox()`, or for a smooth polyline its points plus all Bézier handles via `loadSegment()`) padded by `hitPadding()` (half the stroke, a miter up to `miterlimit` × half, a square cap's corner, arrowheads); min / max for mirrored rects; `needsExactHitTest()` (no own `getBoundingBox()`) skips the check. (2) `cssStyle().pointerEvents !== 'none'`. (3) the exact test: the global matrix × `u` on `pxl.dummyCtx` (logical units, as in §6.1), `hitTest(ctx, 1)` if the shape has one, else `draw(ctx, 1)`, in `try` / `finally` with `save` / `restore` (a throwing shape counts as not hit). The box is read from current values every time, so a shape changed by `setAttribute()` is hit at its new place.
 - Cost: about 0.4–0.8 µs per shape with warm caches, about 10× in a real frame; 1–4 exact tests per hit test.
 
 ### 8.3 States

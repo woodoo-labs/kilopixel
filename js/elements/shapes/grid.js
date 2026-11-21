@@ -1,7 +1,7 @@
 pxl.Grid = class Grid extends pxl.Shape {
   static defaults = { ...pxl.Shape.defaults, step: 50, major: 0, labels: false, labelsize: 12 };
 
-  draw(ctx, u, t) {
+  draw(ctx, u) {
     const { step, major, labels, labelsize, strokewidth } = this.attributeValues;
     if (step <= 0) return; // the line loops would never end
 

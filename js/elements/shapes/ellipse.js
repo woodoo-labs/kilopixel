@@ -11,7 +11,7 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
     this._arrowEnd = pxl.createArrowRecord();
   }
 
-  draw(ctx, u, t) {
+  draw(ctx, u) {
     const { rx, ry, irx, iry, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.attributeValues;
 
     const safeRX = Math.max(0, rx);

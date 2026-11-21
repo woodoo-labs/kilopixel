@@ -51,7 +51,7 @@ pxl.Text = class Text extends pxl.Shape {
   }
 
   // Three caches, each rebuilt only when its inputs change: font string → line layout → bounding box
-  draw(ctx, u, t) {
+  draw(ctx, u) {
     const {
       text, size, font, align, baseline, weight, fontstyle, maxwidth,
       direction, width, lineheight, letterspacing, reveal

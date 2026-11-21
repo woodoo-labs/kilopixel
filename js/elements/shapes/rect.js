@@ -6,7 +6,7 @@ pxl.Rect = class Rect extends pxl.Shape {
     this._radii = [0, 0, 0, 0]; // reused by roundRect() every frame
   }
 
-  draw(ctx, u, t) {
+  draw(ctx, u) {
     const { w, h, r, r1, r2, r3, r4, anchor } = this.attributeValues;
 
     const startX = -w * pxl.anchorX[anchor] * u;

@@ -310,7 +310,7 @@ pxl.Stage = class Stage extends HTMLElement {
     }
     for (let i = 0; i < this.layers.length; i++) {
       const layer = this.layers[i];
-      if (layer.needsRender()) layer.render(this.unit, t);
+      if (layer.needsRender()) layer.render(this.unit);
     }
 
     const ms = performance.now() - start;

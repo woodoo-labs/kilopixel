@@ -143,6 +143,7 @@ Existing tests stay (two-phase frame, ref cycles, safe render, `toLocal`, layer 
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-21: `design/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; the contract "`draw()` only reads values" holds in the code (line 42 and the §47 row describe it as planned).
 - 2026-11-20: the shape authoring plan was replaced by `design/2026-11-20_custom_shapes_plan.md` (TODO §47); §6 points to it.
 - 2026-11-20: `<pxl-clip>` parked in `design/ideas/`; §6 marks its row.
 - 2026-11-20: merged from the two-phase frame plan (open parts), the reactive propagation plan (option A) and the per-frame evaluation plan (option B). Their decision names map as follows: per-frame D1–D3, D5–D8 → D1, D2, D4, D5, D7, D8 here (its D4 had moved to C1); two-phase questions 6, 7, 9 → D6, D9, D10; reactive propagation D1–D4 → part of option A, D2, D3, D4.

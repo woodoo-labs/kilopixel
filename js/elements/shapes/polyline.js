@@ -105,7 +105,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     this._pointCount = count;
   }
 
-  draw(ctx, u, t) {
+  draw(ctx, u) {
     if (this._pointCount < 4) return;
 
     if (!this.loadPoints(u)) return;

@@ -146,7 +146,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
   }
 
   // Draw phase
-  render(u, t) {
+  render(u) {
     if (this._failedFrame === pxl._frame) return;
     const isUpdated = this._updateFrame === pxl._frame;
     const hasChanged = (isUpdated && this._wasDirty) || this.isDirty;
@@ -209,7 +209,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
       pxl.applyTransformState(ctx, u, this.attributeValues);
     }
     for (let i = 0; i < this.childList.length; i++) {
-      this.childList[i].render(ctx, u, t);
+      this.childList[i].render(ctx, u);
     }
     if (hasTransformChanges) ctx.restore();
 

@@ -1332,12 +1332,13 @@ pxl.InteractionEngine = class InteractionEngine {
     pxl._hitResult = false;
     ctx.save();
     try {
+      // In logical units, like Shape.render(): the global matrix scaled by u
       const m = shape.getGlobalMatrix(), u = this.stage.unit;
-      ctx.setTransform(m[0], m[1], m[2], m[3], m[4] * u, m[5] * u);
+      ctx.setTransform(m[0] * u, m[1] * u, m[2] * u, m[3] * u, m[4] * u, m[5] * u);
       ctx.beginPath();
       // Shapes that can't express their hit area as a path (e.g. text) provide hitTest()
-      if (shape.hitTest) shape.hitTest(ctx, u);
-      else shape.draw(ctx, u, 0);
+      if (shape.hitTest) shape.hitTest(ctx, 1);
+      else shape.draw(ctx, 1);
     } catch (error) {
       shape.reportError(error);
       return false;
@@ -1969,7 +1970,7 @@ pxl.Stage = class Stage extends HTMLElement {
     }
     for (let i = 0; i < this.layers.length; i++) {
       const layer = this.layers[i];
-      if (layer.needsRender()) layer.render(this.unit, t);
+      if (layer.needsRender()) layer.render(this.unit);
     }
 
     const ms = performance.now() - start;
@@ -2500,7 +2501,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
   }
 
   // Draw phase
-  render(u, t) {
+  render(u) {
     if (this._failedFrame === pxl._frame) return;
     const isUpdated = this._updateFrame === pxl._frame;
     const hasChanged = (isUpdated && this._wasDirty) || this.isDirty;
@@ -2563,7 +2564,7 @@ pxl.Layer = class Layer extends pxl.PxlNode {
       pxl.applyTransformState(ctx, u, this.attributeValues);
     }
     for (let i = 0; i < this.childList.length; i++) {
-      this.childList[i].render(ctx, u, t);
+      this.childList[i].render(ctx, u);
     }
     if (hasTransformChanges) ctx.restore();
 
@@ -2641,7 +2642,7 @@ pxl.Group = class Group extends pxl.PxlNode {
   }
 
   // Draw phase, into the parent layer's canvas
-  render(ctx, u, t) {
+  render(ctx, u) {
     if (this._failedFrame === pxl._frame || this.attributeValues.hidden) return;
 
     const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.attributeValues;
@@ -2654,7 +2655,7 @@ pxl.Group = class Group extends pxl.PxlNode {
       pxl.applyTransformState(ctx, u, this.attributeValues);
     }
     for (let i = 0; i < this.childList.length; i++) {
-      this.childList[i].render(ctx, u, t);
+      this.childList[i].render(ctx, u);
     }
     if (hasStateChanges) ctx.restore();
   }
@@ -2720,16 +2721,21 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   // Draw phase. Every shape draws in its own canvas state: whatever it changes or throws, the next shape starts clean.
-  render(ctx, u, t) {
+  // draw() works in logical units (design/2026-11-20_custom_shapes_plan.md §5.3): the context is scaled by u after
+  // the shape's transform and compositing state (shadows and filters ignore the transform, so they carry u
+  // themselves). The built-in shapes still multiply their lengths by draw()'s second argument, which is always 1.
+  // draw() gets no time: time-dependent values are evaluated in update(), so the hit test sees what is drawn.
+  render(ctx, u) {
     if (this._failedFrame === pxl._frame || this.attributeValues.hidden) return;
     if (this.needsIsolation()) {
-      this.renderIsolated(ctx, u, t);
+      this.renderIsolated(ctx, u);
       return;
     }
     ctx.save();
     try {
       pxl.applyContextState(ctx, u, this.attributeValues, this);
-      this.draw(ctx, u, t);
+      ctx.scale(u, u);
+      this.draw(ctx, 1);
     } catch (error) {
       this.reportError(error);
     } finally {
@@ -2776,15 +2782,15 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // Draws with the shape's global matrix (the same pixels as the layer's transform chain, plan §3.4) into the whole
   // scratch area of the layer's size, then composites it with an identity transform: canvas shadows and filters
   // ignore the transform, so offsets and blur sizes stay as on the direct path.
-  renderIsolated(ctx, u, t) {
-    const canvas = ctx.canvas, w = canvas.width, h = canvas.height, d = this.parentLayer.dpr;
+  renderIsolated(ctx, u) {
+    const canvas = ctx.canvas, w = canvas.width, h = canvas.height, k = u * this.parentLayer.dpr;
     const scratch = pxl.getIsolationContext(w, h);
     scratch.clearRect(0, 0, w, h);
     scratch.save();
     try {
-      const m = this.getGlobalMatrix();
-      scratch.setTransform(m[0] * d, m[1] * d, m[2] * d, m[3] * d, m[4] * u * d, m[5] * u * d);
-      this.draw(scratch, u, t);
+      const m = this.getGlobalMatrix(); // in logical units: scaled by u like render()
+      scratch.setTransform(m[0] * k, m[1] * k, m[2] * k, m[3] * k, m[4] * k, m[5] * k);
+      this.draw(scratch, 1);
     } catch (error) {
       this.reportError(error);
       return;
@@ -2954,7 +2960,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
   // Sets all stroke-related context state (style, width, caps, joins, dash).
   // Shared by path-based shapes (via applyStyle) and non-path shapes like Text (strokeText).
-  applyStrokeState(ctx, u) {
+  applyStrokeState(ctx, u = 1) {
     const { stroke, strokewidth, linecap, linejoin, miterlimit } = this.attributeValues;
 
     ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
@@ -3006,7 +3012,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     return !!stroke && stroke !== 'none' && stroke !== 'transparent' && strokewidth > 0;
   }
 
-  applyStyle(ctx, u) {
+  applyStyle(ctx, u = 1) {
     if (this.hasFill()) {
       ctx.fillStyle = this.createGradient(ctx, u, this.attributeValues.fill, 0);
       ctx.fill();
@@ -3129,7 +3135,7 @@ pxl.Circle = class Circle extends pxl.Shape {
     this._arrowEnd = pxl.createArrowRecord();
   }
 
-  draw(ctx, u, t) {
+  draw(ctx, u) {
     const { r, ir, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.attributeValues;
 
     const safeR = Math.max(0, r);
@@ -3238,7 +3244,7 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
     this._arrowEnd = pxl.createArrowRecord();
   }
 
-  draw(ctx, u, t) {
+  draw(ctx, u) {
     const { rx, ry, irx, iry, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.attributeValues;
 
     const safeRX = Math.max(0, rx);
@@ -3357,7 +3363,7 @@ pxl.Rect = class Rect extends pxl.Shape {
     this._radii = [0, 0, 0, 0]; // reused by roundRect() every frame
   }
 
-  draw(ctx, u, t) {
+  draw(ctx, u) {
     const { w, h, r, r1, r2, r3, r4, anchor } = this.attributeValues;
 
     const startX = -w * pxl.anchorX[anchor] * u;
@@ -3412,7 +3418,7 @@ pxl.Line = class Line extends pxl.Shape {
     this._arrowEnd = pxl.createArrowRecord();
   }
 
-  draw(ctx, u, t) {
+  draw(ctx, u) {
     const { x1, y1, x2, y2, arrowstart, arrowend } = this.attributeValues;
     const startX = x1 * u, startY = y1 * u;
     const endX = x2 * u, endY = y2 * u;
@@ -3574,7 +3580,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     this._pointCount = count;
   }
 
-  draw(ctx, u, t) {
+  draw(ctx, u) {
     if (this._pointCount < 4) return;
 
     if (!this.loadPoints(u)) return;
@@ -3931,7 +3937,7 @@ pxl.Text = class Text extends pxl.Shape {
   }
 
   // Three caches, each rebuilt only when its inputs change: font string → line layout → bounding box
-  draw(ctx, u, t) {
+  draw(ctx, u) {
     const {
       text, size, font, align, baseline, weight, fontstyle, maxwidth,
       direction, width, lineheight, letterspacing, reveal
@@ -4129,7 +4135,7 @@ document.fonts.addEventListener('loadingdone', () => {
 pxl.Grid = class Grid extends pxl.Shape {
   static defaults = { ...pxl.Shape.defaults, step: 50, major: 0, labels: false, labelsize: 12 };
 
-  draw(ctx, u, t) {
+  draw(ctx, u) {
     const { step, major, labels, labelsize, strokewidth } = this.attributeValues;
     if (step <= 0) return; // the line loops would never end
 

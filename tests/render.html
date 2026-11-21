@@ -34,10 +34,10 @@
     // --- Helpers ---
 
     // Draws `content` in one layer of a 1000 × 600 px stage (unit 1), runs fn(layer, stage), removes the stage.
-    // resize() renders once; render(t) draws again at time t, as the tests need.
-    async function draw(content, fn, t = 1) {
+    // resize() renders once; render(t) draws again at time t, as the tests need. Another width gives another unit.
+    async function draw(content, fn, t = 1, width = 1000) {
       const box = document.createElement('div');
-      box.style.width = '1000px';
+      box.style.width = width + 'px';
       box.innerHTML = `<pxl-stage ratio="5 / 3" alwaysrender><pxl-layer>${content}</pxl-layer></pxl-stage>`;
       document.querySelector('.docs-inner').append(box);
       try {
@@ -271,6 +271,86 @@
     test('grid: with a stroke, major lines are drawn', () =>
       draw(`<pxl-grid step="100" major="2" stroke="#000" strokewidth="2"></pxl-grid>`, (layer) =>
         expectInk(layer, [[200, 50, true], [100, 50, true], [150, 50, false]])));
+
+    // ===================================================================
+    // Logical units (design/2026-11-20_custom_shapes_plan.md §5.3, §5.4): draw() works in the units of the HTML on a
+    // canvas scaled by the stage's unit, so a custom shape needs no u, and it gets no time
+    // ===================================================================
+    section('Logical units');
+
+    // Written the way a custom shape is: no u anywhere. A stroked line from (0, 0) to (400, 0), and a filled
+    // 400 × 100 box below it (gradients span the shape's box, 400 wide). draw() records the arguments after ctx.
+    customElements.define('test-logical-shape', class extends pxl.Shape {
+      draw(ctx, ...rest) {
+        this.drawArgs = rest;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(400, 0);
+        if (this.isStroked()) this.applyStrokeState(ctx);
+        if (this.isStroked()) ctx.stroke();
+        ctx.beginPath();
+        ctx.rect(0, 100, 400, 100);
+        if (this.hasFill()) this.applyStyle(ctx);
+      }
+      getBoundingBox() {
+        return Object.assign(this.boundingBox, { left: 0, right: 400, top: 0, bottom: 200 });
+      }
+    });
+
+    for (const width of [500, 1000]) {
+      test(`custom shape in logical units at stage width ${width}: stroke width and dashes scale with the stage`, () =>
+        draw('<test-logical-shape x="100" y="100" stroke="#000" strokewidth="40" linedash="[50, 50]"></test-logical-shape>',
+          (layer) => expectInk(layer, [
+            [125, 100, true], [125, 115, true], [125, 125, false], // dash on: 20 units on each side of the line
+            [175, 100, false], [225, 100, true]                     // the gap, the next dash
+          ]), 1, width));
+
+      test(`custom shape in logical units at stage width ${width}: a gradient spans the box`, () =>
+        draw(`<test-logical-shape x="100" y="100" fill="linear(0, ['#ff0000', '#0000ff'])"></test-logical-shape>`, (layer) => {
+          const left = pixel(layer, 105, 250), right = pixel(layer, 495, 250);
+          if (!(left[0] > 200 && left[2] < 60 && right[2] > 200 && right[0] < 60)) {
+            throw new Error(`left ${left}, right ${right}: expected red to blue across the box`);
+          }
+        }, 1, width));
+
+      test(`custom shape in logical units at stage width ${width}: hit along its outline, also when isolated`, () =>
+        draw(`<test-logical-shape id="lu1" x="100" y="100" stroke="#000" strokewidth="40" linedash="[50, 50]"></test-logical-shape>
+          <test-logical-shape id="lu2" x="500" y="100" fill="#000" shadowcolor="#000" shadowblur="5"></test-logical-shape>`,
+          (layer, stage) => {
+            const hit = (x, y) => stage.interaction.findShapeAt(x, y)?.id || 'none';
+            // lu1: its stroke, 20 units on each side of the line, and not its box (no fill); lu2 (isolated): its box
+            const got = [hit(125, 115), hit(125, 125), hit(105, 250), hit(895, 295), hit(905, 250), hit(600, 150)];
+            const expected = ['lu1', 'none', 'none', 'lu2', 'none', 'none'];
+            if (got.join() !== expected.join()) throw new Error(`hits ${got}, expected ${expected}`);
+          }, 1, width));
+    }
+
+    test('custom shape: draw() gets (ctx, 1) and no time, drawn, isolated and hit tested', () =>
+      draw(`<test-logical-shape id="luA" x="100" y="100" fill="#000"></test-logical-shape>
+        <test-logical-shape id="luB" x="500" y="100" fill="#000" shadowcolor="#000" shadowblur="5"></test-logical-shape>`,
+        (layer, stage) => {
+          const a = stage.querySelector('#luA'), b = stage.querySelector('#luB');
+          const seen = { drawn: a.drawArgs, isolated: b.drawArgs };
+          if (!b.needsIsolation()) throw new Error('luB is not isolated');
+          stage.interaction.findShapeAt(150, 250);
+          seen.hitTest = a.drawArgs;
+          for (const [name, args] of Object.entries(seen)) {
+            if (args.join() !== '1') throw new Error(`${name}: draw(ctx, ${args.join(', ')})`);
+          }
+        }, 5));
+
+    test('text in logical units: the same box and line breaks at stage widths 500 and 1000', async () => {
+      const content = '<pxl-text x="100" y="100" size="24" width="300" fill="#000" ' +
+        'text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor"></pxl-text>';
+      const seen = [];
+      for (const width of [500, 1000]) {
+        await draw(content, (layer, stage) => {
+          const t = stage.querySelector('pxl-text'), b = t.getBoundingBox();
+          seen.push(`${t._lines.join('|')} ${b.left} ${b.right} ${b.top} ${b.bottom}`);
+        }, 1, width);
+      }
+      if (seen[0] !== seen[1]) throw new Error(`width 500: ${seen[0]}; width 1000: ${seen[1]}`);
+    });
 
     // ===================================================================
     // Paint: fill, stroke, alpha, gradients, dashes, compositing, shadows

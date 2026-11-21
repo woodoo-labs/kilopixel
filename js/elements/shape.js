@@ -57,16 +57,21 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   // Draw phase. Every shape draws in its own canvas state: whatever it changes or throws, the next shape starts clean.
-  render(ctx, u, t) {
+  // draw() works in logical units (design/2026-11-20_custom_shapes_plan.md §5.3): the context is scaled by u after
+  // the shape's transform and compositing state (shadows and filters ignore the transform, so they carry u
+  // themselves). The built-in shapes still multiply their lengths by draw()'s second argument, which is always 1.
+  // draw() gets no time: time-dependent values are evaluated in update(), so the hit test sees what is drawn.
+  render(ctx, u) {
     if (this._failedFrame === pxl._frame || this.attributeValues.hidden) return;
     if (this.needsIsolation()) {
-      this.renderIsolated(ctx, u, t);
+      this.renderIsolated(ctx, u);
       return;
     }
     ctx.save();
     try {
       pxl.applyContextState(ctx, u, this.attributeValues, this);
-      this.draw(ctx, u, t);
+      ctx.scale(u, u);
+      this.draw(ctx, 1);
     } catch (error) {
       this.reportError(error);
     } finally {
@@ -113,15 +118,15 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // Draws with the shape's global matrix (the same pixels as the layer's transform chain, plan §3.4) into the whole
   // scratch area of the layer's size, then composites it with an identity transform: canvas shadows and filters
   // ignore the transform, so offsets and blur sizes stay as on the direct path.
-  renderIsolated(ctx, u, t) {
-    const canvas = ctx.canvas, w = canvas.width, h = canvas.height, d = this.parentLayer.dpr;
+  renderIsolated(ctx, u) {
+    const canvas = ctx.canvas, w = canvas.width, h = canvas.height, k = u * this.parentLayer.dpr;
     const scratch = pxl.getIsolationContext(w, h);
     scratch.clearRect(0, 0, w, h);
     scratch.save();
     try {
-      const m = this.getGlobalMatrix();
-      scratch.setTransform(m[0] * d, m[1] * d, m[2] * d, m[3] * d, m[4] * u * d, m[5] * u * d);
-      this.draw(scratch, u, t);
+      const m = this.getGlobalMatrix(); // in logical units: scaled by u like render()
+      scratch.setTransform(m[0] * k, m[1] * k, m[2] * k, m[3] * k, m[4] * k, m[5] * k);
+      this.draw(scratch, 1);
     } catch (error) {
       this.reportError(error);
       return;
@@ -291,7 +296,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
   // Sets all stroke-related context state (style, width, caps, joins, dash).
   // Shared by path-based shapes (via applyStyle) and non-path shapes like Text (strokeText).
-  applyStrokeState(ctx, u) {
+  applyStrokeState(ctx, u = 1) {
     const { stroke, strokewidth, linecap, linejoin, miterlimit } = this.attributeValues;
 
     ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
@@ -343,7 +348,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     return !!stroke && stroke !== 'none' && stroke !== 'transparent' && strokewidth > 0;
   }
 
-  applyStyle(ctx, u) {
+  applyStyle(ctx, u = 1) {
     if (this.hasFill()) {
       ctx.fillStyle = this.createGradient(ctx, u, this.attributeValues.fill, 0);
       ctx.fill();

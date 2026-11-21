@@ -377,6 +377,7 @@ No special dirty logic is needed. The clip redraws every frame along with its pa
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-21: `design/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; `render(ctx, u, t)` and `draw(ctx, u, t)` with `* u` here are the old form.
 - 2026-11-20: `design/2026-11-20_custom_shapes_plan.md` dropped `path()` again (one template, `draw(ctx)`); a path-only method would have to come back with this plan.
 - 2026-11-20: `design/2026-11-20_custom_shapes_plan.md` proposes `path(ctx)`, a path-only method for shapes: what this plan needed as `buildPath()`.
 - 2026-11-20: parked in `design/ideas/` (was TODO item 2). A shape with `mask="destination-in"` in its own layer clips that layer today, with soft edges and text masks that `ctx.clip()` can't do. Missing: clipping only part of a layer, and a clipped hit area. A route for clipping inside a layer that needs no `buildPath()` in every shape: group compositing through the isolation scratch canvas (a mask inside the group acts only on the group).
