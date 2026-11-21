@@ -1,22 +1,21 @@
 pxl.Shape = class Shape extends pxl.PxlNode {
+  // The pxl-on-* handlers are attributes without a value, so they aren't in defaults
   static get observedAttributes() {
-    return [
-      'x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy',
-      'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset',
-      'alpha', 'blend', 'mask', 'filter', 'shadowcolor', 'shadowblur', 'shadowx', 'shadowy', 'hidden',
-      'pxl-on-click', 'pxl-on-enter', 'pxl-on-leave', 'pxl-on-down', 'pxl-on-up', 'pxl-on-move', 'id'
-    ];
+    return [...super.observedAttributes, ...Object.keys(pxl.HANDLER_EVENTS)];
   }
 
   static defaults = {
     x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0,
     fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0,
-    alpha: 1, blend: 'source-over', mask: 'none', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false,
-    isHovered: false, isPressed: false
+    alpha: 1, blend: 'source-over', mask: 'none', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false
   };
 
   constructor() {
     super();
+    // Runtime state written by the interaction engine, read as ref.<id>.isHovered: values, but not attributes
+    this.attributeValues.isHovered = false;
+    this.attributeValues.isPressed = false;
+
     this.stage = null; // set in connectedCallback
 
     // Reused by getBoundingBox() every frame

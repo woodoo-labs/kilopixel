@@ -1,19 +1,20 @@
 pxl.Group = class Group extends pxl.PxlNode {
+  // The pxl-on-* handlers are attributes without a value, so they aren't in defaults
   static get observedAttributes() {
-    return [
-      'x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden',
-      'pxl-on-click', 'pxl-on-enter', 'pxl-on-leave', 'pxl-on-down', 'pxl-on-up', 'pxl-on-move', 'id'
-    ];
+    return [...super.observedAttributes, ...Object.keys(pxl.HANDLER_EVENTS)];
   }
 
-  // isHovered / isPressed: true while a shape inside the group is hovered or pressed, like :hover on a parent
   static defaults = {
-    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false,
-    isHovered: false, isPressed: false
+    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false
   };
 
   constructor() {
     super();
+    // Runtime state written by the interaction engine: true while a shape inside the group is hovered or pressed,
+    // like :hover on a parent. Values (ref.<id>.isHovered), but not attributes
+    this.attributeValues.isHovered = false;
+    this.attributeValues.isPressed = false;
+
     this.childList = []; // groups and shapes
     this._isOrderDirty = false; // children need sorting by DOM position
     this.stage = null; // set in connectedCallback

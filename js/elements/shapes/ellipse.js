@@ -1,12 +1,4 @@
 pxl.Ellipse = class Ellipse extends pxl.Shape {
-  static get observedAttributes() {
-    return [
-      ...super.observedAttributes,
-      'rx', 'ry', 'irx', 'iry', 'start', 'end', 'sweep', 'pie', 'closed', 'anticlockwise',
-      'arrowstart', 'arrowend', 'arrowstyle'
-    ];
-  }
-
   static defaults = {
     ...pxl.Shape.defaults,
     rx: 0, ry: 0, irx: 0, iry: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false,

@@ -1,6 +1,4 @@
 pxl.Rect = class Rect extends pxl.Shape {
-  static get observedAttributes() { return [...super.observedAttributes, 'w', 'h', 'r', 'r1', 'r2', 'r3', 'r4', 'anchor']; }
-
   static defaults = { ...pxl.Shape.defaults, w: 0, h: 0, r: null, r1: null, r2: null, r3: null, r4: null, anchor: 'center' };
 
   constructor() {

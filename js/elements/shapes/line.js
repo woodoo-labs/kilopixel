@@ -1,6 +1,4 @@
 pxl.Line = class Line extends pxl.Shape {
-  static get observedAttributes() { return [...super.observedAttributes, 'x1', 'y1', 'x2', 'y2', 'arrowstart', 'arrowend', 'arrowstyle']; }
-
   static defaults = { ...pxl.Shape.defaults, x1: 0, y1: 0, x2: 0, y2: 0, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
 
   constructor() {

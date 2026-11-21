@@ -3,6 +3,12 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   // Also used to resolve bare / removed attributes (pxl.resolveEmptyAttribute).
   static defaults = {};
 
+  // Every key of defaults is an attribute. The browser reads this once, at define time, with this = the class being
+  // defined, so one getter serves every subclass, custom shapes included.
+  static get observedAttributes() {
+    return [...Object.keys(this.defaults), 'id'];
+  }
+
   constructor() {
     super();
     // Before any field exists: own properties now were set before the upgrade (pxl.takeOwnProperties)

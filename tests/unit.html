@@ -479,7 +479,7 @@
         const el = document.createElement(tag), wrong = [];
         for (const name of names) {
           el.setAttribute(name, '');
-          const expected = pxl.BOOLEAN_ATTRIBUTES.has(name) ? true : name === 'value' ? '' : (Class.defaults[name] ?? null);
+          const expected = typeof Class.defaults[name] === 'boolean' ? true : name === 'value' ? '' : (Class.defaults[name] ?? null);
           if (!same(el.attributeValues[name], expected)) wrong.push(`${name}: ${show(el.attributeValues[name])} instead of ${show(expected)}`);
         }
         if (wrong.length) throw new Error(wrong.join('; '));
@@ -488,7 +488,7 @@
       test(`${tag}: removed attribute → the default, also after an animated value`, () => {
         const el = document.createElement(tag), wrong = [];
         for (const name of names) {
-          el.setAttribute(name, pxl.BOOLEAN_ATTRIBUTES.has(name) ? 'true' : 't * 0 + 7');
+          el.setAttribute(name, typeof Class.defaults[name] === 'boolean' ? 'true' : 't * 0 + 7');
           el.removeAttribute(name);
           const expected = Class.defaults[name] ?? null;
           if (!same(el.attributeValues[name], expected)) wrong.push(`${name}: ${show(el.attributeValues[name])} instead of ${show(expected)}`);
@@ -547,6 +547,92 @@
         throw new Error(`heights ${bare} / ${set} / ${removed}, alwaysrender ${always}`);
       }
     });
+
+    // ===================================================================
+    // Attribute lists from defaults (design/2026-11-20_custom_shapes_plan.md §5.1, §5.2): every key of static defaults
+    // is observed, a boolean default makes a presence attribute
+    // ===================================================================
+    section('Attribute lists from defaults');
+
+    // The hand-written lists the engine had before they were derived; the derived ones must observe the same names
+    const COMMON = 'x y dx dy rotate zoom scalex scaley skewx skewy';
+    const SHAPE = `${COMMON} fill stroke strokewidth linecap linejoin miterlimit linedash dashoffset alpha blend mask filter ` +
+      'shadowcolor shadowblur shadowx shadowy hidden pxl-on-click pxl-on-enter pxl-on-leave pxl-on-down pxl-on-up pxl-on-move id';
+    const ARROWS = 'arrowstart arrowend arrowstyle';
+    table('observedAttributes: the same names as the former hand-written lists', [
+      ['pxl-circle', `${SHAPE} r ir start end sweep pie closed anticlockwise ${ARROWS}`],
+      ['pxl-ellipse', `${SHAPE} rx ry irx iry start end sweep pie closed anticlockwise ${ARROWS}`],
+      ['pxl-rect', `${SHAPE} w h r r1 r2 r3 r4 anchor`],
+      ['pxl-line', `${SHAPE} x1 y1 x2 y2 ${ARROWS}`],
+      ['pxl-polyline', `${SHAPE} points closed smooth mode ${ARROWS}`],
+      ['pxl-text', `${SHAPE} text size font align baseline weight fontstyle maxwidth direction width lineheight letterspacing reveal`],
+      ['pxl-grid', `${SHAPE} step major labels labelsize`],
+      ['pxl-group', `${COMMON} hidden pxl-on-click pxl-on-enter pxl-on-leave pxl-on-down pxl-on-up pxl-on-move id`],
+      ['pxl-layer', `${COMMON} alpha blend filter hidden id`],
+      ['pxl-var', 'value id']
+    ], ([tag, names]) => [customElements.get(tag).observedAttributes.slice().sort(), names.split(' ').sort()], ([tag]) => tag);
+
+    test('presence attributes of the built-in elements: the boolean defaults', () => {
+      const found = new Set();
+      for (const tag of ELEMENTS) {
+        const defaults = customElements.get(tag).defaults;
+        for (const name of Object.keys(defaults)) if (typeof defaults[name] === 'boolean') found.add(name);
+      }
+      const expected = ['anticlockwise', 'closed', 'hidden', 'labels', 'pie', 'smooth'];
+      if (!same([...found].sort(), expected)) throw new Error(`${[...found].sort()} instead of ${expected}`);
+    });
+
+    test('isHovered / isPressed: false on new shapes and groups, but not attributes or properties', () => {
+      const wrong = [];
+      for (const tag of ['pxl-circle', 'pxl-group']) {
+        const Class = customElements.get(tag), el = document.createElement(tag);
+        for (const name of ['isHovered', 'isPressed']) {
+          if (el.attributeValues[name] !== false) wrong.push(`${tag} ${name}: ${show(el.attributeValues[name])}`);
+          if (name in Class.defaults || Class.observedAttributes.includes(name.toLowerCase())) wrong.push(`${tag} ${name}: an attribute`);
+          if (name in el) wrong.push(`${tag} ${name}: a property`);
+        }
+      }
+      if (wrong.length) throw new Error(wrong.join('; '));
+    });
+
+    // A custom shape gets its attributes, presence attributes and properties from its defaults alone
+    if (!customElements.get('pxl-unit-pump')) {
+      customElements.define('pxl-unit-pump', class UnitPump extends pxl.Shape {
+        static defaults = { ...pxl.Shape.defaults, running: false, speed: 1 };
+        draw() {}
+        getBoundingBox() { return this.boundingBox; }
+      });
+    }
+
+    test('custom shape: its defaults, the handlers and id are observed', () => {
+      const names = customElements.get('pxl-unit-pump').observedAttributes;
+      const missing = ['running', 'speed', 'fill', 'id', ...Object.keys(pxl.HANDLER_EVENTS)].filter((n) => !names.includes(n));
+      if (missing.length) throw new Error(`not observed: ${missing.join(', ')}`);
+    });
+
+    test('custom shape: a false default makes a presence attribute (bare true, "false" false, removed false)', () => {
+      const el = document.createElement('pxl-unit-pump'), seen = [];
+      el.setAttribute('running', '');
+      seen.push(el.attributeValues.running);
+      el.setAttribute('running', 'false');
+      seen.push(el.attributeValues.running);
+      el.setAttribute('running', 'true');
+      el.removeAttribute('running');
+      seen.push(el.attributeValues.running);
+      el.setAttribute('speed', '');
+      seen.push(el.attributeValues.speed);
+      if (!same(seen, [true, false, false, 1])) throw new Error(`running ${seen.slice(0, 3)}, bare speed ${seen[3]}`);
+    });
+
+    test('custom shape: its attributes are properties', () => {
+      const el = document.createElement('pxl-unit-pump');
+      el.running = true;
+      el.speed = 3;
+      if (el.attributeValues.running !== true || el.speed !== 3) {
+        throw new Error(`running ${show(el.attributeValues.running)}, speed ${show(el.speed)}`);
+      }
+    });
+
 
     // ===================================================================
     // Properties (design/done/2026-10-30_framework_compatibility_plan.md §6, §24): every attribute is also a property,

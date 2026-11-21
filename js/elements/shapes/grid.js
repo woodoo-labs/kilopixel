@@ -1,8 +1,4 @@
 pxl.Grid = class Grid extends pxl.Shape {
-  static get observedAttributes() {
-    return [...super.observedAttributes, 'step', 'major', 'labels', 'labelsize'];
-  }
-
   static defaults = { ...pxl.Shape.defaults, step: 50, major: 0, labels: false, labelsize: 12 };
 
   draw(ctx, u, t) {

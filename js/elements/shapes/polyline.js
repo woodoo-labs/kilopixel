@@ -1,6 +1,7 @@
 pxl.Polyline = class Polyline extends pxl.Shape {
+  // points has no default: it is stored as one value per coordinate (p0, p1, …, see setPoints())
   static get observedAttributes() {
-    return [...super.observedAttributes, 'points', 'closed', 'smooth', 'mode', 'arrowstart', 'arrowend', 'arrowstyle'];
+    return [...super.observedAttributes, 'points'];
   }
 
   static defaults = {

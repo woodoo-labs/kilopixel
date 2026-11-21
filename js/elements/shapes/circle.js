@@ -1,12 +1,4 @@
 pxl.Circle = class Circle extends pxl.Shape {
-  static get observedAttributes() {
-    return [
-      ...super.observedAttributes,
-      'r', 'ir', 'start', 'end', 'sweep', 'pie', 'closed', 'anticlockwise',
-      'arrowstart', 'arrowend', 'arrowstyle'
-    ];
-  }
-
   static defaults = {
     ...pxl.Shape.defaults,
     r: 0, ir: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false,

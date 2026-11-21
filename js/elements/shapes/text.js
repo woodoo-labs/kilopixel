@@ -2,14 +2,6 @@
 pxl._fontGeneration = 0;
 
 pxl.Text = class Text extends pxl.Shape {
-  static get observedAttributes() {
-    return [
-      ...super.observedAttributes,
-      'text', 'size', 'font', 'align', 'baseline', 'weight', 'fontstyle', 'maxwidth',
-      'direction', 'width', 'lineheight', 'letterspacing', 'reveal'
-    ];
-  }
-
   static defaults = {
     ...pxl.Shape.defaults,
     text: '', size: 16, font: 'sans-serif', align: 'start',

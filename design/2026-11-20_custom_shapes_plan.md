@@ -1,6 +1,6 @@
 # Custom Shapes and Element Structure
 
-- **Status**: 🟡 **Proposed** (2026-11-21, D3 decided: `pxl.defineShape()`; logical units pass in Firefox; the test in Safari and D2, D4–D9 open)
+- **Status**: 🟡 **Proposed** (2026-11-21, step 2 built (§12): attribute lists from `defaults`; D3 decided; the test in Safari and D2, D4–D9 open)
 - **Date**: 2026-11-20
 - **Replaces**: `design/archive/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`, `draw()` without `t`, custom animation patterns, verified 2026-10-17 and 2026-11-07) and the structure cleanup draft of 2026-11-20 (`scratch/2026-11-20_engine_structure_cleanup_plan.md` (not kept); its steps and measurements are §6 here)
 - **Related**: `design/2026-11-20_evaluation_model_plan.md` (step 2 makes "`draw()` only reads values" a contract), `design/2026-10-19_polygon_star_shape_plan.md` (the first new shape in this form), `design/done/2026-11-01_isolated_shape_compositing_plan.md` (`drawsMoreThanOnce()`), `design/done/2026-11-07_safe_shape_render_plan.md` (a careless shape can't break the layer), `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked), `design/2026-10-30_space_attribute_plan.md` (with step 6.6)
@@ -115,6 +115,8 @@ Everything listed here is public and stays stable; everything else (names with `
 
 From the shape authoring plan §3.1: `PxlNode`'s static getter returns `Object.keys(this.defaults)` (one getter serves every subclass; the browser reads it once at define time), with the lowercase warning; `Shape` and `Group` append the keys of `pxl.HANDLER_EVENTS`; every element keeps `id`. `isHovered` / `isPressed` move out of `defaults` into the constructors of `Shape` and `Group` (runtime state, not attributes). `<pxl-polyline>` gets `points: ''`. Checked 2026-11-07: the derived lists equal today's hand-written ones except for these three cases. `Stage` keeps its own list.
 
+*2026-11-21, built with two deviations (§12):* `points` stays out of `defaults` (Polyline adds it to the list), and the lowercase warning moves to the checks of `pxl.defineShape()` (§5.5).
+
 ### 5.2 Presence Attributes From `defaults`
 
 `pxl.resolveEmptyAttribute()` treats a bare attribute as `true` when the class default is a boolean, instead of looking it up in `pxl.BOOLEAN_ATTRIBUTES`, which goes away. For the built-ins this is the same set (`hidden`, `closed`, `smooth`, `pie`, `anticlockwise`, `labels`: the boolean defaults once `isHovered` / `isPressed` are out). `pxl.isSpatialKey()` stays a fixed list (custom shapes don't add transforms).
@@ -198,7 +200,7 @@ From the cleanup draft of 2026-11-20. **Not part of the custom-shape steps (§9)
 
 | Change | `pxl.min.js` |
 |---|---|
-| §5.1 derived lists (11 hand-written lists) | about −0.5 KB |
+| §5.1 derived lists (11 hand-written lists) | about −0.5 KB; measured with §5.2: −1.4 KB (§12) |
 | §5.3 phase 1 | about +0.1 KB |
 | §5.3 phase 2 (the `* u` out of the built-ins) | about −1 KB |
 | §5.5, §5.7 new code (with `defineShape()`, the tag list in the default styles goes) | about +0.3 KB |
@@ -214,7 +216,7 @@ From the cleanup draft of 2026-11-20. **Not part of the custom-shape steps (§9)
 ## 9. Steps
 
 1. **Test phase 1 in Firefox and Safari:** `logical_units/text_tests.html`, the page sweep, `template/rich.html`. Firefox done 2026-11-21 (§5.3); Safari open.
-2. §5.1 and §5.2 (derived attribute lists and presence attributes; `isHovered` / `isPressed` out of `defaults`; `points: ''`).
+2. §5.1 and §5.2 (derived attribute lists and presence attributes; `isHovered` / `isPressed` out of `defaults`; `points: ''`). Built 2026-11-21 (§12), `points` without a default.
 3. §5.3 phase 1 and §5.4: the calling convention, `draw(ctx)` without `t`.
 4. §5.6 rename, if decided (D4).
 5. §5.5 and §5.7: defining the tag, `setBoundingBox()`, `paint()`, the checks once per class; the Star and the Gauge as tests, loaded as a second script.
@@ -226,7 +228,7 @@ From the cleanup draft of 2026-11-20. **Not part of the custom-shape steps (§9)
 
 | # | Case | Expected |
 |---|---|---|
-| 1 | Every built-in class: derived `observedAttributes` against the old lists | the same sets, apart from §5.1's three cases |
+| 1 | Every built-in class: derived `observedAttributes` against the old lists | the same sets, apart from §5.1's three cases (built: the same sets, §12) |
 | 2 | Bare and removed attributes of every attribute of every element (Rule A, `tests/unit.html`) | unchanged; presence attributes the same six |
 | 3 | A custom shape with a `false` default, written bare | `true`; removed: `false` |
 | 4 | The Star at stage widths 500 and 1000 | the same picture scaled; stroke width, dashes and gradient scaled once |
@@ -255,10 +257,32 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 | D8 | Typings for custom shapes | a declaration to copy on the docs page; generated typings later |
 | D9 | Internal animated values (§5.9) | after the evaluation model |
 
+## 12. Step 2 Built (2026-11-21)
+
+**What changed** (§5.1, §5.2):
+
+- `js/elements/node.js`: `PxlNode`'s `static get observedAttributes()` returns `Object.keys(this.defaults)` plus `id`; with `this` the class being defined, it serves every subclass.
+- `js/elements/shape.js`, `js/elements/group.js`: the getter adds the keys of `pxl.HANDLER_EVENTS`. `isHovered` / `isPressed` left `defaults`; the constructors set them in `attributeValues` (still `ref.<id>.isHovered`, still not attributes or properties).
+- `js/elements/layer.js`, `variable.js`, `shapes/circle.js`, `ellipse.js`, `rect.js`, `line.js`, `text.js`, `grid.js`: the hand-written lists removed. `Stage` keeps its own.
+- `js/elements/shapes/polyline.js`: the getter adds only `points`.
+- `js/engine.js`: `pxl.BOOLEAN_ATTRIBUTES` removed; `pxl.resolveEmptyAttribute()` returns `true` for a bare attribute whose class default is a boolean. The built-ins have the same six presence attributes.
+
+**Deviations:**
+
+- **`points` has no default** (the plan: `points: ''`). Polyline stores the coordinates as `p0`, `p1`, …, never `points` itself, so a default would leave a `ref.<id>.points` that never changes. Keeping it out of `defaults` keeps today's behavior.
+- **The lowercase warning** moves to step 5 (§5.5, the checks of `pxl.defineShape()`): the getter is also called by `pxl.defineAccessors()` and by tests, so a warning there would repeat. All built-in keys are lowercase.
+
+**Tests** (`tests/unit.html`, section "Attribute lists from defaults"): the derived lists of the ten elements against a copy of the former hand-written lists (the same names); the presence attributes of the built-ins are exactly the six; `isHovered` / `isPressed` start `false` on shapes and groups and are neither attributes nor properties; a custom shape defined in the test (`running: false`, `speed: 1`) is observed with its handlers and `id`, a bare `running` is `true`, `"false"` and removed `false`, both are properties. The Rule A tests read booleans from the default's type. `node tools/run_tests.js`: all passed.
+
+**Size:** `pxl.min.js` 74,281 → 72,818 bytes (−1.4 KB; estimated −0.5 KB). The typings only changed the order (handlers after the shape's own attributes).
+
+**Left:** the lowercase warning (step 5).
+
 ## Log
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-21: step 2 built (§12): `observedAttributes` from `defaults`, presence attributes from boolean defaults, `pxl.BOOLEAN_ATTRIBUTES` removed; `points` without a default, the lowercase warning moved to step 5. −1.4 KB.
 - 2026-11-21: D3 decided: `pxl.defineShape(tag, Class)` for built-in and custom shapes (§5.5). Phase 1 tested in Firefox 160 (§5.3): the same as in Chrome except text spacing (lines up to 10 device pixels shorter, wrapping unchanged); scripts in `firefox/`. Safari still open.
 - 2026-11-20: one template, `draw(ctx)` in logical units (D1 decided): the engine scales the canvas by `u`, in two phases (§5.3) with the measurements of `logical_units/`; `path()` and the two levels dropped. D3 reopened (`pxl.defineShape()` or plain `define()`). The investigation found shape shadows and filters at 1/DPR of their size on HiDPI screens: fixed in commit `7cbb439`. Prototypes moved into `template/`, `logical_units/`, `transform_path/`.
 - 2026-11-20: D3 decided: no registration API, custom shapes are written like built-in shapes (a class and `customElements.define()` in a second script). `pxl.defineShape()` dropped; hiding content (§5.5) by manual slot assignment instead of a tag list; the checks run once per class. The structure cleanup (§6) moves after the custom-shape steps and is discussed separately.

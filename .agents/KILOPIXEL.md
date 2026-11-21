@@ -1,6 +1,6 @@
 # Kilopixel — Language Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~73KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~71KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 How to write Kilopixel: elements, attributes, expressions, interaction. Each fact is stated once; sections link each other. How the engine does it (source files, frame, reactivity, hit testing, drawing): `.agents/ENGINE.md`. Docs pages also follow `docs/DOCS_STANDARDS.md`.
 
@@ -111,7 +111,7 @@ Text with digits next to operators, parentheses or brackets looks like code (`te
 | bare (`''`: `<pxl-polyline closed>`, `el.hidden = true`, `toggleAttribute`) | `true` | `''` | the class default |
 | removed (`removeAttribute`, `el.hidden = false`, a framework dropping `null`) | the default (`false`) | `0` | the class default |
 
-- Boolean attributes: `hidden`, `closed`, `smooth`, `pie`, `anticlockwise`, `labels`. Only bare, `"true"` and `"false"` are booleans: `closed="1"` is not `true`. Examples write `="true"` for readability.
+- Boolean attributes are those with a `false` / `true` default: `hidden`, `closed`, `smooth`, `pie`, `anticlockwise`, `labels`. Only bare, `"true"` and `"false"` are booleans: `closed="1"` is not `true`. Examples write `="true"` for readability.
 - The resolved value is static: removing an animated or reactive attribute also stops its animation or subscription.
 - Defaults that are `null` on purpose mean "not set" (rect `r1`–`r4` fall back to `r`; circle `end` / `sweep`: a full circle).
 - Not handled: whitespace-only values (`" "` parses to `0`) and invalid values (`miterlimit="abc"`).

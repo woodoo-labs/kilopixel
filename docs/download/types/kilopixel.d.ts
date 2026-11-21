@@ -148,12 +148,6 @@ declare global {
     shadowblur?: PxlNumber | null;
     shadowx?: PxlNumber | null;
     shadowy?: PxlNumber | null;
-    'pxl-on-click'?: string;
-    'pxl-on-enter'?: string;
-    'pxl-on-leave'?: string;
-    'pxl-on-down'?: string;
-    'pxl-on-up'?: string;
-    'pxl-on-move'?: string;
     r?: PxlNumber | null;
     ir?: PxlNumber | null;
     start?: PxlNumber | null;
@@ -165,6 +159,12 @@ declare global {
     arrowstart?: number | 'auto' | PxlExpression | null;
     arrowend?: number | 'auto' | PxlExpression | null;
     arrowstyle?: 'filled' | 'line' | PxlExpression | null;
+    'pxl-on-click'?: string;
+    'pxl-on-enter'?: string;
+    'pxl-on-leave'?: string;
+    'pxl-on-down'?: string;
+    'pxl-on-up'?: string;
+    'pxl-on-move'?: string;
   }
   /** <pxl-circle>: every attribute is also a property; reading returns the evaluated value */
   interface PxlCircleElement extends PxlElement {
@@ -271,12 +271,6 @@ declare global {
     shadowblur?: PxlNumber | null;
     shadowx?: PxlNumber | null;
     shadowy?: PxlNumber | null;
-    'pxl-on-click'?: string;
-    'pxl-on-enter'?: string;
-    'pxl-on-leave'?: string;
-    'pxl-on-down'?: string;
-    'pxl-on-up'?: string;
-    'pxl-on-move'?: string;
     rx?: PxlNumber | null;
     ry?: PxlNumber | null;
     irx?: PxlNumber | null;
@@ -290,6 +284,12 @@ declare global {
     arrowstart?: number | 'auto' | PxlExpression | null;
     arrowend?: number | 'auto' | PxlExpression | null;
     arrowstyle?: 'filled' | 'line' | PxlExpression | null;
+    'pxl-on-click'?: string;
+    'pxl-on-enter'?: string;
+    'pxl-on-leave'?: string;
+    'pxl-on-down'?: string;
+    'pxl-on-up'?: string;
+    'pxl-on-move'?: string;
   }
   /** <pxl-ellipse>: every attribute is also a property; reading returns the evaluated value */
   interface PxlEllipseElement extends PxlElement {
@@ -400,12 +400,6 @@ declare global {
     shadowblur?: PxlNumber | null;
     shadowx?: PxlNumber | null;
     shadowy?: PxlNumber | null;
-    'pxl-on-click'?: string;
-    'pxl-on-enter'?: string;
-    'pxl-on-leave'?: string;
-    'pxl-on-down'?: string;
-    'pxl-on-up'?: string;
-    'pxl-on-move'?: string;
     w?: PxlNumber | null;
     h?: PxlNumber | null;
     r?: PxlNumber | null;
@@ -414,6 +408,12 @@ declare global {
     r3?: PxlNumber | null;
     r4?: PxlNumber | null;
     anchor?: 'left' | 'right' | 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top' | 'bottom' | 'top-center' | 'bottom-center' | 'left-center' | 'right-center' | 'center-top' | 'center-bottom' | 'center-left' | 'center-right' | PxlExpression | null;
+    'pxl-on-click'?: string;
+    'pxl-on-enter'?: string;
+    'pxl-on-leave'?: string;
+    'pxl-on-down'?: string;
+    'pxl-on-up'?: string;
+    'pxl-on-move'?: string;
   }
   /** <pxl-rect>: every attribute is also a property; reading returns the evaluated value */
   interface PxlRectElement extends PxlElement {
@@ -514,12 +514,6 @@ declare global {
     shadowblur?: PxlNumber | null;
     shadowx?: PxlNumber | null;
     shadowy?: PxlNumber | null;
-    'pxl-on-click'?: string;
-    'pxl-on-enter'?: string;
-    'pxl-on-leave'?: string;
-    'pxl-on-down'?: string;
-    'pxl-on-up'?: string;
-    'pxl-on-move'?: string;
     x1?: PxlNumber | null;
     y1?: PxlNumber | null;
     x2?: PxlNumber | null;
@@ -527,6 +521,12 @@ declare global {
     arrowstart?: number | 'auto' | PxlExpression | null;
     arrowend?: number | 'auto' | PxlExpression | null;
     arrowstyle?: 'filled' | 'line' | PxlExpression | null;
+    'pxl-on-click'?: string;
+    'pxl-on-enter'?: string;
+    'pxl-on-leave'?: string;
+    'pxl-on-down'?: string;
+    'pxl-on-up'?: string;
+    'pxl-on-move'?: string;
   }
   /** <pxl-line>: every attribute is also a property; reading returns the evaluated value */
   interface PxlLineElement extends PxlElement {
@@ -625,6 +625,12 @@ declare global {
     shadowblur?: PxlNumber | null;
     shadowx?: PxlNumber | null;
     shadowy?: PxlNumber | null;
+    closed?: PxlBoolean | null;
+    smooth?: PxlBoolean | null;
+    mode?: 'absolute' | 'relative' | PxlExpression | null;
+    arrowstart?: number | 'auto' | PxlExpression | null;
+    arrowend?: number | 'auto' | PxlExpression | null;
+    arrowstyle?: 'filled' | 'line' | PxlExpression | null;
     'pxl-on-click'?: string;
     'pxl-on-enter'?: string;
     'pxl-on-leave'?: string;
@@ -632,12 +638,6 @@ declare global {
     'pxl-on-up'?: string;
     'pxl-on-move'?: string;
     points?: string | readonly (number | string)[] | readonly (readonly [number | string, number | string])[] | null;
-    closed?: PxlBoolean | null;
-    smooth?: PxlBoolean | null;
-    mode?: 'absolute' | 'relative' | PxlExpression | null;
-    arrowstart?: number | 'auto' | PxlExpression | null;
-    arrowend?: number | 'auto' | PxlExpression | null;
-    arrowstyle?: 'filled' | 'line' | PxlExpression | null;
   }
   /** <pxl-polyline>: every attribute is also a property; reading returns the evaluated value */
   interface PxlPolylineElement extends PxlElement {
@@ -693,8 +693,6 @@ declare global {
     set shadowx(value: PxlNumber | null | undefined);
     get shadowy(): number;
     set shadowy(value: PxlNumber | null | undefined);
-    get points(): number[];
-    set points(value: string | readonly (number | string)[] | readonly (readonly [number | string, number | string])[] | null | undefined);
     get closed(): boolean;
     set closed(value: PxlBoolean | null | undefined);
     get smooth(): boolean;
@@ -707,6 +705,8 @@ declare global {
     set arrowend(value: number | 'auto' | PxlExpression | null | undefined);
     get arrowstyle(): 'filled' | 'line';
     set arrowstyle(value: 'filled' | 'line' | PxlExpression | null | undefined);
+    get points(): number[];
+    set points(value: string | readonly (number | string)[] | readonly (readonly [number | string, number | string])[] | null | undefined);
   }
   /** Props of <pxl-text> in JSX and templates (null or undefined: the default) */
   interface PxlTextAttributes {
@@ -736,12 +736,6 @@ declare global {
     shadowblur?: PxlNumber | null;
     shadowx?: PxlNumber | null;
     shadowy?: PxlNumber | null;
-    'pxl-on-click'?: string;
-    'pxl-on-enter'?: string;
-    'pxl-on-leave'?: string;
-    'pxl-on-down'?: string;
-    'pxl-on-up'?: string;
-    'pxl-on-move'?: string;
     text?: string | number | null;
     size?: PxlNumber | null;
     font?: string | null;
@@ -755,6 +749,12 @@ declare global {
     lineheight?: PxlNumber | null;
     letterspacing?: PxlNumber | null;
     reveal?: PxlNumber | null;
+    'pxl-on-click'?: string;
+    'pxl-on-enter'?: string;
+    'pxl-on-leave'?: string;
+    'pxl-on-down'?: string;
+    'pxl-on-up'?: string;
+    'pxl-on-move'?: string;
   }
   /** <pxl-text>: every attribute is also a property; reading returns the evaluated value */
   interface PxlTextElement extends PxlElement {
@@ -865,16 +865,16 @@ declare global {
     shadowblur?: PxlNumber | null;
     shadowx?: PxlNumber | null;
     shadowy?: PxlNumber | null;
+    step?: PxlNumber | null;
+    major?: PxlNumber | null;
+    labels?: PxlBoolean | null;
+    labelsize?: PxlNumber | null;
     'pxl-on-click'?: string;
     'pxl-on-enter'?: string;
     'pxl-on-leave'?: string;
     'pxl-on-down'?: string;
     'pxl-on-up'?: string;
     'pxl-on-move'?: string;
-    step?: PxlNumber | null;
-    major?: PxlNumber | null;
-    labels?: PxlBoolean | null;
-    labelsize?: PxlNumber | null;
   }
   /** <pxl-grid>: every attribute is also a property; reading returns the evaluated value */
   interface PxlGridElement extends PxlElement {

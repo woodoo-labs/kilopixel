@@ -107,17 +107,15 @@ pxl.renameNode = function(element, oldId, newId) {
 // Attribute Compilation
 // =========================================================================
 
-// Attributes that follow the HTML presence rule: a bare attribute (<pxl-polyline closed>) means true
-pxl.BOOLEAN_ATTRIBUTES = new Set(['hidden', 'closed', 'smooth', 'pie', 'anticlockwise', 'labels']);
-
-// Resolves a bare ('') or removed (null) attribute: bare boolean = true, bare <pxl-var> value = '',
-// otherwise the class default (design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md)
+// Resolves a bare ('') or removed (null) attribute (design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md):
+// an attribute with a boolean default follows the HTML presence rule, so bare (<pxl-polyline closed>) is true;
+// a bare <pxl-var> value is ''; otherwise the class default
 pxl.resolveEmptyAttribute = function(element, name, newValue) {
+  const value = element.constructor.defaults[name];
   if (newValue === '') {
-    if (pxl.BOOLEAN_ATTRIBUTES.has(name)) return true;
+    if (typeof value === 'boolean') return true;
     if (name === 'value') return ''; // only <pxl-var> has a value attribute
   }
-  const value = element.constructor.defaults[name];
   return value === undefined ? null : value;
 };
 
@@ -1988,6 +1986,12 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   // Also used to resolve bare / removed attributes (pxl.resolveEmptyAttribute).
   static defaults = {};
 
+  // Every key of defaults is an attribute. The browser reads this once, at define time, with this = the class being
+  // defined, so one getter serves every subclass, custom shapes included.
+  static get observedAttributes() {
+    return [...Object.keys(this.defaults), 'id'];
+  }
+
   constructor() {
     super();
     // Before any field exists: own properties now were set before the upgrade (pxl.takeOwnProperties)
@@ -2349,13 +2353,6 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
 
 pxl.Layer = class Layer extends pxl.PxlNode {
-  static get observedAttributes() {
-    return [
-      'x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy',
-      'alpha', 'blend', 'filter', 'hidden', 'id'
-    ];
-  }
-
   static defaults = {
     x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0,
     alpha: 1, blend: 'source-over', filter: 'none', hidden: false
@@ -2576,21 +2573,22 @@ pxl.Layer = class Layer extends pxl.PxlNode {
 };
 customElements.define('pxl-layer', pxl.Layer);
 pxl.Group = class Group extends pxl.PxlNode {
+  // The pxl-on-* handlers are attributes without a value, so they aren't in defaults
   static get observedAttributes() {
-    return [
-      'x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy', 'hidden',
-      'pxl-on-click', 'pxl-on-enter', 'pxl-on-leave', 'pxl-on-down', 'pxl-on-up', 'pxl-on-move', 'id'
-    ];
+    return [...super.observedAttributes, ...Object.keys(pxl.HANDLER_EVENTS)];
   }
 
-  // isHovered / isPressed: true while a shape inside the group is hovered or pressed, like :hover on a parent
   static defaults = {
-    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false,
-    isHovered: false, isPressed: false
+    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false
   };
 
   constructor() {
     super();
+    // Runtime state written by the interaction engine: true while a shape inside the group is hovered or pressed,
+    // like :hover on a parent. Values (ref.<id>.isHovered), but not attributes
+    this.attributeValues.isHovered = false;
+    this.attributeValues.isPressed = false;
+
     this.childList = []; // groups and shapes
     this._isOrderDirty = false; // children need sorting by DOM position
     this.stage = null; // set in connectedCallback
@@ -2664,24 +2662,23 @@ pxl.Group = class Group extends pxl.PxlNode {
 customElements.define('pxl-group', pxl.Group);
 
 pxl.Shape = class Shape extends pxl.PxlNode {
+  // The pxl-on-* handlers are attributes without a value, so they aren't in defaults
   static get observedAttributes() {
-    return [
-      'x', 'y', 'dx', 'dy', 'rotate', 'zoom', 'scalex', 'scaley', 'skewx', 'skewy',
-      'fill', 'stroke', 'strokewidth', 'linecap', 'linejoin', 'miterlimit', 'linedash', 'dashoffset',
-      'alpha', 'blend', 'mask', 'filter', 'shadowcolor', 'shadowblur', 'shadowx', 'shadowy', 'hidden',
-      'pxl-on-click', 'pxl-on-enter', 'pxl-on-leave', 'pxl-on-down', 'pxl-on-up', 'pxl-on-move', 'id'
-    ];
+    return [...super.observedAttributes, ...Object.keys(pxl.HANDLER_EVENTS)];
   }
 
   static defaults = {
     x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0,
     fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0,
-    alpha: 1, blend: 'source-over', mask: 'none', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false,
-    isHovered: false, isPressed: false
+    alpha: 1, blend: 'source-over', mask: 'none', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false
   };
 
   constructor() {
     super();
+    // Runtime state written by the interaction engine, read as ref.<id>.isHovered: values, but not attributes
+    this.attributeValues.isHovered = false;
+    this.attributeValues.isPressed = false;
+
     this.stage = null; // set in connectedCallback
 
     // Reused by getBoundingBox() every frame
@@ -3120,14 +3117,6 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 };
 pxl.Circle = class Circle extends pxl.Shape {
-  static get observedAttributes() {
-    return [
-      ...super.observedAttributes,
-      'r', 'ir', 'start', 'end', 'sweep', 'pie', 'closed', 'anticlockwise',
-      'arrowstart', 'arrowend', 'arrowstyle'
-    ];
-  }
-
   static defaults = {
     ...pxl.Shape.defaults,
     r: 0, ir: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false,
@@ -3237,14 +3226,6 @@ pxl.Circle = class Circle extends pxl.Shape {
 customElements.define('pxl-circle', pxl.Circle);
 
 pxl.Ellipse = class Ellipse extends pxl.Shape {
-  static get observedAttributes() {
-    return [
-      ...super.observedAttributes,
-      'rx', 'ry', 'irx', 'iry', 'start', 'end', 'sweep', 'pie', 'closed', 'anticlockwise',
-      'arrowstart', 'arrowend', 'arrowstyle'
-    ];
-  }
-
   static defaults = {
     ...pxl.Shape.defaults,
     rx: 0, ry: 0, irx: 0, iry: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false,
@@ -3369,8 +3350,6 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
 customElements.define('pxl-ellipse', pxl.Ellipse);
 
 pxl.Rect = class Rect extends pxl.Shape {
-  static get observedAttributes() { return [...super.observedAttributes, 'w', 'h', 'r', 'r1', 'r2', 'r3', 'r4', 'anchor']; }
-
   static defaults = { ...pxl.Shape.defaults, w: 0, h: 0, r: null, r1: null, r2: null, r3: null, r4: null, anchor: 'center' };
 
   constructor() {
@@ -3425,8 +3404,6 @@ pxl.Rect = class Rect extends pxl.Shape {
 customElements.define('pxl-rect', pxl.Rect);
 
 pxl.Line = class Line extends pxl.Shape {
-  static get observedAttributes() { return [...super.observedAttributes, 'x1', 'y1', 'x2', 'y2', 'arrowstart', 'arrowend', 'arrowstyle']; }
-
   static defaults = { ...pxl.Shape.defaults, x1: 0, y1: 0, x2: 0, y2: 0, arrowstart: 0, arrowend: 0, arrowstyle: 'filled' };
 
   constructor() {
@@ -3491,8 +3468,9 @@ pxl.Line = class Line extends pxl.Shape {
 customElements.define('pxl-line', pxl.Line);
 
 pxl.Polyline = class Polyline extends pxl.Shape {
+  // points has no default: it is stored as one value per coordinate (p0, p1, …, see setPoints())
   static get observedAttributes() {
-    return [...super.observedAttributes, 'points', 'closed', 'smooth', 'mode', 'arrowstart', 'arrowend', 'arrowstyle'];
+    return [...super.observedAttributes, 'points'];
   }
 
   static defaults = {
@@ -3904,14 +3882,6 @@ customElements.define('pxl-polyline', pxl.Polyline);
 pxl._fontGeneration = 0;
 
 pxl.Text = class Text extends pxl.Shape {
-  static get observedAttributes() {
-    return [
-      ...super.observedAttributes,
-      'text', 'size', 'font', 'align', 'baseline', 'weight', 'fontstyle', 'maxwidth',
-      'direction', 'width', 'lineheight', 'letterspacing', 'reveal'
-    ];
-  }
-
   static defaults = {
     ...pxl.Shape.defaults,
     text: '', size: 16, font: 'sans-serif', align: 'start',
@@ -4157,10 +4127,6 @@ document.fonts.addEventListener('loadingdone', () => {
 });
 
 pxl.Grid = class Grid extends pxl.Shape {
-  static get observedAttributes() {
-    return [...super.observedAttributes, 'step', 'major', 'labels', 'labelsize'];
-  }
-
   static defaults = { ...pxl.Shape.defaults, step: 50, major: 0, labels: false, labelsize: 12 };
 
   draw(ctx, u, t) {
@@ -4262,8 +4228,6 @@ pxl.Grid = class Grid extends pxl.Shape {
 customElements.define('pxl-grid', pxl.Grid);
 
 pxl.Variable = class Variable extends pxl.PxlNode {
-  static get observedAttributes() { return ['value', 'id']; }
-
   static defaults = { value: 0 };
 
   constructor() {
