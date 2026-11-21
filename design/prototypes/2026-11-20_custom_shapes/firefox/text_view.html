@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Text Under Scale Viewer | Prototype</title>
+<style>
+  body { margin: 16px; font: 14px system-ui, sans-serif; background: #f8fafc; color: #0f172a; }
+  h1 { font-size: 18px; margin: 0 0 8px; }
+  p { margin: 6px 0; max-width: 900px; }
+  #summary { margin: 10px 0; padding: 10px 12px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; }
+  .wrap { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+  table { border-collapse: collapse; background: #fff; font-size: 12px; }
+  th, td { padding: 3px 8px; border-bottom: 1px solid #e2e8f0; text-align: right; white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  tbody tr { cursor: pointer; } tbody tr:hover { background: #f1f5f9; } tr.sel { background: #fde68a !important; }
+  #view { flex: 1 1 500px; min-width: 0; }
+  #view canvas { display: block; max-width: 100%; border: 1px solid #cbd5e1; margin: 4px 0 10px; image-rendering: pixelated; background: #fff; }
+  .label { font-weight: 600; }
+  button, select { font: inherit; padding: 4px 10px; }
+  iframe { display: none; }
+</style>
+</head>
+<body>
+<h1>Text: today vs logical units</h1>
+<p>Each case draws the same text twice: <b>today</b> (font size × u on a canvas scaled by the device pixel ratio) and in
+<b>logical units</b> (the font size as written, on a canvas scaled by u × the device pixel ratio). Pick a case to see both
+enlarged and the difference in red.</p>
+<div><button id="run">Run the 600 cases</button> <select id="sort">
+  <option value="share">sort: most different pixels first</option>
+  <option value="width">sort: largest width difference first</option>
+  <option value="least">sort: most similar first</option>
+</select> <span id="status"></span></div>
+<div id="summary">Not run yet.</div>
+<div class="wrap">
+  <table><thead><tr><th>case</th><th>ink px</th><th>differ &gt; 64</th><th>width today</th><th>width logical</th></tr></thead>
+    <tbody id="rows"></tbody></table>
+  <div id="view"></div>
+</div>
+<iframe id="f" src="/design/prototypes/2026-11-20_custom_shapes/logical_units/text_tests.html"></iframe>
+<script>
+const f = document.getElementById('f'), rowsEl = document.getElementById('rows'), view = document.getElementById('view');
+let rows = [];
+const name = (r) => `${r.font} ${r.weight} ${r.size}px, u ${r.u}, dpr ${r.dpr}${r.stroke ? ', outlined' : ''}`;
+const share = (r) => r.over64 / Math.max(1, r.inkPixels);
+const widthDiff = (r) => Math.abs(r.widthToday - r.widthLogical) / r.widthLogical;
+
+document.getElementById('run').onclick = async () => {
+  document.getElementById('status').textContent = 'running…';
+  await new Promise((r) => setTimeout(r, 30));
+  const w = f.contentWindow, s = await w.runTextTests();
+  rows = w.textRows;
+  document.getElementById('summary').innerHTML =
+    `<b>${navigator.userAgent.match(/(Firefox|Edg|Chrome|Safari)\/[\d.]+/)?.[0] || ''}</b>, device pixel ratio ${devicePixelRatio}: ` +
+    `${s.cases} cases, ${s.identicalCases} identical; ${s.share} of the ink pixels differ by more than 64 of 255; ` +
+    `widths differ by up to ${s.maxRelativeWidthDifference}.`;
+  document.getElementById('status').textContent = '';
+  list();
+};
+document.getElementById('sort').onchange = list;
+
+function list() {
+  const by = document.getElementById('sort').value;
+  const sorted = rows.map((r, i) => ({ r, i })).sort((p, q) =>
+    by === 'width' ? widthDiff(q.r) - widthDiff(p.r) : by === 'least' ? share(p.r) - share(q.r) : share(q.r) - share(p.r));
+  rowsEl.innerHTML = '';
+  for (const { r, i } of sorted.slice(0, 40)) {
+    const tr = rowsEl.insertRow();
+    tr.innerHTML = `<td>${name(r)}</td><td>${r.inkPixels}</td><td>${(share(r) * 100).toFixed(1)} %</td>` +
+      `<td>${r.widthToday.toFixed(2)}</td><td>${r.widthLogical.toFixed(2)}</td>`;
+    tr.onclick = () => { for (const x of rowsEl.rows) x.className = ''; tr.className = 'sel'; show(r); };
+  }
+  if (rowsEl.rows[0]) rowsEl.rows[0].click();
+}
+
+function show(r, zoom = 4) {
+  const w = Math.min(r.a.canvas.width, 300), h = r.a.canvas.height;
+  view.innerHTML = `<div class="label">${name(r)}</div>`;
+  const big = (src, label) => {
+    const c = document.createElement('canvas'); c.width = w * zoom; c.height = h * zoom;
+    const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+    g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(src, 0, 0, w, h, 0, 0, w * zoom, h * zoom);
+    view.insertAdjacentHTML('beforeend', `<div>${label}</div>`); view.append(c);
+  };
+  big(r.a.canvas, 'Today');
+  big(r.b.canvas, 'Logical units');
+  // Difference: grey = both, red = only today, blue = only logical units
+  const d = document.createElement('canvas'); d.width = w; d.height = h;
+  const g = d.getContext('2d'), img = g.createImageData(w, h), W = r.a.canvas.width;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const a = r.a.data[(y * W + x) * 4 + 3], b = r.b.data[(y * W + x) * 4 + 3], o = (y * w + x) * 4;
+    img.data[o] = 255 - b; img.data[o + 1] = 255 - Math.max(a, b); img.data[o + 2] = 255 - a;
+    img.data[o + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  big(d, 'Difference: black = both, red = only today, blue = only logical units');
+}
+</script>
+</body>
+</html>

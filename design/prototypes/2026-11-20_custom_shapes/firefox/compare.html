@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Today vs Logical Units | Prototype</title>
+<script src="/design/prototypes/2026-11-20_custom_shapes/logical_units/patch.js"></script>
+<style>
+  body { margin: 0; font: 14px system-ui, sans-serif; background: #f8fafc; color: #0f172a; }
+  header { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+           padding: 10px 16px; background: #fff; border-bottom: 1px solid #cbd5e1; }
+  #mode { min-width: 150px; padding: 4px 10px; border-radius: 6px; font-weight: 600; text-align: center; }
+  #mode.today { background: #e2e8f0; } #mode.logical { background: #fde68a; }
+  iframe { display: block; width: 100%; height: calc(100vh - 54px); border: 0; }
+  button, select { font: inherit; padding: 4px 10px; }
+</style>
+</head>
+<body>
+<header>
+  <select id="page"></select>
+  <button id="toggle">Switch (space)</button>
+  <label><input type="checkbox" id="blink"> Blink every second</label>
+  <label><input type="checkbox" id="freeze"> Freeze time</label>
+  <span id="mode" class="today">Today</span>
+  <span id="info"></span>
+</header>
+<iframe id="f"></iframe>
+<script>
+// Shows one page drawn as today (lengths × u) or in logical units (canvas scaled by u, draw(ctx, 1)), switchable.
+const PAGES = ['/docs/text.html', '/examples/test23.html', '/examples/test15.html', '/docs/mapping.html',
+  '/docs/walkthrough.html', '/docs/polyline.html', '/docs/arrows.html', '/docs/linear.html', '/docs/radial.html',
+  '/docs/dashes.html', '/docs/gallery.html', '/examples/test50.html', '/examples/test48.html', '/docs/circle.html'];
+const select = document.getElementById('page'), f = document.getElementById('f');
+const mode = document.getElementById('mode'), info = document.getElementById('info');
+for (const p of PAGES) select.add(new Option(p, p));
+let uninstall = null, blinkTimer = 0, frozenAt = null;
+
+const stages = () => [...f.contentDocument.querySelectorAll('pxl-stage')];
+function redraw() {
+  for (const s of stages()) if (s.clientWidth > 0) s.resize();
+}
+function setLogical(on) {
+  const pxl = f.contentWindow.pxl;
+  if (!pxl) return;
+  if (on && !uninstall) uninstall = installLogicalPatch(pxl);
+  if (!on && uninstall) { uninstall(); uninstall = null; }
+  mode.textContent = on ? 'Logical units' : 'Today';
+  mode.className = on ? 'logical' : 'today';
+  redraw();
+}
+function load() {
+  uninstall = null;
+  setFreeze(false);
+  f.src = select.value + (location.hash ? '' : '');
+  mode.textContent = 'Today'; mode.className = 'today';
+}
+f.onload = () => {
+  const w = f.contentWindow;
+  info.textContent = `device pixel ratio ${w.devicePixelRatio}, ${stages().length} stages`;
+  w.addEventListener('keydown', onKey);
+};
+// Freeze: every stage renders at one fixed t, so only the drawing method changes between the two pictures
+function setFreeze(on) {
+  document.getElementById('freeze').checked = on;
+  const w = f.contentWindow;
+  if (!w || !w.pxl) return;
+  for (const s of stages()) {
+    if (on) { const render = w.pxl.Stage.prototype.render; s.render = function() { return render.call(this, 2.345); }; }
+    else delete s.render;
+  }
+  redraw();
+}
+function onKey(e) {
+  if (e.code === 'Space') { e.preventDefault(); setLogical(!uninstall); }
+}
+select.onchange = load;
+document.getElementById('toggle').onclick = () => setLogical(!uninstall);
+document.getElementById('blink').onchange = (e) => {
+  clearInterval(blinkTimer);
+  if (e.target.checked) blinkTimer = setInterval(() => setLogical(!uninstall), 1000);
+};
+document.getElementById('freeze').onchange = (e) => setFreeze(e.target.checked);
+document.addEventListener('keydown', onKey);
+load();
+</script>
+</body>
+</html>

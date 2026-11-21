@@ -1,11 +1,11 @@
 # Custom Shapes and Element Structure
 
-- **Status**: 🟡 **Proposed** (2026-11-20, one template: `draw(ctx)` in logical units, in two phases; D3 and a test in Firefox and Safari open)
+- **Status**: 🟡 **Proposed** (2026-11-21, D3 decided: `pxl.defineShape()`; logical units pass in Firefox; the test in Safari and D2, D4–D9 open)
 - **Date**: 2026-11-20
 - **Replaces**: `design/archive/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`, `draw()` without `t`, custom animation patterns, verified 2026-10-17 and 2026-11-07) and the structure cleanup draft of 2026-11-20 (`scratch/2026-11-20_engine_structure_cleanup_plan.md` (not kept); its steps and measurements are §6 here)
 - **Related**: `design/2026-11-20_evaluation_model_plan.md` (step 2 makes "`draw()` only reads values" a contract), `design/2026-10-19_polygon_star_shape_plan.md` (the first new shape in this form), `design/done/2026-11-01_isolated_shape_compositing_plan.md` (`drawsMoreThanOnce()`), `design/done/2026-11-07_safe_shape_render_plan.md` (a careless shape can't break the layer), `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked), `design/2026-10-30_space_attribute_plan.md` (with step 6.6)
 - **Target Implementation**: `js/elements/shape.js`, `js/elements/shapes/*.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/stage.js`, `js/graphics.js`, `js/interaction.js`, `js/engine.js`; `tools/build_types.js`; `tests/`; a new docs page `docs/custom-shapes.html`; `.agents/KILOPIXEL.md`, `.agents/ENGINE.md`
-- **Prototypes** (`design/prototypes/2026-11-20_custom_shapes/`): `template/` (the template as a patch over the engine: `proposal.js`, a Star, a Gauge, `minimal.html`, `rich.html`), `logical_units/` (the canvas, text and shadow tests and the page sweep of §5.3), `transform_path/` (§6.6); older: `design/prototypes/2026-10-17_shape_authoring/` (Rule A tests)
+- **Prototypes** (`design/prototypes/2026-11-20_custom_shapes/`): `template/` (the template as a patch over the engine: `proposal.js`, a Star, a Gauge, `minimal.html`, `rich.html`), `logical_units/` (the canvas, text and shadow tests and the page sweep of §5.3), `firefox/` (the same in Firefox: a driver over WebDriver BiDi, a text viewer and a page that switches between today and logical units), `transform_path/` (§6.6); older: `design/prototypes/2026-10-17_shape_authoring/` (Rule A tests)
 
 ---
 
@@ -18,7 +18,7 @@ A page author can define a shape of their own:
 
 **One template serves both:** `draw(ctx)` in logical units. The engine scales the canvas by `u` before `draw()`, so authors never see `u`: a path, a line width, a dash, a gradient or a font size is written as it appears in the HTML.
 
-**Custom shapes are built-in shapes written by someone else.** A custom shape file looks like `js/elements/shapes/rect.js`: a class that extends `pxl.Shape` and one line that defines its tag (D3), loaded as a second script after `pxl.min.js`. The engine treats both the same, and the built-in files are the examples.
+**Custom shapes are built-in shapes written by someone else.** A custom shape file looks like `js/elements/shapes/rect.js`: a class that extends `pxl.Shape` and one line that defines its tag with `pxl.defineShape()` (D3), loaded as a second script after `pxl.min.js`. The engine treats both the same, and the built-in files are the examples.
 
 ## 2. Today
 
@@ -74,7 +74,7 @@ pxl.Star = class Star extends pxl.Shape {
     return this.setBoundingBox(-r, -r, r, r);
   }
 };
-pxl.defineShape('pxl-star', pxl.Star); // or customElements.define(): D3
+pxl.defineShape('pxl-star', pxl.Star);
 ```
 
 ```html
@@ -92,7 +92,7 @@ Everything listed here is public and stays stable; everything else (names with `
 
 | | Name | Meaning |
 |---|---|---|
-| **write** | `class … extends pxl.Shape` + the defining line (D3) | in a script after `pxl.min.js`, like the built-in files. The tag starts with `pxl-` by convention (any valid custom element name works) |
+| **write** | `class … extends pxl.Shape` + `pxl.defineShape(tag, Class)` | in a script after `pxl.min.js`, like the built-in files. The tag starts with `pxl-` by convention (any valid custom element name works) |
 | | `static defaults` | every attribute of the shape with its default, spread from `pxl.Shape.defaults`. Keys lowercase (HTML lowercases attribute names; a warning otherwise). A `false` / `true` default makes a presence attribute (bare = `true`) |
 | | `draw(ctx)` | the drawing, in logical units (the canvas is scaled by `u`). Only reads `this.values`: no `t`, no DOM, no allocation per frame if it can be avoided |
 | | `getBoundingBox()` | the box in logical units, through `setBoundingBox(left, top, right, bottom)`. Strongly recommended: without it, gradients collapse, hit testing skips its pre-check, and a warning comes once for the class |
@@ -143,7 +143,8 @@ From the shape authoring plan §3.1: `PxlNode`'s static getter returns `Object.k
 - Isolation and hit testing get `u` in their matrix (`setTransform(m · u · dpr, …)`; hit testing without the DPR).
 - Thresholds that are device pixels today become logical units: the polyline's "same point" (0.01), text `maxwidth`, the minimum radial-gradient radius (0.001).
 - `getImageData()` / `putImageData()` ignore the transform: a free shape using them reads `this.stage.unit`.
-- **Not tested:** Firefox and Safari. Paths follow the specification; text rendering differs most between browsers, so `logical_units/text_tests.html` and the page sweep run there before phase 1 is built.
+- **Firefox** (160, headless, 2026-11-21; `firefox/bidi.js` runs the same pages over WebDriver BiDi, `firefox/text_view.html` and `firefox/compare.html` show them in any browser): the canvas rules are those of Chrome. The page sweep, at DPR 1 and 2: no console messages; 143 and 120 of 300 layers identical, the rest anti-aliasing (at most 21 / 255 on polylines, 1–3 on circles and rects) and text; hit testing differs at 598 and 602 of 525,146 points. `template/rich.html`: the hits, three real clicks and the label as in Chrome. Text differs more than in Chrome: about 23 % of the ink pixels by more than 64 / 255 (23–30 of 600 cases identical, varying between runs), because Firefox sets the glyphs a little closer at the unscaled font size, so a line ends up to 10 device pixels earlier (254 cases not at all); the glyphs are equally sharp, widths differ by up to 0.68 % (Chrome 0.72 %), and the wrapped line counts on `examples/test15.html` and `examples/test23.html` are the same in both modes.
+- **Not tested:** Safari. Text rendering differs most between browsers, so `logical_units/text_tests.html` and the page sweep run there before phase 1 is built.
 
 **Two phases, so that no step risks the built-ins:**
 
@@ -156,10 +157,10 @@ From the shape authoring plan §3.3: the 7 shape signatures, `Shape.render()`, `
 
 ### 5.5 Defining the Tag (D3)
 
-Two options, both in a script after `pxl.min.js`:
+**Decided 2026-11-21: `pxl.defineShape(tag, Class)`**, in a script after `pxl.min.js`. The two options as weighed:
 
-- **`pxl.defineShape(tag, Class)`** for built-in and custom shapes alike: `customElements.define()` plus a `tag { display: none; }` rule in the default styles (the mechanism used today, so content inside a shape never shows), the checks at define time (uppercase keys, no `draw()`, no `getBoundingBox()`), and a warning instead of the browser's `NotSupportedError` when a script is loaded twice. The hand-written tag list in `pxl.DEFAULT_STYLES` goes.
-- **Plain `customElements.define()`:** nothing Kilopixel-specific to learn. The engine then hides content without a tag list: the layer's shadow root uses manual slot assignment (`slotAssignment: 'manual'`) and assigns to its `<slot>` only children that aren't Kilopixel elements, re-assigning when children change or upgrade (Chrome 86, Firefox 92, Safari 16.4); the checks run once per class at the first instance. To prototype: assigning on pages with thousands of shapes, and a tag defined late.
+- **`pxl.defineShape(tag, Class)`** (chosen) for built-in and custom shapes alike: `customElements.define()` plus a `tag { display: none; }` rule in the default styles (the mechanism used today, so content inside a shape never shows), the checks at define time (uppercase keys, no `draw()`, no `getBoundingBox()`), and a warning instead of the browser's `NotSupportedError` when a script is loaded twice. The hand-written tag list in `pxl.DEFAULT_STYLES` goes.
+- **Plain `customElements.define()`** (not chosen: the slot assignment is more code and unproven, while the CSS rule works today): nothing Kilopixel-specific to learn. The engine then hides content without a tag list: the layer's shadow root uses manual slot assignment (`slotAssignment: 'manual'`) and assigns to its `<slot>` only children that aren't Kilopixel elements, re-assigning when children change or upgrade (Chrome 86, Firefox 92, Safari 16.4); the checks run once per class at the first instance. To prototype: assigning on pages with thousands of shapes, and a tag defined late.
 
 ### 5.6 `values` and `expressions`
 
@@ -212,11 +213,11 @@ From the cleanup draft of 2026-11-20. **Not part of the custom-shape steps (§9)
 
 ## 9. Steps
 
-1. **Test phase 1 in Firefox and Safari:** `logical_units/text_tests.html`, the page sweep, `template/rich.html`.
+1. **Test phase 1 in Firefox and Safari:** `logical_units/text_tests.html`, the page sweep, `template/rich.html`. Firefox done 2026-11-21 (§5.3); Safari open.
 2. §5.1 and §5.2 (derived attribute lists and presence attributes; `isHovered` / `isPressed` out of `defaults`; `points: ''`).
 3. §5.3 phase 1 and §5.4: the calling convention, `draw(ctx)` without `t`.
 4. §5.6 rename, if decided (D4).
-5. §5.5 (after D3) and §5.7: defining the tag, `setBoundingBox()`, `paint()`, the checks once per class; the Star and the Gauge as tests, loaded as a second script.
+5. §5.5 and §5.7: defining the tag, `setBoundingBox()`, `paint()`, the checks once per class; the Star and the Gauge as tests, loaded as a second script.
 6. Docs (§8), KILOPIXEL.md and ENGINE.md.
 7. `<pxl-polygon>` (`design/2026-10-19_polygon_star_shape_plan.md`) as the first new shape in this form.
 8. Later: §5.3 phase 2; the structure cleanup (§6), discussed separately; §6.6 waits for `space`.
@@ -245,8 +246,8 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 | | Question | Recommended |
 |---|---|---|
 | D1 | One template, `draw(ctx)` | **decided 2026-11-20** (the two levels `path()` / `draw(ctx, u)` dropped) |
-| D2 | Logical units for every shape, in two phases (§5.3) | yes, after the test in Firefox and Safari (§9 step 1) |
-| D3 | Defining the tag: `pxl.defineShape()` for all shapes, or plain `customElements.define()` (§5.5) | `pxl.defineShape()`: the proven CSS rule hides content, checks run at define time; reopened 2026-11-20 |
+| D2 | Logical units for every shape, in two phases (§5.3) | yes, after the test in Safari (§9 step 1); Firefox passed 2026-11-21 |
+| D3 | Defining the tag: `pxl.defineShape()` for all shapes, or plain `customElements.define()` (§5.5) | **decided 2026-11-21**: `pxl.defineShape()` (the proven CSS rule hides content, checks run at define time) |
 | D4 | Rename `attributeValues` → `values`, `attributeExpressions` → `expressions` | yes, before the API is public |
 | D5 | Class fields for built-ins | no: the engine keeps constructors; authors choose |
 | D6 | The public helpers of §4 (`applyStyle`, `applyStrokeState`, `paint`, `hasFill`, `isStroked`, `setBoundingBox`) | yes; arrowheads stay internal (§5.9) |
@@ -258,6 +259,7 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-21: D3 decided: `pxl.defineShape(tag, Class)` for built-in and custom shapes (§5.5). Phase 1 tested in Firefox 160 (§5.3): the same as in Chrome except text spacing (lines up to 10 device pixels shorter, wrapping unchanged); scripts in `firefox/`. Safari still open.
 - 2026-11-20: one template, `draw(ctx)` in logical units (D1 decided): the engine scales the canvas by `u`, in two phases (§5.3) with the measurements of `logical_units/`; `path()` and the two levels dropped. D3 reopened (`pxl.defineShape()` or plain `define()`). The investigation found shape shadows and filters at 1/DPR of their size on HiDPI screens: fixed in commit `7cbb439`. Prototypes moved into `template/`, `logical_units/`, `transform_path/`.
 - 2026-11-20: D3 decided: no registration API, custom shapes are written like built-in shapes (a class and `customElements.define()` in a second script). `pxl.defineShape()` dropped; hiding content (§5.5) by manual slot assignment instead of a tag list; the checks run once per class. The structure cleanup (§6) moves after the custom-shape steps and is discussed separately.
 - 2026-11-20: written from the shape authoring plan (archived) and the structure cleanup draft, with custom shapes as a public API: a clean template and enough freedom.
