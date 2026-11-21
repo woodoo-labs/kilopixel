@@ -1,6 +1,6 @@
-// A custom shape for the tests with its own drawing (design/2026-11-20_custom_shapes_plan.md §3): several paint calls,
-// the shape's stroke on a second path, a label in the shape's fill through paint(), the presence attribute ticks and
-// its own hit area. Loaded as a second script after pxl.min.js.
+// <pxl-gauge>: a Kilopixel custom shape (https://woodoo-labs.github.io/kilopixel/custom-shapes.html) with its own
+// drawing. Load it after pxl.min.js. Several paint calls, the shape's stroke on the value arc, a label in the shape's fill,
+// the presence attribute ticks and its own hit area.
 pxl.Gauge = class Gauge extends pxl.Shape {
   static defaults = { ...pxl.Shape.defaults, value: 0, r: 100, label: '', ticks: false };
 

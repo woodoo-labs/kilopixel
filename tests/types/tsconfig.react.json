@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": { "jsx": "react-jsx", "skipLibCheck": true },
-  "files": ["kilopixel/kilopixel.d.ts", "kilopixel/kilopixel-react.d.ts", "fixtures/react.tsx"]
+  "files": ["kilopixel/kilopixel.d.ts", "kilopixel/kilopixel-react.d.ts", "fixtures/custom.ts", "fixtures/react.tsx"]
 }

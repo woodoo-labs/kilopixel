@@ -131,6 +131,12 @@ class DocsSidebar extends HTMLElement {
             <li><a href="animation.html" class="${currentPath === 'animation.html' ? 'active' : ''}">Animation</a></li>
           </ul>
         </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">Extending</div>
+          <ul>
+            <li><a href="custom-shapes.html" class="${currentPath === 'custom-shapes.html' ? 'active' : ''}">Custom Shapes</a></li>
+          </ul>
+        </div>
       </aside>
     `;
 

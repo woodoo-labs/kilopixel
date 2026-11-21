@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Shapes | Kilopixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+
+  <!-- Prism Syntax Highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-ghcolors.min.css" rel="stylesheet" />
+
+  <!-- Import our custom layout elements and interactive framework -->
+  <script src="js/layout.js"></script>
+  <script src="js/docs.js"></script>
+  <script src="js/api-tabs.js"></script>
+  <!-- Kilopixel Engine -->
+  <script src="js/pxl.min.js"></script>
+  <!-- The custom shapes of this page, each a second script after the engine -->
+  <script src="js/shapes/star.js"></script>
+  <script src="js/shapes/gauge.js"></script>
+</head>
+<body>
+
+  <!-- Centralized Header -->
+  <docs-header></docs-header>
+
+  <div class="layout-container">
+
+    <!-- Centralized Sidebar -->
+    <docs-sidebar></docs-sidebar>
+
+    <!-- Main Content Area -->
+    <main class="docs-content">
+      <div class="docs-inner">
+        <h1>Custom Shapes</h1>
+        <p class="lead">A custom shape is a JavaScript class that extends <code>pxl.Shape</code> and draws with the canvas API. Loaded in a script after <code>pxl.min.js</code>, it works like a built-in shape: every common attribute, expressions, animation, <code>ref.*</code>, events and hit testing come with it.</p>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: A FIRST SHAPE -->
+        <!-- ================================================================= -->
+        <h2>1. A First Shape</h2>
+        <p>A shape class has three parts. <code>static defaults</code> lists its own attributes with their default values, after the common ones of every shape. <code>draw(ctx)</code> draws the shape around its center; the canvas is already moved, rotated and scaled, so lengths are written as the HTML gives them: a radius of <code>200</code> draws as <code>r="200"</code> on any stage size. <code>getBoundingBox()</code> returns the box around the outline, through <code>setBoundingBox(left, top, right, bottom)</code>: gradients span it, and hit testing checks it before the exact test.</p>
+        <p><code>this.applyStyle(ctx)</code> fills and strokes the current path with the shape's <code>fill</code> and <code>stroke</code>, gradients, widths and dashes included. The last line, <code>pxl.defineShape()</code>, gives the class its tag.</p>
+
+        <pre><code class="language-javascript">// star.js: load it after pxl.min.js
+pxl.Star = class Star extends pxl.Shape {
+  static defaults = { ...pxl.Shape.defaults, points: 5, r: 50, ir: 20 };
+
+  draw(ctx) {
+    const { points, r, ir } = this.values;
+    ctx.beginPath();
+    for (let i = 0; i &lt; points * 2; i++) {
+      const angle = i * Math.PI / points - Math.PI / 2;
+      const radius = i % 2 ? ir : r;
+      ctx.lineTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
+    }
+    ctx.closePath();
+    this.applyStyle(ctx); // fill, then stroke
+  }
+
+  // It paints at most twice, so it needs the scratch canvas only for fill + stroke
+  drawsMoreThanOnce() {
+    return this.hasFill() &amp;&amp; this.isStroked();
+  }
+
+  getBoundingBox() {
+    const { r } = this.values;
+    return this.setBoundingBox(-r, -r, r, r);
+  }
+};
+pxl.defineShape('pxl-star', pxl.Star);</code></pre>
+
+        <div class="download-actions">
+          <a href="js/shapes/star.js" download="star.js" class="btn-download-secondary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download star.js
+          </a>
+        </div>
+
+        <p>The page loads the shape's file after the engine and uses the tag like any other shape. <code>drawsMoreThanOnce()</code> is optional (section 4).</p>
+
+        <pre><code class="language-html">&lt;script src="pxl.min.js"&gt;&lt;/script&gt;
+&lt;script src="star.js"&gt;&lt;/script&gt;
+
+&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Star, a custom shape --&gt;
+    &lt;pxl-star x="500" y="300" stroke="#f97316" strokewidth="4" r="200"
+      points="<mark id="sec1StarPointsCode">5</mark>" ir="<mark id="sec1StarIrCode">80</mark>"
+      fill="<mark id="sec1StarFillCode">#ffedd566</mark>"&gt;
+    &lt;/pxl-star&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+            </div>
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label><span>Points <span class="indicator-dot"></span></span> <span id="sec1StarPointsVal">5</span></label>
+                <input type="range" min="3" max="12" step="1" value="5" autocomplete="off"
+                  oninput="document.getElementById('sec1Star').setAttribute('points', this.value); document.getElementById('sec1StarPointsVal').innerText = this.value; document.getElementById('sec1StarPointsCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Inner Radius</span> <span id="sec1StarIrVal">80</span></label>
+                <input type="range" min="20" max="200" step="10" value="80" autocomplete="off"
+                  oninput="document.getElementById('sec1Star').setAttribute('ir', this.value); document.getElementById('sec1StarIrVal').innerText = this.value; document.getElementById('sec1StarIrCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Fill</span></label>
+                <div class="toggle-group">
+                  <button class="toggle-btn active" onclick="document.getElementById('sec1Star').setAttribute('fill', '#ffedd566'); pxlDocs.updateToggle(this, null, 'sec1StarFillCode', '#ffedd566');">color</button>
+                  <button class="toggle-btn" onclick="document.getElementById('sec1Star').setAttribute('fill', &quot;radial([1], ['#fff7ed', '#fdba74'])&quot;); pxlDocs.updateToggle(this, null, 'sec1StarFillCode', &quot;radial([1], ['#fff7ed', '#fdba74'])&quot;);">gradient</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage id="sec1Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Star (Orange Scheme) -->
+              <pxl-star id="sec1Star" x="500" y="300" r="200" ir="80" points="5" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-star>
+              <pxl-circle x="500" y="300" r="8" fill="#fb923c"></pxl-circle>
+              <pxl-text x="500" y="560" text="'Star Center'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 2: ATTRIBUTES -->
+        <!-- ================================================================= -->
+        <h2>2. Attributes</h2>
+        <p>Every key of <code>static defaults</code> is an attribute. It takes numbers, expressions and <code>ref.*</code> like a built-in attribute, a bare or removed attribute falls back to its default, and it is also a JavaScript property for frameworks. <code>draw()</code> reads the current values from <code>this.values</code>, the same object that other shapes read as <code>ref.&lt;id&gt;</code>: the right star below copies <code>ref.star.points</code>.</p>
+        <ul>
+          <li><strong>Lowercase Keys:</strong> HTML lowercases attribute names, so a key like <code>pumpSpeed</code> would never receive its attribute. <code>pxl.defineShape()</code> warns about it.</li>
+          <li><strong>Presence Attributes:</strong> a key whose default is <code>false</code> or <code>true</code> becomes a presence attribute: written bare, as in <code>&lt;pxl-gauge ticks&gt;</code>, it is <code>true</code> (section 3).</li>
+        </ul>
+
+        <div class="callout-info">
+          <p class="callout-title">Animation Goes Through Attributes</p>
+          <p class="callout-body"><code>draw()</code> gets no time. Animate a custom shape like any other, with an expression in an attribute: <code>rotate="t * 30"</code>, or an attribute of the shape's own such as <code>spin="t * 90"</code> that <code>draw()</code> reads. The engine then knows the shape moves, redraws it in every frame and hit tests it where it is drawn.</p>
+        </div>
+
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Left: Star, points from the slider --&gt;
+    &lt;pxl-star id="star" x="300" y="300" fill="#ffedd566" stroke="#f97316" strokewidth="4"
+      r="180" ir="70" points="<mark id="sec2Star1PointsCode">5</mark>"&gt;
+    &lt;/pxl-star&gt;
+
+    &lt;!-- Right: Copy, reads the points of the left star and turns --&gt;
+    &lt;pxl-star x="700" y="300" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4" r="180" ir="70"
+      points="<mark id="sec2Star2PointsCode" class="highlight-reactive">ref.star.points</mark>" rotate="t * <mark id="sec2Star2RotateCode">30</mark>"&gt;
+    &lt;/pxl-star&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+            </div>
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label><span>Points</span> <span id="sec2Star1PointsVal">5</span></label>
+                <input type="range" min="3" max="12" step="1" value="5" autocomplete="off" data-mark="sec2Star1PointsCode, sec2Star2PointsCode"
+                  oninput="document.getElementById('sec2Star1').setAttribute('points', this.value); document.getElementById('sec2Star1PointsVal').innerText = this.value; document.getElementById('sec2Star1PointsCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Spin (°/s)</span> <span id="sec2Star2RotateVal">30</span></label>
+                <input type="range" min="-90" max="90" step="10" value="30" autocomplete="off"
+                  oninput="document.getElementById('sec2Star2').setAttribute('rotate', 't * ' + this.value); document.getElementById('sec2Star2RotateVal').innerText = this.value; document.getElementById('sec2Star2RotateCode').innerText = this.value;">
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage id="sec2Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Left: Star (Orange Scheme) -->
+              <pxl-star id="sec2Star1" x="300" y="300" r="180" ir="70" points="5" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-star>
+              <pxl-text x="300" y="560" text="'Star'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+
+              <!-- Right: Copy (Blue Scheme) -->
+              <pxl-star id="sec2Star2" x="700" y="300" r="180" ir="70" points="ref.sec2Star1.points" rotate="t * 30" fill="#dbeafe66" stroke="#3b82f6" strokewidth="4"></pxl-star>
+              <pxl-text x="700" y="560" text="'Copy'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 3: FREE DRAWING -->
+        <!-- ================================================================= -->
+        <h2>3. Free Drawing</h2>
+        <p><code>draw()</code> may use any canvas call, as often as it needs. The gauge below paints a light track, a value arc in the shape's own stroke (<code>applyStrokeState()</code> sets color or gradient, width, caps and dashes without stroking), tick marks with the presence attribute <code>ticks</code>, and a label in the shape's fill. <code>this.paint(ctx, 'fill')</code> returns the fill as a canvas style: a color, or a gradient built in the shape's box.</p>
+        <p>By default a shape is hit where it fills and strokes. <code>hitTest(ctx)</code> replaces that with a hit area of its own: it adds a path and calls <code>ctx.fill()</code>, which tests the pointer instead of painting. The gauge is hit on its whole half disc, not only on the arcs.</p>
+
+        <pre><code class="language-javascript">// gauge.js: load it after pxl.min.js
+pxl.Gauge = class Gauge extends pxl.Shape {
+  static defaults = { ...pxl.Shape.defaults, value: 0, r: 100, label: '', ticks: false };
+
+  draw(ctx) {
+    const { value, r, label, ticks, strokewidth } = this.values;
+    const end = Math.PI * (1 + Math.min(1, Math.max(0, value)));
+
+    // Track: a fixed light arc under the value
+    ctx.beginPath();
+    ctx.arc(0, 0, r, Math.PI, 2 * Math.PI);
+    ctx.lineWidth = strokewidth;
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.stroke();
+
+    // Value: the shape's own stroke (color or gradient, width, caps, dashes)
+    ctx.beginPath();
+    ctx.arc(0, 0, r, Math.PI, end);
+    this.applyStrokeState(ctx);
+    ctx.stroke();
+
+    // Ticks, with the bare attribute &lt;pxl-gauge ticks&gt;
+    if (ticks) {
+      ctx.beginPath();
+      for (let i = 0; i &lt;= 10; i++) {
+        const a = Math.PI * (1 + i / 10), c = Math.cos(a), s = Math.sin(a);
+        const inner = r - strokewidth, outer = r - strokewidth * (i % 5 ? 1.4 : 1.8);
+        ctx.moveTo(c * inner, s * inner);
+        ctx.lineTo(c * outer, s * outer);
+      }
+      ctx.lineWidth = 3;
+      ctx.setLineDash([]);
+      ctx.strokeStyle = '#94a3b8';
+      ctx.stroke();
+    }
+
+    // Label in the shape's fill
+    ctx.fillStyle = this.paint(ctx, 'fill');
+    ctx.font = `600 ${r * 0.26}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(label, 0, -r * 0.12);
+  }
+
+  // The half disc, without the stroke (like the built-in shapes)
+  getBoundingBox() {
+    const { r } = this.values;
+    return this.setBoundingBox(-r, -r, r, 0);
+  }
+
+  // The hit area: the whole half disc with the stroke, not only the painted arcs
+  hitTest(ctx) {
+    const b = this.getBoundingBox(), pad = this.values.strokewidth / 2;
+    ctx.rect(b.left - pad, b.top - pad, b.right - b.left + 2 * pad, b.bottom - b.top + pad);
+    ctx.fill();
+  }
+};
+pxl.defineShape('pxl-gauge', pxl.Gauge);</code></pre>
+
+        <div class="download-actions">
+          <a href="js/shapes/gauge.js" download="gauge.js" class="btn-download-secondary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download gauge.js
+          </a>
+        </div>
+
+        <pre><code class="language-html">&lt;pxl-stage ratio="5 / 3"&gt;
+  &lt;pxl-layer&gt;
+    &lt;!-- Gauge, hit on its whole half disc --&gt;
+    &lt;pxl-gauge id="gauge" x="500" y="450" fill="#c2410c" stroke="#f97316" strokewidth="40"
+      r="300" label="`${round(ref.gauge.value * 100)} %`" zoom="ref.gauge.isHovered ? 1.04 : 1"
+      value="<mark id="sec3GaugeValueCode">0.6</mark>" <mark id="sec3GaugeTicksCode">ticks</mark>&gt;
+    &lt;/pxl-gauge&gt;
+  &lt;/pxl-layer&gt;
+&lt;/pxl-stage&gt;</code></pre>
+
+        <div class="demo-container">
+          <div class="demo-controls">
+            <div class="demo-controls-header">
+              <h3 class="demo-controls-title">Controls</h3>
+            </div>
+            <div class="playground-sliders">
+              <div class="control-group">
+                <label><span>Value</span> <span id="sec3GaugeValueVal">0.6</span></label>
+                <input type="range" min="0" max="1" step="0.05" value="0.6" autocomplete="off"
+                  oninput="document.getElementById('sec3Gauge').setAttribute('value', this.value); document.getElementById('sec3GaugeValueVal').innerText = this.value; document.getElementById('sec3GaugeValueCode').innerText = this.value;">
+              </div>
+              <div class="control-group">
+                <label><span>Ticks <span class="indicator-dot"></span></span></label>
+                <div class="toggle-group">
+                  <button class="toggle-btn" onclick="document.getElementById('sec3Gauge').removeAttribute('ticks'); pxlDocs.updateToggle(this, null, 'sec3GaugeTicksCode', '');">removed</button>
+                  <button class="toggle-btn active" onclick="document.getElementById('sec3Gauge').setAttribute('ticks', ''); pxlDocs.updateToggle(this, null, 'sec3GaugeTicksCode', 'ticks');">bare</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <pxl-stage id="sec3Stage" ratio="5 / 3" class="demo-stage">
+            <pxl-layer>
+              <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
+
+              <!-- Gauge (Orange Scheme) -->
+              <pxl-gauge id="sec3Gauge" x="500" y="450" r="300" value="0.6" ticks fill="#c2410c" stroke="#f97316" strokewidth="40"
+                label="`${round(ref.sec3Gauge.value * 100)} %`" zoom="ref.sec3Gauge.isHovered ? 1.04 : 1"></pxl-gauge>
+              <pxl-circle x="500" y="450" r="8" fill="#fb923c"></pxl-circle>
+              <pxl-text x="500" y="530" text="'Gauge Center'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+            </pxl-layer>
+          </pxl-stage>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 4: COMPOSITING -->
+        <!-- ================================================================= -->
+        <h2>4. Compositing</h2>
+        <p>The canvas applies a shadow, <code>blend</code>, <code>mask</code> or <code>filter</code> to every paint call on its own. A shape that paints more than once would cast its stroke's shadow onto its own fill, or mask its fill away with its stroke. Such a shape is drawn into a scratch canvas first and goes onto the layer in one step, like an SVG group, which costs a little time.</p>
+        <p><code>drawsMoreThanOnce()</code> tells the engine whether that is needed. The default is <code>true</code>, which is always correct. A shape that paints once can say so and is then drawn directly:</p>
+
+        <pre><code class="language-javascript">// One fill() or one stroke(): never more than once
+drawsMoreThanOnce() {
+  return false;
+}
+
+// applyStyle() on one path: twice only when the shape has both a fill and a stroke
+drawsMoreThanOnce() {
+  return this.hasFill() &amp;&amp; this.isStroked();
+}
+
+// Several paint calls (the gauge): leave the method out</code></pre>
+
+        <p>Count the paint calls (<code>fill()</code>, <code>stroke()</code>, <code>fillText()</code>, <code>drawImage()</code>), not the paths: five dots in one path filled once paint once.</p>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 5: RULES -->
+        <!-- ================================================================= -->
+        <h2>5. Rules</h2>
+        <ul>
+          <li><strong>Lengths as in the HTML:</strong> write radii, line widths, dash lengths and font sizes as the attributes give them. The engine scales the canvas to the stage. Only pixel access (<code>getImageData()</code>) works in canvas pixels; <code>this.stage.unit</code> is the number of CSS pixels per unit.</li>
+          <li><strong>Only Values in Draw:</strong> <code>draw()</code> reads <code>this.values</code> and nothing else: no time, no DOM, no network. It runs in every frame the shape changes and in hit tests, so it should create as few objects as it can.</li>
+          <li><strong>The Box Without the Stroke:</strong> <code>getBoundingBox()</code> covers the outline, like the box of the built-in shapes; hit testing adds half the stroke itself. Without the method, gradients collapse to a point, and <code>pxl.defineShape()</code> warns.</li>
+          <li><strong>A Clean Canvas:</strong> the engine sets the transform, <code>alpha</code>, compositing and shadow before <code>draw()</code> and restores the canvas afterwards. A shape may change any canvas state; an error in <code>draw()</code> skips the shape for that frame with a warning.</li>
+          <li><strong>Content Inside the Tag:</strong> text written inside <code>&lt;pxl-star&gt;</code> stays hidden once the shape's script has run.</li>
+        </ul>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 6: TYPESCRIPT -->
+        <!-- ================================================================= -->
+        <h2>6. TypeScript</h2>
+        <p>The type definitions (<a href="frameworks.html">Frameworks</a>) include <code>PxlShapeAttributes</code> and <code>PxlShapeElement</code>, the attributes and properties every shape has. A custom shape's declaration extends them with its own attributes:</p>
+
+        <pre><code class="language-javascript">// star.d.ts, next to kilopixel.d.ts
+export {};
+
+declare global {
+  interface PxlStarAttributes extends PxlShapeAttributes {
+    points?: PxlNumber | null;
+    r?: PxlNumber | null;
+    ir?: PxlNumber | null;
+  }
+  interface PxlStarElement extends PxlShapeElement {
+    get points(): number; set points(value: PxlNumber | null | undefined);
+    get r(): number; set r(value: PxlNumber | null | undefined);
+    get ir(): number; set ir(value: PxlNumber | null | undefined);
+  }
+  interface HTMLElementTagNameMap { 'pxl-star': PxlStarElement }
+}</code></pre>
+
+        <p>For JSX and templates, copy the line of a built-in shape from the framework's file (<code>kilopixel-react.d.ts</code>, …) and rename it. For React:</p>
+
+        <pre><code class="language-javascript">import type { DetailedHTMLProps, HTMLAttributes } from 'react';
+
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      'pxl-star': Omit&lt;DetailedHTMLProps&lt;HTMLAttributes&lt;PxlStarElement&gt;, PxlStarElement&gt;,
+        keyof PxlStarAttributes&gt; &amp; PxlStarAttributes;
+    }
+  }
+}</code></pre>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 7: SHAPE CLASS REFERENCE -->
+        <!-- ================================================================= -->
+        <h2>7. Shape Class Reference</h2>
+        <p>The table below lists what a custom shape writes, what it may override, and what it may read and call. Everything else on <code>pxl.Shape</code> is internal and may change. The other tabs list the attributes every shape gets.</p>
+
+        <div class="demo-controls">
+          <div class="demo-controls-header">
+            <div class="demo-tabs">
+              <button class="tab-btn active" onclick="pxlDocs.switchTab(this, 'sec7WriteTab')">Write</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec7OverrideTab')">Override</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec7CallTab')">Read &amp; Call</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec7StylingTab')">Styling</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec7TransformsTab')">Transforms</button>
+              <button class="tab-btn" onclick="pxlDocs.switchTab(this, 'sec7EventsTab')">Events</button>
+            </div>
+          </div>
+
+          <!-- TAB 1: WRITE -->
+          <div class="tab-content active" id="sec7WriteTab">
+            <div class="api-list">
+              <div class="api-subheading">Every Custom Shape</div>
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">class … extends pxl.Shape</code>
+                  <div class="api-meta"><span class="api-pill values-pill">class</span></div>
+                </div>
+                <div class="api-item-desc">
+                  The shape, in a script loaded after <code>pxl.min.js</code>. <code>pxl.Star = class Star …</code> puts it on the <code>pxl</code> namespace like the built-in shapes; a plain <code>class Star</code> works the same.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">static defaults</code>
+                  <div class="api-meta"><span class="api-pill values-pill">object</span></div>
+                </div>
+                <div class="api-item-desc">
+                  Every attribute of the shape with its default, after <code>...pxl.Shape.defaults</code>. Keys in lowercase; a <code>false</code> or <code>true</code> default makes a presence attribute.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">draw(ctx)</code>
+                  <div class="api-meta"><span class="api-pill values-pill">method</span><span class="api-pill default-pill">required</span></div>
+                </div>
+                <div class="api-item-desc">
+                  Draws the shape around its center, with lengths as in the HTML. Reads only <code>this.values</code>.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">getBoundingBox()</code>
+                  <div class="api-meta"><span class="api-pill values-pill">method</span><span class="api-pill default-pill">recommended</span></div>
+                </div>
+                <div class="api-item-desc">
+                  Returns the box around the outline, without the stroke: <code>return this.setBoundingBox(left, top, right, bottom)</code>. Gradients span it; hit testing checks it first.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">pxl.defineShape(tag, Class)</code>
+                  <div class="api-meta"><span class="api-pill values-pill">function</span></div>
+                </div>
+                <div class="api-item-desc">
+                  Defines the tag (<code>'pxl-star'</code>; the <code>pxl-</code> prefix is a convention) and hides content written inside it. Warns once for keys with capitals, a missing <code>draw()</code> or <code>getBoundingBox()</code>, and a tag that is already defined.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: OVERRIDE -->
+          <div class="tab-content" id="sec7OverrideTab">
+            <div class="api-list">
+              <div class="api-subheading">Optional Methods</div>
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">hitTest(ctx)</code>
+                  <div class="api-meta"><span class="api-pill values-pill">method</span><span class="api-pill default-pill">default: what draw() paints</span></div>
+                </div>
+                <div class="api-item-desc">
+                  The hit area: add a path and call <code>ctx.fill()</code> or <code>ctx.stroke()</code>, which test the pointer instead of painting.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">drawsMoreThanOnce()</code>
+                  <div class="api-meta"><span class="api-pill values-pill">method</span><span class="api-pill default-pill">default: true</span></div>
+                </div>
+                <div class="api-item-desc">
+                  Whether <code>draw()</code> paints more than once, which decides whether a shadow, <code>blend</code>, <code>mask</code> or <code>filter</code> needs the scratch canvas (section 4).
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">hitPadding()</code>
+                  <div class="api-meta"><span class="api-pill values-pill">method</span><span class="api-pill default-pill">default: from the stroke</span></div>
+                </div>
+                <div class="api-item-desc">
+                  How far the paint reaches beyond the box, for the box check before hit testing. Override it when <code>draw()</code> paints outside its box.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: READ & CALL -->
+          <div class="tab-content" id="sec7CallTab">
+            <div class="api-list">
+              <div class="api-subheading">Read</div>
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">this.values</code>
+                  <div class="api-meta"><span class="api-pill values-pill">object</span></div>
+                </div>
+                <div class="api-item-desc">
+                  The current value of every attribute, the object that expressions read as <code>ref.&lt;id&gt;</code>; also <code>isHovered</code> and <code>isPressed</code>.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">this.stage.unit</code>
+                  <div class="api-meta"><span class="api-pill values-pill">number</span></div>
+                </div>
+                <div class="api-item-desc">
+                  CSS pixels per unit of the stage, for the rare drawing in canvas pixels (<code>getImageData()</code>).
+                </div>
+              </div>
+
+              <div class="api-subheading">Call</div>
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">applyStyle(ctx)</code>
+                  <div class="api-meta"><span class="api-pill values-pill">method</span></div>
+                </div>
+                <div class="api-item-desc">
+                  Fills the current path with <code>fill</code> (if set), then strokes it with <code>stroke</code> (if set), gradients and dashes included.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">applyStrokeState(ctx)</code>
+                  <div class="api-meta"><span class="api-pill values-pill">method</span></div>
+                </div>
+                <div class="api-item-desc">
+                  Sets the stroke color or gradient, width, caps, joins, miter limit and dashes without stroking, for <code>stroke()</code> on a path of your own or <code>strokeText()</code>.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">paint(ctx, 'fill' | 'stroke')</code>
+                  <div class="api-meta"><span class="api-pill values-pill">method</span></div>
+                </div>
+                <div class="api-item-desc">
+                  The fill or stroke as a canvas style: a color as written, or a gradient built in the shape's box.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">hasFill(), isStroked()</code>
+                  <div class="api-meta"><span class="api-pill values-pill">method</span></div>
+                </div>
+                <div class="api-item-desc">
+                  Whether a fill, or a stroke with a width above 0, is set.
+                </div>
+              </div>
+
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">setBoundingBox(left, top, right, bottom)</code>
+                  <div class="api-meta"><span class="api-pill values-pill">method</span></div>
+                </div>
+                <div class="api-item-desc">
+                  Writes the shape's box and returns it, without creating an object.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: COMMON STYLING -->
+          <docs-api-styling id="sec7StylingTab" class="tab-content"></docs-api-styling>
+
+          <!-- TAB 5: TRANSFORMS & SPATIAL -->
+          <docs-api-transforms id="sec7TransformsTab" class="tab-content"></docs-api-transforms>
+
+          <!-- TAB 6: INTERACTIVE EVENTS -->
+          <docs-api-events id="sec7EventsTab" class="tab-content"></docs-api-events>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Prism Syntax Highlighting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/keep-markup/prism-keep-markup.min.js"></script>
+</body>
+</html>

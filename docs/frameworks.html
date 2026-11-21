@@ -72,6 +72,7 @@ export class ChartComponent {}</code></pre>
       <pre><code class="language-javascript">const circle = document.querySelector('pxl-circle'); // PxlCircleElement
 circle.r = 50;                 // or an expression: 'sin(t) * 10 + 50'
 const radius: number = circle.r;</code></pre>
+      <p>A custom shape needs a declaration of its own, which extends <code>PxlShapeAttributes</code> and <code>PxlShapeElement</code> (<a href="custom-shapes.html">Custom Shapes</a>).</p>
       <div class="callout-info">
         <p class="callout-title">Inside the Project</p>
         <p class="callout-body">The framework files import the framework's own types (<code>react</code>, <code>vue</code>, …), so they must sit inside the project, next to its <code>node_modules</code>. They are generated from the engine with each version; download them again when you update <code>pxl.min.js</code>.</p>

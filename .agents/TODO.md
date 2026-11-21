@@ -116,4 +116,4 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Status**: 🟡 **Proposed**
 - **Plan**: `design/2026-11-20_custom_shapes_plan.md` (replaces shape authoring; the structure cleanup in plan §6 is discussed separately)
 - Custom shapes are written like built-in shapes, in a second script after `pxl.min.js`: one template, `static defaults` and `draw(ctx)` in logical units (the engine scales the canvas by `u`, in two phases), the tag defined with `pxl.defineShape()` (D3 decided); booleans from defaults; a public contract.
-- **Next**: step 6, the docs (`docs/custom-shapes.html`, KILOPIXEL.md "Custom Shapes"). Steps 2–5 built: the template works (plan sections "Step 2 Built" … "Step 5 Built"). Check phase 1 in Safari. **Open**: D5, D7–D9.
+- **Next**: step 7, `<pxl-polygon>` as the first new shape in this form. Steps 2–6 built: custom shapes work and are documented (`docs/custom-shapes.html`). Check phase 1 in Safari. **Open**: D5, D7, D9.

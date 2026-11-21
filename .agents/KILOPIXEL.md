@@ -424,7 +424,42 @@ An infinite grid: it draws exactly the visible part, at any zoom, rotation or ne
 - **Inside a layer** it is evaluated by that layer, like a shape: frozen while the layer or a group around it is hidden. **Stage-level** (in a stage, outside every layer): evaluated before the layers, every reader sees this frame's value; a static one keeps the page at 0 FPS. **Outside every stage:** static and reactive values work, `t` doesn't.
 - **Several inputs, one attribute:** give each input its own variable and read them all, `fill="linear([ref.x0.value, ref.y0.value, ref.x1.value, ref.y1.value], ['red', 'blue'])"`; a slider then sets one value (the docs pages call this Tier 2, `docs/DOCS_STANDARDS.md` §4).
 
-## 12. Performance Monitor
+## 12. Custom Shapes
+
+A class that extends `pxl.Shape`, in a script after `pxl.min.js`, written like the built-in shape files. Docs page: `docs/custom-shapes.html`; the Star and the Gauge there (`docs/js/shapes/`) are also the test shapes. Design: `design/2026-11-20_custom_shapes_plan.md`.
+
+```javascript
+pxl.Star = class Star extends pxl.Shape {
+  static defaults = { ...pxl.Shape.defaults, points: 5, r: 50, ir: 20 };
+  draw(ctx) { /* path around (0, 0), lengths as in the HTML */ this.applyStyle(ctx); }
+  getBoundingBox() { const { r } = this.values; return this.setBoundingBox(-r, -r, r, r); }
+};
+pxl.defineShape('pxl-star', pxl.Star);
+```
+
+| | Name | Meaning |
+|---|---|---|
+| **write** | `class … extends pxl.Shape` | on `pxl` like the built-ins, or a plain class |
+| | `static defaults` | every attribute with its default, after `...pxl.Shape.defaults`. Each key is an observed attribute (Rule A, §3.5) and a property (§3.7). Keys lowercase (HTML lowercases attribute names). A `false` / `true` default makes a presence attribute (bare = `true`) |
+| | `draw(ctx)` | the drawing around the shape's origin. The canvas is scaled by `u`, so lengths are written as in the HTML. Reads only `this.values`: no time (animate through attributes, `rotate="t * 30"` or an own `spin="t * 90"`), no DOM, as little allocation as possible |
+| | `getBoundingBox()` | the box around the outline, without the stroke, through `setBoundingBox()`. Gradients span it; hit testing checks it (padded by `hitPadding()`) before the exact test. Without it, gradients collapse to a point and every hit test is exact |
+| | `pxl.defineShape(tag, Class)` | defines the tag (`pxl-` by convention) and hides content inside it (`display: none`; before the script runs, the content shows). Warns once per class: a key with capitals, no `draw()`, no `getBoundingBox()`; a tag already defined (a script loaded twice) warns and keeps the first class |
+| **may override** | `hitTest(ctx)` | the hit area: a path and `ctx.fill()` / `ctx.stroke()` (they test the pointer instead of painting). Default: what `draw()` fills and strokes |
+| | `drawsMoreThanOnce()` | whether `draw()` makes more than one paint call (`fill()`, `stroke()`, `fillText()`, `drawImage()`), which decides isolation with `mask`, `blend`, `filter` or a shadow (§4). Default `true`; one path through `applyStyle()`: `this.hasFill() && this.isStroked()` |
+| | `hitPadding()` | how far the paint reaches beyond the box (default: from the stroke) |
+| **may read** | `this.values` | the current values (the object `ref.<id>` reads), also `isHovered`, `isPressed` |
+| | `this.stage.unit` | CSS pixels per unit, for pixel access (`getImageData()` ignores the canvas transform) |
+| **may call** | `applyStyle(ctx)` | fill (if set), then stroke (if set) the current path, gradients and dashes included |
+| | `applyStrokeState(ctx)` | stroke style, width, caps, joins, miter limit, dash, without stroking |
+| | `paint(ctx, 'fill' | 'stroke')` | the fill or stroke as a canvas style: a color as written, a gradient in the shape's box |
+| | `hasFill()`, `isStroked()` | whether a fill, or a stroke with a width above 0, is set |
+| | `setBoundingBox(left, top, right, bottom)` | writes the box and returns it, no allocation |
+
+Everything else on `pxl.Shape` (names with `_`, `update()`, `render()`, matrices, arrowheads) is internal. **Guarantees:** the transform (with `u`), `alpha`, `blend` / `mask`, `filter` and the shadow are set before `draw()`; the canvas state is restored afterwards; an error in `draw()` is reported once and skips the shape for that frame; the shape redraws when one of its values changes.
+
+**TypeScript:** `PxlShapeAttributes` and `PxlShapeElement` (generated) hold what every shape has; a custom shape's declaration extends them with its own attributes and adds its tag to `HTMLElementTagNameMap`, and for JSX to the framework's tag list (the docs page shows both).
+
+## 13. Performance Monitor
 
 `ref.<stage>.fps`, `renderAvg`, `renderMax` (§6.1), published once per second. An FPS display is itself a reader: on an otherwise idle page it alternates between 0 and 1. Every frame counts, also pointer frames that drew nothing.
 
@@ -432,7 +467,7 @@ An infinite grid: it draws exactly the visible part, at any zoom, rotation or ne
 <pxl-text x="20" y="30" text="ref.main.fps + ' FPS | ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#0f0"></pxl-text>
 ```
 
-## 13. Pitfalls
+## 14. Pitfalls
 
 - Closing tags always (§1); shapes inside a layer.
 - `pxl-on-click` …, not `onclick` / `onhover` (§8.2).

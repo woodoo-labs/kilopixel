@@ -1,5 +1,5 @@
-// A custom shape for the tests, written as the custom shapes plan's template (design/2026-11-20_custom_shapes_plan.md
-// §3) and loaded as a second script after pxl.min.js: one path, filled and stroked, in logical units.
+// <pxl-star>: a Kilopixel custom shape (https://woodoo-labs.github.io/kilopixel/custom-shapes.html).
+// Load it after pxl.min.js. One path, filled and stroked; lengths are written as in the HTML.
 pxl.Star = class Star extends pxl.Shape {
   static defaults = { ...pxl.Shape.defaults, points: 5, r: 50, ir: 20 };
 

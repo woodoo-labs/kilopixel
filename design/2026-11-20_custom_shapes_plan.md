@@ -1,6 +1,6 @@
 # Custom Shapes and Element Structure
 
-- **Status**: 🟡 **Proposed** (2026-11-21, steps 2–5 built (§12–§15): the template works; docs (step 6), the Safari test and D5, D7–D9 open)
+- **Status**: 🟡 **Proposed** (2026-11-21, steps 2–6 built (§12–§16): custom shapes work and are documented; the Safari test, `<pxl-polygon>` and D5, D7, D9 open)
 - **Date**: 2026-11-20
 - **Replaces**: `design/archive/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`, `draw()` without `t`, custom animation patterns, verified 2026-10-17 and 2026-11-07) and the structure cleanup draft of 2026-11-20 (`scratch/2026-11-20_engine_structure_cleanup_plan.md` (not kept); its steps and measurements are §6 here)
 - **Related**: `design/2026-11-20_evaluation_model_plan.md` (step 2 makes "`draw()` only reads values" a contract), `design/2026-10-19_polygon_star_shape_plan.md` (the first new shape in this form), `design/done/2026-11-01_isolated_shape_compositing_plan.md` (`drawsMoreThanOnce()`), `design/done/2026-11-07_safe_shape_render_plan.md` (a careless shape can't break the layer), `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked), `design/2026-10-30_space_attribute_plan.md` (with step 6.6)
@@ -213,6 +213,8 @@ From the cleanup draft of 2026-11-20. **Not part of the custom-shape steps (§9)
 - **`docs/custom-shapes.html`** (new, DOCS_STANDARDS): the Star (live), the Gauge as the example with more freedom, the contract table, the rules (logical units, no `t`, lowercase keys, booleans from defaults, `drawsMoreThanOnce()`), the second script after `pxl.min.js`, a TypeScript declaration, a downloadable `star.js`.
 - `.agents/KILOPIXEL.md`: a section "Custom Shapes" (the contract of §4); `.agents/ENGINE.md`: §6.1 (drawing in logical units), the checklist §12.
 
+*2026-11-21: built (§16), also with the Gauge's `gauge.js` to download.*
+
 ## 9. Steps
 
 1. **Test phase 1 in Firefox and Safari:** `logical_units/text_tests.html`, the page sweep, `template/rich.html`. Firefox done 2026-11-21 (§5.3); Safari open.
@@ -220,7 +222,7 @@ From the cleanup draft of 2026-11-20. **Not part of the custom-shape steps (§9)
 3. §5.3 phase 1 and §5.4: the calling convention, `draw(ctx)` without `t`. Built 2026-11-21 (§13).
 4. §5.6 rename, if decided (D4). Built 2026-11-21 (§14).
 5. §5.5 and §5.7: defining the tag, `setBoundingBox()`, `paint()`, the checks once per class; the Star and the Gauge as tests, loaded as a second script. Built 2026-11-21 (§15).
-6. Docs (§8), KILOPIXEL.md and ENGINE.md.
+6. Docs (§8), KILOPIXEL.md and ENGINE.md. Built 2026-11-21 (§16).
 7. `<pxl-polygon>` (`design/2026-10-19_polygon_star_shape_plan.md`) as the first new shape in this form.
 8. Later: §5.3 phase 2; the structure cleanup (§6), discussed separately; §6.6 waits for `space`.
 
@@ -254,7 +256,7 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 | D5 | Class fields for built-ins | no: the engine keeps constructors; authors choose |
 | D6 | The public helpers of §4 (`applyStyle`, `applyStrokeState`, `paint`, `hasFill`, `isStroked`, `setBoundingBox`) | **decided and built 2026-11-21** (§15); arrowheads stay internal (§5.9) |
 | D7 | The transform path (§6.6) | with `space`, not alone (the cleanup is discussed separately) |
-| D8 | Typings for custom shapes | a declaration to copy on the docs page; generated typings later |
+| D8 | Typings for custom shapes | **decided and built 2026-11-21** (§16): generated base types `PxlShapeAttributes` / `PxlShapeElement`, a declaration to copy on the docs page |
 | D9 | Internal animated values (§5.9) | after the evaluation model |
 
 ## 12. Step 2 Built (2026-11-21)
@@ -320,16 +322,33 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 - Content inside a custom shape tag shows until its script has defined the tag (the tag isn't known before; accepted).
 - D6 decided with the build.
 
-**Tests:** `tests/shapes/star.js` and `tests/shapes/gauge.js`, written with the real API, are loaded as a second script by `tests/index.html` and `tests/render.html`. `tests/index.html`, section "Custom shapes": both defined with their attributes; hits along the Star's outline and on the Gauge's half disc through `hitTest()`; the bare `ticks`; the Star's `drawsMoreThanOnce()` deciding isolation with `mask`; `setBoundingBox()` returning the own box; `paint()` with a color and a gradient; content hidden in a shape tag, also defined later and inside a shadow root; one warning each for a capital key, no `draw()` and no `getBoundingBox()`, none in five frames and a hit test; a tag defined twice warns and keeps the first class. `tests/render.html`: the Star at stage widths 500 and 1000; the Gauge's gradient value arc, the track after it and the label in its fill. `node tools/run_tests.js`, `--smoke` and `--types`: all passed; the typings still list all 7 shapes.
+**Tests:** `tests/shapes/star.js` and `tests/shapes/gauge.js` (moved to `docs/js/shapes/` in step 6, §16), written with the real API, are loaded as a second script by `tests/index.html` and `tests/render.html`. `tests/index.html`, section "Custom shapes": both defined with their attributes; hits along the Star's outline and on the Gauge's half disc through `hitTest()`; the bare `ticks`; the Star's `drawsMoreThanOnce()` deciding isolation with `mask`; `setBoundingBox()` returning the own box; `paint()` with a color and a gradient; content hidden in a shape tag, also defined later and inside a shadow root; one warning each for a capital key, no `draw()` and no `getBoundingBox()`, none in five frames and a hit test; a tag defined twice warns and keeps the first class. `tests/render.html`: the Star at stage widths 500 and 1000; the Gauge's gradient value arc, the track after it and the label in its fill. `node tools/run_tests.js`, `--smoke` and `--types`: all passed; the typings still list all 7 shapes.
 
 **Size:** `pxl.min.js` 71,806 → 72,093 bytes (+0.3 KB, as estimated).
 
 **Left:** step 6 (docs page, KILOPIXEL.md section "Custom Shapes"), the Safari check, step 7 (`<pxl-polygon>`).
 
+## 16. Step 6 Built (2026-11-21)
+
+**What changed** (§8):
+
+- `docs/custom-shapes.html` (new): 1. A First Shape (`star.js` in full, the HTML with the second script, a demo with points, inner radius and a color or gradient fill), 2. Attributes (defaults as attributes, lowercase keys, presence attributes, `this.values` and `ref.*`, a callout on animating through attributes; a demo where a second star reads `ref.star.points` and turns at a set speed), 3. Free Drawing (`gauge.js` in full, `applyStrokeState()`, `paint()`, `hitTest()`; a demo with value and the bare `ticks`), 4. Compositing (`drawsMoreThanOnce()`), 5. Rules, 6. TypeScript, 7. Shape Class Reference (write, override, read and call, plus the common styling, transform and event tabs). No showcase. Downloads for `star.js` and `gauge.js`.
+- `docs/js/shapes/star.js`, `gauge.js`: moved from `tests/shapes/`, with comments for page authors; the docs page and the test pages load the same files.
+- `docs/js/layout.js`: a sidebar section "Extending" with "Custom Shapes". `docs/frameworks.html`: one sentence pointing custom shapes to the page.
+- `.agents/KILOPIXEL.md`: section 12 "Custom Shapes" (the contract of §4); Performance Monitor and Pitfalls are now 13 and 14 (no references to them elsewhere).
+- `tools/build_types.js`: generated `PxlShapeAttributes` and `PxlShapeElement` from `pxl.Shape`; the built-in shapes' interfaces extend them and list only their own attributes (`kilopixel.d.ts` 968 → 470 lines).
+
+**Decisions:** D8 with generated base types (the user's choice), so a copied declaration lists only the shape's own attributes. The docs speak of lengths "as in the HTML", not of logical units (`docs/DOCS_STANDARDS.md` §6). The TypeScript blocks use Prism's JavaScript highlighting (the page loads no extra Prism language).
+
+**Tests:** `tests/types/fixtures/custom.ts` (new) declares `<pxl-star>` as the docs page shows it and checks properties, expressions, props and expected errors; `fixtures/react.tsx` adds the JSX line of the page and uses `<pxl-star>`. `node tools/run_tests.js` (the sweep now has 82 pages, no console messages) and `--types`: all passed. Checked in the browser pane: the three demos, the controls and their code marks, no horizontal scroll at phone width.
+
+**Left:** the Safari check (§9 step 1), step 7 (`<pxl-polygon>`), phase 2 of §5.3 and the structure cleanup (§6).
+
 ## Log
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-21: step 6 built (§16): `docs/custom-shapes.html`, KILOPIXEL.md §12, generated shape base types for TypeScript (D8 decided); `star.js` and `gauge.js` moved to `docs/js/shapes/`.
 - 2026-11-21: step 5 built (§15): `pxl.defineShape()` with the checks once per class and the tag hidden by the default styles, `setBoundingBox()`, `paint()`; the Star and the Gauge as test shapes in `tests/shapes/`. D6 decided. +0.3 KB.
 - 2026-11-21: step 4 built (§14): `attributeValues` → `values`, `attributeExpressions` → `expressions` (D4 decided); −1.0 KB. `template/` and `logical_units/` run with commit `5ff5ea6`.
 - 2026-11-21: step 3 built (§13): drawing in logical units, phase 1 (`ctx.scale(u, u)`, `draw(ctx, 1)`), `draw()` without `t`; D2 decided, the Safari test becomes a check afterwards.

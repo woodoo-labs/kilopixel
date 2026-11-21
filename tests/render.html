@@ -16,9 +16,9 @@
   </style>
   <!-- The built bundle: run `node build.js` before opening this page -->
   <script src="../dist/pxl.min.js"></script>
-  <!-- Custom shapes, loaded as a second script like a page would (tests/shapes/) -->
-  <script src="shapes/star.js"></script>
-  <script src="shapes/gauge.js"></script>
+  <!-- Custom shapes from the docs (docs/js/shapes/), loaded as a second script like a page would -->
+  <script src="../docs/js/shapes/star.js"></script>
+  <script src="../docs/js/shapes/gauge.js"></script>
   <script src="runner.js"></script>
 </head>
 <body>
@@ -355,7 +355,7 @@
       if (seen[0] !== seen[1]) throw new Error(`width 500: ${seen[0]}; width 1000: ${seen[1]}`);
     });
 
-    // The Star and the Gauge from tests/shapes/ (design/2026-11-20_custom_shapes_plan.md §3), loaded as a second script
+    // The Star and the Gauge from docs/js/shapes/ (design/2026-11-20_custom_shapes_plan.md §3), loaded as a second script
     for (const width of [500, 1000]) {
       test(`custom shapes: the Star at stage width ${width}: its points painted, the space between them empty`, () =>
         draw('<pxl-star x="300" y="300" r="200" ir="80" fill="#000" stroke="#000" strokewidth="10"></pxl-star>', (layer) =>
