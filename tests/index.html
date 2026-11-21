@@ -278,11 +278,23 @@
       expectMapped('tlReader2', 'tlSun2', XY);
     });
 
-    test('toLocal: nothing redraws while nothing moves (stage idle at 0 FPS)', async () => {
-      await document.fonts.ready; // a font that finishes loading redraws every stage once (text.js)
-      await wait(2200); // fps is published once per second
-      const fps = pxl.nodes.tlStage2.fps;
-      if (fps !== 0) throw new Error(`static stage renders at ${fps} FPS`);
+    // Checked on the engine's state, not on the published FPS: headless, frames don't follow the virtual time of the
+    // waits (tools/run_tests.js), so the frame that draws the previous test's move can land in any measured second.
+    // Rendered by hand: once that move is drawn, a frame must request no further frame and leave no layer busy.
+    test('toLocal: nothing redraws while nothing moves (stage idle)', () => {
+      const stage = el('tlStage2');
+      let requests = 0;
+      stage.requestRender = function() { requests++; pxl.Stage.prototype.requestRender.call(this); };
+      try {
+        for (let i = 0; i < 3 && (i === 0 || requests); i++) {
+          requests = 0;
+          stage.render(performance.now() / 1000);
+        }
+      } finally {
+        delete stage.requestRender;
+      }
+      const busy = stage.layers.filter((layer) => layer.isDirty || layer.isAnimated).length;
+      if (requests || busy) throw new Error(`after three frames: ${requests} frames requested, ${busy} layers dirty or animated`);
     });
 
     test('toLocal: reader in a nested group inside a rotating layer', () =>
@@ -1578,18 +1590,24 @@
     });
 
     test('monitor: an idle stage drops to 0 within a second instead of keeping its last values', async () => {
-      // tlStage2 is static (see "stage idle at 0 FPS"): no frames, so the timer must publish 0 on its own.
-      // A font that finishes loading redraws every stage once (text.js), and the previous test published by hand:
-      // wait for the fonts and one full timer interval first, so no earlier frame lands in this test's interval.
-      await document.fonts.ready;
-      await wait(1100);
-      const values = pxl.nodes.tlStage2;
-      values.fps = 26;
-      values.renderAvg = '3.00';
-      values.renderMax = '5.00';
-      await wait(1200);
-      if (values.fps !== 0 || values.renderAvg !== '0.00' || values.renderMax !== '0.00') {
-        throw new Error(`fps ${values.fps}, renderAvg ${values.renderAvg}, renderMax ${values.renderMax}`);
+      // The stage draws nothing during the test, so the timer must publish 0 on its own. Its frames are kept out
+      // instead of waited for: headless, a frame requested earlier (a late font, the toLocal tests) can land in any
+      // interval (tools/run_tests.js). One full interval first: the previous test published by hand.
+      const stage = el('tlStage2');
+      stage.render = () => {};
+      try {
+        await wait(1100);
+        const values = pxl.nodes.tlStage2;
+        values.fps = 26;
+        values.renderAvg = '3.00';
+        values.renderMax = '5.00';
+        await wait(1200);
+        if (values.fps !== 0 || values.renderAvg !== '0.00' || values.renderMax !== '0.00') {
+          throw new Error(`fps ${values.fps}, renderAvg ${values.renderAvg}, renderMax ${values.renderMax}`);
+        }
+      } finally {
+        delete stage.render;
+        stage.requestRender(); // draws what a skipped frame left
       }
     });
 

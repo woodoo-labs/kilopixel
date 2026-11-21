@@ -16,8 +16,11 @@
 //   --verbose        list every test, and the console messages of the test pages
 // Exit code: 0 all passed, 1 failures, 2 setup problem (no browser, server didn't start).
 //
-// Test pages run in their own headless browser process with --virtual-time-budget: timers and frames run as fast
-// as the page allows, so the result doesn't depend on a visible window, and waits in tests cost no real time.
+// Test pages run in their own headless browser process with --virtual-time-budget: timers run as fast as the page
+// allows, so the result doesn't depend on a visible window, and waits in tests cost no real time. Animation frames
+// don't follow the virtual time: a wait() can pass without any frame, and a frame requested before it can run at
+// any point of it. Awaiting a frame doesn't help either: the virtual time jumps to the next timer meanwhile (the
+// test's timeout). Tests that count frames therefore render by hand or keep the stage's frames out.
 // The sweep runs in one browser with several tabs over the DevTools protocol, in real time: browser processes
 // start one after another (measured on Windows: 6 at once take as long as 6 in a row), tabs load in parallel.
 // Without WebSocket (Node < 22) the sweep falls back to one process per page. Starts the dev server
