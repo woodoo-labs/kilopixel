@@ -152,8 +152,44 @@ async function textMeasurement() {
       for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 64 && x > R) R = x; return R; };
     const drift = {};
     for (const r of window.textRows) { const k = edge(r.b) - edge(r.a); drift[k] = (drift[k] || 0) + 1; }
-    return { browser: navigator.userAgent, summary, rightEdgeDriftDevicePx: drift };
+    // The cases whose widths differ most, with the font size each method sets: today size × u, logical units size
+    const widest = window.textRows.map((r) => ({ font: r.font, weight: r.weight, size: r.size, u: r.u, dpr: r.dpr,
+      stroke: r.stroke, fontPxToday: +(r.size * r.u).toFixed(3), widthToday: r.widthToday, widthLogical: r.widthLogical,
+      difference: +(Math.abs(r.widthToday - r.widthLogical) / r.widthLogical * 100).toFixed(2) }))
+      .sort((p, q) => q.difference - p.difference).slice(0, 12);
+    return { browser: navigator.userAgent, summary, rightEdgeDriftDevicePx: drift, widest };
   })`);
+}
+
+// Which ways of reading pixels back work in this Safari: a plain canvas, one with willReadFrequently, and a plain
+// canvas copied into a willReadFrequently one (drawImage, createImageBitmap); then a page's layer canvas the same way
+async function readbackProbe() {
+  const probe = `(async () => {
+    const out = {};
+    const make = (options) => { const c = document.createElement('canvas'); c.width = 50; c.height = 50;
+      const g = c.getContext('2d', options); g.fillStyle = '#f00'; g.fillRect(10, 10, 30, 30); return c; };
+    const read = (canvas) => { const d = canvas.getContext('2d', { willReadFrequently: true }).getImageData(25, 25, 1, 1).data; return Array.from(d).join(','); };
+    const attempt = async (name, fn) => { try { out[name] = await fn(); } catch (e) { out[name] = 'ERROR ' + e.name + ': ' + e.message; } };
+    const copyTo = (source) => { const c = document.createElement('canvas'); c.width = source.width; c.height = source.height;
+      c.getContext('2d', { willReadFrequently: true }).drawImage(source, 0, 0); return c; };
+    await attempt('plain getImageData', () => Array.from(make().getContext('2d').getImageData(25, 25, 1, 1).data).join(','));
+    await attempt('willReadFrequently getImageData', () => read(make({ willReadFrequently: true })));
+    await attempt('plain → drawImage → willReadFrequently', () => read(copyTo(make())));
+    await attempt('plain → createImageBitmap → willReadFrequently', async () => read(copyTo(await createImageBitmap(make()))));
+    await attempt('plain toDataURL length', () => make().toDataURL().length);
+    // resize() sizes the layers and draws once, also when the page doesn't get animation frames
+    const stage = document.querySelector('pxl-stage'), layer = stage && stage.querySelector('pxl-layer');
+    if (layer) {
+      stage.resize();
+      const canvas = layer._canvas, copy = copyTo(canvas), d = copy.getContext('2d').getImageData(0, 0, copy.width, copy.height).data;
+      let ink = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 0) ink++;
+      out['layer canvas copied: painted pixels'] = ink + ' of ' + (d.length / 4);
+    }
+    return out;
+  })()`;
+  await open('docs/circle.html');
+  await sleep(1500);
+  return runAsync(probe);
 }
 
 async function canvasMeasurement() {
@@ -195,7 +231,17 @@ function summaryMarkdown(r) {
     lines.push('', '## Text: Today vs. Logical Units', '',
       `${s.cases} cases, ${s.identicalCases} identical; ${s.share} of the ink pixels differ by more than 64 / 255; ` +
       `widths differ by up to ${s.maxRelativeWidthDifference}.`, '',
-      `Right edge drift in device pixels (logical − today): \`${JSON.stringify(r.text.rightEdgeDriftDevicePx)}\``);
+      `Right edge drift in device pixels (logical − today): \`${JSON.stringify(r.text.rightEdgeDriftDevicePx)}\``, '',
+      'Widest differences (today draws size × u px; logical units draw size px on a canvas scaled by u):', '',
+      '| Font | Size | u | DPR | Font px today | Width today | Width logical | Difference |', '|---|---|---|---|---|---|---|---|');
+    for (const w of r.text.widest || []) {
+      lines.push(`| ${w.font} ${w.weight}${w.stroke ? ' outlined' : ''} | ${w.size} | ${w.u} | ${w.dpr} | ${w.fontPxToday} | ` +
+        `${w.widthToday.toFixed(2)} | ${w.widthLogical.toFixed(2)} | ${w.difference} % |`);
+    }
+  }
+  if (r.readback) {
+    lines.push('', '## Pixel Readback', '', '| Way | Result |', '|---|---|');
+    for (const [way, value] of Object.entries(r.readback)) lines.push(`| ${way} | ${String(value).replace(/\|/g, '/')} |`);
   }
   if (r.canvas) lines.push('', '## Canvas Rules', '', '```json', JSON.stringify(r.canvas, null, 1), '```');
   for (const [name, message] of Object.entries(r.errors)) lines.push('', `**${name} failed:** ${message}`);
@@ -207,7 +253,7 @@ async function main() {
   fs.mkdirSync(OUT, { recursive: true });
   const server = await startServer();
   const driver = await startDriver();
-  const result = { browser: '', tests: [], sweep: [], text: null, canvas: null, screenshots: [], errors: {} };
+  const result = { browser: '', readback: null, tests: [], sweep: [], text: null, canvas: null, screenshots: [], errors: {} };
   const step = async (name, fn) => {
     console.log(`Safari: ${name} …`);
     try { return await fn(); } catch (e) { result.errors[name] = e.message; console.log(`  failed: ${e.message}`); return null; }
@@ -215,6 +261,7 @@ async function main() {
   try {
     await open('docs/index.html');
     result.browser = await run('return navigator.userAgent;');
+    result.readback = await step('readback probe', readbackProbe);
     for (const page of TEST_PAGES) {
       const t = await step(page, () => testPage(page));
       if (t) result.tests.push(t);
