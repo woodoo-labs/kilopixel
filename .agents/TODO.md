@@ -61,6 +61,7 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Status**: 🟡 **Proposed**
 - **Plan**: `design/2026-10-19_polygon_star_shape_plan.md`
 - One shape for regular polygons and stars: `sides`, `r`, a relative star amount, `start`. Arbitrary polygons stay `<pxl-polyline closed>`.
+- **Next**: bring the plan's code to the form of the built-in shapes today (`design/done/2026-11-20_custom_shapes_plan.md`: `static defaults` only, `draw(ctx)` without `u`, `pxl.defineShape()`), then build it as the first shape in that form.
 - **Open** (plan §7): the name of the star amount (`indent`), the element name, the default `start` and `sides`.
 
 ## 28. Draw in Another Element's Space (`space`)
@@ -112,18 +113,12 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Next**: step 2, change-based dirty flags with the keep-alive in the stage: a layer redraws only when a value changed (a `floor(t)` clock once per second). Then a prototype of option B (no broadcasts) and decision D1 between it and option A (ordered broadcasts).
 - **Also decided there**: scoped names instead of global ids (D8); B8 of `design/done/2026-10-27_engine_cleanup_inventory_note.md` (the evaluation loops either option rewrites).
 
-## 47. Custom Shapes
-- **Status**: 🟡 **Proposed**
-- **Plan**: `design/2026-11-20_custom_shapes_plan.md` (replaces shape authoring; the structure cleanup in plan §6 is discussed separately)
-- Custom shapes are written like built-in shapes, in a second script after `pxl.min.js`: one template, `static defaults` and `draw(ctx)` in logical units (the engine scales the canvas by `u`, in two phases), the tag defined with `pxl.defineShape()` (D3 decided); booleans from defaults; a public contract.
-- **Next**: step 7, `<pxl-polygon>` as the first new shape in this form. Steps 2–6 built: custom shapes work and are documented (`docs/custom-shapes.html`); Safari checked on an iPhone (plan §5.3). **Open**: D5, D7, D9.
-
 ## 48. Late Web Fonts in Safari
 - **Status**: 💬 **Discussion** (no plan yet)
 - Safari 27 sends no `loadingdone` when a web font arrives (measured on an iPhone, 2026-11-22), so text drawn before the font keeps the fallback font's widths, lines and box (`docs/` uses Inter). The two late-font tests in `tests/index.html` fail there too, although a synthetic event reached a listener in a probe.
-- **Next**: a small plan: another signal for arrived fonts (`document.fonts.ready` after each `loading`, the fonts' `loaded` promises), and a test that runs in Safari. Background: `design/2026-11-20_custom_shapes_plan.md` §5.3.
+- **Next**: a small plan: another signal for arrived fonts (`document.fonts.ready` after each `loading`, the fonts' `loaded` promises), and a test that runs in Safari. Background: `design/done/2026-11-20_custom_shapes_plan.md` §5.3.
 
 ## 49. Shape Filters in Safari
 - **Status**: 💬 **Discussion** (no plan yet)
 - Safari's canvas has no `ctx.filter` (iPhone, 2026-11-22), so `filter` on a shape draws nothing extra there; filters on layers are CSS and work.
-- **Next**: a note on `docs/filter.html`; then decide whether `blur()` and `dropShadow()` on shapes get a fallback in Safari (the canvas shadow, or the layer's filter). Background: `design/2026-11-20_custom_shapes_plan.md` §5.3.
+- **Next**: a note on `docs/filter.html`; then decide whether `blur()` and `dropShadow()` on shapes get a fallback in Safari (the canvas shadow, or the layer's filter). Background: `design/done/2026-11-20_custom_shapes_plan.md` §5.3.

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Phase 2 Scene | Prototype</title>
+<style>body { margin: 0; } pxl-stage { width: 1200px; }</style>
+<script>
+// The engine named in ?engine= (old.min.js or new.min.js, copied to scratch/phase2/ by run.js), loaded before the stage
+document.write(`<script src="/scratch/phase2/${new URLSearchParams(location.search).get('engine')}"><\/script>`);
+</script>
+</head>
+<body>
+<pxl-stage id="main" ratio="16 / 9" alwaysrender><pxl-layer id="lay"></pxl-layer></pxl-stage>
+<script>
+const stage = document.getElementById('main'), lay = document.getElementById('lay');
+stage.render = () => {}; // frames only when measured
+
+function scene(kind) {
+  let html = '';
+  if (kind === 'circles') for (let i = 0; i < 5000; i++)
+    html += `<pxl-circle x="${(i * 37) % 1000}" y="${(i * 53) % 560}" r="4" fill="hsl(${i % 360}, 70%, 50%)" stroke="#fff" strokewidth="0.5"></pxl-circle>`;
+  if (kind === 'texts') for (let i = 0; i < 500; i++)
+    html += `<pxl-text x="${(i * 97) % 1000}" y="${20 + (i * 31) % 540}" text="Label ${i}" size="14" fill="#333"></pxl-text>`;
+  if (kind === 'gradients') for (let i = 0; i < 1000; i++)
+    html += `<pxl-rect x="${(i * 37) % 1000}" y="${(i * 53) % 560}" w="20" h="12" fill="linear(${i % 180}, ['red', 'blue'])" stroke="#000" strokewidth="1" linedash="[3, 2]"></pxl-rect>`;
+  if (kind === 'arrows') for (let i = 0; i < 1000; i++)
+    html += `<pxl-polyline points="${(i * 37) % 1000},${(i * 53) % 560}; ${(i * 37) % 1000 + 30},${(i * 53) % 560 + 10}; ${(i * 37) % 1000 + 50},${(i * 53) % 560 - 10}" smooth="true" stroke="#0a0" strokewidth="2" arrowend="auto"></pxl-polyline>`;
+  // 200 groups, each two groups deep, rotated and scaled, with 10 shapes
+  if (kind === 'groups') for (let g = 0; g < 200; g++) {
+    html += `<pxl-group x="${(g * 37) % 1000}" y="${(g * 53) % 560}" rotate="${g % 90}"><pxl-group zoom="0.8" dx="5">`;
+    for (let i = 0; i < 10; i++) html += `<pxl-rect x="${i * 4}" w="6" h="6" fill="#36c" stroke="#000" strokewidth="1"></pxl-rect>`;
+    html += '</pxl-group></pxl-group>';
+  }
+  return html;
+}
+
+// Builds a scene and warms it up
+window.prepare = function(kind) {
+  lay.innerHTML = scene(kind);
+  stage.resize();
+  for (let i = 0; i < 5; i++) window.drawFrames(1);
+};
+
+// n full frames (every layer redrawn), returns ms per frame
+let t = 1;
+window.drawFrames = function(n) {
+  const start = performance.now();
+  for (let i = 0; i < n; i++) {
+    lay.isDirty = true;
+    pxl.Stage.prototype.render.call(stage, (t += 0.016));
+  }
+  lay._ctx.getImageData(0, 0, 1, 1); // waits for the drawing to finish
+  return (performance.now() - start) / n;
+};
+</script>
+</body>
+</html>

@@ -111,6 +111,7 @@ Speed is not the reason for either; B ends with less to understand and keep righ
 | D8 | Scoped names instead of global ids (`design/done/2026-10-30_framework_compatibility_plan.md` D2, §8.2): compiled functions would get `ref` per stage at call time, so component instances share them | design together with D1: both change how `ref` is resolved |
 | D9 | Throttled layers (`design/2026-11-12_layer_throttling_plan.md`): evaluated every frame (smooth readers) or at their rate | decide with throttling part A, after step 2 |
 | D10 | Hit testing uses the values of the last update; in a throttled layer they can be ahead of its pixels | accept |
+| D11 | Internal animated values of custom shapes (a pump's impeller that spins while `running`, without the page writing `t`): a declarative `static animations = { impeller: 'this.values.running ? t * 90 : 0' }` evaluated like an animated attribute, and values that keep state between frames (smooth start and stop) | decide with D1; until then time goes through an attribute (`spin="t * 180"`). From `design/done/2026-11-20_custom_shapes_plan.md` §5.9 (D9 there) |
 
 ## 6. Plans That Depend on This
 
@@ -121,7 +122,7 @@ Speed is not the reason for either; B ends with less to understand and keep righ
 | — | `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked) | if it is picked up: its `applyClip()` evaluates children while drawing; they must be evaluated in the update phase (possible since step 1) |
 | §28 | `design/2026-10-30_space_attribute_plan.md` | its reactivity (§3.3) subscribes through broadcasts: rewrite after D1; its draw-order rule (§3.5) is gone since step 1 |
 | §5 | `design/2026-08-02_declarative_html_output_pxl_out_plan.md` | after D1: under A the propagation must be ordered first (no 210 before 220), under B it is a reader in part 3 |
-| §47 | `design/2026-11-20_custom_shapes_plan.md` | `draw(ctx, u)` without `t` becomes the contract with step 2; internal animated values (its §5.9) wait for D1 |
+| (closed) | `design/done/2026-11-20_custom_shapes_plan.md` | `draw(ctx)` without `t` is the contract since its step 3; internal animated values (its §5.9, D9) moved here as D11 |
 
 Not affected: hit testing and event dispatch (both fit either option), isolation, `<pxl-plot>`, `<pxl-path>`.
 
@@ -143,8 +144,9 @@ Existing tests stay (two-phase frame, ref cycles, safe render, `toLocal`, layer 
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
-- 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
-- 2026-11-21: `design/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; the contract "`draw()` only reads values" holds in the code (line 42 and the §47 row describe it as planned).
-- 2026-11-20: the shape authoring plan was replaced by `design/2026-11-20_custom_shapes_plan.md` (TODO §47); §6 points to it.
+- 2026-11-22: D11 added: internal animated values of custom shapes, moved here from `design/done/2026-11-20_custom_shapes_plan.md` (D9 there), which is closed.
+- 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
+- 2026-11-21: `design/done/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; the contract "`draw()` only reads values" holds in the code (line 42 and the custom shapes row describe it as planned).
+- 2026-11-20: the shape authoring plan was replaced by `design/done/2026-11-20_custom_shapes_plan.md`; §6 points to it.
 - 2026-11-20: `<pxl-clip>` parked in `design/ideas/`; §6 marks its row.
 - 2026-11-20: merged from the two-phase frame plan (open parts), the reactive propagation plan (option A) and the per-frame evaluation plan (option B). Their decision names map as follows: per-frame D1–D3, D5–D8 → D1, D2, D4, D5, D7, D8 here (its D4 had moved to C1); two-phase questions 6, 7, 9 → D6, D9, D10; reactive propagation D1–D4 → part of option A, D2, D3, D4.

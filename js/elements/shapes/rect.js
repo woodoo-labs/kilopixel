@@ -6,11 +6,11 @@ pxl.Rect = class Rect extends pxl.Shape {
     this._radii = [0, 0, 0, 0]; // reused by roundRect() every frame
   }
 
-  draw(ctx, u) {
+  draw(ctx) {
     const { w, h, r, r1, r2, r3, r4, anchor } = this.values;
 
-    const startX = -w * pxl.anchorX[anchor] * u;
-    const startY = -h * pxl.anchorY[anchor] * u;
+    const startX = -w * pxl.anchorX[anchor];
+    const startY = -h * pxl.anchorY[anchor];
 
     // r is the radius of every corner that has no r1 … r4 of its own
     const baseR = r ?? 0;
@@ -22,15 +22,15 @@ pxl.Rect = class Rect extends pxl.Shape {
     ctx.beginPath();
     if (rad1 > 0 || rad2 > 0 || rad3 > 0 || rad4 > 0) {
       // roundRect throws on a negative radius (an animated radius can dip below 0); like circle and ellipse, it becomes 0
-      this._radii[0] = Math.max(0, rad1) * u;
-      this._radii[1] = Math.max(0, rad2) * u;
-      this._radii[2] = Math.max(0, rad3) * u;
-      this._radii[3] = Math.max(0, rad4) * u;
-      ctx.roundRect(startX, startY, w * u, h * u, this._radii);
+      this._radii[0] = Math.max(0, rad1);
+      this._radii[1] = Math.max(0, rad2);
+      this._radii[2] = Math.max(0, rad3);
+      this._radii[3] = Math.max(0, rad4);
+      ctx.roundRect(startX, startY, w, h, this._radii);
     } else {
-      ctx.rect(startX, startY, w * u, h * u);
+      ctx.rect(startX, startY, w, h);
     }
-    this.applyStyle(ctx, u);
+    this.applyStyle(ctx);
   }
 
   // Fill and stroke, or arrowheads: more than one draw call, isolated when it has compositing state (Shape.render())

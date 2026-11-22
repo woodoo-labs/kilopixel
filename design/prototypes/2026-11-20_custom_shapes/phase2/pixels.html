@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Phase 2 Pixels | Prototype</title>
+<style>
+  body { margin: 16px; font: 14px system-ui, sans-serif; background: #f8fafc; color: #0f172a; }
+  #out { white-space: pre-wrap; font: 12px ui-monospace, monospace; }
+  iframe { width: 1200px; height: 900px; border: 1px solid #cbd5e1; }
+</style>
+</head>
+<body>
+<h1 style="font-size: 18px">Old vs. new engine: every docs and example page, pixel by pixel</h1>
+<p>Each page is loaded three times (old, new, old again) with its engine swapped, every stage is drawn at the same
+time t, and every layer is compared. A layer that differs between the two old loads is unstable (clock, randomness)
+and isn't counted. Hit testing is compared on a grid of points. <code>await comparePages()</code> runs it.</p>
+<div id="out"></div>
+<iframe id="frame"></iframe>
+<script>
+const T = 2.345;
+const frame = document.getElementById('frame'), out = document.getElementById('out');
+
+// The page with its engine replaced: old.min.js (the build before phase 2) or new.min.js
+async function load(page, engine) {
+  let html = await (await fetch('/' + page, { cache: 'no-store' })).text();
+  html = html.replace(/src="[^"]*pxl\.min\.js"/g, `src="/scratch/phase2/${engine}"`);
+  const dir = page.slice(0, page.lastIndexOf('/') + 1);
+  html = html.replace(/<head[^>]*>/i, (tag) => `${tag}<base href="/${dir}">`);
+  await new Promise((resolve) => { frame.onload = resolve; frame.srcdoc = html; });
+  const w = frame.contentWindow;
+  await w.document.fonts.ready;
+  await new Promise((r) => setTimeout(r, 300));
+  return w;
+}
+
+// Every stage drawn at time T, twice (Chrome moves a canvas to CPU drawing after readbacks), then read
+function snapshot(w) {
+  const stages = [...w.document.querySelectorAll('pxl-stage')].filter((s) => s.clientWidth > 0);
+  for (const s of stages) s.render = () => {};
+  const draw = () => {
+    for (const s of stages) {
+      s.resize();
+      for (const layer of s.layers) layer.isDirty = true;
+      w.pxl.Stage.prototype.render.call(s, T);
+    }
+  };
+  const read = () => stages.flatMap((s) => s.layers.map((l) => l._ctx.getImageData(0, 0, l._canvas.width, l._canvas.height).data));
+  draw(); read(); draw();
+  const pixels = read();
+  // Hit testing: which element (by its place in the document) is hit on a grid of points
+  const all = [...w.document.querySelectorAll('*')];
+  const hits = stages.flatMap((s) => {
+    const list = [], h = s.values.height;
+    for (let x = 5; x < 1000; x += 15) for (let y = 5; y < h; y += 15) list.push(all.indexOf(s.interaction.findShapeAt(x, y)));
+    return list;
+  });
+  return { stages: stages.length, pixels, hits };
+}
+
+// Premultiplied difference, so the color of fully transparent pixels doesn't count
+function diff(A, B) {
+  if (A.length !== B.length) return { max: 255, count: -1 };
+  let max = 0, count = 0;
+  for (let i = 0; i < A.length; i += 4) {
+    const aa = A[i + 3], ba = B[i + 3];
+    let d = Math.abs(aa - ba);
+    for (let c = 0; c < 3; c++) d = Math.max(d, Math.abs(A[i + c] * aa - B[i + c] * ba) / 255);
+    if (d > 0.5) { count++; if (d > max) max = d; }
+  }
+  return { max: Math.round(max), count };
+}
+
+async function comparePage(page) {
+  const a = snapshot(await load(page, 'old.min.js'));
+  const b = snapshot(await load(page, 'new.min.js'));
+  const a2 = snapshot(await load(page, 'old.min.js'));
+  const r = { page, stages: a.stages, layers: a.pixels.length, unstable: 0, differ: 0, max: 0, pixels: 0, hitPoints: a.hits.length, hitDiff: 0 };
+  if (a.pixels.length !== b.pixels.length) { r.error = `layers ${a.pixels.length} old, ${b.pixels.length} new`; return r; }
+  for (let i = 0; i < a.pixels.length; i++) {
+    if (diff(a.pixels[i], a2.pixels[i]).count !== 0) { r.unstable++; continue; }
+    const d = diff(a.pixels[i], b.pixels[i]);
+    if (d.count !== 0) { r.differ++; r.pixels += d.count; r.max = Math.max(r.max, d.max); }
+  }
+  const stableHits = a.hits.map((h, i) => h === a2.hits[i]);
+  for (let i = 0; i < a.hits.length; i++) if (stableHits[i] && a.hits[i] !== b.hits[i]) r.hitDiff++;
+  return r;
+}
+
+// The first differing layer of a page as an image: the old drawing faded, differing pixels in red (stronger = larger)
+window.diffImage = async function(page) {
+  const a = snapshot(await load(page, 'old.min.js'));
+  const w = frame.contentWindow, sizes = [...w.document.querySelectorAll('pxl-stage')].filter((s) => s.clientWidth > 0)
+    .flatMap((s) => s.layers.map((l) => [l._canvas.width, l._canvas.height]));
+  const b = snapshot(await load(page, 'new.min.js'));
+  const i = a.pixels.findIndex((p, k) => diff(p, b.pixels[k]).count > 0);
+  if (i < 0) return 'no difference';
+  const [W, H] = sizes[i], A = a.pixels[i], B = b.pixels[i];
+  const c = document.createElement('canvas'); c.width = W; c.height = H; c.style.maxWidth = '100%'; c.style.border = '1px solid #000';
+  const g = c.getContext('2d'), img = g.createImageData(W, H);
+  let shown = 0;
+  for (let p = 0; p < A.length; p += 4) {
+    const d = Math.max(Math.abs(A[p + 3] - B[p + 3]), ...[0, 1, 2].map((ch) => Math.abs(A[p + ch] * A[p + 3] - B[p + ch] * B[p + 3]) / 255));
+    if (d > 0.5) { img.data[p] = 255; img.data[p + 1] = 0; img.data[p + 2] = 0; img.data[p + 3] = Math.min(255, 80 + d * 4); shown++; }
+    else { img.data[p] = img.data[p + 1] = img.data[p + 2] = 0; img.data[p + 3] = A[p + 3] * 0.25; }
+  }
+  g.putImageData(img, 0, 0);
+  document.body.prepend(c);
+  return { layer: i, size: [W, H], differing: shown };
+};
+
+window.comparePages = async function(pages) {
+  pages = pages || await (await fetch('/scratch/phase2/pages.json', { cache: 'no-store' })).json();
+  const results = [];
+  for (const page of pages) {
+    let r;
+    try { r = await comparePage(page); } catch (e) { r = { page, error: e.message }; }
+    results.push(r);
+    out.textContent += JSON.stringify(r) + '\n';
+  }
+  const sum = (k) => results.reduce((s, r) => s + (r[k] || 0), 0);
+  return {
+    pages: results.length, stages: sum('stages'), layers: sum('layers'), unstable: sum('unstable'),
+    differingLayers: sum('differ'), differingPixels: sum('pixels'), maxDifference: Math.max(0, ...results.map((r) => r.max || 0)),
+    hitPoints: sum('hitPoints'), hitDifferences: sum('hitDiff'),
+    pagesWithDifferences: results.filter((r) => r.differ || r.hitDiff || r.error)
+  };
+};
+</script>
+</body>
+</html>

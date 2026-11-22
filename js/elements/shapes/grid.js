@@ -1,7 +1,7 @@
 pxl.Grid = class Grid extends pxl.Shape {
   static defaults = { ...pxl.Shape.defaults, step: 50, major: 0, labels: false, labelsize: 12 };
 
-  draw(ctx, u) {
+  draw(ctx) {
     const { step, major, labels, labelsize, strokewidth } = this.values;
     if (step <= 0) return; // the line loops would never end
 
@@ -30,15 +30,15 @@ pxl.Grid = class Grid extends pxl.Shape {
     ctx.beginPath();
     for (let x = startX; x <= endX; x += step) {
       if (major > 0 && Math.round(x / step) % major === 0) continue;
-      ctx.moveTo(x * u, startY * u);
-      ctx.lineTo(x * u, endY * u);
+      ctx.moveTo(x, startY);
+      ctx.lineTo(x, endY);
     }
     for (let y = startY; y <= endY; y += step) {
       if (major > 0 && Math.round(y / step) % major === 0) continue;
-      ctx.moveTo(startX * u, y * u);
-      ctx.lineTo(endX * u, y * u);
+      ctx.moveTo(startX, y);
+      ctx.lineTo(endX, y);
     }
-    this.applyStyle(ctx, u);
+    this.applyStyle(ctx);
 
     // Major lines: every major-th line, twice as thick. Only with a stroke: applyStyle() set the stroke state, without
     // it the canvas would draw them in its default black.
@@ -47,25 +47,25 @@ pxl.Grid = class Grid extends pxl.Shape {
       ctx.beginPath();
       for (let x = startX; x <= endX; x += step) {
         if (Math.round(x / step) % major !== 0) continue;
-        ctx.moveTo(x * u, startY * u);
-        ctx.lineTo(x * u, endY * u);
+        ctx.moveTo(x, startY);
+        ctx.lineTo(x, endY);
       }
       for (let y = startY; y <= endY; y += step) {
         if (Math.round(y / step) % major !== 0) continue;
-        ctx.moveTo(startX * u, y * u);
-        ctx.lineTo(endX * u, y * u);
+        ctx.moveTo(startX, y);
+        ctx.lineTo(endX, y);
       }
 
       // Not reset: the labels below only fill, and render() restores the state
-      ctx.lineWidth = (strokewidth * 2) * u;
+      ctx.lineWidth = strokewidth * 2;
       ctx.stroke();
     }
 
     // Coordinates at the major intersections, in the fill color (or the stroke color without fill; neither: no labels)
     const hasFill = this.hasFill();
     if (labels && major > 0 && (hasFill || isStroked)) {
-      ctx.fillStyle = hasFill ? this.createGradient(ctx, u, this.values.fill, 0) : ctx.strokeStyle;
-      ctx.font = `${labelsize * u}px monospace`;
+      ctx.fillStyle = hasFill ? this.createGradient(ctx, this.values.fill, 0) : ctx.strokeStyle;
+      ctx.font = `${labelsize}px monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.letterSpacing = '0px';
@@ -78,7 +78,7 @@ pxl.Grid = class Grid extends pxl.Shape {
 
       for (let x = startMajorX; x <= endMajorX; x += majorStep) {
         for (let y = startMajorY; y <= endMajorY; y += majorStep) {
-          ctx.fillText(`${x},${y}`, x * u, y * u);
+          ctx.fillText(`${x},${y}`, x, y);
         }
       }
     }

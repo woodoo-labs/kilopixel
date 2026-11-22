@@ -14,7 +14,6 @@ pxl.Text = class Text extends pxl.Shape {
     super();
     this._cachedFontString = '';
     this._lastSize = 0;
-    this._lastU = 0;
     this._lastFont = '';
     this._lastWeight = '';
     this._lastStyle = '';
@@ -51,7 +50,7 @@ pxl.Text = class Text extends pxl.Shape {
   }
 
   // Three caches, each rebuilt only when its inputs change: font string → line layout → bounding box
-  draw(ctx, u) {
+  draw(ctx) {
     const {
       text, size, font, align, baseline, weight, fontstyle, maxwidth,
       direction, width, lineheight, letterspacing, reveal
@@ -66,7 +65,6 @@ pxl.Text = class Text extends pxl.Shape {
     let tier1Dirty = false;
     if (
       this._lastSize !== size ||
-      this._lastU !== u ||
       this._lastFont !== font ||
       this._lastWeight !== weight ||
       this._lastStyle !== fontstyle ||
@@ -74,11 +72,10 @@ pxl.Text = class Text extends pxl.Shape {
       this._lastFontGeneration !== pxl._fontGeneration
     ) {
       tier1Dirty = true;
-      this._cachedFontString = `${fontstyle} ${weight} ${size * u}px ${font}`;
-      this._cachedLetterSpacingString = (letterspacing * u) + 'px';
+      this._cachedFontString = `${fontstyle} ${weight} ${size}px ${font}`;
+      this._cachedLetterSpacingString = letterspacing + 'px';
 
       this._lastSize = size;
-      this._lastU = u;
       this._lastFont = font;
       this._lastWeight = weight;
       this._lastStyle = fontstyle;
@@ -109,7 +106,7 @@ pxl.Text = class Text extends pxl.Shape {
 
           for (let i = 1; i < words.length; i++) {
             const testLine = currentLine + ' ' + words[i];
-            if (ctx.measureText(testLine).width / u > width) {
+            if (ctx.measureText(testLine).width > width) {
               this._lines.push(currentLine);
               currentLine = words[i];
             } else {
@@ -141,7 +138,7 @@ pxl.Text = class Text extends pxl.Shape {
       for (let i = 0; i < this._lines.length; i++) {
         const metrics = ctx.measureText(this._lines[i]);
         // measureText() ignores maxWidth: a line wider than maxwidth is squeezed around its anchor, so both sides scale
-        const squeeze = maxwidth > 0 ? Math.min(1, maxwidth * u / metrics.width) : 1;
+        const squeeze = maxwidth > 0 ? Math.min(1, maxwidth / metrics.width) : 1;
         const left = metrics.actualBoundingBoxLeft * squeeze;
         const right = metrics.actualBoundingBoxRight * squeeze;
         if (left > maxLeft) maxLeft = left;
@@ -150,10 +147,10 @@ pxl.Text = class Text extends pxl.Shape {
         if (i === this._lines.length - 1) maxDescent = metrics.actualBoundingBoxDescent;
       }
 
-      this.boundingBox.left = -maxLeft / u;
-      this.boundingBox.right = maxRight / u;
+      this.boundingBox.left = -maxLeft;
+      this.boundingBox.right = maxRight;
 
-      const totalBlockHeight = Math.max(0, this._lines.length - 1) * (size * lineheight) * u;
+      const totalBlockHeight = Math.max(0, this._lines.length - 1) * size * lineheight;
 
       let startY = 0;
       if (baseline === 'middle') {
@@ -162,9 +159,9 @@ pxl.Text = class Text extends pxl.Shape {
         startY = -totalBlockHeight;
       }
 
-      this.boundingBox.top = (startY - maxAscent) / u;
-      this.boundingBox.bottom = (startY + totalBlockHeight + maxDescent) / u;
-      this._startY = startY / u;
+      this.boundingBox.top = startY - maxAscent;
+      this.boundingBox.bottom = startY + totalBlockHeight + maxDescent;
+      this._startY = startY;
 
       this._lastAlign = align;
       this._lastBaseline = baseline;
@@ -186,12 +183,12 @@ pxl.Text = class Text extends pxl.Shape {
     const hasStroke = this.isStroked();
     if (!hasFill && !hasStroke) return;
 
-    if (hasFill) ctx.fillStyle = this.createGradient(ctx, u, this.values.fill, 0);
-    if (hasStroke) this.applyStrokeState(ctx, u);
+    if (hasFill) ctx.fillStyle = this.createGradient(ctx, this.values.fill, 0);
+    if (hasStroke) this.applyStrokeState(ctx);
 
     this._hasInk = true;
 
-    const pxWidth = maxwidth > 0 ? maxwidth * u : undefined;
+    const pxWidth = maxwidth > 0 ? maxwidth : undefined;
     for (let i = 0; i < this._lines.length; i++) {
       if (charsRemaining <= 0) break;
 
@@ -203,13 +200,13 @@ pxl.Text = class Text extends pxl.Shape {
       const yOffset = this._startY + (i * size * lineheight);
 
       if (hasFill) {
-        if (pxWidth) ctx.fillText(lineStr, 0, yOffset * u, pxWidth);
-        else ctx.fillText(lineStr, 0, yOffset * u);
+        if (pxWidth) ctx.fillText(lineStr, 0, yOffset, pxWidth);
+        else ctx.fillText(lineStr, 0, yOffset);
       }
 
       if (hasStroke) {
-        if (pxWidth) ctx.strokeText(lineStr, 0, yOffset * u, pxWidth);
-        else ctx.strokeText(lineStr, 0, yOffset * u);
+        if (pxWidth) ctx.strokeText(lineStr, 0, yOffset, pxWidth);
+        else ctx.strokeText(lineStr, 0, yOffset);
       }
 
       charsRemaining -= (this._lines[i].length + 1); // +1 accounts for wrapped space/newline
@@ -229,12 +226,12 @@ pxl.Text = class Text extends pxl.Shape {
   }
 
   // Glyphs can't be turned into a path, so the hit area is the bounding box from the last draw()
-  hitTest(ctx, u) {
+  hitTest(ctx) {
     if (!this._hasInk) return; // nothing visible: empty text, reveal hides all, no fill and no stroke
 
     const b = this.boundingBox;
     const pad = this.isStroked() ? this.values.strokewidth / 2 : 0;
-    ctx.rect((b.left - pad) * u, (b.top - pad) * u, (b.right - b.left + 2 * pad) * u, (b.bottom - b.top + 2 * pad) * u);
+    ctx.rect(b.left - pad, b.top - pad, b.right - b.left + 2 * pad, b.bottom - b.top + 2 * pad);
     ctx.fill(); // intercepted on pxl.dummyCtx (isPointInPath)
   }
 };

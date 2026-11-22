@@ -426,7 +426,7 @@ An infinite grid: it draws exactly the visible part, at any zoom, rotation or ne
 
 ## 12. Custom Shapes
 
-A class that extends `pxl.Shape`, in a script after `pxl.min.js`, written like the built-in shape files. Docs page: `docs/custom-shapes.html`; the Star and the Gauge there (`docs/js/shapes/`) are also the test shapes. Design: `design/2026-11-20_custom_shapes_plan.md`.
+A class that extends `pxl.Shape`, in a script after `pxl.min.js`, written like the built-in shape files. Docs page: `docs/custom-shapes.html`; the Star and the Gauge there (`docs/js/shapes/`) are also the test shapes. Design: `design/done/2026-11-20_custom_shapes_plan.md`.
 
 ```javascript
 pxl.Star = class Star extends pxl.Shape {

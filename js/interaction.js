@@ -543,13 +543,13 @@ pxl.InteractionEngine = class InteractionEngine {
     pxl._hitResult = false;
     ctx.save();
     try {
-      // In logical units, like Shape.render(): the global matrix scaled by u
+      // In logical units, like the layer: the global matrix scaled by u
       const m = shape.getGlobalMatrix(), u = this.stage.unit;
       ctx.setTransform(m[0] * u, m[1] * u, m[2] * u, m[3] * u, m[4] * u, m[5] * u);
       ctx.beginPath();
       // Shapes that can't express their hit area as a path (e.g. text) provide hitTest()
-      if (shape.hitTest) shape.hitTest(ctx, 1);
-      else shape.draw(ctx, 1);
+      if (shape.hitTest) shape.hitTest(ctx);
+      else shape.draw(ctx);
     } catch (error) {
       shape.reportError(error);
       return false;

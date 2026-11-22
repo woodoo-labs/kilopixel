@@ -125,10 +125,11 @@ launch configuration `kilopixel` (`.claude/launch.json`) starts the same server 
 
 ## 9. Where the Work Stands (2026-11-22)
 
-- Last commit: `6051eb3` (custom shapes docs). The test run on GitHub Actions passes on every push.
-- The custom shapes plan (`design/2026-11-20_custom_shapes_plan.md`) is built through step 6: custom shapes work and
-  are documented on `docs/custom-shapes.html`.
-- Next: step 7, `<pxl-polygon>` as the first new shape written this way (`.agents/TODO.md` §47).
-- Open: checking the drawing at the stage's scale in Safari, which needs a Mac or an iPhone (plan §9 step 1).
+- The custom shapes plan is done (`design/done/2026-11-20_custom_shapes_plan.md`): custom shapes work, are documented
+  on `docs/custom-shapes.html`, draw in logical units everywhere, and were checked in Chrome, Firefox and Safari.
+- Next candidates in `.agents/TODO.md`: §48 (late web fonts in Safari), §49 (shape filters in Safari), §23
+  (`<pxl-polygon>`, the first new shape in the custom-shape form).
+- Safari is checked on a real iPhone or iPad over the Wi-Fi: `design/prototypes/2026-11-20_custom_shapes/safari/`
+  (`receiver.js` explains it).
 
 Delete this note when the second laptop is set up, or keep it for the next one.

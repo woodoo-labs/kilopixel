@@ -11,7 +11,7 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
     this._arrowEnd = pxl.createArrowRecord();
   }
 
-  draw(ctx, u) {
+  draw(ctx) {
     const { rx, ry, irx, iry, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.values;
 
     const safeRX = Math.max(0, rx);
@@ -36,21 +36,20 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
     // Arrowheads (open arcs only)
     const arrowStart = this._arrowStart, arrowEnd = this._arrowEnd;
     const canHaveArrows = safeRX > 0 && safeRY > 0 && !hasInner && !isPie && !isClosed && this.isStroked();
-    const hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart, u);
-    const hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend, u);
+    const hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart);
+    const hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend);
     const hasArrows = hasStart || hasEnd;
     let drawShaft = true;
 
     if (hasArrows) {
-      const radiusX = safeRX * u, radiusY = safeRY * u;
       const travel = isAnti ? -1 : 1; // direction of increasing arc position
       let startInsetRadians = 0, endInsetRadians = 0;
 
       if (hasStart) {
-        startInsetRadians = this.aimEllipseArrow(arrowStart, radiusX, radiusY, startRadians, travel);
+        startInsetRadians = this.aimEllipseArrow(arrowStart, safeRX, safeRY, startRadians, travel);
       }
       if (hasEnd) {
-        endInsetRadians = this.aimEllipseArrow(arrowEnd, radiusX, radiusY, endRadians, -travel);
+        endInsetRadians = this.aimEllipseArrow(arrowEnd, safeRX, safeRY, endRadians, -travel);
       }
 
       // Skip the arc if both insets would cross each other
@@ -61,13 +60,13 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
 
     if (drawShaft) {
       ctx.beginPath();
-      ctx.ellipse(0, 0, safeRX * u, safeRY * u, 0, drawStartRadians, drawEndRadians, isAnti);
+      ctx.ellipse(0, 0, safeRX, safeRY, 0, drawStartRadians, drawEndRadians, isAnti);
 
       if (hasInner) {
         if (isFull) {
-          ctx.moveTo((safeIRX * u) * Math.cos(drawEndRadians), (safeIRY * u) * Math.sin(drawEndRadians));
+          ctx.moveTo(safeIRX * Math.cos(drawEndRadians), safeIRY * Math.sin(drawEndRadians));
         }
-        ctx.ellipse(0, 0, safeIRX * u, safeIRY * u, 0, drawEndRadians, drawStartRadians, !isAnti);
+        ctx.ellipse(0, 0, safeIRX, safeIRY, 0, drawEndRadians, drawStartRadians, !isAnti);
         ctx.closePath();
       } else if (isPie && !isFull) {
         ctx.lineTo(0, 0);
@@ -76,12 +75,12 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
         ctx.closePath();
       }
 
-      this.applyStyle(ctx, u);
+      this.applyStyle(ctx);
     } else {
-      this.applyStrokeState(ctx, u);
+      this.applyStrokeState(ctx);
     }
 
-    if (hasArrows) this.drawArrows(ctx, u, arrowStart, arrowEnd);
+    if (hasArrows) this.drawArrows(ctx, arrowStart, arrowEnd);
   }
 
   // Aims an arrow at the arc end at parameter `radians`; `inward` (±1) is the parameter direction into the arc.

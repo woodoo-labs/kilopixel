@@ -15,7 +15,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     this._rawParts = []; // parser output, reused
 
     // Each coordinate is its own attribute p0, p1, … (keys built once per points change);
-    // loadPoints() copies their values, scaled by u, into flatCache, for draw() and for getHitBox(). Float64 like the
+    // loadPoints() copies their values into flatCache, for draw() and for getHitBox(). Float64 like the
     // matrices: relative mode adds the points up, and Float32 rounding would add up with them.
     this._flatCache = new Float64Array(0);
     this._pointKeys = [];
@@ -105,10 +105,10 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     this._pointCount = count;
   }
 
-  draw(ctx, u) {
+  draw(ctx) {
     if (this._pointCount < 4) return;
 
-    if (!this.loadPoints(u)) return;
+    if (!this.loadPoints()) return;
 
     const { smooth, arrowstart, arrowend } = this.values;
     const closed = this.values.closed === true;
@@ -117,8 +117,8 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     // Arrowheads only apply to open strokes
     const arrowStart = this._arrowStart, arrowEnd = this._arrowEnd;
     const canHaveArrows = !closed && this.isStroked();
-    let hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart, u);
-    let hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend, u);
+    let hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart);
+    let hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend);
 
     // Arrows sit on the first / last point with a distinct neighbour: zero-length end segments are skipped
     let first = 0, last = len - 1;
@@ -138,24 +138,24 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     if (isSmooth) {
       const k3 = (typeof smooth === 'number' ? smooth : 1) / 3;
       this.traceSmooth(ctx, len, closed, k3, hasStart, hasEnd, first, last);
-      this.applyStyle(ctx, u);
+      this.applyStyle(ctx);
     } else if (this.traceStraight(ctx, closed, hasStart, hasEnd, first, last)) {
-      this.applyStyle(ctx, u);
+      this.applyStyle(ctx);
     } else {
-      this.applyStrokeState(ctx, u);
+      this.applyStrokeState(ctx);
     }
 
-    if (hasStart || hasEnd) this.drawArrows(ctx, u, arrowStart, arrowEnd);
+    if (hasStart || hasEnd) this.drawArrows(ctx, arrowStart, arrowEnd);
   }
 
-  // Fills flatCache with the absolute coordinates, scaled by u. Returns false if a coordinate isn't a finite number
+  // Fills flatCache with the absolute coordinates. Returns false if a coordinate isn't a finite number
   // (a ref that isn't connected yet, a division by zero): the canvas would drop that vertex or bend a smooth curve,
   // so the polyline draws nothing until all coordinates are valid.
-  loadPoints(u) {
+  loadPoints() {
     const pts = this._flatCache;
     let probe = 0;
     for (let i = 0; i < this._pointCount; i++) {
-      pts[i] = this.values[this._pointKeys[i]] * u;
+      pts[i] = this.values[this._pointKeys[i]];
       probe += pts[i] * 0;   // 0 for a finite value, NaN for NaN or ±Infinity
     }
     if (probe !== 0) return false;
@@ -312,7 +312,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     if (smooth === false || smooth === null || this._pointCount < 6) return this.getBoundingBox();
 
     const box = this._hitBox;
-    if (!this.loadPoints(1)) {
+    if (!this.loadPoints()) {
       box.left = box.right = box.top = box.bottom = NaN; // draws nothing, so nothing to hit
       return box;
     }

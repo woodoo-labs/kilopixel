@@ -1332,13 +1332,13 @@ pxl.InteractionEngine = class InteractionEngine {
     pxl._hitResult = false;
     ctx.save();
     try {
-      // In logical units, like Shape.render(): the global matrix scaled by u
+      // In logical units, like the layer: the global matrix scaled by u
       const m = shape.getGlobalMatrix(), u = this.stage.unit;
       ctx.setTransform(m[0] * u, m[1] * u, m[2] * u, m[3] * u, m[4] * u, m[5] * u);
       ctx.beginPath();
       // Shapes that can't express their hit area as a path (e.g. text) provide hitTest()
-      if (shape.hitTest) shape.hitTest(ctx, 1);
-      else shape.draw(ctx, 1);
+      if (shape.hitTest) shape.hitTest(ctx);
+      else shape.draw(ctx);
     } catch (error) {
       shape.reportError(error);
       return false;
@@ -1417,25 +1417,25 @@ pxl.anchorY = {
 
 // Radial gradient radius: a number is a logical length; a string is the distance from the center (x, y)
 // to a side, a perimeter point or a CSS keyword of the bounding box (w × h)
-pxl.resolveRadius = function(r, x, y, w, h, u) {
-  if (typeof r === 'number') return Math.abs(r * u);
+pxl.resolveRadius = function(r, x, y, w, h) {
+  if (typeof r === 'number') return Math.abs(r);
 
   // Sides: perpendicular distance
-  if (r === 'top')    return Math.abs(y * h * u);
-  if (r === 'bottom') return Math.abs((1 - y) * h * u);
-  if (r === 'left')   return Math.abs(x * w * u);
-  if (r === 'right')  return Math.abs((1 - x) * w * u);
+  if (r === 'top')    return Math.abs(y * h);
+  if (r === 'bottom') return Math.abs((1 - y) * h);
+  if (r === 'left')   return Math.abs(x * w);
+  if (r === 'right')  return Math.abs((1 - x) * w);
 
   // Perimeter points (corners, edge midpoints): straight distance
   const ax = pxl.anchorX[r];
   if (ax !== undefined) {
-    const dx = (x - ax) * w * u, dy = (y - pxl.anchorY[r]) * h * u;
+    const dx = (x - ax) * w, dy = (y - pxl.anchorY[r]) * h;
     return Math.sqrt(dx * dx + dy * dy);
   }
 
   // CSS keywords
-  const lx = x * w * u, rx = (1 - x) * w * u;
-  const ty = y * h * u, by = (1 - y) * h * u;
+  const lx = x * w, rx = (1 - x) * w;
+  const ty = y * h, by = (1 - y) * h;
   switch (r) {
     case 'closest-side':   return Math.max(0.001, Math.min(lx, rx, ty, by));
     case 'farthest-side':  return Math.max(lx, rx, ty, by);
@@ -1447,11 +1447,12 @@ pxl.resolveRadius = function(r, x, y, w, h, u) {
   }
 };
 
-// Same order as pxl.Matrix.updateLocal: translate(x, y) → rotate → scale → skew → translate(dx, dy)
-pxl.applyTransformState = function(ctx, u, values) {
+// Same order as pxl.Matrix.updateLocal: translate(x, y) → rotate → scale → skew → translate(dx, dy). In logical
+// units: the layer has scaled the context by u.
+pxl.applyTransformState = function(ctx, values) {
   const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = values;
 
-  if (x || y) ctx.translate(x * u, y * u);
+  if (x || y) ctx.translate(x, y);
   if (rotate) ctx.rotate(rotate * Math.PI / 180);
 
   const finalScaleX = zoom * scalex;
@@ -1463,7 +1464,7 @@ pxl.applyTransformState = function(ctx, u, values) {
     const sy = Math.tan(skewy * Math.PI / 180);
     ctx.transform(1, sy, sx, 1, 0, 0);
   }
-  if (dx || dy) ctx.translate(dx * u, dy * u);
+  if (dx || dy) ctx.translate(dx, dy);
 };
 
 // Scales every px value in the final filter string by the unit u: the helpers' (blur(5) → 'blur(5px)')
@@ -1474,7 +1475,7 @@ pxl.scaleResponsiveFilter = function(filterStr, u) {
 };
 
 pxl.applyContextState = function(ctx, u, values, node) {
-  pxl.applyTransformState(ctx, u, values);
+  pxl.applyTransformState(ctx, values);
   pxl.applyCompositingState(ctx, u, values, node);
 };
 
@@ -2573,14 +2574,15 @@ pxl.Layer = class Layer extends pxl.PxlNode {
                                 zoom !== 1 || scalex !== 1 || scaley !== 1 ||
                                 skewx || skewy;
 
-    if (hasTransformChanges) {
-      ctx.save();
-      pxl.applyTransformState(ctx, u, this.values);
-    }
+    // Everything inside draws in logical units: the one scale by u for the whole layer
+    // (design/done/2026-11-20_custom_shapes_plan.md §5.3, phase 2). u goes on for shadows and filters only.
+    ctx.save();
+    ctx.scale(u, u);
+    if (hasTransformChanges) pxl.applyTransformState(ctx, this.values);
     for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].render(ctx, u);
     }
-    if (hasTransformChanges) ctx.restore();
+    ctx.restore();
 
     // Heartbeat: an animated layer asks for the next frame (without isDirty, so the CSS-only path stays possible)
     if (this.isAnimated) this.stage.requestRender();
@@ -2666,7 +2668,7 @@ pxl.Group = class Group extends pxl.PxlNode {
 
     if (hasStateChanges) {
       ctx.save();
-      pxl.applyTransformState(ctx, u, this.values);
+      pxl.applyTransformState(ctx, this.values);
     }
     for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].render(ctx, u);
@@ -2701,14 +2703,12 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
     // Gradient cache per slot: [0] = fill, [1] = stroke (createGradient). error: kept when building failed
     this._gradCache = [
-      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null, error: null },
-      { config: null, u: 0, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null, error: null }
+      { config: null, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null, error: null },
+      { config: null, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null, error: null }
     ];
 
-    // Scaled dash pattern, cached per (linedash, u) by applyLineDash()
-    this._lastDash = null;
-    this._lastDashU = 0;
-    this._scaledDash = [];
+    // A dash written as one number, as the array setLineDash() needs (applyLineDash())
+    this._singleDash = [0];
 
     // pxl-on-* listeners by DOM event type (PxlNode.setHandler())
     this.handlers = pxl.createHandlers();
@@ -2735,10 +2735,10 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   // Draw phase. Every shape draws in its own canvas state: whatever it changes or throws, the next shape starts clean.
-  // draw() works in logical units (design/2026-11-20_custom_shapes_plan.md §5.3): the context is scaled by u after
-  // the shape's transform and compositing state (shadows and filters ignore the transform, so they carry u
-  // themselves). The built-in shapes still multiply their lengths by draw()'s second argument, which is always 1.
-  // draw() gets no time: time-dependent values are evaluated in update(), so the hit test sees what is drawn.
+  // draw() works in logical units (design/done/2026-11-20_custom_shapes_plan.md §5.3): the layer has scaled the
+  // context by u, so every length is written as the attribute gives it. u is only passed on for what ignores the
+  // transform: shadows and canvas filters (applyCompositingState()). draw() gets no time: time-dependent values are
+  // evaluated in update(), so the hit test sees what is drawn.
   render(ctx, u) {
     if (this._failedFrame === pxl._frame || this.values.hidden) return;
     if (this.needsIsolation()) {
@@ -2748,8 +2748,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     ctx.save();
     try {
       pxl.applyContextState(ctx, u, this.values, this);
-      ctx.scale(u, u);
-      this.draw(ctx, 1);
+      this.draw(ctx);
     } catch (error) {
       this.reportError(error);
     } finally {
@@ -2802,9 +2801,9 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     scratch.clearRect(0, 0, w, h);
     scratch.save();
     try {
-      const m = this.getGlobalMatrix(); // in logical units: scaled by u like render()
+      const m = this.getGlobalMatrix(); // in logical units: scaled by u like the layer
       scratch.setTransform(m[0] * k, m[1] * k, m[2] * k, m[3] * k, m[4] * k, m[5] * k);
-      this.draw(scratch, 1);
+      this.draw(scratch);
     } catch (error) {
       this.reportError(error);
       return;
@@ -2881,10 +2880,10 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // The fill or stroke as a canvas style, for a shape that paints with it in its own way (fillText(), a second
   // path): a color string as it is, a gradient built in the shape's box
   paint(ctx, which) {
-    return which === 'stroke' ? this.createGradient(ctx, 1, this.values.stroke, 1) : this.createGradient(ctx, 1, this.values.fill, 0);
+    return which === 'stroke' ? this.createGradient(ctx, this.values.stroke, 1) : this.createGradient(ctx, this.values.fill, 0);
   }
 
-  createGradient(ctx, u, styleValue, slot) {
+  createGradient(ctx, styleValue, slot) {
     if (typeof styleValue !== 'object' || !styleValue.isGradient) {
       return styleValue;
     }
@@ -2893,8 +2892,8 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     const c = this._gradCache[slot];
     const sw = this.values.strokewidth;
 
-    // Reuse while the descriptor, the unit, the bounding box and the stroke width are unchanged
-    if (c.config === styleValue && c.u === u &&
+    // Reuse while the descriptor, the bounding box and the stroke width are unchanged
+    if (c.config === styleValue &&
         c.bl === box.left && c.bt === box.top &&
         c.br === box.right && c.bb === box.bottom && c.sw === sw) {
       if (c.error) throw c.error;
@@ -2902,7 +2901,6 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     }
 
     c.config = styleValue;
-    c.u = u;
     c.bl = box.left;
     c.bt = box.top;
     c.br = box.right;
@@ -2911,7 +2909,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     c.grad = null;
     c.error = null;
     try {
-      c.grad = this.buildGradient(ctx, u, styleValue, slot, box, sw);
+      c.grad = this.buildGradient(ctx, styleValue, slot, box, sw);
     } catch (error) {
       // A gradient that fails with these values (a typo in a stop color) fails again: keep the error, so later
       // frames throw the same object instead of building a new one (render() catches it, reportError() stays quiet)
@@ -2922,7 +2920,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   // The canvas gradient for a descriptor in the shape's box; createGradient() caches it
-  buildGradient(ctx, u, styleValue, slot, box, sw) {
+  buildGradient(ctx, styleValue, slot, box, sw) {
     // A stroke is at least strokewidth thick: a line's box has a zero side, and a gradient across it would
     // have zero length and paint nothing. For the stroke, each side spans at least strokewidth around the center.
     // (design/done/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md)
@@ -2943,34 +2941,34 @@ pxl.Shape = class Shape extends pxl.PxlNode {
         const cosRad = Math.cos(rad);
         const sinRad = Math.sin(rad);
         const distance = Math.abs((width / 2) * cosRad) + Math.abs((height / 2) * sinRad);
-        gx1 = (cx - distance * cosRad) * u;
-        gy1 = (cy - distance * sinRad) * u;
-        gx2 = (cx + distance * cosRad) * u;
-        gy2 = (cy + distance * sinRad) * u;
+        gx1 = cx - distance * cosRad;
+        gy1 = cy - distance * sinRad;
+        gx2 = cx + distance * cosRad;
+        gy2 = cy + distance * sinRad;
       } else {
-        gx1 = (left + width * styleValue.x1) * u;
-        gy1 = (top + height * styleValue.y1) * u;
-        gx2 = (left + width * styleValue.x2) * u;
-        gy2 = (top + height * styleValue.y2) * u;
+        gx1 = left + width * styleValue.x1;
+        gy1 = top + height * styleValue.y1;
+        gx2 = left + width * styleValue.x2;
+        gy2 = top + height * styleValue.y2;
       }
 
       grad = ctx.createLinearGradient(gx1, gy1, gx2, gy2);
 
     } else if (styleValue.type === 'radial') {
-      const px0 = (left + width * styleValue.x0) * u;
-      const py0 = (top + height * styleValue.y0) * u;
-      const px1 = (left + width * styleValue.x1) * u;
-      const py1 = (top + height * styleValue.y1) * u;
+      const px0 = left + width * styleValue.x0;
+      const py0 = top + height * styleValue.y0;
+      const px1 = left + width * styleValue.x1;
+      const py1 = top + height * styleValue.y1;
 
-      const pr0 = pxl.resolveRadius(styleValue.r0, styleValue.x0, styleValue.y0, width, height, u);
-      const pr1 = pxl.resolveRadius(styleValue.r1, styleValue.x1, styleValue.y1, width, height, u);
+      const pr0 = pxl.resolveRadius(styleValue.r0, styleValue.x0, styleValue.y0, width, height);
+      const pr1 = pxl.resolveRadius(styleValue.r1, styleValue.x1, styleValue.y1, width, height);
 
       grad = ctx.createRadialGradient(px0, py0, pr0, px1, py1, pr1);
 
     } else {
       // conic (descriptors only come from linear(), radial() and conic())
-      const gcx = (left + width * styleValue.cx) * u;
-      const gcy = (top + height * styleValue.cy) * u;
+      const gcx = left + width * styleValue.cx;
+      const gcy = top + height * styleValue.cy;
       grad = ctx.createConicGradient(styleValue.startAngle * Math.PI / 180, gcx, gcy);
     }
 
@@ -2986,46 +2984,35 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
   // Sets all stroke-related context state (style, width, caps, joins, dash).
   // Shared by path-based shapes (via applyStyle) and non-path shapes like Text (strokeText).
-  applyStrokeState(ctx, u = 1) {
+  applyStrokeState(ctx) {
     const { stroke, strokewidth, linecap, linejoin, miterlimit } = this.values;
 
-    ctx.strokeStyle = this.createGradient(ctx, u, stroke, 1);
+    ctx.strokeStyle = this.createGradient(ctx, stroke, 1);
 
-    ctx.lineWidth = strokewidth * u;
+    ctx.lineWidth = strokewidth;
     ctx.lineCap = linecap;
     ctx.lineJoin = linejoin;
     ctx.miterLimit = miterlimit;
 
-    this.applyLineDash(ctx, u);
+    this.applyLineDash(ctx);
   }
 
-  // Dash pattern scaled by u; the scaled array is cached per (linedash, u)
-  applyLineDash(ctx, u) {
+  // The dash pattern as written (setLineDash() copies it): an array, or one number for equal dashes and gaps. Any
+  // other value (a string that isn't a pattern) draws solid.
+  applyLineDash(ctx) {
     const { linedash, dashoffset } = this.values;
     if (!pxl.hasLineDash(linedash)) {
       ctx.setLineDash(pxl._emptyDash);
       ctx.lineDashOffset = 0;
       return;
     }
-
-    if (this._lastDash !== linedash || this._lastDashU !== u) {
-      this._lastDash = linedash;
-      this._lastDashU = u;
-
-      const scaled = this._scaledDash;
-      if (typeof linedash === 'number') {
-        scaled.length = 1;
-        scaled[0] = linedash * u;
-      } else if (Array.isArray(linedash)) {
-        scaled.length = linedash.length;
-        for (let i = 0; i < linedash.length; i++) {
-          scaled[i] = linedash[i] * u;
-        }
-      }
+    if (typeof linedash === 'number') {
+      this._singleDash[0] = linedash;
+      ctx.setLineDash(this._singleDash);
+    } else {
+      ctx.setLineDash(Array.isArray(linedash) ? linedash : pxl._emptyDash);
     }
-
-    ctx.setLineDash(this._scaledDash);
-    ctx.lineDashOffset = dashoffset * u;
+    ctx.lineDashOffset = dashoffset;
   }
 
   hasFill() {
@@ -3038,34 +3025,34 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     return !!stroke && stroke !== 'none' && stroke !== 'transparent' && strokewidth > 0;
   }
 
-  applyStyle(ctx, u = 1) {
+  applyStyle(ctx) {
     if (this.hasFill()) {
-      ctx.fillStyle = this.createGradient(ctx, u, this.values.fill, 0);
+      ctx.fillStyle = this.createGradient(ctx, this.values.fill, 0);
       ctx.fill();
     }
 
     if (this.isStroked()) {
-      this.applyStrokeState(ctx, u);
+      this.applyStrokeState(ctx);
       ctx.stroke();
     }
   }
 
   // --- Arrowheads ---
   // Geometry: design/done/2026-10-14_unified_arrowhead_geometry_plan.md
-  // All distances are in context units (logical value × u).
+  // All distances are logical units, like the path they end.
 
   // Resolves one arrow end into distances along the path and writes them into the pre-allocated rec.
   // Returns true if this end has an arrowhead.
-  resolveArrow(rec, attrValue, u) {
+  resolveArrow(rec, attrValue) {
     const { strokewidth, linecap, linejoin, arrowstyle } = this.values;
-    const size = pxl.arrowSize(attrValue, strokewidth) * u;
+    const size = pxl.arrowSize(attrValue, strokewidth);
 
     if (!(size > 0)) {
       rec.size = 0;
       return false;
     }
 
-    const sw = strokewidth * u;
+    const sw = strokewidth;
     const len = size * pxl.ARROW_COS30;
     const capExt = (linecap === 'butt') ? 0 : sw * 0.5;
 
@@ -3107,7 +3094,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   // Draws both arrowheads in one path. Expects stroke state to be applied already.
   // Always the last call of a shape's draw(): it changes the miter limit, the dash and fillStyle without
   // resetting them, and render() restores the state afterwards.
-  drawArrows(ctx, u, recA, recB) {
+  drawArrows(ctx, recA, recB) {
     const isLine = this.values.arrowstyle === 'line';
 
     ctx.beginPath();
@@ -3152,7 +3139,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 // =========================================================================
 // Defining a Shape's Tag
 // =========================================================================
-// For built-in and custom shapes alike (design/2026-11-20_custom_shapes_plan.md §5.5), in a script after pxl.min.js.
+// For built-in and custom shapes alike (design/done/2026-11-20_custom_shapes_plan.md §5.5), in a script after pxl.min.js.
 // The checks run once per class, here, instead of in every frame; the tag joins the default styles' display: none,
 // so content written inside a shape never shows as page text.
 pxl.defineShape = function(tag, Class) {
@@ -3187,7 +3174,7 @@ pxl.Circle = class Circle extends pxl.Shape {
     this._arrowEnd = pxl.createArrowRecord();
   }
 
-  draw(ctx, u) {
+  draw(ctx) {
     const { r, ir, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.values;
 
     const safeR = Math.max(0, r);
@@ -3209,21 +3196,20 @@ pxl.Circle = class Circle extends pxl.Shape {
     // Arrowheads (open arcs only)
     const arrowStart = this._arrowStart, arrowEnd = this._arrowEnd;
     const canHaveArrows = safeR > 0 && safeIR === 0 && !isPie && !isClosed && this.isStroked();
-    const hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart, u);
-    const hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend, u);
+    const hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart);
+    const hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend);
     const hasArrows = hasStart || hasEnd;
     let drawShaft = true;
 
     if (hasArrows) {
-      const radius = safeR * u;
       const travel = isAnti ? -1 : 1; // direction of increasing arc position
       let startInsetRadians = 0, endInsetRadians = 0;
 
       if (hasStart) {
-        startInsetRadians = this.aimArcArrow(arrowStart, radius, startRadians, travel);
+        startInsetRadians = this.aimArcArrow(arrowStart, safeR, startRadians, travel);
       }
       if (hasEnd) {
-        endInsetRadians = this.aimArcArrow(arrowEnd, radius, endRadians, -travel);
+        endInsetRadians = this.aimArcArrow(arrowEnd, safeR, endRadians, -travel);
       }
 
       // Skip the arc if both insets would cross each other
@@ -3234,13 +3220,13 @@ pxl.Circle = class Circle extends pxl.Shape {
 
     if (drawShaft) {
       ctx.beginPath();
-      ctx.arc(0, 0, safeR * u, drawStartRadians, drawEndRadians, isAnti);
+      ctx.arc(0, 0, safeR, drawStartRadians, drawEndRadians, isAnti);
 
       if (safeIR > 0) {
         if (isFull) {
-          ctx.moveTo((safeIR * u) * Math.cos(drawEndRadians), (safeIR * u) * Math.sin(drawEndRadians));
+          ctx.moveTo(safeIR * Math.cos(drawEndRadians), safeIR * Math.sin(drawEndRadians));
         }
-        ctx.arc(0, 0, safeIR * u, drawEndRadians, drawStartRadians, !isAnti);
+        ctx.arc(0, 0, safeIR, drawEndRadians, drawStartRadians, !isAnti);
         ctx.closePath();
       } else if (isPie && !isFull) {
         ctx.lineTo(0, 0);
@@ -3249,12 +3235,12 @@ pxl.Circle = class Circle extends pxl.Shape {
         ctx.closePath();
       }
 
-      this.applyStyle(ctx, u);
+      this.applyStyle(ctx);
     } else {
-      this.applyStrokeState(ctx, u);
+      this.applyStrokeState(ctx);
     }
 
-    if (hasArrows) this.drawArrows(ctx, u, arrowStart, arrowEnd);
+    if (hasArrows) this.drawArrows(ctx, arrowStart, arrowEnd);
   }
 
   // Aims an arrow at the arc end at angle `radians`; `inward` (±1) is the angle direction into the arc.
@@ -3292,7 +3278,7 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
     this._arrowEnd = pxl.createArrowRecord();
   }
 
-  draw(ctx, u) {
+  draw(ctx) {
     const { rx, ry, irx, iry, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.values;
 
     const safeRX = Math.max(0, rx);
@@ -3317,21 +3303,20 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
     // Arrowheads (open arcs only)
     const arrowStart = this._arrowStart, arrowEnd = this._arrowEnd;
     const canHaveArrows = safeRX > 0 && safeRY > 0 && !hasInner && !isPie && !isClosed && this.isStroked();
-    const hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart, u);
-    const hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend, u);
+    const hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart);
+    const hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend);
     const hasArrows = hasStart || hasEnd;
     let drawShaft = true;
 
     if (hasArrows) {
-      const radiusX = safeRX * u, radiusY = safeRY * u;
       const travel = isAnti ? -1 : 1; // direction of increasing arc position
       let startInsetRadians = 0, endInsetRadians = 0;
 
       if (hasStart) {
-        startInsetRadians = this.aimEllipseArrow(arrowStart, radiusX, radiusY, startRadians, travel);
+        startInsetRadians = this.aimEllipseArrow(arrowStart, safeRX, safeRY, startRadians, travel);
       }
       if (hasEnd) {
-        endInsetRadians = this.aimEllipseArrow(arrowEnd, radiusX, radiusY, endRadians, -travel);
+        endInsetRadians = this.aimEllipseArrow(arrowEnd, safeRX, safeRY, endRadians, -travel);
       }
 
       // Skip the arc if both insets would cross each other
@@ -3342,13 +3327,13 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
 
     if (drawShaft) {
       ctx.beginPath();
-      ctx.ellipse(0, 0, safeRX * u, safeRY * u, 0, drawStartRadians, drawEndRadians, isAnti);
+      ctx.ellipse(0, 0, safeRX, safeRY, 0, drawStartRadians, drawEndRadians, isAnti);
 
       if (hasInner) {
         if (isFull) {
-          ctx.moveTo((safeIRX * u) * Math.cos(drawEndRadians), (safeIRY * u) * Math.sin(drawEndRadians));
+          ctx.moveTo(safeIRX * Math.cos(drawEndRadians), safeIRY * Math.sin(drawEndRadians));
         }
-        ctx.ellipse(0, 0, safeIRX * u, safeIRY * u, 0, drawEndRadians, drawStartRadians, !isAnti);
+        ctx.ellipse(0, 0, safeIRX, safeIRY, 0, drawEndRadians, drawStartRadians, !isAnti);
         ctx.closePath();
       } else if (isPie && !isFull) {
         ctx.lineTo(0, 0);
@@ -3357,12 +3342,12 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
         ctx.closePath();
       }
 
-      this.applyStyle(ctx, u);
+      this.applyStyle(ctx);
     } else {
-      this.applyStrokeState(ctx, u);
+      this.applyStrokeState(ctx);
     }
 
-    if (hasArrows) this.drawArrows(ctx, u, arrowStart, arrowEnd);
+    if (hasArrows) this.drawArrows(ctx, arrowStart, arrowEnd);
   }
 
   // Aims an arrow at the arc end at parameter `radians`; `inward` (±1) is the parameter direction into the arc.
@@ -3407,11 +3392,11 @@ pxl.Rect = class Rect extends pxl.Shape {
     this._radii = [0, 0, 0, 0]; // reused by roundRect() every frame
   }
 
-  draw(ctx, u) {
+  draw(ctx) {
     const { w, h, r, r1, r2, r3, r4, anchor } = this.values;
 
-    const startX = -w * pxl.anchorX[anchor] * u;
-    const startY = -h * pxl.anchorY[anchor] * u;
+    const startX = -w * pxl.anchorX[anchor];
+    const startY = -h * pxl.anchorY[anchor];
 
     // r is the radius of every corner that has no r1 … r4 of its own
     const baseR = r ?? 0;
@@ -3423,15 +3408,15 @@ pxl.Rect = class Rect extends pxl.Shape {
     ctx.beginPath();
     if (rad1 > 0 || rad2 > 0 || rad3 > 0 || rad4 > 0) {
       // roundRect throws on a negative radius (an animated radius can dip below 0); like circle and ellipse, it becomes 0
-      this._radii[0] = Math.max(0, rad1) * u;
-      this._radii[1] = Math.max(0, rad2) * u;
-      this._radii[2] = Math.max(0, rad3) * u;
-      this._radii[3] = Math.max(0, rad4) * u;
-      ctx.roundRect(startX, startY, w * u, h * u, this._radii);
+      this._radii[0] = Math.max(0, rad1);
+      this._radii[1] = Math.max(0, rad2);
+      this._radii[2] = Math.max(0, rad3);
+      this._radii[3] = Math.max(0, rad4);
+      ctx.roundRect(startX, startY, w, h, this._radii);
     } else {
-      ctx.rect(startX, startY, w * u, h * u);
+      ctx.rect(startX, startY, w, h);
     }
-    this.applyStyle(ctx, u);
+    this.applyStyle(ctx);
   }
 
   // Fill and stroke, or arrowheads: more than one draw call, isolated when it has compositing state (Shape.render())
@@ -3457,21 +3442,19 @@ pxl.Line = class Line extends pxl.Shape {
     this._arrowEnd = pxl.createArrowRecord();
   }
 
-  draw(ctx, u) {
-    const { x1, y1, x2, y2, arrowstart, arrowend } = this.values;
-    const startX = x1 * u, startY = y1 * u;
-    const endX = x2 * u, endY = y2 * u;
+  draw(ctx) {
+    const { x1: startX, y1: startY, x2: endX, y2: endY, arrowstart, arrowend } = this.values;
 
     const arrowStart = this._arrowStart, arrowEnd = this._arrowEnd;
     const isStroked = this.isStroked();
-    const hasStart = isStroked && this.resolveArrow(arrowStart, arrowstart, u);
-    const hasEnd = isStroked && this.resolveArrow(arrowEnd, arrowend, u);
+    const hasStart = isStroked && this.resolveArrow(arrowStart, arrowstart);
+    const hasEnd = isStroked && this.resolveArrow(arrowEnd, arrowend);
 
     if (!hasStart && !hasEnd) {
       ctx.beginPath();
       ctx.moveTo(startX, startY);
       ctx.lineTo(endX, endY);
-      this.applyStyle(ctx, u);
+      this.applyStyle(ctx);
       return;
     }
 
@@ -3488,12 +3471,12 @@ pxl.Line = class Line extends pxl.Shape {
       ctx.beginPath();
       ctx.moveTo(startX + dirX * startInset, startY + dirY * startInset);
       ctx.lineTo(endX - dirX * endInset, endY - dirY * endInset);
-      this.applyStyle(ctx, u);
+      this.applyStyle(ctx);
     } else {
-      this.applyStrokeState(ctx, u);
+      this.applyStrokeState(ctx);
     }
 
-    this.drawArrows(ctx, u, arrowStart, arrowEnd);
+    this.drawArrows(ctx, arrowStart, arrowEnd);
   }
 
   // Fill and stroke, or arrowheads: more than one draw call, isolated when it has compositing state (Shape.render())
@@ -3525,7 +3508,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     this._rawParts = []; // parser output, reused
 
     // Each coordinate is its own attribute p0, p1, … (keys built once per points change);
-    // loadPoints() copies their values, scaled by u, into flatCache, for draw() and for getHitBox(). Float64 like the
+    // loadPoints() copies their values into flatCache, for draw() and for getHitBox(). Float64 like the
     // matrices: relative mode adds the points up, and Float32 rounding would add up with them.
     this._flatCache = new Float64Array(0);
     this._pointKeys = [];
@@ -3615,10 +3598,10 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     this._pointCount = count;
   }
 
-  draw(ctx, u) {
+  draw(ctx) {
     if (this._pointCount < 4) return;
 
-    if (!this.loadPoints(u)) return;
+    if (!this.loadPoints()) return;
 
     const { smooth, arrowstart, arrowend } = this.values;
     const closed = this.values.closed === true;
@@ -3627,8 +3610,8 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     // Arrowheads only apply to open strokes
     const arrowStart = this._arrowStart, arrowEnd = this._arrowEnd;
     const canHaveArrows = !closed && this.isStroked();
-    let hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart, u);
-    let hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend, u);
+    let hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart);
+    let hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend);
 
     // Arrows sit on the first / last point with a distinct neighbour: zero-length end segments are skipped
     let first = 0, last = len - 1;
@@ -3648,24 +3631,24 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     if (isSmooth) {
       const k3 = (typeof smooth === 'number' ? smooth : 1) / 3;
       this.traceSmooth(ctx, len, closed, k3, hasStart, hasEnd, first, last);
-      this.applyStyle(ctx, u);
+      this.applyStyle(ctx);
     } else if (this.traceStraight(ctx, closed, hasStart, hasEnd, first, last)) {
-      this.applyStyle(ctx, u);
+      this.applyStyle(ctx);
     } else {
-      this.applyStrokeState(ctx, u);
+      this.applyStrokeState(ctx);
     }
 
-    if (hasStart || hasEnd) this.drawArrows(ctx, u, arrowStart, arrowEnd);
+    if (hasStart || hasEnd) this.drawArrows(ctx, arrowStart, arrowEnd);
   }
 
-  // Fills flatCache with the absolute coordinates, scaled by u. Returns false if a coordinate isn't a finite number
+  // Fills flatCache with the absolute coordinates. Returns false if a coordinate isn't a finite number
   // (a ref that isn't connected yet, a division by zero): the canvas would drop that vertex or bend a smooth curve,
   // so the polyline draws nothing until all coordinates are valid.
-  loadPoints(u) {
+  loadPoints() {
     const pts = this._flatCache;
     let probe = 0;
     for (let i = 0; i < this._pointCount; i++) {
-      pts[i] = this.values[this._pointKeys[i]] * u;
+      pts[i] = this.values[this._pointKeys[i]];
       probe += pts[i] * 0;   // 0 for a finite value, NaN for NaN or ±Infinity
     }
     if (probe !== 0) return false;
@@ -3822,7 +3805,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
     if (smooth === false || smooth === null || this._pointCount < 6) return this.getBoundingBox();
 
     const box = this._hitBox;
-    if (!this.loadPoints(1)) {
+    if (!this.loadPoints()) {
       box.left = box.right = box.top = box.bottom = NaN; // draws nothing, so nothing to hit
       return box;
     }
@@ -3925,7 +3908,6 @@ pxl.Text = class Text extends pxl.Shape {
     super();
     this._cachedFontString = '';
     this._lastSize = 0;
-    this._lastU = 0;
     this._lastFont = '';
     this._lastWeight = '';
     this._lastStyle = '';
@@ -3962,7 +3944,7 @@ pxl.Text = class Text extends pxl.Shape {
   }
 
   // Three caches, each rebuilt only when its inputs change: font string → line layout → bounding box
-  draw(ctx, u) {
+  draw(ctx) {
     const {
       text, size, font, align, baseline, weight, fontstyle, maxwidth,
       direction, width, lineheight, letterspacing, reveal
@@ -3977,7 +3959,6 @@ pxl.Text = class Text extends pxl.Shape {
     let tier1Dirty = false;
     if (
       this._lastSize !== size ||
-      this._lastU !== u ||
       this._lastFont !== font ||
       this._lastWeight !== weight ||
       this._lastStyle !== fontstyle ||
@@ -3985,11 +3966,10 @@ pxl.Text = class Text extends pxl.Shape {
       this._lastFontGeneration !== pxl._fontGeneration
     ) {
       tier1Dirty = true;
-      this._cachedFontString = `${fontstyle} ${weight} ${size * u}px ${font}`;
-      this._cachedLetterSpacingString = (letterspacing * u) + 'px';
+      this._cachedFontString = `${fontstyle} ${weight} ${size}px ${font}`;
+      this._cachedLetterSpacingString = letterspacing + 'px';
 
       this._lastSize = size;
-      this._lastU = u;
       this._lastFont = font;
       this._lastWeight = weight;
       this._lastStyle = fontstyle;
@@ -4020,7 +4000,7 @@ pxl.Text = class Text extends pxl.Shape {
 
           for (let i = 1; i < words.length; i++) {
             const testLine = currentLine + ' ' + words[i];
-            if (ctx.measureText(testLine).width / u > width) {
+            if (ctx.measureText(testLine).width > width) {
               this._lines.push(currentLine);
               currentLine = words[i];
             } else {
@@ -4052,7 +4032,7 @@ pxl.Text = class Text extends pxl.Shape {
       for (let i = 0; i < this._lines.length; i++) {
         const metrics = ctx.measureText(this._lines[i]);
         // measureText() ignores maxWidth: a line wider than maxwidth is squeezed around its anchor, so both sides scale
-        const squeeze = maxwidth > 0 ? Math.min(1, maxwidth * u / metrics.width) : 1;
+        const squeeze = maxwidth > 0 ? Math.min(1, maxwidth / metrics.width) : 1;
         const left = metrics.actualBoundingBoxLeft * squeeze;
         const right = metrics.actualBoundingBoxRight * squeeze;
         if (left > maxLeft) maxLeft = left;
@@ -4061,10 +4041,10 @@ pxl.Text = class Text extends pxl.Shape {
         if (i === this._lines.length - 1) maxDescent = metrics.actualBoundingBoxDescent;
       }
 
-      this.boundingBox.left = -maxLeft / u;
-      this.boundingBox.right = maxRight / u;
+      this.boundingBox.left = -maxLeft;
+      this.boundingBox.right = maxRight;
 
-      const totalBlockHeight = Math.max(0, this._lines.length - 1) * (size * lineheight) * u;
+      const totalBlockHeight = Math.max(0, this._lines.length - 1) * size * lineheight;
 
       let startY = 0;
       if (baseline === 'middle') {
@@ -4073,9 +4053,9 @@ pxl.Text = class Text extends pxl.Shape {
         startY = -totalBlockHeight;
       }
 
-      this.boundingBox.top = (startY - maxAscent) / u;
-      this.boundingBox.bottom = (startY + totalBlockHeight + maxDescent) / u;
-      this._startY = startY / u;
+      this.boundingBox.top = startY - maxAscent;
+      this.boundingBox.bottom = startY + totalBlockHeight + maxDescent;
+      this._startY = startY;
 
       this._lastAlign = align;
       this._lastBaseline = baseline;
@@ -4097,12 +4077,12 @@ pxl.Text = class Text extends pxl.Shape {
     const hasStroke = this.isStroked();
     if (!hasFill && !hasStroke) return;
 
-    if (hasFill) ctx.fillStyle = this.createGradient(ctx, u, this.values.fill, 0);
-    if (hasStroke) this.applyStrokeState(ctx, u);
+    if (hasFill) ctx.fillStyle = this.createGradient(ctx, this.values.fill, 0);
+    if (hasStroke) this.applyStrokeState(ctx);
 
     this._hasInk = true;
 
-    const pxWidth = maxwidth > 0 ? maxwidth * u : undefined;
+    const pxWidth = maxwidth > 0 ? maxwidth : undefined;
     for (let i = 0; i < this._lines.length; i++) {
       if (charsRemaining <= 0) break;
 
@@ -4114,13 +4094,13 @@ pxl.Text = class Text extends pxl.Shape {
       const yOffset = this._startY + (i * size * lineheight);
 
       if (hasFill) {
-        if (pxWidth) ctx.fillText(lineStr, 0, yOffset * u, pxWidth);
-        else ctx.fillText(lineStr, 0, yOffset * u);
+        if (pxWidth) ctx.fillText(lineStr, 0, yOffset, pxWidth);
+        else ctx.fillText(lineStr, 0, yOffset);
       }
 
       if (hasStroke) {
-        if (pxWidth) ctx.strokeText(lineStr, 0, yOffset * u, pxWidth);
-        else ctx.strokeText(lineStr, 0, yOffset * u);
+        if (pxWidth) ctx.strokeText(lineStr, 0, yOffset, pxWidth);
+        else ctx.strokeText(lineStr, 0, yOffset);
       }
 
       charsRemaining -= (this._lines[i].length + 1); // +1 accounts for wrapped space/newline
@@ -4140,12 +4120,12 @@ pxl.Text = class Text extends pxl.Shape {
   }
 
   // Glyphs can't be turned into a path, so the hit area is the bounding box from the last draw()
-  hitTest(ctx, u) {
+  hitTest(ctx) {
     if (!this._hasInk) return; // nothing visible: empty text, reveal hides all, no fill and no stroke
 
     const b = this.boundingBox;
     const pad = this.isStroked() ? this.values.strokewidth / 2 : 0;
-    ctx.rect((b.left - pad) * u, (b.top - pad) * u, (b.right - b.left + 2 * pad) * u, (b.bottom - b.top + 2 * pad) * u);
+    ctx.rect(b.left - pad, b.top - pad, b.right - b.left + 2 * pad, b.bottom - b.top + 2 * pad);
     ctx.fill(); // intercepted on pxl.dummyCtx (isPointInPath)
   }
 };
@@ -4160,7 +4140,7 @@ document.fonts.addEventListener('loadingdone', () => {
 pxl.Grid = class Grid extends pxl.Shape {
   static defaults = { ...pxl.Shape.defaults, step: 50, major: 0, labels: false, labelsize: 12 };
 
-  draw(ctx, u) {
+  draw(ctx) {
     const { step, major, labels, labelsize, strokewidth } = this.values;
     if (step <= 0) return; // the line loops would never end
 
@@ -4189,15 +4169,15 @@ pxl.Grid = class Grid extends pxl.Shape {
     ctx.beginPath();
     for (let x = startX; x <= endX; x += step) {
       if (major > 0 && Math.round(x / step) % major === 0) continue;
-      ctx.moveTo(x * u, startY * u);
-      ctx.lineTo(x * u, endY * u);
+      ctx.moveTo(x, startY);
+      ctx.lineTo(x, endY);
     }
     for (let y = startY; y <= endY; y += step) {
       if (major > 0 && Math.round(y / step) % major === 0) continue;
-      ctx.moveTo(startX * u, y * u);
-      ctx.lineTo(endX * u, y * u);
+      ctx.moveTo(startX, y);
+      ctx.lineTo(endX, y);
     }
-    this.applyStyle(ctx, u);
+    this.applyStyle(ctx);
 
     // Major lines: every major-th line, twice as thick. Only with a stroke: applyStyle() set the stroke state, without
     // it the canvas would draw them in its default black.
@@ -4206,25 +4186,25 @@ pxl.Grid = class Grid extends pxl.Shape {
       ctx.beginPath();
       for (let x = startX; x <= endX; x += step) {
         if (Math.round(x / step) % major !== 0) continue;
-        ctx.moveTo(x * u, startY * u);
-        ctx.lineTo(x * u, endY * u);
+        ctx.moveTo(x, startY);
+        ctx.lineTo(x, endY);
       }
       for (let y = startY; y <= endY; y += step) {
         if (Math.round(y / step) % major !== 0) continue;
-        ctx.moveTo(startX * u, y * u);
-        ctx.lineTo(endX * u, y * u);
+        ctx.moveTo(startX, y);
+        ctx.lineTo(endX, y);
       }
 
       // Not reset: the labels below only fill, and render() restores the state
-      ctx.lineWidth = (strokewidth * 2) * u;
+      ctx.lineWidth = strokewidth * 2;
       ctx.stroke();
     }
 
     // Coordinates at the major intersections, in the fill color (or the stroke color without fill; neither: no labels)
     const hasFill = this.hasFill();
     if (labels && major > 0 && (hasFill || isStroked)) {
-      ctx.fillStyle = hasFill ? this.createGradient(ctx, u, this.values.fill, 0) : ctx.strokeStyle;
-      ctx.font = `${labelsize * u}px monospace`;
+      ctx.fillStyle = hasFill ? this.createGradient(ctx, this.values.fill, 0) : ctx.strokeStyle;
+      ctx.font = `${labelsize}px monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.letterSpacing = '0px';
@@ -4237,7 +4217,7 @@ pxl.Grid = class Grid extends pxl.Shape {
 
       for (let x = startMajorX; x <= endMajorX; x += majorStep) {
         for (let y = startMajorY; y <= endMajorY; y += majorStep) {
-          ctx.fillText(`${x},${y}`, x * u, y * u);
+          ctx.fillText(`${x},${y}`, x, y);
         }
       }
     }

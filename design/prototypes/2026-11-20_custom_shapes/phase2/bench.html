@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Phase 2 Benchmark | Prototype</title>
+<style>
+  body { margin: 16px; font: 14px system-ui, sans-serif; background: #f8fafc; color: #0f172a; }
+  #out { white-space: pre-wrap; font: 12px ui-monospace, monospace; }
+  iframe { width: 1220px; height: 720px; border: 1px solid #cbd5e1; display: block; margin: 8px 0; }
+</style>
+</head>
+<body>
+<h1 style="font-size: 18px">Old vs. new engine: frame time</h1>
+<p>The same scene in two frames, one per engine. Blocks of consecutive full frames alternate between them (old,
+new, old, …), so both see the same machine state; the median of the block means is reported.
+<code>await benchAll()</code> runs every scene.</p>
+<div id="out"></div>
+<iframe id="old" src="scene.html?engine=old.min.js"></iframe>
+<iframe id="new" src="scene.html?engine=new.min.js"></iframe>
+<script>
+const out = document.getElementById('out');
+const median = (a) => { const s = a.slice().sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+
+window.bench = async function(kind, blocks = 31, framesPerBlock = 20) {
+  const w = { old: document.getElementById('old').contentWindow, new: document.getElementById('new').contentWindow };
+  w.old.prepare(kind);
+  w.new.prepare(kind);
+  const times = { old: [], new: [] };
+  for (let b = 0; b < blocks; b++) {
+    // Swap the order every block, so neither engine always runs first
+    for (const engine of b % 2 ? ['new', 'old'] : ['old', 'new']) times[engine].push(w[engine].drawFrames(framesPerBlock));
+    await new Promise((r) => setTimeout(r, 0));
+  }
+  // The median of the blocks, and the fastest block (steadier: noise only ever adds time)
+  const pct = (a, b) => ((b - a) / a * 100).toFixed(1) + ' %';
+  const mo = median(times.old), mn = median(times.new), fo = Math.min(...times.old), fn = Math.min(...times.new);
+  const r = { kind, medianOld: +mo.toFixed(2), medianNew: +mn.toFixed(2), medianChange: pct(mo, mn),
+    fastestOld: +fo.toFixed(2), fastestNew: +fn.toFixed(2), fastestChange: pct(fo, fn) };
+  out.textContent += JSON.stringify(r) + '\n';
+  return r;
+};
+
+window.benchAll = async function(rounds = 1) {
+  const results = [];
+  for (let i = 0; i < rounds; i++) {
+    for (const kind of ['circles', 'texts', 'gradients', 'arrows', 'groups']) results.push(await bench(kind));
+  }
+  return results;
+};
+</script>
+</body>
+</html>

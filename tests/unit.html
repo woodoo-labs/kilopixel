@@ -360,19 +360,19 @@
 
     // Box 200 × 100, center at (0.25, 0.5) of the box, u = 1: distances to left / right / top / bottom are 50 / 150 / 50 / 50
     table('resolveRadius: numbers, sides, points on the box, CSS keywords', [
-      [200, 400, 'u = 2'], [-100, 200, 'negative, u = 2'],
+      [200, 200], [-100, 100, 'negative'],
       ['top', 50], ['bottom', 50], ['left', 50], ['right', 150],
       ['top-left', Math.hypot(50, 50)], ['bottom-right', Math.hypot(150, 50)], ['right-center', 150],
       ['center-top', Math.hypot(50, 50)], ['top-center', Math.hypot(50, 50)],
       ['closest-side', 50], ['farthest-side', 150],
       ['closest-corner', Math.hypot(50, 50)], ['farthest-corner', Math.hypot(150, 50)],
       ['unknown-word', 0]
-    ], ([r, expected]) => [pxl.resolveRadius(r, 0.25, 0.5, 200, 100, typeof r === 'number' ? 2 : 1), expected],
+    ], ([r, expected]) => [pxl.resolveRadius(r, 0.25, 0.5, 200, 100), expected],
     ([r, , note]) => `${show(r)}${note ? ` (${note})` : ''}`);
 
     test('resolveRadius: closest-side and closest-corner stay above 0 for a center on the edge', () => {
-      const side = pxl.resolveRadius('closest-side', 0, 0.5, 200, 100, 1);
-      const corner = pxl.resolveRadius('closest-corner', 0, 0, 200, 100, 1);
+      const side = pxl.resolveRadius('closest-side', 0, 0.5, 200, 100);
+      const corner = pxl.resolveRadius('closest-corner', 0, 0, 200, 100);
       if (!(side > 0) || !(corner > 0)) throw new Error(`closest-side ${side}, closest-corner ${corner}`);
     });
 
@@ -549,7 +549,7 @@
     });
 
     // ===================================================================
-    // Attribute lists from defaults (design/2026-11-20_custom_shapes_plan.md §5.1, §5.2): every key of static defaults
+    // Attribute lists from defaults (design/done/2026-11-20_custom_shapes_plan.md §5.1, §5.2): every key of static defaults
     // is observed, a boolean default makes a presence attribute
     // ===================================================================
     section('Attribute lists from defaults');

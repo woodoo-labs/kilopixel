@@ -118,5 +118,6 @@ Pages that rely on a negative sweep drawing the long way: none known (to check i
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-22: `design/done/2026-11-20_custom_shapes_plan.md` phase 2 built: the layer scales by the unit once, and the shapes and their helpers (`applyStyle(ctx)`, `applyStrokeState(ctx)`, `createGradient(ctx, value, slot)`, `resolveArrow(rec, value)`, `drawArrows(ctx, a, b)`, `applyTransformState(ctx, values)`) take no `u`; code here with `u` is the old form.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
 - Status line until 2026-11-20: 🟡 **Proposed** (2026-11-16, direction and head behavior chosen with the prototype: the sign of `sweep` is the direction, heads shrink while the path is shorter than them, ellipses measure the arc length; D1–D5 open)

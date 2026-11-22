@@ -1,5 +1,5 @@
 // Receives the results that device.html (next to this file) sends from a phone or tablet, and stores them in
-// scratch/safari-device/ (one JSON file per page). Used for the Safari check of design/2026-11-20_custom_shapes_plan.md §5.3.
+// scratch/safari-device/ (one JSON file per page). Used for the Safari check of design/done/2026-11-20_custom_shapes_plan.md §5.3.
 //
 //   node design/prototypes/2026-11-20_custom_shapes/safari/receiver.js   (port 8126)
 //

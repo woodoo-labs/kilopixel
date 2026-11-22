@@ -1,11 +1,11 @@
 # Custom Shapes and Element Structure
 
-- **Status**: 🟡 **Proposed** (2026-11-22, steps 2–6 built (§12–§16): custom shapes work, are documented and draw right in Safari; `<pxl-polygon>` and D5, D7, D9 open)
+- **Status**: ✅ **Implemented** (2026-11-22, built in §12–§17; closed in §18: the structure cleanup, D7, D9 and step 7 moved to other plans)
 - **Date**: 2026-11-20
 - **Replaces**: `design/archive/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`, `draw()` without `t`, custom animation patterns, verified 2026-10-17 and 2026-11-07) and the structure cleanup draft of 2026-11-20 (`scratch/2026-11-20_engine_structure_cleanup_plan.md` (not kept); its steps and measurements are §6 here)
 - **Related**: `design/2026-11-20_evaluation_model_plan.md` (step 2 makes "`draw()` only reads values" a contract), `design/2026-10-19_polygon_star_shape_plan.md` (the first new shape in this form), `design/done/2026-11-01_isolated_shape_compositing_plan.md` (`drawsMoreThanOnce()`), `design/done/2026-11-07_safe_shape_render_plan.md` (a careless shape can't break the layer), `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked), `design/2026-10-30_space_attribute_plan.md` (with step 6.6)
 - **Target Implementation**: `js/elements/shape.js`, `js/elements/shapes/*.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/stage.js`, `js/graphics.js`, `js/interaction.js`, `js/engine.js`; `tools/build_types.js`; `tests/`; a new docs page `docs/custom-shapes.html`; `.agents/KILOPIXEL.md`, `.agents/ENGINE.md`
-- **Prototypes** (`design/prototypes/2026-11-20_custom_shapes/`): `template/` (the template as a patch over the engine: `proposal.js`, a Star, a Gauge, `minimal.html`, `rich.html`), `logical_units/` (the canvas, text and shadow tests and the page sweep of §5.3), `firefox/` (the same in Firefox: a driver over WebDriver BiDi, a text viewer and a page that switches between today and logical units), `safari/` (a page that runs the tests on a phone or tablet and sends the results to a receiver on the laptop), `transform_path/` (§6.6). `template/` and `logical_units/` patch the engine and use `attributeValues`, renamed in step 4. Their comparison of today's drawing with logical units means something only with the engine before step 3, commit `82eb93d` (`git show 82eb93d:dist/pxl.js`); `logical_units/text_tests.html` and `canvas_tests.html` use the canvas alone and work with any engine. Older: `design/prototypes/2026-10-17_shape_authoring/` (Rule A tests)
+- **Prototypes** (`design/prototypes/2026-11-20_custom_shapes/`): `template/` (the template as a patch over the engine: `proposal.js`, a Star, a Gauge, `minimal.html`, `rich.html`), `logical_units/` (the canvas, text and shadow tests and the page sweep of §5.3), `firefox/` (the same in Firefox: a driver over WebDriver BiDi, a text viewer and a page that switches between today and logical units), `safari/` (a page that runs the tests on a phone or tablet and sends the results to a receiver on the laptop), `phase2/` (the old-vs-new pixel comparison of every page and the frame-time benchmark of §17), `transform_path/` (§6.6). `template/` and `logical_units/` patch the engine and use `attributeValues`, renamed in step 4. Their comparison of today's drawing with logical units means something only with the engine before step 3, commit `82eb93d` (`git show 82eb93d:dist/pxl.js`); `logical_units/text_tests.html` and `canvas_tests.html` use the canvas alone and work with any engine. Older: `design/prototypes/2026-10-17_shape_authoring/` (Rule A tests)
 
 ---
 
@@ -151,7 +151,7 @@ From the shape authoring plan §3.1: `PxlNode`'s static getter returns `Object.k
 **Two phases, so that no step risks the built-ins:**
 
 1. **Phase 1, the calling convention:** `Shape.render()`, `renderIsolated()` and the hit test scale the context by `u` and call `draw(ctx, 1)`; the helpers' `u` defaults to 1 (`applyStyle(ctx)`). The built-in shapes keep their code and multiply by 1. This is the patch that ran over all pages above (`template/proposal.js` is the same plus the template's API). Custom shapes can then be written as in §3.
-2. **Phase 2 (optional, later), the cleanup:** the built-in shapes and helpers lose their `* u`, the caches their `u` key (`_scaledDash`, `_lastDashU`, Text's `_lastU`), layers and groups transform in logical units. `u` is always 1 there already, so the page sweep must show 0 differences. About −1 KB.
+2. **Phase 2 (optional, later), the cleanup:** the built-in shapes and helpers lose their `* u`, the caches their `u` key (`_scaledDash`, `_lastDashU`, Text's `_lastU`), layers and groups transform in logical units. `u` is always 1 there already, so the page sweep must show 0 differences. About −1 KB. *2026-11-22: built (§17); the sweep shows rounding differences on edge pixels, not 0.*
 
 ### 5.4 `draw(ctx)` Without `t`
 
@@ -178,13 +178,13 @@ The engine keeps "fields in the constructor" (CLAUDE.md "Engine Code Style": one
 
 ### 5.9 Later
 
-- **Internal animated values** (a pump's impeller, Pattern B of the shape authoring plan §4, verified 2026-10-17): a declarative helper (`static animations = { impeller: 'this.values.running ? t * 90 : 0' }`) after the evaluation model (`design/2026-11-20_evaluation_model_plan.md`), which decides how such values are evaluated. Until then: time in an attribute (`spin="t * 180"`, Pattern A).
+- *2026-11-22: moved to `design/2026-11-20_evaluation_model_plan.md` (its D11, §18).* **Internal animated values** (a pump's impeller, Pattern B of the shape authoring plan §4, verified 2026-10-17): a declarative helper (`static animations = { impeller: 'this.values.running ? t * 90 : 0' }`) after the evaluation model (`design/2026-11-20_evaluation_model_plan.md`), which decides how such values are evaluated. Until then: time in an attribute (`spin="t * 180"`, Pattern A).
 - **Arrowheads** for custom shapes (`resolveArrow()`, `aimArrow()`, `drawArrows()`) stay internal: their contract (records, insets, call order) is too detailed for a first public API.
 - **Typings:** `tools/build_types.js` can't know user tags; the docs page shows a declaration to copy.
 
 ## 6. Structure Cleanup (No Behavior Change; Later)
 
-From the cleanup draft of 2026-11-20. **Not part of the custom-shape steps (§9):** to be discussed separately. It touches the same classes, so whichever comes second adapts to the first. Each step one commit; the tests are the check.
+*2026-11-22: moved with D7 to `design/ideas/2026-11-22_engine_structure_cleanup_plan.md` (§18); the text below stays as history.* From the cleanup draft of 2026-11-20. **Not part of the custom-shape steps (§9):** to be discussed separately. It touches the same classes, so whichever comes second adapts to the first. Each step one commit; the tests are the check.
 
 1. **`pxl.describe(element)`:** the text `<pxl-rect id="btn">` for warnings, in 4 places today.
 2. **`pxl.BaseElement`** (new `js/elements/base.js`), the base of `Stage` and `PxlNode`: `values` with the hidden `set` / `$node`, the `id` registry (`refKey`, `_isRegistered`, rename), properties set before the upgrade, `attributeChangedCallback()` for unchanged values and `id`, passing other names to the subclass. Methods on the class, so the fields stay in their class.
@@ -202,7 +202,7 @@ From the cleanup draft of 2026-11-20. **Not part of the custom-shape steps (§9)
 |---|---|
 | §5.1 derived lists (11 hand-written lists) | about −0.5 KB; measured with §5.2: −1.4 KB (§12) |
 | §5.3 phase 1 | about +0.1 KB |
-| §5.3 phase 2 (the `* u` out of the built-ins) | about −1 KB |
+| §5.3 phase 2 (the `* u` out of the built-ins) | about −1 KB; measured −0.6 KB (§17) |
 | §5.5, §5.7 new code (with `defineShape()`, the tag list in the default styles goes) | about +0.3 KB |
 | §5.6 rename | about −0.8 KB |
 | §6.1–6.4 structure (later) | −1 to −1.5 KB |
@@ -223,8 +223,8 @@ From the cleanup draft of 2026-11-20. **Not part of the custom-shape steps (§9)
 4. §5.6 rename, if decided (D4). Built 2026-11-21 (§14).
 5. §5.5 and §5.7: defining the tag, `setBoundingBox()`, `paint()`, the checks once per class; the Star and the Gauge as tests, loaded as a second script. Built 2026-11-21 (§15).
 6. Docs (§8), KILOPIXEL.md and ENGINE.md. Built 2026-11-21 (§16).
-7. `<pxl-polygon>` (`design/2026-10-19_polygon_star_shape_plan.md`) as the first new shape in this form.
-8. Later: §5.3 phase 2; the structure cleanup (§6), discussed separately; §6.6 waits for `space`.
+7. `<pxl-polygon>` (`design/2026-10-19_polygon_star_shape_plan.md`) as the first new shape in this form. *2026-11-22: handed to that plan (TODO §23, §18).*
+8. Later: §5.3 phase 2; the structure cleanup (§6), discussed separately; §6.6 waits for `space`. Phase 2 built 2026-11-22 (§17).
 
 ## 10. Tests
 
@@ -253,11 +253,11 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 | D2 | Logical units for every shape, in two phases (§5.3) | **decided 2026-11-21**, phase 1 built before the Safari test (Chrome and Firefox passed); Safari passed 2026-11-22 (§5.3) |
 | D3 | Defining the tag: `pxl.defineShape()` for all shapes, or plain `customElements.define()` (§5.5) | **decided 2026-11-21**: `pxl.defineShape()` (the proven CSS rule hides content, checks run at define time) |
 | D4 | Rename `attributeValues` → `values`, `attributeExpressions` → `expressions` | **decided and built 2026-11-21** (§14) |
-| D5 | Class fields for built-ins | no: the engine keeps constructors; authors choose |
+| D5 | Class fields for built-ins | **decided 2026-11-22**: no, the engine keeps constructors; authors choose |
 | D6 | The public helpers of §4 (`applyStyle`, `applyStrokeState`, `paint`, `hasFill`, `isStroked`, `setBoundingBox`) | **decided and built 2026-11-21** (§15); arrowheads stay internal (§5.9) |
-| D7 | The transform path (§6.6) | with `space`, not alone (the cleanup is discussed separately) |
+| D7 | The transform path (§6.6) | with `space`, not alone; moved 2026-11-22 to `design/ideas/2026-11-22_engine_structure_cleanup_plan.md` (its D1) |
 | D8 | Typings for custom shapes | **decided and built 2026-11-21** (§16): generated base types `PxlShapeAttributes` / `PxlShapeElement`, a declaration to copy on the docs page |
-| D9 | Internal animated values (§5.9) | after the evaluation model |
+| D9 | Internal animated values (§5.9) | after the evaluation model; moved 2026-11-22 to `design/2026-11-20_evaluation_model_plan.md` (its D11) |
 
 ## 12. Step 2 Built (2026-11-21)
 
@@ -344,10 +344,40 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 
 **Left:** the Safari check (§9 step 1), step 7 (`<pxl-polygon>`), phase 2 of §5.3 and the structure cleanup (§6).
 
+## 17. Phase 2 Built (2026-11-22)
+
+**What changed** (§5.3 phase 2):
+
+- `js/elements/layer.js`: `render(u)` saves, scales by `u` once, applies its own transform and draws its children inside, then restores: everything in a layer draws in logical units.
+- `js/graphics.js`: `pxl.applyTransformState(ctx, values)` and `pxl.resolveRadius(r, x, y, w, h)` take no `u`. `pxl.applyContextState()` and `pxl.applyCompositingState()` keep it: shadows and canvas filters ignore the transform (`u` × DPR).
+- `js/elements/shape.js`: `render()` no longer scales and calls `draw(ctx)`; `renderIsolated()` and the hit test (`js/interaction.js`) keep the global matrix × `u` and call `draw(ctx)` / `hitTest(ctx)`. The helpers take no `u`: `applyStyle(ctx)`, `applyStrokeState(ctx)`, `applyLineDash(ctx)`, `createGradient(ctx, value, slot)`, `resolveArrow(rec, value)`, `drawArrows(ctx, a, b)`, `paint()`. The gradient cache lost its `u` key; the dash cache (`_lastDash`, `_lastDashU`, `_scaledDash`) went: an array goes to `setLineDash()` as written, one number through the reused `_singleDash`.
+- The 7 built-in shapes: `draw(ctx)` without any `* u`; Polyline's `loadPoints()`, Text's font string `${size}px` and `hitTest(ctx)`; Text's `_lastU` went, so a resize measures no text again. Leftover aliases (`radius = safeR`, `startX = x1`) removed.
+
+**Pixels** (`phase2/run.js pixels`, headless Chrome with software drawing, old = commit `16e4a5d`): 82 pages, 173 stages, 306 layers, each loaded old, new, old again and drawn at the same t. 289 layers identical, 1 unstable (differs between the two old loads), 16 differ: 14 of them by 1–8 / 255 on a few pixels; `docs/fill.html` (440 pixels, up to 24), `examples/test01.html` and `test02.html` (about 80 pixels, up to 31) and `examples/test45.html` (filled circles 15 groups deep: 10,328 pixels, up to 77, the same page and maximum as §6.6). Hit testing: 0 differences at 535,732 points. **Deviation:** the plan expected 0 differences; the order of the identical transforms changed (scale first, then translations, instead of translations × u, then scale), and the canvas's float matrices then round differently: on `test45` the 3,012 circle matrices agree to 0.000036 device pixels (entries up to 900), enough to tip edge pixels that lie on a boundary. Accepted, as in §6.6. A mutated engine (default `strokewidth` 2) made 13 of 17 layers differ by up to 240, so the comparison does catch real changes.
+
+**Frame time** (`phase2/run.js bench`, headless Chrome with the GPU, 31 blocks of 20 frames per engine, alternating; the fastest block, since noise only adds time; two identical engines agree to 0.3 %): three runs, every scene equal or faster: 5,000 circles −6 to −8 %, 500 texts −3 to −7 %, 1,000 gradient rects with dashes −2 to −21 %, 1,000 smooth polylines with arrowheads −1 to +1 %, 200 nested groups with 2,000 rects −2 to −8 %.
+
+**Tests:** three tests follow the change: the hidden-shape test counts the layer's own `save()`, the custom-shape test expects `draw(ctx)` with no further argument, `resolveRadius` lost its `u` rows. `node tools/run_tests.js` and `--smoke`: all passed.
+
+**Size:** `pxl.min.js` 72,093 → 71,450 bytes (−0.6 KB; estimated −1 KB).
+
+## 18. Closed (2026-11-22)
+
+Custom shapes are built (steps 2–6, phase 2 of §5.3), documented (`docs/custom-shapes.html`, KILOPIXEL.md §12) and checked in Chrome, Firefox and Safari. Decisions D1–D6 and D8 are built, D5 decided as recommended. What was left moved where it belongs:
+
+- **The structure cleanup** (§6) and **D7** (one transform path): `design/ideas/2026-11-22_engine_structure_cleanup_plan.md` (💬, parked; step 6 goes with `space`, TODO §28).
+- **D9** (internal animated values, §5.9): `design/2026-11-20_evaluation_model_plan.md`, its D11, decided with its D1.
+- **Step 7** (`<pxl-polygon>` in this form): `design/2026-10-19_polygon_star_shape_plan.md`, TODO §23.
+- **Safari limits** found in §5.3: TODO §48 (late web fonts) and §49 (shape filters).
+
+Its TODO item is removed; its number stays free.
+
 ## Log
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-22: closed (§18): ✅ and moved to `design/done/`; D5 decided; §6 with D7 to `design/ideas/2026-11-22_engine_structure_cleanup_plan.md`, D9 to the evaluation model plan, step 7 to the polygon plan; its TODO item removed.
+- 2026-11-22: phase 2 of §5.3 built (§17): the layer scales by u once, no `* u` in shapes, helpers and caches; edge-pixel rounding on 16 of 306 layers, hit testing unchanged, frames equal or faster; −0.6 KB. Tools in `phase2/`.
 - 2026-11-22: Safari checked on an iPhone (§5.3): all pixel tests pass, so phase 1 holds in Safari; found Safari's missing `ctx.filter` (TODO §49) and late web fonts without `loadingdone` (TODO §48). GitHub's macOS runner can't paint or read pixels, so its workflow and script are removed again (they are in commit `bae213f`). The device check page and its receiver are kept in `safari/`.
 - 2026-11-22: a Safari script and a manual GitHub workflow for the Safari test (§9 step 1; commit `a73e8bc`, removed again, see above). Corrected the prototype note: the comparison of `template/` and `logical_units/` needs the engine of commit `82eb93d`, not `5ff5ea6`.
 - 2026-11-21: step 6 built (§16): `docs/custom-shapes.html`, KILOPIXEL.md §12, generated shape base types for TypeScript (D8 decided); `star.js` and `gauge.js` moved to `docs/js/shapes/`.

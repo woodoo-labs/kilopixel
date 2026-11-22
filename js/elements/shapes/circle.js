@@ -11,7 +11,7 @@ pxl.Circle = class Circle extends pxl.Shape {
     this._arrowEnd = pxl.createArrowRecord();
   }
 
-  draw(ctx, u) {
+  draw(ctx) {
     const { r, ir, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.values;
 
     const safeR = Math.max(0, r);
@@ -33,21 +33,20 @@ pxl.Circle = class Circle extends pxl.Shape {
     // Arrowheads (open arcs only)
     const arrowStart = this._arrowStart, arrowEnd = this._arrowEnd;
     const canHaveArrows = safeR > 0 && safeIR === 0 && !isPie && !isClosed && this.isStroked();
-    const hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart, u);
-    const hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend, u);
+    const hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart);
+    const hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend);
     const hasArrows = hasStart || hasEnd;
     let drawShaft = true;
 
     if (hasArrows) {
-      const radius = safeR * u;
       const travel = isAnti ? -1 : 1; // direction of increasing arc position
       let startInsetRadians = 0, endInsetRadians = 0;
 
       if (hasStart) {
-        startInsetRadians = this.aimArcArrow(arrowStart, radius, startRadians, travel);
+        startInsetRadians = this.aimArcArrow(arrowStart, safeR, startRadians, travel);
       }
       if (hasEnd) {
-        endInsetRadians = this.aimArcArrow(arrowEnd, radius, endRadians, -travel);
+        endInsetRadians = this.aimArcArrow(arrowEnd, safeR, endRadians, -travel);
       }
 
       // Skip the arc if both insets would cross each other
@@ -58,13 +57,13 @@ pxl.Circle = class Circle extends pxl.Shape {
 
     if (drawShaft) {
       ctx.beginPath();
-      ctx.arc(0, 0, safeR * u, drawStartRadians, drawEndRadians, isAnti);
+      ctx.arc(0, 0, safeR, drawStartRadians, drawEndRadians, isAnti);
 
       if (safeIR > 0) {
         if (isFull) {
-          ctx.moveTo((safeIR * u) * Math.cos(drawEndRadians), (safeIR * u) * Math.sin(drawEndRadians));
+          ctx.moveTo(safeIR * Math.cos(drawEndRadians), safeIR * Math.sin(drawEndRadians));
         }
-        ctx.arc(0, 0, safeIR * u, drawEndRadians, drawStartRadians, !isAnti);
+        ctx.arc(0, 0, safeIR, drawEndRadians, drawStartRadians, !isAnti);
         ctx.closePath();
       } else if (isPie && !isFull) {
         ctx.lineTo(0, 0);
@@ -73,12 +72,12 @@ pxl.Circle = class Circle extends pxl.Shape {
         ctx.closePath();
       }
 
-      this.applyStyle(ctx, u);
+      this.applyStyle(ctx);
     } else {
-      this.applyStrokeState(ctx, u);
+      this.applyStrokeState(ctx);
     }
 
-    if (hasArrows) this.drawArrows(ctx, u, arrowStart, arrowEnd);
+    if (hasArrows) this.drawArrows(ctx, arrowStart, arrowEnd);
   }
 
   // Aims an arrow at the arc end at angle `radians`; `inward` (±1) is the angle direction into the arc.

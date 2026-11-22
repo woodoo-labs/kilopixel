@@ -276,7 +276,7 @@
         expectInk(layer, [[200, 50, true], [100, 50, true], [150, 50, false]])));
 
     // ===================================================================
-    // Logical units (design/2026-11-20_custom_shapes_plan.md §5.3, §5.4): draw() works in the units of the HTML on a
+    // Logical units (design/done/2026-11-20_custom_shapes_plan.md §5.3, §5.4): draw() works in the units of the HTML on a
     // canvas scaled by the stage's unit, so a custom shape needs no u, and it gets no time
     // ===================================================================
     section('Logical units');
@@ -328,7 +328,7 @@
           }, 1, width));
     }
 
-    test('custom shape: draw() gets (ctx, 1) and no time, drawn, isolated and hit tested', () =>
+    test('custom shape: draw() gets only ctx (no unit, no time), drawn, isolated and hit tested', () =>
       draw(`<test-logical-shape id="luA" x="100" y="100" fill="#000"></test-logical-shape>
         <test-logical-shape id="luB" x="500" y="100" fill="#000" shadowcolor="#000" shadowblur="5"></test-logical-shape>`,
         (layer, stage) => {
@@ -338,7 +338,7 @@
           stage.interaction.findShapeAt(150, 250);
           seen.hitTest = a.drawArgs;
           for (const [name, args] of Object.entries(seen)) {
-            if (args.join() !== '1') throw new Error(`${name}: draw(ctx, ${args.join(', ')})`);
+            if (args.length !== 0) throw new Error(`${name}: draw(ctx, ${args.join(', ')})`);
           }
         }, 5));
 
@@ -355,7 +355,7 @@
       if (seen[0] !== seen[1]) throw new Error(`width 500: ${seen[0]}; width 1000: ${seen[1]}`);
     });
 
-    // The Star and the Gauge from docs/js/shapes/ (design/2026-11-20_custom_shapes_plan.md §3), loaded as a second script
+    // The Star and the Gauge from docs/js/shapes/ (design/done/2026-11-20_custom_shapes_plan.md §3), loaded as a second script
     for (const width of [500, 1000]) {
       test(`custom shapes: the Star at stage width ${width}: its points painted, the space between them empty`, () =>
         draw('<pxl-star x="300" y="300" r="200" ir="80" fill="#000" stroke="#000" strokewidth="10"></pxl-star>', (layer) =>

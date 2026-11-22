@@ -204,14 +204,15 @@ pxl.Layer = class Layer extends pxl.PxlNode {
                                 zoom !== 1 || scalex !== 1 || scaley !== 1 ||
                                 skewx || skewy;
 
-    if (hasTransformChanges) {
-      ctx.save();
-      pxl.applyTransformState(ctx, u, this.values);
-    }
+    // Everything inside draws in logical units: the one scale by u for the whole layer
+    // (design/done/2026-11-20_custom_shapes_plan.md §5.3, phase 2). u goes on for shadows and filters only.
+    ctx.save();
+    ctx.scale(u, u);
+    if (hasTransformChanges) pxl.applyTransformState(ctx, this.values);
     for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].render(ctx, u);
     }
-    if (hasTransformChanges) ctx.restore();
+    ctx.restore();
 
     // Heartbeat: an animated layer asks for the next frame (without isDirty, so the CSS-only path stays possible)
     if (this.isAnimated) this.stage.requestRender();

@@ -22,25 +22,25 @@ pxl.anchorY = {
 
 // Radial gradient radius: a number is a logical length; a string is the distance from the center (x, y)
 // to a side, a perimeter point or a CSS keyword of the bounding box (w × h)
-pxl.resolveRadius = function(r, x, y, w, h, u) {
-  if (typeof r === 'number') return Math.abs(r * u);
+pxl.resolveRadius = function(r, x, y, w, h) {
+  if (typeof r === 'number') return Math.abs(r);
 
   // Sides: perpendicular distance
-  if (r === 'top')    return Math.abs(y * h * u);
-  if (r === 'bottom') return Math.abs((1 - y) * h * u);
-  if (r === 'left')   return Math.abs(x * w * u);
-  if (r === 'right')  return Math.abs((1 - x) * w * u);
+  if (r === 'top')    return Math.abs(y * h);
+  if (r === 'bottom') return Math.abs((1 - y) * h);
+  if (r === 'left')   return Math.abs(x * w);
+  if (r === 'right')  return Math.abs((1 - x) * w);
 
   // Perimeter points (corners, edge midpoints): straight distance
   const ax = pxl.anchorX[r];
   if (ax !== undefined) {
-    const dx = (x - ax) * w * u, dy = (y - pxl.anchorY[r]) * h * u;
+    const dx = (x - ax) * w, dy = (y - pxl.anchorY[r]) * h;
     return Math.sqrt(dx * dx + dy * dy);
   }
 
   // CSS keywords
-  const lx = x * w * u, rx = (1 - x) * w * u;
-  const ty = y * h * u, by = (1 - y) * h * u;
+  const lx = x * w, rx = (1 - x) * w;
+  const ty = y * h, by = (1 - y) * h;
   switch (r) {
     case 'closest-side':   return Math.max(0.001, Math.min(lx, rx, ty, by));
     case 'farthest-side':  return Math.max(lx, rx, ty, by);
@@ -52,11 +52,12 @@ pxl.resolveRadius = function(r, x, y, w, h, u) {
   }
 };
 
-// Same order as pxl.Matrix.updateLocal: translate(x, y) → rotate → scale → skew → translate(dx, dy)
-pxl.applyTransformState = function(ctx, u, values) {
+// Same order as pxl.Matrix.updateLocal: translate(x, y) → rotate → scale → skew → translate(dx, dy). In logical
+// units: the layer has scaled the context by u.
+pxl.applyTransformState = function(ctx, values) {
   const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = values;
 
-  if (x || y) ctx.translate(x * u, y * u);
+  if (x || y) ctx.translate(x, y);
   if (rotate) ctx.rotate(rotate * Math.PI / 180);
 
   const finalScaleX = zoom * scalex;
@@ -68,7 +69,7 @@ pxl.applyTransformState = function(ctx, u, values) {
     const sy = Math.tan(skewy * Math.PI / 180);
     ctx.transform(1, sy, sx, 1, 0, 0);
   }
-  if (dx || dy) ctx.translate(dx * u, dy * u);
+  if (dx || dy) ctx.translate(dx, dy);
 };
 
 // Scales every px value in the final filter string by the unit u: the helpers' (blur(5) → 'blur(5px)')
@@ -79,7 +80,7 @@ pxl.scaleResponsiveFilter = function(filterStr, u) {
 };
 
 pxl.applyContextState = function(ctx, u, values, node) {
-  pxl.applyTransformState(ctx, u, values);
+  pxl.applyTransformState(ctx, values);
   pxl.applyCompositingState(ctx, u, values, node);
 };
 

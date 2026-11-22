@@ -228,12 +228,14 @@ Sidebar: "Polygon" link back under Shapes & Paths, after "Polyline".
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
-- 2026-11-21: `design/2026-11-20_custom_shapes_plan.md` step 5 built: shapes are defined with `pxl.defineShape(tag, Class)` and write their box with `setBoundingBox(left, top, right, bottom)`; this plan's four `boundingBox` assignments and `customElements.define()` are the old form.
-- 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
-- 2026-11-21: `design/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; this plan's `draw(ctx, u, t)` with `* u` is the old form.
-- 2026-11-21: `observedAttributes` is derived from `static defaults` and presence attributes come from boolean defaults (`design/2026-11-20_custom_shapes_plan.md` step 2): the hand-written `observedAttributes` in this plan's code is the old form.
-- 2026-11-21: `design/2026-11-20_custom_shapes_plan.md` D3 decided: shapes define their tag with `pxl.defineShape()`; the `customElements.define()` line in this plan's code is the old form.
-- 2026-11-20: `design/2026-11-20_custom_shapes_plan.md` dropped `path()`: this shape would be written with the one template, `draw(ctx)` in logical units.
-- 2026-11-20: the shape authoring plan was replaced by `design/2026-11-20_custom_shapes_plan.md` (TODO §47), where this shape is the first one written as a path shape (`path(ctx)` in logical units).
+- 2026-11-22: `design/done/2026-11-20_custom_shapes_plan.md` is closed; its step 7 is this plan: build `<pxl-polygon>` in the form of the built-in shapes today (`static defaults` only, `draw(ctx)` in logical units without `u`, `setBoundingBox()`, `pxl.defineShape()`); this plan's code is the old form.
+- 2026-11-22: `design/done/2026-11-20_custom_shapes_plan.md` phase 2 built: the layer scales by the unit once, and the shapes and their helpers (`applyStyle(ctx)`, `applyStrokeState(ctx)`, `createGradient(ctx, value, slot)`, `resolveArrow(rec, value)`, `drawArrows(ctx, a, b)`, `applyTransformState(ctx, values)`) take no `u`; code here with `u` is the old form.
+- 2026-11-21: `design/done/2026-11-20_custom_shapes_plan.md` step 5 built: shapes are defined with `pxl.defineShape(tag, Class)` and write their box with `setBoundingBox(left, top, right, bottom)`; this plan's four `boundingBox` assignments and `customElements.define()` are the old form.
+- 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
+- 2026-11-21: `design/done/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; this plan's `draw(ctx, u, t)` with `* u` is the old form.
+- 2026-11-21: `observedAttributes` is derived from `static defaults` and presence attributes come from boolean defaults (`design/done/2026-11-20_custom_shapes_plan.md` step 2): the hand-written `observedAttributes` in this plan's code is the old form.
+- 2026-11-21: `design/done/2026-11-20_custom_shapes_plan.md` D3 decided: shapes define their tag with `pxl.defineShape()`; the `customElements.define()` line in this plan's code is the old form.
+- 2026-11-20: `design/done/2026-11-20_custom_shapes_plan.md` dropped `path()`: this shape would be written with the one template, `draw(ctx)` in logical units.
+- 2026-11-20: the shape authoring plan was replaced by `design/done/2026-11-20_custom_shapes_plan.md`, where this shape is the first one written as a path shape (`path(ctx)` in logical units).
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
 - Status line until 2026-11-20: 🟡 **Proposed** (no code changes yet; open decisions in §7)

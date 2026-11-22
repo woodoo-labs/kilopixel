@@ -377,7 +377,7 @@
       }
     });
 
-    // Drawn in logical units (design/2026-11-20_custom_shapes_plan.md §5.3): the coordinates as written, the canvas scaled
+    // Drawn in logical units (design/done/2026-11-20_custom_shapes_plan.md §5.3): the coordinates as written, the canvas scaled
     test('polyline: drawn coordinates are the values without Float32 rounding, also summed in relative mode', () => {
       srClear();
       srAdd('srLayerA', '<pxl-polyline id="f64Abs" points="333.3,150.7; 400,200" stroke="#000"></pxl-polyline>');
@@ -1019,7 +1019,8 @@
       let saves = 0;
       ctx.save = function() { saves++; return save.call(this); };
       try { srRender(2); } finally { delete ctx.save; }
-      if (saves !== 0) throw new Error(`${saves} save() calls for a hidden shape`);
+      // One save() is the layer's own, around its children (it scales them by the unit); none for the hidden shape
+      if (saves !== 1) throw new Error(`${saves - 1} save() calls for a hidden shape`);
       if (el('srHiddenReader').values.text !== 200) throw new Error(`reader shows ${el('srHiddenReader').values.text}`);
       srClear();
     });
@@ -1431,7 +1432,7 @@
       }));
 
     // ===================================================================
-    // Custom shapes (design/2026-11-20_custom_shapes_plan.md §5.5, §5.7): pxl.defineShape(), setBoundingBox(), paint().
+    // Custom shapes (design/done/2026-11-20_custom_shapes_plan.md §5.5, §5.7): pxl.defineShape(), setBoundingBox(), paint().
     // The Star and the Gauge are loaded as a second script from the docs (docs/js/shapes/), like a page loads a custom shape.
     // ===================================================================
     section('Custom shapes');

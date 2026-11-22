@@ -7,21 +7,19 @@ pxl.Line = class Line extends pxl.Shape {
     this._arrowEnd = pxl.createArrowRecord();
   }
 
-  draw(ctx, u) {
-    const { x1, y1, x2, y2, arrowstart, arrowend } = this.values;
-    const startX = x1 * u, startY = y1 * u;
-    const endX = x2 * u, endY = y2 * u;
+  draw(ctx) {
+    const { x1: startX, y1: startY, x2: endX, y2: endY, arrowstart, arrowend } = this.values;
 
     const arrowStart = this._arrowStart, arrowEnd = this._arrowEnd;
     const isStroked = this.isStroked();
-    const hasStart = isStroked && this.resolveArrow(arrowStart, arrowstart, u);
-    const hasEnd = isStroked && this.resolveArrow(arrowEnd, arrowend, u);
+    const hasStart = isStroked && this.resolveArrow(arrowStart, arrowstart);
+    const hasEnd = isStroked && this.resolveArrow(arrowEnd, arrowend);
 
     if (!hasStart && !hasEnd) {
       ctx.beginPath();
       ctx.moveTo(startX, startY);
       ctx.lineTo(endX, endY);
-      this.applyStyle(ctx, u);
+      this.applyStyle(ctx);
       return;
     }
 
@@ -38,12 +36,12 @@ pxl.Line = class Line extends pxl.Shape {
       ctx.beginPath();
       ctx.moveTo(startX + dirX * startInset, startY + dirY * startInset);
       ctx.lineTo(endX - dirX * endInset, endY - dirY * endInset);
-      this.applyStyle(ctx, u);
+      this.applyStyle(ctx);
     } else {
-      this.applyStrokeState(ctx, u);
+      this.applyStrokeState(ctx);
     }
 
-    this.drawArrows(ctx, u, arrowStart, arrowEnd);
+    this.drawArrows(ctx, arrowStart, arrowEnd);
   }
 
   // Fill and stroke, or arrowheads: more than one draw call, isolated when it has compositing state (Shape.render())

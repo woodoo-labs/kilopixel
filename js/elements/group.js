@@ -77,7 +77,7 @@ pxl.Group = class Group extends pxl.PxlNode {
 
     if (hasStateChanges) {
       ctx.save();
-      pxl.applyTransformState(ctx, u, this.values);
+      pxl.applyTransformState(ctx, this.values);
     }
     for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].render(ctx, u);

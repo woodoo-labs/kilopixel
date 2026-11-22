@@ -1,4 +1,4 @@
-// PROTOTYPE ONLY: phase 1 of design/2026-11-20_custom_shapes_plan.md §5, added at runtime over the engine
+// PROTOTYPE ONLY: phase 1 of design/done/2026-11-20_custom_shapes_plan.md §5, added at runtime over the engine
 // (/dist/pxl.js): every shape draws in logical units on a context scaled by u (draw(ctx, 1); the built-in shapes,
 // which multiply by their u parameter, multiply by 1), and the helpers' u defaults to 1, so a custom shape writes
 // draw(ctx) without u. Plus the parts of the proposed API the template uses: this.values, setBoundingBox(),

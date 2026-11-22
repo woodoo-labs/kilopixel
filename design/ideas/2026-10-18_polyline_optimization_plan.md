@@ -396,7 +396,7 @@ Build the path once per (`u`, points, `smooth`, `closed`, arrows) and reuse it. 
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
-- 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
-- 2026-11-21: `design/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; `flatCache` holds the values × 1 (logical units), not × the stage unit.
+- 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
+- 2026-11-21: `design/done/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; `flatCache` holds the values × 1 (logical units), not × the stage unit.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
 - Status line until 2026-11-20: 🟡 **Proposed** (low priority; 2026-11-19: a `setPoints()` exists now, built with the `points` property of `design/done/2026-10-30_framework_compatibility_plan.md` §24: arrays read in place, keys and buffer kept when the count stays, `resizePoints()` replaces `clearPoints()`; phase 2 below builds on it; 2026-10-19: measured gains are small, §2.3; the `ref.<id>.pN` fix is implemented, §2.3.4; priorities below)
