@@ -84,6 +84,19 @@ pxl.applyContextState = function(ctx, u, values, node) {
   pxl.applyCompositingState(ctx, u, values, node);
 };
 
+// Safari's canvas has ctx.filter only behind its "Canvas Filters" feature flag, off by default: a shape's filter is
+// then ignored (TODO §49). Checked once per page, at the first shape with a filter; the prototype is asked, because
+// assigning ctx.filter where it doesn't exist creates a plain property on that context.
+pxl._canvasFilterChecked = false;
+
+pxl.checkCanvasFilter = function(ctx, node) {
+  if (pxl._canvasFilterChecked) return;
+  pxl._canvasFilterChecked = true;
+  if ('filter' in Object.getPrototypeOf(ctx)) return;
+  console.warn(`[pxl] <${node.localName}${node.id ? ` id="${node.id}"` : ''}> has a filter, but this browser's canvas ` +
+    'ignores filters on shapes (Safari: only with its "Canvas Filters" feature flag). A filter on a layer works everywhere.');
+};
+
 // How a shape's pixels combine with the layer: alpha, mask / blend, filter, shadow. An isolated shape
 // (Shape.renderIsolated()) applies it once, when its finished bitmap is drawn onto the layer.
 // Canvas shadows and filters ignore the canvas transform, which holds the layer's device pixel ratio: their lengths
@@ -101,6 +114,7 @@ pxl.applyCompositingState = function(ctx, u, values, node) {
   }
 
   if (filter !== 'none') {
+    pxl.checkCanvasFilter(ctx, node);
     ctx.filter = node.resolveFilter(filter, k);
   }
 

@@ -1435,6 +1435,49 @@
     // Custom shapes (design/done/2026-11-20_custom_shapes_plan.md §5.5, §5.7): pxl.defineShape(), setBoundingBox(), paint().
     // The Star and the Gauge are loaded as a second script from the docs (docs/js/shapes/), like a page loads a custom shape.
     // ===================================================================
+    section('Canvas filter support');
+
+    // Safari has ctx.filter only behind a feature flag (TODO §49). A context without it is simulated with an object
+    // whose prototype has no filter, as Safari's is; pxl._canvasFilterChecked is reset around each test.
+    const filterlessContext = () => Object.create({ globalAlpha: 1 });
+    function withFilterCheck(fn) {
+      const checked = pxl._canvasFilterChecked;
+      pxl._canvasFilterChecked = false;
+      try { return fn(); } finally { pxl._canvasFilterChecked = checked; }
+    }
+
+    test('canvas filter: a canvas without filter support warns once per page, naming the first filtered shape', () => {
+      srClear();
+      srAdd('srLayerA', '<pxl-circle id="cfA" r="10" fill="#000" filter="blur(2)"></pxl-circle><pxl-circle id="cfB" r="10" fill="#000" filter="blur(4)"></pxl-circle>');
+      const a = el('cfA'), b = el('cfB');
+      const warnings = withFilterCheck(() => captureWarnings(() => {
+        for (let frame = 0; frame < 3; frame++) {
+          pxl.applyCompositingState(filterlessContext(), 1, a.values, a);
+          pxl.applyCompositingState(filterlessContext(), 1, b.values, b);
+        }
+      }));
+      srClear();
+      if (warnings.length !== 1 || !warnings[0].includes('<pxl-circle id="cfA">') || !warnings[0].includes('Canvas Filters')) {
+        throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      }
+    });
+
+    test('canvas filter: no check and no warning for shapes without a filter, none where the canvas supports filters', () => {
+      srClear();
+      srAdd('srLayerA', '<pxl-circle id="cfPlain" r="10" fill="#000"></pxl-circle>');
+      const plain = el('cfPlain');
+      const plainResult = withFilterCheck(() => {
+        const warnings = captureWarnings(() => pxl.applyCompositingState(filterlessContext(), 1, plain.values, plain));
+        return { warnings, checked: pxl._canvasFilterChecked };
+      });
+      srAdd('srLayerA', '<pxl-circle id="cfReal" x="100" y="100" r="10" fill="#000" filter="blur(2)"></pxl-circle>');
+      const realWarnings = withFilterCheck(() => captureWarnings(() => srRender(1)));
+      srClear();
+      if (plainResult.warnings.length || plainResult.checked || realWarnings.length) {
+        throw new Error(`no filter: ${plainResult.warnings.length} warnings, checked ${plainResult.checked}; real canvas: ${JSON.stringify(realWarnings)}`);
+      }
+    });
+
     section('Custom shapes');
 
     // A minimal shape class: draws nothing, has a box
