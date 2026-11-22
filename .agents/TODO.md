@@ -120,5 +120,5 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 
 ## 49. Shape Filters in Safari
 - **Status**: 💬 **Discussion** (no plan yet)
-- Safari's canvas has no `ctx.filter` (iPhone, 2026-11-22), so `filter` on a shape draws nothing extra there; filters on layers are CSS and work.
-- **Next**: a note on `docs/filter.html`; then decide whether `blur()` and `dropShadow()` on shapes get a fallback in Safari (the canvas shadow, or the layer's filter). Background: `design/done/2026-11-20_custom_shapes_plan.md` §5.3.
+- Safari has `ctx.filter` only behind its "Canvas Filters" feature flag, off by default, so `filter` on a shape draws nothing extra for its visitors; filters on layers are CSS and work. With the flag on, `tests/render.html` passes 56/56 on an iPhone (2026-11-22). `docs/filter.html` says so and points to layer filters.
+- **Next**: decide whether `blur()` and `dropShadow()` on shapes get a fallback in Safari (the canvas shadow, or the layer's filter). Background: `design/done/2026-11-20_custom_shapes_plan.md` §5.3.
