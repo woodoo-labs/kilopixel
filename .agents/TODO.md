@@ -114,9 +114,10 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Also decided there**: scoped names instead of global ids (D8); B8 of `design/done/2026-10-27_engine_cleanup_inventory_note.md` (the evaluation loops either option rewrites).
 
 ## 48. Late Web Fonts in Safari
-- **Status**: 💬 **Discussion** (no plan yet)
-- Safari 27 sends no `loadingdone` when a web font arrives (measured on an iPhone, 2026-11-22), so text drawn before the font keeps the fallback font's widths, lines and box (`docs/` uses Inter). The two late-font tests in `tests/index.html` fail there too, although a synthetic event reached a listener in a probe.
-- **Next**: a small plan: another signal for arrived fonts (`document.fonts.ready` after each `loading`, the fonts' `loaded` promises), and a test that runs in Safari. Background: `design/done/2026-11-20_custom_shapes_plan.md` §5.3.
+- **Status**: 🟡 **Proposed**
+- **Plan**: `design/2026-11-22_late_web_fonts_plan.md`
+- Safari drops listeners on an unreferenced `document.fonts` and never sends `loadingdone`, so text drawn before its web font keeps the fallback font's widths, lines and box (measured on an iPhone; `docs/` uses Inter). Fix A (a kept reference, `loading`, then `ready`) works there and in Chrome.
+- **Next**: decide D1–D4 (plan §7), then build fix A and run `tests/index.html` on the iPhone.
 
 ## 49. Shape Filters in Safari
 - **Status**: 💬 **Discussion** (no plan yet)

@@ -1,0 +1,120 @@
+<!doctype html>
+<!--
+  The two fixes for late web fonts: A (a kept reference, "loading", then ready) and B (per-text check() and load()) (design/2026-11-22_late_web_fonts_plan.md §2). Open it through the dev server, on a phone or tablet over the
+  Wi-Fi (http://<laptop IP>:8124/design/prototypes/2026-11-22_late_web_fonts/…), with the receiver running for the results:
+  node design/prototypes/2026-11-20_custom_shapes/safari/receiver.js (results in scratch/safari-device/).
+  It loads today's engine (/dist/pxl.min.js); the measurements in the plan were made with the engine of commit f9aeccd.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Late Font Fix Check</title>
+<script src="/dist/pxl.min.js"></script>
+<script>
+// Fix A, as the engine would do it, installed before anything loads: a kept reference to document.fonts, and on each
+// "loading" event, wait for document.fonts.ready, then measure text again and redraw (instead of "loadingdone")
+window.fixA = { loadingEvents: 0, readyResolved: 0, facesLoadedAtReady: [] };
+pxl._fonts = document.fonts;
+pxl._fonts.addEventListener('loading', () => {
+  fixA.loadingEvents++;
+  pxl._fonts.ready.then(() => {
+    fixA.readyResolved++;
+    fixA.facesLoadedAtReady.push([...pxl._fonts].filter((f) => f.status === 'loaded').map((f) => f.family).join(', '));
+    pxl._fontGeneration++;
+    for (let i = 0; i < pxl.perf.stages.length; i++) pxl.perf.stages[i].invalidateLayers();
+  });
+});
+</script>
+<style>
+  body { margin: 16px; font: 16px -apple-system, system-ui, sans-serif; background: #f8fafc; color: #0f172a; }
+  button { width: 100%; padding: 16px; font: 600 18px -apple-system, system-ui, sans-serif; border: 0; border-radius: 12px;
+           background: #2563eb; color: #fff; margin: 8px 0; }
+  button:disabled { background: #94a3b8; }
+  table { border-collapse: collapse; width: 100%; background: #fff; font-size: 14px; }
+  td { border: 1px solid #e2e8f0; padding: 6px 8px; vertical-align: top; }
+  td:first-child { width: 45%; } .yes { color: #166534; font-weight: 700; } .no { color: #991b1b; font-weight: 700; }
+  pxl-stage { width: 100%; max-width: 500px; background: #fff; border: 1px solid #cbd5e1; margin: 10px 0; }
+</style>
+</head>
+<body>
+<h1 style="font-size: 20px">Late web fonts: does the fix work?</h1>
+<p>Press the button and wait about 30 seconds. The results are sent to the laptop.</p>
+<button id="go">Run the fix test</button>
+<table id="out"></table>
+<pxl-stage ratio="5 / 2"><pxl-layer>
+  <pxl-text id="textA" x="20" y="90" size="64" fill="#0f172a" font="Pacifico, serif" text="Kilopixel"></pxl-text>
+  <pxl-text id="textB" x="20" y="200" size="64" fill="#1d4ed8" font="Bungee, serif" text="Kilopixel"></pxl-text>
+</pxl-layer></pxl-stage>
+<script>
+const out = document.getElementById('out');
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const row = (label, value, good) => {
+  const tr = out.insertRow();
+  tr.insertCell().textContent = label;
+  const td = tr.insertCell();
+  td.textContent = value;
+  if (good !== undefined) td.className = good ? 'yes' : 'no';
+};
+function addFont(family) {
+  const chars = 'Kilopixel' + Math.random().toString(36).slice(2, 10);
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}&text=${encodeURIComponent(chars)}`;
+  document.head.append(link);
+  return new Promise((r) => { link.onload = r; link.onerror = r; setTimeout(r, 6000); });
+}
+const width = (id) => document.getElementById(id).getBoundingBox().right;
+const loadedFace = (family) => [...document.fonts].some((f) => f.family === family && f.status === 'loaded');
+
+document.getElementById('go').onclick = async (event) => {
+  event.target.disabled = true;
+  out.textContent = '';
+
+  // A: the stylesheet arrives, the canvas text uses the font: no explicit load() from the page, as on a real page
+  const beforeA = { generation: pxl._fontGeneration, width: width('textA') };
+  await addFont('Pacifico');
+  document.getElementById('late-a')?.remove();
+  const span = document.createElement('span'); span.style.fontFamily = 'Pacifico'; span.textContent = 'Kilopixel'; document.body.append(span);
+  for (let i = 0; i < 40 && !loadedFace('Pacifico'); i++) await sleep(250);
+  await sleep(1500);
+  const afterA = { generation: pxl._fontGeneration, width: width('textA') };
+  span.remove();
+  row('A. Pacifico arrived', loadedFace('Pacifico') ? 'yes' : 'no', loadedFace('Pacifico'));
+  row('A. "loading" events / ready resolved', `${fixA.loadingEvents} / ${fixA.readyResolved}`, fixA.readyResolved > 0);
+  row('A. Faces loaded when ready resolved', fixA.facesLoadedAtReady.join(' ; ') || '(none)', fixA.facesLoadedAtReady.some((f) => f.includes('Pacifico')));
+  row('A. Text measured again (width)', `${beforeA.width.toFixed(1)} → ${afterA.width.toFixed(1)}`, afterA.width !== beforeA.width);
+
+  // B: per-text check and load: the text asks for its own font when check() says it isn't ready
+  const beforeB = width('textB');
+  await addFont('Bungee');
+  const font = '64px Bungee';
+  const ready = document.fonts.check(font, 'Kilopixel');
+  let bLoaded = false;
+  if (!ready) {
+    try {
+      await Promise.race([document.fonts.load(font, 'Kilopixel'), sleep(8000)]);
+      bLoaded = loadedFace('Bungee');
+      pxl._fontGeneration++;
+      for (let i = 0; i < pxl.perf.stages.length; i++) pxl.perf.stages[i].invalidateLayers();
+    } catch (e) { /* reported below */ }
+  }
+  await sleep(1000);
+  const afterB = width('textB');
+  row('B. check() before loading', ready ? 'true (said ready)' : 'false (not ready)', !ready);
+  row('B. load() loaded it', bLoaded ? 'yes' : 'no', bLoaded);
+  row('B. Text measured again (width)', `${beforeB.toFixed(1)} → ${afterB.toFixed(1)}`, afterB !== beforeB);
+
+  const rows = [...out.rows].map((tr) => [...tr.cells].map((td) => td.textContent).join(' | '));
+  try {
+    await fetch(`http://${location.hostname}:8126/result?name=fonts2`, { method: 'POST', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ userAgent: navigator.userAgent, rows }) });
+    row('Sent to the laptop', 'yes', true);
+  } catch (e) {
+    row('Sent to the laptop', `no: ${e.message}`, false);
+  }
+  event.target.disabled = false;
+};
+</script>
+</body>
+</html>

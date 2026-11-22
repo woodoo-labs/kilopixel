@@ -1,0 +1,88 @@
+<!doctype html>
+<!--
+  A web font used only by a <pxl-text>: does the browser load it without being asked, and which signals come
+  (design/2026-11-22_late_web_fonts_plan.md §2). Open it through the dev server, on a phone or tablet over the Wi-Fi
+  (http://<laptop IP>:8124/design/prototypes/2026-11-22_late_web_fonts/fonts3.html), with the receiver running for the results:
+  node design/prototypes/2026-11-20_custom_shapes/safari/receiver.js (results in scratch/safari-device/).
+  It runs by itself and loads today's engine (/dist/pxl.min.js); the plan's measurements used commit f9aeccd.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canvas-Only Font Check</title>
+<script>
+// A web font used ONLY by a <pxl-text>, as on a real page: its stylesheet in <head> before the engine, nothing in the
+// page's own text uses it, and nobody calls document.fonts.load(). Does the browser load it, and which signals come?
+// A fresh random subset each time, so nothing comes from the cache.
+window.FAMILY = 'Righteous';
+window.signals = { loading: 0, loadingdone: 0, readyResolved: 0 };
+window.keptFonts = document.fonts;
+keptFonts.addEventListener('loading', () => {
+  signals.loading++;
+  keptFonts.ready.then(() => signals.readyResolved++);
+});
+keptFonts.addEventListener('loadingdone', () => signals.loadingdone++);
+const chars = 'Kilopixel' + Math.random().toString(36).slice(2, 10);
+document.write(`<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${FAMILY}&text=${encodeURIComponent(chars)}">`);
+</script>
+<script src="/dist/pxl.min.js"></script>
+<style>
+  body { margin: 16px; font: 16px -apple-system, system-ui, sans-serif; background: #f8fafc; color: #0f172a; }
+  table { border-collapse: collapse; width: 100%; background: #fff; font-size: 14px; }
+  td { border: 1px solid #e2e8f0; padding: 6px 8px; vertical-align: top; }
+  td:first-child { width: 45%; } .yes { color: #166534; font-weight: 700; } .no { color: #991b1b; font-weight: 700; }
+  pxl-stage { width: 100%; max-width: 500px; background: #fff; border: 1px solid #cbd5e1; margin: 10px 0; }
+</style>
+</head>
+<body>
+<h1 style="font-size: 20px">A font used only on the canvas</h1>
+<p>Nothing to press: it runs by itself for about 12 seconds and sends the results to the laptop. Keep the screen on.</p>
+<pxl-stage ratio="5 / 2"><pxl-layer>
+  <pxl-text id="only" x="20" y="150" size="90" fill="#0f172a" font="Righteous, serif" text="Kilopixel"></pxl-text>
+</pxl-layer></pxl-stage>
+<table id="out"></table>
+<script>
+const out = document.getElementById('out');
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const row = (label, value, good) => {
+  const tr = out.insertRow();
+  tr.insertCell().textContent = label;
+  const td = tr.insertCell();
+  td.textContent = value;
+  if (good !== undefined) td.className = good ? 'yes' : 'no';
+};
+const faceStatus = () => [...document.fonts].filter((f) => f.family === FAMILY).map((f) => f.status).join(', ') || '(no face)';
+
+(async () => {
+  const text = document.getElementById('only');
+  const start = { generation: pxl._fontGeneration, width: text.getBoundingBox().right, check: document.fonts.check(`90px ${FAMILY}`, 'Kilopixel') };
+  // The face's status over time, without anyone asking for the font
+  const timeline = [];
+  let last = '';
+  for (let i = 0; i <= 24; i++) {
+    const s = faceStatus();
+    if (s !== last) { timeline.push(`${(i * 0.5).toFixed(1)} s: ${s}`); last = s; }
+    await sleep(500);
+  }
+  const end = { generation: pxl._fontGeneration, width: text.getBoundingBox().right };
+  const loaded = faceStatus().includes('loaded');
+  row('Face status over time (nobody asked for it)', timeline.join(' → '));
+  row('The font loaded by itself', loaded ? 'yes' : 'no', loaded);
+  row('check() at start', String(start.check));
+  row('Signals (kept reference): loading / loadingdone / ready', `${signals.loading} / ${signals.loadingdone} / ${signals.readyResolved}`, signals.readyResolved > 0);
+  row('Engine today: generation', `${start.generation} → ${end.generation}`, end.generation > start.generation);
+  row('Engine today: text measured again (width)', `${start.width.toFixed(1)} → ${end.width.toFixed(1)}`, end.width !== start.width);
+
+  const rows = [...out.rows].map((tr) => [...tr.cells].map((td) => td.textContent).join(' | '));
+  try {
+    await fetch(`http://${location.hostname}:8126/result?name=fonts3`, { method: 'POST', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ userAgent: navigator.userAgent, rows }) });
+    row('Sent to the laptop', 'yes', true);
+  } catch (e) {
+    row('Sent to the laptop', `no: ${e.message}`, false);
+  }
+})();
+</script>
+</body>
+</html>

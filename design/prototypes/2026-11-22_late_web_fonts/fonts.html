@@ -1,0 +1,126 @@
+<!doctype html>
+<!--
+  What a browser reports when a web font arrives late: the engine, listeners with and without a kept reference to document.fonts, and document.fonts.ready (design/2026-11-22_late_web_fonts_plan.md §2). Open it through the dev server, on a phone or tablet over the
+  Wi-Fi (http://<laptop IP>:8124/design/prototypes/2026-11-22_late_web_fonts/…), with the receiver running for the results:
+  node design/prototypes/2026-11-20_custom_shapes/safari/receiver.js (results in scratch/safari-device/).
+  It loads today's engine (/dist/pxl.min.js); the measurements in the plan were made with the engine of commit f9aeccd.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Late Font Check</title>
+<script src="/dist/pxl.min.js"></script>
+<style>
+  body { margin: 16px; font: 16px -apple-system, system-ui, sans-serif; background: #f8fafc; color: #0f172a; }
+  button { width: 100%; padding: 16px; font: 600 18px -apple-system, system-ui, sans-serif; border: 0; border-radius: 12px;
+           background: #2563eb; color: #fff; margin: 8px 0; }
+  button:disabled { background: #94a3b8; }
+  table { border-collapse: collapse; width: 100%; background: #fff; font-size: 14px; }
+  td { border: 1px solid #e2e8f0; padding: 6px 8px; vertical-align: top; }
+  td:first-child { width: 45%; } .yes { color: #166534; font-weight: 700; } .no { color: #991b1b; font-weight: 700; }
+  pxl-stage { width: 100%; max-width: 500px; background: #fff; border: 1px solid #cbd5e1; margin: 10px 0; }
+  #ua { font-size: 12px; color: #64748b; }
+</style>
+</head>
+<body>
+<h1 style="font-size: 20px">Late web fonts: what does this browser report?</h1>
+<p>Press the button and wait about 30 seconds. Then send a screenshot of the table (or read it to me).</p>
+<button id="go">Run the font test</button>
+<table id="out"></table>
+<pxl-stage ratio="5 / 2"><pxl-layer>
+  <pxl-text id="late" x="40" y="160" size="80" fill="#0f172a" font="Pacifico, serif" text="Kilopixel"></pxl-text>
+</pxl-layer></pxl-stage>
+<p id="ua"></p>
+<script>
+const out = document.getElementById('out');
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const row = (label, value, good) => {
+  const tr = out.insertRow();
+  tr.insertCell().textContent = label;
+  const td = tr.insertCell();
+  td.textContent = value;
+  if (good !== undefined) td.className = good ? 'yes' : 'no';
+};
+document.getElementById('ua').textContent = navigator.userAgent;
+
+// A web font this browser hasn't loaded yet: Google Fonts with a random subset, so nothing comes from the cache
+function addFont(family) {
+  const chars = 'Kilopixel' + Math.random().toString(36).slice(2, 10);
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}&text=${encodeURIComponent(chars)}`;
+  document.head.append(link);
+  return new Promise((r) => { link.onload = r; link.onerror = r; setTimeout(r, 6000); });
+}
+
+// Plenty of short-lived objects, so the browser has a reason to collect unused ones (like the fonts wrapper)
+async function makeGarbage() {
+  for (let i = 0; i < 40; i++) { let a = new Array(500000).fill(i); a = null; await sleep(10); }
+}
+
+async function loadAndWait(family) {
+  const started = performance.now();
+  let loaded = false;
+  // The sample text matters: the subset font only covers these letters, and load() without it would load nothing
+  try { await Promise.race([document.fonts.load(`40px "${family}"`, 'Kilopixel'), sleep(8000)]); loaded = document.fonts.check(`40px "${family}"`, 'Kilopixel') && [...document.fonts].some((f) => f.family === family && f.status === 'loaded'); } catch (e) { /* reported as not loaded */ }
+  await sleep(1500); // events may come a little after the load promise
+  return { loaded, ms: Math.round(performance.now() - started) };
+}
+
+document.getElementById('go').onclick = async (event) => {
+  event.target.disabled = true;
+  out.textContent = '';
+
+  // 1. The engine itself: its loadingdone listener was added when pxl.min.js loaded, without a kept reference
+  await makeGarbage();
+  const text = document.getElementById('late');
+  const before = { generation: pxl._fontGeneration, width: text.getBoundingBox().right };
+  await addFont('Pacifico');
+  const r1 = await loadAndWait('Pacifico');
+  await sleep(500);
+  const after = { generation: pxl._fontGeneration, width: text.getBoundingBox().right };
+  row('1. Pacifico loaded (document.fonts.load)', `${r1.loaded ? 'yes' : 'no'} after ${r1.ms} ms`, r1.loaded);
+  row('1. Engine noticed it (font generation)', `${before.generation} → ${after.generation}`, after.generation > before.generation);
+  row('1. Text measured again (box width)', `${before.width.toFixed(1)} → ${after.width.toFixed(1)}`, after.width !== before.width);
+
+  // 2. A listener added like the engine's: no reference to document.fonts kept
+  let plain = { loading: 0, loadingdone: 0 };
+  document.fonts.addEventListener('loading', () => plain.loading++);
+  document.fonts.addEventListener('loadingdone', () => plain.loadingdone++);
+  await makeGarbage();
+  await addFont('Bungee');
+  const r2 = await loadAndWait('Bungee');
+  row('2. Bungee loaded', `${r2.loaded ? 'yes' : 'no'} after ${r2.ms} ms`, r2.loaded);
+  row('2. Events, listener WITHOUT kept reference', `loading ${plain.loading}, loadingdone ${plain.loadingdone}`, plain.loadingdone > 0);
+
+  // 3. A listener on a kept reference (last, so it can't keep the wrapper alive for the cases above)
+  window.keptFonts = document.fonts;
+  const kept = { loading: 0, loadingdone: 0 };
+  keptFonts.addEventListener('loading', () => kept.loading++);
+  keptFonts.addEventListener('loadingdone', () => kept.loadingdone++);
+  const plainBefore = plain.loadingdone;
+  await makeGarbage();
+  await addFont('Lobster Two');
+  const r3 = await loadAndWait('Lobster Two');
+  row('3. Lobster Two loaded', `${r3.loaded ? 'yes' : 'no'} after ${r3.ms} ms`, r3.loaded);
+  row('3. Events, listener WITH kept reference', `loading ${kept.loading}, loadingdone ${kept.loadingdone}`, kept.loadingdone > 0);
+  row('3. (listener of case 2 meanwhile)', `loadingdone +${plain.loadingdone - plainBefore}`);
+
+  // 4. The ready promise as another signal
+  const readyState = await Promise.race([document.fonts.ready.then(() => 'resolved'), sleep(3000).then(() => 'pending')]);
+  row('4. document.fonts.ready', `${readyState}, status "${document.fonts.status}"`, readyState === 'resolved');
+  // Sends the table to the receiver on the laptop (design/prototypes/2026-11-20_custom_shapes/safari/receiver.js, port 8126)
+  const rows = [...out.rows].map((tr) => [...tr.cells].map((td) => td.textContent).join(' | '));
+  try {
+    await fetch(`http://${location.hostname}:8126/result?name=fonts`, { method: 'POST', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ userAgent: navigator.userAgent, rows }) });
+    row('Sent to the laptop', 'yes', true);
+  } catch (e) {
+    row('Sent to the laptop', `no: ${e.message}`, false);
+  }
+  event.target.disabled = false;
+};
+</script>
+</body>
+</html>
