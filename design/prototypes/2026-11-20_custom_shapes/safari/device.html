@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safari Check</title>
+<style>
+  body { margin: 16px; font: 17px -apple-system, system-ui, sans-serif; background: #f8fafc; color: #0f172a; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 22px 0 8px; }
+  p { margin: 4px 0 10px; color: #475569; font-size: 15px; }
+  button { width: 100%; padding: 16px; font: 600 18px -apple-system, system-ui, sans-serif; border: 0; border-radius: 12px;
+           background: #2563eb; color: #fff; }
+  button:disabled { background: #94a3b8; }
+  #log { margin: 12px 0; padding: 0; list-style: none; font-size: 15px; }
+  #log li { padding: 8px 10px; margin: 4px 0; border-radius: 8px; background: #fff; border: 1px solid #e2e8f0; }
+  #log li.ok { border-color: #86efac; } #log li.bad { border-color: #fca5a5; }
+  a { display: block; margin: 8px 0; padding: 14px 16px; border-radius: 10px; background: #fff; border: 1px solid #cbd5e1;
+      color: #1d4ed8; text-decoration: none; font-weight: 600; }
+  a span { display: block; font-weight: 400; color: #64748b; font-size: 14px; margin-top: 2px; }
+  /* The pages run here at a desktop size, shown small */
+  #frameBox { width: 320px; height: 225px; overflow: hidden; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; }
+  #frame { width: 1280px; height: 900px; border: 0; transform: scale(0.25); transform-origin: 0 0; }
+</style>
+</head>
+<body>
+<h1>Kilopixel: Safari Check</h1>
+<p>Press the button and keep this page open (screen on) until it says "All sent". It runs the tests and the text
+measurement here and sends the results to the laptop (receiver.js next to this page). About two minutes. The text
+measurement may not finish on a phone (memory).</p>
+<button id="go">Run everything and send</button>
+<p style="margin-top: 14px">Second round: only the text measurement and a few feature checks, step by step.</p>
+<button id="go2">Text and features</button>
+<ul id="log"></ul>
+<div id="frameBox"><iframe id="frame"></iframe></div>
+
+<h2>Afterwards: Look at the Drawing</h2>
+<a href="/docs/custom-shapes.html">Custom Shapes<span>stars, gauge, controls</span></a>
+<a href="/docs/text.html">Text<span>wrapping, alignment</span></a>
+<a href="/examples/test23.html">test23<span>text stress test</span></a>
+
+<script>
+const RECEIVER = `http://${location.hostname}:8126/result`;
+const frame = document.getElementById('frame'), log = document.getElementById('log');
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const note = (text, cls = '') => { const li = document.createElement('li'); li.textContent = text; li.className = cls; log.append(li); return li; };
+
+// text/plain keeps it a simple request (no CORS preflight)
+async function send(name, data) {
+  await fetch(`${RECEIVER}?name=${encodeURIComponent(name)}`, { method: 'POST', headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ name, userAgent: navigator.userAgent, devicePixelRatio, screen: [screen.width, screen.height], data }) });
+}
+
+function load(url) {
+  return new Promise((resolve) => { frame.onload = () => resolve(frame.contentWindow); frame.src = url; });
+}
+
+async function testPage(url) {
+  const li = note(`${url}: running…`);
+  const w = await load(url);
+  const started = Date.now();
+  while (!w.kilopixelTests && Date.now() - started < 240000) await sleep(500);
+  const r = w.kilopixelTests;
+  if (!r) { li.textContent = `${url}: no result after 4 minutes`; li.className = 'bad'; await send(url, { error: 'timeout' }); return; }
+  const failed = r.results.filter((t) => t.status === 'failed' || t.status === 'fixed')
+    .map((t) => `${t.section ? t.section + ' / ' : ''}${t.name}: ${t.error || t.status}`);
+  li.textContent = `${url}: ${r.passed}/${r.total} passed${r.known ? `, ${r.known} known` : ''}`;
+  li.className = r.ok ? 'ok' : 'bad';
+  await send(url, { passed: r.passed, total: r.total, known: r.known, ok: r.ok, failed, seconds: (Date.now() - started) / 1000 });
+}
+
+async function textMeasurement() {
+  const li = note('text measurement (600 cases): running…');
+  const w = await load('/design/prototypes/2026-11-20_custom_shapes/logical_units/text_tests.html');
+  try {
+    const summary = await w.runTextTests();
+    const edge = (r) => { const W = r.canvas.width, H = r.canvas.height, d = r.data; let R = -1;
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 64 && x > R) R = x; return R; };
+    const drift = {};
+    for (const r of w.textRows) { const k = edge(r.b) - edge(r.a); drift[k] = (drift[k] || 0) + 1; }
+    const widest = w.textRows.map((r) => ({ font: r.font, weight: r.weight, size: r.size, u: r.u, dpr: r.dpr, stroke: r.stroke,
+      fontPxToday: +(r.size * r.u).toFixed(3), widthToday: r.widthToday, widthLogical: r.widthLogical,
+      difference: +(Math.abs(r.widthToday - r.widthLogical) / r.widthLogical * 100).toFixed(2) }))
+      .sort((p, q) => q.difference - p.difference).slice(0, 15);
+    li.textContent = `text: ${summary.identicalCases} of ${summary.cases} identical, ${summary.share}, widths up to ${summary.maxRelativeWidthDifference}`;
+    li.className = 'ok';
+    await send('text', { summary, rightEdgeDriftDevicePx: drift, widest });
+  } catch (e) {
+    li.textContent = `text: ${e.name}: ${e.message}`; li.className = 'bad';
+    await send('text', { error: `${e.name}: ${e.message}` });
+  }
+}
+
+// Quick checks of the canvas and font features the failed tests depend on
+async function features() {
+  const out = {};
+  const ctx = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+  ctx.canvas.width = 100; ctx.canvas.height = 100;
+  out.filterProperty = 'filter' in ctx;
+  ctx.filter = 'blur(6px)';
+  out.filterReadBack = String(ctx.filter);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(30, 30, 40, 40);
+  ctx.filter = 'none';
+  out.alphaOutsideBlurredRect = ctx.getImageData(25, 50, 1, 1).data[3]; // 5 px outside: > 0 when blurred
+  out.letterSpacing = 'letterSpacing' in ctx;
+  out.fontsIsEventTarget = typeof document.fonts.addEventListener === 'function';
+  let synthetic = 0;
+  const onSynthetic = () => synthetic++;
+  document.fonts.addEventListener('loadingdone', onSynthetic);
+  document.fonts.dispatchEvent(new Event('loadingdone'));
+  document.fonts.removeEventListener('loadingdone', onSynthetic);
+  out.syntheticLoadingdoneReached = synthetic;
+  // A real web font: does loadingdone fire when it arrives?
+  let real = 0;
+  document.fonts.addEventListener('loadingdone', () => real++);
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://fonts.googleapis.com/css2?family=Lobster&display=swap';
+  document.head.append(link);
+  await new Promise((r) => { link.onload = r; link.onerror = r; setTimeout(r, 5000); });
+  const span = document.createElement('span');
+  span.style.fontFamily = 'Lobster';
+  span.textContent = 'Probe';
+  document.body.append(span);
+  try { await Promise.race([document.fonts.load('20px Lobster'), sleep(8000)]); } catch (e) { out.fontLoadError = e.message; }
+  await sleep(1000);
+  out.realLoadingdoneEvents = real;
+  out.lobsterLoaded = document.fonts.check('20px Lobster');
+  span.remove();
+  return out;
+}
+
+document.getElementById('go2').onclick = async (event) => {
+  event.target.disabled = true;
+  log.textContent = '';
+  const step = async (name, fn) => {
+    const li = note(`${name}: running…`);
+    try {
+      await send(`${name}-start`, {});
+      const result = await fn();
+      li.textContent = `${name}: done`;
+      li.className = 'ok';
+      await send(name, result);
+    } catch (e) {
+      li.textContent = `${name}: ${e.name}: ${e.message}`;
+      li.className = 'bad';
+      try { await send(name, { error: `${e.name}: ${e.message}`, stack: String(e.stack).slice(0, 1000) }); } catch (e2) { note(`sending failed: ${e2.message}`, 'bad'); }
+    }
+  };
+  await step('features', features);
+  await step('text', async () => {
+    const w = await load('/design/prototypes/2026-11-20_custom_shapes/logical_units/text_tests.html');
+    const summary = await Promise.race([w.runTextTests(), sleep(240000).then(() => { throw new Error('no result after 4 minutes'); })]);
+    const widest = w.textRows.map((r) => ({ font: r.font, weight: r.weight, size: r.size, u: r.u, dpr: r.dpr, stroke: r.stroke,
+      fontPxToday: +(r.size * r.u).toFixed(3), widthToday: r.widthToday, widthLogical: r.widthLogical,
+      difference: +(Math.abs(r.widthToday - r.widthLogical) / r.widthLogical * 100).toFixed(2) }))
+      .sort((p, q) => q.difference - p.difference).slice(0, 15);
+    return { summary, widest };
+  });
+  frame.src = 'about:blank';
+  note('Second round sent.', 'ok');
+  event.target.disabled = false;
+};
+
+document.getElementById('go').onclick = async (event) => {
+  event.target.disabled = true;
+  log.textContent = '';
+  try {
+    await send('start', {});
+    note('connected to the laptop', 'ok');
+  } catch (e) {
+    note(`can't reach the laptop's receiver (${e.message}); is it running?`, 'bad');
+    event.target.disabled = false;
+    return;
+  }
+  for (const url of ['/tests/unit.html', '/tests/index.html', '/tests/render.html', '/tests/frameworks.html']) await testPage(url);
+  await textMeasurement();
+  frame.src = 'about:blank';
+  note('All sent. Thank you!', 'ok');
+  event.target.disabled = false;
+};
+</script>
+</body>
+</html>

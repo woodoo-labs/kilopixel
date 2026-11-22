@@ -3,7 +3,7 @@
 Planned work only, one short item each; the plan holds the details. Parked ideas are plans in `design/ideas/` (no item here), implemented plans are in `design/done/`, superseded and dropped ones in `design/archive/`. Workflow: `.claude/CLAUDE.md` → "Plans and TODO"; check: `node tools/check_plans.js`.
 
 - **Status words** (as in the plans): 💬 **Discussion** (ideas, nothing decided) · 🟡 **Proposed** (complete plan, waiting for a decision) · 🟢 **Decided** (agreed, not built yet).
-- **Numbers are stable:** other files refer to items as "TODO §46". A removed item leaves a gap; a new item gets the next free number (next: §48).
+- **Numbers are stable:** other files refer to items as "TODO §46". A removed item leaves a gap; a new item gets the next free number (next: §50).
 
 ## 1. SVG Paths and Icons (`<pxl-path>`)
 - **Status**: 🟡 **Proposed**
@@ -116,4 +116,14 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Status**: 🟡 **Proposed**
 - **Plan**: `design/2026-11-20_custom_shapes_plan.md` (replaces shape authoring; the structure cleanup in plan §6 is discussed separately)
 - Custom shapes are written like built-in shapes, in a second script after `pxl.min.js`: one template, `static defaults` and `draw(ctx)` in logical units (the engine scales the canvas by `u`, in two phases), the tag defined with `pxl.defineShape()` (D3 decided); booleans from defaults; a public contract.
-- **Next**: step 7, `<pxl-polygon>` as the first new shape in this form. Steps 2–6 built: custom shapes work and are documented (`docs/custom-shapes.html`). Check phase 1 in Safari. **Open**: D5, D7, D9.
+- **Next**: step 7, `<pxl-polygon>` as the first new shape in this form. Steps 2–6 built: custom shapes work and are documented (`docs/custom-shapes.html`); Safari checked on an iPhone (plan §5.3). **Open**: D5, D7, D9.
+
+## 48. Late Web Fonts in Safari
+- **Status**: 💬 **Discussion** (no plan yet)
+- Safari 27 sends no `loadingdone` when a web font arrives (measured on an iPhone, 2026-11-22), so text drawn before the font keeps the fallback font's widths, lines and box (`docs/` uses Inter). The two late-font tests in `tests/index.html` fail there too, although a synthetic event reached a listener in a probe.
+- **Next**: a small plan: another signal for arrived fonts (`document.fonts.ready` after each `loading`, the fonts' `loaded` promises), and a test that runs in Safari. Background: `design/2026-11-20_custom_shapes_plan.md` §5.3.
+
+## 49. Shape Filters in Safari
+- **Status**: 💬 **Discussion** (no plan yet)
+- Safari's canvas has no `ctx.filter` (iPhone, 2026-11-22), so `filter` on a shape draws nothing extra there; filters on layers are CSS and work.
+- **Next**: a note on `docs/filter.html`; then decide whether `blur()` and `dropShadow()` on shapes get a fallback in Safari (the canvas shadow, or the layer's filter). Background: `design/2026-11-20_custom_shapes_plan.md` §5.3.
