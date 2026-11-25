@@ -1,5 +1,5 @@
 // Serves a 1×1 PNG after a delay, so a page's load event comes late: fonts4.html (next to this file) checks whether
-// document.fonts.ready waits for it (design/2026-11-22_late_web_fonts_plan.md §2b).
+// document.fonts.ready waits for it (design/done/2026-11-22_late_web_fonts_plan.md §2b).
 //
 //   node design/prototypes/2026-11-22_late_web_fonts/slow_image_server.js   (port 8125)
 //

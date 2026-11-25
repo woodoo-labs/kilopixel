@@ -727,12 +727,19 @@
       if (squeezed >= full) throw new Error('the gradient box did not shrink');
     });
 
-    test('late font: loadingdone raises the generation, invalidates every layer and measures again', () => {
+    // A batch of web fonts, as the browser announces it: a loading event, then ready. The engine's callback on ready was
+    // added in the loading handler, before this await's, so it has run when the await returns.
+    async function fontsArrive() {
+      document.fonts.dispatchEvent(new Event('loading'));
+      await document.fonts.ready;
+    }
+
+    test('late font: a loading event, then ready, raises the generation, invalidates every layer and measures again', async () => {
       const lines = el('tbWrap')._lines.length + el('tbText')._lines.length + el('tbChain')._lines.length + el('tbGradient')._lines.length;
       drawTextStage();
       const before = pxl._fontGeneration;
       document.querySelectorAll('pxl-layer').forEach((layer) => { layer.isDirty = false; });
-      document.fonts.dispatchEvent(new Event('loadingdone'));
+      await fontsArrive();
       if (pxl._fontGeneration !== before + 1) throw new Error(`generation ${pxl._fontGeneration}, expected ${before + 1}`);
       const clean = [...document.querySelectorAll('pxl-layer')].filter((layer) => !layer.isDirty);
       if (clean.length) throw new Error(`${clean.length} layers are not dirty`);
@@ -740,7 +747,7 @@
       if (calls < lines) throw new Error(`${calls} measureText calls for ${lines} lines`);
     });
 
-    test('late font: wrapping and box follow when the arriving font has other metrics', () => {
+    test('late font: wrapping and box follow when the arriving font has other metrics', async () => {
       const text = el('tbWrap');
       drawTextStage();
       const linesBefore = text._lines.length, rightBefore = text.boundingBox.right;
@@ -758,7 +765,7 @@
       try {
         drawTextStage();
         linesNoEvent = text._lines.length;
-        document.fonts.dispatchEvent(new Event('loadingdone'));
+        await fontsArrive();
         drawTextStage();
         linesAfter = text._lines.length;
       } finally {
@@ -767,9 +774,37 @@
       if (linesNoEvent !== linesBefore) throw new Error('the text measured again without an event');
       if (linesAfter <= linesBefore) throw new Error(`still ${linesAfter} lines after the font change`);
 
-      document.fonts.dispatchEvent(new Event('loadingdone'));
+      await fontsArrive();
       drawTextStage();
       if (text._lines.length !== linesBefore || text.boundingBox.right !== rightBefore) throw new Error('did not return to the first layout');
+    });
+
+    // Safari drops the listeners of an unreferenced document.fonts and never sends loadingdone
+    // (design/done/2026-11-22_late_web_fonts_plan.md §2)
+    test('late font: the listener sits on a kept reference, and loadingdone alone measures nothing again', async () => {
+      const before = pxl._fontGeneration;
+      document.fonts.dispatchEvent(new Event('loadingdone'));
+      await document.fonts.ready;
+      if (pxl._fonts !== document.fonts || pxl._fontGeneration !== before) {
+        throw new Error(`kept reference ${pxl._fonts === document.fonts}, generation ${before} → ${pxl._fontGeneration}`);
+      }
+    });
+
+    test('late font: fonts that were loading before the engine ran are measured again once ready resolves', async () => {
+      // A fresh page: its loading events, if any, came before the engine's listener, so only the start promise counts
+      const frame = document.createElement('iframe');
+      frame.style.display = 'none';
+      frame.srcdoc = '<!DOCTYPE html><script src="/dist/pxl.min.js"><\/script>';
+      document.body.append(frame);
+      try {
+        await new Promise((resolve) => frame.addEventListener('load', resolve));
+        const w = frame.contentWindow;
+        await w.document.fonts.ready;
+        await null; // the engine's callback was added first; one more turn in case the frame's promise settled just now
+        if (w.pxl._fontGeneration !== 1) throw new Error(`generation ${w.pxl._fontGeneration}, expected 1`);
+      } finally {
+        frame.remove();
+      }
     });
 
     // ===================================================================

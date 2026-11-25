@@ -1,6 +1,6 @@
 # Late Web Fonts in Safari
 
-- **Status**: 🟡 **Proposed** (2026-11-25, fix A's edge cases checked in Chrome, §2b; Safari's ready and a slow image still to check; D1–D4 open)
+- **Status**: ✅ **Implemented** (2026-11-25, fix A built, §8; left: the iPhone run, TODO §48)
 - **Date**: 2026-11-22
 - **Related**: `design/done/2026-11-06_text_box_accuracy_plan.md` (built today's `loadingdone` listener and `pxl._fontGeneration`), `design/done/2026-11-20_custom_shapes_plan.md` §5.3 (the Safari check that found it)
 - **Target Implementation**: `js/elements/shapes/text.js` (the listener at the end of the file), `tests/index.html` (section "Text box"), `.agents/ENGINE.md` ("Late web fonts")
@@ -73,7 +73,7 @@ Kilopixel handles it without the author's help (`docs/DOCS_STANDARDS.md`: "Web f
 ```javascript
 // js/elements/shapes/text.js, replacing the loadingdone listener
 // Safari sends no loadingdone, and drops listeners on document.fonts unless something keeps the object
-// (design/2026-11-22_late_web_fonts_plan.md). "loading" on a kept reference, then ready, works in every browser.
+// (design/done/2026-11-22_late_web_fonts_plan.md). "loading" on a kept reference, then ready, works in every browser.
 pxl._fonts = document.fonts;
 
 pxl.fontsArrived = function() {
@@ -119,7 +119,9 @@ Fix B would need changes in Text's font cache, a promise per font string, and wo
 2. The device run on the iPhone; results here (a "Built" section).
 3. `.agents/ENGINE.md` "Late web fonts", TODO §48 removed, this plan to `design/done/`.
 
-## 7. Open Decisions
+## 7. Decisions
+
+Decided 2026-11-25 as recommended: fix A, no `loadingdone` listener, `ready.then()` at start, no fix B.
 
 | | Question | Recommended |
 |---|---|---|
@@ -128,9 +130,19 @@ Fix B would need changes in Text's font cache, a promise per font string, and wo
 | D3 | Call `ready.then()` once at start, for fonts that began loading before the engine | yes |
 | D4 | Add fix B as a second layer (each text requests its font with `load()`) | no: canvas-only fonts load by themselves in Safari, Chrome and Firefox (§2); add it only if a browser is found where they don't |
 
+## 8. Built (2026-11-25)
+
+- **`js/elements/shapes/text.js`:** the `loadingdone` listener is replaced as in §3: `pxl._fonts` keeps `document.fonts`; `pxl.fontsArrived()` raises `pxl._fontGeneration` and invalidates the layers of every stage; a `loading` handler calls it when the new batch's `ready` resolves; one `ready.then()` at start covers fonts that began loading before the engine (D3). No deviation from §3.
+- **Tests** (`tests/index.html`, "Text box"): the two late-font tests send a `loading` event and await `ready` (helper `fontsArrive()`). New: the listener sits on the kept reference, and `loadingdone` alone measures nothing again. New: in a fresh page (an iframe that loads only the engine), the start promise raises the generation to 1. 155/155 pass, the full run too.
+- **Size:** 70.32 KB minified, 21.18 KB gzipped (+0.12 KB, +0.02 KB); the rounded sizes in the docs stay.
+- **Reference:** `.agents/ENGINE.md` "Late web fonts". `.agents/KILOPIXEL.md` and `docs/DOCS_STANDARDS.md` describe what authors see, which doesn't change.
+- **Deviation from §6:** the plan is closed before the device run (step 2), because that run needs the iPhone; TODO §48 keeps it: `tests/index.html` (its late-font tests failed there before), `fonts.html` case 1, and `fonts4.html` (does Safari's `ready` wait for a slow image, §2b). The results go into this section.
+
 ## Log
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-25: D1–D4 decided as recommended; fix A built (§8); moved to `design/done/`, the iPhone run stays in TODO §48.
 
 - 2026-11-25: fix A's edge cases checked in Chrome (§2b, `fonts4.html`, `slow_image_server.js`): `ready` waits for the new batch but not for the load event, a failed face is never requested again; §4 lists the edge cases thought through; the device run (§5) adds `fonts4.html` for Safari's `ready`.
 - 2026-11-22: canvas-only fonts measured (`fonts3.html`): they load by themselves in Safari, Chrome and Firefox, and fix A sees them; §2a on how others handle it (Konva, Fabric, Excalidraw); D4 (fix B as a second layer) added, recommended no.

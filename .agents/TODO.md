@@ -108,10 +108,9 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Also decided there**: scoped names instead of global ids (D8); B8 of `design/done/2026-10-27_engine_cleanup_inventory_note.md` (the evaluation loops either option rewrites).
 
 ## 48. Late Web Fonts in Safari
-- **Status**: 🟡 **Proposed**
-- **Plan**: `design/2026-11-22_late_web_fonts_plan.md`
-- Safari drops listeners on an unreferenced `document.fonts` and never sends `loadingdone`, so text drawn before its web font keeps the fallback font's widths, lines and box (measured on an iPhone; `docs/` uses Inter). Fix A (a kept reference, `loading`, then `ready`) works there and in Chrome.
-- **Next**: decide D1–D4 (plan §7), then build fix A and run `tests/index.html` on the iPhone.
+- **Status**: 🟢 **Decided** (fix A built 2026-11-25; the device run is left)
+- **Plan**: `design/done/2026-11-22_late_web_fonts_plan.md` (§8)
+- **Left**: on the iPhone, `tests/index.html` (its late-font tests failed there before fix A), `fonts.html` case 1 and `fonts4.html` (does Safari's `ready` wait for a slow image); results into plan §8, then remove this item.
 
 ## 49. Shape Filters in Safari
 - **Status**: 💬 **Discussion** (no plan yet)

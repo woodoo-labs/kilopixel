@@ -237,8 +237,21 @@ pxl.Text = class Text extends pxl.Shape {
 };
 pxl.defineShape('pxl-text', pxl.Text);
 
+// =========================================================================
+// Late Web Fonts
+// =========================================================================
+// Text measured before its web font arrived keeps the fallback font's widths until it is measured again. Safari sends
+// no loadingdone, and drops the listeners of document.fonts unless a reference keeps the object alive; "loading" on a
+// kept reference, then ready, works in Safari, Chrome and Firefox (design/done/2026-11-22_late_web_fonts_plan.md).
+pxl._fonts = document.fonts;
+
 // All layers, because a custom shape can draw text too. Hidden or off-screen stages catch up when they next render.
-document.fonts.addEventListener('loadingdone', () => {
+pxl.fontsArrived = function() {
   pxl._fontGeneration++;
   for (let i = 0; i < pxl.perf.stages.length; i++) pxl.perf.stages[i].invalidateLayers();
-});
+};
+
+// ready is a new promise for each batch, so read inside the handler it waits for the fonts that start loading now
+pxl._fonts.addEventListener('loading', () => pxl._fonts.ready.then(pxl.fontsArrived));
+// Fonts that started loading before the engine ran (page text in <head>): their loading event came before the listener
+pxl._fonts.ready.then(pxl.fontsArrived);
