@@ -121,7 +121,7 @@ Speed is not the reason for either; B ends with less to understand and keep righ
 | §3 | `design/2026-10-01_tween_animation_plan.md` | its §7 "auto-sleep" is replaced by step 2 (a finished tween stops redrawing on its own); a spring is a reader with state, evaluated once per frame in the order |
 | — | `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked) | if it is picked up: its `applyClip()` evaluates children while drawing; they must be evaluated in the update phase (possible since step 1) |
 | §28 | `design/2026-10-30_space_attribute_plan.md` | its reactivity (§3.3) subscribes through broadcasts: rewrite after D1; its draw-order rule (§3.5) is gone since step 1 |
-| §5 | `design/2026-08-02_declarative_html_output_pxl_out_plan.md` | after D1: under A the propagation must be ordered first (no 210 before 220), under B it is a reader in part 3 |
+| (parked) | `design/ideas/2026-08-02_declarative_html_output_pxl_out_plan.md` | after D1: under A the propagation must be ordered first (no 210 before 220), under B it is a reader in part 3 |
 | (closed) | `design/done/2026-11-20_custom_shapes_plan.md` | `draw(ctx)` without `t` is the contract since its step 3; internal animated values (its §5.9, D9) moved here as D11 |
 
 Not affected: hit testing and event dispatch (both fit either option), isolation, `<pxl-plot>`, `<pxl-path>`.
@@ -144,6 +144,7 @@ Existing tests stay (two-phase frame, ref cycles, safe render, `toLocal`, layer 
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-25: `<pxl-out>` parked in `design/ideas/` (its TODO item removed): D1 and D8 need not serve an element outside every stage; §1 item 3 and the §6 row still name it.
 - 2026-11-22: D11 added: internal animated values of custom shapes, moved here from `design/done/2026-11-20_custom_shapes_plan.md` (D9 there), which is closed.
 - 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-21: `design/done/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; the contract "`draw()` only reads values" holds in the code (line 42 and the custom shapes row describe it as planned).

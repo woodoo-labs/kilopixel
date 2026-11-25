@@ -1,8 +1,8 @@
 # Declarative HTML Output Element (`<pxl-out>`)
 
-- **Status**: 🟡 **Proposed** (2026-11-17, §3.3 pointer timing)
+- **Status**: 🟡 **Proposed** (2026-11-25, parked: little need found, and it would constrain D1 and D8 of the evaluation model; see Log)
 - **Date**: 2026-08-02 (revised 2026-10-17: based on `PxlNode`, Rule A, write-on-change, stage pause / `alwaysrender`, accessibility)
-- **Related**: `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, `static defaults`), `design/archive/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`), `.agents/TODO.md` §5
+- **Related**: `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A, `static defaults`), `design/archive/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`)
 - **Target Implementation**: new `js/elements/out.js` (after `variable.js` in `build.js`)
 
 ---
@@ -176,6 +176,9 @@ The text is real DOM text, so screen readers can read it. `<pxl-out>` does **not
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-25: parked in `design/ideas/`, its TODO item removed. Need: of 24 docs pages and 56 examples only `examples/test47.html` and `examples/benchmark.html` show scene values as page text, each with a few lines polling `stage.values`; the canvas (`<pxl-text>`), handlers that write the DOM and DOM events cover the rest. Cost: outside every stage no frame evaluates it, so it would decide parts of D1 (option B has no broadcasts) and D8 (needs a page-level scope) of `design/2026-11-20_evaluation_model_plan.md`. If a need appears, consider a JavaScript bridge first (a `change` event on `<pxl-var>`, stage values as properties), after D1.
+- 2026-11-25: found when parking: §3.2 has no `update()`, so `Layer.update()` would throw for a `<pxl-out>` inside a layer (§4 calls that placement harmless); a `<pxl-out>` whose parent is a shadow root (a Lit template) throws in `PxlNode.connectedCallback()` (`parentElement` is `null`) until that is guarded.
+- Status line until 2026-11-25: 🟡 **Proposed** (2026-11-17, §3.3 pointer timing)
 - 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-21: `observedAttributes` is derived from `static defaults` and presence attributes come from boolean defaults (`design/done/2026-11-20_custom_shapes_plan.md` step 2): the hand-written `observedAttributes` in §3 is the old form.
 - 2026-11-20: the two-phase frame, reactive propagation and per-frame evaluation plans were merged into `design/2026-11-20_evaluation_model_plan.md` (TODO §46); its §6 says what changes for this plan.

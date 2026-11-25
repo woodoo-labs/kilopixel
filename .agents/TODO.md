@@ -17,12 +17,6 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - `tween(duration, ease, delay)` runs 0 → 1 once; Penner easings (`ease('back', p)`); springs that smooth reactive changes (`ref.btn.isHovered ? 1.2 : 1`) with state per attribute; `deg()` / `rad()` helpers (attributes use degrees, Math uses radians).
 - **Next**: bring the plan up to date with today's engine.
 
-## 5. Values as Page Text (`<pxl-out>`)
-- **Status**: 🟡 **Proposed**
-- **Plan**: `design/2026-08-02_declarative_html_output_pxl_out_plan.md`
-- An element outside the stage that shows a `ref` value as DOM text (`ref.main.fps`, coordinates) without JavaScript; writes only when the text changes.
-- **Note**: it needs readers to see no half-updated values: build it after D1 of the evaluation model (§46).
-
 ## 7. Math Plots (`<pxl-plot>`)
 - **Status**: 🟡 **Proposed**
 - **Plan**: `design/2026-09-07_plot_element_plan.md`
@@ -77,7 +71,7 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 
 ## 34. Quoted Text in Expressions: Docs
 - **Status**: 💬 **Discussion**
-- **Plan**: `design/done/2026-11-02_string_literals_in_expressions_plan.md` (§5, §7)
+- **Plan**: `design/done/2026-11-02_string_literals_in_expressions_plan.md` §5, §7
 - **Open**: a `docs/text.html` section on what `text` accepts (plain text, single quotes, backticks, `\n`); a quoting convention for snippets in `docs/DOCS_STANDARDS.md`.
 
 ## 38. Polyline `smoothstyle`

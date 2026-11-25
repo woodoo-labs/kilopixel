@@ -41,7 +41,7 @@ Tests in `tests/index.html` ("ref cycles: …"): a cycle that never settles stop
 
 Diamonds and half-updated values cost a little time but are not visible today. Build the full design when one of these comes:
 
-- **`<pxl-out>`** (TODO §5) or event handlers that react to every value change: they would show or act on the 210 before the 220.
+- **`<pxl-out>`** (`design/ideas/2026-08-02_declarative_html_output_pxl_out_plan.md`) or event handlers that react to every value change: they would show or act on the 210 before the 220.
 - **A real page** where a diamond's cost shows up in a measurement.
 
 ## 4. Design (for Later)
