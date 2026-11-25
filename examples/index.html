@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Declarative Canvas Framework</title>
+  <title>Kilopixel</title>
   <link rel="stylesheet" href="css/styles.css">
   <script src="../dist/pxl.min.js"></script>
 </head>
 <body>
 
-  <h1>Declarative Canvas Framework</h1>
+  <h1>Kilopixel</h1>
 
   <!-- Controls -->
   <button id="button01">Move Circle2 left</button>
@@ -28,8 +28,8 @@
   <pxl-stage id="main" ratio="10 / 3">
     
     <!-- Full Attributes Set -->
-    <pxl-layer x="0" y="0" dx="0" dy="0" rotate="0" hidden="false" fps="4">
-      <pxl-circle id="circle1" x="glide(10) * 400" y="50" dx="0" dy="0" rotate="0" hidden="false" fill="orange" stroke="t > 6000 ? 'blue' : 'yellow'" strokewidth="5" r="30"></pxl-circle>
+    <pxl-layer x="0" y="0" dx="0" dy="0" rotate="0" hidden="false">
+      <pxl-circle id="circle1" x="glide(10) * 400" y="50" dx="0" dy="0" rotate="0" hidden="false" fill="orange" stroke="t > 6 ? 'blue' : 'yellow'" strokewidth="5" r="30"></pxl-circle>
       <pxl-rect x="200" y="100" dx="50" dy="20" rotate="10" hidden="false" fill="tomato" stroke="rgb(50, 250/3, 50)" strokewidth="3" w="50" h="30"></pxl-rect>
       <pxl-circle x="600" y="50" dx="0" dy="0" rotate="0" hidden="false" fill="red" stroke="blue" strokewidth="0" r="1"></pxl-circle>
       <pxl-line x="600" y="50" dx="18" x1="0" y1="-4" x2="0" y2="4" stroke="blue"></pxl-line>
@@ -72,7 +72,7 @@
   <!-- Secondary Stage -->
   <div style="width: 500px; background-color: silver">
     <pxl-stage id="main2" ratio="1 / 1">
-      <pxl-layer fps="4" x="500" y="500" rotate="0" hidden="false">
+      <pxl-layer x="500" y="500" rotate="0" hidden="false">
         <pxl-circle x="0" y="0" dx="0" dy="0" fill="red" stroke="black" strokewidth="1" rotate="0" hidden="false" r="10"></pxl-circle>
 
         <pxl-rect x="0" y="0" dx="-100" dy="-100" fill="red" stroke="black" strokewidth="1" rotate="0" hidden="false" w="50" h="30"></pxl-rect>
@@ -84,5 +84,21 @@
       </pxl-layer>
     </pxl-stage>
   </div>
+
+  <script>
+    // Every attribute is also a property: numbers are stored as they are, without compiling
+    const circle2 = document.getElementById('circle2');
+    const layer2 = document.getElementById('layer2');
+    const on = (id, action) => document.getElementById(id).addEventListener('click', action);
+
+    on('button01', () => { circle2.x -= 50; });
+    on('button02', () => { circle2.x += 50; });
+    on('button03', () => { layer2.hidden = true; });
+    on('button04', () => { layer2.hidden = false; });
+    on('button05', () => { circle2.r += 5; });
+    on('button06', () => { circle2.r = Math.max(0, circle2.r - 5); });
+    on('button07', () => { layer2.rotate += 10; });
+    on('button08', () => { layer2.rotate -= 10; });
+  </script>
 </body>
 </html>
