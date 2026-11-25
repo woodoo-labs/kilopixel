@@ -1,10 +1,10 @@
 # Late Web Fonts in Safari
 
-- **Status**: 🟡 **Proposed** (2026-11-22, fix A measured on an iPhone and in Chrome, also for canvas-only fonts; D1–D4 open)
+- **Status**: 🟡 **Proposed** (2026-11-25, fix A's edge cases checked in Chrome, §2b; Safari's ready and a slow image still to check; D1–D4 open)
 - **Date**: 2026-11-22
 - **Related**: `design/done/2026-11-06_text_box_accuracy_plan.md` (built today's `loadingdone` listener and `pxl._fontGeneration`), `design/done/2026-11-20_custom_shapes_plan.md` §5.3 (the Safari check that found it)
 - **Target Implementation**: `js/elements/shapes/text.js` (the listener at the end of the file), `tests/index.html` (section "Text box"), `.agents/ENGINE.md` ("Late web fonts")
-- **Prototypes** (`design/prototypes/2026-11-22_late_web_fonts/`): `fonts.html` (what a browser reports when a web font arrives), `fonts2.html` (fixes A and B), `fonts3.html` (a font used only by the canvas); all send their table to `design/prototypes/2026-11-20_custom_shapes/safari/receiver.js`
+- **Prototypes** (`design/prototypes/2026-11-22_late_web_fonts/`): `fonts.html` (what a browser reports when a web font arrives), `fonts2.html` (fixes A and B), `fonts3.html` (a font used only by the canvas), `fonts4.html` (fix A with a slow image and a font that fails, with `slow_image_server.js`); all send their table to `design/prototypes/2026-11-20_custom_shapes/safari/receiver.js`
 
 ---
 
@@ -54,6 +54,20 @@ So canvas text starts the download in all three browsers, and fix A sees it.
 
 Kilopixel handles it without the author's help (`docs/DOCS_STANDARDS.md`: "Web fonts need no preloader"), so it needs a signal for fonts it didn't ask for: fix A. Fix B is the explicit variant the others use; it doesn't depend on any browser starting a download by itself (D4).
 
+## 2b. Fix A's Edge Cases (2026-11-25, Chrome)
+
+`fonts4.html` (fix A counted, not wired into the engine) in headless Chrome 158, with `slow_image_server.js` holding the load event for 4 s; two scratch pages before it gave the same answers (not kept):
+
+| Question | Chrome |
+|---|---|
+| Read in the `loading` handler, is `ready` the new pending promise or the old resolved one? | the new one: it resolved when the font arrived (154 ms), not at once |
+| Does `ready` wait for the load event (a slow image)? | no: resolved at 154 ms, `readyState` `interactive`; load at 4118 ms |
+| Does the `ready.then()` at start fire at once? | no: after parsing (`interactive`), also on a page whose fonts were already loaded when the script ran |
+| A face that fails (404), its text redrawn 10 more times | status `error`, 0 new `loading` events: a failed face isn't requested again, so no loop |
+| Callbacks per batch | 2 (the start promise and the `loading` handler wait for the same `ready`) |
+
+**Open for the device run (§5):** whether Safari's `ready` also resolves before a slow image. If it waits for the load event, text is measured again only when the image has arrived: late, not wrong.
+
 ## 3. Proposal: Fix A
 
 ```javascript
@@ -83,13 +97,21 @@ Fix B would need changes in Text's font cache, a promise per font string, and wo
 - **A font that fails to load:** `ready` resolves anyway; the text is measured again with the fallback, which changes nothing visible.
 - **A page with no web fonts:** `ready` is already resolved at start: one invalidation in the first frames, before anything is cached that matters.
 - **Shadow DOM and iframes:** `document.fonts` is per document, as today; a stage inside an iframe loads its own engine.
+- **Two callbacks per batch** (§2b): the start promise and a `loading` handler, or two `loading` events of one batch, wait for the same `ready`. Each raises the generation and redraws every layer once: harmless.
+- **Subset fonts** (`unicode-range`, as Google Fonts serves them): new characters (another language, `reveal`) load another subset, which brings one more batch and measures all text again. Finite, so no loop; a face that fails isn't requested again (§2b).
+- **One redraw after load on every page**, from the start promise, also without web fonts: one frame of full drawing, and the page is idle again afterwards. The tests that count frame requests count synchronously, so a promise callback can't land inside them.
+- **Several stages:** the callback runs as a microtask, possibly between two stages' frames; one measures again in this frame, the other in the next.
+- **Hidden or off-screen stages:** invalidated, drawn when shown; text compares the generation in `draw()`.
+- **Hit testing** uses the old box until the next frame has drawn the text again: one frame.
+- **Custom shapes that cache text metrics themselves** don't see `pxl._fontGeneration` (internal); the redraw reaches them, their cache doesn't. The docs' Gauge only calls `fillText()`, so nothing is affected today; a line in `docs/custom-shapes.html` if a shape ever measures text.
+- **Browsers without `document.fonts`:** `addEventListener` would throw at load, as today's code does; every browser with custom elements has it, so no guard.
 
 ## 5. Tests
 
 - `tests/index.html`, "late font: … raises the generation …": dispatch `loading` instead of `loadingdone` and await `document.fonts.ready` before checking (the generation is raised in a promise callback now).
 - "late font: wrapping and box follow …": the same change.
 - New: the listener sits on a kept reference (`pxl._fonts === document.fonts`), and `loadingdone` alone no longer raises the generation (the engine doesn't depend on it).
-- **On the device:** `tests/index.html` on the iPhone (`design/prototypes/2026-11-20_custom_shapes/safari/device.html` or opened directly): the two late-font tests failed there and must pass. Then `fonts.html` case 1 must show the engine noticing the font.
+- **On the device:** `tests/index.html` on the iPhone (`design/prototypes/2026-11-20_custom_shapes/safari/device.html` or opened directly): the two late-font tests failed there and must pass. Then `fonts.html` case 1 must show the engine noticing the font, and `fonts4.html` (with `slow_image_server.js` running) whether Safari's `ready` waits for a slow image (§2b).
 
 ## 6. Steps
 
@@ -110,5 +132,6 @@ Fix B would need changes in Text's font cache, a promise per font string, and wo
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-25: fix A's edge cases checked in Chrome (§2b, `fonts4.html`, `slow_image_server.js`): `ready` waits for the new batch but not for the load event, a failed face is never requested again; §4 lists the edge cases thought through; the device run (§5) adds `fonts4.html` for Safari's `ready`.
 - 2026-11-22: canvas-only fonts measured (`fonts3.html`): they load by themselves in Safari, Chrome and Firefox, and fix A sees them; §2a on how others handle it (Konva, Fabric, Excalidraw); D4 (fix B as a second layer) added, recommended no.
 - 2026-11-22: written from the measurements on an iPhone and in Chrome (§2): Safari drops listeners on an unreferenced `document.fonts` and never sends `loadingdone`; fix A proposed.

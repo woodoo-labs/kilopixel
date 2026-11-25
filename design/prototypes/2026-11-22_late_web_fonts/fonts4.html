@@ -1,0 +1,124 @@
+<!doctype html>
+<!--
+  Edge cases of fix A (design/2026-11-22_late_web_fonts_plan.md §2b): does document.fonts.ready wait for a slow image
+  (the load event), and is a font that failed to load requested again when its text is redrawn?
+  Needs the slow image server: node design/prototypes/2026-11-22_late_web_fonts/slow_image_server.js (port 8125).
+  Open it through the dev server, on a phone or tablet over the Wi-Fi
+  (http://<laptop IP>:8124/design/prototypes/2026-11-22_late_web_fonts/fonts4.html), with the receiver running for the results:
+  node design/prototypes/2026-11-20_custom_shapes/safari/receiver.js (results in scratch/safari-device/).
+  On the laptop the rows are also logged to the console (node tools/run_tests.js --page <this file> --verbose).
+  It runs by itself and loads today's engine (/dist/pxl.min.js); the plan's Chrome measurements used commit f483503.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fix A Edge Cases</title>
+<script>
+// Fix A as the plan proposes it, counted instead of wired into the engine: a kept reference to document.fonts, and on
+// every loading event, ready. A fresh random subset of a Google font each time, so nothing comes from the cache.
+window.FAMILY = 'Lobster';
+window.t0 = performance.now();
+window.ms = () => Math.round(performance.now() - t0);
+window.events = [];
+window.note = (what) => events.push(`${ms()} ms ${what}`);
+window.signals = { loading: 0, arrived: 0 };
+window.keptFonts = document.fonts;
+const fontsArrived = (from) => () => {
+  signals.arrived++;
+  note(`ready resolved (${from}, readyState ${document.readyState})`);
+};
+keptFonts.addEventListener('loading', () => {
+  signals.loading++;
+  note('loading');
+  keptFonts.ready.then(fontsArrived('after loading'));
+});
+keptFonts.ready.then(fontsArrived('at start'));
+document.addEventListener('DOMContentLoaded', () => note('DOMContentLoaded'));
+window.addEventListener('load', () => note('load'));
+const chars = 'Kilopixel' + Math.random().toString(36).slice(2, 10);
+document.write(`<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${FAMILY}&text=${encodeURIComponent(chars)}">`);
+</script>
+<style>
+  /* A face that can't load (404), used only by the second text */
+  @font-face { font-family: 'Missing'; src: url('/design/prototypes/2026-11-22_late_web_fonts/missing.woff2') format('woff2'); }
+</style>
+<script src="/dist/pxl.min.js"></script>
+<style>
+  body { margin: 16px; font: 16px -apple-system, system-ui, sans-serif; background: #f8fafc; color: #0f172a; }
+  table { border-collapse: collapse; width: 100%; background: #fff; font-size: 14px; }
+  td { border: 1px solid #e2e8f0; padding: 6px 8px; vertical-align: top; }
+  td:first-child { width: 45%; } .yes { color: #166534; font-weight: 700; } .no { color: #991b1b; font-weight: 700; }
+  pxl-stage { width: 100%; max-width: 500px; background: #fff; border: 1px solid #cbd5e1; margin: 10px 0; }
+</style>
+</head>
+<body>
+<h1 style="font-size: 20px">Fix A: slow image, failed font</h1>
+<p>Nothing to press: it runs by itself for about 6 seconds and sends the results to the laptop. Keep the screen on.</p>
+<pxl-stage ratio="5 / 2"><pxl-layer>
+  <pxl-text x="20" y="90" size="70" fill="#0f172a" font="Lobster, serif" text="Kilopixel"></pxl-text>
+  <pxl-text x="20" y="170" size="40" fill="#64748b" font="Missing, sans-serif" text="Missing font"></pxl-text>
+</pxl-layer></pxl-stage>
+<!-- Holds the load event for 4 s (slow_image_server.js) -->
+<img id="slow" src="" alt="" width="1" height="1">
+<table id="out"></table>
+<script>
+document.getElementById('slow').src = `http://${location.hostname}:8125/slow.png?ms=4000&r=${Math.random()}`;
+document.getElementById('slow').addEventListener('error', () => note('slow image failed (is slow_image_server.js running?)'));
+
+const out = document.getElementById('out');
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const row = (label, value, good) => {
+  const tr = out.insertRow();
+  tr.insertCell().textContent = label;
+  const td = tr.insertCell();
+  td.textContent = value;
+  if (good !== undefined) td.className = good ? 'yes' : 'no';
+};
+const faceStatus = (family) => [...document.fonts].filter((f) => f.family.replace(/["']/g, '') === family).map((f) => f.status).join(', ') || '(no face)';
+
+(async () => {
+  // The web font's arrival, while the image still holds the load event
+  let fontLoadedAt = -1;
+  for (let i = 0; i < 300 && document.readyState !== 'complete'; i++) {
+    if (fontLoadedAt < 0 && faceStatus(FAMILY).includes('loaded')) fontLoadedAt = ms();
+    await sleep(20);
+  }
+  if (fontLoadedAt < 0 && faceStatus(FAMILY).includes('loaded')) fontLoadedAt = ms();
+  const loadAt = ms();
+
+  // Redraw the text with the failed face ten times: a new request would bring a new loading event
+  const loadingBefore = signals.loading;
+  const stage = document.querySelector('pxl-stage');
+  // Short enough for the headless sweep, which closes a tab 1.5 s after its load event
+  for (let i = 0; i < 10; i++) {
+    stage.invalidateLayers();
+    await sleep(50);
+  }
+  await sleep(300);
+
+  const readyTimes = events.filter((e) => e.includes('ready resolved'));
+  const firstReadyAfterFont = readyTimes.map((e) => parseInt(e, 10)).find((t) => t >= fontLoadedAt);
+  row('Events', events.join(' → '));
+  row('Web font loaded at', fontLoadedAt < 0 ? 'never' : `${fontLoadedAt} ms`, fontLoadedAt >= 0);
+  row('Load event (slow image) at', `${loadAt} ms`, loadAt > fontLoadedAt + 1000);
+  row('ready resolved before the load event (does not wait for the image)',
+    firstReadyAfterFont === undefined ? 'no ready after the font' : `${firstReadyAfterFont} ms: ${firstReadyAfterFont < loadAt ? 'yes' : 'no'}`,
+    firstReadyAfterFont !== undefined && firstReadyAfterFont < loadAt);
+  row('Fix A callbacks (fontsArrived) in total', String(signals.arrived));
+  row('Failed face: status', faceStatus('Missing'), faceStatus('Missing') === 'error');
+  row('Failed face: new loading events during 10 redraws', String(signals.loading - loadingBefore), signals.loading === loadingBefore);
+
+  const rows = [...out.rows].map((tr) => [...tr.cells].map((td) => td.textContent).join(' | '));
+  for (const r of rows) console.log(r);
+  try {
+    await fetch(`http://${location.hostname}:8126/result?name=fonts4`, { method: 'POST', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ userAgent: navigator.userAgent, rows }) });
+    row('Sent to the laptop', 'yes', true);
+  } catch (e) {
+    row('Sent to the laptop', `no: ${e.message}`, false);
+  }
+})();
+</script>
+</body>
+</html>
