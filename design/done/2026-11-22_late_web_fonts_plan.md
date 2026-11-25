@@ -1,6 +1,6 @@
 # Late Web Fonts in Safari
 
-- **Status**: ✅ **Implemented** (2026-11-25, fix A built, §8; left: the iPhone run, TODO §48)
+- **Status**: ✅ **Implemented** (2026-11-25, fix A built and run on an iPhone, §8)
 - **Date**: 2026-11-22
 - **Related**: `design/done/2026-11-06_text_box_accuracy_plan.md` (built today's `loadingdone` listener and `pxl._fontGeneration`), `design/done/2026-11-20_custom_shapes_plan.md` §5.3 (the Safari check that found it)
 - **Target Implementation**: `js/elements/shapes/text.js` (the listener at the end of the file), `tests/index.html` (section "Text box"), `.agents/ENGINE.md` ("Late web fonts")
@@ -68,6 +68,8 @@ Kilopixel handles it without the author's help (`docs/DOCS_STANDARDS.md`: "Web f
 
 **Open for the device run (§5):** whether Safari's `ready` also resolves before a slow image. If it waits for the load event, text is measured again only when the image has arrived: late, not wrong.
 
+*2026-11-25, on the iPhone (§8):* Safari's `ready` waits for the load event; Chrome's doesn't.
+
 ## 3. Proposal: Fix A
 
 ```javascript
@@ -117,7 +119,7 @@ Fix B would need changes in Text's font cache, a promise per font string, and wo
 
 1. Fix A in `text.js` (§3), the tests (§5), `node build.js`, `node tools/run_tests.js`.
 2. The device run on the iPhone; results here (a "Built" section).
-3. `.agents/ENGINE.md` "Late web fonts", TODO §48 removed, this plan to `design/done/`.
+3. `.agents/ENGINE.md` "Late web fonts", its TODO item removed, this plan to `design/done/`.
 
 ## 7. Decisions
 
@@ -136,13 +138,20 @@ Decided 2026-11-25 as recommended: fix A, no `loadingdone` listener, `ready.then
 - **Tests** (`tests/index.html`, "Text box"): the two late-font tests send a `loading` event and await `ready` (helper `fontsArrive()`). New: the listener sits on the kept reference, and `loadingdone` alone measures nothing again. New: in a fresh page (an iframe that loads only the engine), the start promise raises the generation to 1. 155/155 pass, the full run too.
 - **Size:** 70.32 KB minified, 21.18 KB gzipped (+0.12 KB, +0.02 KB); the rounded sizes in the docs stay.
 - **Reference:** `.agents/ENGINE.md` "Late web fonts". `.agents/KILOPIXEL.md` and `docs/DOCS_STANDARDS.md` describe what authors see, which doesn't change.
-- **Deviation from §6:** the plan is closed before the device run (step 2), because that run needs the iPhone; TODO §48 keeps it: `tests/index.html` (its late-font tests failed there before), `fonts.html` case 1, and `fonts4.html` (does Safari's `ready` wait for a slow image, §2b). The results go into this section.
+- **Deviation from §6:** the plan is closed before the device run (step 2), because that run needs the iPhone; its TODO item keeps it: `tests/index.html` (its late-font tests failed there before), `fonts.html` case 1, and `fonts4.html` (does Safari's `ready` wait for a slow image, §2b). The results go into this section.
+- **Device run** (2026-11-25, the same iPhone: Safari 27.0.1, iOS 18.7, DPR 3, through `device.html` and the receiver):
+  - **Test pages:** `unit.html` 88/88, `index.html` 154/155, `render.html` 56/56, `frameworks.html` 58/58. The late-font tests pass (they failed before fix A). The one failure is the known one: edge pixels of the nested-transform isolation test, 18 / 255 where 2 is allowed (anti-aliasing, as on 2026-11-22, `design/done/2026-11-20_custom_shapes_plan.md`).
+  - **`fonts.html`:** case 1, the engine: generation 1 → 2 (1 from the start promise, D3), text box width 302.2 → 328.5 (before fix A: 0 → 0 and 302.2 → 302.2). A listener without a kept reference now gets `loading` too, because the engine keeps the object alive. `loadingdone` still never comes (D2).
+  - **`fonts4.html`:** the font loaded at 43 ms, but `ready` resolved only together with the load event at 4072 ms, when the slow image had arrived (Chrome: right after the font). So in Safari, text drawn before its web font keeps the fallback font's widths, and a static layer the fallback glyphs, until the whole page has loaded: late, not wrong (§2b). The failed face behaved as in Chrome: status `error`, no new request in 10 redraws. The page's verdict row compared with a polled time and said "yes"; it now compares with the load event itself.
+- **Not built (decided 2026-11-25):** waiting for each face's own `FontFace.loaded` in the `loading` handler, which would measure again as soon as a font arrives, without waiting for the page (about 3 lines, one more callback per face, the `ready` path kept). Its TODO item was closed without it; pick it up if a Safari page with slow images shows the fallback font too long.
 
 ## Log
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
-- 2026-11-25: D1–D4 decided as recommended; fix A built (§8); moved to `design/done/`, the iPhone run stays in TODO §48.
+- 2026-11-25: the iPhone run (§8): fix A works in Safari; its `ready` waits for the load event, so a slow image delays the new measurement; the per-face alternative is recorded as not built; its TODO item removed; `fonts4.html` compares with the load event itself.
+
+- 2026-11-25: D1–D4 decided as recommended; fix A built (§8); moved to `design/done/`, the iPhone run stays in its TODO item.
 
 - 2026-11-25: fix A's edge cases checked in Chrome (§2b, `fonts4.html`, `slow_image_server.js`): `ready` waits for the new batch but not for the load event, a failed face is never requested again; §4 lists the edge cases thought through; the device run (§5) adds `fonts4.html` for Safari's `ready`.
 - 2026-11-22: canvas-only fonts measured (`fonts3.html`): they load by themselves in Safari, Chrome and Firefox, and fix A sees them; §2a on how others handle it (Konva, Fabric, Excalidraw); D4 (fix B as a second layer) added, recommended no.

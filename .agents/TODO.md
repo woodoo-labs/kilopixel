@@ -107,11 +107,6 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Next**: step 2, change-based dirty flags with the keep-alive in the stage: a layer redraws only when a value changed (a `floor(t)` clock once per second). Then a prototype of option B (no broadcasts) and decision D1 between it and option A (ordered broadcasts).
 - **Also decided there**: scoped names instead of global ids (D8); B8 of `design/done/2026-10-27_engine_cleanup_inventory_note.md` (the evaluation loops either option rewrites).
 
-## 48. Late Web Fonts in Safari
-- **Status**: 🟢 **Decided** (fix A built 2026-11-25; the device run is left)
-- **Plan**: `design/done/2026-11-22_late_web_fonts_plan.md` (§8)
-- **Left**: on the iPhone, `tests/index.html` (its late-font tests failed there before fix A), `fonts.html` case 1 and `fonts4.html` (does Safari's `ready` wait for a slow image); results into plan §8, then remove this item.
-
 ## 49. Shape Filters in Safari
 - **Status**: 💬 **Discussion** (no plan yet)
 - Safari has `ctx.filter` only behind its "Canvas Filters" feature flag, off by default, so `filter` on a shape draws nothing extra for its visitors; filters on layers are CSS and work. With the flag on, `tests/render.html` passes 56/56 on an iPhone (2026-11-22). `docs/filter.html` says so and points to layer filters; the engine warns once per page when a shape's filter meets a canvas without filters.

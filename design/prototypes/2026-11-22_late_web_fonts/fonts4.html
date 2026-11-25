@@ -35,7 +35,8 @@ keptFonts.addEventListener('loading', () => {
 });
 keptFonts.ready.then(fontsArrived('at start'));
 document.addEventListener('DOMContentLoaded', () => note('DOMContentLoaded'));
-window.addEventListener('load', () => note('load'));
+window.loadEventAt = -1;
+window.addEventListener('load', () => { loadEventAt = ms(); note('load'); });
 const chars = 'Kilopixel' + Math.random().toString(36).slice(2, 10);
 document.write(`<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${FAMILY}&text=${encodeURIComponent(chars)}">`);
 </script>
@@ -85,7 +86,6 @@ const faceStatus = (family) => [...document.fonts].filter((f) => f.family.replac
     await sleep(20);
   }
   if (fontLoadedAt < 0 && faceStatus(FAMILY).includes('loaded')) fontLoadedAt = ms();
-  const loadAt = ms();
 
   // Redraw the text with the failed face ten times: a new request would bring a new loading event
   const loadingBefore = signals.loading;
@@ -101,10 +101,11 @@ const faceStatus = (family) => [...document.fonts].filter((f) => f.family.replac
   const firstReadyAfterFont = readyTimes.map((e) => parseInt(e, 10)).find((t) => t >= fontLoadedAt);
   row('Events', events.join(' → '));
   row('Web font loaded at', fontLoadedAt < 0 ? 'never' : `${fontLoadedAt} ms`, fontLoadedAt >= 0);
-  row('Load event (slow image) at', `${loadAt} ms`, loadAt > fontLoadedAt + 1000);
+  // The time of the load event itself (the poll loop above notices it up to 20 ms later); no colour: either answer is
+  // a finding (Chrome 158: yes; Safari 27: no, ready resolves together with the load event)
+  row('Load event (slow image) at', `${loadEventAt} ms`, loadEventAt > fontLoadedAt + 1000);
   row('ready resolved before the load event (does not wait for the image)',
-    firstReadyAfterFont === undefined ? 'no ready after the font' : `${firstReadyAfterFont} ms: ${firstReadyAfterFont < loadAt ? 'yes' : 'no'}`,
-    firstReadyAfterFont !== undefined && firstReadyAfterFont < loadAt);
+    firstReadyAfterFont === undefined ? 'no ready after the font' : `${firstReadyAfterFont} ms: ${firstReadyAfterFont < loadEventAt ? 'yes' : 'no'}`);
   row('Fix A callbacks (fontsArrived) in total', String(signals.arrived));
   row('Failed face: status', faceStatus('Missing'), faceStatus('Missing') === 'error');
   row('Failed face: new loading events during 10 redraws', String(signals.loading - loadingBefore), signals.loading === loadingBefore);
