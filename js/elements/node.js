@@ -134,7 +134,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     }
 
     this.parentLayer = this.closest('pxl-layer');
-    this.parentContainer = this.parentElement.closest('pxl-group, pxl-layer');
+    // No parent element directly in a shadow root (a Lit or web component template): then there is no container
+    const parent = this.parentElement;
+    this.parentContainer = parent === null ? null : parent.closest('pxl-group, pxl-layer');
     this._lastParentMatrixVersion = -1; // a new parent's version may equal the old one's
     this.parentContainer?.registerChild(this);
     pxl.restoreVariableSubscriptions(this);

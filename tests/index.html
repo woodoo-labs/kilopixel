@@ -2599,6 +2599,29 @@
         if (first !== 61 || pxl.nodes.lcReader.x !== 81) throw new Error(`reader ${first}, after re-insert ${pxl.nodes.lcReader.x}`);
       }));
 
+    // A Lit or web component template renders its elements straight into the shadow root, where parentElement is null
+    test('lifecycle: a variable, shape and group directly in a shadow root connect without an error and are registered', () => {
+      const host = document.createElement('div');
+      document.querySelector('.docs-inner').append(host);
+      const errors = [];
+      const onError = (e) => errors.push(e.message);
+      window.addEventListener('error', onError);
+      try {
+        host.attachShadow({ mode: 'open' }).innerHTML = `<pxl-var id="lcShadowVar" value="42"></pxl-var>
+          <pxl-circle id="lcShadowCircle" r="5"></pxl-circle><pxl-group id="lcShadowGroup"></pxl-group>
+          <pxl-stage><pxl-layer><pxl-circle id="lcShadowReader" x="ref.lcShadowVar.value + 1" r="5"></pxl-circle></pxl-layer></pxl-stage>`;
+        const circle = pxl.nodes.lcShadowCircle?.$node;
+        if (errors.length || !pxl.nodes.lcShadowVar || !pxl.nodes.lcShadowGroup || !circle || circle.parentContainer !== null ||
+            pxl.nodes.lcShadowReader.x !== 43) {
+          throw new Error(`errors [${errors}], var ${!!pxl.nodes.lcShadowVar}, group ${!!pxl.nodes.lcShadowGroup}, ` +
+            `circle container ${circle && circle.parentContainer}, reader x ${pxl.nodes.lcShadowReader.x}`);
+        }
+      } finally {
+        window.removeEventListener('error', onError);
+        host.remove();
+      }
+    });
+
     // ===================================================================
     // Fixes from the framework review (design/done/2026-10-30_framework_compatibility_plan.md §19.1, fixed in §19.4 step 1)
     // ===================================================================
