@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Step 2 redraws</title>
+<style>
+  body { margin: 16px; font: 14px system-ui, sans-serif; }
+  #out { white-space: pre-wrap; font: 12px ui-monospace, monospace; }
+  iframe { width: 1200px; height: 900px; border: 1px solid #ccc; }
+</style>
+</head>
+<body>
+<div id="out"></div>
+<iframe id="frame"></iframe>
+<script>
+// Every docs and example page with an engine build swapped in (old.min.js / new.min.js, which run.js writes to
+// scratch/evaluation_model/). The engine's animation frames are captured and run by hand, FRAMES of them at 60 per
+// second, so both builds see the same times.
+// Counted per page: frames the stages asked for and ran, canvas clears (= redraws) per layer. At the end the layers
+// are read as they are, without forcing a redraw: what a visitor would see after the skipped redraws.
+const FRAMES = 120, T0 = 2;
+const frame = document.getElementById('frame'), out = document.getElementById('out');
+
+async function load(page, engine) {
+  let html = await (await fetch('/' + page, { cache: 'no-store' })).text();
+  html = html.replace(/src="[^"]*pxl\.min\.js"/g, `src="/scratch/evaluation_model/${engine}"`);
+  const dir = page.slice(0, page.lastIndexOf('/') + 1);
+  html = html.replace(/<head[^>]*>/i, (tag) => `${tag}<base href="/${dir}">`);
+  await new Promise((resolve) => { frame.onload = resolve; frame.srcdoc = html; });
+  const w = frame.contentWindow;
+  await w.document.fonts.ready;
+  await new Promise((r) => setTimeout(r, 300));
+  return w;
+}
+
+function run(w) {
+  const stages = [...w.document.querySelectorAll('pxl-stage')].filter((s) => s.clientWidth > 0);
+  // Engine frames go into a queue; the page's own rAF callbacks (telemetry etc.) still run for real
+  const queue = new Set(), realRaf = w.requestAnimationFrame.bind(w);
+  const engineCallbacks = new Set(stages.map((s) => s._frameCallback));
+  w.requestAnimationFrame = (cb) => (engineCallbacks.has(cb) ? (queue.add(cb), 1) : realRaf(cb));
+  // alwaysrender: the measuring frame may be out of view, which would pause every stage; then a clean start
+  for (const s of stages) { s.setAttribute('alwaysrender', ''); s.resize(); }
+  queue.clear();
+  for (const s of stages) { s._isUpdatePending = false; s.requestRender(); }
+  const clears = new Map();
+  for (const s of stages) for (const l of s.layers) {
+    clears.set(l, 0);
+    const ctx = l._ctx, orig = ctx.clearRect;
+    ctx.clearRect = function(...a) { clears.set(l, clears.get(l) + 1); return orig.apply(this, a); };
+  }
+  let frames = 0;
+  for (let k = 0; k < FRAMES; k++) {
+    const t = (T0 + k / 60) * 1000, now = [...queue];
+    queue.clear();
+    for (const cb of now) { frames++; cb(t); }
+  }
+  const layers = stages.flatMap((s) => s.layers);
+  return {
+    stages: stages.length, layers: layers.length, frames,
+    clears: layers.reduce((n, l) => n + clears.get(l), 0),
+    perLayer: layers.map((l) => clears.get(l)),
+    pixels: layers.map((l) => l._ctx.getImageData(0, 0, l._canvas.width, l._canvas.height).data)
+  };
+}
+
+function differs(A, B) {
+  if (A.length !== B.length) return true;
+  for (let i = 0; i < A.length; i += 4) {
+    const aa = A[i + 3], ba = B[i + 3];
+    if (Math.abs(aa - ba) > 0) return true;
+    for (let c = 0; c < 3; c++) if (Math.abs(A[i + c] * aa - B[i + c] * ba) / 255 > 0.5) return true;
+  }
+  return false;
+}
+
+async function measurePage(page) {
+  const a = run(await load(page, 'old.min.js'));
+  const b = run(await load(page, 'new.min.js'));
+  const a2 = run(await load(page, 'old.min.js'));
+  const r = { page, stages: a.stages, layers: a.layers, framesOld: a.frames, framesNew: b.frames, clearsOld: a.clears, clearsNew: b.clears,
+              unstable: 0, differ: 0 };
+  if (a.layers !== b.layers) { r.error = `layers ${a.layers} old, ${b.layers} new`; return r; }
+  for (let i = 0; i < a.pixels.length; i++) {
+    if (differs(a.pixels[i], a2.pixels[i])) { r.unstable++; continue; }
+    if (differs(a.pixels[i], b.pixels[i])) r.differ++;
+  }
+  r.perLayerOld = a.perLayer.join(' ');
+  r.perLayerNew = b.perLayer.join(' ');
+  return r;
+}
+
+window.measureAll = async function(pages) {
+  pages = pages || await (await fetch('/scratch/evaluation_model/pages.json', { cache: 'no-store' })).json();
+  const results = [];
+  for (const page of pages) {
+    let r;
+    try { r = await measurePage(page); } catch (e) { r = { page, error: e.message }; }
+    results.push(r);
+    out.textContent += JSON.stringify(r) + '\n';
+  }
+  const sum = (k) => results.reduce((s, r) => s + (r[k] || 0), 0);
+  return {
+    pages: results.length, stages: sum('stages'), layers: sum('layers'),
+    framesOld: sum('framesOld'), framesNew: sum('framesNew'), clearsOld: sum('clearsOld'), clearsNew: sum('clearsNew'),
+    unstableLayers: sum('unstable'), differingLayers: sum('differ'), results
+  };
+};
+</script>
+</body>
+</html>

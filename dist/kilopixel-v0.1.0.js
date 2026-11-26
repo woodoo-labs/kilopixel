@@ -245,7 +245,8 @@ pxl.setFromRef = function(element, name, value) {
 };
 
 // Re-evaluates toLocal() attributes after the element's own space moved (an ancestor's matrix changed).
-// Returns a bitmask: 1 = values changed, 2 = matrix dirtied (setLocalMatrixDirty already walked the subtree).
+// Returns a bitmask: 1 = values changed, 2 = matrix dirtied (setLocalMatrixDirty already walked the subtree),
+// 4 = a changed value changes the pixels (PxlNode.affectsPixels()).
 pxl.evaluateToLocalAttributes = function(element) {
   let result = 0;
   const keys = element.toLocalAttributeKeys;
@@ -257,17 +258,19 @@ pxl.evaluateToLocalAttributes = function(element) {
       element.values[key] = newVal;
       result |= 1;
       if (pxl.isSpatialKey(key)) result |= 2;
+      if (element.affectsPixels(key)) result |= 4;
     }
   }
 
   if (result & 2) element.setLocalMatrixDirty();
-  if (result & 1) element.parentLayer?.invalidate();
+  if (result & 4) element.parentLayer?.invalidate();
+  else if (result & 1) element.compositingChanged();
   return result;
 };
 
 // Re-evaluates the reactive attributes that depend on varName.
-// Returns a bitmask: 1 = varName is still needed, 2 = values changed, 4 = a changed value changes the pixels (not
-// only a layer's compositing, see PxlNode.isCompositingKey()).
+// Returns a bitmask: 1 = varName is still needed, 2 = values changed, 4 = a changed value changes the pixels
+// (PxlNode.affectsPixels()).
 pxl.evaluateAttributesForVariable = function(element, varName) {
   let result = 0;
   let matrixDirtied = false;
@@ -283,7 +286,7 @@ pxl.evaluateAttributesForVariable = function(element, varName) {
       if (element.values[key] !== newVal) {
         element.values[key] = newVal;
         result |= 2;
-        if (!element.isCompositingKey(key)) result |= 4;
+        if (element.affectsPixels(key)) result |= 4;
         if (pxl.isSpatialKey(key)) matrixDirtied = true;
       }
     }
@@ -1739,6 +1742,7 @@ pxl.Stage = class Stage extends HTMLElement {
     this._variables = []; // stage-level <pxl-var>: inside the stage, outside every layer
     this._isOrderDirty = false;
     this._isUpdatePending = false;
+    this._isRendering = false; // render() is running: it asks for the next frame itself when it ends
     this._isSizePending = true;
     this._isVisible = true;
     this.unit = 0;
@@ -1959,8 +1963,10 @@ pxl.Stage = class Stage extends HTMLElement {
     for (let i = 0; i < this.layers.length; i++) this.layers[i].invalidate();
   }
 
+  // A change during a frame (the pointer and handlers at its start, broadcasts, the update phase) is drawn in that
+  // frame: render() asks for the next one only when something is still animated or dirty at its end
   requestRender() {
-    if (!this._isVisible || this._isSizePending || this._isUpdatePending) return;
+    if (!this._isVisible || this._isSizePending || this._isUpdatePending || this._isRendering) return;
     this._isUpdatePending = true;
     requestAnimationFrame(this._frameCallback);
   }
@@ -1971,7 +1977,21 @@ pxl.Stage = class Stage extends HTMLElement {
   render(t) {
     const start = performance.now();
     pxl._frame++;
+    this._isRendering = true;
+    try {
+      this.runFrame(t);
+    } finally {
+      this._isRendering = false; // whatever happened, the stage must be able to ask for frames again
+    }
+    if (this.needsNextFrame()) this.requestRender();
 
+    const ms = performance.now() - start;
+    this.perfAccumulated += ms;
+    if (ms > this.perfMax) this.perfMax = ms;
+    this.perfFrames++;
+  }
+
+  runFrame(t) {
     // Pointer first: broadcast the stage's pointer values, hit-test against the picture on screen, update the
     // hover / press states and run the handlers. Their readers are then drawn in this frame, not the next one
     // (design/done/2026-11-17_pointer_frame_order_plan.md).
@@ -1983,29 +2003,34 @@ pxl.Stage = class Stage extends HTMLElement {
       this._isOrderDirty = false;
     }
 
-    // Stage-level variables first, so readers in every layer see this frame's value.
-    // They have no layer heartbeat: the stage keeps the loop running while one is animated.
-    let isVariableAnimated = false;
+    // Stage-level variables first, so readers in every layer see this frame's value
     for (let i = 0; i < this._variables.length; i++) {
-      const variable = this._variables[i];
-      variable.update(t);
-      if (variable.isAnimated) isVariableAnimated = true;
+      this._variables[i].update(t);
     }
-    if (isVariableAnimated) this.requestRender();
 
+    // Update phase: layers that changed, and layers with animated content (the clock must notice the next second)
     for (let i = 0; i < this.layers.length; i++) {
       const layer = this.layers[i];
-      if (layer.isDirty || layer.isAnimated) layer.update(t);
+      if (layer.isDirty || layer.hasAnimatedContent) layer.update(t);
     }
+    // Draw phase: only layers whose pixels are out of date, or whose CSS changed
     for (let i = 0; i < this.layers.length; i++) {
       const layer = this.layers[i];
       if (layer.needsRender()) layer.render(this.unit);
     }
+  }
 
-    const ms = performance.now() - start;
-    this.perfAccumulated += ms;
-    if (ms > this.perfMax) this.perfMax = ms;
-    this.perfFrames++;
+  // The keep-alive (design/2026-11-20_evaluation_model_plan.md, step 2): the next frame while anything is animated,
+  // or a layer is still dirty (one whose update failed keeps its request)
+  needsNextFrame() {
+    for (let i = 0; i < this._variables.length; i++) {
+      if (this._variables[i].isAnimated) return true;
+    }
+    for (let i = 0; i < this.layers.length; i++) {
+      const layer = this.layers[i];
+      if (layer.hasAnimatedContent || layer.isDirty) return true;
+    }
+    return false;
   }
 };
 
@@ -2127,16 +2152,23 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this.isAnimated = this.animatedAttributeKeys.length > 0;
     if (pxl.isSpatialKey(name)) this.setLocalMatrixDirty();
     if (this.refKey) pxl.broadcast(this.refKey);
-    if (this.isCompositingKey(name)) this.compositingChanged();
-    else this.parentLayer?.invalidate();
+    if (this.affectsPixels(name)) {
+      this.parentLayer?.invalidate();
+    } else {
+      this.compositingChanged();
+      // Nothing to redraw, but an animated value must be evaluated in the next frames (a hidden shape, a variable)
+      if (this.isAnimated) this.parentLayer?.wake();
+    }
   }
 
-  // A value that is only CSS on the layer's canvas and leaves its pixels as they are. Only a layer has such values
-  // (its alpha, blend and filter); it overrides both methods.
-  isCompositingKey(key) {
-    return false;
+  // Whether a changed value changes the pixels of the layer. A hidden element draws nothing, so only its hidden
+  // counts; it is still evaluated, so ref.* to it stays current. A layer (its alpha, blend and filter are CSS on its
+  // canvas) and a variable (its readers redraw their own layers) override it.
+  affectsPixels(key) {
+    return key === 'hidden' || !this.values.hidden;
   }
 
+  // A changed value that leaves the pixels as they are but needs new CSS: only a layer has such values
   compositingChanged() {}
 
   connectedCallback() {
@@ -2219,7 +2251,12 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   }
 
   evaluateAnimations(t) {
+    // Keeps the stage's frame loop running while anything in the layer is animated (a layer is its own parentLayer),
+    // also when the evaluation below fails: an error that depends on t may go away
+    if (this.isAnimated) this.parentLayer?.markAnimated();
+
     let animatedValuesChanged = false;
+    let pixelsChanged = false;
     let matrixDirtied = false;
     const keys = this.animatedAttributeKeys;
     for (let i = 0; i < keys.length; i++) {
@@ -2228,6 +2265,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       if (this.values[key] !== newVal) {
         this.values[key] = newVal;
         animatedValuesChanged = true;
+        if (this.affectsPixels(key)) pixelsChanged = true;
         if (pxl.isSpatialKey(key)) matrixDirtied = true;
       }
     }
@@ -2238,9 +2276,10 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       pxl.broadcast(this.refKey);
     }
 
-    // A layer is its own parentLayer (closest() includes the element). Marking itself dirty here would rule out
-    // the CSS-only fast path in Layer.render(); an animated layer keeps the loop running there instead.
-    if (this.isAnimated && this.parentLayer !== this) this.parentLayer?.invalidate();
+    // Only a value that changed redraws the layer: a clock showing floor(t) redraws once per second, a finished
+    // clamp() animation not at all (design/2026-11-20_evaluation_model_plan.md, step 2)
+    if (pixelsChanged) this.parentLayer?.invalidate();
+    else if (animatedValuesChanged) this.compositingChanged();
 
     return animatedValuesChanged;
   }
@@ -2250,10 +2289,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   // An element that throws while evaluating or drawing is skipped for this frame instead of breaking the frame.
   // Warns once per distinct message and at most 3 times per element: a message that contains a changing value
   // (an animated negative radius in a custom shape's arc()) would otherwise warn in every frame.
-  // An animated element keeps asking for frames: evaluateAnimations() does that at its end, which the error may
-  // have skipped, and an error that depends on t can then recover.
+  // An animated element keeps the frames coming (evaluateAnimations() marks it before evaluating), so an error that
+  // depends on t can recover.
   reportError(error) {
-    if (this.isAnimated) this.parentLayer?.invalidate();
     // The same error object again (a gradient that failed before): nothing new to report or allocate
     if (error === this._lastError) return;
     this._lastError = error;
@@ -2399,13 +2437,14 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     this.childList = []; // groups and shapes
     this._isOrderDirty = false; // children need sorting by DOM position
 
+    // Pixels out of date: something in the layer changed since its last draw
     this.isDirty = true;
     this._isCanvasEmpty = false;
 
-    // The heartbeat across the two phases (see update())
-    this._updateFrame = -1;
-    this._wasDirty = false;
-    this._keepAlive = false;
+    // Something in the layer was animated in its last update (markAnimated()): the stage walks it in the next frame
+    // and keeps its frame loop running. Recomputed in every update, never counted (elements come and go).
+    this._animatedFrame = -1;
+    this.hasAnimatedContent = false;
     this.stage = null;
     this.dpr = 1; // set by the stage; isolated shapes read it (Shape.renderIsolated())
 
@@ -2461,14 +2500,26 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     this.stage?.requestRender();
   }
 
-  // A property, setAttribute() or a ref changed alpha, blend or filter: render() writes the CSS in the next frame and
-  // keeps the pixels, like an animated compositing value (the CSS-only path)
-  isCompositingKey(key) {
-    return key === 'alpha' || key === 'blend' || key === 'filter';
+  // alpha, blend and filter are CSS on the canvas: render() writes the new CSS and keeps the pixels (the CSS-only
+  // path), whether they are animated or set from outside (a property, setAttribute(), a ref)
+  affectsPixels(key) {
+    return key !== 'alpha' && key !== 'blend' && key !== 'filter';
   }
 
   compositingChanged() {
     this._isCompositingDirty = true;
+    this.stage?.requestRender();
+  }
+
+  // Called by every animated element inside while it is evaluated (PxlNode.evaluateAnimations()), the layer included
+  markAnimated() {
+    this._animatedFrame = pxl._frame;
+  }
+
+  // An element inside became animated without a change to draw (a hidden shape, a variable): the stage walks the
+  // layer in the next frame, whose update then finds it animated
+  wake() {
+    this.hasAnimatedContent = true;
     this.stage?.requestRender();
   }
 
@@ -2488,54 +2539,41 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     this.invalidate();
   }
 
-  // Update phase. isDirty carries two things into a frame:
-  // - requests from before it (setAttribute(), broadcasts from earlier layers, resize, the first draw): kept in
-  //   _wasDirty, because isDirty is cleared now;
-  // - the heartbeat: every animated child calls parentLayer.invalidate() while it is evaluated, so after the
-  //   children isDirty says "something in here is animated" (_keepAlive), and the layer stays in the next frame.
+  // Update phase: evaluates the layer and its children. A value that changes the pixels makes the layer dirty
+  // (evaluateAnimations()); every animated element marks it, so the stage keeps it in the next frame.
   update(t) {
-    this._updateFrame = pxl._frame;
     if (this._isOrderDirty) {
       this.childList.sort(pxl.sortByDOMPosition);
       this._isOrderDirty = false;
     }
 
-    this._wasDirty = this.isDirty;
-    this.isDirty = false;
-    this._keepAlive = false;
-
     // A failing expression skips the layer with its children for this frame; it keeps its previous pixels and
-    // its request. reportError() keeps an animated layer asking for frames.
+    // stays dirty, so the stage tries again in the next frame
     try {
       this.evaluateAnimations(t);
     } catch (error) {
       this._failedFrame = pxl._frame;
-      this.isDirty = this._wasDirty;
       this.reportError(error);
-      return;
     }
 
     // A hidden layer doesn't evaluate its children: their values that follow t stay as they are until it is shown
-    if (!this.values.hidden) {
+    if (this._failedFrame !== pxl._frame && !this.values.hidden) {
       for (let i = 0; i < this.childList.length; i++) {
         this.childList[i].update(t);
       }
     }
-    this._keepAlive = this.isDirty;
+    this.hasAnimatedContent = this._animatedFrame === pxl._frame;
   }
 
-  // Draw in this frame: dirty before the update or since (a later layer's broadcast reaches it after its update;
-  // the broadcast has already set its values), animated itself, or new compositing CSS to write
+  // Draw in this frame: pixels out of date (also through a later layer's broadcast after this layer's update; the
+  // broadcast has already set the values), or new compositing CSS to write
   needsRender() {
-    return (this._updateFrame === pxl._frame && this._wasDirty) || this.isDirty || this.isAnimated ||
-           this._isCompositingDirty;
+    return this.isDirty || this._isCompositingDirty;
   }
 
   // Draw phase
   render(u) {
     if (this._failedFrame === pxl._frame) return;
-    const isUpdated = this._updateFrame === pxl._frame;
-    const hasChanged = (isUpdated && this._wasDirty) || this.isDirty;
 
     const { alpha, blend, filter, hidden } = this.values;
 
@@ -2557,29 +2595,15 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     }
     this._isCompositingDirty = false;
 
-    // CSS-only path: nothing in the layer changed and nothing but compositing is animated (no transform, no hidden),
-    // so the pixels stay the same. Also for compositing changed from outside (compositingChanged()).
-    let onlyCompositingAnimated = true;
-    for (let i = 0; i < this.animatedAttributeKeys.length; i++) {
-      if (!this.isCompositingKey(this.animatedAttributeKeys[i])) {
-        onlyCompositingAnimated = false;
-        break;
-      }
-    }
-
-    if (onlyCompositingAnimated && !hasChanged) {
-      if (this.isAnimated) this.stage.requestRender();
-      return;
-    }
+    // CSS-only path: only compositing changed (or nothing), so the pixels stay the same
+    if (!this.isDirty) return;
+    this.isDirty = false;
 
     const ctx = this._ctx;
     ctx.clearRect(0, 0, this._canvas.width / this.dpr, this._canvas.height / this.dpr);
-    // Drawn with this frame's values: only the heartbeat survives into the next frame
-    this.isDirty = isUpdated && this._keepAlive;
 
     if (hidden) {
       this._isCanvasEmpty = true;
-      if (this.isAnimated) this.stage.requestRender();
       return;
     }
 
@@ -2599,9 +2623,6 @@ pxl.Layer = class Layer extends pxl.PxlNode {
       this.childList[i].render(ctx, u);
     }
     ctx.restore();
-
-    // Heartbeat: an animated layer asks for the next frame (without isDirty, so the CSS-only path stays possible)
-    if (this.isAnimated) this.stage.requestRender();
   }
 };
 customElements.define('pxl-layer', pxl.Layer);
@@ -4286,6 +4307,11 @@ pxl.Variable = class Variable extends pxl.PxlNode {
     this.stage?.unregisterVariable(this);
     this.stage = null;
     super.disconnectedCallback();
+  }
+
+  // A variable draws nothing: its readers redraw their own layers when their values change
+  affectsPixels() {
+    return false;
   }
 
   // From the attribute and the property (el.value = 5)

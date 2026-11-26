@@ -49,11 +49,12 @@ Base of layers, groups, shapes and variables.
 **Methods**
 
 - `attributeChangedCallback()`: `id` → registry (§4.1); `pxl-on-*` → `setHandler()` (§8.7); everything else → `setValue(name, value)`.
-- `setValue(name, value)`, the one path for attributes and properties: unchanged value → nothing; a function → warn once (`pxl.warnFunctionValue`); a string or `null` → `pxl.compileAttribute()`; anything else → `pxl.storeValue()`. Then `valueChanged(name)`: `isAnimated`, local matrix dirty for transform keys (`pxl.isSpatialKey`), broadcast `refKey`, and `parentLayer.invalidate()`, or `compositingChanged()` for a key where `isCompositingKey()` is true (only a layer's `alpha`, `blend`, `filter`, §5.3).
+- `setValue(name, value)`, the one path for attributes and properties: unchanged value → nothing; a function → warn once (`pxl.warnFunctionValue`); a string or `null` → `pxl.compileAttribute()`; anything else → `pxl.storeValue()`. Then `valueChanged(name)`: `isAnimated`, local matrix dirty for transform keys (`pxl.isSpatialKey`), broadcast `refKey`, and `parentLayer.invalidate()` for a key where `affectsPixels()` is true, otherwise `compositingChanged()` (only a layer does something there, §5.3) and, for an animated element, `parentLayer.wake()` (§5.2).
+- `affectsPixels(key)`: whether a changed value changes the layer's pixels. Default: `true`, except while the element is hidden (only `hidden` itself counts then; a hidden element is still evaluated). A layer: not for `alpha`, `blend`, `filter` (CSS on its canvas). A variable: never (its readers redraw their own layers).
 - `connectedCallback()`: properties set before the upgrade (`_pendingProperties`, §4.5), `parentLayer` / `parentContainer`, `registerChild()` on the container (once per connect, no `includes()` check: that made inserting n children quadratic), `_lastParentMatrixVersion = -1` (a new parent may have the old one's version), subscriptions restored, reactive attributes evaluated (their refs and `toLocal()` need the element in the DOM), registry entry and broadcast for an `id`, `_isRegistered = true`.
 - `disconnectedCallback()`: registry entry removed (only if it points to this element), own subscriptions cleared, `unregisterChild()`. Shapes and groups also call `interaction.releaseElement()` (§8.5).
-- `evaluateAnimations(t)`: evaluates the animated keys, stores changed values, marks the local matrix dirty for transform keys, broadcasts `refKey` if a value changed and someone subscribes, and — for elements other than a layer — calls `parentLayer.invalidate()` while animated (the heartbeat, §5.2).
-- `reportError(error)`: warns once per distinct message, at most 3 times per element (the third says more are hidden; browser messages may contain changing values). The same error object again returns at once (a cached gradient error allocates nothing). An animated element keeps invalidating its layer, so an error that depends on `t` recovers.
+- `evaluateAnimations(t)`: while animated, first `parentLayer.markAnimated()` (the keep-alive, §5.2; before evaluating, so an element whose evaluation fails keeps the frames coming and an error that depends on `t` recovers). Then evaluates the animated keys, stores changed values, marks the local matrix dirty for transform keys, broadcasts `refKey` if a value changed and someone subscribes, and calls `parentLayer.invalidate()` only if a changed value `affectsPixels()`, otherwise `compositingChanged()` if any value changed.
+- `reportError(error)`: warns once per distinct message, at most 3 times per element (the third says more are hidden; browser messages may contain changing values). The same error object again returns at once (a cached gradient error allocates nothing).
 
 ## 3. Compiler (`js/compiler.js`)
 
@@ -109,7 +110,7 @@ pxl.broadcast('ref.a')                         subscribers walked backwards (one
   → element.variableChangedCallback('ref.a')
     → pxl.evaluateAttributesForVariable()      re-evaluates the reactive keys that depend on it; bitmask:
          1 = still needed (0 → unsubscribe), 2 = a value changed, 4 = a changed value changes pixels
-    → if 2: broadcast own refKey, then parentLayer.invalidate() (4) or compositingChanged() (only compositing)
+    → if 2: broadcast own refKey, then parentLayer.invalidate() (4) or compositingChanged()
 ```
 
 - Recursive and depth first. A reader's own error is reported by the reader; the element that changed isn't blamed, the other readers still update.
@@ -119,7 +120,7 @@ pxl.broadcast('ref.a')                         subscribers walked backwards (one
 ### 4.4 `toLocal` Reactivity
 
 - **Target side:** readers subscribe to `ref.<target>`. When an ancestor's transform changes, `setLocalMatrixDirty()` → `broadcastGlobalMatrixChange()` walks its subtree and broadcasts every child someone subscribes to.
-- **Reader side:** the same walk calls `pxl.evaluateToLocalAttributes()` on children with `toLocalAttributeKeys` (bitmask: 1 changed, 2 matrix dirtied, in which case `setLocalMatrixDirty()` already walked the subtree). The walk runs before drawing, so there is no lag. Time-dependent `toLocal` expressions are evaluated every frame anyway and not listed. Design: `design/done/2026-10-26_tolocal_fix_plan.md`.
+- **Reader side:** the same walk calls `pxl.evaluateToLocalAttributes()` on children with `toLocalAttributeKeys` (bitmask: 1 changed, 2 matrix dirtied, in which case `setLocalMatrixDirty()` already walked the subtree, 4 a changed value `affectsPixels()`). The walk runs before drawing, so there is no lag. Time-dependent `toLocal` expressions are evaluated every frame anyway and not listed. Design: `design/done/2026-10-26_tolocal_fix_plan.md`.
 
 ### 4.5 Properties
 
@@ -135,47 +136,52 @@ Language §3.7 is the contract. Mechanics (design: `design/done/2026-10-30_frame
 
 ### 5.1 Requests
 
-`Stage.requestRender()` schedules one `requestAnimationFrame` (no frame while invisible, before the first size, or already pending). Callers: `Layer.invalidate()` (sets `isDirty`; a hidden layer whose canvas is already empty returns early), the heartbeats (§5.2), animated stage-level variables, pointer events, `compositingChanged()`, resize, font arrival (`invalidateLayers()`).
+`Stage.requestRender()` schedules one `requestAnimationFrame` (no frame while invisible, before the first size, already pending, or while `render()` runs: a change during a frame, such as a pointer reader or a handler at its start, is drawn in that frame, and `render()` decides about the next one, §5.2). Callers: `Layer.invalidate()` (sets `isDirty`; a hidden layer whose canvas is already empty returns early), `Layer.wake()`, the keep-alive at the end of `render()`, `Variable.valueChanged()`, pointer events, `compositingChanged()`, resize, font arrival (`invalidateLayers()`).
+
+`isDirty` means only "pixels out of date": a layer redraws in a frame only when something in it changed. A `floor(t)` clock redraws once per second, a finished `clamp(t * 100, 0, 300)` stops redrawing; values that are new objects every frame (an animated gradient descriptor, an array) count as changed. Frames still run while anything is animated, so the clock notices the next second. Design: `design/2026-11-20_evaluation_model_plan.md` (step 2).
 
 ### 5.2 `Stage.render(t)` (`t` in seconds)
 
 ```
-pxl._frame++                                  per-frame state is stored as the frame it belongs to (no resets)
-interaction.process()                         pointer first: broadcast the stage's mouse values, hit test against
+pxl._frame++; _isRendering = true             per-frame state is stored as the frame it belongs to (no resets)
+runFrame(t), in try / finally (_isRendering = false whatever happens):
+  interaction.process()                       pointer first: broadcast the stage's mouse values, hit test against
                                               the last update (the picture on screen), hover states and events;
                                               their readers update now and are drawn in this frame (§8.4)
-sort layers and stage-level variables by DOM position (if _isOrderDirty)
-stage-level <pxl-var>: update(t); one animated → requestRender()
-UPDATE PHASE, layers with isDirty || isAnimated:
-  layer.update(t)
-    _updateFrame = frame; sort children (if dirty)
-    _wasDirty = isDirty; isDirty = false      requests from before the frame are kept
-    evaluateAnimations(t)                     error → _failedFrame, isDirty = _wasDirty, reportError, return
-    unless hidden: child.update(t)            group: sort, evaluate (error: skip subtree), unless hidden its children
-                                              shape: evaluate (also when hidden); variable: evaluate
-                                              animated children call parentLayer.invalidate(): isDirty again
-    _keepAlive = isDirty                      the heartbeat of this frame
-DRAW PHASE, layers where needsRender():       (updated && _wasDirty) || isDirty || isAnimated || _isCompositingDirty
-  layer.render(u)                             isDirty also catches a later layer's broadcast after this update
-    failed this frame → return (keeps its pixels)
-    write CSS opacity / mix-blend-mode / filter if changed; _isCompositingDirty = false
-    CSS-only path (§5.3) → heartbeat if animated, return
-    clearRect; isDirty = updated && _keepAlive   only the heartbeat survives into the next frame
-    hidden → canvas empty, heartbeat, return
-    save; scale(u, u); applyTransformState if a transform is set; children render(ctx, u); restore
-    animated layer → requestRender()          its own heartbeat, without isDirty
+  sort layers and stage-level variables by DOM position (if _isOrderDirty)
+  stage-level <pxl-var>: update(t)
+  UPDATE PHASE, layers with isDirty || hasAnimatedContent:
+    layer.update(t)
+      sort children (if dirty)
+      evaluateAnimations(t)                   marks the layer if animated; error → _failedFrame, reportError
+      unless failed or hidden: child.update(t)   group: sort, evaluate (error: skip subtree), unless hidden its
+                                              children; shape: evaluate (also when hidden); variable: evaluate.
+                                              Animated ones call markAnimated(); a changed value that
+                                              affectsPixels() calls invalidate(): isDirty
+      hasAnimatedContent = marked in this frame
+  DRAW PHASE, layers where needsRender():     isDirty || _isCompositingDirty (isDirty also catches a later
+    layer.render(u)                           layer's broadcast after this layer's update)
+      failed this frame → return (keeps its pixels and stays dirty)
+      write CSS opacity / mix-blend-mode / filter if changed; _isCompositingDirty = false
+      not dirty → return: the CSS-only path (§5.3)
+      isDirty = false; clearRect
+      hidden → canvas empty, return
+      save; scale(u, u); applyTransformState if a transform is set; children render(ctx, u); restore
+needsNextFrame()                              the keep-alive: an animated stage-level variable, or a layer with
+  → requestRender()                           hasAnimatedContent or still dirty (a failed update keeps its request)
 perf counters (hit testing included)
 ```
 
-Static layers cost nothing per frame. Design: `design/done/2026-11-12_two_phase_frame_plan.md` (evaluation before drawing: readers drawn before their targets see this frame's values; readers with `t` excepted).
+- **`hasAnimatedContent`** is recomputed in every update of the layer, never counted: elements come and go and switch between static and animated, and each such change already invalidates the layer (or calls `wake()`), so the next walk finds it. `wake()` is for an animated value that changes no pixels: a hidden shape or a variable made animated with `setAttribute()`.
+- Static layers cost nothing per frame, and a layer with animated content costs only its update when nothing changed. Design: `design/done/2026-11-12_two_phase_frame_plan.md` (evaluation before drawing: readers drawn before their targets see this frame's values; readers with `t` excepted).
 
 ### 5.3 CSS-Only Fast Path
 
-A layer whose animated attributes are all compositing (`alpha`, `blend`, `filter`; no transform, no `hidden`) and that has no other change writes only its canvas CSS and keeps its pixels. It works because a layer, its own `parentLayer`, doesn't invalidate itself in `evaluateAnimations()`. The same path takes compositing values changed from outside: `valueChanged()` and `variableChangedCallback()` call `compositingChanged()` (sets `_isCompositingDirty`, asks for a frame) instead of `invalidate()`. Any other change in the same frame still redraws. Design: two-phase plan §7.1, framework plan §29.
+A layer's `alpha`, `blend` and `filter` don't `affectsPixels()`: when only they change, animated or from outside (`valueChanged()`, `variableChangedCallback()`), the layer gets `compositingChanged()` (sets `_isCompositingDirty`, asks for a frame) instead of `invalidate()`, writes only its canvas CSS and keeps its pixels. Any other change in the same frame still redraws. Design: two-phase plan §7.1, framework plan §29.
 
 ### 5.4 Hidden Subtrees
 
-A hidden shape is evaluated and not drawn. A hidden group or layer doesn't update its children: values that follow `t` freeze (also in a `<pxl-var>` inside), values that follow refs keep updating through broadcasts. Stage-level variables aren't affected. Design: `design/done/2026-11-07_safe_shape_render_plan.md` §5.1.
+A hidden shape is evaluated and not drawn, and its changes don't redraw its layer (`affectsPixels()`; only `hidden` itself does). A hidden group or layer doesn't update its children: values that follow `t` freeze (also in a `<pxl-var>` inside), values that follow refs keep updating through broadcasts. Stage-level variables aren't affected. Design: `design/done/2026-11-07_safe_shape_render_plan.md` §5.1.
 
 ### 5.5 Errors
 

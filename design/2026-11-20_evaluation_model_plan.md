@@ -1,6 +1,6 @@
 # Evaluation Model: When Values Are Evaluated and Layers Redrawn
 
-- **Status**: 🟡 **Proposed** (2026-11-20, merges three plans; next: step 2, then decision D1)
+- **Status**: 🟡 **Proposed** (2026-11-26, step 2 built, §9; next: a prototype of option B, then decision D1)
 - **Date**: 2026-11-20
 - **Replaces**: `design/done/2026-11-12_two_phase_frame_plan.md` (step 1 built there, §7.4; its open parts continue here), `design/done/2026-11-12_reactive_propagation_plan.md` (the cycle stop built there, §2; its full design is option A here), `design/archive/2026-11-15_per_frame_evaluation_plan.md` (option B here). Details, derivations and measurements stay in those plans; this one holds the state, the next step and the decisions.
 - **Related**: `design/done/2026-11-17_pointer_frame_order_plan.md` (the pointer at the start of the frame), `design/done/2026-11-07_safe_shape_render_plan.md` (error rules, kept), `design/done/2026-10-26_tolocal_fix_plan.md` (the `toLocal` matrix walk)
@@ -30,7 +30,11 @@ An attribute expression is re-evaluated by one of three mechanisms (`.agents/ENG
 5. **A change before the running frame's update phase requests a frame of its own:** a pointer reader adds an empty frame after each move (`test.known()` in `tests/index.html`, rule R1).
 6. **Hidden subtrees:** values that follow `t` freeze inside a hidden group or layer, also for readers outside (§5, D6).
 
-## 2. Step 2 (Next): Change-Based Dirty Flags, Keep-Alive in the Stage
+*2026-11-26:* problems 1 and 5 are solved by step 2 (§9).
+
+## 2. Step 2: Change-Based Dirty Flags, Keep-Alive in the Stage
+
+*2026-11-26: built, §9 (with three additions: variables and hidden elements redraw nothing, `wake()`).*
 
 Needed by both options of D1, by throttling and by tweens. Design: two-phase plan §3.2, §3.3, §7.2, §7.3.
 
@@ -140,9 +144,73 @@ Existing tests stay (two-phase frame, ref cycles, safe render, `toLocal`, layer 
 - Step 2: a `floor(t)` text redraws once per second; a finished `clamp()` animation stops redrawing; one pointer move with a reader of the pointer runs one frame (today's `test.known()`); a page without animation stays at 0 FPS; a shape added to a static layer is drawn in the next frame.
 - D1: ten stacked diamonds evaluate their bottom once per change and never show a half-updated value; a chain of 10,000 readers ends at the right value; three readers with `t` in the DOM order C, B, A show the same frame's values; a cycle without `t` warns once, names its elements and doesn't keep the stage running; an idle page with 1,000 readers runs no frame while the monitor publishes; a reader written before its source updates when the source connects and again when it is removed; a `toLocal` reader that another reader reads, with a target in a group that moves with `t`.
 
+## 9. Step 2 Built (2026-11-26)
+
+As §2 describes it: `isDirty` means only "pixels out of date", and the stage keeps the frame loop running.
+
+- **`js/elements/node.js`:**
+  - `affectsPixels(key)` replaces `isCompositingKey()`: whether a changed value changes the layer's pixels.
+  - `valueChanged()` invalidates the layer only for such a value; otherwise it calls `compositingChanged()`, and for an animated element `parentLayer.wake()`.
+  - `evaluateAnimations()` calls `parentLayer.markAnimated()` while the element is animated, *before* evaluating. It invalidates only when a changed value `affectsPixels()`, otherwise calls `compositingChanged()`. Its special case for a layer's own values (`parentLayer !== this`) is gone: `affectsPixels()` covers it.
+  - `reportError()` no longer invalidates.
+- **`js/engine.js`:** `pxl.evaluateAttributesForVariable()` and `pxl.evaluateToLocalAttributes()` use `affectsPixels()` (bit 4); the second calls `compositingChanged()` for other changes.
+- **`js/elements/layer.js`:**
+  - `affectsPixels()`: not for `alpha`, `blend`, `filter`.
+  - `markAnimated()` stamps the frame (`_animatedFrame`); the update sets `hasAnimatedContent` from it after the children. `wake()` sets it from outside and asks for a frame.
+  - `needsRender()` = `isDirty || _isCompositingDirty`. `render()` returns after the CSS when the layer isn't dirty (the CSS-only path, without its loop over the animated keys) and clears `isDirty` before drawing.
+  - Removed: `_updateFrame`, `_wasDirty`, `_keepAlive` and the three heartbeats in `render()`.
+  - A failed update no longer clears `isDirty`, so the layer keeps its request without restoring it.
+- **`js/elements/stage.js`:**
+  - `render()` runs `runFrame()` inside `try` / `finally` with `_isRendering`, during which `requestRender()` does nothing (R1).
+  - The update phase walks layers with `isDirty || hasAnimatedContent`.
+  - `needsNextFrame()` asks for the next frame while a stage-level variable is animated, or a layer has animated content or is still dirty.
+- **`js/elements/variable.js`:** `affectsPixels()` returns `false`.
+
+**Deviations from §2, decided while building:**
+- **Variables redraw nothing:** §2 counted any changed value. An animated `<pxl-var>` inside a layer used to redraw the layer in every frame for nothing; its readers redraw their own layers.
+- **Hidden elements redraw nothing** except for `hidden` itself. They are still evaluated, so `ref.*` to them stays current.
+- **`wake()`:** both rules above mean that an element made animated with `setAttribute()` may change no pixels, so nothing would bring its layer into the next update. `wake()` does that without a redraw.
+- **The keep-alive mark comes before the evaluation,** so an animated element whose evaluation fails keeps the frames coming and recovers when the error depends on `t`. A shape whose evaluation fails now keeps its old pixels unless something else redraws its layer; before, it disappeared for that frame.
+- **The layers to walk** are `isDirty || hasAnimatedContent`. A layer's own animated attributes mark it like a child's, so §2's third condition ("animated attributes of its own") isn't needed.
+- **Not built:** skipping static subtrees in the update phase (optional in §2).
+- **Not measured:** the pages that read a derived value right after `setAttribute()` (D5). That belongs to the prototype of option B.
+
+**Tests** (`tests/index.html`), 161/161 pass:
+- The `test.known()` of R1 ("one pointer move with a reader of the pointer runs one frame") is a test now.
+- New section "Change-based redraws":
+  - a `floor(t)` text redraws once in a second;
+  - a finished `clamp()` stops redrawing while the stage keeps evaluating;
+  - an animated variable redraws nothing, its reader's layer redraws;
+  - a hidden animated shape is evaluated but redraws nothing, and showing it redraws once;
+  - a hidden shape and a variable made animated with `setAttribute()` are evaluated in the next frames (`wake()`).
+- "safe render: an animated shape keeps its layer running while it fails" now checks `hasAnimatedContent` and `needsNextFrame()` instead of `isDirty`.
+- The idle page ("nothing redraws while nothing moves") and "a shape added to a static layer is drawn in the next frame" are existing tests and pass.
+
+**Pages** (`design/prototypes/2026-11-20_evaluation_model/run.js`: every docs and example page, 120 frames driven by hand, the canvases compared at the end without a forced redraw):
+
+| | Before (`a1f46e3`) | Step 2 |
+|---|---|---|
+| Pages, stages, layers | 82, 173, 306 | the same |
+| Frames run | 9,336 | 9,336 |
+| Canvas clears (redraws) | 10,907 | 10,667 (−2.2 %) |
+| Layers that look different | | 0 (3 unstable: clocks, randomness) |
+
+- **The saving comes from two pages:**
+  - `examples/test29.html`: a layer that holds only variables, 120 → 0;
+  - `examples/test54.html`: a clock on `time('h')`, `time('m')`, `floor(time('s'))`, which now redraws once per second instead of 60 times.
+- **Every other page** animates with `t` throughout and redraws as before, as §2 expected. The tool run against itself gave noise only on `docs/walkthrough.html` (1–2 layers, randomness).
+
+**Size:** 70.43 KB minified, 21.21 KB gzipped (+0.11 KB, +0.03 KB); the rounded sizes in the docs stay.
+
+**Reference:** `.agents/ENGINE.md` §2, §4.3, §4.4, §5.1–§5.4; `.agents/KILOPIXEL.md` §6.2 (a layer redraws only in frames where something in it changed) and §13 (frames that redrew nothing count).
+
+**Left:** the prototype of option B and D1 (§7, step 2 there).
+
 ## Log
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-26: step 2 built (§9): change-based dirty flags, the keep-alive in the stage, R1; variables and hidden elements redraw nothing; problems 1 and 5 of §1 solved.
 
 - 2026-11-25: `<pxl-out>` parked in `design/ideas/` (its TODO item removed): D1 and D8 need not serve an element outside every stage; §1 item 3 and the §6 row still name it.
 - 2026-11-22: D11 added: internal animated values of custom shapes, moved here from `design/done/2026-11-20_custom_shapes_plan.md` (D9 there), which is closed.

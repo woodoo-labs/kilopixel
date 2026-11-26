@@ -64,6 +64,7 @@ pxl.Stage = class Stage extends HTMLElement {
     this._variables = []; // stage-level <pxl-var>: inside the stage, outside every layer
     this._isOrderDirty = false;
     this._isUpdatePending = false;
+    this._isRendering = false; // render() is running: it asks for the next frame itself when it ends
     this._isSizePending = true;
     this._isVisible = true;
     this.unit = 0;
@@ -284,8 +285,10 @@ pxl.Stage = class Stage extends HTMLElement {
     for (let i = 0; i < this.layers.length; i++) this.layers[i].invalidate();
   }
 
+  // A change during a frame (the pointer and handlers at its start, broadcasts, the update phase) is drawn in that
+  // frame: render() asks for the next one only when something is still animated or dirty at its end
   requestRender() {
-    if (!this._isVisible || this._isSizePending || this._isUpdatePending) return;
+    if (!this._isVisible || this._isSizePending || this._isUpdatePending || this._isRendering) return;
     this._isUpdatePending = true;
     requestAnimationFrame(this._frameCallback);
   }
@@ -296,7 +299,21 @@ pxl.Stage = class Stage extends HTMLElement {
   render(t) {
     const start = performance.now();
     pxl._frame++;
+    this._isRendering = true;
+    try {
+      this.runFrame(t);
+    } finally {
+      this._isRendering = false; // whatever happened, the stage must be able to ask for frames again
+    }
+    if (this.needsNextFrame()) this.requestRender();
 
+    const ms = performance.now() - start;
+    this.perfAccumulated += ms;
+    if (ms > this.perfMax) this.perfMax = ms;
+    this.perfFrames++;
+  }
+
+  runFrame(t) {
     // Pointer first: broadcast the stage's pointer values, hit-test against the picture on screen, update the
     // hover / press states and run the handlers. Their readers are then drawn in this frame, not the next one
     // (design/done/2026-11-17_pointer_frame_order_plan.md).
@@ -308,29 +325,34 @@ pxl.Stage = class Stage extends HTMLElement {
       this._isOrderDirty = false;
     }
 
-    // Stage-level variables first, so readers in every layer see this frame's value.
-    // They have no layer heartbeat: the stage keeps the loop running while one is animated.
-    let isVariableAnimated = false;
+    // Stage-level variables first, so readers in every layer see this frame's value
     for (let i = 0; i < this._variables.length; i++) {
-      const variable = this._variables[i];
-      variable.update(t);
-      if (variable.isAnimated) isVariableAnimated = true;
+      this._variables[i].update(t);
     }
-    if (isVariableAnimated) this.requestRender();
 
+    // Update phase: layers that changed, and layers with animated content (the clock must notice the next second)
     for (let i = 0; i < this.layers.length; i++) {
       const layer = this.layers[i];
-      if (layer.isDirty || layer.isAnimated) layer.update(t);
+      if (layer.isDirty || layer.hasAnimatedContent) layer.update(t);
     }
+    // Draw phase: only layers whose pixels are out of date, or whose CSS changed
     for (let i = 0; i < this.layers.length; i++) {
       const layer = this.layers[i];
       if (layer.needsRender()) layer.render(this.unit);
     }
+  }
 
-    const ms = performance.now() - start;
-    this.perfAccumulated += ms;
-    if (ms > this.perfMax) this.perfMax = ms;
-    this.perfFrames++;
+  // The keep-alive (design/2026-11-20_evaluation_model_plan.md, step 2): the next frame while anything is animated,
+  // or a layer is still dirty (one whose update failed keeps its request)
+  needsNextFrame() {
+    for (let i = 0; i < this._variables.length; i++) {
+      if (this._variables[i].isAnimated) return true;
+    }
+    for (let i = 0; i < this.layers.length; i++) {
+      const layer = this.layers[i];
+      if (layer.hasAnimatedContent || layer.isDirty) return true;
+    }
+    return false;
   }
 };
 

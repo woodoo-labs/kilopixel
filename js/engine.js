@@ -238,7 +238,8 @@ pxl.setFromRef = function(element, name, value) {
 };
 
 // Re-evaluates toLocal() attributes after the element's own space moved (an ancestor's matrix changed).
-// Returns a bitmask: 1 = values changed, 2 = matrix dirtied (setLocalMatrixDirty already walked the subtree).
+// Returns a bitmask: 1 = values changed, 2 = matrix dirtied (setLocalMatrixDirty already walked the subtree),
+// 4 = a changed value changes the pixels (PxlNode.affectsPixels()).
 pxl.evaluateToLocalAttributes = function(element) {
   let result = 0;
   const keys = element.toLocalAttributeKeys;
@@ -250,17 +251,19 @@ pxl.evaluateToLocalAttributes = function(element) {
       element.values[key] = newVal;
       result |= 1;
       if (pxl.isSpatialKey(key)) result |= 2;
+      if (element.affectsPixels(key)) result |= 4;
     }
   }
 
   if (result & 2) element.setLocalMatrixDirty();
-  if (result & 1) element.parentLayer?.invalidate();
+  if (result & 4) element.parentLayer?.invalidate();
+  else if (result & 1) element.compositingChanged();
   return result;
 };
 
 // Re-evaluates the reactive attributes that depend on varName.
-// Returns a bitmask: 1 = varName is still needed, 2 = values changed, 4 = a changed value changes the pixels (not
-// only a layer's compositing, see PxlNode.isCompositingKey()).
+// Returns a bitmask: 1 = varName is still needed, 2 = values changed, 4 = a changed value changes the pixels
+// (PxlNode.affectsPixels()).
 pxl.evaluateAttributesForVariable = function(element, varName) {
   let result = 0;
   let matrixDirtied = false;
@@ -276,7 +279,7 @@ pxl.evaluateAttributesForVariable = function(element, varName) {
       if (element.values[key] !== newVal) {
         element.values[key] = newVal;
         result |= 2;
-        if (!element.isCompositingKey(key)) result |= 4;
+        if (element.affectsPixels(key)) result |= 4;
         if (pxl.isSpatialKey(key)) matrixDirtied = true;
       }
     }

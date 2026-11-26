@@ -396,6 +396,7 @@ The stage and layer automatically awaken on:
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-26: step 2 of `design/2026-11-20_evaluation_model_plan.md` built (its §9): the layer heartbeat is gone, a layer is dirty only when a value in it changed, the stage keeps the frame loop running: a finished tween stops redrawing by itself; §7 and the heartbeat row in §8 describe the old code.
 - 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-20: the two-phase frame, reactive propagation and per-frame evaluation plans were merged into `design/2026-11-20_evaluation_model_plan.md` (TODO §46); its §6 says what changes for this plan.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.

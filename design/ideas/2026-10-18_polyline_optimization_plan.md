@@ -396,6 +396,7 @@ Build the path once per (`u`, points, `smooth`, `closed`, arrows) and reuse it. 
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-26: step 2 of `design/2026-11-20_evaluation_model_plan.md` built (its §9): the layer heartbeat is gone, a layer is dirty only when a value in it changed, the stage keeps the frame loop running; the "Layer heartbeat" row describes the old code.
 - 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-21: `design/done/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; `flatCache` holds the values × 1 (logical units), not × the stage unit.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.

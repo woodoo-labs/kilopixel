@@ -377,6 +377,7 @@ No special dirty logic is needed. The clip redraws every frame along with its pa
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-26: step 2 of `design/2026-11-20_evaluation_model_plan.md` built (its §9): the layer heartbeat is gone, a layer is dirty only when a value in it changed, the stage keeps the frame loop running; §9 (children kept dirty by the heartbeat) describes the old code.
 - 2026-11-22: `design/done/2026-11-20_custom_shapes_plan.md` phase 2 built: the layer scales by the unit once, and the shapes and their helpers (`applyStyle(ctx)`, `applyStrokeState(ctx)`, `createGradient(ctx, value, slot)`, `resolveArrow(rec, value)`, `drawArrows(ctx, a, b)`, `applyTransformState(ctx, values)`) take no `u`; code here with `u` is the old form.
 - 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-21: `design/done/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; `render(ctx, u, t)` and `draw(ctx, u, t)` with `* u` here are the old form.

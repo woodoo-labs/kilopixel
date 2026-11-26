@@ -114,16 +114,23 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this.isAnimated = this.animatedAttributeKeys.length > 0;
     if (pxl.isSpatialKey(name)) this.setLocalMatrixDirty();
     if (this.refKey) pxl.broadcast(this.refKey);
-    if (this.isCompositingKey(name)) this.compositingChanged();
-    else this.parentLayer?.invalidate();
+    if (this.affectsPixels(name)) {
+      this.parentLayer?.invalidate();
+    } else {
+      this.compositingChanged();
+      // Nothing to redraw, but an animated value must be evaluated in the next frames (a hidden shape, a variable)
+      if (this.isAnimated) this.parentLayer?.wake();
+    }
   }
 
-  // A value that is only CSS on the layer's canvas and leaves its pixels as they are. Only a layer has such values
-  // (its alpha, blend and filter); it overrides both methods.
-  isCompositingKey(key) {
-    return false;
+  // Whether a changed value changes the pixels of the layer. A hidden element draws nothing, so only its hidden
+  // counts; it is still evaluated, so ref.* to it stays current. A layer (its alpha, blend and filter are CSS on its
+  // canvas) and a variable (its readers redraw their own layers) override it.
+  affectsPixels(key) {
+    return key === 'hidden' || !this.values.hidden;
   }
 
+  // A changed value that leaves the pixels as they are but needs new CSS: only a layer has such values
   compositingChanged() {}
 
   connectedCallback() {
@@ -206,7 +213,12 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   }
 
   evaluateAnimations(t) {
+    // Keeps the stage's frame loop running while anything in the layer is animated (a layer is its own parentLayer),
+    // also when the evaluation below fails: an error that depends on t may go away
+    if (this.isAnimated) this.parentLayer?.markAnimated();
+
     let animatedValuesChanged = false;
+    let pixelsChanged = false;
     let matrixDirtied = false;
     const keys = this.animatedAttributeKeys;
     for (let i = 0; i < keys.length; i++) {
@@ -215,6 +227,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       if (this.values[key] !== newVal) {
         this.values[key] = newVal;
         animatedValuesChanged = true;
+        if (this.affectsPixels(key)) pixelsChanged = true;
         if (pxl.isSpatialKey(key)) matrixDirtied = true;
       }
     }
@@ -225,9 +238,10 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       pxl.broadcast(this.refKey);
     }
 
-    // A layer is its own parentLayer (closest() includes the element). Marking itself dirty here would rule out
-    // the CSS-only fast path in Layer.render(); an animated layer keeps the loop running there instead.
-    if (this.isAnimated && this.parentLayer !== this) this.parentLayer?.invalidate();
+    // Only a value that changed redraws the layer: a clock showing floor(t) redraws once per second, a finished
+    // clamp() animation not at all (design/2026-11-20_evaluation_model_plan.md, step 2)
+    if (pixelsChanged) this.parentLayer?.invalidate();
+    else if (animatedValuesChanged) this.compositingChanged();
 
     return animatedValuesChanged;
   }
@@ -237,10 +251,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   // An element that throws while evaluating or drawing is skipped for this frame instead of breaking the frame.
   // Warns once per distinct message and at most 3 times per element: a message that contains a changing value
   // (an animated negative radius in a custom shape's arc()) would otherwise warn in every frame.
-  // An animated element keeps asking for frames: evaluateAnimations() does that at its end, which the error may
-  // have skipped, and an error that depends on t can then recover.
+  // An animated element keeps the frames coming (evaluateAnimations() marks it before evaluating), so an error that
+  // depends on t can recover.
   reportError(error) {
-    if (this.isAnimated) this.parentLayer?.invalidate();
     // The same error object again (a gradient that failed before): nothing new to report or allocate
     if (error === this._lastError) return;
     this._lastError = error;

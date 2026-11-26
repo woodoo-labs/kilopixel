@@ -256,6 +256,7 @@ A manual test page with all cases side by side (layers at full rate, `maxfps` 30
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-26: step 2 of `design/2026-11-20_evaluation_model_plan.md` built (its §9): the layer heartbeat is gone, a layer is dirty only when a value in it changed, the stage keeps the frame loop running; §2 item 1 and the keep-alive of part A (§3.4) describe the old code.
 - 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-21: `design/done/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; `Layer.render(u, t)` is now `Layer.render(u)`.
 - 2026-11-20: the two-phase frame, reactive propagation and per-frame evaluation plans were merged into `design/2026-11-20_evaluation_model_plan.md` (TODO §46); its §6 says what changes for this plan.

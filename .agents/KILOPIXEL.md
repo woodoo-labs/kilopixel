@@ -201,7 +201,7 @@ Readable as `ref.<stage>.*`: `mouseX`, `mouseY` (pointer in stage units, default
 
 ### 6.2 `<pxl-layer>`
 
-The ten transform attributes (§2), `alpha` (`1`), `blend` (`'source-over'`), `filter` (`'none'`), `hidden` (`false`). Its canvas fills the stage (`position: absolute; inset: 0`). Compositing values are CSS (§4). A static layer costs nothing per frame, so put shapes that change into their own layer: one change redraws its whole layer. Layers don't nest.
+The ten transform attributes (§2), `alpha` (`1`), `blend` (`'source-over'`), `filter` (`'none'`), `hidden` (`false`). Its canvas fills the stage (`position: absolute; inset: 0`). Compositing values are CSS (§4). A layer redraws only in frames where something in it changed (a `floor(t)` clock: once per second; a finished `clamp(t * 100, 0, 300)`: never again), and a static layer costs nothing per frame. One change redraws the whole layer, so put shapes that change into their own layer. Layers don't nest.
 
 ### 6.3 `<pxl-group>`
 
@@ -461,7 +461,7 @@ Everything else on `pxl.Shape` (names with `_`, `update()`, `render()`, matrices
 
 ## 13. Performance Monitor
 
-`ref.<stage>.fps`, `renderAvg`, `renderMax` (§6.1), published once per second. An FPS display is itself a reader: on an otherwise idle page it alternates between 0 and 1. Every frame counts, also pointer frames that drew nothing.
+`ref.<stage>.fps`, `renderAvg`, `renderMax` (§6.1), published once per second. An FPS display is itself a reader: on an otherwise idle page it alternates between 0 and 1. Every frame counts, also frames that redrew nothing: while anything is animated, frames keep running even when no value changed.
 
 ```html
 <pxl-text x="20" y="30" text="ref.main.fps + ' FPS | ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#0f0"></pxl-text>

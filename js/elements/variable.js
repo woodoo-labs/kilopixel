@@ -22,6 +22,11 @@ pxl.Variable = class Variable extends pxl.PxlNode {
     super.disconnectedCallback();
   }
 
+  // A variable draws nothing: its readers redraw their own layers when their values change
+  affectsPixels() {
+    return false;
+  }
+
   // From the attribute and the property (el.value = 5)
   valueChanged(name) {
     super.valueChanged(name);

@@ -931,7 +931,7 @@
       srClear();
       srAdd('srLayerA', `<pxl-circle id="srLate" x="t < 2 ? missingFunction() : 300" y="300" r="20" fill="#0000ff"></pxl-circle>`);
       captureWarnings(() => srRender(1));
-      if (!el('srLayerA').isDirty) throw new Error('the layer stopped asking for frames');
+      if (!el('srLayerA').hasAnimatedContent || !el('srStage').needsNextFrame()) throw new Error('the layer stopped asking for frames');
       srRender(3);
       if (el('srLate').values.x !== 300) throw new Error(`x is ${el('srLate').values.x}`);
       const p = pixelAt('srLayerA', 300, 300);
@@ -1912,6 +1912,75 @@
       srClear();
     });
 
+    // --- Change-based redraws (design/2026-11-20_evaluation_model_plan.md, step 2) ---
+    section('Change-based redraws');
+
+    // The test stage's frames from t0 on, 60 per second, as the browser would run them; returns the clears of a layer
+    function framesFrom(t0, count, layerId) {
+      const stage = el('srStage');
+      if (stage.unit === 0) stage.resize();
+      return countClears(layerId, () => { for (let i = 0; i < count; i++) stage.render(t0 + i / 60); });
+    }
+
+    test('redraws: a floor(t) clock redraws its layer once per second, not in every frame', () => {
+      srClear();
+      srAdd('srLayerA', '<pxl-text x="100" y="100" text="floor(t)" fill="#000"></pxl-text>');
+      framesFrom(1.5, 1, 'srLayerA');
+      const clears = framesFrom(1.5 + 1 / 60, 60, 'srLayerA'); // one second, across t = 2
+      if (clears !== 1) throw new Error(`${clears} redraws in one second`);
+      srClear();
+    });
+
+    test('redraws: a finished clamp() animation stops redrawing, while the stage keeps evaluating', () => {
+      srClear();
+      srAdd('srLayerA', '<pxl-circle id="rdIntro" x="clamp(t * 100, 0, 300)" y="100" r="10" fill="#000"></pxl-circle>');
+      const moving = framesFrom(2, 30, 'srLayerA');
+      framesFrom(3.5, 1, 'srLayerA'); // reaches the end, 300
+      const finished = framesFrom(3.6, 30, 'srLayerA');
+      if (moving !== 30 || finished !== 0 || el('rdIntro').values.x !== 300 || !el('srStage').needsNextFrame()) {
+        throw new Error(`redraws while moving ${moving}, after the end ${finished}, x ${el('rdIntro').values.x}`);
+      }
+      srClear();
+    });
+
+    test('redraws: an animated variable redraws nothing itself; the layer of a shape that reads it redraws', () => {
+      srClear();
+      srAdd('srLayerA', '<pxl-var id="rdVar" value="t * 10"></pxl-var>');
+      srAdd('srLayerB', '<pxl-circle id="rdVarReader" x="ref.rdVar.value" y="100" r="10" fill="#000"></pxl-circle>');
+      framesFrom(1, 1, 'srLayerA');
+      let readerClears = 0;
+      const varClears = framesFrom(2, 10, 'srLayerA');
+      readerClears = framesFrom(3, 10, 'srLayerB');
+      if (varClears !== 0 || readerClears !== 10 || el('rdVarReader').values.x !== 30 + 9 / 6) {
+        throw new Error(`variable's layer ${varClears} redraws, reader's layer ${readerClears}, reader x ${el('rdVarReader').values.x}`);
+      }
+      srClear();
+    });
+
+    test('redraws: a hidden animated shape is evaluated but redraws nothing; showing it redraws once', () => {
+      srClear();
+      srAdd('srLayerA', '<pxl-circle id="rdHidden" hidden x="t * 100" y="100" r="10" fill="#000"></pxl-circle>');
+      framesFrom(1, 1, 'srLayerA');
+      const hidden = framesFrom(2, 10, 'srLayerA');
+      const x = el('rdHidden').values.x;
+      el('rdHidden').hidden = false;
+      const shown = framesFrom(3, 1, 'srLayerA');
+      if (hidden !== 0 || x !== 200 + 900 / 60 || shown !== 1) throw new Error(`hidden ${hidden} redraws, x ${x}, shown ${shown}`);
+      srClear();
+    });
+
+    test('redraws: a hidden shape or a variable made animated with setAttribute() is evaluated in the next frames', () => {
+      srClear();
+      srAdd('srLayerA', '<pxl-circle id="rdWakeShape" hidden x="0" r="10"></pxl-circle><pxl-var id="rdWakeVar" value="0"></pxl-var>');
+      framesFrom(1, 2, 'srLayerA');
+      el('rdWakeShape').setAttribute('x', 't * 100');
+      el('rdWakeVar').setAttribute('value', 't * 10');
+      framesFrom(5, 1, 'srLayerA');
+      const shapeX = el('rdWakeShape').values.x, value = el('rdWakeVar').values.value;
+      if (shapeX !== 500 || value !== 50) throw new Error(`shape x ${shapeX}, variable ${value}`);
+      srClear();
+    });
+
     // --- Stage sizing and layer canvas (design/done/2026-11-04_stage_sizing_plan.md) ---
     section('Stage sizing and layer canvas');
 
@@ -2548,7 +2617,7 @@
     // A change before the update phase of the running frame (here: the pointer reader's invalidate() in process()) is
     // drawn in that frame, so it must not ask for another one (design/done/2026-11-12_two_phase_frame_plan.md §9, R1).
     // The stage's frames are queued and run by hand; other stages keep the browser's requestAnimationFrame.
-    test.known('interaction: one pointer move with a reader of the pointer runs one frame, not an extra empty one', () =>
+    test('interaction: one pointer move with a reader of the pointer runs one frame, not an extra empty one', () =>
       withStage(`<div style="width: 500px"><pxl-stage id="ixOneFrame" alwaysrender><pxl-layer>
         <pxl-circle x="ref.ixOneFrame.mouseX" y="300" r="20" fill="#000"></pxl-circle>
       </pxl-layer></pxl-stage></div>`, (stage) => {

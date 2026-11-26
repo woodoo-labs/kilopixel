@@ -27,7 +27,7 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Status**: 🟡 **Proposed**
 - **Plan**: `design/2026-11-12_layer_throttling_plan.md`
 - Built: stage-level `<pxl-var>` (part B), the monitor fix (C1). Open: `maxfps` on layers (part A) and `ref.<layer>.fps` (C2).
-- **Next**: after step 2 of the evaluation model (§46), which makes part A much simpler.
+- **Next**: part A, much simpler since step 2 of the evaluation model (§46) is built: a skipped layer just stays dirty until its window.
 
 ## 9. Images (`<pxl-image>`)
 - **Status**: 💬 **Discussion** (no plan yet)
@@ -104,7 +104,8 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 ## 46. Evaluation Model
 - **Status**: 🟡 **Proposed**
 - **Plan**: `design/2026-11-20_evaluation_model_plan.md` (merges the two-phase frame, reactive propagation and per-frame evaluation plans)
-- **Next**: step 2, change-based dirty flags with the keep-alive in the stage: a layer redraws only when a value changed (a `floor(t)` clock once per second). Then a prototype of option B (no broadcasts) and decision D1 between it and option A (ordered broadcasts).
+- **Built**: step 2 (plan §9): a layer redraws only when a value in it changed (a `floor(t)` clock once per second), the stage keeps the frame loop running.
+- **Next**: a prototype of option B (no broadcasts), then decision D1 between it and option A (ordered broadcasts).
 - **Also decided there**: scoped names instead of global ids (D8); B8 of `design/done/2026-10-27_engine_cleanup_inventory_note.md` (the evaluation loops either option rewrites).
 
 ## 49. Shape Filters in Safari
