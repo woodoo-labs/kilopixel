@@ -1,6 +1,6 @@
 # String Literals in Expressions
 
-- **Status**: ✅ **Implemented** (2026-11-17, §3.1–3.3 built, §8; the docs ideas are TODO §34)
+- **Status**: ✅ **Implemented** (2026-11-17, §3.1–3.3 built, §8; the docs ideas are TODO §52)
 - **Date**: 2026-11-02
 - **Related**: `design/archive/quote-aware-percent-sanitizer.md` (2026-07-13, never implemented; this plan covers its case), `docs/text.html` (`text` attribute: when to quote)
 - **Target Implementation**: `js/compiler.js` (`rewriteExpression`, `compileExpression`, `parseAttributeValue`)
@@ -242,7 +242,7 @@ Verification: all tests in `tests/index.html` pass; `docs/text.html`, `docs/mapp
 - **Scope:** §3.1–3.3 as drafted: every check and rewrite reads only the code. The `return` check is the case where text disappears without a warning; the `?.` rewrite and the lone `t` come with it.
 - **Colors:** the `%` quoting runs on code only, so `'hsla(280, 80%, 30%, 0.06)'` as a gradient stop works now. It comes free with the split: keeping the old behavior would have needed extra code. The docs keep the rule "no % signs" and say that `hsl()` / `hsla()` are functions that need no quotes, also in a gradient's colors (`docs/fill.html` §3 callout).
 - **Escapes (§3.4): left out.** Only a lone quoted string with an escaped quote breaks (`'It\'s'` shows raw), and simpler forms exist for every case: `It's` without quotes, backticks, or an expression (`'It\'s ' + …` works, JavaScript reads the escape). §3.4 would have sent every quoted string with a backslash to JavaScript, which changes what backslashes mean in quoted text (`'C:\dir'`). `\n` works in every form without it: the text shape turns a written `\n` into a line break. Its known test was removed.
-- **Docs left for later** (TODO §34): `docs/text.html`, a section on what the `text` attribute accepts (§5); `docs/DOCS_STANDARDS.md`, a quoting convention for snippets.
+- **Docs left for later** (TODO §52): `docs/text.html`, a section on what the `text` attribute accepts (§5); `docs/DOCS_STANDARDS.md`, a quoting convention for snippets.
 
 ## 8. Built 2026-11-17
 

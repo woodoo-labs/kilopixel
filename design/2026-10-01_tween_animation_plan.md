@@ -396,6 +396,7 @@ The stage and layer automatically awaken on:
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-27: `design/2026-11-27_release_0_1_plan.md` R2 decided: reactive values first (`spring()` / `ease()` toward a target that changes, §5 there), `tween()` from load second; this plan is rewritten around that before building.
 - 2026-11-27: evaluation model option B built (`design/done/2026-11-20_evaluation_model_plan.md` §11): no broadcasts or subscriptions; a change raises a version and the next update phase evaluates sources in their order, then their readers. A spring would be a source in that order; §6 and §7 describe the old code.
 - 2026-11-26: step 2 of `design/done/2026-11-20_evaluation_model_plan.md` built (its §9): the layer heartbeat is gone, a layer is dirty only when a value in it changed, the stage keeps the frame loop running: a finished tween stops redrawing by itself; §7 and the heartbeat row in §8 describe the old code.
 - 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.

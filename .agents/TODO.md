@@ -3,7 +3,7 @@
 Planned work only, one short item each; the plan holds the details. Parked ideas are plans in `design/ideas/` (no item here), implemented plans are in `design/done/`, superseded and dropped ones in `design/archive/`. Workflow: `.claude/CLAUDE.md` → "Plans and TODO"; check: `node tools/check_plans.js`.
 
 - **Status words** (as in the plans): 💬 **Discussion** (ideas, nothing decided) · 🟡 **Proposed** (complete plan, waiting for a decision) · 🟢 **Decided** (agreed, not built yet).
-- **Numbers are stable:** other files refer to items as "TODO §46". A removed item leaves a gap; a new item gets the next free number (next: §51).
+- **Numbers are stable:** other files refer to items as "TODO §46". A removed item leaves a gap; a new item gets the next free number (next: §53).
 
 ## 1. SVG Paths and Icons (`<pxl-path>`)
 - **Status**: 🟡 **Proposed**
@@ -15,7 +15,8 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Status**: 🟡 **Proposed** (`tween`; easing, springs and angle helpers are 💬)
 - **Plan**: `design/2026-10-01_tween_animation_plan.md`
 - `tween(duration, ease, delay)` runs 0 → 1 once; Penner easings (`ease('back', p)`); springs that smooth reactive changes (`ref.btn.isHovered ? 1.2 : 1`) with state per attribute; `deg()` / `rad()` helpers (attributes use degrees, Math uses radians).
-- **Next**: bring the plan up to date with today's engine.
+- **Decided** (release plan R2, `design/2026-11-27_release_0_1_plan.md` §5): reactive values first (`spring()`, `ease()` toward a target that changes, e.g. after a click), `tween()` from load second.
+- **Next**: rewrite the plan around that.
 
 ## 7. Math Plots (`<pxl-plot>`)
 - **Status**: 🟡 **Proposed**
@@ -33,11 +34,6 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Status**: 💬 **Discussion** (no plan yet)
 - PNG, JPEG, WebP and complex SVGs through `ctx.drawImage()`, with `contain` / `cover` fitting and anchors.
 - **Notes**: images that arrive late (what to draw before loading, the box before the size is known, one image per `src`, failed loads): `design/done/2026-11-06_text_box_accuracy_plan.md` §7.
-
-## 11. Default Text Alignment
-- **Status**: 💬 **Discussion**
-- `<pxl-text>` uses the canvas defaults `align="start"`, `baseline="alphabetic"`; the other shapes are centered on `(x, y)`. `center` / `middle` would be consistent but moves every label that relies on the defaults (about 14 px).
-- **For now**: keep the canvas defaults. A change is cheapest before the first release.
 
 ## 12. Arrowheads Docs Page (`docs/arrows.html`)
 - **Status**: 🟢 **Decided** (page in progress)
@@ -63,11 +59,6 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Plan**: `design/2026-10-30_space_attribute_plan.md`
 - `space="ref.A"` makes A's frame the element's parent space: exact overlays and labels on moving shapes without the `toLocal()` clone rule.
 - **Open**: the name (`space` / `frame`), the origin, the scope, a hidden target. Pick up together with the parked note `design/ideas/2026-10-25_refs_across_spaces_note.md`.
-
-## 34. Quoted Text in Expressions: Docs
-- **Status**: 💬 **Discussion**
-- **Plan**: `design/done/2026-11-02_string_literals_in_expressions_plan.md` §5, §7
-- **Open**: a `docs/text.html` section on what `text` accepts (plain text, single quotes, backticks, `\n`); a quoting convention for snippets in `docs/DOCS_STANDARDS.md`.
 
 ## 38. Polyline `smoothstyle`
 - **Status**: 🟡 **Proposed**
@@ -100,3 +91,15 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Status**: 💬 **Discussion** (no plan yet)
 - Safari has `ctx.filter` only behind its "Canvas Filters" feature flag, off by default, so `filter` on a shape draws nothing extra for its visitors; filters on layers are CSS and work. With the flag on, `tests/render.html` passes 56/56 on an iPhone (2026-11-22). `docs/filter.html` says so and points to layer filters; the engine warns once per page when a shape's filter meets a canvas without filters.
 - **Next**: decide whether `blur()` and `dropShadow()` on shapes get a fallback in Safari (the canvas shadow, or the layer's filter). Background: `design/done/2026-11-20_custom_shapes_plan.md` §5.3.
+
+## 51. Release 0.1: Scope
+- **Status**: 🟢 **Decided**
+- **Plan**: `design/2026-11-27_release_0_1_plan.md`
+- What 0.1 needs: A decisions that would break pages later (§52 text as a template and centered text, §42, §49, release policy), B features (§3 animation started by events, §1 path, §9 image), C release work (§43, §44, 9 docs pages, §12); D the rest after 0.1.
+- **Decided**: R1–R5 (plan §6). **Next**: plans for §52 and §3; decisions for §42 (D1–D5) and §49.
+
+## 52. Text as a Template, Centered by Default
+- **Status**: 🟢 **Decided** (no plan of its own yet)
+- **Plan**: `design/2026-11-27_release_0_1_plan.md` §4 (analysis, edge cases), R1, R3
+- `<pxl-text>` `text` (the attribute) is text where only `${…}` is code; an `undefined` part draws nothing; the property stays literal. Default `align="center"`, `baseline="middle"`, like every other shape. One migration of about 640 labels; the docs section on what `text` accepts (the former items on quoted text in the docs and on default alignment are merged here).
+- **Next**: a plan (parser, Rule A, tests, migration script).
