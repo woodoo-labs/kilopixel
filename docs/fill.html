@@ -623,7 +623,7 @@
                   <!-- Stage x ≈ 885: Bleeds gracefully off top-right -->
                   <pxl-line x1="135" y1="0" x2="135" y2="-90" stroke="rgba(255, 255, 255, 0.18)" strokewidth="1.2"></pxl-line>
                   <pxl-group x="135" y="-90">
-                    <pxl-circle r="52" fill="radial([0.35 + sin(t * 0.3) * 0.05, 0.35 + cos(t * 0.3) * 0.05, 0.6], ['#fef08a', '#eab308', '#ca8a04'])"></pxl-circle>
+                    <pxl-circle r="52" fill="radial([0.35 + sin(t * 0.3) * 0.05, 0.35 + cos(t * 0.3) * 0.05, 'farthest-side'], ['#fef08a', '#eab308', '#ca8a04'])"></pxl-circle>
                     <pxl-ellipse rx="86" ry="18" fill="none" stroke="rgba(255, 255, 255, 0.35)" strokewidth="2.5" rotate="-22"></pxl-ellipse>
 
                     <!-- Giant Luminous Gradient Donut below the Solar Orb (Bleeds off right edge) -->
@@ -679,7 +679,7 @@
                       <pxl-rect x="-15" y="30" w="135" h="52" r="26" fill="linear(45 + sin(t * 0.4) * 20, ['#00f2ffcc', '#0284c7cc'])" rotate="25 + sin(t * 0.8) * 16"></pxl-rect>
                       <!-- Dangling Radial Shaded Amber Bead -->
                       <pxl-line x1="55" y1="0" x2="55" y2="85" stroke="rgba(255, 255, 255, 0.18)" strokewidth="1.2"></pxl-line>
-                      <pxl-circle x="55" y="85" r="26" fill="radial([0.35, 0.35, 0.6], ['#fef08a', '#f59e0b', '#b45309'])"></pxl-circle>
+                      <pxl-circle x="55" y="85" r="26" fill="radial([0.35, 0.35, 'farthest-side'], ['#fef08a', '#f59e0b', '#b45309'])"></pxl-circle>
                     </pxl-group>
 
                     <!-- Lower-Right (Stage x ≈ 690, y ≈ 760 - 910): Bold Micro Mobile -->
@@ -690,9 +690,9 @@
                       <pxl-line x1="0" y1="0" x2="0" y2="60" stroke="rgba(255, 255, 255, 0.2)" strokewidth="1.2"></pxl-line>
                       
                       <!-- 3 Geometric Weights with 3D Spherical & Linear Shading -->
-                      <pxl-circle x="-60" y="88" r="22" fill="radial([0.35, 0.35, 0.7], ['#f87171', '#dc2626'])"></pxl-circle>
+                      <pxl-circle x="-60" y="88" r="22" fill="radial([0.35, 0.35, 'farthest-side'], ['#f87171', '#dc2626'])"></pxl-circle>
                       <pxl-rect x="0" y="88" w="30" h="30" r="4" fill="linear(45, ['#fef08a', '#eab308'])" rotate="45 + t * 20"></pxl-rect>
-                      <pxl-circle x="60" y="82" r="18" fill="radial([0.35, 0.35, 0.7], ['#67e8f9', '#0891b2'])"></pxl-circle>
+                      <pxl-circle x="60" y="82" r="18" fill="radial([0.35, 0.35, 'farthest-side'], ['#67e8f9', '#0891b2'])"></pxl-circle>
 
                       <!-- Dangling Breathing Terminal Drop -->
                       <pxl-line x1="-60" y1="110" x2="-60" y2="155" stroke="rgba(255, 255, 255, 0.18)" strokewidth="1"></pxl-line>
