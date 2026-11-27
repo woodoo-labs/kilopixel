@@ -261,7 +261,8 @@ docs-sidebar {
 
 .sidebar li { margin: 0; padding: 0; }
 
-.sidebar li a {
+.sidebar li a,
+.sidebar li .sidebar-soon {
   display: block;
   margin-left: 32px;
   padding: 6px 32px 6px 8px;
@@ -285,6 +286,20 @@ docs-sidebar {
   color: var(--sidebar-active-accent);
   background-color: var(--sidebar-active-bg);
   font-weight: 400;
+}
+
+/* A page listed before it exists: muted, not a link, with a small "soon" tag */
+.sidebar li .sidebar-soon {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.sidebar li .sidebar-soon::after {
+  content: 'soon';
+  margin-left: 6px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* --- Callouts & Action Buttons --- */

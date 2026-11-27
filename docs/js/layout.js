@@ -59,17 +59,17 @@ class DocsSidebar extends HTMLElement {
         <div class="sidebar-section">
           <div class="sidebar-title">Canvas &amp; Containers</div>
           <ul>
-            <li><a href="stage.html" class="${currentPath === 'stage.html' ? 'active' : ''}">Stage</a></li>
-            <li><a href="layer.html" class="${currentPath === 'layer.html' ? 'active' : ''}">Layer</a></li>
-            <li><a href="group.html" class="${currentPath === 'group.html' ? 'active' : ''}">Group</a></li>
+            <li><span class="sidebar-soon" title="Coming soon">Stage</span></li>
+            <li><span class="sidebar-soon" title="Coming soon">Layer</span></li>
+            <li><span class="sidebar-soon" title="Coming soon">Group</span></li>
           </ul>
         </div>
         <div class="sidebar-section">
           <div class="sidebar-title">Transformations</div>
           <ul>
-            <li><a href="position.html" class="${currentPath === 'position.html' ? 'active' : ''}">Center &amp; Offset</a></li>
-            <li><a href="scale.html" class="${currentPath === 'scale.html' ? 'active' : ''}">Zoom &amp; Scale</a></li>
-            <li><a href="transform.html" class="${currentPath === 'transform.html' ? 'active' : ''}">Rotate &amp; Skew</a></li>
+            <li><span class="sidebar-soon" title="Coming soon">Center &amp; Offset</span></li>
+            <li><span class="sidebar-soon" title="Coming soon">Zoom &amp; Scale</span></li>
+            <li><span class="sidebar-soon" title="Coming soon">Rotate &amp; Skew</span></li>
           </ul>
         </div>
         <div class="sidebar-section">
@@ -80,7 +80,7 @@ class DocsSidebar extends HTMLElement {
             <li><a href="rect.html" class="${currentPath === 'rect.html' ? 'active' : ''}">Rectangle</a></li>
             <li><a href="line.html" class="${currentPath === 'line.html' ? 'active' : ''}">Line</a></li>
             <li><a href="polyline.html" class="${currentPath === 'polyline.html' ? 'active' : ''}">Polyline</a></li>
-            <li><a href="grid.html" class="${currentPath === 'grid.html' ? 'active' : ''}">Grid</a></li>
+            <li><span class="sidebar-soon" title="Coming soon">Grid</span></li>
           </ul>
         </div>
         <div class="sidebar-section">
@@ -124,11 +124,11 @@ class DocsSidebar extends HTMLElement {
         <div class="sidebar-section">
           <div class="sidebar-title">Engine &amp; Reactivity</div>
           <ul>
-            <li><a href="expressions.html" class="${currentPath === 'expressions.html' ? 'active' : ''}">Expressions</a></li>
-            <li><a href="referencing.html" class="${currentPath === 'referencing.html' ? 'active' : ''}">Referencing</a></li>
+            <li><span class="sidebar-soon" title="Coming soon">Expressions</span></li>
+            <li><span class="sidebar-soon" title="Coming soon">Referencing</span></li>
             <li><a href="mapping.html" class="${currentPath === 'mapping.html' ? 'active' : ''}">Coordinate Mapping</a></li>
-            <li><a href="events.html" class="${currentPath === 'events.html' ? 'active' : ''}">Events</a></li>
-            <li><a href="animation.html" class="${currentPath === 'animation.html' ? 'active' : ''}">Animation</a></li>
+            <li><span class="sidebar-soon" title="Coming soon">Events</span></li>
+            <li><span class="sidebar-soon" title="Coming soon">Animation</span></li>
           </ul>
         </div>
         <div class="sidebar-section">

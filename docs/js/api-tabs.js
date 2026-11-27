@@ -335,6 +335,7 @@ class DocsApiEvents extends HTMLElement {
               ${handler('pxl-on-move', 'Runs when the pointer moves over the shape (on a group: over any shape inside it), at most once per frame.')}
               ${handler('pxl-on-down', 'Runs when a press starts on the shape: mouse button, finger or pen. Shows the hand cursor.')}
               ${handler('pxl-on-up', 'Runs when a press ends over the shape. Shows the hand cursor.')}
+              ${item('Handler code', [['values', 'script']], 'JavaScript statements with <code>this</code> = the element and the scope of expressions (<code>sin()</code>, <code>hsl()</code>, <code>toLocal()</code>, …). <code>ref.&lt;id&gt;</code> reads other elements, and an assignment changes them like the property: <code>pxl-on-click="ref.counter.value++"</code>, <code>ref.box.r += 10</code>, <code>ref.box.fill = \'red\'</code>. Strings are compiled, except <code>text</code>; a new expression goes through <code>setAttribute()</code>. A handler that throws is logged, and the other listeners still run.')}
               ${item('Handler order', [['values', 'note']], 'Handlers are listeners for DOM events: a shape\'s handler runs first, then its group\'s, then the groups further out. The hand cursor comes from CSS (<code>[pxl-on-click] { cursor: pointer }</code> in the default styles), so a page can change it.')}
 
               <div class="api-subheading">Reactive Interaction Properties (Runtime Getters)</div>
