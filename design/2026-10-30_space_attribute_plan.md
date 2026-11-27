@@ -237,6 +237,7 @@ No change in the hot path for pages that don't use `space`.
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-27: evaluation model decided (`design/2026-11-20_evaluation_model_plan.md` §10.4): option B without broadcasts, and `toLocal()` reads within one stage; §3.3 (reactivity through broadcasts) describes the old engine.
 - 2026-11-22: the one transform path (D7 of `design/done/2026-11-20_custom_shapes_plan.md`) is now D1 of `design/ideas/2026-11-22_engine_structure_cleanup_plan.md`, to be built together with `space`.
 - 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-20: `design/done/2026-11-20_custom_shapes_plan.md` §6.6 (one transform path: every shape drawn with its global matrix) is meant to be built together with this plan; it turns §3.2's extra transform into a different parent matrix.

@@ -1,0 +1,1044 @@
+diff --git a/js/compiler.js b/js/compiler.js
+index dd82ac0..4f15a5f 100644
+--- a/js/compiler.js
++++ b/js/compiler.js
+@@ -318,6 +318,8 @@ pxl.compileExpression = function(str) {
+       const fullKey = `ref.${match[1]}`;
+       if (!deps.includes(fullKey)) deps.push(fullKey);
+     }
++    // The ids, for the version check without building strings (PxlNode.isOutOfDate())
++    const sourceIds = deps.map((key) => key.slice(4));
+     const hasVars = deps.length > 0;
+ 
+     // A plain expression gets a return; code with its own return statements is used as written
+@@ -337,7 +339,15 @@ pxl.compileExpression = function(str) {
+       `)(pxl.scope, pxl.nodes);
+ 
+       fn.isTimeDependent = isAnimated;
+-      if (hasVars) fn.variableDependencies = deps;
++      if (hasVars) {
++        fn.variableDependencies = deps;
++        fn.sourceIds = sourceIds;
++        for (const key of deps) {
++          if (pxl._readKeys.has(key)) continue;
++          pxl._readKeys.add(key);
++          pxl._orderVersion++; // an element with this id may be a node now
++        }
++      }
+       if (usesToLocal) fn.usesToLocal = true;
+ 
+       pxl.cacheExpression(pxl.animationCache, str, fn);
+diff --git a/js/elements/group.js b/js/elements/group.js
+index d4ecdbd..7aa6e29 100644
+--- a/js/elements/group.js
++++ b/js/elements/group.js
+@@ -60,7 +60,8 @@ pxl.Group = class Group extends pxl.PxlNode {
+       return;
+     }
+ 
+-    if (this.values.hidden) return;
++    // Failed as an ordered source in part 1 (Stage.evaluateOrder())
++    if (this._failedFrame === pxl._frame || this.values.hidden) return;
+     for (let i = 0; i < this.childList.length; i++) {
+       this.childList[i].update(t);
+     }
+diff --git a/js/elements/node.js b/js/elements/node.js
+index 72caf9a..e39b1ef 100644
+--- a/js/elements/node.js
++++ b/js/elements/node.js
+@@ -27,9 +27,26 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
+ 
+     this.animatedAttributeKeys = [];
+     this.reactiveAttributeKeys = [];
+-    this.toLocalAttributeKeys = []; // reactive keys using toLocal(): also depend on this element's own space
+     this.isAnimated = false;
+ 
++    // Versions (design/2026-11-20_evaluation_model_plan.md, option B): the change count at this element's last
++    // change, and at the last evaluation of its reactive values
++    this.changeVersion = 0;
++    this._seenVersion = 0;
++    // The ids all reactive values read, collected once per change of the expressions: the check per frame then
++    // touches one array instead of every expression (Stage.updateReaders())
++    this._sourceIds = [];
++    this.hasToLocal = false;
++    this.areSourcesDirty = false;
++    // Frame in which evaluateAnimations() ran: an ordered source is evaluated before the walk, which then skips it
++    this._evaluatedFrame = -1;
++    // The stage whose update phase evaluates the reactive values (null when not connected), and the stage whose
++    // reader list holds the element (removed lazily, Stage.updateReaders())
++    this.readerStage = null;
++    this.listedIn = null;
++    // In the stage's order of sources (Stage.buildOrder())
++    this.isOrderNode = false;
++
+     // The children of a layer or group (set there); null for shapes and variables. A field on every node, so the hit
+     // walk and the matrix walk read an own property instead of searching HTMLElement's prototype chain for it.
+     this.childList = null;
+@@ -42,9 +59,6 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
+     // During an upgrade the attributes arrive before connectedCallback, which registers the id itself.
+     this._isRegistered = false;
+ 
+-    // Own broadcasts from variableChangedCallback() that are still running (see there)
+-    this._broadcastNesting = 0;
+-
+     // Frame (pxl._frame) in which the update phase failed for this element: the draw phase of that frame skips it.
+     // A frame number needs no reset, unlike a boolean.
+     this._failedFrame = -1;
+@@ -113,7 +127,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
+   valueChanged(name) {
+     this.isAnimated = this.animatedAttributeKeys.length > 0;
+     if (pxl.isSpatialKey(name)) this.setLocalMatrixDirty();
+-    if (this.refKey) pxl.broadcast(this.refKey);
++    if (this.refKey !== null) pxl.markChanged(this);
+     if (this.affectsPixels(name)) {
+       this.parentLayer?.invalidate();
+     } else {
+@@ -146,7 +160,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
+     this.parentContainer = parent === null ? null : parent.closest('pxl-group, pxl-layer');
+     this._lastParentMatrixVersion = -1; // a new parent's version may equal the old one's
+     this.parentContainer?.registerChild(this);
+-    pxl.restoreVariableSubscriptions(this);
++    this.readerStage = this.closest('pxl-stage');
+ 
+     // Reactive attributes are evaluated now: their refs and toLocal() need the element in the DOM
+     const keys = this.reactiveAttributeKeys;
+@@ -163,59 +177,124 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
+       this.setLocalMatrixDirty();
+       this.parentLayer?.invalidate();
+     }
++    this._seenVersion = pxl._changeCounter;
++    if (this.areSourcesDirty) this.collectSources();
++    this.registerReader();
+ 
+     if (this.id) {
+       pxl.nodes[this.id] = this.values;
+       this.refKey = `ref.${this.id}`;
+-      // Broadcast arrival so any elements initialized earlier can successfully re-evaluate
+-      pxl.broadcast(this.refKey);
++      // Readers written before it pick it up in the next update phase
++      pxl.markChanged(this);
++      if (pxl._readKeys.has(this.refKey)) pxl._orderVersion++;
+     }
+     this._isRegistered = true;
+   }
+ 
+   disconnectedCallback() {
+     this._isRegistered = false;
+-    if (this.id && pxl.nodes[this.id] === this.values) {
+-      delete pxl.nodes[this.id];
+-    }
+-    pxl.clearAllVariableSubscriptions(this);
++    if (this.id && pxl.nodes[this.id] === this.values) pxl.unregisterNode(this, this.id);
++    if (this.isOrderNode) pxl._orderVersion++; // an ancestor of a toLocal() reader
++    this.readerStage = null;
+     this.parentContainer?.unregisterChild(this);
+   }
+ 
+-  variableChangedCallback(varName) {
+-    // Chains, diamonds and elements with many inputs are entered one call after the other. A cycle whose values
+-    // keep changing enters again from inside its own broadcast, one level deeper in every round.
+-    if (this._broadcastNesting === pxl.MAX_CYCLE_ROUNDS) {
+-      this.reportError(pxl.CYCLE_MESSAGE);
+-      return;
++  // --- Reactive Values ---
++
++  // Puts the element in its stage's reader list when it has reactive values
++  registerReader() {
++    if (this.reactiveAttributeKeys.length > 0) this.readerStage?.addReader(this);
++  }
++
++  // Whether a source changed since the reactive values were last evaluated. toLocal() results also depend on the
++  // ancestors of both elements, so they are evaluated in every frame that runs.
++  isOutOfDate() {
++    if (this.areSourcesDirty || this.hasToLocal) return true;
++    const seen = this._seenVersion;
++    if (pxl._registryVersion > seen) return true;
++    const ids = this._sourceIds;
++    for (let i = 0; i < ids.length; i++) {
++      const values = pxl.nodes[ids[i]];
++      if (values !== undefined && values.$node.changeVersion > seen) return true;
+     }
++    return false;
++  }
+ 
+-    let result;
++  collectSources() {
++    const ids = this._sourceIds;
++    ids.length = 0;
++    this.hasToLocal = false;
++    const keys = this.reactiveAttributeKeys;
++    for (let i = 0; i < keys.length; i++) {
++      const fn = this.expressions[keys[i]];
++      if (fn.usesToLocal) this.hasToLocal = true;
++      for (const id of fn.sourceIds) {
++        if (!ids.includes(id)) ids.push(id);
++      }
++    }
++    this.areSourcesDirty = false;
++  }
++
++  // Evaluates the reactive values; returns whether one changed
++  evaluateReactive() {
++    if (this.areSourcesDirty) this.collectSources();
++    let changed = false;
++    let pixelsChanged = false;
++    let matrixDirtied = false;
++    const keys = this.reactiveAttributeKeys;
++    for (let i = 0; i < keys.length; i++) {
++      const key = keys[i];
++      const newVal = this.expressions[key].call(this, 0);
++      if (this.values[key] !== newVal) {
++        this.values[key] = newVal;
++        changed = true;
++        if (this.affectsPixels(key)) pixelsChanged = true;
++        if (pxl.isSpatialKey(key)) matrixDirtied = true;
++      }
++    }
++    this._seenVersion = pxl._changeCounter;
++    if (!changed) return false;
++
++    if (matrixDirtied) this.setLocalMatrixDirty();
++    if (this.refKey !== null) pxl.markChanged(this);
++    if (pixelsChanged) this.parentLayer?.invalidate();
++    else this.compositingChanged();
++    return true;
++  }
++
++  // Update phase. An element that reads itself sees its own new values in the same frame (rule R3).
++  updateReactive() {
+     try {
+-      result = pxl.evaluateAttributesForVariable(this, varName);
++      if (this.evaluateReactive() && this.readsItself()) this.evaluateReactive();
+     } catch (error) {
+-      // The reader's own error, reported here: the element whose broadcast called this isn't blamed or skipped,
+-      // and the other readers of that broadcast still update
++      this._seenVersion = pxl._changeCounter; // tried again when a source changes
+       this.reportError(error);
+-      return;
+     }
++  }
+ 
+-    if ((result & 1) === 0) pxl.unsubscribeFromVariable(varName, this);
+-    if ((result & 2) !== 0) {
+-      if (this.refKey) {
+-        this._broadcastNesting++;
+-        pxl.broadcast(this.refKey);
+-        this._broadcastNesting--;
+-      }
+-      if ((result & 4) !== 0) this.parentLayer?.invalidate();
+-      else this.compositingChanged();
++  // Part 1 of the update phase (Stage.evaluateOrder()): the walk then skips the element's values with t
++  updateAsSource(t) {
++    try {
++      this.evaluateAnimations(t);
++    } catch (error) {
++      this._failedFrame = pxl._frame;
++      this.reportError(error);
++      return;
+     }
++    if (this.isOutOfDate()) this.updateReactive();
++  }
++
++  readsItself() {
++    return this.refKey !== null && this._sourceIds.includes(this.id);
+   }
+ 
+   evaluateAnimations(t) {
+     // Keeps the stage's frame loop running while anything in the layer is animated (a layer is its own parentLayer),
+     // also when the evaluation below fails: an error that depends on t may go away
+     if (this.isAnimated) this.parentLayer?.markAnimated();
++    // An ordered source was evaluated before the walk (Stage.evaluateOrder())
++    if (this._evaluatedFrame === pxl._frame) return false;
++    this._evaluatedFrame = pxl._frame;
+ 
+     let animatedValuesChanged = false;
+     let pixelsChanged = false;
+@@ -234,9 +313,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
+ 
+     if (matrixDirtied) this.setLocalMatrixDirty();
+ 
+-    if (this.refKey && animatedValuesChanged && pxl._subscriptions[this.refKey]) {
+-      pxl.broadcast(this.refKey);
+-    }
++    if (animatedValuesChanged && this.refKey !== null) pxl.markChanged(this);
+ 
+     // Only a value that changed redraws the layer: a clock showing floor(t) redraws once per second, a finished
+     // clamp() animation not at all (design/2026-11-20_evaluation_model_plan.md, step 2)
+@@ -289,41 +366,12 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
+     return this._cachedFilterScaled;
+   }
+ 
+-  // --- Spatial Reactivity ---
++  // --- Matrix ---
+ 
++  // Read lazily: getGlobalMatrix() of the element and of everything inside notices the new version. toLocal()
++  // readers are evaluated in every frame that runs (isOutOfDate()).
+   setLocalMatrixDirty() {
+     this._isLocalMatrixDirty = true;
+-    this.broadcastGlobalMatrixChange();
+-  }
+-
+-  broadcastGlobalMatrixChange() {
+-    if (this.childList !== null) {
+-      const len = this.childList.length;
+-      const subs = pxl._subscriptions;
+-      for (let i = 0; i < len; i++) {
+-        const child = this.childList[i];
+-
+-        // The child's own space moved: its toLocal() results are stale (design/done/2026-10-26_tolocal_fix_plan.md).
+-        // If re-evaluating moves the child, setLocalMatrixDirty() has already walked its subtree.
+-        let walked = false;
+-        if (child.toLocalAttributeKeys.length > 0) {
+-          try {
+-            walked = (pxl.evaluateToLocalAttributes(child) & 2) !== 0;
+-          } catch (error) {
+-            // The reader's own error: the element that moved isn't blamed, and the walk goes on
+-            child.reportError(error);
+-          }
+-        }
+-
+-        // Broadcast the child if someone is explicitly tracking its global matrix
+-        if (child.refKey && subs[child.refKey] && subs[child.refKey].length > 0) {
+-          pxl.broadcast(child.refKey);
+-        }
+-
+-        // Walk on: deeper elements may be tracked or read toLocal() too
+-        if (!walked) child.broadcastGlobalMatrixChange();
+-      }
+-    }
+   }
+ 
+   // --- Lazy Matrices ---
+diff --git a/js/elements/shapes/polyline.js b/js/elements/shapes/polyline.js
+index f31e5b9..78b273f 100644
+--- a/js/elements/shapes/polyline.js
++++ b/js/elements/shapes/polyline.js
+@@ -84,7 +84,7 @@ pxl.Polyline = class Polyline extends pxl.Shape {
+ 
+     this.isAnimated = this.animatedAttributeKeys.length > 0;
+     // Readers of ref.<id>.pN update like for any other attribute
+-    if (this.refKey) pxl.broadcast(this.refKey);
++    if (this.refKey !== null) pxl.markChanged(this);
+     this.parentLayer?.invalidate();
+   }
+ 
+@@ -95,7 +95,6 @@ pxl.Polyline = class Polyline extends pxl.Shape {
+       const key = this._pointKeys[i];
+       pxl.removeFromArray(this.animatedAttributeKeys, key);
+       pxl.removeFromArray(this.reactiveAttributeKeys, key);
+-      pxl.removeFromArray(this.toLocalAttributeKeys, key);
+       delete this.expressions[key];
+       delete this.values[key];
+     }
+diff --git a/js/elements/stage.js b/js/elements/stage.js
+index 4af7845..1ecbf73 100644
+--- a/js/elements/stage.js
++++ b/js/elements/stage.js
+@@ -75,6 +75,19 @@ pxl.Stage = class Stage extends HTMLElement {
+     this._internals = null; // ElementInternals, attached when the stage first needs the fallback width
+     this.refKey = null;
+     this._isRegistered = false; // connectedCallback has run: id changes from now on move the registry entry
++    this.changeVersion = 0; // a source like any element (pxl.markChanged())
++
++    // Option B (design/2026-11-20_evaluation_model_plan.md §3.2): the ref keys its reactive readers read (a change
++    // to one asks this stage for a frame), its reactive readers in DOM order, and its order of sources (elements
++    // read by others with expressions of their own), with the cycles at the end
++    this._keysRead = new Set();
++    this._readers = [];
++    this._isReaderOrderDirty = false;
++    this._checkedCounter = -1; // pxl._changeCounter at the last pass over the readers
++    this._hasToLocalReaders = false;
++    this._order = [];
++    this._cycleStart = 0;
++    this._builtOrderVersion = -1;
+ 
+     // Published as ref.<id>.* once per second by pxl.perf's timer; renderAvg / renderMax are strings with 2 decimals
+     this.values = {
+@@ -133,7 +146,7 @@ pxl.Stage = class Stage extends HTMLElement {
+       this._parsedRatio = (newValue === null || newValue === '') ? 16 / 9 : pxl.parseAttributeValue(newValue);
+       this.style.aspectRatio = this._parsedRatio;
+       this.values.height = 1000 / this._parsedRatio;
+-      if (this.refKey) pxl.broadcast(this.refKey);
++      if (this.refKey !== null) pxl.markChanged(this);
+     } else if (name === 'alwaysrender') {
+       if (this.isAlwaysRender()) {
+         this._intersectionObserver?.disconnect();
+@@ -156,7 +169,7 @@ pxl.Stage = class Stage extends HTMLElement {
+     if (this.id) {
+       pxl.nodes[this.id] = this.values;
+       this.refKey = `ref.${this.id}`;
+-      pxl.broadcast(this.refKey);
++      pxl.markChanged(this);
+     }
+     this._isRegistered = true;
+ 
+@@ -187,7 +200,7 @@ pxl.Stage = class Stage extends HTMLElement {
+ 
+   disconnectedCallback() {
+     this._isRegistered = false;
+-    if (this.id && pxl.nodes[this.id] === this.values) delete pxl.nodes[this.id];
++    if (this.id && pxl.nodes[this.id] === this.values) pxl.unregisterNode(this, this.id);
+     this._intersectionObserver?.disconnect();
+     this._intersectionObserver = null;
+     this._resizeObserver.disconnect();
+@@ -196,6 +209,10 @@ pxl.Stage = class Stage extends HTMLElement {
+     this.interaction.reset(); // before the layers are dropped: it removes the cursor from their canvases
+     this.layers = [];
+     this._variables = [];
++    for (let i = 0; i < this._order.length; i++) this._order[i].isOrderNode = false;
++    this._order.length = 0;
++    this._cycleStart = 0;
++    this._builtOrderVersion = -1;
+ 
+     for (const type of pxl.Stage.POINTER_EVENTS) this.removeEventListener(type, this.interaction);
+     for (const type of pxl.Stage.ARRIVING_EVENTS) this.removeEventListener(type, this.interaction, true);
+@@ -270,7 +287,7 @@ pxl.Stage = class Stage extends HTMLElement {
+ 
+     this.unit = w / 1000;
+     this.values.height = 1000 / this._parsedRatio;
+-    if (this.refKey) pxl.broadcast(this.refKey);
++    if (this.refKey !== null) pxl.markChanged(this);
+ 
+     this._dpr = window.devicePixelRatio;
+     this._isSizePending = false;
+@@ -325,16 +342,24 @@ pxl.Stage = class Stage extends HTMLElement {
+       this._isOrderDirty = false;
+     }
+ 
+-    // Stage-level variables first, so readers in every layer see this frame's value
++    // Update phase, part 1: the sources others read, sources before readers, wherever they are (also hidden)
++    if (this._builtOrderVersion !== pxl._orderVersion) this.buildOrder();
++    this.evaluateOrder(t);
++
++    // Stage-level variables that nobody reads (the others were evaluated in part 1)
+     for (let i = 0; i < this._variables.length; i++) {
+       this._variables[i].update(t);
+     }
+ 
+-    // Update phase: layers that changed, and layers with animated content (the clock must notice the next second)
++    // Part 2, the walk: every other expression with t, in layers that changed or have animated content (the clock
++    // must notice the next second)
+     for (let i = 0; i < this.layers.length; i++) {
+       const layer = this.layers[i];
+       if (layer.isDirty || layer.hasAnimatedContent) layer.update(t);
+     }
++
++    // Part 3: reactive readers that nobody reads, when a source changed
++    this.updateReaders();
+     // Draw phase: only layers whose pixels are out of date, or whose CSS changed
+     for (let i = 0; i < this.layers.length; i++) {
+       const layer = this.layers[i];
+@@ -342,6 +367,160 @@ pxl.Stage = class Stage extends HTMLElement {
+     }
+   }
+ 
++  // --- Option B: Readers and the Order of Sources ---
++
++  // A change to key asks this stage for a frame (pxl.wakeReaders())
++  readsKey(key) {
++    return this._keysRead.has(key);
++  }
++
++  // Called when a connected element has reactive values (PxlNode.registerReader())
++  addReader(reader) {
++    const keys = reader.reactiveAttributeKeys;
++    for (let i = 0; i < keys.length; i++) {
++      const deps = reader.expressions[keys[i]].variableDependencies;
++      for (let j = 0; j < deps.length; j++) this._keysRead.add(deps[j]);
++    }
++    if (reader.listedIn !== this) {
++      reader.listedIn = this;
++      this._readers.push(reader);
++    }
++    this._isReaderOrderDirty = true;
++  }
++
++  // Part 3 of the update phase. Removed readers are dropped here (a removal touches no list).
++  updateReaders() {
++    const readers = this._readers;
++    if (this._isReaderOrderDirty) {
++      readers.sort(pxl.sortByDOMPosition); // a toLocal() reader comes after its reactive ancestors
++      this._isReaderOrderDirty = false;
++    } else if (this._checkedCounter === pxl._changeCounter && !this._hasToLocalReaders) {
++      return; // no source anyone reads has changed since the last pass
++    }
++    let n = 0;
++    let hasToLocal = false;
++    for (let i = 0; i < readers.length; i++) {
++      const reader = readers[i];
++      if (reader.readerStage !== this) {
++        if (reader.listedIn === this) reader.listedIn = null;
++        continue;
++      }
++      readers[n++] = reader;
++      if (!reader.isOrderNode && reader.isOutOfDate()) reader.updateReactive();
++      if (reader.hasToLocal) hasToLocal = true;
++    }
++    readers.length = n;
++    this._hasToLocalReaders = hasToLocal;
++    this._checkedCounter = pxl._changeCounter;
++  }
++
++  // Nodes: elements of this stage that someone reads and that have expressions of their own; for a toLocal()
++  // reader also the ancestors of the reader and of its target that have expressions. Sorted with Kahn's algorithm;
++  // what is left over is in a cycle (or after one) and goes to the end. Built only when pxl._orderVersion changed.
++  buildOrder() {
++    this._builtOrderVersion = pxl._orderVersion;
++    const nodes = this._order;
++    for (let i = 0; i < nodes.length; i++) nodes[i].isOrderNode = false;
++    nodes.length = 0;
++
++    for (const key of pxl._readKeys) {
++      const values = pxl.nodes[key.slice(4)];
++      if (values !== undefined) this.addOrderNode(values.$node);
++    }
++    const sources = new Map();
++    for (let i = 0; i < nodes.length; i++) { // grows while ancestors are added
++      const list = this.orderSources(nodes[i]);
++      sources.set(nodes[i], list);
++      for (const source of list) this.addOrderNode(source);
++    }
++    if (nodes.length === 0) {
++      this._cycleStart = 0;
++      return;
++    }
++
++    nodes.sort(pxl.sortByDOMPosition);
++    const inDegree = new Map();
++    const readersOf = new Map();
++    for (const node of nodes) {
++      inDegree.set(node, 0);
++      readersOf.set(node, []);
++    }
++    for (const node of nodes) {
++      for (const source of sources.get(node)) {
++        if (source === node || !source.isOrderNode || source.readerStage !== this) continue;
++        inDegree.set(node, inDegree.get(node) + 1);
++        readersOf.get(source).push(node);
++      }
++    }
++    const sorted = nodes.filter((node) => inDegree.get(node) === 0);
++    for (let i = 0; i < sorted.length; i++) {
++      for (const reader of readersOf.get(sorted[i])) {
++        const d = inDegree.get(reader) - 1;
++        inDegree.set(reader, d);
++        if (d === 0) sorted.push(reader);
++      }
++    }
++    this._cycleStart = sorted.length;
++    for (const node of nodes) {
++      if (inDegree.get(node) > 0) sorted.push(node);
++    }
++    for (let i = 0; i < sorted.length; i++) nodes[i] = sorted[i];
++  }
++
++  addOrderNode(element) {
++    if (element.isOrderNode || element.readerStage !== this) return;
++    if (element.animatedAttributeKeys.length + element.reactiveAttributeKeys.length === 0) return;
++    element.isOrderNode = true;
++    this._order.push(element);
++  }
++
++  // The elements a node's expressions depend on (duplicates are fine: each edge is counted on both sides)
++  orderSources(node) {
++    const list = [];
++    const lists = [node.animatedAttributeKeys, node.reactiveAttributeKeys];
++    for (const keys of lists) {
++      for (const key of keys) {
++        const fn = node.expressions[key];
++        const ids = fn.sourceIds || [];
++        for (const id of ids) {
++          const values = pxl.nodes[id];
++          if (values === undefined) continue;
++          list.push(values.$node);
++          if (fn.usesToLocal) this.pushAncestors(values.$node, list);
++        }
++        if (fn.usesToLocal) {
++          pxl._hasToLocalNodes = true;
++          this.pushAncestors(node, list);
++        }
++      }
++    }
++    return [...new Set(list)];
++  }
++
++  pushAncestors(element, list) {
++    for (let p = element.parentContainer; p !== null && p !== undefined; p = p.parentContainer) list.push(p);
++  }
++
++  // Part 1 of the update phase. Cycles without t are evaluated in rounds while their values change (C1 b).
++  evaluateOrder(t) {
++    const order = this._order;
++    for (let i = 0; i < order.length; i++) order[i].updateAsSource(t);
++    if (this._cycleStart === order.length) return;
++    for (let round = 1; round < pxl.MAX_CYCLE_ROUNDS; round++) {
++      let changed = false;
++      for (let i = this._cycleStart; i < order.length; i++) {
++        const node = order[i];
++        try {
++          if (node.evaluateReactive()) changed = true;
++        } catch (error) {
++          node.reportError(error);
++        }
++      }
++      if (!changed) return;
++    }
++    order[this._cycleStart].reportError(pxl.CYCLE_MESSAGE);
++  }
++
+   // The keep-alive (design/2026-11-20_evaluation_model_plan.md, step 2): the next frame while anything is animated,
+   // or a layer is still dirty (one whose update failed keeps its request)
+   needsNextFrame() {
+diff --git a/js/engine.js b/js/engine.js
+index 7dfc317..5961448 100644
+--- a/js/engine.js
++++ b/js/engine.js
+@@ -27,72 +27,66 @@ pxl.isSpatialKey = function(key) {
+ // =========================================================================
+ // Reactivity Engine
+ // =========================================================================
+-
+-// Subscribers per ref key: { 'ref.id': [element, …] }
+-pxl._subscriptions = {};
++// No broadcasts (design/2026-11-20_evaluation_model_plan.md, option B): a change raises a version and asks the
++// stages that read it for a frame. In its update phase a stage evaluates what is out of date, sources before
++// readers (Stage.runFrame()).
+ 
+ // Element id → its values, read by expressions as ref.<id>.<name>
+ pxl.nodes = {};
+ 
+-// A ref.* cycle whose values keep changing stops after this many rounds (PxlNode.variableChangedCallback).
+-// A cycle of n elements nests n × rounds calls, so the limit keeps cycles of up to ~200 elements below the stack limit.
++// Counts every change. A source's changeVersion is the count at its last change; a reader keeps the count at its
++// last evaluation (_seenVersion) and is out of date when a source's version is newer.
++pxl._changeCounter = 0;
++// Raised when an element with an id leaves the registry: its readers now read undefined
++pxl._registryVersion = 0;
++// Every ref key an expression names (filled by the compiler, never shrinks): only these sources wake stages and
++// can be nodes of a stage's order
++pxl._readKeys = new Set();
++// Raised when a stage's order of sources may have changed (Stage.buildOrder())
++pxl._orderVersion = 0;
++// Some stage's order holds a toLocal() reader: its edges include ancestors, so their expressions count too
++pxl._hasToLocalNodes = false;
++
++// A cycle without t whose values keep changing stops after this many rounds (Stage.evaluateOrder())
+ pxl.MAX_CYCLE_ROUNDS = 100;
+ pxl.CYCLE_MESSAGE = `a ref.* cycle never settles: values still changed after ${pxl.MAX_CYCLE_ROUNDS} rounds`;
+ 
+-pxl.broadcast = function(fullKey) {
+-  const subs = pxl._subscriptions[fullKey];
+-  if (subs) {
+-    // Backwards: a subscriber may unsubscribe itself during the loop
+-    for (let i = subs.length - 1; i >= 0; i--) {
+-      subs[i].variableChangedCallback(fullKey);
+-    }
+-  }
++// Only a source that someone reads counts: the counter then stays still while only unread values change, and a
++// stage skips its readers (Stage.updateReaders())
++pxl.markChanged = function(node) {
++  if (node.refKey === null || !pxl._readKeys.has(node.refKey)) return;
++  node.changeVersion = ++pxl._changeCounter;
++  pxl.wakeReaders(node.refKey);
+ };
+ 
+-// The keys each element is subscribed to (element → Set), the other side of pxl._subscriptions: removing an
+-// element then touches only its own keys. Scanning every key for every removed element was quadratic (2,000 shapes
+-// with 2,000 readers took 380 ms to remove, design/done/2026-10-30_framework_compatibility_plan.md §19.1).
+-pxl._subscribedKeys = new WeakMap();
+-
+-pxl.subscribeToVariable = function(fullKey, element) {
+-  let keys = pxl._subscribedKeys.get(element);
+-  if (!keys) pxl._subscribedKeys.set(element, keys = new Set());
+-  if (keys.has(fullKey)) return;
+-  keys.add(fullKey);
+-  (pxl._subscriptions[fullKey] ||= []).push(element);
+-};
+-
+-pxl.unsubscribeFromVariable = function(fullKey, element) {
+-  const keys = pxl._subscribedKeys.get(element);
+-  if (!keys || !keys.delete(fullKey)) return;
+-
+-  const subs = pxl._subscriptions[fullKey];
+-  pxl.removeFromArray(subs, element);
+-  if (subs.length === 0) delete pxl._subscriptions[fullKey]; // keeps the map small for debugging
++// Asks every stage with a reactive reader of key for a frame. The running stage asks for none: its update phase
++// is still to come (rule R1).
++pxl.wakeReaders = function(key) {
++  const stages = pxl.perf.stages;
++  for (let i = 0; i < stages.length; i++) {
++    if (stages[i].readsKey(key)) stages[i].requestRender();
++  }
+ };
+ 
+-pxl.clearAllVariableSubscriptions = function(element) {
+-  const keys = pxl._subscribedKeys.get(element);
+-  if (!keys) return;
+-  for (const fullKey of keys) {
+-    const subs = pxl._subscriptions[fullKey];
+-    pxl.removeFromArray(subs, element);
+-    if (subs.length === 0) delete pxl._subscriptions[fullKey];
++// An element left the registry (removed, or its id changed)
++pxl.unregisterNode = function(element, id) {
++  delete pxl.nodes[id];
++  pxl._registryVersion = ++pxl._changeCounter;
++  const key = `ref.${id}`;
++  if (pxl._readKeys.has(key)) {
++    pxl.wakeReaders(key);
++    pxl._orderVersion++;
+   }
+-  keys.clear();
+ };
+ 
+-// An element's id was set, changed or removed after it connected (connectedCallback reads the id once): move its
+-// registry entry, and tell the readers of both names (readers of the old name now read undefined)
++// An element's id was set, changed or removed after it connected (connectedCallback reads the id once)
+ pxl.renameNode = function(element, oldId, newId) {
+-  if (oldId && pxl.nodes[oldId] === element.values) {
+-    delete pxl.nodes[oldId];
+-    pxl.broadcast(`ref.${oldId}`);
+-  }
++  if (oldId && pxl.nodes[oldId] === element.values) pxl.unregisterNode(element, oldId);
+   element.refKey = newId ? `ref.${newId}` : null;
+   if (newId) {
+     pxl.nodes[newId] = element.values;
+-    pxl.broadcast(element.refKey);
++    pxl.markChanged(element);
++    if (pxl._readKeys.has(element.refKey)) pxl._orderVersion++;
+   }
+ };
+ 
+@@ -127,40 +121,37 @@ pxl.compileAttribute = function(element, name, newValue) {
+     // Evaluated every frame (evaluateAnimations)
+     if (!element.animatedAttributeKeys.includes(name)) element.animatedAttributeKeys.push(name);
+     pxl.removeFromArray(element.reactiveAttributeKeys, name);
+-    pxl.removeFromArray(element.toLocalAttributeKeys, name);
+   } else {
+-    // Evaluated when a ref.* dependency broadcasts. Functions are only compiled for time or refs,
+-    // so a reactive function always has variableDependencies.
++    // Evaluated in the update phase when a source changed (Stage.runFrame()). Functions are only compiled for time
++    // or refs, so a reactive function always has variableDependencies.
+     pxl.removeFromArray(element.animatedAttributeKeys, name);
+     if (!element.reactiveAttributeKeys.includes(name)) element.reactiveAttributeKeys.push(name);
+ 
+-    // toLocal results also depend on the element's own space (re-evaluated by broadcastGlobalMatrixChange)
+-    if (parsed.usesToLocal) {
+-      if (!element.toLocalAttributeKeys.includes(name)) element.toLocalAttributeKeys.push(name);
+-    } else {
+-      pxl.removeFromArray(element.toLocalAttributeKeys, name);
+-    }
+-
+-    const deps = parsed.variableDependencies;
+-    for (let i = 0; i < deps.length; i++) {
+-      pxl.subscribeToVariable(deps[i], element);
+-    }
+-
+     // Not connected yet: connectedCallback evaluates it
+     if (element.isConnected) {
+       element.values[name] = parsed.call(element, 0);
++      element.registerReader();
+     }
+   }
++  pxl.expressionsChanged(element);
++};
++
++// The order of a stage's sources may change when a node's expressions change, or a container's (toLocal() also
++// depends on the ancestors)
++pxl.expressionsChanged = function(element) {
++  element.areSourcesDirty = true;
++  if (element.isOrderNode || (element.childList !== null && pxl._hasToLocalNodes)) pxl._orderVersion++;
+ };
+ 
+ // A value that needs no compiling, stored as it is: a parsed attribute string, or a property value (number, boolean,
+ // array, gradient descriptor, …). Arrays are kept by reference and never changed by the engine.
+ pxl.storeValue = function(element, name, value) {
++  const wasFunction = typeof element.expressions[name] === 'function';
+   element.expressions[name] = value;
+   pxl.removeFromArray(element.animatedAttributeKeys, name);
+   pxl.removeFromArray(element.reactiveAttributeKeys, name);
+-  pxl.removeFromArray(element.toLocalAttributeKeys, name);
+   element.values[name] = value;
++  if (wasFunction) pxl.expressionsChanged(element);
+ };
+ 
+ // =========================================================================
+@@ -236,65 +227,3 @@ pxl.setFromRef = function(element, name, value) {
+   if (typeof value === 'string' || !isKnown) element.setAttribute(name, value);
+   else element[name] = value;
+ };
+-
+-// Re-evaluates toLocal() attributes after the element's own space moved (an ancestor's matrix changed).
+-// Returns a bitmask: 1 = values changed, 2 = matrix dirtied (setLocalMatrixDirty already walked the subtree),
+-// 4 = a changed value changes the pixels (PxlNode.affectsPixels()).
+-pxl.evaluateToLocalAttributes = function(element) {
+-  let result = 0;
+-  const keys = element.toLocalAttributeKeys;
+-
+-  for (let i = 0; i < keys.length; i++) {
+-    const key = keys[i];
+-    const newVal = element.expressions[key].call(element, 0);
+-    if (element.values[key] !== newVal) {
+-      element.values[key] = newVal;
+-      result |= 1;
+-      if (pxl.isSpatialKey(key)) result |= 2;
+-      if (element.affectsPixels(key)) result |= 4;
+-    }
+-  }
+-
+-  if (result & 2) element.setLocalMatrixDirty();
+-  if (result & 4) element.parentLayer?.invalidate();
+-  else if (result & 1) element.compositingChanged();
+-  return result;
+-};
+-
+-// Re-evaluates the reactive attributes that depend on varName.
+-// Returns a bitmask: 1 = varName is still needed, 2 = values changed, 4 = a changed value changes the pixels
+-// (PxlNode.affectsPixels()).
+-pxl.evaluateAttributesForVariable = function(element, varName) {
+-  let result = 0;
+-  let matrixDirtied = false;
+-  const keys = element.reactiveAttributeKeys;
+-
+-  for (let i = 0; i < keys.length; i++) {
+-    const key = keys[i];
+-    const fn = element.expressions[key];
+-
+-    if (fn.variableDependencies.includes(varName)) {
+-      result |= 1;
+-      const newVal = fn.call(element, 0);
+-      if (element.values[key] !== newVal) {
+-        element.values[key] = newVal;
+-        result |= 2;
+-        if (element.affectsPixels(key)) result |= 4;
+-        if (pxl.isSpatialKey(key)) matrixDirtied = true;
+-      }
+-    }
+-  }
+-
+-  if (matrixDirtied) element.setLocalMatrixDirty();
+-  return result;
+-};
+-
+-pxl.restoreVariableSubscriptions = function(element) {
+-  const keys = element.reactiveAttributeKeys;
+-  for (let i = 0; i < keys.length; i++) {
+-    const deps = element.expressions[keys[i]].variableDependencies;
+-    for (let j = 0; j < deps.length; j++) {
+-      pxl.subscribeToVariable(deps[j], element);
+-    }
+-  }
+-};
+diff --git a/js/interaction.js b/js/interaction.js
+index c806dd7..00a7094 100644
+--- a/js/interaction.js
++++ b/js/interaction.js
+@@ -288,7 +288,7 @@ pxl.InteractionEngine = class InteractionEngine {
+   setState(node, key, value) {
+     if (node.values[key] === value) return;
+     node.values[key] = value;
+-    if (node.refKey) pxl.broadcast(node.refKey);
++    if (node.refKey !== null) pxl.markChanged(node);
+   }
+ 
+   // Sets a state on node and its groups, up to (not including) stop or the layer
+@@ -568,7 +568,7 @@ pxl.InteractionEngine = class InteractionEngine {
+     const values = this.stage.values;
+     const isPointerChanged = this._isMouseDirty;
+     if (isPointerChanged) {
+-      if (this.stage.refKey) pxl.broadcast(this.stage.refKey);
++      if (this.stage.refKey !== null) pxl.markChanged(this.stage);
+       this._isMouseDirty = false;
+     }
+ 
+diff --git a/js/monitor.js b/js/monitor.js
+index fae1d1c..b5c7a62 100644
+--- a/js/monitor.js
++++ b/js/monitor.js
+@@ -38,7 +38,7 @@ pxl.perf = {
+       values.fps = seconds > 0 ? Math.round(frames / seconds) : 0;
+       values.renderAvg = (frames > 0 ? stage.perfAccumulated / frames : 0).toFixed(2);
+       values.renderMax = stage.perfMax.toFixed(2);
+-      if (stage.refKey) pxl.broadcast(stage.refKey);
++      if (stage.refKey !== null) pxl.markChanged(stage);
+ 
+       // Reset counters for the next interval
+       stage.perfFrames = 0;
+diff --git a/tests/frameworks.html b/tests/frameworks.html
+index 38c47df..ade6936 100644
+--- a/tests/frameworks.html
++++ b/tests/frameworks.html
+@@ -195,7 +195,9 @@
+       withBox((box) => {
+         const reader = make('pxl-circle', { id: 'fwEarlyReader', x: 'ref.fwLateTarget.x + 1', r: '5' });
+         const target = make('pxl-circle', { id: 'fwLateTarget', x: '60', r: '5' });
+-        box.appendChild(make('pxl-stage', { alwaysrender: '' }, [make('pxl-layer', {}, [make('pxl-group', {}, [reader]), target])]));
++        const stage = make('pxl-stage', { alwaysrender: '' }, [make('pxl-layer', {}, [make('pxl-group', {}, [reader]), target])]);
++        box.appendChild(stage);
++        stage.resize(); stage.render(1); // option B: readers update in the next frame (D5)
+         if (reader.values.x !== 61) throw new Error(`reader x ${reader.values.x}`);
+       }));
+ 
+@@ -900,7 +902,7 @@
+         box.remove();
+         const left = {
+           entries: ids.filter((id) => pxl.nodes[id]),
+-          subscriptions: ids.filter((id) => (pxl._subscriptions['ref.' + id] || []).length),
++          subscriptions: [], // option B: no subscriptions
+           monitored: pxl.perf.stages.includes(stage), variables: stage._variables.length, layers: stage.layers.length
+         };
+         if (mounted !== ids.length || variables !== 1 || left.entries.length || left.subscriptions.length || left.monitored || left.variables || left.layers) {
+diff --git a/tests/index.html b/tests/index.html
+index a098c86..a33610d 100644
+--- a/tests/index.html
++++ b/tests/index.html
+@@ -277,7 +277,7 @@
+       layer.setAttribute('x', '450');
+       layer.setAttribute('rotate', '35');
+       layer.setAttribute('zoom', '1.4');
+-      await wait(100);
++      await wait(100); nextFrame();
+       expectMapped('tlReader2', 'tlSun2', XY);
+     });
+ 
+@@ -319,25 +319,26 @@
+       layer.setAttribute('x', '500');
+       layer.setAttribute('y', '300');
+       layer.setAttribute('rotate', '30');
+-      await wait(100);
++      await wait(100); nextFrame();
+       ends('tlCircle5a', 'tlCircle5b');
+     });
+ 
+     test('toLocal: line follows when a target\'s layer moves (target side)', async () => {
+       el('tlLayer5b').setAttribute('rotate', '45');
+       el('tlLayer5a').setAttribute('zoom', '0.7');
+-      await wait(100);
++      await wait(100); nextFrame();
+       expectMapped('tlLine5', 'tlCircle5a', [['x1', 'x'], ['y1', 'y']]);
+       expectMapped('tlLine5', 'tlCircle5b', [['x2', 'x'], ['y2', 'y']]);
+     });
+ 
+-    test('toLocal: replacing a toLocal attribute with a number removes it from toLocalAttributeKeys', async () => {
++    test('toLocal: replacing a toLocal attribute with a number keeps the number', async () => {
+       const reader = el('tlReader2');
+-      if (!reader.toLocalAttributeKeys.includes('x')) throw new Error('x missing before the change');
+       reader.setAttribute('x', '10');
+-      if (reader.toLocalAttributeKeys.includes('x')) throw new Error('x still listed after setAttribute(\'x\', \'10\')');
++      nextFrame();
++      if (reader.values.x !== 10) throw new Error(`x is ${reader.values.x} after setAttribute('x', '10') and a frame`);
+       reader.setAttribute('x', "toLocal(ref.tlSun2, 'x')");
+-      if (!reader.toLocalAttributeKeys.includes('x')) throw new Error('x not listed again after restoring toLocal');
++      nextFrame();
++      expectMapped('tlReader2', 'tlSun2', XY);
+     });
+ 
+     // ===================================================================
+@@ -357,7 +358,7 @@
+       box.setAttribute('scalex', '1.5');
+       box.setAttribute('skewx', '20');
+       box.setAttribute('dy', '40');
+-      await wait(100);
++      await wait(100); nextFrame();
+       expectMapped('txReader', 'txBox', [['x', 'tx'], ['y', 'ty']]);
+     });
+ 
+@@ -828,6 +829,12 @@
+       draw() { this.calls = (this.calls || 0) + 1; throw new RangeError(`value ${this.calls} is invalid`); }
+     });
+ 
++
++    // Option B: reactive readers update in the next frame's update phase (D5)
++    function nextFrame() {
++      document.querySelectorAll('pxl-stage').forEach((s) => { if (s.unit === 0) s.resize(); s.render(performance.now() / 1000); });
++    }
++
+     // Renders the test stage at time t; resize() first, so it also works in a background tab
+     function srRender(t) {
+       const stage = el('srStage');
+@@ -1763,12 +1770,12 @@
+         try {
+           el('rcA').setAttribute('value', 'ref.rcB.value + 1');
+           el('rcA').setAttribute('value', 'ref.rcB.value + 2');
++          nextFrame();
+         } catch (e) { error = e; }
+       });
+       if (error) throw new Error(`setAttribute threw: ${error}`);
+       const a = el('rcA').values.value, b = el('rcB').values.value;
+       if (!(a < 1000 && b < 1000)) throw new Error(`values ran away: a = ${a}, b = ${b}`);
+-      if (el('rcA')._broadcastNesting !== 0 || el('rcB')._broadcastNesting !== 0) throw new Error('broadcast nesting not reset');
+       if (warnings.length !== 1 || !warnings[0].includes('never settles')) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+       srClear();
+     });
+@@ -1778,7 +1785,7 @@
+       // The walkthrough's section 9 orb: shadowcolor="ref.sec9FlyingOrb.stroke"
+       srAdd('srLayerA', `<pxl-var id="rcHue" value="10"></pxl-var>
+         <pxl-circle id="rcSelf" x="100" y="100" r="10" stroke="hsl(ref.rcHue.value, 100, 60)" shadowcolor="ref.rcSelf.stroke"></pxl-circle>`);
+-      const warnings = captureWarnings(() => el('rcHue').setAttribute('value', '200'));
++      const warnings = captureWarnings(() => { el('rcHue').setAttribute('value', '200'); nextFrame(); });
+       const { stroke, shadowcolor } = el('rcSelf').values;
+       if (shadowcolor !== stroke) throw new Error(`shadowcolor ${shadowcolor} lags behind stroke ${stroke}`);
+       if (warnings.length !== 0) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+@@ -1837,7 +1844,7 @@
+       for (let i = 1; i <= 150; i++) sum += ` + ref.rcCh${i}.value`;
+       html += `<pxl-var id="rcSum" value="${sum}"></pxl-var>`;
+       srAdd('srLayerA', html);
+-      const warnings = captureWarnings(() => el('rcCh0').setAttribute('value', '1000'));
++      const warnings = captureWarnings(() => { el('rcCh0').setAttribute('value', '1000'); nextFrame(); });
+       const end = el('rcCh150').values.value;
+       if (end !== 1150) throw new Error(`chain end = ${end}, expected 1150`);
+       const expectedSum = 150 * 1000 + 150 * 151 / 2;
+@@ -2814,11 +2821,13 @@
+       withStage(ixStage('<pxl-circle id="lcReader" x="ref.lcSource.x + 1" r="5" fill="#000"></pxl-circle>'), (stage) => {
+         const layer = stage.querySelector('pxl-layer');
+         layer.insertAdjacentHTML('beforeend', '<pxl-circle id="lcSource" x="60" r="5"></pxl-circle>');
++        nextFrame();
+         const first = pxl.nodes.lcReader.x;
+         const source = el('lcSource');
+         source.remove();
+         source.setAttribute('x', '80');
+         layer.append(source);
++        nextFrame();
+         if (first !== 61 || pxl.nodes.lcReader.x !== 81) throw new Error(`reader ${first}, after re-insert ${pxl.nodes.lcReader.x}`);
+       }));
+ 
+@@ -2854,6 +2863,7 @@
+       withStage(ixStage(`<pxl-circle id="kbReader" x="ref.kbLate.x + 1" r="5"></pxl-circle><pxl-circle x="70" r="5"></pxl-circle>`), (stage) => {
+         const late = stage.querySelector('pxl-layer').lastElementChild;
+         late.id = 'kbLate';
++        nextFrame();
+         if (!pxl.nodes.kbLate || pxl.nodes.kbReader.x !== 71) throw new Error(`registered ${!!pxl.nodes.kbLate}, reader ${pxl.nodes.kbReader.x}`);
+       }));
+ 
+@@ -2904,6 +2914,7 @@
+       withStage(ixStage('<pxl-circle id="fxReader" x="ref.fxGone.x + 1" r="5"></pxl-circle><pxl-circle id="fxGone" x="30" r="5"></pxl-circle>'), () => {
+         const before = pxl.nodes.fxReader.x;
+         el('fxGone').removeAttribute('id');
++        nextFrame();
+         const after = pxl.nodes.fxReader.x;
+         if (before !== 31 || pxl.nodes.fxGone || !Number.isNaN(after)) throw new Error(`reader ${before} → ${after}, entry left ${!!pxl.nodes.fxGone}`);
+       }));
+@@ -2919,6 +2930,7 @@
+     test('a stage renamed after insertion works for readers of its new name; removing it leaves no entry', () =>
+       withStage('<div style="width: 500px"><pxl-stage id="fxStageOld" ratio="2" alwaysrender><pxl-layer><pxl-circle id="fxStageReader" r="5" y="ref.fxStageNew.height"></pxl-circle></pxl-layer></pxl-stage></div>', (stage) => {
+         stage.id = 'fxStageNew';
++        nextFrame();
+         const state = { reader: pxl.nodes.fxStageReader.y, old: !!pxl.nodes.fxStageOld };
+         stage.remove();
+         state.afterRemove = !!pxl.nodes.fxStageNew;
+@@ -2929,7 +2941,7 @@
+       withStage(ixStage(`<pxl-circle id="fxSource" x="10" r="5"></pxl-circle>
+         <pxl-circle id="fxSub" x="ref.fxSource.x + 1" y="ref.fxSource.x + 2" r="5"></pxl-circle>
+         <pxl-circle id="fxSwitched" x="ref.fxSource.x + 3" r="5"></pxl-circle>`), (stage) => {
+-        const subs = () => pxl._subscriptions['ref.fxSource'] || [];
++        const subs = () => { nextFrame(); return stage._readers.filter((e) => e === el('fxSub') || e === el('fxSwitched')); };
+         const reader = el('fxSub'), switched = el('fxSwitched');
+         switched.setAttribute('x', '5'); // no longer a reader: dropped on the next broadcast or on removal
+         reader.remove();
+@@ -2938,6 +2950,7 @@
+         stage.querySelector('pxl-layer').append(reader);
+         const afterInsert = subs().filter((e) => e === reader).length;
+         el('fxSource').setAttribute('x', '20');
++        nextFrame();
+         if (afterRemove !== 0 || afterInsert !== 1 || pxl.nodes.fxSub.x !== 21) {
+           throw new Error(`subscribers after removal ${afterRemove}, reader subscribed ${afterInsert}×, reader x ${pxl.nodes.fxSub.x}`);
+         }

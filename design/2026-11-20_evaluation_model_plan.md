@@ -1,11 +1,11 @@
 # Evaluation Model: When Values Are Evaluated and Layers Redrawn
 
-- **Status**: 🟡 **Proposed** (2026-11-26, step 2 built, §9; next: a prototype of option B, then decision D1)
+- **Status**: 🟢 **Decided** (2026-11-27, option B with global ids, §10.4; next: build it)
 - **Date**: 2026-11-20
 - **Replaces**: `design/done/2026-11-12_two_phase_frame_plan.md` (step 1 built there, §7.4; its open parts continue here), `design/done/2026-11-12_reactive_propagation_plan.md` (the cycle stop built there, §2; its full design is option A here), `design/archive/2026-11-15_per_frame_evaluation_plan.md` (option B here). Details, derivations and measurements stay in those plans; this one holds the state, the next step and the decisions.
 - **Related**: `design/done/2026-11-17_pointer_frame_order_plan.md` (the pointer at the start of the frame), `design/done/2026-11-07_safe_shape_render_plan.md` (error rules, kept), `design/done/2026-10-26_tolocal_fix_plan.md` (the `toLocal` matrix walk)
-- **Target Implementation**: `js/elements/stage.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/variable.js`, `js/engine.js`, `js/interaction.js`, `js/monitor.js`, `tests/index.html`, `.agents/ENGINE.md` §4–§5, `.agents/KILOPIXEL.md` §3.6
-- **Prototypes**: `design/prototypes/2026-11-12_two_phase_frame/` (second walk, CSS-only path, frame bench), `design/prototypes/2026-11-12_reactive_propagation/` (cycles, propagation cost), `design/prototypes/2026-11-15_per_frame_evaluation/pull_bench.html` (broadcast against a per-frame loop, ordering cost)
+- **Target Implementation**: `js/compiler.js`, `js/elements/stage.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/variable.js`, `js/engine.js`, `js/interaction.js`, `js/monitor.js`, `tests/index.html`, `.agents/ENGINE.md` §4–§5, `.agents/KILOPIXEL.md` §3.6
+- **Prototypes**: `design/prototypes/2026-11-20_evaluation_model/` (step 2 page sweep `run.js`; option B as `option_b.patch`, its bench `option_b_bench.html`, §10), `design/prototypes/2026-11-12_two_phase_frame/` (second walk, CSS-only path, frame bench), `design/prototypes/2026-11-12_reactive_propagation/` (cycles, propagation cost), `design/prototypes/2026-11-15_per_frame_evaluation/pull_bench.html` (broadcast against a per-frame loop, ordering cost)
 
 ---
 
@@ -85,6 +85,8 @@ Design: per-frame plan §2–§3.
 | Diamonds | evaluated once (14 stacked: 65,532 evaluations → 42) | evaluated once |
 | Risk | small steps on working code | replaces the core of `engine.js` and `node.js` in one step |
 
+*2026-11-27: B prototyped (§10). Measured against today: the same cost when a source changes, 16 ns per idle reader (0 when nothing read changed), diamonds 65,532 → 42 evaluations, about +166 lines and +2.95 KB rather than fewer lines.*
+
 Speed is not the reason for either; B ends with less to understand and keep right, A keeps today's timing. **Recommended procedure:** build step 2, prototype B as a patch over the engine, run the page sweep (every docs and example page, 60 frames driven by hand, pixels and canvas clears compared with today, as in two-phase plan §7.4) and the frame bench, then decide.
 
 ## 4. Rules Both Options Share
@@ -100,22 +102,24 @@ Speed is not the reason for either; B ends with less to understand and keep righ
 
 **Cycles with `t`** (a "follow" self-reference, shapes chasing each other) keep working as today: members evaluated once per frame in DOM order, a member reading a later one gets its previous frame's value; no warning, the feedback is usually intended.
 
-## 5. Open Decisions
+## 5. Decisions
 
 | | Question | Recommended |
 |---|---|---|
-| D1 | Option A or B (§3) | build step 2, prototype B, then decide |
-| C1 | Cycles without `t` (`a = b + 1`, `b = a + 1`): (a) today's recursion with the nesting counter, A only; (b) members in DOM order, repeated while values change, at most `pxl.MAX_CYCLE_ROUNDS` rounds, one warning, and the edge that closes the cycle requests no frame; (c) one pass and a warning when the order is built | (b), on both options: it keeps the results of every cycle that settles or converges, without recursion; (c) stops converging cycles after one step |
-| D2 | Granularity: element (as the compiler records it) or attribute (`ref.orb.stroke` as its own source) | element |
-| D3 | A: one propagation per `broadcast()`, or several changes in a handler as one | one per `broadcast()` (reads right after a change see new values) |
-| D4 | `toLocal`: A keeps the walk through the work list; B evaluates every frame that runs, or compares matrix versions | as listed; matrix versions only if a measurement asks for it |
-| D5 | B: derived values right after `setAttribute()` in the next frame, or evaluated on demand when a stale value is read | the next frame, if step 2 finds no page that relies on it |
-| D6 | Hidden subtrees: evaluate them every frame, never, or only what someone outside reads (R5) | only what is read: under B the ordered sources already are |
-| D7 | B: wake every stage in view, or only stages with readers of the source | every stage in view |
-| D8 | Scoped names instead of global ids (`design/done/2026-10-30_framework_compatibility_plan.md` D2, §8.2): compiled functions would get `ref` per stage at call time, so component instances share them | design together with D1: both change how `ref` is resolved |
+| D1 | Option A or B (§3) | build step 2, prototype B, then decide. *2026-11-27: **decided: B** (§10.4)* |
+| C1 | Cycles without `t` (`a = b + 1`, `b = a + 1`): (a) today's recursion with the nesting counter, A only; (b) members in DOM order, repeated while values change, at most `pxl.MAX_CYCLE_ROUNDS` rounds, one warning, and the edge that closes the cycle requests no frame; (c) one pass and a warning when the order is built | (b), on both options: it keeps the results of every cycle that settles or converges, without recursion; (c) stops converging cycles after one step. *2026-11-27: **decided: (b)**, as prototyped (§10)* |
+| D2 | Granularity: element (as the compiler records it) or attribute (`ref.orb.stroke` as its own source) | element. *2026-11-27: **decided: element*** |
+| D3 | A: one propagation per `broadcast()`, or several changes in a handler as one | one per `broadcast()` (reads right after a change see new values). *2026-11-27: not needed, B decided* |
+| D4 | `toLocal`: A keeps the walk through the work list; B evaluates every frame that runs, or compares matrix versions | as listed; matrix versions only if a measurement asks for it. *2026-11-27: **decided**: evaluated in every frame that runs; `toLocal()` reads a target in the reader's own stage only (§10.4)* |
+| D5 | B: derived values right after `setAttribute()` in the next frame, or evaluated on demand when a stale value is read | the next frame, if step 2 finds no page that relies on it. *2026-11-27: **decided: the next frame**; no docs or example page relies on it (§10.2); the docs say so* |
+| D6 | Hidden subtrees: evaluate them every frame, never, or only what someone outside reads (R5) | only what is read: under B the ordered sources already are. *2026-11-27: **decided**, as prototyped (§10.4)* |
+| D7 | B: wake every stage in view, or only stages with readers of the source | every stage in view. *2026-11-27: **decided: only stages that read the changed key**, as prototyped (§10.1)* |
+| D8 | Scoped names instead of global ids (`design/done/2026-10-30_framework_compatibility_plan.md` D2, §8.2): compiled functions would get `ref` per stage at call time, so component instances share them | design together with D1: both change how `ref` is resolved. *2026-11-27: **decided: keep global ids** (§10.4); scoped names parked in `design/ideas/2026-11-27_scoped_names_note.md`* |
 | D9 | Throttled layers (`design/2026-11-12_layer_throttling_plan.md`): evaluated every frame (smooth readers) or at their rate | decide with throttling part A, after step 2 |
-| D10 | Hit testing uses the values of the last update; in a throttled layer they can be ahead of its pixels | accept |
-| D11 | Internal animated values of custom shapes (a pump's impeller that spins while `running`, without the page writing `t`): a declarative `static animations = { impeller: 'this.values.running ? t * 90 : 0' }` evaluated like an animated attribute, and values that keep state between frames (smooth start and stop) | decide with D1; until then time goes through an attribute (`spin="t * 180"`). From `design/done/2026-11-20_custom_shapes_plan.md` §5.9 (D9 there) |
+| D10 | Hit testing uses the values of the last update; in a throttled layer they can be ahead of its pixels | accept. *2026-11-27: **decided: accept*** |
+| D11 | Internal animated values of custom shapes (a pump's impeller that spins while `running`, without the page writing `t`): a declarative `static animations = { impeller: 'this.values.running ? t * 90 : 0' }` evaluated like an animated attribute, and values that keep state between frames (smooth start and stop) | decide with D1; until then time goes through an attribute (`spin="t * 180"`). From `design/done/2026-11-20_custom_shapes_plan.md` §5.9 (D9 there). *2026-11-27: still open, not needed for the build* |
+| D12 | Duplicate ids (added 2026-11-27): today the element connected last wins silently, and removing it deletes the entry although the other is still there | **decided: nothing special**, as today (§10.4) |
+| D13 | A `<pxl-var>` outside every stage (added 2026-11-27): no stage evaluates it | **decided: nothing special**: not evaluated, like any element outside a stage (§10.4) |
 
 ## 6. Plans That Depend on This
 
@@ -136,6 +140,8 @@ Not affected: hit testing and event dispatch (both fit either option), isolation
 2. **Prototype B** as a patch over the engine; the page sweep and the frame bench; decide D1 and C1.
 3. **Build** the chosen option, tests first (§8).
 4. **Update** the dependent plans (§6), `.agents/ENGINE.md` §4–§5 and `.agents/KILOPIXEL.md` §3.6.
+
+*2026-11-27: step 2 done (§10); D1 decided, step 3 is next (§10.5).*
 
 ## 8. Tests
 
@@ -206,9 +212,76 @@ As §2 describes it: `isDirty` means only "pixels out of date", and the stage ke
 
 **Left:** the prototype of option B and D1 (§7, step 2 there).
 
+## 10. Prototype of Option B (2026-11-27)
+
+`design/prototypes/2026-11-20_evaluation_model/option_b.patch` applies to commit `e1b2f68` (`git apply`, then `node build.js`). It is a working engine, not a sketch: every test page passes with it.
+
+### 10.1 What the Patch Does
+
+- **`js/engine.js`:** `pxl.markChanged(node)` replaces `broadcast()`. It acts only for keys someone reads (`pxl._readKeys`, filled by the compiler): it raises `pxl._changeCounter` into the node's `changeVersion` and wakes the stages that read the key (`pxl.wakeReaders()`, D7). Removing an id raises `pxl._registryVersion`. Changes that affect the order raise `pxl._orderVersion`. Gone: subscriptions, `broadcast()`, `evaluateToLocalAttributes()`, `evaluateAttributesForVariable()`, `restoreVariableSubscriptions()`.
+- **`js/compiler.js`:** a compiled expression also keeps `sourceIds`, the ids it reads without the `ref.` prefix.
+- **`js/elements/node.js`:** `changeVersion` and `_seenVersion`; `isOutOfDate()` compares the versions of the sources in a flat `_sourceIds` list; `evaluateReactive()`, `updateReactive()` (evaluated twice when the element reads itself, R3), `updateAsSource()`. `valueChanged()` and `evaluateAnimations()` call `markChanged()`. The `toLocal` key list and the matrix broadcast are gone.
+- **`js/elements/stage.js`, the update phase:**
+  1. `evaluateOrder()`: the ordered sources, built by `buildOrder()` only when `pxl._orderVersion` changed (Kahn's algorithm; a `toLocal()` node also depends on the ancestors of itself and its target). What is left over is in a cycle and is evaluated in rounds while values change, at most `pxl.MAX_CYCLE_ROUNDS`, with one warning (C1 b).
+  2. Stage-level variables, then the walk as today.
+  3. `updateReaders()`: the readers nobody reads, each evaluated when out of date. It returns at once when no read key changed since its last pass and the stage has no `toLocal()` readers.
+- **Smaller:** `group.js`, `polyline.js`, `interaction.js`, `monitor.js` call `markChanged()`.
+- **Tests:** 10 cases read a derived value right after a change and now render a frame in between (D5); 3 checks of removed internals (subscriptions, `toLocalAttributeKeys`, the broadcast nesting) check the behavior instead.
+
+### 10.2 Results
+
+- **Tests:** `tests/index.html` 169/169, `tests/frameworks.html` 58/58, `tests/render.html` 56/56, `tests/unit.html` 88/88.
+- **Pages** (`run.js e1b2f68` against the patched build): 82 pages, 173 stages, 306 layers; 9,336 frames and 10,667 canvas clears in both; 0 layers that look different (5 unstable: clocks, randomness). **No page relies on reading a derived value right after `setAttribute()` (D5).**
+- **Bench** (`option_b_bench.html`, Chrome, the same machine):
+
+| Case | Today (`e1b2f68`) | Option B |
+|---|---|---|
+| 5,000 readers, their source changes in every frame | 0.40 ms per frame | 0.40 ms |
+| The same readers, nothing they read changes | 0.000 ms | 0.000 ms |
+| 14 stacked diamonds, one change at the top | 65,532 evaluations, 7.6 ms | 42 evaluations, 0.10 ms |
+| A chain of 10,000 readers, one change | 4.7 ms, recursive (1) | 3.9 ms, no recursion |
+| Readers with `t` written before their sources (C reads B reads A) | B one frame behind, C older | all three in step |
+| A handler sets 10 variables one reader sums | 10 evaluations of the reader | 1 |
+| A derived value read right after `setAttribute()` | new | old until the next frame (D5) |
+
+(1) One call per link: it finished from the console, and overflowed the stack in earlier runs started from inside the bench loop.
+
+- **The version check** of an idle reader (`checkCost()`): 16 ns for `isOutOfDate()`. With the stage's skip (no read key changed) a frame touches no reader at all. The first version needed about 300 ns per idle reader: it looked up each expression's dependency list on the element and counted every change, also of keys nobody reads. The flat `_sourceIds`, counting only read keys and the skip fixed that.
+- **Size and code:** `js/` +372 / −206 lines (+166); `pxl.min.js` 71.16 → 74.11 KB (+2.95 KB), about +0.7 KB gzipped. §3.2 expected about −35 lines: it counted the broadcast code that goes, but the order (Kahn, `toLocal` ancestors, cycle rounds) and the reader list with its version checks are larger than estimated.
+
+### 10.3 Limits Found
+
+1. **Paused stages:** a stage out of view (the intersection observer) or in a background tab runs no frames, so the values *derived* inside it stay at its last frame until it runs again. Values set from outside are current at once, and nothing stale is on screen; only JavaScript that reads a derived value of a paused stage sees an old one. Decided in §10.4.
+2. **A `<pxl-var>` outside every stage** is never evaluated, because no stage runs it; a plain value is still readable through its id. Decided in §10.4 (D13).
+3. **`toLocal()` across stages:** a reader didn't follow a target moved by an ancestor in another stage. Decided in §10.4.
+
+### 10.4 Decisions (2026-11-27)
+
+- **D1: option B,** as prototyped: the same cost as today when sources change, nothing when they don't, diamonds evaluated once, no recursion, no lag for readers with `t`. Accepted against it: +166 lines rather than fewer, and D5.
+- **Confirmed as prototyped:** C1 (b), D2 element, D4 (`toLocal()` evaluated in every frame that runs), D6 (what others read is evaluated, also when hidden; values with `t` that nobody reads stay frozen while hidden), D7 (only stages that read the changed key are woken), D10 accept.
+- **D5: the next frame.** A handler that sets a value and reads one derived from it in its next statement sees the old one; what is drawn is always current. KILOPIXEL.md and the docs say so.
+- **`toLocal()` reads a target in the reader's own stage only:** its geometry needs a shared space, and another stage's frame doesn't move with this one.
+- **D8: keep global ids.** Names scoped to their surroundings (`name`, looked up from the reader outward) were designed in this discussion and work for repeated markup, but they add a second lookup rule, a migration of every page and their own corner cases (a reader must find itself and its ancestors before their subtrees, or every copy follows the first). The case they help is narrow: a shape read through `ref.*` inside repeated markup, which frameworks handle with generated ids (`bg${i}`), as `docs/frameworks.html` already says. The design is parked in `design/ideas/2026-11-27_scoped_names_note.md` for a native `<pxl-repeat>` or a user who needs it.
+- **D12, duplicate ids: nothing special,** as today: the element connected last wins, and removing it leaves the id unregistered although the other element is still there. A duplicate id is the author's mistake, and `docs/frameworks.html` §5 already says ids must be unique. Considered: a warning (about 5–8 lines; checked in the next frame, because frameworks may insert a replacement before removing the old element), or the first in DOM order winning like `getElementById()` (about 10–15 lines); worth adding only if users get confused.
+- **D13, a `<pxl-var>` outside every stage: nothing special.** It isn't evaluated, like a circle outside a stage isn't drawn, and needs no warning. No docs, example or test page has one; a value shared between stages lives in one of them and is read through its global id.
+- **Paused stages** (§10.3, 1): accepted; the docs say that a stage out of view updates its derived values when it runs again.
+- **Timing across stages:** another stage's pointer and hover are set at the start of that stage's frame; a reader in a stage that runs earlier in the same animation frame sees them one frame late, as today. A shared frame for all stages (all pointers first, then every update phase, then every draw) would fix that and keep stages in step: about 30–40 lines, later and only if needed.
+- **Still open, not needed for the build:** D9 (with the throttling plan), D11 (internal animations of custom shapes).
+
+### 10.5 Next
+
+1. **Build** B from the patch (§7 step 3), with the tests of §8 (diamonds, chain, readers with `t`, the idle page, a `toLocal()` reader that others read), and the 10 tests that now render a frame between a change and a read.
+2. **Update** the dependent plans (§6), `.agents/ENGINE.md` §4–§5 and `.agents/KILOPIXEL.md` §3.6 (D5, `toLocal()` within one stage, paused stages), and the docs:
+   - `docs/frameworks.html` §2 or §3: a handler that sets a value and reads one derived from it right away gets the old one until the next frame (D5); §8 Known Limits: a stage out of view updates its derived values when it runs again;
+   - `docs/walkthrough.html` §8 and `docs/mapping.html` (intro or §1): `toLocal()` reads a target in the reader's own stage.
+
+   No interactive demo depends on the timing: the page sweep was identical, and `docs/mapping.html` §2 (a `toLocal()` reader that others read, in a transformed layer) matched after every slider move and with both layers following `t`, one frame after each change (checked in the browser, 2026-11-27).
+
 ## Log
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-27: option B prototyped (§10: patch, bench, page sweep); decided: B, global ids (scoped names parked in `design/ideas/2026-11-27_scoped_names_note.md`), D5 the next frame, nothing special for duplicate ids (D12) and variables outside a stage (D13), `toLocal()` within one stage.
 
 - 2026-11-26: step 2 built (§9): change-based dirty flags, the keep-alive in the stage, R1; variables and hidden elements redraw nothing; problems 1 and 5 of §1 solved.
 

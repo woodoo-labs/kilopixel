@@ -1,0 +1,187 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script>
+  // Option A (today) against option B (design/2026-11-20_evaluation_model_plan.md §10). The engine comes from ?src=
+  // (default /dist/pxl.min.js): today's build, or a build with option_b.patch applied. Run runBench() and, with option B,
+  // checkCost() in the console; the page renders its frames by hand (stage.render(t)).
+  const src = new URLSearchParams(location.search).get('src') || '/dist/pxl.min.js';
+  document.write(`<script src="${src}"><\/script>`);
+</script>
+</head>
+<body>
+<script>
+// Cases where option A (today's broadcasts) and option B (per-frame versions) differ.
+// Frames are rendered by hand (stage.render(t)); each case builds its own stage and removes it.
+function mount(html) {
+  const box = document.createElement('div');
+  box.style.width = '1000px';
+  box.innerHTML = `<pxl-stage alwaysrender ratio="2">${html}</pxl-stage>`;
+  document.body.append(box);
+  const stage = box.querySelector('pxl-stage');
+  stage.resize();
+  return { box, stage };
+}
+const frame = (stage, t) => stage.render(t);
+const median = (a) => { const s = [...a].sort((x, y) => x - y); return s[s.length >> 1]; };
+let evals = 0;
+// Counts evaluations of every expression of the elements under root
+function countEvals(root) {
+  for (const el of root.querySelectorAll('*')) {
+    if (!el.expressions) continue;
+    for (const key of [...el.reactiveAttributeKeys, ...el.animatedAttributeKeys]) {
+      const fn = el.expressions[key];
+      const wrapped = function(t) { evals++; return fn.call(this, t); };
+      Object.assign(wrapped, fn);
+      el.expressions[key] = wrapped;
+    }
+  }
+}
+
+const cases = {
+  // 5,000 hidden readers of one variable (no drawing), the variable changes in every frame: set + frame
+  readersChanged() {
+    let html = '<pxl-var id="bA" value="0"></pxl-var><pxl-layer>';
+    for (let i = 0; i < 5000; i++) html += `<pxl-circle hidden r="2" x="ref.bA.value * ${i % 50} + 1"></pxl-circle>`;
+    const { box, stage } = mount(html + '</pxl-layer>');
+    const v = box.querySelector('pxl-var'), times = [];
+    for (let i = 1; i <= 120; i++) {
+      const t0 = performance.now();
+      v.value = i;
+      frame(stage, i / 60);
+      times.push(performance.now() - t0);
+    }
+    const ok = box.querySelector('pxl-circle:last-child').values.x === 120 * (4999 % 50) + 1;
+    box.remove();
+    return `${median(times).toFixed(2)} ms per frame${ok ? '' : ' WRONG VALUE'}`;
+  },
+  // The same 5,000 readers, nothing they read changes, one animated circle keeps the frames running
+  readersIdle() {
+    let html = '<pxl-var id="bB" value="1"></pxl-var><pxl-layer><pxl-circle r="5" x="t * 10"></pxl-circle></pxl-layer><pxl-layer>';
+    for (let i = 0; i < 5000; i++) html += `<pxl-circle hidden r="2" x="ref.bB.value * ${i % 50} + 1"></pxl-circle>`;
+    const { box, stage } = mount(html + '</pxl-layer>');
+    const times = [];
+    for (let i = 1; i <= 120; i++) {
+      const t0 = performance.now();
+      frame(stage, i / 60);
+      times.push(performance.now() - t0);
+    }
+    box.remove();
+    return `${median(times).toFixed(3)} ms per frame`;
+  },
+  // 14 stacked diamonds: d(i) = l(i) + r(i), l(i) = d(i-1) + 1, r(i) = d(i-1) + 2; one change at the top
+  diamonds() {
+    let html = '<pxl-var id="bD0" value="0"></pxl-var>';
+    for (let i = 1; i <= 14; i++) {
+      html += `<pxl-var id="bL${i}" value="ref.bD${i - 1}.value + 1"></pxl-var><pxl-var id="bR${i}" value="ref.bD${i - 1}.value + 2"></pxl-var>` +
+              `<pxl-var id="bD${i}" value="ref.bL${i}.value + ref.bR${i}.value"></pxl-var>`;
+    }
+    const { box, stage } = mount(html + '<pxl-layer></pxl-layer>');
+    frame(stage, 1);
+    countEvals(box);
+    evals = 0;
+    const t0 = performance.now();
+    box.querySelector('#bD0').value = 1;
+    frame(stage, 2);
+    const ms = performance.now() - t0;
+    const bottom = box.querySelector('#bD14').values.value;
+    box.remove();
+    return `${evals} evaluations, ${ms.toFixed(2)} ms, bottom ${bottom}`;
+  },
+  // A chain of 10,000 readers: one change at the start
+  chain() {
+    let html = '<pxl-var id="bC0" value="0"></pxl-var>';
+    for (let i = 1; i <= 10000; i++) html += `<pxl-var id="bC${i}" value="ref.bC${i - 1}.value + 1"></pxl-var>`;
+    let result;
+    const t0 = performance.now();
+    const { box, stage } = mount(html + '<pxl-layer></pxl-layer>');
+    const tMount = performance.now() - t0;
+    frame(stage, 1);
+    const t1 = performance.now();
+    try {
+      box.querySelector('#bC0').value = 5;
+      frame(stage, 2);
+      result = `end ${box.querySelector('#bC10000').values.value} (expected 10005)`;
+    } catch (e) {
+      result = `threw ${e}`;
+    }
+    const ms = performance.now() - t1;
+    box.remove();
+    return `${result}, change ${ms.toFixed(1)} ms, mount + first frame ${tMount.toFixed(0)} ms`;
+  },
+  // Readers with t written before their sources: C reads B reads A, A moves with t
+  readersWithT() {
+    const { box, stage } = mount(`<pxl-layer>
+      <pxl-circle id="bTC" r="5" x="ref.bTB.x + t * 0"></pxl-circle>
+      <pxl-circle id="bTB" r="5" x="ref.bTA.x + t * 0"></pxl-circle>
+      <pxl-circle id="bTA" r="5" x="t * 100"></pxl-circle></pxl-layer>`);
+    frame(stage, 1); frame(stage, 2);
+    const v = (id) => box.querySelector('#' + id).values.x;
+    const r = `A ${v('bTA')}, B ${v('bTB')}, C ${v('bTC')}`;
+    box.remove();
+    return r;
+  },
+  // A handler sets a variable and reads a value derived from it in its next statement (D5)
+  readRightAfterSet() {
+    const { box, stage } = mount(`<pxl-var id="bS" value="1"></pxl-var>
+      <pxl-layer><pxl-circle id="bSR" r="5" x="ref.bS.value * 10"></pxl-circle></pxl-layer>`);
+    box.querySelector('#bS').value = 7;
+    const right = box.querySelector('#bSR').values.x;
+    frame(stage, 1);
+    const next = box.querySelector('#bSR').values.x;
+    box.remove();
+    return `right after: ${right}, after the frame: ${next}`;
+  },
+  // A handler sets 10 variables that one reader sums: evaluations of the reader
+  batch() {
+    let html = '', sum = '0';
+    for (let i = 0; i < 10; i++) { html += `<pxl-var id="bM${i}" value="0"></pxl-var>`; sum += ` + ref.bM${i}.value`; }
+    const { box, stage } = mount(html + `<pxl-layer><pxl-circle id="bMR" r="5" x="${sum}"></pxl-circle></pxl-layer>`);
+    frame(stage, 1);
+    countEvals(box.querySelector('pxl-layer'));
+    evals = 0;
+    for (let i = 0; i < 10; i++) box.querySelector('#bM' + i).value = i + 1;
+    frame(stage, 2);
+    const r = `${evals} evaluations of the reader, x ${box.querySelector('#bMR').values.x}`;
+    box.remove();
+    return r;
+  }
+};
+
+// Option B only: what the version check of 5,000 readers costs, piece by piece (ns per reader)
+window.checkCost = function() {
+  let html = '<pxl-var id="bK" value="1"></pxl-var><pxl-layer>';
+  for (let i = 0; i < 5000; i++) html += `<pxl-circle hidden r="2" x="ref.bK.value * ${i % 50} + 1"></pxl-circle>`;
+  const { box, stage } = mount(html + '</pxl-layer>');
+  const readers = stage._readers;
+  const n = readers.length;
+  let x = 0;
+  function time(fn) {
+    for (let k = 0; k < 20; k++) fn(); // warm up
+    const t = performance.now();
+    for (let k = 0; k < 200; k++) fn();
+    return Math.round((performance.now() - t) / 200 / n * 1e6);
+  }
+  const res = {
+    loop() { for (let i = 0; i < n; i++) x += readers[i].readerStage === stage ? 1 : 0; },
+    keyList() { for (let i = 0; i < n; i++) x += readers[i].reactiveAttributeKeys.length; },
+    expression() { for (let i = 0; i < n; i++) { const r = readers[i]; x += r.expressions[r.reactiveAttributeKeys[0]].sourceIds.length; } },
+    source() { for (let i = 0; i < n; i++) x += pxl.nodes.bK.$node.changeVersion; },
+    isOutOfDate() { for (let i = 0; i < n; i++) x += readers[i].isOutOfDate() ? 1 : 0; },
+    updateReaders() { stage.updateReaders(); }
+  };
+  const out = {};
+  for (const [name, fn] of Object.entries(res)) out[name] = time(fn) + ' ns';
+  box.remove();
+  return out;
+};
+
+window.runBench = async function() {
+  const out = {};
+  for (const [name, fn] of Object.entries(cases)) {
+    try { out[name] = fn(); } catch (e) { out[name] = `ERROR ${e}`; }
+    await new Promise((r) => setTimeout(r, 50));
+  }
+  return out;
+};
+</script>
+</body></html>

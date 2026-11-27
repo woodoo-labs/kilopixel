@@ -97,11 +97,11 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Background**: `design/done/2026-10-30_framework_compatibility_plan.md` §23.6, §26.2.
 
 ## 46. Evaluation Model
-- **Status**: 🟡 **Proposed**
+- **Status**: 🟢 **Decided**
 - **Plan**: `design/2026-11-20_evaluation_model_plan.md` (merges the two-phase frame, reactive propagation and per-frame evaluation plans)
-- **Built**: step 2 (plan §9): a layer redraws only when a value in it changed (a `floor(t)` clock once per second), the stage keeps the frame loop running.
-- **Next**: a prototype of option B (no broadcasts), then decision D1 between it and option A (ordered broadcasts).
-- **Also decided there**: scoped names instead of global ids (D8); B8 of `design/done/2026-10-27_engine_cleanup_inventory_note.md` (the evaluation loops either option rewrites).
+- **Built**: step 2 (plan §9): a layer redraws only when a value in it changed, the stage keeps the frame loop running.
+- **Decided** (plan §10.4): option B, no broadcasts (prototyped: all tests and pages pass, diamonds evaluated once, +166 lines); global ids kept; derived values in the next frame (D5); `toLocal()` within one stage.
+- **Next**: build B from the patch (plan §10.5). Also there: B8 of `design/done/2026-10-27_engine_cleanup_inventory_note.md`.
 
 ## 49. Shape Filters in Safari
 - **Status**: 💬 **Discussion** (no plan yet)
