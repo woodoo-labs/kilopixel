@@ -1,6 +1,6 @@
 # Evaluation Model: When Values Are Evaluated and Layers Redrawn
 
-- **Status**: 🟢 **Decided** (2026-11-27, option B with global ids, §10.4; next: build it)
+- **Status**: ✅ **Implemented** (2026-11-27, option B with global ids, §11)
 - **Date**: 2026-11-20
 - **Replaces**: `design/done/2026-11-12_two_phase_frame_plan.md` (step 1 built there, §7.4; its open parts continue here), `design/done/2026-11-12_reactive_propagation_plan.md` (the cycle stop built there, §2; its full design is option A here), `design/archive/2026-11-15_per_frame_evaluation_plan.md` (option B here). Details, derivations and measurements stay in those plans; this one holds the state, the next step and the decisions.
 - **Related**: `design/done/2026-11-17_pointer_frame_order_plan.md` (the pointer at the start of the frame), `design/done/2026-11-07_safe_shape_render_plan.md` (error rules, kept), `design/done/2026-10-26_tolocal_fix_plan.md` (the `toLocal` matrix walk)
@@ -30,7 +30,7 @@ An attribute expression is re-evaluated by one of three mechanisms (`.agents/ENG
 5. **A change before the running frame's update phase requests a frame of its own:** a pointer reader adds an empty frame after each move (`test.known()` in `tests/index.html`, rule R1).
 6. **Hidden subtrees:** values that follow `t` freeze inside a hidden group or layer, also for readers outside (§5, D6).
 
-*2026-11-26:* problems 1 and 5 are solved by step 2 (§9).
+*2026-11-26:* problems 1 and 5 are solved by step 2 (§9). *2026-11-27:* problems 2, 3 and 4 by option B (§11); for 6, values that others read are evaluated also when hidden (D6).
 
 ## 2. Step 2: Change-Based Dirty Flags, Keep-Alive in the Stage
 
@@ -141,7 +141,7 @@ Not affected: hit testing and event dispatch (both fit either option), isolation
 3. **Build** the chosen option, tests first (§8).
 4. **Update** the dependent plans (§6), `.agents/ENGINE.md` §4–§5 and `.agents/KILOPIXEL.md` §3.6.
 
-*2026-11-27: step 2 done (§10); D1 decided, step 3 is next (§10.5).*
+*2026-11-27: step 2 done (§10); D1 decided, step 3 is next (§10.5).* *2026-11-27: steps 3 and 4 built (§11).*
 
 ## 8. Tests
 
@@ -270,6 +270,8 @@ As §2 describes it: `isDirty` means only "pixels out of date", and the stage ke
 
 ### 10.5 Next
 
+*2026-11-27: built, §11.*
+
 1. **Build** B from the patch (§7 step 3), with the tests of §8 (diamonds, chain, readers with `t`, the idle page, a `toLocal()` reader that others read), and the 10 tests that now render a frame between a change and a read.
 2. **Update** the dependent plans (§6), `.agents/ENGINE.md` §4–§5 and `.agents/KILOPIXEL.md` §3.6 (D5, `toLocal()` within one stage, paused stages), and the docs:
    - `docs/frameworks.html` §2 or §3: a handler that sets a value and reads one derived from it right away gets the old one until the next frame (D5); §8 Known Limits: a stage out of view updates its derived values when it runs again;
@@ -277,9 +279,77 @@ As §2 describes it: `isDirty` means only "pixels out of date", and the stage ke
 
    No interactive demo depends on the timing: the page sweep was identical, and `docs/mapping.html` §2 (a `toLocal()` reader that others read, in a transformed layer) matched after every slider move and with both layers following `t`, one frame after each change (checked in the browser, 2026-11-27).
 
+## 11. Built (2026-11-27)
+
+Option B as prototyped (§10), from `design/prototypes/2026-11-20_evaluation_model/option_b.patch`, with two fixes and one cleanup agreed before building.
+
+**Files, functions and fields:**
+- **`js/engine.js`:**
+  - New: `pxl.markChanged()`, `pxl.wakeReaders()`, `pxl.registerNode()`, `pxl.unregisterNode()`, `pxl.addReadIds()`, `pxl.isRead()`, `pxl.expressionsChanged()`; `pxl._changeCounter`, `pxl._registryVersion`, `pxl._readIds`, `pxl._orderVersion`. `pxl.renameNode()` uses the first two.
+  - Gone: `pxl._subscriptions`, `pxl._subscribedKeys`, `broadcast()`, `subscribeToVariable()`, `unsubscribeFromVariable()`, `clearAllVariableSubscriptions()`, `restoreVariableSubscriptions()`, `evaluateAttributesForVariable()`, `evaluateToLocalAttributes()`.
+- **`js/compiler.js`:** `fn.sourceIds` (the ids, always set) replaces `variableDependencies`; `fn.usesToLocal` is always a boolean.
+- **`js/elements/node.js`:**
+  - New: `registeredId` (replaces `refKey`), `changeVersion`, `_seenVersion`, `sourceIds`, `hasToLocal`, `_evaluatedFrame`, and, written by the stage, `readerStage`, `listedIn`, `isOrderNode`. Methods `collectSources()`, `isOutOfDate()`, `evaluateReactive()`, `updateReactive()`, `updateAsSource()`, `readsItself()`. `connectedCallback()` evaluates through `evaluateReactive()`.
+  - Gone: `variableChangedCallback()`, `broadcastGlobalMatrixChange()`, `toLocalAttributeKeys`, `_broadcastNesting`.
+- **`js/elements/stage.js`:** `runFrame()` in three parts; `readsId()`, `addReader()`, `updateReaders()`, `buildOrder()`, `addOrderNode()`, `orderSources()`, `pushContainers()`, `evaluateOrder()`; `registeredId`, `changeVersion`, `_idsRead`, `_readers`, `_checkedCounter`, `_order`, `_cycleStart`, `_builtOrderVersion`.
+- **Smaller:**
+  - `group.js`: skips its children after failing in part 1;
+  - `polyline.js`: `markChanged()`, and `expressionsChanged()` when removed point keys held expressions;
+  - `layer.js`: a comment;
+  - `interaction.js`, `monitor.js`: `markChanged()`.
+
+**Deviations from the patch, agreed before building** (both bugs checked in `scratch/` against the patched build, and against today's engine, which got them right):
+1. **One list of ids.** The compiler gives only `sourceIds`; `pxl._readIds` and the stage's `_idsRead` hold ids; `refKey` (`'ref.<id>'`) became `registeredId`. Every use of the `ref.` keys was a broadcast or a subscription. Callers call `pxl.markChanged()` without checking for an id first.
+2. **Every `toLocal()` reader is a source in the order**, not only one that others read. With the patch, a reader before a group whose reactive `rotate` moves its target read the group's old matrix and asked for no further frame: it stayed at (600, 250) instead of (500, 350). In the order, the reader comes after the group. Part 3 then needs no DOM-order sort of its readers and no exception for `toLocal()` in its skip.
+3. **An element that others read rebuilds the order when it gets its first expression.** With the patch only elements already in the order did: when the new expression's source was already read by another element, the reader showed 11 instead of 21, again without a next frame.
+
+**Decided while building:**
+- **Sources are collected when the expressions change** (`collectSources()`, from `pxl.expressionsChanged()` and on connect), not lazily as in the patch (`areSourcesDirty`): one place, and no flag to check per frame. It loops over the element's keys on every `setAttribute()` of an expression, so a polyline with n coordinate expressions reads n² keys once, small against compiling them.
+- **Readers with `toLocal()` and only `t`** are in the reader list too, so the order finds them.
+- **The reader pass** also drops elements that are no longer readers.
+- **The order is rebuilt when any container's expressions change.** The patch did that only while a `toLocal()` node existed (`pxl._hasToLocalNodes`, gone).
+- **The order's edges keep duplicates** (Kahn counts each edge on both sides). A source in another stage's order adds no edge (it is read as it is; without that check, which the patch had and the first cleanup lost, building the order threw, found by the cross-stage test), and a `toLocal()` target in another stage adds no containers (§10.4).
+- **B8** of `design/done/2026-10-27_engine_cleanup_inventory_note.md`, settled: the connect loop uses `evaluateReactive()`; `evaluateAnimations()` and `evaluateReactive()` stay two loops on the per-frame path.
+- **Readers with `t` no longer lag** behind a source later in the DOM: a source that others read is in the order (§1, problem 2). KILOPIXEL.md §3.6 drops that exception.
+- **Not built:** a warning that names every member of a cycle (the first member is named, as before).
+
+**Tests:**
+- `tests/index.html` 178/178. New section "Evaluation order" (9 tests):
+  - ten stacked diamonds evaluate their bottom once, with all inputs new;
+  - a chain of 10,000 readers ends at the right value in one frame;
+  - readers with `t` in DOM order C, B, A show the same frame;
+  - a `toLocal()` reader that others read follows a target in a group that moves with `t`;
+  - the two cases of deviations 2 and 3;
+  - a source in another stage's order is read as it is;
+  - a derived value is new in the next frame, not right after `setAttribute()` (D5);
+  - the monitor asks no frame of a stage whose readers don't read it, and one once a reader does.
+- **Changed tests:**
+  - the cycle test also checks that the warning names a member and that the stage doesn't keep running;
+  - the 10 tests that read a derived value right after a change render a frame first (`nextFrame()`);
+  - the checks of `toLocalAttributeKeys`, `_broadcastNesting` and `pxl._subscriptions` check behavior or the stage's reader list instead.
+- **Other pages:**
+  - `tests/unit.html` 88/88 (classification reads `sourceIds`);
+  - `tests/frameworks.html` 58/58;
+  - `tests/render.html` 56/56;
+  - `tests/scaling.html` 9/9 ("one variable read by n shapes" renders a frame per change, since `setAttribute()` no longer evaluates the readers);
+  - page sweep: 82 pages, no console messages.
+
+**Pages** (`run.js HEAD` against the build, as in §9 and §10.2): 82 pages, 173 stages, 306 layers; 9,336 frames and 10,667 canvas clears in both. One run showed 2 differing layers on `docs/walkthrough.html` (the page that gave noise in §9); three runs of that page in the browser and a layer-by-layer check of two old and two new runs showed none.
+
+**Size and code:** `js/` +399 / −245 lines (+154; the patch +166). `pxl.min.js` 71.16 → 73.56 KB (+2.40 KB; the patch +2.95 KB), gzipped about +0.56 KB.
+
+**Reference and docs:**
+- `.agents/ENGINE.md` §1–§5 (§4 rewritten), §6.5, §8.3, §8.4, §9, §10;
+- `.agents/KILOPIXEL.md` §2, §3.2, §3.5, §3.6 (D5, stages out of view), §9 (one stage);
+- `docs/frameworks.html` §2 (Derived Values) and §8 (Stages Out of View), `docs/walkthrough.html` §8, `docs/mapping.html` (lead).
+
+**Left:** D9 (with the throttling plan), D11 (custom shapes' internal animations).
+
 ## Log
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-27: option B built (§11), with two fixes (every `toLocal()` reader in the order; an element that others read rebuilds the order when it gets its first expression) and one list of ids (`sourceIds`, `registeredId`); moved to `design/done/`, its TODO item removed.
 
 - 2026-11-27: option B prototyped (§10: patch, bench, page sweep); decided: B, global ids (scoped names parked in `design/ideas/2026-11-27_scoped_names_note.md`), D5 the next frame, nothing special for duplicate ids (D12) and variables outside a stage (D13), `toLocal()` within one stage.
 

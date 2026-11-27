@@ -10,7 +10,7 @@ Build order (`files` in `build.js`):
 
 | # | File | Contents |
 |---|---|---|
-| 1 | `js/engine.js` | `pxl` namespace, generic helpers, reactivity (`pxl.nodes`, subscriptions, `broadcast`), attribute compilation bridge, property accessors |
+| 1 | `js/engine.js` | `pxl` namespace, generic helpers, reactivity (`pxl.nodes`, versions, `markChanged`), attribute compilation bridge, property accessors |
 | 2 | `js/matrix.js` | `pxl.Matrix` (Float64Array affine matrices, written in place), `pxl.toLocal` |
 | 3 | `js/compiler.js` | expression scope, time drivers, `parseAttributeValue`, `compileExpression` |
 | 4 | `js/interaction.js` | `pxl-on-*` handlers, `pxl.InteractionEngine`: hit testing, states, DOM events, cursor |
@@ -42,18 +42,20 @@ Base of layers, groups, shapes and variables.
 
 - `static defaults`: per class, read-only, extended by spreading (`{ ...pxl.Shape.defaults, r: 0 }`). The constructor copies them into `expressions` and `values`; `pxl.resolveEmptyAttribute` reads them for bare and removed attributes (language §3.5).
 - `expressions`: per name the compiled function or the static value. `values`: the current values, read by drawing and by `ref.<id>` (`pxl.nodes[id]` is this object). Hidden (non-enumerable) properties on it: `set(key, value)` (→ `pxl.setFromRef()`), `$node` (the element), getters `tx` / `ty` (the local matrix translation).
-- Key lists: `animatedAttributeKeys` (use `t`, evaluated every frame), `reactiveAttributeKeys` (read `ref.*`, evaluated on change), `toLocalAttributeKeys` (reactive keys using `toLocal()`, also re-evaluated when the element's own space moves). `isAnimated` = animated keys exist.
+- Key lists: `animatedAttributeKeys` (use `t`, evaluated every frame), `reactiveAttributeKeys` (read `ref.*`, evaluated when a source changed). `isAnimated` = animated keys exist.
+- Reactivity (§4): `registeredId` (the id in `pxl.nodes`, or `null`), `changeVersion`, `_seenVersion`, `sourceIds`, `hasToLocal`, `_evaluatedFrame`; written by the stage: `readerStage`, `listedIn`, `isOrderNode`.
 - `parentLayer` (`closest('pxl-layer')`; a layer is its own), `parentContainer` (closest group or layer above), `childList` (layers and groups; `null` for shapes and variables, an own field so walks don't search the prototype chain).
-- Matrices (§7.2), `_failedFrame` (§5.5), `_broadcastNesting` (§4.3), `_cssStyle` (computed style, created on first use), filter cache, error dedup fields.
+- Matrices (§7.2), `_failedFrame` (§5.5), `_cssStyle` (computed style, created on first use), filter cache, error dedup fields.
 
 **Methods**
 
 - `attributeChangedCallback()`: `id` → registry (§4.1); `pxl-on-*` → `setHandler()` (§8.7); everything else → `setValue(name, value)`.
-- `setValue(name, value)`, the one path for attributes and properties: unchanged value → nothing; a function → warn once (`pxl.warnFunctionValue`); a string or `null` → `pxl.compileAttribute()`; anything else → `pxl.storeValue()`. Then `valueChanged(name)`: `isAnimated`, local matrix dirty for transform keys (`pxl.isSpatialKey`), broadcast `refKey`, and `parentLayer.invalidate()` for a key where `affectsPixels()` is true, otherwise `compositingChanged()` (only a layer does something there, §5.3) and, for an animated element, `parentLayer.wake()` (§5.2).
+- `setValue(name, value)`, the one path for attributes and properties: unchanged value → nothing; a function → warn once (`pxl.warnFunctionValue`); a string or `null` → `pxl.compileAttribute()`; anything else → `pxl.storeValue()`. Then `valueChanged(name)`: `isAnimated`, local matrix dirty for transform keys (`pxl.isSpatialKey`), `pxl.markChanged()`, and `parentLayer.invalidate()` for a key where `affectsPixels()` is true, otherwise `compositingChanged()` (only a layer does something there, §5.3) and, for an animated element, `parentLayer.wake()` (§5.2).
 - `affectsPixels(key)`: whether a changed value changes the layer's pixels. Default: `true`, except while the element is hidden (only `hidden` itself counts then; a hidden element is still evaluated). A layer: not for `alpha`, `blend`, `filter` (CSS on its canvas). A variable: never (its readers redraw their own layers).
-- `connectedCallback()`: properties set before the upgrade (`_pendingProperties`, §4.5), `parentLayer` / `parentContainer`, `registerChild()` on the container (once per connect, no `includes()` check: that made inserting n children quadratic), `_lastParentMatrixVersion = -1` (a new parent may have the old one's version), subscriptions restored, reactive attributes evaluated (their refs and `toLocal()` need the element in the DOM), registry entry and broadcast for an `id`, `_isRegistered = true`.
-- `disconnectedCallback()`: registry entry removed (only if it points to this element), own subscriptions cleared, `unregisterChild()`. Shapes and groups also call `interaction.releaseElement()` (§8.5).
-- `evaluateAnimations(t)`: while animated, first `parentLayer.markAnimated()` (the keep-alive, §5.2; before evaluating, so an element whose evaluation fails keeps the frames coming and an error that depends on `t` recovers). Then evaluates the animated keys, stores changed values, marks the local matrix dirty for transform keys, broadcasts `refKey` if a value changed and someone subscribes, and calls `parentLayer.invalidate()` only if a changed value `affectsPixels()`, otherwise `compositingChanged()` if any value changed.
+- `connectedCallback()`: properties set before the upgrade (`_pendingProperties`, §4.5), `parentLayer` / `parentContainer`, `registerChild()` on the container (once per connect, no `includes()` check: that made inserting n children quadratic), `_lastParentMatrixVersion = -1` (a new parent may have the old one's version), `readerStage`, reactive attributes evaluated (`evaluateReactive()`: their refs and `toLocal()` need the element in the DOM), `collectSources()`, a new order for a `toLocal()` reader, `pxl.registerNode()` for an `id`, `_isRegistered = true`.
+- `disconnectedCallback()`: registry entry removed (only if it points to this element), `registeredId` and `readerStage` cleared (the stage drops the element in its next pass), a new order if it was a node, `unregisterChild()`. Shapes and groups also call `interaction.releaseElement()` (§8.5).
+- `evaluateAnimations(t)`: while animated, first `parentLayer.markAnimated()` (the keep-alive, §5.2; before evaluating, so an element whose evaluation fails keeps the frames coming and an error that depends on `t` recovers). Returns at once if it already ran in this frame (`_evaluatedFrame`: a source evaluated in part 1, §4.3). Then evaluates the animated keys, stores changed values, marks the local matrix dirty for transform keys, `pxl.markChanged()` if a value changed, and calls `parentLayer.invalidate()` only if a changed value `affectsPixels()`, otherwise `compositingChanged()` if any value changed.
+- `collectSources()`, `isOutOfDate()`, `evaluateReactive()` (returns whether a value changed), `updateReactive()` (catches errors), `updateAsSource(t)`: §4.2, §4.3.
 - `reportError(error)`: warns once per distinct message, at most 3 times per element (the third says more are hidden; browser messages may contain changing values). The same error object again returns at once (a cached gradient error allocates nothing).
 
 ## 3. Compiler (`js/compiler.js`)
@@ -65,7 +67,7 @@ Base of layers, groups, shapes and variables.
 3. **CSS percentages:** `50%` before `,` or `)` → `'50%'` (a quoted CSS color in a gradient stays as written).
 4. **Time:** `pxl.timeDriverRegex` finds `t` (not after a `.`) or a driver call; `toLocal(` sets `usesToLocal` (and `pxl.checkToLocalProperties` warns once about unknown literal property names).
 5. **`pxl.rewriteExpression()`** (shared with handlers): `ref.a.b` → `ref.a?.b`; `toLocal(` → `pxl.toLocal(this, `.
-6. **Dependencies:** every `ref.<id>` → `variableDependencies` (`'ref.<id>'` keys).
+6. **Sources:** every `ref.<id>` → `sourceIds` (the ids, each once); new ids go to `pxl._readIds` (`pxl.addReadIds()`, §4.3).
 7. **Return:** without the word `return` in the code, wrapped in `return …;`.
 
 Animated or reactive (time or refs), one outer function per distinct string, shared by every element using it:
@@ -80,47 +82,48 @@ const fn = new Function('scope', 'ref', `
 `)(pxl.scope, pxl.nodes);
 ```
 
-Flags on the function: `isTimeDependent`, `variableDependencies` (only when there are refs), `usesToLocal`. It is called as `fn.call(element, t)` (`this` = the element, for `toLocal`). Static expressions: evaluated once with `new Function`, the result cached (an `undefined` result keeps the source string). A string that doesn't compile warns, is cached and used as text. `pxl.scope` is a whitelist (`Object.create(null)`), so polyfills can't leak in.
+Fields of the function: `isTimeDependent`, `sourceIds` (empty without refs), `usesToLocal`. It is called as `fn.call(element, t)` (`this` = the element, for `toLocal`). Static expressions: evaluated once with `new Function`, the result cached (an `undefined` result keeps the source string). A string that doesn't compile warns, is cached and used as text. `pxl.scope` is a whitelist (`Object.create(null)`), so polyfills can't leak in.
 
 ## 4. Reactivity (`js/engine.js`)
 
 ### 4.1 Registry
 
-- `pxl.nodes`: `{ id: values }`, the `ref` object of every compiled function. Connect registers and broadcasts `ref.<id>`, so readers written before the element re-evaluate.
-- `id` is observed: once registered (`_isRegistered`, set at the end of `connectedCallback()`), a changed id moves the entry (`pxl.renameNode()`: the old entry is removed only if it points to this element, `refKey` follows, both names are broadcast, readers of the old name read `undefined`). Frameworks such as Angular and Alpine set `id` after insertion; during an upgrade the attributes arrive before `connectedCallback()`, which registers the id itself.
+- `pxl.nodes`: `{ id: values }`, the `ref` object of every compiled function. `pxl.registerNode(element, id)` (on connect, or a new id) stores the entry, sets `registeredId` and marks the element changed, so readers written before it pick it up in the next update phase. `pxl.unregisterNode(id)` (removal, or a changed id) deletes it and raises `pxl._registryVersion`: every reader is out of date once, and readers of that id read `undefined`.
+- `id` is observed: once registered (`_isRegistered`, set at the end of `connectedCallback()`), a changed id moves the entry (`pxl.renameNode()`: the old entry is removed only if it points to this element). Frameworks such as Angular and Alpine set `id` after insertion; during an upgrade the attributes arrive before `connectedCallback()`, which registers the id itself.
 
-### 4.2 Classification and Subscriptions
+### 4.2 Classification
 
 `pxl.compileAttribute(element, name, value)` (bare / removed values resolved first by `pxl.resolveEmptyAttribute`):
 
 | Result | Storage | Evaluated |
 |---|---|---|
-| static value | `pxl.storeValue()`: `values[name]`, removed from all key lists | never again |
+| static value | `pxl.storeValue()`: `values[name]`, removed from both key lists | never again |
 | function with `isTimeDependent` | `animatedAttributeKeys` | every frame (`evaluateAnimations`) |
-| function with `variableDependencies` only | `reactiveAttributeKeys` (+ `toLocalAttributeKeys` if `usesToLocal`), subscribed to each dependency, evaluated at once if connected | when a dependency broadcasts |
+| function without `t` (it reads ids) | `reactiveAttributeKeys`, evaluated at once if connected | in the update phase, when a source changed (§4.3) |
 
-- `pxl._subscriptions`: `{ 'ref.id': [element, …] }`. `pxl._subscribedKeys`: `WeakMap` element → `Set` of its keys, so `subscribeToVariable()` checks the set and `clearAllVariableSubscriptions()` removes an element only from its own keys (removing many elements with readers stays linear; design: `design/done/2026-10-30_framework_compatibility_plan.md` §20). `restoreVariableSubscriptions()` on connect.
-- Readers with `t` don't subscribe; they read their sources when evaluated.
-- Granularity is the element: any change of `ref.<id>` re-evaluates every reader of any of its values (unchanged results stop there).
+- A function set or removed calls `pxl.expressionsChanged()`: `collectSources()` (connected elements) and, for an element that is in an order, uses `toLocal()`, is a container or is read by others, a new order (`pxl._orderVersion`).
+- `collectSources()` collects `sourceIds` (the ids the reactive values read) and `hasToLocal` (any expression uses `toLocal()`), and puts an element with reactive values or `toLocal()` into its stage's reader list (`Stage.addReader()`, which also adds the ids to the stage's `_idsRead`).
+- Granularity is the element: any change of `ref.<id>` makes every reader of any of its values out of date (unchanged results stop there).
 
-### 4.3 Propagation
+### 4.3 Versions and the Update Phase
 
-```
-pxl.broadcast('ref.a')                         subscribers walked backwards (one may unsubscribe itself)
-  → element.variableChangedCallback('ref.a')
-    → pxl.evaluateAttributesForVariable()      re-evaluates the reactive keys that depend on it; bitmask:
-         1 = still needed (0 → unsubscribe), 2 = a value changed, 4 = a changed value changes pixels
-    → if 2: broadcast own refKey, then parentLayer.invalidate() (4) or compositingChanged()
-```
+Design: `design/done/2026-11-20_evaluation_model_plan.md` (option B, §10, §11).
 
-- Recursive and depth first. A reader's own error is reported by the reader; the element that changed isn't blamed, the other readers still update.
-- **Cycles:** a cycle whose values keep changing re-enters an element from inside its own broadcast. `_broadcastNesting` counts that and stops at `pxl.MAX_CYCLE_ROUNDS` (100) with `pxl.CYCLE_MESSAGE` through `reportError()`. Chains, diamonds and elements with many inputs are entered one after the other, so the count doesn't grow for them. A cycle of n elements nests n × 100 calls, below the stack limit up to about 200 elements. An attribute reading another attribute of its own element follows after one extra round.
-- **Diamonds:** a reader reached on two paths is evaluated once per path and may first see one new and one old input; only final values are drawn. Design: `design/done/2026-11-12_reactive_propagation_plan.md`.
+- **A change evaluates no reader.** `pxl.markChanged(element)` (from `valueChanged()`, `evaluateAnimations()`, `evaluateReactive()`, interaction states, the stage's pointer, size and monitor values, `Polyline.setPoints()`) acts only for an element that someone reads (`pxl.isRead()`: its `registeredId` is in `pxl._readIds`, the ids every compiled expression names, filled by `pxl.addReadIds()`, never shrinking). It raises `pxl._changeCounter` into the element's `changeVersion` and calls `pxl.wakeReaders(id)`: `requestRender()` on every stage whose `_idsRead` has the id. The running stage requests nothing: its update phase is still to come; an idle page with readers stays idle while the monitor publishes values nobody reads.
+- **Out of date** (`isOutOfDate()`): `hasToLocal`, or `pxl._registryVersion`, or a source's `changeVersion` newer than the reader's `_seenVersion` (the counter at its last evaluation; one flat loop over `sourceIds`, about 20 ns per reader that is up to date).
+- **The update phase** (`Stage.runFrame()`, §5.2):
+  1. **Sources in order** (`evaluateOrder()`): `updateAsSource(t)` on every node of the stage's order: `evaluateAnimations(t)`, then `updateReactive()` if out of date. Nodes: elements of this stage that others read and that have expressions, every `toLocal()` reader, and the containers with expressions above a `toLocal()` reader and above its target. They are evaluated also when hidden. `_evaluatedFrame` makes the walk skip their values with `t`; a failure sets `_failedFrame`, so both phases skip the element (a group with its children).
+  2. **The walk:** stage-level variables, then `layer.update(t)` for layers with `isDirty || hasAnimatedContent`: every other expression with `t`.
+  3. **Readers nobody reads** (`updateReaders()`): `updateReactive()` for each reader that isn't a node and is out of date. Skipped entirely when `pxl._changeCounter` hasn't moved since the last pass (`_checkedCounter`). The pass drops elements that left the stage or are no longer readers (`readerStage`, `listedIn`): removing an element touches no list. The readers read only sources that are already current, so their order doesn't matter.
+- **The order** (`buildOrder()`): rebuilt only when `pxl._orderVersion` changed (a read element connects, leaves, gets an id or new expressions; a new read id; a `toLocal()` reader connects; a container's expressions change). Edges come from `sourceIds` of both key lists (`orderSources()`), for `toLocal()` also the containers above both elements; self-edges, sources without expressions and sources in another stage's order are left out (read as they are). Kahn's algorithm from DOM order; what is left over is in a cycle or reads one and goes to the end (`_cycleStart`). Allocates, but only when rebuilt.
+- **Cycles without `t`:** after the first pass, the nodes from `_cycleStart` on are evaluated again (`evaluateReactive()`) in rounds while a value changes, at most `pxl.MAX_CYCLE_ROUNDS` (100), then `pxl.CYCLE_MESSAGE` through `reportError()` of the first. A cycle that settles or converges keeps its values; no recursion, and the rounds request no frame. Cycles with `t` are evaluated once per frame in their order: a member reading a later one gets its previous value.
+- **An element that reads itself** sees its own new values in the same frame: `updateReactive()` evaluates once more when a value changed and `readsItself()`.
+- **Timing:** a reactive value is updated in the next update phase, not inside `setAttribute()`; the frame on screen is the same. JavaScript that reads a derived value right after a change sees the old one. A stage out of view runs no frames, so values derived inside it wait until it runs again.
+- **Errors:** `updateReactive()` catches the reader's own error (`reportError()`), sets `_seenVersion` (tried again when a source changes); the element that changed isn't blamed, other readers update.
 
 ### 4.4 `toLocal` Reactivity
 
-- **Target side:** readers subscribe to `ref.<target>`. When an ancestor's transform changes, `setLocalMatrixDirty()` → `broadcastGlobalMatrixChange()` walks its subtree and broadcasts every child someone subscribes to.
-- **Reader side:** the same walk calls `pxl.evaluateToLocalAttributes()` on children with `toLocalAttributeKeys` (bitmask: 1 changed, 2 matrix dirtied, in which case `setLocalMatrixDirty()` already walked the subtree, 4 a changed value `affectsPixels()`). The walk runs before drawing, so there is no lag. Time-dependent `toLocal` expressions are evaluated every frame anyway and not listed. Design: `design/done/2026-10-26_tolocal_fix_plan.md`.
+A `toLocal()` result depends on the matrices of the containers above both elements, which no version tracks. So every `toLocal()` reader (reactive or with `t`) is a node of its stage's order, with edges to the target and to the containers with expressions above both, and is evaluated in every frame that runs (`isOutOfDate()` returns true for `hasToLocal`). `setLocalMatrixDirty()` only sets the flag; matrices are read lazily (§7.2). A target in another stage is read as it is: its frame doesn't move with this one. Design: `design/done/2026-10-26_tolocal_fix_plan.md` (the matrix math), evaluation plan §10.4.
 
 ### 4.5 Properties
 
@@ -136,31 +139,34 @@ Language §3.7 is the contract. Mechanics (design: `design/done/2026-10-30_frame
 
 ### 5.1 Requests
 
-`Stage.requestRender()` schedules one `requestAnimationFrame` (no frame while invisible, before the first size, already pending, or while `render()` runs: a change during a frame, such as a pointer reader or a handler at its start, is drawn in that frame, and `render()` decides about the next one, §5.2). Callers: `Layer.invalidate()` (sets `isDirty`; a hidden layer whose canvas is already empty returns early), `Layer.wake()`, the keep-alive at the end of `render()`, `Variable.valueChanged()`, pointer events, `compositingChanged()`, resize, font arrival (`invalidateLayers()`).
+`Stage.requestRender()` schedules one `requestAnimationFrame` (no frame while invisible, before the first size, already pending, or while `render()` runs: a change during a frame, such as a pointer reader or a handler at its start, is drawn in that frame, and `render()` decides about the next one, §5.2). Callers: `pxl.wakeReaders()` (§4.3), `Layer.invalidate()` (sets `isDirty`; a hidden layer whose canvas is already empty returns early), `Layer.wake()`, the keep-alive at the end of `render()`, `Variable.valueChanged()`, pointer events, `compositingChanged()`, resize, font arrival (`invalidateLayers()`).
 
-`isDirty` means only "pixels out of date": a layer redraws in a frame only when something in it changed. A `floor(t)` clock redraws once per second, a finished `clamp(t * 100, 0, 300)` stops redrawing; values that are new objects every frame (an animated gradient descriptor, an array) count as changed. Frames still run while anything is animated, so the clock notices the next second. Design: `design/2026-11-20_evaluation_model_plan.md` (step 2).
+`isDirty` means only "pixels out of date": a layer redraws in a frame only when something in it changed. A `floor(t)` clock redraws once per second, a finished `clamp(t * 100, 0, 300)` stops redrawing; values that are new objects every frame (an animated gradient descriptor, an array) count as changed. Frames still run while anything is animated, so the clock notices the next second. Design: `design/done/2026-11-20_evaluation_model_plan.md` (step 2).
 
 ### 5.2 `Stage.render(t)` (`t` in seconds)
 
 ```
 pxl._frame++; _isRendering = true             per-frame state is stored as the frame it belongs to (no resets)
 runFrame(t), in try / finally (_isRendering = false whatever happens):
-  interaction.process()                       pointer first: broadcast the stage's mouse values, hit test against
+  interaction.process()                       pointer first: mark the stage's pointer values changed, hit test against
                                               the last update (the picture on screen), hover states and events;
-                                              their readers update now and are drawn in this frame (§8.4)
+                                              their readers update in this update phase and are drawn (§8.4)
   sort layers and stage-level variables by DOM position (if _isOrderDirty)
-  stage-level <pxl-var>: update(t)
-  UPDATE PHASE, layers with isDirty || hasAnimatedContent:
+  UPDATE PHASE (§4.3)
+  1 buildOrder() if pxl._orderVersion changed; evaluateOrder(t): the sources in their order, then cycle rounds
+  2 stage-level <pxl-var>: update(t); layers with isDirty || hasAnimatedContent:
     layer.update(t)
       sort children (if dirty)
       evaluateAnimations(t)                   marks the layer if animated; error → _failedFrame, reportError
       unless failed or hidden: child.update(t)   group: sort, evaluate (error: skip subtree), unless hidden its
                                               children; shape: evaluate (also when hidden); variable: evaluate.
                                               Animated ones call markAnimated(); a changed value that
-                                              affectsPixels() calls invalidate(): isDirty
+                                              affectsPixels() calls invalidate(): isDirty. Sources evaluated
+                                              in part 1 are skipped (_evaluatedFrame)
       hasAnimatedContent = marked in this frame
-  DRAW PHASE, layers where needsRender():     isDirty || _isCompositingDirty (isDirty also catches a later
-    layer.render(u)                           layer's broadcast after this layer's update)
+  3 updateReaders(): readers nobody reads, if out of date (skipped when no read element changed)
+  DRAW PHASE, layers where needsRender():     isDirty || _isCompositingDirty (isDirty also catches a reader
+    layer.render(u)                           of part 3 evaluated after this layer's update)
       failed this frame → return (keeps its pixels and stays dirty)
       write CSS opacity / mix-blend-mode / filter if changed; _isCompositingDirty = false
       not dirty → return: the CSS-only path (§5.3)
@@ -173,15 +179,15 @@ perf counters (hit testing included)
 ```
 
 - **`hasAnimatedContent`** is recomputed in every update of the layer, never counted: elements come and go and switch between static and animated, and each such change already invalidates the layer (or calls `wake()`), so the next walk finds it. `wake()` is for an animated value that changes no pixels: a hidden shape or a variable made animated with `setAttribute()`.
-- Static layers cost nothing per frame, and a layer with animated content costs only its update when nothing changed. Design: `design/done/2026-11-12_two_phase_frame_plan.md` (evaluation before drawing: readers drawn before their targets see this frame's values; readers with `t` excepted).
+- Static layers cost nothing per frame, and a layer with animated content costs only its update when nothing changed. Design: `design/done/2026-11-12_two_phase_frame_plan.md` (evaluation before drawing: readers drawn before their targets see this frame's values).
 
 ### 5.3 CSS-Only Fast Path
 
-A layer's `alpha`, `blend` and `filter` don't `affectsPixels()`: when only they change, animated or from outside (`valueChanged()`, `variableChangedCallback()`), the layer gets `compositingChanged()` (sets `_isCompositingDirty`, asks for a frame) instead of `invalidate()`, writes only its canvas CSS and keeps its pixels. Any other change in the same frame still redraws. Design: two-phase plan §7.1, framework plan §29.
+A layer's `alpha`, `blend` and `filter` don't `affectsPixels()`: when only they change, animated or from outside (`valueChanged()`, `evaluateReactive()`), the layer gets `compositingChanged()` (sets `_isCompositingDirty`, asks for a frame) instead of `invalidate()`, writes only its canvas CSS and keeps its pixels. Any other change in the same frame still redraws. Design: two-phase plan §7.1, framework plan §29.
 
 ### 5.4 Hidden Subtrees
 
-A hidden shape is evaluated and not drawn, and its changes don't redraw its layer (`affectsPixels()`; only `hidden` itself does). A hidden group or layer doesn't update its children: values that follow `t` freeze (also in a `<pxl-var>` inside), values that follow refs keep updating through broadcasts. Stage-level variables aren't affected. Design: `design/done/2026-11-07_safe_shape_render_plan.md` §5.1.
+A hidden shape is evaluated and not drawn, and its changes don't redraw its layer (`affectsPixels()`; only `hidden` itself does). A hidden group or layer doesn't update its children in the walk: values that follow `t` freeze (also in a `<pxl-var>` inside) unless others read them, since sources in the order are evaluated also when hidden (§4.3, part 1); values that follow refs keep updating (part 3). Stage-level variables aren't affected. Design: `design/done/2026-11-07_safe_shape_render_plan.md` §5.1.
 
 ### 5.5 Errors
 
@@ -189,7 +195,7 @@ Nothing that throws breaks the frame (design: `design/done/2026-11-07_safe_shape
 
 - **Shape:** `update()` catches evaluation errors (`_failedFrame`: the draw phase skips it); `render()` catches drawing errors; the canvas state is always restored.
 - **Group, layer, variable:** a failed evaluation skips the element with its children in both phases; a layer keeps its pixels and its request, a variable its value.
-- **Readers** evaluated by a broadcast or the `toLocal` walk catch their own errors (§4.3), also outside frames.
+- **Readers** catch their own errors in `updateReactive()` (§4.3); a source that fails in part 1 is skipped in both phases (`_failedFrame`).
 - Not covered: an expression that fails at once in `setAttribute()` surfaces as an uncaught error of the custom element reaction (the old value stays). Handler errors: §8.7.
 
 ## 6. Drawing
@@ -236,7 +242,7 @@ Design (derivations): `design/done/2026-10-14_unified_arrowhead_geometry_plan.md
 - **Rect:** origin `(-w·ax, -h·ay)` from `pxl.anchorX` / `pxl.anchorY`; `roundRect()` with radii clamped to ≥ 0 (it throws on negatives) when any is > 0, else `rect()`; radii in the pre-allocated `_radii`.
 - **Line:** without arrows `moveTo` / `lineTo`; with arrows one `sqrt`, the shaft trimmed by each inset, only heads if the insets exceed the length.
 - **Polyline:**
-  - `setPoints(value)` (attribute and property): a string through `pxl.parsePointsIntoArray()` (parenthesis-aware split into coordinate strings), an array read in place. Only when the count changes, `resizePoints()` removes keys beyond it (from all key lists) and adds `p0, p1, …` and a new `Float64Array` buffer; kept keys keep their value until set again. Each coordinate: a string → `pxl.compileAttribute(this, 'pN', s)`, a number stored (written directly when the key holds no expression). Then `isAnimated`, broadcast, invalidate.
+  - `setPoints(value)` (attribute and property): a string through `pxl.parsePointsIntoArray()` (parenthesis-aware split into coordinate strings), an array read in place. Only when the count changes, `resizePoints()` removes keys beyond it (from all key lists) and adds `p0, p1, …` and a new `Float64Array` buffer; kept keys keep their value until set again. Each coordinate: a string → `pxl.compileAttribute(this, 'pN', s)`, a number stored (written directly when the key holds no expression). Then `isAnimated`, `pxl.markChanged()`, invalidate. Removing keys that held expressions calls `pxl.expressionsChanged()`.
   - `loadPoints()` fills `_flatCache` (Float64 like the matrices, so relative sums carry no Float32 error) with the values, accumulates relative mode, and returns false if any value isn't finite (`probe += v * 0`, no extra loop).
   - Smooth: `loadSegment()` serves drawing, arrow trimming and the hit box, so they always agree (6 `sqrt` per segment, no allocation). Handles at P with incoming Δin (length dIn), outgoing Δout (dOut), `aIn = √dIn`, `aOut = √dOut`: tangent `T = dIn·Δout + dOut·Δin`, outgoing handle `k·T / (3·aIn·(aIn + aOut))`, incoming `−k·T / (3·aOut·(aIn + aOut))` (`k` = `smooth`); evenly spaced points give `(pNext − pPrev)·k/6`. Design: `design/done/2026-10-23_smooth_polyline_spline_plan.md`.
   - Arrows skip end segments shorter than 0.01 px.
@@ -297,11 +303,11 @@ The stage passes them to its `InteractionEngine` (`handleEvent`): `Stage.POINTER
 
 ### 8.3 States
 
-`_hovered`, `_pressed`: the innermost node; its groups up to the layer share the state (`setChain()`, `setState()` broadcasts the node's `refKey` only on change). A group without an id broadcasts nothing; state changes never invalidate a layer, only readers redraw.
+`_hovered`, `_pressed`: the innermost node; its groups up to the layer share the state (`setChain()`, `setState()` calls `pxl.markChanged()` only on change). A group without an id changes nothing for readers; state changes never invalidate a layer, only readers redraw.
 
 ### 8.4 `process()`, at the Start of Every Frame
 
-1. If the pointer changed: broadcast the stage's `refKey`.
+1. If the pointer changed: `pxl.markChanged()` on the stage.
 2. Stage not hovered or pointer over HTML content: `hover(null)`. Otherwise hit test when the pointer changed or `pxl.RESTING_HIT_INTERVAL` (100 ms) has passed (a moving shape under a resting pointer), then `hover()` and `updateCursor()`.
 3. The pointer moved and no capture: queue one `pointermove` and one `mousemove` on the hovered shape with the summed movement.
 4. `flush()` the queue.
@@ -328,14 +334,14 @@ None in the walk, box check, boundary walk and queue; one event object per dispa
 
 - **Default styles** (`pxl.defaultStyles()`, `stage.js`): `@layer pxl { … }` with the stage's display / position / width, `pxl-stage:state(fallback)` (`contain: inline-size; contain-intrinsic-inline-size: 300px; min-width: 0`), `display: none` for `pxl-var`, `pxl-group` and every tag `pxl.defineShape()` defined (`pxl._shapeTags`), `pxl-grid { pointer-events: none }`, the handler cursor rule. `pxl.addDefaultStyles(root)` prepends one `<style data-pxl>` to `<head>` at load and to a shadow root when a stage connects inside one, and keeps it in `pxl._styleElements`; `pxl.hideShapeTag(tag)` adds a tag and rewrites them all, so a shape defined later (a custom shape's script) is hidden in existing roots too. Content inside a shape tag shows until its script has defined the tag. The first declared cascade layer ranks lowest, so any page rule wins, also in the page's own layers (Tailwind v4); `adoptedStyleSheets` and `:where()` would beat layered rules.
 - **Layer canvas:** in an open shadow root with `pxl.Layer.STYLES` (`:host` absolute, `inset: 0`; the canvas fills it) and a `<slot>` for light-DOM children; `innerHTML` and frameworks can't remove it. Engine and tests reach it as `layer._canvas`. `resize(w, h, dpr)` sets the canvas size (which resets the context) and scales by `dpr` again.
-- **Sizing:** a `ResizeObserver` with `device-pixel-content-box` (fallback `content-box`, Safari) → `resize()`: `unit`, height broadcast, every layer resized, an immediate render. Width 0 → `markFallbackWidth()` (the custom state through `attachInternals()`, field `_internals`; skipped without a box; older browsers without custom states stay 0). Also checked once in the frame after connect (an observer needn't report a box that stays 0); `disconnectedCallback()` removes the state. Design: `design/done/2026-11-04_stage_sizing_plan.md`.
+- **Sizing:** a `ResizeObserver` with `device-pixel-content-box` (fallback `content-box`, Safari) → `resize()`: `unit`, height (`pxl.markChanged()`), every layer resized, an immediate render. Width 0 → `markFallbackWidth()` (the custom state through `attachInternals()`, field `_internals`; skipped without a box; older browsers without custom states stay 0). Also checked once in the frame after connect (an observer needn't report a box that stays 0); `disconnectedCallback()` removes the state. Design: `design/done/2026-11-04_stage_sizing_plan.md`.
 - **Visibility:** an `IntersectionObserver` pauses rendering out of view unless `isAlwaysRender()`.
 - **Lists:** `layers` and `_variables` (stage-level `<pxl-var>`, registered when a variable has no `parentLayer`), sorted by DOM position when `_isOrderDirty` (`pxl.sortByDOMPosition`). Layers and groups keep `childList` sorted the same way, in their update.
 - `values` is created in the constructor and kept on reconnect (pointer and stats survive a move). `id` is observed like on nodes.
 
 ## 10. Performance Monitor (`js/monitor.js`)
 
-`pxl.perf.stages`; a stage registers on connect. Each `Stage.render()` adds to `perfFrames`, `perfAccumulated`, `perfMax`. A 1-second `setInterval` (`_timer`, running while any stage is registered) publishes `fps = round(frames / seconds since the last publish)` (timers fire late in background tabs), `renderAvg`, `renderMax`, into the stage's `values`, broadcasts `ref.<stage>`, and resets the counters. Not from `render()`: an idle page would freeze at its last values. Frame counting (only frames that drew) and per-layer metrics: `design/2026-11-12_layer_throttling_plan.md` (D4, C2).
+`pxl.perf.stages`; a stage registers on connect. Each `Stage.render()` adds to `perfFrames`, `perfAccumulated`, `perfMax`. A 1-second `setInterval` (`_timer`, running while any stage is registered) publishes `fps = round(frames / seconds since the last publish)` (timers fire late in background tabs), `renderAvg`, `renderMax`, into the stage's `values`, `pxl.markChanged()` on the stage (a frame only for stages that read it), and resets the counters. Not from `render()`: an idle page would freeze at its last values. Frame counting (only frames that drew) and per-layer metrics: `design/2026-11-12_layer_throttling_plan.md` (D4, C2).
 
 ## 11. Build (`build.js`)
 

@@ -1,6 +1,6 @@
 # Engine Cleanup: Inventory
 
-- **Status**: ✅ **Implemented** (2026-10-27; B8 is left and goes with TODO §46)
+- **Status**: ✅ **Implemented** (2026-10-27; B8 settled in `design/done/2026-11-20_evaluation_model_plan.md` §11)
 - **Verification**: 18/18 engine tests (6 new for A1–A6); 137 docs canvases pixel-identical before and after (`design/prototypes/2026-10-27_engine_cleanup_inventory/pixel_snapshot.js`; one canvas on `blend.html` uses `random()` and is excluded); no console errors on the docs and the `toLocal` examples.
 - **Scope**: the 19 engine files in `js/` (≈3,060 lines, build order in `build.js`). Not covered: `docs/js/*`, docs pages, `examples/`.
 - **Method**: every file read in full, plus pattern scans over `js/` (fallbacks, `typeof` checks, duplicated helpers, comment tone, whitespace, line length).

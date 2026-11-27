@@ -84,21 +84,23 @@ pxl.Polyline = class Polyline extends pxl.Shape {
 
     this.isAnimated = this.animatedAttributeKeys.length > 0;
     // Readers of ref.<id>.pN update like for any other attribute
-    if (this.refKey) pxl.broadcast(this.refKey);
+    pxl.markChanged(this);
     this.parentLayer?.invalidate();
   }
 
   // Keys beyond the new count go, new ones are added; keys below it keep their value until set again (animated
   // coordinates are only evaluated in the next frame, so ref.<id>.pN readers would see undefined in between)
   resizePoints(count) {
+    let removedExpression = false;
     for (let i = count; i < this._pointCount; i++) {
       const key = this._pointKeys[i];
+      if (typeof this.expressions[key] === 'function') removedExpression = true;
       pxl.removeFromArray(this.animatedAttributeKeys, key);
       pxl.removeFromArray(this.reactiveAttributeKeys, key);
-      pxl.removeFromArray(this.toLocalAttributeKeys, key);
       delete this.expressions[key];
       delete this.values[key];
     }
+    if (removedExpression) pxl.expressionsChanged(this);
     for (let i = this._pointCount; i < count; i++) this._pointKeys[i] = `p${i}`;
     this._pointKeys.length = count;
     this._flatCache = new Float64Array(count);

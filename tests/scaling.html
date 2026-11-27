@@ -144,8 +144,8 @@
       return ms;
     }, 2000), { timeout: 20000 });
 
-    // design/done/2026-10-30_framework_compatibility_plan.md §19.1: clearAllVariableSubscriptions() scanned every subscription
-    // key for every removed element (ratio 5–9); fixed with per-element keys (pxl._subscribedKeys)
+    // design/done/2026-10-30_framework_compatibility_plan.md §19.1: removing elements with readers was quadratic once
+    // (ratio 5–9). Readers now leave their stage's list in its next pass over them (Stage.updateReaders()).
     test('removing shapes with readers is linear', () => expectLinear((n) => {
       const { layer, clear } = freshStage();
       layer.insertAdjacentHTML('beforeend', shapesMarkup(n, true, 'rrm'));
@@ -206,16 +206,22 @@
     }, { timeout: 30000 });
 
     // The readers share one expression: with one per reader, 4,000 compiled functions make memory effects, not the
-    // broadcast, grow faster than linear (measured ratio up to 4.5)
+    // evaluation, grow faster than linear (measured ratio up to 4.5). The readers update in the frame after the change.
     test('one variable read by n shapes: a change costs linear time', () => expectLinear((n) => {
-      const { layer, clear } = freshStage();
+      const { stage, layer, clear } = freshStage();
       let html = '<pxl-var id="scVar" value="0"></pxl-var>';
       for (let i = 0; i < n; i++) html += `<pxl-circle x="ref.scVar.value" y="${i % 600}" r="2"></pxl-circle>`;
       layer.insertAdjacentHTML('beforeend', html);
       const variable = document.getElementById('scVar');
-      for (let round = 1; round <= 3; round++) variable.setAttribute('value', String(-round)); // warm-up
+      for (let round = 1; round <= 3; round++) { // warm-up
+        variable.setAttribute('value', String(-round));
+        stage.render(round);
+      }
       const t0 = performance.now();
-      for (let round = 1; round <= 20; round++) variable.setAttribute('value', String(round));
+      for (let round = 1; round <= 20; round++) {
+        variable.setAttribute('value', String(round));
+        stage.render(3 + round);
+      }
       const ms = performance.now() - t0;
       clear();
       return ms;

@@ -2,7 +2,7 @@
 
 - **Status**: 💬 **Discussion** (2026-11-27, parked: global ids kept; for a native `<pxl-repeat>` or a user who needs it)
 - **Date**: 2026-11-27
-- **Related**: `design/2026-11-20_evaluation_model_plan.md` (D8 there: global ids kept, §10.4), `design/done/2026-10-30_framework_compatibility_plan.md` (§8.2: global ids, stage-scoped ids or a `name` attribute)
+- **Related**: `design/done/2026-11-20_evaluation_model_plan.md` (D8 there: global ids kept, §10.4), `design/done/2026-10-30_framework_compatibility_plan.md` (§8.2: global ids, stage-scoped ids or a `name` attribute)
 - **Target Implementation**: `js/compiler.js`, `js/engine.js`, `js/elements/node.js`, `js/elements/stage.js`
 
 ---

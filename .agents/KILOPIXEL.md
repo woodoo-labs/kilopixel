@@ -1,6 +1,6 @@
 # Kilopixel — Language Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~71KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~74KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 How to write Kilopixel: elements, attributes, expressions, interaction. Each fact is stated once; sections link each other. How the engine does it (source files, frame, reactivity, hit testing, drawing): `.agents/ENGINE.md`. Docs pages also follow `docs/DOCS_STANDARDS.md`.
 
@@ -37,7 +37,7 @@ Kilopixel is a declarative, reactive animation engine for HTML5 Canvas built on 
 ## 2. Units and Coordinates
 
 - **Logical width 1000** on every stage. The unit `u = clientWidth / 1000`; lengths (`x`, `y`, `dx`, `dy`, radii, `w`, `h`, `strokewidth`, `dashoffset`, `linedash`, shadow and filter sizes, `size`, …) are multiplied by `u` when drawing. Height: `1000 / ratio` (`ref.<stage>.height`). `x="500"` is always the horizontal center, at any stage size.
-- Write fixed positions as numbers (`x="500"`), not `x="ref.main.width / 2"`: a number is parsed once; the expression subscribes to the stage.
+- Write fixed positions as numbers (`x="500"`), not `x="ref.main.width / 2"`: a number is parsed once; the expression is evaluated again whenever the stage changes.
 - Each layer canvas has `devicePixelRatio` pixels per CSS pixel.
 - **Center and offset**, the same for layers, groups and shapes: `x`, `y` is the center, the point that rotation, scaling and skew turn around. `dx`, `dy` is an offset applied after them: it moves the drawing, not the center. So a rotating element with an offset orbits its center:
 
@@ -71,7 +71,7 @@ Text with digits next to operators, parentheses or brackets looks like code (`te
 
 - **JavaScript expressions** evaluated with the scope below. Without the word `return` an expression is returned as it is (`t > 10 ? 'red' : 'blue'`); with it, it is a code block (`if (t < 10) { return 'red'; } return 'blue';`).
 - **CSS percentages** inside code are allowed: `hsl(120, 50%, 40%)` works as an expression.
-- **Static** (no `t`, no `ref`): evaluated once. **Animated** (uses `t` or a time driver): every frame. **Reactive** (reads `ref.*`, no `t`): when a referenced element changes. A string that doesn't compile warns and is used as text.
+- **Static** (no `t`, no `ref`): evaluated once. **Animated** (uses `t` or a time driver): every frame. **Reactive** (reads `ref.*`, no `t`): in the next frame after a referenced element changed (§3.6). A string that doesn't compile warns and is used as text.
 - Text inside an expression is quoted: `fill="t > 5 ? 'red' : 'blue'"`, `` text="`Score: ${ref.score.value}`" ``. Colors as function arguments are strings too: `dropShadow(0, 20, 20, '#0ff')` (without quotes: a SyntaxError).
 - Function calls need no backticks: `fill="hsl(t * 36, 80, 50)"`, `fill="linear(45, ['red', 'blue'])"`.
 
@@ -112,18 +112,19 @@ Text with digits next to operators, parentheses or brackets looks like code (`te
 | removed (`removeAttribute`, `el.hidden = false`, a framework dropping `null`) | the default (`false`) | `0` | the class default |
 
 - Boolean attributes are those with a `false` / `true` default: `hidden`, `closed`, `smooth`, `pie`, `anticlockwise`, `labels`. Only bare, `"true"` and `"false"` are booleans: `closed="1"` is not `true`. Examples write `="true"` for readability.
-- The resolved value is static: removing an animated or reactive attribute also stops its animation or subscription.
+- The resolved value is static: removing an animated or reactive attribute also stops its animation or its updates.
 - Defaults that are `null` on purpose mean "not set" (rect `r1`–`r4` fall back to `r`; circle `end` / `sweep`: a full circle).
 - Not handled: whitespace-only values (`" "` parses to `0`) and invalid values (`miterlimit="abc"`).
 
 ### 3.6 References (`ref.*`)
 
 - Every element with an `id` is readable as `ref.<id>.<name>`: its current attribute values (`ref.box.x`), a variable's `ref.speed.value`, a stage's pointer and size (§6.1), states `isHovered` / `isPressed` (§8).
-- `ref.player.x` reads `undefined` (not a TypeError) while `player` isn't connected yet; a reader updates when it connects.
+- `ref.player.x` reads `undefined` (not a TypeError) while `player` isn't connected yet; a reader updates in the frame after it connects.
 - **Ids in camelCase:** `id="orbitSpeed"`. A hyphen is a minus sign: `ref.orbit-speed.x` reads as `ref.orbit - speed.x`.
-- Readers see this frame's values of their targets, whatever the DOM order. Exception: a reader whose expression also uses `t` reads its target when it is evaluated itself, so placed before an animated target it lags one frame.
+- Readers see this frame's values of their targets, whatever the DOM order, also readers that use `t`. A reader that reaches a source on several paths (diamonds) is evaluated once, with all its inputs new.
+- **Derived values update in the next frame,** before it is drawn: what is drawn is always current. A handler or script that sets a value and reads one derived from it in its next statement sees the old one (`ref.price.set('value', 5)`, then `ref.total.value`) until the stage has run a frame. A stage out of view (or in a background tab) runs no frames: values derived inside it update when it runs again; values set from outside are current at once.
 - A self-reference with `t` reads the previous frame's value (the "follow" effect: `x="ref.me.x + (100 - ref.me.x) * 0.1 + t * 0"`).
-- A `ref` cycle whose values keep changing (`a = b + 1`, `b = a + 1`) stops after 100 rounds with a warning; a cycle that settles (`a = b`, `b = a`) keeps its values.
+- A `ref` cycle whose values keep changing (`a = b + 1`, `b = a + 1`) stops after 100 rounds per frame with a warning; a cycle that settles (`a = b`, `b = a`) keeps its values.
 - **Setting from handlers:** `ref.<id>.set(name, value)`: a string is compiled like the attribute (`setAttribute()`), any other value goes through the property (numbers aren't compiled, arrays stay arrays). An unknown name warns once per element type and name.
 
 ### 3.7 Properties (JavaScript and Frameworks)
@@ -287,7 +288,7 @@ Only CSS: the hovered shape's computed `cursor` (inherited from its groups, laye
 
 ## 9. Coordinate Mapping (`toLocal`)
 
-`toLocal(target, property)` gives a target's frame in the caller's parent space: the space where the caller's own `x`, `y` are read, so the result is directly an attribute value. Readers update when either side moves.
+`toLocal(target, property)` gives a target's frame in the caller's parent space: the space where the caller's own `x`, `y` are read, so the result is directly an attribute value. Readers update in every frame the stage runs, so they follow either side. The target must be in the reader's stage: another stage's frame doesn't move with this one.
 
 | Property | Meaning |
 |---|---|

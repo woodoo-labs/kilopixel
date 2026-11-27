@@ -3,7 +3,7 @@
 - **Status**: ✅ **Implemented** (2026-11-22, built in §12–§17; closed in §18: the structure cleanup, D7, D9 and step 7 moved to other plans)
 - **Date**: 2026-11-20
 - **Replaces**: `design/archive/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`, `draw()` without `t`, custom animation patterns, verified 2026-10-17 and 2026-11-07) and the structure cleanup draft of 2026-11-20 (`scratch/2026-11-20_engine_structure_cleanup_plan.md` (not kept); its steps and measurements are §6 here)
-- **Related**: `design/2026-11-20_evaluation_model_plan.md` (step 2 makes "`draw()` only reads values" a contract), `design/2026-10-19_polygon_star_shape_plan.md` (the first new shape in this form), `design/done/2026-11-01_isolated_shape_compositing_plan.md` (`drawsMoreThanOnce()`), `design/done/2026-11-07_safe_shape_render_plan.md` (a careless shape can't break the layer), `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked), `design/2026-10-30_space_attribute_plan.md` (with step 6.6)
+- **Related**: `design/done/2026-11-20_evaluation_model_plan.md` (step 2 makes "`draw()` only reads values" a contract), `design/2026-10-19_polygon_star_shape_plan.md` (the first new shape in this form), `design/done/2026-11-01_isolated_shape_compositing_plan.md` (`drawsMoreThanOnce()`), `design/done/2026-11-07_safe_shape_render_plan.md` (a careless shape can't break the layer), `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked), `design/2026-10-30_space_attribute_plan.md` (with step 6.6)
 - **Target Implementation**: `js/elements/shape.js`, `js/elements/shapes/*.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/stage.js`, `js/graphics.js`, `js/interaction.js`, `js/engine.js`; `tools/build_types.js`; `tests/`; a new docs page `docs/custom-shapes.html`; `.agents/KILOPIXEL.md`, `.agents/ENGINE.md`
 - **Prototypes** (`design/prototypes/2026-11-20_custom_shapes/`): `template/` (the template as a patch over the engine: `proposal.js`, a Star, a Gauge, `minimal.html`, `rich.html`), `logical_units/` (the canvas, text and shadow tests and the page sweep of §5.3), `firefox/` (the same in Firefox: a driver over WebDriver BiDi, a text viewer and a page that switches between today and logical units), `safari/` (a page that runs the tests on a phone or tablet and sends the results to a receiver on the laptop), `phase2/` (the old-vs-new pixel comparison of every page and the frame-time benchmark of §17), `transform_path/` (§6.6). `template/` and `logical_units/` patch the engine and use `attributeValues`, renamed in step 4. Their comparison of today's drawing with logical units means something only with the engine before step 3, commit `82eb93d` (`git show 82eb93d:dist/pxl.js`); `logical_units/text_tests.html` and `canvas_tests.html` use the canvas alone and work with any engine. Older: `design/prototypes/2026-10-17_shape_authoring/` (Rule A tests)
 
@@ -178,7 +178,7 @@ The engine keeps "fields in the constructor" (CLAUDE.md "Engine Code Style": one
 
 ### 5.9 Later
 
-- *2026-11-22: moved to `design/2026-11-20_evaluation_model_plan.md` (its D11, §18).* **Internal animated values** (a pump's impeller, Pattern B of the shape authoring plan §4, verified 2026-10-17): a declarative helper (`static animations = { impeller: 'this.values.running ? t * 90 : 0' }`) after the evaluation model (`design/2026-11-20_evaluation_model_plan.md`), which decides how such values are evaluated. Until then: time in an attribute (`spin="t * 180"`, Pattern A).
+- *2026-11-22: moved to `design/done/2026-11-20_evaluation_model_plan.md` (its D11, §18).* **Internal animated values** (a pump's impeller, Pattern B of the shape authoring plan §4, verified 2026-10-17): a declarative helper (`static animations = { impeller: 'this.values.running ? t * 90 : 0' }`) after the evaluation model (`design/done/2026-11-20_evaluation_model_plan.md`), which decides how such values are evaluated. Until then: time in an attribute (`spin="t * 180"`, Pattern A).
 - **Arrowheads** for custom shapes (`resolveArrow()`, `aimArrow()`, `drawArrows()`) stay internal: their contract (records, insets, call order) is too detailed for a first public API.
 - **Typings:** `tools/build_types.js` can't know user tags; the docs page shows a declaration to copy.
 
@@ -257,7 +257,7 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 | D6 | The public helpers of §4 (`applyStyle`, `applyStrokeState`, `paint`, `hasFill`, `isStroked`, `setBoundingBox`) | **decided and built 2026-11-21** (§15); arrowheads stay internal (§5.9) |
 | D7 | The transform path (§6.6) | with `space`, not alone; moved 2026-11-22 to `design/ideas/2026-11-22_engine_structure_cleanup_plan.md` (its D1) |
 | D8 | Typings for custom shapes | **decided and built 2026-11-21** (§16): generated base types `PxlShapeAttributes` / `PxlShapeElement`, a declaration to copy on the docs page |
-| D9 | Internal animated values (§5.9) | after the evaluation model; moved 2026-11-22 to `design/2026-11-20_evaluation_model_plan.md` (its D11) |
+| D9 | Internal animated values (§5.9) | after the evaluation model; moved 2026-11-22 to `design/done/2026-11-20_evaluation_model_plan.md` (its D11) |
 
 ## 12. Step 2 Built (2026-11-21)
 
@@ -366,7 +366,7 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 Custom shapes are built (steps 2–6, phase 2 of §5.3), documented (`docs/custom-shapes.html`, KILOPIXEL.md §12) and checked in Chrome, Firefox and Safari. Decisions D1–D6 and D8 are built, D5 decided as recommended. What was left moved where it belongs:
 
 - **The structure cleanup** (§6) and **D7** (one transform path): `design/ideas/2026-11-22_engine_structure_cleanup_plan.md` (💬, parked; step 6 goes with `space`, TODO §28).
-- **D9** (internal animated values, §5.9): `design/2026-11-20_evaluation_model_plan.md`, its D11, decided with its D1.
+- **D9** (internal animated values, §5.9): `design/done/2026-11-20_evaluation_model_plan.md`, its D11, decided with its D1.
 - **Step 7** (`<pxl-polygon>` in this form): `design/2026-10-19_polygon_star_shape_plan.md`, TODO §23.
 - **Safari limits** found in §5.3: `design/done/2026-11-22_late_web_fonts_plan.md` (late web fonts) and TODO §49 (shape filters).
 

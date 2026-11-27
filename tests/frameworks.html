@@ -195,7 +195,9 @@
       withBox((box) => {
         const reader = make('pxl-circle', { id: 'fwEarlyReader', x: 'ref.fwLateTarget.x + 1', r: '5' });
         const target = make('pxl-circle', { id: 'fwLateTarget', x: '60', r: '5' });
-        box.appendChild(make('pxl-stage', { alwaysrender: '' }, [make('pxl-layer', {}, [make('pxl-group', {}, [reader]), target])]));
+        const stage = make('pxl-stage', { alwaysrender: '' }, [make('pxl-layer', {}, [make('pxl-group', {}, [reader]), target])]);
+        box.appendChild(stage);
+        stage.resize(); stage.render(1); // readers update in the next frame's update phase
         if (reader.values.x !== 61) throw new Error(`reader x ${reader.values.x}`);
       }));
 
@@ -884,7 +886,7 @@
         if (pxl.nodes.fwReReader.fill !== '#f00') throw new Error(`reader fill ${pxl.nodes.fwReReader.fill}`);
       }));
 
-    test('unmounting a whole tree leaves no registry entries, subscriptions, stage variables or monitor entry', () => {
+    test('unmounting a whole tree leaves no registry entries, stage variables or monitor entry', () => {
       const ids = ['fwUmStage', 'fwUmVar', 'fwUmLayer', 'fwUmGroup', 'fwUmCircle', 'fwUmReader', 'fwUmHover'];
       return withStage(`<div style="width: 500px"><pxl-stage id="fwUmStage" alwaysrender>
           <pxl-var id="fwUmVar" value="3"></pxl-var>
@@ -900,10 +902,9 @@
         box.remove();
         const left = {
           entries: ids.filter((id) => pxl.nodes[id]),
-          subscriptions: ids.filter((id) => (pxl._subscriptions['ref.' + id] || []).length),
           monitored: pxl.perf.stages.includes(stage), variables: stage._variables.length, layers: stage.layers.length
         };
-        if (mounted !== ids.length || variables !== 1 || left.entries.length || left.subscriptions.length || left.monitored || left.variables || left.layers) {
+        if (mounted !== ids.length || variables !== 1 || left.entries.length || left.monitored || left.variables || left.layers) {
           throw new Error(`mounted ${mounted} ids, ${variables} stage variable(s); left: ${JSON.stringify(left)}`);
         }
       });

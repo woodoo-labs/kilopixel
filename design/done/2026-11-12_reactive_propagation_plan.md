@@ -1,6 +1,6 @@
 # Reactive Propagation in Dependency Order
 
-- **Status**: ✅ **Implemented** (2026-11-13, the cycle stop of §2; the full design is option A of `design/2026-11-20_evaluation_model_plan.md`)
+- **Status**: ✅ **Implemented** (2026-11-13, the cycle stop of §2; the full design is option A of `design/done/2026-11-20_evaluation_model_plan.md`)
 - **Date**: 2026-11-12
 - **Related**: `design/archive/2026-11-15_per_frame_evaluation_plan.md` (the alternative: no broadcasts at all; if it is built, this plan is superseded), `design/done/2026-11-12_two_phase_frame_plan.md` (§3.1.1: its update phase orders readers with `t`; could share the ordering code), `design/done/2026-10-26_tolocal_fix_plan.md` (toLocal readers and `broadcastGlobalMatrixChange()`), `design/done/2026-11-07_safe_shape_render_plan.md` (a reader's error is its own), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (`isHovered` / `isPressed` broadcasts)
 - **Target Implementation** (if built): `js/engine.js` (`pxl.broadcast()`), `js/elements/node.js` (`variableChangedCallback()`, new fields), `tests/index.html`, `.agents/KILOPIXEL.md` (Variable Change Propagation)

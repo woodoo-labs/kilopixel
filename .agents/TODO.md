@@ -27,7 +27,7 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Status**: 🟡 **Proposed**
 - **Plan**: `design/2026-11-12_layer_throttling_plan.md`
 - Built: stage-level `<pxl-var>` (part B), the monitor fix (C1). Open: `maxfps` on layers (part A) and `ref.<layer>.fps` (C2).
-- **Next**: part A, much simpler since step 2 of the evaluation model (§46) is built: a skipped layer just stays dirty until its window.
+- **Next**: part A, much simpler since step 2 of the evaluation model (`design/done/2026-11-20_evaluation_model_plan.md`) is built: a skipped layer just stays dirty until its window.
 
 ## 9. Images (`<pxl-image>`)
 - **Status**: 💬 **Discussion** (no plan yet)
@@ -95,13 +95,6 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Status**: 💬 **Discussion** (no plan yet)
 - `getBoundingClientRect()` of a shape is empty (tooltips need a workaround); clickable shapes get no keyboard focus or roles; CSS `:hover` never matches a shape (a custom state?). Each needs its own plan.
 - **Background**: `design/done/2026-10-30_framework_compatibility_plan.md` §23.6, §26.2.
-
-## 46. Evaluation Model
-- **Status**: 🟢 **Decided**
-- **Plan**: `design/2026-11-20_evaluation_model_plan.md` (merges the two-phase frame, reactive propagation and per-frame evaluation plans)
-- **Built**: step 2 (plan §9): a layer redraws only when a value in it changed, the stage keeps the frame loop running.
-- **Decided** (plan §10.4): option B, no broadcasts (prototyped: all tests and pages pass, diamonds evaluated once, +166 lines); global ids kept; derived values in the next frame (D5); `toLocal()` within one stage.
-- **Next**: build B from the patch (plan §10.5). Also there: B8 of `design/done/2026-10-27_engine_cleanup_inventory_note.md`.
 
 ## 49. Shape Filters in Safari
 - **Status**: 💬 **Discussion** (no plan yet)

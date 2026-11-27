@@ -82,7 +82,7 @@ Why it stays correct without clearing the whole scratch canvas: a shape composit
 
 ## 5. Performance in the Frame Loop
 
-Per isolated shape and frame, only while its layer redraws (since step 2 of `design/2026-11-20_evaluation_model_plan.md` that is only when something in the layer changed):
+Per isolated shape and frame, only while its layer redraws (since step 2 of `design/done/2026-11-20_evaluation_model_plan.md` that is only when something in the layer changed):
 
 | | Step 1 | Box version |
 |---|---|---|

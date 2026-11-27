@@ -237,10 +237,11 @@ No change in the hot path for pages that don't use `space`.
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
-- 2026-11-27: evaluation model decided (`design/2026-11-20_evaluation_model_plan.md` §10.4): option B without broadcasts, and `toLocal()` reads within one stage; §3.3 (reactivity through broadcasts) describes the old engine.
+- 2026-11-27: evaluation model option B built (`design/done/2026-11-20_evaluation_model_plan.md` §11): §3 (B subscribes to `ref.A`, `broadcastGlobalMatrixChange()`) describes the old code; a `space` reader would be a source in the stage's order with the containers above A as edges, like a `toLocal()` reader.
+- 2026-11-27: evaluation model decided (`design/done/2026-11-20_evaluation_model_plan.md` §10.4): option B without broadcasts, and `toLocal()` reads within one stage; §3.3 (reactivity through broadcasts) describes the old engine.
 - 2026-11-22: the one transform path (D7 of `design/done/2026-11-20_custom_shapes_plan.md`) is now D1 of `design/ideas/2026-11-22_engine_structure_cleanup_plan.md`, to be built together with `space`.
 - 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-20: `design/done/2026-11-20_custom_shapes_plan.md` §6.6 (one transform path: every shape drawn with its global matrix) is meant to be built together with this plan; it turns §3.2's extra transform into a different parent matrix.
-- 2026-11-20: the two-phase frame, reactive propagation and per-frame evaluation plans were merged into `design/2026-11-20_evaluation_model_plan.md` (TODO §46); its §6 says what changes for this plan.
+- 2026-11-20: the two-phase frame, reactive propagation and per-frame evaluation plans were merged into `design/done/2026-11-20_evaluation_model_plan.md`; its §6 says what changes for this plan.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
 - Status line until 2026-11-20: 🟡 **Proposed** (2026-11-13: the draw-order rule of §3.5 is gone with two-phase frame step 1; 2026-10-30, no code changes yet)

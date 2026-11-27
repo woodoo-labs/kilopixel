@@ -71,12 +71,12 @@
       return {
         fn: true,
         time: value.isTimeDependent === true,
-        deps: value.variableDependencies || [],
+        ids: value.sourceIds,
         toLocal: value.usesToLocal === true
       };
     }
-    const STATIC_FN = { fn: true, time: false, deps: [], toLocal: false };
-    const TIME_FN = { fn: true, time: true, deps: [], toLocal: false };
+    const STATIC_FN = { fn: true, time: false, ids: [], toLocal: false };
+    const TIME_FN = { fn: true, time: true, ids: [], toLocal: false };
 
     // Runs fn with console.warn replaced, returns the warnings
     function warnings(fn) {
@@ -136,10 +136,10 @@
     table('parseAttributeValue: time and refs make functions with the right flags', [
       ['t', TIME_FN], ['t * 90', TIME_FN], ['wave(2) * 10', TIME_FN], ['loop(3)', TIME_FN],
       ["time('s')", TIME_FN], ['`${t}`', TIME_FN],
-      ['ref.uA.x + 1', { fn: true, time: false, deps: ['ref.uA'], toLocal: false }],
-      ['ref.uA.x + ref.uB.y + ref.uA.z', { fn: true, time: false, deps: ['ref.uA', 'ref.uB'], toLocal: false }],
-      ['ref.uA.x + t', { fn: true, time: true, deps: ['ref.uA'], toLocal: false }],
-      ["toLocal(ref.uA, 'x')", { fn: true, time: false, deps: ['ref.uA'], toLocal: true }],
+      ['ref.uA.x + 1', { fn: true, time: false, ids: ['uA'], toLocal: false }],
+      ['ref.uA.x + ref.uB.y + ref.uA.z', { fn: true, time: false, ids: ['uA', 'uB'], toLocal: false }],
+      ['ref.uA.x + t', { fn: true, time: true, ids: ['uA'], toLocal: false }],
+      ["toLocal(ref.uA, 'x')", { fn: true, time: false, ids: ['uA'], toLocal: true }],
       ['if (t < 10) { return 1; } else { return 2; }', TIME_FN]
     ], ([input, expected]) => [kind(pxl.parseAttributeValue(input)), expected]);
 
@@ -215,10 +215,10 @@
 
     table('quoted text adds no time or ref dependency', [
       ['`wait t seconds`', 'wait t seconds'],
-      ["'Item t: ' + ref.uA.x", { fn: true, time: false, deps: ['ref.uA'], toLocal: false }],
-      ["'ref.uB.y = ' + ref.uA.x", { fn: true, time: false, deps: ['ref.uA'], toLocal: false }],
-      ['`value: ${ref.uA.x}`', { fn: true, time: false, deps: ['ref.uA'], toLocal: false }],
-      ["'toLocal(ref.uB) = ' + toLocal(ref.uA, 'x')", { fn: true, time: false, deps: ['ref.uA'], toLocal: true }],
+      ["'Item t: ' + ref.uA.x", { fn: true, time: false, ids: ['uA'], toLocal: false }],
+      ["'ref.uB.y = ' + ref.uA.x", { fn: true, time: false, ids: ['uA'], toLocal: false }],
+      ['`value: ${ref.uA.x}`', { fn: true, time: false, ids: ['uA'], toLocal: false }],
+      ["'toLocal(ref.uB) = ' + toLocal(ref.uA, 'x')", { fn: true, time: false, ids: ['uA'], toLocal: true }],
       ['`${t} seconds`', TIME_FN]
     ], ([input, expected]) => [kind(pxl.parseAttributeValue(input)), expected]);
 

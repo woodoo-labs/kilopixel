@@ -187,6 +187,7 @@ Before the 2026-10-26 fix, and still useful as a pattern: let the element in the
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-27: evaluation model option B built (`design/done/2026-11-20_evaluation_model_plan.md` §11): `toLocal()` readers are evaluated in every frame that runs and read targets in their own stage only.
 - 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
 - Status line until 2026-11-20: 💬 **Discussion** (living note, no decisions yet; started 2026-10-25, ideas added 2026-10-26). This is the hub for refs, points and `toLocal`; start here.

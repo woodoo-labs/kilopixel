@@ -27,73 +27,82 @@ pxl.isSpatialKey = function(key) {
 // =========================================================================
 // Reactivity Engine
 // =========================================================================
-
-// Subscribers per ref key: { 'ref.id': [element, …] }
-pxl._subscriptions = {};
+// A change doesn't evaluate the element's readers: it raises a version and asks the stages that read the element for
+// a frame. Their update phase then evaluates what is out of date, sources before their readers (Stage.runFrame()).
+// Design: design/done/2026-11-20_evaluation_model_plan.md.
 
 // Element id → its values, read by expressions as ref.<id>.<name>
 pxl.nodes = {};
 
-// A ref.* cycle whose values keep changing stops after this many rounds (PxlNode.variableChangedCallback).
-// A cycle of n elements nests n × rounds calls, so the limit keeps cycles of up to ~200 elements below the stack limit.
+// Counts the changes of elements that someone reads. Such an element's changeVersion is the count at its last
+// change; a reader keeps the count at its last evaluation and is out of date when a source's version is newer.
+pxl._changeCounter = 0;
+// The count when an element last left the registry: its readers now read undefined
+pxl._registryVersion = 0;
+// Every id an expression reads (filled by the compiler, never shrinks): only changes of these elements count
+pxl._readIds = new Set();
+// Raised when a stage's order of sources may have changed (Stage.buildOrder())
+pxl._orderVersion = 0;
+
+// A cycle without t whose values keep changing stops after this many rounds (Stage.evaluateOrder())
 pxl.MAX_CYCLE_ROUNDS = 100;
 pxl.CYCLE_MESSAGE = `a ref.* cycle never settles: values still changed after ${pxl.MAX_CYCLE_ROUNDS} rounds`;
 
-pxl.broadcast = function(fullKey) {
-  const subs = pxl._subscriptions[fullKey];
-  if (subs) {
-    // Backwards: a subscriber may unsubscribe itself during the loop
-    for (let i = subs.length - 1; i >= 0; i--) {
-      subs[i].variableChangedCallback(fullKey);
-    }
+// Called by the compiler for the ids of a new expression. An element with a new id may now be a source of an order.
+pxl.addReadIds = function(ids) {
+  for (let i = 0; i < ids.length; i++) {
+    if (pxl._readIds.has(ids[i])) continue;
+    pxl._readIds.add(ids[i]);
+    pxl._orderVersion++;
   }
 };
 
-// The keys each element is subscribed to (element → Set), the other side of pxl._subscriptions: removing an
-// element then touches only its own keys. Scanning every key for every removed element was quadratic (2,000 shapes
-// with 2,000 readers took 380 ms to remove, design/done/2026-10-30_framework_compatibility_plan.md §19.1).
-pxl._subscribedKeys = new WeakMap();
-
-pxl.subscribeToVariable = function(fullKey, element) {
-  let keys = pxl._subscribedKeys.get(element);
-  if (!keys) pxl._subscribedKeys.set(element, keys = new Set());
-  if (keys.has(fullKey)) return;
-  keys.add(fullKey);
-  (pxl._subscriptions[fullKey] ||= []).push(element);
+pxl.isRead = function(element) {
+  return element.registeredId !== null && pxl._readIds.has(element.registeredId);
 };
 
-pxl.unsubscribeFromVariable = function(fullKey, element) {
-  const keys = pxl._subscribedKeys.get(element);
-  if (!keys || !keys.delete(fullKey)) return;
-
-  const subs = pxl._subscriptions[fullKey];
-  pxl.removeFromArray(subs, element);
-  if (subs.length === 0) delete pxl._subscriptions[fullKey]; // keeps the map small for debugging
+// After a value of element changed. Only an element that someone reads counts, so the counter stays still while
+// only unread values change, and a stage can skip its readers (Stage.updateReaders()).
+pxl.markChanged = function(element) {
+  if (!pxl.isRead(element)) return;
+  element.changeVersion = ++pxl._changeCounter;
+  pxl.wakeReaders(element.registeredId);
 };
 
-pxl.clearAllVariableSubscriptions = function(element) {
-  const keys = pxl._subscribedKeys.get(element);
-  if (!keys) return;
-  for (const fullKey of keys) {
-    const subs = pxl._subscriptions[fullKey];
-    pxl.removeFromArray(subs, element);
-    if (subs.length === 0) delete pxl._subscriptions[fullKey];
+// Asks every stage that reads id for a frame. The running stage asks for none: its update phase is still to come,
+// or the change came from there (rule R1).
+pxl.wakeReaders = function(id) {
+  const stages = pxl.perf.stages;
+  for (let i = 0; i < stages.length; i++) {
+    if (stages[i].readsId(id)) stages[i].requestRender();
   }
-  keys.clear();
 };
 
-// An element's id was set, changed or removed after it connected (connectedCallback reads the id once): move its
-// registry entry, and tell the readers of both names (readers of the old name now read undefined)
+// An element (or stage) with an id connected, or got an id. Readers written before it pick it up in the next update
+// phase; a source that someone reads may be a node of the order.
+pxl.registerNode = function(element, id) {
+  pxl.nodes[id] = element.values;
+  element.registeredId = id;
+  pxl.markChanged(element);
+  if (pxl.isRead(element)) pxl._orderVersion++;
+};
+
+// An element left the registry (removed, or its id changed): its readers now read undefined
+pxl.unregisterNode = function(id) {
+  delete pxl.nodes[id];
+  pxl._registryVersion = ++pxl._changeCounter;
+  if (pxl._readIds.has(id)) {
+    pxl.wakeReaders(id);
+    pxl._orderVersion++;
+  }
+};
+
+// An element's id was set, changed or removed after it connected (connectedCallback reads the id once). The old
+// entry is removed only if it is this element's.
 pxl.renameNode = function(element, oldId, newId) {
-  if (oldId && pxl.nodes[oldId] === element.values) {
-    delete pxl.nodes[oldId];
-    pxl.broadcast(`ref.${oldId}`);
-  }
-  element.refKey = newId ? `ref.${newId}` : null;
-  if (newId) {
-    pxl.nodes[newId] = element.values;
-    pxl.broadcast(element.refKey);
-  }
+  if (oldId && pxl.nodes[oldId] === element.values) pxl.unregisterNode(oldId);
+  element.registeredId = null;
+  if (newId) pxl.registerNode(element, newId);
 };
 
 // =========================================================================
@@ -127,40 +136,35 @@ pxl.compileAttribute = function(element, name, newValue) {
     // Evaluated every frame (evaluateAnimations)
     if (!element.animatedAttributeKeys.includes(name)) element.animatedAttributeKeys.push(name);
     pxl.removeFromArray(element.reactiveAttributeKeys, name);
-    pxl.removeFromArray(element.toLocalAttributeKeys, name);
   } else {
-    // Evaluated when a ref.* dependency broadcasts. Functions are only compiled for time or refs,
-    // so a reactive function always has variableDependencies.
+    // Evaluated in the update phase when a source changed (Stage.updateReaders()). Functions are only compiled for
+    // time or refs, so a reactive function always reads at least one id.
     pxl.removeFromArray(element.animatedAttributeKeys, name);
     if (!element.reactiveAttributeKeys.includes(name)) element.reactiveAttributeKeys.push(name);
-
-    // toLocal results also depend on the element's own space (re-evaluated by broadcastGlobalMatrixChange)
-    if (parsed.usesToLocal) {
-      if (!element.toLocalAttributeKeys.includes(name)) element.toLocalAttributeKeys.push(name);
-    } else {
-      pxl.removeFromArray(element.toLocalAttributeKeys, name);
-    }
-
-    const deps = parsed.variableDependencies;
-    for (let i = 0; i < deps.length; i++) {
-      pxl.subscribeToVariable(deps[i], element);
-    }
-
     // Not connected yet: connectedCallback evaluates it
-    if (element.isConnected) {
-      element.values[name] = parsed.call(element, 0);
-    }
+    if (element.isConnected) element.values[name] = parsed.call(element, 0);
   }
+  pxl.expressionsChanged(element);
 };
 
 // A value that needs no compiling, stored as it is: a parsed attribute string, or a property value (number, boolean,
 // array, gradient descriptor, …). Arrays are kept by reference and never changed by the engine.
 pxl.storeValue = function(element, name, value) {
+  const wasExpression = typeof element.expressions[name] === 'function';
   element.expressions[name] = value;
   pxl.removeFromArray(element.animatedAttributeKeys, name);
   pxl.removeFromArray(element.reactiveAttributeKeys, name);
-  pxl.removeFromArray(element.toLocalAttributeKeys, name);
   element.values[name] = value;
+  if (wasExpression) pxl.expressionsChanged(element);
+};
+
+// An expression was set or removed: the element's sources, its place in its stage's reader list, and the order of
+// sources, which holds elements that others read, toLocal() readers and the containers above them (Stage.buildOrder())
+pxl.expressionsChanged = function(element) {
+  if (element.isConnected) element.collectSources();
+  if (element.isOrderNode || element.hasToLocal || element.childList !== null || pxl.isRead(element)) {
+    pxl._orderVersion++;
+  }
 };
 
 // =========================================================================
@@ -235,66 +239,4 @@ pxl.setFromRef = function(element, name, value) {
   }
   if (typeof value === 'string' || !isKnown) element.setAttribute(name, value);
   else element[name] = value;
-};
-
-// Re-evaluates toLocal() attributes after the element's own space moved (an ancestor's matrix changed).
-// Returns a bitmask: 1 = values changed, 2 = matrix dirtied (setLocalMatrixDirty already walked the subtree),
-// 4 = a changed value changes the pixels (PxlNode.affectsPixels()).
-pxl.evaluateToLocalAttributes = function(element) {
-  let result = 0;
-  const keys = element.toLocalAttributeKeys;
-
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    const newVal = element.expressions[key].call(element, 0);
-    if (element.values[key] !== newVal) {
-      element.values[key] = newVal;
-      result |= 1;
-      if (pxl.isSpatialKey(key)) result |= 2;
-      if (element.affectsPixels(key)) result |= 4;
-    }
-  }
-
-  if (result & 2) element.setLocalMatrixDirty();
-  if (result & 4) element.parentLayer?.invalidate();
-  else if (result & 1) element.compositingChanged();
-  return result;
-};
-
-// Re-evaluates the reactive attributes that depend on varName.
-// Returns a bitmask: 1 = varName is still needed, 2 = values changed, 4 = a changed value changes the pixels
-// (PxlNode.affectsPixels()).
-pxl.evaluateAttributesForVariable = function(element, varName) {
-  let result = 0;
-  let matrixDirtied = false;
-  const keys = element.reactiveAttributeKeys;
-
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    const fn = element.expressions[key];
-
-    if (fn.variableDependencies.includes(varName)) {
-      result |= 1;
-      const newVal = fn.call(element, 0);
-      if (element.values[key] !== newVal) {
-        element.values[key] = newVal;
-        result |= 2;
-        if (element.affectsPixels(key)) result |= 4;
-        if (pxl.isSpatialKey(key)) matrixDirtied = true;
-      }
-    }
-  }
-
-  if (matrixDirtied) element.setLocalMatrixDirty();
-  return result;
-};
-
-pxl.restoreVariableSubscriptions = function(element) {
-  const keys = element.reactiveAttributeKeys;
-  for (let i = 0; i < keys.length; i++) {
-    const deps = element.expressions[keys[i]].variableDependencies;
-    for (let j = 0; j < deps.length; j++) {
-      pxl.subscribeToVariable(deps[j], element);
-    }
-  }
 };

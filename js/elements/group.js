@@ -60,7 +60,8 @@ pxl.Group = class Group extends pxl.PxlNode {
       return;
     }
 
-    if (this.values.hidden) return;
+    // Also when it failed as a source in part 1 of the update phase (PxlNode.updateAsSource())
+    if (this._failedFrame === pxl._frame || this.values.hidden) return;
     for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].update(t);
     }

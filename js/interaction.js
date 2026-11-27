@@ -288,7 +288,7 @@ pxl.InteractionEngine = class InteractionEngine {
   setState(node, key, value) {
     if (node.values[key] === value) return;
     node.values[key] = value;
-    if (node.refKey) pxl.broadcast(node.refKey);
+    pxl.markChanged(node);
   }
 
   // Sets a state on node and its groups, up to (not including) stop or the layer
@@ -568,7 +568,7 @@ pxl.InteractionEngine = class InteractionEngine {
     const values = this.stage.values;
     const isPointerChanged = this._isMouseDirty;
     if (isPointerChanged) {
-      if (this.stage.refKey) pxl.broadcast(this.stage.refKey);
+      pxl.markChanged(this.stage);
       this._isMouseDirty = false;
     }
 

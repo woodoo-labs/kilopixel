@@ -27,8 +27,25 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
     this.animatedAttributeKeys = [];
     this.reactiveAttributeKeys = [];
-    this.toLocalAttributeKeys = []; // reactive keys using toLocal(): also depend on this element's own space
     this.isAnimated = false;
+
+    // Versions (pxl._changeCounter): the count at this element's last change that someone reads, and at the last
+    // evaluation of its reactive values. A source with a newer version makes them out of date (isOutOfDate()).
+    this.changeVersion = 0;
+    this._seenVersion = 0;
+    // The ids the reactive values read, and whether any expression uses toLocal(); collected when the expressions
+    // change (collectSources()), so the check per frame touches one array instead of every expression
+    this.sourceIds = [];
+    this.hasToLocal = false;
+    // Frame in which evaluateAnimations() last ran: a source in the stage's order is evaluated before the walk,
+    // which then skips it
+    this._evaluatedFrame = -1;
+    // The stage whose update phase evaluates the element (null while not connected). Written by the stage: the stage
+    // whose reader list holds the element (it drops removed readers in its next pass), and whether the element is a
+    // source in the stage's order (Stage.buildOrder())
+    this.readerStage = null;
+    this.listedIn = null;
+    this.isOrderNode = false;
 
     // The children of a layer or group (set there); null for shapes and variables. A field on every node, so the hit
     // walk and the matrix walk read an own property instead of searching HTMLElement's prototype chain for it.
@@ -37,13 +54,10 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     // Set in connectedCallback
     this.parentLayer = null;
     this.parentContainer = null;
-    this.refKey = null;
+    this.registeredId = null; // the id under which pxl.nodes holds the values (pxl.registerNode())
     // connectedCallback has run: an id that changes from now on is moved in the registry by attributeChangedCallback.
     // During an upgrade the attributes arrive before connectedCallback, which registers the id itself.
     this._isRegistered = false;
-
-    // Own broadcasts from variableChangedCallback() that are still running (see there)
-    this._broadcastNesting = 0;
 
     // Frame (pxl._frame) in which the update phase failed for this element: the draw phase of that frame skips it.
     // A frame number needs no reset, unlike a boolean.
@@ -113,7 +127,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   valueChanged(name) {
     this.isAnimated = this.animatedAttributeKeys.length > 0;
     if (pxl.isSpatialKey(name)) this.setLocalMatrixDirty();
-    if (this.refKey) pxl.broadcast(this.refKey);
+    pxl.markChanged(this);
     if (this.affectsPixels(name)) {
       this.parentLayer?.invalidate();
     } else {
@@ -146,76 +160,128 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this.parentContainer = parent === null ? null : parent.closest('pxl-group, pxl-layer');
     this._lastParentMatrixVersion = -1; // a new parent's version may equal the old one's
     this.parentContainer?.registerChild(this);
-    pxl.restoreVariableSubscriptions(this);
+    this.readerStage = this.closest('pxl-stage');
 
-    // Reactive attributes are evaluated now: their refs and toLocal() need the element in the DOM
-    const keys = this.reactiveAttributeKeys;
-    let matrixDirtied = false;
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      const newVal = this.expressions[key].call(this, 0);
-      if (this.values[key] !== newVal) {
-        this.values[key] = newVal;
-        if (pxl.isSpatialKey(key)) matrixDirtied = true;
-      }
-    }
-    if (matrixDirtied) {
-      this.setLocalMatrixDirty();
-      this.parentLayer?.invalidate();
-    }
-
-    if (this.id) {
-      pxl.nodes[this.id] = this.values;
-      this.refKey = `ref.${this.id}`;
-      // Broadcast arrival so any elements initialized earlier can successfully re-evaluate
-      pxl.broadcast(this.refKey);
-    }
+    // Reactive attributes are evaluated now: their refs and toLocal() need the element in the DOM. Not counted as a
+    // change: the element isn't registered yet, and registering it below tells its readers.
+    this.evaluateReactive();
+    this.collectSources();
+    if (this.hasToLocal) pxl._orderVersion++; // a toLocal() reader is a source in its stage's order
+    if (this.id) pxl.registerNode(this, this.id);
     this._isRegistered = true;
   }
 
   disconnectedCallback() {
     this._isRegistered = false;
-    if (this.id && pxl.nodes[this.id] === this.values) {
-      delete pxl.nodes[this.id];
-    }
-    pxl.clearAllVariableSubscriptions(this);
+    const id = this.registeredId;
+    if (id !== null && pxl.nodes[id] === this.values) pxl.unregisterNode(id);
+    this.registeredId = null;
+    if (this.isOrderNode) pxl._orderVersion++;
+    this.readerStage = null;
     this.parentContainer?.unregisterChild(this);
   }
 
-  variableChangedCallback(varName) {
-    // Chains, diamonds and elements with many inputs are entered one call after the other. A cycle whose values
-    // keep changing enters again from inside its own broadcast, one level deeper in every round.
-    if (this._broadcastNesting === pxl.MAX_CYCLE_ROUNDS) {
-      this.reportError(pxl.CYCLE_MESSAGE);
-      return;
-    }
+  // --- Reactive Values ---
+  // Design: design/done/2026-11-20_evaluation_model_plan.md
 
-    let result;
+  // Called on connect and when an expression changes (pxl.expressionsChanged()): collects the ids the reactive values
+  // read, and puts the element in its stage's reader list when it has reactive values or uses toLocal()
+  collectSources() {
+    const ids = this.sourceIds;
+    ids.length = 0;
+    const keys = this.reactiveAttributeKeys;
+    for (let i = 0; i < keys.length; i++) {
+      const sources = this.expressions[keys[i]].sourceIds;
+      for (let j = 0; j < sources.length; j++) {
+        if (!ids.includes(sources[j])) ids.push(sources[j]);
+      }
+    }
+    this.hasToLocal = this.anyUsesToLocal(keys) || this.anyUsesToLocal(this.animatedAttributeKeys);
+    if (keys.length > 0 || this.hasToLocal) this.readerStage?.addReader(this);
+  }
+
+  anyUsesToLocal(keys) {
+    for (let i = 0; i < keys.length; i++) {
+      if (this.expressions[keys[i]].usesToLocal) return true;
+    }
+    return false;
+  }
+
+  // Whether a source changed since the reactive values were last evaluated. toLocal() results also depend on the
+  // containers above both elements, so they are evaluated in every frame that runs.
+  isOutOfDate() {
+    if (this.hasToLocal) return true;
+    const seen = this._seenVersion;
+    if (pxl._registryVersion > seen) return true;
+    const ids = this.sourceIds;
+    for (let i = 0; i < ids.length; i++) {
+      const values = pxl.nodes[ids[i]];
+      if (values !== undefined && values.$node.changeVersion > seen) return true;
+    }
+    return false;
+  }
+
+  // Evaluates the reactive values; returns whether one changed
+  evaluateReactive() {
+    let changed = false;
+    let pixelsChanged = false;
+    let matrixDirtied = false;
+    const keys = this.reactiveAttributeKeys;
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const newVal = this.expressions[key].call(this, 0);
+      if (this.values[key] !== newVal) {
+        this.values[key] = newVal;
+        changed = true;
+        if (this.affectsPixels(key)) pixelsChanged = true;
+        if (pxl.isSpatialKey(key)) matrixDirtied = true;
+      }
+    }
+    this._seenVersion = pxl._changeCounter;
+    if (!changed) return false;
+
+    if (matrixDirtied) this.setLocalMatrixDirty();
+    pxl.markChanged(this);
+    if (pixelsChanged) this.parentLayer?.invalidate();
+    else this.compositingChanged();
+    return true;
+  }
+
+  // Update phase. An element that reads itself sees its own new values in the same frame: one more round when a
+  // value changed.
+  updateReactive() {
     try {
-      result = pxl.evaluateAttributesForVariable(this, varName);
+      if (this.evaluateReactive() && this.readsItself()) this.evaluateReactive();
     } catch (error) {
-      // The reader's own error, reported here: the element whose broadcast called this isn't blamed or skipped,
-      // and the other readers of that broadcast still update
+      this._seenVersion = pxl._changeCounter; // tried again when a source changes
+      this.reportError(error);
+    }
+  }
+
+  readsItself() {
+    return this.registeredId !== null && this.sourceIds.includes(this.registeredId);
+  }
+
+  // Part 1 of the update phase (Stage.evaluateOrder()), before the walk, which then skips the element's values with
+  // t. A failed evaluation skips the element in both phases, as in the walk.
+  updateAsSource(t) {
+    try {
+      this.evaluateAnimations(t);
+    } catch (error) {
+      this._failedFrame = pxl._frame;
       this.reportError(error);
       return;
     }
-
-    if ((result & 1) === 0) pxl.unsubscribeFromVariable(varName, this);
-    if ((result & 2) !== 0) {
-      if (this.refKey) {
-        this._broadcastNesting++;
-        pxl.broadcast(this.refKey);
-        this._broadcastNesting--;
-      }
-      if ((result & 4) !== 0) this.parentLayer?.invalidate();
-      else this.compositingChanged();
-    }
+    if (this.isOutOfDate()) this.updateReactive();
   }
 
   evaluateAnimations(t) {
     // Keeps the stage's frame loop running while anything in the layer is animated (a layer is its own parentLayer),
     // also when the evaluation below fails: an error that depends on t may go away
     if (this.isAnimated) this.parentLayer?.markAnimated();
+    // A source in the stage's order was evaluated before the walk (Stage.evaluateOrder())
+    if (this._evaluatedFrame === pxl._frame) return false;
+    this._evaluatedFrame = pxl._frame;
 
     let animatedValuesChanged = false;
     let pixelsChanged = false;
@@ -234,12 +300,10 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
     if (matrixDirtied) this.setLocalMatrixDirty();
 
-    if (this.refKey && animatedValuesChanged && pxl._subscriptions[this.refKey]) {
-      pxl.broadcast(this.refKey);
-    }
+    if (animatedValuesChanged) pxl.markChanged(this);
 
     // Only a value that changed redraws the layer: a clock showing floor(t) redraws once per second, a finished
-    // clamp() animation not at all (design/2026-11-20_evaluation_model_plan.md, step 2)
+    // clamp() animation not at all (design/done/2026-11-20_evaluation_model_plan.md, step 2)
     if (pixelsChanged) this.parentLayer?.invalidate();
     else if (animatedValuesChanged) this.compositingChanged();
 
@@ -289,41 +353,12 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     return this._cachedFilterScaled;
   }
 
-  // --- Spatial Reactivity ---
+  // --- Matrix ---
 
+  // Read lazily: getGlobalMatrix() of the element and of everything inside notices the new version. toLocal()
+  // readers need no notice: they are evaluated in every frame that runs (isOutOfDate()).
   setLocalMatrixDirty() {
     this._isLocalMatrixDirty = true;
-    this.broadcastGlobalMatrixChange();
-  }
-
-  broadcastGlobalMatrixChange() {
-    if (this.childList !== null) {
-      const len = this.childList.length;
-      const subs = pxl._subscriptions;
-      for (let i = 0; i < len; i++) {
-        const child = this.childList[i];
-
-        // The child's own space moved: its toLocal() results are stale (design/done/2026-10-26_tolocal_fix_plan.md).
-        // If re-evaluating moves the child, setLocalMatrixDirty() has already walked its subtree.
-        let walked = false;
-        if (child.toLocalAttributeKeys.length > 0) {
-          try {
-            walked = (pxl.evaluateToLocalAttributes(child) & 2) !== 0;
-          } catch (error) {
-            // The reader's own error: the element that moved isn't blamed, and the walk goes on
-            child.reportError(error);
-          }
-        }
-
-        // Broadcast the child if someone is explicitly tracking its global matrix
-        if (child.refKey && subs[child.refKey] && subs[child.refKey].length > 0) {
-          pxl.broadcast(child.refKey);
-        }
-
-        // Walk on: deeper elements may be tracked or read toLocal() too
-        if (!walked) child.broadcastGlobalMatrixChange();
-      }
-    }
   }
 
   // --- Lazy Matrices ---

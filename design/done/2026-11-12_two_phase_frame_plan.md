@@ -1,6 +1,6 @@
 # Two-Phase Frame: Evaluate Everything, Then Draw
 
-- **Status**: ✅ **Implemented** (2026-11-13, step 1 built, §7.4; the rest continues in `design/2026-11-20_evaluation_model_plan.md`)
+- **Status**: ✅ **Implemented** (2026-11-13, step 1 built, §7.4; the rest continues in `design/done/2026-11-20_evaluation_model_plan.md`)
 - **Date**: 2026-11-12
 - **Related**: see §6 (every plan whose per-frame design depends on this one, and what changes for it); `design/archive/2026-11-15_per_frame_evaluation_plan.md` (proposes another way after step 2: one evaluation per frame for all expressions, no broadcasts; step 2 is the first step of both); background: `design/done/2026-11-07_safe_shape_render_plan.md` (same render path, hidden subtrees in §5.1), `design/done/2026-10-26_tolocal_fix_plan.md` (matrix walk within the frame), `design/ideas/2026-10-25_refs_across_spaces_note.md` (hub for refs, toLocal and the one-frame lag)
 - **Target Implementation** (step 1 built, §7.4): `js/elements/stage.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/variable.js`, `tests/index.html`, `.agents/KILOPIXEL.md` (Per-Frame Data Flow, Per-Frame Render Pipeline, Coordinate Mapping, AI guide), `docs/mapping.html` (section 7 removed, §8)
@@ -45,7 +45,7 @@ The update phase evaluates every source before the elements that read it, whatev
 - **Cycle rule:** the members of a cycle (A → B → C → A) are evaluated once each, in DOM order; where an element reads a member that comes later, it gets that member's value from the previous frame. Deterministic, no recursion. A self-reference with `t` (the "follow" effect, `x="ref.me.x + (100 - ref.me.x) * 0.1 + t * 0"`) is the cycle of one and keeps working as today. Feedback with `t` is often intentional (shapes chasing each other, springs), so no warning.
 - **Limit:** several stages each run their own loop; a reader in one stage that reads another can still lag a frame. A shared update phase for all stages could fix that later.
 
-**Reactive cycles** (no `t`) are not part of this plan: they settle during propagation, which recurses. A cycle that never settles (`a = b + 1`, `b = a + 1`) stops after 100 rounds with a warning (since 2026-11-13). Diamonds evaluated once per path and half-updated values remain, accepted until a feature needs them: `design/done/2026-11-12_reactive_propagation_plan.md` (TODO §46).
+**Reactive cycles** (no `t`) are not part of this plan: they settle during propagation, which recurses. A cycle that never settles (`a = b + 1`, `b = a + 1`) stops after 100 rounds with a warning (since 2026-11-13). Diamonds evaluated once per path and half-updated values remain, accepted until a feature needs them: `design/done/2026-11-12_reactive_propagation_plan.md` (`design/done/2026-11-20_evaluation_model_plan.md`).
 
 ### 3.2 Change-based dirty flags
 

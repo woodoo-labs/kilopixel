@@ -1,5 +1,5 @@
 // Counts frames and redraws on every docs and example page for two engine builds, and compares the pixels at the end
-// (design/2026-11-20_evaluation_model_plan.md, step 2). Runs redraws.html (next to this file) in headless Chrome over the
+// (design/done/2026-11-20_evaluation_model_plan.md, step 2). Runs redraws.html (next to this file) in headless Chrome over the
 // DevTools protocol (no packages, Node 22+).
 // The dev server must run (node tools/serve.js, port 8124).
 //   node design/prototypes/2026-11-20_evaluation_model/run.js <old commit>      old: dist/pxl.min.js of that commit (default HEAD); new: today's dist/pxl.min.js

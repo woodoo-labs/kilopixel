@@ -3,7 +3,7 @@
 - **Status**: 💬 **Discussion** (2026-11-22, moved out of the custom shapes plan; to be discussed; step 6 waits for `space`)
 - **Date**: 2026-11-22
 - **Origin**: §6 and decision D7 of `design/done/2026-11-20_custom_shapes_plan.md`, which took them from the cleanup draft of 2026-11-20 (`scratch/2026-11-20_engine_structure_cleanup_plan.md` (not kept))
-- **Related**: `design/2026-10-30_space_attribute_plan.md` (step 6 goes with it, TODO §28), `design/2026-11-20_evaluation_model_plan.md` (rewrites the evaluation loops step 4 touches)
+- **Related**: `design/2026-10-30_space_attribute_plan.md` (step 6 goes with it, TODO §28), `design/done/2026-11-20_evaluation_model_plan.md` (rewrites the evaluation loops step 4 touches)
 - **Target Implementation**: `js/elements/node.js`, `js/elements/stage.js`, `js/elements/layer.js`, `js/elements/group.js`, a new `js/elements/base.js` and `js/elements/container.js`, `js/interaction.js`, `js/compiler.js`, `js/graphics.js`; `build.js` (file list)
 - **Prototypes**: `design/prototypes/2026-11-20_custom_shapes/transform_path/` (step 6, made for the custom shapes plan)
 

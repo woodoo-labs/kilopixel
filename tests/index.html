@@ -277,7 +277,7 @@
       layer.setAttribute('x', '450');
       layer.setAttribute('rotate', '35');
       layer.setAttribute('zoom', '1.4');
-      await wait(100);
+      await wait(100); nextFrame();
       expectMapped('tlReader2', 'tlSun2', XY);
     });
 
@@ -319,25 +319,26 @@
       layer.setAttribute('x', '500');
       layer.setAttribute('y', '300');
       layer.setAttribute('rotate', '30');
-      await wait(100);
+      await wait(100); nextFrame();
       ends('tlCircle5a', 'tlCircle5b');
     });
 
     test('toLocal: line follows when a target\'s layer moves (target side)', async () => {
       el('tlLayer5b').setAttribute('rotate', '45');
       el('tlLayer5a').setAttribute('zoom', '0.7');
-      await wait(100);
+      await wait(100); nextFrame();
       expectMapped('tlLine5', 'tlCircle5a', [['x1', 'x'], ['y1', 'y']]);
       expectMapped('tlLine5', 'tlCircle5b', [['x2', 'x'], ['y2', 'y']]);
     });
 
-    test('toLocal: replacing a toLocal attribute with a number removes it from toLocalAttributeKeys', async () => {
+    test('toLocal: replacing a toLocal attribute with a number keeps the number', async () => {
       const reader = el('tlReader2');
-      if (!reader.toLocalAttributeKeys.includes('x')) throw new Error('x missing before the change');
       reader.setAttribute('x', '10');
-      if (reader.toLocalAttributeKeys.includes('x')) throw new Error('x still listed after setAttribute(\'x\', \'10\')');
+      nextFrame();
+      if (reader.values.x !== 10) throw new Error(`x is ${reader.values.x} after setAttribute('x', '10') and a frame`);
       reader.setAttribute('x', "toLocal(ref.tlSun2, 'x')");
-      if (!reader.toLocalAttributeKeys.includes('x')) throw new Error('x not listed again after restoring toLocal');
+      nextFrame();
+      expectMapped('tlReader2', 'tlSun2', XY);
     });
 
     // ===================================================================
@@ -357,7 +358,7 @@
       box.setAttribute('scalex', '1.5');
       box.setAttribute('skewx', '20');
       box.setAttribute('dy', '40');
-      await wait(100);
+      await wait(100); nextFrame();
       expectMapped('txReader', 'txBox', [['x', 'tx'], ['y', 'ty']]);
     });
 
@@ -828,6 +829,12 @@
       draw() { this.calls = (this.calls || 0) + 1; throw new RangeError(`value ${this.calls} is invalid`); }
     });
 
+
+    // Renders every stage on the page once: readers of a changed value update in the next frame's update phase
+    function nextFrame() {
+      document.querySelectorAll('pxl-stage').forEach((s) => { if (s.unit === 0) s.resize(); s.render(performance.now() / 1000); });
+    }
+
     // Renders the test stage at time t; resize() first, so it also works in a background tab
     function srRender(t) {
       const stage = el('srStage');
@@ -1060,7 +1067,7 @@
       srClear();
     });
 
-    test('safe render: a reader that fails during a broadcast is blamed itself; the variable and other readers update', () => {
+    test('safe render: a reader that fails is blamed itself; the variable and other readers update', () => {
       srClear();
       srAdd('srLayerA', `<pxl-var id="srClock" value="t"></pxl-var>
         <pxl-circle id="srBadReader" x="ref.srClock.value > 0.5 ? missingFunction() : 100" r="5"></pxl-circle>
@@ -1763,13 +1770,16 @@
         try {
           el('rcA').setAttribute('value', 'ref.rcB.value + 1');
           el('rcA').setAttribute('value', 'ref.rcB.value + 2');
+          nextFrame();
         } catch (e) { error = e; }
       });
       if (error) throw new Error(`setAttribute threw: ${error}`);
       const a = el('rcA').values.value, b = el('rcB').values.value;
       if (!(a < 1000 && b < 1000)) throw new Error(`values ran away: a = ${a}, b = ${b}`);
-      if (el('rcA')._broadcastNesting !== 0 || el('rcB')._broadcastNesting !== 0) throw new Error('broadcast nesting not reset');
-      if (warnings.length !== 1 || !warnings[0].includes('never settles')) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      if (warnings.length !== 1 || !warnings[0].includes('never settles') || !/id="rc[AB]"/.test(warnings[0])) {
+        throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      }
+      if (el('srStage').needsNextFrame()) throw new Error('the cycle keeps the stage running');
       srClear();
     });
 
@@ -1778,7 +1788,7 @@
       // The walkthrough's section 9 orb: shadowcolor="ref.sec9FlyingOrb.stroke"
       srAdd('srLayerA', `<pxl-var id="rcHue" value="10"></pxl-var>
         <pxl-circle id="rcSelf" x="100" y="100" r="10" stroke="hsl(ref.rcHue.value, 100, 60)" shadowcolor="ref.rcSelf.stroke"></pxl-circle>`);
-      const warnings = captureWarnings(() => el('rcHue').setAttribute('value', '200'));
+      const warnings = captureWarnings(() => { el('rcHue').setAttribute('value', '200'); nextFrame(); });
       const { stroke, shadowcolor } = el('rcSelf').values;
       if (shadowcolor !== stroke) throw new Error(`shadowcolor ${shadowcolor} lags behind stroke ${stroke}`);
       if (warnings.length !== 0) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
@@ -1832,12 +1842,12 @@
       srClear();
       let html = '<pxl-var id="rcCh0" value="0"></pxl-var>';
       for (let i = 1; i <= 150; i++) html += `<pxl-var id="rcCh${i}" value="ref.rcCh${i - 1}.value + 1"></pxl-var>`;
-      // Reads all 150 links: entered once per link in one broadcast, one call after the other
+      // Reads all 150 links: evaluated once, after all of them
       let sum = '0';
       for (let i = 1; i <= 150; i++) sum += ` + ref.rcCh${i}.value`;
       html += `<pxl-var id="rcSum" value="${sum}"></pxl-var>`;
       srAdd('srLayerA', html);
-      const warnings = captureWarnings(() => el('rcCh0').setAttribute('value', '1000'));
+      const warnings = captureWarnings(() => { el('rcCh0').setAttribute('value', '1000'); nextFrame(); });
       const end = el('rcCh150').values.value;
       if (end !== 1150) throw new Error(`chain end = ${end}, expected 1150`);
       const expectedSum = 150 * 1000 + 150 * 151 / 2;
@@ -1845,6 +1855,150 @@
       if (warnings.length !== 0) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
       srClear();
     });
+
+    // --- Evaluation order (design/done/2026-11-20_evaluation_model_plan.md §8, §11) ---
+    // A change raises a version; the next update phase evaluates the sources in their order, then the walk, then the
+    // readers that nobody reads (ENGINE.md §4.3).
+    section('Evaluation order');
+
+    test('evaluation order: ten stacked diamonds evaluate their bottom once per change, never with half-updated inputs', () => {
+      srClear();
+      // D(i + 1) reads L(i) and R(i), which both read D(i): 2^10 paths from the top to the bottom
+      let html = '<pxl-var id="eoD0" value="0"></pxl-var>';
+      for (let i = 0; i < 10; i++) {
+        html += `<pxl-var id="eoL${i}" value="ref.eoD${i}.value + 1"></pxl-var><pxl-var id="eoR${i}" value="ref.eoD${i}.value + 2"></pxl-var>`;
+        if (i < 9) html += `<pxl-var id="eoD${i + 1}" value="ref.eoL${i}.value + ref.eoR${i}.value"></pxl-var>`;
+      }
+      html += '<pxl-var id="eoBottom" value="window.eoRecord(ref.eoL9.value + ref.eoR9.value)"></pxl-var>';
+      const seen = [];
+      window.eoRecord = (value) => { seen.push(value); return value; };
+      srAdd('srLayerA', html);
+      srRender(1);
+      seen.length = 0;
+      el('eoD0').setAttribute('value', '1');
+      srRender(2);
+      let expected = 1;
+      for (let i = 0; i < 10; i++) expected = 2 * expected + 3;
+      if (seen.length !== 1 || seen[0] !== expected) throw new Error(`bottom evaluated with ${JSON.stringify(seen)}, expected [${expected}]`);
+      delete window.eoRecord;
+      srClear();
+    });
+
+    test('evaluation order: a chain of 10,000 readers ends at the right value in one frame', () => {
+      srClear();
+      let html = '<pxl-var id="eoCh0" value="0"></pxl-var>';
+      for (let i = 1; i <= 10000; i++) html += `<pxl-var id="eoCh${i}" value="ref.eoCh${i - 1}.value + 1"></pxl-var>`;
+      srAdd('srLayerA', html);
+      srRender(1);
+      const warnings = captureWarnings(() => { el('eoCh0').setAttribute('value', '5'); srRender(2); });
+      if (el('eoCh10000').values.value !== 10005) throw new Error(`chain end ${el('eoCh10000').values.value}, expected 10005`);
+      if (warnings.length !== 0) throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      srClear();
+    }, { timeout: 30000 });
+
+    test('evaluation order: readers with t written before their sources (C reads B reads A) show the same frame', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-circle id="eoTC" x="ref.eoTB.x + t * 0" r="5"></pxl-circle>
+        <pxl-circle id="eoTB" x="ref.eoTA.x + t * 0" r="5"></pxl-circle>
+        <pxl-circle id="eoTA" x="t * 10" r="5"></pxl-circle>`);
+      for (const t of [1, 2, 3]) {
+        srRender(t);
+        const xs = ['eoTA', 'eoTB', 'eoTC'].map((id) => el(id).values.x);
+        if (xs.some((x) => x !== t * 10)) throw new Error(`at t = ${t}: A, B, C = ${xs}`);
+      }
+      srClear();
+    });
+
+    test('evaluation order: a toLocal() reader that others read follows a target in a group that moves with t', () => {
+      srClear();
+      // The worst DOM order: the reader's reader first, the group with the target last
+      srAdd('srLayerA', `<pxl-circle id="eoTlFollower" x="ref.eoTlReader.x + 10" r="5"></pxl-circle>
+        <pxl-circle id="eoTlReader" x="toLocal(ref.eoTlTarget, 'tx')" r="5"></pxl-circle>
+        <pxl-group x="100 + t * 100" y="100"><pxl-circle id="eoTlTarget" dx="50" r="5"></pxl-circle></pxl-group>`);
+      for (const t of [1, 2, 3]) {
+        srRender(t);
+        const reader = el('eoTlReader').values.x, follower = el('eoTlFollower').values.x;
+        if (reader !== 150 + t * 100 || follower !== reader + 10) throw new Error(`at t = ${t}: reader ${reader}, follower ${follower}`);
+      }
+      srClear();
+    });
+
+    test('evaluation order: a toLocal() reader before a group whose reactive transform moves its target is current after one frame', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-var id="eoAngle" value="0"></pxl-var>
+        <pxl-circle id="eoRotReader" x="toLocal(ref.eoRotTarget, 'tx')" y="toLocal(ref.eoRotTarget, 'ty')" r="5"></pxl-circle>
+        <pxl-group x="500" y="250" rotate="ref.eoAngle.value"><pxl-circle id="eoRotTarget" dx="100" r="5"></pxl-circle></pxl-group>`);
+      srRender(1);
+      el('eoAngle').setAttribute('value', '90');
+      srRender(2);
+      const { x, y } = el('eoRotReader').values;
+      if (Math.round(x) !== 500 || Math.round(y) !== 350) throw new Error(`reader at (${x}, ${y}), expected (500, 350)`);
+      if (el('srStage').needsNextFrame()) throw new Error('the stage keeps running');
+      srClear();
+    });
+
+    test('evaluation order: an element that others read and that gets its first expression is evaluated before its readers', () => {
+      srClear();
+      // eoSrc is already read by eoOther, so the new expression of eoMid reads no new id
+      srAdd('srLayerA', `<pxl-var id="eoSrc" value="1"></pxl-var>
+        <pxl-circle id="eoOther" x="ref.eoSrc.value" r="5"></pxl-circle>
+        <pxl-circle id="eoMidReader" x="ref.eoMid.value + 1" r="5"></pxl-circle>
+        <pxl-var id="eoMid" value="5"></pxl-var>`);
+      srRender(1);
+      el('eoMid').setAttribute('value', 'ref.eoSrc.value * 10');
+      srRender(2);
+      el('eoSrc').setAttribute('value', '2');
+      srRender(3);
+      if (el('eoMidReader').values.x !== 21) throw new Error(`reader ${el('eoMidReader').values.x}, expected 21`);
+      srClear();
+    });
+
+    test('evaluation order: a source in another stage\'s order is read as it is, without an edge', () =>
+      withStage(`<div style="width: 500px"><pxl-stage alwaysrender><pxl-layer>
+          <pxl-var id="eoXsBase" value="1"></pxl-var><pxl-var id="eoXsSrc" value="ref.eoXsBase.value + 1"></pxl-var>
+        </pxl-layer></pxl-stage>
+        <pxl-stage alwaysrender><pxl-layer>
+          <pxl-var id="eoXsMid" value="ref.eoXsSrc.value * 10"></pxl-var><pxl-circle id="eoXsReader" x="ref.eoXsMid.value" r="5"></pxl-circle>
+        </pxl-layer></pxl-stage></div>`, (first, box) => {
+        const second = box.querySelectorAll('pxl-stage')[1];
+        second.resize();
+        first.render(1);
+        second.render(1);
+        el('eoXsBase').setAttribute('value', '4');
+        const errors = captureErrors(() => { first.render(2); second.render(2); });
+        if (errors.length !== 0) throw new Error(`errors: ${errors}`);
+        if (el('eoXsReader').values.x !== 50) throw new Error(`reader ${el('eoXsReader').values.x}, expected 50`);
+      }));
+
+    test('evaluation order: a value derived from a change is new in the next frame, not right after setAttribute()', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-var id="eoSet" value="1"></pxl-var>
+        <pxl-circle id="eoDerived" x="ref.eoSet.value * 2" r="5"></pxl-circle>`);
+      srRender(1);
+      el('eoSet').setAttribute('value', '4');
+      const before = el('eoDerived').values.x;
+      srRender(2);
+      if (before !== 2 || el('eoDerived').values.x !== 8) throw new Error(`right after the change ${before}, after a frame ${el('eoDerived').values.x}`);
+      srClear();
+    });
+
+    test('evaluation order: the monitor publishing asks no frame of a stage whose readers don\'t read it', () =>
+      withStage(`<div style="width: 500px"><pxl-stage id="eoIdleStage" alwaysrender><pxl-var id="eoIdleVar" value="3"></pxl-var>
+        <pxl-layer>${'<pxl-circle x="ref.eoIdleVar.value" r="2"></pxl-circle>'.repeat(1000)}</pxl-layer></pxl-stage></div>`, (stage) => {
+        stage.render(1);
+        let requests = 0;
+        stage.requestRender = () => { requests++; };
+        try {
+          pxl.perf.publish();
+          const idle = requests;
+          stage.querySelector('pxl-circle').setAttribute('x', 'ref.eoIdleStage.fps');
+          requests = 0;
+          pxl.perf.publish();
+          if (idle !== 0 || requests !== 1) throw new Error(`requests: ${idle} while nothing reads the stage, ${requests} once a reader does`);
+        } finally {
+          delete stage.requestRender;
+        }
+      }));
 
     // --- Stage-level variables (design/2026-11-12_layer_throttling_plan.md Part B) ---
     section('Stage-level variables');
@@ -1998,7 +2152,7 @@
       srClear();
     });
 
-    test('two-phase frame: a layer made dirty by an earlier layer\'s broadcast is drawn once per frame, with the new value', () => {
+    test('two-phase frame: a layer made dirty by a variable in an earlier layer is drawn once per frame, with the new value', () => {
       srClear();
       srAdd('srLayerA', '<pxl-var id="tpVar" value="t * 10"></pxl-var>');
       srAdd('srLayerB', '<pxl-circle id="tpReader" x="ref.tpVar.value" y="100" r="10"></pxl-circle>');
@@ -2031,7 +2185,7 @@
       srClear();
     });
 
-    // --- Change-based redraws (design/2026-11-20_evaluation_model_plan.md, step 2) ---
+    // --- Change-based redraws (design/done/2026-11-20_evaluation_model_plan.md, step 2) ---
     section('Change-based redraws');
 
     // The test stage's frames from t0 on, 60 per second, as the browser would run them; returns the clears of a layer
@@ -2814,11 +2968,13 @@
       withStage(ixStage('<pxl-circle id="lcReader" x="ref.lcSource.x + 1" r="5" fill="#000"></pxl-circle>'), (stage) => {
         const layer = stage.querySelector('pxl-layer');
         layer.insertAdjacentHTML('beforeend', '<pxl-circle id="lcSource" x="60" r="5"></pxl-circle>');
+        nextFrame();
         const first = pxl.nodes.lcReader.x;
         const source = el('lcSource');
         source.remove();
         source.setAttribute('x', '80');
         layer.append(source);
+        nextFrame();
         if (first !== 61 || pxl.nodes.lcReader.x !== 81) throw new Error(`reader ${first}, after re-insert ${pxl.nodes.lcReader.x}`);
       }));
 
@@ -2854,6 +3010,7 @@
       withStage(ixStage(`<pxl-circle id="kbReader" x="ref.kbLate.x + 1" r="5"></pxl-circle><pxl-circle x="70" r="5"></pxl-circle>`), (stage) => {
         const late = stage.querySelector('pxl-layer').lastElementChild;
         late.id = 'kbLate';
+        nextFrame();
         if (!pxl.nodes.kbLate || pxl.nodes.kbReader.x !== 71) throw new Error(`registered ${!!pxl.nodes.kbLate}, reader ${pxl.nodes.kbReader.x}`);
       }));
 
@@ -2904,6 +3061,7 @@
       withStage(ixStage('<pxl-circle id="fxReader" x="ref.fxGone.x + 1" r="5"></pxl-circle><pxl-circle id="fxGone" x="30" r="5"></pxl-circle>'), () => {
         const before = pxl.nodes.fxReader.x;
         el('fxGone').removeAttribute('id');
+        nextFrame();
         const after = pxl.nodes.fxReader.x;
         if (before !== 31 || pxl.nodes.fxGone || !Number.isNaN(after)) throw new Error(`reader ${before} → ${after}, entry left ${!!pxl.nodes.fxGone}`);
       }));
@@ -2919,27 +3077,29 @@
     test('a stage renamed after insertion works for readers of its new name; removing it leaves no entry', () =>
       withStage('<div style="width: 500px"><pxl-stage id="fxStageOld" ratio="2" alwaysrender><pxl-layer><pxl-circle id="fxStageReader" r="5" y="ref.fxStageNew.height"></pxl-circle></pxl-layer></pxl-stage></div>', (stage) => {
         stage.id = 'fxStageNew';
+        nextFrame();
         const state = { reader: pxl.nodes.fxStageReader.y, old: !!pxl.nodes.fxStageOld };
         stage.remove();
         state.afterRemove = !!pxl.nodes.fxStageNew;
         if (state.reader !== 500 || state.old || state.afterRemove) throw new Error(JSON.stringify(state));
       }));
 
-    test('removed readers leave no subscriptions; a reader inserted again is subscribed once', () =>
+    test('removed readers leave their stage\'s reader list; a reader inserted again is listed once', () =>
       withStage(ixStage(`<pxl-circle id="fxSource" x="10" r="5"></pxl-circle>
         <pxl-circle id="fxSub" x="ref.fxSource.x + 1" y="ref.fxSource.x + 2" r="5"></pxl-circle>
         <pxl-circle id="fxSwitched" x="ref.fxSource.x + 3" r="5"></pxl-circle>`), (stage) => {
-        const subs = () => pxl._subscriptions['ref.fxSource'] || [];
+        const subs = () => { nextFrame(); return stage._readers.filter((e) => e === el('fxSub') || e === el('fxSwitched')); };
         const reader = el('fxSub'), switched = el('fxSwitched');
-        switched.setAttribute('x', '5'); // no longer a reader: dropped on the next broadcast or on removal
+        switched.setAttribute('x', '5'); // no longer a reader: dropped in the stage's next pass over its readers
         reader.remove();
         switched.remove();
         const afterRemove = subs().length;
         stage.querySelector('pxl-layer').append(reader);
         const afterInsert = subs().filter((e) => e === reader).length;
         el('fxSource').setAttribute('x', '20');
+        nextFrame();
         if (afterRemove !== 0 || afterInsert !== 1 || pxl.nodes.fxSub.x !== 21) {
-          throw new Error(`subscribers after removal ${afterRemove}, reader subscribed ${afterInsert}×, reader x ${pxl.nodes.fxSub.x}`);
+          throw new Error(`listed after removal ${afterRemove}, reader listed ${afterInsert}×, reader x ${pxl.nodes.fxSub.x}`);
         }
       }));
 

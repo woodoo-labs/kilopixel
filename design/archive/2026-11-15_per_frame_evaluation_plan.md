@@ -1,8 +1,8 @@
 # Per-Frame Evaluation in Dependency Order (No Broadcasts)
 
-- **Status**: ⚪ **Superseded by** `design/2026-11-20_evaluation_model_plan.md` (2026-11-20, option B there)
+- **Status**: ⚪ **Superseded by** `design/done/2026-11-20_evaluation_model_plan.md` (2026-11-20, option B there)
 - **Date**: 2026-11-15
-- **Related**: `design/done/2026-11-12_two_phase_frame_plan.md` (TODO §46: step 1 built; its steps 2 and 3 are the first steps of this plan too, §8), `design/done/2026-11-12_reactive_propagation_plan.md` (TODO §46: orders the broadcasts instead of removing them; this plan is the alternative, §7), `design/done/2026-10-26_tolocal_fix_plan.md` (the matrix walk this plan removes), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (sticky ids and lazy unregistering, §3.7), `design/done/2026-11-07_safe_shape_render_plan.md` (error rules, kept)
+- **Related**: `design/done/2026-11-12_two_phase_frame_plan.md` (`design/done/2026-11-20_evaluation_model_plan.md`: step 1 built; its steps 2 and 3 are the first steps of this plan too, §8), `design/done/2026-11-12_reactive_propagation_plan.md` (`design/done/2026-11-20_evaluation_model_plan.md`: orders the broadcasts instead of removing them; this plan is the alternative, §7), `design/done/2026-10-26_tolocal_fix_plan.md` (the matrix walk this plan removes), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (sticky ids and lazy unregistering, §3.7), `design/done/2026-11-07_safe_shape_render_plan.md` (error rules, kept)
 - **Target Implementation** (if decided): `js/engine.js`, `js/elements/node.js`, `js/elements/stage.js`, `js/elements/layer.js`, `js/interaction.js`, `js/monitor.js`, `tests/index.html`, `.agents/KILOPIXEL.md` (Reactivity Engine, Per-Frame Render Pipeline)
 - **Prototype**: `design/prototypes/2026-11-15_per_frame_evaluation/pull_bench.html` (today's broadcast against a per-frame loop, on the engine's own compiled expressions; cost of ordering a graph)
 

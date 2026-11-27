@@ -141,8 +141,8 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     this.hasAnimatedContent = this._animatedFrame === pxl._frame;
   }
 
-  // Draw in this frame: pixels out of date (also through a later layer's broadcast after this layer's update; the
-  // broadcast has already set the values), or new compositing CSS to write
+  // Draw in this frame: pixels out of date (also by a reader evaluated after this layer's update, in part 3 of the
+  // update phase: its values are already set), or new compositing CSS to write
   needsRender() {
     return this.isDirty || this._isCompositingDirty;
   }

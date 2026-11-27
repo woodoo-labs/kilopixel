@@ -3,7 +3,7 @@
 - **Status**: 🟡 **Proposed** (2026-11-13, parts B and C1 built; part A, C2 and D1–D4, D7–D9 open)
 - **Date**: 2026-11-12
 - **Supersedes**: `design/archive/2026-09-14_stage_variables_and_layer_throttling_plan.md` (stage-level `<pxl-var>`, `maxfps`, per-layer metrics) and `design/archive/2026-09-14_layer_throttling_plan.md` (revised 2026-09-15: `maxfps` in detail, keep-alive, cross-layer variables, frame counting, monitor bug)
-- **Related**: `design/done/2026-11-07_safe_shape_render_plan.md` (error path in `Layer.render()`), `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: `maxfps` comes from `static defaults`), `design/done/2026-11-12_two_phase_frame_plan.md` (💬, TODO §46: an update phase before drawing would simplify Part A and absorb Part B, §1.1 and D9 here)
+- **Related**: `design/done/2026-11-07_safe_shape_render_plan.md` (error path in `Layer.render()`), `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: `maxfps` comes from `static defaults`), `design/done/2026-11-12_two_phase_frame_plan.md` (built in `design/done/2026-11-20_evaluation_model_plan.md`: an update phase before drawing would simplify Part A and absorb Part B, §1.1 and D9 here)
 - **Target Implementation**: `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/monitor.js`, `tests/index.html`, `.agents/KILOPIXEL.md` (Stage, Layer, Variable, Per-Frame Render Pipeline, Performance Monitor); docs: see D8
 
 ---
@@ -22,7 +22,7 @@ Suggested order: B and C1 (both built 2026-11-13) → A + C2, each its own commi
 
 ### 1.1 If the Two-Phase Frame Comes First
 
-This plan is designed for today's single-pass frame, where elements are evaluated while they are drawn. `design/done/2026-11-12_two_phase_frame_plan.md` (TODO §46) proposes evaluating every element first, then drawing. If that is built first:
+This plan is designed for today's single-pass frame, where elements are evaluated while they are drawn. `design/done/2026-11-12_two_phase_frame_plan.md` (built in `design/done/2026-11-20_evaluation_model_plan.md`) proposes evaluating every element first, then drawing. If that is built first:
 
 - **Part A gets simpler.** The stage keeps the loop alive from the update phase, so a skipped layer just stays dirty until its window: the keep-alive of §3.4 (rAF relay or timer) and D2 go away. The gate (§3.3), what is throttled (§3.2) and D1, D3, D7 stay.
 - **§3.6 can go away.** If the update phase evaluates throttled layers every frame, variables in them stay smooth (the two-phase plan's open question 7 decides this).
@@ -172,7 +172,7 @@ if (variablesAnimated) this.requestRender();
 
 ### 4.4 Relation to the Two-Phase Frame
 
-The two-phase frame (`design/done/2026-11-12_two_phase_frame_plan.md`, TODO §46) would evaluate all elements before drawing; stage-level variables are a small, separate first step that doesn't depend on it. If it is built, its update phase simply starts with the stage's variables (§1.1).
+The two-phase frame (`design/done/2026-11-12_two_phase_frame_plan.md`, built in `design/done/2026-11-20_evaluation_model_plan.md`) would evaluate all elements before drawing; stage-level variables are a small, separate first step that doesn't depend on it. If it is built, its update phase simply starts with the stage's variables (§1.1).
 
 ### 4.5 Built 2026-11-13
 
@@ -256,10 +256,11 @@ A manual test page with all cases side by side (layers at full rate, `maxfps` 30
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
-- 2026-11-26: step 2 of `design/2026-11-20_evaluation_model_plan.md` built (its §9): the layer heartbeat is gone, a layer is dirty only when a value in it changed, the stage keeps the frame loop running; §2 item 1 and the keep-alive of part A (§3.4) describe the old code.
+- 2026-11-27: evaluation model option B built (`design/done/2026-11-20_evaluation_model_plan.md` §11): §3's "reactive `ref.*` broadcasts" and §5's broadcast of `ref.<layerId>` describe the old code; a change now calls `pxl.markChanged()`, which asks only stages that read the id for a frame. D9 is still open.
+- 2026-11-26: step 2 of `design/done/2026-11-20_evaluation_model_plan.md` built (its §9): the layer heartbeat is gone, a layer is dirty only when a value in it changed, the stage keeps the frame loop running; §2 item 1 and the keep-alive of part A (§3.4) describe the old code.
 - 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-21: `design/done/2026-11-20_custom_shapes_plan.md` step 3 built: shapes draw in logical units (the canvas scaled by the unit, `draw(ctx, 1)`) and `draw()` gets no `t`; `Layer.render(u, t)` is now `Layer.render(u)`.
-- 2026-11-20: the two-phase frame, reactive propagation and per-frame evaluation plans were merged into `design/2026-11-20_evaluation_model_plan.md` (TODO §46); its §6 says what changes for this plan.
+- 2026-11-20: the two-phase frame, reactive propagation and per-frame evaluation plans were merged into `design/done/2026-11-20_evaluation_model_plan.md`; its §6 says what changes for this plan.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
 - 2026-11-20: §5.3 no longer says the monitor can't read the stage's layers (the field is the public `layers` now).
 - Status line until 2026-11-20: 🟡 **Proposed** (2026-11-13, Part B built with D6 (b), §4.5; C1 built with D5 (a), §5.4; Part A, frame counting (D4) and C2 open, decisions D1–D4 and D7–D9 open, D9: build A after the two-phase frame?)

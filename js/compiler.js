@@ -306,19 +306,19 @@ pxl.compileExpression = function(str) {
     }
 
     const isAnimated = pxl.timeDriverRegex.test(unquoted);
-    // toLocal readers are also re-evaluated when their own space moves (design/done/2026-10-26_tolocal_fix_plan.md)
+    // toLocal() results also depend on the containers above both elements (Stage.buildOrder())
     const usesToLocal = /\btoLocal\(/.test(unquoted);
     if (usesToLocal) pxl.checkToLocalProperties(str); // reads the full string: the property name is a string
     const source = pxl.rewriteExpression(parts.join(''));
 
-    const deps = [];
+    // The ids it reads: the stage evaluates it after them, and when one of them changed
+    const sourceIds = [];
     const refRegex = /\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
     let match;
     while ((match = refRegex.exec(unquoted)) !== null) {
-      const fullKey = `ref.${match[1]}`;
-      if (!deps.includes(fullKey)) deps.push(fullKey);
+      if (!sourceIds.includes(match[1])) sourceIds.push(match[1]);
     }
-    const hasVars = deps.length > 0;
+    const hasVars = sourceIds.length > 0;
 
     // A plain expression gets a return; code with its own return statements is used as written
     const code = /\breturn\b/.test(unquoted) ? source : `return ${source};`;
@@ -337,8 +337,9 @@ pxl.compileExpression = function(str) {
       `)(pxl.scope, pxl.nodes);
 
       fn.isTimeDependent = isAnimated;
-      if (hasVars) fn.variableDependencies = deps;
-      if (usesToLocal) fn.usesToLocal = true;
+      fn.sourceIds = sourceIds;
+      fn.usesToLocal = usesToLocal;
+      pxl.addReadIds(sourceIds);
 
       pxl.cacheExpression(pxl.animationCache, str, fn);
       return fn;

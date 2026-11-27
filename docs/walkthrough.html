@@ -882,7 +882,7 @@
       <h2>8. Cross-Space Projection <code>toLocal()</code></h2>
       <p><code>toLocal()</code> maps a position from one coordinate space into another. A shape can follow a shape in a different layer, however that layer is moved, rotated or zoomed, without any trigonometry.</p>
       <ul>
-        <li><strong>Separate Layers:</strong> The shapes can sit in different layers that move and rotate independently.</li>
+        <li><strong>Separate Layers:</strong> The shapes can sit in different layers of the same stage that move and rotate independently.</li>
         <li><strong>Mapped Position:</strong> <code>toLocal(ref.target, 'x')</code> and <code>toLocal(ref.target, 'y')</code> return the target's position in the space of the shape that reads it, so the result can be used directly as its <code>x</code> and <code>y</code>.</li>
         <li><strong>Automatic Updates:</strong> When a layer moves or rotates, every shape that reads a position inside it with <code>toLocal()</code> updates.</li>
       </ul>
