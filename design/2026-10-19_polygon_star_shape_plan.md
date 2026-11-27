@@ -228,6 +228,7 @@ Sidebar: "Polygon" link back under Shapes & Paths, after "Polyline".
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-27: the handlers are `pxl-on-click` … `pxl-on-move` since 2026-11-18 (`design/done/2026-10-30_framework_compatibility_plan.md` §23); §10 (test 8) uses the old name `onclick`.
 - 2026-11-22: `design/done/2026-11-20_custom_shapes_plan.md` is closed; its step 7 is this plan: build `<pxl-polygon>` in the form of the built-in shapes today (`static defaults` only, `draw(ctx)` in logical units without `u`, `setBoundingBox()`, `pxl.defineShape()`); this plan's code is the old form.
 - 2026-11-22: `design/done/2026-11-20_custom_shapes_plan.md` phase 2 built: the layer scales by the unit once, and the shapes and their helpers (`applyStyle(ctx)`, `applyStrokeState(ctx)`, `createGradient(ctx, value, slot)`, `resolveArrow(rec, value)`, `drawArrows(ctx, a, b)`, `applyTransformState(ctx, values)`) take no `u`; code here with `u` is the old form.
 - 2026-11-21: `design/done/2026-11-20_custom_shapes_plan.md` step 5 built: shapes are defined with `pxl.defineShape(tag, Class)` and write their box with `setBoundingBox(left, top, right, bottom)`; this plan's four `boundingBox` assignments and `customElements.define()` are the old form.

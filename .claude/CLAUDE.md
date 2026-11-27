@@ -69,7 +69,7 @@ Declarative, reactive HTML5 Canvas engine built on Web Components (`<pxl-stage>`
 ## Working on Another Machine
 
 The user works on two Windows laptops. When a session starts on a machine that hasn't pulled for a while, or when the user asks to sync:
-1. `git fetch` and `git status`; show what's new and pull only after the user's OK.
+1. `git fetch --prune` and `git status`; show what's new and pull only after the user's OK. Then `git branch -vv`: local branches marked `gone` were deleted on GitHub (from the other laptop); delete them (`git branch -D`) only after the user's OK.
 2. **Line endings, once per machine:** if `git ls-files --eol` shows working files as `w/crlf`, the copy predates `.gitattributes`. With no uncommitted work, rewrite them once: `git rm -r --cached -q . && git reset -q --hard HEAD`.
 3. If a `package-lock.json` in `tests/types/` or `tests/smoke/<app>/` changed in the pull (or `node_modules` is missing there), run `npm ci` in that folder.
 4. Run `node tools/run_tests.js`; it must end with "All passed." (It starts the dev server itself if needed. The machine needs Chrome or Edge, and Node 22 or later for the fast page sweep; older Node works, the sweep is just slower.)

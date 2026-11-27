@@ -279,6 +279,7 @@ Largest distance from the drawn curve to the true curve (stage units, stage 1000
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-27: the handlers are `pxl-on-click` … `pxl-on-move` since 2026-11-18 (`design/done/2026-10-30_framework_compatibility_plan.md` §23); §3 lists the old names `onclick` … `onmove`.
 - 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
 - Status line until 2026-11-20: 🟡 **Proposed** (2026-11-11, notes on sampling and smoothing in §10; uniform spline from `design/2026-11-11_polyline_smoothstyle_plan.md`)
