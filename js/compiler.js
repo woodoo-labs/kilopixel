@@ -207,14 +207,14 @@ pxl.splitStringLiterals = function(str) {
 };
 
 // Rewrites shared by attribute expressions and pxl-on-* handlers, applied to code only (quoted text stays as written):
-// ref.a.b → ref.a?.b (the referenced element may not be connected yet),
+// ref.a.b → ref.a?.b (the referenced element may not be connected yet), only in expressions: handlers assign through
+// ref (pxl.handlerRef), and JavaScript can't assign to an optional chain;
 // toLocal( → pxl.toLocal(this, (the caller is the element the code belongs to)
-pxl.rewriteExpression = function(str) {
+pxl.rewriteExpression = function(str, isHandler = false) {
   const parts = pxl.splitStringLiterals(str);
   for (let i = 0; i < parts.length; i += 2) {
-    parts[i] = parts[i]
-      .replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.')
-      .replace(/\btoLocal\(/g, 'pxl.toLocal(this, ');
+    if (!isHandler) parts[i] = parts[i].replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.');
+    parts[i] = parts[i].replace(/\btoLocal\(/g, 'pxl.toLocal(this, ');
   }
   return parts.join('');
 };

@@ -223,20 +223,3 @@ pxl.warnFunctionValue = function(element, name) {
 pxl.setPendingProperties = function(element, pending) {
   for (let i = 0; i < pending.length; i += 2) element[pending[i]] = pending[i + 1];
 };
-
-// ref.<id>.set(name, value), Kilopixel's own setter for handlers: a string is compiled like the attribute (handlers
-// are trusted code); any other value goes through the property, so numbers aren't compiled and arrays stay arrays.
-// A name the element doesn't have warns once per element type and name (a typo, or a renamed attribute).
-pxl._unknownSetNames = new Set();
-pxl.setFromRef = function(element, name, value) {
-  const isKnown = name in element || name.includes('-');
-  if (!isKnown) {
-    const key = `${element.localName} ${name}`;
-    if (!pxl._unknownSetNames.has(key)) {
-      pxl._unknownSetNames.add(key);
-      console.warn(`[pxl] <${element.localName}${element.id ? ` id="${element.id}"` : ''}>: set('${name}', …) sets an attribute it doesn't have`);
-    }
-  }
-  if (typeof value === 'string' || !isKnown) element.setAttribute(name, value);
-  else element[name] = value;
-};

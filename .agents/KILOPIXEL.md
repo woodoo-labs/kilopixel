@@ -122,10 +122,10 @@ Text with digits next to operators, parentheses or brackets looks like code (`te
 - `ref.player.x` reads `undefined` (not a TypeError) while `player` isn't connected yet; a reader updates in the frame after it connects.
 - **Ids in camelCase:** `id="orbitSpeed"`. A hyphen is a minus sign: `ref.orbit-speed.x` reads as `ref.orbit - speed.x`.
 - Readers see this frame's values of their targets, whatever the DOM order, also readers that use `t`. A reader that reaches a source on several paths (diamonds) is evaluated once, with all its inputs new.
-- **Derived values update in the next frame,** before it is drawn: what is drawn is always current. A handler or script that sets a value and reads one derived from it in its next statement sees the old one (`ref.price.set('value', 5)`, then `ref.total.value`) until the stage has run a frame. A stage out of view (or in a background tab) runs no frames: values derived inside it update when it runs again; values set from outside are current at once.
+- **Derived values update in the next frame,** before it is drawn: what is drawn is always current. A handler or script that sets a value and reads one derived from it in its next statement sees the old one (`ref.price.value = 5`, then `ref.total.value`) until the stage has run a frame. A stage out of view (or in a background tab) runs no frames: values derived inside it update when it runs again; values set from outside are current at once.
 - A self-reference with `t` reads the previous frame's value (the "follow" effect: `x="ref.me.x + (100 - ref.me.x) * 0.1 + t * 0"`).
 - A `ref` cycle whose values keep changing (`a = b + 1`, `b = a + 1`) stops after 100 rounds per frame with a warning; a cycle that settles (`a = b`, `b = a`) keeps its values.
-- **Setting from handlers:** `ref.<id>.set(name, value)`: a string is compiled like the attribute (`setAttribute()`), any other value goes through the property (numbers aren't compiled, arrays stay arrays). An unknown name warns once per element type and name.
+- **Setting from handlers** (§8.2): assign, `ref.counter.value++`, `ref.box.r += 10`, `ref.box.fill = 'red'`. An assignment does what the property does (§3.7): numbers and arrays are stored as they are, `null` gives the default, strings are compiled, except `text`, which is literal. A new expression, also for `text`, goes through `setAttribute()` on the element (`this.setAttribute(…)`, `document.getElementById(…).setAttribute(…)`). Only attributes can be assigned, not `id` or `pxl-on-*`: a state (`isHovered`), a readout (`tx`, `pN`, a stage's `mouseX`) or an unknown name warns once per element type and name and changes nothing. Assignment works in handlers only; in an attribute it is a SyntaxError.
 
 ### 3.7 Properties (JavaScript and Frameworks)
 
@@ -239,7 +239,7 @@ States `isHovered`, `isPressed` (§8.1). Fill first, then stroke on top (half th
 <!-- A button: handler and states on the group, so the label belongs to it. The hand comes with pxl-on-click -->
 <pxl-var id="counter" value="0"></pxl-var>
 <pxl-group id="btn" x="500" y="300" zoom="ref.btn.isPressed ? 0.95 : (ref.btn.isHovered ? 1.05 : 1)"
-  pxl-on-click="ref.counter.set('value', ref.counter.value + 1)">
+  pxl-on-click="ref.counter.value++">
   <pxl-rect w="120" h="50" r="10" fill="ref.btn.isPressed ? '#222' : (ref.btn.isHovered ? '#555' : '#888')"></pxl-rect>
   <pxl-text text="'Add'" size="20" fill="#fff" align="center" baseline="middle"></pxl-text>
 </pxl-group>
@@ -247,7 +247,7 @@ States `isHovered`, `isPressed` (§8.1). Fill first, then stroke on top (half th
 
 ### 8.2 Handlers (`pxl-on-*`)
 
-JavaScript statements in an attribute of a shape or group, with the expression scope, `ref` and `this` = the element. Each is a listener for a DOM event:
+JavaScript statements in an attribute of a shape or group, with the expression scope, `ref` and `this` = the element. Their `ref` assigns (`ref.counter.value++`, §3.6). `ref.<id>` of a missing element is `undefined` there, so reading through it throws (logged, below): by the time a handler runs its targets are connected, and a missing one is a typo or a removed element. For one that may be missing: `ref.tip?.x`, `if (ref.tip) …`. Each handler is a listener for a DOM event:
 
 | Attribute | Event | Runs when |
 |---|---|---|
@@ -419,7 +419,7 @@ An infinite grid: it draws exactly the visible part, at any zoom, rotation or ne
 
 ```html
 <pxl-var id="speed" value="100"></pxl-var>
-<pxl-circle r="ref.speed.value" pxl-on-click="ref.speed.set('value', ref.speed.value + 10)"></pxl-circle>
+<pxl-circle r="ref.speed.value" pxl-on-click="ref.speed.value += 10"></pxl-circle>
 ```
 
 - From JavaScript or a framework: `document.getElementById('speed').value = 20`, React `<pxl-var value={speed}>` (numbers aren't compiled).

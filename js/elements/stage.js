@@ -92,8 +92,8 @@ pxl.Stage = class Stage extends HTMLElement {
       mouseX: 500, mouseY: 500, isHovered: false, width: 1000, height: 1000 / this._parsedRatio,
       fps: 0, renderAvg: '0.00', renderMax: '0.00'
     };
-    Object.defineProperty(this.values, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
     Object.defineProperty(this.values, '$node', { value: this, enumerable: false, writable: false });
+    this.assigningRef = null; // what ref.<id> returns in handlers (pxl.handlerRef), created on first use
 
     // Properties set before the upgrade, applied in connectedCallback: [name, value, …] or null
     this._pendingProperties = ownKeys.length === 0 ? null : pxl.takeOwnProperties(this, ownKeys);

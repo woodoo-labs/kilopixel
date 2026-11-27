@@ -271,7 +271,7 @@
 
     <!-- [80-81] Top-left node: CYAN — uses bounce() driver -->
     <pxl-group id="nodeA" x="80" y="60" zoom="ref.nodeA.isPressed ? 0.9 : (ref.nodeA.isHovered ? 1.15 : 1)"
-      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)">
+      pxl-on-click="ref.clicks.value++">
       <pxl-rect w="40" h="40" r="8"
         fill="ref.nodeA.isPressed ? '#00ccdd' : (ref.nodeA.isHovered ? '#005566' : '#002233')"
         stroke="ref.nodeA.isHovered ? '#00e5ff' : '#004455'" strokewidth="1"
@@ -281,7 +281,7 @@
 
     <!-- [82-83] Top-right node: MAGENTA — uses yoyo() driver -->
     <pxl-group id="nodeB" x="920" y="60" zoom="ref.nodeB.isPressed ? 0.9 : (ref.nodeB.isHovered ? 1.15 : 1)"
-      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)">
+      pxl-on-click="ref.clicks.value++">
       <pxl-rect w="40" h="40" r="8"
         fill="ref.nodeB.isPressed ? '#cc0088' : (ref.nodeB.isHovered ? '#550033' : '#220022')"
         stroke="ref.nodeB.isHovered ? '#ff00aa' : '#440044'" strokewidth="1"
@@ -291,7 +291,7 @@
 
     <!-- [84-85] Bottom-left node: GOLD — uses glide() driver -->
     <pxl-group id="nodeC" x="80" y="502" zoom="ref.nodeC.isPressed ? 0.9 : (ref.nodeC.isHovered ? 1.15 : 1)"
-      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)">
+      pxl-on-click="ref.clicks.value++">
       <pxl-rect w="40" h="40" r="8"
         fill="ref.nodeC.isPressed ? '#cc8800' : (ref.nodeC.isHovered ? '#553300' : '#221a00')"
         stroke="ref.nodeC.isHovered ? '#ffbb00' : '#443300'" strokewidth="1"
@@ -301,7 +301,7 @@
 
     <!-- [86-87] Bottom-right node: VIOLET — uses glitch() driver -->
     <pxl-group id="nodeD" x="920" y="502" zoom="ref.nodeD.isPressed ? 0.9 : (ref.nodeD.isHovered ? 1.15 : 1)"
-      pxl-on-click="ref.clicks.set('value', ref.clicks.value + 1)">
+      pxl-on-click="ref.clicks.value++">
       <pxl-rect w="40" h="40" r="8"
         fill="ref.nodeD.isPressed ? '#7700cc' : (ref.nodeD.isHovered ? '#330055' : '#1a0033')"
         stroke="ref.nodeD.isHovered ? '#aa44ff' : '#330055'" strokewidth="1"

@@ -149,7 +149,7 @@
             <pxl-group id="ecGroupB" x="300"></pxl-group>
             <pxl-circle id="ecTarget" x="640" y="120" r="12" fill="#3b82f6"></pxl-circle>
             <pxl-rect id="ecButton" x="200" y="400" w="80" h="40" fill="#22c55e"
-              pxl-on-click="ref.ecVar.set('value', toLocal(ref.ecTarget, 'x'))"></pxl-rect>
+              pxl-on-click="ref.ecVar.value = toLocal(ref.ecTarget, 'x')"></pxl-rect>
             <pxl-polyline id="ecPoly" points="100,500; 300,550" stroke="#ec4899" strokewidth="3"></pxl-polyline>
           </pxl-layer>
         </pxl-stage>
@@ -2512,7 +2512,7 @@
       ixLog = [];
       return withStage(ixStage(`<pxl-var id="ixCount" value="0"></pxl-var>
         <pxl-circle id="ixSelf" x="500" y="300" r="80" fill="#000"
-          pxl-on-click="ref.ixCount.set('value', ref.ixCount.value + 1); ixLog.push('click'); this.removeAttribute('pxl-on-click')"></pxl-circle>`),
+          pxl-on-click="ref.ixCount.value++; ixLog.push('click'); this.removeAttribute('pxl-on-click')"></pxl-circle>`),
       (stage) => {
         hover(stage, 500, 300);
         input(stage, 'click');

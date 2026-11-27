@@ -56,4 +56,5 @@ Global ids stay (evaluation model §10.4): one lookup rule that every web develo
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-27: handlers have a `ref` of their own (`pxl.handlerRef`, `design/done/2026-11-27_handler_assignment_plan.md`): resolving names must cover it as well as `pxl.nodes`.
 - 2026-11-27: written from the evaluation model discussion (D8 there) and parked: global ids kept.

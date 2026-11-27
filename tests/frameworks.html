@@ -394,15 +394,46 @@
         if (layer.isDirty) throw new Error('the layer is dirty after setting the same values');
       }));
 
-    test('ref.<id>.set() with a number or an array goes through the property; a string still compiles (W3)', () =>
-      withStage(oneLayer(`<pxl-line id="fwRefSet" x1="100" y1="100" x2="900" y2="100" stroke="#000"></pxl-line>`), () => {
-        const before = cacheSize(), values = pxl.nodes.fwRefSet;
-        for (let i = 0; i < 100; i++) values.set('x1', i);
-        values.set('linedash', [20, 10]);
-        const grown = cacheSize() - before;
-        values.set('x2', '400 + 100');
-        const state = { x1: values.x1, dash: values.linedash, grown, x2: values.x2, attribute: el('fwRefSet').getAttribute('x2') };
-        if (state.x1 !== 99 || !Array.isArray(state.dash) || state.grown !== 0 || state.x2 !== 500 || state.attribute !== '400 + 100') {
+    // Handlers assign through ref like properties (design/done/2026-11-27_handler_assignment_plan.md)
+    test('handlers assign through ref like the property: numbers and arrays as given, strings compile, text literal, null resets', () =>
+      withStage(oneLayer(`<pxl-var id="fwAsCount" value="0"></pxl-var>
+        <pxl-line id="fwAsLine" x1="100" y1="100" x2="900" y2="100" stroke="#000"></pxl-line>
+        <pxl-text id="fwAsText" text="start" fill="#000"></pxl-text>
+        <pxl-circle id="fwAsReader" r="ref.fwAsCount.value * 10" fill="#000"></pxl-circle>
+        <pxl-rect id="fwAsButton" w="10" h="10" fill="#000" pxl-on-click="ref.fwAsCount.value++; ref.fwAsLine.x1 += 10;
+          ref.fwAsLine.linedash = [20, 10]; ref.fwAsLine.x2 = '400 + 100'; ref.fwAsText.text = 'Q1 - 2024'; ref.fwAsLine.stroke = null"></pxl-rect>`),
+      (stage) => {
+        const before = cacheSize();
+        el('fwAsButton').click();
+        el('fwAsButton').click();
+        stage.render(1);
+        const v = pxl.nodes;
+        const state = {
+          count: v.fwAsCount.value, r: v.fwAsReader.r, x1: v.fwAsLine.x1, dash: v.fwAsLine.linedash, x2: v.fwAsLine.x2,
+          text: v.fwAsText.text, stroke: v.fwAsLine.stroke, attribute: el('fwAsLine').getAttribute('x2'), grown: cacheSize() - before
+        };
+        // One cache entry: '400 + 100'. The number, the array, null and the literal text compile nothing
+        if (state.count !== 2 || state.r !== 20 || state.x1 !== 120 || state.dash.join() !== '20,10' || state.x2 !== 500 ||
+            state.text !== 'Q1 - 2024' || state.stroke !== null || state.attribute !== '900' || state.grown > 1) {
+          throw new Error(JSON.stringify(state));
+        }
+      }));
+
+    test('handlers: an unknown id throws, logged with the element; the other listeners still run; set() is gone', () =>
+      withStage(oneLayer(`<pxl-circle id="fwAsMissing" r="10" fill="#000"
+        pxl-on-click="this.dataset.setType = typeof ref.fwAsMissing.set; ref.fwAsNope.x = 5"></pxl-circle>`), () => {
+        const errors = [], error = console.error;
+        let ran = false;
+        el('fwAsMissing').addEventListener('click', () => { ran = true; });
+        console.error = (...args) => errors.push(args.map(String).join(' '));
+        try {
+          el('fwAsMissing').click();
+        } finally {
+          console.error = error;
+        }
+        const state = { errors, ran, setType: el('fwAsMissing').dataset.setType, inNodes: typeof pxl.nodes.fwAsMissing.set };
+        if (errors.length !== 1 || !errors[0].includes('id="fwAsMissing"> pxl-on-click failed') || !ran ||
+            state.setType !== 'undefined' || state.inNodes !== 'undefined') {
           throw new Error(JSON.stringify(state));
         }
       }));
@@ -985,15 +1016,25 @@
     // ===================================================================
     section('Small items (plan §10)');
 
-    test('T-N1: ref.<id>.set() with an unknown attribute name warns once; a known name doesn\'t', async () => {
+    // Since 2026-11-27 through assignment in handlers (design/done/2026-11-27_handler_assignment_plan.md §3.3)
+    test('T-N1: assigning an unknown name, a state, a readout or id in a handler warns once per name and changes nothing', async () => {
+      let state;
       const warnings = await captureWarnings(() =>
-        withStage(oneLayer('<pxl-circle id="fwSetTarget" r="5"></pxl-circle>'), () => {
-          pxl.nodes.fwSetTarget.set('x', 5);
-          pxl.nodes.fwSetTarget.set('scale', 2);
-          pxl.nodes.fwSetTarget.set('scale', 3);
+        withStage(`<div style="width: 500px"><pxl-stage id="fwAsStage" alwaysrender><pxl-layer>
+          <pxl-circle id="fwSetTarget" r="5" fill="#000" pxl-on-click="ref.fwSetTarget.x = 5; ref.fwSetTarget.scale = 2;
+            ref.fwSetTarget.scale = 3; ref.fwSetTarget.isHovered = true; ref.fwSetTarget.tx = 1; ref.fwSetTarget.id = 'other';
+            ref.fwAsStage.mouseX = 1; ref.fwAsStage.ratio = '2 / 1'"></pxl-circle></pxl-layer></pxl-stage></div>`, () => {
+          el('fwSetTarget').click();
+          el('fwSetTarget').click();
+          const v = pxl.nodes.fwSetTarget;
+          state = { x: v.x, scale: 'scale' in v, isHovered: v.isHovered, id: el('fwSetTarget').id, ratio: el('fwAsStage').getAttribute('ratio') };
         }));
-      const aboutScale = warnings.filter((w) => w.includes('scale')).length;
-      if (aboutScale !== 1 || warnings.length !== 1) throw new Error(`${warnings.length} warning(s), ${aboutScale} about "scale"`);
+      const names = ['scale', 'isHovered', 'tx', 'id', 'mouseX'];
+      const counts = names.map((name) => warnings.filter((w) => w.includes(`.${name} can't be assigned`)).length);
+      if (counts.join() !== '1,1,1,1,1' || warnings.length !== 5 || state.x !== 5 || state.scale || state.isHovered ||
+          state.id !== 'fwSetTarget' || state.ratio !== '2 / 1') {
+        throw new Error(`warnings ${counts} of ${warnings.length}, ${JSON.stringify(state)}`);
+      }
     });
 
     runTests();

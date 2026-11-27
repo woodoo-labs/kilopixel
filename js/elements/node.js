@@ -17,7 +17,6 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
     this.expressions = {};
     this.values = {};
-    Object.defineProperty(this.values, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
     Object.defineProperty(this.values, '$node', { value: this, enumerable: false, writable: false });
     // Drawn origin in the parent space: dx / dy are applied after rotate / scale / skew, so it's the local matrix translation
     Object.defineProperty(this.values, 'tx', { get: () => this.getLocalMatrix()[4], enumerable: false });
@@ -55,6 +54,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this.parentLayer = null;
     this.parentContainer = null;
     this.registeredId = null; // the id under which pxl.nodes holds the values (pxl.registerNode())
+    this.assigningRef = null; // what ref.<id> returns in handlers (pxl.handlerRef), created on first use
     // connectedCallback has run: an id that changes from now on is moved in the registry by attributeChangedCallback.
     // During an upgrade the attributes arrive before connectedCallback, which registers the id itself.
     this._isRegistered = false;

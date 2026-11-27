@@ -367,6 +367,7 @@ const files = [
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-27: handlers assign through `ref` and `ref.<id>.set()` is gone (`design/done/2026-11-27_handler_assignment_plan.md`); §7 test case 6 uses `set()` (now `ref.counter.value++`).
 - 2026-11-27: the handlers are `pxl-on-click` … `pxl-on-move` since 2026-11-18 (`design/done/2026-10-30_framework_compatibility_plan.md` §23); §3.1 and §7 (test case 6) use the old names `onclick` … `onmove`.
 - 2026-11-22: `design/done/2026-11-20_custom_shapes_plan.md` phase 2 built: the layer scales by the unit once, and the shapes and their helpers (`applyStyle(ctx)`, `applyStrokeState(ctx)`, `createGradient(ctx, value, slot)`, `resolveArrow(rec, value)`, `drawArrows(ctx, a, b)`, `applyTransformState(ctx, values)`) take no `u`; code here with `u` is the old form.
 - 2026-11-21: `design/done/2026-11-20_custom_shapes_plan.md` step 5 built: shapes are defined with `pxl.defineShape(tag, Class)` and write their box with `setBoundingBox(left, top, right, bottom)`; the four `boundingBox` assignments in §5.1 are the old form.

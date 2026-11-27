@@ -41,7 +41,7 @@ Base of layers, groups, shapes and variables.
 **State**
 
 - `static defaults`: per class, read-only, extended by spreading (`{ ...pxl.Shape.defaults, r: 0 }`). The constructor copies them into `expressions` and `values`; `pxl.resolveEmptyAttribute` reads them for bare and removed attributes (language §3.5).
-- `expressions`: per name the compiled function or the static value. `values`: the current values, read by drawing and by `ref.<id>` (`pxl.nodes[id]` is this object). Hidden (non-enumerable) properties on it: `set(key, value)` (→ `pxl.setFromRef()`), `$node` (the element), getters `tx` / `ty` (the local matrix translation).
+- `expressions`: per name the compiled function or the static value. `values`: the current values, read by drawing and by `ref.<id>` (`pxl.nodes[id]` is this object). Hidden (non-enumerable) properties on it: `$node` (the element), getters `tx` / `ty` (the local matrix translation). The element field `assigningRef` (also on the stage): what `ref.<id>` returns in handlers (§8.7), `null` until first used.
 - Key lists: `animatedAttributeKeys` (use `t`, evaluated every frame), `reactiveAttributeKeys` (read `ref.*`, evaluated when a source changed). `isAnimated` = animated keys exist.
 - Reactivity (§4): `registeredId` (the id in `pxl.nodes`, or `null`), `changeVersion`, `_seenVersion`, `sourceIds`, `hasToLocal`, `_evaluatedFrame`; written by the stage: `readerStage`, `listedIn`, `isOrderNode`.
 - `parentLayer` (`closest('pxl-layer')`; a layer is its own), `parentContainer` (closest group or layer above), `childList` (layers and groups; `null` for shapes and variables, an own field so walks don't search the prototype chain).
@@ -66,7 +66,7 @@ Base of layers, groups, shapes and variables.
 2. **`pxl.splitStringLiterals()`** splits once into code and string literals (`'…'`, `"…"`, the text of `` `…` ``; code inside `${…}` is code). Steps 3–6 read and rewrite code only. Regex literals and comments aren't recognized.
 3. **CSS percentages:** `50%` before `,` or `)` → `'50%'` (a quoted CSS color in a gradient stays as written).
 4. **Time:** `pxl.timeDriverRegex` finds `t` (not after a `.`) or a driver call; `toLocal(` sets `usesToLocal` (and `pxl.checkToLocalProperties` warns once about unknown literal property names).
-5. **`pxl.rewriteExpression()`** (shared with handlers): `ref.a.b` → `ref.a?.b`; `toLocal(` → `pxl.toLocal(this, `.
+5. **`pxl.rewriteExpression(str, isHandler)`** (shared with handlers): `ref.a.b` → `ref.a?.b`, not in handlers (§8.7); `toLocal(` → `pxl.toLocal(this, `.
 6. **Sources:** every `ref.<id>` → `sourceIds` (the ids, each once); new ids go to `pxl._readIds` (`pxl.addReadIds()`, §4.3).
 7. **Return:** without the word `return` in the code, wrapped in `return …;`.
 
@@ -88,7 +88,7 @@ Fields of the function: `isTimeDependent`, `sourceIds` (empty without refs), `us
 
 ### 4.1 Registry
 
-- `pxl.nodes`: `{ id: values }`, the `ref` object of every compiled function. `pxl.registerNode(element, id)` (on connect, or a new id) stores the entry, sets `registeredId` and marks the element changed, so readers written before it pick it up in the next update phase. `pxl.unregisterNode(id)` (removal, or a changed id) deletes it and raises `pxl._registryVersion`: every reader is out of date once, and readers of that id read `undefined`.
+- `pxl.nodes`: `{ id: values }`, the `ref` object of every compiled expression (handlers: `pxl.handlerRef`, §8.7). `pxl.registerNode(element, id)` (on connect, or a new id) stores the entry, sets `registeredId` and marks the element changed, so readers written before it pick it up in the next update phase. `pxl.unregisterNode(id)` (removal, or a changed id) deletes it and raises `pxl._registryVersion`: every reader is out of date once, and readers of that id read `undefined`.
 - `id` is observed: once registered (`_isRegistered`, set at the end of `connectedCallback()`), a changed id moves the entry (`pxl.renameNode()`: the old entry is removed only if it points to this element). Frameworks such as Angular and Alpine set `id` after insertion; during an upgrade the attributes arrive before `connectedCallback()`, which registers the id itself.
 
 ### 4.2 Classification
@@ -131,7 +131,6 @@ Language §3.7 is the contract. Mechanics (design: `design/done/2026-10-30_frame
 
 - `pxl.defineAccessors(Class)`: a getter / setter per observed attribute on the class prototype, the first time an instance is created (`pxl._accessorClasses`), so custom shapes get them. Skipped: hyphenated names, and names the prototype already has (`id`, `hidden` native; `Text`'s `text`, `Polyline`'s `points` have their own). Setter → `setValue(name, value === undefined ? null : value)`.
 - Values set before the upgrade are own properties hiding the accessors: the constructor reads `Object.keys(this)` before adding any field, and `pxl.takeOwnProperties()` takes them out as `[name, value, …]`; `connectedCallback()` sets them again (`pxl.setPendingProperties()`), after the attributes. An element upgraded without being connected gets them on insertion.
-- `pxl.setFromRef()` (`ref.<id>.set`): a string → `setAttribute()`, otherwise the property; an unknown name warns once per element type and name (`pxl._unknownSetNames`).
 - `Text.text` stores a string with `pxl.storeValue()` (never compiled). `Polyline.points` → `setPoints()` (§6.5). Stage `ratio` / `alwaysrender`: setters `reflectAttribute()`, getters return the parsed ratio and `isAlwaysRender()`.
 - Costs measured with `design/prototypes/2026-10-30_framework_compatibility/w3_property_costs.html`.
 
@@ -328,7 +327,9 @@ None in the walk, box check, boundary walk and queue; one event object per dispa
 
 ### 8.7 Handlers
 
-`pxl.HANDLER_EVENTS` maps `pxl-on-*` to event types; `pxl.createHandlers()` makes the per-element record (`handlers.click`, …). `setHandler(name, source)` removes the old listener (a removed or empty handler leaves `handlers.<type>` `null`) and adds `pxl.compileHandler()`'s: the source through `pxl.rewriteExpression()`, compiled with the scope and `ref`, wrapped in a listener that calls it with `this` = the element and logs a throw with `console.error`. Design: `design/archive/2026-11-15_handler_errors_plan.md`.
+`pxl.HANDLER_EVENTS` maps `pxl-on-*` to event types; `pxl.createHandlers()` makes the per-element record (`handlers.click`, …). `setHandler(name, source)` removes the old listener (a removed or empty handler leaves `handlers.<type>` `null`) and adds `pxl.compileHandler()`'s: the source through `pxl.rewriteExpression(source, true)` (no `?.`, so `ref.a.b` can be assigned), compiled with the scope and `pxl.handlerRef` as `ref`, wrapped in a listener that calls it with `this` = the element and logs a throw with `console.error`. Design: `design/archive/2026-11-15_handler_errors_plan.md`.
+
+`pxl.handlerRef` is a `Proxy` over `pxl.nodes`: `ref.<id>` returns the element's `assigningRef`, a `Proxy` over its `values` with the shared handler `pxl.ASSIGNING_REF` (created on first use; an unknown id gives `undefined`, so reading through it throws in the handler). Reads go to `values`. Its `set` trap assigns the element's property (`element[name] = value`, so it takes the path of language §3.7) when the name is in the class's assignable names: its `observedAttributes` without `id` and hyphenated names, a `Set` per class in `pxl._assignableNames` built on first use. Any other name (states, `tx`, `pN`, a stage's readouts, `id`, unknown names) warns once per element type and name (`pxl._unassignableNames`) and returns `false`: handlers are sloppy-mode code, so the assignment fails silently, while `true` would break the `Proxy` invariant for the fixed getters `tx`, `ty`, `$node`. Expressions never see the wrappers. Design: `design/done/2026-11-27_handler_assignment_plan.md`.
 
 ## 9. Stage and Layer Internals
 

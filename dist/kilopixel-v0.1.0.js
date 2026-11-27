@@ -231,23 +231,6 @@ pxl.setPendingProperties = function(element, pending) {
   for (let i = 0; i < pending.length; i += 2) element[pending[i]] = pending[i + 1];
 };
 
-// ref.<id>.set(name, value), Kilopixel's own setter for handlers: a string is compiled like the attribute (handlers
-// are trusted code); any other value goes through the property, so numbers aren't compiled and arrays stay arrays.
-// A name the element doesn't have warns once per element type and name (a typo, or a renamed attribute).
-pxl._unknownSetNames = new Set();
-pxl.setFromRef = function(element, name, value) {
-  const isKnown = name in element || name.includes('-');
-  if (!isKnown) {
-    const key = `${element.localName} ${name}`;
-    if (!pxl._unknownSetNames.has(key)) {
-      pxl._unknownSetNames.add(key);
-      console.warn(`[pxl] <${element.localName}${element.id ? ` id="${element.id}"` : ''}>: set('${name}', …) sets an attribute it doesn't have`);
-    }
-  }
-  if (typeof value === 'string' || !isKnown) element.setAttribute(name, value);
-  else element[name] = value;
-};
-
 // =========================================================================
 // pxl.Matrix: 2D affine matrices [a, b, c, d, tx, ty], written into existing arrays
 // =========================================================================
@@ -580,14 +563,14 @@ pxl.splitStringLiterals = function(str) {
 };
 
 // Rewrites shared by attribute expressions and pxl-on-* handlers, applied to code only (quoted text stays as written):
-// ref.a.b → ref.a?.b (the referenced element may not be connected yet),
+// ref.a.b → ref.a?.b (the referenced element may not be connected yet), only in expressions: handlers assign through
+// ref (pxl.handlerRef), and JavaScript can't assign to an optional chain;
 // toLocal( → pxl.toLocal(this, (the caller is the element the code belongs to)
-pxl.rewriteExpression = function(str) {
+pxl.rewriteExpression = function(str, isHandler = false) {
   const parts = pxl.splitStringLiterals(str);
   for (let i = 0; i < parts.length; i += 2) {
-    parts[i] = parts[i]
-      .replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.')
-      .replace(/\btoLocal\(/g, 'pxl.toLocal(this, ');
+    if (!isHandler) parts[i] = parts[i].replace(/\bref\.([a-zA-Z_$][a-zA-Z0-9_$]*)\./g, 'ref.$1?.');
+    parts[i] = parts[i].replace(/\btoLocal\(/g, 'pxl.toLocal(this, ');
   }
   return parts.join('');
 };
@@ -762,15 +745,58 @@ pxl.createHandlers = function() {
   return { click: null, pointerenter: null, pointerleave: null, pointerdown: null, pointerup: null, pointermove: null };
 };
 
-// Compiles a handler with the expression scope (ref, Math names, colors, …) and `this` bound to the element.
-// A handler that throws is logged with its element and attribute; the event's other listeners still run.
+// The ref of handlers: ref.<id> reads the element's values like an expression does, and an assignment
+// (ref.counter.value++, ref.box.r += 10) goes through the element's property, so it is tracked and redrawn like
+// el.r = 10. Expressions keep pxl.nodes, the plain values: this wrapper never runs in a frame.
+// Design: design/done/2026-11-27_handler_assignment_plan.md
+pxl.handlerRef = new Proxy(pxl.nodes, {
+  get(nodes, id) {
+    const values = nodes[id];
+    if (values === undefined) return undefined;
+    const element = values.$node;
+    element.assigningRef ??= new Proxy(values, pxl.ASSIGNING_REF);
+    return element.assigningRef;
+  }
+});
+
+// The element's attributes can be assigned (a Set per class, built on first use); states, readouts (tx, pN, a
+// stage's mouseX), id, handler attributes and unknown names warn once per element type and name
+pxl._assignableNames = new Map();
+pxl._unassignableNames = new Set();
+pxl.ASSIGNING_REF = {
+  set(values, name, value) {
+    const element = values.$node;
+    const Class = element.constructor;
+    let names = pxl._assignableNames.get(Class);
+    if (names === undefined) {
+      names = new Set(Class.observedAttributes.filter((key) => key !== 'id' && !key.includes('-')));
+      pxl._assignableNames.set(Class, names);
+    }
+    if (names.has(name)) {
+      element[name] = value;
+      return true;
+    }
+    const key = `${element.localName} ${String(name)}`;
+    if (!pxl._unassignableNames.has(key)) {
+      pxl._unassignableNames.add(key);
+      console.warn(`[pxl] <${element.localName}${element.id ? ` id="${element.id}"` : ''}>: ref.<id>.${String(name)} can't be assigned (not an attribute)`);
+    }
+    // Not assigned. Handlers are sloppy-mode code, so false fails silently after the warning; true would throw for
+    // tx, ty and $node (fixed getters on values: a Proxy may not report them as assigned)
+    return false;
+  }
+};
+
+// Compiles a handler with the expression scope (Math names, colors, …), its own ref (pxl.handlerRef) and `this`
+// bound to the element. A handler that throws is logged with its element and attribute; the event's other listeners
+// still run.
 pxl.compileHandler = function(element, name, source) {
   const handler = new Function('scope', 'ref', `
     const { ${pxl.scopeKeys} } = scope;
     return function() {
-      ${pxl.rewriteExpression(source)}
+      ${pxl.rewriteExpression(source, true)}
     };
-  `)(pxl.scope, pxl.nodes);
+  `)(pxl.scope, pxl.handlerRef);
   return function() {
     try {
       handler.call(element);
@@ -1713,8 +1739,8 @@ pxl.Stage = class Stage extends HTMLElement {
       mouseX: 500, mouseY: 500, isHovered: false, width: 1000, height: 1000 / this._parsedRatio,
       fps: 0, renderAvg: '0.00', renderMax: '0.00'
     };
-    Object.defineProperty(this.values, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
     Object.defineProperty(this.values, '$node', { value: this, enumerable: false, writable: false });
+    this.assigningRef = null; // what ref.<id> returns in handlers (pxl.handlerRef), created on first use
 
     // Properties set before the upgrade, applied in connectedCallback: [name, value, …] or null
     this._pendingProperties = ownKeys.length === 0 ? null : pxl.takeOwnProperties(this, ownKeys);
@@ -2171,7 +2197,6 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
     this.expressions = {};
     this.values = {};
-    Object.defineProperty(this.values, 'set', { value: (k, v) => pxl.setFromRef(this, k, v), enumerable: false, writable: false });
     Object.defineProperty(this.values, '$node', { value: this, enumerable: false, writable: false });
     // Drawn origin in the parent space: dx / dy are applied after rotate / scale / skew, so it's the local matrix translation
     Object.defineProperty(this.values, 'tx', { get: () => this.getLocalMatrix()[4], enumerable: false });
@@ -2209,6 +2234,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this.parentLayer = null;
     this.parentContainer = null;
     this.registeredId = null; // the id under which pxl.nodes holds the values (pxl.registerNode())
+    this.assigningRef = null; // what ref.<id> returns in handlers (pxl.handlerRef), created on first use
     // connectedCallback has run: an id that changes from now on is moved in the registry by attributeChangedCallback.
     // During an upgrade the attributes arrive before connectedCallback, which registers the id itself.
     this._isRegistered = false;

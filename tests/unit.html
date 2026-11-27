@@ -238,10 +238,17 @@
       }
     });
 
-    test('rewriteExpression (attributes and on* handlers): only code is rewritten', () => {
+    test('rewriteExpression (attributes and pxl-on-* handlers): only code is rewritten', () => {
       const source = "ref.a.b + 'ref.a.b' + `${ref.c.d} ref.e.f` + toLocal(ref.g, 'x') + 'toLocal('";
       const expected = "ref.a?.b + 'ref.a.b' + `${ref.c?.d} ref.e.f` + pxl.toLocal(this, ref.g, 'x') + 'toLocal('";
       const actual = pxl.rewriteExpression(source);
+      if (actual !== expected) throw new Error(`got ${actual}`);
+    });
+
+    test('rewriteExpression for handlers keeps ref.a.b, so it can be assigned; toLocal( is still rewritten', () => {
+      const source = "ref.a.b += 1; ref.c.d = toLocal(ref.g, 'x') + 'toLocal('";
+      const expected = "ref.a.b += 1; ref.c.d = pxl.toLocal(this, ref.g, 'x') + 'toLocal('";
+      const actual = pxl.rewriteExpression(source, true);
       if (actual !== expected) throw new Error(`got ${actual}`);
     });
 
