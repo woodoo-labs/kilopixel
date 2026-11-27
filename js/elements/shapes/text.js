@@ -49,17 +49,17 @@ pxl.Text = class Text extends pxl.Shape {
     }
   }
 
-  // Three caches, each rebuilt only when its inputs change: font string → line layout → bounding box
-  draw(ctx) {
+  // Sets the context's text state and brings the three caches up to date, each rebuilt only when its inputs change:
+  // font string → line layout → bounding box. Returns false when there is no text to draw. draw() calls it first; an
+  // isolated text calls it before drawing too (prepare()), so its box is current when the engine needs it.
+  layout(ctx) {
     const {
       text, size, font, align, baseline, weight, fontstyle, maxwidth,
-      direction, width, lineheight, letterspacing, reveal
+      direction, width, lineheight, letterspacing
     } = this.values;
 
-    this._hasInk = false;
-
     // null / undefined: a ref that isn't connected yet
-    if (text === null || text === undefined || text === '') return;
+    if (text === null || text === undefined || text === '') return false;
 
     // --- 1. Font string ---
     let tier1Dirty = false;
@@ -169,8 +169,18 @@ pxl.Text = class Text extends pxl.Shape {
       this._lastDirection = direction;
       this._lastMaxwidth = maxwidth;
     }
+    return true;
+  }
 
-    // --- Drawing ---
+  // The box of an isolated text comes from its layout, done on the scratch canvas before the box is needed
+  prepare(ctx) {
+    return this.layout(ctx);
+  }
+
+  draw(ctx) {
+    this._hasInk = false;
+    if (!this.layout(ctx)) return;
+    const { size, maxwidth, lineheight, reveal } = this.values;
 
     // Typewriter reveal: 0 = nothing, 1 = everything
     let charsRemaining = Infinity;

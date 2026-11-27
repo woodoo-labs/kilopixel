@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>test48 variants</title>
+<style>
+  body { margin: 0; font: 12px system-ui, sans-serif; }
+  iframe { width: 1400px; height: 1700px; border: 0; }
+</style>
+</head>
+<body>
+<iframe id="frame"></iframe>
+<script>
+// examples/test48.html with today's engine (design/done/2026-11-26_isolation_box_plan.md), changed by text replacements, measured with real animation frames:
+// frames per second and the engine's time per frame. Shows which part of the page costs the frames.
+const SECONDS = 3;
+const frame = document.getElementById('frame');
+
+const VARIANTS = {
+  original: (h) => h,
+  noShadows: (h) => h.replace(/ shadowcolor="[^"]*"/g, ''),
+  noBlend: (h) => h.replace(/ blend="screen"/g, ''),
+  noShadowsNoBlend: (h) => h.replace(/ shadowcolor="[^"]*"/g, '').replace(/ blend="screen"/g, ''),
+  staticHud: (h) => h.replace(/text="'hsl\(' \+[^"]*"/g, 'text="hsl"').replace(/text="ref\.stage\.fps[^"]*"/g, 'text="fps"'),
+  noGradientsInLayer3: (h) => h.replace(/fill="conic\(t \* 12[^"]*"/, 'fill="#f43f5e"').replace(/fill="linear\(t \* 15[^"]*"/, 'fill="#1e293b"'),
+  layer3Empty: (h) => h.replace(/(<!-- LAYER 3[\s\S]*?<pxl-layer>)[\s\S]*?(<\/pxl-layer>\s*<\/pxl-stage>)/, '$1<pxl-circle x="t" r="1" fill="#000"></pxl-circle>$2'),
+  // Shadows kept, but the white stroke removed from the shapes that have one: they draw once, so they aren't isolated
+  shadowsNotIsolated: (h) => h.replace(/ stroke="#ffffff" strokewidth="2(\.5)?"/g, ''),
+  // The original page, with isolation limited to each shape's own box (prototype of TODO §31, patched in after load)
+  boxIsolation: (h) => h,
+  // The suggestion: the triangle and the complementary axis each in a layer of its own, rotated as a layer
+  rotatingLayers: (h) => rotatingLayers(h),
+  // Each shadowed node split in two: the fill with blend and shadow (draws once), and a white ring without them
+  splitFillRing: (h) => splitFillRing(h),
+  // The same, and the triangle polyline (screen blend, fill and stroke) split into fill and outline too
+  splitAll: (h) => splitFillRing(h, true),
+  splitAllRotatingLayers: (h) => rotatingLayers(splitFillRing(h, true))
+};
+
+// match: the shadowed fill grows by half the ring's width, so its silhouette (and the glow) is the old fill and ring
+// together; the white ring covers the grown edge
+function splitFillRing(h, polylineToo = false, match = false) {
+  h = h.replace(/<pxl-(circle|rect)\b([^>]*shadowcolor[^>]*)><\/pxl-\1>/g, (m, tag, attrs) => {
+    if (!/ stroke="#ffffff"/.test(attrs)) return m;
+    let fill = attrs.replace(/ stroke="[^"]*"/, '').replace(/ strokewidth="[^"]*"/, '');
+    if (match) {
+      const sw = +attrs.match(/ strokewidth="([\d.]+)"/)[1];
+      fill = fill.replace(/ (r|w|h)="([\d.]+)"/g, (a, k, v) => ` ${k}="${k === 'r' ? +v + sw / 2 : +v + sw}"`);
+    }
+    const ring = attrs.replace(/ fill="[^"]*"/, ' fill="none"').replace(/ blend="[^"]*"/, '')
+      .replace(/ shadowcolor="[^"]*"/, '').replace(/ shadowblur="[^"]*"/, '');
+    return `<pxl-${tag}${fill}></pxl-${tag}><pxl-${tag}${ring}></pxl-${tag}>`;
+  });
+  if (polylineToo) {
+    h = h.replace(/<pxl-polyline\b([^>]*)>\s*<\/pxl-polyline>/, (m, attrs) => {
+      const fill = attrs.replace(/ stroke="[^"]*"/, '').replace(/ strokewidth="[^"]*"/, '');
+      const outline = attrs.replace(/ fill="[^"]*"/, ' fill="none"');
+      return `<pxl-polyline${fill}></pxl-polyline><pxl-polyline${outline}></pxl-polyline>`;
+    });
+  }
+  return h;
+}
+
+// Layer 3 split into: the triangle (a layer rotated by t * 8), the complementary axis (a layer rotated by -t * 6), and
+// the rest (the core and the HUD), in the same stacking order
+function rotatingLayers(h) {
+  const start = h.indexOf('<pxl-layer>', h.indexOf('LAYER 3: KINETIC')), end = h.indexOf('</pxl-layer>', start);
+  const inner = h.slice(start + '<pxl-layer>'.length, end);
+  const block = (open, nextMarker) => {
+    const s = inner.indexOf(open), e = inner.lastIndexOf('</pxl-group>', inner.indexOf(nextMarker));
+    return { s, e: e + '</pxl-group>'.length, body: inner.slice(s + open.length, e) };
+  };
+  const tri = block('<pxl-group rotate="t * 8">', 'ARMATURE 2'), comp = block('<pxl-group rotate="-t * 6">', 'CENTRAL CORE');
+  const rest = inner.slice(0, tri.s) + inner.slice(tri.e, comp.s) + inner.slice(comp.e);
+  return h.slice(0, start) +
+    `<pxl-layer x="500" y="500" rotate="t * 8">${tri.body}</pxl-layer>` +
+    `<pxl-layer x="500" y="500" rotate="-t * 6">${comp.body}</pxl-layer>` +
+    `<pxl-layer>${rest}` + h.slice(end);
+}
+
+// TODO §31 step 2 as a patch: clear, draw and composite only the shape's device box, not the whole layer. The box is
+// the shape's paint (hit box padded like for hit testing) mapped through its global matrix; the shadow and the filter
+// are applied when the box is drawn onto the layer, so they may spread beyond it as before.
+function patchBoxIsolation(pxl) {
+  pxl.Shape.prototype.renderIsolated = function(ctx, u) {
+    const canvas = ctx.canvas, W = canvas.width, H = canvas.height, k = u * this.parentLayer.dpr;
+    const m = this.getGlobalMatrix(), b = this.getHitBox(), pad = this.hitPadding() + 1;
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const [px, py] of [[b.left - pad, b.top - pad], [b.right + pad, b.top - pad], [b.left - pad, b.bottom + pad], [b.right + pad, b.bottom + pad]]) {
+      const dx = (m[0] * px + m[2] * py + m[4]) * k, dy = (m[1] * px + m[3] * py + m[5]) * k;
+      if (dx < x0) x0 = dx; if (dx > x1) x1 = dx; if (dy < y0) y0 = dy; if (dy > y1) y1 = dy;
+    }
+    x0 = Math.max(0, Math.floor(x0)); y0 = Math.max(0, Math.floor(y0));
+    x1 = Math.min(W, Math.ceil(x1)); y1 = Math.min(H, Math.ceil(y1));
+    if (!(x1 > x0 && y1 > y0)) return;
+    const w = x1 - x0, h = y1 - y0;
+    const scratch = pxl.getIsolationContext(W, H);
+    scratch.clearRect(0, 0, w, h);
+    scratch.save();
+    try {
+      scratch.setTransform(m[0] * k, m[1] * k, m[2] * k, m[3] * k, m[4] * k - x0, m[5] * k - y0);
+      this.draw(scratch);
+    } catch (error) { this.reportError(error); return; } finally { scratch.restore(); }
+    ctx.save();
+    try {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      pxl.applyCompositingState(ctx, u, this.values, this);
+      ctx.drawImage(scratch.canvas, 0, 0, w, h, x0, y0, w, h);
+    } catch (error) { this.reportError(error); } finally { ctx.restore(); }
+  };
+}
+
+async function load(variant) {
+  let html = await (await fetch('/examples/test48.html', { cache: 'no-store' })).text();
+  html = VARIANTS[variant](html).replace(/<head[^>]*>/i, (tag) => `${tag}<base href="/examples/">`);
+  await new Promise((resolve) => { frame.onload = resolve; frame.srcdoc = html; });
+  const w = frame.contentWindow;
+  await w.document.fonts.ready;
+  return w;
+}
+
+async function measure(variant) {
+  const w = await load(variant);
+  if (variant === 'boxIsolation') patchBoxIsolation(w.pxl);
+  const stage = w.document.querySelector('pxl-stage');
+  stage.setAttribute('alwaysrender', '');
+  await new Promise((r) => setTimeout(r, 1000));
+  const times = [], render = stage.render, frames = [];
+  stage.render = function(t) { frames.push(t); const s = w.performance.now(); render.call(this, t); times.push(w.performance.now() - s); };
+  await new Promise((r) => setTimeout(r, SECONDS * 1000));
+  stage.render = render;
+  times.sort((a, b) => a - b);
+  const isolated = [...w.document.querySelectorAll('pxl-stage *')].filter((e) => e.needsIsolation && e.needsIsolation()).length;
+  return { variant, fps: +(times.length / SECONDS).toFixed(1), engineMedianMs: +times[times.length >> 1].toFixed(2),
+           isolatedShapes: isolated, layers: stage.layers.length, shapes: stage.querySelectorAll("pxl-circle, pxl-rect, pxl-polyline").length, stage: `${stage.clientWidth}x${stage.clientHeight} css px, DPR ${w.devicePixelRatio}` };
+}
+
+// Layer 3 of the original and of the box-isolation variant, drawn by hand at the same t, compared pixel by pixel
+// (premultiplied, so the color of transparent pixels doesn't count)
+window.comparePixels = async function(t = 7.3, va = 'original', vb = 'boxIsolation') {
+  const grab = async (variant) => {
+    const w = await load(variant);
+    if (variant === 'boxIsolation') patchBoxIsolation(w.pxl);
+    const stage = w.document.querySelector('pxl-stage');
+    w.requestAnimationFrame = () => 1;
+    stage.render = stage.render.bind(stage);
+    for (const l of stage.layers) l.isDirty = true;
+    w.pxl.Stage.prototype.render.call(stage, t);
+    const l = stage.layers[2];
+    l._ctx.getImageData(0, 0, 1, 1); // Chrome may switch to CPU drawing after a readback: draw again, then read
+    for (const x of stage.layers) x.isDirty = true;
+    w.pxl.Stage.prototype.render.call(stage, t);
+    return l._ctx.getImageData(0, 0, l._canvas.width, l._canvas.height).data;
+  };
+  const A = await grab(va), B = await grab(vb);
+  let count = 0, max = 0;
+  for (let i = 0; i < A.length; i += 4) {
+    let d = Math.abs(A[i + 3] - B[i + 3]);
+    for (let c = 0; c < 3; c++) d = Math.max(d, Math.abs(A[i + c] * A[i + 3] - B[i + c] * B[i + 3]) / 255);
+    if (d > 0.5) { count++; if (d > max) max = d; }
+  }
+  return { pixels: A.length / 4, differing: count, maxDifference: Math.round(max) };
+};
+
+window.gpuInfo = function() {
+  const gl = document.createElement('canvas').getContext('webgl');
+  const ext = gl && gl.getExtension('WEBGL_debug_renderer_info');
+  return ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : 'unknown';
+};
+
+window.measureAll = async function(names = Object.keys(VARIANTS)) {
+  const out = [];
+  for (const n of names) out.push(await measure(n));
+  return { gpu: gpuInfo(), results: out };
+};
+</script>
+</body>
+</html>

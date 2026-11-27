@@ -146,7 +146,7 @@ Not affected: the framework plan (`design/done/2026-10-30_framework_compatibilit
 2. **This plan:** step 1 measured and built (§7.4); answer the rest of §4, then 🟡 for steps 2–4.
 3. **Build it in steps** (§7.2): step 1 done; step 2 when a measurement shows that the saved redraws matter, or with throttling or tweens.
 4. **Update the dependent plans to the new model, then build them:** throttling Part A (much simpler), tween §7, `<pxl-clip>`, `space` (without §3.5).
-5. **Isolated compositing (TODO §31)** before or after item 3, not in parallel; `paintorder` after it. (2026-11-20: no shared code any more, any order; isolation plan §9. Step 1 of the isolation plan built the same day.)
+5. **Isolated compositing (`design/done/2026-11-26_isolation_box_plan.md`)** before or after item 3, not in parallel; `paintorder` after it. (2026-11-20: no shared code any more, any order; isolation plan §9. Step 1 of the isolation plan built the same day.)
 6. **Docs cleanup** (§8): already with step 1 of §7.2.
 
 ### 7.1 Found While Checking: The CSS-Only Fast Path Never Ran (Fixed 2026-11-12)

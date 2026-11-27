@@ -93,5 +93,10 @@ pxl.Grid = class Grid extends pxl.Shape {
   getBoundingBox() {
     return this.boundingBox;
   }
+
+  // Its box is known only in draw(), and it is the visible area anyway: an isolated grid uses the whole layer
+  hasBoxBeforeDraw() {
+    return false;
+  }
 };
 pxl.defineShape('pxl-grid', pxl.Grid);

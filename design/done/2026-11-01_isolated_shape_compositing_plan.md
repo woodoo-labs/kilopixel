@@ -1,6 +1,6 @@
 # Isolated Shape Compositing: Fill and Stroke Composite as One
 
-- **Status**: ✅ **Implemented** (2026-11-20, step 1 built, §10; step 2 is TODO §31)
+- **Status**: ✅ **Implemented** (2026-11-20, step 1 built, §10; step 2 built: `design/done/2026-11-26_isolation_box_plan.md`)
 - **Date**: 2026-11-01
 - **Related**: `design/done/2026-11-07_safe_shape_render_plan.md` (built 2026-11-07, same function `Shape.render()`; the base for this plan, §9), TODO §14 `paintorder` (changes the order of the same draw calls; build it after this plan, §9), `docs/DOCS_STANDARDS.md` §2 ("Ghosts of fill-only shapes", the docs rule this removes), `design/done/2026-11-12_two_phase_frame_plan.md` and `design/archive/2026-11-15_per_frame_evaluation_plan.md` (no shared code since 2026-11-13, §9), `design/archive/2026-10-17_shape_authoring_plan.md` (replaced by `design/done/2026-11-20_custom_shapes_plan.md`, §3.5), `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked; a clip on the layer also clips the composite step, §9)
 - **Target Implementation**: `js/elements/shape.js` (`render()`), `js/graphics.js` (`applyContextState` split), `js/elements/stage.js` (scratch canvas size), `js/elements/shapes/text.js` and `grid.js` (draw count)
@@ -181,7 +181,7 @@ Pixel reads on a small stage, one test per row:
 Three plans change how a shape's draw calls (fill, stroke, arrowheads, text lines) reach the layer. Built in this order, each one makes the next simpler:
 
 1. **Always `save()` / `restore()` per shape** (`design/done/2026-11-07_safe_shape_render_plan.md`, built 2026-11-07): `Shape.render()` gets one path, save → transform → draw → restore, instead of the `hasStateChanges` check. The isolated path then only swaps the target of `draw()` (the scratch canvas) instead of adding a third path. The shared scratch canvas also needs the same protection against custom shapes that change canvas state and don't reset it (the `GhostStar` test, `design/archive/2026-10-17_always_save_restore_plan.md` §5.2): a leak there would reach every isolated shape after it.
-2. **This plan** (TODO §31).
+2. **This plan** (`design/done/2026-11-26_isolation_box_plan.md`).
 3. **`paintorder`** (TODO §14, concept): `paintorder="stroke"` draws the stroke first and the fill on top. Without isolation it has the same compositing bug: with a shadow, the fill's shadow falls onto the stroke drawn just before it. With isolation it only swaps two calls inside the scratch canvas, and shadow, mask and filter apply to the finished shape. Shared open questions: arrowheads (§3.1 counts them as an extra draw call; §14 asks how they paint with `paintorder="stroke"`) and semi-transparent fills (§14 "fills show the stroke underneath", here §6.1 `alpha`). Prototype for text: `design/prototypes/2026-11-01_isolated_shape_compositing/paint_order_text.html` (plain canvas: per line as today, all fills then all strokes, strokes under the fills; overlapping lines and a label on a busy background).
 
 **Other plans** (checked 2026-11-20):
@@ -197,4 +197,10 @@ Three plans change how a shape's draw calls (fill, stroke, arrowheads, text line
 - **Tests** (`tests/index.html`, section "Isolated compositing", the 8 of §7): `source-in` keeps the fill, `xor` keeps the stroke's inner half, a shadow changes no pixel of the shape itself (1,596 pixels before), two-line text with `source-in` keeps both lines, `needsIsolation()` for 17 shapes (fill only, `alpha`, `shadowcolor="none"`, arrows without stroke, wrap width, grid, custom shapes), the transform in nested rotated, skewed and zoomed groups (to 2 / 255), a custom shape with and without the override, an arrowhead's shadow on its own shaft (189 pixels before). Run against the build before: the 7 that check the bug fail for the right reason; the transform test passes there too (it guards the new path).
 - **Docs:** `mask.html` shapes have fill and stroke; the fills are the opaque `100` steps (`#ffedd5`, `#dbeafe`), not the 40 % fill of DOCS_STANDARDS.md §2 (§5 said 40 %): with half-transparent fills the boolean operations don't show (`xor` only lightens the overlap). Ghosts follow the standard rule (`300`, solid); the callout "Don't Mix Fill and Stroke" became "Fill and Stroke Mask as One"; the "Ghosts of fill-only shapes" rule left DOCS_STANDARDS.md. (2026-11-20, after a look at the page: solid colored ghosts along a cut edge looked like a leftover of the stroke, so the ghosts are light slate and dashed again, `#cbd5e1`, and DOCS_STANDARDS.md §2 has the rule "Ghosts of masked shapes".) `shadow.html` §1 and `blend.html` change only in the picture (the stroke's shadow and the multiplied inner half of the stroke are gone), not in their text.
 - **Size:** `pxl.min.js` 70.58 → 72.52 KB (~73KB in the docs), gzipped 20.84 → 21.28 KB.
-- **Open:** step 2, the bounding-box scratch region (§6.2, TODO §31). Known limit: an isolated text with `direction` unset draws left-to-right on the scratch canvas, which is outside the document, also on a right-to-left page (checked 2026-11-20); `direction="rtl"` on the text avoids it.
+- **Open:** step 2, the bounding-box scratch region (§6.2, `design/done/2026-11-26_isolation_box_plan.md`). Known limit: an isolated text with `direction` unset draws left-to-right on the scratch canvas, which is outside the document, also on a right-to-left page (checked 2026-11-20); `direction="rtl"` on the text avoids it.
+
+## Log
+
+Newest first, one line per change (CLAUDE.md "Plans and TODO").
+
+- 2026-11-26: step 2 continues in `design/done/2026-11-26_isolation_box_plan.md`: with shadows or filters the box pays off from a few shapes (`examples/test48.html`), not only from about 50 (§4.1, measured without them).

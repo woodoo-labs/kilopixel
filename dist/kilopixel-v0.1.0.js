@@ -2829,17 +2829,38 @@ pxl.Shape = class Shape extends pxl.PxlNode {
            (pxl.arrowSize(arrowstart, strokewidth) > 0 || pxl.arrowSize(arrowend, strokewidth) > 0);
   }
 
-  // Draws with the shape's global matrix (the same pixels as the layer's transform chain, plan §3.4) into the whole
-  // scratch area of the layer's size, then composites it with an identity transform: canvas shadows and filters
-  // ignore the transform, so offsets and blur sizes stay as on the direct path.
+  // Draws with the shape's global matrix (the same pixels as the layer's transform chain, plan §3.4) into the scratch
+  // canvas, only within the shape's device box, then composites that box with an identity transform: canvas shadows
+  // and filters ignore the transform, so offsets and blur sizes stay as on the direct path, and they may reach beyond
+  // the box. Masks that erase outside the drawn image (destination-in, copy, …) still do: the canvas treats the area
+  // outside it as transparent. The GPU work then depends on the shape's size, not the layer's: a shadow is a blur over
+  // what is composited (design/done/2026-11-26_isolation_box_plan.md). The scratch canvas is never cleared as a whole:
+  // a shape composites only its own box, which it cleared first.
   renderIsolated(ctx, u) {
     const canvas = ctx.canvas, w = canvas.width, h = canvas.height, k = u * this.parentLayer.dpr;
     const scratch = pxl.getIsolationContext(w, h);
-    scratch.clearRect(0, 0, w, h);
+    const m = this.getGlobalMatrix(); // in logical units: scaled by u like the layer
+    let left = 0, top = 0, right = w, bottom = h;
     scratch.save();
     try {
-      const m = this.getGlobalMatrix(); // in logical units: scaled by u like the layer
-      scratch.setTransform(m[0] * k, m[1] * k, m[2] * k, m[3] * k, m[4] * k, m[5] * k);
+      // Inside save() / restore(), so state set here (a text's font) doesn't reach the next isolated shape
+      if (!this.prepare(scratch)) return;
+      if (this.hasBoxBeforeDraw()) {
+        // The hit box, padded like for hit testing, through the global matrix: the four corners unrolled (no
+        // allocation), rounded outwards with one more device pixel for antialiasing, clamped to the canvas
+        const box = this.getHitBox(), pad = this.hitPadding();
+        const l = box.left - pad, r = box.right + pad, t = box.top - pad, b = box.bottom + pad;
+        const xl = m[0] * l, xr = m[0] * r, xt = m[2] * t + m[4], xb = m[2] * b + m[4];
+        const yl = m[1] * l, yr = m[1] * r, yt = m[3] * t + m[5], yb = m[3] * b + m[5];
+        left = Math.max(0, Math.floor(Math.min(xl + xt, xr + xt, xl + xb, xr + xb) * k) - 1);
+        right = Math.min(w, Math.ceil(Math.max(xl + xt, xr + xt, xl + xb, xr + xb) * k) + 1);
+        top = Math.max(0, Math.floor(Math.min(yl + yt, yr + yt, yl + yb, yr + yb) * k) - 1);
+        bottom = Math.min(h, Math.ceil(Math.max(yl + yt, yr + yt, yl + yb, yr + yb) * k) + 1);
+        // Empty, NaN or off the canvas: nothing to composite
+        if (!(right > left && bottom > top)) return;
+      }
+      scratch.clearRect(0, 0, right - left, bottom - top);
+      scratch.setTransform(m[0] * k, m[1] * k, m[2] * k, m[3] * k, m[4] * k - left, m[5] * k - top);
       this.draw(scratch);
     } catch (error) {
       this.reportError(error);
@@ -2847,16 +2868,29 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     } finally {
       scratch.restore();
     }
+    const bw = right - left, bh = bottom - top;
     ctx.save();
     try {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       pxl.applyCompositingState(ctx, u, this.values, this);
-      ctx.drawImage(scratch.canvas, 0, 0, w, h, 0, 0, w, h);
+      ctx.drawImage(scratch.canvas, 0, 0, bw, bh, left, top, bw, bh);
     } catch (error) {
       this.reportError(error);
     } finally {
       ctx.restore();
     }
+  }
+
+  // Runs on the scratch canvas before an isolated shape's box is computed; false means there is nothing to draw.
+  // Text lays out here, so its box (measured in draw() otherwise) is current.
+  prepare(ctx) {
+    return true;
+  }
+
+  // Whether the box is known before drawing. Not for a shape without its own getBoundingBox() (it gets the whole
+  // area, as its hit test does) and not for the grid, whose box is the visible area, computed in draw().
+  hasBoxBeforeDraw() {
+    return !this.needsExactHitTest();
   }
 
   // Custom shapes override this (gradients are sized to it); without it, gradients collapse to a point and hit
@@ -3980,17 +4014,17 @@ pxl.Text = class Text extends pxl.Shape {
     }
   }
 
-  // Three caches, each rebuilt only when its inputs change: font string → line layout → bounding box
-  draw(ctx) {
+  // Sets the context's text state and brings the three caches up to date, each rebuilt only when its inputs change:
+  // font string → line layout → bounding box. Returns false when there is no text to draw. draw() calls it first; an
+  // isolated text calls it before drawing too (prepare()), so its box is current when the engine needs it.
+  layout(ctx) {
     const {
       text, size, font, align, baseline, weight, fontstyle, maxwidth,
-      direction, width, lineheight, letterspacing, reveal
+      direction, width, lineheight, letterspacing
     } = this.values;
 
-    this._hasInk = false;
-
     // null / undefined: a ref that isn't connected yet
-    if (text === null || text === undefined || text === '') return;
+    if (text === null || text === undefined || text === '') return false;
 
     // --- 1. Font string ---
     let tier1Dirty = false;
@@ -4100,8 +4134,18 @@ pxl.Text = class Text extends pxl.Shape {
       this._lastDirection = direction;
       this._lastMaxwidth = maxwidth;
     }
+    return true;
+  }
 
-    // --- Drawing ---
+  // The box of an isolated text comes from its layout, done on the scratch canvas before the box is needed
+  prepare(ctx) {
+    return this.layout(ctx);
+  }
+
+  draw(ctx) {
+    this._hasInk = false;
+    if (!this.layout(ctx)) return;
+    const { size, maxwidth, lineheight, reveal } = this.values;
 
     // Typewriter reveal: 0 = nothing, 1 = everything
     let charsRemaining = Infinity;
@@ -4281,6 +4325,11 @@ pxl.Grid = class Grid extends pxl.Shape {
   // Set in draw(): the visible area
   getBoundingBox() {
     return this.boundingBox;
+  }
+
+  // Its box is known only in draw(), and it is the visible area anyway: an isolated grid uses the whole layer
+  hasBoxBeforeDraw() {
+    return false;
   }
 };
 pxl.defineShape('pxl-grid', pxl.Grid);

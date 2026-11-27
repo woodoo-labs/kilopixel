@@ -1466,6 +1466,125 @@
         if (changed !== 0) throw new Error(`the shadow changed ${changed} pixels of the line`);
       }));
 
+    // --- Only the shape's box (design/done/2026-11-26_isolation_box_plan.md) ---
+
+    // The drawImage() calls of the layer while fn runs: [image, sx, sy, sw, sh, dx, dy, dw, dh] each
+    function isoComposites(layer, fn) {
+      const ctx = layer._ctx, original = ctx.drawImage, calls = [];
+      ctx.drawImage = function(...args) { calls.push(args); return original.apply(this, args); };
+      try { fn(); } finally { ctx.drawImage = original; }
+      return calls;
+    }
+    // Whether a composited rectangle covers a shape's bounding box (no rotation) within the canvas, in device pixels
+    function isoCovers(layer, shape, call) {
+      const k = layer.stage.unit * layer.dpr, m = shape.getGlobalMatrix(), b = shape.getBoundingBox();
+      const w = layer._canvas.width, h = layer._canvas.height, [, , , , , dx, dy, dw, dh] = call;
+      return dx <= Math.max(0, (m[4] + b.left) * k) && dy <= Math.max(0, (m[5] + b.top) * k) &&
+             dx + dw >= Math.min(w, (m[4] + b.right) * k) && dy + dh >= Math.min(h, (m[5] + b.bottom) * k);
+    }
+    customElements.define('test-iso-nobox', class extends pxl.Shape {
+      draw(ctx) {
+        ctx.beginPath();
+        ctx.rect(-80, -40, 160, 80);
+        this.applyStyle(ctx);
+      }
+    });
+    customElements.define('test-iso-font', class extends pxl.Shape {
+      draw(ctx) {
+        this.seenFont = ctx.font;
+        ctx.beginPath();
+        ctx.rect(-20, -20, 40, 40);
+        this.applyStyle(ctx);
+      }
+      getBoundingBox() { return this.setBoundingBox(-20, -20, 20, 20); }
+    });
+
+    test('isolated box: only the shape\'s box is composited, not the whole layer', () => isoStage(
+      `<pxl-circle id="ibCircle" x="500" y="250" r="50" fill="#1d4ed8" stroke="#0f172a" strokewidth="4" shadowcolor="#000" shadowblur="10"></pxl-circle>`,
+      (layer, shape) => {
+        const calls = isoComposites(layer, () => isoRender(layer));
+        const k = layer.stage.unit * layer.dpr, [, , , , , , , dw, dh] = calls[0];
+        // The circle (100 units) plus the miter padding of its stroke (2 × 10 × 2 units) and a pixel each side
+        if (calls.length !== 1 || dw < 100 * k || dw > 140 * k + 4 || dh > 140 * k + 4 || dw >= layer._canvas.width / 2) {
+          throw new Error(`${calls.length} composites, ${dw} × ${dh} px of a ${layer._canvas.width} px wide layer`);
+        }
+      }));
+
+    test('isolated box: a mask that erases outside the shape (destination-in) still erases the whole layer', () => isoStage(
+      `<pxl-rect x="500" y="250" w="1000" h="500" fill="#fb923c"></pxl-rect>
+       <pxl-ellipse id="ibErase" x="500" y="250" rx="100" ry="60" fill="#1d4ed8" stroke="#0f172a" strokewidth="10" mask="destination-in"></pxl-ellipse>`,
+      (layer) => {
+        const far = isoPixel(layer, 100, 100), inside = isoPixel(layer, 500, 250);
+        if (far[3] !== 0 || inside[3] === 0) throw new Error(`far outside alpha ${far[3]}, inside alpha ${inside[3]}`);
+      }));
+
+    test('isolated box: a shadow and a filter reach beyond the shape\'s box', () => isoStage(
+      `<pxl-circle x="200" y="150" r="40" fill="#1d4ed8" stroke="#0f172a" strokewidth="4" shadowcolor="#000" shadowx="400"></pxl-circle>
+       <pxl-rect x="500" y="400" w="200" h="60" fill="#1d4ed8" stroke="#0f172a" strokewidth="4" filter="blur(12)"></pxl-rect>`,
+      (layer) => {
+        // The shadow 400 units to the right; the blur just right of the rect's padded box (600 + 20 + a pixel)
+        const shadow = isoPixel(layer, 600, 150), blurred = isoPixel(layer, 628, 400);
+        if (shadow[3] < 200 || blurred[3] === 0 || blurred[3] === 255) throw new Error(`shadow alpha ${shadow[3]}, blur alpha ${blurred[3]}`);
+      }));
+
+    test('isolated box: a text\'s box is laid out before drawing, also when it grows, wraps, squeezes or has a stroke', () => isoStage(
+      `<pxl-text id="ibText" x="100" y="100" text="one\\ntwo" size="40" fill="#1d4ed8" shadowcolor="#000" shadowblur="6"></pxl-text>`,
+      (layer, text) => {
+        const cases = [
+          ['text', 'one\\ntwo much longer\\nthree'],
+          ['width', '150'],
+          ['text', 'a single line that is wrapped at the width'],
+          ['maxwidth', '120'],
+          ['stroke', '#000']
+        ];
+        for (const [name, value] of cases) {
+          text.setAttribute(name, value);
+          const calls = isoComposites(layer, () => isoRender(layer));
+          if (calls.length !== 1 || !isoCovers(layer, text, calls[0])) {
+            throw new Error(`after ${name}="${value}": ${calls.length} composites, ${calls[0] && calls[0].slice(5).join(', ')} doesn't cover the text`);
+          }
+        }
+        // The grown three-line text: with the alphabetic baseline the block grows upwards, so its last line sits on y = 100
+        text.setAttribute('width', '0');
+        text.setAttribute('maxwidth', '0');
+        text.setAttribute('text', 'one\\ntwo\\nthree');
+        isoRender(layer);
+        if (isoOpaqueIn(layer, 100, 75, 200, 100) === 0) throw new Error('the third line is not painted');
+      }));
+
+    test('isolated box: an unchanged text measures nothing again in later frames', () => isoStage(
+      `<pxl-text x="100" y="100" text="one\\ntwo" size="40" fill="#1d4ed8" shadowcolor="#000" shadowblur="6"></pxl-text>`,
+      (layer) => {
+        const calls = countMeasureText(() => { for (let i = 0; i < 10; i++) isoRender(layer); });
+        if (calls !== 0) throw new Error(`${calls} measureText() calls in 10 frames`);
+      }));
+
+    test('isolated box: a shape without its own box and an isolated grid use the whole layer', () => isoStage(
+      `<test-iso-nobox x="500" y="250" fill="#1d4ed8" stroke="#0f172a" strokewidth="4" shadowcolor="#000"></test-iso-nobox>
+       <pxl-grid step="50" major="4" stroke="#94a3b8" shadowcolor="#000" shadowblur="2"></pxl-grid>`,
+      (layer) => {
+        const calls = isoComposites(layer, () => isoRender(layer)), w = layer._canvas.width, h = layer._canvas.height;
+        const whole = calls.filter((c) => c[7] === w && c[8] === h).length;
+        if (calls.length !== 2 || whole !== 2) throw new Error(`${calls.length} composites, ${whole} of the whole layer`);
+      }));
+
+    test('isolated box: an empty box (NaN, empty text) composites nothing and warns nothing', () => isoStage(
+      `<pxl-rect x="500" y="250" w="NaN" h="60" fill="#1d4ed8" stroke="#0f172a" strokewidth="4" shadowcolor="#000"></pxl-rect>
+       <pxl-text x="100" y="100" text="" width="200" fill="#1d4ed8" shadowcolor="#000"></pxl-text>`,
+      (layer) => {
+        let calls;
+        const warnings = captureWarnings(() => { calls = isoComposites(layer, () => isoRender(layer)); });
+        if (calls.length !== 0 || warnings.length !== 0) throw new Error(`${calls.length} composites, warnings ${JSON.stringify(warnings)}`);
+      }));
+
+    test('isolated box: a text\'s layout on the scratch canvas leaves no font for the next isolated shape', () => isoStage(
+      `<pxl-text x="100" y="100" text="one\\ntwo" size="40" font="serif" fill="#1d4ed8" shadowcolor="#000"></pxl-text>
+       <test-iso-font id="ibFont" x="500" y="250" fill="#1d4ed8" stroke="#0f172a" shadowcolor="#000"></test-iso-font>`,
+      (layer, shape) => {
+        isoRender(layer);
+        if (shape.seenFont !== '10px sans-serif') throw new Error(`the next shape sees the font "${shape.seenFont}"`);
+      }));
+
     // ===================================================================
     // Custom shapes (design/done/2026-11-20_custom_shapes_plan.md §5.5, §5.7): pxl.defineShape(), setBoundingBox(), paint().
     // The Star and the Gauge are loaded as a second script from the docs (docs/js/shapes/), like a page loads a custom shape.

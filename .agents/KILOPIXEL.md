@@ -1,6 +1,6 @@
 # Kilopixel — Language Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~70KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~71KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 How to write Kilopixel: elements, attributes, expressions, interaction. Each fact is stated once; sections link each other. How the engine does it (source files, frame, reactivity, hit testing, drawing): `.agents/ENGINE.md`. Docs pages also follow `docs/DOCS_STANDARDS.md`.
 
@@ -152,7 +152,7 @@ Users' guide: `docs/frameworks.html`. Every observed attribute (not the hyphenat
 - **Groups only transform:** no `alpha`, `blend`, `filter` or shadow. Use a layer, or set them on the shapes.
 - **`blend`** (layers and shapes) mixes colors (`screen`, `multiply`, `overlay`, `lighter`, …). **`mask`** (shapes only) is alpha compositing and clipping (`destination-in`, `destination-out`, `source-atop`, …): CSS `mix-blend-mode` has no such modes.
 - **Shadows** only on shapes. One shadow of a layer's whole silhouette: `filter="dropShadow(…)"` on the layer.
-- **Isolated shapes:** a shape that draws more than once (fill and stroke, arrowheads, several text lines, a grid's major lines and labels) and has `mask`, `blend`, `filter` or a visible shadow is drawn as one unit, like an SVG group: its own fill isn't masked away by its stroke, its stroke casts no shadow onto its fill. `alpha` stays per draw call. Cost: about 0.3 ms of CPU per frame for the first isolated shape, about 1 ms for 5–20; from about 50 per frame the GPU limits it (100: 26 fps). An isolated text with `direction` unset draws left-to-right, also on a right-to-left page.
+- **Isolated shapes:** a shape that draws more than once (fill and stroke, arrowheads, several text lines, a grid's major lines and labels) and has `mask`, `blend`, `filter` or a visible shadow is drawn as one unit, like an SVG group: its own fill isn't masked away by its stroke, its stroke casts no shadow onto its fill. `alpha` stays per draw call. Cost: about 0.3 ms of CPU per frame for the first isolated shape, about 1 ms for 5–20. The GPU work covers only the shape's box, so a shadow or filter on an isolated shape costs in proportion to the shape's size; an isolated grid, or a custom shape without `getBoundingBox()`, covers the whole layer. An isolated text with `direction` unset draws left-to-right, also on a right-to-left page.
 
 ## 5. Colors, Gradients, Filters
 
@@ -442,11 +442,12 @@ pxl.defineShape('pxl-star', pxl.Star);
 | **write** | `class … extends pxl.Shape` | on `pxl` like the built-ins, or a plain class |
 | | `static defaults` | every attribute with its default, after `...pxl.Shape.defaults`. Each key is an observed attribute (Rule A, §3.5) and a property (§3.7). Keys lowercase (HTML lowercases attribute names). A `false` / `true` default makes a presence attribute (bare = `true`) |
 | | `draw(ctx)` | the drawing around the shape's origin. The canvas is scaled by `u`, so lengths are written as in the HTML. Reads only `this.values`: no time (animate through attributes, `rotate="t * 30"` or an own `spin="t * 90"`), no DOM, as little allocation as possible |
-| | `getBoundingBox()` | the box around the outline, without the stroke, through `setBoundingBox()`. Gradients span it; hit testing checks it (padded by `hitPadding()`) before the exact test. Without it, gradients collapse to a point and every hit test is exact |
+| | `getBoundingBox()` | the box around the outline, without the stroke, through `setBoundingBox()`. Gradients span it; hit testing checks it (padded by `hitPadding()`) before the exact test; an isolated shape (§4) is drawn only within it (padded the same way), so paint beyond is cut then. Without it, gradients collapse to a point, every hit test is exact, and an isolated shape covers the whole layer |
 | | `pxl.defineShape(tag, Class)` | defines the tag (`pxl-` by convention) and hides content inside it (`display: none`; before the script runs, the content shows). Warns once per class: a key with capitals, no `draw()`, no `getBoundingBox()`; a tag already defined (a script loaded twice) warns and keeps the first class |
 | **may override** | `hitTest(ctx)` | the hit area: a path and `ctx.fill()` / `ctx.stroke()` (they test the pointer instead of painting). Default: what `draw()` fills and strokes |
 | | `drawsMoreThanOnce()` | whether `draw()` makes more than one paint call (`fill()`, `stroke()`, `fillText()`, `drawImage()`), which decides isolation with `mask`, `blend`, `filter` or a shadow (§4). Default `true`; one path through `applyStyle()`: `this.hasFill() && this.isStroked()` |
 | | `hitPadding()` | how far the paint reaches beyond the box (default: from the stroke) |
+| | `prepare(ctx)` | runs on the scratch canvas before an isolated shape's box is read, for a shape that measures in `draw()` (as text does); returns `false` when there is nothing to draw. Default: `true` |
 | **may read** | `this.values` | the current values (the object `ref.<id>` reads), also `isHovered`, `isPressed` |
 | | `this.stage.unit` | CSS pixels per unit, for pixel access (`getImageData()` ignores the canvas transform) |
 | **may call** | `applyStyle(ctx)` | fill (if set), then stroke (if set) the current path, gradients and dashes included |

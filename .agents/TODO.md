@@ -64,11 +64,6 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - `space="ref.A"` makes A's frame the element's parent space: exact overlays and labels on moving shapes without the `toLocal()` clone rule.
 - **Open**: the name (`space` / `frame`), the origin, the scope, a hidden target. Pick up together with the parked note `design/ideas/2026-10-25_refs_across_spaces_note.md`.
 
-## 31. Isolated Compositing, Step 2: the Bounding Box
-- **Status**: 🟢 **Decided**
-- **Plan**: `design/done/2026-11-01_isolated_shape_compositing_plan.md` (step 1 built, plan §10)
-- Clear and composite only the shape's device box instead of the whole scratch area: with 100 isolated shapes per frame 35 instead of 26 fps (DPR 2), no difference under about 50. Build it when a page needs it.
-
 ## 34. Quoted Text in Expressions: Docs
 - **Status**: 💬 **Discussion**
 - **Plan**: `design/done/2026-11-02_string_literals_in_expressions_plan.md` §5, §7

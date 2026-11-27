@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Isolation reach</title></head>
+<body>
+<iframe id="frame" style="width:1300px;height:1000px;border:0"></iframe>
+<script>
+// Every docs and example page (design/done/2026-11-26_isolation_box_plan.md §1): its isolated shapes after a few frames, which of them have a shadow or a filter (the
+// expensive case: a blur over the whole layer-sized image), and whether their layer redraws every frame.
+const frame = document.getElementById('frame');
+async function inspect(page) {
+  await new Promise((resolve) => { frame.onload = resolve; frame.src = '/' + page; });
+  const w = frame.contentWindow;
+  await w.document.fonts.ready;
+  for (const s of w.document.querySelectorAll('pxl-stage')) { s.setAttribute('alwaysrender', ''); s.resize(); }
+  await new Promise((r) => setTimeout(r, 400));
+  const out = { page, isolated: 0, blurred: 0, blurredAnimated: 0, examples: [] };
+  for (const el of w.document.querySelectorAll('pxl-stage *')) {
+    if (!el.needsIsolation || el.values.hidden || !el.needsIsolation()) continue;
+    out.isolated++;
+    const v = el.values, blurred = (v.shadowcolor && v.shadowcolor !== 'none' && v.shadowcolor !== 'transparent') || v.filter !== 'none';
+    if (!blurred) continue;
+    out.blurred++;
+    const animated = el.parentLayer && el.parentLayer.hasAnimatedContent;
+    if (animated) out.blurredAnimated++;
+    if (out.examples.length < 3) out.examples.push(`${el.localName}${el.id ? '#' + el.id : ''}${animated ? ' (animated layer)' : ''}`);
+  }
+  return out;
+}
+window.reach = async function() {
+  const pages = await (await fetch('/scratch/isolation_box/pages.json', { cache: 'no-store' })).json();
+  const rows = [];
+  for (const p of pages) { try { rows.push(await inspect(p)); } catch (e) { rows.push({ page: p, error: e.message }); } }
+  const sum = (k) => rows.reduce((s, r) => s + (r[k] || 0), 0);
+  return { pages: rows.length, pagesWithIsolated: rows.filter((r) => r.isolated).length, isolated: sum('isolated'),
+           pagesWithBlurred: rows.filter((r) => r.blurred).length, blurred: sum('blurred'), blurredAnimated: sum('blurredAnimated'),
+           detail: rows.filter((r) => r.blurred).map((r) => `${r.page}: ${r.isolated} isolated, ${r.blurred} with shadow/filter, ${r.blurredAnimated} in animated layers; ${r.examples.join(', ')}`) };
+};
+</script>
+</body>
+</html>

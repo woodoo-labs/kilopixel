@@ -437,7 +437,7 @@ declare module 'react' {
                   <div class="api-meta"><span class="api-pill values-pill">method</span><span class="api-pill default-pill">recommended</span></div>
                 </div>
                 <div class="api-item-desc">
-                  Returns the box around the outline, without the stroke: <code>return this.setBoundingBox(left, top, right, bottom)</code>. Gradients span it; hit testing checks it first.
+                  Returns the box around the outline, without the stroke: <code>return this.setBoundingBox(left, top, right, bottom)</code>. Gradients span it; hit testing checks it first. A shape with <code>mask</code>, <code>blend</code>, <code>filter</code> or a shadow that fills and strokes is drawn only within this box plus <code>hitPadding()</code>: paint beyond them is cut.
                 </div>
               </div>
 
@@ -483,7 +483,16 @@ declare module 'react' {
                   <div class="api-meta"><span class="api-pill values-pill">method</span><span class="api-pill default-pill">default: from the stroke</span></div>
                 </div>
                 <div class="api-item-desc">
-                  How far the paint reaches beyond the box, for the box check before hit testing. Override it when <code>draw()</code> paints outside its box.
+                  How far the paint reaches beyond the box, for the box check before hit testing and for the area an isolated shape is drawn in. Override it when <code>draw()</code> paints outside its box.
+                </div>
+              </div>
+              <div class="api-item">
+                <div class="api-item-header">
+                  <code class="api-name">prepare(ctx)</code>
+                  <div class="api-meta"><span class="api-pill values-pill">method</span><span class="api-pill default-pill">default: true</span></div>
+                </div>
+                <div class="api-item-desc">
+                  Runs before an isolated shape's box is read. Override it when the box is only known after measuring (as text measures its glyphs), and return <code>false</code> when there is nothing to draw.
                 </div>
               </div>
             </div>

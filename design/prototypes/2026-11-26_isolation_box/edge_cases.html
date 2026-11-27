@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Box isolation: edge cases</title>
+<script src="/dist/pxl.min.js"></script>
+<style>
+  body { margin: 16px; font: 13px system-ui, sans-serif; background: #f8fafc; }
+  .case { display: inline-block; width: 300px; margin: 6px; vertical-align: top; }
+  pxl-stage { background: #fff; border: 1px solid #cbd5e1; }
+  pre { white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<pre id="out"></pre>
+<div id="cases"></div>
+<script>
+// Edge cases of design/done/2026-11-26_isolation_box_plan.md. Each case is a stage, drawn with today's renderIsolated() (the
+// whole scratch area) and with the box version below; every layer is compared pixel by pixel (premultiplied).
+const CASES = {
+  'mask destination-in (unbounded)': `<pxl-rect x="500" y="300" w="800" h="400" fill="#3b82f6"></pxl-rect>
+    <pxl-ellipse x="500" y="300" rx="150" ry="100" fill="#f97316" stroke="#000" strokewidth="20" mask="destination-in"></pxl-ellipse>`,
+  'mask source-in': `<pxl-rect x="400" y="300" w="400" h="400" fill="#3b82f6"></pxl-rect>
+    <pxl-ellipse x="550" y="300" rx="150" ry="100" fill="#f97316" stroke="#000" strokewidth="20" mask="source-in"></pxl-ellipse>`,
+  'mask copy (unbounded)': `<pxl-rect x="500" y="300" w="800" h="400" fill="#3b82f6"></pxl-rect>
+    <pxl-ellipse x="500" y="300" rx="150" ry="100" fill="#f97316" stroke="#000" strokewidth="20" mask="copy"></pxl-ellipse>`,
+  'mask destination-atop (unbounded)': `<pxl-rect x="500" y="300" w="800" h="400" fill="#3b82f6"></pxl-rect>
+    <pxl-ellipse x="500" y="300" rx="150" ry="100" fill="#f97316" stroke="#000" strokewidth="20" mask="destination-atop"></pxl-ellipse>`,
+  'mask source-out (unbounded)': `<pxl-rect x="500" y="300" w="800" h="400" fill="#3b82f6"></pxl-rect>
+    <pxl-ellipse x="500" y="300" rx="150" ry="100" fill="#f97316" stroke="#000" strokewidth="20" mask="source-out"></pxl-ellipse>`,
+  'mask xor': `<pxl-rect x="400" y="300" w="400" h="400" fill="#3b82f6"></pxl-rect>
+    <pxl-ellipse x="550" y="300" rx="150" ry="100" fill="#f97316" stroke="#000" strokewidth="20" mask="xor"></pxl-ellipse>`,
+  'shadow offset far': `<pxl-circle x="200" y="150" r="80" fill="#f97316" stroke="#000" strokewidth="8" shadowcolor="#0008" shadowblur="30" shadowx="500" shadowy="300"></pxl-circle>`,
+  'shape off canvas, shadow in': `<pxl-circle x="-150" y="300" r="80" fill="#f97316" stroke="#000" strokewidth="8" shadowcolor="#000" shadowblur="10" shadowx="400"></pxl-circle>`,
+  'filter blur, rotated group': `<pxl-group x="500" y="300" rotate="30" zoom="1.3"><pxl-rect w="300" h="120" fill="#22c55e" stroke="#000" strokewidth="10" filter="blur(12)"></pxl-rect></pxl-group>`,
+  'filter dropShadow': `<pxl-rect x="500" y="300" w="300" h="120" fill="#22c55e" stroke="#000" strokewidth="10" filter="dropShadow(60, 40, 10, '#f00')"></pxl-rect>`,
+  'blend multiply, smooth closed polyline': `<pxl-rect x="500" y="300" w="900" h="500" fill="#facc15"></pxl-rect>
+    <pxl-polyline points="300,150; 700,100; 650,500; 250,450" closed smooth="2" fill="#3b82f6" stroke="#000" strokewidth="12" blend="multiply"></pxl-polyline>`,
+  'arrow with shadow': `<pxl-line x1="150" y1="500" x2="850" y2="100" stroke="#000" strokewidth="10" arrowend="auto" arrowstart="60" shadowcolor="#f00" shadowblur="8" shadowy="20"></pxl-line>`,
+  'two-line text with shadow': `<pxl-text id="cText" x="500" y="300" text="one\\ntwo" size="80" align="center" baseline="middle" fill="#f97316" stroke="#000" strokewidth="3" shadowcolor="#0008" shadowblur="10" shadowx="10"></pxl-text>`,
+  'grid with shadow': `<pxl-grid step="50" major="4" labels stroke="#94a3b8" fill="#334155" shadowcolor="#f00" shadowblur="4"></pxl-grid>`,
+  'custom shape without box': `<test-nobox x="500" y="300" shadowcolor="#000" shadowblur="10"></test-nobox>`
+};
+
+// A custom shape without getBoundingBox(): fills and strokes a star-like path
+pxl.defineShape('test-nobox', class TestNoBox extends pxl.Shape {
+  static defaults = { ...pxl.Shape.defaults, fill: '#a855f7', stroke: '#000', strokewidth: 6 };
+  draw(ctx) {
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5, r = i % 2 ? 80 : 200; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
+    ctx.closePath();
+    this.applyStyle(ctx);
+  }
+});
+
+const full = pxl.Shape.prototype.renderIsolated;
+
+// The box version: the box (hit box padded like for hit testing) through the global matrix; a shape without its own
+// box gets the whole area; after drawing, a box that grew (text, grid: known only after their layout) is drawn again
+const box = new Float64Array(4);
+function deviceBox(shape, k, W, H) {
+  const m = shape.getGlobalMatrix(), b = shape.getHitBox(), pad = shape.hitPadding() + 1;
+  const l = b.left - pad, r = b.right + pad, t = b.top - pad, bo = b.bottom + pad;
+  const ax = m[0] * k, bx = m[2] * k, ex = m[4] * k, ay = m[1] * k, by = m[3] * k, ey = m[5] * k;
+  const x1 = ax * l + bx * t + ex, x2 = ax * r + bx * t + ex, x3 = ax * l + bx * bo + ex, x4 = ax * r + bx * bo + ex;
+  const y1 = ay * l + by * t + ey, y2 = ay * r + by * t + ey, y3 = ay * l + by * bo + ey, y4 = ay * r + by * bo + ey;
+  box[0] = Math.max(0, Math.floor(Math.min(x1, x2, x3, x4)));
+  box[1] = Math.max(0, Math.floor(Math.min(y1, y2, y3, y4)));
+  box[2] = Math.min(W, Math.ceil(Math.max(x1, x2, x3, x4)));
+  box[3] = Math.min(H, Math.ceil(Math.max(y1, y2, y3, y4)));
+  if (!(box[2] > box[0] && box[3] > box[1])) box[0] = box[1] = box[2] = box[3] = 0; // also NaN
+}
+window.regrows = 0;
+function boxed(ctx, u) {
+  const canvas = ctx.canvas, W = canvas.width, H = canvas.height, k = u * this.parentLayer.dpr;
+  const scratch = pxl.getIsolationContext(W, H), m = this.getGlobalMatrix();
+  if (this.needsExactHitTest()) { box[0] = 0; box[1] = 0; box[2] = W; box[3] = H; } else deviceBox(this, k, W, H);
+  let x0 = box[0], y0 = box[1], x1 = box[2], y1 = box[3];
+  for (let pass = 0; pass < 2; pass++) {
+    scratch.clearRect(0, 0, x1 - x0, y1 - y0);
+    scratch.save();
+    try {
+      scratch.setTransform(m[0] * k, m[1] * k, m[2] * k, m[3] * k, m[4] * k - x0, m[5] * k - y0);
+      this.draw(scratch);
+    } catch (error) { this.reportError(error); return; } finally { scratch.restore(); }
+    if (this.needsExactHitTest()) break;
+    deviceBox(this, k, W, H); // the box after drawing: text and grid lay out in draw()
+    if (box[0] >= x0 && box[1] >= y0 && box[2] <= x1 && box[3] <= y1) break;
+    window.regrows++;
+    x0 = Math.min(x0, box[0]); y0 = Math.min(y0, box[1]); x1 = Math.max(x1, box[2]); y1 = Math.max(y1, box[3]);
+  }
+  if (!(x1 > x0 && y1 > y0)) return;
+  ctx.save();
+  try {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    pxl.applyCompositingState(ctx, u, this.values, this);
+    ctx.drawImage(scratch.canvas, 0, 0, x1 - x0, y1 - y0, x0, y0, x1 - x0, y1 - y0);
+  } catch (error) { this.reportError(error); } finally { ctx.restore(); }
+}
+
+function diff(A, B) {
+  let count = 0, max = 0;
+  for (let i = 0; i < A.length; i += 4) {
+    let d = Math.abs(A[i + 3] - B[i + 3]);
+    for (let c = 0; c < 3; c++) d = Math.max(d, Math.abs(A[i + c] * A[i + 3] - B[i + c] * B[i + 3]) / 255);
+    if (d > 0.5) { count++; if (d > max) max = d; }
+  }
+  return { count, max: Math.round(max) };
+}
+
+window.runChecks = async function() {
+  const host = document.getElementById('cases'), lines = [];
+  for (const [name, html] of Object.entries(CASES)) {
+    const div = document.createElement('div');
+    div.className = 'case';
+    div.innerHTML = `<div>${name}</div><pxl-stage ratio="5 / 3" alwaysrender><pxl-layer>${html}</pxl-layer></pxl-stage>`;
+    host.append(div);
+    const stage = div.querySelector('pxl-stage'), layer = stage.querySelector('pxl-layer');
+    stage.resize();
+    const draw = (method) => {
+      pxl.Shape.prototype.renderIsolated = method;
+      layer.isDirty = true;
+      stage.render(1);
+      layer._ctx.getImageData(0, 0, 1, 1);
+      layer.isDirty = true;
+      stage.render(1);
+      return layer._ctx.getImageData(0, 0, layer._canvas.width, layer._canvas.height).data;
+    };
+    const a = draw(full), b = draw(boxed);
+    let extra = '';
+    if (name.startsWith('two-line text')) {
+      // The text grows between frames: its box is known only after the layout
+      const t = div.querySelector('#cText');
+      t.setAttribute('text', 'one\\ntwo much longer\\nthree');
+      const a2 = draw(full);
+      t.setAttribute('text', 'one\\ntwo');
+      draw(boxed);
+      t.setAttribute('text', 'one\\ntwo much longer\\nthree');
+      const before = window.regrows, b2 = draw(boxed);
+      const d2 = diff(a2, b2);
+      extra = `; after the text grew: ${d2.count} differ (max ${d2.max}), regrow passes ${window.regrows - before}`;
+    }
+    const d = diff(a, b);
+    lines.push(`${name.padEnd(42)} ${String(d.count).padStart(6)} differ, max ${d.max}${extra}`);
+    pxl.Shape.prototype.renderIsolated = full;
+  }
+  document.getElementById('out').textContent = lines.join('\n');
+  return lines.join('\n');
+};
+</script>
+</body>
+</html>
