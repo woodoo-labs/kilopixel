@@ -32,7 +32,7 @@
       <p class="lead">Kilopixel is a single JavaScript file. Include it with a <code>&lt;script&gt;</code> tag in any HTML file: there are no dependencies, no build tools, and no local web server to set up.</p>
 
       <h2>1. Download & Include</h2>
-      <p>Download the minified engine file (<code>pxl.min.js</code>, ~74KB, ~22KB gzipped) or the complete boilerplate starter kit using the buttons below and save it to your computer.</p>
+      <p>Download the minified engine file (<code>pxl.min.js</code>, ~75KB, ~23KB gzipped) or the complete boilerplate starter kit using the buttons below and save it to your computer.</p>
       <p>Include the script in the <code>&lt;head&gt;</code> of your HTML document. The browser then knows Kilopixel's elements before it reaches them in the page, so each stage takes its size as soon as it is parsed and the content below it doesn't jump while the page loads.</p>
 
       <pre><code class="language-html">&lt;!-- Include Kilopixel in the head of your document --&gt;
@@ -41,7 +41,7 @@
       <div class="download-actions">
         <a href="download/pxl.min.js" download="pxl.min.js" class="btn-download-primary">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          Download pxl.min.js (~74KB)
+          Download pxl.min.js (~75KB)
         </a>
         <a href="download/kilopixel-boilerplate.zip" download="kilopixel-boilerplate.zip" class="btn-download-secondary">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -144,9 +144,9 @@
 
             <!-- 2. Shape helpers -->
             <pxl-line x1="0" y1="ref.sec5Circle.y" x2="ref.sec5Circle.x" y2="ref.sec5Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.sec5Circle.x / 2" y="ref.sec5Circle.y + 15" baseline="top" align="center" text="`x = ${ref.sec5Circle.x}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+            <pxl-text x="ref.sec5Circle.x / 2" y="ref.sec5Circle.y + 15" baseline="top" text="x = ${ref.sec5Circle.x}" size="27" fill="#fdba74" font="monospace"></pxl-text>
             <pxl-line x1="ref.sec5Circle.x" y1="0" x2="ref.sec5Circle.x" y2="ref.sec5Circle.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
-            <pxl-text x="ref.sec5Circle.x + 15" y="ref.sec5Circle.y / 2" baseline="middle" align="left" text="`y = ${ref.sec5Circle.y}`" size="27" fill="#fdba74" font="monospace"></pxl-text>
+            <pxl-text x="ref.sec5Circle.x + 15" y="ref.sec5Circle.y / 2" align="left" text="y = ${ref.sec5Circle.y}" size="27" fill="#fdba74" font="monospace"></pxl-text>
 
             <!-- 3. The shape -->
             <pxl-circle id="sec5Circle" x="500" y="300" r="80 + wave(2) * 20"
@@ -156,8 +156,8 @@
             <!-- 4. Shape center -->
             <pxl-circle x="ref.sec5Circle.x" y="ref.sec5Circle.y" r="5" fill="#fb923c"></pxl-circle>
             <pxl-text x="ref.sec5Circle.x + 15" y="ref.sec5Circle.y - 15" baseline="bottom"
-              text="`Circle (${ref.sec5Circle.x}, ${ref.sec5Circle.y})`"
-              size="27" fill="#fb923c" font="monospace">
+              text="Circle (${ref.sec5Circle.x}, ${ref.sec5Circle.y})"
+              size="27" fill="#fb923c" font="monospace" align="start">
             </pxl-text>
           </pxl-layer>
         </pxl-stage>

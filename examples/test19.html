@@ -158,17 +158,17 @@
 
           <!-- Background Chart Grid Lines -->
           <pxl-line x1="100" y1="ref.main.height * 0.2" x2="900" y2="ref.main.height * 0.2" stroke="rgba(255,255,255,0.05)" strokewidth="2" linedash="[5,5]"></pxl-line>
-          <pxl-text x="80" y="ref.main.height * 0.2" text="'150k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
+          <pxl-text x="80" y="ref.main.height * 0.2" text="150k" size="14" fill="#666" align="right"></pxl-text>
           
           <pxl-line x1="100" y1="ref.main.height * 0.4" x2="900" y2="ref.main.height * 0.4" stroke="rgba(255,255,255,0.05)" strokewidth="2" linedash="[5,5]"></pxl-line>
-          <pxl-text x="80" y="ref.main.height * 0.4" text="'100k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
+          <pxl-text x="80" y="ref.main.height * 0.4" text="100k" size="14" fill="#666" align="right"></pxl-text>
           
           <pxl-line x1="100" y1="ref.main.height * 0.6" x2="900" y2="ref.main.height * 0.6" stroke="rgba(255,255,255,0.05)" strokewidth="2" linedash="[5,5]"></pxl-line>
-          <pxl-text x="80" y="ref.main.height * 0.6" text="'50k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
+          <pxl-text x="80" y="ref.main.height * 0.6" text="50k" size="14" fill="#666" align="right"></pxl-text>
 
           <!-- The Solid Baseline -->
           <pxl-line x1="100" y1="ref.main.height * 0.8" x2="900" y2="ref.main.height * 0.8" stroke="rgba(255,255,255,0.2)" strokewidth="4"></pxl-line>
-          <pxl-text x="80" y="ref.main.height * 0.8" text="'0k'" size="14" fill="#666" align="right" baseline="middle"></pxl-text>
+          <pxl-text x="80" y="ref.main.height * 0.8" text="0k" size="14" fill="#666" align="right"></pxl-text>
 
           <!-- BAR 1 -->
           <pxl-group x="500 - ref.spacing.value * 2" y="ref.main.height * 0.8">
@@ -186,11 +186,11 @@
              <pxl-text 
                x="0" 
                y="-(ref.val1.value + Math.sin(t * ref.speed.value + 0) * ref.wave.value) * 3 - 20" 
-               text="Math.round(ref.val1.value + Math.sin(t * ref.speed.value + 0) * ref.wave.value) + 'k'" 
-               align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
+               text="${Math.round(ref.val1.value + Math.sin(t * ref.speed.value + 0) * ref.wave.value)}k" 
+               baseline="bottom" size="18" fill="#fff" weight="bold">
              </pxl-text>
              <!-- X-Axis Label -->
-             <pxl-text x="0" y="30" text="'Q1'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
+             <pxl-text x="0" y="30" text="Q1" size="16" fill="#888" weight="bold" baseline="alphabetic"></pxl-text>
           </pxl-group>
 
           <!-- BAR 2 -->
@@ -207,10 +207,10 @@
              <pxl-text 
                x="0" 
                y="-(ref.val2.value + Math.sin(t * ref.speed.value + 1) * ref.wave.value) * 3 - 20" 
-               text="Math.round(ref.val2.value + Math.sin(t * ref.speed.value + 1) * ref.wave.value) + 'k'" 
-               align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
+               text="${Math.round(ref.val2.value + Math.sin(t * ref.speed.value + 1) * ref.wave.value)}k" 
+               baseline="bottom" size="18" fill="#fff" weight="bold">
              </pxl-text>
-             <pxl-text x="0" y="30" text="'Q2'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
+             <pxl-text x="0" y="30" text="Q2" size="16" fill="#888" weight="bold" baseline="alphabetic"></pxl-text>
           </pxl-group>
 
           <!-- BAR 3 -->
@@ -227,10 +227,10 @@
              <pxl-text 
                x="0" 
                y="-(ref.val3.value + Math.sin(t * ref.speed.value + 2) * ref.wave.value) * 3 - 20" 
-               text="Math.round(ref.val3.value + Math.sin(t * ref.speed.value + 2) * ref.wave.value) + 'k'" 
-               align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
+               text="${Math.round(ref.val3.value + Math.sin(t * ref.speed.value + 2) * ref.wave.value)}k" 
+               baseline="bottom" size="18" fill="#fff" weight="bold">
              </pxl-text>
-             <pxl-text x="0" y="30" text="'Q3'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
+             <pxl-text x="0" y="30" text="Q3" size="16" fill="#888" weight="bold" baseline="alphabetic"></pxl-text>
           </pxl-group>
 
           <!-- BAR 4 -->
@@ -247,10 +247,10 @@
              <pxl-text 
                x="0" 
                y="-(ref.val4.value + Math.sin(t * ref.speed.value + 3) * ref.wave.value) * 3 - 20" 
-               text="Math.round(ref.val4.value + Math.sin(t * ref.speed.value + 3) * ref.wave.value) + 'k'" 
-               align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
+               text="${Math.round(ref.val4.value + Math.sin(t * ref.speed.value + 3) * ref.wave.value)}k" 
+               baseline="bottom" size="18" fill="#fff" weight="bold">
              </pxl-text>
-             <pxl-text x="0" y="30" text="'Q4'" align="center" size="16" fill="#888" weight="bold"></pxl-text>
+             <pxl-text x="0" y="30" text="Q4" size="16" fill="#888" weight="bold" baseline="alphabetic"></pxl-text>
           </pxl-group>
 
           <!-- BAR 5 -->
@@ -267,14 +267,14 @@
              <pxl-text 
                x="0" 
                y="-(ref.val5.value + Math.sin(t * ref.speed.value + 4) * ref.wave.value) * 3 - 20" 
-               text="Math.round(ref.val5.value + Math.sin(t * ref.speed.value + 4) * ref.wave.value) + 'k'" 
-               align="center" baseline="bottom" size="18" fill="#fff" weight="bold">
+               text="${Math.round(ref.val5.value + Math.sin(t * ref.speed.value + 4) * ref.wave.value)}k" 
+               baseline="bottom" size="18" fill="#fff" weight="bold">
              </pxl-text>
-             <pxl-text x="0" y="30" text="'2027'" align="center" size="16" fill="#00ffcc" weight="bold"></pxl-text>
+             <pxl-text x="0" y="30" text="2027" size="16" fill="#00ffcc" weight="bold" baseline="alphabetic"></pxl-text>
           </pxl-group>
 
           <!-- FPS Monitor -->
-          <pxl-text x="980" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#0f0" align="right" stroke="none"></pxl-text>
+          <pxl-text x="980" y="30" text="${ref.main.fps} FPS | AVG: ${ref.main.renderAvg}ms" font="monospace" size="14" fill="#0f0" align="right" stroke="none" baseline="alphabetic"></pxl-text>
 
         </pxl-layer>
 

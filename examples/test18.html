@@ -161,14 +161,14 @@
             <pxl-circle x="-80" y="-80" r="40" fill="hsl(0, 100, 60)"></pxl-circle>
             <pxl-circle x="80" y="80" r="40" fill="hsl(200, 100, 60)"></pxl-circle>
             
-            <pxl-text x="0" y="0" text="'TARGET'" align="center" baseline="middle" size="40" font="sans-serif" weight="bold" fill="#fff" stroke="none"></pxl-text>
+            <pxl-text x="0" y="0" text="TARGET" size="40" font="sans-serif" weight="bold" fill="#fff" stroke="none"></pxl-text>
             
           </pxl-group>
         </pxl-layer>
 
         <pxl-layer>
           <!-- FPS Monitor -->
-          <pxl-text x="20" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms | MAX: ' + ref.main.renderMax + 'ms'" font="monospace" size="14" fill="#0f0" align="left" stroke="none"></pxl-text>
+          <pxl-text x="20" y="30" text="${ref.main.fps} FPS | AVG: ${ref.main.renderAvg}ms | MAX: ${ref.main.renderMax}ms" font="monospace" size="14" fill="#0f0" align="left" stroke="none" baseline="alphabetic"></pxl-text>
         </pxl-layer>
 
       </pxl-stage>

@@ -4,11 +4,14 @@ pxl._fontGeneration = 0;
 pxl.Text = class Text extends pxl.Shape {
   static defaults = {
     ...pxl.Shape.defaults,
-    text: '', size: 16, font: 'sans-serif', align: 'start',
-    baseline: 'alphabetic', weight: 'normal', fontstyle: 'normal',
+    text: '', size: 16, font: 'sans-serif', align: 'center',
+    baseline: 'middle', weight: 'normal', fontstyle: 'normal',
     maxwidth: 0, direction: null, width: 0, lineheight: 1.2,
     letterspacing: 0, reveal: null
   };
+
+  // The text attribute is a template: text where only ${…} is code (pxl.parseTemplate). Its property is literal.
+  static templateAttributes = ['text'];
 
   constructor() {
     super();
@@ -31,22 +34,6 @@ pxl.Text = class Text extends pxl.Shape {
     this._totalChars = 0;
     this._startY = 0;
     this._hasInk = false; // true only if the last draw() painted something (used by hitTest)
-  }
-
-  // The text property shows a string as it is, never as an expression: frameworks bind data to it (text={label}),
-  // and compiling data would run it as code ('alert(1)') or fail on it ('Q1 - 2024'). Expressions stay available
-  // through the attribute. Other values (numbers) go the usual way.
-  get text() {
-    return this.values.text;
-  }
-
-  set text(value) {
-    if (typeof value !== 'string') {
-      this.setValue('text', value === undefined ? null : value);
-    } else if (value !== this.expressions.text) {
-      pxl.storeValue(this, 'text', value);
-      this.valueChanged('text');
-    }
   }
 
   // Sets the context's text state and brings the three caches up to date, each rebuilt only when its inputs change:

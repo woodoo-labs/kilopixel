@@ -61,7 +61,7 @@
           <!-- Floating Scanner -->
           <pxl-group id="scanner" x="500+yoyo(5)*200-100" y="281+wave(7)*80-40">
             <pxl-circle r="3" fill="#fff" stroke="#00f2ff" strokewidth="1"></pxl-circle>
-            <pxl-text text="'POS_SCAN: X' + floor(ref.scanner.x) + ' Y' + floor(ref.scanner.y)" x="10" y="-10" size="10" fill="#00f2ff"></pxl-text>
+            <pxl-text text="POS_SCAN: X${floor(ref.scanner.x)} Y${floor(ref.scanner.y)}" x="10" y="-10" size="10" fill="#00f2ff" align="start" baseline="alphabetic"></pxl-text>
           </pxl-group>
         </pxl-layer>
 
@@ -79,9 +79,9 @@
 
            <!-- Fixed glitch text -->
            <pxl-text x="500" y="60" 
-                     text="'LATENCY_MONITOR: ' + ref.main.renderAvg + 'ms'" 
-                     size="11" align="center" fill="#00f2ff"
-                     dx="glitch(0.1)*4-2">
+                     text="LATENCY_MONITOR: ${ref.main.renderAvg}ms" 
+                     size="11" fill="#00f2ff"
+                     dx="glitch(0.1)*4-2" baseline="alphabetic">
            </pxl-text>
         </pxl-layer>
 

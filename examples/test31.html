@@ -80,7 +80,7 @@
           stroke="(abs(ref.main.mouseX - ref.box.x) < 75 && abs(ref.main.mouseY - ref.box.y) < 75) ? '#fb7185' : '#334155'"
           strokewidth="4"
         ></pxl-rect>
-        <pxl-text x="300" y="281" text="Hover Me" size="16" weight="bold" fill="#fff" align="center" baseline="middle" stroke="none"></pxl-text>
+        <pxl-text x="300" y="281" text="Hover Me" size="16" weight="bold" fill="#fff" stroke="none"></pxl-text>
 
         <!-- 
           2. SOFT PROXIMITY (Moving Circle)
@@ -99,7 +99,7 @@
           filter="dropShadow(0, 0, map(clamp(ref.orbDist.value, 0, 200), 0, 200, 40, 0), '#22d3ee')"
         ></pxl-circle>
         
-        <pxl-text x="ref.orb.x" y="ref.orb.y + 100" text="Chase Me" size="16" weight="bold" fill="#94a3b8" align="center" stroke="none"></pxl-text>
+        <pxl-text x="ref.orb.x" y="ref.orb.y + 100" text="Chase Me" size="16" weight="bold" fill="#94a3b8" stroke="none" baseline="alphabetic"></pxl-text>
 
       </pxl-layer>
 

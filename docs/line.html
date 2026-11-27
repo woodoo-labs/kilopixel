@@ -132,11 +132,11 @@
 
               <!-- Left: Horizontal Line (Orange Scheme) -->
               <pxl-line id="sec1Line1" x1="150" y1="300" x2="450" y2="300" stroke="#f97316" strokewidth="20"></pxl-line>
-              <pxl-text x="300" y="500" text="'Horizontal'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+              <pxl-text x="300" y="500" text="Horizontal" size="27" weight="700" fill="#fb923c" font="monospace" baseline="alphabetic"></pxl-text>
 
               <!-- Right: Diagonal Line (Blue Scheme) -->
               <pxl-line id="sec1Line2" x1="550" y1="450" x2="850" y2="150" stroke="#3b82f6" strokewidth="4"></pxl-line>
-              <pxl-text x="700" y="500" text="'Diagonal'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              <pxl-text x="700" y="500" text="Diagonal" size="27" weight="700" fill="#60a5fa" font="monospace" baseline="alphabetic"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -238,11 +238,11 @@
 
               <!-- Left: Dashed Line (Orange Scheme) -->
               <pxl-line id="sec2Line1" x1="150" y1="300" x2="450" y2="300" strokewidth="6" stroke="#f97316" linecap="round" linedash="20"></pxl-line>
-              <pxl-text x="300" y="500" text="'Dashed'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+              <pxl-text x="300" y="500" text="Dashed" size="27" weight="700" fill="#fb923c" font="monospace" baseline="alphabetic"></pxl-text>
 
               <!-- Right: Gradient Line (Blue Scheme) -->
               <pxl-line id="sec2Line2" x1="550" y1="300" x2="850" y2="300" strokewidth="30" linecap="round" stroke="linear(0, ['#3b82f6', '#ec4899'])"></pxl-line>
-              <pxl-text x="700" y="500" text="'Gradient'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              <pxl-text x="700" y="500" text="Gradient" size="27" weight="700" fill="#60a5fa" font="monospace" baseline="alphabetic"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -344,22 +344,22 @@
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
               <!-- Left: Auto Arrowheads (Orange Scheme) -->
-              <pxl-text x="300" y="80" text="'arrowstart=&quot;auto&quot;'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
-              <pxl-text x="300" y="120" text="'arrowend=&quot;auto&quot;'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+              <pxl-text x="300" y="80" text="arrowstart=&quot;auto&quot;" size="27" fill="#fb923c" font="monospace" baseline="alphabetic"></pxl-text>
+              <pxl-text x="300" y="120" text="arrowend=&quot;auto&quot;" size="27" fill="#fb923c" font="monospace" baseline="alphabetic"></pxl-text>
 
               <pxl-line id="sec3Line1" x1="150" y1="300" x2="450" y2="300" stroke="#f97316" strokewidth="10"
                 arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-line>
 
-              <pxl-text x="300" y="500" text="'arrowstyle=&quot;' + ref.sec3Line1.arrowstyle + '&quot;'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+              <pxl-text x="300" y="500" text="arrowstyle=&quot;${ref.sec3Line1.arrowstyle}&quot;" size="27" fill="#fb923c" font="monospace" baseline="alphabetic"></pxl-text>
 
               <!-- Right: Custom Arrowheads (Blue Scheme) -->
-              <pxl-text x="700" y="80" text="'arrowstart=&quot;' + ref.sec3Line2.arrowstart + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
-              <pxl-text x="700" y="120" text="'arrowend=&quot;' + ref.sec3Line2.arrowend + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              <pxl-text x="700" y="80" text="arrowstart=&quot;${ref.sec3Line2.arrowstart}&quot;" size="27" fill="#60a5fa" font="monospace" baseline="alphabetic"></pxl-text>
+              <pxl-text x="700" y="120" text="arrowend=&quot;${ref.sec3Line2.arrowend}&quot;" size="27" fill="#60a5fa" font="monospace" baseline="alphabetic"></pxl-text>
 
               <pxl-line id="sec3Line2" x1="550" y1="300" x2="850" y2="300" stroke="#3b82f6" strokewidth="6"
                 arrowstart="0" arrowend="35" arrowstyle="line"></pxl-line>
 
-              <pxl-text x="700" y="500" text="'arrowstyle=&quot;' + ref.sec3Line2.arrowstyle + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              <pxl-text x="700" y="500" text="arrowstyle=&quot;${ref.sec3Line2.arrowstyle}&quot;" size="27" fill="#60a5fa" font="monospace" baseline="alphabetic"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -486,17 +486,17 @@
               <!-- Top: Center at Start Point (Orange Scheme) -->
               <pxl-line id="sec4Top" x="ref.sec4Var1.value" y="ref.sec4Var2.value" x2="400" rotate="0" stroke="#f97316" strokewidth="4"></pxl-line>
               <pxl-circle x="ref.sec4Var1.value" y="ref.sec4Var2.value" r="5" fill="#fb923c"></pxl-circle>
-              <pxl-text x="ref.sec4Var1.value" y="ref.sec4Var2.value + 20" text="'Center (x, y)'" size="27" fill="#fb923c" font="monospace" align="center" baseline="top"></pxl-text>
+              <pxl-text x="ref.sec4Var1.value" y="ref.sec4Var2.value + 20" text="Center (x, y)" size="27" fill="#fb923c" font="monospace" baseline="top"></pxl-text>
 
               <!-- Middle: Center at Midpoint (Blue Scheme) -->
               <pxl-line id="sec4Middle" x="ref.sec4Var3.value" y="ref.sec4Var4.value" x1="-200" x2="200" rotate="0" stroke="#3b82f6" strokewidth="4"></pxl-line>
               <pxl-circle x="ref.sec4Var3.value" y="ref.sec4Var4.value" r="5" fill="#60a5fa"></pxl-circle>
-              <pxl-text x="ref.sec4Var3.value" y="ref.sec4Var4.value + 20" text="'Center (x, y)'" size="27" fill="#60a5fa" font="monospace" align="center" baseline="top"></pxl-text>
+              <pxl-text x="ref.sec4Var3.value" y="ref.sec4Var4.value + 20" text="Center (x, y)" size="27" fill="#60a5fa" font="monospace" baseline="top"></pxl-text>
 
               <!-- Bottom: Center at End Point (Green Scheme) -->
               <pxl-line id="sec4Bottom" x="ref.sec4Var5.value" y="ref.sec4Var6.value" x1="-400" rotate="0" stroke="#22c55e" strokewidth="4"></pxl-line>
               <pxl-circle x="ref.sec4Var5.value" y="ref.sec4Var6.value" r="5" fill="#4ade80"></pxl-circle>
-              <pxl-text x="ref.sec4Var5.value" y="ref.sec4Var6.value + 20" text="'Center (x, y)'" size="27" fill="#4ade80" font="monospace" align="center" baseline="top"></pxl-text>
+              <pxl-text x="ref.sec4Var5.value" y="ref.sec4Var6.value + 20" text="Center (x, y)" size="27" fill="#4ade80" font="monospace" baseline="top"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>

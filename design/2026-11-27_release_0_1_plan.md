@@ -24,8 +24,8 @@ The rule for the scope follows from that:
 
 | # | Item | Question | State |
 |---|---|---|---|
-| A1 | TODO §52 text as a template | `text` read as a template where only `${…}` is code, instead of today's guessing between text and code | **decided 2026-11-27** (R1, §4); own plan before building |
-| A2 | Default text alignment (TODO §52, with A1) | keep `start` / `alphabetic`, or `center` / `middle` like every other shape | **decided 2026-11-27: `center` / `middle`** (R3), built with A1; moves every label that relies on the default by about 14 px |
+| A1 | Text as a template | `text` read as a template where only `${…}` is code, instead of today's guessing between text and code | **built 2026-11-27**: `design/done/2026-11-27_text_template_plan.md` |
+| A2 | Default text alignment (with A1) | keep `start` / `alphabetic`, or `center` / `middle` like every other shape | **built 2026-11-27: `center` / `middle`** (R3), with A1; moves every label that relies on the default by about 14 px |
 | A3 | TODO §42 negative sweep | the sign of `sweep` becomes the direction (today `sweep="-90"` draws three quarters) | 🟡, D1–D5 with recommendations and a prototype |
 | A4 | TODO §49 shape filters in Safari | a fallback for `blur()` / `dropShadow()` on shapes, or a documented limit | 💬 |
 | A5 | Release policy | what changes on release day (R5, §6) | **decided 2026-11-27** (R5); applied on release day |
@@ -48,7 +48,7 @@ A1 and A2 both change every label: decided together, they cost one migration of 
 | C2 | TODO §44 npm package | `exports`, `sideEffects`, typings; the smoke pages for Svelte and Lit with it |
 | C3 | Docs: the pages marked "soon" in the sidebar | Stage, Layer, Group; Transforms (one page for Center & Offset, Zoom & Scale, Rotate & Skew, R4; the sidebar gets one entry when it is written); Grid; Expressions, Referencing, Events, Animation: 9 pages, the largest part of 0.1 |
 | C4 | TODO §12 arrows page | one section left ("Rules & Edge Cases"), after A3 |
-| C5 | Text docs | the `docs/text.html` section on what `text` accepts, now for templates (A1); the former quoting convention is not needed (merged into TODO §52) |
+| C5 | Text docs | the `docs/text.html` section on what `text` accepts, now for templates (A1); the former quoting convention is not needed (built with A1; the section with a demo comes with the Expressions page, C3) |
 
 ### D. After 0.1
 
@@ -157,5 +157,6 @@ The handler only changes a variable (assignment works since 2026-11-27); every h
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
-- 2026-11-27: 🟢 Decided: R1 (template, draw nothing), R2 (reactive values first), R3 (with A1, `center` / `middle`), R4 (9 pages), R5 (as listed). the TODO items on default alignment and on quoted text in the docs merged into §52.
+- 2026-11-27: A1 and A2 built (`design/done/2026-11-27_text_template_plan.md`).
+- 2026-11-27: 🟢 Decided: R1 (template, draw nothing), R2 (reactive values first), R3 (with A1, `center` / `middle`), R4 (9 pages), R5 (as listed). the TODO items on default alignment and on quoted text in the docs merged into one item, built the same day.
 - 2026-11-27: written; text survey kept in `design/prototypes/2026-11-27_release_0_1/`.

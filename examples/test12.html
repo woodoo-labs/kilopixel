@@ -25,7 +25,7 @@
         <pxl-circle x="200" y="800" r="50" fill="#a200ff"></pxl-circle>
         <pxl-circle x="800" y="800" r="50" fill="#ffcc00"></pxl-circle>
         <pxl-rect x="500" y="400" w="100" h="100" fill="#00ffaa" rotate="t*45"></pxl-rect>
-        <pxl-text x="500" y="100" text="'MOVE MOUSE TO EXPLORE'" size="40" fill="#fff" align="center"></pxl-text>
+        <pxl-text x="500" y="100" text="MOVE MOUSE TO EXPLORE" size="40" fill="#fff" baseline="alphabetic"></pxl-text>
       </pxl-group>
 
       <!-- The Darkness Overlay -->
@@ -36,7 +36,7 @@
       </pxl-rect>
       
       <!-- Performance Monitor -->
-      <pxl-text x="20" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms | MAX: ' + ref.main.renderMax + 'ms'" font="monospace" size="14" fill="#0f0"></pxl-text>
+      <pxl-text x="20" y="30" text="${ref.main.fps} FPS | AVG: ${ref.main.renderAvg}ms | MAX: ${ref.main.renderMax}ms" font="monospace" size="14" fill="#0f0" align="start" baseline="alphabetic"></pxl-text>
     </pxl-layer>
   </pxl-stage>
 </body>

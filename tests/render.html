@@ -221,15 +221,33 @@
     // ===================================================================
     section('Text');
 
-    test('text: drawn from x on the alphabetic baseline by default', () =>
-      draw(`<pxl-text x="100" y="300" size="100" text="HHHH" ${BLACK}></pxl-text>`, (layer) => {
+    test('text: centered on x, y by default, like every other shape', () =>
+      draw(`<pxl-text x="500" y="300" size="100" text="HHHH" ${BLACK}></pxl-text>`, (layer) => {
+        const left = inkIn(layer, 300, 260, 495, 340), right = inkIn(layer, 505, 260, 700, 340);
+        const above = inkIn(layer, 300, 255, 700, 295), below = inkIn(layer, 300, 305, 700, 345);
+        const outside = inkIn(layer, 0, 0, 250, 600) + inkIn(layer, 750, 0, 1000, 600) + inkIn(layer, 0, 0, 1000, 220) + inkIn(layer, 0, 380, 1000, 600);
+        if (!left || !right || !above || !below || outside) {
+          throw new Error(`left ${left}, right ${right}, above ${above}, below ${below}, far outside ${outside}`);
+        }
+      }));
+
+    test('text: a block of lines is centered on y by default', () =>
+      draw(`<pxl-text x="500" y="300" size="60" text="HH\\nHH\\nHH" ${BLACK}></pxl-text>`, (layer) => {
+        // Lines 72 apart (size 60 × lineheight 1.2): the middle one on y
+        const top = inkIn(layer, 440, 210, 560, 245), middle = inkIn(layer, 440, 285, 560, 315), bottom = inkIn(layer, 440, 355, 560, 390);
+        const beyond = inkIn(layer, 0, 0, 1000, 180) + inkIn(layer, 0, 420, 1000, 600);
+        if (!top || !middle || !bottom || beyond) throw new Error(`top ${top}, middle ${middle}, bottom ${bottom}, beyond ${beyond}`);
+      }));
+
+    test('text: align="start" and baseline="alphabetic" draw from x on the baseline', () =>
+      draw(`<pxl-text x="100" y="300" size="100" text="HHHH" ${BLACK} align="start" baseline="alphabetic"></pxl-text>`, (layer) => {
         const above = inkIn(layer, 100, 230, 400, 295), below = inkIn(layer, 100, 310, 400, 380), left = inkIn(layer, 0, 230, 90, 295);
         if (above === 0 || below !== 0 || left !== 0) throw new Error(`ink above the baseline ${above}, below ${below}, left of x ${left}`);
       }));
 
     test('text: align center and end', () =>
-      draw(`<pxl-text x="500" y="150" size="80" text="HHHH" align="center" ${BLACK}></pxl-text>
-        <pxl-text x="500" y="400" size="80" text="HHHH" align="end" ${BLACK}></pxl-text>`, (layer) => {
+      draw(`<pxl-text x="500" y="150" size="80" text="HHHH" ${BLACK} baseline="alphabetic"></pxl-text>
+        <pxl-text x="500" y="400" size="80" text="HHHH" align="end" ${BLACK} baseline="alphabetic"></pxl-text>`, (layer) => {
         const centerLeft = inkIn(layer, 300, 100, 495, 145), centerRight = inkIn(layer, 505, 100, 700, 145);
         const endLeft = inkIn(layer, 200, 350, 495, 395), endRight = inkIn(layer, 505, 350, 800, 395);
         if (!centerLeft || !centerRight || !endLeft || endRight) {
@@ -238,8 +256,8 @@
       }));
 
     test('text: reveal shows the first characters', () =>
-      draw(`<pxl-text x="100" y="150" size="80" text="HHHH" reveal="0" ${BLACK}></pxl-text>
-        <pxl-text x="100" y="400" size="80" text="HHHH" reveal="0.5" ${BLACK}></pxl-text>`, (layer) => {
+      draw(`<pxl-text x="100" y="150" size="80" text="HHHH" reveal="0" ${BLACK} align="start" baseline="alphabetic"></pxl-text>
+        <pxl-text x="100" y="400" size="80" text="HHHH" reveal="0.5" ${BLACK} align="start" baseline="alphabetic"></pxl-text>`, (layer) => {
         // 0.5 of 4 characters (+1): floor(2.5) = 2 characters, about the left half
         const hidden = inkIn(layer, 100, 90, 500, 145);
         const first = inkIn(layer, 100, 340, 190, 395), last = inkIn(layer, 330, 340, 500, 395);
@@ -248,7 +266,7 @@
 
     // With the alphabetic baseline a text block grows upward: its last line sits on y (text.js, startY)
     test('text: width wraps onto a second line; with the alphabetic baseline the last line sits on y', () =>
-      draw(`<pxl-text x="100" y="300" size="60" width="300" text="HHH HHH HHH" ${BLACK}></pxl-text>`, (layer) => {
+      draw(`<pxl-text x="100" y="300" size="60" width="300" text="HHH HHH HHH" ${BLACK} align="start" baseline="alphabetic"></pxl-text>`, (layer) => {
         const last = inkIn(layer, 100, 260, 400, 297), first = inkIn(layer, 100, 185, 400, 225);
         const below = inkIn(layer, 100, 305, 400, 380), wide = inkIn(layer, 450, 150, 900, 300);
         if (!last || !first || below || wide) {

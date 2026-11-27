@@ -160,8 +160,8 @@
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
               <!-- Top-Left HUD Info -->
-              <pxl-text x="30" y="30" text="'Center = (0.5, 0.5)'" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
-              <pxl-text x="30" y="65" text="'r1 = ' + (typeof ref.sec1ex1Var1.value === 'string' ? '\'' + ref.sec1ex1Var1.value + '\'' : ref.sec1ex1Var1.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+              <pxl-text x="30" y="30" text="Center = (0.5, 0.5)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+              <pxl-text x="30" y="65" text="r1 = ${(typeof ref.sec1ex1Var1.value === 'string' ? '\'' + ref.sec1ex1Var1.value + '\'' : ref.sec1ex1Var1.value)}" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
               
               <pxl-rect id="sec1ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="radial([ref.sec1ex1Var1.value], ['#f8fafc', '#475569'])"></pxl-rect>
               
@@ -171,14 +171,14 @@
                 
                 <!-- Blue corner coordinates (0,0) and (1,1) -->
                 <pxl-circle x="-ref.sec1ex1Rect.w/2" y="-ref.sec1ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
-                <pxl-text x="-ref.sec1ex1Rect.w/2" y="-ref.sec1ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+                <pxl-text x="-ref.sec1ex1Rect.w/2" y="-ref.sec1ex1Rect.h/2 - 15" text="(0, 0)" fill="#60a5fa" size="27" font="monospace" baseline="bottom"></pxl-text>
                 
                 <pxl-circle x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
-                <pxl-text x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                <pxl-text x="ref.sec1ex1Rect.w/2" y="ref.sec1ex1Rect.h/2 + 15" text="(1, 1)" fill="#60a5fa" size="27" font="monospace" baseline="top"></pxl-text>
 
                 <!-- Pink center coordinate -->
                 <pxl-circle x="0" y="0" r="8" fill="#f472b6"></pxl-circle>
-                <pxl-text x="0" y="20" text="'Center'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                <pxl-text x="0" y="20" text="Center" fill="#f472b6" size="27" font="monospace" baseline="top"></pxl-text>
                 
                 <!-- Pink Radius Circle -->
                 <pxl-circle x="0" y="0" r="ref.sec1ex1VarRadius.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec1ex1VarRadius.value > 0 ? 1 : 0"></pxl-circle>
@@ -196,9 +196,9 @@
                 <pxl-text 
                   x="ref.sec1ex1VarTargetX.value / 2 + (ref.sec1ex1VarRadius.value === 0 ? 0 : (ref.sec1ex1VarTargetY.value / ref.sec1ex1VarRadius.value) * 22)" 
                   y="ref.sec1ex1VarTargetY.value / 2 - (ref.sec1ex1VarRadius.value === 0 ? 0 : (ref.sec1ex1VarTargetX.value / ref.sec1ex1VarRadius.value) * 22)" 
-                  text="'r1'" 
+                  text="r1" 
                   alpha="ref.sec1ex1VarRadius.value > 0 ? 1 : 0"
-                  fill="#ec4899" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
+                  fill="#ec4899" size="27" font="monospace"></pxl-text>
 
               </pxl-group>
             </pxl-layer>
@@ -349,8 +349,8 @@
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
               <!-- Top-Left HUD Info -->
-              <pxl-text x="30" y="30" text="'Center = (' + ref.sec2ex1Var1.value + ', ' + ref.sec2ex1Var2.value + ')'" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
-              <pxl-text x="30" y="65" text="'r1 = ' + (typeof ref.sec2ex1Var3.value === 'string' ? '\'' + ref.sec2ex1Var3.value + '\'' : ref.sec2ex1Var3.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+              <pxl-text x="30" y="30" text="Center = (${ref.sec2ex1Var1.value}, ${ref.sec2ex1Var2.value})" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+              <pxl-text x="30" y="65" text="r1 = ${(typeof ref.sec2ex1Var3.value === 'string' ? '\'' + ref.sec2ex1Var3.value + '\'' : ref.sec2ex1Var3.value)}" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
               
               <pxl-rect id="sec2ex1Rect" x="500" y="300" w="400" h="250" rotate="0" fill="radial([ref.sec2ex1Var1.value, ref.sec2ex1Var2.value, ref.sec2ex1Var3.value], ['#f8fafc', '#475569'])"></pxl-rect>
               
@@ -360,14 +360,14 @@
                 
                 <!-- Blue corner coordinates (0,0) and (1,1) -->
                 <pxl-circle x="-ref.sec2ex1Rect.w/2" y="-ref.sec2ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
-                <pxl-text x="-ref.sec2ex1Rect.w/2" y="-ref.sec2ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+                <pxl-text x="-ref.sec2ex1Rect.w/2" y="-ref.sec2ex1Rect.h/2 - 15" text="(0, 0)" fill="#60a5fa" size="27" font="monospace" baseline="bottom"></pxl-text>
                 
                 <pxl-circle x="ref.sec2ex1Rect.w/2" y="ref.sec2ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
-                <pxl-text x="ref.sec2ex1Rect.w/2" y="ref.sec2ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                <pxl-text x="ref.sec2ex1Rect.w/2" y="ref.sec2ex1Rect.h/2 + 15" text="(1, 1)" fill="#60a5fa" size="27" font="monospace" baseline="top"></pxl-text>
 
                 <!-- Pink center coordinate -->
                 <pxl-circle x="ref.sec2ex1VarPcx0.value" y="ref.sec2ex1VarPcy0.value" r="8" fill="#f472b6"></pxl-circle>
-                <pxl-text x="ref.sec2ex1VarPcx0.value" y="ref.sec2ex1VarPcy0.value + 20" text="'Center'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                <pxl-text x="ref.sec2ex1VarPcx0.value" y="ref.sec2ex1VarPcy0.value + 20" text="Center" fill="#f472b6" size="27" font="monospace" baseline="top"></pxl-text>
                 
                 <!-- Pink Radius Circle -->
                 <pxl-circle x="ref.sec2ex1VarPcx0.value" y="ref.sec2ex1VarPcy0.value" r="ref.sec2ex1VarRadius.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec2ex1VarRadius.value > 0 ? 1 : 0"></pxl-circle>
@@ -385,9 +385,9 @@
                 <pxl-text 
                   x="ref.sec2ex1VarPcx0.value + ref.sec2ex1VarDx.value / 2 + (ref.sec2ex1VarRadius.value === 0 ? 0 : (ref.sec2ex1VarDy.value / ref.sec2ex1VarRadius.value) * 22)" 
                   y="ref.sec2ex1VarPcy0.value + ref.sec2ex1VarDy.value / 2 - (ref.sec2ex1VarRadius.value === 0 ? 0 : (ref.sec2ex1VarDx.value / ref.sec2ex1VarRadius.value) * 22)" 
-                  text="'r1'" 
+                  text="r1" 
                   alpha="ref.sec2ex1VarRadius.value > 0 ? 1 : 0"
-                  fill="#ec4899" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
+                  fill="#ec4899" size="27" font="monospace"></pxl-text>
 
               </pxl-group>
             </pxl-layer>
@@ -607,8 +607,8 @@
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
               <!-- Top-Left HUD Info -->
-              <pxl-text x="30" y="30" text="'Start: (' + ref.sec3ex1Var1.value + ', ' + ref.sec3ex1Var2.value + ') | r0 = ' + (typeof ref.sec3ex1Var3.value === 'string' ? '\'' + ref.sec3ex1Var3.value + '\'' : ref.sec3ex1Var3.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
-              <pxl-text x="30" y="65" text="'End:   (' + ref.sec3ex1Var4.value + ', ' + ref.sec3ex1Var5.value + ') | r1 = ' + (typeof ref.sec3ex1Var6.value === 'string' ? '\'' + ref.sec3ex1Var6.value + '\'' : ref.sec3ex1Var6.value)" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+              <pxl-text x="30" y="30" text="Start: (${ref.sec3ex1Var1.value}, ${ref.sec3ex1Var2.value}) | r0 = ${(typeof ref.sec3ex1Var3.value === 'string' ? '\'' + ref.sec3ex1Var3.value + '\'' : ref.sec3ex1Var3.value)}" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
+              <pxl-text x="30" y="65" text="End:   (${ref.sec3ex1Var4.value}, ${ref.sec3ex1Var5.value}) | r1 = ${(typeof ref.sec3ex1Var6.value === 'string' ? '\'' + ref.sec3ex1Var6.value + '\'' : ref.sec3ex1Var6.value)}" fill="#f472b6" size="27" font="monospace" align="left" baseline="top"></pxl-text>
               
               <pxl-rect id="sec3ex1Rect" x="500" y="300" w="400" h="300" rotate="0" fill="radial([ref.sec3ex1Var1.value, ref.sec3ex1Var2.value, ref.sec3ex1Var3.value, ref.sec3ex1Var4.value, ref.sec3ex1Var5.value, ref.sec3ex1Var6.value], ['#f8fafc', '#475569'])"></pxl-rect>
               
@@ -618,14 +618,14 @@
                 
                 <!-- Blue corner coordinates (0,0) and (1,1) -->
                 <pxl-circle x="-ref.sec3ex1Rect.w/2" y="-ref.sec3ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
-                <pxl-text x="-ref.sec3ex1Rect.w/2" y="-ref.sec3ex1Rect.h/2 - 15" text="'(0, 0)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="bottom"></pxl-text>
+                <pxl-text x="-ref.sec3ex1Rect.w/2" y="-ref.sec3ex1Rect.h/2 - 15" text="(0, 0)" fill="#60a5fa" size="27" font="monospace" baseline="bottom"></pxl-text>
                 
                 <pxl-circle x="ref.sec3ex1Rect.w/2" y="ref.sec3ex1Rect.h/2" r="8" fill="#60a5fa"></pxl-circle>
-                <pxl-text x="ref.sec3ex1Rect.w/2" y="ref.sec3ex1Rect.h/2 + 15" text="'(1, 1)'" fill="#60a5fa" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                <pxl-text x="ref.sec3ex1Rect.w/2" y="ref.sec3ex1Rect.h/2 + 15" text="(1, 1)" fill="#60a5fa" size="27" font="monospace" baseline="top"></pxl-text>
 
                 <!-- Pink Start Circle (Center 0 + Radius 0) -->
                 <pxl-circle x="ref.sec3ex1VarPcx0.value" y="ref.sec3ex1VarPcy0.value" r="8" fill="#f472b6"></pxl-circle>
-                <pxl-text x="ref.sec3ex1VarPcx0.value" y="ref.sec3ex1VarPcy0.value + 20" text="'Center 0'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                <pxl-text x="ref.sec3ex1VarPcx0.value" y="ref.sec3ex1VarPcy0.value + 20" text="Center 0" fill="#f472b6" size="27" font="monospace" baseline="top"></pxl-text>
                 <pxl-circle x="ref.sec3ex1VarPcx0.value" y="ref.sec3ex1VarPcy0.value" r="ref.sec3ex1VarRadius0.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec3ex1VarRadius0.value > 0 ? 1 : 0"></pxl-circle>
                 <pxl-line 
                   x1="ref.sec3ex1VarPcx0.value" 
@@ -637,13 +637,13 @@
                 <pxl-text 
                   x="ref.sec3ex1VarPcx0.value + ref.sec3ex1VarDx0.value / 2 + (ref.sec3ex1VarRadius0.value === 0 ? 0 : (ref.sec3ex1VarDy0.value / ref.sec3ex1VarRadius0.value) * 22)" 
                   y="ref.sec3ex1VarPcy0.value + ref.sec3ex1VarDy0.value / 2 - (ref.sec3ex1VarRadius0.value === 0 ? 0 : (ref.sec3ex1VarDx0.value / ref.sec3ex1VarRadius0.value) * 22)" 
-                  text="'r0'" 
+                  text="r0" 
                   alpha="ref.sec3ex1VarRadius0.value > 0 ? 1 : 0"
-                  fill="#ec4899" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
+                  fill="#ec4899" size="27" font="monospace"></pxl-text>
 
                 <!-- Pink End Circle (Center 1 + Radius 1) -->
                 <pxl-circle x="ref.sec3ex1VarPcx1.value" y="ref.sec3ex1VarPcy1.value" r="8" fill="#f472b6"></pxl-circle>
-                <pxl-text x="ref.sec3ex1VarPcx1.value" y="ref.sec3ex1VarPcy1.value + 20" text="'Center 1'" fill="#f472b6" size="27" font="monospace" align="center" baseline="top"></pxl-text>
+                <pxl-text x="ref.sec3ex1VarPcx1.value" y="ref.sec3ex1VarPcy1.value + 20" text="Center 1" fill="#f472b6" size="27" font="monospace" baseline="top"></pxl-text>
                 <pxl-circle x="ref.sec3ex1VarPcx1.value" y="ref.sec3ex1VarPcy1.value" r="ref.sec3ex1VarRadius1.value" fill="none" stroke="#f9a8d4" strokewidth="2" linedash="[5, 5]" alpha="ref.sec3ex1VarRadius1.value > 0 ? 1 : 0"></pxl-circle>
                 <pxl-line 
                   x1="ref.sec3ex1VarPcx1.value" 
@@ -655,9 +655,9 @@
                 <pxl-text 
                   x="ref.sec3ex1VarPcx1.value + ref.sec3ex1VarDx1.value / 2 + (ref.sec3ex1VarRadius1.value === 0 ? 0 : (ref.sec3ex1VarDy1.value / ref.sec3ex1VarRadius1.value) * 22)" 
                   y="ref.sec3ex1VarPcy1.value + ref.sec3ex1VarDy1.value / 2 - (ref.sec3ex1VarRadius1.value === 0 ? 0 : (ref.sec3ex1VarDx1.value / ref.sec3ex1VarRadius1.value) * 22)" 
-                  text="'r1'" 
+                  text="r1" 
                   alpha="ref.sec3ex1VarRadius1.value > 0 ? 1 : 0"
-                  fill="#ec4899" size="27" font="monospace" align="center" baseline="middle"></pxl-text>
+                  fill="#ec4899" size="27" font="monospace"></pxl-text>
 
               </pxl-group>
             </pxl-layer>

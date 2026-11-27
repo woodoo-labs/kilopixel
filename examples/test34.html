@@ -13,8 +13,8 @@
   <pxl-stage id="main" ratio="1000 / 1000">
     <!-- Top-level Background Layer -->
     <pxl-layer>
-      <pxl-text x="980" y="30" text="ref.main.fps + ' FPS'" font="monospace" size="14" fill="#0f0" align="right"></pxl-text>
-      <pxl-text x="500" y="50" text="'GLOBAL MATRIX TRACKING'" size="30" fill="white" align="center"></pxl-text>
+      <pxl-text x="980" y="30" text="${ref.main.fps} FPS" font="monospace" size="14" fill="#0f0" align="right" baseline="alphabetic"></pxl-text>
+      <pxl-text x="500" y="50" text="GLOBAL MATRIX TRACKING" size="30" fill="white" baseline="alphabetic"></pxl-text>
       
       <!-- Source world (Scaled to 0.5, shifted, and rotated) -->
       <pxl-group zoom="0.5" rotate="t*10" x="500" y="500">
@@ -38,7 +38,7 @@
         <!-- Text also locked onto it -->
         <pxl-text x="toLocal(ref.target, 'x')" 
                   y="toLocal(ref.target, 'y') - 70" 
-                  text="'TRACKER LOCKED'" size="16" fill="#0f0" align="center" font="monospace"></pxl-text>
+                  text="TRACKER LOCKED" size="16" fill="#0f0" font="monospace" baseline="alphabetic"></pxl-text>
       </pxl-group>
     </pxl-layer>
   </pxl-stage>

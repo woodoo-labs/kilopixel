@@ -16,10 +16,10 @@
   <pxl-layer>
     
     <!-- Title -->
-    <pxl-text text="'Advanced pxl-circle'" x="500" y="100" size="40" font="system-ui" weight="bold" fill="white" align="center"></pxl-text>
+    <pxl-text text="Advanced pxl-circle" x="500" y="100" size="40" font="system-ui" weight="bold" fill="white" baseline="alphabetic"></pxl-text>
     
     <!-- FPS Monitor & Background Glow -->
-    <pxl-text x="980" y="30" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#0f0" align="right" stroke="none"></pxl-text>
+    <pxl-text x="980" y="30" text="${ref.main.fps} FPS | AVG: ${ref.main.renderAvg}ms" font="monospace" size="14" fill="#0f0" align="right" stroke="none" baseline="alphabetic"></pxl-text>
     <pxl-circle x="500" y="400" r="400 + wave(5) * 50" fill="radial([1, 1], ['rgba(0,242,254,0.05)', 'rgba(0,242,254,0)'])"></pxl-circle>
 
     <!-- 1. The Glowing Loading Ring -->
@@ -38,7 +38,7 @@
       ></pxl-circle>
       <!-- Satellite orbiting the ring -->
       <pxl-circle x="cos(t*3) * 70" y="sin(t*3) * 70" r="5" fill="#00f2fe" filter="dropShadow(0, 0, 5, 'rgba(0,242,254,0.8)')"></pxl-circle>
-      <pxl-text text="'Arc Mode'" y="90" size="14" fill="#94a3b8" align="center"></pxl-text>
+      <pxl-text text="Arc Mode" y="90" size="14" fill="#94a3b8" baseline="alphabetic"></pxl-text>
     </pxl-group>
 
     <!-- 2. The Pac-Man (Pie Mode) -->
@@ -61,7 +61,7 @@
         <pxl-circle x="70 - (t * 50) % 50" y="0" r="4" fill="#fff" alpha="0.5 + wave(2)*0.5"></pxl-circle>
       </pxl-group>
 
-      <pxl-text text="'Pie Mode'" y="90" size="14" fill="#94a3b8" align="center"></pxl-text>
+      <pxl-text text="Pie Mode" y="90" size="14" fill="#94a3b8" baseline="alphabetic"></pxl-text>
     </pxl-group>
 
     <!-- 3. The Animated Donut Chart -->
@@ -89,9 +89,9 @@
         start="130" 
         sweep="wave(4.4) * 140"
       ></pxl-circle>
-      <pxl-text text="'Donut Mode'" y="90" size="14" fill="#94a3b8" align="center"></pxl-text>
+      <pxl-text text="Donut Mode" y="90" size="14" fill="#94a3b8" baseline="alphabetic"></pxl-text>
       <!-- Center Text -->
-      <pxl-text text="'75%'" y="5" size="20" weight="bold" fill="white" align="center" baseline="middle"></pxl-text>
+      <pxl-text text="75%" y="5" size="20" weight="bold" fill="white"></pxl-text>
     </pxl-group>
 
   </pxl-layer>

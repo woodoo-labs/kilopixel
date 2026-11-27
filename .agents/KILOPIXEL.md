@@ -1,6 +1,6 @@
 # Kilopixel — Language Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~74KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~75KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 How to write Kilopixel: elements, attributes, expressions, interaction. Each fact is stated once; sections link each other. How the engine does it (source files, frame, reactivity, hit testing, drawing): `.agents/ENGINE.md`. Docs pages also follow `docs/DOCS_STANDARDS.md`.
 
@@ -55,7 +55,9 @@ Kilopixel is a declarative, reactive animation engine for HTML5 Canvas built on 
 
 ### 3.1 How an Attribute Value Is Read
 
-In this order; most values never reach the compiler:
+**Templates first:** `<pxl-text>` `text` (and attributes a custom shape lists in `static templateAttributes`, §12) is never guessed at. Everything is text, as written (quotes, operators, backslashes, backticks); only `${…}` is code, an expression as in any attribute; `\${` writes a literal `${`; a written `\n` breaks the line. `text="Score: ${ref.score.value} / 3"` is reactive, `text="${floor(t)} s"` animated, a value without `${` is never compiled. While a part is `undefined`, `null` or `NaN` (a `ref` not connected yet), the text draws nothing and isn't hit. An unclosed `${`, an empty `${}` or a part that doesn't compile warns, and the value is shown as written. `text="ref.score.value"` shows those words: write `text="${ref.score.value}"`.
+
+Every other attribute, in this order; most values never reach the compiler:
 
 1. `#ff0000`, `#fff`: a hex color, kept as text.
 2. `` `…` ``: a template literal, always compiled.
@@ -65,14 +67,14 @@ In this order; most values never reach the compiler:
 6. Anything that looks like code: `t`, `ref.`, `toLocal(`, parentheses, brackets, operators next to numbers, `+` next to a quote. Compiled.
 7. Anything else: text.
 
-Text with digits next to operators, parentheses or brackets looks like code (`text="Level 2-3"`): quote it (`text="'Level 2-3'"`). Words inside quoted strings are never code: `'Press return: ' + ref.score.value` keeps its `return`, a lone `t` or `ref.a.b` inside quotes adds no dependency.
+Text with digits next to operators, parentheses or brackets looks like code (`label="Level 2-3"` on a custom shape without templates): quote it (`label="'Level 2-3'"`). Words inside quoted strings are never code: `'Press return: ' + ref.score.value` keeps its `return`, a lone `t` or `ref.a.b` inside quotes adds no dependency.
 
 ### 3.2 Expressions
 
 - **JavaScript expressions** evaluated with the scope below. Without the word `return` an expression is returned as it is (`t > 10 ? 'red' : 'blue'`); with it, it is a code block (`if (t < 10) { return 'red'; } return 'blue';`).
 - **CSS percentages** inside code are allowed: `hsl(120, 50%, 40%)` works as an expression.
 - **Static** (no `t`, no `ref`): evaluated once. **Animated** (uses `t` or a time driver): every frame. **Reactive** (reads `ref.*`, no `t`): in the next frame after a referenced element changed (§3.6). A string that doesn't compile warns and is used as text.
-- Text inside an expression is quoted: `fill="t > 5 ? 'red' : 'blue'"`, `` text="`Score: ${ref.score.value}`" ``. Colors as function arguments are strings too: `dropShadow(0, 20, 20, '#0ff')` (without quotes: a SyntaxError).
+- Text inside an expression is quoted: `fill="t > 5 ? 'red' : 'blue'"`, `text="${ref.btn.isHovered ? 'On' : 'Off'}"`. Colors as function arguments are strings too: `dropShadow(0, 20, 20, '#0ff')` (without quotes: a SyntaxError).
 - Function calls need no backticks: `fill="hsl(t * 36, 80, 50)"`, `fill="linear(45, ['red', 'blue'])"`.
 
 ### 3.3 Scope
@@ -134,14 +136,14 @@ Users' guide: `docs/frameworks.html`. Every observed attribute (not the hyphenat
 | Value set | Result |
 |---|---|
 | number, boolean, array, object (a gradient descriptor) | stored as it is: no parsing, no compiling. Arrays are kept by reference and never changed by the engine: assign a new array to change one |
-| string | compiled like the attribute string (CSS colors stay text, §3.1). Except `text`, below |
+| string | compiled like the attribute string (CSS colors stay text, §3.1). Except template attributes (`text`), below |
 | `undefined` / `null` | the default, as a removed attribute; `''` like a bare one |
 | a function | not supported: warned once per element, the value stays |
 | the same parsed value again | nothing happens (no redraw) |
 
 - The getter returns the evaluated value (same as `ref.<id>.<name>`).
 - No reflection: a property doesn't write the attribute. The last change wins; setting an attribute to the text it already has is no change.
-- **`text` is literal** as a property: shown as it is, never compiled, because frameworks bind data to it (compiling would run `alert(1)` or fail on `Q1 - 2024`). Every other string property is code like an attribute value: never pass untrusted strings to them (colors from data: `#hex`, `rgb()` and the CSS color functions stay text).
+- **`text` is literal** as a property (so is every template attribute, §3.1): shown as it is, also with `${`, never compiled, because frameworks bind data to it (compiling would run `alert(1)` or fail on `Q1 - 2024`). Every other string property is code like an attribute value: never pass untrusted strings to them (colors from data: `#hex`, `rgb()` and the CSS color functions stay text).
 - Values set before the element upgraded (a script loaded late) are applied on connect, after the attributes, so a framework value wins over server HTML.
 - Special: `<pxl-polyline>` `points` (§11.5); `<pxl-var>` `value` also asks for a frame; `<pxl-stage>` `ratio` and `alwaysrender` write the attribute (`false`, `null`, `undefined` remove it); `id` and `hidden` are the native ones (`hidden` reflects).
 - Cost: a number property about 0.5 µs per set, `setAttribute()` about 4–5 µs, a new CSS color string about 1 µs. Nothing per frame.
@@ -241,7 +243,7 @@ States `isHovered`, `isPressed` (§8.1). Fill first, then stroke on top (half th
 <pxl-group id="btn" x="500" y="300" zoom="ref.btn.isPressed ? 0.95 : (ref.btn.isHovered ? 1.05 : 1)"
   pxl-on-click="ref.counter.value++">
   <pxl-rect w="120" h="50" r="10" fill="ref.btn.isPressed ? '#222' : (ref.btn.isHovered ? '#555' : '#888')"></pxl-rect>
-  <pxl-text text="'Add'" size="20" fill="#fff" align="center" baseline="middle"></pxl-text>
+  <pxl-text text="Add" size="20" fill="#fff"></pxl-text>
 </pxl-group>
 ```
 
@@ -384,13 +386,13 @@ Bounding box `{ left: -w·ax, right: w·(1 − ax), top: -h·ay, bottom: h·(1 �
 
 | Attribute | Default | Meaning |
 |---|---|---|
-| `text` | `''` | the text (§3.1: plain words need no quotes; inside expressions quote it; `\n` breaks lines). As a property: literal (§3.7) |
+| `text` | `''` | a template (§3.1): text as written, `${…}` inserts a value, `\n` breaks lines. As a property: literal (§3.7) |
 | `size` | `16` | font size, logical units |
 | `font` | `'sans-serif'` | font family |
 | `weight` | `'normal'` | `normal`, `bold`, `100`–`900` |
 | `fontstyle` | `'normal'` | `normal`, `italic`, `oblique` |
-| `align` | `'start'` | `start`, `end`, `left`, `right`, `center` |
-| `baseline` | `'alphabetic'` | `alphabetic`, `top`, `middle`, `bottom`, `hanging`, `ideographic` |
+| `align` | `'center'` | `center`, `start`, `end`, `left`, `right` |
+| `baseline` | `'middle'` | `middle` (the middle of the em box, so a label doesn't move when its characters change), `alphabetic`, `top`, `bottom`, `hanging`, `ideographic`. A block of several lines is centered as a whole |
 | `direction` | `null` | `ltr`, `rtl`; unset: inherited |
 | `maxwidth` | `0` | squeeze lines wider than this (canvas `maxWidth`) |
 | `width` | `0` | wrap words at this width |
@@ -443,6 +445,7 @@ pxl.defineShape('pxl-star', pxl.Star);
 |---|---|---|
 | **write** | `class … extends pxl.Shape` | on `pxl` like the built-ins, or a plain class |
 | | `static defaults` | every attribute with its default, after `...pxl.Shape.defaults`. Each key is an observed attribute (Rule A, §3.5) and a property (§3.7). Keys lowercase (HTML lowercases attribute names). A `false` / `true` default makes a presence attribute (bare = `true`) |
+| | `static templateAttributes` | optional: attributes read as templates like `text` (§3.1), e.g. `['label']`; their properties are literal |
 | | `draw(ctx)` | the drawing around the shape's origin. The canvas is scaled by `u`, so lengths are written as in the HTML. Reads only `this.values`: no time (animate through attributes, `rotate="t * 30"` or an own `spin="t * 90"`), no DOM, as little allocation as possible |
 | | `getBoundingBox()` | the box around the outline, without the stroke, through `setBoundingBox()`. Gradients span it; hit testing checks it (padded by `hitPadding()`) before the exact test; an isolated shape (§4) is drawn only within it (padded the same way), so paint beyond is cut then. Without it, gradients collapse to a point, every hit test is exact, and an isolated shape covers the whole layer |
 | | `pxl.defineShape(tag, Class)` | defines the tag (`pxl-` by convention) and hides content inside it (`display: none`; before the script runs, the content shows). Warns once per class: a key with capitals, no `draw()`, no `getBoundingBox()`; a tag already defined (a script loaded twice) warns and keeps the first class |
@@ -467,7 +470,7 @@ Everything else on `pxl.Shape` (names with `_`, `update()`, `render()`, matrices
 `ref.<stage>.fps`, `renderAvg`, `renderMax` (§6.1), published once per second. An FPS display is itself a reader: on an otherwise idle page it alternates between 0 and 1. Every frame counts, also frames that redrew nothing: while anything is animated, frames keep running even when no value changed.
 
 ```html
-<pxl-text x="20" y="30" text="ref.main.fps + ' FPS | ' + ref.main.renderAvg + 'ms'" font="monospace" size="14" fill="#0f0"></pxl-text>
+<pxl-text x="20" y="30" text="${ref.main.fps} FPS | ${ref.main.renderAvg}ms" font="monospace" size="14" fill="#0f0"></pxl-text>
 ```
 
 ## 14. Pitfalls
@@ -476,7 +479,7 @@ Everything else on `pxl.Shape` (names with `_`, `update()`, `render()`, matrices
 - `pxl-on-click` …, not `onclick` / `onhover` (§8.2).
 - Raw numbers for fixed coordinates (§2); `t` in seconds (`t * 90` = 90° per second).
 - `fill` or `stroke`, or the shape is invisible.
-- Quote text in expressions and colors as arguments (§3.2); ids in camelCase (§3.6).
+- Labels need no quotes, values go in with `${…}` (§3.1); quote text inside expressions and colors as arguments (§3.2); ids in camelCase (§3.6).
 - Filters with helpers, also animated; filter and shadow sizes are logical units (§5.3).
 - Arrowheads need an open, stroked path (§10).
 - In JavaScript or a framework: DOM events on shapes and groups; no hand cursor without CSS (§8.5); stage units from `ref.<stage>.mouseX`, not `event.offsetX`.

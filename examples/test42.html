@@ -250,7 +250,7 @@
               <pxl-rect x="700" y="700" w="200" h="200" fill="#ff00ff"></pxl-rect>
             </pxl-layer>
             <pxl-layer id="stage4LeftHud">
-              <pxl-text x="20" y="50" text="ref.stage4Left.fps + ' FPS | AVG: ' + ref.stage4Left.renderAvg + 'ms'" font="monospace" size="32" fill="#0f0" shadowcolor="#000" shadowblur="10"></pxl-text>
+              <pxl-text x="20" y="50" text="${ref.stage4Left.fps} FPS | AVG: ${ref.stage4Left.renderAvg}ms" font="monospace" size="32" fill="#0f0" shadowcolor="#000" shadowblur="10" align="start" baseline="alphabetic"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -267,7 +267,7 @@
               <pxl-rect x="700" y="700" w="200" h="200" fill="#ff00ff" filter="[hueRotate(wave(5)*360), blur(wave(2)*20)]"></pxl-rect>
             </pxl-layer>
             <pxl-layer id="stage4RightHud">
-              <pxl-text x="20" y="50" text="ref.stage4Right.fps + ' FPS | AVG: ' + ref.stage4Right.renderAvg + 'ms'" font="monospace" size="32" fill="#0f0" shadowcolor="#000" shadowblur="10"></pxl-text>
+              <pxl-text x="20" y="50" text="${ref.stage4Right.fps} FPS | AVG: ${ref.stage4Right.renderAvg}ms" font="monospace" size="32" fill="#0f0" shadowcolor="#000" shadowblur="10" align="start" baseline="alphabetic"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>

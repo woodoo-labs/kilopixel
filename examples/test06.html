@@ -1051,11 +1051,11 @@
 
       <!-- Information HUD -->
       <pxl-layer>
-        <pxl-text x="500" y="40" align="center" size="10" fill="rgba(0,242,255,0.4)" 
-                  text="'ENGINE_STATUS: STABLE // SCANNING_ARRAY_01'"></pxl-text>
+        <pxl-text x="500" y="40" size="10" fill="rgba(0,242,255,0.4)" 
+                  text="ENGINE_STATUS: STABLE // SCANNING_ARRAY_01" baseline="alphabetic"></pxl-text>
         <pxl-text x="980" y="540" align="end" size="14" fill="#fff" 
-                  text="`MAGNITUDE: ${floor(ref.scale.value * 100)}%`"></pxl-text>
-        <pxl-text x="20" y="40" text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms | MAX: ' + ref.main.renderMax + 'ms'" font="monospace" size="14" fill="#0f0" align="left" stroke="none"></pxl-text>
+                  text="MAGNITUDE: ${floor(ref.scale.value * 100)}%" baseline="alphabetic"></pxl-text>
+        <pxl-text x="20" y="40" text="${ref.main.fps} FPS | AVG: ${ref.main.renderAvg}ms | MAX: ${ref.main.renderMax}ms" font="monospace" size="14" fill="#0f0" align="left" stroke="none" baseline="alphabetic"></pxl-text>
       </pxl-layer>
 
     </pxl-stage>

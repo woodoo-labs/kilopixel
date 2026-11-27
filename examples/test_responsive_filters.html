@@ -51,25 +51,25 @@
           
           <!-- 1. Single Static Filter -->
           <pxl-rect x="200" y="300" w="150" h="150" fill="#3b82f6" filter="blur(10)"></pxl-rect>
-          <pxl-text x="200" y="420" text="'blur(10)'" size="16" fill="#94a3b8" align="center"></pxl-text>
+          <pxl-text x="200" y="420" text="blur(10)" size="16" fill="#94a3b8" baseline="alphabetic"></pxl-text>
           
           <!-- 2. Animated Single Filter (Responsive Drop Shadow) -->
           <pxl-circle x="500" y="300" r="75" fill="#ef4444" filter="dropShadow(0, 20 + wave(2)*40, 10, 'rgba(255, 255, 255, 0.6)')" dy="wave(2)*-20"></pxl-circle>
-          <pxl-text x="500" y="420" text="'dropShadow(...) animated'" size="16" fill="#94a3b8" align="center"></pxl-text>
+          <pxl-text x="500" y="420" text="dropShadow(...) animated" size="16" fill="#94a3b8" baseline="alphabetic"></pxl-text>
           
           <!-- 3. Static Array Chain -->
           <pxl-rect x="800" y="300" w="150" h="150" fill="#10b981" filter="[blur(5), brightness(150), hueRotate(180)]"></pxl-rect>
-          <pxl-text x="800" y="420" text="'[blur, brightness, hueRotate]'" size="16" fill="#94a3b8" align="center"></pxl-text>
+          <pxl-text x="800" y="420" text="[blur, brightness, hueRotate]" size="16" fill="#94a3b8" baseline="alphabetic"></pxl-text>
 
           <!-- 4. Animated Array Chain -->
           <pxl-circle x="350" y="700" r="75" fill="#f59e0b" filter="[blur(wave(3)*20), hueRotate(t*100), saturate(200)]"></pxl-circle>
-          <pxl-text x="350" y="820" text="'Animated Chained Array'" size="16" fill="#94a3b8" align="center"></pxl-text>
+          <pxl-text x="350" y="820" text="Animated Chained Array" size="16" fill="#94a3b8" baseline="alphabetic"></pxl-text>
 
           <!-- 5. Multiple Color Quotes inside dropShadow -->
           <pxl-circle x="650" y="700" r="75" fill="#a855f7" filter="[dropShadow(wave(1)*-30, 10, 15, '#3b82f6'), dropShadow(wave(1)*30, -10, 15, '#ef4444')]"></pxl-circle>
-          <pxl-text x="650" y="820" text="'Double dropShadow()'" size="16" fill="#94a3b8" align="center"></pxl-text>
+          <pxl-text x="650" y="820" text="Double dropShadow()" size="16" fill="#94a3b8" baseline="alphabetic"></pxl-text>
 
-          <pxl-text x="500" y="950" text="'Resize the window! Filters automatically scale with the responsive unit u.'" size="20" fill="#e2e8f0" align="center"></pxl-text>
+          <pxl-text x="500" y="950" text="Resize the window! Filters automatically scale with the responsive unit u." size="20" fill="#e2e8f0" baseline="alphabetic"></pxl-text>
           
         </pxl-layer>
 

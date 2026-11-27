@@ -190,19 +190,19 @@
         <!-- Text box: maxwidth and late web fonts (design/done/2026-11-06_text_box_accuracy_plan.md) -->
         <pxl-stage id="tbStage" ratio="5 / 3" alwaysrender>
           <pxl-layer id="tbLayer">
-            <pxl-text id="tbText" x="500" y="150" size="48" font="Arial" fill="#0f172a" align="center" baseline="middle"
+            <pxl-text id="tbText" x="500" y="150" size="48" font="Arial" fill="#0f172a"
               text="KILOPIXEL DECLARATIVE CANVAS"></pxl-text>
-            <pxl-text id="tbChain" x="500" y="300" size="48" font="Arial" fill="#0f172a" text="KILOPIXEL DECLARATIVE CANVAS"></pxl-text>
-            <pxl-text id="tbGradient" x="500" y="450" size="48" font="Arial" align="center" fill="linear(0, ['#3b82f6', '#ec4899'])"
-              text="KILOPIXEL DECLARATIVE CANVAS"></pxl-text>
-            <pxl-text id="tbWrap" x="500" y="520" size="30" font="Arial" fill="#0f172a" align="center" width="800"
-              text="Kilopixel draws declarative canvas shapes"></pxl-text>
+            <pxl-text id="tbChain" x="500" y="300" size="48" font="Arial" fill="#0f172a" text="KILOPIXEL DECLARATIVE CANVAS" align="start" baseline="alphabetic"></pxl-text>
+            <pxl-text id="tbGradient" x="500" y="450" size="48" font="Arial" fill="linear(0, ['#3b82f6', '#ec4899'])"
+              text="KILOPIXEL DECLARATIVE CANVAS" baseline="alphabetic"></pxl-text>
+            <pxl-text id="tbWrap" x="500" y="520" size="30" font="Arial" fill="#0f172a" width="800"
+              text="Kilopixel draws declarative canvas shapes" baseline="alphabetic"></pxl-text>
           </pxl-layer>
         </pxl-stage>
         <pxl-stage id="tbMovingStage" ratio="5 / 3" alwaysrender>
           <pxl-layer id="tbMovingLayer">
-            <pxl-text id="tbMoving" x="500" y="300" dx="sin(t * 3) * 40" size="48" font="Arial" fill="#0f172a" align="center" maxwidth="300"
-              text="KILOPIXEL DECLARATIVE CANVAS"></pxl-text>
+            <pxl-text id="tbMoving" x="500" y="300" dx="sin(t * 3) * 40" size="48" font="Arial" fill="#0f172a" maxwidth="300"
+              text="KILOPIXEL DECLARATIVE CANVAS" baseline="alphabetic"></pxl-text>
           </pxl-layer>
         </pxl-stage>
 
@@ -1056,14 +1056,14 @@
     test('safe render: a hidden shape is not saved but still evaluated, so ref.* to it stays current', () => {
       srClear();
       srAdd('srLayerA', `<pxl-circle id="srHidden" hidden="true" x="t * 100" r="5"></pxl-circle>`);
-      srAdd('srLayerB', `<pxl-text id="srHiddenReader" text="ref.srHidden.x"></pxl-text>`);
+      srAdd('srLayerB', `<pxl-text id="srHiddenReader" text="\${ref.srHidden.x}" align="start" baseline="alphabetic"></pxl-text>`);
       const ctx = el('srLayerA')._ctx, save = ctx.save;
       let saves = 0;
       ctx.save = function() { saves++; return save.call(this); };
       try { srRender(2); } finally { delete ctx.save; }
       // One save() is the layer's own, around its children (it scales them by the unit); none for the hidden shape
       if (saves !== 1) throw new Error(`${saves - 1} save() calls for a hidden shape`);
-      if (el('srHiddenReader').values.text !== 200) throw new Error(`reader shows ${el('srHiddenReader').values.text}`);
+      if (el('srHiddenReader').values.text !== '200') throw new Error(`reader shows ${el('srHiddenReader').values.text}`);
       srClear();
     });
 
@@ -1388,8 +1388,8 @@
 
     test('isolated compositing: multi-line text with mask="source-in" keeps every line', () => isoStage(
       `<pxl-rect x="500" y="250" w="600" h="400" fill="#fb923c"></pxl-rect>
-       <pxl-text id="isoText" x="500" y="250" text="'MMMM\\nMMMM'" size="110" weight="bold" fill="#1d4ed8" align="center"
-         baseline="middle" mask="source-in"></pxl-text>`,
+       <pxl-text id="isoText" x="500" y="250" text="MMMM\\nMMMM" size="110" weight="bold" fill="#1d4ed8"
+         mask="source-in"></pxl-text>`,
       (layer) => {
         // Before: each line was masked against the lines drawn before it, so the second erased the first
         const top = isoOpaqueIn(layer, 200, 50, 800, 250), bottom = isoOpaqueIn(layer, 200, 250, 800, 450);
@@ -1406,10 +1406,10 @@
        <pxl-line id="isoL1" x2="100" stroke="#000" strokewidth="4" arrowend="auto" shadowcolor="#000"></pxl-line>
        <pxl-line id="isoL2" x2="100" stroke="#000" strokewidth="4" shadowcolor="#000"></pxl-line>
        <pxl-line id="isoL3" x2="100" stroke="none" arrowend="auto" shadowcolor="#000"></pxl-line>
-       <pxl-text id="isoT1" text="'one'" fill="#000" shadowcolor="#000"></pxl-text>
-       <pxl-text id="isoT2" text="'one\\ntwo'" fill="#000" shadowcolor="#000"></pxl-text>
-       <pxl-text id="isoT3" text="'one'" fill="#000" stroke="#fff" filter="blur(1)"></pxl-text>
-       <pxl-text id="isoT4" text="'one'" width="200" fill="#000" shadowcolor="#000"></pxl-text>
+       <pxl-text id="isoT1" text="one" fill="#000" shadowcolor="#000" align="start" baseline="alphabetic"></pxl-text>
+       <pxl-text id="isoT2" text="one\\ntwo" fill="#000" shadowcolor="#000" align="start" baseline="alphabetic"></pxl-text>
+       <pxl-text id="isoT3" text="one" fill="#000" stroke="#fff" filter="blur(1)" align="start" baseline="alphabetic"></pxl-text>
+       <pxl-text id="isoT4" text="one" width="200" fill="#000" shadowcolor="#000" align="start" baseline="alphabetic"></pxl-text>
        <pxl-grid id="isoG1" stroke="#000" major="4" shadowcolor="#000"></pxl-grid>
        <pxl-grid id="isoG2" stroke="#000" shadowcolor="#000"></pxl-grid>
        <test-iso-badge id="isoC1" fill="#000" mask="xor"></test-iso-badge>
@@ -1429,7 +1429,7 @@
               <pxl-group zoom="1.2" rotate="35" x="60">
                 <pxl-ellipse rx="90" ry="50" fill="#dbeafe" stroke="#3b82f6" strokewidth="12"></pxl-ellipse>
                 <pxl-polyline points="-200,80; -120,140; -40,90" stroke="#0f766e" strokewidth="8" arrowend="auto"></pxl-polyline>
-                <pxl-text x="-60" y="-120" text="'Two\\nlines'" size="40" fill="#111" stroke="#f43f5e" strokewidth="2"></pxl-text>
+                <pxl-text x="-60" y="-120" text="Two\\nlines" size="40" fill="#111" stroke="#f43f5e" strokewidth="2" align="start" baseline="alphabetic"></pxl-text>
               </pxl-group>
             </pxl-group>
           </pxl-layer>
@@ -1535,7 +1535,7 @@
       }));
 
     test('isolated box: a text\'s box is laid out before drawing, also when it grows, wraps, squeezes or has a stroke', () => isoStage(
-      `<pxl-text id="ibText" x="100" y="100" text="one\\ntwo" size="40" fill="#1d4ed8" shadowcolor="#000" shadowblur="6"></pxl-text>`,
+      `<pxl-text id="ibText" x="100" y="100" text="one\\ntwo" size="40" fill="#1d4ed8" shadowcolor="#000" shadowblur="6" align="start" baseline="alphabetic"></pxl-text>`,
       (layer, text) => {
         const cases = [
           ['text', 'one\\ntwo much longer\\nthree'],
@@ -1560,7 +1560,7 @@
       }));
 
     test('isolated box: an unchanged text measures nothing again in later frames', () => isoStage(
-      `<pxl-text x="100" y="100" text="one\\ntwo" size="40" fill="#1d4ed8" shadowcolor="#000" shadowblur="6"></pxl-text>`,
+      `<pxl-text x="100" y="100" text="one\\ntwo" size="40" fill="#1d4ed8" shadowcolor="#000" shadowblur="6" align="start" baseline="alphabetic"></pxl-text>`,
       (layer) => {
         const calls = countMeasureText(() => { for (let i = 0; i < 10; i++) isoRender(layer); });
         if (calls !== 0) throw new Error(`${calls} measureText() calls in 10 frames`);
@@ -1577,7 +1577,7 @@
 
     test('isolated box: an empty box (NaN, empty text) composites nothing and warns nothing', () => isoStage(
       `<pxl-rect x="500" y="250" w="NaN" h="60" fill="#1d4ed8" stroke="#0f172a" strokewidth="4" shadowcolor="#000"></pxl-rect>
-       <pxl-text x="100" y="100" text="" width="200" fill="#1d4ed8" shadowcolor="#000"></pxl-text>`,
+       <pxl-text x="100" y="100" text="" width="200" fill="#1d4ed8" shadowcolor="#000" align="start" baseline="alphabetic"></pxl-text>`,
       (layer) => {
         let calls;
         const warnings = captureWarnings(() => { calls = isoComposites(layer, () => isoRender(layer)); });
@@ -1585,7 +1585,7 @@
       }));
 
     test('isolated box: a text\'s layout on the scratch canvas leaves no font for the next isolated shape', () => isoStage(
-      `<pxl-text x="100" y="100" text="one\\ntwo" size="40" font="serif" fill="#1d4ed8" shadowcolor="#000"></pxl-text>
+      `<pxl-text x="100" y="100" text="one\\ntwo" size="40" font="serif" fill="#1d4ed8" shadowcolor="#000" align="start" baseline="alphabetic"></pxl-text>
        <test-iso-font id="ibFont" x="500" y="250" fill="#1d4ed8" stroke="#0f172a" shadowcolor="#000"></test-iso-font>`,
       (layer, shape) => {
         isoRender(layer);
@@ -2197,7 +2197,7 @@
 
     test('redraws: a floor(t) clock redraws its layer once per second, not in every frame', () => {
       srClear();
-      srAdd('srLayerA', '<pxl-text x="100" y="100" text="floor(t)" fill="#000"></pxl-text>');
+      srAdd('srLayerA', '<pxl-text x="100" y="100" text="\${floor(t)}" fill="#000" align="start" baseline="alphabetic"></pxl-text>');
       framesFrom(1.5, 1, 'srLayerA');
       const clears = framesFrom(1.5 + 1 / 60, 60, 'srLayerA'); // one second, across t = 2
       if (clears !== 1) throw new Error(`${clears} redraws in one second`);
@@ -2495,7 +2495,7 @@
       ixLog = [];
       return withStage(ixStage(`
         <pxl-line x1="100" y1="100" x2="900" y2="100" stroke="#000" strokewidth="20" pxl-on-enter="ixLog.push('line')"></pxl-line>
-        <pxl-text x="100" y="250" size="40" text="Hit me" fill="#000" pxl-on-enter="ixLog.push('text')"></pxl-text>
+        <pxl-text x="100" y="250" size="40" text="Hit me" fill="#000" pxl-on-enter="ixLog.push('text')" align="start" baseline="alphabetic"></pxl-text>
         <pxl-group x="500" y="300" rotate="90">
           <pxl-rect x="200" w="40" h="40" fill="#000" pxl-on-enter="ixLog.push('rect')"></pxl-rect>
         </pxl-group>`), (stage) => {
@@ -2567,9 +2567,9 @@
         <pxl-polyline x="100" y="380" mode="relative" points="0,0; 60,40; 60,-40" stroke="#000" strokewidth="6" arrowstart="30" arrowstyle="line"></pxl-polyline>
         <pxl-group x="450" y="420" skewx="25" scalex="-1">
           <pxl-ellipse rx="80" ry="40" start="0" sweep="250" stroke="#000" strokewidth="8" arrowend="auto"></pxl-ellipse>
-          <pxl-text y="10" size="30" text="Mirrored" fill="#000"></pxl-text>
+          <pxl-text y="10" size="30" text="Mirrored" fill="#000" align="start" baseline="alphabetic"></pxl-text>
         </pxl-group>
-        <pxl-text x="700" y="450" size="36" text="Hit" stroke="#000" strokewidth="6" align="center"></pxl-text>
+        <pxl-text x="700" y="450" size="36" text="Hit" stroke="#000" strokewidth="6" baseline="alphabetic"></pxl-text>
         <pxl-polyline points="830,20; 870,160; 910,20; 950,160" smooth="2" stroke="#000" strokewidth="6"></pxl-polyline>
         <pxl-polyline points="30,470; 230,480; 40,510; 240,540" smooth="-1" stroke="#000" strokewidth="6"></pxl-polyline>
         <pxl-polyline points="870,380; 990,420; 960,540; 860,500" smooth="true" closed="true" fill="#000"></pxl-polyline>
@@ -3050,7 +3050,7 @@
     });
 
     test('text children of a shape are not shown as page text (C17)', () =>
-      withStage(ixStage('<pxl-text id="kbChildren" x="100" y="100" text="Canvas">Hello from JSX children</pxl-text>'), () => {
+      withStage(ixStage('<pxl-text id="kbChildren" x="100" y="100" text="Canvas" align="start" baseline="alphabetic">Hello from JSX children</pxl-text>'), () => {
         const range = document.createRange();
         range.selectNodeContents(el('kbChildren'));
         const visible = [...range.getClientRects()].filter((r) => r.width > 0).length;
@@ -3100,6 +3100,44 @@
         nextFrame();
         if (afterRemove !== 0 || afterInsert !== 1 || pxl.nodes.fxSub.x !== 21) {
           throw new Error(`listed after removal ${afterRemove}, reader listed ${afterInsert}×, reader x ${pxl.nodes.fxSub.x}`);
+        }
+      }));
+
+    // ===================================================================
+    // Text templates (design/done/2026-11-27_text_template_plan.md)
+    // ===================================================================
+    section('Text templates');
+
+    test('text template: an undefined part draws nothing and is not hit; it appears when its target connects and follows it', () =>
+      withStage(ixStage(`<pxl-text id="ttLabel" x="500" y="300" size="80" fill="#000" text="Score: \${ref.ttScore.value}"></pxl-text>`),
+        (stage) => {
+          hover(stage, 500, 300);
+          const before = { text: pxl.nodes.ttLabel.text, hovered: pxl.nodes.ttLabel.isHovered };
+          stage.querySelector('pxl-layer').insertAdjacentHTML('beforeend', '<pxl-var id="ttScore" value="2"></pxl-var>');
+          stage.render(1); // the label gets its text; the next frame's hit test finds it
+          hover(stage, 500, 300);
+          const connected = { text: pxl.nodes.ttLabel.text, hovered: pxl.nodes.ttLabel.isHovered };
+          el('ttScore').value = 5;
+          stage.render(1);
+          const state = { before, connected, changed: pxl.nodes.ttLabel.text };
+          if (before.text !== null || before.hovered || connected.text !== 'Score: 2' || !connected.hovered || state.changed !== 'Score: 5') {
+            throw new Error(JSON.stringify(state));
+          }
+        }));
+
+    test('text template: a part with t is animated; setAttribute() reads a template, the property stays literal', () =>
+      withStage(ixStage('<pxl-text id="ttClock" fill="#000" text="${floor(t)} s"></pxl-text>'), (stage) => {
+        stage.render(1.5);
+        const first = pxl.nodes.ttClock.text;
+        stage.render(2.5);
+        const second = pxl.nodes.ttClock.text;
+        el('ttClock').setAttribute('text', 'Level 2-3 ${1 + 1}');
+        const attribute = pxl.nodes.ttClock.text;
+        el('ttClock').text = '${1 + 1}';
+        stage.render(3.5);
+        const state = { first, second, attribute, property: pxl.nodes.ttClock.text };
+        if (first !== '1 s' || second !== '2 s' || attribute !== 'Level 2-3 2' || state.property !== '${1 + 1}') {
+          throw new Error(JSON.stringify(state));
         }
       }));
 

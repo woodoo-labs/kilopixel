@@ -123,9 +123,10 @@ pxl.resolveEmptyAttribute = function(element, name, newValue) {
 
 // newValue: an attribute string, or null for a removed attribute
 pxl.compileAttribute = function(element, name, newValue) {
-  const parsed = (newValue === null || newValue === '')
-    ? pxl.resolveEmptyAttribute(element, name, newValue)
-    : pxl.parseAttributeValue(newValue);
+  let parsed;
+  if (newValue === null || newValue === '') parsed = pxl.resolveEmptyAttribute(element, name, newValue);
+  else if (element.constructor.templateAttributes.includes(name)) parsed = pxl.parseTemplate(newValue);
+  else parsed = pxl.parseAttributeValue(newValue);
   if (typeof parsed !== 'function') {
     pxl.storeValue(element, name, parsed);
     return;
@@ -179,19 +180,32 @@ pxl._accessorClasses = new WeakSet();
 // Defines a getter / setter for every observed attribute on the class prototype, the first time an instance of the
 // class is created, so custom shapes (class Star extends pxl.Shape) get them too. Hyphenated names (pxl-on-*
 // handlers) stay attribute-only; names the prototype already has keep theirs: HTMLElement's id and hidden, an
-// attribute named like another HTMLElement property, a class's own getter (Text's text, Polyline's points).
+// attribute named like another HTMLElement property, a class's own getter (Polyline's points).
+// A string set as a template attribute's property (Text's text) is text, never code: frameworks bind data to it, and
+// compiling data would run it ('${alert(1)}'). The attribute stays a template.
 pxl.defineAccessors = function(Class) {
   if (pxl._accessorClasses.has(Class)) return;
   pxl._accessorClasses.add(Class);
   const proto = Class.prototype;
   for (const name of Class.observedAttributes) {
     if (name.includes('-') || name in proto) continue;
+    const isTemplate = Class.templateAttributes.includes(name);
     Object.defineProperty(proto, name, {
       get() { return this.values[name]; },
-      set(value) { this.setValue(name, value === undefined ? null : value); },
+      set(value) {
+        if (isTemplate && typeof value === 'string') pxl.setLiteral(this, name, value);
+        else this.setValue(name, value === undefined ? null : value);
+      },
       configurable: true
     });
   }
+};
+
+// A string stored as it is, never parsed or compiled (a template attribute's property)
+pxl.setLiteral = function(element, name, value) {
+  if (value === element.expressions[name]) return;
+  pxl.storeValue(element, name, value);
+  element.valueChanged(name);
 };
 
 // Properties a framework set before the element was upgraded (code splitting, a script loaded late) are own

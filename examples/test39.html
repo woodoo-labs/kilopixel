@@ -172,21 +172,21 @@
       <pxl-layer id="hudLayer">
         <pxl-text 
           x="20" y="30" 
-          text="'ANGLE: ' + Math.round((ref.spinner?.rotate || 0) % 360) + '°'" 
+          text="ANGLE: ${Math.round((ref.spinner?.rotate || 0) % 360)}°" 
           font="monospace"
           size="14" 
           fill="#0f0" 
           align="left"
-          stroke="none"></pxl-text>
+          stroke="none" baseline="alphabetic"></pxl-text>
 
         <pxl-text 
           x="980" y="30" 
-          text="ref.main.fps + ' FPS | AVG: ' + ref.main.renderAvg + 'ms'" 
+          text="${ref.main.fps} FPS | AVG: ${ref.main.renderAvg}ms" 
           font="monospace" 
           size="14" 
           fill="#0f0" 
           align="right" 
-          stroke="none"></pxl-text>
+          stroke="none" baseline="alphabetic"></pxl-text>
       </pxl-layer>
 
     </pxl-stage>

@@ -60,7 +60,7 @@ Base of layers, groups, shapes and variables.
 
 ## 3. Compiler (`js/compiler.js`)
 
-`pxl.parseAttributeValue()` implements language §3.1 (`pxl.CSS_HSL_REGEX`, `pxl.CSS_COLOR_FUNCTION_REGEX` for the CSS colors kept as text). Code goes to `pxl.compileExpression(str)`:
+`pxl.compileAttribute()` sends a name in the class's `static templateAttributes` (`[]` on `pxl.PxlNode`, `['text']` on `pxl.Text`) to `pxl.parseTemplate()` (below), every other value to `pxl.parseAttributeValue()`, which implements the rest of language §3.1 (`pxl.CSS_HSL_REGEX`, `pxl.CSS_COLOR_FUNCTION_REGEX` for the CSS colors kept as text). Code goes to `pxl.compileExpression(str)`:
 
 1. **Cache:** `pxl.staticCache` (results of static expressions) and `pxl.animationCache` (functions), Maps keyed by the source string, at most `pxl.COMPILE_CACHE_LIMIT` (2,000) entries each; `pxl.cacheExpression()` drops the oldest (insertion order). A framework that rebuilds strings every render would grow them without end; elements keep their functions.
 2. **`pxl.splitStringLiterals()`** splits once into code and string literals (`'…'`, `"…"`, the text of `` `…` ``; code inside `${…}` is code). Steps 3–6 read and rewrite code only. Regex literals and comments aren't recognized.
@@ -83,6 +83,8 @@ const fn = new Function('scope', 'ref', `
 ```
 
 Fields of the function: `isTimeDependent`, `sourceIds` (empty without refs), `usesToLocal`. It is called as `fn.call(element, t)` (`this` = the element, for `toLocal`). Static expressions: evaluated once with `new Function`, the result cached (an `undefined` result keeps the source string). A string that doesn't compile warns, is cached and used as text. `pxl.scope` is a whitelist (`Object.create(null)`), so polyfills can't leak in.
+
+**Templates** (`pxl.parseTemplate(str)`): the value is scanned by the engine, not wrapped in backticks, so the text's backslashes and backticks never meet JavaScript's escape rules. `\${` becomes a literal `${`; a code part runs from `${` to its matching `}` (`pxl.findTemplateEnd()` skips quoted strings with their escapes and nested template literals). Without a code part the result is the text itself. Otherwise one source is generated and compiled with `pxl.compileExpression()`, so caching, rewrites, flags and warnings are those of any expression: `const _p0 = (code); if (_p0 === undefined || _p0 === null || _p0 !== _p0) return null;` per part, then `return "text" + _p0 + "text" …;` with the text as JSON string literals, which `pxl.splitStringLiterals()` skips as quoted text. A static template is evaluated once; `null` makes `Text.layout()` draw nothing. An unclosed or empty `${` warns and keeps the value as written; a part that doesn't compile does the same (`compileExpression()` warns and returns the source, which `parseTemplate()` recognizes). Design: `design/done/2026-11-27_text_template_plan.md`.
 
 ## 4. Reactivity (`js/engine.js`)
 
@@ -129,9 +131,9 @@ A `toLocal()` result depends on the matrices of the containers above both elemen
 
 Language §3.7 is the contract. Mechanics (design: `design/done/2026-10-30_framework_compatibility_plan.md` §24):
 
-- `pxl.defineAccessors(Class)`: a getter / setter per observed attribute on the class prototype, the first time an instance is created (`pxl._accessorClasses`), so custom shapes get them. Skipped: hyphenated names, and names the prototype already has (`id`, `hidden` native; `Text`'s `text`, `Polyline`'s `points` have their own). Setter → `setValue(name, value === undefined ? null : value)`.
+- `pxl.defineAccessors(Class)`: a getter / setter per observed attribute on the class prototype, the first time an instance is created (`pxl._accessorClasses`), so custom shapes get them. Skipped: hyphenated names, and names the prototype already has (`id`, `hidden` native; `Polyline`'s `points` has its own). Setter → `setValue(name, value === undefined ? null : value)`; for a template attribute a string goes to `pxl.setLiteral()` instead (below).
 - Values set before the upgrade are own properties hiding the accessors: the constructor reads `Object.keys(this)` before adding any field, and `pxl.takeOwnProperties()` takes them out as `[name, value, …]`; `connectedCallback()` sets them again (`pxl.setPendingProperties()`), after the attributes. An element upgraded without being connected gets them on insertion.
-- `Text.text` stores a string with `pxl.storeValue()` (never compiled). `Polyline.points` → `setPoints()` (§6.5). Stage `ratio` / `alwaysrender`: setters `reflectAttribute()`, getters return the parsed ratio and `isAlwaysRender()`.
+- A template attribute's accessor (`Text.text`) stores a string with `pxl.setLiteral()` (`pxl.storeValue()` and `valueChanged()`, never parsed); other values take `setValue()`. `Polyline.points` → `setPoints()` (§6.5). Stage `ratio` / `alwaysrender`: setters `reflectAttribute()`, getters return the parsed ratio and `isAlwaysRender()`.
 - Costs measured with `design/prototypes/2026-10-30_framework_compatibility/w3_property_costs.html`.
 
 ## 5. The Frame

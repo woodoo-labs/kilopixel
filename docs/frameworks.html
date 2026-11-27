@@ -91,7 +91,7 @@ const radius: number = circle.r;</code></pre>
         &lt;pxl-polyline points={data} stroke="#3b82f6" strokewidth={4}&gt;&lt;/pxl-polyline&gt;
 
         {/* Bottom: Label, shown as written */}
-        &lt;pxl-text x={500} y={550} size={27} align="center" text={`Value: ${value}`}&gt;&lt;/pxl-text&gt;
+        &lt;pxl-text x={500} y={550} size={27} text={`Value: ${value}`} baseline="alphabetic"&gt;&lt;/pxl-text&gt;
       &lt;/pxl-layer&gt;
     &lt;/pxl-stage&gt;
   );
@@ -99,11 +99,11 @@ const radius: number = circle.r;</code></pre>
       <p>The same in a Vue template:</p>
       <pre><code class="language-html">&lt;pxl-circle :x="250" :y="300" :r="value" fill="#f97316"&gt;&lt;/pxl-circle&gt;
 &lt;pxl-polyline :points="data" stroke="#3b82f6" :strokewidth="4"&gt;&lt;/pxl-polyline&gt;
-&lt;pxl-text :x="500" :y="550" :size="27" align="center" :text="`Value: ${value}`"&gt;&lt;/pxl-text&gt;</code></pre>
+&lt;pxl-text :x="500" :y="550" :size="27" :text="`Value: ${value}`" baseline="alphabetic"&gt;&lt;/pxl-text&gt;</code></pre>
       <ul>
         <li><strong>Numbers, Arrays, Objects:</strong> stored as they are, without parsing: <code>r={value}</code>, <code>linedash={[20, 10]}</code>, <code>points={[[0, 0], [100, 50]]}</code> (flat <code>[x0, y0, x1, y1]</code> works too). To change an array, pass a new one: a change made to the same array in place isn't seen.</li>
         <li><strong>Strings:</strong> read like attribute text, so <code>x="300 + sin(t) * 100"</code> animates and <code>fill="hsl(200, 50%, 40%)"</code> is a color.</li>
-        <li><strong>Text:</strong> a string set as <code>text</code> is shown exactly as written, never read as an expression. Expressions in <code>text</code> stay available in plain markup.</li>
+        <li><strong>Text:</strong> a string set as <code>text</code> is shown exactly as written, also with <code>${</code>. In plain markup, the <code>text</code> attribute inserts values with <code>${…}</code> (<code>text="Score: ${ref.score.value}"</code>).</li>
         <li><strong>Removing a Value:</strong> <code>undefined</code> or <code>null</code> sets the default, like a removed attribute.</li>
         <li><strong>Last Change Wins:</strong> setting a property doesn't change the attribute in the markup. Set each value one way, not both.</li>
         <li><strong>Reading Back:</strong> <code>el.x</code> returns the current value, also of an animated expression.</li>
@@ -124,7 +124,7 @@ const radius: number = circle.r;</code></pre>
 &lt;pxl-group x={700} y={300} style={{ cursor: 'pointer' }} onClick={() =&gt; setCount((c) =&gt; c + 1)}
   onPointerEnter={() =&gt; setHover(true)} onPointerLeave={() =&gt; setHover(false)}&gt;
   &lt;pxl-rect w={300} h={120} r={16} fill={hover ? '#2563eb' : '#3b82f6'}&gt;&lt;/pxl-rect&gt;
-  &lt;pxl-text size={27} fill="#ffffff" align="center" baseline="middle" text="Add"&gt;&lt;/pxl-text&gt;
+  &lt;pxl-text size={27} fill="#ffffff" text="Add"&gt;&lt;/pxl-text&gt;
 &lt;/pxl-group&gt;</code></pre>
       <pre><code class="language-html">&lt;!-- Vue --&gt;
 &lt;pxl-group :x="700" :y="300" :style="{ cursor: 'pointer' }" @click="count++"
@@ -203,7 +203,7 @@ const radius: number = circle.r;</code></pre>
     &lt;pxl-group id="button" x="700" y="300" style="cursor: <mark id="sec9ButtonCursorCode">pointer</mark>"&gt;
       &lt;pxl-rect w="300" h="120" r="16" stroke="#3b82f6" strokewidth="4"
         fill="ref.button.isHovered ? '#bfdbfe' : '#dbeafe66'"&gt;&lt;/pxl-rect&gt;
-      &lt;pxl-text size="27" fill="#3b82f6" align="center" baseline="middle" text="Button"&gt;&lt;/pxl-text&gt;
+      &lt;pxl-text size="27" fill="#3b82f6" text="Button"&gt;&lt;/pxl-text&gt;
     &lt;/pxl-group&gt;
   &lt;/pxl-layer&gt;
 &lt;/pxl-stage&gt;
@@ -260,7 +260,7 @@ const radius: number = circle.r;</code></pre>
             <pxl-group id="sec9Button" x="700" y="300" style="cursor: pointer">
               <pxl-rect w="300" h="120" r="16" stroke="#3b82f6" strokewidth="4"
                 fill="ref.sec9Button.isHovered ? '#bfdbfe' : '#dbeafe66'"></pxl-rect>
-              <pxl-text size="27" fill="#3b82f6" align="center" baseline="middle" text="Button"></pxl-text>
+              <pxl-text size="27" fill="#3b82f6" text="Button"></pxl-text>
             </pxl-group>
           </pxl-layer>
         </pxl-stage>

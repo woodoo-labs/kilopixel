@@ -33,8 +33,8 @@
       <pxl-rect x="200" y="100" dx="50" dy="20" rotate="10" hidden="false" fill="tomato" stroke="rgb(50, 250/3, 50)" strokewidth="3" w="50" h="30"></pxl-rect>
       <pxl-circle x="600" y="50" dx="0" dy="0" rotate="0" hidden="false" fill="red" stroke="blue" strokewidth="0" r="1"></pxl-circle>
       <pxl-line x="600" y="50" dx="18" x1="0" y1="-4" x2="0" y2="4" stroke="blue"></pxl-line>
-      <pxl-text x="600" y="50" dx="20" dy="0" rotate="loop(10)*360" hidden="false" fill="black" stroke="none" strokewidth="2" text="if (0 > 10) return 'jep'; else if (50 > 60) return 'yes'; else return 50 + 50 * sin(PI / 3)" size="8" weight="normal" align="start" font="sans-serif" baseline="middle" fontstyle="normal"></pxl-text>
-      <pxl-text x="600" y="100" dx="20" dy="0" rotate="0" hidden="false" fill="black" stroke="none" strokewidth="2" text="'Hello loop(2) ! * / World return!'"></pxl-text>
+      <pxl-text x="600" y="50" dx="20" dy="0" rotate="loop(10)*360" hidden="false" fill="black" stroke="none" strokewidth="2" text="${(() => { if (0 > 10) return 'jep'; else if (50 > 60) return 'yes'; else return 50 + 50 * sin(PI / 3) })()}" size="8" weight="normal" align="start" font="sans-serif" fontstyle="normal"></pxl-text>
+      <pxl-text x="600" y="100" dx="20" dy="0" rotate="0" hidden="false" fill="black" stroke="none" strokewidth="2" text="Hello loop(2) ! * / World return!" align="start" baseline="alphabetic"></pxl-text>
 
       <pxl-group x="500" y="100" dx="0" dy="0" rotate="0" hidden="false">
         <pxl-circle x="0" y="0" dx="0" dy="0" rotate="0" hidden="false" fill="red" stroke="grey" strokewidth="2" r="2"></pxl-circle>

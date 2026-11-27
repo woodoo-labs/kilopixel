@@ -12,7 +12,7 @@
 <body>
   <pxl-stage id="main" ratio="1000 / 1000">
     <pxl-layer>
-      <pxl-text x="500" y="50" text="'SELF REFERENCING WITH IDs'" size="30" fill="white" align="center"></pxl-text>
+      <pxl-text x="500" y="50" text="SELF REFERENCING WITH IDs" size="30" fill="white" baseline="alphabetic"></pxl-text>
       
       <!-- Example 1: Circle pulsating, using its own radius to drive its color! -->
       <!-- The larger it gets, the further it shifts the HSL hue -->
@@ -34,8 +34,8 @@
       <pxl-text 
         id="SelfAwareText"
         x="800" y="400 + wave(1.5)*150" 
-        text="'I am SelfAwareText at Y: ' + Math.round(ref.SelfAwareText.y)" 
-        size="16" fill="yellow" align="center">
+        text="I am SelfAwareText at Y: ${Math.round(ref.SelfAwareText.y)}" 
+        size="16" fill="yellow" baseline="alphabetic">
       </pxl-text>
 
     </pxl-layer>

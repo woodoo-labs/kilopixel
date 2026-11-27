@@ -398,7 +398,7 @@
     test('handlers assign through ref like the property: numbers and arrays as given, strings compile, text literal, null resets', () =>
       withStage(oneLayer(`<pxl-var id="fwAsCount" value="0"></pxl-var>
         <pxl-line id="fwAsLine" x1="100" y1="100" x2="900" y2="100" stroke="#000"></pxl-line>
-        <pxl-text id="fwAsText" text="start" fill="#000"></pxl-text>
+        <pxl-text id="fwAsText" text="start" fill="#000" align="start" baseline="alphabetic"></pxl-text>
         <pxl-circle id="fwAsReader" r="ref.fwAsCount.value * 10" fill="#000"></pxl-circle>
         <pxl-rect id="fwAsButton" w="10" h="10" fill="#000" pxl-on-click="ref.fwAsCount.value++; ref.fwAsLine.x1 += 10;
           ref.fwAsLine.linedash = [20, 10]; ref.fwAsLine.x2 = '400 + 100'; ref.fwAsText.text = 'Q1 - 2024'; ref.fwAsLine.stroke = null"></pxl-rect>`),
@@ -674,7 +674,7 @@
     test('pressed on one shape and released on another: no click on either, the browser\'s click passes; inside one group the group gets it (W1)', () =>
       withStage(oneLayer(`${CIRCLE('fwPressA')}<pxl-circle id="fwPressB" x="250" y="300" r="80" fill="#000"></pxl-circle>
         <pxl-group id="fwPressGroup"><pxl-rect id="fwPressRect" x="750" y="300" w="160" h="80" fill="#000"></pxl-rect>
-          <pxl-text id="fwPressLabel" x="750" y="200" size="40" text="Label" fill="#000" align="center"></pxl-text></pxl-group>`), (stage, box) => {
+          <pxl-text id="fwPressLabel" x="750" y="200" size="40" text="Label" fill="#000" baseline="alphabetic"></pxl-text></pxl-group>`), (stage, box) => {
         stage.render(1); // the text's box comes from its first draw
         const log = listen(box, ['click']);
         hover(stage, 500, 300);
@@ -959,7 +959,7 @@
           <pxl-layer>
             <pxl-group x="100" rotate="t * 10">
               <pxl-circle x="ref.fwSsrVar.value" y="200" r="30" fill="#000"></pxl-circle>
-              <pxl-text x="300" y="200" text="Label">children</pxl-text>
+              <pxl-text x="300" y="200" text="Label" align="start" baseline="alphabetic">children</pxl-text>
             </pxl-group>
             <pxl-polyline points="0,0; 100,100" stroke="#000"></pxl-polyline>
           </pxl-layer>

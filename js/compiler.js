@@ -359,3 +359,82 @@ pxl.compileExpression = function(str) {
     return str;
   }
 };
+
+// =========================================================================
+// Template Attributes: Text Where Only ${…} Is Code
+// =========================================================================
+// A template attribute (static templateAttributes: Text's text) is never guessed at like other values: everything is
+// text, ${…} is code, and \${ writes a literal ${. The engine splits the value itself instead of wrapping it in
+// JavaScript backticks, so backslashes and backticks in the text stay as written.
+// Design: design/done/2026-11-27_text_template_plan.md
+
+// Index of the } that closes the code part starting at `from`, or -1. Quoted strings (with their escapes) and nested
+// template literals are skipped, so a } or ${ inside them doesn't end the part.
+pxl.findTemplateEnd = function(str, from) {
+  let depth = 0;
+  for (let i = from; i < str.length; i++) {
+    const char = str[i];
+    if (char === '\'' || char === '"' || char === '`') {
+      for (i++; i < str.length && str[i] !== char; i++) {
+        if (str[i] === '\\') {
+          i++;
+        } else if (char === '`' && str[i] === '$' && str[i + 1] === '{') {
+          const end = pxl.findTemplateEnd(str, i + 2);
+          if (end < 0) return -1;
+          i = end;
+        }
+      }
+    } else if (char === '{') {
+      depth++;
+    } else if (char === '}') {
+      if (depth === 0) return i;
+      depth--;
+    }
+  }
+  return -1;
+};
+
+// The text itself when it has no code part. Otherwise one compiled function (cached like any expression, animated or
+// reactive by its parts): each part in turn, and an undefined, null or NaN part makes the result null, so the text
+// draws nothing until every part is defined; else the text with the parts joined in. The text between the parts goes
+// into the generated code as JSON string literals, which the expression checks and rewrites skip as quoted text.
+pxl.parseTemplate = function(str) {
+  const texts = [];
+  const codes = [];
+  let text = '';
+  let i = 0;
+  while (i < str.length) {
+    if (str[i] === '\\' && str[i + 1] === '$' && str[i + 2] === '{') {
+      text += '${';
+      i += 3;
+    } else if (str[i] === '$' && str[i + 1] === '{') {
+      const end = pxl.findTemplateEnd(str, i + 2);
+      const code = end < 0 ? '' : str.slice(i + 2, end).trim();
+      if (code === '') {
+        console.warn(`[pxl] template with ${end < 0 ? 'an unclosed ${' : 'an empty ${}'}, shown as text: ${str}`);
+        return str;
+      }
+      texts.push(text);
+      codes.push(code);
+      text = '';
+      i = end + 1;
+    } else {
+      text += str[i];
+      i++;
+    }
+  }
+  if (codes.length === 0) return text;
+  texts.push(text);
+
+  let source = '';
+  let joined = JSON.stringify(texts[0]);
+  for (let p = 0; p < codes.length; p++) {
+    source += `const _p${p} = (${codes[p]});\n` +
+      `if (_p${p} === undefined || _p${p} === null || _p${p} !== _p${p}) return null;\n`;
+    joined += ` + _p${p} + ${JSON.stringify(texts[p + 1])}`;
+  }
+  source += `return ${joined};`;
+  const compiled = pxl.compileExpression(source);
+  // A part that doesn't compile: compileExpression warned and returned its source; the value is shown as written
+  return compiled === source ? str : compiled;
+};

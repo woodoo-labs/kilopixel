@@ -114,15 +114,15 @@
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
               <!-- Left: Auto Arrowheads (Orange Scheme) -->
-              <pxl-text x="300" y="80" text="'arrowstart=&quot;auto&quot;'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
-              <pxl-text x="300" y="120" text="'arrowend=&quot;auto&quot;'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+              <pxl-text x="300" y="80" text="arrowstart=&quot;auto&quot;" size="27" fill="#fb923c" font="monospace" baseline="alphabetic"></pxl-text>
+              <pxl-text x="300" y="120" text="arrowend=&quot;auto&quot;" size="27" fill="#fb923c" font="monospace" baseline="alphabetic"></pxl-text>
 
               <pxl-circle id="sec1Arc" x="300" y="300" r="120" start="135" sweep="270" stroke="#f97316" strokewidth="10" fill="none"
                 arrowstart="auto" arrowend="auto"></pxl-circle>
 
               <!-- Right: Custom Arrowheads (Blue Scheme) -->
-              <pxl-text x="700" y="80" text="'arrowstart=&quot;' + ref.sec1Poly.arrowstart + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
-              <pxl-text x="700" y="120" text="'arrowend=&quot;' + ref.sec1Poly.arrowend + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              <pxl-text x="700" y="80" text="arrowstart=&quot;${ref.sec1Poly.arrowstart}&quot;" size="27" fill="#60a5fa" font="monospace" baseline="alphabetic"></pxl-text>
+              <pxl-text x="700" y="120" text="arrowend=&quot;${ref.sec1Poly.arrowend}&quot;" size="27" fill="#60a5fa" font="monospace" baseline="alphabetic"></pxl-text>
 
               <pxl-polyline id="sec1Poly" points="550,300; 650,220; 750,380; 850,300" smooth="1" stroke="#3b82f6" strokewidth="6"
                 arrowstart="0" arrowend="35"></pxl-polyline>
@@ -222,16 +222,16 @@
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
               <!-- Left: Filled Arrowhead (Orange Scheme) -->
-              <pxl-text x="300" y="80" text="'Solid Triangle'" size="27" weight="700" fill="#fb923c" font="monospace" align="center"></pxl-text>
+              <pxl-text x="300" y="80" text="Solid Triangle" size="27" weight="700" fill="#fb923c" font="monospace" baseline="alphabetic"></pxl-text>
               <pxl-line id="sec2Line1" x1="150" y1="300" x2="450" y2="300" stroke="#f97316" strokewidth="10"
                 arrowend="40" arrowstyle="filled"></pxl-line>
-              <pxl-text x="300" y="500" text="'arrowstyle=&quot;' + ref.sec2Line1.arrowstyle + '&quot;'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+              <pxl-text x="300" y="500" text="arrowstyle=&quot;${ref.sec2Line1.arrowstyle}&quot;" size="27" fill="#fb923c" font="monospace" baseline="alphabetic"></pxl-text>
 
               <!-- Right: Line Chevron Arrowhead (Blue Scheme) -->
-              <pxl-text x="700" y="80" text="'Open Chevron'" size="27" weight="700" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              <pxl-text x="700" y="80" text="Open Chevron" size="27" weight="700" fill="#60a5fa" font="monospace" baseline="alphabetic"></pxl-text>
               <pxl-line id="sec2Line2" x1="550" y1="300" x2="850" y2="300" stroke="#3b82f6" strokewidth="10"
                 arrowend="40" arrowstyle="line"></pxl-line>
-              <pxl-text x="700" y="500" text="'arrowstyle=&quot;' + ref.sec2Line2.arrowstyle + '&quot;'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              <pxl-text x="700" y="500" text="arrowstyle=&quot;${ref.sec2Line2.arrowstyle}&quot;" size="27" fill="#60a5fa" font="monospace" baseline="alphabetic"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -393,29 +393,29 @@
 
               <!-- Grey Dashed Reference Guide through the shared end point -->
               <pxl-line x1="750" y1="80" x2="750" y2="560" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
-              <pxl-text x="750" y="70" baseline="bottom" text="'end x = 750'" size="27" fill="#94a3b8" font="monospace" align="center"></pxl-text>
+              <pxl-text x="750" y="70" baseline="bottom" text="end x = 750" size="27" fill="#94a3b8" font="monospace"></pxl-text>
 
               <!-- Top: Line (Orange Scheme): grey reference stroke without arrowhead (offset by 50), then the arrowed shape -->
-              <pxl-text x="320" y="150" text="'linecap=&quot;' + ref.sec3Line.linecap + '&quot;'" size="27" weight="700" fill="#fb923c" font="monospace" align="right" baseline="middle"></pxl-text>
+              <pxl-text x="320" y="150" text="linecap=&quot;${ref.sec3Line.linecap}&quot;" size="27" weight="700" fill="#fb923c" font="monospace" align="right"></pxl-text>
               <pxl-line x1="350" y1="150" x2="750" y2="150" dy="50" stroke="#cbd5e1"
                 strokewidth="ref.sec3Line.strokewidth" linecap="ref.sec3Line.linecap"></pxl-line>
-              <pxl-text x="790" y="200" text="'reference'" size="27" fill="#94a3b8" font="monospace" baseline="middle"></pxl-text>
+              <pxl-text x="790" y="200" text="reference" size="27" fill="#94a3b8" font="monospace" align="start"></pxl-text>
               <pxl-line id="sec3Line" x1="350" y1="150" x2="750" y2="150" stroke="#f97316" strokewidth="20"
                 arrowend="75" arrowstyle="filled" linecap="butt"></pxl-line>
 
               <!-- Middle: Polyline (Blue Scheme): grey reference stroke without arrowhead (offset by 50), then the arrowed shape -->
-              <pxl-text x="320" y="300" text="'linecap=&quot;' + ref.sec3Polyline.linecap + '&quot;'" size="27" weight="700" fill="#60a5fa" font="monospace" align="right" baseline="middle"></pxl-text>
+              <pxl-text x="320" y="300" text="linecap=&quot;${ref.sec3Polyline.linecap}&quot;" size="27" weight="700" fill="#60a5fa" font="monospace" align="right"></pxl-text>
               <pxl-polyline points="350,300; 450,250; 550,350; 650,300; 750,300" dy="50" stroke="#cbd5e1"
                 strokewidth="ref.sec3Polyline.strokewidth" linecap="ref.sec3Polyline.linecap"></pxl-polyline>
-              <pxl-text x="790" y="350" text="'reference'" size="27" fill="#94a3b8" font="monospace" baseline="middle"></pxl-text>
+              <pxl-text x="790" y="350" text="reference" size="27" fill="#94a3b8" font="monospace" align="start"></pxl-text>
               <pxl-polyline id="sec3Polyline" points="350,300; 450,250; 550,350; 650,300; 750,300" stroke="#3b82f6" strokewidth="20"
                 arrowend="75" arrowstyle="filled" linecap="square"></pxl-polyline>
 
               <!-- Bottom: Elliptical Arc (Green Scheme): grey reference stroke without arrowhead (offset by 50), then the arrowed shape -->
-              <pxl-text x="320" y="450" text="'linecap=&quot;' + ref.sec3Ellipse.linecap + '&quot;'" size="27" weight="700" fill="#4ade80" font="monospace" align="right" baseline="middle"></pxl-text>
+              <pxl-text x="320" y="450" text="linecap=&quot;${ref.sec3Ellipse.linecap}&quot;" size="27" weight="700" fill="#4ade80" font="monospace" align="right"></pxl-text>
               <pxl-ellipse x="750" y="580" rx="400" ry="130" start="180" sweep="90" dy="50" stroke="#cbd5e1"
                 strokewidth="ref.sec3Ellipse.strokewidth" linecap="ref.sec3Ellipse.linecap"></pxl-ellipse>
-              <pxl-text x="790" y="500" text="'reference'" size="27" fill="#94a3b8" font="monospace" baseline="middle"></pxl-text>
+              <pxl-text x="790" y="500" text="reference" size="27" fill="#94a3b8" font="monospace" align="start"></pxl-text>
               <pxl-ellipse id="sec3Ellipse" x="750" y="580" rx="400" ry="130" start="180" sweep="90" stroke="#22c55e" strokewidth="20"
                 arrowend="75" arrowstyle="line" linecap="round"></pxl-ellipse>
             </pxl-layer>
@@ -562,17 +562,17 @@
               <pxl-grid stroke="#f1f5f9" major="2"></pxl-grid>
 
               <!-- Top: Miter Join (Orange Scheme) -->
-              <pxl-text x="320" y="150" text="'linejoin=&quot;miter&quot;'" size="27" weight="700" fill="#fb923c" font="monospace" align="right" baseline="middle"></pxl-text>
+              <pxl-text x="320" y="150" text="linejoin=&quot;miter&quot;" size="27" weight="700" fill="#fb923c" font="monospace" align="right"></pxl-text>
               <pxl-polyline id="sec4Miter" points="350,185; 390,115; 430,185; 470,115; 510,185; 750,150" stroke="#f97316" strokewidth="20"
                 arrowend="75" miterlimit="10" arrowstyle="line" linejoin="miter"></pxl-polyline>
 
               <!-- Middle: Bevel Join (Blue Scheme) -->
-              <pxl-text x="320" y="300" text="'linejoin=&quot;bevel&quot;'" size="27" weight="700" fill="#60a5fa" font="monospace" align="right" baseline="middle"></pxl-text>
+              <pxl-text x="320" y="300" text="linejoin=&quot;bevel&quot;" size="27" weight="700" fill="#60a5fa" font="monospace" align="right"></pxl-text>
               <pxl-polyline id="sec4Bevel" points="350,335; 390,265; 430,335; 470,265; 510,335; 750,300" stroke="#3b82f6" strokewidth="20"
                 arrowend="75" arrowstyle="line" linejoin="bevel"></pxl-polyline>
 
               <!-- Bottom: Round Join (Green Scheme) -->
-              <pxl-text x="320" y="450" text="'linejoin=&quot;round&quot;'" size="27" weight="700" fill="#4ade80" font="monospace" align="right" baseline="middle"></pxl-text>
+              <pxl-text x="320" y="450" text="linejoin=&quot;round&quot;" size="27" weight="700" fill="#4ade80" font="monospace" align="right"></pxl-text>
               <pxl-polyline id="sec4Round" points="350,485; 390,415; 430,485; 470,415; 510,485; 750,450" stroke="#22c55e" strokewidth="20"
                 arrowend="75" arrowstyle="line" linejoin="round"></pxl-polyline>
             </pxl-layer>

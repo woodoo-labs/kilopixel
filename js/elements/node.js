@@ -2,6 +2,9 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   // Attribute defaults per class (read-only). Subclasses extend them: { ...Parent.defaults, ... }.
   // Also used to resolve bare / removed attributes (pxl.resolveEmptyAttribute).
   static defaults = {};
+  // Attributes read as templates (pxl.parseTemplate): text where only ${…} is code. Text has ['text']; custom shapes
+  // may list their own text attributes.
+  static templateAttributes = [];
 
   // Every key of defaults is an attribute. The browser reads this once, at define time, with this = the class being
   // defined, so one getter serves every subclass, custom shapes included.

@@ -72,7 +72,7 @@
               <pxl-group :id="id + 'button'" :x="820" :y="250" :style="{ cursor: 'pointer' }" @click="counts.buttonClicks++"
                 @pointerenter="counts.buttonHovered = true" @pointerleave="counts.buttonHovered = false">
                 <pxl-rect :w="200" :h="80" :r="12" :fill="counts.buttonHovered ? '#2563eb' : '#3b82f6'"></pxl-rect>
-                <pxl-text :id="id + 'label'" :text="label" :size="22" fill="#fff" align="center" baseline="middle"></pxl-text>
+                <pxl-text :id="id + 'label'" :text="label" :size="22" fill="#fff"></pxl-text>
               </pxl-group>
               <pxl-line :id="id + 'dash'" :x1="80" :y1="470" :x2="920" :y2="470" stroke="#0f172a" :strokewidth="3" :linedash="dash"></pxl-line>
               <pxl-polyline :id="id + 'chart'" :points="data" stroke="#16a34a" :strokewidth="4" fill="none"></pxl-polyline>

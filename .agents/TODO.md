@@ -95,11 +95,5 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 ## 51. Release 0.1: Scope
 - **Status**: 🟢 **Decided**
 - **Plan**: `design/2026-11-27_release_0_1_plan.md`
-- What 0.1 needs: A decisions that would break pages later (§52 text as a template and centered text, §42, §49, release policy), B features (§3 animation started by events, §1 path, §9 image), C release work (§43, §44, 9 docs pages, §12); D the rest after 0.1.
-- **Decided**: R1–R5 (plan §6). **Next**: plans for §52 and §3; decisions for §42 (D1–D5) and §49.
-
-## 52. Text as a Template, Centered by Default
-- **Status**: 🟢 **Decided** (no plan of its own yet)
-- **Plan**: `design/2026-11-27_release_0_1_plan.md` §4 (analysis, edge cases), R1, R3
-- `<pxl-text>` `text` (the attribute) is text where only `${…}` is code; an `undefined` part draws nothing; the property stays literal. Default `align="center"`, `baseline="middle"`, like every other shape. One migration of about 640 labels; the docs section on what `text` accepts (the former items on quoted text in the docs and on default alignment are merged here).
-- **Next**: a plan (parser, Rule A, tests, migration script).
+- What 0.1 needs: A decisions that would break pages later (text as a template and centered text: built, `design/done/2026-11-27_text_template_plan.md`; §42, §49, release policy), B features (§3 animation started by events, §1 path, §9 image), C release work (§43, §44, 9 docs pages, §12); D the rest after 0.1.
+- **Decided**: R1–R5 (plan §6). **Next**: the plan for §3 (animation); decisions for §42 (D1–D5) and §49.

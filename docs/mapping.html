@@ -141,10 +141,10 @@
               <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <!-- Center dot and labels undo the layer's zoom, so they keep their size -->
               <pxl-circle x="0" y="0" r="5 / ref.sec1Layer.zoom" fill="#a78bfa"></pxl-circle>
-              <pxl-text x="15" y="-15" zoom="1 / ref.sec1Layer.zoom" baseline="bottom" text="'Layer Center'" size="27" fill="#a78bfa" font="monospace"></pxl-text>
+              <pxl-text x="15" y="-15" zoom="1 / ref.sec1Layer.zoom" baseline="bottom" text="Layer Center" size="27" fill="#a78bfa" font="monospace" align="start"></pxl-text>
 
               <pxl-circle id="sec1Planet" x="200" y="100" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
-              <pxl-text x="ref.sec1Planet.x" y="ref.sec1Planet.y - 55" zoom="1 / ref.sec1Layer.zoom" baseline="bottom" text="'Planet'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+              <pxl-text x="ref.sec1Planet.x" y="ref.sec1Planet.y - 55" zoom="1 / ref.sec1Layer.zoom" baseline="bottom" text="Planet" size="27" fill="#fb923c" font="monospace"></pxl-text>
             </pxl-layer>
 
             <!-- Line in an Untransformed Layer (Green Scheme) -->
@@ -155,23 +155,23 @@
 
               <pxl-line id="sec1Line" x1="150" y1="150" x2="toLocal(ref.sec1Planet, 'x')" y2="toLocal(ref.sec1Planet, 'y')" stroke="#22c55e" strokewidth="4"></pxl-line>
               <pxl-circle x="ref.sec1Line.x1" y="ref.sec1Line.y1" r="5" fill="#4ade80"></pxl-circle>
-              <pxl-text x="ref.sec1Line.x1" y="ref.sec1Line.y1 - 15" baseline="bottom" text="'Start Point'" size="27" fill="#4ade80" font="monospace" align="center"></pxl-text>
+              <pxl-text x="ref.sec1Line.x1" y="ref.sec1Line.y1 - 15" baseline="bottom" text="Start Point" size="27" fill="#4ade80" font="monospace"></pxl-text>
               <pxl-circle x="ref.sec1Line.x2" y="ref.sec1Line.y2" r="5" fill="#4ade80"></pxl-circle>
 
               <!-- Readout: mapped end point = layer (violet 400) + planet (orange 400), both in the line's space; total in green 500 -->
-              <pxl-text x="515" y="490" baseline="bottom" size="27" font="monospace" fill="#64748b" text="`In the Line's Space:`"></pxl-text>
-              <pxl-text x="515" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'Mapped x2:'"></pxl-text>
-              <pxl-text x="760" y="530" baseline="bottom" size="27" font="monospace" fill="#22c55e" align="right" text="Math.round(ref.sec1Line.x2)"></pxl-text>
-              <pxl-text x="782" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'='"></pxl-text>
-              <pxl-text x="865" y="530" baseline="bottom" size="27" font="monospace" fill="#a78bfa" align="right" text="Math.round(toLocal(ref.sec1Layer, 'x'))"></pxl-text>
-              <pxl-text x="887" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="ref.sec1VarPlanetX.value < 0 ? '-' : '+'"></pxl-text>
-              <pxl-text x="970" y="530" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="Math.abs(ref.sec1VarPlanetX.value)"></pxl-text>
-              <pxl-text x="515" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'Mapped y2:'"></pxl-text>
-              <pxl-text x="760" y="570" baseline="bottom" size="27" font="monospace" fill="#22c55e" align="right" text="Math.round(ref.sec1Line.y2)"></pxl-text>
-              <pxl-text x="782" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'='"></pxl-text>
-              <pxl-text x="865" y="570" baseline="bottom" size="27" font="monospace" fill="#a78bfa" align="right" text="Math.round(toLocal(ref.sec1Layer, 'y'))"></pxl-text>
-              <pxl-text x="887" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="ref.sec1VarPlanetY.value < 0 ? '-' : '+'"></pxl-text>
-              <pxl-text x="970" y="570" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="Math.abs(ref.sec1VarPlanetY.value)"></pxl-text>
+              <pxl-text x="515" y="490" baseline="bottom" size="27" font="monospace" fill="#64748b" text="In the Line's Space:" align="start"></pxl-text>
+              <pxl-text x="515" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="Mapped x2:" align="start"></pxl-text>
+              <pxl-text x="760" y="530" baseline="bottom" size="27" font="monospace" fill="#22c55e" align="right" text="${Math.round(ref.sec1Line.x2)}"></pxl-text>
+              <pxl-text x="782" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="=" align="start"></pxl-text>
+              <pxl-text x="865" y="530" baseline="bottom" size="27" font="monospace" fill="#a78bfa" align="right" text="${Math.round(toLocal(ref.sec1Layer, 'x'))}"></pxl-text>
+              <pxl-text x="887" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="${ref.sec1VarPlanetX.value < 0 ? '-' : '+'}" align="start"></pxl-text>
+              <pxl-text x="970" y="530" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="${Math.abs(ref.sec1VarPlanetX.value)}"></pxl-text>
+              <pxl-text x="515" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="Mapped y2:" align="start"></pxl-text>
+              <pxl-text x="760" y="570" baseline="bottom" size="27" font="monospace" fill="#22c55e" align="right" text="${Math.round(ref.sec1Line.y2)}"></pxl-text>
+              <pxl-text x="782" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="=" align="start"></pxl-text>
+              <pxl-text x="865" y="570" baseline="bottom" size="27" font="monospace" fill="#a78bfa" align="right" text="${Math.round(toLocal(ref.sec1Layer, 'y'))}"></pxl-text>
+              <pxl-text x="887" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="${ref.sec1VarPlanetY.value < 0 ? '-' : '+'}" align="start"></pxl-text>
+              <pxl-text x="970" y="570" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="${Math.abs(ref.sec1VarPlanetY.value)}"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -264,10 +264,10 @@
               <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#fed7aa" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#fed7aa" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-circle x="0" y="0" r="5" fill="#fdba74"></pxl-circle>
-              <pxl-text x="-15" y="-15" baseline="bottom" text="'Layer 1 Center'" size="27" fill="#fdba74" font="monospace" align="right"></pxl-text>
+              <pxl-text x="-15" y="-15" baseline="bottom" text="Layer 1 Center" size="27" fill="#fdba74" font="monospace" align="right"></pxl-text>
 
               <pxl-circle id="sec2Planet" x="150" y="0" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
-              <pxl-text x="ref.sec2Planet.x" y="ref.sec2Planet.y + 75" baseline="top" text="'Planet'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+              <pxl-text x="ref.sec2Planet.x" y="ref.sec2Planet.y + 75" baseline="top" text="Planet" size="27" fill="#fb923c" font="monospace"></pxl-text>
             </pxl-layer>
 
             <!-- Layer 2 With the Ring -->
@@ -275,7 +275,7 @@
               <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#bfdbfe" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#bfdbfe" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-circle x="0" y="0" r="5" fill="#93c5fd"></pxl-circle>
-              <pxl-text x="15" y="-15" baseline="bottom" text="'Layer 2 Center'" size="27" fill="#93c5fd" font="monospace"></pxl-text>
+              <pxl-text x="15" y="-15" baseline="bottom" text="Layer 2 Center" size="27" fill="#93c5fd" font="monospace" align="start"></pxl-text>
 
               <!-- Ring center to the axes (center helpers, step 300) -->
               <pxl-line x1="ref.sec2Ring.x" y1="ref.sec2Ring.y" x2="ref.sec2Ring.x" y2="0" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]"></pxl-line>
@@ -283,7 +283,7 @@
 
               <pxl-circle id="sec2Ring" x="toLocal(ref.sec2Planet, 'x')" y="toLocal(ref.sec2Planet, 'y')" r="60" stroke="#3b82f6" strokewidth="4"></pxl-circle>
               <pxl-circle x="ref.sec2Ring.x" y="ref.sec2Ring.y" r="5" fill="#60a5fa"></pxl-circle>
-              <pxl-text x="ref.sec2Ring.x" y="ref.sec2Ring.y - ref.sec2Ring.r - 15" baseline="bottom" text="'Ring'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              <pxl-text x="ref.sec2Ring.x" y="ref.sec2Ring.y - ref.sec2Ring.r - 15" baseline="bottom" text="Ring" size="27" fill="#60a5fa" font="monospace"></pxl-text>
             </pxl-layer>
 
             <!-- Readout: ring center = layer 1 (orange 300) + planet (orange 400) - layer 2 (blue 300), all turned into
@@ -299,23 +299,23 @@
               <pxl-var id="sec2VarPlanetX" value="Math.round(ref.sec2Ring.x) - ref.sec2VarLayer1X.value + ref.sec2VarLayer2X.value"></pxl-var>
               <pxl-var id="sec2VarPlanetY" value="Math.round(ref.sec2Ring.y) - ref.sec2VarLayer1Y.value + ref.sec2VarLayer2Y.value"></pxl-var>
 
-              <pxl-text x="440" y="490" baseline="bottom" size="27" font="monospace" fill="#64748b" text="`In the Ring's Space:`"></pxl-text>
-              <pxl-text x="440" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'Mapped x:'"></pxl-text>
-              <pxl-text x="655" y="530" baseline="bottom" size="27" font="monospace" fill="#3b82f6" align="right" text="Math.round(ref.sec2Ring.x)"></pxl-text>
-              <pxl-text x="672" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'='"></pxl-text>
-              <pxl-text x="760" y="530" baseline="bottom" size="27" font="monospace" fill="#fdba74" align="right" text="ref.sec2VarLayer1X.value"></pxl-text>
-              <pxl-text x="777" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="ref.sec2VarPlanetX.value < 0 ? '-' : '+'"></pxl-text>
-              <pxl-text x="865" y="530" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="Math.abs(ref.sec2VarPlanetX.value)"></pxl-text>
-              <pxl-text x="882" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="ref.sec2VarLayer2X.value < 0 ? '+' : '-'"></pxl-text>
-              <pxl-text x="970" y="530" baseline="bottom" size="27" font="monospace" fill="#93c5fd" align="right" text="Math.abs(ref.sec2VarLayer2X.value)"></pxl-text>
-              <pxl-text x="440" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'Mapped y:'"></pxl-text>
-              <pxl-text x="655" y="570" baseline="bottom" size="27" font="monospace" fill="#3b82f6" align="right" text="Math.round(ref.sec2Ring.y)"></pxl-text>
-              <pxl-text x="672" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'='"></pxl-text>
-              <pxl-text x="760" y="570" baseline="bottom" size="27" font="monospace" fill="#fdba74" align="right" text="ref.sec2VarLayer1Y.value"></pxl-text>
-              <pxl-text x="777" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="ref.sec2VarPlanetY.value < 0 ? '-' : '+'"></pxl-text>
-              <pxl-text x="865" y="570" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="Math.abs(ref.sec2VarPlanetY.value)"></pxl-text>
-              <pxl-text x="882" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="ref.sec2VarLayer2Y.value < 0 ? '+' : '-'"></pxl-text>
-              <pxl-text x="970" y="570" baseline="bottom" size="27" font="monospace" fill="#93c5fd" align="right" text="Math.abs(ref.sec2VarLayer2Y.value)"></pxl-text>
+              <pxl-text x="440" y="490" baseline="bottom" size="27" font="monospace" fill="#64748b" text="In the Ring's Space:" align="start"></pxl-text>
+              <pxl-text x="440" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="Mapped x:" align="start"></pxl-text>
+              <pxl-text x="655" y="530" baseline="bottom" size="27" font="monospace" fill="#3b82f6" align="right" text="${Math.round(ref.sec2Ring.x)}"></pxl-text>
+              <pxl-text x="672" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="=" align="start"></pxl-text>
+              <pxl-text x="760" y="530" baseline="bottom" size="27" font="monospace" fill="#fdba74" align="right" text="${ref.sec2VarLayer1X.value}"></pxl-text>
+              <pxl-text x="777" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="${ref.sec2VarPlanetX.value < 0 ? '-' : '+'}" align="start"></pxl-text>
+              <pxl-text x="865" y="530" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="${Math.abs(ref.sec2VarPlanetX.value)}"></pxl-text>
+              <pxl-text x="882" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="${ref.sec2VarLayer2X.value < 0 ? '+' : '-'}" align="start"></pxl-text>
+              <pxl-text x="970" y="530" baseline="bottom" size="27" font="monospace" fill="#93c5fd" align="right" text="${Math.abs(ref.sec2VarLayer2X.value)}"></pxl-text>
+              <pxl-text x="440" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="Mapped y:" align="start"></pxl-text>
+              <pxl-text x="655" y="570" baseline="bottom" size="27" font="monospace" fill="#3b82f6" align="right" text="${Math.round(ref.sec2Ring.y)}"></pxl-text>
+              <pxl-text x="672" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="=" align="start"></pxl-text>
+              <pxl-text x="760" y="570" baseline="bottom" size="27" font="monospace" fill="#fdba74" align="right" text="${ref.sec2VarLayer1Y.value}"></pxl-text>
+              <pxl-text x="777" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="${ref.sec2VarPlanetY.value < 0 ? '-' : '+'}" align="start"></pxl-text>
+              <pxl-text x="865" y="570" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="${Math.abs(ref.sec2VarPlanetY.value)}"></pxl-text>
+              <pxl-text x="882" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="${ref.sec2VarLayer2Y.value < 0 ? '+' : '-'}" align="start"></pxl-text>
+              <pxl-text x="970" y="570" baseline="bottom" size="27" font="monospace" fill="#93c5fd" align="right" text="${Math.abs(ref.sec2VarLayer2Y.value)}"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -432,16 +432,16 @@
               <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-circle x="0" y="0" r="5" fill="#a78bfa"></pxl-circle>
-              <pxl-text x="-15" y="15" baseline="top" text="'Layer Center'" size="27" fill="#a78bfa" font="monospace" align="right"></pxl-text>
+              <pxl-text x="-15" y="15" baseline="top" text="Layer Center" size="27" fill="#a78bfa" font="monospace" align="right"></pxl-text>
 
               <pxl-circle id="sec3Planet" x="200" y="0" dx="150" rotate="0" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
 
               <!-- Planet center (step 400) and offset (steps 600 / 700) -->
               <pxl-line x1="ref.sec3Planet.x" y1="ref.sec3Planet.y" x2="ref.sec3Planet.tx" y2="ref.sec3Planet.ty" stroke="#ea580c" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-circle x="ref.sec3Planet.x" y="ref.sec3Planet.y" r="5" fill="#fb923c"></pxl-circle>
-              <pxl-text x="ref.sec3Planet.x" y="ref.sec3Planet.y - 15" baseline="bottom" text="'Planet Center'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+              <pxl-text x="ref.sec3Planet.x" y="ref.sec3Planet.y - 15" baseline="bottom" text="Planet Center" size="27" fill="#fb923c" font="monospace"></pxl-text>
               <pxl-circle x="ref.sec3Planet.tx" y="ref.sec3Planet.ty" r="5" fill="#c2410c"></pxl-circle>
-              <pxl-text x="ref.sec3Planet.tx + 55" y="ref.sec3Planet.ty" baseline="middle" text="'Planet'" size="27" fill="#c2410c" font="monospace"></pxl-text>
+              <pxl-text x="ref.sec3Planet.tx + 55" y="ref.sec3Planet.ty" text="Planet" size="27" fill="#c2410c" font="monospace" align="start"></pxl-text>
             </pxl-layer>
 
             <!-- Readers in an Untransformed Layer -->
@@ -456,27 +456,27 @@
               <!-- Line to the drawn planet (Green Scheme) -->
               <pxl-line id="sec3Line" x1="150" y1="520" x2="toLocal(ref.sec3Planet, 'tx')" y2="toLocal(ref.sec3Planet, 'ty')" stroke="#22c55e" strokewidth="4"></pxl-line>
               <pxl-circle x="ref.sec3Line.x1" y="ref.sec3Line.y1" r="5" fill="#4ade80"></pxl-circle>
-              <pxl-text x="ref.sec3Line.x1" y="ref.sec3Line.y1 + 15" baseline="top" text="'Start Point'" size="27" fill="#4ade80" font="monospace" align="center"></pxl-text>
+              <pxl-text x="ref.sec3Line.x1" y="ref.sec3Line.y1 + 15" baseline="top" text="Start Point" size="27" fill="#4ade80" font="monospace"></pxl-text>
               <pxl-circle x="ref.sec3Line.x2" y="ref.sec3Line.y2" r="5" fill="#4ade80"></pxl-circle>
 
               <!-- Readout: mapped end point = layer (violet 400) + planet center (orange 400) + offset (orange 700, like the "Planet" label), in the line's space -->
-              <pxl-text x="410" y="490" baseline="bottom" size="27" font="monospace" fill="#64748b" text="`In the Line's Space:`"></pxl-text>
-              <pxl-text x="410" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'Mapped x2:'"></pxl-text>
-              <pxl-text x="655" y="530" baseline="bottom" size="27" font="monospace" fill="#22c55e" align="right" text="Math.round(toLocal(ref.sec3Planet, 'tx'))"></pxl-text>
-              <pxl-text x="672" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'='"></pxl-text>
-              <pxl-text x="760" y="530" baseline="bottom" size="27" font="monospace" fill="#a78bfa" align="right" text="Math.round(toLocal(ref.sec3Layer, 'x'))"></pxl-text>
-              <pxl-text x="777" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="ref.sec3VarCenterX.value < 0 ? '-' : '+'"></pxl-text>
-              <pxl-text x="865" y="530" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="Math.abs(ref.sec3VarCenterX.value)"></pxl-text>
-              <pxl-text x="882" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="Math.round(toLocal(ref.sec3Planet, 'dx')) < 0 ? '-' : '+'"></pxl-text>
-              <pxl-text x="970" y="530" baseline="bottom" size="27" font="monospace" fill="#c2410c" align="right" text="Math.abs(Math.round(toLocal(ref.sec3Planet, 'dx')))"></pxl-text>
-              <pxl-text x="410" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'Mapped y2:'"></pxl-text>
-              <pxl-text x="655" y="570" baseline="bottom" size="27" font="monospace" fill="#22c55e" align="right" text="Math.round(toLocal(ref.sec3Planet, 'ty'))"></pxl-text>
-              <pxl-text x="672" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'='"></pxl-text>
-              <pxl-text x="760" y="570" baseline="bottom" size="27" font="monospace" fill="#a78bfa" align="right" text="Math.round(toLocal(ref.sec3Layer, 'y'))"></pxl-text>
-              <pxl-text x="777" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="ref.sec3VarCenterY.value < 0 ? '-' : '+'"></pxl-text>
-              <pxl-text x="865" y="570" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="Math.abs(ref.sec3VarCenterY.value)"></pxl-text>
-              <pxl-text x="882" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="Math.round(toLocal(ref.sec3Planet, 'dy')) < 0 ? '-' : '+'"></pxl-text>
-              <pxl-text x="970" y="570" baseline="bottom" size="27" font="monospace" fill="#c2410c" align="right" text="Math.abs(Math.round(toLocal(ref.sec3Planet, 'dy')))"></pxl-text>
+              <pxl-text x="410" y="490" baseline="bottom" size="27" font="monospace" fill="#64748b" text="In the Line's Space:" align="start"></pxl-text>
+              <pxl-text x="410" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="Mapped x2:" align="start"></pxl-text>
+              <pxl-text x="655" y="530" baseline="bottom" size="27" font="monospace" fill="#22c55e" align="right" text="${Math.round(toLocal(ref.sec3Planet, 'tx'))}"></pxl-text>
+              <pxl-text x="672" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="=" align="start"></pxl-text>
+              <pxl-text x="760" y="530" baseline="bottom" size="27" font="monospace" fill="#a78bfa" align="right" text="${Math.round(toLocal(ref.sec3Layer, 'x'))}"></pxl-text>
+              <pxl-text x="777" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="${ref.sec3VarCenterX.value < 0 ? '-' : '+'}" align="start"></pxl-text>
+              <pxl-text x="865" y="530" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="${Math.abs(ref.sec3VarCenterX.value)}"></pxl-text>
+              <pxl-text x="882" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="${Math.round(toLocal(ref.sec3Planet, 'dx')) < 0 ? '-' : '+'}" align="start"></pxl-text>
+              <pxl-text x="970" y="530" baseline="bottom" size="27" font="monospace" fill="#c2410c" align="right" text="${Math.abs(Math.round(toLocal(ref.sec3Planet, 'dx')))}"></pxl-text>
+              <pxl-text x="410" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="Mapped y2:" align="start"></pxl-text>
+              <pxl-text x="655" y="570" baseline="bottom" size="27" font="monospace" fill="#22c55e" align="right" text="${Math.round(toLocal(ref.sec3Planet, 'ty'))}"></pxl-text>
+              <pxl-text x="672" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="=" align="start"></pxl-text>
+              <pxl-text x="760" y="570" baseline="bottom" size="27" font="monospace" fill="#a78bfa" align="right" text="${Math.round(toLocal(ref.sec3Layer, 'y'))}"></pxl-text>
+              <pxl-text x="777" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="${ref.sec3VarCenterY.value < 0 ? '-' : '+'}" align="start"></pxl-text>
+              <pxl-text x="865" y="570" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="${Math.abs(ref.sec3VarCenterY.value)}"></pxl-text>
+              <pxl-text x="882" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="${Math.round(toLocal(ref.sec3Planet, 'dy')) < 0 ? '-' : '+'}" align="start"></pxl-text>
+              <pxl-text x="970" y="570" baseline="bottom" size="27" font="monospace" fill="#c2410c" align="right" text="${Math.abs(Math.round(toLocal(ref.sec3Planet, 'dy')))}"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -594,20 +594,20 @@
               <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-circle x="0" y="0" r="5" fill="#a78bfa"></pxl-circle>
-              <pxl-text x="-15" y="-15" baseline="bottom" text="'Layer Center'" size="27" fill="#a78bfa" font="monospace" align="right"></pxl-text>
+              <pxl-text x="-15" y="-15" baseline="bottom" text="Layer Center" size="27" fill="#a78bfa" font="monospace" align="right"></pxl-text>
 
               <!-- Layer center to group center (center helper 300) and the group center (300, two-layer colors) -->
               <pxl-line x2="ref.sec4Group.x" y2="ref.sec4Group.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-circle x="ref.sec4Group.x" y="ref.sec4Group.y" r="5" fill="#fdba74"></pxl-circle>
 
               <pxl-group id="sec4Group" x="150" y="-100" rotate="0">
-                <pxl-text x="0" y="-15" baseline="bottom" text="'Group Center'" size="27" fill="#fdba74" font="monospace" align="center"></pxl-text>
+                <pxl-text x="0" y="-15" baseline="bottom" text="Group Center" size="27" fill="#fdba74" font="monospace"></pxl-text>
                 <pxl-line x2="ref.sec4Pointer.x" y2="ref.sec4Pointer.y" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
                 <pxl-circle x="ref.sec4Pointer.x" y="ref.sec4Pointer.y" r="5" fill="#fb923c"></pxl-circle>
 
                 <pxl-line id="sec4Pointer" x="100" y="50" x2="100" rotate="90" stroke="#f97316" strokewidth="4" arrowend="auto"></pxl-line>
                 <!-- Label past the arrow's tip, across the arrow: turned 90° less than the pointer, so the offset dy runs along the arrow -->
-                <pxl-text x="ref.sec4Pointer.x" y="ref.sec4Pointer.y" dy="ref.sec4Pointer.x2 + 15" rotate="ref.sec4Pointer.rotate - 90" baseline="top" text="'Pointer'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+                <pxl-text x="ref.sec4Pointer.x" y="ref.sec4Pointer.y" dy="ref.sec4Pointer.x2 + 15" rotate="ref.sec4Pointer.rotate - 90" baseline="top" text="Pointer" size="27" fill="#fb923c" font="monospace"></pxl-text>
               </pxl-group>
             </pxl-layer>
 
@@ -617,19 +617,19 @@
               <pxl-circle x="850" y="150" r="100" stroke="#93c5fd" strokewidth="2" linedash="[5, 5]"></pxl-circle>
               <pxl-line id="sec4Needle" x="850" y="150" x1="-50" x2="50" rotate="toLocal(ref.sec4Pointer, 'rotate')" stroke="#3b82f6" strokewidth="4" arrowend="auto"></pxl-line>
               <pxl-circle x="850" y="150" r="5" fill="#60a5fa"></pxl-circle>
-              <pxl-text x="850" y="35" baseline="bottom" text="'Needle'" size="27" fill="#60a5fa" font="monospace" align="center"></pxl-text>
+              <pxl-text x="850" y="35" baseline="bottom" text="Needle" size="27" fill="#60a5fa" font="monospace"></pxl-text>
 
               <!-- Readout: total rotation = layer (violet 400) + group (orange 300) + pointer (orange 400); total in blue 500 like the needle.
                    The raw sum, not toLocal's value: toLocal wraps to -180..180, so 300 would show as -60 next to 120 + 90 + 90. -->
-              <pxl-text x="375" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="`In the Needle's Space:`"></pxl-text>
-              <pxl-text x="375" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'Mapped rotate:'"></pxl-text>
-              <pxl-text x="680" y="570" baseline="bottom" size="27" font="monospace" fill="#3b82f6" align="right" text="ref.sec4Layer.rotate + ref.sec4Group.rotate + ref.sec4Pointer.rotate"></pxl-text>
-              <pxl-text x="697" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'='"></pxl-text>
-              <pxl-text x="780" y="570" baseline="bottom" size="27" font="monospace" fill="#a78bfa" align="right" text="ref.sec4Layer.rotate"></pxl-text>
-              <pxl-text x="797" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="ref.sec4Group.rotate < 0 ? '-' : '+'"></pxl-text>
-              <pxl-text x="875" y="570" baseline="bottom" size="27" font="monospace" fill="#fdba74" align="right" text="Math.abs(ref.sec4Group.rotate)"></pxl-text>
-              <pxl-text x="892" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="ref.sec4Pointer.rotate < 0 ? '-' : '+'"></pxl-text>
-              <pxl-text x="970" y="570" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="Math.abs(ref.sec4Pointer.rotate)"></pxl-text>
+              <pxl-text x="375" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="In the Needle's Space:" align="start"></pxl-text>
+              <pxl-text x="375" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="Mapped rotate:" align="start"></pxl-text>
+              <pxl-text x="680" y="570" baseline="bottom" size="27" font="monospace" fill="#3b82f6" align="right" text="${ref.sec4Layer.rotate + ref.sec4Group.rotate + ref.sec4Pointer.rotate}"></pxl-text>
+              <pxl-text x="697" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="=" align="start"></pxl-text>
+              <pxl-text x="780" y="570" baseline="bottom" size="27" font="monospace" fill="#a78bfa" align="right" text="${ref.sec4Layer.rotate}"></pxl-text>
+              <pxl-text x="797" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="${ref.sec4Group.rotate < 0 ? '-' : '+'}" align="start"></pxl-text>
+              <pxl-text x="875" y="570" baseline="bottom" size="27" font="monospace" fill="#fdba74" align="right" text="${Math.abs(ref.sec4Group.rotate)}"></pxl-text>
+              <pxl-text x="892" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="${ref.sec4Pointer.rotate < 0 ? '-' : '+'}" align="start"></pxl-text>
+              <pxl-text x="970" y="570" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="${Math.abs(ref.sec4Pointer.rotate)}"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -754,7 +754,7 @@
               <pxl-line x1="0" y1="-2000" x2="0" y2="2000" stroke="#cbd5e1" strokewidth="2 / ref.sec5Layer.zoom" linedash="[5, 5]"></pxl-line>
               <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2 / ref.sec5Layer.zoom" linedash="[5, 5]"></pxl-line>
               <pxl-circle x="0" y="0" r="5 / ref.sec5Layer.zoom" fill="#a78bfa"></pxl-circle>
-              <pxl-text x="-15 / ref.sec5Layer.zoom" y="-15 / ref.sec5Layer.zoom" zoom="1 / ref.sec5Layer.zoom" baseline="bottom" text="'Layer Center'" size="27" fill="#a78bfa" font="monospace" align="right"></pxl-text>
+              <pxl-text x="-15 / ref.sec5Layer.zoom" y="-15 / ref.sec5Layer.zoom" zoom="1 / ref.sec5Layer.zoom" baseline="bottom" text="Layer Center" size="27" fill="#a78bfa" font="monospace" align="right"></pxl-text>
 
               <!-- Group position along the layer's axes (center helpers, step 300) -->
               <pxl-line x2="ref.sec5Group.x" stroke="#fdba74" strokewidth="2 / ref.sec5Layer.zoom" linedash="[5, 5]"></pxl-line>
@@ -763,11 +763,11 @@
               <pxl-group id="sec5Group" x="150" y="0" zoom="1.5">
                 <!-- Group center (300, two-layer colors) and the planet's position along the group's axes (center helpers 300) -->
                 <pxl-circle x="0" y="0" r="5 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" fill="#fdba74"></pxl-circle>
-                <pxl-text x="-15 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" y="15 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" zoom="1 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" baseline="top" text="'Group Center'" size="27" fill="#fdba74" font="monospace" align="right"></pxl-text>
+                <pxl-text x="-15 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" y="15 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" zoom="1 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" baseline="top" text="Group Center" size="27" fill="#fdba74" font="monospace" align="right"></pxl-text>
                 <pxl-line x2="ref.sec5Planet.x" stroke="#fdba74" strokewidth="2 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" linedash="[5, 5]"></pxl-line>
                 <pxl-line x1="ref.sec5Planet.x" x2="ref.sec5Planet.x" y2="ref.sec5Planet.y" stroke="#fdba74" strokewidth="2 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" linedash="[5, 5]"></pxl-line>
                 <pxl-circle id="sec5Planet" x="100" y="0" zoom="1" r="40" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-circle>
-                <pxl-text x="ref.sec5Planet.x" y="ref.sec5Planet.y - ref.sec5Planet.r * ref.sec5Planet.zoom - 15 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" zoom="1 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" baseline="bottom" text="'Planet'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+                <pxl-text x="ref.sec5Planet.x" y="ref.sec5Planet.y - ref.sec5Planet.r * ref.sec5Planet.zoom - 15 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" zoom="1 / (ref.sec5Layer.zoom * ref.sec5Group.zoom)" baseline="bottom" text="Planet" size="27" fill="#fb923c" font="monospace"></pxl-text>
               </pxl-group>
             </pxl-layer>
 
@@ -776,15 +776,15 @@
               <pxl-circle id="sec5Ring" x="toLocal(ref.sec5Planet, 'x')" y="toLocal(ref.sec5Planet, 'y')" r="ref.sec5Planet.r * toLocal(ref.sec5Planet, 'zoom') + 15" stroke="#3b82f6" strokewidth="4"></pxl-circle>
 
               <!-- Readout: total zoom = layer (violet 400) × group (orange 300) × planet (orange 400); total in blue 500 like the ring -->
-              <pxl-text x="420" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="`In the Ring's Space:`"></pxl-text>
-              <pxl-text x="420" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'Mapped zoom:'"></pxl-text>
-              <pxl-text x="695" y="570" baseline="bottom" size="27" font="monospace" fill="#3b82f6" align="right" text="Math.round(toLocal(ref.sec5Planet, 'zoom') * 100) / 100"></pxl-text>
-              <pxl-text x="712" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'='"></pxl-text>
-              <pxl-text x="785" y="570" baseline="bottom" size="27" font="monospace" fill="#a78bfa" align="right" text="ref.sec5Layer.zoom"></pxl-text>
-              <pxl-text x="802" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'×'"></pxl-text>
-              <pxl-text x="875" y="570" baseline="bottom" size="27" font="monospace" fill="#fdba74" align="right" text="ref.sec5Group.zoom"></pxl-text>
-              <pxl-text x="892" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="'×'"></pxl-text>
-              <pxl-text x="965" y="570" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="ref.sec5Planet.zoom"></pxl-text>
+              <pxl-text x="420" y="530" baseline="bottom" size="27" font="monospace" fill="#64748b" text="In the Ring's Space:" align="start"></pxl-text>
+              <pxl-text x="420" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="Mapped zoom:" align="start"></pxl-text>
+              <pxl-text x="695" y="570" baseline="bottom" size="27" font="monospace" fill="#3b82f6" align="right" text="${Math.round(toLocal(ref.sec5Planet, 'zoom') * 100) / 100}"></pxl-text>
+              <pxl-text x="712" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="=" align="start"></pxl-text>
+              <pxl-text x="785" y="570" baseline="bottom" size="27" font="monospace" fill="#a78bfa" align="right" text="${ref.sec5Layer.zoom}"></pxl-text>
+              <pxl-text x="802" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="×" align="start"></pxl-text>
+              <pxl-text x="875" y="570" baseline="bottom" size="27" font="monospace" fill="#fdba74" align="right" text="${ref.sec5Group.zoom}"></pxl-text>
+              <pxl-text x="892" y="570" baseline="bottom" size="27" font="monospace" fill="#64748b" text="×" align="start"></pxl-text>
+              <pxl-text x="965" y="570" baseline="bottom" size="27" font="monospace" fill="#fb923c" align="right" text="${ref.sec5Planet.zoom}"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
@@ -909,7 +909,7 @@
               <pxl-line x1="-2000" y1="0" x2="2000" y2="0" stroke="#cbd5e1" strokewidth="2" linedash="[5, 5]"></pxl-line>
               <pxl-circle x="0" y="0" r="5" fill="#a78bfa"></pxl-circle>
               <!-- Labels turn with the layer, their own scalex undoes its stretch -->
-              <pxl-text x="-15" y="-15" scalex="1 / ref.sec6Layer.scalex" baseline="bottom" text="'Layer Center'" size="27" fill="#a78bfa" font="monospace" align="right"></pxl-text>
+              <pxl-text x="-15" y="-15" scalex="1 / ref.sec6Layer.scalex" baseline="bottom" text="Layer Center" size="27" fill="#a78bfa" font="monospace" align="right"></pxl-text>
 
               <!-- Flag position along the layer's axes (center helpers 300) -->
               <pxl-line x2="ref.sec6Flag.x" stroke="#fdba74" strokewidth="2" linedash="[5, 5]"></pxl-line>
@@ -917,7 +917,7 @@
 
               <pxl-polyline id="sec6Flag" closed="true" points="-60,90; -60,-90; 90,-45; -30,0; -30,90" x="100" y="0" rotate="30" skewx="0" scaley="1" fill="#ffedd566" stroke="#f97316" strokewidth="4"></pxl-polyline>
               <pxl-circle x="ref.sec6Flag.x" y="ref.sec6Flag.y" r="5" fill="#fb923c"></pxl-circle>
-              <pxl-text x="ref.sec6Flag.x" y="ref.sec6Flag.y" dy="125" scalex="1 / ref.sec6Layer.scalex" baseline="top" text="'Flag Center'" size="27" fill="#fb923c" font="monospace" align="center"></pxl-text>
+              <pxl-text x="ref.sec6Flag.x" y="ref.sec6Flag.y" dy="125" scalex="1 / ref.sec6Layer.scalex" baseline="top" text="Flag Center" size="27" fill="#fb923c" font="monospace"></pxl-text>
             </pxl-layer>
 
             <!-- Outline in an Untransformed Layer (Blue Scheme) -->
@@ -929,15 +929,15 @@
                 stroke="#3b82f6" strokewidth="4"></pxl-polyline>
 
               <!-- Readout: the four mapped frame values in the outline's space; values in blue 500 like the outline -->
-              <pxl-text x="620" y="410" baseline="bottom" size="27" fill="#64748b" font="monospace" text="`In the Outline's Space:`"></pxl-text>
-              <pxl-text x="620" y="450" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped rotate: '"></pxl-text>
-              <pxl-text x="620" y="450" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'               ' + Math.round(ref.sec6Outline.rotate)"></pxl-text>
-              <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped skewx:  '"></pxl-text>
-              <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'               ' + Math.round(ref.sec6Outline.skewx)"></pxl-text>
-              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped scalex: '"></pxl-text>
-              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'               ' + Math.round(ref.sec6Outline.scalex * 100) / 100"></pxl-text>
-              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace" text="'Mapped scaley: '"></pxl-text>
-              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="'               ' + Math.round(ref.sec6Outline.scaley * 100) / 100"></pxl-text>
+              <pxl-text x="620" y="410" baseline="bottom" size="27" fill="#64748b" font="monospace" text="In the Outline's Space:" align="start"></pxl-text>
+              <pxl-text x="620" y="450" baseline="bottom" size="27" fill="#64748b" font="monospace" text="Mapped rotate: " align="start"></pxl-text>
+              <pxl-text x="620" y="450" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="               ${Math.round(ref.sec6Outline.rotate)}" align="start"></pxl-text>
+              <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#64748b" font="monospace" text="Mapped skewx:  " align="start"></pxl-text>
+              <pxl-text x="620" y="490" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="               ${Math.round(ref.sec6Outline.skewx)}" align="start"></pxl-text>
+              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#64748b" font="monospace" text="Mapped scalex: " align="start"></pxl-text>
+              <pxl-text x="620" y="530" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="${'               ' + Math.round(ref.sec6Outline.scalex * 100) / 100}" align="start"></pxl-text>
+              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#64748b" font="monospace" text="Mapped scaley: " align="start"></pxl-text>
+              <pxl-text x="620" y="570" baseline="bottom" size="27" fill="#3b82f6" font="monospace" text="${'               ' + Math.round(ref.sec6Outline.scaley * 100) / 100}" align="start"></pxl-text>
             </pxl-layer>
           </pxl-stage>
         </div>
