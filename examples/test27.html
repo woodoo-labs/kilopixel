@@ -17,10 +17,9 @@
       <pxl-text x="500" y="60" text="THE ELLIPSE ARROW ENCYCLOPEDIA" size="40" font="system-ui" weight="900" fill="linear(t * 60, ['#00f2fe', '#4facfe'])" baseline="alphabetic"></pxl-text>
 
       <pxl-layer>
-        <pxl-rect x="500" y="1500" width="1000" height="3000" fill="#0f172a"></pxl-rect>
+        <pxl-rect x="500" y="1500" w="1000" h="3000" fill="#0f172a"></pxl-rect>
         <pxl-group>
-          <pxl-line x1="0" y1="0" x2="0" y2="3000" strokewidth="1" stroke="#38bdf8" mode="relative" repeat="20" dx="50"></pxl-line>
-          <pxl-line x1="0" y1="0" x2="1000" y2="0" strokewidth="1" stroke="#38bdf8" mode="relative" repeat="60" dy="50"></pxl-line>
+          <pxl-grid step="50" stroke="#38bdf8" strokewidth="1"></pxl-grid>
         </pxl-group>
       </pxl-layer>
 
@@ -86,7 +85,7 @@
         <pxl-ellipse x="0" y="0" rx="220" ry="160" strokewidth="15" stroke="linear(90, ['#f43f5e', '#f59e0b'])" start="t*50" sweep="270 + wave(1)*50" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-ellipse>
         
         <!-- Extremely outer dotted line to show boundaries -->
-        <pxl-ellipse x="0" y="0" rx="340" ry="240" strokewidth="2" stroke="#333" start="0" sweep="360" stroke-dasharray="5 5"></pxl-ellipse>
+        <pxl-ellipse x="0" y="0" rx="340" ry="240" strokewidth="2" stroke="#333" start="0" sweep="360" linedash="[5, 5]"></pxl-ellipse>
         <pxl-ellipse x="0" y="0" rx="340" ry="240" strokewidth="10" stroke="linear(0, ['#0ea5e9', 'rgba(14, 165, 233, 0)'])" start="t*150" sweep="45" arrowend="30" arrowstyle="filled"></pxl-ellipse>
         <pxl-ellipse x="0" y="0" rx="340" ry="240" strokewidth="10" stroke="linear(0, ['#8b5cf6', 'rgba(139, 92, 246, 0)'])" start="t*150 + 180" sweep="45" arrowend="30" arrowstyle="filled"></pxl-ellipse>
       </pxl-group>

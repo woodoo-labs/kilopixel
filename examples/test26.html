@@ -23,12 +23,11 @@
       <!-- BACKGROUND -->
       <pxl-layer>
         <!-- Dark Blue/Slate background -->
-        <pxl-rect x="500" y="1500" width="1000" height="3000" fill="#0f172a"></pxl-rect>
+        <pxl-rect x="500" y="1500" w="1000" h="3000" fill="#0f172a"></pxl-rect>
         
         <!-- Cyberpunk Grid -->
         <pxl-group>
-          <pxl-line x1="0" y1="0" x2="0" y2="3000" strokewidth="1" stroke="#38bdf8" mode="relative" repeat="20" dx="50"></pxl-line>
-          <pxl-line x1="0" y1="0" x2="1000" y2="0" strokewidth="1" stroke="#38bdf8" mode="relative" repeat="60" dy="50"></pxl-line>
+          <pxl-grid step="50" stroke="#38bdf8" strokewidth="1"></pxl-grid>
         </pxl-group>
       </pxl-layer>
       <pxl-text x="500" y="150" text="SECTION 1: arrowstyle=&quot;filled&quot;" size="20" font="system-ui" weight="bold" fill="white" baseline="alphabetic"></pxl-text>
@@ -104,7 +103,7 @@
         <pxl-circle x="0" y="0" r="200" strokewidth="15" stroke="linear(90, ['#f43f5e', '#f59e0b'])" start="t*50" sweep="270 + wave(1)*50" arrowstart="auto" arrowend="auto" arrowstyle="filled"></pxl-circle>
         
         <!-- Extremely outer dotted line to show boundaries -->
-        <pxl-circle x="0" y="0" r="300" strokewidth="2" stroke="#333" start="0" sweep="360" stroke-dasharray="5 5"></pxl-circle>
+        <pxl-circle x="0" y="0" r="300" strokewidth="2" stroke="#333" start="0" sweep="360" linedash="[5, 5]"></pxl-circle>
         <pxl-circle x="0" y="0" r="300" strokewidth="10" stroke="#0ea5e9" start="t*150" sweep="45" arrowend="30" arrowstyle="filled"></pxl-circle>
         <pxl-circle x="0" y="0" r="300" strokewidth="10" stroke="#8b5cf6" start="t*150 + 180" sweep="45" arrowend="30" arrowstyle="filled"></pxl-circle>
       </pxl-group>

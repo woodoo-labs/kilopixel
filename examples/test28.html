@@ -67,8 +67,7 @@
       
       <!-- Ambient Cyberpunk Grid -->
       <pxl-group>
-        <pxl-line x1="0" y1="0" x2="0" y2="1000" strokewidth="1" stroke="#38bdf8" mode="relative" repeat="30" dx="33.33"></pxl-line>
-        <pxl-line x1="0" y1="0" x2="1000" y2="0" strokewidth="1" stroke="#38bdf8" mode="relative" repeat="30" dy="33.33"></pxl-line>
+        <pxl-grid step="33.33" stroke="#38bdf8" strokewidth="1"></pxl-grid>
       </pxl-group>
     </pxl-layer>
 
@@ -105,7 +104,7 @@
         y2="ref.main.mouseY" 
         strokewidth="2" 
         stroke="linear(0, ['rgba(244,63,94,0.8)', 'rgba(56,189,248,0.2)'])"
-        stroke-dasharray="10 10">
+        linedash="[10, 10]">
       </pxl-line>
       
       <pxl-circle x="ref.main.mouseX" y="ref.main.mouseY" r="10" stroke="#38bdf8" strokewidth="2"></pxl-circle>

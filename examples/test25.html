@@ -44,17 +44,16 @@
 
   <div class="stage-container">
     <!-- Using a 1000x2100 stage for plenty of vertical room -->
-    <pxl-stage id="main" ratio="1000 / 2100" fps="60">
+    <pxl-stage id="main" ratio="1000 / 2100">
       
       <!-- BACKGROUND -->
       <pxl-layer>
         <!-- Dark Blue/Slate background -->
-        <pxl-rect x="500" y="1050" width="1000" height="2100" fill="#0f172a"></pxl-rect>
+        <pxl-rect x="500" y="1050" w="1000" h="2100" fill="#0f172a"></pxl-rect>
         
         <!-- Cyberpunk Grid -->
         <pxl-group>
-          <pxl-line x1="0" y1="0" x2="0" y2="2100" strokewidth="1" stroke="#38bdf8" mode="relative" repeat="20" dx="50"></pxl-line>
-          <pxl-line x1="0" y1="0" x2="1000" y2="0" strokewidth="1" stroke="#38bdf8" mode="relative" repeat="42" dy="50"></pxl-line>
+          <pxl-grid step="50" stroke="#38bdf8" strokewidth="1"></pxl-grid>
         </pxl-group>
       </pxl-layer>
 
