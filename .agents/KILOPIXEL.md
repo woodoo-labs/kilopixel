@@ -237,6 +237,7 @@ States `isHovered`, `isPressed` (§8.1). Fill first, then stroke on top (half th
 
 ```html
 <!-- A button: handler and states on the group, so the label belongs to it. The hand comes with pxl-on-click -->
+<pxl-var id="counter" value="0"></pxl-var>
 <pxl-group id="btn" x="500" y="300" zoom="ref.btn.isPressed ? 0.95 : (ref.btn.isHovered ? 1.05 : 1)"
   pxl-on-click="ref.counter.set('value', ref.counter.value + 1)">
   <pxl-rect w="120" h="50" r="10" fill="ref.btn.isPressed ? '#222' : (ref.btn.isHovered ? '#555' : '#888')"></pxl-rect>
