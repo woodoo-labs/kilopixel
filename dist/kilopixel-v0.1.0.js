@@ -118,12 +118,12 @@ pxl.renameNode = function(element, oldId, newId) {
 
 // Resolves a bare ('') or removed (null) attribute (design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md):
 // an attribute with a boolean default follows the HTML presence rule, so bare (<pxl-polyline closed>) is true;
-// a bare <pxl-var> value is ''; otherwise the class default
+// a bare <pxl-var> value is '' (a cleared text input); otherwise the class default, also for a custom shape's value
 pxl.resolveEmptyAttribute = function(element, name, newValue) {
   const value = element.constructor.defaults[name];
   if (newValue === '') {
     if (typeof value === 'boolean') return true;
-    if (name === 'value') return ''; // only <pxl-var> has a value attribute
+    if (name === 'value' && element instanceof pxl.Variable) return '';
   }
   return value === undefined ? null : value;
 };

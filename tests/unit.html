@@ -16,6 +16,9 @@
   </style>
   <!-- The built bundle: run `node build.js` before opening this page -->
   <script src="../dist/pxl.min.js"></script>
+  <!-- Custom shapes from the docs (docs/js/shapes/), loaded as a second script like a page would: Rule A covers them -->
+  <script src="../docs/js/shapes/star.js"></script>
+  <script src="../docs/js/shapes/gauge.js"></script>
   <script src="runner.js"></script>
 </head>
 <body>
@@ -507,8 +510,10 @@
     // ===================================================================
     section('Rule A: empty and removed attributes');
 
-    const ELEMENTS = ['pxl-circle', 'pxl-ellipse', 'pxl-rect', 'pxl-line', 'pxl-polyline', 'pxl-text', 'pxl-grid',
+    const BUILT_IN = ['pxl-circle', 'pxl-ellipse', 'pxl-rect', 'pxl-line', 'pxl-polyline', 'pxl-text', 'pxl-grid',
       'pxl-group', 'pxl-layer', 'pxl-var'];
+    // The docs' custom shapes too: the Gauge has a value attribute, whose bare value is its default, not '' as on <pxl-var>
+    const ELEMENTS = [...BUILT_IN, 'pxl-star', 'pxl-gauge'];
     const HANDLERS = new Set(Object.keys(pxl.HANDLER_EVENTS));
     // Attributes that are not stored as one value: polyline points become p0, p1, …; id only moves the registry entry
     const NOT_A_VALUE = new Set(['points', 'id']);
@@ -526,7 +531,8 @@
         const el = document.createElement(tag), wrong = [];
         for (const name of names) {
           el.setAttribute(name, '');
-          const expected = typeof Class.defaults[name] === 'boolean' ? true : name === 'value' ? '' : (Class.defaults[name] ?? null);
+          const expected = typeof Class.defaults[name] === 'boolean' ? true :
+            (tag === 'pxl-var' && name === 'value') ? '' : (Class.defaults[name] ?? null);
           if (!same(el.values[name], expected)) wrong.push(`${name}: ${show(el.values[name])} instead of ${show(expected)}`);
         }
         if (wrong.length) throw new Error(wrong.join('; '));
@@ -621,7 +627,7 @@
 
     test('presence attributes of the built-in elements: the boolean defaults', () => {
       const found = new Set();
-      for (const tag of ELEMENTS) {
+      for (const tag of BUILT_IN) {
         const defaults = customElements.get(tag).defaults;
         for (const name of Object.keys(defaults)) if (typeof defaults[name] === 'boolean') found.add(name);
       }
