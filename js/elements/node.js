@@ -42,10 +42,11 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     // Frame in which evaluateAnimations() last ran: a source in the stage's order is evaluated before the walk,
     // which then skips it
     this._evaluatedFrame = -1;
-    // The stage whose update phase evaluates the element (null while not connected). Written by the stage: the stage
-    // whose reader list holds the element (it drops removed readers in its next pass), and whether the element is a
-    // source in the stage's order (UpdateScheduler.buildOrder())
-    this.readerStage = null;
+    // The element's stage, set on connect and cleared on disconnect (null outside a stage): its update phase evaluates
+    // the element, its interaction engine holds hover and press, and custom shapes read this.stage.unit. Written by the
+    // stage's scheduler: the stage whose reader list holds the element (it drops removed readers in its next pass), and
+    // whether the element is a source in the stage's order (UpdateScheduler.buildOrder())
+    this.stage = null;
     this.listedIn = null;
     this.isOrderNode = false;
 
@@ -151,6 +152,8 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   compositingChanged() {}
 
   connectedCallback() {
+    // First: properties set before the upgrade (below) may already ask the stage for a frame
+    this.stage = this.closest('pxl-stage');
     if (this._pendingProperties !== null) {
       const pending = this._pendingProperties;
       this._pendingProperties = null;
@@ -163,7 +166,6 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this.parentContainer = parent === null ? null : parent.closest('pxl-group, pxl-layer');
     this._lastParentMatrixVersion = -1; // a new parent's version may equal the old one's
     this.parentContainer?.registerChild(this);
-    this.readerStage = this.closest('pxl-stage');
 
     // Reactive attributes are evaluated now: their refs and toLocal() need the element in the DOM. Not counted as a
     // change: the element isn't registered yet, and registering it below tells its readers.
@@ -180,8 +182,11 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     if (id !== null && pxl.nodes[id] === this.values) pxl.unregisterNode(id);
     this.registeredId = null;
     if (this.isOrderNode) pxl._orderVersion++;
-    this.readerStage = null;
     this.parentContainer?.unregisterChild(this);
+    // Hover and press inside the element pass to its nearest group still in the page, without events (the DOM sends
+    // none to removed elements); nothing for a variable, and a layer's shapes find nothing left to release
+    this.stage?.interaction.releaseElement(this);
+    this.stage = null;
   }
 
   // --- Reactive Values ---
@@ -200,7 +205,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       }
     }
     this.hasToLocal = this.anyUsesToLocal(keys) || this.anyUsesToLocal(this.animatedAttributeKeys);
-    if (keys.length > 0 || this.hasToLocal) this.readerStage?.scheduler.addReader(this);
+    if (keys.length > 0 || this.hasToLocal) this.stage?.scheduler.addReader(this);
   }
 
   anyUsesToLocal(keys) {

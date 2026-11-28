@@ -337,7 +337,7 @@
     section('Scope helpers');
 
     // Scope names come from several engine files (compiler.js, gradient.js, compositing.js); pxl.scopeKeys() lists them at the first
-    // compile (design/2026-11-28_engine_restructure_plan.md D2). A name added after that would be missing everywhere.
+    // compile (design/done/2026-11-28_engine_restructure_plan.md D2). A name added after that would be missing everywhere.
     test('scope: every name in pxl.scope is visible in static and animated expressions and in handlers', () => {
       const missing = [];
       const el = document.createElement('pxl-rect');

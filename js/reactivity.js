@@ -84,7 +84,7 @@ pxl.renameNode = function(element, oldId, newId) {
 // =========================================================================
 // Design: design/done/2026-11-20_evaluation_model_plan.md §3.2, §10, §11. The stage owns one (stage.scheduler) and
 // calls it twice per frame: evaluateSources() before the walk of its layers, updateReaders() after it. The elements'
-// readerStage and listedIn hold the stage, not the scheduler.
+// stage and listedIn hold the stage, not the scheduler.
 pxl.UpdateScheduler = class UpdateScheduler {
   constructor(stage) {
     this.stage = stage;
@@ -140,7 +140,7 @@ pxl.UpdateScheduler = class UpdateScheduler {
     let n = 0;
     for (let i = 0; i < readers.length; i++) {
       const reader = readers[i];
-      if (reader.readerStage !== this.stage || (reader.reactiveAttributeKeys.length === 0 && !reader.hasToLocal)) {
+      if (reader.stage !== this.stage || (reader.reactiveAttributeKeys.length === 0 && !reader.hasToLocal)) {
         if (reader.listedIn === this.stage) reader.listedIn = null;
         continue;
       }
@@ -188,7 +188,7 @@ pxl.UpdateScheduler = class UpdateScheduler {
       for (const source of sources.get(node)) {
         // Left out: self-references (an element sees its own new values through updateReactive()), sources without
         // expressions, and sources in another stage's order, which are read as they are
-        if (source === node || !source.isOrderNode || source.readerStage !== this.stage) continue;
+        if (source === node || !source.isOrderNode || source.stage !== this.stage) continue;
         inDegree.set(node, inDegree.get(node) + 1);
         readersOf.get(source).push(node);
       }
@@ -211,7 +211,7 @@ pxl.UpdateScheduler = class UpdateScheduler {
   // Only elements of this stage with expressions: a source in another stage, or a stage itself (its pointer and
   // size), is read as it is
   addOrderNode(element) {
-    if (element.isOrderNode || element.readerStage !== this.stage) return;
+    if (element.isOrderNode || element.stage !== this.stage) return;
     if (element.animatedAttributeKeys.length + element.reactiveAttributeKeys.length === 0) return;
     element.isOrderNode = true;
     this._order.push(element);
@@ -230,7 +230,7 @@ pxl.UpdateScheduler = class UpdateScheduler {
           const values = pxl.nodes[fn.sourceIds[j]];
           if (values === undefined) continue;
           list.push(values.$node);
-          if (fn.usesToLocal && values.$node.readerStage === this.stage) this.pushContainers(values.$node, list);
+          if (fn.usesToLocal && values.$node.stage === this.stage) this.pushContainers(values.$node, list);
         }
         if (fn.usesToLocal) this.pushContainers(node, list);
       }

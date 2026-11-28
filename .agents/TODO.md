@@ -97,9 +97,3 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Plan**: `design/2026-11-27_release_0_1_plan.md`
 - What 0.1 needs: A decisions that would break pages later (text as a template and centered text: built, `design/done/2026-11-27_text_template_plan.md`; §42, §49, release policy), B features (§3 animation started by events, §1 path, §9 image), C release work (§43, §44, 9 docs pages, §12); D the rest after 0.1.
 - **Decided**: R1–R5 (plan §6). **Next**: the plan for §3 (animation); decisions for §42 (D1–D5) and §49.
-
-## 53. Engine Restructure: Files by Feature
-- **Status**: 🟢 **Decided**
-- **Plan**: `design/2026-11-28_engine_restructure_plan.md`
-- Each engine feature in one file, no behavior change: a stage registry (`pxl.stages`), `handlers.js`, `graphics.js` dissolved into `compositing.js` and its callers, `gradient.js`, `reactivity.js` with the scheduler as a class; then shared base classes (`pxl.BaseElement`, `pxl.Container`) from the merged cleanup idea. Eight phases, one commit each.
-- **Decided**: D1–D7 as recommended (plan §5; matrix-based drawing, D7, gets its own plan). D8 (hit testing in its own file) open. Built: phases 1–5 (files by feature). **Next**: phase 6, `pxl.BaseElement`.

@@ -524,7 +524,7 @@ declare module 'react' {
                   <div class="api-meta"><span class="api-pill values-pill">number</span></div>
                 </div>
                 <div class="api-item-desc">
-                  CSS pixels per unit of the stage, for the rare drawing in canvas pixels (<code>getImageData()</code>).
+                  CSS pixels per unit of the stage, for the rare drawing in canvas pixels (<code>getImageData()</code>). <code>this.stage</code> is <code>null</code> while the shape isn't on a page; <code>draw()</code> only runs on a page.
                 </div>
               </div>
 

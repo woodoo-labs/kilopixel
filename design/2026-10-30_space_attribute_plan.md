@@ -237,8 +237,8 @@ No change in the hot path for pages that don't use `space`.
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
-- 2026-11-28: `js/graphics.js` is gone (`design/2026-11-28_engine_restructure_plan.md` phase 3): transform, compositing and isolation helpers are in `js/compositing.js`, arc angles in `js/elements/shapes/arc.js`, arrow and line dash helpers in `js/elements/shape.js`, the points parser in `js/elements/shapes/polyline.js`; names stay. References to `graphics.js` here describe the old layout.
-- 2026-11-28: the cleanup idea was merged into `design/2026-11-28_engine_restructure_plan.md`; the one transform path (with its 2026-11-20 measurement) is now in its §8, still meant to be built with `space`.
+- 2026-11-28: `js/graphics.js` is gone (`design/done/2026-11-28_engine_restructure_plan.md` phase 3): transform, compositing and isolation helpers are in `js/compositing.js`, arc angles in `js/elements/shapes/arc.js`, arrow and line dash helpers in `js/elements/shape.js`, the points parser in `js/elements/shapes/polyline.js`; names stay. References to `graphics.js` here describe the old layout.
+- 2026-11-28: the cleanup idea was merged into `design/done/2026-11-28_engine_restructure_plan.md`; the one transform path (with its 2026-11-20 measurement) is now in its §8, still meant to be built with `space`.
 - 2026-11-27: `text` is a template and centered by default (`design/done/2026-11-27_text_template_plan.md`); its examples quote labels and rely on the old `start` / `alphabetic` default.
 - 2026-11-27: the handlers are `pxl-on-click` … `pxl-on-move` since 2026-11-18 (`design/done/2026-10-30_framework_compatibility_plan.md` §23); §6 ("Events") uses the old name `onclick`.
 - 2026-11-27: evaluation model option B built (`design/done/2026-11-20_evaluation_model_plan.md` §11): §3 (B subscribes to `ref.A`, `broadcastGlobalMatrixChange()`) describes the old code; a `space` reader would be a source in the stage's order with the containers above A as edges, like a `toLocal()` reader.

@@ -21,7 +21,6 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     // and keeps its frame loop running. Recomputed in every update, never counted (elements come and go).
     this._animatedFrame = -1;
     this.hasAnimatedContent = false;
-    this.stage = null;
     this.dpr = 1; // set by the stage; isolated shapes read it (Shape.renderIsolated())
 
     // The canvas lives in the layer's shadow root: replacing the layer's children (innerHTML, htmx, frameworks)
@@ -49,18 +48,15 @@ pxl.Layer = class Layer extends pxl.PxlNode {
       console.warn(`[pxl] ${pxl.describe(this)} is inside another layer, ${pxl.describe(outer)}: layers don't nest, and ` +
         'its canvas covers the outer one. Place it next to the other layer (layers stack in DOM order).');
     }
-    this.stage = this.closest('pxl-stage');
+    super.connectedCallback(); // sets this.stage
     this.stage?.registerLayer(this);
-
-    super.connectedCallback();
     this.invalidate();
   }
 
   disconnectedCallback() {
-    super.disconnectedCallback();
-    this.stage?.unregisterLayer(this);
-    this.stage = null;
+    this.stage?.unregisterLayer(this); // before the base class clears this.stage
     this.isDirty = false;
+    super.disconnectedCallback();
   }
 
   // Called once per connect (PxlNode.connectedCallback); no includes() check, which made inserting n children quadratic

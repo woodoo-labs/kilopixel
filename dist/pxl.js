@@ -284,7 +284,7 @@ pxl.renameNode = function(element, oldId, newId) {
 // =========================================================================
 // Design: design/done/2026-11-20_evaluation_model_plan.md §3.2, §10, §11. The stage owns one (stage.scheduler) and
 // calls it twice per frame: evaluateSources() before the walk of its layers, updateReaders() after it. The elements'
-// readerStage and listedIn hold the stage, not the scheduler.
+// stage and listedIn hold the stage, not the scheduler.
 pxl.UpdateScheduler = class UpdateScheduler {
   constructor(stage) {
     this.stage = stage;
@@ -340,7 +340,7 @@ pxl.UpdateScheduler = class UpdateScheduler {
     let n = 0;
     for (let i = 0; i < readers.length; i++) {
       const reader = readers[i];
-      if (reader.readerStage !== this.stage || (reader.reactiveAttributeKeys.length === 0 && !reader.hasToLocal)) {
+      if (reader.stage !== this.stage || (reader.reactiveAttributeKeys.length === 0 && !reader.hasToLocal)) {
         if (reader.listedIn === this.stage) reader.listedIn = null;
         continue;
       }
@@ -388,7 +388,7 @@ pxl.UpdateScheduler = class UpdateScheduler {
       for (const source of sources.get(node)) {
         // Left out: self-references (an element sees its own new values through updateReactive()), sources without
         // expressions, and sources in another stage's order, which are read as they are
-        if (source === node || !source.isOrderNode || source.readerStage !== this.stage) continue;
+        if (source === node || !source.isOrderNode || source.stage !== this.stage) continue;
         inDegree.set(node, inDegree.get(node) + 1);
         readersOf.get(source).push(node);
       }
@@ -411,7 +411,7 @@ pxl.UpdateScheduler = class UpdateScheduler {
   // Only elements of this stage with expressions: a source in another stage, or a stage itself (its pointer and
   // size), is read as it is
   addOrderNode(element) {
-    if (element.isOrderNode || element.readerStage !== this.stage) return;
+    if (element.isOrderNode || element.stage !== this.stage) return;
     if (element.animatedAttributeKeys.length + element.reactiveAttributeKeys.length === 0) return;
     element.isOrderNode = true;
     this._order.push(element);
@@ -430,7 +430,7 @@ pxl.UpdateScheduler = class UpdateScheduler {
           const values = pxl.nodes[fn.sourceIds[j]];
           if (values === undefined) continue;
           list.push(values.$node);
-          if (fn.usesToLocal && values.$node.readerStage === this.stage) this.pushContainers(values.$node, list);
+          if (fn.usesToLocal && values.$node.stage === this.stage) this.pushContainers(values.$node, list);
         }
         if (fn.usesToLocal) this.pushContainers(node, list);
       }
@@ -2409,10 +2409,11 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     // Frame in which evaluateAnimations() last ran: a source in the stage's order is evaluated before the walk,
     // which then skips it
     this._evaluatedFrame = -1;
-    // The stage whose update phase evaluates the element (null while not connected). Written by the stage: the stage
-    // whose reader list holds the element (it drops removed readers in its next pass), and whether the element is a
-    // source in the stage's order (UpdateScheduler.buildOrder())
-    this.readerStage = null;
+    // The element's stage, set on connect and cleared on disconnect (null outside a stage): its update phase evaluates
+    // the element, its interaction engine holds hover and press, and custom shapes read this.stage.unit. Written by the
+    // stage's scheduler: the stage whose reader list holds the element (it drops removed readers in its next pass), and
+    // whether the element is a source in the stage's order (UpdateScheduler.buildOrder())
+    this.stage = null;
     this.listedIn = null;
     this.isOrderNode = false;
 
@@ -2518,6 +2519,8 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
   compositingChanged() {}
 
   connectedCallback() {
+    // First: properties set before the upgrade (below) may already ask the stage for a frame
+    this.stage = this.closest('pxl-stage');
     if (this._pendingProperties !== null) {
       const pending = this._pendingProperties;
       this._pendingProperties = null;
@@ -2530,7 +2533,6 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this.parentContainer = parent === null ? null : parent.closest('pxl-group, pxl-layer');
     this._lastParentMatrixVersion = -1; // a new parent's version may equal the old one's
     this.parentContainer?.registerChild(this);
-    this.readerStage = this.closest('pxl-stage');
 
     // Reactive attributes are evaluated now: their refs and toLocal() need the element in the DOM. Not counted as a
     // change: the element isn't registered yet, and registering it below tells its readers.
@@ -2547,8 +2549,11 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     if (id !== null && pxl.nodes[id] === this.values) pxl.unregisterNode(id);
     this.registeredId = null;
     if (this.isOrderNode) pxl._orderVersion++;
-    this.readerStage = null;
     this.parentContainer?.unregisterChild(this);
+    // Hover and press inside the element pass to its nearest group still in the page, without events (the DOM sends
+    // none to removed elements); nothing for a variable, and a layer's shapes find nothing left to release
+    this.stage?.interaction.releaseElement(this);
+    this.stage = null;
   }
 
   // --- Reactive Values ---
@@ -2567,7 +2572,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       }
     }
     this.hasToLocal = this.anyUsesToLocal(keys) || this.anyUsesToLocal(this.animatedAttributeKeys);
-    if (keys.length > 0 || this.hasToLocal) this.readerStage?.scheduler.addReader(this);
+    if (keys.length > 0 || this.hasToLocal) this.stage?.scheduler.addReader(this);
   }
 
   anyUsesToLocal(keys) {
@@ -2812,7 +2817,6 @@ pxl.Layer = class Layer extends pxl.PxlNode {
     // and keeps its frame loop running. Recomputed in every update, never counted (elements come and go).
     this._animatedFrame = -1;
     this.hasAnimatedContent = false;
-    this.stage = null;
     this.dpr = 1; // set by the stage; isolated shapes read it (Shape.renderIsolated())
 
     // The canvas lives in the layer's shadow root: replacing the layer's children (innerHTML, htmx, frameworks)
@@ -2840,18 +2844,15 @@ pxl.Layer = class Layer extends pxl.PxlNode {
       console.warn(`[pxl] ${pxl.describe(this)} is inside another layer, ${pxl.describe(outer)}: layers don't nest, and ` +
         'its canvas covers the outer one. Place it next to the other layer (layers stack in DOM order).');
     }
-    this.stage = this.closest('pxl-stage');
+    super.connectedCallback(); // sets this.stage
     this.stage?.registerLayer(this);
-
-    super.connectedCallback();
     this.invalidate();
   }
 
   disconnectedCallback() {
-    super.disconnectedCallback();
-    this.stage?.unregisterLayer(this);
-    this.stage = null;
+    this.stage?.unregisterLayer(this); // before the base class clears this.stage
     this.isDirty = false;
+    super.disconnectedCallback();
   }
 
   // Called once per connect (PxlNode.connectedCallback); no includes() check, which made inserting n children quadratic
@@ -3013,19 +3014,8 @@ pxl.Group = class Group extends pxl.PxlNode {
 
     this.childList = []; // groups and shapes
     this._isOrderDirty = false; // children need sorting by DOM position
-    this.stage = null; // set in connectedCallback
     // pxl-on-* listeners by DOM event type (PxlNode.setHandler()): events from the shapes inside bubble up to them
     this.handlers = pxl.createHandlers();
-  }
-
-  connectedCallback() {
-    this.stage = this.closest('pxl-stage');
-    super.connectedCallback();
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this.stage?.interaction.releaseElement(this);
   }
 
   // Called once per connect (PxlNode.connectedCallback); no includes() check, which made inserting n children quadratic
@@ -3131,7 +3121,6 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     this.values.isHovered = false;
     this.values.isPressed = false;
 
-    this.stage = null; // set in connectedCallback
 
     // Reused by getBoundingBox() every frame
     this.boundingBox = { left: 0, right: 0, top: 0, bottom: 0 };
@@ -3144,16 +3133,6 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
     // pxl-on-* listeners by DOM event type (PxlNode.setHandler())
     this.handlers = pxl.createHandlers();
-  }
-
-  connectedCallback() {
-    this.stage = this.closest('pxl-stage');
-    super.connectedCallback();
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this.stage?.interaction.releaseElement(this);
   }
 
   // Update phase. A hidden shape still evaluates, so ref.* to it stays current.
@@ -4635,22 +4614,23 @@ pxl.Variable = class Variable extends pxl.PxlNode {
 
   constructor() {
     super();
-    // Set only for a stage-level variable (inside a stage, outside every layer): the stage evaluates it
-    this.stage = null;
+    // Inside a stage but outside every layer: the stage evaluates it and runs its frame loop for it. Decided on
+    // connect, reset on disconnect, so a value set before the next connect asks no stage for a frame.
+    this._isStageLevel = false;
   }
 
   // display: none comes from pxl.defaultStyles()
   connectedCallback() {
     super.connectedCallback();
     if (!this.parentLayer) {
-      this.stage = this.closest('pxl-stage');
+      this._isStageLevel = true;
       this.stage?.registerVariable(this);
     }
   }
 
   disconnectedCallback() {
-    this.stage?.unregisterVariable(this);
-    this.stage = null;
+    if (this._isStageLevel) this.stage?.unregisterVariable(this);
+    this._isStageLevel = false;
     super.disconnectedCallback();
   }
 
@@ -4662,8 +4642,8 @@ pxl.Variable = class Variable extends pxl.PxlNode {
   // From the attribute and the property (el.value = 5)
   valueChanged(name) {
     super.valueChanged(name);
-    // No layer to invalidate: the stage starts its loop when the value becomes animated
-    this.stage?.requestRender();
+    // A stage-level variable has no layer to invalidate: its stage starts the loop when the value becomes animated
+    if (this._isStageLevel) this.stage?.requestRender();
   }
 
   // Update phase. A failing expression keeps the previous value for this frame.

@@ -15,19 +15,8 @@ pxl.Group = class Group extends pxl.PxlNode {
 
     this.childList = []; // groups and shapes
     this._isOrderDirty = false; // children need sorting by DOM position
-    this.stage = null; // set in connectedCallback
     // pxl-on-* listeners by DOM event type (PxlNode.setHandler()): events from the shapes inside bubble up to them
     this.handlers = pxl.createHandlers();
-  }
-
-  connectedCallback() {
-    this.stage = this.closest('pxl-stage');
-    super.connectedCallback();
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this.stage?.interaction.releaseElement(this);
   }
 
   // Called once per connect (PxlNode.connectedCallback); no includes() check, which made inserting n children quadratic

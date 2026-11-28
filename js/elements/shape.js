@@ -49,7 +49,6 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     this.values.isHovered = false;
     this.values.isPressed = false;
 
-    this.stage = null; // set in connectedCallback
 
     // Reused by getBoundingBox() every frame
     this.boundingBox = { left: 0, right: 0, top: 0, bottom: 0 };
@@ -62,16 +61,6 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 
     // pxl-on-* listeners by DOM event type (PxlNode.setHandler())
     this.handlers = pxl.createHandlers();
-  }
-
-  connectedCallback() {
-    this.stage = this.closest('pxl-stage');
-    super.connectedCallback();
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this.stage?.interaction.releaseElement(this);
   }
 
   // Update phase. A hidden shape still evaluates, so ref.* to it stays current.

@@ -1,6 +1,6 @@
 # Engine Restructure: Files by Feature
 
-- **Status**: 🟢 **Decided** (2026-11-28, D1–D7 decided, D8 open; cleanup idea merged as phases 6–8; phases 1–5 built, §9–§13; next: phase 6)
+- **Status**: ✅ **Implemented** (2026-11-28, phases 1–5 and 7 built, §9–§14; phases 6 and 8 and D8 parked in design/ideas/)
 - **Date**: 2026-11-28
 - **Related**: `design/done/2026-10-27_engine_cleanup_inventory_note.md` (the code style this keeps), `design/done/2026-11-20_evaluation_model_plan.md` (the scheduler that moves in phase 5), `design/done/2026-11-01_isolated_shape_compositing_plan.md` and `design/done/2026-11-26_isolation_box_plan.md` (the isolation code that moves in phase 3), `design/2026-11-12_layer_throttling_plan.md` (TODO §8: phase 1 builds the publishing step of its per-layer metrics, C2), `design/2026-10-30_space_attribute_plan.md` (TODO §28: the one transform path of §8 goes with it), `design/archive/2026-11-22_engine_structure_cleanup_plan.md` (the parked cleanup idea of 2026-11-22, merged here on 2026-11-28: its steps 2–4 are phases 6–8), `.claude/CLAUDE.md` "Engine Code Rules" and "Engine Code Style"
 - **Target Implementation**: `build.js` (file list), `js/engine.js`, `js/compiler.js`, `js/interaction.js`, `js/graphics.js` (removed), `js/monitor.js`, `js/elements/stage.js`, `js/elements/node.js`, `js/elements/shape.js`, `js/elements/shapes/arc.js`, `js/elements/shapes/polyline.js`, `js/elements/shapes/text.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/variable.js`, new `js/reactivity.js`, `js/gradient.js`, `js/compositing.js`, `js/handlers.js`, `js/elements/base.js`, `js/elements/container.js`; `tests/index.html`, `tests/frameworks.html`, `tests/unit.html`; `.agents/ENGINE.md`
@@ -75,6 +75,8 @@ Each phase: one commit, `node build.js`, `node tools/run_tests.js` (full), `node
 7. **`stage` and `releaseElement()` in `PxlNode`:** one `stage` field, set on connect and cleared on disconnect, for every node. It replaces `readerStage` (shapes, groups and layers look up the same `closest('pxl-stage')` a second time as `stage`), and the scheduler's `listedIn` compares with it. Removing a layer then releases hover and press in its own `disconnectedCallback()` (same states, no events). `Variable` uses `stage` today for "stage-level only": it gets a field of its own for that, and still registers with the stage only when stage-level. About an hour.
 8. **`pxl.Container`** (`js/elements/container.js`), the base of `Layer` and `Group`: `childList`, the DOM sort, `registerChild()` / `unregisterChild()` (both invalidate `parentLayer`, which is the layer itself for a layer), the child update and draw loops (`pxl.hasTransform()` is shared already, `5493ab8`). About an hour.
 
+*2026-11-28:* phases 6 and 8 are parked in `design/ideas/2026-11-28_element_base_classes_note.md` (about 15 and 12 shared lines, for a class level and lifecycle rules); phase 7 stays here, under discussion.
+
 The order goes from smallest to largest, so the first phases also show whether the build checks (`_` ownership) need anything special for moves. Phases 6–8 come after phase 5, when the files have settled: phase 5 rewrites much of `stage.js`, and phase 7 renames the field the scheduler reads.
 
 ## 5. Decisions
@@ -88,7 +90,7 @@ The order goes from smallest to largest, so the first phases also show whether t
 | D5 | Registry and versions: with the scheduler in `reactivity.js`, or stay in `engine.js`? | **A** `reactivity.js`; **B** stay | **A**: "who reads whom and when it is evaluated" in one file |
 | D6 | The scheduler as a class owned by the stage, or `pxl.*` functions taking the stage? | **A** class (`stage.scheduler`); **B** functions | **A**: it owns six fields, which CLAUDE.md wants in a constructor; same pattern as `pxl.InteractionEngine` |
 | D7 | Drawing with the cached local matrix (`ctx.transform(...getLocalMatrix())`) instead of `applyTransformState()`'s calls | **A** in this plan as phase 6; **B** its own plan | **B**: it changes behavior (canvas calls, possibly pixels) and needs a measurement against the frame budget; this plan only moves code. *2026-11-28:* the merged idea had measured it on 2026-11-20 (global matrix per shape: 3–9 % slower alone, §8); it stays tied to `space` |
-| D8 | Split hit testing out of `interaction.js` (the merged idea's step 5: `pxl.dummyCtx` and the walk to a file of its own)? | **A** split; **B** keep | **B**: the walk is three `pxl.InteractionEngine` methods (about 70 lines) and the dummy context (about 10); a file of their own would need a class or `pxl.*` functions taking the engine, and `interaction.js` (about 570 lines after phase 2) stays about one subject, the pointer over shapes. Open |
+| D8 | Split hit testing out of `interaction.js` (the merged idea's step 5: `pxl.dummyCtx` and the walk to a file of its own)? | **A** split; **B** keep | **B**: the walk is three `pxl.InteractionEngine` methods (about 70 lines) and the dummy context (about 10); a file of their own would need a class or `pxl.*` functions taking the engine, and `interaction.js` (about 570 lines after phase 2) stays about one subject, the pointer over shapes. *2026-11-28:* parked with phases 6 and 8 in `design/ideas/2026-11-28_element_base_classes_note.md` |
 
 **Decided 2026-11-28:** every decision as recommended: D1 A (one `compositing.js`), D2 A (`pxl.scope` in `engine.js`, `pxl.scopeKeys` at the first compile, with its unit test and the load-order rule of §6.3), D3 A (anchors in `engine.js`), D4 A (arrow helpers in `shape.js`), D5 A (registry and scheduler in `reactivity.js`), D6 A (`pxl.UpdateScheduler`, owned by the stage), D7 B (its own plan, §8). D8 (added with the merge, 2026-11-28) is open.
 
@@ -206,8 +208,25 @@ As planned in §4, with D5 and D6:
 - **Docs:** ENGINE.md §1 (file table: `reactivity.js` is file 2, 23 files), §4 (the file, the scheduler, `stage.scheduler.addReader()`), §5.2 (the frame), §11 (file count).
 - **Left:** phases 6–8 (shared base classes), D8.
 
+## 14. Phase 7 Built (2026-11-28)
+
+Discussed and checked before building (per-frame cost, garbage, edge cases); phases 6 and 8 and D8 are parked in `design/ideas/2026-11-28_element_base_classes_note.md`.
+
+- **`js/elements/node.js`:** one field, `stage`, on every node: set first in `connectedCallback()` (properties set before the upgrade may already ask the stage for a frame), cleared last in `disconnectedCallback()`, after `stage.interaction.releaseElement(this)`, which moved here from `Shape` and `Group` and now runs for every node. `readerStage` is gone; `collectSources()` calls `stage?.scheduler.addReader(this)`.
+- **`js/elements/shape.js`, `js/elements/group.js`:** their `stage` field and both lifecycle overrides removed.
+- **`js/elements/layer.js`:** registers with the stage after the base class's connect (it sets `stage`), unregisters before the base class's disconnect (it clears `stage`).
+- **`js/elements/variable.js`:** `_isStageLevel` keeps the meaning `stage` had there (inside a stage, outside every layer), decided on connect and reset on disconnect; registering, unregistering and the frame request on a value change check it, so a variable inside a layer behaves as before.
+- **`js/reactivity.js`:** the scheduler compares the elements' `stage` (four places).
+- **Found while checking:** the reset of `_isStageLevel` on disconnect (else a value set before the next connect could ask the old stage for a frame); `addReader()` may now run twice during one connect, harmless (the ids are a `Set`, `listedIn` prevents a second entry). A removed shape or group no longer keeps its stage alive through `stage`; it still keeps `parentLayer` (not in this phase).
+- **Tests** (`tests/index.html`, 190/190): every node has its stage, the new one after a move, `null` after removal; a removed layer leaves nothing hovered or pressed, without events; a variable inside a layer asks for no frame by itself, a stage-level one does. The existing test of a stage variable moved into a layer checked the old meaning of `stage` (`null` in a layer) and now checks `_isStageLevel`. Full test run passed; build checks and generated types unchanged.
+- **Per frame:** unchanged (the scheduler's check reads `stage` instead of `readerStage`); no allocation. One `closest('pxl-stage')` per connect instead of two for shapes, groups and layers.
+- **Size:** 75.08 KB (−0.4 KB).
+- **Docs:** ENGINE.md §2 (the field, connect, disconnect), §4.3, §8.5; KILOPIXEL.md §12 and `docs/custom-shapes.html` (`this.stage` is `null` while the shape isn't connected).
+
 ## Log
 
+- 2026-11-28: phase 7 built (§14); the plan is implemented (phases 1–5 and 7; 6, 8 and D8 parked) and moved to `design/done/`.
+- 2026-11-28: phases 6 and 8 and D8 parked in `design/ideas/2026-11-28_element_base_classes_note.md` after measuring how much they would share; phase 7 (one `stage` field per node) under discussion.
 - 2026-11-28: phase 5 built (§13): `js/reactivity.js` with `pxl.UpdateScheduler`. Phases 1–5 (files by feature) are done. Next: phase 6.
 - 2026-11-28: phase 4 built (§12): `js/gradient.js` with `pxl.GradientSlot`. Next: phase 5.
 - 2026-11-28: phase 3 built (§11): `js/compositing.js`, `graphics.js` removed, scope names at the first compile (D2). Next: phase 4.
@@ -218,3 +237,4 @@ As planned in §4, with D5 and D6:
 - 2026-11-28: review for per-frame cost, garbage and edge cases: §6.2 (rules for phases 4 and 5), §6.3 (edge cases), animated gradients in §8. The review found the `paint()` bug fixed in `a54e485`.
 - 2026-11-28: phase 1 also moves the monitor's publishing into the stage (`publishMetrics()`, counters owned by the stage), the step the throttling plan's C2 needs; that plan (TODO §8) stays after release 0.1.
 - 2026-11-28: proposed after the code review of the same day; its small findings were built first.
+- Status line until 2026-11-28 (implemented): 🟢 **Decided** (2026-11-28, phases 1–5 built, §9–§13; phase 7 under discussion; phases 6 and 8 and D8 parked in design/ideas/)

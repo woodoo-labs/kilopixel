@@ -3,22 +3,23 @@ pxl.Variable = class Variable extends pxl.PxlNode {
 
   constructor() {
     super();
-    // Set only for a stage-level variable (inside a stage, outside every layer): the stage evaluates it
-    this.stage = null;
+    // Inside a stage but outside every layer: the stage evaluates it and runs its frame loop for it. Decided on
+    // connect, reset on disconnect, so a value set before the next connect asks no stage for a frame.
+    this._isStageLevel = false;
   }
 
   // display: none comes from pxl.defaultStyles()
   connectedCallback() {
     super.connectedCallback();
     if (!this.parentLayer) {
-      this.stage = this.closest('pxl-stage');
+      this._isStageLevel = true;
       this.stage?.registerVariable(this);
     }
   }
 
   disconnectedCallback() {
-    this.stage?.unregisterVariable(this);
-    this.stage = null;
+    if (this._isStageLevel) this.stage?.unregisterVariable(this);
+    this._isStageLevel = false;
     super.disconnectedCallback();
   }
 
@@ -30,8 +31,8 @@ pxl.Variable = class Variable extends pxl.PxlNode {
   // From the attribute and the property (el.value = 5)
   valueChanged(name) {
     super.valueChanged(name);
-    // No layer to invalidate: the stage starts its loop when the value becomes animated
-    this.stage?.requestRender();
+    // A stage-level variable has no layer to invalidate: its stage starts the loop when the value becomes animated
+    if (this._isStageLevel) this.stage?.requestRender();
   }
 
   // Update phase. A failing expression keeps the previous value for this frame.

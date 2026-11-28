@@ -2111,13 +2111,28 @@
       srClear();
     });
 
+    // Every variable has its stage (phase 7 of design/done/2026-11-28_engine_restructure_plan.md); only a stage-level one
+    // asks it for frames itself
+    test('stage variables: a variable inside a layer asks for no frame by itself; a stage-level one does', () => {
+      srClear();
+      srAdd('srLayerA', '<pxl-var id="svInLayer" value="1"></pxl-var>');
+      el('srStage').insertAdjacentHTML('beforeend', '<pxl-var id="svAtStage" value="1"></pxl-var>');
+      srRender(1);
+      const inLayer = countRenderRequests(() => el('svInLayer').setAttribute('value', '2'));
+      const atStage = countRenderRequests(() => el('svAtStage').setAttribute('value', '2'));
+      const hasStage = el('svInLayer').stage === el('srStage');
+      srClear();
+      if (inLayer !== 0 || atStage === 0 || !hasStage) throw new Error(`requests: in a layer ${inLayer}, stage-level ${atStage}; stage set ${hasStage}`);
+    });
+
     test('stage variables: moved into a layer or removed, the stage no longer evaluates it', () => {
       srClear();
       srAdd('srStage', '<pxl-var id="svMove" value="t"></pxl-var>');
       const stage = el('srStage'), variable = el('svMove');
       if (!stage._variables.includes(variable)) throw new Error('not registered with the stage');
       el('srLayerA').appendChild(variable);
-      if (stage._variables.includes(variable) || variable.stage !== null) throw new Error('still registered after moving into a layer');
+      if (stage._variables.includes(variable)) throw new Error('still registered after moving into a layer');
+      if (variable._isStageLevel || variable.stage !== stage) throw new Error(`in a layer: stage-level ${variable._isStageLevel}, stage set ${variable.stage === stage}`);
       srRender(7);
       if (variable.values.value !== 7) throw new Error(`the layer did not evaluate it: ${variable.values.value}`);
       stage.appendChild(variable);
@@ -2141,7 +2156,7 @@
       if (fps !== 15 || renderAvg !== '2.00' || renderMax !== '4.00') throw new Error(`fps ${fps}, renderAvg ${renderAvg}, renderMax ${renderMax}`);
     });
 
-    // design/2026-11-28_engine_restructure_plan.md phase 1: the stage owns its counters, the timer only calls it
+    // design/done/2026-11-28_engine_restructure_plan.md phase 1: the stage owns its counters, the timer only calls it
     test('monitor: publishMetrics() publishes the stage\'s own counters and starts counting anew', () => {
       const stage = el('srStage');
       stage._perfFrames = 12;
@@ -3060,6 +3075,45 @@
           throw new Error(`layers ${stage.layers.length}, monitor entries ${monitored}, alpha ${alphaAt(layer, 500, 300)}`);
         }
       }));
+
+    // design/done/2026-11-28_engine_restructure_plan.md phase 7: one stage field per node, set on connect, cleared on disconnect
+    test('lifecycle: every node has its stage while connected, the new one after a move, null after removal', () =>
+      withStage(`<div style="width: 500px"><pxl-stage id="lsStageA" alwaysrender><pxl-var id="lsVarStage" value="1"></pxl-var>
+          <pxl-layer id="lsLayer"><pxl-group id="lsGroup"><pxl-circle id="lsCircle" r="5"></pxl-circle></pxl-group>
+          <pxl-var id="lsVarLayer" value="2"></pxl-var></pxl-layer></pxl-stage>
+        <pxl-stage id="lsStageB" alwaysrender><pxl-layer id="lsLayerB"></pxl-layer></pxl-stage></div>`, (stageA, box) => {
+        const stageB = box.querySelector('#lsStageB');
+        const nodes = ['lsVarStage', 'lsLayer', 'lsGroup', 'lsCircle', 'lsVarLayer'].map((id) => el(id));
+        const wrong = nodes.filter((node) => node.stage !== stageA).map((node) => node.id);
+        const [, layer, group, circle] = nodes;
+        box.querySelector('#lsLayerB').append(circle);
+        if (circle.stage !== stageB) wrong.push('moved circle');
+        circle.remove();
+        group.remove();
+        layer.remove();
+        for (const node of [circle, group, layer]) if (node.stage !== null) wrong.push(`removed ${node.id}`);
+        if (wrong.length) throw new Error(`wrong stage: ${wrong}`);
+      }));
+
+    test('lifecycle: a removed layer leaves nothing hovered or pressed inside it, without events', () =>
+      withStage(ixStage(`<pxl-group id="lrGroup"><pxl-circle id="lrCircle" x="500" y="300" r="100" fill="#000"></pxl-circle></pxl-group>`),
+        (stage) => {
+          hover(stage, 500, 300);
+          pointerAt(stage, 'pointerdown', 500, 300);
+          const circle = el('lrCircle'), group = el('lrGroup');
+          const before = [circle.values.isHovered, circle.values.isPressed, group.values.isHovered, group.values.isPressed];
+          let events = 0;
+          for (const node of [circle, group]) {
+            for (const type of ['pointerleave', 'pointerout', 'pointerup']) node.addEventListener(type, () => events++);
+          }
+          stage.querySelector('pxl-layer').remove();
+          const after = [circle.values.isHovered, circle.values.isPressed, group.values.isHovered, group.values.isPressed];
+          const engine = stage.interaction;
+          if (before.join() !== 'true,true,true,true' || after.join() !== 'false,false,false,false' || events ||
+              engine._hovered !== null || engine._pressed !== null) {
+            throw new Error(`before ${before}, after ${after}, events ${events}, engine hovered ${engine._hovered}, pressed ${engine._pressed}`);
+          }
+        }));
 
     test('lifecycle: a layer inside another layer warns once, naming both; layers side by side don\'t', () => {
       const box = document.createElement('div');

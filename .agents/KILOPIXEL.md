@@ -454,7 +454,7 @@ pxl.defineShape('pxl-star', pxl.Star);
 | | `hitPadding()` | how far the paint reaches beyond the box (default: from the stroke) |
 | | `prepare(ctx)` | runs on the scratch canvas before an isolated shape's box is read, for a shape that measures in `draw()` (as text does); returns `false` when there is nothing to draw. Default: `true` |
 | **may read** | `this.values` | the current values (the object `ref.<id>` reads), also `isHovered`, `isPressed` |
-| | `this.stage.unit` | CSS pixels per unit, for pixel access (`getImageData()` ignores the canvas transform) |
+| | `this.stage.unit` | CSS pixels per unit, for pixel access (`getImageData()` ignores the canvas transform); `this.stage` is `null` while the shape isn't connected, `draw()` never runs then |
 | **may call** | `applyStyle(ctx)` | fill (if set), then stroke (if set) the current path, gradients and dashes included |
 | | `applyStrokeState(ctx)` | stroke style, width, caps, joins, miter limit, dash, without stroking |
 | | `paint(ctx, 'fill' | 'stroke')` | the fill or stroke as a canvas style: a color as written, a gradient in the shape's box; `null` when not set (check `hasFill()` / `isStroked()` first) |
