@@ -1,6 +1,6 @@
 # Engine Structure Cleanup
 
-- **Status**: 💬 **Discussion** (2026-11-22, moved out of the custom shapes plan; to be discussed; step 6 waits for `space`)
+- **Status**: ⚪ **Superseded by** `design/2026-11-28_engine_restructure_plan.md` (2026-11-28, merged: steps 2–4 are its phases 6–8, step 6 is in its §8)
 - **Date**: 2026-11-22
 - **Origin**: §6 and decision D7 of `design/done/2026-11-20_custom_shapes_plan.md`, which took them from the cleanup draft of 2026-11-20 (`scratch/2026-11-20_engine_structure_cleanup_plan.md` (not kept))
 - **Related**: `design/2026-10-30_space_attribute_plan.md` (step 6 goes with it, TODO §28), `design/done/2026-11-20_evaluation_model_plan.md` (rewrites the evaluation loops step 4 touches)
@@ -39,4 +39,6 @@ Steps 1–5 and step 6 are independent: 1–5 can go in any time; 6 waits for `s
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-28: merged into `design/2026-11-28_engine_restructure_plan.md` and archived: step 1 built there as `pxl.describe()` (`1c01aca`); steps 2–4 are its phases 6–8; step 5's handler compiling went to `js/handlers.js` (its phase 2), the hit-testing split is its D8; step 6 is in its §8, still tied to `space`.
+- Status line until 2026-11-28: 💬 **Discussion** (2026-11-22, moved out of the custom shapes plan; to be discussed; step 6 waits for `space`)
 - 2026-11-22: moved out of `design/done/2026-11-20_custom_shapes_plan.md` (§6 and D7) when that plan was closed.

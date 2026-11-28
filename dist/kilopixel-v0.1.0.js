@@ -819,19 +819,6 @@ pxl.parseTemplate = function(str) {
 };
 
 // =========================================================================
-// Hit Test Context
-// =========================================================================
-// 1×1 canvas, used only for its context (hit testing never paints)
-pxl.dummyCtx = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d');
-pxl._hitX = 0;
-pxl._hitY = 0;
-pxl._hitResult = false;
-
-// fill() / stroke() test the hit point instead of painting: a shape's own draw() becomes its hit test
-pxl.dummyCtx.fill = function() { if (this.isPointInPath(pxl._hitX, pxl._hitY)) pxl._hitResult = true; };
-pxl.dummyCtx.stroke = function() { if (this.isPointInStroke(pxl._hitX, pxl._hitY)) pxl._hitResult = true; };
-
-// =========================================================================
 // Handlers: pxl-on-* Attributes Are Listeners
 // =========================================================================
 // Handler attribute → the DOM event it listens to. Not on…: onclick is the browser's own handler attribute, and
@@ -907,6 +894,19 @@ pxl.compileHandler = function(element, name, source) {
     }
   };
 };
+
+// =========================================================================
+// Hit Test Context
+// =========================================================================
+// 1×1 canvas, used only for its context (hit testing never paints)
+pxl.dummyCtx = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d');
+pxl._hitX = 0;
+pxl._hitY = 0;
+pxl._hitResult = false;
+
+// fill() / stroke() test the hit point instead of painting: a shape's own draw() becomes its hit test
+pxl.dummyCtx.fill = function() { if (this.isPointInPath(pxl._hitX, pxl._hitY)) pxl._hitResult = true; };
+pxl.dummyCtx.stroke = function() { if (this.isPointInStroke(pxl._hitX, pxl._hitY)) pxl._hitResult = true; };
 
 // =========================================================================
 // DOM Events on Shapes

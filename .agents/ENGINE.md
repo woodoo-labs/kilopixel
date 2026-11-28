@@ -13,17 +13,18 @@ Build order (`files` in `build.js`):
 | 1 | `js/engine.js` | `pxl` namespace, generic helpers (`pxl.describe()` names an element in warnings; `pxl.TRANSFORM_DEFAULTS`, spread into the defaults of layers, groups and shapes), reactivity (`pxl.nodes`, versions, `markChanged`), attribute compilation bridge, property accessors |
 | 2 | `js/matrix.js` | `pxl.Matrix` (Float64Array affine matrices, written in place), `pxl.toLocal` |
 | 3 | `js/compiler.js` | expression scope, time drivers, `parseAttributeValue`, `compileExpression` |
-| 4 | `js/interaction.js` | `pxl-on-*` handlers, `pxl.InteractionEngine`: hit testing, states, DOM events, cursor |
-| 5 | `js/graphics.js` | anchor tables, `resolveRadius`, transform and compositing state, isolation canvas, arc angles, arrowhead constants, line dash helper, points parser |
-| 6 | `js/monitor.js` | `pxl.perf`: the 1-second timer that calls `Stage.publishMetrics()` |
-| 7 | `js/elements/stage.js` | `pxl._frame`, `pxl.stages` (every connected stage), default styles, `pxl.Stage` |
-| 8 | `js/elements/node.js` | `pxl.PxlNode` |
-| 9 | `js/elements/layer.js` | `pxl.Layer` |
-| 10 | `js/elements/group.js` | `pxl.Group` |
-| 11 | `js/elements/shape.js` | `pxl.Shape`: style, gradients, isolation, hit box, arrowheads; `pxl.defineShape()` |
-| 12 | `js/elements/shapes/arc.js` | `pxl.ArcShape`: the shared base of circle and ellipse, no tag |
-| 13–19 | `js/elements/shapes/*.js` | circle, ellipse, rect, line, polyline, text, grid |
-| 20 | `js/elements/variable.js` | `pxl.Variable` |
+| 4 | `js/handlers.js` | `pxl-on-*` handlers: `pxl.HANDLER_EVENTS`, `pxl.createHandlers`, `pxl.handlerRef` and its assignment rules, `pxl.compileHandler` |
+| 5 | `js/interaction.js` | `pxl.InteractionEngine`: hit testing, states, DOM events, cursor |
+| 6 | `js/graphics.js` | anchor tables, `resolveRadius`, transform and compositing state, isolation canvas, arc angles, arrowhead constants, line dash helper, points parser |
+| 7 | `js/monitor.js` | `pxl.perf`: the 1-second timer that calls `Stage.publishMetrics()` |
+| 8 | `js/elements/stage.js` | `pxl._frame`, `pxl.stages` (every connected stage), default styles, `pxl.Stage` |
+| 9 | `js/elements/node.js` | `pxl.PxlNode` |
+| 10 | `js/elements/layer.js` | `pxl.Layer` |
+| 11 | `js/elements/group.js` | `pxl.Group` |
+| 12 | `js/elements/shape.js` | `pxl.Shape`: style, gradients, isolation, hit box, arrowheads; `pxl.defineShape()` |
+| 13 | `js/elements/shapes/arc.js` | `pxl.ArcShape`: the shared base of circle and ellipse, no tag |
+| 14–20 | `js/elements/shapes/*.js` | circle, ellipse, rect, line, polyline, text, grid |
+| 21 | `js/elements/variable.js` | `pxl.Variable` |
 
 ```
 HTMLElement
@@ -330,7 +331,7 @@ Design: `design/done/2026-11-17_pointer_frame_order_plan.md`. A static page asks
 
 None in the walk, box check, boundary walk and queue; one event object per dispatched event.
 
-### 8.7 Handlers
+### 8.7 Handlers (`js/handlers.js`)
 
 `pxl.HANDLER_EVENTS` maps `pxl-on-*` to event types; `pxl.createHandlers()` makes the per-element record (`handlers.click`, …). `setHandler(name, source)` removes the old listener (a removed or empty handler leaves `handlers.<type>` `null`) and adds `pxl.compileHandler()`'s: the source through `pxl.rewriteExpression(source, true)` (no `?.`, so `ref.a.b` can be assigned), compiled with the scope and `pxl.handlerRef` as `ref`, wrapped in a listener that calls it with `this` = the element and logs a throw with `console.error`. Design: `design/archive/2026-11-15_handler_errors_plan.md`.
 
@@ -351,7 +352,7 @@ None in the walk, box check, boundary walk and queue; one event object per dispa
 
 ## 11. Build (`build.js`)
 
-1. `readSources()` / `bundleSource()` concatenate the 20 files; `require('./build.js')` builds nothing and exports them with `checkSources()` for `tools/check_build.js`.
+1. `readSources()` / `bundleSource()` concatenate the 21 files; `require('./build.js')` builds nothing and exports them with `checkSources()` for `tools/check_build.js`.
 2. `checkSources()` refuses: a top-level `class` / `const` / `let` / `var` / `function`; trailing whitespace; a `_` field used in another engine file or a plain field used only in its own (found by name, equal names in different classes count together).
 3. The bundle sets `window.pxl = { version: '0.1.0' }` inside a function that returns without a browser (server-side rendering) or when `<pxl-stage>` is already defined (warns `[pxl] Kilopixel is already loaded …`, the first copy keeps working).
 4. Typings: `tools/build_types.js` runs the bundle in a Node `vm` with a stubbed DOM, reads `observedAttributes` and `static defaults` of every element, and writes `kilopixel.d.ts` plus one file per framework (React, Preact, Solid, Vue, Svelte) to `dist/types/` and `docs/download/types/`. Types come from the default's type plus a table in the script (keywords, colors, arrays, `points`, `text`, nullable numbers); an attribute with a `null` default the table doesn't cover stops the build. Every value also accepts `PxlExpression` (`string & {}`, keeps keyword suggestions). `node tools/run_tests.js --types` checks them against the real framework types (`tests/types/`).

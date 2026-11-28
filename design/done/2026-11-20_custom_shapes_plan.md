@@ -184,7 +184,7 @@ The engine keeps "fields in the constructor" (CLAUDE.md "Engine Code Style": one
 
 ## 6. Structure Cleanup (No Behavior Change; Later)
 
-*2026-11-22: moved with D7 to `design/ideas/2026-11-22_engine_structure_cleanup_plan.md` (§18); the text below stays as history.* From the cleanup draft of 2026-11-20. **Not part of the custom-shape steps (§9):** to be discussed separately. It touches the same classes, so whichever comes second adapts to the first. Each step one commit; the tests are the check.
+*2026-11-22: moved with D7 to `design/archive/2026-11-22_engine_structure_cleanup_plan.md` (§18); the text below stays as history.* From the cleanup draft of 2026-11-20. **Not part of the custom-shape steps (§9):** to be discussed separately. It touches the same classes, so whichever comes second adapts to the first. Each step one commit; the tests are the check.
 
 1. **`pxl.describe(element)`:** the text `<pxl-rect id="btn">` for warnings, in 4 places today.
 2. **`pxl.BaseElement`** (new `js/elements/base.js`), the base of `Stage` and `PxlNode`: `values` with the hidden `set` / `$node`, the `id` registry (`refKey`, `_isRegistered`, rename), properties set before the upgrade, `attributeChangedCallback()` for unchanged values and `id`, passing other names to the subclass. Methods on the class, so the fields stay in their class.
@@ -255,7 +255,7 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 | D4 | Rename `attributeValues` → `values`, `attributeExpressions` → `expressions` | **decided and built 2026-11-21** (§14) |
 | D5 | Class fields for built-ins | **decided 2026-11-22**: no, the engine keeps constructors; authors choose |
 | D6 | The public helpers of §4 (`applyStyle`, `applyStrokeState`, `paint`, `hasFill`, `isStroked`, `setBoundingBox`) | **decided and built 2026-11-21** (§15); arrowheads stay internal (§5.9) |
-| D7 | The transform path (§6.6) | with `space`, not alone; moved 2026-11-22 to `design/ideas/2026-11-22_engine_structure_cleanup_plan.md` (its D1) |
+| D7 | The transform path (§6.6) | with `space`, not alone; moved 2026-11-22 to `design/archive/2026-11-22_engine_structure_cleanup_plan.md` (its D1) |
 | D8 | Typings for custom shapes | **decided and built 2026-11-21** (§16): generated base types `PxlShapeAttributes` / `PxlShapeElement`, a declaration to copy on the docs page |
 | D9 | Internal animated values (§5.9) | after the evaluation model; moved 2026-11-22 to `design/done/2026-11-20_evaluation_model_plan.md` (its D11) |
 
@@ -365,7 +365,7 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 
 Custom shapes are built (steps 2–6, phase 2 of §5.3), documented (`docs/custom-shapes.html`, KILOPIXEL.md §12) and checked in Chrome, Firefox and Safari. Decisions D1–D6 and D8 are built, D5 decided as recommended. What was left moved where it belongs:
 
-- **The structure cleanup** (§6) and **D7** (one transform path): `design/ideas/2026-11-22_engine_structure_cleanup_plan.md` (💬, parked; step 6 goes with `space`, TODO §28).
+- **The structure cleanup** (§6) and **D7** (one transform path): `design/archive/2026-11-22_engine_structure_cleanup_plan.md` (💬, parked; step 6 goes with `space`, TODO §28).
 - **D9** (internal animated values, §5.9): `design/done/2026-11-20_evaluation_model_plan.md`, its D11, decided with its D1.
 - **Step 7** (`<pxl-polygon>` in this form): `design/2026-10-19_polygon_star_shape_plan.md`, TODO §23.
 - **Safari limits** found in §5.3: `design/done/2026-11-22_late_web_fonts_plan.md` (late web fonts) and TODO §49 (shape filters).
@@ -376,7 +376,7 @@ Its TODO item is removed; its number stays free.
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
-- 2026-11-22: closed (§18): ✅ and moved to `design/done/`; D5 decided; §6 with D7 to `design/ideas/2026-11-22_engine_structure_cleanup_plan.md`, D9 to the evaluation model plan, step 7 to the polygon plan; its TODO item removed.
+- 2026-11-22: closed (§18): ✅ and moved to `design/done/`; D5 decided; §6 with D7 to `design/archive/2026-11-22_engine_structure_cleanup_plan.md`, D9 to the evaluation model plan, step 7 to the polygon plan; its TODO item removed.
 - 2026-11-22: phase 2 of §5.3 built (§17): the layer scales by u once, no `* u` in shapes, helpers and caches; edge-pixel rounding on 16 of 306 layers, hit testing unchanged, frames equal or faster; −0.6 KB. Tools in `phase2/`.
 - 2026-11-22: Safari checked on an iPhone (§5.3): all pixel tests pass, so phase 1 holds in Safari; found Safari's missing `ctx.filter` (TODO §49) and late web fonts without `loadingdone` (`design/done/2026-11-22_late_web_fonts_plan.md`). GitHub's macOS runner can't paint or read pixels, so its workflow and script are removed again (they are in commit `bae213f`). The device check page and its receiver are kept in `safari/`.
 - 2026-11-22: a Safari script and a manual GitHub workflow for the Safari test (§9 step 1; commit `a73e8bc`, removed again, see above). Corrected the prototype note: the comparison of `template/` and `logical_units/` needs the engine of commit `82eb93d`, not `5ff5ea6`.
