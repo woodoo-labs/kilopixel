@@ -176,7 +176,7 @@ runFrame(t), in try / finally (_isRendering = false whatever happens):
       not dirty → return: the CSS-only path (§5.3)
       isDirty = false; clearRect
       hidden → canvas empty, return
-      save; scale(u, u); applyTransformState if a transform is set; children render(ctx, u); restore
+      save; scale(u, u); applyTransformState if hasTransform(); children render(ctx, u); restore
 needsNextFrame()                              the keep-alive: an animated stage-level variable, or a layer with
   → requestRender()                           hasAnimatedContent or still dirty (a failed update keeps its request)
 perf counters (hit testing included)
@@ -206,7 +206,7 @@ Nothing that throws breaks the frame (design: `design/done/2026-11-07_safe_shape
 
 ### 6.1 `Shape.render(ctx, u)`
 
-Skips a failed or hidden shape; `needsIsolation()` → `renderIsolated()`; otherwise `ctx.save()`, `pxl.applyContextState()` (= `pxl.applyTransformState()`, steps in language §2, each skipped at its default, + `pxl.applyCompositingState()`: alpha multiplied, mask or blend, `resolveFilter()` (before it, `pxl.checkCanvasFilter()` asks the context's prototype once per page whether it has `filter`, and warns if not), shadow only with `shadowcolor`, `none` / `transparent` reset it; canvas shadows and filters ignore the canvas transform, so their lengths are scaled by `u` × the layer's `dpr`), `draw(ctx)`, `ctx.restore()` in `finally`. Every shape draws in its own canvas state, so a custom shape can't leak state. Custom shapes override `draw()`, not `update()` or `render()`. Groups apply only `applyTransformState()`, and only around their children when a transform isn't at its default; a layer always scales by `u` first (below).
+Skips a failed or hidden shape; `needsIsolation()` → `renderIsolated()`; otherwise `ctx.save()`, `pxl.applyContextState()` (= `pxl.applyTransformState()`, steps in language §2, each skipped at its default, + `pxl.applyCompositingState()`: alpha multiplied, mask or blend, `resolveFilter()` (before it, `pxl.checkCanvasFilter()` asks the context's prototype once per page whether it has `filter`, and warns if not), shadow only with `shadowcolor`, `none` / `transparent` reset it; canvas shadows and filters ignore the canvas transform, so their lengths are scaled by `u` × the layer's `dpr`), `draw(ctx)`, `ctx.restore()` in `finally`. Every shape draws in its own canvas state, so a custom shape can't leak state. Custom shapes override `draw()`, not `update()` or `render()`. Groups apply only `applyTransformState()`, and only around their children when a transform isn't at its default (`pxl.hasTransform()`, the same tests); a layer always scales by `u` first (below).
 
 **Logical units:** everything inside a layer draws in the units of the HTML. `Layer.render()` scales its context by `u` once, so transforms, paths, line widths, dashes, gradients and font sizes are written as the attributes say, and nothing that `draw()` measures depends on the stage size; `renderIsolated()` and the hit test set the global matrix × `u` instead. `u` reaches `Shape.render()` only for what ignores the canvas transform is scaled by the engine before `draw()`: shadows and `ctx.filter` (`u` × `dpr`, above). Pixel access ignores it too (`getImageData()`): a shape that reads or writes pixels uses `this.stage.unit`. `draw()` gets no time: time-dependent values are evaluated in `update()`, so a hit test sees what is drawn. Design: `design/done/2026-11-20_custom_shapes_plan.md` §5.3, §5.4.
 

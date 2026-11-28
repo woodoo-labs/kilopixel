@@ -182,16 +182,11 @@ pxl.Layer = class Layer extends pxl.PxlNode {
 
     this._isCanvasEmpty = false;
 
-    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.values;
-    const hasTransformChanges = x || y || dx || dy || rotate ||
-                                zoom !== 1 || scalex !== 1 || scaley !== 1 ||
-                                skewx || skewy;
-
     // Everything inside draws in logical units: the one scale by u for the whole layer
     // (design/done/2026-11-20_custom_shapes_plan.md §5.3, phase 2). u goes on for shadows and filters only.
     ctx.save();
     ctx.scale(u, u);
-    if (hasTransformChanges) pxl.applyTransformState(ctx, this.values);
+    if (pxl.hasTransform(this.values)) pxl.applyTransformState(ctx, this.values);
     for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].render(ctx, u);
     }

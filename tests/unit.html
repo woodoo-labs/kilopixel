@@ -657,6 +657,15 @@
       if (wrong.length) throw new Error(wrong.join('; '));
     });
 
+    test('pxl.hasTransform(): false at pxl.TRANSFORM_DEFAULTS, true when any one key is away from its default', () => {
+      const wrong = [];
+      if (pxl.hasTransform({ ...pxl.TRANSFORM_DEFAULTS }) !== false) wrong.push('true at the defaults');
+      for (const key of Object.keys(pxl.TRANSFORM_DEFAULTS)) {
+        if (pxl.hasTransform({ ...pxl.TRANSFORM_DEFAULTS, [key]: 2 }) !== true) wrong.push(`${key} = 2: not a transform`);
+      }
+      if (wrong.length) throw new Error(wrong.join('; '));
+    });
+
     test('pxl.describe(): an element as warnings name it, with its id or without', () => {
       const rect = document.createElement('pxl-rect'), plain = pxl.describe(rect);
       rect.id = 'btn';

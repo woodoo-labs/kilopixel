@@ -52,6 +52,13 @@ pxl.resolveRadius = function(r, x, y, w, h) {
   }
 };
 
+// Whether a transform attribute is away from its default (pxl.TRANSFORM_DEFAULTS): a layer or group without one skips
+// the transform, a group also save() / restore(). The same tests as applyTransformState() makes, step by step.
+pxl.hasTransform = function(values) {
+  const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = values;
+  return !!(x || y || dx || dy || rotate || zoom !== 1 || scalex !== 1 || scaley !== 1 || skewx || skewy);
+};
+
 // Same order as pxl.Matrix.updateLocal: translate(x, y) → rotate → scale → skew → translate(dx, dy). In logical
 // units: the layer has scaled the context by u.
 pxl.applyTransformState = function(ctx, values) {

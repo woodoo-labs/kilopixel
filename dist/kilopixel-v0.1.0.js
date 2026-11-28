@@ -1521,6 +1521,13 @@ pxl.resolveRadius = function(r, x, y, w, h) {
   }
 };
 
+// Whether a transform attribute is away from its default (pxl.TRANSFORM_DEFAULTS): a layer or group without one skips
+// the transform, a group also save() / restore(). The same tests as applyTransformState() makes, step by step.
+pxl.hasTransform = function(values) {
+  const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = values;
+  return !!(x || y || dx || dy || rotate || zoom !== 1 || scalex !== 1 || scaley !== 1 || skewx || skewy);
+};
+
 // Same order as pxl.Matrix.updateLocal: translate(x, y) → rotate → scale → skew → translate(dx, dy). In logical
 // units: the layer has scaled the context by u.
 pxl.applyTransformState = function(ctx, values) {
@@ -2888,16 +2895,11 @@ pxl.Layer = class Layer extends pxl.PxlNode {
 
     this._isCanvasEmpty = false;
 
-    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.values;
-    const hasTransformChanges = x || y || dx || dy || rotate ||
-                                zoom !== 1 || scalex !== 1 || scaley !== 1 ||
-                                skewx || skewy;
-
     // Everything inside draws in logical units: the one scale by u for the whole layer
     // (design/done/2026-11-20_custom_shapes_plan.md §5.3, phase 2). u goes on for shadows and filters only.
     ctx.save();
     ctx.scale(u, u);
-    if (hasTransformChanges) pxl.applyTransformState(ctx, this.values);
+    if (pxl.hasTransform(this.values)) pxl.applyTransformState(ctx, this.values);
     for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].render(ctx, u);
     }
@@ -2976,19 +2978,15 @@ pxl.Group = class Group extends pxl.PxlNode {
   render(ctx, u) {
     if (this._failedFrame === pxl._frame || this.values.hidden) return;
 
-    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.values;
-    const hasStateChanges = x || y || dx || dy || rotate ||
-                            zoom !== 1 || scalex !== 1 || scaley !== 1 ||
-                            skewx || skewy;
-
-    if (hasStateChanges) {
+    const hasTransform = pxl.hasTransform(this.values);
+    if (hasTransform) {
       ctx.save();
       pxl.applyTransformState(ctx, this.values);
     }
     for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].render(ctx, u);
     }
-    if (hasStateChanges) ctx.restore();
+    if (hasTransform) ctx.restore();
   }
 };
 customElements.define('pxl-group', pxl.Group);

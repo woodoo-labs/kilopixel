@@ -69,19 +69,15 @@ pxl.Group = class Group extends pxl.PxlNode {
   render(ctx, u) {
     if (this._failedFrame === pxl._frame || this.values.hidden) return;
 
-    const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = this.values;
-    const hasStateChanges = x || y || dx || dy || rotate ||
-                            zoom !== 1 || scalex !== 1 || scaley !== 1 ||
-                            skewx || skewy;
-
-    if (hasStateChanges) {
+    const hasTransform = pxl.hasTransform(this.values);
+    if (hasTransform) {
       ctx.save();
       pxl.applyTransformState(ctx, this.values);
     }
     for (let i = 0; i < this.childList.length; i++) {
       this.childList[i].render(ctx, u);
     }
-    if (hasStateChanges) ctx.restore();
+    if (hasTransform) ctx.restore();
   }
 };
 customElements.define('pxl-group', pxl.Group);
