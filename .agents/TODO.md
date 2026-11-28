@@ -99,7 +99,7 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Decided**: R1–R5 (plan §6). **Next**: the plan for §3 (animation); decisions for §42 (D1–D5) and §49.
 
 ## 53. Engine Restructure: Files by Feature
-- **Status**: 🟡 **Proposed**
+- **Status**: 🟢 **Decided**
 - **Plan**: `design/2026-11-28_engine_restructure_plan.md`
 - Each engine feature in one file, no behavior change: a stage registry (`pxl.stages`), `handlers.js`, `graphics.js` dissolved into `compositing.js` and its callers, `gradient.js`, `reactivity.js` with the scheduler as a class. Five phases, one commit each.
-- **Open**: D1–D7 (plan §5).
+- **Decided**: D1–D7 as recommended (plan §5; matrix-based drawing, D7, gets its own plan). **Next**: phase 1, the stage registry and `stage.publishMetrics()`.

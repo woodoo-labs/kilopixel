@@ -1,6 +1,6 @@
 # Engine Restructure: Files by Feature
 
-- **Status**: 🟡 **Proposed** (2026-11-28, five phases of moves without behavior change; decisions D1–D7 open)
+- **Status**: 🟢 **Decided** (2026-11-28, D1–D7 as recommended in §5; next: phase 1)
 - **Date**: 2026-11-28
 - **Related**: `design/done/2026-10-27_engine_cleanup_inventory_note.md` (the code style this keeps), `design/done/2026-11-20_evaluation_model_plan.md` (the scheduler that moves in phase 5), `design/done/2026-11-01_isolated_shape_compositing_plan.md` and `design/done/2026-11-26_isolation_box_plan.md` (the isolation code that moves in phase 3), `design/2026-11-12_layer_throttling_plan.md` (TODO §8: phase 1 builds the publishing step of its per-layer metrics, C2), `.claude/CLAUDE.md` "Engine Code Rules" and "Engine Code Style"
 - **Target Implementation**: `build.js` (file list), `js/engine.js`, `js/compiler.js`, `js/interaction.js`, `js/graphics.js` (removed), `js/monitor.js`, `js/elements/stage.js`, `js/elements/node.js`, `js/elements/shape.js`, `js/elements/shapes/arc.js`, `js/elements/shapes/polyline.js`, `js/elements/shapes/text.js`, new `js/reactivity.js`, `js/gradient.js`, `js/compositing.js`, `js/handlers.js`; `tests/index.html`, `tests/frameworks.html`, `tests/unit.html`; `.agents/ENGINE.md`
@@ -76,6 +76,8 @@ The order goes from smallest to largest, so the first phases also show whether t
 | D6 | The scheduler as a class owned by the stage, or `pxl.*` functions taking the stage? | **A** class (`stage.scheduler`); **B** functions | **A**: it owns six fields, which CLAUDE.md wants in a constructor; same pattern as `pxl.InteractionEngine` |
 | D7 | Drawing with the cached local matrix (`ctx.transform(...getLocalMatrix())`) instead of `applyTransformState()`'s calls | **A** in this plan as phase 6; **B** its own plan | **B**: it changes behavior (canvas calls, possibly pixels) and needs a measurement against the frame budget; this plan only moves code |
 
+**Decided 2026-11-28:** every decision as recommended: D1 A (one `compositing.js`), D2 A (`pxl.scope` in `engine.js`, `pxl.scopeKeys` at the first compile, with its unit test and the load-order rule of §6.3), D3 A (anchors in `engine.js`), D4 A (arrow helpers in `shape.js`), D5 A (registry and scheduler in `reactivity.js`), D6 A (`pxl.UpdateScheduler`, owned by the stage), D7 B (its own plan, §8).
+
 ## 6. Risks, Per-Frame Cost and Edge Cases
 
 ### 6.1 Moves
@@ -130,6 +132,7 @@ Class-structure follow-ups from the same review, each small, better as a second 
 
 ## Log
 
+- 2026-11-28: decided: D1–D7 as recommended (§5). Next: phase 1.
 - 2026-11-28: review for per-frame cost, garbage and edge cases: §6.2 (rules for phases 4 and 5), §6.3 (edge cases), animated gradients in §8. The review found the `paint()` bug fixed in `a54e485`.
 - 2026-11-28: phase 1 also moves the monitor's publishing into the stage (`publishMetrics()`, counters owned by the stage), the step the throttling plan's C2 needs; that plan (TODO §8) stays after release 0.1.
 - 2026-11-28: proposed after the code review of the same day; its small findings were built first.
