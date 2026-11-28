@@ -336,6 +336,26 @@
     // ===================================================================
     section('Scope helpers');
 
+    // Scope names come from several engine files (compiler.js, compositing.js); pxl.scopeKeys() lists them at the first
+    // compile (design/2026-11-28_engine_restructure_plan.md D2). A name added after that would be missing everywhere.
+    test('scope: every name in pxl.scope is visible in static and animated expressions and in handlers', () => {
+      const missing = [];
+      const el = document.createElement('pxl-rect');
+      for (const name of Object.keys(pxl.scope)) {
+        const staticType = pxl.compileExpression(`typeof ${name}`);
+        const animated = pxl.compileExpression(`typeof ${name} + t * 0`);
+        const animatedType = typeof animated === 'function' ? animated(0) : animated;
+        pxl.compileHandler(el, 'pxl-on-click', `this.seenType = typeof ${name}`)();
+        if (staticType === 'undefined' || String(animatedType).startsWith('undefined') || el.seenType === 'undefined') {
+          missing.push(`${name} (static ${staticType}, animated ${animatedType}, handler ${el.seenType})`);
+        }
+      }
+      const keys = pxl.scopeKeys().split(', ');
+      const expectedFamilies = ['sin', 'hsl', 'clamp', 'linear', 'blur', 'dropShadow'];
+      const absent = expectedFamilies.filter((name) => !keys.includes(name));
+      if (missing.length || absent.length) throw new Error(`missing: ${missing.join('; ')}; not in scopeKeys(): ${absent}`);
+    });
+
     table('color functions', [
       ['rgb(1, 2, 3)', 'rgb(1,2,3)'], ['rgba(1, 2, 3, 0.5)', 'rgba(1,2,3,0.5)'],
       ['hsl(t * 0 + 120, 50, 40)', 'hsl(120,50%,40%)'], ["hsl(t * 0 + 120, '50%', '40%')", 'hsl(120,50%,40%)'],

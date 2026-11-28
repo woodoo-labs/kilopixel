@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Restructure: pixel hashes</title>
+  <!-- Through the dev server: http://localhost:8124/design/prototypes/2026-11-28_engine_restructure/pixel_hashes.html -->
+  <script src="/dist/pxl.js"></script>
+  <script src="/docs/js/shapes/star.js"></script>
+  <script src="/docs/js/shapes/gauge.js"></script>
+  <style>
+    body { font: 14px sans-serif; margin: 16px; }
+    #box { width: 1000px; }
+    pre { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <p>
+    Renders each scene alone in a 1000 px stage and hashes the layer's pixels. A phase of
+    <code>design/2026-11-28_engine_restructure_plan.md</code> that moves drawing code must not change a hash:
+    open with <code>?save</code> on the build before the phase, then without it on the build after.
+  </p>
+  <p id="summary"></p>
+  <div id="box"></div>
+  <pre id="out"></pre>
+  <script>
+    const S = 'stroke="#c00" strokewidth="8"';
+    const F = 'fill="#06c"';
+    const G = "fill=\"radial([0.3, 0.3, 'farthest-corner'], ['#fff', '#06c'])\"";
+
+    const scenes = [
+      // Transforms on layers, groups and shapes (applyTransformState, hasTransform)
+      `<pxl-rect x="500" y="300" w="200" h="120" ${F} ${S}></pxl-rect>`,
+      `<pxl-rect x="500" y="300" w="200" h="120" rotate="20" zoom="1.2" skewx="10" dx="30" ${F} ${S}></pxl-rect>`,
+      `<pxl-group x="400" y="250" rotate="-15" scalex="1.3"><pxl-circle dx="60" r="50" ${F} ${S}></pxl-circle></pxl-group>`,
+      `<pxl-group x="500" y="300" skewy="15"><pxl-group zoom="0.8" rotate="30"><pxl-rect w="150" h="90" anchor="top-left" ${F}></pxl-rect></pxl-group></pxl-group>`,
+      // Compositing state (applyCompositingState): alpha, blend, mask, filter, shadow
+      `<pxl-circle x="450" y="300" r="100" ${F}></pxl-circle><pxl-circle x="550" y="300" r="100" fill="#c00" alpha="0.5"></pxl-circle>`,
+      `<pxl-circle x="450" y="300" r="100" ${F}></pxl-circle><pxl-circle x="550" y="300" r="100" fill="#c00" blend="multiply"></pxl-circle>`,
+      `<pxl-circle x="450" y="300" r="100" ${F}></pxl-circle><pxl-circle x="550" y="300" r="100" fill="#000" mask="destination-out"></pxl-circle>`,
+      `<pxl-rect x="500" y="300" w="200" h="120" ${F} filter="blur(4)"></pxl-rect>`,
+      `<pxl-rect x="500" y="300" w="200" h="120" ${F} filter="[blur(2), dropShadow(10, 10, 6, '#000')]"></pxl-rect>`,
+      `<pxl-rect x="500" y="300" w="200" h="120" ${F} shadowcolor="#000" shadowblur="12" shadowx="10" shadowy="8"></pxl-rect>`,
+      `<pxl-rect x="500" y="300" w="200" h="120" ${F} shadowcolor="none" shadowblur="12"></pxl-rect>`,
+      // Isolation (getIsolationContext): shapes that draw more than once with compositing state
+      `<pxl-rect x="500" y="300" w="200" h="120" ${F} ${S} shadowcolor="#000" shadowblur="10" shadowx="8" shadowy="8"></pxl-rect>`,
+      `<pxl-circle x="500" y="300" r="100" ${F} ${S} filter="blur(3)"></pxl-circle>`,
+      `<pxl-circle x="450" y="300" r="100" fill="#0a0"></pxl-circle><pxl-circle x="550" y="300" r="100" ${F} ${S} blend="screen"></pxl-circle>`,
+      `<pxl-line x1="200" y1="300" x2="800" y2="300" ${S} arrowstart="40" arrowend="40" shadowcolor="#000" shadowblur="6" shadowx="5" shadowy="5"></pxl-line>`,
+      `<pxl-text x="500" y="300" text="Isolated text" size="70" ${F} ${S} shadowcolor="#000" shadowblur="6" shadowx="4" shadowy="4"></pxl-text>`,
+      `<pxl-star x="500" y="300" r="150" ir="60" ${F} ${S} shadowcolor="#000" shadowblur="8" shadowx="6" shadowy="6"></pxl-star>`,
+      // Line dash (hasLineDash) and arrowheads (arrow constants, arrowSize, createArrowRecord)
+      `<pxl-line x1="200" y1="200" x2="800" y2="400" ${S} linedash="[30, 15]" dashoffset="10"></pxl-line>`,
+      `<pxl-line x1="200" y1="200" x2="800" y2="400" ${S} linedash="20"></pxl-line>`,
+      `<pxl-line x1="200" y1="200" x2="800" y2="400" ${S} linedash="none"></pxl-line>`,
+      `<pxl-line x1="200" y1="300" x2="800" y2="300" ${S} arrowstart="auto" arrowend="50" arrowstyle="line" linejoin="round"></pxl-line>`,
+      `<pxl-polyline points="200,400; 400,200; 600,400; 800,200" ${S} arrowstart="40" arrowend="40" linedash="[25, 10]"></pxl-polyline>`,
+      `<pxl-polyline points="200,400; 400,200; 600,400; 800,200" smooth="true" ${S} arrowend="40"></pxl-polyline>`,
+      `<pxl-circle x="500" y="300" r="150" sweep="270" ${S} arrowstart="30" arrowend="40"></pxl-circle>`,
+      `<pxl-ellipse x="500" y="300" rx="250" ry="100" start="-30" sweep="240" ${S} arrowend="40" arrowstyle="line"></pxl-ellipse>`,
+      // Arc angles (arcEndRadians, isFullTurn)
+      `<pxl-circle x="500" y="300" r="150" pie="true" start="20" end="250" ${F} ${S}></pxl-circle>`,
+      `<pxl-circle x="500" y="300" r="150" sweep="-120" ${S}></pxl-circle>`,
+      `<pxl-circle x="500" y="300" r="150" ir="80" start="10" sweep="360" ${F} ${S}></pxl-circle>`,
+      // Points parser (parsePointsIntoArray)
+      `<pxl-polyline points="200,300; min(400, 500),150; 600 , 450 ;800,300" ${S}></pxl-polyline>`,
+      `<pxl-polyline points="100,100; 100,0; 0,100; -100,0" mode="relative" closed="true" ${F} ${S}></pxl-polyline>`,
+      // Anchors and radial radii (anchorX / anchorY, resolveRadius)
+      `<pxl-rect x="500" y="300" w="200" h="120" anchor="bottom-right" r="20" ${F} ${S}></pxl-rect>`,
+      `<pxl-rect x="500" y="300" w="300" h="200" ${G}></pxl-rect>`,
+      `<pxl-rect x="500" y="300" w="300" h="200" fill="radial([0.5, 0.5, 'top-left'], ['#fff', '#c00'])"></pxl-rect>`,
+      `<pxl-rect x="500" y="300" w="300" h="200" fill="radial([0.2, 0.7, 'closest-side'], ['#fff', '#0a0'])"></pxl-rect>`,
+      `<pxl-rect x="500" y="300" w="300" h="200" fill="radial([0.4, 0.4, 0, 0.5, 0.5, 'right'], ['#ff0', '#00f'])"></pxl-rect>`,
+      // Other shapes and the Gauge (paint())
+      `<pxl-text x="500" y="300" text="Line one\\nLine two" size="50" ${F} width="400"></pxl-text>`,
+      `<pxl-grid step="50" major="4" labels="true" stroke="#999" fill="#333"></pxl-grid>`,
+      `<pxl-gauge x="500" y="400" r="200" strokewidth="30" stroke="#06c" fill="#333" value="0.6" label="'60 %'" ticks></pxl-gauge>`
+    ];
+
+    function hash(data) {
+      let h = 2166136261;
+      for (let i = 0; i < data.length; i++) h = Math.imul(h ^ data[i], 16777619);
+      return (h >>> 0).toString(16);
+    }
+
+    const box = document.getElementById('box'), result = {};
+    for (const scene of scenes) {
+      box.innerHTML = `<pxl-stage ratio="5 / 3" alwaysrender><pxl-layer>${scene}</pxl-layer></pxl-stage>`;
+      const stage = box.querySelector('pxl-stage'), layer = box.querySelector('pxl-layer');
+      stage.resize();
+      layer.isDirty = true;
+      stage.render(1);
+      const c = layer._canvas;
+      result[scene] = hash(layer._ctx.getImageData(0, 0, c.width, c.height).data);
+    }
+    box.innerHTML = '';
+
+    const KEY = 'pxlRestructureBaseline';
+    const summary = document.getElementById('summary');
+    const values = Object.values(result);
+    let changed = [];
+    if (location.search.includes('save')) {
+      localStorage.setItem(KEY, JSON.stringify(result));
+      summary.textContent = `Saved ${values.length} hashes as the baseline (${new Set(values).size} distinct).`;
+    } else {
+      const baseline = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if (baseline) {
+        changed = Object.keys(result).filter((scene) => baseline[scene] !== result[scene]);
+        summary.textContent = `${values.length} scenes, ${changed.length} changed against the baseline.`;
+      } else {
+        summary.textContent = 'No baseline yet: open with ?save on the build before the change.';
+      }
+    }
+    window.pixelHashes = { result, changed, distinct: new Set(values).size };
+    document.getElementById('out').textContent = (changed.length ? 'Changed:\n' + changed.join('\n') + '\n\n' : '') +
+      JSON.stringify(result, null, 1);
+  </script>
+</body>
+</html>

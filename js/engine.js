@@ -33,6 +33,31 @@ pxl.describe = function(element) {
   return `<${element.localName}${element.id ? ` id="${element.id}"` : ''}>`;
 };
 
+// The points of a box by name, as proportions of its width and height: rect's anchor and the radii of radial
+// gradients (pxl.resolveRadius)
+pxl.anchorX = {
+  'left': 0, 'right': 1, 'center': 0.5,
+  'top-left': 0, 'top-right': 1, 'bottom-left': 0, 'bottom-right': 1,
+  'top': 0.5, 'bottom': 0.5,
+  'top-center': 0.5, 'bottom-center': 0.5,
+  'left-center': 0, 'right-center': 1,
+  'center-top': 0.5, 'center-bottom': 0.5,
+  'center-left': 0, 'center-right': 1
+};
+pxl.anchorY = {
+  'top': 0, 'bottom': 1, 'center': 0.5,
+  'top-left': 0, 'top-right': 0, 'bottom-left': 1, 'bottom-right': 1,
+  'left': 0.5, 'right': 0.5,
+  'top-center': 0, 'bottom-center': 1,
+  'left-center': 0.5, 'right-center': 0.5,
+  'center-top': 0, 'center-bottom': 1,
+  'center-left': 0.5, 'center-right': 0.5
+};
+
+// Names available in every expression and handler: Math, colors and utilities (compiler.js), filters
+// (compositing.js), gradients. A whitelist without a prototype, so polyfills can't leak in.
+pxl.scope = Object.create(null);
+
 // =========================================================================
 // Reactivity Engine
 // =========================================================================

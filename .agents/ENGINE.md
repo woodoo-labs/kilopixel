@@ -10,20 +10,20 @@ Build order (`files` in `build.js`):
 
 | # | File | Contents |
 |---|---|---|
-| 1 | `js/engine.js` | `pxl` namespace, generic helpers (`pxl.describe()` names an element in warnings; `pxl.TRANSFORM_DEFAULTS`, spread into the defaults of layers, groups and shapes), reactivity (`pxl.nodes`, versions, `markChanged`), attribute compilation bridge, property accessors |
+| 1 | `js/engine.js` | `pxl` namespace, `pxl.scope` (empty; filled by compiler.js and compositing.js), the anchor tables, generic helpers (`pxl.describe()` names an element in warnings; `pxl.TRANSFORM_DEFAULTS`, spread into the defaults of layers, groups and shapes), reactivity (`pxl.nodes`, versions, `markChanged`), attribute compilation bridge, property accessors |
 | 2 | `js/matrix.js` | `pxl.Matrix` (Float64Array affine matrices, written in place), `pxl.toLocal` |
-| 3 | `js/compiler.js` | expression scope, time drivers, `parseAttributeValue`, `compileExpression` |
-| 4 | `js/handlers.js` | `pxl-on-*` handlers: `pxl.HANDLER_EVENTS`, `pxl.createHandlers`, `pxl.handlerRef` and its assignment rules, `pxl.compileHandler` |
-| 5 | `js/interaction.js` | `pxl.InteractionEngine`: hit testing, states, DOM events, cursor |
-| 6 | `js/graphics.js` | anchor tables, `resolveRadius`, transform and compositing state, isolation canvas, arc angles, arrowhead constants, line dash helper, points parser |
+| 3 | `js/compiler.js` | Math, color, utility and gradient scope entries, `pxl.scopeKeys()`, time drivers, `parseAttributeValue`, `compileExpression`, templates |
+| 4 | `js/compositing.js` | canvas state: `pxl.hasTransform`, `pxl.applyTransformState`, `pxl.applyContextState`, `pxl.applyCompositingState`, `pxl.scaleResponsiveFilter`, `pxl.checkCanvasFilter`, the isolation canvas; the filter scope entries |
+| 5 | `js/handlers.js` | `pxl-on-*` handlers: `pxl.HANDLER_EVENTS`, `pxl.createHandlers`, `pxl.handlerRef` and its assignment rules, `pxl.compileHandler` |
+| 6 | `js/interaction.js` | `pxl.InteractionEngine`: hit testing, states, DOM events, cursor |
 | 7 | `js/monitor.js` | `pxl.perf`: the 1-second timer that calls `Stage.publishMetrics()` |
 | 8 | `js/elements/stage.js` | `pxl._frame`, `pxl.stages` (every connected stage), default styles, `pxl.Stage` |
 | 9 | `js/elements/node.js` | `pxl.PxlNode` |
 | 10 | `js/elements/layer.js` | `pxl.Layer` |
 | 11 | `js/elements/group.js` | `pxl.Group` |
-| 12 | `js/elements/shape.js` | `pxl.Shape`: style, gradients, isolation, hit box, arrowheads; `pxl.defineShape()` |
-| 13 | `js/elements/shapes/arc.js` | `pxl.ArcShape`: the shared base of circle and ellipse, no tag |
-| 14–20 | `js/elements/shapes/*.js` | circle, ellipse, rect, line, polyline, text, grid |
+| 12 | `js/elements/shape.js` | arrowhead constants and helpers, line dash helper, `pxl.resolveRadius`; `pxl.Shape`: style, gradients, isolation, hit box, arrowheads; `pxl.defineShape()` |
+| 13 | `js/elements/shapes/arc.js` | `pxl.arcEndRadians`, `pxl.isFullTurn`; `pxl.ArcShape`: the shared base of circle and ellipse, no tag |
+| 14–20 | `js/elements/shapes/*.js` | circle, ellipse, rect, line, polyline (with `pxl.parsePointsIntoArray`), text, grid |
 | 21 | `js/elements/variable.js` | `pxl.Variable` |
 
 ```
@@ -78,13 +78,15 @@ Animated or reactive (time or refs), one outer function per distinct string, sha
 
 ```javascript
 const fn = new Function('scope', 'ref', `
-  const { PI, sin, cos, ... } = scope;   // pxl.scopeKeys
+  const { PI, sin, cos, ... } = scope;   // pxl.scopeKeys()
   let t;
   const _d = new Date();
   const loop = (d) => (t % d) / d;       // pxl.timeDrivers, from pxl.drivers
   return function(_t) { t = _t; <code> };
 `)(pxl.scope, pxl.nodes);
 ```
+
+`pxl.scope` is created in `engine.js` and filled by `compiler.js` (Math, colors, utilities, gradients) and `compositing.js` (filters). `pxl.scopeKeys()` lists its names once, at the first compile: every file that adds names loads before the first `customElements.define()`, which may already compile (a stage upgraded while the bundle runs compiles its `ratio`). `tests/unit.html` checks that every name is visible in static and animated expressions and in handlers.
 
 Fields of the function: `isTimeDependent`, `sourceIds` (empty without refs), `usesToLocal`. It is called as `fn.call(element, t)` (`this` = the element, for `toLocal`). Static expressions: evaluated once with `new Function`, the result cached (an `undefined` result keeps the source string). A string that doesn't compile warns, is cached and used as text. `pxl.scope` is a whitelist (`Object.create(null)`), so polyfills can't leak in.
 

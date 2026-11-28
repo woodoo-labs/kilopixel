@@ -40,6 +40,31 @@ pxl.describe = function(element) {
   return `<${element.localName}${element.id ? ` id="${element.id}"` : ''}>`;
 };
 
+// The points of a box by name, as proportions of its width and height: rect's anchor and the radii of radial
+// gradients (pxl.resolveRadius)
+pxl.anchorX = {
+  'left': 0, 'right': 1, 'center': 0.5,
+  'top-left': 0, 'top-right': 1, 'bottom-left': 0, 'bottom-right': 1,
+  'top': 0.5, 'bottom': 0.5,
+  'top-center': 0.5, 'bottom-center': 0.5,
+  'left-center': 0, 'right-center': 1,
+  'center-top': 0.5, 'center-bottom': 0.5,
+  'center-left': 0, 'center-right': 1
+};
+pxl.anchorY = {
+  'top': 0, 'bottom': 1, 'center': 0.5,
+  'top-left': 0, 'top-right': 0, 'bottom-left': 1, 'bottom-right': 1,
+  'left': 0.5, 'right': 0.5,
+  'top-center': 0, 'bottom-center': 1,
+  'left-center': 0.5, 'right-center': 0.5,
+  'center-top': 0, 'center-bottom': 1,
+  'center-left': 0.5, 'center-right': 0.5
+};
+
+// Names available in every expression and handler: Math, colors and utilities (compiler.js), filters
+// (compositing.js), gradients. A whitelist without a prototype, so polyfills can't leak in.
+pxl.scope = Object.create(null);
+
 // =========================================================================
 // Reactivity Engine
 // =========================================================================
@@ -381,9 +406,6 @@ pxl.toLocalProperties = ['x', 'y', 'dx', 'dy', 'tx', 'ty', 'rotate', 'scalex', '
 // Expression Scope & Time Drivers
 // =========================================================================
 
-// Names available in every expression (created once, passed to each compiled function)
-pxl.scope = Object.create(null);
-
 // Math constants and methods, usable in expressions without the Math. prefix.
 // Hardcoded whitelist of standard names to prevent polyfill contamination.
 for (const prop of [
@@ -409,18 +431,6 @@ pxl.scope.hsla = (h, s, l, a) => {
   const lf = typeof l === 'number' ? l + '%' : l;
   return `hsla(${h},${sf},${lf},${a})`;
 };
-
-// CSS Filter Helpers
-pxl.scope.blur       = (radius) => `blur(${radius}px)`;
-pxl.scope.dropShadow = (x, y, blur, color) => `drop-shadow(${x}px ${y}px ${blur}px ${color || '#000'})`;
-pxl.scope.brightness = (val) => `brightness(${val}%)`;
-pxl.scope.contrast   = (val) => `contrast(${val}%)`;
-pxl.scope.hueRotate  = (deg) => `hue-rotate(${deg}deg)`;
-pxl.scope.invert     = (val) => `invert(${val}%)`;
-pxl.scope.saturate   = (val) => `saturate(${val}%)`;
-pxl.scope.grayscale  = (val) => `grayscale(${val}%)`;
-pxl.scope.sepia      = (val) => `sepia(${val}%)`;
-pxl.scope.opacity    = (val) => `opacity(${val}%)`;
 
 pxl.scope.clamp = (v, low, high) => Math.max(low, Math.min(high, v));
 pxl.scope.lerp  = (a, b, alpha) => a + (b - a) * alpha;
@@ -490,7 +500,14 @@ pxl.scope.conic = (angleOrConfig, colorsArray) => {
   return { isGradient: true, type: 'conic', startAngle, cx, cy, stops };
 };
 
-pxl.scopeKeys = Object.keys(pxl.scope).join(', ');
+// The scope's names, destructured at the top of every compiled function. Built at the first compile: every engine
+// file that adds names (this one, compositing.js) has loaded by then, since they all load before the first
+// customElements.define(), which may compile (a stage upgraded while the bundle runs compiles its ratio).
+pxl._scopeKeys = null;
+pxl.scopeKeys = function() {
+  if (pxl._scopeKeys === null) pxl._scopeKeys = Object.keys(pxl.scope).join(', ');
+  return pxl._scopeKeys;
+};
 
 // Time drivers: source code, injected into every compiled expression (they read its `t`)
 pxl.drivers = {
@@ -705,7 +722,7 @@ pxl.compileExpression = function(str) {
     if (isAnimated || hasVars) {
       // The outer function runs once (destructures the scope); the returned closure runs per evaluation
       const fn = new Function('scope', 'ref', `
-        const { ${pxl.scopeKeys} } = scope;
+        const { ${pxl.scopeKeys()} } = scope;
         let t;
         const _d = new Date();
         ${pxl.timeDrivers}
@@ -726,7 +743,7 @@ pxl.compileExpression = function(str) {
 
     // Static: evaluated once
     const result = new Function('scope', `
-      const { ${pxl.scopeKeys} } = scope;
+      const { ${pxl.scopeKeys()} } = scope;
       ${code}
     `)(pxl.scope);
     const val = (result !== undefined) ? result : str;
@@ -819,6 +836,130 @@ pxl.parseTemplate = function(str) {
 };
 
 // =========================================================================
+// Canvas State: Transform, Compositing, Filters, Isolation
+// =========================================================================
+// What a node sets on the canvas before it draws, and the scratch canvas of isolated shapes.
+
+// Whether a transform attribute is away from its default (pxl.TRANSFORM_DEFAULTS): a layer or group without one skips
+// the transform, a group also save() / restore(). The same tests as applyTransformState() makes, step by step.
+pxl.hasTransform = function(values) {
+  const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = values;
+  return !!(x || y || dx || dy || rotate || zoom !== 1 || scalex !== 1 || scaley !== 1 || skewx || skewy);
+};
+
+// Same order as pxl.Matrix.updateLocal: translate(x, y) → rotate → scale → skew → translate(dx, dy). In logical
+// units: the layer has scaled the context by u.
+pxl.applyTransformState = function(ctx, values) {
+  const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = values;
+
+  if (x || y) ctx.translate(x, y);
+  if (rotate) ctx.rotate(rotate * Math.PI / 180);
+
+  const finalScaleX = zoom * scalex;
+  const finalScaleY = zoom * scaley;
+  if (finalScaleX !== 1 || finalScaleY !== 1) ctx.scale(finalScaleX, finalScaleY);
+
+  if (skewx || skewy) {
+    const sx = Math.tan(skewx * Math.PI / 180);
+    const sy = Math.tan(skewy * Math.PI / 180);
+    ctx.transform(1, sy, sx, 1, 0, 0);
+  }
+  if (dx || dy) ctx.translate(dx, dy);
+};
+
+// Scales every px value in the final filter string by the unit u: the helpers' (blur(5) → 'blur(5px)')
+// and those written in backticks. JavaScript prints values near 0 in exponent notation (1.2e-15),
+// so the number includes an optional exponent; otherwise only '-15px' would be scaled.
+pxl.scaleResponsiveFilter = function(filterStr, u) {
+  return filterStr.replace(/(-?\d*\.?\d+(?:e[-+]?\d+)?)px/g, (match, val) => (parseFloat(val) * u) + 'px');
+};
+
+pxl.applyContextState = function(ctx, u, values, node) {
+  pxl.applyTransformState(ctx, values);
+  pxl.applyCompositingState(ctx, u, values, node);
+};
+
+// Safari's canvas has ctx.filter only behind its "Canvas Filters" feature flag, off by default: a shape's filter is
+// then ignored (TODO §49). Checked once per page, at the first shape with a filter; the prototype is asked, because
+// assigning ctx.filter where it doesn't exist creates a plain property on that context.
+pxl._canvasFilterChecked = false;
+
+pxl.checkCanvasFilter = function(ctx, node) {
+  if (pxl._canvasFilterChecked) return;
+  pxl._canvasFilterChecked = true;
+  if ('filter' in Object.getPrototypeOf(ctx)) return;
+  console.warn(`[pxl] ${pxl.describe(node)} has a filter, but this browser's canvas ` +
+    'ignores filters on shapes (Safari: only with its "Canvas Filters" feature flag). A filter on a layer works everywhere.');
+};
+
+// How a shape's pixels combine with the layer: alpha, mask / blend, filter, shadow. An isolated shape
+// (Shape.renderIsolated()) applies it once, when its finished bitmap is drawn onto the layer.
+// Canvas shadows and filters ignore the canvas transform, which holds the layer's device pixel ratio: their lengths
+// are bitmap pixels, so they are scaled by u and the DPR.
+pxl.applyCompositingState = function(ctx, u, values, node) {
+  const { alpha, blend, mask, filter, shadowcolor, shadowblur, shadowx, shadowy } = values;
+  const k = u * node.parentLayer.dpr;
+
+  if (alpha !== 1) ctx.globalAlpha *= alpha;
+
+  if (mask !== 'none') {
+    ctx.globalCompositeOperation = mask;
+  } else if (blend !== 'source-over') {
+    ctx.globalCompositeOperation = blend;
+  }
+
+  if (filter !== 'none') {
+    pxl.checkCanvasFilter(ctx, node);
+    ctx.filter = node.resolveFilter(filter, k);
+  }
+
+  if (shadowcolor) {
+    if (shadowcolor === 'none' || shadowcolor === 'transparent') {
+      ctx.shadowColor = 'rgba(0, 0, 0, 0)';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+    } else {
+      ctx.shadowColor = shadowcolor;
+      ctx.shadowBlur = shadowblur * k;
+      ctx.shadowOffsetX = shadowx * k;
+      ctx.shadowOffsetY = shadowy * k;
+    }
+  }
+};
+
+// The scratch canvas of isolated shapes (design/done/2026-11-01_isolated_shape_compositing_plan.md §3.2): one for the
+// page, created on first use. It only grows, to the largest layer canvas it served, so it never resizes back and
+// forth between layers of different sizes. Isolation never nests: groups have no compositing state.
+pxl._isolationContext = null;
+
+pxl.getIsolationContext = function(width, height) {
+  let ctx = pxl._isolationContext;
+  if (ctx === null) {
+    ctx = pxl._isolationContext = document.createElement('canvas').getContext('2d');
+  }
+  const canvas = ctx.canvas;
+  if (canvas.width < width) canvas.width = width;
+  if (canvas.height < height) canvas.height = height;
+  return ctx;
+};
+
+// =========================================================================
+// Filter Helpers in Expressions
+// =========================================================================
+// They write the units, so filter="blur(4)" is enough; px values are scaled by pxl.scaleResponsiveFilter().
+pxl.scope.blur       = (radius) => `blur(${radius}px)`;
+pxl.scope.dropShadow = (x, y, blur, color) => `drop-shadow(${x}px ${y}px ${blur}px ${color || '#000'})`;
+pxl.scope.brightness = (val) => `brightness(${val}%)`;
+pxl.scope.contrast   = (val) => `contrast(${val}%)`;
+pxl.scope.hueRotate  = (deg) => `hue-rotate(${deg}deg)`;
+pxl.scope.invert     = (val) => `invert(${val}%)`;
+pxl.scope.saturate   = (val) => `saturate(${val}%)`;
+pxl.scope.grayscale  = (val) => `grayscale(${val}%)`;
+pxl.scope.sepia      = (val) => `sepia(${val}%)`;
+pxl.scope.opacity    = (val) => `opacity(${val}%)`;
+
+// =========================================================================
 // Handlers: pxl-on-* Attributes Are Listeners
 // =========================================================================
 // Handler attribute → the DOM event it listens to. Not on…: onclick is the browser's own handler attribute, and
@@ -881,7 +1022,7 @@ pxl.ASSIGNING_REF = {
 // still run.
 pxl.compileHandler = function(element, name, source) {
   const handler = new Function('scope', 'ref', `
-    const { ${pxl.scopeKeys} } = scope;
+    const { ${pxl.scopeKeys()} } = scope;
     return function() {
       ${pxl.rewriteExpression(source, true)}
     };
@@ -1464,243 +1605,6 @@ pxl.InteractionEngine = class InteractionEngine {
       this._isMoved = false;
     }
     this.flush();
-  }
-};
-
-// =========================================================================
-// Drawing & Transform Helpers
-// =========================================================================
-pxl.anchorX = {
-  'left': 0, 'right': 1, 'center': 0.5,
-  'top-left': 0, 'top-right': 1, 'bottom-left': 0, 'bottom-right': 1,
-  'top': 0.5, 'bottom': 0.5,
-  'top-center': 0.5, 'bottom-center': 0.5,
-  'left-center': 0, 'right-center': 1,
-  'center-top': 0.5, 'center-bottom': 0.5,
-  'center-left': 0, 'center-right': 1
-};
-pxl.anchorY = {
-  'top': 0, 'bottom': 1, 'center': 0.5,
-  'top-left': 0, 'top-right': 0, 'bottom-left': 1, 'bottom-right': 1,
-  'left': 0.5, 'right': 0.5,
-  'top-center': 0, 'bottom-center': 1,
-  'left-center': 0.5, 'right-center': 0.5,
-  'center-top': 0, 'center-bottom': 1,
-  'center-left': 0.5, 'center-right': 0.5
-};
-
-// Radial gradient radius: a number is a logical length; a string is the distance from the center (x, y)
-// to a side, a perimeter point or a CSS keyword of the bounding box (w × h)
-pxl.resolveRadius = function(r, x, y, w, h) {
-  if (typeof r === 'number') return Math.abs(r);
-
-  // Sides: perpendicular distance
-  if (r === 'top')    return Math.abs(y * h);
-  if (r === 'bottom') return Math.abs((1 - y) * h);
-  if (r === 'left')   return Math.abs(x * w);
-  if (r === 'right')  return Math.abs((1 - x) * w);
-
-  // Perimeter points (corners, edge midpoints): straight distance
-  const ax = pxl.anchorX[r];
-  if (ax !== undefined) {
-    const dx = (x - ax) * w, dy = (y - pxl.anchorY[r]) * h;
-    return Math.sqrt(dx * dx + dy * dy);
-  }
-
-  // CSS keywords
-  const lx = x * w, rx = (1 - x) * w;
-  const ty = y * h, by = (1 - y) * h;
-  switch (r) {
-    case 'closest-side':   return Math.max(0.001, Math.min(lx, rx, ty, by));
-    case 'farthest-side':  return Math.max(lx, rx, ty, by);
-    case 'closest-corner':
-      return Math.max(0.001, Math.min(Math.hypot(lx, ty), Math.hypot(rx, ty), Math.hypot(lx, by), Math.hypot(rx, by)));
-    case 'farthest-corner':
-      return Math.max(Math.hypot(lx, ty), Math.hypot(rx, ty), Math.hypot(lx, by), Math.hypot(rx, by));
-    default: return 0;
-  }
-};
-
-// Whether a transform attribute is away from its default (pxl.TRANSFORM_DEFAULTS): a layer or group without one skips
-// the transform, a group also save() / restore(). The same tests as applyTransformState() makes, step by step.
-pxl.hasTransform = function(values) {
-  const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = values;
-  return !!(x || y || dx || dy || rotate || zoom !== 1 || scalex !== 1 || scaley !== 1 || skewx || skewy);
-};
-
-// Same order as pxl.Matrix.updateLocal: translate(x, y) → rotate → scale → skew → translate(dx, dy). In logical
-// units: the layer has scaled the context by u.
-pxl.applyTransformState = function(ctx, values) {
-  const { x, y, dx, dy, rotate, zoom, scalex, scaley, skewx, skewy } = values;
-
-  if (x || y) ctx.translate(x, y);
-  if (rotate) ctx.rotate(rotate * Math.PI / 180);
-
-  const finalScaleX = zoom * scalex;
-  const finalScaleY = zoom * scaley;
-  if (finalScaleX !== 1 || finalScaleY !== 1) ctx.scale(finalScaleX, finalScaleY);
-
-  if (skewx || skewy) {
-    const sx = Math.tan(skewx * Math.PI / 180);
-    const sy = Math.tan(skewy * Math.PI / 180);
-    ctx.transform(1, sy, sx, 1, 0, 0);
-  }
-  if (dx || dy) ctx.translate(dx, dy);
-};
-
-// Scales every px value in the final filter string by the unit u: the helpers' (blur(5) → 'blur(5px)')
-// and those written in backticks. JavaScript prints values near 0 in exponent notation (1.2e-15),
-// so the number includes an optional exponent; otherwise only '-15px' would be scaled.
-pxl.scaleResponsiveFilter = function(filterStr, u) {
-  return filterStr.replace(/(-?\d*\.?\d+(?:e[-+]?\d+)?)px/g, (match, val) => (parseFloat(val) * u) + 'px');
-};
-
-pxl.applyContextState = function(ctx, u, values, node) {
-  pxl.applyTransformState(ctx, values);
-  pxl.applyCompositingState(ctx, u, values, node);
-};
-
-// Safari's canvas has ctx.filter only behind its "Canvas Filters" feature flag, off by default: a shape's filter is
-// then ignored (TODO §49). Checked once per page, at the first shape with a filter; the prototype is asked, because
-// assigning ctx.filter where it doesn't exist creates a plain property on that context.
-pxl._canvasFilterChecked = false;
-
-pxl.checkCanvasFilter = function(ctx, node) {
-  if (pxl._canvasFilterChecked) return;
-  pxl._canvasFilterChecked = true;
-  if ('filter' in Object.getPrototypeOf(ctx)) return;
-  console.warn(`[pxl] ${pxl.describe(node)} has a filter, but this browser's canvas ` +
-    'ignores filters on shapes (Safari: only with its "Canvas Filters" feature flag). A filter on a layer works everywhere.');
-};
-
-// How a shape's pixels combine with the layer: alpha, mask / blend, filter, shadow. An isolated shape
-// (Shape.renderIsolated()) applies it once, when its finished bitmap is drawn onto the layer.
-// Canvas shadows and filters ignore the canvas transform, which holds the layer's device pixel ratio: their lengths
-// are bitmap pixels, so they are scaled by u and the DPR.
-pxl.applyCompositingState = function(ctx, u, values, node) {
-  const { alpha, blend, mask, filter, shadowcolor, shadowblur, shadowx, shadowy } = values;
-  const k = u * node.parentLayer.dpr;
-
-  if (alpha !== 1) ctx.globalAlpha *= alpha;
-
-  if (mask !== 'none') {
-    ctx.globalCompositeOperation = mask;
-  } else if (blend !== 'source-over') {
-    ctx.globalCompositeOperation = blend;
-  }
-
-  if (filter !== 'none') {
-    pxl.checkCanvasFilter(ctx, node);
-    ctx.filter = node.resolveFilter(filter, k);
-  }
-
-  if (shadowcolor) {
-    if (shadowcolor === 'none' || shadowcolor === 'transparent') {
-      ctx.shadowColor = 'rgba(0, 0, 0, 0)';
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-    } else {
-      ctx.shadowColor = shadowcolor;
-      ctx.shadowBlur = shadowblur * k;
-      ctx.shadowOffsetX = shadowx * k;
-      ctx.shadowOffsetY = shadowy * k;
-    }
-  }
-};
-
-// The scratch canvas of isolated shapes (design/done/2026-11-01_isolated_shape_compositing_plan.md §3.2): one for the
-// page, created on first use. It only grows, to the largest layer canvas it served, so it never resizes back and
-// forth between layers of different sizes. Isolation never nests: groups have no compositing state.
-pxl._isolationContext = null;
-
-pxl.getIsolationContext = function(width, height) {
-  let ctx = pxl._isolationContext;
-  if (ctx === null) {
-    ctx = pxl._isolationContext = document.createElement('canvas').getContext('2d');
-  }
-  const canvas = ctx.canvas;
-  if (canvas.width < width) canvas.width = width;
-  if (canvas.height < height) canvas.height = height;
-  return ctx;
-};
-
-// =========================================================================
-// Arc Angles (circle, ellipse)
-// =========================================================================
-
-// End angle in radians: sweep (relative to start) wins over end; neither means a full turn
-pxl.arcEndRadians = function(startRadians, end, sweep) {
-  if (sweep !== null) return startRadians + sweep * Math.PI / 180;
-  if (end !== null) return end * Math.PI / 180;
-  return startRadians + Math.PI * 2;
-};
-
-pxl.isFullTurn = function(startRadians, endRadians) {
-  return Math.abs(endRadians - startRadians) >= Math.PI * 2 - 1e-4;
-};
-
-// =========================================================================
-// Arrowhead Geometry (design/done/2026-10-14_unified_arrowhead_geometry_plan.md)
-// =========================================================================
-pxl.ARROW_COS30 = Math.cos(Math.PI / 6); // arrowhead half-angle is 30°
-pxl.ARROW_SIN30 = 0.5;
-pxl.ARROW_K_DEPTH = 0.6;                 // min shaft depth inside a filled head, as fraction of head length
-
-// Side length of an arrowhead in logical units for an arrowstart / arrowend value: 'auto' is 3.6 × strokewidth;
-// 0 (also for a negative or invalid value) means no arrowhead
-pxl.arrowSize = function(value, strokewidth) {
-  const size = value === 'auto' ? strokewidth * 3.6 : value;
-  return size > 0 ? size : 0;
-};
-
-// Per-arrow-end record, allocated once per shape and reused every frame. All fields start as doubles
-// so V8 keeps one stable hidden class for every arrow shape.
-pxl.createArrowRecord = function() {
-  return { size: NaN, len: NaN, tipAdvance: NaN, inset: NaN, tipX: NaN, tipY: NaN, dirX: NaN, dirY: NaN };
-};
-
-// =========================================================================
-// Stroke & Line Dash Helpers
-// =========================================================================
-pxl._emptyDash = [];
-
-// Solid line: null (default), 'none' or 0
-pxl.hasLineDash = function(linedash) {
-  return !!linedash && linedash !== 'none' && linedash !== '0';
-};
-
-// =========================================================================
-// Geometry Parsing
-// =========================================================================
-// Splits "x,y; x,y; …" into coordinate strings [x0, y0, x1, y1, …]. Commas and semicolons
-// inside parentheses belong to the expression: min(a, b) stays one coordinate.
-pxl.parsePointsIntoArray = function(str, targetArray) {
-  targetArray.length = 0;
-  let start = 0;
-  let depth = 0;
-  let currentX = null;
-  const input = str + ';'; // the last point ends like all others
-
-  for (let i = 0; i < input.length; i++) {
-    const char = input[i];
-
-    if (char === '(') depth++;
-    else if (char === ')') depth--;
-
-    if (depth === 0) {
-      if (char === ',') {
-        currentX = input.substring(start, i).trim();
-        start = i + 1;
-      } else if (char === ';') {
-        const currentY = input.substring(start, i).trim();
-        if (currentX !== null && currentX !== '' && currentY !== '') {
-          targetArray.push(currentX, currentY);
-        }
-        currentX = null;
-        start = i + 1;
-      }
-    }
   }
 };
 
@@ -2995,6 +2899,71 @@ pxl.Group = class Group extends pxl.PxlNode {
 };
 customElements.define('pxl-group', pxl.Group);
 
+// =========================================================================
+// Arrowhead Geometry (design/done/2026-10-14_unified_arrowhead_geometry_plan.md)
+// =========================================================================
+pxl.ARROW_COS30 = Math.cos(Math.PI / 6); // arrowhead half-angle is 30°
+pxl.ARROW_SIN30 = 0.5;
+pxl.ARROW_K_DEPTH = 0.6;                 // min shaft depth inside a filled head, as fraction of head length
+
+// Side length of an arrowhead in logical units for an arrowstart / arrowend value: 'auto' is 3.6 × strokewidth;
+// 0 (also for a negative or invalid value) means no arrowhead
+pxl.arrowSize = function(value, strokewidth) {
+  const size = value === 'auto' ? strokewidth * 3.6 : value;
+  return size > 0 ? size : 0;
+};
+
+// Per-arrow-end record, allocated once per shape and reused every frame. All fields start as doubles
+// so V8 keeps one stable hidden class for every arrow shape.
+pxl.createArrowRecord = function() {
+  return { size: NaN, len: NaN, tipAdvance: NaN, inset: NaN, tipX: NaN, tipY: NaN, dirX: NaN, dirY: NaN };
+};
+
+// =========================================================================
+// Line Dash and Gradient Radius
+// =========================================================================
+pxl._emptyDash = [];
+
+// Solid line: null (default), 'none' or 0
+pxl.hasLineDash = function(linedash) {
+  return !!linedash && linedash !== 'none' && linedash !== '0';
+};
+
+// Radial gradient radius: a number is a logical length; a string is the distance from the center (x, y)
+// to a side, a perimeter point or a CSS keyword of the bounding box (w × h)
+pxl.resolveRadius = function(r, x, y, w, h) {
+  if (typeof r === 'number') return Math.abs(r);
+
+  // Sides: perpendicular distance
+  if (r === 'top')    return Math.abs(y * h);
+  if (r === 'bottom') return Math.abs((1 - y) * h);
+  if (r === 'left')   return Math.abs(x * w);
+  if (r === 'right')  return Math.abs((1 - x) * w);
+
+  // Perimeter points (corners, edge midpoints): straight distance
+  const ax = pxl.anchorX[r];
+  if (ax !== undefined) {
+    const dx = (x - ax) * w, dy = (y - pxl.anchorY[r]) * h;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  // CSS keywords
+  const lx = x * w, rx = (1 - x) * w;
+  const ty = y * h, by = (1 - y) * h;
+  switch (r) {
+    case 'closest-side':   return Math.max(0.001, Math.min(lx, rx, ty, by));
+    case 'farthest-side':  return Math.max(lx, rx, ty, by);
+    case 'closest-corner':
+      return Math.max(0.001, Math.min(Math.hypot(lx, ty), Math.hypot(rx, ty), Math.hypot(lx, by), Math.hypot(rx, by)));
+    case 'farthest-corner':
+      return Math.max(Math.hypot(lx, ty), Math.hypot(rx, ty), Math.hypot(lx, by), Math.hypot(rx, by));
+    default: return 0;
+  }
+};
+
+// =========================================================================
+// pxl.Shape
+// =========================================================================
 pxl.Shape = class Shape extends pxl.PxlNode {
   // The pxl-on-* handlers are attributes without a value, so they aren't in defaults
   static get observedAttributes() {
@@ -3538,6 +3507,17 @@ pxl.defineShape = function(tag, Class) {
 // Both draw an elliptical arc and close it in one of their ways: a full turn, a ring (inner radii), a pie (lines to
 // the center) or a chord (closed), with arrowheads on an open arc. A circle is the case rx = ry. The radii are
 // parameters, never read here from the values: each subclass has its own radius attributes (r, ir or rx, ry, irx, iry).
+// End angle in radians: sweep (relative to start) wins over end; neither means a full turn
+pxl.arcEndRadians = function(startRadians, end, sweep) {
+  if (sweep !== null) return startRadians + sweep * Math.PI / 180;
+  if (end !== null) return end * Math.PI / 180;
+  return startRadians + Math.PI * 2;
+};
+
+pxl.isFullTurn = function(startRadians, endRadians) {
+  return Math.abs(endRadians - startRadians) >= Math.PI * 2 - 1e-4;
+};
+
 pxl.ArcShape = class ArcShape extends pxl.Shape {
   static defaults = {
     ...pxl.Shape.defaults,
@@ -3801,6 +3781,37 @@ pxl.Line = class Line extends pxl.Shape {
   }
 };
 pxl.defineShape('pxl-line', pxl.Line);
+
+// Splits "x,y; x,y; …" into coordinate strings [x0, y0, x1, y1, …]. Commas and semicolons
+// inside parentheses belong to the expression: min(a, b) stays one coordinate.
+pxl.parsePointsIntoArray = function(str, targetArray) {
+  targetArray.length = 0;
+  let start = 0;
+  let depth = 0;
+  let currentX = null;
+  const input = str + ';'; // the last point ends like all others
+
+  for (let i = 0; i < input.length; i++) {
+    const char = input[i];
+
+    if (char === '(') depth++;
+    else if (char === ')') depth--;
+
+    if (depth === 0) {
+      if (char === ',') {
+        currentX = input.substring(start, i).trim();
+        start = i + 1;
+      } else if (char === ';') {
+        const currentY = input.substring(start, i).trim();
+        if (currentX !== null && currentX !== '' && currentY !== '') {
+          targetArray.push(currentX, currentY);
+        }
+        currentX = null;
+        start = i + 1;
+      }
+    }
+  }
+};
 
 pxl.Polyline = class Polyline extends pxl.Shape {
   // points has no default: it is stored as one value per coordinate (p0, p1, …, see setPoints())

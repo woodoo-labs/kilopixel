@@ -1,3 +1,68 @@
+// =========================================================================
+// Arrowhead Geometry (design/done/2026-10-14_unified_arrowhead_geometry_plan.md)
+// =========================================================================
+pxl.ARROW_COS30 = Math.cos(Math.PI / 6); // arrowhead half-angle is 30°
+pxl.ARROW_SIN30 = 0.5;
+pxl.ARROW_K_DEPTH = 0.6;                 // min shaft depth inside a filled head, as fraction of head length
+
+// Side length of an arrowhead in logical units for an arrowstart / arrowend value: 'auto' is 3.6 × strokewidth;
+// 0 (also for a negative or invalid value) means no arrowhead
+pxl.arrowSize = function(value, strokewidth) {
+  const size = value === 'auto' ? strokewidth * 3.6 : value;
+  return size > 0 ? size : 0;
+};
+
+// Per-arrow-end record, allocated once per shape and reused every frame. All fields start as doubles
+// so V8 keeps one stable hidden class for every arrow shape.
+pxl.createArrowRecord = function() {
+  return { size: NaN, len: NaN, tipAdvance: NaN, inset: NaN, tipX: NaN, tipY: NaN, dirX: NaN, dirY: NaN };
+};
+
+// =========================================================================
+// Line Dash and Gradient Radius
+// =========================================================================
+pxl._emptyDash = [];
+
+// Solid line: null (default), 'none' or 0
+pxl.hasLineDash = function(linedash) {
+  return !!linedash && linedash !== 'none' && linedash !== '0';
+};
+
+// Radial gradient radius: a number is a logical length; a string is the distance from the center (x, y)
+// to a side, a perimeter point or a CSS keyword of the bounding box (w × h)
+pxl.resolveRadius = function(r, x, y, w, h) {
+  if (typeof r === 'number') return Math.abs(r);
+
+  // Sides: perpendicular distance
+  if (r === 'top')    return Math.abs(y * h);
+  if (r === 'bottom') return Math.abs((1 - y) * h);
+  if (r === 'left')   return Math.abs(x * w);
+  if (r === 'right')  return Math.abs((1 - x) * w);
+
+  // Perimeter points (corners, edge midpoints): straight distance
+  const ax = pxl.anchorX[r];
+  if (ax !== undefined) {
+    const dx = (x - ax) * w, dy = (y - pxl.anchorY[r]) * h;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  // CSS keywords
+  const lx = x * w, rx = (1 - x) * w;
+  const ty = y * h, by = (1 - y) * h;
+  switch (r) {
+    case 'closest-side':   return Math.max(0.001, Math.min(lx, rx, ty, by));
+    case 'farthest-side':  return Math.max(lx, rx, ty, by);
+    case 'closest-corner':
+      return Math.max(0.001, Math.min(Math.hypot(lx, ty), Math.hypot(rx, ty), Math.hypot(lx, by), Math.hypot(rx, by)));
+    case 'farthest-corner':
+      return Math.max(Math.hypot(lx, ty), Math.hypot(rx, ty), Math.hypot(lx, by), Math.hypot(rx, by));
+    default: return 0;
+  }
+};
+
+// =========================================================================
+// pxl.Shape
+// =========================================================================
 pxl.Shape = class Shape extends pxl.PxlNode {
   // The pxl-on-* handlers are attributes without a value, so they aren't in defaults
   static get observedAttributes() {

@@ -2,9 +2,6 @@
 // Expression Scope & Time Drivers
 // =========================================================================
 
-// Names available in every expression (created once, passed to each compiled function)
-pxl.scope = Object.create(null);
-
 // Math constants and methods, usable in expressions without the Math. prefix.
 // Hardcoded whitelist of standard names to prevent polyfill contamination.
 for (const prop of [
@@ -30,18 +27,6 @@ pxl.scope.hsla = (h, s, l, a) => {
   const lf = typeof l === 'number' ? l + '%' : l;
   return `hsla(${h},${sf},${lf},${a})`;
 };
-
-// CSS Filter Helpers
-pxl.scope.blur       = (radius) => `blur(${radius}px)`;
-pxl.scope.dropShadow = (x, y, blur, color) => `drop-shadow(${x}px ${y}px ${blur}px ${color || '#000'})`;
-pxl.scope.brightness = (val) => `brightness(${val}%)`;
-pxl.scope.contrast   = (val) => `contrast(${val}%)`;
-pxl.scope.hueRotate  = (deg) => `hue-rotate(${deg}deg)`;
-pxl.scope.invert     = (val) => `invert(${val}%)`;
-pxl.scope.saturate   = (val) => `saturate(${val}%)`;
-pxl.scope.grayscale  = (val) => `grayscale(${val}%)`;
-pxl.scope.sepia      = (val) => `sepia(${val}%)`;
-pxl.scope.opacity    = (val) => `opacity(${val}%)`;
 
 pxl.scope.clamp = (v, low, high) => Math.max(low, Math.min(high, v));
 pxl.scope.lerp  = (a, b, alpha) => a + (b - a) * alpha;
@@ -111,7 +96,14 @@ pxl.scope.conic = (angleOrConfig, colorsArray) => {
   return { isGradient: true, type: 'conic', startAngle, cx, cy, stops };
 };
 
-pxl.scopeKeys = Object.keys(pxl.scope).join(', ');
+// The scope's names, destructured at the top of every compiled function. Built at the first compile: every engine
+// file that adds names (this one, compositing.js) has loaded by then, since they all load before the first
+// customElements.define(), which may compile (a stage upgraded while the bundle runs compiles its ratio).
+pxl._scopeKeys = null;
+pxl.scopeKeys = function() {
+  if (pxl._scopeKeys === null) pxl._scopeKeys = Object.keys(pxl.scope).join(', ');
+  return pxl._scopeKeys;
+};
 
 // Time drivers: source code, injected into every compiled expression (they read its `t`)
 pxl.drivers = {
@@ -326,7 +318,7 @@ pxl.compileExpression = function(str) {
     if (isAnimated || hasVars) {
       // The outer function runs once (destructures the scope); the returned closure runs per evaluation
       const fn = new Function('scope', 'ref', `
-        const { ${pxl.scopeKeys} } = scope;
+        const { ${pxl.scopeKeys()} } = scope;
         let t;
         const _d = new Date();
         ${pxl.timeDrivers}
@@ -347,7 +339,7 @@ pxl.compileExpression = function(str) {
 
     // Static: evaluated once
     const result = new Function('scope', `
-      const { ${pxl.scopeKeys} } = scope;
+      const { ${pxl.scopeKeys()} } = scope;
       ${code}
     `)(pxl.scope);
     const val = (result !== undefined) ? result : str;

@@ -61,7 +61,7 @@ pxl.ASSIGNING_REF = {
 // still run.
 pxl.compileHandler = function(element, name, source) {
   const handler = new Function('scope', 'ref', `
-    const { ${pxl.scopeKeys} } = scope;
+    const { ${pxl.scopeKeys()} } = scope;
     return function() {
       ${pxl.rewriteExpression(source, true)}
     };

@@ -1,6 +1,6 @@
 # Engine Restructure: Files by Feature
 
-- **Status**: 🟢 **Decided** (2026-11-28, D1–D7 decided, D8 open; cleanup idea merged as phases 6–8; phases 1–2 built, §9, §10; next: phase 3)
+- **Status**: 🟢 **Decided** (2026-11-28, D1–D7 decided, D8 open; cleanup idea merged as phases 6–8; phases 1–3 built, §9–§11; next: phase 4)
 - **Date**: 2026-11-28
 - **Related**: `design/done/2026-10-27_engine_cleanup_inventory_note.md` (the code style this keeps), `design/done/2026-11-20_evaluation_model_plan.md` (the scheduler that moves in phase 5), `design/done/2026-11-01_isolated_shape_compositing_plan.md` and `design/done/2026-11-26_isolation_box_plan.md` (the isolation code that moves in phase 3), `design/2026-11-12_layer_throttling_plan.md` (TODO §8: phase 1 builds the publishing step of its per-layer metrics, C2), `design/2026-10-30_space_attribute_plan.md` (TODO §28: the one transform path of §8 goes with it), `design/archive/2026-11-22_engine_structure_cleanup_plan.md` (the parked cleanup idea of 2026-11-22, merged here on 2026-11-28: its steps 2–4 are phases 6–8), `.claude/CLAUDE.md` "Engine Code Rules" and "Engine Code Style"
 - **Target Implementation**: `build.js` (file list), `js/engine.js`, `js/compiler.js`, `js/interaction.js`, `js/graphics.js` (removed), `js/monitor.js`, `js/elements/stage.js`, `js/elements/node.js`, `js/elements/shape.js`, `js/elements/shapes/arc.js`, `js/elements/shapes/polyline.js`, `js/elements/shapes/text.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/variable.js`, new `js/reactivity.js`, `js/gradient.js`, `js/compositing.js`, `js/handlers.js`, `js/elements/base.js`, `js/elements/container.js`; `tests/index.html`, `tests/frameworks.html`, `tests/unit.html`; `.agents/ENGINE.md`
@@ -166,8 +166,22 @@ As planned in §4:
 - **Docs:** ENGINE.md §1 (file table: `handlers.js` is file 4, 21 files), §8.7 (heading names the file), §11 (file count).
 - **Left:** phases 3–8, D8.
 
+## 11. Phase 3 Built (2026-11-28)
+
+As planned in §4, with D1–D4:
+
+- **`js/compositing.js`** (new, after `compiler.js`): `pxl.hasTransform`, `pxl.applyTransformState`, `pxl.scaleResponsiveFilter`, `pxl.applyContextState`, `pxl.checkCanvasFilter`, `pxl.applyCompositingState`, `pxl.getIsolationContext` from `graphics.js`, and the ten filter scope entries (`blur()`, `dropShadow()`, …) from `compiler.js` (D1, D2).
+- **D2 built:** `pxl.scope` is created in `engine.js`; `pxl.scopeKeys` is now a function, `pxl.scopeKeys()`, that builds the list at the first compile (`pxl._scopeKeys`); `compiler.js` and `handlers.js` call it. New unit test ("scope: every name in `pxl.scope` is visible in static and animated expressions and in handlers").
+- **Moved to their callers:** the anchor tables to `engine.js` (D3); `pxl.arcEndRadians` and `pxl.isFullTurn` to `arc.js`; the arrow constants, `pxl.arrowSize`, `pxl.createArrowRecord`, `pxl._emptyDash` and `pxl.hasLineDash` to `shape.js` (D4); `pxl.parsePointsIntoArray` to `polyline.js`. `js/graphics.js` is removed; `build.js` lists 21 files.
+- **Deviation:** `pxl.resolveRadius` went to `shape.js`, next to its only caller `buildGradient()`, instead of waiting in `graphics.js`: phase 4 moves both to `gradient.js`.
+- **Pixels:** `design/prototypes/2026-11-28_engine_restructure/pixel_hashes.html`, 38 scenes through every moved helper (transforms on layers, groups and shapes, alpha, blend, mask, filters, shadows, isolation, dashes, arrowheads, arc angles, the points parser, anchors, radial radii, text, grid, the Gauge): 0 changed against the build before the phase.
+- **Checks:** full test run passed (unit 107/107); generated types unchanged; build checks (`_` ownership) passed without changes. Bundle 74.61 KB (+0.1 KB, the `scopeKeys()` function and comments), still ~75KB.
+- **Docs:** ENGINE.md §1 (file table), §3 (where the scope is filled, `pxl.scopeKeys()`).
+- **Left:** phases 4–8, D8.
+
 ## Log
 
+- 2026-11-28: phase 3 built (§11): `js/compositing.js`, `graphics.js` removed, scope names at the first compile (D2). Next: phase 4.
 - 2026-11-28: phase 2 built (§10): `js/handlers.js`. Next: phase 3.
 - 2026-11-28: merged the parked idea `design/archive/2026-11-22_engine_structure_cleanup_plan.md` (archived as superseded by this plan): its steps 2–4 are phases 6–8, step 1 was built as `pxl.describe()`, step 5's handler move is phase 2 (into `handlers.js`, not `compiler.js`), its hit-testing split is D8 (open), step 6 is in §8 with its measurement.
 - 2026-11-28: phase 1 built (§9): `pxl.stages`, `pxl.perf` only the timer, `Stage.publishMetrics()`. Next: phase 2.

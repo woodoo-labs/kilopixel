@@ -1,3 +1,34 @@
+// Splits "x,y; x,y; …" into coordinate strings [x0, y0, x1, y1, …]. Commas and semicolons
+// inside parentheses belong to the expression: min(a, b) stays one coordinate.
+pxl.parsePointsIntoArray = function(str, targetArray) {
+  targetArray.length = 0;
+  let start = 0;
+  let depth = 0;
+  let currentX = null;
+  const input = str + ';'; // the last point ends like all others
+
+  for (let i = 0; i < input.length; i++) {
+    const char = input[i];
+
+    if (char === '(') depth++;
+    else if (char === ')') depth--;
+
+    if (depth === 0) {
+      if (char === ',') {
+        currentX = input.substring(start, i).trim();
+        start = i + 1;
+      } else if (char === ';') {
+        const currentY = input.substring(start, i).trim();
+        if (currentX !== null && currentX !== '' && currentY !== '') {
+          targetArray.push(currentX, currentY);
+        }
+        currentX = null;
+        start = i + 1;
+      }
+    }
+  }
+};
+
 pxl.Polyline = class Polyline extends pxl.Shape {
   // points has no default: it is stored as one value per coordinate (p0, p1, …, see setPoints())
   static get observedAttributes() {

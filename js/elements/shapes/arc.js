@@ -4,6 +4,17 @@
 // Both draw an elliptical arc and close it in one of their ways: a full turn, a ring (inner radii), a pie (lines to
 // the center) or a chord (closed), with arrowheads on an open arc. A circle is the case rx = ry. The radii are
 // parameters, never read here from the values: each subclass has its own radius attributes (r, ir or rx, ry, irx, iry).
+// End angle in radians: sweep (relative to start) wins over end; neither means a full turn
+pxl.arcEndRadians = function(startRadians, end, sweep) {
+  if (sweep !== null) return startRadians + sweep * Math.PI / 180;
+  if (end !== null) return end * Math.PI / 180;
+  return startRadians + Math.PI * 2;
+};
+
+pxl.isFullTurn = function(startRadians, endRadians) {
+  return Math.abs(endRadians - startRadians) >= Math.PI * 2 - 1e-4;
+};
+
 pxl.ArcShape = class ArcShape extends pxl.Shape {
   static defaults = {
     ...pxl.Shape.defaults,
