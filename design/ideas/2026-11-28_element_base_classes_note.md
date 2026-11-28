@@ -27,6 +27,16 @@ Together about 25–30 lines less (the cleanup idea's −1 to −1.5 KB included
 
 When the element lifecycle changes anyway: `space` (TODO §28) gives elements a second parent frame; a new element kind that is a container (a clip or mask group) would be a third copy of the container code, which would change the count above.
 
+## 4. Also Open: Parents Kept After Removal
+
+Since phase 7 of the restructure plan (`design/done/2026-11-28_engine_restructure_plan.md` §14), every node clears `stage` on disconnect. `parentLayer` and `parentContainer` are set on connect (`js/elements/node.js`) and never cleared, so a removed shape or group still points at its former layer and container:
+
+- **Memory:** an element that the page or a framework keeps after removing it (a detached list item, a cached component) keeps its former layer alive, and with it the layer's canvas (1000 × 600 CSS px at a pixel ratio of 2: about 9.6 MB). Unmeasured how often that happens in practice.
+- **Wasted frames:** `valueChanged()`, `evaluateReactive()` and `evaluateAnimations()` call `parentLayer?.invalidate()`, so setting an attribute on a removed shape marks its former layer dirty and asks that layer's stage for a frame that changes nothing.
+
+Clearing both on disconnect would need a check of what reads them while an element is detached: `getGlobalMatrix()` walks `parentContainer`, the hit walk and `toLocal()` read matrices of connected elements only, and `releaseElement()` reads `parentContainer` of the removed element before `stage` is cleared. Fits the same lifecycle work as §1.
+
 ## Log
 
+- 2026-11-28: §4: `parentLayer` and `parentContainer` stay set after removal (memory, wasted frames), recorded after restructure phase 7.
 - 2026-11-28: parked from the restructure plan (its phases 6 and 8, D8) after measuring how much they would share (§2).
