@@ -1,8 +1,8 @@
 # Regular Polygon & Star Shape (`<pxl-polygon>`)
 
-- **Status**: 🟡 **Proposed** (2026-10-19, open decisions in §7)
+- **Status**: 🟡 **Proposed** (2026-11-28, parked until after release 0.1; open decisions in §7)
 - **Date**: 2026-10-19
-- **Related**: `design/archive/2026-10-17_shape_authoring_plan.md` (custom shape template, the Star example), `design/ideas/2026-10-18_polyline_optimization_plan.md` (closed polylines), `.agents/TODO.md` §23
+- **Related**: `design/archive/2026-10-17_shape_authoring_plan.md` (custom shape template, the Star example), `design/ideas/2026-10-18_polyline_optimization_plan.md` (closed polylines)
 - **Target Implementation**: `js/elements/shapes/polygon.js` (new), `build.js`, `docs/polygon.html` (new), `docs/js/layout.js`, `.agents/KILOPIXEL.md`
 - **Prototypes**: `design/prototypes/2026-10-19_polygon_star_shape/test.html` (absolute `ir`), `design/prototypes/2026-10-19_polygon_star_shape/relative.html` (relative star amount, §3)
 
@@ -228,6 +228,7 @@ Sidebar: "Polygon" link back under Shapes & Paths, after "Polyline".
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-28: parked in `design/ideas/` until after release 0.1 (group D of `design/2026-11-27_release_0_1_plan.md`); TODO item §23 removed.
 - 2026-11-27: the handlers are `pxl-on-click` … `pxl-on-move` since 2026-11-18 (`design/done/2026-10-30_framework_compatibility_plan.md` §23); §10 (test 8) uses the old name `onclick`.
 - 2026-11-22: `design/done/2026-11-20_custom_shapes_plan.md` is closed; its step 7 is this plan: build `<pxl-polygon>` in the form of the built-in shapes today (`static defaults` only, `draw(ctx)` in logical units without `u`, `setBoundingBox()`, `pxl.defineShape()`); this plan's code is the old form.
 - 2026-11-22: `design/done/2026-11-20_custom_shapes_plan.md` phase 2 built: the layer scales by the unit once, and the shapes and their helpers (`applyStyle(ctx)`, `applyStrokeState(ctx)`, `createGradient(ctx, value, slot)`, `resolveArrow(rec, value)`, `drawArrows(ctx, a, b)`, `applyTransformState(ctx, values)`) take no `u`; code here with `u` is the old form.

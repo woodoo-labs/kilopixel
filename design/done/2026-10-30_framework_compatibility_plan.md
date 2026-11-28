@@ -2,7 +2,7 @@
 
 - **Status**: ✅ **Implemented** (2026-11-20, steps 1–5 of §19.4 built in §20–§29; what is left moved to the TODO, §30)
 - **Date**: 2026-10-30
-- **Related**: `design/prototypes/2026-10-30_framework_compatibility/review_checks.html` (review §19); `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/done/2026-11-07_safe_shape_render_plan.md`, `design/2026-10-30_space_attribute_plan.md`, `design/done/2026-11-04_stage_sizing_plan.md` (builds W2)
+- **Related**: `design/prototypes/2026-10-30_framework_compatibility/review_checks.html` (review §19); `design/prototypes/2026-10-30_framework_compatibility/d4_clicks.html` (D4); the React 19 and Vue 3.5 prototypes `react.html`, `vue.html`, `vue_debug.html` with `FINDINGS.md` in the same folder, `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: removed attributes fall back to defaults, already written with frameworks in mind), `design/archive/2026-10-15_interactive_state_auto_registration_plan.md` (which shapes are hit-tested), `design/archive/events_implementation_plan.md` (the current `on*` handlers), `design/done/2026-11-07_safe_shape_render_plan.md`, `design/ideas/2026-10-30_space_attribute_plan.md`, `design/done/2026-11-04_stage_sizing_plan.md` (builds W2)
 - **Target Implementation**: `js/interaction.js`, `js/elements/shape.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/stage.js`, `js/elements/variable.js`, `js/compiler.js`, `js/engine.js`; a new test page `tests/frameworks.html`; docs and examples that use `on*` handlers
 
 ---
@@ -915,5 +915,5 @@ Item 3 of §28, found with W3 (§24.2). A layer's `alpha`, `blend` and `filter` 
 Steps 1–5 of §19.4 are built (§20–§29); the DOM contract row by row is in §3, the state by kind of project in §26.1. The open points of §28 moved:
 
 - **Smoke pages for Svelte 5 and Lit, the Angular app, the npm package** (§26.3, §28 items 1, 4, 5): TODO §44.
-- **A shape's position on the page, keyboard focus, accessibility, `:hover` on shapes** (§23.6, §26.2): TODO §45.
+- **A shape's position on the page, keyboard focus, accessibility, `:hover` on shapes** (§23.6, §26.2): `design/ideas/2026-11-28_small_ideas_note.md` §2.
 - **Scoped names (D2)** (§8.2, §19.3): with the evaluation model, `design/done/2026-11-20_evaluation_model_plan.md` (`design/archive/2026-11-15_per_frame_evaluation_plan.md` D8).

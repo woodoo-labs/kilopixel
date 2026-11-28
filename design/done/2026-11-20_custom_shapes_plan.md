@@ -3,7 +3,7 @@
 - **Status**: ✅ **Implemented** (2026-11-22, built in §12–§17; closed in §18: the structure cleanup, D7, D9 and step 7 moved to other plans)
 - **Date**: 2026-11-20
 - **Replaces**: `design/archive/2026-10-17_shape_authoring_plan.md` (derived `observedAttributes`, `draw()` without `t`, custom animation patterns, verified 2026-10-17 and 2026-11-07) and the structure cleanup draft of 2026-11-20 (`scratch/2026-11-20_engine_structure_cleanup_plan.md` (not kept); its steps and measurements are §6 here)
-- **Related**: `design/done/2026-11-20_evaluation_model_plan.md` (step 2 makes "`draw()` only reads values" a contract), `design/2026-10-19_polygon_star_shape_plan.md` (the first new shape in this form), `design/done/2026-11-01_isolated_shape_compositing_plan.md` (`drawsMoreThanOnce()`), `design/done/2026-11-07_safe_shape_render_plan.md` (a careless shape can't break the layer), `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked), `design/2026-10-30_space_attribute_plan.md` (with step 6.6)
+- **Related**: `design/done/2026-11-20_evaluation_model_plan.md` (step 2 makes "`draw()` only reads values" a contract), `design/ideas/2026-10-19_polygon_star_shape_plan.md` (the first new shape in this form), `design/done/2026-11-01_isolated_shape_compositing_plan.md` (`drawsMoreThanOnce()`), `design/done/2026-11-07_safe_shape_render_plan.md` (a careless shape can't break the layer), `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked), `design/ideas/2026-10-30_space_attribute_plan.md` (with step 6.6)
 - **Target Implementation**: `js/elements/shape.js`, `js/elements/shapes/*.js`, `js/elements/node.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/stage.js`, `js/graphics.js`, `js/interaction.js`, `js/engine.js`; `tools/build_types.js`; `tests/`; a new docs page `docs/custom-shapes.html`; `.agents/KILOPIXEL.md`, `.agents/ENGINE.md`
 - **Prototypes** (`design/prototypes/2026-11-20_custom_shapes/`): `template/` (the template as a patch over the engine: `proposal.js`, a Star, a Gauge, `minimal.html`, `rich.html`), `logical_units/` (the canvas, text and shadow tests and the page sweep of §5.3), `firefox/` (the same in Firefox: a driver over WebDriver BiDi, a text viewer and a page that switches between today and logical units), `safari/` (a page that runs the tests on a phone or tablet and sends the results to a receiver on the laptop), `phase2/` (the old-vs-new pixel comparison of every page and the frame-time benchmark of §17), `transform_path/` (§6.6). `template/` and `logical_units/` patch the engine and use `attributeValues`, renamed in step 4. Their comparison of today's drawing with logical units means something only with the engine before step 3, commit `82eb93d` (`git show 82eb93d:dist/pxl.js`); `logical_units/text_tests.html` and `canvas_tests.html` use the canvas alone and work with any engine. Older: `design/prototypes/2026-10-17_shape_authoring/` (Rule A tests)
 
@@ -194,7 +194,7 @@ The engine keeps "fields in the constructor" (CLAUDE.md "Engine Code Style": one
 6. **One transform path** (decision D7): every shape drawn with its global matrix (`setTransform()`), as isolation and hit testing already are; groups and layers apply no transform when drawing; `pxl.applyTransformState()` and `pxl.applyContextState()` go. Measured 2026-11-20 as a patch over commit `2f75888` (`design/prototypes/2026-11-20_custom_shapes/transform_path/`):
    - **Pixels:** 24 docs and 56 example pages, 169 stages, 300 layers, every layer drawn old, patched, old again, compared premultiplied: 284 layers identical, 16 differ only on anti-aliased edges (worst: `examples/test45.html`, filled circles 15 groups deep, at most 77 / 255 on single edge pixels; the matrices agree to 7 · 10⁻⁶ device pixels). Two traps: Chrome moves a canvas from GPU to CPU drawing after a few `getImageData()` calls (read every layer three times first), and un-premultiplied values of nearly transparent pixels jump by up to 255.
    - **Frame time:** 5,000 circles, `Layer.render()` only, old and patched alternating: 3–9 % slower in 8 of 9 runs (0.6–2 ms per frame), from the matrix lookup per shape.
-   - So not alone: with `space` (TODO §28), whose extra transform becomes a different parent matrix. Together with §5.3 phase 2 the global matrix would include `u`.
+   - So not alone: with `space` (`design/ideas/2026-10-30_space_attribute_plan.md`), whose extra transform becomes a different parent matrix. Together with §5.3 phase 2 the global matrix would include `u`.
 
 ## 7. Size (Estimates; Measured After Each Step)
 
@@ -223,7 +223,7 @@ The engine keeps "fields in the constructor" (CLAUDE.md "Engine Code Style": one
 4. §5.6 rename, if decided (D4). Built 2026-11-21 (§14).
 5. §5.5 and §5.7: defining the tag, `setBoundingBox()`, `paint()`, the checks once per class; the Star and the Gauge as tests, loaded as a second script. Built 2026-11-21 (§15).
 6. Docs (§8), KILOPIXEL.md and ENGINE.md. Built 2026-11-21 (§16).
-7. `<pxl-polygon>` (`design/2026-10-19_polygon_star_shape_plan.md`) as the first new shape in this form. *2026-11-22: handed to that plan (TODO §23, §18).*
+7. `<pxl-polygon>` (`design/ideas/2026-10-19_polygon_star_shape_plan.md`) as the first new shape in this form. *2026-11-22: handed to that plan (§18).*
 8. Later: §5.3 phase 2; the structure cleanup (§6), discussed separately; §6.6 waits for `space`. Phase 2 built 2026-11-22 (§17).
 
 ## 10. Tests
@@ -365,9 +365,9 @@ The page sweep (no console messages) and `tests/render.html` guard the built-ins
 
 Custom shapes are built (steps 2–6, phase 2 of §5.3), documented (`docs/custom-shapes.html`, KILOPIXEL.md §12) and checked in Chrome, Firefox and Safari. Decisions D1–D6 and D8 are built, D5 decided as recommended. What was left moved where it belongs:
 
-- **The structure cleanup** (§6) and **D7** (one transform path): `design/archive/2026-11-22_engine_structure_cleanup_plan.md` (💬, parked; step 6 goes with `space`, TODO §28).
+- **The structure cleanup** (§6) and **D7** (one transform path): `design/archive/2026-11-22_engine_structure_cleanup_plan.md` (💬, parked; step 6 goes with `space`).
 - **D9** (internal animated values, §5.9): `design/done/2026-11-20_evaluation_model_plan.md`, its D11, decided with its D1.
-- **Step 7** (`<pxl-polygon>` in this form): `design/2026-10-19_polygon_star_shape_plan.md`, TODO §23.
+- **Step 7** (`<pxl-polygon>` in this form): `design/ideas/2026-10-19_polygon_star_shape_plan.md`.
 - **Safari limits** found in §5.3: `design/done/2026-11-22_late_web_fonts_plan.md` (late web fonts) and TODO §49 (shape filters).
 
 Its TODO item is removed; its number stays free.

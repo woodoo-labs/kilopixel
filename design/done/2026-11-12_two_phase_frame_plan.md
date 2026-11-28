@@ -79,7 +79,7 @@ The stage knows after the update phase whether anything is animated and requests
 
 ### 3.4 Stage-level `<pxl-var>`
 
-Built 2026-11-13 (`design/2026-11-12_layer_throttling_plan.md` Part B): `Stage.render()` evaluates variables outside every layer before the layers. The update phase simply starts with them; their keep-alive in the stage is already what §3.3 proposes for everything.
+Built 2026-11-13 (`design/ideas/2026-11-12_layer_throttling_plan.md` Part B): `Stage.render()` evaluates variables outside every layer before the layers. The update phase simply starts with them; their keep-alive in the stage is already what §3.3 proposes for everything.
 
 ### 3.5 `maxfps` becomes a pure draw gate
 
@@ -128,17 +128,17 @@ Plans whose per-frame design assumes today's single pass. Each has a pointer to 
 
 | TODO | Plan | What changes with a two-phase frame |
 |---|---|---|
-| §8 | `design/2026-11-12_layer_throttling_plan.md` | Part A: the keep-alive (§3.4) and the variable placement rule (§3.6) are workarounds for the single pass; the gate stays. Part B (built 2026-11-13): becomes the start of the update phase. Part C: independent. Its D9 is the order |
+| §8 | `design/ideas/2026-11-12_layer_throttling_plan.md` | Part A: the keep-alive (§3.4) and the variable placement rule (§3.6) are workarounds for the single pass; the gate stays. Part B (built 2026-11-13): becomes the start of the update phase. Part C: independent. Its D9 is the order |
 | §3 | `design/2026-10-01_tween_animation_plan.md` | §7 (sleep when tweens finish) works through `isAnimated` and the layer heartbeat; with §3.3 the stage decides from the update phase, and change-based dirty flags stop redrawing a finished tween on their own |
 | §2 | `design/ideas/2026-09-29_pxl-clip_element_plan.md` | §6.1 `applyClip()` evaluates its children while drawing and §9 relies on the layer heartbeat; the clip's children must be evaluated in the update phase |
-| §28 | `design/2026-10-30_space_attribute_plan.md` | §3.5 "Draw Order" (one-frame lag, readers after targets) goes away: no lag since step 1 for readers without `t` |
+| §28 | `design/ideas/2026-10-30_space_attribute_plan.md` | §3.5 "Draw Order" (one-frame lag, readers after targets) goes away: no lag since step 1 for readers without `t` |
 | §25 | `design/ideas/2026-10-25_refs_across_spaces_note.md` | the same lag for toLocal and plain `ref.*`; this plan is the general fix |
 | §20 | `design/archive/2026-10-17_shape_authoring_plan.md` | §3.3 `draw(ctx, u)` without `t` becomes a requirement (§3.2); §4 Pattern B sets `isAnimated` by hand, which the update phase must keep working; its open point "while stopped, the layer keeps redrawing" is solved by §3.2 |
 | §39 | `design/done/2026-11-12_reactive_propagation_plan.md` | no dependency: reactive propagation stays recursive (the cycle crash is fixed); this plan builds its own order for readers with `t` (§3.1.1). If §39 is built later, both could share the ordering code |
 | §31 | `design/done/2026-11-01_isolated_shape_compositing_plan.md` | no logical dependency, but both change `Shape.render()` (it the drawing, this plan the evaluation): build one after the other, not in parallel (2026-11-20: since step 1 `Shape.render()` only draws, and steps 2–4 change the update phase; any order, isolation plan §9) |
 | §14 | (no plan) `paintorder` | same draw path; only ordering, after §31 |
 
-Not affected: the framework plan (`design/done/2026-10-30_framework_compatibility_plan.md`: its event dispatch fits both models), `<pxl-out>` (`design/ideas/2026-08-02_declarative_html_output_pxl_out_plan.md`: updates through broadcasts, independent of draw order), `<pxl-plot>` (TODO §7), stage sizing (`design/done/2026-11-04_stage_sizing_plan.md`). TODO §9 (`<pxl-image>`) only adds an external invalidation source (§3.2).
+Not affected: the framework plan (`design/done/2026-10-30_framework_compatibility_plan.md`: its event dispatch fits both models), `<pxl-out>` (`design/ideas/2026-08-02_declarative_html_output_pxl_out_plan.md`: updates through broadcasts, independent of draw order), `<pxl-plot>` (`design/ideas/2026-09-07_plot_element_plan.md`), stage sizing (`design/done/2026-11-04_stage_sizing_plan.md`). TODO §9 (`<pxl-image>`) only adds an external invalidation source (§3.2).
 
 ## 7. Suggested Order
 
@@ -197,7 +197,7 @@ Per step:
 - **Step 2:** the step where the rule matters most (§3.2, §3.3).
 - **Stage-level variables** (built): one moved from the stage into a layer, or back, leaves and joins the stage's list in `disconnectedCallback()` / `connectedCallback()` (engine test "stage variables: moved into a layer or removed …").
 - **Step 3:** evaluating a hidden subtree only when something reads it (§4, question 6) uses the live readers, so it follows readers added later: `pxl._subscriptions` for readers without `t`, the compiler's dependencies for readers with `t` (§9 R5).
-- **Throttling** (`design/2026-11-12_layer_throttling_plan.md` §3.3): a layer moved to another stage clears its timer on disconnect and resets its wait on connect; a shape moved into a throttled layer waits for that layer's next window, like any other change there.
+- **Throttling** (`design/ideas/2026-11-12_layer_throttling_plan.md` §3.3): a layer moved to another stage clears its timer on disconnect and resets its wait on connect; a shape moved into a throttled layer waits for that layer's next window, like any other change there.
 - **Copies** (`cloneNode()`): a copy is a new element and needs nothing special. Unrelated to this plan and unchanged: a copy keeps its `id`, so two elements share it and `ref.<id>` points to the one connected last.
 - **Elements added in an event handler:** hit testing and the handlers run at the start of the frame (`interaction.process()`, since 2026-11-17, `design/done/2026-11-17_pointer_frame_order_plan.md`), so such elements are evaluated and drawn in the same frame.
 

@@ -1,6 +1,6 @@
 # Technical Implementation Plan: Declarative `<pxl-plot>` Element
 
-- **Status**: 🟡 **Proposed** (2026-11-11, notes on sampling and smoothing in §10)
+- **Status**: 🟡 **Proposed** (2026-11-28, parked until after release 0.1; notes on sampling and smoothing in §10)
 - **Date**: 2026-09-07
 - **Target Files**:
   - `js/compiler.js` (Expression compiler parameter injection & static-path guard)
@@ -269,7 +269,7 @@ Largest distance from the drawn curve to the true curve (stage units, stage 1000
 ### 10.3 Consequences for `<pxl-plot>`
 
 - **`smooth` uses the uniform spline** (the polyline's spline before 2026-10-24: handles `±(next − previous) · k / 6`). Between equal steps it is about 5–10 times closer to the true curve than the centripetal one at the same number of samples. `<pxl-polyline>` keeps the centripetal spline as its default.
-- **Reusable code**: `design/2026-11-11_polyline_smoothstyle_plan.md` adds the uniform spline to `<pxl-polyline>` (`smoothstyle="uniform"`) in the shared segment loader `loadSegment()`, which also serves arrow trimming and hit testing. The plot builds on that code instead of writing its own spline: extend `pxl.Polyline` or move the spline into a shared helper (that plan, §6).
+- **Reusable code**: `design/ideas/2026-11-11_polyline_smoothstyle_plan.md` adds the uniform spline to `<pxl-polyline>` (`smoothstyle="uniform"`) in the shared segment loader `loadSegment()`, which also serves arrow trimming and hit testing. The plot builds on that code instead of writing its own spline: extend `pxl.Polyline` or move the spline into a shared helper (that plan, §6).
 - **Dense sampling is the other way out**: with about 600 steps, straight segments are within half a unit of the true curve. Steps cost one evaluation of `fx` / `fy` each and are only recomputed when an input changes, so a high default (several hundred) may be better than smoothing by default. Decide with a benchmark.
 - **Free ends** (open plots) still need a rule; uniform Catmull-Rom with clamped ends straightens out before the end (problem #1 of the 2026-10-23 plan). For a plot, the missing neighbour can be computed: one more sample just outside `domain`.
 - **Repeated curves** (a parametric curve traced several times over `domain`) are drawn identically on every pass only if the steps per pass are a whole number. With dense sampling the difference is below a pixel.
@@ -279,8 +279,9 @@ Largest distance from the drawn curve to the true curve (stage units, stage 1000
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-28: parked in `design/ideas/` until after release 0.1 (group D of `design/2026-11-27_release_0_1_plan.md`); TODO item §7 removed.
 - 2026-11-28: `pxl.scopeKeys` is now a function, `pxl.scopeKeys()`, which lists the scope's names at the first compile (`design/done/2026-11-28_engine_restructure_plan.md` §11); the `${this.scopeKeys}` of §6's sketch is the old string.
 - 2026-11-27: the handlers are `pxl-on-click` … `pxl-on-move` since 2026-11-18 (`design/done/2026-10-30_framework_compatibility_plan.md` §23); §3 lists the old names `onclick` … `onmove`.
 - 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
-- Status line until 2026-11-20: 🟡 **Proposed** (2026-11-11, notes on sampling and smoothing in §10; uniform spline from `design/2026-11-11_polyline_smoothstyle_plan.md`)
+- Status line until 2026-11-20: 🟡 **Proposed** (2026-11-11, notes on sampling and smoothing in §10; uniform spline from `design/ideas/2026-11-11_polyline_smoothstyle_plan.md`)

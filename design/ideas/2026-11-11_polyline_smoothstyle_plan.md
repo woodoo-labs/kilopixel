@@ -1,8 +1,8 @@
 # Polyline `smoothstyle`: Uniform or Centripetal Spline
 
-- **Status**: 🟡 **Proposed** (2026-11-11, D1–D3 open)
+- **Status**: 🟡 **Proposed** (2026-11-28, parked until after release 0.1; D1–D3 open)
 - **Date**: 2026-11-11
-- **Related**: `design/done/2026-10-23_smooth_polyline_spline_plan.md` (the centripetal spline, implemented 2026-10-24), `design/2026-09-07_plot_element_plan.md` §10 (`<pxl-plot>` needs the uniform spline and reuses this code, §6)
+- **Related**: `design/done/2026-10-23_smooth_polyline_spline_plan.md` (the centripetal spline, implemented 2026-10-24), `design/ideas/2026-09-07_plot_element_plan.md` §10 (`<pxl-plot>` needs the uniform spline and reuses this code, §6)
 - **Target Implementation**: `js/elements/shapes/polyline.js`, `tests/index.html`, `.agents/KILOPIXEL.md` (Smoothing), `docs/polyline.html` (new section 5), `docs/walkthrough.html` section 9 (D3)
 - **Prototypes**: `design/prototypes/2026-11-11_polyline_smoothstyle/smoothstyle_examples.html` (both splines on 6 candidate examples, plain canvas), `design/prototypes/2026-11-11_polyline_smoothstyle/spline_error.js`, `design/prototypes/2026-11-11_polyline_smoothstyle/spline_uniform_sec9.js`, `design/prototypes/2026-11-11_polyline_smoothstyle/smoothstyle_search.js` (error against the true curve)
 
@@ -130,12 +130,13 @@ The points of the figure eight are written as rounded numbers. Candidates that s
 2. Engine: `smoothstyle` in `polyline.js`, `node build.js`, update the `~NNKB` sizes, tests in `tests/index.html`.
 3. KILOPIXEL.md, `docs/polyline.html` section 5 with the renumbering, walkthrough section 9 (D3).
 4. Browser check: polyline page (both shapes, both styles, arrowheads, console), walkthrough section 9, tests.
-5. Plan to ✅, TODO item removed; plot plan §10 and TODO §7 point to the shared code.
+5. Plan to ✅, TODO item removed; plot plan §10 points to the shared code.
 
 ## Log
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-28: parked in `design/ideas/` until after release 0.1 (group D of `design/2026-11-27_release_0_1_plan.md`); TODO item §38 removed.
 - 2026-11-21: `attributeValues` is now `values` and `attributeExpressions` `expressions` (`design/done/2026-11-20_custom_shapes_plan.md` step 4); the old names here are the old form.
 - 2026-11-21: `observedAttributes` is derived from `static defaults` and presence attributes come from boolean defaults (`design/done/2026-11-20_custom_shapes_plan.md` step 2): `smoothstyle` only goes into `defaults`.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.

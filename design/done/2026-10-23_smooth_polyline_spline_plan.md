@@ -2,7 +2,7 @@
 
 - **Status**: ✅ **Implemented** (2026-10-24; the seam rule of §4.2 was removed again the same day)
 - **Date**: 2026-10-23
-- **Related**: `design/done/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming on smooth polylines, §4.3), `design/ideas/2026-10-18_polyline_optimization_plan.md` (§5 edge cases #8, #9, #11, #12; §6.2 smooth loop), `design/2026-09-07_plot_element_plan.md` and `design/2026-09-30_path_element_plan.md` (both reuse the polyline spline)
+- **Related**: `design/done/2026-10-14_unified_arrowhead_geometry_plan.md` (arrow trimming on smooth polylines, §4.3), `design/ideas/2026-10-18_polyline_optimization_plan.md` (§5 edge cases #8, #9, #11, #12; §6.2 smooth loop), `design/ideas/2026-09-07_plot_element_plan.md` and `design/2026-09-30_path_element_plan.md` (both reuse the polyline spline)
 - **Target Implementation**: `js/elements/shapes/polyline.js`, `js/elements/shapes/circle.js` and `ellipse.js` (arrow trim, §5.4), `.agents/KILOPIXEL.md` (Smoothing, Arrowheads), `docs/polyline.html` (section 2)
 - **Test Pages** (not kept): `scratch/polyline_shapes/smooth_ends.html` (17 cases × 6 variants A–F, opens directly from the file system; `?v=AF` shows only some variants), `smooth_bench.html` (loop benchmark, §4.3.1), `arrow_trim.html` (polyline arrow trimming, §5.2), `ellipse_arrows.html` (ellipse arrows, real engine, §5.4; needs the dev server)
 

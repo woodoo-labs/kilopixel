@@ -3,7 +3,7 @@
 - **Status**: 💬 **Discussion** (2026-11-28, parked: base classes, parents kept after removal, three smaller follow-ups; pick up when the element lifecycle is reworked)
 - **Date**: 2026-11-28
 - **Origin**: phases 6 and 8 and decision D8 of `design/done/2026-11-28_engine_restructure_plan.md`, which took them from steps 2, 4 and 5 of `design/archive/2026-11-22_engine_structure_cleanup_plan.md`
-- **Related**: `design/2026-10-30_space_attribute_plan.md` (TODO §28: a reason to rework the lifecycle and the transform path anyway)
+- **Related**: `design/ideas/2026-10-30_space_attribute_plan.md` (a reason to rework the lifecycle and the transform path anyway)
 
 ---
 
@@ -25,7 +25,7 @@ Together about 25–30 lines less (the cleanup idea's −1 to −1.5 KB included
 
 ## 3. When to Pick Up
 
-When the element lifecycle changes anyway: `space` (TODO §28) gives elements a second parent frame; a new element kind that is a container (a clip or mask group) would be a third copy of the container code, which would change the count above.
+When the element lifecycle changes anyway: `space` gives elements a second parent frame; a new element kind that is a container (a clip or mask group) would be a third copy of the container code, which would change the count above.
 
 ## 4. Also Open: Parents Kept After Removal
 
@@ -38,7 +38,7 @@ Clearing both on disconnect would need a check of what reads them while an eleme
 
 ## 5. Other Follow-Ups of the Restructure
 
-From §8 of `design/done/2026-11-28_engine_restructure_plan.md`, which closed with them open (its fourth follow-up, the one transform path, waits with `space`, TODO §28):
+From §8 of `design/done/2026-11-28_engine_restructure_plan.md`, which closed with them open (its fourth follow-up, the one transform path, waits with `space`):
 
 - **What shapes and groups still share:** both add the `pxl-on-*` attributes to `observedAttributes`, set `values.isHovered` and `values.isPressed` in their constructors and create the `handlers` record (`js/elements/shape.js`, `js/elements/group.js`, about 6 lines each). The plan left the decision to after phase 7; with `stage` and `releaseElement()` in `PxlNode` since then, this is what is left of "interactive node". Small; decide with §1.
 - **`Polyline.setPoints()` re-implements `valueChanged()`** (`js/elements/shapes/polyline.js`): it sets `isAnimated`, calls `pxl.markChanged()` and `parentLayer?.invalidate()` itself, and skips `affectsPixels()`, so points changed on a hidden polyline redraw its layer although nothing is drawn. A wasted frame, no wrong pixels.

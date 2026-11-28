@@ -1,6 +1,6 @@
 # Layer Throttling (`maxfps`), Stage-Level `<pxl-var>` and Performance Monitor
 
-- **Status**: 🟡 **Proposed** (2026-11-13, parts B and C1 built; part A, C2 and D1–D4, D7–D9 open)
+- **Status**: 🟡 **Proposed** (2026-11-28, parked until after release 0.1; parts B and C1 built; part A, C2 and D1–D4, D7–D9 open)
 - **Date**: 2026-11-12
 - **Supersedes**: `design/archive/2026-09-14_stage_variables_and_layer_throttling_plan.md` (stage-level `<pxl-var>`, `maxfps`, per-layer metrics) and `design/archive/2026-09-14_layer_throttling_plan.md` (revised 2026-09-15: `maxfps` in detail, keep-alive, cross-layer variables, frame counting, monitor bug)
 - **Related**: `design/done/2026-11-07_safe_shape_render_plan.md` (error path in `Layer.render()`), `design/done/2026-10-17_attribute_defaults_and_state_isolation_plan.md` (Rule A: `maxfps` comes from `static defaults`), `design/done/2026-11-12_two_phase_frame_plan.md` (built in `design/done/2026-11-20_evaluation_model_plan.md`: an update phase before drawing would simplify Part A and absorb Part B, §1.1 and D9 here)
@@ -256,6 +256,7 @@ A manual test page with all cases side by side (layers at full rate, `maxfps` 30
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-28: parked in `design/ideas/` until after release 0.1 (group D of `design/2026-11-27_release_0_1_plan.md`); TODO item §8 removed.
 - 2026-11-28: restructure phase 1 built (`design/done/2026-11-28_engine_restructure_plan.md` §9): `pxl.stages` is the stage registry, `pxl.perf` only the timer (`start()`, `stop()`, `publish()`), and `Stage.publishMetrics(seconds)` publishes from counters the stage owns (`_perfFrames`, …). §5.3's publishing step exists; `registerStage()` and `perfFrames` in §2, §5.1 and §5.4 are the old names.
 - 2026-11-28: `design/done/2026-11-28_engine_restructure_plan.md` (proposed then) phase 1 builds §5.3's publishing step: `pxl.stages` as the stage registry, `pxl.perf` only the timer, `stage.publishMetrics(seconds)` with the counters owned by the stage. If it is built first, C2 adds only the layers' counters.
 - 2026-11-27: evaluation model option B built (`design/done/2026-11-20_evaluation_model_plan.md` §11): §3's "reactive `ref.*` broadcasts" and §5's broadcast of `ref.<layerId>` describe the old code; a change now calls `pxl.markChanged()`, which asks only stages that read the id for a frame. D9 is still open.

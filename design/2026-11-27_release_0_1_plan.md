@@ -52,7 +52,7 @@ A1 and A2 both change every label: decided together, they cost one migration of 
 
 ### D. After 0.1
 
-TODO §7 plot, §8 `maxfps`, §14 `paintorder`, §23 polygon, §28 `space`, §38 `smoothstyle`, §45 accessibility (focus, roles, `getBoundingClientRect()`), the parked ideas in `design/ideas/`. Independent of the release: sorting the example pages (an overview page, `scratch/examples_overview/index.html` (not kept), was built on 2026-11-27).
+Parked in `design/ideas/` on 2026-11-28, their TODO items removed: plot (`design/ideas/2026-09-07_plot_element_plan.md`), `maxfps` (`design/ideas/2026-11-12_layer_throttling_plan.md`), polygon (`design/ideas/2026-10-19_polygon_star_shape_plan.md`), `space` (`design/ideas/2026-10-30_space_attribute_plan.md`), `smoothstyle` (`design/ideas/2026-11-11_polyline_smoothstyle_plan.md`), `paintorder` and accessibility (focus, roles, `getBoundingClientRect()`: `design/ideas/2026-11-28_small_ideas_note.md`), and the other parked ideas there. Independent of the release: sorting the example pages (an overview page, `scratch/examples_overview/index.html` (not kept), was built on 2026-11-27).
 
 ## 3. Order
 
@@ -157,6 +157,7 @@ The handler only changes a variable (assignment works since 2026-11-27); every h
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-28: group D parked in `design/ideas/`, its TODO items removed (§7, §8, §14, §23, §28, §38, §45).
 - 2026-11-27: A1 and A2 built (`design/done/2026-11-27_text_template_plan.md`).
 - 2026-11-27: 🟢 Decided: R1 (template, draw nothing), R2 (reactive values first), R3 (with A1, `center` / `middle`), R4 (9 pages), R5 (as listed). the TODO items on default alignment and on quoted text in the docs merged into one item, built the same day.
 - 2026-11-27: written; text survey kept in `design/prototypes/2026-11-27_release_0_1/`.

@@ -2,7 +2,7 @@
 
 - **Status**: 💬 **Discussion** (2026-10-26, no decisions; next step: a plan with one real use case, §7.8)
 - **Context**: polyline docs (section 8 and the planned Element Reference). Question: should `ref.<id>.pN` be documented, and how do readers attach to a polyline point from another layer?
-- **TODO**: none (parked in `design/ideas/`; picked up together with TODO §28)
+- **TODO**: none (parked in `design/ideas/`; picked up together with `design/ideas/2026-10-30_space_attribute_plan.md`)
 - **Related**: `design/done/2026-10-26_tolocal_fix_plan.md` (implemented 2026-10-26): `toLocal` readers now also update when their own space moves. Any point form (§5.1, §5.2, §7) builds on that reactivity.
 
 ## 0. Related Documents
@@ -19,7 +19,7 @@ All documents on this topic, oldest first. Older plans are kept unchanged as his
 | **This note** | 2026-10-25 | Refs are values, not positions; patterns that work today; possible additions | ⚪ Open ideas |
 | `design/done/2026-10-26_tolocal_fix_plan.md` | 2026-10-26 | Readers update when their **own** space moves | ✅ Implemented |
 | `design/done/2026-10-29_tolocal_decomposition_plan.md` | 2026-10-29 | Frame decomposition (`skewx`, signed `scaley`, `zoom`), warning for unknown names; the `scale` attribute becomes `zoom` (multiplier) | ✅ Implemented |
-| `design/2026-10-30_space_attribute_plan.md` | 2026-10-30 | `space="ref.A"`: draw an element in another element's space (exact overlays, points inside the target, attachments) | 🟡 Proposed |
+| `design/ideas/2026-10-30_space_attribute_plan.md` | 2026-10-30 | `space="ref.A"`: draw an element in another element's space (exact overlays, points inside the target, attachments) | 🟡 Proposed |
 | `design/done/2026-11-12_two_phase_frame_plan.md` | 2026-11-12 | Evaluate every element before drawing: removes the one-frame lag of readers drawn before their targets (toLocal, `space`, `ref.*`) | 💬 Discussion; step 1 built 2026-11-13 (no lag for readers without `t`) |
 
 ## 1. Core Finding: Refs Are Values, Not Positions

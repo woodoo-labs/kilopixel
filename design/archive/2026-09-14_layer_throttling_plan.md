@@ -1,6 +1,6 @@
 # Layer Throttling (`maxfps` Attribute)
 
-- **Status**: ⚪ **Superseded by** `design/2026-11-12_layer_throttling_plan.md` (2026-11-12, merged with `design/archive/2026-09-14_stage_variables_and_layer_throttling_plan.md` and checked against the engine of that date)
+- **Status**: ⚪ **Superseded by** `design/ideas/2026-11-12_layer_throttling_plan.md` (2026-11-12, merged with `design/archive/2026-09-14_stage_variables_and_layer_throttling_plan.md` and checked against the engine of that date)
 - **Date**: 2026-09-14 (revised 2026-09-15)
 - **Scope**: `<pxl-layer>` element, stage render loop, performance monitor
 

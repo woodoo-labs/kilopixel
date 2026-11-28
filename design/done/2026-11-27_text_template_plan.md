@@ -114,7 +114,7 @@ Counted on the docs, example and test pages (the two survey scripts):
 | `<pxl-text>` in the code snippets of docs pages (escaped HTML: `text.html` 14, `frameworks.html` 4, `linear.html` 2, `fill.html` 1) | 21 | by the same script, which also reads the escaped form; framework snippets with a binding (`text={label}`, `:text`) stay |
 | `setAttribute('text', …)` in scripts, `<pxl-text>` made with `createElement()` in tests | 2 / 2 | by hand (the script reads markup only) |
 | `design/prototypes/` pages with `<pxl-text>` | 25 | **not migrated**: prototypes are history and load `/dist/pxl.js`, so after the build they show quotes and centered labels; their status lines name the commit they were made with where it matters |
-| open plans with quoted labels in examples (`design/2026-10-30_space_attribute_plan.md`, `design/ideas/2026-09-29_pxl-clip_element_plan.md`) | 2 | a Log line each (CLAUDE.md "Plans and TODO" rule 6) |
+| open plans with quoted labels in examples (`design/ideas/2026-10-30_space_attribute_plan.md`, `design/ideas/2026-09-29_pxl-clip_element_plan.md`) | 2 | a Log line each (CLAUDE.md "Plans and TODO" rule 6) |
 
 A script (kept in `design/prototypes/2026-11-27_text_template/`) does the mechanical rows and prints every expression it rewrote for a check by eye. That the pages look the same afterwards is checked by the render tests, the sweep (a value that stopped compiling would warn) and by eye on the docs pages. The alignment rows keep every label in place; on the docs pages, labels that would look right centered lose their `align="start"` / `baseline="alphabetic"` when C3 of the release plan rewrites them (D2).
 

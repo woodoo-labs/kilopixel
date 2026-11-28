@@ -1,6 +1,6 @@
 # Technical Implementation Plan: Stage-Level Variables & Layer-Level FPS Throttling
 
-- **Status**: ⚪ **Superseded by** `design/2026-11-12_layer_throttling_plan.md` (2026-11-12, merged with `design/archive/2026-09-14_layer_throttling_plan.md` and checked against the engine of that date)
+- **Status**: ⚪ **Superseded by** `design/ideas/2026-11-12_layer_throttling_plan.md` (2026-11-12, merged with `design/archive/2026-09-14_layer_throttling_plan.md` and checked against the engine of that date)
 - **Date**: 2026-09-14
 - **Target Files**:
   - `js/elements/stage.js` (Root variable registration, master variable loop, performance metrics)

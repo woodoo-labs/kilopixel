@@ -172,7 +172,7 @@ The other path is safer and keeps today's timing. This plan ends with less to un
 1. **Change-based dirty flags and the keep-alive in the stage** (two-phase plan §7.2 step 2). Needed on both paths; builds on today's broadcasts. While doing it, count the engine tests and docs pages that read a derived value right after `setAttribute()` (for D5).
 2. **Prototype the rest as a patch over the running engine** (as step 1 of the two-phase plan was): versions, the reader list, the order, `toLocal` in part 3 and the hard case of §3.5. Run the page sweep of the two-phase plan §7.4 (all docs and example pages, 60 frames by hand, compare the pixels and the number of canvas clears) and the frame bench. Decide D1 on the result.
 3. **Build it:** tests first (§9), then replace the broadcasts.
-4. **Update the plans that assume broadcasts:** `<pxl-out>` (`design/ideas/2026-08-02_declarative_html_output_pxl_out_plan.md`), tweens and springs (TODO §3: a spring is a reader with state, evaluated once per frame in the order), `space` (TODO §28), throttling (TODO §8). Archive `design/done/2026-11-12_reactive_propagation_plan.md` as superseded.
+4. **Update the plans that assume broadcasts:** `<pxl-out>` (`design/ideas/2026-08-02_declarative_html_output_pxl_out_plan.md`), tweens and springs (TODO §3: a spring is a reader with state, evaluated once per frame in the order), `space` (`design/ideas/2026-10-30_space_attribute_plan.md`), throttling (`design/ideas/2026-11-12_layer_throttling_plan.md`). Archive `design/done/2026-11-12_reactive_propagation_plan.md` as superseded.
 5. **KILOPIXEL.md:** Reactivity Engine, Variable Change Propagation, Per-Frame Render Pipeline, Interaction System.
 
 ## 9. Tests

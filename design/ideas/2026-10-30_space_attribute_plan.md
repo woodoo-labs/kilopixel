@@ -1,6 +1,6 @@
 # The `space` Attribute: Draw an Element in Another Element's Space
 
-- **Status**: 🟡 **Proposed** (2026-11-13, §3.5 is obsolete since two-phase step 1; nothing built)
+- **Status**: 🟡 **Proposed** (2026-11-28, parked until after release 0.1; §3.5 is obsolete since two-phase step 1; nothing built)
 - **Date**: 2026-10-30
 - **Related**: `design/done/2026-10-29_tolocal_decomposition_plan.md` (§7 "Later idea", the clone rule this replaces for exact copies), `design/ideas/2026-10-25_refs_across_spaces_note.md` (hub for refs across spaces; §4 anchors), `design/done/2026-10-26_tolocal_fix_plan.md` (reactivity walk), `design/done/2026-11-07_safe_shape_render_plan.md` (same render path, §10), `design/done/2026-11-12_two_phase_frame_plan.md` (💬; its step 1, built 2026-11-13, removed the one-frame lag of §3.5 here)
 - **Target Implementation**: `js/elements/node.js` (`getParentMatrix`, `getGlobalMatrix`, space resolution), `js/graphics.js` (`applyTransformState`), `js/matrix.js` (`pxl.toLocal` uses the parent matrix), `js/elements/shape.js` and `group.js` (attribute, state check), `js/engine.js` (spatial key, reactivity); hit testing in `js/interaction.js` needs no change (§3.2)
@@ -237,6 +237,7 @@ No change in the hot path for pages that don't use `space`.
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-28: parked in `design/ideas/` until after release 0.1 (group D of `design/2026-11-27_release_0_1_plan.md`); TODO item §28 removed.
 - 2026-11-28: `js/graphics.js` is gone (`design/done/2026-11-28_engine_restructure_plan.md` phase 3): transform, compositing and isolation helpers are in `js/compositing.js`, arc angles in `js/elements/shapes/arc.js`, arrow and line dash helpers in `js/elements/shape.js`, the points parser in `js/elements/shapes/polyline.js`; names stay. References to `graphics.js` here describe the old layout.
 - 2026-11-28: the cleanup idea was merged into `design/done/2026-11-28_engine_restructure_plan.md`; the one transform path (with its 2026-11-20 measurement) is now in its §8, still meant to be built with `space`.
 - 2026-11-27: `text` is a template and centered by default (`design/done/2026-11-27_text_template_plan.md`); its examples quote labels and rely on the old `start` / `alphabetic` default.

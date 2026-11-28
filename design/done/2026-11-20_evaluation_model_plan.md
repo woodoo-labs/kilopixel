@@ -115,7 +115,7 @@ Speed is not the reason for either; B ends with less to understand and keep righ
 | D6 | Hidden subtrees: evaluate them every frame, never, or only what someone outside reads (R5) | only what is read: under B the ordered sources already are. *2026-11-27: **decided**, as prototyped (§10.4)* |
 | D7 | B: wake every stage in view, or only stages with readers of the source | every stage in view. *2026-11-27: **decided: only stages that read the changed key**, as prototyped (§10.1)* |
 | D8 | Scoped names instead of global ids (`design/done/2026-10-30_framework_compatibility_plan.md` D2, §8.2): compiled functions would get `ref` per stage at call time, so component instances share them | design together with D1: both change how `ref` is resolved. *2026-11-27: **decided: keep global ids** (§10.4); scoped names parked in `design/ideas/2026-11-27_scoped_names_note.md`* |
-| D9 | Throttled layers (`design/2026-11-12_layer_throttling_plan.md`): evaluated every frame (smooth readers) or at their rate | decide with throttling part A, after step 2 |
+| D9 | Throttled layers (`design/ideas/2026-11-12_layer_throttling_plan.md`): evaluated every frame (smooth readers) or at their rate | decide with throttling part A, after step 2 |
 | D10 | Hit testing uses the values of the last update; in a throttled layer they can be ahead of its pixels | accept. *2026-11-27: **decided: accept*** |
 | D11 | Internal animated values of custom shapes (a pump's impeller that spins while `running`, without the page writing `t`): a declarative `static animations = { impeller: 'this.values.running ? t * 90 : 0' }` evaluated like an animated attribute, and values that keep state between frames (smooth start and stop) | decide with D1; until then time goes through an attribute (`spin="t * 180"`). From `design/done/2026-11-20_custom_shapes_plan.md` §5.9 (D9 there). *2026-11-27: still open, not needed for the build* |
 | D12 | Duplicate ids (added 2026-11-27): today the element connected last wins silently, and removing it deletes the entry although the other is still there | **decided: nothing special**, as today (§10.4) |
@@ -125,10 +125,10 @@ Speed is not the reason for either; B ends with less to understand and keep righ
 
 | TODO | Plan | What changes |
 |---|---|---|
-| §8 | `design/2026-11-12_layer_throttling_plan.md` | part A after step 2: a skipped layer just stays dirty until its window (no rAF relay or timer); D9 |
+| §8 | `design/ideas/2026-11-12_layer_throttling_plan.md` | part A after step 2: a skipped layer just stays dirty until its window (no rAF relay or timer); D9 |
 | §3 | `design/2026-10-01_tween_animation_plan.md` | its §7 "auto-sleep" is replaced by step 2 (a finished tween stops redrawing on its own); a spring is a reader with state, evaluated once per frame in the order |
 | — | `design/ideas/2026-09-29_pxl-clip_element_plan.md` (parked) | if it is picked up: its `applyClip()` evaluates children while drawing; they must be evaluated in the update phase (possible since step 1) |
-| §28 | `design/2026-10-30_space_attribute_plan.md` | its reactivity (§3.3) subscribes through broadcasts: rewrite after D1; its draw-order rule (§3.5) is gone since step 1 |
+| §28 | `design/ideas/2026-10-30_space_attribute_plan.md` | its reactivity (§3.3) subscribes through broadcasts: rewrite after D1; its draw-order rule (§3.5) is gone since step 1 |
 | (parked) | `design/ideas/2026-08-02_declarative_html_output_pxl_out_plan.md` | after D1: under A the propagation must be ordered first (no 210 before 220), under B it is a reader in part 3 |
 | (closed) | `design/done/2026-11-20_custom_shapes_plan.md` | `draw(ctx)` without `t` is the contract since its step 3; internal animated values (its §5.9, D9) moved here as D11 |
 

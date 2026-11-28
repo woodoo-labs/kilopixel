@@ -75,7 +75,7 @@ Raw canvas benchmark, no Kilopixel engine (`scratch/save_restore_bench.html` (no
 - `Shape.render()`: the 15-term `hasStateChanges` check disappears; `applyContextState` already skips neutral values.
 - `drawArrows`: the manual `fillStyle` save/reset and the "not restored" `miterLimit` comment (`shape.js`).
 - `Grid.draw`: the manual `lineWidth` reset for major lines.
-- New features that touch context state (e.g. `paintorder`, TODO §14) can't leak into the next shape.
+- New features that touch context state (e.g. `paintorder`, `design/ideas/2026-11-28_small_ideas_note.md` §1) can't leak into the next shape.
 
 ### 4.3 What It Would Not Change
 
