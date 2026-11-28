@@ -30,6 +30,8 @@ A code review on 2026-11-28 found the code consistent and well commented, but gr
 
 2026-11-28: the last two rows of the table are built away by phase 1 (§9).
 
+2026-11-28: built away by phases 2–4 as well: *Handlers* (phase 2, §10: `js/handlers.js`; `setHandler()` stays a `PxlNode` method), *`graphics.js`* (phase 3, §11: removed), *Gradients* (phase 4, §12: `js/gradient.js`). *Filters*: the helpers, `pxl.scaleResponsiveFilter` and `pxl.checkCanvasFilter` are in `js/compositing.js` (phase 3); `resolveFilter()` stays a `PxlNode` method, since it caches per element. *Reactivity* is phase 5.
+
 The parked idea `design/archive/2026-11-22_engine_structure_cleanup_plan.md` (2026-11-22, from the custom shapes plan) had listed part of this before and is merged here: its step 1 is `pxl.describe()` (built, `1c01aca`); its steps 2–4 are phases 6–8; its step 5 split `interaction.js` too (handler compiling to `compiler.js`, here its own `handlers.js` in phase 2; hit testing to a file of its own, D8); its step 6, the one transform path, is in §8.
 
 `stage.js` does six jobs (DOM lifecycle, sizing, visibility, frame loop, scheduling, perf counters); the scheduler is the one that is a feature of its own.
