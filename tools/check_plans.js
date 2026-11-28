@@ -25,7 +25,7 @@ const STATUS_MAX = 200; // characters after "**Status**: "
 const TODO_ITEM_MAX = 800; // characters per TODO item, heading included
 
 // design/: active plans (each with a TODO item); design/ideas/: parked ideas (open, no TODO item);
-// design/done/: implemented plans that still describe the engine; design/archive/: superseded, dropped, replaced
+// design/done/: implemented plans; design/archive/: superseded and dropped plans (a plan moves once, when it closes)
 const FOLDERS = ['design', 'design/ideas', 'design/done', 'design/archive'];
 const planFiles = FOLDERS.flatMap(dir => fs.readdirSync(path.join(root, dir)).filter(f => f.endsWith('.md')).map(f => `${dir}/${f}`));
 const folderOf = (file) => path.dirname(file);
