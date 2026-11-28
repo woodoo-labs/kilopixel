@@ -461,7 +461,7 @@ pxl.defineShape('pxl-star', pxl.Star);
 | | `hasFill()`, `isStroked()` | whether a fill, or a stroke with a width above 0, is set |
 | | `setBoundingBox(left, top, right, bottom)` | writes the box and returns it, no allocation |
 
-Everything else on `pxl.Shape` (names with `_`, `update()`, `render()`, matrices, arrowheads) is internal. **Guarantees:** the transform (with `u`), `alpha`, `blend` / `mask`, `filter` and the shadow are set before `draw()`; the canvas state is restored afterwards; an error in `draw()` is reported once and skips the shape for that frame; the shape redraws when one of its values changes.
+Everything else on `pxl.Shape` (names with `_`, `update()`, `render()`, matrices, arrowheads) is internal, and so is `pxl.ArcShape`, the base of circle and ellipse: extend `pxl.Shape`. **Guarantees:** the transform (with `u`), `alpha`, `blend` / `mask`, `filter` and the shadow are set before `draw()`; the canvas state is restored afterwards; an error in `draw()` is reported once and skips the shape for that frame; the shape redraws when one of its values changes.
 
 **TypeScript:** `PxlShapeAttributes` and `PxlShapeElement` (generated) hold what every shape has; a custom shape's declaration extends them with its own attributes and adds its tag to `HTMLElementTagNameMap`, and for JSX to the framework's tag list (the docs page shows both).
 

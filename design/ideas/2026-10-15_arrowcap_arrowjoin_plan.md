@@ -115,6 +115,7 @@ Case 3 is the critical one: it needs `arrowjoin="miter"` for a sharp tip on a ro
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-28: circle and ellipse now share `pxl.ArcShape` (`js/elements/shapes/arc.js`): their arrowheads are drawn once there (`drawArc()`, `aimArcArrow()`); this plan's targets `circle.js` / `ellipse.js` describe the old split.
 - 2026-11-21: `observedAttributes` is derived from `static defaults` and presence attributes come from boolean defaults (`design/done/2026-11-20_custom_shapes_plan.md` step 2): `arrowcap` and `arrowjoin` only go into `defaults`.
 - 2026-11-20: `.agents/KILOPIXEL.md` was split into `.agents/KILOPIXEL.md` (language) and `.agents/ENGINE.md` (engine); section names in this plan refer to the old single file.
 - Status line until 2026-11-20: 💬 **Discussion** (direction agreed, open decisions listed in §6)
