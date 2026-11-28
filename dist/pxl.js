@@ -3524,10 +3524,16 @@ pxl.defineShape = function(tag, Class) {
   customElements.define(tag, Class);
 };
 
-pxl.Circle = class Circle extends pxl.Shape {
+// =========================================================================
+// pxl.ArcShape: the shared base of circle and ellipse (no tag of its own)
+// =========================================================================
+// Both draw an elliptical arc and close it in one of their ways: a full turn, a ring (inner radii), a pie (lines to
+// the center) or a chord (closed), with arrowheads on an open arc. A circle is the case rx = ry. The radii are
+// parameters, never read here from the values: each subclass has its own radius attributes (r, ir or rx, ry, irx, iry).
+pxl.ArcShape = class ArcShape extends pxl.Shape {
   static defaults = {
     ...pxl.Shape.defaults,
-    r: 0, ir: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false,
+    start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false,
     arrowstart: 0, arrowend: 0, arrowstyle: 'filled'
   };
 
@@ -3537,112 +3543,9 @@ pxl.Circle = class Circle extends pxl.Shape {
     this._arrowEnd = pxl.createArrowRecord();
   }
 
-  draw(ctx) {
-    const { r, ir, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.values;
-
-    const safeR = Math.max(0, r);
-    const safeIR = Math.max(0, ir);
-
-    if (safeR === 0 && safeIR === 0) return;
-
-    const isPie = pie === true;
-    const isAnti = anticlockwise === true;
-    const isClosed = closed === true;
-
-    const startRadians = start * Math.PI / 180;
-    const endRadians = pxl.arcEndRadians(startRadians, end, sweep);
-    const isFull = pxl.isFullTurn(startRadians, endRadians);
-
-    let drawStartRadians = startRadians;
-    let drawEndRadians = endRadians;
-
-    // Arrowheads (open arcs only)
-    const arrowStart = this._arrowStart, arrowEnd = this._arrowEnd;
-    const canHaveArrows = safeR > 0 && safeIR === 0 && !isPie && !isClosed && this.isStroked();
-    const hasStart = canHaveArrows && this.resolveArrow(arrowStart, arrowstart);
-    const hasEnd = canHaveArrows && this.resolveArrow(arrowEnd, arrowend);
-    const hasArrows = hasStart || hasEnd;
-    let drawShaft = true;
-
-    if (hasArrows) {
-      const travel = isAnti ? -1 : 1; // direction of increasing arc position
-      let startInsetRadians = 0, endInsetRadians = 0;
-
-      if (hasStart) {
-        startInsetRadians = this.aimArcArrow(arrowStart, safeR, startRadians, travel);
-      }
-      if (hasEnd) {
-        endInsetRadians = this.aimArcArrow(arrowEnd, safeR, endRadians, -travel);
-      }
-
-      // Skip the arc if both insets would cross each other
-      drawShaft = startInsetRadians + endInsetRadians < Math.abs(endRadians - startRadians);
-      drawStartRadians += travel * startInsetRadians;
-      drawEndRadians -= travel * endInsetRadians;
-    }
-
-    if (drawShaft) {
-      ctx.beginPath();
-      ctx.arc(0, 0, safeR, drawStartRadians, drawEndRadians, isAnti);
-
-      if (safeIR > 0) {
-        if (isFull) {
-          ctx.moveTo(safeIR * Math.cos(drawEndRadians), safeIR * Math.sin(drawEndRadians));
-        }
-        ctx.arc(0, 0, safeIR, drawEndRadians, drawStartRadians, !isAnti);
-        ctx.closePath();
-      } else if (isPie && !isFull) {
-        ctx.lineTo(0, 0);
-        ctx.closePath();
-      } else if ((isFull && !hasArrows) || isClosed) {
-        ctx.closePath();
-      }
-
-      this.applyStyle(ctx);
-    } else {
-      this.applyStrokeState(ctx);
-    }
-
-    if (hasArrows) this.drawArrows(ctx, arrowStart, arrowEnd);
-  }
-
-  // Aims an arrow at the arc end at angle `radians`; `inward` (±1) is the angle direction into the arc.
-  // Direction is the chord from the arc point one head length in, back to the end, so the head's
-  // base sits on the arc. Returns the inset as an angle (straight distance from the end, like all arrowheads).
-  aimArcArrow(rec, radius, radians, inward) {
-    const px = radius * Math.cos(radians), py = radius * Math.sin(radians);
-    const baseRadians = radians + inward * 2 * Math.asin(Math.min(rec.len, 2 * radius) / (2 * radius));
-    this.aimArrow(rec, px, py, px - radius * Math.cos(baseRadians), py - radius * Math.sin(baseRadians));
-    return 2 * Math.asin(Math.min(rec.inset, 2 * radius) / (2 * radius));
-  }
-
-  // Fill and stroke, or arrowheads: more than one draw call, isolated when it has compositing state (Shape.render())
-  drawsMoreThanOnce() {
-    return this.fillsAndStrokesOrHasArrows();
-  }
-
-  getBoundingBox() {
-    const { r } = this.values;
-    return this.setBoundingBox(-r, -r, r, r);
-  }
-};
-pxl.defineShape('pxl-circle', pxl.Circle);
-
-pxl.Ellipse = class Ellipse extends pxl.Shape {
-  static defaults = {
-    ...pxl.Shape.defaults,
-    rx: 0, ry: 0, irx: 0, iry: 0, start: 0, end: null, sweep: null, pie: false, closed: false, anticlockwise: false,
-    arrowstart: 0, arrowend: 0, arrowstyle: 'filled'
-  };
-
-  constructor() {
-    super();
-    this._arrowStart = pxl.createArrowRecord();
-    this._arrowEnd = pxl.createArrowRecord();
-  }
-
-  draw(ctx) {
-    const { rx, ry, irx, iry, start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.values;
+  // The arc with radii rx, ry and the inner radii irx, iry (a ring when either is above 0). Negative radii count as 0.
+  drawArc(ctx, rx, ry, irx, iry) {
+    const { start, end, sweep, pie, closed, anticlockwise, arrowstart, arrowend } = this.values;
 
     const safeRX = Math.max(0, rx);
     const safeRY = Math.max(0, ry);
@@ -3676,10 +3579,10 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
       let startInsetRadians = 0, endInsetRadians = 0;
 
       if (hasStart) {
-        startInsetRadians = this.aimEllipseArrow(arrowStart, safeRX, safeRY, startRadians, travel);
+        startInsetRadians = this.aimArcArrow(arrowStart, safeRX, safeRY, startRadians, travel);
       }
       if (hasEnd) {
-        endInsetRadians = this.aimEllipseArrow(arrowEnd, safeRX, safeRY, endRadians, -travel);
+        endInsetRadians = this.aimArcArrow(arrowEnd, safeRX, safeRY, endRadians, -travel);
       }
 
       // Skip the arc if both insets would cross each other
@@ -3690,13 +3593,13 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
 
     if (drawShaft) {
       ctx.beginPath();
-      ctx.ellipse(0, 0, safeRX, safeRY, 0, drawStartRadians, drawEndRadians, isAnti);
+      this.traceArc(ctx, safeRX, safeRY, drawStartRadians, drawEndRadians, isAnti);
 
       if (hasInner) {
         if (isFull) {
           ctx.moveTo(safeIRX * Math.cos(drawEndRadians), safeIRY * Math.sin(drawEndRadians));
         }
-        ctx.ellipse(0, 0, safeIRX, safeIRY, 0, drawEndRadians, drawStartRadians, !isAnti);
+        this.traceArc(ctx, safeIRX, safeIRY, drawEndRadians, drawStartRadians, !isAnti);
         ctx.closePath();
       } else if (isPie && !isFull) {
         ctx.lineTo(0, 0);
@@ -3713,18 +3616,27 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
     if (hasArrows) this.drawArrows(ctx, arrowStart, arrowEnd);
   }
 
+  // Equal radii draw with arc(): a circle keeps the exact path it always had
+  traceArc(ctx, rx, ry, from, to, anticlockwise) {
+    if (rx === ry) ctx.arc(0, 0, rx, from, to, anticlockwise);
+    else ctx.ellipse(0, 0, rx, ry, 0, from, to, anticlockwise);
+  }
+
   // Aims an arrow at the arc end at parameter `radians`; `inward` (±1) is the parameter direction into the arc.
-  // Direction is the chord from the curve point one head length in, back to the end. Returns the inset as a parameter offset.
-  aimEllipseArrow(rec, radiusX, radiusY, radians, inward) {
+  // Direction is the chord from the curve point one head length in, back to the end, so the head's base sits on the
+  // arc. Returns the inset as a parameter offset (straight distance from the end, like all arrowheads).
+  aimArcArrow(rec, radiusX, radiusY, radians, inward) {
     const px = radiusX * Math.cos(radians), py = radiusY * Math.sin(radians);
     const baseRadians = radians + inward * this.parameterOffset(radiusX, radiusY, radians, inward, rec.len);
     this.aimArrow(rec, px, py, px - radiusX * Math.cos(baseRadians), py - radiusY * Math.sin(baseRadians));
     return this.parameterOffset(radiusX, radiusY, radians, inward, rec.inset);
   }
 
-  // Parameter offset (towards `inward`) where the arc is `distance` away from `radians` in a straight line.
-  // Bisection: a local estimate fails at the tip of thin ellipses, where the curve turns fast.
+  // Parameter offset (towards `inward`) where the arc is `distance` away from `radians` in a straight line. On a
+  // circle the chord gives it exactly; on an ellipse by bisection, since a local estimate fails at the tip of thin
+  // ellipses, where the curve turns fast.
   parameterOffset(radiusX, radiusY, radians, inward, distance) {
+    if (radiusX === radiusY) return 2 * Math.asin(Math.min(distance, 2 * radiusX) / (2 * radiusX));
     const cos = Math.cos(radians), sin = Math.sin(radians);
     let lo = 0, hi = Math.PI;
     for (let i = 0; i < 12; i++) {
@@ -3738,6 +3650,34 @@ pxl.Ellipse = class Ellipse extends pxl.Shape {
   // Fill and stroke, or arrowheads: more than one draw call, isolated when it has compositing state (Shape.render())
   drawsMoreThanOnce() {
     return this.fillsAndStrokesOrHasArrows();
+  }
+};
+
+// The arc, ring, pie, chord and arrowheads come from pxl.ArcShape (arc.js); a circle is its case rx = ry
+pxl.Circle = class Circle extends pxl.ArcShape {
+  // r and ir first, like the attribute tables; spreading ArcShape's defaults again keeps the keys' first place
+  static defaults = { ...pxl.Shape.defaults, r: 0, ir: 0, ...pxl.ArcShape.defaults };
+
+  draw(ctx) {
+    const { r, ir } = this.values;
+    this.drawArc(ctx, r, r, ir, ir);
+  }
+
+  getBoundingBox() {
+    const { r } = this.values;
+    return this.setBoundingBox(-r, -r, r, r);
+  }
+};
+pxl.defineShape('pxl-circle', pxl.Circle);
+
+// The arc, ring, pie, chord and arrowheads come from pxl.ArcShape (arc.js)
+pxl.Ellipse = class Ellipse extends pxl.ArcShape {
+  // rx, ry, irx and iry first, like the attribute tables; spreading ArcShape's defaults again keeps the keys' first place
+  static defaults = { ...pxl.Shape.defaults, rx: 0, ry: 0, irx: 0, iry: 0, ...pxl.ArcShape.defaults };
+
+  draw(ctx) {
+    const { rx, ry, irx, iry } = this.values;
+    this.drawArc(ctx, rx, ry, irx, iry);
   }
 
   getBoundingBox() {

@@ -17,6 +17,7 @@ const files = [
   'js/elements/layer.js',
   'js/elements/group.js',
   'js/elements/shape.js',
+  'js/elements/shapes/arc.js',
   'js/elements/shapes/circle.js',
   'js/elements/shapes/ellipse.js',
   'js/elements/shapes/rect.js',

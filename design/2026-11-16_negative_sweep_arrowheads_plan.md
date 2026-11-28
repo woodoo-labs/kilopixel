@@ -116,6 +116,7 @@ Pages that rely on a negative sweep drawing the long way: none known (to check i
 
 ## Log
 
+- 2026-11-28: circle and ellipse now share `pxl.ArcShape` (`js/elements/shapes/arc.js`): `drawArc()`, `aimArcArrow()` and `parameterOffset()` live there; this plan's references to `circle.js` / `ellipse.js` describe the old split.
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
 - 2026-11-22: `design/done/2026-11-20_custom_shapes_plan.md` phase 2 built: the layer scales by the unit once, and the shapes and their helpers (`applyStyle(ctx)`, `applyStrokeState(ctx)`, `createGradient(ctx, value, slot)`, `resolveArrow(rec, value)`, `drawArrows(ctx, a, b)`, `applyTransformState(ctx, values)`) take no `u`; code here with `u` is the old form.

@@ -145,6 +145,33 @@
       draw(`<pxl-ellipse x="500" y="300" rx="200" ry="50" irx="100" iry="25" ${BLACK}></pxl-ellipse>`, (layer) =>
         expectInk(layer, [[500, 300, false], [560, 300, false], [650, 300, true], [500, 340, true]])));
 
+    // Circle and ellipse share pxl.ArcShape (arc.js): equal radii take the circle's path and its exact arrow trim
+    test('ellipse: equal radii draw exactly like a circle (arrowheads, ring wedge, pie)', async () => {
+      const shared = 'x="500" y="300" stroke="#000" strokewidth="8"';
+      const cases = [
+        ['r="120" sweep="270" arrowstart="30" arrowend="40"', 'rx="120" ry="120" sweep="270" arrowstart="30" arrowend="40"'],
+        [`r="120" ir="60" start="30" sweep="200" ${BLACK}`, `rx="120" ry="120" irx="60" iry="60" start="30" sweep="200" ${BLACK}`],
+        [`r="120" pie="true" start="10" end="250" ${BLACK}`, `rx="120" ry="120" pie="true" start="10" end="250" ${BLACK}`]
+      ];
+      const alphas = (layer) => {
+        const c = layer._canvas, data = layer._ctx.getImageData(0, 0, c.width, c.height).data;
+        return data.filter((_, i) => i % 4 === 3);
+      };
+      const wrong = [];
+      for (const [circle, ellipse] of cases) {
+        let a, b;
+        await draw(`<pxl-circle ${shared} ${circle}></pxl-circle>`, (layer) => { a = alphas(layer); });
+        await draw(`<pxl-ellipse ${shared} ${ellipse}></pxl-ellipse>`, (layer) => { b = alphas(layer); });
+        let painted = 0, differ = 0;
+        for (let i = 0; i < a.length; i++) {
+          if (a[i] > 0) painted++;
+          if (a[i] !== b[i]) differ++;
+        }
+        if (differ > 0 || painted === 0) wrong.push(`${circle}: ${differ} pixels differ, ${painted} painted`);
+      }
+      if (wrong.length) throw new Error(wrong.join('; '));
+    });
+
     // ===================================================================
     // Rect
     // ===================================================================

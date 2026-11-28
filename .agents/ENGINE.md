@@ -21,15 +21,18 @@ Build order (`files` in `build.js`):
 | 9 | `js/elements/layer.js` | `pxl.Layer` |
 | 10 | `js/elements/group.js` | `pxl.Group` |
 | 11 | `js/elements/shape.js` | `pxl.Shape`: style, gradients, isolation, hit box, arrowheads; `pxl.defineShape()` |
-| 12–18 | `js/elements/shapes/*.js` | circle, ellipse, rect, line, polyline, text, grid |
-| 19 | `js/elements/variable.js` | `pxl.Variable` |
+| 12 | `js/elements/shapes/arc.js` | `pxl.ArcShape`: the shared base of circle and ellipse, no tag |
+| 13–19 | `js/elements/shapes/*.js` | circle, ellipse, rect, line, polyline, text, grid |
+| 20 | `js/elements/variable.js` | `pxl.Variable` |
 
 ```
 HTMLElement
 ├── Stage (pxl-stage)        the root, not a PxlNode
 └── PxlNode
     ├── Layer, Group, Variable
-    └── Shape → Circle, Ellipse, Rect, Line, Polyline, Text, Grid
+    └── Shape
+        ├── ArcShape → Circle, Ellipse
+        └── Rect, Line, Polyline, Text, Grid
 ```
 
 **Namespace:** classes are expressions on `pxl` (`pxl.Line = class Line extends pxl.Shape`): `class pxl.Line` isn't valid JavaScript, and a declaration would be a page global (a user script with the same name fails; a global `Text` would hide the DOM's `Text`). The class keeps its readable name (`pxl.Line.name === 'Line'`). Custom shapes extend `pxl.Shape` like the built-in ones. Design: `design/done/2026-10-17_bundle_scope_plan.md`.
@@ -234,12 +237,12 @@ Design (derivations): `design/done/2026-10-14_unified_arrowhead_geometry_plan.md
   - `'line'`: the stroked chevron corner reaches beyond its vertex by `joinExt` = sw (miter), sw / 2 (round), sw / 4 (bevel): `tipAdvance = capExt − joinExt`, `inset = joinExt` (the shaft ends at the chevron vertex).
   - `'filled'`: shaft depth behind the tip `D = min(max(Dmin, 0.6 × len), len + capExt)` with `Dmin` = 0.866·sw (butt), 1.366·sw (square), sw (round) — continuous, so animated sizes never jump; `tipAdvance = capExt`, `inset = D − capExt`.
 - `aimArrow(rec, px, py, vx, vy)`: unit direction out of the path, tip = end + `tipAdvance` · dir; returns the vector length.
-- **One trim definition:** the shaft end and the head base lie `inset` / the head length from the tip in a straight line, on every shape. Lines: along the line. Circles: `2·asin(d / 2R)`. Ellipses: 12 bisection steps on the angle (a local estimate fails at thin tips). Smooth polylines: 12 bisection steps on the end Bézier segment (`trimParameter`), split with de Casteljau; `_flatCache` is never changed. The head points along the chord over its own length, so its base sits on the curve.
+- **One trim definition:** the shaft end and the head base lie `inset` / the head length from the tip in a straight line, on every shape. Lines: along the line. Circles (and ellipses with equal radii): `2·asin(d / 2R)`. Ellipses: 12 bisection steps on the angle (a local estimate fails at thin tips). Smooth polylines: 12 bisection steps on the end Bézier segment (`trimParameter`), split with de Casteljau; `_flatCache` is never changed. The head points along the chord over its own length, so its base sits on the curve.
 - `drawArrows(ctx, a, b)`: both heads in one path, one `fill()` (filled: `fillStyle = strokeStyle`) or one `stroke()` (chevrons: dash off, miter limit raised to at least 4, since a 60° miter needs 2). Always the last call of `draw()`: it leaves `fillStyle`, dash and miter limit changed, and `render()` restores them. `traceArrow()` adds one head; wings are the direction rotated by ±30° with `pxl.ARROW_COS30` / `pxl.ARROW_SIN30` (no trig per head). Shapes without heads skip all of it.
 
 ### 6.5 Per Shape
 
-- **Circle / ellipse:** `pxl.arcEndRadians(start, end, sweep)` (sweep wins, neither: full turn), `pxl.isFullTurn()`; ring: the inner arc in reverse, then close; pie: `lineTo(0, 0)`, close. Arrows: §6.4.
+- **Circle / ellipse:** one `pxl.ArcShape.drawArc(ctx, rx, ry, irx, iry)`; a circle passes `r, r, ir, ir`. The radii are parameters, never read from the values (each class has its own radius attributes). Equal radii draw with `arc()` (`traceArc()`), others with `ellipse()`; `parameterOffset()` gives the arrow trims. `pxl.arcEndRadians(start, end, sweep)` (sweep wins, neither: full turn), `pxl.isFullTurn()`; ring: the inner arc in reverse, then close; pie: `lineTo(0, 0)`, close. Arrows: §6.4.
 - **Rect:** origin `(-w·ax, -h·ay)` from `pxl.anchorX` / `pxl.anchorY`; `roundRect()` with radii clamped to ≥ 0 (it throws on negatives) when any is > 0, else `rect()`; radii in the pre-allocated `_radii`.
 - **Line:** without arrows `moveTo` / `lineTo`; with arrows one `sqrt`, the shaft trimmed by each inset, only heads if the insets exceed the length.
 - **Polyline:**
@@ -348,7 +351,7 @@ None in the walk, box check, boundary walk and queue; one event object per dispa
 
 ## 11. Build (`build.js`)
 
-1. `readSources()` / `bundleSource()` concatenate the 19 files; `require('./build.js')` builds nothing and exports them with `checkSources()` for `tools/check_build.js`.
+1. `readSources()` / `bundleSource()` concatenate the 20 files; `require('./build.js')` builds nothing and exports them with `checkSources()` for `tools/check_build.js`.
 2. `checkSources()` refuses: a top-level `class` / `const` / `let` / `var` / `function`; trailing whitespace; a `_` field used in another engine file or a plain field used only in its own (found by name, equal names in different classes count together).
 3. The bundle sets `window.pxl = { version: '0.1.0' }` inside a function that returns without a browser (server-side rendering) or when `<pxl-stage>` is already defined (warns `[pxl] Kilopixel is already loaded …`, the first copy keeps working).
 4. Typings: `tools/build_types.js` runs the bundle in a Node `vm` with a stubbed DOM, reads `observedAttributes` and `static defaults` of every element, and writes `kilopixel.d.ts` plus one file per framework (React, Preact, Solid, Vue, Svelte) to `dist/types/` and `docs/download/types/`. Types come from the default's type plus a table in the script (keywords, colors, arrays, `points`, `text`, nullable numbers); an attribute with a `null` default the table doesn't cover stops the build. Every value also accepts `PxlExpression` (`string & {}`, keeps keyword suggestions). `node tools/run_tests.js --types` checks them against the real framework types (`tests/types/`).

@@ -375,6 +375,7 @@ No special dirty logic is needed. The clip redraws every frame along with its pa
 
 ## Log
 
+- 2026-11-28: circle and ellipse now share `pxl.ArcShape` (`js/elements/shapes/arc.js`); a path method for them would go there once, not into both files.
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
 - 2026-11-27: `text` is a template and centered by default (`design/done/2026-11-27_text_template_plan.md`); its examples quote labels and rely on the old `start` / `alphabetic` default.
