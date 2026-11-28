@@ -256,6 +256,7 @@ A manual test page with all cases side by side (layers at full rate, `maxfps` 30
 
 Newest first, one line per change (CLAUDE.md "Plans and TODO").
 
+- 2026-11-28: restructure phase 1 built (`design/2026-11-28_engine_restructure_plan.md` §9): `pxl.stages` is the stage registry, `pxl.perf` only the timer (`start()`, `stop()`, `publish()`), and `Stage.publishMetrics(seconds)` publishes from counters the stage owns (`_perfFrames`, …). §5.3's publishing step exists; `registerStage()` and `perfFrames` in §2, §5.1 and §5.4 are the old names.
 - 2026-11-28: `design/2026-11-28_engine_restructure_plan.md` (TODO §53, proposed) phase 1 builds §5.3's publishing step: `pxl.stages` as the stage registry, `pxl.perf` only the timer, `stage.publishMetrics(seconds)` with the counters owned by the stage. If it is built first, C2 adds only the layers' counters.
 - 2026-11-27: evaluation model option B built (`design/done/2026-11-20_evaluation_model_plan.md` §11): §3's "reactive `ref.*` broadcasts" and §5's broadcast of `ref.<layerId>` describe the old code; a change now calls `pxl.markChanged()`, which asks only stages that read the id for a frame. D9 is still open.
 - 2026-11-26: step 2 of `design/done/2026-11-20_evaluation_model_plan.md` built (its §9): the layer heartbeat is gone, a layer is dirty only when a value in it changed, the stage keeps the frame loop running; §2 item 1 and the keep-alive of part A (§3.4) describe the old code.

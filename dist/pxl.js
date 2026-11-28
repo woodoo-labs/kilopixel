@@ -88,7 +88,7 @@ pxl.markChanged = function(element) {
 // Asks every stage that reads id for a frame. The running stage asks for none: its update phase is still to come,
 // or the change came from there (rule R1).
 pxl.wakeReaders = function(id) {
-  const stages = pxl.perf.stages;
+  const stages = pxl.stages;
   for (let i = 0; i < stages.length; i++) {
     if (stages[i].readsId(id)) stages[i].requestRender();
   }
@@ -1708,27 +1708,25 @@ pxl.parsePointsIntoArray = function(str, targetArray) {
 // Performance Monitor
 // =========================================================================
 
-// Publishes fps, renderAvg and renderMax of every stage once per second (ref.<stageId>.*).
-// Its own timer, not the frame loop: an idle page publishes 0 instead of keeping the last values.
+// The timer that publishes fps, renderAvg and renderMax of every stage once per second (Stage.publishMetrics()).
+// Its own timer, not the frame loop: an idle page publishes 0 instead of keeping the last values. Runs while any stage
+// is connected (pxl.stages, stage.js).
 pxl.perf = {
-  stages: [],
   _timer: 0,
   _lastPublish: 0,
 
-  registerStage: function(stage) {
-    if (!pxl.perf.stages.includes(stage)) pxl.perf.stages.push(stage);
-    if (!pxl.perf._timer) {
-      pxl.perf._lastPublish = performance.now();
-      pxl.perf._timer = setInterval(pxl.perf.publish, 1000);
-    }
+  // On every stage connect; starts the timer for the first one
+  start: function() {
+    if (pxl.perf._timer) return;
+    pxl.perf._lastPublish = performance.now();
+    pxl.perf._timer = setInterval(pxl.perf.publish, 1000);
   },
 
-  unregisterStage: function(stage) {
-    pxl.removeFromArray(pxl.perf.stages, stage);
-    if (pxl.perf.stages.length === 0 && pxl.perf._timer) {
-      clearInterval(pxl.perf._timer);
-      pxl.perf._timer = 0;
-    }
+  // After the last stage left
+  stop: function() {
+    if (!pxl.perf._timer) return;
+    clearInterval(pxl.perf._timer);
+    pxl.perf._timer = 0;
   },
 
   publish: function() {
@@ -1736,27 +1734,17 @@ pxl.perf = {
     const now = performance.now();
     const seconds = (now - pxl.perf._lastPublish) / 1000;
     pxl.perf._lastPublish = now;
-
-    for (let i = 0; i < pxl.perf.stages.length; i++) {
-      const stage = pxl.perf.stages[i];
-      const values = stage.values;
-      const frames = stage.perfFrames;
-      values.fps = seconds > 0 ? Math.round(frames / seconds) : 0;
-      values.renderAvg = (frames > 0 ? stage.perfAccumulated / frames : 0).toFixed(2);
-      values.renderMax = stage.perfMax.toFixed(2);
-      pxl.markChanged(stage);
-
-      // Reset counters for the next interval
-      stage.perfFrames = 0;
-      stage.perfAccumulated = 0;
-      stage.perfMax = 0;
-    }
+    for (let i = 0; i < pxl.stages.length; i++) pxl.stages[i].publishMetrics(seconds);
   }
 };
 
 // Frame number, counted by every Stage.render(): per-frame state (_failedFrame, a layer's update frame) is stored as
 // the frame it belongs to, so it never needs a reset
 pxl._frame = 0;
+
+// Every connected stage, in no particular order: a stage joins on connect and leaves on disconnect. Read by
+// pxl.wakeReaders(), pxl.fontsArrived() and pxl.perf's timer.
+pxl.stages = [];
 
 // Default styles of stages, variables and shapes, in a cascade layer so that any page CSS wins over them, also CSS in
 // the page's own cascade layers: the <style> goes first, and the layer declared first ranks lowest.
@@ -1843,7 +1831,7 @@ pxl.Stage = class Stage extends HTMLElement {
     this._cycleStart = 0;
     this._builtOrderVersion = -1;
 
-    // Published as ref.<id>.* once per second by pxl.perf's timer; renderAvg / renderMax are strings with 2 decimals
+    // Published as ref.<id>.* once per second (publishMetrics()); renderAvg / renderMax are strings with 2 decimals
     this.values = {
       mouseX: 500, mouseY: 500, isHovered: false, width: 1000, height: 1000 / this._parsedRatio,
       fps: 0, renderAvg: '0.00', renderMax: '0.00'
@@ -1854,10 +1842,10 @@ pxl.Stage = class Stage extends HTMLElement {
     // Properties set before the upgrade, applied in connectedCallback: [name, value, …] or null
     this._pendingProperties = ownKeys.length === 0 ? null : pxl.takeOwnProperties(this, ownKeys);
 
-    // Performance metrics
-    this.perfFrames = 0;
-    this.perfAccumulated = 0;
-    this.perfMax = 0;
+    // Frames, their total and longest time (ms) since the last publishMetrics()
+    this._perfFrames = 0;
+    this._perfAccumulated = 0;
+    this._perfMax = 0;
 
     this._frameCallback = (t) => {
       this._isUpdatePending = false;
@@ -1938,7 +1926,8 @@ pxl.Stage = class Stage extends HTMLElement {
 
     for (const type of pxl.Stage.POINTER_EVENTS) this.addEventListener(type, this.interaction);
     for (const type of pxl.Stage.ARRIVING_EVENTS) this.addEventListener(type, this.interaction, true);
-    pxl.perf.registerStage(this);
+    if (!pxl.stages.includes(this)) pxl.stages.push(this);
+    pxl.perf.start();
 
     if (!this.isAlwaysRender()) this.observeVisibility();
 
@@ -1969,7 +1958,8 @@ pxl.Stage = class Stage extends HTMLElement {
 
     for (const type of pxl.Stage.POINTER_EVENTS) this.removeEventListener(type, this.interaction);
     for (const type of pxl.Stage.ARRIVING_EVENTS) this.removeEventListener(type, this.interaction, true);
-    pxl.perf.unregisterStage(this);
+    pxl.removeFromArray(pxl.stages, this);
+    if (pxl.stages.length === 0) pxl.perf.stop();
 
     // Checked again in the new place
     this._internals?.states.delete('fallback');
@@ -2077,9 +2067,23 @@ pxl.Stage = class Stage extends HTMLElement {
     if (this.needsNextFrame()) this.requestRender();
 
     const ms = performance.now() - start;
-    this.perfAccumulated += ms;
-    if (ms > this.perfMax) this.perfMax = ms;
-    this.perfFrames++;
+    this._perfAccumulated += ms;
+    if (ms > this._perfMax) this._perfMax = ms;
+    this._perfFrames++;
+  }
+
+  // Called once per second by pxl.perf's timer: publishes fps, renderAvg and renderMax (ref.<id>.*) and starts counting
+  // anew. seconds is the real time since the last publish: timers in background tabs or after a long frame fire late.
+  publishMetrics(seconds) {
+    const values = this.values;
+    const frames = this._perfFrames;
+    values.fps = seconds > 0 ? Math.round(frames / seconds) : 0;
+    values.renderAvg = (frames > 0 ? this._perfAccumulated / frames : 0).toFixed(2);
+    values.renderMax = this._perfMax.toFixed(2);
+    pxl.markChanged(this);
+    this._perfFrames = 0;
+    this._perfAccumulated = 0;
+    this._perfMax = 0;
   }
 
   runFrame(t) {
@@ -4448,7 +4452,7 @@ pxl._fonts = document.fonts;
 // All layers, because a custom shape can draw text too. Hidden or off-screen stages catch up when they next render.
 pxl.fontsArrived = function() {
   pxl._fontGeneration++;
-  for (let i = 0; i < pxl.perf.stages.length; i++) pxl.perf.stages[i].invalidateLayers();
+  for (let i = 0; i < pxl.stages.length; i++) pxl.stages[i].invalidateLayers();
 };
 
 // ready is a new promise for each batch, so read inside the handler it waits for the fonts that start loading now

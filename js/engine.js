@@ -81,7 +81,7 @@ pxl.markChanged = function(element) {
 // Asks every stage that reads id for a frame. The running stage asks for none: its update phase is still to come,
 // or the change came from there (rule R1).
 pxl.wakeReaders = function(id) {
-  const stages = pxl.perf.stages;
+  const stages = pxl.stages;
   for (let i = 0; i < stages.length; i++) {
     if (stages[i].readsId(id)) stages[i].requestRender();
   }

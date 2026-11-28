@@ -2132,13 +2132,36 @@
 
     test('monitor: fps is frames per second of the real interval, not frames since the last publish', () => {
       const stage = el('srStage');
-      stage.perfFrames = 30;
-      stage.perfAccumulated = 60;
-      stage.perfMax = 4;
+      stage._perfFrames = 30;
+      stage._perfAccumulated = 60;
+      stage._perfMax = 4;
       pxl.perf._lastPublish = performance.now() - 2000; // a timer that fired a second late
       pxl.perf.publish();
       const { fps, renderAvg, renderMax } = stage.values;
       if (fps !== 15 || renderAvg !== '2.00' || renderMax !== '4.00') throw new Error(`fps ${fps}, renderAvg ${renderAvg}, renderMax ${renderMax}`);
+    });
+
+    // design/2026-11-28_engine_restructure_plan.md phase 1: the stage owns its counters, the timer only calls it
+    test('monitor: publishMetrics() publishes the stage\'s own counters and starts counting anew', () => {
+      const stage = el('srStage');
+      stage._perfFrames = 12;
+      stage._perfAccumulated = 18;
+      stage._perfMax = 3;
+      stage.publishMetrics(1);
+      const { fps, renderAvg, renderMax } = stage.values;
+      const left = [stage._perfFrames, stage._perfAccumulated, stage._perfMax];
+      if (fps !== 12 || renderAvg !== '1.50' || renderMax !== '3.00' || left.join() !== '0,0,0') {
+        throw new Error(`fps ${fps}, renderAvg ${renderAvg}, renderMax ${renderMax}; counters left ${left}`);
+      }
+    });
+
+    test('monitor: the timer runs while a stage is connected, every connected stage is in pxl.stages once', () => {
+      const stages = [...document.querySelectorAll('pxl-stage')].filter((s) => s.isConnected);
+      const missing = stages.filter((s) => pxl.stages.filter((x) => x === s).length !== 1);
+      const extra = pxl.stages.filter((s) => !s.isConnected);
+      if (!pxl.perf._timer || missing.length || extra.length) {
+        throw new Error(`timer ${pxl.perf._timer}, missing or twice ${missing.length}, disconnected listed ${extra.length}`);
+      }
     });
 
     test('monitor: an idle stage drops to 0 within a second instead of keeping its last values', async () => {
@@ -3032,7 +3055,7 @@
         stage.resize();
         stage.render(2);
         const layer = stage.querySelector('pxl-layer');
-        const monitored = pxl.perf.stages.filter((s) => s === stage).length;
+        const monitored = pxl.stages.filter((s) => s === stage).length;
         if (stage.layers.length !== 1 || monitored !== 1 || alphaAt(layer, 500, 300) !== 255) {
           throw new Error(`layers ${stage.layers.length}, monitor entries ${monitored}, alpha ${alphaAt(layer, 500, 300)}`);
         }

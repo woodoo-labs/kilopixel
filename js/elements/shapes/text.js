@@ -245,7 +245,7 @@ pxl._fonts = document.fonts;
 // All layers, because a custom shape can draw text too. Hidden or off-screen stages catch up when they next render.
 pxl.fontsArrived = function() {
   pxl._fontGeneration++;
-  for (let i = 0; i < pxl.perf.stages.length; i++) pxl.perf.stages[i].invalidateLayers();
+  for (let i = 0; i < pxl.stages.length; i++) pxl.stages[i].invalidateLayers();
 };
 
 // ready is a new promise for each batch, so read inside the handler it waits for the fonts that start loading now

@@ -1,6 +1,6 @@
 # Engine Restructure: Files by Feature
 
-- **Status**: 🟢 **Decided** (2026-11-28, D1–D7 as recommended in §5; next: phase 1)
+- **Status**: 🟢 **Decided** (2026-11-28, D1–D7 as recommended in §5; phase 1 built, §9; next: phase 2)
 - **Date**: 2026-11-28
 - **Related**: `design/done/2026-10-27_engine_cleanup_inventory_note.md` (the code style this keeps), `design/done/2026-11-20_evaluation_model_plan.md` (the scheduler that moves in phase 5), `design/done/2026-11-01_isolated_shape_compositing_plan.md` and `design/done/2026-11-26_isolation_box_plan.md` (the isolation code that moves in phase 3), `design/2026-11-12_layer_throttling_plan.md` (TODO §8: phase 1 builds the publishing step of its per-layer metrics, C2), `.claude/CLAUDE.md` "Engine Code Rules" and "Engine Code Style"
 - **Target Implementation**: `build.js` (file list), `js/engine.js`, `js/compiler.js`, `js/interaction.js`, `js/graphics.js` (removed), `js/monitor.js`, `js/elements/stage.js`, `js/elements/node.js`, `js/elements/shape.js`, `js/elements/shapes/arc.js`, `js/elements/shapes/polyline.js`, `js/elements/shapes/text.js`, new `js/reactivity.js`, `js/gradient.js`, `js/compositing.js`, `js/handlers.js`; `tests/index.html`, `tests/frameworks.html`, `tests/unit.html`; `.agents/ENGINE.md`
@@ -26,6 +26,8 @@ A code review on 2026-11-28 found the code consistent and well commented, but gr
 | List of all stages | `pxl.perf.stages` in `monitor.js`, also used as the stage registry by `pxl.wakeReaders()` and `pxl.fontsArrived()` |
 | Performance values | the stage counts frames and time (`perfFrames`, `perfAccumulated`, `perfMax`); `monitor.js` reads them, writes `fps`, `renderAvg`, `renderMax` into the stage's values and resets them: one feature's state written from two files |
 | `graphics.js` | a grab bag: most helpers have one caller (`pxl.parsePointsIntoArray`: polyline; `pxl.arcEndRadians`, `pxl.isFullTurn`: arc.js; line dash, arrow constants, compositing, isolation: shape.js) |
+
+2026-11-28: the last two rows of the table are built away by phase 1 (§9).
 
 `stage.js` does six jobs (DOM lifecycle, sizing, visibility, frame loop, scheduling, perf counters); the scheduler is the one that is a feature of its own.
 
@@ -130,8 +132,22 @@ Class-structure follow-ups from the same review, each small, better as a second 
 - D7, drawing with the local matrix.
 - Allocation of animated gradients: `linear(t * 30, ['red', 'blue'])` creates the colors array, the stops array, a stop object per color, the descriptor and a new `CanvasGradient`, per shape and frame (ENGINE.md accepts it, about 0.8 µs). The largest known garbage source in an animated scene; a plan of its own if a measurement shows it matters.
 
+## 9. Phase 1 Built (2026-11-28)
+
+As planned in §4, phase 1:
+
+- **`js/elements/stage.js`:** `pxl.stages`, every connected stage; `connectedCallback()` adds the stage (if it isn't listed yet) and calls `pxl.perf.start()`, `disconnectedCallback()` removes it and calls `pxl.perf.stop()` when the list is empty. The counters are `_perfFrames`, `_perfAccumulated`, `_perfMax`, used only in `stage.js`. New method `publishMetrics(seconds)`: writes `fps`, `renderAvg`, `renderMax`, calls `pxl.markChanged()` on the stage, resets the counters.
+- **`js/monitor.js`:** `pxl.perf` is `start()`, `stop()` and `publish()` (the tick: measures the seconds since the last tick, calls `publishMetrics(seconds)` on every stage); `stages`, `registerStage()` and `unregisterStage()` are gone.
+- **`js/engine.js`** (`pxl.wakeReaders()`) and **`js/elements/shapes/text.js`** (`pxl.fontsArrived()`) read `pxl.stages`.
+- **Deviation:** §4 had `start()` "when the first stage registers". Built: every stage connect calls `start()`, which returns at once while the timer runs, so the stage doesn't need to know whether it is the first. The rule that an empty list stops the timer lives in `stage.js`, next to the list.
+- **Tests:** `tests/index.html` (the monitor test sets `_perfFrames`, … ; "publishMetrics() publishes the stage's own counters and starts counting anew"; "the timer runs while a stage is connected, every connected stage is in `pxl.stages` once"; the re-insert test reads `pxl.stages`), `tests/frameworks.html` (an unmounted stage leaves `pxl.stages`). Full test run passed.
+- **Per frame:** unchanged (the same three counter lines in `render()`); `publishMetrics()` runs once per second per stage, as the monitor's loop did.
+- **Docs:** ENGINE.md §1 (rows 6 and 7), §6.5 (late web fonts), §10.
+- **Left:** phases 2–5. The throttling plan's C2 (TODO §8) can now add the layers' counters to `publishMetrics()`.
+
 ## Log
 
+- 2026-11-28: phase 1 built (§9): `pxl.stages`, `pxl.perf` only the timer, `Stage.publishMetrics()`. Next: phase 2.
 - 2026-11-28: decided: D1–D7 as recommended (§5). Next: phase 1.
 - 2026-11-28: review for per-frame cost, garbage and edge cases: §6.2 (rules for phases 4 and 5), §6.3 (edge cases), animated gradients in §8. The review found the `paint()` bug fixed in `a54e485`.
 - 2026-11-28: phase 1 also moves the monitor's publishing into the stage (`publishMetrics()`, counters owned by the stage), the step the throttling plan's C2 needs; that plan (TODO §8) stays after release 0.1.

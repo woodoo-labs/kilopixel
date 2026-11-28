@@ -933,7 +933,7 @@
         box.remove();
         const left = {
           entries: ids.filter((id) => pxl.nodes[id]),
-          monitored: pxl.perf.stages.includes(stage), variables: stage._variables.length, layers: stage.layers.length
+          monitored: pxl.stages.includes(stage), variables: stage._variables.length, layers: stage.layers.length
         };
         if (mounted !== ids.length || variables !== 1 || left.entries.length || left.monitored || left.variables || left.layers) {
           throw new Error(`mounted ${mounted} ids, ${variables} stage variable(s); left: ${JSON.stringify(left)}`);
