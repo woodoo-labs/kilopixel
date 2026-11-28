@@ -1,6 +1,6 @@
 # Engine Restructure: Files by Feature
 
-- **Status**: 🟢 **Decided** (2026-11-28, D1–D7 decided, D8 open; cleanup idea merged as phases 6–8; phases 1–4 built, §9–§12; next: phase 5)
+- **Status**: 🟢 **Decided** (2026-11-28, D1–D7 decided, D8 open; cleanup idea merged as phases 6–8; phases 1–5 built, §9–§13; next: phase 6)
 - **Date**: 2026-11-28
 - **Related**: `design/done/2026-10-27_engine_cleanup_inventory_note.md` (the code style this keeps), `design/done/2026-11-20_evaluation_model_plan.md` (the scheduler that moves in phase 5), `design/done/2026-11-01_isolated_shape_compositing_plan.md` and `design/done/2026-11-26_isolation_box_plan.md` (the isolation code that moves in phase 3), `design/2026-11-12_layer_throttling_plan.md` (TODO §8: phase 1 builds the publishing step of its per-layer metrics, C2), `design/2026-10-30_space_attribute_plan.md` (TODO §28: the one transform path of §8 goes with it), `design/archive/2026-11-22_engine_structure_cleanup_plan.md` (the parked cleanup idea of 2026-11-22, merged here on 2026-11-28: its steps 2–4 are phases 6–8), `.claude/CLAUDE.md` "Engine Code Rules" and "Engine Code Style"
 - **Target Implementation**: `build.js` (file list), `js/engine.js`, `js/compiler.js`, `js/interaction.js`, `js/graphics.js` (removed), `js/monitor.js`, `js/elements/stage.js`, `js/elements/node.js`, `js/elements/shape.js`, `js/elements/shapes/arc.js`, `js/elements/shapes/polyline.js`, `js/elements/shapes/text.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/variable.js`, new `js/reactivity.js`, `js/gradient.js`, `js/compositing.js`, `js/handlers.js`, `js/elements/base.js`, `js/elements/container.js`; `tests/index.html`, `tests/frameworks.html`, `tests/unit.html`; `.agents/ENGINE.md`
@@ -30,7 +30,7 @@ A code review on 2026-11-28 found the code consistent and well commented, but gr
 
 2026-11-28: the last two rows of the table are built away by phase 1 (§9).
 
-2026-11-28: built away by phases 2–4 as well: *Handlers* (phase 2, §10: `js/handlers.js`; `setHandler()` stays a `PxlNode` method), *`graphics.js`* (phase 3, §11: removed), *Gradients* (phase 4, §12: `js/gradient.js`). *Filters*: the helpers, `pxl.scaleResponsiveFilter` and `pxl.checkCanvasFilter` are in `js/compositing.js` (phase 3); `resolveFilter()` stays a `PxlNode` method, since it caches per element. *Reactivity* is phase 5.
+2026-11-28: built away by phases 2–4 as well: *Handlers* (phase 2, §10: `js/handlers.js`; `setHandler()` stays a `PxlNode` method), *`graphics.js`* (phase 3, §11: removed), *Gradients* (phase 4, §12: `js/gradient.js`). *Filters*: the helpers, `pxl.scaleResponsiveFilter` and `pxl.checkCanvasFilter` are in `js/compositing.js` (phase 3); `resolveFilter()` stays a `PxlNode` method, since it caches per element. *Reactivity*: phase 5 (§13), `js/reactivity.js`.
 
 The parked idea `design/archive/2026-11-22_engine_structure_cleanup_plan.md` (2026-11-22, from the custom shapes plan) had listed part of this before and is merged here: its step 1 is `pxl.describe()` (built, `1c01aca`); its steps 2–4 are phases 6–8; its step 5 split `interaction.js` too (handler compiling to `compiler.js`, here its own `handlers.js` in phase 2; hit testing to a file of its own, D8); its step 6, the one transform path, is in §8.
 
@@ -193,8 +193,22 @@ As planned in §4, with D2:
 - **Docs:** ENGINE.md §1 (file table: `gradient.js` is file 4, 22 files), §3 (where the scope is filled), §6.3 (the slot), §11 (file count).
 - **Left:** phase 5 (`reactivity.js`, the scheduler), phases 6–8, D8.
 
+## 13. Phase 5 Built (2026-11-28)
+
+As planned in §4, with D5 and D6:
+
+- **`js/reactivity.js`** (new, file 2, after `engine.js`): the registry and versions from `engine.js` (`pxl.nodes`, `pxl._changeCounter`, `pxl._registryVersion`, `pxl._readIds`, `pxl._orderVersion`, `pxl.MAX_CYCLE_ROUNDS`, `pxl.CYCLE_MESSAGE`, `pxl.addReadIds`, `pxl.isRead`, `pxl.markChanged`, `pxl.wakeReaders`, `pxl.registerNode`, `pxl.unregisterNode`, `pxl.renameNode`), unchanged except that `pxl.wakeReaders()` asks `stage.scheduler.readsId(id)`; and **`pxl.UpdateScheduler`** with the six fields (`_idsRead`, `_readers`, `_checkedCounter`, `_order`, `_cycleStart`, `_builtOrderVersion`) and eight methods (`readsId`, `addReader`, `updateReaders`, `buildOrder`, `addOrderNode`, `orderSources`, `pushContainers`, `evaluateOrder`) from `stage.js`, plus `evaluateSources(t)` (the order rebuilt if needed, then evaluated) and `reset()` (what `disconnectedCallback()` did to the order).
+- **In the moved methods, `this` meant the stage in seven places** (`listedIn`, `readerStage` compared or set): they use `this.stage` now, so the elements keep the stage as their value (§6.3).
+- **`js/elements/stage.js`** (about 530 → 387 lines): `this.scheduler = new pxl.UpdateScheduler(this)` in the constructor; `runFrame()` calls `scheduler.evaluateSources(t)` before the walk and `scheduler.updateReaders()` after it; `disconnectedCallback()` calls `scheduler.reset()`. **`js/elements/node.js`:** `collectSources()` calls `readerStage?.scheduler.addReader(this)`. Comments naming `Stage.buildOrder()`, `Stage.evaluateOrder()` and `Stage.updateReaders()` (in `engine.js`, `compiler.js`, `node.js`, `tests/scaling.html`) name the scheduler.
+- **Tests:** `tests/index.html` reads `stage.scheduler._readers`. Full test run passed, the evaluation-order, lifecycle and reference-cycle tests and `tests/scaling.html` included; generated types unchanged; build checks (`_` ownership) passed without changes.
+- **Per frame:** two method calls on `stage.scheduler` instead of `this` (one property load each); the loops are unchanged. No drawing code moved, so no pixel comparison; §12 showed that the gradient benchmark can't resolve differences of this size, so it wasn't repeated.
+- **Size:** 75.50 KB (+0.3 KB, the class wrapper and its comments), still ~75KB by the build's rounding check.
+- **Docs:** ENGINE.md §1 (file table: `reactivity.js` is file 2, 23 files), §4 (the file, the scheduler, `stage.scheduler.addReader()`), §5.2 (the frame), §11 (file count).
+- **Left:** phases 6–8 (shared base classes), D8.
+
 ## Log
 
+- 2026-11-28: phase 5 built (§13): `js/reactivity.js` with `pxl.UpdateScheduler`. Phases 1–5 (files by feature) are done. Next: phase 6.
 - 2026-11-28: phase 4 built (§12): `js/gradient.js` with `pxl.GradientSlot`. Next: phase 5.
 - 2026-11-28: phase 3 built (§11): `js/compositing.js`, `graphics.js` removed, scope names at the first compile (D2). Next: phase 4.
 - 2026-11-28: phase 2 built (§10): `js/handlers.js`. Next: phase 3.

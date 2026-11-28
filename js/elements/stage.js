@@ -81,15 +81,8 @@ pxl.Stage = class Stage extends HTMLElement {
     this._isRegistered = false; // connectedCallback has run: id changes from now on move the registry entry
     this.changeVersion = 0; // a source like any element: its pointer, size and monitor values (pxl.markChanged())
 
-    // The update phase (design/done/2026-11-20_evaluation_model_plan.md): the ids that its readers read (a change
-    // of one asks this stage for a frame), the elements with reactive values or toLocal(), and the order of sources
-    // (elements that others read, toLocal() readers and the containers above them), with the cycles at the end
-    this._idsRead = new Set();
-    this._readers = [];
-    this._checkedCounter = -1; // pxl._changeCounter at the last pass over the readers
-    this._order = [];
-    this._cycleStart = 0;
-    this._builtOrderVersion = -1;
+    // The update phase: the order of sources and the readers (pxl.UpdateScheduler, reactivity.js)
+    this.scheduler = new pxl.UpdateScheduler(this);
 
     // Published as ref.<id>.* once per second (publishMetrics()); renderAvg / renderMax are strings with 2 decimals
     this.values = {
@@ -210,11 +203,7 @@ pxl.Stage = class Stage extends HTMLElement {
     this.interaction.reset(); // before the layers are dropped: it removes the cursor from their canvases
     this.layers = [];
     this._variables = [];
-    // Its elements left with it: a stage inserted again builds its order anew
-    for (let i = 0; i < this._order.length; i++) this._order[i].isOrderNode = false;
-    this._order.length = 0;
-    this._cycleStart = 0;
-    this._builtOrderVersion = -1;
+    this.scheduler.reset(); // its elements left with it: a stage inserted again builds its order anew
 
     for (const type of pxl.Stage.POINTER_EVENTS) this.removeEventListener(type, this.interaction);
     for (const type of pxl.Stage.ARRIVING_EVENTS) this.removeEventListener(type, this.interaction, true);
@@ -359,8 +348,7 @@ pxl.Stage = class Stage extends HTMLElement {
     }
 
     // Update phase, part 1: the sources in their order, sources before readers wherever they are (also hidden)
-    if (this._builtOrderVersion !== pxl._orderVersion) this.buildOrder();
-    this.evaluateOrder(t);
+    this.scheduler.evaluateSources(t);
 
     // Part 2, the walk: every other expression with t. Stage-level variables, then the layers that changed or have
     // animated content (the clock must notice the next second).
@@ -373,166 +361,13 @@ pxl.Stage = class Stage extends HTMLElement {
     }
 
     // Part 3: the reactive values that nobody reads, when a source changed
-    this.updateReaders();
+    this.scheduler.updateReaders();
 
     // Draw phase: only layers whose pixels are out of date, or whose CSS changed
     for (let i = 0; i < this.layers.length; i++) {
       const layer = this.layers[i];
       if (layer.needsRender()) layer.render(this.unit);
     }
-  }
-
-  // --- Readers and the Order of Sources ---
-  // Design: design/done/2026-11-20_evaluation_model_plan.md §3.2, §10, §11
-
-  // A change of the element with this id asks this stage for a frame (pxl.wakeReaders())
-  readsId(id) {
-    return this._idsRead.has(id);
-  }
-
-  // Called for an element of this stage with reactive values or toLocal() when it connects or its expressions change
-  // (PxlNode.collectSources()). The ids are never removed: a stale one only asks for a frame that finds nothing to do.
-  addReader(reader) {
-    const ids = reader.sourceIds;
-    for (let i = 0; i < ids.length; i++) this._idsRead.add(ids[i]);
-    if (reader.listedIn !== this) {
-      reader.listedIn = this;
-      this._readers.push(reader);
-    }
-  }
-
-  // Part 3 of the update phase: the readers that aren't sources in the order, each evaluated when a source changed.
-  // They read only sources evaluated before (in part 1, or elements without expressions), so their order doesn't
-  // matter. Removed elements, and elements that are no longer readers, are dropped here: removing an element or an
-  // expression touches no list.
-  updateReaders() {
-    if (this._checkedCounter === pxl._changeCounter) return; // nothing that anyone reads has changed since
-    const readers = this._readers;
-    let n = 0;
-    for (let i = 0; i < readers.length; i++) {
-      const reader = readers[i];
-      if (reader.readerStage !== this || (reader.reactiveAttributeKeys.length === 0 && !reader.hasToLocal)) {
-        if (reader.listedIn === this) reader.listedIn = null;
-        continue;
-      }
-      readers[n++] = reader;
-      if (!reader.isOrderNode && reader.isOutOfDate()) reader.updateReactive();
-    }
-    readers.length = n;
-    this._checkedCounter = pxl._changeCounter;
-  }
-
-  // The sources of part 1, sorted so that each comes after the sources it reads. Nodes: the elements of this stage
-  // that others read and that have expressions; toLocal() readers; and, for a toLocal() reader, the containers above
-  // it and above its target that have expressions. Sorted with Kahn's algorithm, starting from DOM order; what is
-  // left over is in a cycle or reads one, and goes to the end (_cycleStart). Built only when pxl._orderVersion
-  // changed: an element that someone reads connects, leaves, gets an id or new expressions; a toLocal() reader
-  // connects; a container's expressions change. Allocates, but only then.
-  buildOrder() {
-    this._builtOrderVersion = pxl._orderVersion;
-    const nodes = this._order;
-    for (let i = 0; i < nodes.length; i++) nodes[i].isOrderNode = false;
-    nodes.length = 0;
-
-    for (const id of pxl._readIds) {
-      const values = pxl.nodes[id];
-      if (values !== undefined) this.addOrderNode(values.$node);
-    }
-    for (let i = 0; i < this._readers.length; i++) {
-      if (this._readers[i].hasToLocal) this.addOrderNode(this._readers[i]);
-    }
-    const sources = new Map();
-    for (let i = 0; i < nodes.length; i++) { // grows while containers are added
-      const list = this.orderSources(nodes[i]);
-      sources.set(nodes[i], list);
-      for (let j = 0; j < list.length; j++) this.addOrderNode(list[j]);
-    }
-
-    nodes.sort(pxl.sortByDOMPosition);
-    const inDegree = new Map();
-    const readersOf = new Map();
-    for (const node of nodes) {
-      inDegree.set(node, 0);
-      readersOf.set(node, []);
-    }
-    for (const node of nodes) {
-      for (const source of sources.get(node)) {
-        // Left out: self-references (an element sees its own new values through updateReactive()), sources without
-        // expressions, and sources in another stage's order, which are read as they are
-        if (source === node || !source.isOrderNode || source.readerStage !== this) continue;
-        inDegree.set(node, inDegree.get(node) + 1);
-        readersOf.get(source).push(node);
-      }
-    }
-    const sorted = nodes.filter((node) => inDegree.get(node) === 0);
-    for (let i = 0; i < sorted.length; i++) {
-      for (const reader of readersOf.get(sorted[i])) {
-        const remaining = inDegree.get(reader) - 1;
-        inDegree.set(reader, remaining);
-        if (remaining === 0) sorted.push(reader);
-      }
-    }
-    this._cycleStart = sorted.length;
-    for (const node of nodes) {
-      if (inDegree.get(node) > 0) sorted.push(node);
-    }
-    for (let i = 0; i < sorted.length; i++) nodes[i] = sorted[i];
-  }
-
-  // Only elements of this stage with expressions: a source in another stage, or a stage itself (its pointer and
-  // size), is read as it is
-  addOrderNode(element) {
-    if (element.isOrderNode || element.readerStage !== this) return;
-    if (element.animatedAttributeKeys.length + element.reactiveAttributeKeys.length === 0) return;
-    element.isOrderNode = true;
-    this._order.push(element);
-  }
-
-  // The elements that a node's expressions read; for toLocal() also the containers above both elements, whose
-  // matrices it reads. Duplicates are fine: buildOrder() counts each edge on both sides.
-  orderSources(node) {
-    const list = [];
-    const lists = [node.animatedAttributeKeys, node.reactiveAttributeKeys];
-    for (let k = 0; k < lists.length; k++) {
-      const keys = lists[k];
-      for (let i = 0; i < keys.length; i++) {
-        const fn = node.expressions[keys[i]];
-        for (let j = 0; j < fn.sourceIds.length; j++) {
-          const values = pxl.nodes[fn.sourceIds[j]];
-          if (values === undefined) continue;
-          list.push(values.$node);
-          if (fn.usesToLocal && values.$node.readerStage === this) this.pushContainers(values.$node, list);
-        }
-        if (fn.usesToLocal) this.pushContainers(node, list);
-      }
-    }
-    return list;
-  }
-
-  pushContainers(element, list) {
-    for (let p = element.parentContainer; p !== null; p = p.parentContainer) list.push(p);
-  }
-
-  // Part 1 of the update phase. A cycle without t is evaluated again in rounds while its values change, at most
-  // pxl.MAX_CYCLE_ROUNDS, so a cycle that settles or converges keeps its values (decision C1 b). The rounds ask for
-  // no frame: this stage is rendering.
-  evaluateOrder(t) {
-    const order = this._order;
-    for (let i = 0; i < order.length; i++) order[i].updateAsSource(t);
-    if (this._cycleStart === order.length) return;
-    for (let round = 1; round < pxl.MAX_CYCLE_ROUNDS; round++) {
-      let changed = false;
-      for (let i = this._cycleStart; i < order.length; i++) {
-        const node = order[i];
-        try {
-          if (node.evaluateReactive()) changed = true;
-        } catch (error) {
-          node.reportError(error);
-        }
-      }
-      if (!changed) return;
-    }
-    order[this._cycleStart].reportError(pxl.CYCLE_MESSAGE);
   }
 
   // The keep-alive (design/done/2026-11-20_evaluation_model_plan.md, step 2): the next frame while anything is animated,

@@ -234,7 +234,7 @@ pxl.compileExpression = function(str) {
     }
 
     const isAnimated = pxl.timeDriverRegex.test(unquoted);
-    // toLocal() results also depend on the containers above both elements (Stage.buildOrder())
+    // toLocal() results also depend on the containers above both elements (UpdateScheduler.buildOrder())
     const usesToLocal = /\btoLocal\(/.test(unquoted);
     if (usesToLocal) pxl.checkToLocalProperties(str); // reads the full string: the property name is a string
     const source = pxl.rewriteExpression(parts.join(''));

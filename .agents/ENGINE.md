@@ -10,22 +10,23 @@ Build order (`files` in `build.js`):
 
 | # | File | Contents |
 |---|---|---|
-| 1 | `js/engine.js` | `pxl` namespace, `pxl.scope` (empty; filled by compiler.js, gradient.js and compositing.js), the anchor tables, generic helpers (`pxl.describe()` names an element in warnings; `pxl.TRANSFORM_DEFAULTS`, spread into the defaults of layers, groups and shapes), reactivity (`pxl.nodes`, versions, `markChanged`), attribute compilation bridge, property accessors |
-| 2 | `js/matrix.js` | `pxl.Matrix` (Float64Array affine matrices, written in place), `pxl.toLocal` |
-| 3 | `js/compiler.js` | Math, color and utility scope entries, `pxl.scopeKeys()`, time drivers, `parseAttributeValue`, `compileExpression`, templates |
-| 4 | `js/gradient.js` | `pxl.parseStops`, the scope entries `linear()`, `radial()`, `conic()`, `pxl.resolveRadius`, `pxl.GradientSlot` (the CanvasGradient of a shape's fill or stroke) |
-| 5 | `js/compositing.js` | canvas state: `pxl.hasTransform`, `pxl.applyTransformState`, `pxl.applyContextState`, `pxl.applyCompositingState`, `pxl.scaleResponsiveFilter`, `pxl.checkCanvasFilter`, the isolation canvas; the filter scope entries |
-| 6 | `js/handlers.js` | `pxl-on-*` handlers: `pxl.HANDLER_EVENTS`, `pxl.createHandlers`, `pxl.handlerRef` and its assignment rules, `pxl.compileHandler` |
-| 7 | `js/interaction.js` | `pxl.InteractionEngine`: hit testing, states, DOM events, cursor |
-| 8 | `js/monitor.js` | `pxl.perf`: the 1-second timer that calls `Stage.publishMetrics()` |
-| 9 | `js/elements/stage.js` | `pxl._frame`, `pxl.stages` (every connected stage), default styles, `pxl.Stage` |
-| 10 | `js/elements/node.js` | `pxl.PxlNode` |
-| 11 | `js/elements/layer.js` | `pxl.Layer` |
-| 12 | `js/elements/group.js` | `pxl.Group` |
-| 13 | `js/elements/shape.js` | arrowhead constants and helpers, line dash helper; `pxl.Shape`: style, gradients (two `pxl.GradientSlot`s), isolation, hit box, arrowheads; `pxl.defineShape()` |
-| 14 | `js/elements/shapes/arc.js` | `pxl.arcEndRadians`, `pxl.isFullTurn`; `pxl.ArcShape`: the shared base of circle and ellipse, no tag |
-| 15–21 | `js/elements/shapes/*.js` | circle, ellipse, rect, line, polyline (with `pxl.parsePointsIntoArray`), text, grid |
-| 22 | `js/elements/variable.js` | `pxl.Variable` |
+| 1 | `js/engine.js` | `pxl` namespace, `pxl.scope` (empty; filled by compiler.js, gradient.js and compositing.js), the anchor tables, generic helpers (`pxl.describe()` names an element in warnings; `pxl.TRANSFORM_DEFAULTS`, spread into the defaults of layers, groups and shapes), attribute compilation bridge, property accessors |
+| 2 | `js/reactivity.js` | registry and versions (`pxl.nodes`, `pxl.markChanged`, `pxl.wakeReaders`, …), `pxl.UpdateScheduler`: the update phase of one stage (`stage.scheduler`) |
+| 3 | `js/matrix.js` | `pxl.Matrix` (Float64Array affine matrices, written in place), `pxl.toLocal` |
+| 4 | `js/compiler.js` | Math, color and utility scope entries, `pxl.scopeKeys()`, time drivers, `parseAttributeValue`, `compileExpression`, templates |
+| 5 | `js/gradient.js` | `pxl.parseStops`, the scope entries `linear()`, `radial()`, `conic()`, `pxl.resolveRadius`, `pxl.GradientSlot` (the CanvasGradient of a shape's fill or stroke) |
+| 6 | `js/compositing.js` | canvas state: `pxl.hasTransform`, `pxl.applyTransformState`, `pxl.applyContextState`, `pxl.applyCompositingState`, `pxl.scaleResponsiveFilter`, `pxl.checkCanvasFilter`, the isolation canvas; the filter scope entries |
+| 7 | `js/handlers.js` | `pxl-on-*` handlers: `pxl.HANDLER_EVENTS`, `pxl.createHandlers`, `pxl.handlerRef` and its assignment rules, `pxl.compileHandler` |
+| 8 | `js/interaction.js` | `pxl.InteractionEngine`: hit testing, states, DOM events, cursor |
+| 9 | `js/monitor.js` | `pxl.perf`: the 1-second timer that calls `Stage.publishMetrics()` |
+| 10 | `js/elements/stage.js` | `pxl._frame`, `pxl.stages` (every connected stage), default styles, `pxl.Stage` |
+| 11 | `js/elements/node.js` | `pxl.PxlNode` |
+| 12 | `js/elements/layer.js` | `pxl.Layer` |
+| 13 | `js/elements/group.js` | `pxl.Group` |
+| 14 | `js/elements/shape.js` | arrowhead constants and helpers, line dash helper; `pxl.Shape`: style, gradients (two `pxl.GradientSlot`s), isolation, hit box, arrowheads; `pxl.defineShape()` |
+| 15 | `js/elements/shapes/arc.js` | `pxl.arcEndRadians`, `pxl.isFullTurn`; `pxl.ArcShape`: the shared base of circle and ellipse, no tag |
+| 16–22 | `js/elements/shapes/*.js` | circle, ellipse, rect, line, polyline (with `pxl.parsePointsIntoArray`), text, grid |
+| 23 | `js/elements/variable.js` | `pxl.Variable` |
 
 ```
 HTMLElement
@@ -93,7 +94,7 @@ Fields of the function: `isTimeDependent`, `sourceIds` (empty without refs), `us
 
 **Templates** (`pxl.parseTemplate(str)`): the value is scanned by the engine, not wrapped in backticks, so the text's backslashes and backticks never meet JavaScript's escape rules. `\${` becomes a literal `${`; a code part runs from `${` to its matching `}` (`pxl.findTemplateEnd()` skips quoted strings with their escapes and nested template literals). Without a code part the result is the text itself. Otherwise one source is generated and compiled with `pxl.compileExpression()`, so caching, rewrites, flags and warnings are those of any expression: `const _p0 = (code); if (_p0 === undefined || _p0 === null || _p0 !== _p0) return null;` per part, then `return "text" + _p0 + "text" …;` with the text as JSON string literals, which `pxl.splitStringLiterals()` skips as quoted text. A static template is evaluated once; `null` makes `Text.layout()` draw nothing. An unclosed or empty `${` warns and keeps the value as written; a part that doesn't compile does the same (`compileExpression()` warns and returns the source, which `parseTemplate()` recognizes). Design: `design/done/2026-11-27_text_template_plan.md`.
 
-## 4. Reactivity (`js/engine.js`)
+## 4. Reactivity (`js/reactivity.js`)
 
 ### 4.1 Registry
 
@@ -111,17 +112,17 @@ Fields of the function: `isTimeDependent`, `sourceIds` (empty without refs), `us
 | function without `t` (it reads ids) | `reactiveAttributeKeys`, evaluated at once if connected | in the update phase, when a source changed (§4.3) |
 
 - A function set or removed calls `pxl.expressionsChanged()`: `collectSources()` (connected elements) and, for an element that is in an order, uses `toLocal()`, is a container or is read by others, a new order (`pxl._orderVersion`).
-- `collectSources()` collects `sourceIds` (the ids the reactive values read) and `hasToLocal` (any expression uses `toLocal()`), and puts an element with reactive values or `toLocal()` into its stage's reader list (`Stage.addReader()`, which also adds the ids to the stage's `_idsRead`).
+- `collectSources()` collects `sourceIds` (the ids the reactive values read) and `hasToLocal` (any expression uses `toLocal()`), and puts an element with reactive values or `toLocal()` into its stage's reader list (`stage.scheduler.addReader()`, which also adds the ids to the scheduler's `_idsRead`).
 - Granularity is the element: any change of `ref.<id>` makes every reader of any of its values out of date (unchanged results stop there).
 
 ### 4.3 Versions and the Update Phase
 
 Design: `design/done/2026-11-20_evaluation_model_plan.md` (option B, §10, §11).
 
-- **A change evaluates no reader.** `pxl.markChanged(element)` (from `valueChanged()`, `evaluateAnimations()`, `evaluateReactive()`, interaction states, the stage's pointer, size and monitor values, `Polyline.setPoints()`) acts only for an element that someone reads (`pxl.isRead()`: its `registeredId` is in `pxl._readIds`, the ids every compiled expression names, filled by `pxl.addReadIds()`, never shrinking). It raises `pxl._changeCounter` into the element's `changeVersion` and calls `pxl.wakeReaders(id)`: `requestRender()` on every stage whose `_idsRead` has the id. The running stage requests nothing: its update phase is still to come; an idle page with readers stays idle while the monitor publishes values nobody reads.
+- **A change evaluates no reader.** `pxl.markChanged(element)` (from `valueChanged()`, `evaluateAnimations()`, `evaluateReactive()`, interaction states, the stage's pointer, size and monitor values, `Polyline.setPoints()`) acts only for an element that someone reads (`pxl.isRead()`: its `registeredId` is in `pxl._readIds`, the ids every compiled expression names, filled by `pxl.addReadIds()`, never shrinking). It raises `pxl._changeCounter` into the element's `changeVersion` and calls `pxl.wakeReaders(id)`: `requestRender()` on every stage whose scheduler reads the id (`readsId()`, its `_idsRead`). The running stage requests nothing: its update phase is still to come; an idle page with readers stays idle while the monitor publishes values nobody reads.
 - **Out of date** (`isOutOfDate()`): `hasToLocal`, or `pxl._registryVersion`, or a source's `changeVersion` newer than the reader's `_seenVersion` (the counter at its last evaluation; one flat loop over `sourceIds`, about 20 ns per reader that is up to date).
-- **The update phase** (`Stage.runFrame()`, §5.2):
-  1. **Sources in order** (`evaluateOrder()`): `updateAsSource(t)` on every node of the stage's order: `evaluateAnimations(t)`, then `updateReactive()` if out of date. Nodes: elements of this stage that others read and that have expressions, every `toLocal()` reader, and the containers with expressions above a `toLocal()` reader and above its target. They are evaluated also when hidden. `_evaluatedFrame` makes the walk skip their values with `t`; a failure sets `_failedFrame`, so both phases skip the element (a group with its children).
+- **The update phase** (`Stage.runFrame()`, §5.2), run by the stage's `pxl.UpdateScheduler` (`stage.scheduler`, created in the stage's constructor like `stage.interaction`). The elements' `readerStage` and `listedIn` hold the stage, not the scheduler. On disconnect `scheduler.reset()` clears the order (`isOrderNode` on its nodes), so a stage inserted again builds it anew:
+  1. **Sources in order** (`evaluateSources(t)`: `buildOrder()` if needed, then `evaluateOrder()`): `updateAsSource(t)` on every node of the stage's order: `evaluateAnimations(t)`, then `updateReactive()` if out of date. Nodes: elements of this stage that others read and that have expressions, every `toLocal()` reader, and the containers with expressions above a `toLocal()` reader and above its target. They are evaluated also when hidden. `_evaluatedFrame` makes the walk skip their values with `t`; a failure sets `_failedFrame`, so both phases skip the element (a group with its children).
   2. **The walk:** stage-level variables, then `layer.update(t)` for layers with `isDirty || hasAnimatedContent`: every other expression with `t`.
   3. **Readers nobody reads** (`updateReaders()`): `updateReactive()` for each reader that isn't a node and is out of date. Skipped entirely when `pxl._changeCounter` hasn't moved since the last pass (`_checkedCounter`). The pass drops elements that left the stage or are no longer readers (`readerStage`, `listedIn`): removing an element touches no list. The readers read only sources that are already current, so their order doesn't matter.
 - **The order** (`buildOrder()`): rebuilt only when `pxl._orderVersion` changed (a read element connects, leaves, gets an id or new expressions; a new read id; a `toLocal()` reader connects; a container's expressions change). Edges come from `sourceIds` of both key lists (`orderSources()`), for `toLocal()` also the containers above both elements; self-edges, sources without expressions and sources in another stage's order are left out (read as they are). Kahn's algorithm from DOM order; what is left over is in a cycle or reads one and goes to the end (`_cycleStart`). Allocates, but only when rebuilt.
@@ -161,7 +162,7 @@ runFrame(t), in try / finally (_isRendering = false whatever happens):
                                               their readers update in this update phase and are drawn (§8.4)
   sort layers and stage-level variables by DOM position (if _isOrderDirty)
   UPDATE PHASE (§4.3)
-  1 buildOrder() if pxl._orderVersion changed; evaluateOrder(t): the sources in their order, then cycle rounds
+  1 scheduler.evaluateSources(t): buildOrder() if pxl._orderVersion changed; the sources in their order, then cycle rounds
   2 stage-level <pxl-var>: update(t); layers with isDirty || hasAnimatedContent:
     layer.update(t)
       sort children (if dirty)
@@ -172,7 +173,7 @@ runFrame(t), in try / finally (_isRendering = false whatever happens):
                                               affectsPixels() calls invalidate(): isDirty. Sources evaluated
                                               in part 1 are skipped (_evaluatedFrame)
       hasAnimatedContent = marked in this frame
-  3 updateReaders(): readers nobody reads, if out of date (skipped when no read element changed)
+  3 scheduler.updateReaders(): readers nobody reads, if out of date (skipped when no read element changed)
   DRAW PHASE, layers where needsRender():     isDirty || _isCompositingDirty (isDirty also catches a reader
     layer.render(u)                           of part 3 evaluated after this layer's update)
       failed this frame → return (keeps its pixels and stays dirty)
@@ -355,7 +356,7 @@ None in the walk, box check, boundary walk and queue; one event object per dispa
 
 ## 11. Build (`build.js`)
 
-1. `readSources()` / `bundleSource()` concatenate the 22 files; `require('./build.js')` builds nothing and exports them with `checkSources()` for `tools/check_build.js`.
+1. `readSources()` / `bundleSource()` concatenate the 23 files; `require('./build.js')` builds nothing and exports them with `checkSources()` for `tools/check_build.js`.
 2. `checkSources()` refuses: a top-level `class` / `const` / `let` / `var` / `function`; trailing whitespace; a `_` field used in another engine file or a plain field used only in its own (found by name, equal names in different classes count together).
 3. The bundle sets `window.pxl = { version: '0.1.0' }` inside a function that returns without a browser (server-side rendering) or when `<pxl-stage>` is already defined (warns `[pxl] Kilopixel is already loaded …`, the first copy keeps working).
 4. Typings: `tools/build_types.js` runs the bundle in a Node `vm` with a stubbed DOM, reads `observedAttributes` and `static defaults` of every element, and writes `kilopixel.d.ts` plus one file per framework (React, Preact, Solid, Vue, Svelte) to `dist/types/` and `docs/download/types/`. Types come from the default's type plus a table in the script (keywords, colors, arrays, `points`, `text`, nullable numbers); an attribute with a `null` default the table doesn't cover stops the build. Every value also accepts `PxlExpression` (`string & {}`, keeps keyword suggestions). `node tools/run_tests.js --types` checks them against the real framework types (`tests/types/`).

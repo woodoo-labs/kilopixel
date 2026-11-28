@@ -3202,7 +3202,7 @@
       withStage(ixStage(`<pxl-circle id="fxSource" x="10" r="5"></pxl-circle>
         <pxl-circle id="fxSub" x="ref.fxSource.x + 1" y="ref.fxSource.x + 2" r="5"></pxl-circle>
         <pxl-circle id="fxSwitched" x="ref.fxSource.x + 3" r="5"></pxl-circle>`), (stage) => {
-        const subs = () => { nextFrame(); return stage._readers.filter((e) => e === el('fxSub') || e === el('fxSwitched')); };
+        const subs = () => { nextFrame(); return stage.scheduler._readers.filter((e) => e === el('fxSub') || e === el('fxSwitched')); };
         const reader = el('fxSub'), switched = el('fxSwitched');
         switched.setAttribute('x', '5'); // no longer a reader: dropped in the stage's next pass over its readers
         reader.remove();

@@ -59,87 +59,6 @@ pxl.anchorY = {
 pxl.scope = Object.create(null);
 
 // =========================================================================
-// Reactivity Engine
-// =========================================================================
-// A change doesn't evaluate the element's readers: it raises a version and asks the stages that read the element for
-// a frame. Their update phase then evaluates what is out of date, sources before their readers (Stage.runFrame()).
-// Design: design/done/2026-11-20_evaluation_model_plan.md.
-
-// Element id → its values, read by expressions as ref.<id>.<name>
-pxl.nodes = {};
-
-// Counts the changes of elements that someone reads. Such an element's changeVersion is the count at its last
-// change; a reader keeps the count at its last evaluation and is out of date when a source's version is newer.
-pxl._changeCounter = 0;
-// The count when an element last left the registry: its readers now read undefined
-pxl._registryVersion = 0;
-// Every id an expression reads (filled by the compiler, never shrinks): only changes of these elements count
-pxl._readIds = new Set();
-// Raised when a stage's order of sources may have changed (Stage.buildOrder())
-pxl._orderVersion = 0;
-
-// A cycle without t whose values keep changing stops after this many rounds (Stage.evaluateOrder())
-pxl.MAX_CYCLE_ROUNDS = 100;
-pxl.CYCLE_MESSAGE = `a ref.* cycle never settles: values still changed after ${pxl.MAX_CYCLE_ROUNDS} rounds`;
-
-// Called by the compiler for the ids of a new expression. An element with a new id may now be a source of an order.
-pxl.addReadIds = function(ids) {
-  for (let i = 0; i < ids.length; i++) {
-    if (pxl._readIds.has(ids[i])) continue;
-    pxl._readIds.add(ids[i]);
-    pxl._orderVersion++;
-  }
-};
-
-pxl.isRead = function(element) {
-  return element.registeredId !== null && pxl._readIds.has(element.registeredId);
-};
-
-// After a value of element changed. Only an element that someone reads counts, so the counter stays still while
-// only unread values change, and a stage can skip its readers (Stage.updateReaders()).
-pxl.markChanged = function(element) {
-  if (!pxl.isRead(element)) return;
-  element.changeVersion = ++pxl._changeCounter;
-  pxl.wakeReaders(element.registeredId);
-};
-
-// Asks every stage that reads id for a frame. The running stage asks for none: its update phase is still to come,
-// or the change came from there (rule R1).
-pxl.wakeReaders = function(id) {
-  const stages = pxl.stages;
-  for (let i = 0; i < stages.length; i++) {
-    if (stages[i].readsId(id)) stages[i].requestRender();
-  }
-};
-
-// An element (or stage) with an id connected, or got an id. Readers written before it pick it up in the next update
-// phase; a source that someone reads may be a node of the order.
-pxl.registerNode = function(element, id) {
-  pxl.nodes[id] = element.values;
-  element.registeredId = id;
-  pxl.markChanged(element);
-  if (pxl.isRead(element)) pxl._orderVersion++;
-};
-
-// An element left the registry (removed, or its id changed): its readers now read undefined
-pxl.unregisterNode = function(id) {
-  delete pxl.nodes[id];
-  pxl._registryVersion = ++pxl._changeCounter;
-  if (pxl._readIds.has(id)) {
-    pxl.wakeReaders(id);
-    pxl._orderVersion++;
-  }
-};
-
-// An element's id was set, changed or removed after it connected (connectedCallback reads the id once). The old
-// entry is removed only if it is this element's.
-pxl.renameNode = function(element, oldId, newId) {
-  if (oldId && pxl.nodes[oldId] === element.values) pxl.unregisterNode(oldId);
-  element.registeredId = null;
-  if (newId) pxl.registerNode(element, newId);
-};
-
-// =========================================================================
 // Attribute Compilation
 // =========================================================================
 
@@ -172,7 +91,7 @@ pxl.compileAttribute = function(element, name, newValue) {
     if (!element.animatedAttributeKeys.includes(name)) element.animatedAttributeKeys.push(name);
     pxl.removeFromArray(element.reactiveAttributeKeys, name);
   } else {
-    // Evaluated in the update phase when a source changed (Stage.updateReaders()). Functions are only compiled for
+    // Evaluated in the update phase when a source changed (UpdateScheduler.updateReaders()). Functions are only compiled for
     // time or refs, so a reactive function always reads at least one id.
     pxl.removeFromArray(element.animatedAttributeKeys, name);
     if (!element.reactiveAttributeKeys.includes(name)) element.reactiveAttributeKeys.push(name);
@@ -194,7 +113,7 @@ pxl.storeValue = function(element, name, value) {
 };
 
 // An expression was set or removed: the element's sources, its place in its stage's reader list, and the order of
-// sources, which holds elements that others read, toLocal() readers and the containers above them (Stage.buildOrder())
+// sources, which holds elements that others read, toLocal() readers and the containers above them (UpdateScheduler.buildOrder())
 pxl.expressionsChanged = function(element) {
   if (element.isConnected) element.collectSources();
   if (element.isOrderNode || element.hasToLocal || element.childList !== null || pxl.isRead(element)) {

@@ -44,7 +44,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this._evaluatedFrame = -1;
     // The stage whose update phase evaluates the element (null while not connected). Written by the stage: the stage
     // whose reader list holds the element (it drops removed readers in its next pass), and whether the element is a
-    // source in the stage's order (Stage.buildOrder())
+    // source in the stage's order (UpdateScheduler.buildOrder())
     this.readerStage = null;
     this.listedIn = null;
     this.isOrderNode = false;
@@ -200,7 +200,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
       }
     }
     this.hasToLocal = this.anyUsesToLocal(keys) || this.anyUsesToLocal(this.animatedAttributeKeys);
-    if (keys.length > 0 || this.hasToLocal) this.readerStage?.addReader(this);
+    if (keys.length > 0 || this.hasToLocal) this.readerStage?.scheduler.addReader(this);
   }
 
   anyUsesToLocal(keys) {
@@ -265,7 +265,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     return this.registeredId !== null && this.sourceIds.includes(this.registeredId);
   }
 
-  // Part 1 of the update phase (Stage.evaluateOrder()), before the walk, which then skips the element's values with
+  // Part 1 of the update phase (UpdateScheduler.evaluateOrder()), before the walk, which then skips the element's values with
   // t. A failed evaluation skips the element in both phases, as in the walk.
   updateAsSource(t) {
     try {
@@ -282,7 +282,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     // Keeps the stage's frame loop running while anything in the layer is animated (a layer is its own parentLayer),
     // also when the evaluation below fails: an error that depends on t may go away
     if (this.isAnimated) this.parentLayer?.markAnimated();
-    // A source in the stage's order was evaluated before the walk (Stage.evaluateOrder())
+    // A source in the stage's order was evaluated before the walk (UpdateScheduler.evaluateOrder())
     if (this._evaluatedFrame === pxl._frame) return false;
     this._evaluatedFrame = pxl._frame;
 

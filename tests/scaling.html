@@ -145,7 +145,7 @@
     }, 2000), { timeout: 20000 });
 
     // design/done/2026-10-30_framework_compatibility_plan.md §19.1: removing elements with readers was quadratic once
-    // (ratio 5–9). Readers now leave their stage's list in its next pass over them (Stage.updateReaders()).
+    // (ratio 5–9). Readers now leave their stage's list in its next pass over them (UpdateScheduler.updateReaders()).
     test('removing shapes with readers is linear', () => expectLinear((n) => {
       const { layer, clear } = freshStage();
       layer.insertAdjacentHTML('beforeend', shapesMarkup(n, true, 'rrm'));

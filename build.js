@@ -7,6 +7,7 @@ const VERSION = '0.1.0';
 
 const files = [
   'js/engine.js',
+  'js/reactivity.js',
   'js/matrix.js',
   'js/compiler.js',
   'js/gradient.js',
