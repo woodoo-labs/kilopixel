@@ -7,7 +7,7 @@
 - **Prototypes** in `design/prototypes/2026-11-04_stage_sizing/`:
   - `stage_width_check.html` (today, eight layouts);
   - `stage_sizing_prototype.html` (defaults in a cascade layer; `?fallback=min` and `?fallback=minpct` for the rejected fallback widths);
-  - `zero_width_while_parsing.html` (width 0 while the page is parsed);
+  - `make_zero_width_while_parsing.js` (writes `zero_width_while_parsing.html` to `scratch/`, 2.6 MB: width 0 while the page is parsed);
   - `cascade_layer_order.html` (where the default sheet must go, with page CSS in cascade layers like Tailwind v4; 2026-11-14);
   - `shadow_root_check.html` (layer canvas moved into a shadow root: mouse coordinates and `layer.innerHTML`; 2026-11-14);
   - `fallback_width_check.html` (the 300 px fallback width on every stage in 16 layouts, with and without `min-width: 0`; 2026-11-14);
@@ -144,7 +144,7 @@ Measured in `design/prototypes/2026-11-04_stage_sizing/fallback_width_check.html
 - **Shadow DOM with `:host` for the stage:** layers are light DOM children; the stage would need a shadow root with a `<slot>` only to get one lowest-priority rule. The cascade layer gives the same priority without changing the DOM. (The layer does get a shadow root, for its canvas: §4.4.)
 - **`document.adoptedStyleSheets`** (proposed in the framework plan §5.2): its `pxl` layer ranks above the page's layers (§4.1 table).
 - **`:where(pxl-stage)` outside any layer** (proposed in the framework plan §5.2): zero specificity, but a rule outside any layer beats every layered page rule (§4.1 table).
-- **Zero-width warning** (planned 2026-11-04 to 2026-11-14): a `console.warn` when the stage is still 0 px wide after the `load` event and one frame (`checkWidth()` called from `resize()`, about 15 lines). It had to wait for loading, because a parent can get its width late (measured in `design/prototypes/2026-11-04_stage_sizing/zero_width_while_parsing.html`). Replaced by the fallback width (§4.2): the stage draws instead of asking the user to fix the CSS.
+- **Zero-width warning** (planned 2026-11-04 to 2026-11-14): a `console.warn` when the stage is still 0 px wide after the `load` event and one frame (`checkWidth()` called from `resize()`, about 15 lines). It had to wait for loading, because a parent can get its width late (measured with the page that `design/prototypes/2026-11-04_stage_sizing/make_zero_width_while_parsing.js` writes). Replaced by the fallback width (§4.2): the stage draws instead of asking the user to fix the CSS.
 - **Detecting author styles in JavaScript and writing the defaults inline otherwise:** `getComputedStyle()` returns the width in pixels whether or not the page set it (only `computedStyleMap()` reports `auto`, and Firefox lacks it); the check would be a snapshot that misses stylesheets loaded later, CSS-in-JS, classes added later and media queries; and the inline defaults would again beat every later rule. The cascade layer makes the same choice in the browser, and keeps making it when the CSS changes.
 
 ### 4.4 Layer Canvas in a Shadow Root
