@@ -141,6 +141,8 @@ ENGINE.md only, in each phase: §1 (file table), §3 (scope), §4 (reactivity fi
 
 ## 8. Not in This Plan
 
+*2026-11-28, after closing:* the follow-ups below are tracked in `design/ideas/2026-11-28_element_base_classes_note.md` (§5; the transform path also in the `space` plan, TODO §28). The text stays as history.
+
 - **One transform path** (the merged idea's step 6, D7 here): every shape drawn with its global matrix (`setTransform()`), as isolation and hit testing already are; groups and layers apply no transform when drawing; `pxl.applyTransformState()` and `pxl.applyContextState()` go. Measured on 2026-11-20 as a patch over commit `2f75888` (`design/prototypes/2026-11-20_custom_shapes/transform_path/`): pixels identical in 284 of 300 layers of 24 docs and 56 example pages, the other 16 differ only on anti-aliased edges (at most 77 / 255 on single edge pixels); frame time 3–9 % slower in 8 of 9 runs (0.6–2 ms per frame with 5,000 circles), from the matrix lookup per shape. So not alone: with `space` (TODO §28), whose extra transform becomes a different parent matrix. Since the layer scales by `u` once, the global matrix would be multiplied by `u` × DPR per shape, as isolation does; `design/prototypes/2026-11-20_custom_shapes/phase2/run.js` compares two builds by pixels and frame time.
 - What shapes and groups still share after phase 7: the handler attributes in `observedAttributes`, `isHovered` / `isPressed`, the `handlers` record. Small; a decision when phase 7 is built.
 - `Polyline.setPoints()` re-implements `valueChanged()` (and skips `affectsPixels()`).

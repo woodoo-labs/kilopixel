@@ -1,6 +1,6 @@
-# Shared Base Classes for the Elements (Parked)
+# Element Structure: Parked Follow-Ups of the Engine Restructure
 
-- **Status**: 💬 **Discussion** (2026-11-28, parked: small gain against an extra class level; pick up when the element lifecycle is reworked)
+- **Status**: 💬 **Discussion** (2026-11-28, parked: base classes, parents kept after removal, three smaller follow-ups; pick up when the element lifecycle is reworked)
 - **Date**: 2026-11-28
 - **Origin**: phases 6 and 8 and decision D8 of `design/done/2026-11-28_engine_restructure_plan.md`, which took them from steps 2, 4 and 5 of `design/archive/2026-11-22_engine_structure_cleanup_plan.md`
 - **Related**: `design/2026-10-30_space_attribute_plan.md` (TODO §28: a reason to rework the lifecycle and the transform path anyway)
@@ -36,7 +36,16 @@ Since phase 7 of the restructure plan (`design/done/2026-11-28_engine_restructur
 
 Clearing both on disconnect would need a check of what reads them while an element is detached: `getGlobalMatrix()` walks `parentContainer`, the hit walk and `toLocal()` read matrices of connected elements only, and `releaseElement()` reads `parentContainer` of the removed element before `stage` is cleared. Fits the same lifecycle work as §1.
 
+## 5. Other Follow-Ups of the Restructure
+
+From §8 of `design/done/2026-11-28_engine_restructure_plan.md`, which closed with them open (its fourth follow-up, the one transform path, waits with `space`, TODO §28):
+
+- **What shapes and groups still share:** both add the `pxl-on-*` attributes to `observedAttributes`, set `values.isHovered` and `values.isPressed` in their constructors and create the `handlers` record (`js/elements/shape.js`, `js/elements/group.js`, about 6 lines each). The plan left the decision to after phase 7; with `stage` and `releaseElement()` in `PxlNode` since then, this is what is left of "interactive node". Small; decide with §1.
+- **`Polyline.setPoints()` re-implements `valueChanged()`** (`js/elements/shapes/polyline.js`): it sets `isAnimated`, calls `pxl.markChanged()` and `parentLayer?.invalidate()` itself, and skips `affectsPixels()`, so points changed on a hidden polyline redraw its layer although nothing is drawn. A wasted frame, no wrong pixels.
+- **Animated gradients allocate per frame:** `linear(t * 30, ['red', 'blue'])` creates the colors array, the stops array, a stop object per color, the descriptor and a new `CanvasGradient`, per shape and frame (ENGINE.md accepts it, about 0.8 µs). The largest known garbage source in an animated scene. Not a structure topic: kept here so it isn't lost; a plan of its own if a measurement shows it matters (the benchmark of the restructure, `design/prototypes/2026-11-28_engine_restructure/gradient_bench.html`, could not resolve small differences in the browser pane).
+
 ## Log
 
+- 2026-11-28: §5: the three open follow-ups of the restructure plan's §8 moved here; title widened from "Shared Base Classes for the Elements (Parked)".
 - 2026-11-28: §4: `parentLayer` and `parentContainer` stay set after removal (memory, wasted frames), recorded after restructure phase 7.
 - 2026-11-28: parked from the restructure plan (its phases 6 and 8, D8) after measuring how much they would share (§2).
