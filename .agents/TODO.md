@@ -3,7 +3,7 @@
 Planned work only, one short item each; the plan holds the details. Parked ideas are plans in `design/ideas/` (no item here), implemented plans are in `design/done/`, superseded and dropped ones in `design/archive/`. Workflow: `.claude/CLAUDE.md` → "Plans and TODO"; check: `node tools/check_plans.js`.
 
 - **Status words** (as in the plans): 💬 **Discussion** (ideas, nothing decided) · 🟡 **Proposed** (complete plan, waiting for a decision) · 🟢 **Decided** (agreed, not built yet).
-- **Numbers are stable:** other files refer to items as "TODO §46". A removed item leaves a gap; a new item gets the next free number (next: §53).
+- **Numbers are stable:** other files refer to items as "TODO §46". A removed item leaves a gap; a new item gets the next free number (next: §54).
 
 ## 1. SVG Paths and Icons (`<pxl-path>`)
 - **Status**: 🟡 **Proposed**
@@ -97,3 +97,9 @@ Planned work only, one short item each; the plan holds the details. Parked ideas
 - **Plan**: `design/2026-11-27_release_0_1_plan.md`
 - What 0.1 needs: A decisions that would break pages later (text as a template and centered text: built, `design/done/2026-11-27_text_template_plan.md`; §42, §49, release policy), B features (§3 animation started by events, §1 path, §9 image), C release work (§43, §44, 9 docs pages, §12); D the rest after 0.1.
 - **Decided**: R1–R5 (plan §6). **Next**: the plan for §3 (animation); decisions for §42 (D1–D5) and §49.
+
+## 53. Engine Restructure: Files by Feature
+- **Status**: 🟡 **Proposed**
+- **Plan**: `design/2026-11-28_engine_restructure_plan.md`
+- Each engine feature in one file, no behavior change: a stage registry (`pxl.stages`), `handlers.js`, `graphics.js` dissolved into `compositing.js` and its callers, `gradient.js`, `reactivity.js` with the scheduler as a class. Five phases, one commit each.
+- **Open**: D1–D7 (plan §5).
