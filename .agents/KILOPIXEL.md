@@ -204,7 +204,7 @@ Readable as `ref.<stage>.*`: `mouseX`, `mouseY` (pointer in stage units, default
 
 ### 6.2 `<pxl-layer>`
 
-The ten transform attributes (§2), `alpha` (`1`), `blend` (`'source-over'`), `filter` (`'none'`), `hidden` (`false`). Its canvas fills the stage (`position: absolute; inset: 0`). Compositing values are CSS (§4). A layer redraws only in frames where something in it changed (a `floor(t)` clock: once per second; a finished `clamp(t * 100, 0, 300)`: never again), and a static layer costs nothing per frame. One change redraws the whole layer, so put shapes that change into their own layer. Layers don't nest.
+The ten transform attributes (§2), `alpha` (`1`), `blend` (`'source-over'`), `filter` (`'none'`), `hidden` (`false`). Its canvas fills the stage (`position: absolute; inset: 0`). Compositing values are CSS (§4). A layer redraws only in frames where something in it changed (a `floor(t)` clock: once per second; a finished `clamp(t * 100, 0, 300)`: never again), and a static layer costs nothing per frame. One change redraws the whole layer, so put shapes that change into their own layer. Layers don't nest: a layer inside another warns once, because its canvas covers the outer one; place layers side by side (they stack in DOM order).
 
 ### 6.3 `<pxl-group>`
 

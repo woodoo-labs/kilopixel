@@ -1,3 +1,6 @@
+// Nested layers already warned about (Layer.connectedCallback())
+pxl._nestedLayerWarnings = new WeakSet();
+
 pxl.Layer = class Layer extends pxl.PxlNode {
   static defaults = { ...pxl.TRANSFORM_DEFAULTS, alpha: 1, blend: 'source-over', filter: 'none', hidden: false };
 
@@ -38,6 +41,14 @@ pxl.Layer = class Layer extends pxl.PxlNode {
   }
 
   connectedCallback() {
+    // Layers don't nest: a layer's content shows through its <slot>, above its canvas, so a nested layer's canvas
+    // covers the outer one's (an opaque background in it hides everything). Warned once per element.
+    const outer = this.parentElement === null ? null : this.parentElement.closest('pxl-layer');
+    if (outer !== null && !pxl._nestedLayerWarnings.has(this)) {
+      pxl._nestedLayerWarnings.add(this);
+      console.warn(`[pxl] ${pxl.describe(this)} is inside another layer, ${pxl.describe(outer)}: layers don't nest, and ` +
+        'its canvas covers the outer one. Place it next to the other layer (layers stack in DOM order).');
+    }
     this.stage = this.closest('pxl-stage');
     this.stage?.registerLayer(this);
 

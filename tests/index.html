@@ -3061,6 +3061,23 @@
         }
       }));
 
+    test('lifecycle: a layer inside another layer warns once, naming both; layers side by side don\'t', () => {
+      const box = document.createElement('div');
+      box.style.width = '400px';
+      const warnings = captureWarnings(() => {
+        box.innerHTML = `<pxl-stage><pxl-layer id="nlOuter"><pxl-layer id="nlInner"></pxl-layer></pxl-layer>
+          <pxl-layer id="nlSibling"></pxl-layer></pxl-stage>`;
+        document.querySelector('.docs-inner').append(box);
+        const inner = box.querySelector('#nlInner');
+        inner.remove();
+        box.querySelector('#nlOuter').append(inner); // connected again: no second warning
+      });
+      box.remove();
+      if (warnings.length !== 1 || !warnings[0].includes('<pxl-layer id="nlInner">') || !warnings[0].includes('<pxl-layer id="nlOuter">')) {
+        throw new Error(`warnings: ${JSON.stringify(warnings)}`);
+      }
+    });
+
     test('lifecycle: a reader written before its source updates when the source arrives, and after a re-insert', () =>
       withStage(ixStage('<pxl-circle id="lcReader" x="ref.lcSource.x + 1" r="5" fill="#000"></pxl-circle>'), (stage) => {
         const layer = stage.querySelector('pxl-layer');
