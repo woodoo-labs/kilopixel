@@ -138,6 +138,8 @@ pxl.defineShape('pxl-star', pxl.Star);</code></pre>
         <p>Every key of <code>static defaults</code> is an attribute. It takes numbers, expressions and <code>ref.*</code> like a built-in attribute, a bare or removed attribute falls back to its default, and it is also a JavaScript property for frameworks. <code>draw()</code> reads the current values from <code>this.values</code>, the same object that other shapes read as <code>ref.&lt;id&gt;</code>: the right star below copies <code>ref.star.points</code>.</p>
         <ul>
           <li><strong>Lowercase Keys:</strong> HTML lowercases attribute names, so a key like <code>pumpSpeed</code> would never receive its attribute. <code>pxl.defineShape()</code> warns about it.</li>
+          <li><strong>Built-in Names:</strong> <code>...pxl.Shape.defaults</code> brings the position, transform and style attributes; without it the shape draws nothing, and <code>pxl.defineShape()</code> warns. A built-in name written again, such as <code>fill: '#f97316'</code>, gets a new default and keeps its meaning: <code>x</code> still moves the shape.</li>
+          <li><strong>Reserved Names:</strong> <code>values</code>, <code>expressions</code>, <code>stage</code>, <code>handlers</code>, <code>constructor</code>, <code>update</code>, <code>render</code>, <code>prepare</code> and <code>paint</code> are the engine's own names on every shape. <code>pxl.defineShape()</code> refuses a key with one of them and doesn't define the tag.</li>
           <li><strong>Presence Attributes:</strong> a key whose default is <code>false</code> or <code>true</code> becomes a presence attribute: written bare, as in <code>&lt;pxl-gauge ticks&gt;</code>, it is <code>true</code> (section 3).</li>
         </ul>
 
@@ -447,7 +449,7 @@ declare module 'react' {
                   <div class="api-meta"><span class="api-pill values-pill">function</span></div>
                 </div>
                 <div class="api-item-desc">
-                  Defines the tag (<code>'pxl-star'</code>; the <code>pxl-</code> prefix is a convention) and hides content written inside it. Warns once for keys with capitals, a missing <code>draw()</code> or <code>getBoundingBox()</code>, and a tag that is already defined.
+                  Defines the tag (<code>'pxl-star'</code>; the <code>pxl-</code> prefix is a convention) and hides content written inside it. Warns once for keys with capitals, defaults without <code>...pxl.Shape.defaults</code>, a missing <code>draw()</code> or <code>getBoundingBox()</code>, and a tag that is already defined. A reserved key (section 2) is an error, and the tag is not defined.
                 </div>
               </div>
             </div>

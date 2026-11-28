@@ -3487,16 +3487,33 @@ pxl.Shape = class Shape extends pxl.PxlNode {
 // For built-in and custom shapes alike (design/done/2026-11-20_custom_shapes_plan.md §5.5), in a script after pxl.min.js.
 // The checks run once per class, here, instead of in every frame; the tag joins the default styles' display: none,
 // so content written inside a shape never shows as page text.
+// A key named like one of the engine's own lowercase fields or methods is refused: its accessor on the class prototype
+// would take the name over (values and expressions make the constructor throw, stage breaks on disconnect). The fields
+// are listed here, the methods are found on the prototypes.
 pxl.defineShape = function(tag, Class) {
   if (customElements.get(tag)) {
     console.warn(`[pxl] <${tag}> is already defined; this definition is ignored (is the script loaded twice?).`);
     return;
   }
   const name = Class.name || tag;
-  for (const key of Object.keys(Class.defaults)) {
+  const keys = Object.keys(Class.defaults);
+  const reserved = keys.filter((key) => ['values', 'expressions', 'stage', 'handlers'].includes(key) ||
+    Object.hasOwn(pxl.Shape.prototype, key) || Object.hasOwn(pxl.PxlNode.prototype, key));
+  if (reserved.length > 0) {
+    console.error(`[pxl] ${name}: ${reserved.map((key) => `"${key}"`).join(', ')} can't be an attribute: the engine uses ` +
+      `the name on every shape. <${tag}> is not defined; rename the attribute.`);
+    return;
+  }
+  for (const key of keys) {
     if (key !== key.toLowerCase()) {
       console.warn(`[pxl] ${name}: the attribute "${key}" must be lowercase. HTML lowercases attribute names, so it never arrives.`);
     }
+  }
+  // Without ...pxl.Shape.defaults the shape has no x, zoom, fill, …: its matrix is NaN, and it draws nothing
+  const missing = Object.keys(pxl.Shape.defaults).filter((key) => !(key in Class.defaults));
+  if (missing.length > 0) {
+    console.warn(`[pxl] ${name}: static defaults has no ${missing.join(', ')}. Start it with ...pxl.Shape.defaults, ` +
+      `or <${tag}> has no position, transform or style.`);
   }
   if (typeof Class.prototype.draw !== 'function') console.warn(`[pxl] ${name} has no draw(ctx): <${tag}> draws nothing.`);
   if (Class.prototype.getBoundingBox === pxl.Shape.prototype.getBoundingBox) {

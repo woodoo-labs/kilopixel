@@ -1,6 +1,6 @@
 # Kilopixel — Language Reference
 
-> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~75KB minified | **Zero Dependencies** | **Zero Build Step for Users**
+> **Version**: 0.1.0 | **Status**: Pre-release (API may change, no backwards compatibility) | **Total Source**: ~76KB minified | **Zero Dependencies** | **Zero Build Step for Users**
 
 How to write Kilopixel: elements, attributes, expressions, interaction. Each fact is stated once; sections link each other. How the engine does it (source files, frame, reactivity, hit testing, drawing): `.agents/ENGINE.md`. Docs pages also follow `docs/DOCS_STANDARDS.md`.
 
@@ -444,11 +444,11 @@ pxl.defineShape('pxl-star', pxl.Star);
 | | Name | Meaning |
 |---|---|---|
 | **write** | `class … extends pxl.Shape` | on `pxl` like the built-ins, or a plain class |
-| | `static defaults` | every attribute with its default, after `...pxl.Shape.defaults`. Each key is an observed attribute (Rule A, §3.5) and a property (§3.7). Keys lowercase (HTML lowercases attribute names). A `false` / `true` default makes a presence attribute (bare = `true`) |
+| | `static defaults` | every attribute with its default, after `...pxl.Shape.defaults`. Each key is an observed attribute (Rule A, §3.5) and a property (§3.7). Keys lowercase (HTML lowercases attribute names). A `false` / `true` default makes a presence attribute (bare = `true`). A built-in name (`x`, `fill`, `filter`, …) keeps its meaning: only its default changes. Reserved (the engine's own names on every shape): `values`, `expressions`, `stage`, `handlers`, `constructor`, `update`, `render`, `prepare`, `paint` |
 | | `static templateAttributes` | optional: attributes read as templates like `text` (§3.1), e.g. `['label']`; their properties are literal |
 | | `draw(ctx)` | the drawing around the shape's origin. The canvas is scaled by `u`, so lengths are written as in the HTML. Reads only `this.values`: no time (animate through attributes, `rotate="t * 30"` or an own `spin="t * 90"`), no DOM, as little allocation as possible |
 | | `getBoundingBox()` | the box around the outline, without the stroke, through `setBoundingBox()`. Gradients span it; hit testing checks it (padded by `hitPadding()`) before the exact test; an isolated shape (§4) is drawn only within it (padded the same way), so paint beyond is cut then. Without it, gradients collapse to a point, every hit test is exact, and an isolated shape covers the whole layer |
-| | `pxl.defineShape(tag, Class)` | defines the tag (`pxl-` by convention) and hides content inside it (`display: none`; before the script runs, the content shows). Warns once per class: a key with capitals, no `draw()`, no `getBoundingBox()`; a tag already defined (a script loaded twice) warns and keeps the first class |
+| | `pxl.defineShape(tag, Class)` | defines the tag (`pxl-` by convention) and hides content inside it (`display: none`; before the script runs, the content shows). Warns once per class: a key with capitals, a key of `pxl.Shape.defaults` missing (no spread: the shape has no position and draws nothing), no `draw()`, no `getBoundingBox()`; a tag already defined (a script loaded twice) warns and keeps the first class. A reserved key is an error, and the tag isn't defined |
 | **may override** | `hitTest(ctx)` | the hit area: a path and `ctx.fill()` / `ctx.stroke()` (they test the pointer instead of painting). Default: what `draw()` fills and strokes |
 | | `drawsMoreThanOnce()` | whether `draw()` makes more than one paint call (`fill()`, `stroke()`, `fillText()`, `drawImage()`), which decides isolation with `mask`, `blend`, `filter` or a shadow (§4). Default `true`; one path through `applyStyle()`: `this.hasFill() && this.isStroked()` |
 | | `hitPadding()` | how far the paint reaches beyond the box (default: from the stroke) |

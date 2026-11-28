@@ -1758,6 +1758,47 @@
       }
     });
 
+    test('custom shapes: pxl.defineShape() refuses a key named like an engine field or method; an HTMLElement name works', () => {
+      // The engine's lowercase names (camelCase ones can't collide: keys must be lowercase): a new shape's own fields
+      // without _, and the methods of pxl.Shape and pxl.PxlNode. A new lowercase field fails here until it is refused.
+      const names = new Set(Object.keys(document.createElement('pxl-circle')).filter((key) => key === key.toLowerCase() && !key.startsWith('_')));
+      for (const proto of [pxl.Shape.prototype, pxl.PxlNode.prototype]) {
+        for (const key of Object.getOwnPropertyNames(proto)) if (key === key.toLowerCase()) names.add(key);
+      }
+      const wrong = [];
+      [...names].forEach((key, i) => {
+        const tag = `pxl-test-reserved-${i}`;
+        const errors = captureErrors(() => pxl.defineShape(tag, class Reserved extends pxl.Shape {
+          static defaults = { ...pxl.Shape.defaults, [key]: 1 };
+          draw() {}
+          getBoundingBox() { return this.setBoundingBox(0, 0, 0, 0); }
+        }));
+        if (errors.length !== 1 || !errors[0].includes(`"${key}"`) || customElements.get(tag)) wrong.push(key);
+      });
+      const titleErrors = captureErrors(() => pxl.defineShape('pxl-test-title', class Titled extends pxl.Shape {
+        static defaults = { ...pxl.Shape.defaults, title: 'a' };
+        draw() {}
+        getBoundingBox() { return this.setBoundingBox(0, 0, 0, 0); }
+      }));
+      const titled = document.createElement('pxl-test-title');
+      titled.title = 'b';
+      if (wrong.length || titleErrors.length || titled.values.title !== 'b') {
+        throw new Error(`not refused: ${wrong} (of ${[...names]}); title: errors ${JSON.stringify(titleErrors)}, value ${titled.values.title}`);
+      }
+    });
+
+    test('custom shapes: pxl.defineShape() warns once when static defaults leaves out ...pxl.Shape.defaults', () => {
+      const warnings = captureWarnings(() => pxl.defineShape('pxl-test-nospread', class NoSpread extends pxl.Shape {
+        static defaults = { r: 10 };
+        draw() {}
+        getBoundingBox() { return this.setBoundingBox(0, 0, 0, 0); }
+      }));
+      if (warnings.length !== 1 || !warnings[0].includes('NoSpread') || !warnings[0].includes('...pxl.Shape.defaults') ||
+          !customElements.get('pxl-test-nospread')) {
+        throw new Error(`warnings ${JSON.stringify(warnings)}, defined: ${!!customElements.get('pxl-test-nospread')}`);
+      }
+    });
+
     // --- Reference cycles (design/done/2026-11-12_reactive_propagation_plan.md) ---
     section('Reference cycles');
 
