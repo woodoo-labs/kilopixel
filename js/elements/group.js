@@ -4,9 +4,7 @@ pxl.Group = class Group extends pxl.PxlNode {
     return [...super.observedAttributes, ...Object.keys(pxl.HANDLER_EVENTS)];
   }
 
-  static defaults = {
-    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false
-  };
+  static defaults = { ...pxl.TRANSFORM_DEFAULTS, hidden: false };
 
   constructor() {
     super();

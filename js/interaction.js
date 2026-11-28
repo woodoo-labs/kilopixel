@@ -61,7 +61,7 @@ pxl.ASSIGNING_REF = {
     const key = `${element.localName} ${String(name)}`;
     if (!pxl._unassignableNames.has(key)) {
       pxl._unassignableNames.add(key);
-      console.warn(`[pxl] <${element.localName}${element.id ? ` id="${element.id}"` : ''}>: ref.<id>.${String(name)} can't be assigned (not an attribute)`);
+      console.warn(`[pxl] ${pxl.describe(element)}: ref.<id>.${String(name)} can't be assigned (not an attribute)`);
     }
     // Not assigned. Handlers are sloppy-mode code, so false fails silently after the warning; true would throw for
     // tx, ty and $node (fixed getters on values: a Proxy may not report them as assigned)
@@ -83,7 +83,7 @@ pxl.compileHandler = function(element, name, source) {
     try {
       handler.call(element);
     } catch (error) {
-      console.error(`[pxl] <${element.localName}${element.id ? ` id="${element.id}"` : ''}> ${name} failed:`, error);
+      console.error(`[pxl] ${pxl.describe(element)} ${name} failed:`, error);
     }
   };
 };

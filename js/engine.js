@@ -18,10 +18,19 @@ pxl.sortByDOMPosition = function(a, b) {
   return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_PRECEDING) ? 1 : -1;
 };
 
+// The ten transform attributes of layers, groups and shapes with their defaults, spread into each class's defaults
+pxl.TRANSFORM_DEFAULTS = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0 };
+
+// The keys of pxl.TRANSFORM_DEFAULTS, as comparisons: called for every changed value in the frame
 pxl.isSpatialKey = function(key) {
   return key === 'x' || key === 'y' || key === 'dx' || key === 'dy' ||
          key === 'rotate' || key === 'zoom' || key === 'scalex' ||
          key === 'scaley' || key === 'skewx' || key === 'skewy';
+};
+
+// '<pxl-rect id="btn">' or '<pxl-rect>': how warnings and errors name an element
+pxl.describe = function(element) {
+  return `<${element.localName}${element.id ? ` id="${element.id}"` : ''}>`;
 };
 
 // =========================================================================
@@ -231,7 +240,7 @@ pxl._functionValueWarnings = new WeakSet();
 pxl.warnFunctionValue = function(element, name) {
   if (pxl._functionValueWarnings.has(element)) return;
   pxl._functionValueWarnings.add(element);
-  console.warn(`[pxl] <${element.localName}${element.id ? ` id="${element.id}"` : ''}> ${name}: a function can't be set as a value; use a number or an expression string`);
+  console.warn(`[pxl] ${pxl.describe(element)} ${name}: a function can't be set as a value; use a number or an expression string`);
 };
 
 pxl.setPendingProperties = function(element, pending) {

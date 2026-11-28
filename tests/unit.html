@@ -635,6 +635,35 @@
       if (!same([...found].sort(), expected)) throw new Error(`${[...found].sort()} instead of ${expected}`);
     });
 
+    test('transform attributes: pxl.isSpatialKey() is true exactly for the keys of pxl.TRANSFORM_DEFAULTS', () => {
+      const names = new Set(BUILT_IN.flatMap((tag) => customElements.get(tag).observedAttributes));
+      const spatial = [...names].filter((name) => pxl.isSpatialKey(name)).sort();
+      const keys = Object.keys(pxl.TRANSFORM_DEFAULTS).sort();
+      if (!same(spatial, keys) || keys.join(' ') !== COMMON.split(' ').sort().join(' ')) {
+        throw new Error(`isSpatialKey: ${spatial}; TRANSFORM_DEFAULTS: ${keys}`);
+      }
+    });
+
+    test('transform attributes: layers, groups and shapes start with pxl.TRANSFORM_DEFAULTS, keys and values', () => {
+      const wrong = [];
+      for (const tag of ['pxl-layer', 'pxl-group', ...BUILT_IN.filter((t) => customElements.get(t).prototype instanceof pxl.Shape)]) {
+        const defaults = customElements.get(tag).defaults;
+        const first = Object.keys(defaults).slice(0, 10);
+        if (!same(first, Object.keys(pxl.TRANSFORM_DEFAULTS))) wrong.push(`${tag}: starts with ${first}`);
+        for (const [key, value] of Object.entries(pxl.TRANSFORM_DEFAULTS)) {
+          if (defaults[key] !== value) wrong.push(`${tag} ${key}: ${show(defaults[key])}`);
+        }
+      }
+      if (wrong.length) throw new Error(wrong.join('; '));
+    });
+
+    test('pxl.describe(): an element as warnings name it, with its id or without', () => {
+      const rect = document.createElement('pxl-rect'), plain = pxl.describe(rect);
+      rect.id = 'btn';
+      const withId = pxl.describe(rect);
+      if (plain !== '<pxl-rect>' || withId !== '<pxl-rect id="btn">') throw new Error(`${plain}, ${withId}`);
+    });
+
     test('isHovered / isPressed: false on new shapes and groups, but not attributes or properties', () => {
       const wrong = [];
       for (const tag of ['pxl-circle', 'pxl-group']) {

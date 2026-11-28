@@ -5,7 +5,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   static defaults = {
-    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0,
+    ...pxl.TRANSFORM_DEFAULTS,
     fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0,
     alpha: 1, blend: 'source-over', mask: 'none', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false
   };

@@ -329,7 +329,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this._lastErrorMessage = message;
     this._errorCount++;
     const more = this._errorCount === 3 ? ' (further errors of this element are not shown)' : '';
-    console.warn(`[pxl] <${this.localName}${this.id ? ` id="${this.id}"` : ''}> skipped: ${message}${more}`);
+    console.warn(`[pxl] ${pxl.describe(this)} skipped: ${message}${more}`);
   }
 
   // --- Handlers ---

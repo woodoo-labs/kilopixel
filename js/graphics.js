@@ -93,7 +93,7 @@ pxl.checkCanvasFilter = function(ctx, node) {
   if (pxl._canvasFilterChecked) return;
   pxl._canvasFilterChecked = true;
   if ('filter' in Object.getPrototypeOf(ctx)) return;
-  console.warn(`[pxl] <${node.localName}${node.id ? ` id="${node.id}"` : ''}> has a filter, but this browser's canvas ` +
+  console.warn(`[pxl] ${pxl.describe(node)} has a filter, but this browser's canvas ` +
     'ignores filters on shapes (Safari: only with its "Canvas Filters" feature flag). A filter on a layer works everywhere.');
 };
 

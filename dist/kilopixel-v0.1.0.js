@@ -25,10 +25,19 @@ pxl.sortByDOMPosition = function(a, b) {
   return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_PRECEDING) ? 1 : -1;
 };
 
+// The ten transform attributes of layers, groups and shapes with their defaults, spread into each class's defaults
+pxl.TRANSFORM_DEFAULTS = { x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0 };
+
+// The keys of pxl.TRANSFORM_DEFAULTS, as comparisons: called for every changed value in the frame
 pxl.isSpatialKey = function(key) {
   return key === 'x' || key === 'y' || key === 'dx' || key === 'dy' ||
          key === 'rotate' || key === 'zoom' || key === 'scalex' ||
          key === 'scaley' || key === 'skewx' || key === 'skewy';
+};
+
+// '<pxl-rect id="btn">' or '<pxl-rect>': how warnings and errors name an element
+pxl.describe = function(element) {
+  return `<${element.localName}${element.id ? ` id="${element.id}"` : ''}>`;
 };
 
 // =========================================================================
@@ -238,7 +247,7 @@ pxl._functionValueWarnings = new WeakSet();
 pxl.warnFunctionValue = function(element, name) {
   if (pxl._functionValueWarnings.has(element)) return;
   pxl._functionValueWarnings.add(element);
-  console.warn(`[pxl] <${element.localName}${element.id ? ` id="${element.id}"` : ''}> ${name}: a function can't be set as a value; use a number or an expression string`);
+  console.warn(`[pxl] ${pxl.describe(element)} ${name}: a function can't be set as a value; use a number or an expression string`);
 };
 
 pxl.setPendingProperties = function(element, pending) {
@@ -872,7 +881,7 @@ pxl.ASSIGNING_REF = {
     const key = `${element.localName} ${String(name)}`;
     if (!pxl._unassignableNames.has(key)) {
       pxl._unassignableNames.add(key);
-      console.warn(`[pxl] <${element.localName}${element.id ? ` id="${element.id}"` : ''}>: ref.<id>.${String(name)} can't be assigned (not an attribute)`);
+      console.warn(`[pxl] ${pxl.describe(element)}: ref.<id>.${String(name)} can't be assigned (not an attribute)`);
     }
     // Not assigned. Handlers are sloppy-mode code, so false fails silently after the warning; true would throw for
     // tx, ty and $node (fixed getters on values: a Proxy may not report them as assigned)
@@ -894,7 +903,7 @@ pxl.compileHandler = function(element, name, source) {
     try {
       handler.call(element);
     } catch (error) {
-      console.error(`[pxl] <${element.localName}${element.id ? ` id="${element.id}"` : ''}> ${name} failed:`, error);
+      console.error(`[pxl] ${pxl.describe(element)} ${name} failed:`, error);
     }
   };
 };
@@ -1553,7 +1562,7 @@ pxl.checkCanvasFilter = function(ctx, node) {
   if (pxl._canvasFilterChecked) return;
   pxl._canvasFilterChecked = true;
   if ('filter' in Object.getPrototypeOf(ctx)) return;
-  console.warn(`[pxl] <${node.localName}${node.id ? ` id="${node.id}"` : ''}> has a filter, but this browser's canvas ` +
+  console.warn(`[pxl] ${pxl.describe(node)} has a filter, but this browser's canvas ` +
     'ignores filters on shapes (Safari: only with its "Canvas Filters" feature flag). A filter on a layer works everywhere.');
 };
 
@@ -2602,7 +2611,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
     this._lastErrorMessage = message;
     this._errorCount++;
     const more = this._errorCount === 3 ? ' (further errors of this element are not shown)' : '';
-    console.warn(`[pxl] <${this.localName}${this.id ? ` id="${this.id}"` : ''}> skipped: ${message}${more}`);
+    console.warn(`[pxl] ${pxl.describe(this)} skipped: ${message}${more}`);
   }
 
   // --- Handlers ---
@@ -2696,10 +2705,7 @@ pxl.PxlNode = class PxlNode extends HTMLElement {
 
 
 pxl.Layer = class Layer extends pxl.PxlNode {
-  static defaults = {
-    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0,
-    alpha: 1, blend: 'source-over', filter: 'none', hidden: false
-  };
+  static defaults = { ...pxl.TRANSFORM_DEFAULTS, alpha: 1, blend: 'source-over', filter: 'none', hidden: false };
 
   // :host styles have the lowest priority, so page CSS on pxl-layer wins
   static STYLES = ':host { display: block; position: absolute; inset: 0; } ' +
@@ -2905,9 +2911,7 @@ pxl.Group = class Group extends pxl.PxlNode {
     return [...super.observedAttributes, ...Object.keys(pxl.HANDLER_EVENTS)];
   }
 
-  static defaults = {
-    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0, hidden: false
-  };
+  static defaults = { ...pxl.TRANSFORM_DEFAULTS, hidden: false };
 
   constructor() {
     super();
@@ -2996,7 +3000,7 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   static defaults = {
-    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0,
+    ...pxl.TRANSFORM_DEFAULTS,
     fill: null, stroke: null, strokewidth: 1, linecap: 'butt', linejoin: 'miter', miterlimit: 10, linedash: null, dashoffset: 0,
     alpha: 1, blend: 'source-over', mask: 'none', filter: 'none', shadowcolor: null, shadowblur: 0, shadowx: 0, shadowy: 0, hidden: false
   };

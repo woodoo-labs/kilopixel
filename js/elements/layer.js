@@ -1,8 +1,5 @@
 pxl.Layer = class Layer extends pxl.PxlNode {
-  static defaults = {
-    x: 0, y: 0, dx: 0, dy: 0, rotate: 0, zoom: 1, scalex: 1, scaley: 1, skewx: 0, skewy: 0,
-    alpha: 1, blend: 'source-over', filter: 'none', hidden: false
-  };
+  static defaults = { ...pxl.TRANSFORM_DEFAULTS, alpha: 1, blend: 'source-over', filter: 'none', hidden: false };
 
   // :host styles have the lowest priority, so page CSS on pxl-layer wins
   static STYLES = ':host { display: block; position: absolute; inset: 0; } ' +

@@ -10,7 +10,7 @@ Build order (`files` in `build.js`):
 
 | # | File | Contents |
 |---|---|---|
-| 1 | `js/engine.js` | `pxl` namespace, generic helpers, reactivity (`pxl.nodes`, versions, `markChanged`), attribute compilation bridge, property accessors |
+| 1 | `js/engine.js` | `pxl` namespace, generic helpers (`pxl.describe()` names an element in warnings; `pxl.TRANSFORM_DEFAULTS`, spread into the defaults of layers, groups and shapes), reactivity (`pxl.nodes`, versions, `markChanged`), attribute compilation bridge, property accessors |
 | 2 | `js/matrix.js` | `pxl.Matrix` (Float64Array affine matrices, written in place), `pxl.toLocal` |
 | 3 | `js/compiler.js` | expression scope, time drivers, `parseAttributeValue`, `compileExpression` |
 | 4 | `js/interaction.js` | `pxl-on-*` handlers, `pxl.InteractionEngine`: hit testing, states, DOM events, cursor |
@@ -360,7 +360,7 @@ None in the walk, box check, boundary walk and queue; one event object per dispa
 ## 12. Adding an Attribute
 
 1. `static defaults` of the class, grouped like the tables in `.agents/KILOPIXEL.md`. Every attribute starts there (no defensive fallbacks), and every key is observed: `PxlNode`'s `observedAttributes` getter returns the keys plus `id`, `Shape` and `Group` add the `pxl-on-*` handlers, Polyline adds `points` (stored as `p0`, `p1`, …, so it has no default). Keys are lowercase (HTML lowercases attribute names). Runtime state that isn't an attribute (`isHovered`, `isPressed`) is set in the constructor instead.
-2. Use it from `values` in `draw()` (and `getBoundingBox()` / `hitPadding()` / `drawsMoreThanOnce()` if it changes them). A `false` / `true` default makes a presence attribute (`pxl.resolveEmptyAttribute()`: bare = `true`); a transform key goes into `pxl.isSpatialKey`.
+2. Use it from `values` in `draw()` (and `getBoundingBox()` / `hitPadding()` / `drawsMoreThanOnce()` if it changes them). A `false` / `true` default makes a presence attribute (`pxl.resolveEmptyAttribute()`: bare = `true`); a transform key goes into `pxl.TRANSFORM_DEFAULTS` and `pxl.isSpatialKey` (a unit test checks that both list the same keys).
 3. `tools/build_types.js`: a table entry if the default doesn't tell the type (keywords, colors, arrays, `null`).
 4. Tests: default, empty value, removed value, main effect (Rule A, `tests/unit.html` and `tests/index.html`).
 5. `.agents/KILOPIXEL.md` table, the docs page and its API table, `node build.js`, sizes (CLAUDE.md "File size after a build").
