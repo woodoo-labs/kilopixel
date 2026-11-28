@@ -1598,7 +1598,7 @@
     // ===================================================================
     section('Canvas filter support');
 
-    // Safari has ctx.filter only behind a feature flag (TODO §49). A context without it is simulated with an object
+    // Safari has ctx.filter only behind a feature flag (TODO "Shape Filters in Safari"). A context without it is simulated with an object
     // whose prototype has no filter, as Safari's is; pxl._canvasFilterChecked is reset around each test.
     const filterlessContext = () => Object.create({ globalAlpha: 1 });
     function withFilterCheck(fn) {

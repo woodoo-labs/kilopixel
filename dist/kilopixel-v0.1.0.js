@@ -1235,7 +1235,7 @@ pxl.applyContextState = function(ctx, u, values, node) {
 };
 
 // Safari's canvas has ctx.filter only behind its "Canvas Filters" feature flag, off by default: a shape's filter is
-// then ignored (TODO §49). Checked once per page, at the first shape with a filter; the prototype is asked, because
+// then ignored (TODO "Shape Filters in Safari"). Checked once per page, at the first shape with a filter; the prototype is asked, because
 // assigning ctx.filter where it doesn't exist creates a plain property on that context.
 pxl._canvasFilterChecked = false;
 

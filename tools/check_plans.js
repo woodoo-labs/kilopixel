@@ -1,5 +1,6 @@
-// Checks that the plans in design/ and .agents/TODO.md follow the "Plans and TODO" rule in .claude/CLAUDE.md
-// (no dependencies). Usage: node tools/check_plans.js → lists problems and exits with 1 if there are any.
+// Checks that the plans in design/ and .agents/TODO.md follow the rules in design/README.md, and that KILOPIXEL.md and
+// ENGINE.md name only what exists (no dependencies). Usage: node tools/check_plans.js → lists problems and exits with
+// 1 if there are any.
 const fs = require('fs');
 const path = require('path');
 
@@ -17,17 +18,15 @@ const report = (file, line, message) => problems.push(`${file}${line ? ':' + lin
 const OPEN = ['💬 **Discussion**', '🟡 **Proposed**', '🟢 **Decided**'];
 const CLOSED = ['✅ **Implemented**', '⚪ **Superseded by**', '⚪ **Dropped**'];
 const NAME = /^\d{4}-\d{2}-\d{2}_[a-z0-9_-]+_(plan|note)\.md$/;
-// An implemented plan records what was really built in a "## N. Built (date)" section (rule 3). Plans whose status
-// line dates the implementation before the rule are exempt: their builds are in git and KILOPIXEL.md.
-const BUILT_RULE_DATE = '2026-11-21';
-const BUILT_HEADING = /^##+ .*\bBuilt\b/m;
 const STATUS_MAX = 200; // characters after "**Status**: "
 const TODO_ITEM_MAX = 800; // characters per TODO item, heading included
 
 // design/: active plans (each with a TODO item); design/ideas/: parked ideas (open, no TODO item);
 // design/done/: implemented plans; design/archive/: superseded and dropped plans (a plan moves once, when it closes)
 const FOLDERS = ['design', 'design/ideas', 'design/done', 'design/archive'];
-const planFiles = FOLDERS.flatMap(dir => fs.readdirSync(path.join(root, dir)).filter(f => f.endsWith('.md')).map(f => `${dir}/${f}`));
+const CLOSED_FOLDERS = ['design/done', 'design/archive'];
+const planFiles = FOLDERS.flatMap(dir => fs.readdirSync(path.join(root, dir))
+  .filter(f => f.endsWith('.md') && f !== 'README.md').map(f => `${dir}/${f}`));
 const folderOf = (file) => path.dirname(file);
 
 const planStatus = {}; // file → 'open' | 'closed'
@@ -58,13 +57,6 @@ for (const file of planFiles) {
     const target = (text.match(/Superseded by\*\* `([^`]+)`/) || [])[1];
     if (!target || !exists(target)) report(file, n, `"Superseded by" needs an existing plan in backticks (found: ${target || 'none'})`);
   }
-  if (word === '✅ **Implemented**' && !archived) {
-    const date = (text.match(/\d{4}-\d{2}-\d{2}/) || [])[0];
-    if (date === undefined) report(file, n, 'implemented without a date in the status line');
-    else if (date >= BUILT_RULE_DATE && !BUILT_HEADING.test(read(file))) {
-      report(file, null, 'implemented, but no "## N. Built (date)" section that records what was built');
-    }
-  }
   if (word.startsWith('⚪') && !archived) report(file, n, 'superseded or dropped plans belong in design/archive/');
   if (word === '✅ **Implemented**' && (folder === 'design' || folder === 'design/ideas')) {
     report(file, n, 'implemented plans belong in design/done/');
@@ -76,69 +68,54 @@ for (const file of planFiles) {
 }
 
 // =========================================================================
-// TODO.md: items, statuses, numbers, open plans
+// TODO.md: items (one "## Title" each), statuses, open plans
 // =========================================================================
 
 const TODO = '.agents/TODO.md';
 const todo = read(TODO);
-const todoLines = todo.split('\n');
-const items = {}; // number → text of the item
+const items = {}; // title → text of the item
 let current = null;
-todoLines.forEach((text, i) => {
-  const heading = text.match(/^## (\d+)\. /);
+todo.split('\n').forEach((text, i) => {
+  const heading = text.match(/^## (.+)/);
   if (heading) {
     current = heading[1];
-    if (items[current] !== undefined) report(TODO, i + 1, `item §${current} exists twice`);
+    if (items[current] !== undefined) report(TODO, i + 1, `item "${current}" exists twice`);
     items[current] = '';
   }
   if (current) items[current] += text + '\n';
 });
 
-for (const [num, text] of Object.entries(items)) {
+for (const [title, text] of Object.entries(items)) {
   const status = text.match(/\*\*Status\*\*: (.*)/);
-  if (!status) report(TODO, null, `§${num} has no status line`);
-  else if (!OPEN.some(w => status[1].startsWith(w))) report(TODO, null, `§${num}: status must start with 💬, 🟡 or 🟢 (open work only)`);
+  if (!status) report(TODO, null, `"${title}" has no status line`);
+  else if (!OPEN.some(w => status[1].startsWith(w))) report(TODO, null, `"${title}": status must start with 💬, 🟡 or 🟢 (open work only)`);
   const length = text.trimEnd().length;
-  if (length > TODO_ITEM_MAX) report(TODO, null, `§${num} has ${length} characters (at most ${TODO_ITEM_MAX}): the details belong in the plan`);
+  if (length > TODO_ITEM_MAX) report(TODO, null, `"${title}" has ${length} characters (at most ${TODO_ITEM_MAX}): the details belong in the plan`);
 }
-
-const numbers = Object.keys(items).map(Number);
-const nextFree = Number((todo.match(/next: §(\d+)/) || [])[1]);
-if (!nextFree) report(TODO, null, 'header has no "next: §N"');
-else if (numbers.some(n => n >= nextFree)) report(TODO, null, `"next: §${nextFree}" is not above the highest item (§${Math.max(...numbers)})`);
 
 // Active plans have a TODO item; parked ideas (design/ideas/) don't need one
 for (const [file, state] of Object.entries(planStatus)) {
   if (state === 'open' && folderOf(file) === 'design' && !todo.includes(file)) report(file, null, 'open plan without a TODO item');
 }
 
-// A bare §N in TODO.md is another item, unless it is a section of a plan ("plan §6", "note §7",
-// "`file.md` §5", "ideas in §7") or has a decimal point (§7.4).
-todoLines.forEach((text, i) => {
-  for (const m of text.matchAll(/§(\d+)(\.\d)?/g)) {
-    const before = text.slice(Math.max(0, m.index - 12), m.index);
-    if (m[2] || /(plan|note|`|in|next:|TODO) $/.test(before)) continue;
-    if (items[m[1]] === undefined) report(TODO, i + 1, `refers to §${m[1]}, which is not an item`);
-  }
-});
-
 // =========================================================================
-// Paths, links and TODO numbers in all documents
+// Paths and links in the live documents
 // =========================================================================
 
-const documents = [TODO, '.agents/KILOPIXEL.md', '.agents/ENGINE.md', '.claude/CLAUDE.md', 'docs/DOCS_STANDARDS.md', ...planFiles];
-// Live documents: plans, agent and Claude files, tools. Archived plans are history, so only their
-// links to other plans are checked. js/ and docs/ paths aren't checked: plans name files that don't exist yet.
+// Closed plans (design/done/, design/archive/) are history: frozen, not checked. Their links may point to where a
+// file was when they were written; file names are unique and dated, so a moved plan is still found by its name.
+// js/ and docs/ paths aren't checked: plans name files that don't exist yet.
+const livePlans = planFiles.filter(f => !CLOSED_FOLDERS.includes(folderOf(f)));
+const documents = [TODO, '.agents/KILOPIXEL.md', '.agents/ENGINE.md', '.claude/CLAUDE.md', 'docs/DOCS_STANDARDS.md',
+  'design/README.md', ...livePlans];
 const LIVE_PATH = /(?:^|[\s`(\[])((?:design|\.agents|\.claude|tools)\/[A-Za-z0-9_.\/-]+)/g;
-const PLAN_PATH = /(?:^|[\s`(\[])(design\/[A-Za-z0-9_.\/-]+\.md)/g;
 // Folders that exist only on some laptops (not in git): documents may name them, but they needn't exist here
 const PER_MACHINE = ['.claude/worktrees'];
 
 for (const file of documents) {
-  const archived = file.startsWith('design/archive/');
   let inFence = false;
   read(file).split('\n').forEach((text, i) => {
-    for (const m of text.matchAll(archived ? PLAN_PATH : LIVE_PATH)) {
+    for (const m of text.matchAll(LIVE_PATH)) {
       const p = m[1].replace(/[.,;:]+$/, '').replace(/\/$/, '');
       if (!p.includes('*') && !PER_MACHINE.includes(p) && !exists(p)) report(file, i + 1, `missing: ${p}`);
     }
@@ -158,11 +135,8 @@ for (const file of documents) {
       report(file, i + 1, 'links a scratch/ file: move it to design/prototypes/<plan>/ or mark it "(not kept)"');
     }
 
-    if (file !== TODO) {
-      for (const m of text.matchAll(/TODO(?:\.md)?`? §(\d+)/g)) {
-        if (items[m[1]] === undefined) report(file, i + 1, `refers to TODO §${m[1]}, which doesn't exist (link the plan instead)`);
-      }
-    }
+    // TODO items have no numbers: refer to the plan, or to the item by its title
+    if (/TODO(?:\.md)?`? §\d+/.test(text)) report(file, i + 1, 'refers to a TODO number: name the plan or the item\'s title');
   });
 }
 
@@ -211,7 +185,7 @@ if (exists(PROTOTYPES)) {
 // =========================================================================
 
 const open = Object.values(planStatus).filter(s => s === 'open').length;
-console.log(`${planFiles.length} plans (${open} open), ${numbers.length} TODO items, ${documents.length} documents checked.`);
+console.log(`${planFiles.length} plans (${open} open), ${Object.keys(items).length} TODO items, ${documents.length} documents checked.`);
 if (problems.length) {
   console.log(`\n${problems.length} problem(s):`);
   for (const p of problems) console.log('  ' + p);

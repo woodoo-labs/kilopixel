@@ -2,7 +2,7 @@
 
 - **Status**: 🟡 **Proposed** (2026-11-16, direction and head behavior chosen with the prototype; D1–D5 open)
 - **Date**: 2026-11-16
-- **Related**: `design/done/2026-10-14_unified_arrowhead_geometry_plan.md` (its D9, "insets longer than the path", is replaced by §3.2), `design/archive/2026-09-23_circle_geometry_hardening_and_annular_sector_plan.md` §4.4 (assumed a sweep can swing through zero, `sweep="sin(t) * 90"`), `design/ideas/2026-10-15_arrowcap_arrowjoin_plan.md` (arrowhead look), `design/done/2026-11-15_testing_plan.md` §15 (where this was found), TODO §12 (`docs/arrows.html`, "Rules & Edge Cases")
+- **Related**: `design/done/2026-10-14_unified_arrowhead_geometry_plan.md` (its D9, "insets longer than the path", is replaced by §3.2), `design/archive/2026-09-23_circle_geometry_hardening_and_annular_sector_plan.md` §4.4 (assumed a sweep can swing through zero, `sweep="sin(t) * 90"`), `design/ideas/2026-10-15_arrowcap_arrowjoin_plan.md` (arrowhead look), `design/done/2026-11-15_testing_plan.md` §15 (where this was found), TODO "Arrowheads Docs Page" (`docs/arrows.html`, "Rules & Edge Cases")
 - **Target Implementation**: `js/graphics.js` (`pxl.arcEndRadians`), `js/elements/shapes/circle.js`, `js/elements/shapes/ellipse.js`, `js/elements/shape.js` (`resolveArrow`), `js/elements/shapes/line.js`, `js/elements/shapes/polyline.js`, `tests/render.html`, `tests/unit.html`, `.agents/KILOPIXEL.md`, `docs/circle.html`, `docs/ellipse.html`, `docs/arrows.html`
 - **Prototype**: `design/prototypes/2026-11-16_negative_sweep_arrowheads/index.html` (real `<pxl-circle>` / `<pxl-ellipse>` arcs: today's behavior B and the variants A1 / A2 side by side, animated through zero and at fixed sweeps; `?endOnly` for a single arrowhead; A2 for ellipses by arc length and by `r × |sweep|`). It loads `/dist/pxl.min.js`: column B shows today's behavior only until this plan is built; the engine it was made with is commit `7d12daf` (`git show 7d12daf:dist/pxl.js`)
 
@@ -94,7 +94,7 @@ Pages that rely on a negative sweep drawing the long way: none known (to check i
 ## 6. Docs
 
 - `docs/circle.html`, `docs/ellipse.html`: `sweep` text and the API reference ("signed: negative goes anticlockwise"), `anticlockwise` ("mirrors the sweep"); a short example with a negative sweep.
-- `docs/arrows.html` "Rules & Edge Cases" (TODO §12): heads shrink on paths shorter than them.
+- `docs/arrows.html` "Rules & Edge Cases": heads shrink on paths shorter than them.
 - `.agents/KILOPIXEL.md`: Circle and Ellipse "Drawing Logic", Arrowhead System "Rules & Limits" (replace "If a path is shorter than both insets combined, only the heads are drawn").
 
 ## 7. Open Decisions
@@ -112,7 +112,7 @@ Pages that rely on a negative sweep drawing the long way: none known (to check i
 1. Search docs and examples for negative sweeps and `anticlockwise` (pages whose look changes).
 2. §3.1 direction in `pxl.arcEndRadians()`, `circle.js`, `ellipse.js`; render tests; KILOPIXEL.md and the circle / ellipse docs.
 3. §3.2 / §3.3 shrinking in `resolveArrow()` and the four shapes; render and unit tests; measure the ellipse cost against the frame budget (`examples/benchmark.html` or a bench in the prototype folder).
-4. `docs/arrows.html` rules section (TODO §12).
+4. `docs/arrows.html` rules section.
 
 ## Log
 

@@ -26,8 +26,8 @@ The rule for the scope follows from that:
 |---|---|---|---|
 | A1 | Text as a template | `text` read as a template where only `${…}` is code, instead of today's guessing between text and code | **built 2026-11-27**: `design/done/2026-11-27_text_template_plan.md` |
 | A2 | Default text alignment (with A1) | keep `start` / `alphabetic`, or `center` / `middle` like every other shape | **built 2026-11-27: `center` / `middle`** (R3), with A1; moves every label that relies on the default by about 14 px |
-| A3 | TODO §42 negative sweep | the sign of `sweep` becomes the direction (today `sweep="-90"` draws three quarters) | 🟡, D1–D5 with recommendations and a prototype |
-| A4 | TODO §49 shape filters in Safari | a fallback for `blur()` / `dropShadow()` on shapes, or a documented limit | 💬 |
+| A3 | negative sweep (`design/2026-11-16_negative_sweep_arrowheads_plan.md`) | the sign of `sweep` becomes the direction (today `sweep="-90"` draws three quarters) | 🟡, D1–D5 with recommendations and a prototype |
+| A4 | shape filters in Safari (TODO item, no plan) | a fallback for `blur()` / `dropShadow()` on shapes, or a documented limit | 💬 |
 | A5 | Release policy | what changes on release day (R5, §6) | **decided 2026-11-27** (R5); applied on release day |
 
 A1 and A2 both change every label: decided together, they cost one migration of the pages instead of two.
@@ -36,18 +36,18 @@ A1 and A2 both change every label: decided together, they cost one migration of 
 
 | # | Item | Why | Note |
 |---|---|---|---|
-| B1 | TODO §3 animation started by events | nothing can be animated once after a click today | **decided 2026-11-27** (R2): reactive values first, §5; the tween plan is rewritten before building |
-| B2 | TODO §1 `<pxl-path>` | icons and SVG paths are the first thing many users try | plan exists; its code predates the custom-shape form (`static defaults`, `draw(ctx)` without `u`) |
-| B3 | TODO §9 `<pxl-image>` | images are a basic need | no plan yet; late loading is analysed in `design/done/2026-11-06_text_box_accuracy_plan.md` §7 |
+| B1 | animation started by events (`design/2026-10-01_tween_animation_plan.md`) | nothing can be animated once after a click today | **decided 2026-11-27** (R2): reactive values first, §5; the tween plan is rewritten before building |
+| B2 | `<pxl-path>` (`design/2026-09-30_path_element_plan.md`) | icons and SVG paths are the first thing many users try | plan exists; its code predates the custom-shape form (`static defaults`, `draw(ctx)` without `u`) |
+| B3 | `<pxl-image>` (TODO item, no plan) | images are a basic need | no plan yet; late loading is analysed in `design/done/2026-11-06_text_box_accuracy_plan.md` §7 |
 
 ### C. The Release Itself
 
 | # | Item | Note |
 |---|---|---|
-| C1 | TODO §43 `llms.txt` / `llms-full.txt` | generated from `.agents/KILOPIXEL.md` by `build.js`; decided |
-| C2 | TODO §44 npm package | `exports`, `sideEffects`, typings; the smoke pages for Svelte and Lit with it |
+| C1 | `llms.txt` / `llms-full.txt` (TODO item, no plan) | generated from `.agents/KILOPIXEL.md` by `build.js`; decided |
+| C2 | npm package (TODO "Distribution and More Framework Smoke Pages") | `exports`, `sideEffects`, typings; the smoke pages for Svelte and Lit with it |
 | C3 | Docs: the pages marked "soon" in the sidebar | Stage, Layer, Group; Transforms (one page for Center & Offset, Zoom & Scale, Rotate & Skew, R4; the sidebar gets one entry when it is written); Grid; Expressions, Referencing, Events, Animation: 9 pages, the largest part of 0.1 |
-| C4 | TODO §12 arrows page | one section left ("Rules & Edge Cases"), after A3 |
+| C4 | arrows page (TODO "Arrowheads Docs Page") | one section left ("Rules & Edge Cases"), after A3 |
 | C5 | Text docs | the `docs/text.html` section on what `text` accepts, now for templates (A1); the former quoting convention is not needed (built with A1; the section with a demo comes with the Expressions page, C3) |
 
 ### D. After 0.1
