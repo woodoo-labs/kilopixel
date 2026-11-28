@@ -668,7 +668,9 @@ pxl.timeDriverRegex = new RegExp(`(^|[^.])\\bt\\b|\\b(${Object.keys(pxl.drivers)
 // Compiled functions (time-dependent or reactive), shared by every element using the same string
 pxl.animationCache = new Map();
 
-// Results of static expressions, evaluated once
+// Static expressions: the compiled function, or null for a string that failed. The function runs again each time the
+// string is parsed (pxl.evaluateStatic()), so every element gets its own result: a cached result would put every
+// element with x="random() * 1000" at the same place. Compiling is the cost the cache saves.
 pxl.staticCache = new Map();
 
 // Entries kept per cache. A framework that rebuilds an expression string on every render (`x="${base} + sin(t)"`)
@@ -809,7 +811,8 @@ pxl.parseAttributeValue = function(value) {
 };
 
 pxl.compileExpression = function(str) {
-  if (pxl.staticCache.has(str)) return pxl.staticCache.get(str);
+  const staticFn = pxl.staticCache.get(str);
+  if (staticFn !== undefined) return staticFn === null ? str : pxl.evaluateStatic(staticFn, str);
   if (pxl.animationCache.has(str)) return pxl.animationCache.get(str);
 
   try {
@@ -863,19 +866,36 @@ pxl.compileExpression = function(str) {
       return fn;
     }
 
-    // Static: evaluated once
-    const result = new Function('scope', `
+    // Static: compiled once, evaluated for every element that uses the string
+    const fn = new Function('scope', `
       const { ${pxl.scopeKeys()} } = scope;
-      ${code}
+      return function() {
+        ${code}
+      };
     `)(pxl.scope);
-    const val = (result !== undefined) ? result : str;
-    pxl.cacheExpression(pxl.staticCache, str, val);
-    return val;
+    pxl.cacheExpression(pxl.staticCache, str, fn);
+    return pxl.evaluateStatic(fn, str);
   } catch (e) {
-    pxl.cacheExpression(pxl.staticCache, str, str);
-    console.warn(`[pxl] failed to compile expression, used as text instead: ${str}`, e);
+    pxl.rejectExpression(str, e);
     return str;
   }
+};
+
+// A static expression's value for one element; an undefined result keeps the source string
+pxl.evaluateStatic = function(fn, str) {
+  try {
+    const result = fn();
+    return result !== undefined ? result : str;
+  } catch (e) {
+    pxl.rejectExpression(str, e);
+    return str;
+  }
+};
+
+// A string that doesn't compile or throws when evaluated (foo + 1) warns once and is text from then on
+pxl.rejectExpression = function(str, error) {
+  pxl.cacheExpression(pxl.staticCache, str, null);
+  console.warn(`[pxl] failed to compile expression, used as text instead: ${str}`, error);
 };
 
 // =========================================================================

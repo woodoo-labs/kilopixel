@@ -73,7 +73,7 @@ Text with digits next to operators, parentheses or brackets looks like code (`la
 
 - **JavaScript expressions** evaluated with the scope below. Without the word `return` an expression is returned as it is (`t > 10 ? 'red' : 'blue'`); with it, it is a code block (`if (t < 10) { return 'red'; } return 'blue';`).
 - **CSS percentages** inside code are allowed: `hsl(120, 50%, 40%)` works as an expression.
-- **Static** (no `t`, no `ref`): evaluated once. **Animated** (uses `t` or a time driver): every frame. **Reactive** (reads `ref.*`, no `t`): in the next frame after a referenced element changed (§3.6). A string that doesn't compile warns and is used as text.
+- **Static** (no `t`, no `ref`): evaluated once per element (`x="random() * 1000"` gives each element its own place). **Animated** (uses `t` or a time driver): every frame. **Reactive** (reads `ref.*`, no `t`): in the next frame after a referenced element changed (§3.6). A string that doesn't compile warns and is used as text.
 - Text inside an expression is quoted: `fill="t > 5 ? 'red' : 'blue'"`, `text="${ref.btn.isHovered ? 'On' : 'Off'}"`. Colors as function arguments are strings too: `dropShadow(0, 20, 20, '#0ff')` (without quotes: a SyntaxError).
 - Function calls need no backticks: `fill="hsl(t * 36, 80, 50)"`, `fill="linear(45, ['red', 'blue'])"`.
 

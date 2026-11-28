@@ -154,9 +154,22 @@
       if (pxl.compileExpression('t * 7.5') !== pxl.compileExpression('t * 7.5')) throw new Error('two functions');
     });
 
-    test('compileExpression: random() without t is evaluated once, so every element with that string gets the same value', () => {
+    test('compileExpression: a static expression is compiled once and evaluated per element, so random() differs', () => {
       const a = pxl.parseAttributeValue('random() * 1000'), b = pxl.parseAttributeValue('random() * 1000');
-      if (typeof a !== 'number' || a !== b) throw new Error(`got ${a} and ${b}`);
+      const cached = pxl.staticCache.get('random() * 1000');
+      if (typeof a !== 'number' || typeof b !== 'number' || a === b || typeof cached !== 'function') {
+        throw new Error(`got ${a} and ${b}, cached ${typeof cached}`);
+      }
+    });
+
+    test('compileExpression: a static expression that throws when evaluated warns once and is used as a plain string', () => {
+      const values = [];
+      const seen = warnings(() => {
+        values.push(pxl.parseAttributeValue('uNoSuchName + 1'), pxl.parseAttributeValue('uNoSuchName + 1'));
+      });
+      if (values.join('|') !== 'uNoSuchName + 1|uNoSuchName + 1' || seen.length !== 1) {
+        throw new Error(`values ${show(values)}, ${seen.length} warnings`);
+      }
     });
 
     table('compiled functions: evaluated at t, refs read through the ?. rewrite', [
