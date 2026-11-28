@@ -76,13 +76,41 @@ The order goes from smallest to largest, so the first phases also show whether t
 | D6 | The scheduler as a class owned by the stage, or `pxl.*` functions taking the stage? | **A** class (`stage.scheduler`); **B** functions | **A**: it owns six fields, which CLAUDE.md wants in a constructor; same pattern as `pxl.InteractionEngine` |
 | D7 | Drawing with the cached local matrix (`ctx.transform(...getLocalMatrix())`) instead of `applyTransformState()`'s calls | **A** in this plan as phase 6; **B** its own plan | **B**: it changes behavior (canvas calls, possibly pixels) and needs a measurement against the frame budget; this plan only moves code |
 
-## 6. Risks
+## 6. Risks, Per-Frame Cost and Edge Cases
+
+### 6.1 Moves
 
 - **Load order.** `class … extends` and spread `static defaults` run at load: `arc.js` after `shape.js`, `gradient.js` before `shape.js` only if a class field needs it (none does: the slots are created in the constructor). D2 handles the scope. `build.js` fails on top-level declarations, so a moved helper that was written as a function declaration would be caught.
 - **`_` ownership** (`build.js` checks it by name across files): fields move together with the code that uses them (`_gradCache` → the slot's own fields; the scheduler's `_order`, `_readers`, … → `pxl.UpdateScheduler`). The checker names any field that breaks the rule.
 - **Tests that read internals:** the four lines named in phases 1, 4 and 5. Everything else calls `pxl.*` functions that keep their names.
 - **Prototypes** in `design/prototypes/` that call moved internals (`option_b.patch`, the isolation box pages, `applyCompositingState` in the custom shapes patches) are history and run against the build of their time (`git show <commit>:dist/pxl.js`); not updated.
 - **Bundle size:** about neutral (a class wrapper or two). Checked by `tools/check_build.js`.
+
+### 6.2 Per-Frame Cost and Garbage Collection
+
+Phases 1–3 add nothing per frame: phase 1's only new call, `publishMetrics()`, runs once per second per stage and does the work the monitor does today (`toFixed()` strings once a second); the frame counting in `Stage.render()` stays the same three lines. Phase 2's handlers run only on events. Phase 3 moves functions between files of one concatenated bundle, so the engine runs the same functions.
+
+Phases 4 and 5 touch per-frame paths. Rules for them:
+
+1. **The color fast path stays in `Shape.createGradient()`.** Almost every fill and stroke is a color (or `null`): the test for a descriptor runs before the slot is touched, so a color costs no extra call.
+2. **`pxl.GradientSlot` sets every field in its constructor** (`config`, the four box values, `sw`, `grad`, `error`) and allocates nothing in `resolve()`: it gets the reused box record from `getBoundingBox()`.
+3. **Moved per-frame code keeps its form:** indexed `for` loops, no `forEach` or arrow functions, no array destructuring, no new objects. Destructuring `this.values` is fine (it allocates nothing).
+4. **Measured:** `tests/scaling.html` runs in every full test run; phases 4 and 5 also get a before / after run of `examples/benchmark.html`, accepted within its noise. The scheduler adds one property load per call (`stage.scheduler.…`); `updateReaders()` is still skipped entirely while nothing that anyone reads changed.
+
+### 6.3 Edge Cases
+
+| Phase | Case | What must hold |
+|---|---|---|
+| 1 | A stage moved in the DOM (disconnect, then connect) | It leaves `pxl.stages` and joins again, never twice; the timer may stop and start again, and the first publish after a start divides by the time since the start |
+| 1 | A stage removed while the timer fires | The list changes at once: a removed stage is never published |
+| 1 | Web fonts arrive while a stage is disconnected | Not in `pxl.stages`, so not invalidated; on reconnect its resize renders every layer anyway |
+| 1 | The monitor test calls `pxl.perf.publish()` | The tick keeps that name |
+| 4 | The fill slot also compares `strokewidth` (a fill rebuilds when the stroke width changes) | Moved as it is: a move doesn't change behavior |
+| 4 | `paint()` for a fill or stroke that isn't set | Returns `null` (fixed in `a54e485`); the `null` test moves with the color fast path |
+| 5 | An element moved from one stage to another | `listedIn` and `readerStage` both hold the stage, never the scheduler: the old scheduler drops a reader when `readerStage !== stage`, the new one adds it when `listedIn !== stage`; mixing stage and scheduler there would drop readers silently |
+| 5 | A stage disconnected and inserted again | `scheduler.reset()` clears `isOrderNode` on its nodes and forces a new order, as `disconnectedCallback()` does today |
+| D2 | The script placed after the markup | `customElements.define('pxl-stage')` upgrades the stages while the bundle still runs, and `ratio="16 / 9"` compiles: a `pxl.scopeKeys` computed at the first compile is computed then. Rule: every file that adds scope entries loads before the first `customElements.define()` (gradient.js 5 and compositing.js 6 come before stage.js 10); the unit test of D2 catches a break |
+| all | `tools/build_types.js` runs the bundle in Node with a stubbed DOM | New files touch no DOM at load (the isolation canvas stays lazy); `handlers.js` builds its `Proxy` over `pxl.nodes` at load, so `reactivity.js` comes first (2 before 7) |
 
 ## 7. Docs
 
@@ -98,8 +126,10 @@ Class-structure follow-ups from the same review, each small, better as a second 
 - `stage` and `readerStage`: the same `closest('pxl-stage')` stored twice on shapes and groups.
 - `Polyline.setPoints()` re-implements `valueChanged()` (and skips `affectsPixels()`).
 - D7, drawing with the local matrix.
+- Allocation of animated gradients: `linear(t * 30, ['red', 'blue'])` creates the colors array, the stops array, a stop object per color, the descriptor and a new `CanvasGradient`, per shape and frame (ENGINE.md accepts it, about 0.8 µs). The largest known garbage source in an animated scene; a plan of its own if a measurement shows it matters.
 
 ## Log
 
+- 2026-11-28: review for per-frame cost, garbage and edge cases: §6.2 (rules for phases 4 and 5), §6.3 (edge cases), animated gradients in §8. The review found the `paint()` bug fixed in `a54e485`.
 - 2026-11-28: phase 1 also moves the monitor's publishing into the stage (`publishMetrics()`, counters owned by the stage), the step the throttling plan's C2 needs; that plan (TODO §8) stays after release 0.1.
 - 2026-11-28: proposed after the code review of the same day; its small findings were built first.
