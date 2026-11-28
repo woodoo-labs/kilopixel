@@ -54,8 +54,8 @@ pxl.anchorY = {
   'center-left': 0.5, 'center-right': 0.5
 };
 
-// Names available in every expression and handler: Math, colors and utilities (compiler.js), filters
-// (compositing.js), gradients. A whitelist without a prototype, so polyfills can't leak in.
+// Names available in every expression and handler: Math, colors and utilities (compiler.js), gradients
+// (gradient.js), filters (compositing.js). A whitelist without a prototype, so polyfills can't leak in.
 pxl.scope = Object.create(null);
 
 // =========================================================================

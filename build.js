@@ -9,6 +9,7 @@ const files = [
   'js/engine.js',
   'js/matrix.js',
   'js/compiler.js',
+  'js/gradient.js',
   'js/compositing.js',
   'js/handlers.js',
   'js/interaction.js',

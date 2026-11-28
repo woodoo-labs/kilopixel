@@ -19,45 +19,13 @@ pxl.createArrowRecord = function() {
 };
 
 // =========================================================================
-// Line Dash and Gradient Radius
+// Line Dash
 // =========================================================================
 pxl._emptyDash = [];
 
 // Solid line: null (default), 'none' or 0
 pxl.hasLineDash = function(linedash) {
   return !!linedash && linedash !== 'none' && linedash !== '0';
-};
-
-// Radial gradient radius: a number is a logical length; a string is the distance from the center (x, y)
-// to a side, a perimeter point or a CSS keyword of the bounding box (w × h)
-pxl.resolveRadius = function(r, x, y, w, h) {
-  if (typeof r === 'number') return Math.abs(r);
-
-  // Sides: perpendicular distance
-  if (r === 'top')    return Math.abs(y * h);
-  if (r === 'bottom') return Math.abs((1 - y) * h);
-  if (r === 'left')   return Math.abs(x * w);
-  if (r === 'right')  return Math.abs((1 - x) * w);
-
-  // Perimeter points (corners, edge midpoints): straight distance
-  const ax = pxl.anchorX[r];
-  if (ax !== undefined) {
-    const dx = (x - ax) * w, dy = (y - pxl.anchorY[r]) * h;
-    return Math.sqrt(dx * dx + dy * dy);
-  }
-
-  // CSS keywords
-  const lx = x * w, rx = (1 - x) * w;
-  const ty = y * h, by = (1 - y) * h;
-  switch (r) {
-    case 'closest-side':   return Math.max(0.001, Math.min(lx, rx, ty, by));
-    case 'farthest-side':  return Math.max(lx, rx, ty, by);
-    case 'closest-corner':
-      return Math.max(0.001, Math.min(Math.hypot(lx, ty), Math.hypot(rx, ty), Math.hypot(lx, by), Math.hypot(rx, by)));
-    case 'farthest-corner':
-      return Math.max(Math.hypot(lx, ty), Math.hypot(rx, ty), Math.hypot(lx, by), Math.hypot(rx, by));
-    default: return 0;
-  }
 };
 
 // =========================================================================
@@ -86,11 +54,8 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     // Reused by getBoundingBox() every frame
     this.boundingBox = { left: 0, right: 0, top: 0, bottom: 0 };
 
-    // Gradient cache per slot: [0] = fill, [1] = stroke (createGradient). error: kept when building failed
-    this._gradCache = [
-      { config: null, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null, error: null },
-      { config: null, bl: 0, bt: 0, br: 0, bb: 0, sw: 0, grad: null, error: null }
-    ];
+    // The CanvasGradients of the fill ([0]) and the stroke ([1]), each reused while nothing changed (createGradient())
+    this._gradients = [new pxl.GradientSlot(false), new pxl.GradientSlot(true)];
 
     // A dash written as one number, as the array setLineDash() needs (applyLineDash())
     this._singleDash = [0];
@@ -303,105 +268,15 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     return which === 'stroke' ? this.createGradient(ctx, this.values.stroke, 1) : this.createGradient(ctx, this.values.fill, 0);
   }
 
-  // A gradient descriptor becomes a CanvasGradient; anything else is returned as it is: a color, or null for a fill or
-  // stroke that isn't set (paint() is called by custom shapes without hasFill() first; typeof null is 'object')
+  // A gradient descriptor becomes a CanvasGradient in the shape's box, through the fill's or the stroke's
+  // pxl.GradientSlot; anything else is returned as it is: a color, or null for a fill or stroke that isn't set
+  // (paint() is called by custom shapes without hasFill() first; typeof null is 'object'). The test for a descriptor
+  // comes first: almost every fill and stroke is a color.
   createGradient(ctx, styleValue, slot) {
     if (styleValue === null || typeof styleValue !== 'object' || !styleValue.isGradient) {
       return styleValue;
     }
-
-    const box = this.getBoundingBox();
-    const c = this._gradCache[slot];
-    const sw = this.values.strokewidth;
-
-    // Reuse while the descriptor, the bounding box and the stroke width are unchanged
-    if (c.config === styleValue &&
-        c.bl === box.left && c.bt === box.top &&
-        c.br === box.right && c.bb === box.bottom && c.sw === sw) {
-      if (c.error) throw c.error;
-      return c.grad;
-    }
-
-    c.config = styleValue;
-    c.bl = box.left;
-    c.bt = box.top;
-    c.br = box.right;
-    c.bb = box.bottom;
-    c.sw = sw;
-    c.grad = null;
-    c.error = null;
-    try {
-      c.grad = this.buildGradient(ctx, styleValue, slot, box, sw);
-    } catch (error) {
-      // A gradient that fails with these values (a typo in a stop color) fails again: keep the error, so later
-      // frames throw the same object instead of building a new one (render() catches it, reportError() stays quiet)
-      c.error = error;
-      throw error;
-    }
-    return c.grad;
-  }
-
-  // The canvas gradient for a descriptor in the shape's box; createGradient() caches it
-  buildGradient(ctx, styleValue, slot, box, sw) {
-    // A stroke is at least strokewidth thick: a line's box has a zero side, and a gradient across it would
-    // have zero length and paint nothing. For the stroke, each side spans at least strokewidth around the center.
-    // (design/done/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md)
-    const width = slot === 1 ? Math.max(box.right - box.left, sw) : box.right - box.left;
-    const height = slot === 1 ? Math.max(box.bottom - box.top, sw) : box.bottom - box.top;
-    const cx = (box.left + box.right) / 2;
-    const cy = (box.top + box.bottom) / 2;
-    const left = cx - width / 2;
-    const top = cy - height / 2;
-
-    let grad;
-
-    if (styleValue.type === 'linear') {
-      let gx1, gy1, gx2, gy2;
-
-      if (styleValue.angle !== undefined) {
-        const rad = styleValue.angle * Math.PI / 180;
-        const cosRad = Math.cos(rad);
-        const sinRad = Math.sin(rad);
-        const distance = Math.abs((width / 2) * cosRad) + Math.abs((height / 2) * sinRad);
-        gx1 = cx - distance * cosRad;
-        gy1 = cy - distance * sinRad;
-        gx2 = cx + distance * cosRad;
-        gy2 = cy + distance * sinRad;
-      } else {
-        gx1 = left + width * styleValue.x1;
-        gy1 = top + height * styleValue.y1;
-        gx2 = left + width * styleValue.x2;
-        gy2 = top + height * styleValue.y2;
-      }
-
-      grad = ctx.createLinearGradient(gx1, gy1, gx2, gy2);
-
-    } else if (styleValue.type === 'radial') {
-      const px0 = left + width * styleValue.x0;
-      const py0 = top + height * styleValue.y0;
-      const px1 = left + width * styleValue.x1;
-      const py1 = top + height * styleValue.y1;
-
-      const pr0 = pxl.resolveRadius(styleValue.r0, styleValue.x0, styleValue.y0, width, height);
-      const pr1 = pxl.resolveRadius(styleValue.r1, styleValue.x1, styleValue.y1, width, height);
-
-      grad = ctx.createRadialGradient(px0, py0, pr0, px1, py1, pr1);
-
-    } else {
-      // conic (descriptors only come from linear(), radial() and conic())
-      const gcx = left + width * styleValue.cx;
-      const gcy = top + height * styleValue.cy;
-      grad = ctx.createConicGradient(styleValue.startAngle * Math.PI / 180, gcx, gcy);
-    }
-
-    // Offsets outside 0–1 throw in addColorStop; an animated stop may overshoot, so it parks at the end.
-    // NaN (a ref that isn't connected yet) fails both comparisons and becomes 0.
-    const stops = styleValue.stops;
-    for (let i = 0; i < stops.length; i++) {
-      const offset = stops[i].offset;
-      grad.addColorStop(offset > 0 ? (offset < 1 ? offset : 1) : 0, stops[i].color);
-    }
-    return grad;
+    return this._gradients[slot].resolve(ctx, styleValue, this.getBoundingBox(), this.values.strokewidth);
   }
 
   // Sets all stroke-related context state (style, width, caps, joins, dash).

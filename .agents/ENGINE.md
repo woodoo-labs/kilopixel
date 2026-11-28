@@ -10,21 +10,22 @@ Build order (`files` in `build.js`):
 
 | # | File | Contents |
 |---|---|---|
-| 1 | `js/engine.js` | `pxl` namespace, `pxl.scope` (empty; filled by compiler.js and compositing.js), the anchor tables, generic helpers (`pxl.describe()` names an element in warnings; `pxl.TRANSFORM_DEFAULTS`, spread into the defaults of layers, groups and shapes), reactivity (`pxl.nodes`, versions, `markChanged`), attribute compilation bridge, property accessors |
+| 1 | `js/engine.js` | `pxl` namespace, `pxl.scope` (empty; filled by compiler.js, gradient.js and compositing.js), the anchor tables, generic helpers (`pxl.describe()` names an element in warnings; `pxl.TRANSFORM_DEFAULTS`, spread into the defaults of layers, groups and shapes), reactivity (`pxl.nodes`, versions, `markChanged`), attribute compilation bridge, property accessors |
 | 2 | `js/matrix.js` | `pxl.Matrix` (Float64Array affine matrices, written in place), `pxl.toLocal` |
-| 3 | `js/compiler.js` | Math, color, utility and gradient scope entries, `pxl.scopeKeys()`, time drivers, `parseAttributeValue`, `compileExpression`, templates |
-| 4 | `js/compositing.js` | canvas state: `pxl.hasTransform`, `pxl.applyTransformState`, `pxl.applyContextState`, `pxl.applyCompositingState`, `pxl.scaleResponsiveFilter`, `pxl.checkCanvasFilter`, the isolation canvas; the filter scope entries |
-| 5 | `js/handlers.js` | `pxl-on-*` handlers: `pxl.HANDLER_EVENTS`, `pxl.createHandlers`, `pxl.handlerRef` and its assignment rules, `pxl.compileHandler` |
-| 6 | `js/interaction.js` | `pxl.InteractionEngine`: hit testing, states, DOM events, cursor |
-| 7 | `js/monitor.js` | `pxl.perf`: the 1-second timer that calls `Stage.publishMetrics()` |
-| 8 | `js/elements/stage.js` | `pxl._frame`, `pxl.stages` (every connected stage), default styles, `pxl.Stage` |
-| 9 | `js/elements/node.js` | `pxl.PxlNode` |
-| 10 | `js/elements/layer.js` | `pxl.Layer` |
-| 11 | `js/elements/group.js` | `pxl.Group` |
-| 12 | `js/elements/shape.js` | arrowhead constants and helpers, line dash helper, `pxl.resolveRadius`; `pxl.Shape`: style, gradients, isolation, hit box, arrowheads; `pxl.defineShape()` |
-| 13 | `js/elements/shapes/arc.js` | `pxl.arcEndRadians`, `pxl.isFullTurn`; `pxl.ArcShape`: the shared base of circle and ellipse, no tag |
-| 14–20 | `js/elements/shapes/*.js` | circle, ellipse, rect, line, polyline (with `pxl.parsePointsIntoArray`), text, grid |
-| 21 | `js/elements/variable.js` | `pxl.Variable` |
+| 3 | `js/compiler.js` | Math, color and utility scope entries, `pxl.scopeKeys()`, time drivers, `parseAttributeValue`, `compileExpression`, templates |
+| 4 | `js/gradient.js` | `pxl.parseStops`, the scope entries `linear()`, `radial()`, `conic()`, `pxl.resolveRadius`, `pxl.GradientSlot` (the CanvasGradient of a shape's fill or stroke) |
+| 5 | `js/compositing.js` | canvas state: `pxl.hasTransform`, `pxl.applyTransformState`, `pxl.applyContextState`, `pxl.applyCompositingState`, `pxl.scaleResponsiveFilter`, `pxl.checkCanvasFilter`, the isolation canvas; the filter scope entries |
+| 6 | `js/handlers.js` | `pxl-on-*` handlers: `pxl.HANDLER_EVENTS`, `pxl.createHandlers`, `pxl.handlerRef` and its assignment rules, `pxl.compileHandler` |
+| 7 | `js/interaction.js` | `pxl.InteractionEngine`: hit testing, states, DOM events, cursor |
+| 8 | `js/monitor.js` | `pxl.perf`: the 1-second timer that calls `Stage.publishMetrics()` |
+| 9 | `js/elements/stage.js` | `pxl._frame`, `pxl.stages` (every connected stage), default styles, `pxl.Stage` |
+| 10 | `js/elements/node.js` | `pxl.PxlNode` |
+| 11 | `js/elements/layer.js` | `pxl.Layer` |
+| 12 | `js/elements/group.js` | `pxl.Group` |
+| 13 | `js/elements/shape.js` | arrowhead constants and helpers, line dash helper; `pxl.Shape`: style, gradients (two `pxl.GradientSlot`s), isolation, hit box, arrowheads; `pxl.defineShape()` |
+| 14 | `js/elements/shapes/arc.js` | `pxl.arcEndRadians`, `pxl.isFullTurn`; `pxl.ArcShape`: the shared base of circle and ellipse, no tag |
+| 15–21 | `js/elements/shapes/*.js` | circle, ellipse, rect, line, polyline (with `pxl.parsePointsIntoArray`), text, grid |
+| 22 | `js/elements/variable.js` | `pxl.Variable` |
 
 ```
 HTMLElement
@@ -86,7 +87,7 @@ const fn = new Function('scope', 'ref', `
 `)(pxl.scope, pxl.nodes);
 ```
 
-`pxl.scope` is created in `engine.js` and filled by `compiler.js` (Math, colors, utilities, gradients) and `compositing.js` (filters). `pxl.scopeKeys()` lists its names once, at the first compile: every file that adds names loads before the first `customElements.define()`, which may already compile (a stage upgraded while the bundle runs compiles its `ratio`). `tests/unit.html` checks that every name is visible in static and animated expressions and in handlers.
+`pxl.scope` is created in `engine.js` and filled by `compiler.js` (Math, colors, utilities), `gradient.js` (gradients) and `compositing.js` (filters). `pxl.scopeKeys()` lists its names once, at the first compile: every file that adds names loads before the first `customElements.define()`, which may already compile (a stage upgraded while the bundle runs compiles its `ratio`). `tests/unit.html` checks that every name is visible in static and animated expressions and in handlers.
 
 Fields of the function: `isTimeDependent`, `sourceIds` (empty without refs), `usesToLocal`. It is called as `fn.call(element, t)` (`this` = the element, for `toLocal`). Static expressions: evaluated once with `new Function`, the result cached (an `undefined` result keeps the source string). A string that doesn't compile warns, is cached and used as text. `pxl.scope` is a whitelist (`Object.create(null)`), so polyfills can't leak in.
 
@@ -229,7 +230,7 @@ Design: `design/done/2026-11-01_isolated_shape_compositing_plan.md`.
 
 ### 6.3 Gradients
 
-`createGradient(ctx, value, slot)` returns values that aren't descriptors (`isGradient: true`) unchanged. Each shape caches two slots (`_gradCache[0]` fill, `[1]` stroke) keyed by descriptor object, the four box values and `strokewidth`; while all match, the `CanvasGradient` is reused. A build that throws (a typo in a stop color, a `NaN` box) is cached as the error and thrown again (about 1 µs instead of a new exception, about 6 µs). `buildGradient()` sizes the stroke area to at least `strokewidth` per side (design: `design/done/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`), places linear / radial / conic in the box, `pxl.resolveRadius()` for keyword radii, and clamps stop offsets (`addColorStop` throws outside 0–1). An animated descriptor is a new object every frame, so it builds every frame. A custom shape without its own `getBoundingBox()` gets the base method's zero box, so its gradients collapse to a point (`pxl.defineShape()` warns once, §6.1).
+`Shape.createGradient(ctx, value, slot)` returns values that aren't descriptors (`isGradient: true`) unchanged, `null` included; that test comes first, since almost every fill and stroke is a color. A descriptor goes to the shape's `pxl.GradientSlot` (`js/gradient.js`; `_gradients[0]` fill, `[1]` stroke, created in the constructor): `resolve(ctx, descriptor, box, strokewidth)` reuses the `CanvasGradient` while the descriptor object, the four box values and `strokewidth` match its last build. A build that throws (a typo in a stop color, a `NaN` box) is kept as the error and thrown again (about 1 µs instead of a new exception, about 6 µs). `build()` sizes the stroke slot's area to at least `strokewidth` per side (design: `design/done/2026-10-11_stroke_gradient_zero_dimension_hardening_plan.md`), places linear / radial / conic in the box, `pxl.resolveRadius()` for keyword radii, and clamps stop offsets (`addColorStop` throws outside 0–1). An animated descriptor is a new object every frame, so it builds every frame. A custom shape without its own `getBoundingBox()` gets the base method's zero box, so its gradients collapse to a point (`pxl.defineShape()` warns once, §6.1).
 
 ### 6.4 Arrowheads
 
@@ -354,7 +355,7 @@ None in the walk, box check, boundary walk and queue; one event object per dispa
 
 ## 11. Build (`build.js`)
 
-1. `readSources()` / `bundleSource()` concatenate the 21 files; `require('./build.js')` builds nothing and exports them with `checkSources()` for `tools/check_build.js`.
+1. `readSources()` / `bundleSource()` concatenate the 22 files; `require('./build.js')` builds nothing and exports them with `checkSources()` for `tools/check_build.js`.
 2. `checkSources()` refuses: a top-level `class` / `const` / `let` / `var` / `function`; trailing whitespace; a `_` field used in another engine file or a plain field used only in its own (found by name, equal names in different classes count together).
 3. The bundle sets `window.pxl = { version: '0.1.0' }` inside a function that returns without a browser (server-side rendering) or when `<pxl-stage>` is already defined (warns `[pxl] Kilopixel is already loaded …`, the first copy keeps working).
 4. Typings: `tools/build_types.js` runs the bundle in a Node `vm` with a stubbed DOM, reads `observedAttributes` and `static defaults` of every element, and writes `kilopixel.d.ts` plus one file per framework (React, Preact, Solid, Vue, Svelte) to `dist/types/` and `docs/download/types/`. Types come from the default's type plus a table in the script (keywords, colors, arrays, `points`, `text`, nullable numbers); an attribute with a `null` default the table doesn't cover stops the build. Every value also accepts `PxlExpression` (`string & {}`, keeps keyword suggestions). `node tools/run_tests.js --types` checks them against the real framework types (`tests/types/`).

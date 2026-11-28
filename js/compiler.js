@@ -32,72 +32,8 @@ pxl.scope.clamp = (v, low, high) => Math.max(low, Math.min(high, v));
 pxl.scope.lerp  = (a, b, alpha) => a + (b - a) * alpha;
 pxl.scope.map   = (v, inMin, inMax, outMin, outMax) => (v - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 
-// Color stops for all gradient types: ['red', 'blue'] (evenly spaced) or [0, 'red', 1, 'blue']
-pxl.parseStops = function(colorsArray) {
-  const stops = [];
-  if (!Array.isArray(colorsArray) || colorsArray.length === 0) return stops;
-  if (typeof colorsArray[0] === 'string') {
-    const step = 1 / (colorsArray.length - 1 || 1);
-    for (let i = 0; i < colorsArray.length; i++) {
-      stops.push({ offset: i * step, color: colorsArray[i] });
-    }
-  } else {
-    for (let i = 0; i < colorsArray.length; i += 2) {
-      stops.push({ offset: colorsArray[i], color: colorsArray[i + 1] });
-    }
-  }
-  return stops;
-};
-
-pxl.scope.linear = (direction, colorsArray) => {
-  const stops = pxl.parseStops(colorsArray);
-  if (typeof direction === 'number') {
-    return { isGradient: true, type: 'linear', angle: direction, stops };
-  }
-  if (direction) {
-    return { isGradient: true, type: 'linear', x1: direction[0], y1: direction[1], x2: direction[2], y2: direction[3], stops };
-  }
-  return { isGradient: true, type: 'linear', angle: 0, stops };
-};
-
-pxl.scope.radial = (config, colorsArray) => {
-  const stops = pxl.parseStops(colorsArray);
-  let x0 = 0.5, y0 = 0.5, r0 = 0;
-  let x1 = 0.5, y1 = 0.5, r1 = 0.5;
-
-  if (typeof config === 'number') {
-    r1 = config;
-  } else if (config) {
-    const len = config.length;
-    if (len === 1) {
-      r1 = config[0];
-    } else if (len === 3) {
-      x0 = config[0]; y0 = config[1]; r1 = config[2];
-      x1 = x0; y1 = y0;
-    } else if (len >= 6) {
-      x0 = config[0]; y0 = config[1]; r0 = config[2];
-      x1 = config[3]; y1 = config[4]; r1 = config[5];
-    }
-  }
-
-  return { isGradient: true, type: 'radial', x0, y0, r0, x1, y1, r1, stops };
-};
-
-pxl.scope.conic = (angleOrConfig, colorsArray) => {
-  const stops = pxl.parseStops(colorsArray);
-  let startAngle = 0, cx = 0.5, cy = 0.5;
-  if (typeof angleOrConfig === 'number') {
-    startAngle = angleOrConfig;
-  } else if (angleOrConfig) {
-    startAngle = angleOrConfig[0] || 0;
-    cx = angleOrConfig[1] ?? 0.5;
-    cy = angleOrConfig[2] ?? 0.5;
-  }
-  return { isGradient: true, type: 'conic', startAngle, cx, cy, stops };
-};
-
 // The scope's names, destructured at the top of every compiled function. Built at the first compile: every engine
-// file that adds names (this one, compositing.js) has loaded by then, since they all load before the first
+// file that adds names (this one, gradient.js, compositing.js) has loaded by then, since they all load before the first
 // customElements.define(), which may compile (a stage upgraded while the bundle runs compiles its ratio).
 pxl._scopeKeys = null;
 pxl.scopeKeys = function() {

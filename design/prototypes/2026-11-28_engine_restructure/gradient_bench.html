@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Restructure: gradient benchmark</title>
+  <!-- Through the dev server: http://localhost:8124/design/prototypes/2026-11-28_engine_restructure/gradient_bench.html
+       ?src=/path/to/pxl.js runs another build (default /dist/pxl.js), to compare the build before and after a phase -->
+  <style>
+    body { font: 14px sans-serif; margin: 16px; }
+    #box { width: 1000px; }
+    pre { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <p>
+    Times <code>Stage.render()</code> (update and draw of one layer) for the three paths of
+    <code>Shape.createGradient()</code>: plain colors, static gradients (cache hits) and animated gradients (a new
+    descriptor and CanvasGradient every frame). Median and 90th percentile of 300 frames after 60 warm-up frames, three
+    rounds per case; the result is in <code>window.gradientBench</code>.
+  </p>
+  <pre id="out">Running…</pre>
+  <div id="box"></div>
+  <script>
+    const src = new URLSearchParams(location.search).get('src') || '/dist/pxl.js';
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = run;
+    document.head.append(script);
+
+    const COUNT = 1500;
+    const cases = {
+      colors: (i) => `fill="#06c" stroke="#c00" strokewidth="3"`,
+      staticGradients: (i) => `fill="linear(${i % 180}, ['#06c', '#0c6'])" stroke="radial([0.3, 0.3, 'farthest-corner'], ['#fff', '#c00'])" strokewidth="3"`,
+      animatedGradients: (i) => `fill="linear(t * 90 + ${i % 180}, ['#06c', '#0c6'])" stroke="#c00" strokewidth="3"`
+    };
+
+    function shapes(paint) {
+      let html = '';
+      for (let i = 0; i < COUNT; i++) {
+        const x = 20 + (i * 37) % 960, y = 20 + Math.floor(i / 26) * 10;
+        html += `<pxl-rect x="${x}" y="${y}" w="30" h="16" ${paint(i)}></pxl-rect>`;
+      }
+      return html;
+    }
+
+    function measure(paint) {
+      const box = document.getElementById('box');
+      box.innerHTML = `<pxl-stage ratio="5 / 3" alwaysrender><pxl-layer>${shapes(paint)}</pxl-layer></pxl-stage>`;
+      const stage = box.querySelector('pxl-stage'), layer = box.querySelector('pxl-layer');
+      stage.resize();
+      const times = [];
+      for (let frame = 0; frame < 360; frame++) {
+        layer.isDirty = true; // draw every frame, also where nothing changed
+        const start = performance.now();
+        stage.render(1 + frame / 60);
+        if (frame >= 60) times.push(performance.now() - start);
+      }
+      box.innerHTML = '';
+      times.sort((a, b) => a - b);
+      return { median: times[Math.floor(times.length / 2)], p90: times[Math.floor(times.length * 0.9)] };
+    }
+
+    function run() {
+      const result = { src, count: COUNT };
+      for (const [name, paint] of Object.entries(cases)) {
+        const rounds = [measure(paint), measure(paint), measure(paint)];
+        const medians = rounds.map((r) => r.median).sort((a, b) => a - b);
+        result[name] = { medianMs: +medians[1].toFixed(3), p90Ms: +rounds.map((r) => r.p90).sort((a, b) => a - b)[1].toFixed(3) };
+      }
+      window.gradientBench = result;
+      document.getElementById('out').textContent = JSON.stringify(result, null, 1);
+    }
+  </script>
+</body>
+</html>

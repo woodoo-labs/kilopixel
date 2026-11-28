@@ -1,6 +1,6 @@
 # Engine Restructure: Files by Feature
 
-- **Status**: 🟢 **Decided** (2026-11-28, D1–D7 decided, D8 open; cleanup idea merged as phases 6–8; phases 1–3 built, §9–§11; next: phase 4)
+- **Status**: 🟢 **Decided** (2026-11-28, D1–D7 decided, D8 open; cleanup idea merged as phases 6–8; phases 1–4 built, §9–§12; next: phase 5)
 - **Date**: 2026-11-28
 - **Related**: `design/done/2026-10-27_engine_cleanup_inventory_note.md` (the code style this keeps), `design/done/2026-11-20_evaluation_model_plan.md` (the scheduler that moves in phase 5), `design/done/2026-11-01_isolated_shape_compositing_plan.md` and `design/done/2026-11-26_isolation_box_plan.md` (the isolation code that moves in phase 3), `design/2026-11-12_layer_throttling_plan.md` (TODO §8: phase 1 builds the publishing step of its per-layer metrics, C2), `design/2026-10-30_space_attribute_plan.md` (TODO §28: the one transform path of §8 goes with it), `design/archive/2026-11-22_engine_structure_cleanup_plan.md` (the parked cleanup idea of 2026-11-22, merged here on 2026-11-28: its steps 2–4 are phases 6–8), `.claude/CLAUDE.md` "Engine Code Rules" and "Engine Code Style"
 - **Target Implementation**: `build.js` (file list), `js/engine.js`, `js/compiler.js`, `js/interaction.js`, `js/graphics.js` (removed), `js/monitor.js`, `js/elements/stage.js`, `js/elements/node.js`, `js/elements/shape.js`, `js/elements/shapes/arc.js`, `js/elements/shapes/polyline.js`, `js/elements/shapes/text.js`, `js/elements/layer.js`, `js/elements/group.js`, `js/elements/variable.js`, new `js/reactivity.js`, `js/gradient.js`, `js/compositing.js`, `js/handlers.js`, `js/elements/base.js`, `js/elements/container.js`; `tests/index.html`, `tests/frameworks.html`, `tests/unit.html`; `.agents/ENGINE.md`
@@ -179,8 +179,21 @@ As planned in §4, with D1–D4:
 - **Docs:** ENGINE.md §1 (file table), §3 (where the scope is filled, `pxl.scopeKeys()`).
 - **Left:** phases 4–8, D8.
 
+## 12. Phase 4 Built (2026-11-28)
+
+As planned in §4, with D2:
+
+- **`js/gradient.js`** (new, after `compiler.js`): `pxl.parseStops` and the scope entries `linear()`, `radial()`, `conic()` from `compiler.js`, `pxl.resolveRadius` from `shape.js` (where phase 3 had put it), and **`pxl.GradientSlot`**: `resolve(ctx, descriptor, box, sw)` is the cache check of the old `createGradient()`, `build(ctx, descriptor, box, sw)` the old `buildGradient()`, with `slot === 1` now the slot's own `_isStroke`. All its fields (`_isStroke`, `_config`, `_left`, `_top`, `_right`, `_bottom`, `_sw`, `_grad`, `_error`) are set in its constructor.
+- **`js/elements/shape.js`:** `_gradients = [new pxl.GradientSlot(false), new pxl.GradientSlot(true)]` replaces the two `_gradCache` records; `createGradient(ctx, value, slot)` keeps its test for a descriptor first (colors and `null` return at once) and otherwise calls the slot. `paint()`, `applyStyle()`, `applyStrokeState()`, text and grid are unchanged.
+- **Tests:** `tests/index.html` reads `_gradients[1]._sw` and `_gradients[0]._right` (two tests). Full test run passed; generated types unchanged; build checks passed without changes.
+- **Pixels:** `design/prototypes/2026-11-28_engine_restructure/pixel_hashes.html`, 38 of 38 scenes unchanged (radial, linear and conic gradients, keyword radii, stroke gradients on lines and polylines included).
+- **Per frame:** the rules of §6.2 hold: the color test before the slot, no allocation in `resolve()`, the build code unchanged. Measured with `design/prototypes/2026-11-28_engine_restructure/gradient_bench.html` (1,500 rects drawn every frame; colors, static gradients, animated gradients; the build before the phase loaded with `?src=`). Median ms, before → after: Chrome (browser pane) 9.6 → 9.5, 13.1 → 5.1, 27.9 → 22.6 and in a second pair 8.6 → 4.0, 11.1 → 13.7, 19.9 → 20.3; Firefox headless (timer rounded to 1 ms) 7 → 9, 27 → 20, 10 → 11. The differences go both ways by up to 2× between runs of the same build: the measurement can't show a change of one method call per gradient, and none is visible. A steadier benchmark would need many alternating runs in a headless Chrome; not needed for this phase.
+- **Docs:** ENGINE.md §1 (file table: `gradient.js` is file 4, 22 files), §3 (where the scope is filled), §6.3 (the slot), §11 (file count).
+- **Left:** phase 5 (`reactivity.js`, the scheduler), phases 6–8, D8.
+
 ## Log
 
+- 2026-11-28: phase 4 built (§12): `js/gradient.js` with `pxl.GradientSlot`. Next: phase 5.
 - 2026-11-28: phase 3 built (§11): `js/compositing.js`, `graphics.js` removed, scope names at the first compile (D2). Next: phase 4.
 - 2026-11-28: phase 2 built (§10): `js/handlers.js`. Next: phase 3.
 - 2026-11-28: merged the parked idea `design/archive/2026-11-22_engine_structure_cleanup_plan.md` (archived as superseded by this plan): its steps 2–4 are phases 6–8, step 1 was built as `pxl.describe()`, step 5's handler move is phase 2 (into `handlers.js`, not `compiler.js`), its hit-testing split is D8 (open), step 6 is in §8 with its measurement.

@@ -589,7 +589,7 @@
       const line = el('gsVertical');
       line.setAttribute('strokewidth', '20');
       el('gsStage').resize();
-      const sw = line._gradCache[1].sw;
+      const sw = line._gradients[1]._sw;
       line.setAttribute('strokewidth', '30');
       el('gsStage').resize();
       if (sw !== 20) throw new Error(`cached strokewidth is ${sw}, expected 20`);
@@ -721,9 +721,9 @@
     test('text box: the gradient follows the box when maxwidth changes', () => {
       const text = el('tbGradient');
       textBox({ maxwidth: '0' }, 'tbGradient');
-      const full = text._gradCache[0].br;
+      const full = text._gradients[0]._right;
       const box = textBox({ maxwidth: '200' }, 'tbGradient');
-      const squeezed = text._gradCache[0].br;
+      const squeezed = text._gradients[0]._right;
       if (squeezed !== box.right) throw new Error(`gradient uses ${squeezed}, box is ${box.right}`);
       if (squeezed >= full) throw new Error('the gradient box did not shrink');
     });
