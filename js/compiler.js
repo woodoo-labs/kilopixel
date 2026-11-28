@@ -227,7 +227,7 @@ pxl.checkToLocalProperties = function(str) {
   let match;
   while ((match = propRegex.exec(str)) !== null) {
     if (!pxl.toLocalProperties.includes(match[2])) {
-      console.warn(`toLocal(): '${match[2]}' is not available. Use one of ${pxl.toLocalProperties.join(', ')}. ` +
+      console.warn(`[pxl] toLocal(): '${match[2]}' is not available. Use one of ${pxl.toLocalProperties.join(', ')}. ` +
         `To copy a frame, map rotate, scalex, scaley and skewx: ${str}`);
     }
   }
@@ -355,7 +355,7 @@ pxl.compileExpression = function(str) {
     return val;
   } catch (e) {
     pxl.cacheExpression(pxl.staticCache, str, str);
-    console.warn(`Failed to compile expression, returned string instead: ${str}`, e);
+    console.warn(`[pxl] failed to compile expression, used as text instead: ${str}`, e);
     return str;
   }
 };

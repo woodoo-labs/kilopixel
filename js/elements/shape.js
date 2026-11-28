@@ -215,7 +215,8 @@ pxl.Shape = class Shape extends pxl.PxlNode {
     return this.getBoundingBox();
   }
 
-  // A custom shape without its own getBoundingBox() always gets the exact test (the base method warns on every call)
+  // A custom shape without its own getBoundingBox() always gets the exact test (the base method returns an empty box
+  // silently; pxl.defineShape() warns once for such a class)
   needsExactHitTest() {
     return this.getBoundingBox === pxl.Shape.prototype.getBoundingBox;
   }
