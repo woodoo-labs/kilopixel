@@ -1703,6 +1703,39 @@
       if (fill !== '#ff0000' || !(stroke instanceof CanvasGradient)) throw new Error(`fill ${fill}, stroke ${stroke}`);
     });
 
+    test('custom shapes: paint() gives null for a fill or stroke that isn\'t set, without throwing', () => {
+      const star = document.createElement('pxl-star'), ctx = document.createElement('canvas').getContext('2d');
+      let fill, stroke;
+      try {
+        fill = star.paint(ctx, 'fill');
+        stroke = star.paint(ctx, 'stroke');
+      } catch (error) {
+        throw new Error(`paint() threw: ${error.message}`);
+      }
+      if (fill !== null || stroke !== null) throw new Error(`fill ${fill}, stroke ${stroke}`);
+    });
+
+    test('custom shapes: the Gauge without a fill or without a stroke draws the rest, and warns nothing', () => {
+      srClear();
+      srAdd('srLayerA', `<pxl-gauge id="cgNoFill" x="300" y="400" r="150" strokewidth="30" stroke="#000" value="1" label="A"></pxl-gauge>
+        <pxl-gauge id="cgNoStroke" x="700" y="400" r="150" strokewidth="30" fill="#000" value="1" label="B"></pxl-gauge>`);
+      const warnings = captureWarnings(() => srRender(1));
+      // Dark pixels (the shape's black, not the light track) in a box: the value arc's top on the first gauge (stroke
+      // only), the label above the center on the second (fill only)
+      const darkIn = (x0, y0, x1, y1) => {
+        const layer = el('srLayerA'), k = layer.stage.unit * layer.dpr;
+        const data = layer._ctx.getImageData(Math.round(x0 * k), Math.round(y0 * k), Math.round((x1 - x0) * k), Math.round((y1 - y0) * k)).data;
+        let count = 0;
+        for (let i = 0; i < data.length; i += 4) if (data[i + 3] > 200 && data[i] < 100) count++;
+        return count;
+      };
+      const arc = darkIn(290, 240, 310, 260), label = darkIn(670, 340, 730, 385);
+      srClear();
+      if (warnings.length || arc === 0 || label === 0) {
+        throw new Error(`warnings ${JSON.stringify(warnings)}; dark pixels: arc ${arc}, label ${label}`);
+      }
+    });
+
     test('custom shapes: content inside a shape tag is hidden, also when the tag is defined later and in a shadow root', () => {
       srClear();
       srAdd('srLayerA', '<pxl-star>Star text</pxl-star><pxl-test-late>Late text</pxl-test-late>');

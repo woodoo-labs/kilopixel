@@ -200,7 +200,7 @@ pxl.defineShape('pxl-star', pxl.Star);</code></pre>
         <!-- SECTION 3: FREE DRAWING -->
         <!-- ================================================================= -->
         <h2>3. Free Drawing</h2>
-        <p><code>draw()</code> may use any canvas call, as often as it needs. The gauge below paints a light track, a value arc in the shape's own stroke (<code>applyStrokeState()</code> sets color or gradient, width, caps and dashes without stroking), tick marks with the presence attribute <code>ticks</code>, and a label in the shape's fill. <code>this.paint(ctx, 'fill')</code> returns the fill as a canvas style: a color, or a gradient built in the shape's box.</p>
+        <p><code>draw()</code> may use any canvas call, as often as it needs. The gauge below paints a light track, a value arc in the shape's own stroke (<code>applyStrokeState()</code> sets color or gradient, width, caps and dashes without stroking), tick marks with the presence attribute <code>ticks</code>, and a label in the shape's fill. <code>this.paint(ctx, 'fill')</code> returns the fill as a canvas style: a color, or a gradient built in the shape's box. A shape without a fill or stroke draws nothing with it, so the gauge checks <code>hasFill()</code> and <code>isStroked()</code> first.</p>
         <p>By default a shape is hit where it fills and strokes. <code>hitTest(ctx)</code> replaces that with a hit area of its own: it adds a path and calls <code>ctx.fill()</code>, which tests the pointer instead of painting. The gauge is hit on its whole half disc, not only on the arcs.</p>
 
         <pre><code class="language-javascript">// gauge.js: load it after pxl.min.js
@@ -218,11 +218,13 @@ pxl.Gauge = class Gauge extends pxl.Shape {
     ctx.strokeStyle = '#e2e8f0';
     ctx.stroke();
 
-    // Value: the shape's own stroke (color or gradient, width, caps, dashes)
-    ctx.beginPath();
-    ctx.arc(0, 0, r, Math.PI, end);
-    this.applyStrokeState(ctx);
-    ctx.stroke();
+    // Value: the shape's own stroke (color or gradient, width, caps, dashes), if it has one
+    if (this.isStroked()) {
+      ctx.beginPath();
+      ctx.arc(0, 0, r, Math.PI, end);
+      this.applyStrokeState(ctx);
+      ctx.stroke();
+    }
 
     // Ticks, with the bare attribute &lt;pxl-gauge ticks&gt;
     if (ticks) {
@@ -239,11 +241,13 @@ pxl.Gauge = class Gauge extends pxl.Shape {
       ctx.stroke();
     }
 
-    // Label in the shape's fill
-    ctx.fillStyle = this.paint(ctx, 'fill');
-    ctx.font = `600 ${r * 0.26}px sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.fillText(label, 0, -r * 0.12);
+    // Label in the shape's fill, if it has one
+    if (this.hasFill()) {
+      ctx.fillStyle = this.paint(ctx, 'fill');
+      ctx.font = `600 ${r * 0.26}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(label, 0, -r * 0.12);
+    }
   }
 
   // The half disc, without the stroke (like the built-in shapes)
@@ -551,7 +555,7 @@ declare module 'react' {
                   <div class="api-meta"><span class="api-pill values-pill">method</span></div>
                 </div>
                 <div class="api-item-desc">
-                  The fill or stroke as a canvas style: a color as written, or a gradient built in the shape's box.
+                  The fill or stroke as a canvas style: a color as written, or a gradient built in the shape's box. <code>null</code> when it isn't set: check <code>hasFill()</code> or <code>isStroked()</code> first.
                 </div>
               </div>
 

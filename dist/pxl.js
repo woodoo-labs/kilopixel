@@ -3226,13 +3226,15 @@ pxl.Shape = class Shape extends pxl.PxlNode {
   }
 
   // The fill or stroke as a canvas style, for a shape that paints with it in its own way (fillText(), a second
-  // path): a color string as it is, a gradient built in the shape's box
+  // path): a color string as it is, a gradient built in the shape's box, null when it isn't set
   paint(ctx, which) {
     return which === 'stroke' ? this.createGradient(ctx, this.values.stroke, 1) : this.createGradient(ctx, this.values.fill, 0);
   }
 
+  // A gradient descriptor becomes a CanvasGradient; anything else is returned as it is: a color, or null for a fill or
+  // stroke that isn't set (paint() is called by custom shapes without hasFill() first; typeof null is 'object')
   createGradient(ctx, styleValue, slot) {
-    if (typeof styleValue !== 'object' || !styleValue.isGradient) {
+    if (styleValue === null || typeof styleValue !== 'object' || !styleValue.isGradient) {
       return styleValue;
     }
 

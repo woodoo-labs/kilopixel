@@ -15,11 +15,13 @@ pxl.Gauge = class Gauge extends pxl.Shape {
     ctx.strokeStyle = '#e2e8f0';
     ctx.stroke();
 
-    // Value: the shape's own stroke (color or gradient, width, caps, dashes)
-    ctx.beginPath();
-    ctx.arc(0, 0, r, Math.PI, end);
-    this.applyStrokeState(ctx);
-    ctx.stroke();
+    // Value: the shape's own stroke (color or gradient, width, caps, dashes), if it has one
+    if (this.isStroked()) {
+      ctx.beginPath();
+      ctx.arc(0, 0, r, Math.PI, end);
+      this.applyStrokeState(ctx);
+      ctx.stroke();
+    }
 
     // Ticks, with the bare attribute <pxl-gauge ticks>
     if (ticks) {
@@ -36,11 +38,13 @@ pxl.Gauge = class Gauge extends pxl.Shape {
       ctx.stroke();
     }
 
-    // Label in the shape's fill
-    ctx.fillStyle = this.paint(ctx, 'fill');
-    ctx.font = `600 ${r * 0.26}px sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.fillText(label, 0, -r * 0.12);
+    // Label in the shape's fill, if it has one
+    if (this.hasFill()) {
+      ctx.fillStyle = this.paint(ctx, 'fill');
+      ctx.font = `600 ${r * 0.26}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(label, 0, -r * 0.12);
+    }
   }
 
   // The half disc, without the stroke (like the built-in shapes)

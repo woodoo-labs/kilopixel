@@ -457,7 +457,7 @@ pxl.defineShape('pxl-star', pxl.Star);
 | | `this.stage.unit` | CSS pixels per unit, for pixel access (`getImageData()` ignores the canvas transform) |
 | **may call** | `applyStyle(ctx)` | fill (if set), then stroke (if set) the current path, gradients and dashes included |
 | | `applyStrokeState(ctx)` | stroke style, width, caps, joins, miter limit, dash, without stroking |
-| | `paint(ctx, 'fill' | 'stroke')` | the fill or stroke as a canvas style: a color as written, a gradient in the shape's box |
+| | `paint(ctx, 'fill' | 'stroke')` | the fill or stroke as a canvas style: a color as written, a gradient in the shape's box; `null` when not set (check `hasFill()` / `isStroked()` first) |
 | | `hasFill()`, `isStroked()` | whether a fill, or a stroke with a width above 0, is set |
 | | `setBoundingBox(left, top, right, bottom)` | writes the box and returns it, no allocation |
 
